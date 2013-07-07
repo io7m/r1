@@ -129,11 +129,8 @@ final class KRendererFlat implements KRenderer
   private final @Nonnull MatrixM4x4F.Context matrix_context;
   private final @Nonnull KTransform.Context  transform_context;
   private final @Nonnull GLImplementation    gl;
-
   private final @Nonnull Program             program;
-
   private final @Nonnull Log                 log;
-
   private final @Nonnull VectorM4F           background;
 
   KRendererFlat(
