@@ -81,6 +81,11 @@ import com.io7m.renderer.kernel.KProjection.BEPerspective;
 
 public final class DemoKRendererFlat implements Demo
 {
+  public static @Nonnull String getName()
+  {
+    return "Flat";
+  }
+
   private static @Nonnull KCamera makeCamera(
     final @Nonnull QuaternionI4F.Context quat_context,
     final @Nonnull VectorReadable2I window_size,
@@ -136,27 +141,6 @@ public final class DemoKRendererFlat implements Demo
     return ((Indeterminate.Success<Framebuffer, FramebufferStatus>) fi).value;
   }
 
-  private static @Nonnull KMesh makeMesh(
-    final @Nonnull GLImplementation gi,
-    final @Nonnull KTransform transform,
-    final @Nonnull TextureLoader texture_loader,
-    final @Nonnull FSCapabilityRead fs,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      GLException,
-      FilesystemError,
-      IOException
-  {
-    log.debug("creating mesh");
-
-    final GLInterfaceCommon g = gi.getGLCommon();
-    final Pair<ArrayBuffer, IndexBuffer> p =
-      DemoUtilities.texturedSquare(g, 1);
-    final KMaterial material =
-      DemoKRendererFlat.makeMaterial(texture_loader, fs, g);
-    return new KMesh(transform, p.first, p.second, material);
-  }
-
   private static @Nonnull KMaterial makeMaterial(
     final @Nonnull TextureLoader texture_loader,
     final @Nonnull FSCapabilityRead fs,
@@ -199,6 +183,37 @@ public final class DemoKRendererFlat implements Demo
     }
   }
 
+  private static @Nonnull KMesh makeMesh(
+    final @Nonnull GLImplementation gi,
+    final @Nonnull KTransform transform,
+    final @Nonnull TextureLoader texture_loader,
+    final @Nonnull FSCapabilityRead fs,
+    final @Nonnull Log log)
+    throws ConstraintError,
+      GLException,
+      FilesystemError,
+      IOException
+  {
+    log.debug("creating mesh");
+
+    final GLInterfaceCommon g = gi.getGLCommon();
+    final Pair<ArrayBuffer, IndexBuffer> p =
+      DemoUtilities.texturedSquare(g, 1);
+    final KMaterial material =
+      DemoKRendererFlat.makeMaterial(texture_loader, fs, g);
+    return new KMesh(transform, p.first, p.second, material);
+  }
+
+  private static @Nonnull KScene makeScene(
+    final @Nonnull KMesh mesh,
+    final @Nonnull KCamera camera)
+  {
+    final HashSet<KLight> lights = new HashSet<KLight>();
+    final HashSet<KMesh> meshes = new HashSet<KMesh>();
+    meshes.add(mesh);
+    return new KScene(camera, lights, meshes);
+  }
+
   private final @Nonnull DemoConfig                     config;
   private boolean                                       has_shut_down = false;
   private final @Nonnull GLImplementation               gi;
@@ -208,13 +223,14 @@ public final class DemoKRendererFlat implements Demo
   private final @Nonnull QuaternionI4F.Context          quat_context;
   private final @Nonnull Program                        program;
   private final @Nonnull MatrixM4x4F                    matrix_projection;
+
   private final @Nonnull MatrixM4x4F                    matrix_modelview;
   private final @Nonnull TextureUnit[]                  texture_units;
-
   private @CheckForNull Framebuffer                     framebuffer;
   private @Nonnull KCamera                              camera;
   private final @Nonnull Pair<ArrayBuffer, IndexBuffer> quad;
   private final @Nonnull Pair<ArrayBuffer, IndexBuffer> quad_in_scene;
+
   private FramebufferColorAttachmentPoint[]             framebuffer_color_points;
   private final @Nonnull KMaterial                      mesh_material;
 
@@ -284,16 +300,6 @@ public final class DemoKRendererFlat implements Demo
       return;
     }
     this.framebuffer = new_fb;
-  }
-
-  private static @Nonnull KScene makeScene(
-    final @Nonnull KMesh mesh,
-    final @Nonnull KCamera camera)
-  {
-    final HashSet<KLight> lights = new HashSet<KLight>();
-    final HashSet<KMesh> meshes = new HashSet<KMesh>();
-    meshes.add(mesh);
-    return new KScene(camera, lights, meshes);
   }
 
   @Override public void display(
@@ -509,10 +515,5 @@ public final class DemoKRendererFlat implements Demo
       this.gl.arrayBufferDelete(this.quad_in_scene.first);
       this.gl.indexBufferDelete(this.quad_in_scene.second);
     }
-  }
-
-  public static @Nonnull String getName()
-  {
-    return "Flat";
   }
 }

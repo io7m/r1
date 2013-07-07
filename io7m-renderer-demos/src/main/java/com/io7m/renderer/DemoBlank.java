@@ -31,9 +31,15 @@ import com.io7m.jtensors.VectorReadable2I;
 
 public final class DemoBlank implements Demo
 {
+  public static @Nonnull String getName()
+  {
+    return "ZBlank";
+  }
+
   private final DemoConfig        config;
   private boolean                 has_shut_down;
   private final GLInterfaceCommon gl;
+
   private final Log               log;
 
   public DemoBlank(
@@ -74,10 +80,5 @@ public final class DemoBlank implements Demo
       GLCompileException
   {
     this.has_shut_down = true;
-  }
-
-  public static @Nonnull String getName()
-  {
-    return "ZBlank";
   }
 }

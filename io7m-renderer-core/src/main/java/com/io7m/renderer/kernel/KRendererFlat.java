@@ -46,34 +46,54 @@ import com.io7m.jvvfs.PathVirtual;
 
 final class KRendererFlat implements KRenderer
 {
-  private final @Nonnull MatrixM4x4F         matrix_modelview;
-  private final @Nonnull MatrixM4x4F         matrix_model;
-  private final @Nonnull MatrixM4x4F         matrix_view;
-  private final @Nonnull MatrixM4x4F         matrix_projection;
-  private final @Nonnull MatrixM4x4F.Context matrix_context;
-  private final @Nonnull KTransform.Context  transform_context;
-  private final @Nonnull GLImplementation    gl;
-  private final @Nonnull Program             program;
-  private final @Nonnull Log                 log;
-  private final @Nonnull VectorM4F           background;
-
-  KRendererFlat(
-    final @Nonnull GLImplementation gl,
+  private static @Nonnull Program makeProgram(
+    final @Nonnull GLInterfaceCommon gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
-    throws GLCompileException,
-      ConstraintError
+    throws ConstraintError,
+      GLCompileException
   {
-    this.log = new Log(log, "krenderer-flat");
-    this.gl = gl;
-    this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrix_modelview = new MatrixM4x4F();
-    this.matrix_projection = new MatrixM4x4F();
-    this.matrix_model = new MatrixM4x4F();
-    this.matrix_view = new MatrixM4x4F();
-    this.matrix_context = new MatrixM4x4F.Context();
-    this.transform_context = new KTransform.Context();
-    this.program = KRendererFlat.makeProgram(gl.getGLCommon(), fs, this.log);
+    final boolean is_es = gl.metaIsES();
+    final int version_major = gl.metaGetVersionMajor();
+    final int version_minor = gl.metaGetVersionMinor();
+
+    final Program program = new Program("flat-uv", log);
+    program.addVertexShader(KRendererFlat.shaderPathVertex(
+      is_es,
+      version_major,
+      version_minor));
+    program.addFragmentShader(KRendererFlat.shaderPathFragment(
+      is_es,
+      version_major,
+      version_minor));
+
+    program.compile(fs, gl);
+    return program;
+  }
+
+  private static @Nonnull PathVirtual shaderPathFragment(
+    final boolean is_es,
+    final int version_major,
+    final int version_minor)
+    throws ConstraintError
+  {
+    if (is_es) {
+      return PathVirtual
+        .ofString("/com/io7m/renderer/kernel/gles2_flat_uv.f");
+    }
+
+    if (version_major == 2) {
+      return PathVirtual.ofString("/com/io7m/renderer/kernel/gl21_flat_uv.f");
+    }
+
+    if (version_major == 3) {
+      if (version_minor == 0) {
+        return PathVirtual
+          .ofString("/com/io7m/renderer/kernel/gl30_flat_uv.f");
+      }
+    }
+
+    return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_flat_uv.f");
   }
 
   private static @Nonnull PathVirtual shaderPathVertex(
@@ -102,54 +122,37 @@ final class KRendererFlat implements KRenderer
     return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_standard.v");
   }
 
-  private static @Nonnull PathVirtual shaderPathFragment(
-    final boolean is_es,
-    final int version_major,
-    final int version_minor)
-    throws ConstraintError
-  {
-    if (is_es) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gles2_flat_uv.f");
-    }
+  private final @Nonnull MatrixM4x4F         matrix_modelview;
+  private final @Nonnull MatrixM4x4F         matrix_model;
+  private final @Nonnull MatrixM4x4F         matrix_view;
+  private final @Nonnull MatrixM4x4F         matrix_projection;
+  private final @Nonnull MatrixM4x4F.Context matrix_context;
+  private final @Nonnull KTransform.Context  transform_context;
+  private final @Nonnull GLImplementation    gl;
 
-    if (version_major == 2) {
-      return PathVirtual.ofString("/com/io7m/renderer/kernel/gl21_flat_uv.f");
-    }
+  private final @Nonnull Program             program;
 
-    if (version_major == 3) {
-      if (version_minor == 0) {
-        return PathVirtual
-          .ofString("/com/io7m/renderer/kernel/gl30_flat_uv.f");
-      }
-    }
+  private final @Nonnull Log                 log;
 
-    return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_flat_uv.f");
-  }
+  private final @Nonnull VectorM4F           background;
 
-  private static @Nonnull Program makeProgram(
-    final @Nonnull GLInterfaceCommon gl,
+  KRendererFlat(
+    final @Nonnull GLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
-    throws ConstraintError,
-      GLCompileException
+    throws GLCompileException,
+      ConstraintError
   {
-    final boolean is_es = gl.metaIsES();
-    final int version_major = gl.metaGetVersionMajor();
-    final int version_minor = gl.metaGetVersionMinor();
-
-    final Program program = new Program("flat-uv", log);
-    program.addVertexShader(KRendererFlat.shaderPathVertex(
-      is_es,
-      version_major,
-      version_minor));
-    program.addFragmentShader(KRendererFlat.shaderPathFragment(
-      is_es,
-      version_major,
-      version_minor));
-
-    program.compile(fs, gl);
-    return program;
+    this.log = new Log(log, "krenderer-flat");
+    this.gl = gl;
+    this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
+    this.matrix_modelview = new MatrixM4x4F();
+    this.matrix_projection = new MatrixM4x4F();
+    this.matrix_model = new MatrixM4x4F();
+    this.matrix_view = new MatrixM4x4F();
+    this.matrix_context = new MatrixM4x4F.Context();
+    this.transform_context = new KTransform.Context();
+    this.program = KRendererFlat.makeProgram(gl.getGLCommon(), fs, this.log);
   }
 
   @Override public void render(
