@@ -1,0 +1,83 @@
+/*
+ * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * 
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+ * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+package com.io7m.renderer;
+
+import javax.annotation.Nonnull;
+
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.GLCompileException;
+import com.io7m.jcanephora.GLException;
+import com.io7m.jcanephora.GLInterfaceCommon;
+import com.io7m.jlog.Log;
+import com.io7m.jtensors.VectorReadable2I;
+
+/**
+ * Example program that draws a blank screen.
+ */
+
+public final class DemoBlank implements Demo
+{
+  private final DemoConfig        config;
+  private boolean                 has_shut_down;
+  private final GLInterfaceCommon gl;
+  private final Log               log;
+
+  public DemoBlank(
+    final @Nonnull DemoConfig config)
+  {
+    this.config = config;
+    this.gl = config.getGL().getGLCommon();
+    this.log = new Log(config.getLog(), DemoBlank.getName());
+  }
+
+  @Override public void display(
+    final int frame)
+    throws GLException,
+      GLCompileException,
+      ConstraintError
+  {
+    this.gl.colorBufferClear3f(0.15f, 0.2f, 0.15f);
+  }
+
+  @Override public boolean hasShutDown()
+  {
+    return this.has_shut_down;
+  }
+
+  @Override public void reshape(
+    final @Nonnull VectorReadable2I position,
+    final @Nonnull VectorReadable2I size)
+    throws GLException,
+      ConstraintError,
+      GLCompileException
+  {
+    this.gl.viewportSet(position, size);
+  }
+
+  @Override public void shutdown()
+    throws GLException,
+      ConstraintError,
+      GLCompileException
+  {
+    this.has_shut_down = true;
+  }
+
+  public static @Nonnull String getName()
+  {
+    return "ZBlank";
+  }
+}
