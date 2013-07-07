@@ -169,50 +169,6 @@ final class JOGLDemoRunner implements GLEventListener, KeyListener
     }
   }
 
-  @Override public void display(
-    final GLAutoDrawable drawable)
-  {
-    try {
-      while (this.command_queue.peek() != null) {
-        switch (this.command_queue.poll()) {
-          case COMMAND_NEXT:
-          {
-            if (this.demoHasNext()) {
-              this.demoNext();
-            } else {
-              this.demoShutdown();
-              this.demoFirst();
-            }
-            break;
-          }
-          case COMMAND_PREVIOUS:
-          {
-            if (this.demoHasPrevious()) {
-              this.demoPrevious();
-            }
-            break;
-          }
-        }
-      }
-
-      if (this.demo_current.hasShutDown() == false) {
-        this.demo_current.display(++this.frame);
-      }
-    } catch (final GLException e) {
-      JOGLDemoRunner.fatal(e);
-    } catch (final GLCompileException e) {
-      JOGLDemoRunner.fatal(e);
-    } catch (final ConstraintError e) {
-      JOGLDemoRunner.fatal(e);
-    }
-  }
-
-  @Override public void dispose(
-    final GLAutoDrawable drawable)
-  {
-    // Nothing.
-  }
-
   private void demoFirst()
   {
     try {
@@ -303,6 +259,50 @@ final class JOGLDemoRunner implements GLEventListener, KeyListener
     for (final String name : this.demos.keySet()) {
       this.demos_names_sorted.add(name);
     }
+  }
+
+  @Override public void display(
+    final GLAutoDrawable drawable)
+  {
+    try {
+      while (this.command_queue.peek() != null) {
+        switch (this.command_queue.poll()) {
+          case COMMAND_NEXT:
+          {
+            if (this.demoHasNext()) {
+              this.demoNext();
+            } else {
+              this.demoShutdown();
+              this.demoFirst();
+            }
+            break;
+          }
+          case COMMAND_PREVIOUS:
+          {
+            if (this.demoHasPrevious()) {
+              this.demoPrevious();
+            }
+            break;
+          }
+        }
+      }
+
+      if (this.demo_current.hasShutDown() == false) {
+        this.demo_current.display(++this.frame);
+      }
+    } catch (final GLException e) {
+      JOGLDemoRunner.fatal(e);
+    } catch (final GLCompileException e) {
+      JOGLDemoRunner.fatal(e);
+    } catch (final ConstraintError e) {
+      JOGLDemoRunner.fatal(e);
+    }
+  }
+
+  @Override public void dispose(
+    final GLAutoDrawable drawable)
+  {
+    // Nothing.
   }
 
   @Override public void init(

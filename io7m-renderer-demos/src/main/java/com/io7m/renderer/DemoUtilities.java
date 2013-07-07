@@ -45,6 +45,85 @@ import com.io7m.jvvfs.PathVirtual;
 
 public final class DemoUtilities
 {
+  public static @Nonnull
+    <G extends GLShaders & GLMeta>
+    Program
+    makeFlatUVProgram(
+      final @Nonnull GLInterfaceCommon gl,
+      final @Nonnull FSCapabilityRead fs,
+      final @Nonnull Log log)
+      throws ConstraintError,
+        GLCompileException
+  {
+    final boolean is_es = gl.metaIsES();
+    final int version_major = gl.metaGetVersionMajor();
+    final int version_minor = gl.metaGetVersionMinor();
+
+    final Program program = new Program("flat-uv", log);
+    program.addVertexShader(DemoUtilities.shaderPathVertex(
+      is_es,
+      version_major,
+      version_minor));
+    program.addFragmentShader(DemoUtilities.shaderPathFragment(
+      is_es,
+      version_major,
+      version_minor));
+
+    program.compile(fs, gl);
+    return program;
+  }
+
+  private static @Nonnull PathVirtual shaderPathFragment(
+    final boolean is_es,
+    final int version_major,
+    final int version_minor)
+    throws ConstraintError
+  {
+    if (is_es) {
+      return PathVirtual
+        .ofString("/com/io7m/renderer/kernel/gles2_flat_uv.f");
+    }
+
+    if (version_major == 2) {
+      return PathVirtual.ofString("/com/io7m/renderer/kernel/gl21_flat_uv.f");
+    }
+
+    if (version_major == 3) {
+      if (version_minor == 0) {
+        return PathVirtual
+          .ofString("/com/io7m/renderer/kernel/gl30_flat_uv.f");
+      }
+    }
+
+    return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_flat_uv.f");
+  }
+
+  private static @Nonnull PathVirtual shaderPathVertex(
+    final boolean is_es,
+    final int version_major,
+    final int version_minor)
+    throws ConstraintError
+  {
+    if (is_es) {
+      return PathVirtual
+        .ofString("/com/io7m/renderer/kernel/gles2_standard.v");
+    }
+
+    if (version_major == 2) {
+      return PathVirtual
+        .ofString("/com/io7m/renderer/kernel/gl21_standard.v");
+    }
+
+    if (version_major == 3) {
+      if (version_minor == 0) {
+        return PathVirtual
+          .ofString("/com/io7m/renderer/kernel/gl30_standard.v");
+      }
+    }
+
+    return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_standard.v");
+  }
+
   /**
    * Create a textured quad with edges of length <code>size</code> at
    * <code>z = 0</code>.
@@ -111,84 +190,5 @@ public final class DemoUtilities
 
     gl.indexBufferUpdate(indices, indices_data);
     return new Pair<ArrayBuffer, IndexBuffer>(array, indices);
-  }
-
-  private static @Nonnull PathVirtual shaderPathVertex(
-    final boolean is_es,
-    final int version_major,
-    final int version_minor)
-    throws ConstraintError
-  {
-    if (is_es) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gles2_standard.v");
-    }
-
-    if (version_major == 2) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gl21_standard.v");
-    }
-
-    if (version_major == 3) {
-      if (version_minor == 0) {
-        return PathVirtual
-          .ofString("/com/io7m/renderer/kernel/gl30_standard.v");
-      }
-    }
-
-    return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_standard.v");
-  }
-
-  private static @Nonnull PathVirtual shaderPathFragment(
-    final boolean is_es,
-    final int version_major,
-    final int version_minor)
-    throws ConstraintError
-  {
-    if (is_es) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gles2_flat_uv.f");
-    }
-
-    if (version_major == 2) {
-      return PathVirtual.ofString("/com/io7m/renderer/kernel/gl21_flat_uv.f");
-    }
-
-    if (version_major == 3) {
-      if (version_minor == 0) {
-        return PathVirtual
-          .ofString("/com/io7m/renderer/kernel/gl30_flat_uv.f");
-      }
-    }
-
-    return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_flat_uv.f");
-  }
-
-  public static @Nonnull
-    <G extends GLShaders & GLMeta>
-    Program
-    makeFlatUVProgram(
-      final @Nonnull GLInterfaceCommon gl,
-      final @Nonnull FSCapabilityRead fs,
-      final @Nonnull Log log)
-      throws ConstraintError,
-        GLCompileException
-  {
-    final boolean is_es = gl.metaIsES();
-    final int version_major = gl.metaGetVersionMajor();
-    final int version_minor = gl.metaGetVersionMinor();
-
-    final Program program = new Program("flat-uv", log);
-    program.addVertexShader(DemoUtilities.shaderPathVertex(
-      is_es,
-      version_major,
-      version_minor));
-    program.addFragmentShader(DemoUtilities.shaderPathFragment(
-      is_es,
-      version_major,
-      version_minor));
-
-    program.compile(fs, gl);
-    return program;
   }
 }

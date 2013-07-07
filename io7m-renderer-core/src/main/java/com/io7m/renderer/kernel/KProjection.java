@@ -29,102 +29,6 @@ import com.io7m.jtensors.MatrixM4x4F;
 
 @Immutable abstract class KProjection
 {
-  @Immutable static final class BEPerspective extends KProjection
-  {
-    private final double z_near;
-    private final double z_far;
-    private final double aspect;
-    private final double fov_radians;
-
-    @SuppressWarnings("synthetic-access") BEPerspective(
-      final double z_near,
-      final double z_far,
-      final double aspect,
-      final double fov_radians)
-    {
-      super(Type.PERSPECTIVE);
-      this.z_near = z_near;
-      this.z_far = z_far;
-      this.aspect = aspect;
-      this.fov_radians = fov_radians;
-    }
-
-    @Override public boolean equals(
-      final Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final BEPerspective other = (BEPerspective) obj;
-      if (Double.doubleToLongBits(this.aspect) != Double
-        .doubleToLongBits(other.aspect)) {
-        return false;
-      }
-      if (Double.doubleToLongBits(this.fov_radians) != Double
-        .doubleToLongBits(other.fov_radians)) {
-        return false;
-      }
-      if (Double.doubleToLongBits(this.z_far) != Double
-        .doubleToLongBits(other.z_far)) {
-        return false;
-      }
-      if (Double.doubleToLongBits(this.z_near) != Double
-        .doubleToLongBits(other.z_near)) {
-        return false;
-      }
-      return true;
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      long temp;
-      temp = Double.doubleToLongBits(this.aspect);
-      result = (prime * result) + (int) (temp ^ (temp >>> 32));
-      temp = Double.doubleToLongBits(this.fov_radians);
-      result = (prime * result) + (int) (temp ^ (temp >>> 32));
-      temp = Double.doubleToLongBits(this.z_far);
-      result = (prime * result) + (int) (temp ^ (temp >>> 32));
-      temp = Double.doubleToLongBits(this.z_near);
-      result = (prime * result) + (int) (temp ^ (temp >>> 32));
-      return result;
-    }
-
-    @Override void makeMatrix4x4F(
-      final @Nonnull MatrixM4x4F m)
-      throws ConstraintError
-    {
-      ProjectionMatrix.makePerspective(
-        m,
-        this.z_near,
-        this.z_far,
-        this.aspect,
-        this.fov_radians);
-    }
-
-    @Override public String toString()
-    {
-      final StringBuilder builder = new StringBuilder();
-      builder.append("[BEPerspective ");
-      builder.append(this.z_near);
-      builder.append(" ");
-      builder.append(this.z_far);
-      builder.append(" ");
-      builder.append(this.aspect);
-      builder.append(" ");
-      builder.append(this.fov_radians);
-      builder.append("]");
-      return builder.toString();
-    }
-  }
-
   @Immutable static final class BEOrthographic extends KProjection
   {
     private final double left;
@@ -240,6 +144,102 @@ import com.io7m.jtensors.MatrixM4x4F;
       builder.append(this.near);
       builder.append(" ");
       builder.append(this.far);
+      builder.append("]");
+      return builder.toString();
+    }
+  }
+
+  @Immutable static final class BEPerspective extends KProjection
+  {
+    private final double z_near;
+    private final double z_far;
+    private final double aspect;
+    private final double fov_radians;
+
+    @SuppressWarnings("synthetic-access") BEPerspective(
+      final double z_near,
+      final double z_far,
+      final double aspect,
+      final double fov_radians)
+    {
+      super(Type.PERSPECTIVE);
+      this.z_near = z_near;
+      this.z_far = z_far;
+      this.aspect = aspect;
+      this.fov_radians = fov_radians;
+    }
+
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final BEPerspective other = (BEPerspective) obj;
+      if (Double.doubleToLongBits(this.aspect) != Double
+        .doubleToLongBits(other.aspect)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.fov_radians) != Double
+        .doubleToLongBits(other.fov_radians)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.z_far) != Double
+        .doubleToLongBits(other.z_far)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.z_near) != Double
+        .doubleToLongBits(other.z_near)) {
+        return false;
+      }
+      return true;
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      long temp;
+      temp = Double.doubleToLongBits(this.aspect);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.fov_radians);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.z_far);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.z_near);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      return result;
+    }
+
+    @Override void makeMatrix4x4F(
+      final @Nonnull MatrixM4x4F m)
+      throws ConstraintError
+    {
+      ProjectionMatrix.makePerspective(
+        m,
+        this.z_near,
+        this.z_far,
+        this.aspect,
+        this.fov_radians);
+    }
+
+    @Override public String toString()
+    {
+      final StringBuilder builder = new StringBuilder();
+      builder.append("[BEPerspective ");
+      builder.append(this.z_near);
+      builder.append(" ");
+      builder.append(this.z_far);
+      builder.append(" ");
+      builder.append(this.aspect);
+      builder.append(" ");
+      builder.append(this.fov_radians);
       builder.append("]");
       return builder.toString();
     }
