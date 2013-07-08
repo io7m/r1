@@ -30,6 +30,7 @@ import com.io7m.jcanephora.GLCompileException;
 import com.io7m.jcanephora.GLException;
 import com.io7m.jcanephora.GLImplementation;
 import com.io7m.jcanephora.GLInterfaceCommon;
+import com.io7m.jcanephora.GLUnsupportedException;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Program;
@@ -42,6 +43,7 @@ import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
+import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 
 final class KRendererFlat implements KRenderer
@@ -51,21 +53,24 @@ final class KRendererFlat implements KRenderer
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
     throws ConstraintError,
-      GLCompileException
+      GLCompileException,
+      GLUnsupportedException
   {
     final boolean is_es = gl.metaIsES();
     final int version_major = gl.metaGetVersionMajor();
     final int version_minor = gl.metaGetVersionMinor();
 
     final Program program = new Program("flat-uv", log);
-    program.addVertexShader(KRendererFlat.shaderPathVertex(
+    program.addVertexShader(KShaderPaths.getShader(
       is_es,
       version_major,
-      version_minor));
-    program.addFragmentShader(KRendererFlat.shaderPathFragment(
+      version_minor,
+      "standard.v"));
+    program.addFragmentShader(KShaderPaths.getShader(
       is_es,
       version_major,
-      version_minor));
+      version_minor,
+      "flat_uv.f"));
 
     program.compile(fs, gl);
     return program;
@@ -138,7 +143,8 @@ final class KRendererFlat implements KRenderer
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
     throws GLCompileException,
-      ConstraintError
+      ConstraintError,
+      GLUnsupportedException
   {
     this.log = new Log(log, "krenderer-flat");
     this.gl = gl;
@@ -258,5 +264,17 @@ final class KRendererFlat implements KRenderer
     final @Nonnull VectorReadable4F rgba)
   {
     VectorM4F.copy(rgba, this.background);
+  }
+
+  @Override public void updateShaders(
+    final @Nonnull FSCapabilityRead fs)
+    throws FilesystemError,
+      GLCompileException,
+      ConstraintError
+  {
+    final GLInterfaceCommon gc = this.gl.getGLCommon();
+    if (this.program.requiresCompilation(fs, gc)) {
+      this.program.compile(fs, gc);
+    }
   }
 }

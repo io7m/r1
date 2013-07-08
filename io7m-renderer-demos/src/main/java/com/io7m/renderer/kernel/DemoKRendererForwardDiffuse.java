@@ -65,6 +65,7 @@ import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.jtensors.VectorReadable2I;
 import com.io7m.jtensors.VectorReadable3F;
@@ -74,17 +75,18 @@ import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.Demo;
 import com.io7m.renderer.DemoConfig;
 import com.io7m.renderer.DemoUtilities;
+import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KProjection.BEPerspective;
 
 /**
  * Example program that draws something with {@link KRendererFlat}.
  */
 
-public final class DemoKRendererFlat implements Demo
+public final class DemoKRendererForwardDiffuse implements Demo
 {
   public static @Nonnull String getName()
   {
-    return "Flat";
+    return "ForwardDiffuse";
   }
 
   private static @Nonnull KCamera makeCamera(
@@ -153,7 +155,7 @@ public final class DemoKRendererFlat implements Demo
   {
     final InputStream stream =
       fs.openFile(PathVirtual
-        .ofString("/com/io7m/renderer/textures/reference_8888_4.png"));
+        .ofString("/com/io7m/renderer/textures/brick-diffuse.png"));
 
     try {
       final Texture2DStatic t =
@@ -164,7 +166,7 @@ public final class DemoKRendererFlat implements Demo
           TextureFilterMinification.TEXTURE_FILTER_NEAREST,
           TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
           stream,
-          "ref8888");
+          "brick");
 
       final VectorReadable3F diffuse = new VectorI3F(1, 1, 1);
       final List<Texture2DStatic> diffuse_maps =
@@ -201,7 +203,7 @@ public final class DemoKRendererFlat implements Demo
     final Pair<ArrayBuffer, IndexBuffer> p =
       DemoUtilities.texturedSquare(g, 1);
     final KMaterial material =
-      DemoKRendererFlat.makeMaterial(texture_loader, fs, g);
+      DemoKRendererForwardDiffuse.makeMaterial(texture_loader, fs, g);
     return new KMesh(transform, p.first, p.second, material);
   }
 
@@ -219,7 +221,7 @@ public final class DemoKRendererFlat implements Demo
   private boolean                                       has_shut_down = false;
   private final @Nonnull GLImplementation               gi;
   private final @Nonnull GLInterfaceCommon              gl;
-  private final @Nonnull KRendererFlat                  renderer;
+  private final @Nonnull KRendererForwardDiffuseOnly    renderer;
   private final @Nonnull Log                            log;
   private final @Nonnull QuaternionI4F.Context          quat_context;
   private final @Nonnull Program                        program;
@@ -234,8 +236,9 @@ public final class DemoKRendererFlat implements Demo
 
   private FramebufferColorAttachmentPoint[]             framebuffer_color_points;
   private final @Nonnull KMaterial                      mesh_material;
+  private final @Nonnull KTransform.Context             transform_context;
 
-  public DemoKRendererFlat(
+  public DemoKRendererForwardDiffuse(
     final @Nonnull DemoConfig config)
     throws GLCompileException,
       ConstraintError,
@@ -245,14 +248,11 @@ public final class DemoKRendererFlat implements Demo
       GLUnsupportedException
   {
     this.config = config;
-    this.log = new Log(config.getLog(), DemoKRendererFlat.getName());
+    this.log =
+      new Log(config.getLog(), DemoKRendererForwardDiffuse.getName());
     this.gi = config.getGL();
     this.gl = this.gi.getGLCommon();
-    this.renderer =
-      new KRendererFlat(
-        config.getGL(),
-        config.getFilesystem(),
-        config.getLog());
+
     this.quat_context = new QuaternionI4F.Context();
     this.matrix_modelview = new MatrixM4x4F();
     this.matrix_projection = new MatrixM4x4F();
@@ -268,13 +268,25 @@ public final class DemoKRendererFlat implements Demo
 
     this.quad = DemoUtilities.texturedSquare(this.gl, 200);
     this.quad_in_scene = DemoUtilities.texturedSquare(this.gl, 1);
+    this.transform_context = new KTransform.Context();
+
+    /**
+     * Initialize renderer.
+     */
+
+    this.renderer =
+      new KRendererForwardDiffuseOnly(
+        config.getGL(),
+        config.getFilesystem(),
+        config.getLog());
+    this.renderer.setBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 1));
 
     /**
      * Initialize camera.
      */
 
     this.camera =
-      DemoKRendererFlat.makeCamera(
+      DemoKRendererForwardDiffuse.makeCamera(
         this.quat_context,
         this.config.getWindowSize(),
         this.log);
@@ -284,7 +296,7 @@ public final class DemoKRendererFlat implements Demo
      */
 
     this.mesh_material =
-      DemoKRendererFlat.makeMaterial(
+      DemoKRendererForwardDiffuse.makeMaterial(
         config.getTextureLoader(),
         config.getFilesystem(),
         this.gi.getGLCommon());
@@ -294,7 +306,7 @@ public final class DemoKRendererFlat implements Demo
      */
 
     final Framebuffer new_fb =
-      DemoKRendererFlat.makeFramebuffer(
+      DemoKRendererForwardDiffuse.makeFramebuffer(
         this.gi,
         config.getWindowSize(),
         this.log);
@@ -311,8 +323,17 @@ public final class DemoKRendererFlat implements Demo
       ConstraintError
   {
     final HashSet<KLight> lights = new HashSet<KLight>();
-    final HashSet<KMesh> meshes = new HashSet<KMesh>();
 
+    {
+      final KDirectional light =
+        new KLight.KDirectional(
+          new VectorI3F(0, 0, -1),
+          new KRGBIF(1, 0, 0),
+          1.0f);
+      lights.add(light);
+    }
+
+    final HashSet<KMesh> meshes = new HashSet<KMesh>();
     for (int x = -5; x < 10; ++x) {
       final QuaternionM4F orientation = new QuaternionM4F();
       QuaternionM4F.makeFromAxisAngle(
@@ -347,6 +368,7 @@ public final class DemoKRendererFlat implements Demo
         BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
 
       this.gl.colorBufferClear3f(0.2f, 0.15f, 0.15f);
+      this.gl.depthBufferWriteEnable();
       this.gl.depthBufferClear(1.0f);
       this.gl.depthBufferEnable(DepthFunction.DEPTH_LESS_THAN);
 
@@ -494,7 +516,10 @@ public final class DemoKRendererFlat implements Demo
      */
 
     this.camera =
-      DemoKRendererFlat.makeCamera(this.quat_context, size, this.log);
+      DemoKRendererForwardDiffuse.makeCamera(
+        this.quat_context,
+        size,
+        this.log);
 
     /**
      * Initialize destination framebuffer.
@@ -502,7 +527,7 @@ public final class DemoKRendererFlat implements Demo
 
     {
       final Framebuffer new_fb =
-        DemoKRendererFlat.makeFramebuffer(this.gi, size, this.log);
+        DemoKRendererForwardDiffuse.makeFramebuffer(this.gi, size, this.log);
       if (new_fb == null) {
         this.shutdown();
       }

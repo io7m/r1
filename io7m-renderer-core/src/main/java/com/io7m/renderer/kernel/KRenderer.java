@@ -20,11 +20,20 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.Framebuffer;
+import com.io7m.jcanephora.GLCompileException;
 import com.io7m.jcanephora.GLException;
 import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.jvvfs.FSCapabilityRead;
+import com.io7m.jvvfs.FilesystemError;
 
 interface KRenderer
 {
+  void updateShaders(
+    final @Nonnull FSCapabilityRead fs)
+    throws FilesystemError,
+      GLCompileException,
+      ConstraintError;
+
   /**
    * Render the scene <code>scene</code> to the framebuffer
    * <code>result</code>.

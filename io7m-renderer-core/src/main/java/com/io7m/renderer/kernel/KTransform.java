@@ -21,11 +21,13 @@ import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.QuaternionReadable4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.VectorM3F;
 import com.io7m.jtensors.VectorReadable3F;
 
 /**
@@ -42,14 +44,18 @@ import com.io7m.jtensors.VectorReadable3F;
   @NotThreadSafe static final class Context
   {
     final @Nonnull QuaternionM4F       t_rotation;
-    final @Nonnull MatrixM4x4F         t_matrix;
-    final @Nonnull MatrixM4x4F.Context t_matrix_context;
+    final @Nonnull MatrixM4x4F         t_matrix4x4;
+    final @Nonnull MatrixM4x4F.Context t_matrix4x4_context;
+    final @Nonnull MatrixM3x3F         t_matrix3x3;
+    final @Nonnull MatrixM3x3F.Context t_matrix3x3_context;
 
     Context()
     {
       this.t_rotation = new QuaternionM4F();
-      this.t_matrix = new MatrixM4x4F();
-      this.t_matrix_context = new MatrixM4x4F.Context();
+      this.t_matrix4x4 = new MatrixM4x4F();
+      this.t_matrix4x4_context = new MatrixM4x4F.Context();
+      this.t_matrix3x3 = new MatrixM3x3F();
+      this.t_matrix3x3_context = new MatrixM3x3F.Context();
     }
   }
 
@@ -121,8 +127,9 @@ import com.io7m.jtensors.VectorReadable3F;
     MatrixM4x4F.setIdentity(m);
     MatrixM4x4F.translateByVector3FInPlace(m, this.translation);
 
-    QuaternionM4F.makeRotationMatrix4x4(this.orientation, context.t_matrix);
-    MatrixM4x4F.multiplyInPlace(m, context.t_matrix);
+    QuaternionM4F
+      .makeRotationMatrix4x4(this.orientation, context.t_matrix4x4);
+    MatrixM4x4F.multiplyInPlace(m, context.t_matrix4x4);
   }
 
   @Override public String toString()
@@ -134,5 +141,15 @@ import com.io7m.jtensors.VectorReadable3F;
     builder.append(this.orientation);
     builder.append("]");
     return builder.toString();
+  }
+
+  @Nonnull VectorReadable3F rotateVector3F(
+    final @Nonnull Context context,
+    final @Nonnull VectorI3F v)
+  {
+    final VectorM3F out = new VectorM3F();
+    QuaternionM4F
+      .makeRotationMatrix4x4(this.orientation, context.t_matrix4x4);
+    return MatrixM3x3F.multiplyVector3F(context.t_matrix3x3, v, out);
   }
 }
