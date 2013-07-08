@@ -40,6 +40,7 @@ import com.io7m.jtensors.VectorM2I;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.DemoKRendererFlat;
+import com.io7m.renderer.kernel.DemoKRendererForwardDiffuse;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.event.WindowAdapter;
@@ -232,6 +233,19 @@ final class JOGLDemoRunner implements GLEventListener, KeyListener
 
   private void demosInitialize()
   {
+    this.demos.put(
+      DemoKRendererForwardDiffuse.getName(),
+      new PartialFunction<DemoConfig, Demo, Throwable>() {
+        @Override public Demo call(
+          final DemoConfig c)
+          throws Throwable
+        {
+          JOGLDemoRunner.this.window.setTitle(DemoKRendererForwardDiffuse
+            .getName());
+          return new DemoKRendererForwardDiffuse(c);
+        }
+      });
+
     this.demos.put(
       DemoKRendererFlat.getName(),
       new PartialFunction<DemoConfig, Demo, Throwable>() {

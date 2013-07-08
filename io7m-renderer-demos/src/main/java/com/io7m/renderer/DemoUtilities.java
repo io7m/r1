@@ -35,13 +35,14 @@ import com.io7m.jcanephora.GLInterfaceCommon;
 import com.io7m.jcanephora.GLMeta;
 import com.io7m.jcanephora.GLScalarType;
 import com.io7m.jcanephora.GLShaders;
+import com.io7m.jcanephora.GLUnsupportedException;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.IndexBufferWritableData;
 import com.io7m.jcanephora.Program;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FSCapabilityRead;
-import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.kernel.KShaderPaths;
 
 public final class DemoUtilities
 {
@@ -53,75 +54,27 @@ public final class DemoUtilities
       final @Nonnull FSCapabilityRead fs,
       final @Nonnull Log log)
       throws ConstraintError,
-        GLCompileException
+        GLCompileException,
+        GLUnsupportedException
   {
     final boolean is_es = gl.metaIsES();
     final int version_major = gl.metaGetVersionMajor();
     final int version_minor = gl.metaGetVersionMinor();
 
     final Program program = new Program("flat-uv", log);
-    program.addVertexShader(DemoUtilities.shaderPathVertex(
+    program.addVertexShader(KShaderPaths.getShader(
       is_es,
       version_major,
-      version_minor));
-    program.addFragmentShader(DemoUtilities.shaderPathFragment(
+      version_minor,
+      "standard.v"));
+    program.addFragmentShader(KShaderPaths.getShader(
       is_es,
       version_major,
-      version_minor));
+      version_minor,
+      "flat_uv.f"));
 
     program.compile(fs, gl);
     return program;
-  }
-
-  private static @Nonnull PathVirtual shaderPathFragment(
-    final boolean is_es,
-    final int version_major,
-    final int version_minor)
-    throws ConstraintError
-  {
-    if (is_es) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gles2_flat_uv.f");
-    }
-
-    if (version_major == 2) {
-      return PathVirtual.ofString("/com/io7m/renderer/kernel/gl21_flat_uv.f");
-    }
-
-    if (version_major == 3) {
-      if (version_minor == 0) {
-        return PathVirtual
-          .ofString("/com/io7m/renderer/kernel/gl30_flat_uv.f");
-      }
-    }
-
-    return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_flat_uv.f");
-  }
-
-  private static @Nonnull PathVirtual shaderPathVertex(
-    final boolean is_es,
-    final int version_major,
-    final int version_minor)
-    throws ConstraintError
-  {
-    if (is_es) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gles2_standard.v");
-    }
-
-    if (version_major == 2) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gl21_standard.v");
-    }
-
-    if (version_major == 3) {
-      if (version_minor == 0) {
-        return PathVirtual
-          .ofString("/com/io7m/renderer/kernel/gl30_standard.v");
-      }
-    }
-
-    return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_standard.v");
   }
 
   /**

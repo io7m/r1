@@ -19,31 +19,33 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.jtensors.VectorReadable4F;
 
 /**
  * <p>
- * Immutable RGB vector with single-precision components.
+ * Immutable RGBA vector with single-precision components.
  * </p>
  */
 
-@Immutable final class KRGBIF implements KRGBReadable3F
+@Immutable final class KRGBAIF implements KRGBAReadable4F, KRGBReadable3F
 {
-  private final @Nonnull VectorI3F rgb;
+  private final @Nonnull VectorI4F rgba;
 
-  KRGBIF(
+  KRGBAIF(
     final float red,
     final float green,
-    final float blue)
+    final float blue,
+    final float alpha)
   {
-    this.rgb = new VectorI3F(red, green, blue);
+    this.rgba = new VectorI4F(red, green, blue, alpha);
   }
 
-  KRGBIF(
-    final @Nonnull KRGBReadable3F r)
+  KRGBAIF(
+    final @Nonnull KRGBAReadable4F r)
   {
-    this.rgb = new VectorI3F(r.rgbAsVectorReadable3F());
+    this.rgba = new VectorI4F(r.rgbaAsVectorReadable4F());
   }
 
   @Override public boolean equals(
@@ -58,47 +60,74 @@ import com.io7m.jtensors.VectorReadable3F;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KRGBIF other = (KRGBIF) obj;
-    return this.rgb.equals(other.rgb);
+    final KRGBAIF other = (KRGBAIF) obj;
+    return this.rgba.equals(other.rgba);
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.rgb.hashCode();
+    result = (prime * result) + this.rgba.hashCode();
     return result;
+  }
+
+  @Override public @Nonnull VectorReadable4F rgbaAsVectorReadable4F()
+  {
+    return this.rgba;
+  }
+
+  @Override public float rgbaGetAlphaF()
+  {
+    return this.rgba.w;
+  }
+
+  @Override public float rgbaGetBlueF()
+  {
+    return this.rgba.z;
+  }
+
+  @Override public float rgbaGetGreenF()
+  {
+    return this.rgba.y;
+  }
+
+  @Override public float rgbaGetRedF()
+  {
+    return this.rgba.x;
   }
 
   @Override public @Nonnull VectorReadable3F rgbAsVectorReadable3F()
   {
-    return this.rgb;
+    return this.rgba;
   }
 
   @Override public float rgbGetBlueF()
   {
-    return this.rgb.z;
+    return this.rgbaGetBlueF();
   }
 
   @Override public float rgbGetGreenF()
   {
-    return this.rgb.y;
+    return this.rgbaGetGreenF();
   }
 
   @Override public float rgbGetRedF()
   {
-    return this.rgb.x;
+    return this.rgbaGetRedF();
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KRGBIF ");
-    builder.append(this.rgb.x);
+    builder.append("[KRGBAIF ");
+    builder.append(this.rgba.x);
     builder.append(" ");
-    builder.append(this.rgb.y);
+    builder.append(this.rgba.y);
     builder.append(" ");
-    builder.append(this.rgb.z);
+    builder.append(this.rgba.z);
+    builder.append(" ");
+    builder.append(this.rgba.w);
     builder.append("]");
     return builder.toString();
   }

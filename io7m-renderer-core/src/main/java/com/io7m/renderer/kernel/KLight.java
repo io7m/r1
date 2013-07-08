@@ -19,36 +19,56 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.VectorReadable3F;
+
 /**
  * Lights.
  */
 
-@Immutable abstract class KLight implements KTransformable
+@Immutable abstract class KLight
 {
   @Immutable static final class KCone extends KLight
   {
-    KCone(
-      final @Nonnull KTransform transform)
+    @SuppressWarnings("synthetic-access") KCone(
+      final @Nonnull KRGBReadable3F color)
     {
-      super(Type.CONE, transform);
+      super(Type.CONE, color);
     }
   }
 
   @Immutable static final class KDirectional extends KLight
   {
-    KDirectional(
-      final @Nonnull KTransform transform)
+    private final @Nonnull VectorReadable3F direction;
+    private final float                     intensity;
+
+    @SuppressWarnings("synthetic-access") KDirectional(
+      final @Nonnull VectorReadable3F direction,
+      final @Nonnull KRGBReadable3F color,
+      final float intensity)
     {
-      super(Type.DIRECTIONAL, transform);
+      super(Type.DIRECTIONAL, color);
+      this.direction = new VectorI3F(direction);
+      this.intensity = intensity;
+    }
+
+    @Nonnull VectorReadable3F getDirection()
+    {
+      return this.direction;
+    }
+
+    float getIntensity()
+    {
+      return this.intensity;
     }
   }
 
   @Immutable static final class KPoint extends KLight
   {
-    KPoint(
-      final @Nonnull KTransform transform)
+    @SuppressWarnings("synthetic-access") KPoint(
+      final @Nonnull KRGBReadable3F color)
     {
-      super(Type.POINT, transform);
+      super(Type.POINT, color);
     }
   }
 
@@ -59,19 +79,24 @@ import javax.annotation.concurrent.Immutable;
     CONE
   }
 
-  private final @Nonnull Type       type;
-  private final @Nonnull KTransform transform;
+  private final @Nonnull Type   type;
+  private final @Nonnull KRGBIF color;
 
-  KLight(
+  private KLight(
     final @Nonnull Type type,
-    final @Nonnull KTransform transform)
+    final @Nonnull KRGBReadable3F color)
   {
     this.type = type;
-    this.transform = transform;
+    this.color = new KRGBIF(color);
   }
 
-  @Override public final @Nonnull KTransform getTransform()
+  @Nonnull Type getType()
   {
-    return this.transform;
+    return this.type;
+  }
+
+  @Nonnull KRGBIF getColor()
+  {
+    return this.color;
   }
 }
