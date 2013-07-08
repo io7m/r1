@@ -19,5 +19,5 @@ main (void)
   float l_diffuse_factor    = max(0, dot (l_direction_reversed, f_normal_n));
   vec4 l_diffuse_color      = vec4(l_color, 1.0) * l_intensity * l_diffuse_factor;
 
-  out_frag_color = texture2D(t_diffuse_0, f_uv) * l_diffuse_color;
+  out_frag_color = texture2D(t_diffuse_0, vec2(f_uv.x, 1.0 - f_uv.y)) * l_diffuse_color;
 }
