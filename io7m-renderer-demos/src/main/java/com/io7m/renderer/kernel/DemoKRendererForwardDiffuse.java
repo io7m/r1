@@ -61,6 +61,12 @@ import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jlog.Log;
+import com.io7m.jsom0.ModelObjectVBO;
+import com.io7m.jsom0.NameNormalAttribute;
+import com.io7m.jsom0.NamePositionAttribute;
+import com.io7m.jsom0.NameUVAttribute;
+import com.io7m.jsom0.parser.Error;
+import com.io7m.jsom0.parser.ModelObjectParserVBOImmediate;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
@@ -155,7 +161,7 @@ public final class DemoKRendererForwardDiffuse implements Demo
   {
     final InputStream stream =
       fs.openFile(PathVirtual
-        .ofString("/com/io7m/renderer/textures/brick-diffuse.png"));
+        .ofString("/com/io7m/renderer/textures/suzanne-diffuse.png"));
 
     try {
       final Texture2DStatic t =
@@ -237,6 +243,7 @@ public final class DemoKRendererForwardDiffuse implements Demo
   private FramebufferColorAttachmentPoint[]             framebuffer_color_points;
   private final @Nonnull KMaterial                      mesh_material;
   private final @Nonnull KTransform.Context             transform_context;
+  private final @Nonnull ModelObjectVBO                 suzanne;
 
   public DemoKRendererForwardDiffuse(
     final @Nonnull DemoConfig config)
@@ -269,6 +276,24 @@ public final class DemoKRendererForwardDiffuse implements Demo
     this.quad = DemoUtilities.texturedSquare(this.gl, 200);
     this.quad_in_scene = DemoUtilities.texturedSquare(this.gl, 1);
     this.transform_context = new KTransform.Context();
+
+    {
+      try {
+        final ModelObjectParserVBOImmediate<GLInterfaceCommon> parser =
+          new ModelObjectParserVBOImmediate<GLInterfaceCommon>(
+            "suzanne",
+            config.getFilesystem().openFile(
+              PathVirtual.ofString("/com/io7m/renderer/models/suzanne.so0")),
+            new NamePositionAttribute("position"),
+            new NameNormalAttribute("normal"),
+            new NameUVAttribute("uv"),
+            this.log,
+            this.gl);
+        this.suzanne = parser.modelObject();
+      } catch (final Error e) {
+        throw new UnreachableCodeException();
+      }
+    }
 
     /**
      * Initialize renderer.
@@ -334,18 +359,30 @@ public final class DemoKRendererForwardDiffuse implements Demo
     }
 
     final HashSet<KMesh> meshes = new HashSet<KMesh>();
-    for (int x = -5; x < 10; ++x) {
+
+    {
       final QuaternionM4F orientation = new QuaternionM4F();
+      final QuaternionM4F x_rot = new QuaternionM4F();
+      final QuaternionM4F y_rot = new QuaternionM4F();
+
+      QuaternionM4F.makeFromAxisAngle(
+        new VectorI3F(1, 0, 0),
+        Math.toRadians(90),
+        x_rot);
+
       QuaternionM4F.makeFromAxisAngle(
         new VectorI3F(0, 1, 0),
-        Math.toRadians((frame + x) % 360),
-        orientation);
+        Math.toRadians(frame % 360),
+        y_rot);
+
+      QuaternionM4F.multiplyInPlace(orientation, y_rot);
+      QuaternionM4F.multiplyInPlace(orientation, x_rot);
 
       final KMesh mesh =
         new KMesh(
-          new KTransform(new VectorI3F(x, 0, -1), orientation),
-          this.quad_in_scene.first,
-          this.quad_in_scene.second,
+          new KTransform(new VectorI3F(0, 0, -1), orientation),
+          this.suzanne.getArrayBuffer(),
+          this.suzanne.getIndexBuffer(),
           this.mesh_material);
       meshes.add(mesh);
     }

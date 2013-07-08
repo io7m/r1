@@ -79,6 +79,11 @@
       <version>0.9.4</version>
     </dependency>
     <dependency>
+      <groupId>com.io7m.jsom0.core</groupId>
+      <artifactId>io7m-jsom0-core</artifactId>
+      <version>0.9.0</version>
+    </dependency>
+    <dependency>
       <groupId>com.io7m.renderer.core</groupId>
       <artifactId>io7m-renderer-core</artifactId>
       <version>${project.version}</version>
