@@ -57,6 +57,8 @@ final class KRendererForwardDiffuseOnly implements KRenderer
     final @Nonnull GLInterfaceCommon gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull String name,
+    final @Nonnull String vertex_shader,
+    final @Nonnull String fragment_shader,
     final @Nonnull Log log)
     throws ConstraintError,
       GLCompileException,
@@ -71,12 +73,12 @@ final class KRendererForwardDiffuseOnly implements KRenderer
       is_es,
       version_major,
       version_minor,
-      "standard.v"));
+      vertex_shader));
     program.addFragmentShader(KShaderPaths.getShader(
       is_es,
       version_major,
       version_minor,
-      name + ".f"));
+      fragment_shader));
     program.compile(fs, gl);
     return program;
   }
@@ -118,32 +120,37 @@ final class KRendererForwardDiffuseOnly implements KRenderer
         gl.getGLCommon(),
         fs,
         "fw_diffuse_directional",
+        "fw_diffuse_directional.v",
+        "fw_diffuse_directional.f",
         this.log);
+
     this.program_depth =
       KRendererForwardDiffuseOnly.makeProgram(
         gl.getGLCommon(),
         fs,
         "depth_only",
+        "standard.v",
+        "depth_only.f",
         this.log);
   }
 
   /**
-   * Produce a normal matrix from the modelview matrix. This assumes that the
-   * modelview matrix is orthogonal (which it will be, as {@link KTransform}
-   * doesn't allow scaling).
+   * Produce a normal matrix from the model matrix.
    */
 
   private void makeNormalMatrix()
   {
-    this.matrix_normal.set(0, 0, this.matrix_modelview.get(0, 0));
-    this.matrix_normal.set(1, 0, this.matrix_modelview.get(1, 0));
-    this.matrix_normal.set(2, 0, this.matrix_modelview.get(2, 0));
-    this.matrix_normal.set(0, 1, this.matrix_modelview.get(0, 1));
-    this.matrix_normal.set(1, 1, this.matrix_modelview.get(1, 1));
-    this.matrix_normal.set(2, 1, this.matrix_modelview.get(2, 1));
-    this.matrix_normal.set(0, 2, this.matrix_modelview.get(0, 2));
-    this.matrix_normal.set(1, 2, this.matrix_modelview.get(1, 2));
-    this.matrix_normal.set(2, 2, this.matrix_modelview.get(2, 2));
+    this.matrix_normal.set(0, 0, this.matrix_model.get(0, 0));
+    this.matrix_normal.set(1, 0, this.matrix_model.get(1, 0));
+    this.matrix_normal.set(2, 0, this.matrix_model.get(2, 0));
+    this.matrix_normal.set(0, 1, this.matrix_model.get(0, 1));
+    this.matrix_normal.set(1, 1, this.matrix_model.get(1, 1));
+    this.matrix_normal.set(2, 1, this.matrix_model.get(2, 1));
+    this.matrix_normal.set(0, 2, this.matrix_model.get(0, 2));
+    this.matrix_normal.set(1, 2, this.matrix_model.get(1, 2));
+    this.matrix_normal.set(2, 2, this.matrix_model.get(2, 2));
+    MatrixM3x3F.invertInPlace(this.matrix_normal);
+    MatrixM3x3F.transposeInPlace(this.matrix_normal);
   }
 
   @Override public void render(
@@ -341,6 +348,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
     final ProgramAttribute p_pos = program.getAttribute("v_position");
     final ProgramAttribute p_normal = program.getAttribute("v_normal");
     final ProgramAttribute p_uv = program.getAttribute("v_uv");
+
     final ArrayBufferDescriptor array_type = array.getDescriptor();
     final ArrayBufferAttribute a_pos = array_type.getAttribute("position");
     final ArrayBufferAttribute a_normal = array_type.getAttribute("normal");
@@ -373,6 +381,18 @@ final class KRendererForwardDiffuseOnly implements KRenderer
     throws ConstraintError,
       GLException
   {
+    final VectorM4F light_cs = new VectorM4F();
+    light_cs.x = light.getDirection().getXF();
+    light_cs.y = light.getDirection().getYF();
+    light_cs.z = light.getDirection().getZF();
+    light_cs.w = 0.0f;
+
+    MatrixM4x4F.multiplyVector4FWithContext(
+      this.matrix_context,
+      this.matrix_view,
+      light_cs,
+      light_cs);
+
     this.program_directional.activate(gc);
     try {
       final ProgramUniform u_mproj =
@@ -385,7 +405,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
         this.program_directional.getUniform("l_intensity");
 
       gc.programPutUniformMatrix4x4f(u_mproj, this.matrix_projection);
-      gc.programPutUniformVector3f(l_direction, light.getDirection());
+      gc.programPutUniformVector3f(l_direction, light_cs);
       gc.programPutUniformVector3f(l_color, light
         .getColor()
         .rgbAsVectorReadable3F());
