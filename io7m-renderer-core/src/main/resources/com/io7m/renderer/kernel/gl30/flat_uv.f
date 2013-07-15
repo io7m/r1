@@ -9,5 +9,5 @@ out vec4 out_frag_color;
 void
 main (void)
 {
-  out_frag_color = texture2D(t_diffuse_0, vec2(f_uv.x, 1.0 - f_uv.y));
+  out_frag_color = texture2D(t_diffuse_0, f_uv);
 }

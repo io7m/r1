@@ -29,6 +29,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Indeterminate;
 import com.io7m.jaux.functional.Option;
+import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
@@ -61,12 +62,14 @@ import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jlog.Log;
+import com.io7m.jsom0.Model;
 import com.io7m.jsom0.ModelObjectVBO;
 import com.io7m.jsom0.NameNormalAttribute;
 import com.io7m.jsom0.NamePositionAttribute;
 import com.io7m.jsom0.NameUVAttribute;
 import com.io7m.jsom0.parser.Error;
 import com.io7m.jsom0.parser.ModelObjectParserVBOImmediate;
+import com.io7m.jsom0.parser.ModelParser;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
@@ -102,7 +105,7 @@ public final class DemoKRendererForwardDiffuse implements Demo
   {
     log.debug("making camera");
 
-    final VectorI3F translation = new VectorI3F(0, 0, -5);
+    final VectorI3F translation = new VectorI3F(0, 0, -10);
     final QuaternionI4F orientation =
       QuaternionI4F.lookAtWithContext(
         quat_context,
@@ -238,7 +241,6 @@ public final class DemoKRendererForwardDiffuse implements Demo
   private @CheckForNull Framebuffer                     framebuffer;
   private @Nonnull KCamera                              camera;
   private final @Nonnull Pair<ArrayBuffer, IndexBuffer> quad;
-  private final @Nonnull Pair<ArrayBuffer, IndexBuffer> quad_in_scene;
 
   private FramebufferColorAttachmentPoint[]             framebuffer_color_points;
   private final @Nonnull KMaterial                      mesh_material;
@@ -274,7 +276,6 @@ public final class DemoKRendererForwardDiffuse implements Demo
         this.log);
 
     this.quad = DemoUtilities.texturedSquare(this.gl, 200);
-    this.quad_in_scene = DemoUtilities.texturedSquare(this.gl, 1);
     this.transform_context = new KTransform.Context();
 
     {
@@ -283,13 +284,22 @@ public final class DemoKRendererForwardDiffuse implements Demo
           new ModelObjectParserVBOImmediate<GLInterfaceCommon>(
             "suzanne",
             config.getFilesystem().openFile(
-              PathVirtual.ofString("/com/io7m/renderer/models/suzanne.so0")),
+              PathVirtual.ofString("/com/io7m/renderer/models/monkeys.so0")),
             new NamePositionAttribute("position"),
             new NameNormalAttribute("normal"),
             new NameUVAttribute("uv"),
             this.log,
             this.gl);
-        this.suzanne = parser.modelObject();
+
+        final ModelParser<ModelObjectVBO, GLException> mparser =
+          new ModelParser<ModelObjectVBO, GLException>(parser);
+
+        final Model<ModelObjectVBO> model = mparser.model();
+        final Option<ModelObjectVBO> opt = model.get("monkey_textured_mesh");
+        assert opt.isSome();
+        final Option.Some<ModelObjectVBO> opt_s = (Some<ModelObjectVBO>) opt;
+        this.suzanne = opt_s.value;
+
       } catch (final Error e) {
         throw new UnreachableCodeException();
       }
@@ -350,41 +360,61 @@ public final class DemoKRendererForwardDiffuse implements Demo
     final HashSet<KLight> lights = new HashSet<KLight>();
 
     {
-      final KDirectional light =
+      final KDirectional light0 =
         new KLight.KDirectional(
-          new VectorI3F(0, 0, -1),
+          new VectorI3F(0, -1, 0),
           new KRGBIF(1, 0, 0),
           1.0f);
-      lights.add(light);
+
+      final KDirectional light1 =
+        new KLight.KDirectional(
+          new VectorI3F(1, 0, 0),
+          new KRGBIF(0, 0, 1),
+          1.0f);
+
+      final KDirectional light2 =
+        new KLight.KDirectional(
+          new VectorI3F(-1, 0, 0),
+          new KRGBIF(0, 1, 0),
+          1.0f);
+
+      final KDirectional light3 =
+        new KLight.KDirectional(
+          new VectorI3F(0, 1, 0),
+          new KRGBIF(1, 1, 1),
+          1.0f);
+
+      lights.add(light0);
+      lights.add(light1);
+      lights.add(light2);
+      lights.add(light3);
     }
 
     final HashSet<KMesh> meshes = new HashSet<KMesh>();
 
     {
-      final QuaternionM4F orientation = new QuaternionM4F();
-      final QuaternionM4F x_rot = new QuaternionM4F();
-      final QuaternionM4F y_rot = new QuaternionM4F();
+      for (int y = -9; y < 9; y += 3) {
+        for (int x = -9; x < 9; x += 3) {
 
-      QuaternionM4F.makeFromAxisAngle(
-        new VectorI3F(1, 0, 0),
-        Math.toRadians(90),
-        x_rot);
+          final QuaternionM4F orientation = new QuaternionM4F();
+          final QuaternionM4F y_rot = new QuaternionM4F();
 
-      QuaternionM4F.makeFromAxisAngle(
-        new VectorI3F(0, 1, 0),
-        Math.toRadians(frame % 360),
-        y_rot);
+          QuaternionM4F.makeFromAxisAngle(
+            new VectorI3F(0, 1, 0),
+            Math.toRadians(frame % 360),
+            y_rot);
 
-      QuaternionM4F.multiplyInPlace(orientation, y_rot);
-      QuaternionM4F.multiplyInPlace(orientation, x_rot);
+          QuaternionM4F.multiplyInPlace(orientation, y_rot);
 
-      final KMesh mesh =
-        new KMesh(
-          new KTransform(new VectorI3F(0, 0, -1), orientation),
-          this.suzanne.getArrayBuffer(),
-          this.suzanne.getIndexBuffer(),
-          this.mesh_material);
-      meshes.add(mesh);
+          final KMesh mesh =
+            new KMesh(
+              new KTransform(new VectorI3F(x, y, 0), orientation),
+              this.suzanne.getArrayBuffer(),
+              this.suzanne.getIndexBuffer(),
+              this.mesh_material);
+          meshes.add(mesh);
+        }
+      }
     }
 
     final KScene scene = new KScene(this.camera, lights, meshes);
@@ -584,9 +614,9 @@ public final class DemoKRendererForwardDiffuse implements Demo
     if (this.framebuffer != null) {
       this.framebuffer.delete(this.gl);
     }
-    if (this.quad_in_scene != null) {
-      this.gl.arrayBufferDelete(this.quad_in_scene.first);
-      this.gl.indexBufferDelete(this.quad_in_scene.second);
+    if (this.suzanne != null) {
+      this.gl.arrayBufferDelete(this.suzanne.getArrayBuffer());
+      this.gl.indexBufferDelete(this.suzanne.getIndexBuffer());
     }
   }
 }
