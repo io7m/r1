@@ -370,7 +370,7 @@ public final class DemoKRendererForwardDiffuse implements Demo
         new KLight.KDirectional(
           new VectorI3F(1, 0, 0),
           new KRGBIF(0, 0, 1),
-          1.0f);
+          2.0f);
 
       final KDirectional light2 =
         new KLight.KDirectional(
