@@ -84,7 +84,9 @@ import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.Demo;
 import com.io7m.renderer.DemoConfig;
 import com.io7m.renderer.DemoUtilities;
-import com.io7m.renderer.kernel.KLight.KDirectional;
+import com.io7m.renderer.RSpaceRGB;
+import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.KProjection.BEPerspective;
 
 /**
@@ -195,7 +197,7 @@ public final class DemoKRendererForwardDiffuse implements Demo
     }
   }
 
-  private static @Nonnull KMesh makeMesh(
+  private static @Nonnull KMeshInstance makeMesh(
     final @Nonnull GLImplementation gi,
     final @Nonnull KTransform transform,
     final @Nonnull TextureLoader texture_loader,
@@ -213,15 +215,15 @@ public final class DemoKRendererForwardDiffuse implements Demo
       DemoUtilities.texturedSquare(g, 1);
     final KMaterial material =
       DemoKRendererForwardDiffuse.makeMaterial(texture_loader, fs, g);
-    return new KMesh(transform, p.first, p.second, material);
+    return new KMeshInstance(transform, p.first, p.second, material);
   }
 
   private static @Nonnull KScene makeScene(
-    final @Nonnull KMesh mesh,
+    final @Nonnull KMeshInstance mesh,
     final @Nonnull KCamera camera)
   {
     final HashSet<KLight> lights = new HashSet<KLight>();
-    final HashSet<KMesh> meshes = new HashSet<KMesh>();
+    final HashSet<KMeshInstance> meshes = new HashSet<KMeshInstance>();
     meshes.add(mesh);
     return new KScene(camera, lights, meshes);
   }
@@ -360,28 +362,32 @@ public final class DemoKRendererForwardDiffuse implements Demo
     final HashSet<KLight> lights = new HashSet<KLight>();
 
     {
-      final KDirectional light0 =
+      final KLight light0 =
         new KLight.KDirectional(
-          new VectorI3F(0, -1, 0),
-          new KRGBIF(1, 0, 0),
+          0,
+          new RVectorI3F<RSpaceWorld>(0, -1, 0),
+          new RVectorI3F<RSpaceRGB>(1, 0, 0),
           1.0f);
 
-      final KDirectional light1 =
+      final KLight light1 =
         new KLight.KDirectional(
-          new VectorI3F(1, 0, 0),
-          new KRGBIF(0, 0, 1),
+          1,
+          new RVectorI3F<RSpaceWorld>(1, 0, 0),
+          new RVectorI3F<RSpaceRGB>(0, 0, 1),
           2.0f);
 
-      final KDirectional light2 =
+      final KLight light2 =
         new KLight.KDirectional(
-          new VectorI3F(-1, 0, 0),
-          new KRGBIF(0, 1, 0),
+          2,
+          new RVectorI3F<RSpaceWorld>(-1, 0, 0),
+          new RVectorI3F<RSpaceRGB>(0, 1, 0),
           1.0f);
 
-      final KDirectional light3 =
+      final KLight light3 =
         new KLight.KDirectional(
-          new VectorI3F(0, 1, 0),
-          new KRGBIF(1, 1, 1),
+          3,
+          new RVectorI3F<RSpaceWorld>(0, 1, 0),
+          new RVectorI3F<RSpaceRGB>(1, 1, 1),
           1.0f);
 
       lights.add(light0);
@@ -390,7 +396,7 @@ public final class DemoKRendererForwardDiffuse implements Demo
       lights.add(light3);
     }
 
-    final HashSet<KMesh> meshes = new HashSet<KMesh>();
+    final HashSet<KMeshInstance> meshes = new HashSet<KMeshInstance>();
 
     {
       for (int y = -9; y < 9; y += 3) {
@@ -406,8 +412,8 @@ public final class DemoKRendererForwardDiffuse implements Demo
 
           QuaternionM4F.multiplyInPlace(orientation, y_rot);
 
-          final KMesh mesh =
-            new KMesh(
+          final KMeshInstance mesh =
+            new KMeshInstance(
               new KTransform(new VectorI3F(x, y, 0), orientation),
               this.suzanne.getArrayBuffer(),
               this.suzanne.getIndexBuffer(),

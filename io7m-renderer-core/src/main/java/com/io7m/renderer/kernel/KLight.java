@@ -19,8 +19,10 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jtensors.VectorI3F;
-import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.renderer.RSpaceRGB;
+import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorReadable3F;
 
 /**
  * Lights.
@@ -31,63 +33,80 @@ import com.io7m.jtensors.VectorReadable3F;
   @Immutable static final class KCone extends KLight
   {
     @SuppressWarnings("synthetic-access") KCone(
-      final @Nonnull KRGBReadable3F color)
+      final @Nonnull Integer id,
+      final @Nonnull RVectorReadable3F<RSpaceRGB> colour,
+      final float intensity)
     {
-      super(Type.CONE, color);
+      super(Type.LIGHT_CONE, id, colour, intensity);
     }
   }
 
   @Immutable static final class KDirectional extends KLight
   {
-    private final @Nonnull VectorReadable3F direction;
-    private final float                     intensity;
+    private final @Nonnull RVectorReadable3F<RSpaceWorld> direction;
 
     @SuppressWarnings("synthetic-access") KDirectional(
-      final @Nonnull VectorReadable3F direction,
-      final @Nonnull KRGBReadable3F color,
+      final @Nonnull Integer id,
+      final @Nonnull RVectorReadable3F<RSpaceWorld> direction,
+      final @Nonnull RVectorReadable3F<RSpaceRGB> colour,
       final float intensity)
     {
-      super(Type.DIRECTIONAL, color);
-      this.direction = new VectorI3F(direction);
-      this.intensity = intensity;
+      super(Type.LIGHT_DIRECTIONAL, id, colour, intensity);
+      this.direction = new RVectorI3F<RSpaceWorld>(direction);
     }
 
-    @Nonnull VectorReadable3F getDirection()
+    @Nonnull RVectorReadable3F<RSpaceWorld> getDirection()
     {
       return this.direction;
-    }
-
-    float getIntensity()
-    {
-      return this.intensity;
     }
   }
 
   @Immutable static final class KPoint extends KLight
   {
     @SuppressWarnings("synthetic-access") KPoint(
-      final @Nonnull KRGBReadable3F color)
+      final @Nonnull Integer id,
+      final @Nonnull RVectorReadable3F<RSpaceRGB> colour,
+      final float intensity)
     {
-      super(Type.POINT, color);
+      super(Type.LIGHT_POINT, id, colour, intensity);
     }
   }
 
   static enum Type
   {
-    POINT,
-    DIRECTIONAL,
-    CONE
+    LIGHT_POINT("Point"),
+    LIGHT_DIRECTIONAL("Directional"),
+    LIGHT_CONE("Cone");
+
+    private final @Nonnull String name;
+
+    private Type(
+      final @Nonnull String name)
+    {
+      this.name = name;
+    }
+
+    @Nonnull String getName()
+    {
+      return this.name;
+    }
   }
 
-  private final @Nonnull Type   type;
-  private final @Nonnull KRGBIF color;
+  private final @Nonnull Integer               id;
+  private final @Nonnull Type                  type;
+  private final @Nonnull RVectorI3F<RSpaceRGB> colour;
+  private final float                          intensity;
 
   private KLight(
     final @Nonnull Type type,
-    final @Nonnull KRGBReadable3F color)
+    final @Nonnull Integer id,
+    final @Nonnull RVectorReadable3F<RSpaceRGB> color,
+    final float intensity)
   {
+    this.id = id;
     this.type = type;
-    this.color = new KRGBIF(color);
+    this.colour = new RVectorI3F<RSpaceRGB>(color);
+    this.intensity = intensity;
   }
 
   @Nonnull Type getType()
@@ -95,8 +114,18 @@ import com.io7m.jtensors.VectorReadable3F;
     return this.type;
   }
 
-  @Nonnull KRGBIF getColor()
+  @Nonnull RVectorI3F<RSpaceRGB> getColour()
   {
-    return this.color;
+    return this.colour;
+  }
+
+  @Nonnull Integer getID()
+  {
+    return this.id;
+  }
+
+  float getIntensity()
+  {
+    return this.intensity;
   }
 }

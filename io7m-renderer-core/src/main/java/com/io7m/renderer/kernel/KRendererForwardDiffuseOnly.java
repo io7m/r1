@@ -200,12 +200,12 @@ final class KRendererForwardDiffuseOnly implements KRenderer
 
       for (final KLight light : scene.getLights()) {
         switch (light.getType()) {
-          case CONE:
-          case POINT:
+          case LIGHT_CONE:
+          case LIGHT_POINT:
           {
             throw new UnimplementedCodeException();
           }
-          case DIRECTIONAL:
+          case LIGHT_DIRECTIONAL:
           {
             final KDirectional dlight = (KLight.KDirectional) light;
             this.renderLightPassMeshesDirectional(scene, gc, dlight);
@@ -226,7 +226,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
   private void renderDepthPassMesh(
     final @Nonnull GLInterfaceCommon gc,
     final @Nonnull Program program,
-    final @Nonnull KMesh mesh)
+    final @Nonnull KMeshInstance mesh)
     throws ConstraintError,
       GLException
   {
@@ -288,7 +288,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
         this.program_depth.getUniform("m_projection");
       gc.programPutUniformMatrix4x4f(u_mproj, this.matrix_projection);
 
-      for (final KMesh mesh : scene.getMeshes()) {
+      for (final KMeshInstance mesh : scene.getMeshes()) {
         this.renderDepthPassMesh(gc, this.program_depth, mesh);
       }
     } finally {
@@ -303,7 +303,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
   private void renderLightPassMeshDirectional(
     final @Nonnull GLInterfaceCommon gc,
     final @Nonnull Program program,
-    final @Nonnull KMesh mesh)
+    final @Nonnull KMeshInstance mesh)
     throws ConstraintError,
       GLException
   {
@@ -406,12 +406,10 @@ final class KRendererForwardDiffuseOnly implements KRenderer
 
       gc.programPutUniformMatrix4x4f(u_mproj, this.matrix_projection);
       gc.programPutUniformVector3f(l_direction, light_cs);
-      gc.programPutUniformVector3f(l_color, light
-        .getColor()
-        .rgbAsVectorReadable3F());
+      gc.programPutUniformVector3f(l_color, light.getColour());
       gc.programPutUniformFloat(l_intensity, light.getIntensity());
 
-      for (final KMesh mesh : scene.getMeshes()) {
+      for (final KMeshInstance mesh : scene.getMeshes()) {
         this.renderLightPassMeshDirectional(
           gc,
           this.program_directional,

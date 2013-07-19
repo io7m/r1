@@ -16,44 +16,34 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.Set;
+import java.awt.Dimension;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import javax.swing.JFrame;
 
-/**
- * The set of {@link KMeshInstance} objects and {@link KLight} objects that overlap
- * the view frustum of the given {@link KCamera}.
- */
-
-@Immutable final class KScene
+final class SBLogsWindow extends JFrame
 {
-  private final @Nonnull KCamera     camera;
-  private final @Nonnull Set<KLight> lights;
-  private final @Nonnull Set<KMeshInstance>  meshes;
+  private static final long         serialVersionUID;
 
-  KScene(
-    final @Nonnull KCamera camera,
-    final @Nonnull Set<KLight> lights,
-    final @Nonnull Set<KMeshInstance> meshes)
-  {
-    this.camera = camera;
-    this.lights = lights;
-    this.meshes = meshes;
+  static {
+    serialVersionUID = 4283712509235461406L;
   }
 
-  @Nonnull KCamera getCamera()
+  private final @Nonnull SBLogPanel log_panel;
+
+  public SBLogsWindow()
   {
-    return this.camera;
+    super("Logs");
+    this.log_panel = new SBLogPanel();
+
+    this.getContentPane().add(this.log_panel);
+    this.setPreferredSize(new Dimension(800, 600));
+    this.pack();
   }
 
-  @Nonnull Set<KLight> getLights()
+  void addText(
+    final @Nonnull String text)
   {
-    return this.lights;
-  }
-
-  @Nonnull Set<KMeshInstance> getMeshes()
-  {
-    return this.meshes;
+    this.log_panel.addText(text);
   }
 }

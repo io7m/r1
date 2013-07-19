@@ -188,7 +188,7 @@ final class KRendererFlat implements KRenderer
 
         gc.programPutUniformMatrix4x4f(u_mproj, this.matrix_projection);
 
-        for (final KMesh mesh : scene.getMeshes()) {
+        for (final KMeshInstance mesh : scene.getMeshes()) {
           this.renderMesh(gc, mesh);
         }
       } finally {
@@ -202,7 +202,7 @@ final class KRendererFlat implements KRenderer
 
   private void renderMesh(
     final @Nonnull GLInterfaceCommon gc,
-    final @Nonnull KMesh mesh)
+    final @Nonnull KMeshInstance mesh)
     throws ConstraintError,
       GLException
   {

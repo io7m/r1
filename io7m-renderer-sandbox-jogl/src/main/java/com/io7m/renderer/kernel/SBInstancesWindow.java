@@ -16,44 +16,25 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.Set;
-
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import javax.swing.JFrame;
 
-/**
- * The set of {@link KMeshInstance} objects and {@link KLight} objects that overlap
- * the view frustum of the given {@link KCamera}.
- */
+import com.io7m.jlog.Log;
 
-@Immutable final class KScene
+final class SBInstancesWindow extends JFrame
 {
-  private final @Nonnull KCamera     camera;
-  private final @Nonnull Set<KLight> lights;
-  private final @Nonnull Set<KMeshInstance>  meshes;
+  private static final long serialVersionUID;
 
-  KScene(
-    final @Nonnull KCamera camera,
-    final @Nonnull Set<KLight> lights,
-    final @Nonnull Set<KMeshInstance> meshes)
-  {
-    this.camera = camera;
-    this.lights = lights;
-    this.meshes = meshes;
+  static {
+    serialVersionUID = -312314551231238L;
   }
 
-  @Nonnull KCamera getCamera()
+  public SBInstancesWindow(
+    final @Nonnull SBSceneControllerMeshes controller,
+    final @Nonnull Log log)
   {
-    return this.camera;
-  }
-
-  @Nonnull Set<KLight> getLights()
-  {
-    return this.lights;
-  }
-
-  @Nonnull Set<KMeshInstance> getMeshes()
-  {
-    return this.meshes;
+    super("Instances");
+    this.getContentPane().add(new SBInstancesPanel(controller, log));
+    this.pack();
   }
 }

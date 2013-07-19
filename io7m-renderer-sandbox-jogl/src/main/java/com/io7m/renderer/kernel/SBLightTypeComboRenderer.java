@@ -16,44 +16,37 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.Set;
+import java.awt.Component;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
 
-/**
- * The set of {@link KMeshInstance} objects and {@link KLight} objects that overlap
- * the view frustum of the given {@link KCamera}.
- */
-
-@Immutable final class KScene
+final class SBLightTypeComboRenderer extends JLabel implements
+  ListCellRenderer<KLight.Type>
 {
-  private final @Nonnull KCamera     camera;
-  private final @Nonnull Set<KLight> lights;
-  private final @Nonnull Set<KMeshInstance>  meshes;
+  private static final long serialVersionUID;
 
-  KScene(
-    final @Nonnull KCamera camera,
-    final @Nonnull Set<KLight> lights,
-    final @Nonnull Set<KMeshInstance> meshes)
-  {
-    this.camera = camera;
-    this.lights = lights;
-    this.meshes = meshes;
+  static {
+    serialVersionUID = -7688892007185783325L;
   }
 
-  @Nonnull KCamera getCamera()
+  @Override public Component getListCellRendererComponent(
+    final JList<? extends KLight.Type> list,
+    final KLight.Type value,
+    final int index,
+    final boolean isSelected,
+    final boolean cellHasFocus)
   {
-    return this.camera;
-  }
+    if (isSelected) {
+      this.setBackground(list.getSelectionBackground());
+      this.setForeground(list.getSelectionForeground());
+    } else {
+      this.setBackground(list.getBackground());
+      this.setForeground(list.getForeground());
+    }
 
-  @Nonnull Set<KLight> getLights()
-  {
-    return this.lights;
-  }
-
-  @Nonnull Set<KMeshInstance> getMeshes()
-  {
-    return this.meshes;
+    this.setText(value.getName());
+    return this;
   }
 }

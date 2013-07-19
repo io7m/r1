@@ -16,44 +16,40 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.Set;
+import java.io.File;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 
-/**
- * The set of {@link KMeshInstance} objects and {@link KLight} objects that overlap
- * the view frustum of the given {@link KCamera}.
- */
-
-@Immutable final class KScene
+abstract class SBException extends Exception
 {
-  private final @Nonnull KCamera     camera;
-  private final @Nonnull Set<KLight> lights;
-  private final @Nonnull Set<KMeshInstance>  meshes;
+  private static final long serialVersionUID = -746503205823207820L;
 
-  KScene(
-    final @Nonnull KCamera camera,
-    final @Nonnull Set<KLight> lights,
-    final @Nonnull Set<KMeshInstance> meshes)
+  static enum Type
   {
-    this.camera = camera;
-    this.lights = lights;
-    this.meshes = meshes;
+    SB_EXCEPTION_IMAGE_LOADING
   }
 
-  @Nonnull KCamera getCamera()
+  private final @Nonnull Type type;
+
+  private SBException(
+    final @Nonnull Type type,
+    final @Nonnull String message)
   {
-    return this.camera;
+    super(message);
+    this.type = type;
   }
 
-  @Nonnull Set<KLight> getLights()
+  final static class SBExceptionImageLoading extends SBException
   {
-    return this.lights;
-  }
+    private static final long   serialVersionUID = 7521983144069448194L;
+    private final @Nonnull File file;
 
-  @Nonnull Set<KMeshInstance> getMeshes()
-  {
-    return this.meshes;
+    @SuppressWarnings("synthetic-access") SBExceptionImageLoading(
+      final @Nonnull File file,
+      final @Nonnull String message)
+    {
+      super(Type.SB_EXCEPTION_IMAGE_LOADING, file + ": " + message);
+      this.file = file;
+    }
   }
 }
