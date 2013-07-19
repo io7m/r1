@@ -16,44 +16,52 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.Set;
-
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jcanephora.ArrayBuffer;
+import com.io7m.jcanephora.IndexBuffer;
+
 /**
- * The set of {@link KMeshInstance} objects and {@link KLight} objects that overlap
- * the view frustum of the given {@link KCamera}.
+ * An instance of a polygon mesh on the GPU.
  */
 
-@Immutable final class KScene
+@Immutable final class KMeshInstance implements KTransformable
 {
-  private final @Nonnull KCamera     camera;
-  private final @Nonnull Set<KLight> lights;
-  private final @Nonnull Set<KMeshInstance>  meshes;
+  private final @Nonnull KTransform  transform;
+  private final @Nonnull ArrayBuffer vbo;
+  private final @Nonnull IndexBuffer ibo;
+  private final @Nonnull KMaterial   material;
 
-  KScene(
-    final @Nonnull KCamera camera,
-    final @Nonnull Set<KLight> lights,
-    final @Nonnull Set<KMeshInstance> meshes)
+  public KMeshInstance(
+    final @Nonnull KTransform transform,
+    final @Nonnull ArrayBuffer vbo,
+    final @Nonnull IndexBuffer ibo,
+    final @Nonnull KMaterial material)
   {
-    this.camera = camera;
-    this.lights = lights;
-    this.meshes = meshes;
+    this.transform = transform;
+    this.vbo = vbo;
+    this.ibo = ibo;
+    this.material = material;
   }
 
-  @Nonnull KCamera getCamera()
+  @Nonnull ArrayBuffer getArrayBuffer()
   {
-    return this.camera;
+    return this.vbo;
   }
 
-  @Nonnull Set<KLight> getLights()
+  @Nonnull IndexBuffer getIndexBuffer()
   {
-    return this.lights;
+    return this.ibo;
   }
 
-  @Nonnull Set<KMeshInstance> getMeshes()
+  @Nonnull KMaterial getMaterial()
   {
-    return this.meshes;
+    return this.material;
+  }
+
+  @Override public @Nonnull KTransform getTransform()
+  {
+    return this.transform;
   }
 }

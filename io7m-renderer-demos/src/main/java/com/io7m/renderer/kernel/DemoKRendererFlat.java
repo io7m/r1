@@ -184,7 +184,7 @@ public final class DemoKRendererFlat implements Demo
     }
   }
 
-  private static @Nonnull KMesh makeMesh(
+  private static @Nonnull KMeshInstance makeMesh(
     final @Nonnull GLImplementation gi,
     final @Nonnull KTransform transform,
     final @Nonnull TextureLoader texture_loader,
@@ -202,15 +202,15 @@ public final class DemoKRendererFlat implements Demo
       DemoUtilities.texturedSquare(g, 1);
     final KMaterial material =
       DemoKRendererFlat.makeMaterial(texture_loader, fs, g);
-    return new KMesh(transform, p.first, p.second, material);
+    return new KMeshInstance(transform, p.first, p.second, material);
   }
 
   private static @Nonnull KScene makeScene(
-    final @Nonnull KMesh mesh,
+    final @Nonnull KMeshInstance mesh,
     final @Nonnull KCamera camera)
   {
     final HashSet<KLight> lights = new HashSet<KLight>();
-    final HashSet<KMesh> meshes = new HashSet<KMesh>();
+    final HashSet<KMeshInstance> meshes = new HashSet<KMeshInstance>();
     meshes.add(mesh);
     return new KScene(camera, lights, meshes);
   }
@@ -311,7 +311,7 @@ public final class DemoKRendererFlat implements Demo
       ConstraintError
   {
     final HashSet<KLight> lights = new HashSet<KLight>();
-    final HashSet<KMesh> meshes = new HashSet<KMesh>();
+    final HashSet<KMeshInstance> meshes = new HashSet<KMeshInstance>();
 
     for (int x = -5; x < 10; ++x) {
       final QuaternionM4F orientation = new QuaternionM4F();
@@ -320,8 +320,8 @@ public final class DemoKRendererFlat implements Demo
         Math.toRadians((frame + x) % 360),
         orientation);
 
-      final KMesh mesh =
-        new KMesh(
+      final KMeshInstance mesh =
+        new KMeshInstance(
           new KTransform(new VectorI3F(x, 0, -1), orientation),
           this.quad_in_scene.first,
           this.quad_in_scene.second,

@@ -16,44 +16,40 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.Set;
+import java.awt.Font;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
-/**
- * The set of {@link KMeshInstance} objects and {@link KLight} objects that overlap
- * the view frustum of the given {@link KCamera}.
- */
+import net.java.dev.designgridlayout.DesignGridLayout;
 
-@Immutable final class KScene
+final class SBLogPanel extends JPanel
 {
-  private final @Nonnull KCamera     camera;
-  private final @Nonnull Set<KLight> lights;
-  private final @Nonnull Set<KMeshInstance>  meshes;
+  private static final long        serialVersionUID;
 
-  KScene(
-    final @Nonnull KCamera camera,
-    final @Nonnull Set<KLight> lights,
-    final @Nonnull Set<KMeshInstance> meshes)
-  {
-    this.camera = camera;
-    this.lights = lights;
-    this.meshes = meshes;
+  static {
+    serialVersionUID = -7319547005472170348L;
   }
 
-  @Nonnull KCamera getCamera()
+  private final @Nonnull JTextArea log_area;
+
+  public SBLogPanel()
   {
-    return this.camera;
+    this.log_area = new JTextArea();
+    this.log_area.setEditable(false);
+    this.log_area.setFont(Font.decode(Font.MONOSPACED + " 9"));
+
+    final JScrollPane log_pane = new JScrollPane(this.log_area);
+
+    final DesignGridLayout dg = new DesignGridLayout(this);
+    dg.row().grid().add(log_pane);
   }
 
-  @Nonnull Set<KLight> getLights()
+  void addText(
+    final @Nonnull String text)
   {
-    return this.lights;
-  }
-
-  @Nonnull Set<KMeshInstance> getMeshes()
-  {
-    return this.meshes;
+    this.log_area.append(text);
   }
 }

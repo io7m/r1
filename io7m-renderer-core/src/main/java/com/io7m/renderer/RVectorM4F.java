@@ -14,46 +14,32 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel;
-
-import java.util.Set;
+package com.io7m.renderer;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 
-/**
- * The set of {@link KMeshInstance} objects and {@link KLight} objects that overlap
- * the view frustum of the given {@link KCamera}.
- */
+import com.io7m.jtensors.VectorM4F;
 
-@Immutable final class KScene
+public final class RVectorM4F<T extends RSpace> extends VectorM4F implements
+  RVectorReadable4F<T>
 {
-  private final @Nonnull KCamera     camera;
-  private final @Nonnull Set<KLight> lights;
-  private final @Nonnull Set<KMeshInstance>  meshes;
-
-  KScene(
-    final @Nonnull KCamera camera,
-    final @Nonnull Set<KLight> lights,
-    final @Nonnull Set<KMeshInstance> meshes)
+  public RVectorM4F()
   {
-    this.camera = camera;
-    this.lights = lights;
-    this.meshes = meshes;
+    super();
   }
 
-  @Nonnull KCamera getCamera()
+  public RVectorM4F(
+    final float x,
+    final float y,
+    final float z,
+    final float w)
   {
-    return this.camera;
+    super(x, y, z, w);
   }
 
-  @Nonnull Set<KLight> getLights()
+  public RVectorM4F(
+    final @Nonnull RVectorReadable4F<T> v)
   {
-    return this.lights;
-  }
-
-  @Nonnull Set<KMeshInstance> getMeshes()
-  {
-    return this.meshes;
+    super(v);
   }
 }

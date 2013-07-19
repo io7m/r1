@@ -22,27 +22,42 @@ import javax.annotation.concurrent.Immutable;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.IndexBuffer;
 
-/**
- * A polygon mesh on the GPU.
- */
-
-@Immutable final class KMesh implements KTransformable
+@Immutable final class SBMesh implements Comparable<SBMesh>
 {
-  private final @Nonnull KTransform  transform;
+  private final @Nonnull String      name;
   private final @Nonnull ArrayBuffer vbo;
   private final @Nonnull IndexBuffer ibo;
-  private final @Nonnull KMaterial   material;
 
-  public KMesh(
-    final @Nonnull KTransform transform,
+  SBMesh(
+    final @Nonnull String name,
     final @Nonnull ArrayBuffer vbo,
-    final @Nonnull IndexBuffer ibo,
-    final @Nonnull KMaterial material)
+    final @Nonnull IndexBuffer ibo)
   {
-    this.transform = transform;
+    this.name = name;
     this.vbo = vbo;
     this.ibo = ibo;
-    this.material = material;
+  }
+
+  @Override public int compareTo(
+    final @Nonnull SBMesh o)
+  {
+    return this.name.compareTo(o.name);
+  }
+
+  @Override public boolean equals(
+    final Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final SBMesh other = (SBMesh) obj;
+    return this.name.equals(other.name);
   }
 
   @Nonnull ArrayBuffer getArrayBuffer()
@@ -55,13 +70,19 @@ import com.io7m.jcanephora.IndexBuffer;
     return this.ibo;
   }
 
-  @Nonnull KMaterial getMaterial()
+  @Nonnull String getName()
   {
-    return this.material;
+    return this.name;
   }
 
-  @Override public @Nonnull KTransform getTransform()
+  @Override public int hashCode()
   {
-    return this.transform;
+    return this.name.hashCode();
   }
+
+  @Override public String toString()
+  {
+    return "[SBMesh " + this.name + "]";
+  }
+
 }

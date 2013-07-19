@@ -5,13 +5,13 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.io7m.renderer.demos</groupId>
-  <artifactId>io7m-renderer-demos</artifactId>
+  <groupId>com.io7m.renderer.sandbox-jogl</groupId>
+  <artifactId>io7m-renderer-sandbox-jogl</artifactId>
   <version>0.1.0</version>
   <packaging>jar</packaging>
-  <name>io7m-renderer-demos</name>
-  <description>Common demonstration code</description>
-  <url>http://mvn.io7m.com/renderer-demos/</url>
+  <name>io7m-renderer-sandbox-jogl</name>
+  <description>JOGL renderer sandbox</description>
+  <url>http://mvn.io7m.com/renderer-sandbox-jogl/</url>
 
   <licenses>
     <license>
@@ -44,7 +44,7 @@
     <site>
       <id>io7m</id>
       <name>io7m.com</name>
-      <url>http://mvn.io7m.com/renderer-demos/</url>
+      <url>http://mvn.io7m.com/renderer-sandbox-jogl/</url>
     </site>
   </distributionManagement>
 
@@ -64,8 +64,13 @@
       <version>[5.0.0, 6.0.0)</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.jcanephora.core</groupId>
-      <artifactId>io7m-jcanephora-core</artifactId>
+      <groupId>com.io7m.jcanephora.jogl</groupId>
+      <artifactId>io7m-jcanephora-jogl</artifactId>
+      <version>0.9.8</version>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.jcanephora.texload-imageio</groupId>
+      <artifactId>io7m-jcanephora-texload-imageio</artifactId>
       <version>0.9.8</version>
     </dependency>
     <dependency>
@@ -79,14 +84,14 @@
       <version>0.9.8</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.jsom0.core</groupId>
-      <artifactId>io7m-jsom0-core</artifactId>
-      <version>0.9.1</version>
-    </dependency>
-    <dependency>
       <groupId>com.io7m.renderer.core</groupId>
       <artifactId>io7m-renderer-core</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.jsom0.core</groupId>
+      <artifactId>io7m-jsom0-core</artifactId>
+      <version>0.9.2</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -98,6 +103,21 @@
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
       <version>2.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jogamp.gluegen</groupId>
+      <artifactId>gluegen-rt-main</artifactId>
+      <version>2.0.2-rc-20130717</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jogamp.jogl</groupId>
+      <artifactId>jogl-all-main</artifactId>
+      <version>2.0.2-rc-20130717</version>
+    </dependency>
+    <dependency>
+    	<groupId>net.java.dev.designgridlayout</groupId>
+    	<artifactId>designgridlayout</artifactId>
+    	<version>1.11</version>
     </dependency>
   </dependencies>
 

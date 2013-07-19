@@ -16,44 +16,21 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.Set;
+import java.awt.event.WindowEvent;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import javax.swing.JFrame;
 
-/**
- * The set of {@link KMeshInstance} objects and {@link KLight} objects that overlap
- * the view frustum of the given {@link KCamera}.
- */
-
-@Immutable final class KScene
+final class SBWindowUtilities
 {
-  private final @Nonnull KCamera     camera;
-  private final @Nonnull Set<KLight> lights;
-  private final @Nonnull Set<KMeshInstance>  meshes;
+  /**
+   * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given window.
+   */
 
-  KScene(
-    final @Nonnull KCamera camera,
-    final @Nonnull Set<KLight> lights,
-    final @Nonnull Set<KMeshInstance> meshes)
+  static void closeWindow(
+    final @Nonnull JFrame frame)
   {
-    this.camera = camera;
-    this.lights = lights;
-    this.meshes = meshes;
-  }
-
-  @Nonnull KCamera getCamera()
-  {
-    return this.camera;
-  }
-
-  @Nonnull Set<KLight> getLights()
-  {
-    return this.lights;
-  }
-
-  @Nonnull Set<KMeshInstance> getMeshes()
-  {
-    return this.meshes;
+    final WindowEvent ev = new WindowEvent(frame, WindowEvent.WINDOW_CLOSING);
+    frame.dispatchEvent(ev);
   }
 }
