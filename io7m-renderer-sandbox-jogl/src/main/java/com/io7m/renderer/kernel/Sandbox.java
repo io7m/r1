@@ -22,7 +22,9 @@ import java.util.Properties;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
+import com.io7m.jvvfs.FilesystemError;
 
 public final class Sandbox
 {
@@ -42,18 +44,29 @@ public final class Sandbox
       @Override public void run()
       {
         log.debug("starting");
+        try {
+          final SBGLRenderer renderer = new SBGLRenderer(log);
+          final SBSceneState state = new SBSceneState(log);
+          final SBSceneController controller =
+            new SBSceneController(state, renderer, log);
+          final SBMainWindow window =
+            new SBMainWindow(controller, renderer, log);
+          window.setTitle("Sandbox");
+          window.setPreferredSize(new Dimension(800, 600));
+          window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+          window.pack();
+          window.setVisible(true);
+        } catch (final FilesystemError e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+          System.exit(1);
+        } catch (final ConstraintError e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+          System.exit(1);
+        } finally {
 
-        final SBGLRenderer renderer = new SBGLRenderer(log);
-        final SBSceneState state = new SBSceneState(log);
-        final SBSceneController controller =
-          new SBSceneController(state, renderer, log);
-        final SBMainWindow window =
-          new SBMainWindow(controller, renderer, log);
-        window.setTitle("Sandbox");
-        window.setPreferredSize(new Dimension(800, 600));
-        window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        window.pack();
-        window.setVisible(true);
+        }
       }
     });
   }

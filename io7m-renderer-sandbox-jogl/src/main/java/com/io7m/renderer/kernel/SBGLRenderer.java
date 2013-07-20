@@ -35,17 +35,38 @@ import javax.media.opengl.GLEventListener;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Function;
+import com.io7m.jaux.functional.Indeterminate;
+import com.io7m.jaux.functional.Indeterminate.Failure;
+import com.io7m.jaux.functional.Indeterminate.Success;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jaux.functional.Unit;
+import com.io7m.jcanephora.ArrayBuffer;
+import com.io7m.jcanephora.ArrayBufferAttribute;
+import com.io7m.jcanephora.ArrayBufferDescriptor;
+import com.io7m.jcanephora.AttachmentColor;
+import com.io7m.jcanephora.AttachmentColor.AttachmentColorTexture2DStatic;
+import com.io7m.jcanephora.Framebuffer;
+import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
+import com.io7m.jcanephora.FramebufferConfigurationGLES2Actual;
+import com.io7m.jcanephora.FramebufferStatus;
+import com.io7m.jcanephora.GLCompileException;
 import com.io7m.jcanephora.GLException;
 import com.io7m.jcanephora.GLImplementationJOGL;
 import com.io7m.jcanephora.GLInterfaceCommon;
 import com.io7m.jcanephora.GLUnsupportedException;
+import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.jcanephora.Primitives;
+import com.io7m.jcanephora.Program;
+import com.io7m.jcanephora.ProgramAttribute;
+import com.io7m.jcanephora.ProgramUniform;
+import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureLoader;
 import com.io7m.jcanephora.TextureLoaderImageIO;
+import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jlog.Log;
@@ -57,6 +78,14 @@ import com.io7m.jsom0.NameUVAttribute;
 import com.io7m.jsom0.parser.ModelObjectParser;
 import com.io7m.jsom0.parser.ModelObjectParserVBOImmediate;
 import com.io7m.jsom0.parser.ModelParser;
+import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.VectorI2I;
+import com.io7m.jtensors.VectorM2I;
+import com.io7m.jtensors.VectorM3F;
+import com.io7m.jvvfs.FSCapabilityAll;
+import com.io7m.jvvfs.Filesystem;
+import com.io7m.jvvfs.FilesystemError;
+import com.io7m.jvvfs.PathVirtual;
 
 final class SBGLRenderer implements GLEventListener
 {
@@ -254,9 +283,21 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>        mesh_delete_queue;
   private final @Nonnull ConcurrentHashMap<File, Texture2DStatic>       textures;
   private final @Nonnull ConcurrentHashMap<File, Model<ModelObjectVBO>> meshes;
+  private @CheckForNull SBQuad                                          screen_quad;
+  private Program                                                       program_uv;
+  private final @Nonnull FSCapabilityAll                                filesystem;
+  private @CheckForNull FramebufferConfigurationGLES2Actual             framebuffer_config;
+  private @CheckForNull Framebuffer                                     framebuffer;
+  private boolean                                                       initialized;
+  private final @Nonnull MatrixM4x4F                                    matrix_projection;
+  private final @Nonnull MatrixM4x4F                                    matrix_modelview;
+  private @CheckForNull TextureUnit[]                                   texture_units;
+  private @CheckForNull FramebufferColorAttachmentPoint[]               framebuffer_points;
 
   public SBGLRenderer(
     final @Nonnull Log log)
+    throws ConstraintError,
+      FilesystemError
   {
     this.log = new Log(log, "gl");
     this.texture_loader = new TextureLoaderImageIO();
@@ -267,24 +308,30 @@ final class SBGLRenderer implements GLEventListener
     this.mesh_load_queue = new ConcurrentLinkedQueue<MeshLoadFuture>();
     this.mesh_delete_queue = new ConcurrentLinkedQueue<MeshDeleteFuture>();
     this.meshes = new ConcurrentHashMap<File, Model<ModelObjectVBO>>();
+    this.filesystem = Filesystem.makeWithoutArchiveDirectory(log);
+    this.filesystem.mountClasspathArchive(
+      SBGLRenderer.class,
+      PathVirtual.ROOT);
+    this.matrix_modelview = new MatrixM4x4F();
+    this.matrix_projection = new MatrixM4x4F();
+    this.initialized = false;
   }
 
   @Override public void display(
     final @Nonnull GLAutoDrawable drawable)
   {
-    if (this.gi == null) {
-      return;
-    }
+    assert this.initialized;
 
     try {
       final GLInterfaceCommon gl = this.gi.getGLCommon();
-      gl.colorBufferClear3f(0.0f, 0.0f, 1.0f);
 
       SBGLRenderer.processQueue(this.mesh_delete_queue);
       SBGLRenderer.processQueue(this.texture_delete_queue);
       SBGLRenderer.processQueue(this.texture_load_queue);
       SBGLRenderer.processQueue(this.mesh_load_queue);
 
+      this.renderScene(gl);
+      this.renderResultsToScreen(drawable, gl);
     } catch (final GLException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -300,19 +347,67 @@ final class SBGLRenderer implements GLEventListener
     // TODO Auto-generated method stub
   }
 
+  private @Nonnull Texture2DStaticUsable getRenderedFramebufferTexture()
+    throws ConstraintError
+  {
+    final AttachmentColor ca =
+      this.framebuffer.getColorAttachment(this.framebuffer_points[0]);
+
+    switch (ca.type) {
+      case ATTACHMENT_COLOR_TEXTURE_2D:
+      {
+        final AttachmentColorTexture2DStatic t =
+          (AttachmentColorTexture2DStatic) ca;
+        return t.getTexture2D();
+      }
+      case ATTACHMENT_COLOR_RENDERBUFFER:
+      case ATTACHMENT_COLOR_TEXTURE_CUBE:
+      case ATTACHMENT_SHARED_COLOR_RENDERBUFFER:
+      case ATTACHMENT_SHARED_COLOR_TEXTURE_2D:
+      case ATTACHMENT_SHARED_COLOR_TEXTURE_CUBE:
+      {
+        throw new UnreachableCodeException();
+      }
+    }
+
+    throw new UnreachableCodeException();
+  }
+
   @Override public void init(
     final @Nonnull GLAutoDrawable drawable)
   {
     this.log.debug("initialized");
     try {
       this.gi = new GLImplementationJOGL(drawable.getContext(), this.log);
+      final GLInterfaceCommon gl = this.gi.getGLCommon();
 
+      this.texture_units = gl.textureGetUnits();
+      this.framebuffer_points = gl.framebufferGetColorAttachmentPoints();
+
+      this.program_uv = new Program("uv", this.log);
+      this.program_uv.addVertexShader(SBShaderPaths.getShader(
+        gl.metaGetVersionMajor(),
+        gl.metaGetVersionMinor(),
+        gl.metaIsES(),
+        "standard.v"));
+      this.program_uv.addFragmentShader(SBShaderPaths.getShader(
+        gl.metaGetVersionMajor(),
+        gl.metaGetVersionMinor(),
+        gl.metaIsES(),
+        "flat_uv.f"));
+      this.program_uv.compile(this.filesystem, gl);
+
+      this.reloadSizedResources(drawable, gl);
+
+      this.initialized = true;
     } catch (final GLException e) {
-      this.log.critical(e.getMessage());
+      e.printStackTrace();
     } catch (final GLUnsupportedException e) {
-      this.log.critical(e.getMessage());
+      e.printStackTrace();
     } catch (final ConstraintError e) {
-      this.log.critical(e.getMessage());
+      e.printStackTrace();
+    } catch (final GLCompileException e) {
+      e.printStackTrace();
     }
   }
 
@@ -332,6 +427,175 @@ final class SBGLRenderer implements GLEventListener
     return f;
   }
 
+  /**
+   * Reload those resources that are dependent on the size of the
+   * screen/drawable (such as the framebuffer, and the screen-sized quad).
+   */
+
+  private void reloadSizedResources(
+    final GLAutoDrawable drawable,
+    final GLInterfaceCommon gl)
+    throws ConstraintError,
+      GLException
+  {
+    this.framebuffer_config =
+      new FramebufferConfigurationGLES2Actual(
+        drawable.getWidth(),
+        drawable.getHeight());
+    this.framebuffer_config.requestBestRGBAColorTexture2D(
+      TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+      TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+      TextureFilterMinification.TEXTURE_FILTER_NEAREST,
+      TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
+    this.framebuffer_config.requestDepthRenderbuffer();
+
+    final Indeterminate<Framebuffer, FramebufferStatus> fb =
+      this.framebuffer_config.make(this.gi);
+    switch (fb.type) {
+      case FAILURE:
+      {
+        final Failure<Framebuffer, FramebufferStatus> f =
+          (Indeterminate.Failure<Framebuffer, FramebufferStatus>) fb;
+        throw new GLException(-1, "Could not create framebuffer: " + f.value);
+      }
+      case SUCCESS:
+      {
+        final Success<Framebuffer, FramebufferStatus> f =
+          (Indeterminate.Success<Framebuffer, FramebufferStatus>) fb;
+
+        if (this.framebuffer != null) {
+          this.framebuffer.delete(gl);
+        }
+
+        this.framebuffer = f.value;
+      }
+    }
+
+    if (this.screen_quad != null) {
+      gl.arrayBufferDelete(this.screen_quad.getArrayBuffer());
+      gl.indexBufferDelete(this.screen_quad.getIndexBuffer());
+    }
+
+    this.screen_quad =
+      new SBQuad(gl, drawable.getWidth(), drawable.getHeight(), -1);
+  }
+
+  private void renderResultsToScreen(
+    final @Nonnull GLAutoDrawable drawable,
+    final @Nonnull GLInterfaceCommon gl)
+    throws ConstraintError,
+      GLException
+  {
+    final VectorM2I size = new VectorM2I();
+    size.x = drawable.getWidth();
+    size.y = drawable.getHeight();
+
+    gl.viewportSet(VectorI2I.ZERO, size);
+    gl.colorBufferClear3f(0.0f, 0.0f, 1.0f);
+
+    MatrixM4x4F.setIdentity(this.matrix_projection);
+    ProjectionMatrix.makeOrthographic(
+      this.matrix_projection,
+      0,
+      drawable.getWidth(),
+      0,
+      drawable.getHeight(),
+      1,
+      100);
+
+    final VectorM3F translation = new VectorM3F();
+    translation.x = 0;
+    translation.y = 0;
+    translation.z = -1;
+
+    MatrixM4x4F.setIdentity(this.matrix_modelview);
+    MatrixM4x4F
+      .translateByVector3FInPlace(this.matrix_modelview, translation);
+
+    this.program_uv.activate(gl);
+    {
+      /**
+       * Get references to the program's uniform variable inputs.
+       */
+
+      final ProgramUniform u_proj =
+        this.program_uv.getUniform("m_projection");
+      final ProgramUniform u_model =
+        this.program_uv.getUniform("m_modelview");
+      final ProgramUniform u_texture =
+        this.program_uv.getUniform("t_diffuse_0");
+
+      /**
+       * Upload the matrices to the uniform variable inputs.
+       */
+
+      gl.programPutUniformMatrix4x4f(u_proj, this.matrix_projection);
+      gl.programPutUniformMatrix4x4f(u_model, this.matrix_modelview);
+
+      /**
+       * Bind the texture to the first available texture unit, then upload the
+       * texture unit reference to the shader.
+       */
+
+      gl.texture2DStaticBind(
+        this.texture_units[0],
+        this.getRenderedFramebufferTexture());
+      gl.programPutUniformTextureUnit(u_texture, this.texture_units[0]);
+
+      /**
+       * Get references to the program's vertex attribute inputs.
+       */
+
+      final ProgramAttribute p_pos =
+        this.program_uv.getAttribute("v_position");
+      final ProgramAttribute p_uv = this.program_uv.getAttribute("v_uv");
+
+      /**
+       * Get references to the array buffer's vertex attributes.
+       */
+
+      final ArrayBuffer array = this.screen_quad.getArrayBuffer();
+      final ArrayBufferDescriptor array_type = array.getDescriptor();
+      final ArrayBufferAttribute b_pos = array_type.getAttribute("position");
+      final ArrayBufferAttribute b_uv = array_type.getAttribute("uv");
+
+      /**
+       * Bind the array buffer, and associate program vertex attribute inputs
+       * with array vertex attributes.
+       */
+
+      gl.arrayBufferBind(array);
+      gl.arrayBufferBindVertexAttribute(array, b_pos, p_pos);
+      gl.arrayBufferBindVertexAttribute(array, b_uv, p_uv);
+
+      /**
+       * Draw primitives, using the array buffer and the given index buffer.
+       */
+
+      final IndexBuffer indices = this.screen_quad.getIndexBuffer();
+      gl.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+      gl.arrayBufferUnbind();
+    }
+    this.program_uv.deactivate(gl);
+  }
+
+  private void renderScene(
+    final @Nonnull GLInterfaceCommon gl)
+    throws GLException,
+      ConstraintError
+  {
+    final VectorM2I size = new VectorM2I();
+    size.x = this.framebuffer.getWidth();
+    size.y = this.framebuffer.getHeight();
+
+    gl.framebufferDrawBind(this.framebuffer.getFramebuffer());
+    {
+      gl.viewportSet(VectorI2I.ZERO, size);
+      gl.colorBufferClear3f(0.0f, 1.0f, 0.0f);
+    }
+    gl.framebufferDrawUnbind();
+  }
+
   @Override public void reshape(
     final @Nonnull GLAutoDrawable drawable,
     final int x,
@@ -339,7 +603,18 @@ final class SBGLRenderer implements GLEventListener
     final int width,
     final int height)
   {
-    // TODO Auto-generated method stub
+    assert this.initialized;
+
+    try {
+      final GLInterfaceCommon gl = this.gi.getGLCommon();
+      this.reloadSizedResources(drawable, gl);
+    } catch (final GLException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (final ConstraintError e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
   void textureDelete(
