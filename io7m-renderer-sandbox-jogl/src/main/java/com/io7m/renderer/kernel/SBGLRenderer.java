@@ -41,7 +41,6 @@ import com.io7m.jcanephora.GLImplementationJOGL;
 import com.io7m.jcanephora.GLInterfaceCommon;
 import com.io7m.jcanephora.GLUnsupportedException;
 import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureLoader;
@@ -63,8 +62,10 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull Log                                            log;
   private @CheckForNull GLImplementationJOGL                            gi;
   private final @Nonnull TextureLoader                                  texture_loader;
-  private final @Nonnull ConcurrentLinkedQueue<TextureLoadFuture>       texture_queue;
-  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>          mesh_queue;
+  private final @Nonnull ConcurrentLinkedQueue<TextureLoadFuture>       texture_load_queue;
+  private final @Nonnull ConcurrentLinkedQueue<TextureDeleteFuture>     texture_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>          mesh_load_queue;
+  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>        mesh_delete_queue;
   private final @Nonnull ConcurrentHashMap<File, Texture2DStatic>       textures;
   private final @Nonnull ConcurrentHashMap<File, Model<ModelObjectVBO>> meshes;
 
@@ -73,9 +74,12 @@ final class SBGLRenderer implements GLEventListener
   {
     this.log = new Log(log, "gl");
     this.texture_loader = new TextureLoaderImageIO();
-    this.texture_queue = new ConcurrentLinkedQueue<TextureLoadFuture>();
+    this.texture_load_queue = new ConcurrentLinkedQueue<TextureLoadFuture>();
+    this.texture_delete_queue =
+      new ConcurrentLinkedQueue<TextureDeleteFuture>();
     this.textures = new ConcurrentHashMap<File, Texture2DStatic>();
-    this.mesh_queue = new ConcurrentLinkedQueue<MeshLoadFuture>();
+    this.mesh_load_queue = new ConcurrentLinkedQueue<MeshLoadFuture>();
+    this.mesh_delete_queue = new ConcurrentLinkedQueue<MeshDeleteFuture>();
     this.meshes = new ConcurrentHashMap<File, Model<ModelObjectVBO>>();
   }
 
@@ -89,8 +93,10 @@ final class SBGLRenderer implements GLEventListener
     try {
       final GLInterfaceCommon gl = this.gi.getGLCommon();
       gl.colorBufferClear3f(0.0f, 0.0f, 1.0f);
-      this.processTextureQueue();
-      this.processMeshQueue();
+      this.processTextureLoadQueue();
+      this.processTextureDeleteQueue();
+      this.processMeshLoadQueue();
+      this.processMeshDeleteQueue();
     } catch (final GLException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -100,10 +106,10 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private void processMeshQueue()
+  private void processMeshLoadQueue()
   {
     for (;;) {
-      final MeshLoadFuture f = this.mesh_queue.poll();
+      final MeshLoadFuture f = this.mesh_load_queue.poll();
       if (f == null) {
         break;
       }
@@ -112,10 +118,34 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private void processTextureQueue()
+  private void processMeshDeleteQueue()
   {
     for (;;) {
-      final TextureLoadFuture f = this.texture_queue.poll();
+      final MeshDeleteFuture f = this.mesh_delete_queue.poll();
+      if (f == null) {
+        break;
+      }
+
+      f.run();
+    }
+  }
+
+  private void processTextureLoadQueue()
+  {
+    for (;;) {
+      final TextureLoadFuture f = this.texture_load_queue.poll();
+      if (f == null) {
+        break;
+      }
+
+      f.run();
+    }
+  }
+
+  private void processTextureDeleteQueue()
+  {
+    for (;;) {
+      final TextureDeleteFuture f = this.texture_delete_queue.poll();
       if (f == null) {
         break;
       }
@@ -225,15 +255,15 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private class TextureLoadFuture extends FutureTask<Texture2DStaticUsable>
+  private class TextureLoadFuture extends FutureTask<Texture2DStatic>
   {
     TextureLoadFuture(
       final @Nonnull File file,
       final @Nonnull InputStream stream)
     {
-      super(new Callable<Texture2DStaticUsable>() {
+      super(new Callable<Texture2DStatic>() {
         @SuppressWarnings("synthetic-access") @Override public @Nonnull
-          Texture2DStaticUsable
+          Texture2DStatic
           call()
             throws Exception
         {
@@ -271,12 +301,70 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  Future<Texture2DStaticUsable> textureLoad(
+  private class TextureDeleteFuture extends FutureTask<Void>
+  {
+    TextureDeleteFuture(
+      final @Nonnull Texture2DStatic texture)
+    {
+      super(new Callable<Void>() {
+        @SuppressWarnings("synthetic-access") @Override public @Nonnull
+          Void
+          call()
+            throws Exception
+        {
+          SBGLRenderer.this.log.debug("Deleting " + texture);
+
+          if (SBGLRenderer.this.gi != null) {
+            final GLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
+            try {
+              gl.texture2DStaticDelete(texture);
+            } catch (final ConstraintError e) {
+              throw new UnreachableCodeException();
+            }
+          }
+
+          throw new GLException(-1, "OpenGL not ready!");
+        }
+      });
+    }
+  }
+
+  private class MeshDeleteFuture extends FutureTask<Void>
+  {
+    MeshDeleteFuture(
+      final @Nonnull SBMesh mesh)
+    {
+      super(new Callable<Void>() {
+        @SuppressWarnings("synthetic-access") @Override public @Nonnull
+          Void
+          call()
+            throws Exception
+        {
+          SBGLRenderer.this.log.debug("Deleting mesh " + mesh);
+
+          if (SBGLRenderer.this.gi != null) {
+            final GLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
+
+            try {
+              gl.arrayBufferDelete(mesh.getArrayBuffer());
+              gl.indexBufferDelete(mesh.getIndexBuffer());
+            } catch (final ConstraintError e) {
+              throw new UnreachableCodeException();
+            }
+          }
+
+          throw new GLException(-1, "OpenGL not ready!");
+        }
+      });
+    }
+  }
+
+  Future<Texture2DStatic> textureLoad(
     final @Nonnull File file,
     final @Nonnull InputStream stream)
   {
     final TextureLoadFuture f = new TextureLoadFuture(file, stream);
-    this.texture_queue.add(f);
+    this.texture_load_queue.add(f);
     return f;
   }
 
@@ -285,7 +373,21 @@ final class SBGLRenderer implements GLEventListener
     final @Nonnull InputStream stream)
   {
     final MeshLoadFuture f = new MeshLoadFuture(file, stream);
-    this.mesh_queue.add(f);
+    this.mesh_load_queue.add(f);
     return f;
+  }
+
+  void textureDelete(
+    final @Nonnull Texture2DStatic t)
+  {
+    final TextureDeleteFuture f = new TextureDeleteFuture(t);
+    this.texture_delete_queue.add(f);
+  }
+
+  void meshDelete(
+    final @Nonnull SBMesh m)
+  {
+    final MeshDeleteFuture f = new MeshDeleteFuture(m);
+    this.mesh_delete_queue.add(f);
   }
 }

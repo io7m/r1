@@ -30,12 +30,11 @@ import nu.xom.Serializer;
 import org.junit.Test;
 
 import com.io7m.jaux.functional.Pair;
-import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.RVectorM3F;
 import com.io7m.renderer.kernel.SBSceneState.SBSceneNormalized;
 
 public final class SBSceneStateTest
@@ -48,13 +47,13 @@ public final class SBSceneStateTest
 
     state.textureAdd(
       new File("/x/y/z/file.txt"),
-      new Pair<BufferedImage, Texture2DStaticUsable>(null, null));
+      new Pair<BufferedImage, Texture2DStatic>(null, null));
     state.textureAdd(
       new File("/a/b/c/file.txt"),
-      new Pair<BufferedImage, Texture2DStaticUsable>(null, null));
+      new Pair<BufferedImage, Texture2DStatic>(null, null));
     state.textureAdd(
       new File("/a/b/z/file.txt"),
-      new Pair<BufferedImage, Texture2DStaticUsable>(null, null));
+      new Pair<BufferedImage, Texture2DStatic>(null, null));
 
     {
       final SortedSet<SBMesh> objects = new TreeSet<SBMesh>();
@@ -82,9 +81,10 @@ public final class SBSceneStateTest
       final Integer id = Integer.valueOf(64);
       final File model = new File("/z/z.so0");
       final String model_object = "m1";
-      final RVectorM3F<RSpaceWorld> position =
-        new RVectorM3F<RSpaceWorld>(10, 10, -10);
-      final RVectorM3F<SBDegrees> orientation = new RVectorM3F<SBDegrees>();
+      final RVectorI3F<RSpaceWorld> position =
+        new RVectorI3F<RSpaceWorld>(10, 10, -10);
+      final RVectorI3F<SBDegrees> orientation =
+        new RVectorI3F<SBDegrees>(20, 20, -20);
       final File diffuse_texture = new File("/x/y/z/file.txt");
       final File normal_texture = new File("/a/b/c/file.txt");
       final File specular_texture = new File("/a/b/z/file.txt");

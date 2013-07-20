@@ -21,8 +21,10 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,21 +38,28 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import nu.xom.Attribute;
+import nu.xom.Document;
 import nu.xom.Element;
+import nu.xom.Elements;
+import nu.xom.ValidityException;
 
 import com.io7m.jaux.CheckedMath;
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Pair;
-import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jlog.Log;
+import com.io7m.renderer.RSpaceRGB;
+import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 
 final class SBSceneState implements
   SBSceneStateLights,
   SBSceneStateMeshes,
   SBSceneStateTextures,
-  SBSceneStateObjects
+  SBSceneStateObjects,
+  SBSceneStateDeletion
 {
   static class SBSceneNormalized
   {
@@ -66,14 +75,229 @@ final class SBSceneState implements
       }
     }
 
+    private static @Nonnull Element lightToXML(
+      final @Nonnull KLight light)
+    {
+      final String uri = SBSceneNormalized.SCENE_URI.toString();
+
+      final Element eid = new Element("s:id", uri);
+      eid.appendChild(light.getID().toString());
+
+      final Element ei = new Element("s:intensity", uri);
+      ei.appendChild(Float.toString(light.getIntensity()));
+
+      final Element ec = new Element("s:colour", uri);
+      final Element ecr = new Element("s:r", uri);
+      ecr.appendChild(Float.toString(light.getColour().getXF()));
+      final Element ecg = new Element("s:g", uri);
+      ecg.appendChild(Float.toString(light.getColour().getYF()));
+      final Element ecb = new Element("s:b", uri);
+      ecb.appendChild(Float.toString(light.getColour().getZF()));
+      ec.appendChild(ecr);
+      ec.appendChild(ecg);
+      ec.appendChild(ecb);
+
+      switch (light.getType()) {
+        case LIGHT_CONE:
+        {
+          throw new UnimplementedCodeException();
+        }
+        case LIGHT_DIRECTIONAL:
+        {
+          final KDirectional d = (KLight.KDirectional) light;
+          final Element e = new Element("s:light-directional", uri);
+
+          final Element ed = new Element("s:direction", uri);
+          final Element edx = new Element("s:x", uri);
+          edx.appendChild(Float.toString(d.getDirection().getXF()));
+          final Element edy = new Element("s:y", uri);
+          edy.appendChild(Float.toString(d.getDirection().getYF()));
+          final Element edz = new Element("s:z", uri);
+          edz.appendChild(Float.toString(d.getDirection().getZF()));
+          ed.appendChild(edx);
+          ed.appendChild(edy);
+          ed.appendChild(edz);
+
+          e.appendChild(eid);
+          e.appendChild(ec);
+          e.appendChild(ei);
+          e.appendChild(ed);
+          return e;
+        }
+        case LIGHT_POINT:
+        {
+          throw new UnimplementedCodeException();
+        }
+      }
+
+      throw new UnreachableCodeException();
+    }
+    private static @Nonnull SBObjectDescription loadInstance(
+      final @Nonnull File root_directory,
+      final @Nonnull Element e)
+      throws ValidityException
+    {
+      assert e.getLocalName().equals("instance");
+
+      final Element eid =
+        SBXMLUtilities.getChild(e, "id", SBSceneNormalized.SCENE_URI);
+
+      final Element ep =
+        SBXMLUtilities.getChild(e, "position", SBSceneNormalized.SCENE_URI);
+      final Element eo =
+        SBXMLUtilities
+          .getChild(e, "orientation", SBSceneNormalized.SCENE_URI);
+
+      final Element ed =
+        SBXMLUtilities.getChild(e, "diffuse", SBSceneNormalized.SCENE_URI);
+      final Element en =
+        SBXMLUtilities.getChild(e, "normal", SBSceneNormalized.SCENE_URI);
+      final Element es =
+        SBXMLUtilities.getChild(e, "specular", SBSceneNormalized.SCENE_URI);
+
+      final Element em =
+        SBXMLUtilities.getChild(e, "model", SBSceneNormalized.SCENE_URI);
+      final Element emm =
+        SBXMLUtilities.getChild(e, "mesh", SBSceneNormalized.SCENE_URI);
+
+      final Integer id = SBXMLUtilities.getInteger(eid);
+
+      final RVectorI3F<RSpaceWorld> position =
+        SBXMLUtilities.getVector3f(ep, SBSceneNormalized.SCENE_URI);
+      final RVectorI3F<SBDegrees> orientation =
+        SBXMLUtilities.getVector3f(eo, SBSceneNormalized.SCENE_URI);
+
+      final File diffuse =
+        (ed.getValue().length() == 0) ? null : new File(
+          root_directory,
+          ed.getValue());
+
+      final File normal =
+        (en.getValue().length() == 0) ? null : new File(
+          root_directory,
+          en.getValue());
+
+      final File specular =
+        (es.getValue().length() == 0) ? null : new File(
+          root_directory,
+          es.getValue());
+
+      final File model =
+        new File(root_directory, SBXMLUtilities.getNonEmptyString(em));
+      final String object = SBXMLUtilities.getNonEmptyString(emm);
+
+      return new SBObjectDescription(
+        id,
+        model,
+        object,
+        position,
+        orientation,
+        diffuse,
+        normal,
+        specular);
+    }
+    private static @Nonnull KLight.KDirectional loadLight(
+      final @Nonnull Element e)
+      throws ValidityException
+    {
+      if (e.getLocalName().equals("light-directional")) {
+        return SBSceneNormalized.loadLightDirectional(e);
+      }
+
+      throw new UnimplementedCodeException();
+    }
+    private static @Nonnull KLight.KDirectional loadLightDirectional(
+      final @Nonnull Element e)
+      throws ValidityException
+    {
+      assert e.getLocalName().equals("light-directional");
+
+      final Element ed =
+        SBXMLUtilities.getChild(e, "direction", SBSceneNormalized.SCENE_URI);
+      final Element ec =
+        SBXMLUtilities.getChild(e, "colour", SBSceneNormalized.SCENE_URI);
+      final Element ei =
+        SBXMLUtilities.getChild(e, "intensity", SBSceneNormalized.SCENE_URI);
+      final Element eid =
+        SBXMLUtilities.getChild(e, "id", SBSceneNormalized.SCENE_URI);
+
+      final RVectorI3F<RSpaceWorld> direction =
+        SBXMLUtilities.getVector3f(ed, SBSceneNormalized.SCENE_URI);
+      final RVectorI3F<RSpaceRGB> colour =
+        SBXMLUtilities.getRGB(ec, SBSceneNormalized.SCENE_URI);
+      final Integer id = SBXMLUtilities.getInteger(eid);
+      final float intensity = SBXMLUtilities.getFloat(ei);
+
+      return new KLight.KDirectional(id, direction, colour, intensity);
+    }
+    private static @Nonnull File loadMesh(
+      final @Nonnull File root_directory,
+      final @Nonnull Element e)
+    {
+      assert e.getLocalName().equals("mesh");
+      return new File(root_directory, e.getValue());
+    }
+    private static @Nonnull File loadTexture(
+      final @Nonnull File root_directory,
+      final @Nonnull Element e)
+    {
+      assert e.getLocalName().equals("texture");
+      return new File(root_directory, e.getValue());
+    }
     private final @Nonnull SortedSet<String>              flat_names;
     private final @Nonnull Map<String, File>              flat_to_files;
+
     private final @Nonnull Map<File, String>              files_to_flat;
+
     private final @Nonnull Log                            log;
+
     private final @Nonnull SortedSet<String>              textures;
+
     private final @Nonnull Map<String, SortedSet<String>> meshes;
+
     private final @Nonnull ArrayList<KLight>              lights;
+
     private final @Nonnull ArrayList<SBObjectDescription> instances;
+
+    public SBSceneNormalized(
+      final @Nonnull Log log,
+      final @Nonnull File root_directory,
+      final @Nonnull Document doc)
+      throws ValidityException
+    {
+      this.log = new Log(log, "normalizer");
+      this.flat_to_files = new HashMap<String, File>();
+      this.files_to_flat = new HashMap<File, String>();
+      this.flat_names = new TreeSet<String>();
+      this.textures = new TreeSet<String>();
+      this.meshes = new HashMap<String, SortedSet<String>>();
+      this.lights = new ArrayList<KLight>();
+      this.instances = new ArrayList<SBObjectDescription>();
+
+      final Element root = doc.getRootElement();
+      SBXMLUtilities.checkIsElement(
+        root,
+        "scene",
+        SBSceneNormalized.SCENE_URI);
+
+      final Element e_lights =
+        SBXMLUtilities.getChild(root, "lights", SBSceneNormalized.SCENE_URI);
+      final Element e_textures =
+        SBXMLUtilities
+          .getChild(root, "textures", SBSceneNormalized.SCENE_URI);
+      final Element e_meshes =
+        SBXMLUtilities.getChild(root, "meshes", SBSceneNormalized.SCENE_URI);
+      final Element e_instances =
+        SBXMLUtilities.getChild(
+          root,
+          "instances",
+          SBSceneNormalized.SCENE_URI);
+
+      this.loadLights(e_lights);
+      this.loadTextures(root_directory, e_textures);
+      this.loadMeshes(root_directory, e_meshes);
+      this.loadInstances(root_directory, e_instances);
+    }
 
     SBSceneNormalized(
       final @Nonnull Log log,
@@ -136,6 +360,155 @@ final class SBSceneState implements
           this.putName(file, buffer.toString());
           return buffer.toString();
         }
+      }
+    }
+
+    @Nonnull Map<String, File> getFileMappings()
+    {
+      return this.flat_to_files;
+    }
+
+    @Nonnull Collection<KLight> getLights()
+    {
+      return this.lights;
+    }
+
+    @Nonnull Collection<File> getMeshes()
+    {
+      final ArrayList<File> files = new ArrayList<File>();
+      for (final String file : this.meshes.keySet()) {
+        files.add(new File(file));
+      }
+      return files;
+    }
+
+    @Nonnull Collection<SBObjectDescription> getObjects()
+    {
+      return this.instances;
+    }
+
+    @Nonnull Collection<File> getTextures()
+    {
+      final ArrayList<File> files = new ArrayList<File>();
+      for (final String file : this.textures) {
+        files.add(new File(file));
+      }
+      return files;
+    }
+
+    private @Nonnull Element instanceToXML(
+      final @Nonnull SBObjectDescription o)
+    {
+      final String uri = SBSceneNormalized.SCENE_URI.toString();
+      final Element e = new Element("s:instance", uri);
+
+      final Element eid = new Element("s:id", uri);
+      eid.appendChild(o.getID().toString());
+
+      final Element eo = new Element("s:orientation", uri);
+      final Element eox = new Element("s:x", uri);
+      eox.appendChild(Float.toString(o.getOrientation().getXF()));
+      final Element eoy = new Element("s:y", uri);
+      eoy.appendChild(Float.toString(o.getOrientation().getYF()));
+      final Element eoz = new Element("s:z", uri);
+      eoz.appendChild(Float.toString(o.getOrientation().getZF()));
+      eo.appendChild(eox);
+      eo.appendChild(eoy);
+      eo.appendChild(eoz);
+
+      final Element ep = new Element("s:position", uri);
+      final Element epx = new Element("s:x", uri);
+      epx.appendChild(Float.toString(o.getPosition().getXF()));
+      final Element epy = new Element("s:y", uri);
+      epy.appendChild(Float.toString(o.getPosition().getYF()));
+      final Element epz = new Element("s:z", uri);
+      epz.appendChild(Float.toString(o.getPosition().getZF()));
+      ep.appendChild(epx);
+      ep.appendChild(epy);
+      ep.appendChild(epz);
+
+      final Element emo = new Element("s:model", uri);
+      emo.appendChild(this.files_to_flat.get(o.getModel()));
+      final Element eme = new Element("s:mesh", uri);
+      eme.appendChild(o.getModelObject());
+
+      final Element ed = new Element("s:diffuse", uri);
+      if (o.getDiffuseTexture() != null) {
+        ed.appendChild(this.files_to_flat.get(o.getDiffuseTexture()));
+      }
+      final Element en = new Element("s:normal", uri);
+      if (o.getNormalTexture() != null) {
+        en.appendChild(this.files_to_flat.get(o.getNormalTexture()));
+      }
+      final Element es = new Element("s:specular", uri);
+      if (o.getSpecularTexture() != null) {
+        es.appendChild(this.files_to_flat.get(o.getSpecularTexture()));
+      }
+
+      e.appendChild(eid);
+      e.appendChild(eo);
+      e.appendChild(ep);
+      e.appendChild(emo);
+      e.appendChild(eme);
+      e.appendChild(ed);
+      e.appendChild(en);
+      e.appendChild(es);
+      return e;
+    }
+
+    private void loadInstances(
+      final @Nonnull File root_directory,
+      final @Nonnull Element e)
+      throws ValidityException
+    {
+      assert e.getLocalName().equals("instances");
+
+      final Elements ec = e.getChildElements();
+      for (int index = 0; index < ec.size(); ++index) {
+        final SBObjectDescription o =
+          SBSceneNormalized.loadInstance(root_directory, ec.get(index));
+        this.instances.add(o);
+      }
+    }
+
+    private void loadLights(
+      final @Nonnull Element e)
+      throws ValidityException
+    {
+      assert e.getLocalName().equals("lights");
+
+      final Elements ec = e.getChildElements();
+      for (int index = 0; index < ec.size(); ++index) {
+        final KDirectional light = SBSceneNormalized.loadLight(ec.get(index));
+        this.lights.add(light);
+      }
+    }
+
+    private void loadMeshes(
+      final @Nonnull File root_directory,
+      final @Nonnull Element e)
+    {
+      assert e.getLocalName().equals("meshes");
+
+      final Elements ec = e.getChildElements();
+      for (int index = 0; index < ec.size(); ++index) {
+        final File m =
+          SBSceneNormalized.loadMesh(root_directory, ec.get(index));
+        this.meshes.put(m.toString(), new TreeSet<String>());
+      }
+    }
+
+    private void loadTextures(
+      final @Nonnull File root_directory,
+      final @Nonnull Element e)
+    {
+      assert e.getLocalName().equals("textures");
+
+      final Elements ec = e.getChildElements();
+      for (int index = 0; index < ec.size(); ++index) {
+        final File t =
+          SBSceneNormalized.loadTexture(root_directory, ec.get(index));
+        this.textures.add(t.toString());
       }
     }
 
@@ -248,138 +621,15 @@ final class SBSceneState implements
       e_scene.appendChild(e_instances);
       return e_scene;
     }
-
-    private @Nonnull Element instanceToXML(
-      final @Nonnull SBObjectDescription o)
-    {
-      final String uri = SBSceneNormalized.SCENE_URI.toString();
-      final Element e = new Element("s:instance", uri);
-
-      final Element eid = new Element("s:id", uri);
-      eid.appendChild(o.getID().toString());
-
-      final Element eo = new Element("s:orientation", uri);
-      final Element eox = new Element("s:x", uri);
-      eox.appendChild(Float.toString(o.getOrientation().getXF()));
-      final Element eoy = new Element("s:y", uri);
-      eoy.appendChild(Float.toString(o.getOrientation().getYF()));
-      final Element eoz = new Element("s:z", uri);
-      eoz.appendChild(Float.toString(o.getOrientation().getZF()));
-      eo.appendChild(eox);
-      eo.appendChild(eoy);
-      eo.appendChild(eoz);
-
-      final Element ep = new Element("s:position", uri);
-      final Element epx = new Element("s:x", uri);
-      epx.appendChild(Float.toString(o.getPosition().getXF()));
-      final Element epy = new Element("s:y", uri);
-      epy.appendChild(Float.toString(o.getPosition().getYF()));
-      final Element epz = new Element("s:z", uri);
-      epz.appendChild(Float.toString(o.getPosition().getZF()));
-      ep.appendChild(epx);
-      ep.appendChild(epy);
-      ep.appendChild(epz);
-
-      final Element emo = new Element("s:model", uri);
-      emo.appendChild(this.files_to_flat.get(o.getModel()));
-      final Element eme = new Element("s:mesh", uri);
-      eme.appendChild(o.getModelObject());
-
-      final Element ed = new Element("s:diffuse", uri);
-      if (o.getDiffuseTexture() != null) {
-        ed.appendChild(this.files_to_flat.get(o.getDiffuseTexture()));
-      }
-      final Element en = new Element("s:normal", uri);
-      if (o.getNormalTexture() != null) {
-        en.appendChild(this.files_to_flat.get(o.getNormalTexture()));
-      }
-      final Element es = new Element("s:specular", uri);
-      if (o.getSpecularTexture() != null) {
-        es.appendChild(this.files_to_flat.get(o.getSpecularTexture()));
-      }
-
-      e.appendChild(eid);
-      e.appendChild(eo);
-      e.appendChild(ep);
-      e.appendChild(emo);
-      e.appendChild(eme);
-      e.appendChild(ed);
-      e.appendChild(en);
-      e.appendChild(es);
-      return e;
-    }
-
-    private static @Nonnull Element lightToXML(
-      final @Nonnull KLight light)
-    {
-      final String uri = SBSceneNormalized.SCENE_URI.toString();
-
-      final Element eid = new Element("s:id", uri);
-      eid.appendChild(light.getID().toString());
-
-      final Element ei = new Element("s:intensity", uri);
-      ei.appendChild(Float.toString(light.getIntensity()));
-
-      final Element ec = new Element("s:colour", uri);
-      final Element ecr = new Element("s:r", uri);
-      ecr.appendChild(Float.toString(light.getColour().getXF()));
-      final Element ecg = new Element("s:g", uri);
-      ecg.appendChild(Float.toString(light.getColour().getYF()));
-      final Element ecb = new Element("s:b", uri);
-      ecb.appendChild(Float.toString(light.getColour().getZF()));
-      ec.appendChild(ecr);
-      ec.appendChild(ecg);
-      ec.appendChild(ecb);
-
-      switch (light.getType()) {
-        case LIGHT_CONE:
-        {
-          throw new UnimplementedCodeException();
-        }
-        case LIGHT_DIRECTIONAL:
-        {
-          final KDirectional d = (KLight.KDirectional) light;
-          final Element e = new Element("s:light-directional", uri);
-
-          final Element ed = new Element("s:direction", uri);
-          final Element edx = new Element("s:x", uri);
-          edx.appendChild(Float.toString(d.getDirection().getXF()));
-          final Element edy = new Element("s:y", uri);
-          edy.appendChild(Float.toString(d.getDirection().getYF()));
-          final Element edz = new Element("s:z", uri);
-          edz.appendChild(Float.toString(d.getDirection().getZF()));
-          ed.appendChild(edx);
-          ed.appendChild(edy);
-          ed.appendChild(edz);
-
-          e.appendChild(eid);
-          e.appendChild(ec);
-          e.appendChild(ei);
-          e.appendChild(ed);
-          return e;
-        }
-        case LIGHT_POINT:
-        {
-          throw new UnimplementedCodeException();
-        }
-      }
-
-      throw new UnreachableCodeException();
-    }
-
-    @Nonnull Map<String, File> getFileMappings()
-    {
-      return this.flat_to_files;
-    }
   }
 
-  private final @Nonnull ConcurrentHashMap<Integer, KLight>                                  light_descriptions;
-  private final @Nonnull AtomicInteger                                                       light_id_pool;
-  private final @Nonnull Log                                                                 log;
-  private final @Nonnull ConcurrentHashMap<File, Pair<BufferedImage, Texture2DStaticUsable>> textures;
-  private final @Nonnull ConcurrentHashMap<File, SortedSet<SBMesh>>                          meshes;
-  private final @Nonnull AtomicInteger                                                       object_id_pool;
-  private final @Nonnull ConcurrentHashMap<Integer, SBObjectDescription>                     object_instances;
+  private final @Nonnull ConcurrentHashMap<Integer, KLight>                            light_descriptions;
+  private final @Nonnull AtomicInteger                                                 light_id_pool;
+  private final @Nonnull Log                                                           log;
+  private final @Nonnull ConcurrentHashMap<File, Pair<BufferedImage, Texture2DStatic>> textures;
+  private final @Nonnull ConcurrentHashMap<File, SortedSet<SBMesh>>                    meshes;
+  private final @Nonnull AtomicInteger                                                 object_id_pool;
+  private final @Nonnull ConcurrentHashMap<Integer, SBObjectDescription>               object_instances;
 
   SBSceneState(
     final @Nonnull Log log)
@@ -388,11 +638,37 @@ final class SBSceneState implements
     this.light_descriptions = new ConcurrentHashMap<Integer, KLight>();
     this.light_id_pool = new AtomicInteger(0);
     this.textures =
-      new ConcurrentHashMap<File, Pair<BufferedImage, Texture2DStaticUsable>>();
+      new ConcurrentHashMap<File, Pair<BufferedImage, Texture2DStatic>>();
     this.meshes = new ConcurrentHashMap<File, SortedSet<SBMesh>>();
     this.object_id_pool = new AtomicInteger(0);
     this.object_instances =
       new ConcurrentHashMap<Integer, SBObjectDescription>();
+  }
+
+  @Override public @Nonnull
+    Pair<List<Texture2DStatic>, List<SBMesh>>
+    deleteAll()
+  {
+    this.log.debug("Deleting everything");
+
+    final List<Texture2DStatic> tr = new LinkedList<Texture2DStatic>();
+    final List<SBMesh> mr = new LinkedList<SBMesh>();
+
+    for (final Pair<BufferedImage, Texture2DStatic> p : this.textures
+      .values()) {
+      tr.add(p.second);
+    }
+
+    for (final SortedSet<SBMesh> ms : this.meshes.values()) {
+      mr.addAll(ms);
+    }
+
+    this.light_descriptions.clear();
+    this.meshes.clear();
+    this.object_instances.clear();
+    this.textures.clear();
+
+    return new Pair<List<Texture2DStatic>, List<SBMesh>>(tr, mr);
   }
 
   @Override public void lightAdd(
@@ -516,6 +792,12 @@ final class SBSceneState implements
     this.object_instances.put(object.getID(), object);
   }
 
+  @Override public void objectDelete(
+    final @Nonnull Integer id)
+  {
+    this.object_instances.remove(id);
+  }
+
   @Override public boolean objectExists(
     final @Nonnull Integer id)
   {
@@ -545,7 +827,7 @@ final class SBSceneState implements
 
   @Override public void textureAdd(
     final @Nonnull File file,
-    final @Nonnull Pair<BufferedImage, Texture2DStaticUsable> texture)
+    final @Nonnull Pair<BufferedImage, Texture2DStatic> texture)
   {
     this.textures.put(file, texture);
   }
@@ -553,15 +835,20 @@ final class SBSceneState implements
   @Override public @Nonnull Map<File, BufferedImage> texturesGet()
   {
     final HashMap<File, BufferedImage> m = new HashMap<File, BufferedImage>();
-    final Set<Entry<File, Pair<BufferedImage, Texture2DStaticUsable>>> es =
+    final Set<Entry<File, Pair<BufferedImage, Texture2DStatic>>> es =
       this.textures.entrySet();
 
-    for (final Entry<File, Pair<BufferedImage, Texture2DStaticUsable>> e : es) {
+    for (final Entry<File, Pair<BufferedImage, Texture2DStatic>> e : es) {
       m.put(e.getKey(), e.getValue().first);
     }
 
     return m;
   }
+}
+
+interface SBSceneStateDeletion
+{
+  public @Nonnull Pair<List<Texture2DStatic>, List<SBMesh>> deleteAll();
 }
 
 interface SBSceneStateLights
@@ -597,6 +884,9 @@ interface SBSceneStateObjects
   public void objectAdd(
     final @Nonnull SBObjectDescription object);
 
+  public void objectDelete(
+    final @Nonnull Integer id);
+
   public boolean objectExists(
     final @Nonnull Integer id);
 
@@ -612,7 +902,7 @@ interface SBSceneStateTextures
 {
   public void textureAdd(
     final @Nonnull File file,
-    final @Nonnull Pair<BufferedImage, Texture2DStaticUsable> texture);
+    final @Nonnull Pair<BufferedImage, Texture2DStatic> texture);
 
   public @Nonnull Map<File, BufferedImage> texturesGet();
 }

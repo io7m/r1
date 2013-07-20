@@ -245,7 +245,45 @@ final class SBMainWindow extends JFrame
       {
         final JFileChooser chooser = new JFileChooser();
         chooser.setFileFilter(SBMainWindow.SCENE_FILTER);
-        chooser.showOpenDialog(window);
+        final int r = chooser.showOpenDialog(window);
+
+        switch (r) {
+          case JFileChooser.APPROVE_OPTION:
+          {
+            final SwingWorker<Void, Void> worker =
+              new SwingWorker<Void, Void>() {
+                @Override protected Void doInBackground()
+                  throws Exception
+                {
+                  return controller
+                    .ioLoadScene(chooser.getSelectedFile())
+                    .get();
+                }
+
+                @Override protected void done()
+                {
+                  try {
+                    this.get();
+                  } catch (final InterruptedException x) {
+                    SBErrorBox.showError(log, "Interrupted", x);
+                  } catch (final ExecutionException x) {
+                    SBErrorBox.showError(log, "I/O error", x.getCause());
+                  }
+                }
+              };
+
+            worker.execute();
+            break;
+          }
+          case JFileChooser.CANCEL_OPTION:
+          {
+            break;
+          }
+          case JFileChooser.ERROR_OPTION:
+          {
+            break;
+          }
+        }
       }
     });
 

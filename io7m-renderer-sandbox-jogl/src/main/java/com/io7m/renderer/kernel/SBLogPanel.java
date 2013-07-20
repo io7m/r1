@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import java.awt.Dimension;
 import java.awt.Font;
 
 import javax.annotation.Nonnull;
@@ -42,6 +43,7 @@ final class SBLogPanel extends JPanel
     this.log_area.setFont(Font.decode(Font.MONOSPACED + " 9"));
 
     final JScrollPane log_pane = new JScrollPane(this.log_area);
+    log_pane.setPreferredSize(new Dimension(640, 480));
 
     final DesignGridLayout dg = new DesignGridLayout(this);
     dg.row().grid().add(log_pane);
