@@ -63,8 +63,8 @@ final class SBSceneState implements
 {
   static class SBSceneNormalized
   {
-    private static final @Nonnull URI                     SCENE_URI;
-    private static final @Nonnull String                  SCENE_VERSION;
+    private static final @Nonnull URI    SCENE_URI;
+    private static final @Nonnull String SCENE_VERSION;
 
     static {
       try {
@@ -132,6 +132,7 @@ final class SBSceneState implements
 
       throw new UnreachableCodeException();
     }
+
     private static @Nonnull SBObjectDescription loadInstance(
       final @Nonnull File root_directory,
       final @Nonnull Element e)
@@ -196,6 +197,7 @@ final class SBSceneState implements
         normal,
         specular);
     }
+
     private static @Nonnull KLight.KDirectional loadLight(
       final @Nonnull Element e)
       throws ValidityException
@@ -206,6 +208,7 @@ final class SBSceneState implements
 
       throw new UnimplementedCodeException();
     }
+
     private static @Nonnull KLight.KDirectional loadLightDirectional(
       final @Nonnull Element e)
       throws ValidityException
@@ -230,6 +233,7 @@ final class SBSceneState implements
 
       return new KLight.KDirectional(id, direction, colour, intensity);
     }
+
     private static @Nonnull File loadMesh(
       final @Nonnull File root_directory,
       final @Nonnull Element e)
@@ -237,6 +241,7 @@ final class SBSceneState implements
       assert e.getLocalName().equals("mesh");
       return new File(root_directory, e.getValue());
     }
+
     private static @Nonnull File loadTexture(
       final @Nonnull File root_directory,
       final @Nonnull Element e)
@@ -244,6 +249,7 @@ final class SBSceneState implements
       assert e.getLocalName().equals("texture");
       return new File(root_directory, e.getValue());
     }
+
     private final @Nonnull SortedSet<String>              flat_names;
     private final @Nonnull Map<String, File>              flat_to_files;
 

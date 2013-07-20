@@ -22,24 +22,6 @@ import javax.annotation.Nonnull;
 
 abstract class SBException extends Exception
 {
-  private static final long serialVersionUID = -746503205823207820L;
-
-  static enum Type
-  {
-    SB_EXCEPTION_IMAGE_LOADING,
-    SB_EXCEPTION_INPUT_ERROR,
-  }
-
-  private final @Nonnull Type type;
-
-  private SBException(
-    final @Nonnull Type type,
-    final @Nonnull String message)
-  {
-    super(message);
-    this.type = type;
-  }
-
   final static class SBExceptionImageLoading extends SBException
   {
     private static final long   serialVersionUID = 7521983144069448194L;
@@ -63,5 +45,23 @@ abstract class SBException extends Exception
     {
       super(Type.SB_EXCEPTION_INPUT_ERROR, message);
     }
+  }
+
+  static enum Type
+  {
+    SB_EXCEPTION_IMAGE_LOADING,
+    SB_EXCEPTION_INPUT_ERROR,
+  }
+
+  private static final long   serialVersionUID = -746503205823207820L;
+
+  private final @Nonnull Type type;
+
+  private SBException(
+    final @Nonnull Type type,
+    final @Nonnull String message)
+  {
+    super(message);
+    this.type = type;
   }
 }

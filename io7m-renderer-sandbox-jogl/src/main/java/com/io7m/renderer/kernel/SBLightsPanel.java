@@ -360,20 +360,6 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       }
     }
 
-    protected void setError(
-      final @Nonnull String message)
-    {
-      this.error_icon.setVisible(true);
-      this.error_text.setText(message);
-      this.error_text.setVisible(true);
-    }
-
-    protected void unsetError()
-    {
-      this.error_icon.setVisible(false);
-      this.error_text.setVisible(false);
-    }
-
     private @Nonnull RVectorReadable3F<RSpaceRGB> getColour()
       throws SBExceptionInputError
     {
@@ -449,10 +435,24 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       this.colour_b.setText(Float.toString(color.getZF()));
     }
 
+    protected void setError(
+      final @Nonnull String message)
+    {
+      this.error_icon.setVisible(true);
+      this.error_text.setText(message);
+      this.error_text.setVisible(true);
+    }
+
     private void setIntensity(
       final float value)
     {
       this.intensity.setText(Float.toString(value));
+    }
+
+    protected void unsetError()
+    {
+      this.error_icon.setVisible(false);
+      this.error_text.setVisible(false);
     }
   }
 
@@ -507,21 +507,6 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       this.controller = controller;
     }
 
-    void refreshLights()
-    {
-      this.data.clear();
-      final List<KLight> lights = this.controller.lightsGetAll();
-
-      for (final KLight l : lights) {
-        final ArrayList<String> row = new ArrayList<String>();
-        row.add(l.getID().toString());
-        row.add(l.getType().getName());
-        this.data.add(row);
-      }
-
-      this.fireTableDataChanged();
-    }
-
     @Override public int getColumnCount()
     {
       return this.column_names.length;
@@ -554,6 +539,21 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       final int columnIndex)
     {
       return this.data.get(rowIndex).get(columnIndex);
+    }
+
+    void refreshLights()
+    {
+      this.data.clear();
+      final List<KLight> lights = this.controller.lightsGetAll();
+
+      for (final KLight l : lights) {
+        final ArrayList<String> row = new ArrayList<String>();
+        row.add(l.getID().toString());
+        row.add(l.getType().getName());
+        this.data.add(row);
+      }
+
+      this.fireTableDataChanged();
     }
   }
 
@@ -660,11 +660,6 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
     controller.changeListenerAdd(this);
   }
 
-  @Override public String toString()
-  {
-    return "[SBLightsPanel]";
-  }
-
   @Override public void sceneChanged()
   {
     SwingUtilities.invokeLater(new Runnable() {
@@ -673,5 +668,10 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         SBLightsPanel.this.lights_model.refreshLights();
       }
     });
+  }
+
+  @Override public String toString()
+  {
+    return "[SBLightsPanel]";
   }
 }

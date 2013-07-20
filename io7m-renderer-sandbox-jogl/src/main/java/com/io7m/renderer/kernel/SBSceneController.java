@@ -56,6 +56,17 @@ import com.io7m.renderer.kernel.SBException.SBExceptionImageLoading;
 import com.io7m.renderer.kernel.SBSceneState.SBSceneNormalized;
 import com.io7m.renderer.kernel.SBZipUtilities.TemporaryDirectory;
 
+interface SBSceneChangeListener
+{
+  public void sceneChanged();
+}
+
+interface SBSceneChangeListenerRegistration
+{
+  public void changeListenerAdd(
+    final @Nonnull SBSceneChangeListener listener);
+}
+
 public final class SBSceneController implements
   SBSceneControllerTextures,
   SBSceneControllerLights,
@@ -63,24 +74,6 @@ public final class SBSceneController implements
   SBSceneControllerObjects,
   SBSceneControllerIO
 {
-  private static void ioSaveSceneActualSerializeXML(
-    final @Nonnull SBSceneNormalized nstate,
-    final @Nonnull ZipOutputStream fo)
-    throws UnsupportedEncodingException,
-      IOException
-  {
-    final Element xml = nstate.toXML();
-    final Document doc = new Document(xml);
-    final Serializer s = new Serializer(fo, "UTF-8");
-    s.setIndent(2);
-    s.setMaxLength(80);
-
-    final ZipEntry entry = new ZipEntry("scene.xml");
-    fo.putNextEntry(entry);
-    s.write(doc);
-    fo.closeEntry();
-  }
-
   private static void ioSaveSceneActualCopyFiles(
     final @Nonnull SBSceneNormalized nstate,
     final @Nonnull ZipOutputStream fo)
@@ -112,6 +105,24 @@ public final class SBSceneController implements
         stream.close();
       }
     }
+  }
+
+  private static void ioSaveSceneActualSerializeXML(
+    final @Nonnull SBSceneNormalized nstate,
+    final @Nonnull ZipOutputStream fo)
+    throws UnsupportedEncodingException,
+      IOException
+  {
+    final Element xml = nstate.toXML();
+    final Document doc = new Document(xml);
+    final Serializer s = new Serializer(fo, "UTF-8");
+    s.setIndent(2);
+    s.setMaxLength(80);
+
+    final ZipEntry entry = new ZipEntry("scene.xml");
+    fo.putNextEntry(entry);
+    s.write(doc);
+    fo.closeEntry();
   }
 
   private static @Nonnull BufferedImage textureLoadImageIOActual(
@@ -157,27 +168,11 @@ public final class SBSceneController implements
     this.listeners = new LinkedList<SBSceneChangeListener>();
   }
 
-  private void sceneChanged()
+  @Override public void changeListenerAdd(
+    final @Nonnull SBSceneChangeListener listener)
   {
-    for (final SBSceneChangeListener l : this.listeners) {
-      l.sceneChanged();
-    }
-  }
-
-  @Override public @Nonnull Future<Void> ioSaveScene(
-    final @Nonnull File file)
-  {
-    final FutureTask<Void> f = new FutureTask<Void>(new Callable<Void>() {
-      @SuppressWarnings("synthetic-access") @Override public Void call()
-        throws Exception
-      {
-        SBSceneController.this.ioSaveSceneActual(file);
-        return null;
-      }
-    });
-
-    this.exec_pool.execute(f);
-    return f;
+    this.log.debug("Registered change listener " + listener);
+    this.listeners.add(listener);
   }
 
   @Override public @Nonnull Future<Void> ioLoadScene(
@@ -237,6 +232,22 @@ public final class SBSceneController implements
     }
 
     this.sceneChanged();
+  }
+
+  @Override public @Nonnull Future<Void> ioSaveScene(
+    final @Nonnull File file)
+  {
+    final FutureTask<Void> f = new FutureTask<Void>(new Callable<Void>() {
+      @SuppressWarnings("synthetic-access") @Override public Void call()
+        throws Exception
+      {
+        SBSceneController.this.ioSaveSceneActual(file);
+        return null;
+      }
+    });
+
+    this.exec_pool.execute(f);
+    return f;
   }
 
   private void ioSaveSceneActual(
@@ -390,6 +401,13 @@ public final class SBSceneController implements
     return this.state.objectsGetAll();
   }
 
+  private void sceneChanged()
+  {
+    for (final SBSceneChangeListener l : this.listeners) {
+      l.sceneChanged();
+    }
+  }
+
   @Override public @Nonnull Future<BufferedImage> textureLoad(
     final @Nonnull File file)
   {
@@ -466,33 +484,15 @@ public final class SBSceneController implements
   {
     return this.state.texturesGet();
   }
-
-  @Override public void changeListenerAdd(
-    final @Nonnull SBSceneChangeListener listener)
-  {
-    this.log.debug("Registered change listener " + listener);
-    this.listeners.add(listener);
-  }
 }
 
 interface SBSceneControllerIO
 {
-  public @Nonnull Future<Void> ioSaveScene(
-    final @Nonnull File file);
-
   public @Nonnull Future<Void> ioLoadScene(
     final @Nonnull File file);
-}
 
-interface SBSceneChangeListenerRegistration
-{
-  public void changeListenerAdd(
-    final @Nonnull SBSceneChangeListener listener);
-}
-
-interface SBSceneChangeListener
-{
-  public void sceneChanged();
+  public @Nonnull Future<Void> ioSaveScene(
+    final @Nonnull File file);
 }
 
 interface SBSceneControllerLights extends SBSceneChangeListenerRegistration

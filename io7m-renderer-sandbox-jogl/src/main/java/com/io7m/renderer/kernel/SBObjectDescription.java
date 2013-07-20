@@ -61,16 +61,6 @@ public final class SBObjectDescription
     return this.diffuse_texture;
   }
 
-  @CheckForNull File getNormalTexture()
-  {
-    return this.normal_texture;
-  }
-
-  @CheckForNull File getSpecularTexture()
-  {
-    return this.specular_texture;
-  }
-
   @Nonnull Integer getID()
   {
     return this.id;
@@ -86,6 +76,11 @@ public final class SBObjectDescription
     return this.model_object;
   }
 
+  @CheckForNull File getNormalTexture()
+  {
+    return this.normal_texture;
+  }
+
   RVectorReadable3F<SBDegrees> getOrientation()
   {
     return this.orientation;
@@ -94,6 +89,11 @@ public final class SBObjectDescription
   RVectorReadable3F<RSpaceWorld> getPosition()
   {
     return this.position;
+  }
+
+  @CheckForNull File getSpecularTexture()
+  {
+    return this.specular_texture;
   }
 
   @Override public String toString()

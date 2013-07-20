@@ -48,34 +48,35 @@ import com.io7m.jlog.Log;
 
 final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
 {
-  private static final long                        serialVersionUID;
+  private static final long serialVersionUID;
 
   static {
     serialVersionUID = -941448169051827275L;
+  }
+
+  protected static void enableOrDisableSelect(
+    final @Nonnull JTree t,
+    final @Nonnull JButton button)
+  {
+    final DefaultMutableTreeNode node =
+      (DefaultMutableTreeNode) t.getLastSelectedPathComponent();
+
+    button.setEnabled(false);
+    if (node != null) {
+      if (node.isRoot() == false) {
+        if (node.isLeaf()) {
+          button.setEnabled(true);
+        }
+      }
+    }
   }
 
   private final @Nonnull Log                       log;
   protected final @Nonnull JTree                   tree;
   protected final @Nonnull DefaultMutableTreeNode  tree_root;
   protected @Nonnull Map<File, SortedSet<String>>  meshes;
+
   protected final @Nonnull SBSceneControllerMeshes controller;
-
-  protected @CheckForNull DefaultMutableTreeNode findTreeNode(
-    final @Nonnull String name)
-  {
-    @SuppressWarnings("unchecked") final Enumeration<DefaultMutableTreeNode> e =
-      this.tree_root.children();
-
-    while (e.hasMoreElements()) {
-      final DefaultMutableTreeNode node = e.nextElement();
-      final String model = (String) node.getUserObject();
-      if (model.equals(name)) {
-        return node;
-      }
-    }
-
-    return null;
-  }
 
   SBMeshesPanel(
     final @Nonnull JFrame window,
@@ -203,21 +204,21 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
     controller.changeListenerAdd(this);
   }
 
-  protected static void enableOrDisableSelect(
-    final @Nonnull JTree t,
-    final @Nonnull JButton button)
+  protected @CheckForNull DefaultMutableTreeNode findTreeNode(
+    final @Nonnull String name)
   {
-    final DefaultMutableTreeNode node =
-      (DefaultMutableTreeNode) t.getLastSelectedPathComponent();
+    @SuppressWarnings("unchecked") final Enumeration<DefaultMutableTreeNode> e =
+      this.tree_root.children();
 
-    button.setEnabled(false);
-    if (node != null) {
-      if (node.isRoot() == false) {
-        if (node.isLeaf()) {
-          button.setEnabled(true);
-        }
+    while (e.hasMoreElements()) {
+      final DefaultMutableTreeNode node = e.nextElement();
+      final String model = (String) node.getUserObject();
+      if (model.equals(name)) {
+        return node;
       }
     }
+
+    return null;
   }
 
   protected void meshesRefresh(
@@ -242,11 +243,6 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
     }
   }
 
-  @Override public String toString()
-  {
-    return "[SBMeshesPanel]";
-  }
-
   @Override public void sceneChanged()
   {
     SwingUtilities.invokeLater(new Runnable() {
@@ -257,5 +253,10 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
         SBMeshesPanel.this.meshesRefresh(SBMeshesPanel.this.meshes);
       }
     });
+  }
+
+  @Override public String toString()
+  {
+    return "[SBMeshesPanel]";
   }
 }

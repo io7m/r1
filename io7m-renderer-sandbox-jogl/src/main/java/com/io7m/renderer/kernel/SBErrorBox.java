@@ -34,23 +34,19 @@ import com.io7m.jlog.Log;
 
 public final class SBErrorBox
 {
-  private static void showErrorWithException(
+  public static void showError(
+    final @Nonnull Log log,
     final @Nonnull String title,
     final @Nonnull Throwable e)
   {
-    final StringWriter writer = new StringWriter();
-    writer.append(e.getMessage());
-    writer.append("\n");
-    writer.append("\n");
+    log.error(title + ": " + e.getMessage());
 
-    e.printStackTrace(new PrintWriter(writer));
-    e.printStackTrace();
-
-    final JTextArea text = new JTextArea();
-    text.setEditable(false);
-    text.setText(writer.toString());
-
-    SBErrorBox.showErrorBox(title, text);
+    SwingUtilities.invokeLater(new Runnable() {
+      @SuppressWarnings("synthetic-access") @Override public void run()
+      {
+        SBErrorBox.showErrorWithException(title, e);
+      }
+    });
   }
 
   private static void showErrorBox(
@@ -75,19 +71,23 @@ public final class SBErrorBox
       JOptionPane.ERROR_MESSAGE);
   }
 
-  public static void showError(
-    final @Nonnull Log log,
+  private static void showErrorWithException(
     final @Nonnull String title,
     final @Nonnull Throwable e)
   {
-    log.error(title + ": " + e.getMessage());
+    final StringWriter writer = new StringWriter();
+    writer.append(e.getMessage());
+    writer.append("\n");
+    writer.append("\n");
 
-    SwingUtilities.invokeLater(new Runnable() {
-      @SuppressWarnings("synthetic-access") @Override public void run()
-      {
-        SBErrorBox.showErrorWithException(title, e);
-      }
-    });
+    e.printStackTrace(new PrintWriter(writer));
+    e.printStackTrace();
+
+    final JTextArea text = new JTextArea();
+    text.setEditable(false);
+    text.setText(writer.toString());
+
+    SBErrorBox.showErrorBox(title, text);
   }
 
   public static void showErrorWithoutException(

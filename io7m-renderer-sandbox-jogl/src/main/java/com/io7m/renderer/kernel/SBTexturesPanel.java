@@ -43,17 +43,6 @@ import com.io7m.jlog.Log;
 
 final class SBTexturesPanel extends JPanel
 {
-  private static final long                   serialVersionUID;
-
-  static {
-    serialVersionUID = -941448169051827275L;
-  }
-
-  protected final @Nonnull Log                log_textures;
-  protected final @Nonnull JComboBox<File>    selector;
-  protected @Nonnull Map<File, BufferedImage> images;
-  protected @Nonnull ImageDisplay             image_display;
-
   private static final class ImageDisplay extends JPanel
   {
     private static final long           serialVersionUID;
@@ -84,6 +73,17 @@ final class SBTexturesPanel extends JPanel
       this.image = image;
     }
   }
+
+  private static final long                   serialVersionUID;
+
+  static {
+    serialVersionUID = -941448169051827275L;
+  }
+  protected final @Nonnull Log                log_textures;
+  protected final @Nonnull JComboBox<File>    selector;
+  protected @Nonnull Map<File, BufferedImage> images;
+
+  protected @Nonnull ImageDisplay             image_display;
 
   public SBTexturesPanel(
     final @Nonnull JFrame window,
@@ -205,15 +205,6 @@ final class SBTexturesPanel extends JPanel
     dg.row().grid().empty(2).add(cancel).add(select);
   }
 
-  protected void selectorRefresh(
-    final JComboBox<File> select)
-  {
-    select.removeAllItems();
-    for (final Entry<File, BufferedImage> e : this.images.entrySet()) {
-      select.addItem(e.getKey());
-    }
-  }
-
   protected void imageRefresh(
     final JComboBox<File> select)
   {
@@ -222,6 +213,15 @@ final class SBTexturesPanel extends JPanel
       final BufferedImage bi = SBTexturesPanel.this.images.get(file);
       this.image_display.setImage(bi);
       this.image_display.repaint();
+    }
+  }
+
+  protected void selectorRefresh(
+    final JComboBox<File> select)
+  {
+    select.removeAllItems();
+    for (final Entry<File, BufferedImage> e : this.images.entrySet()) {
+      select.addItem(e.getKey());
     }
   }
 }

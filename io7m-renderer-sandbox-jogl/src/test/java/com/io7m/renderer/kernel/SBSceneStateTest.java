@@ -39,6 +39,13 @@ import com.io7m.renderer.kernel.SBSceneState.SBSceneNormalized;
 
 public final class SBSceneStateTest
 {
+  private Log makeLog()
+  {
+    final Properties props = new Properties();
+    props.setProperty("com.io7m.renderer.logs.tests", "true");
+    return new Log(props, "com.io7m.renderer", "tests");
+  }
+
   @Test public void testNormalization()
     throws IOException
   {
@@ -108,12 +115,5 @@ public final class SBSceneStateTest
     s.setIndent(2);
     s.setMaxLength(80);
     s.write(new Document(e));
-  }
-
-  private Log makeLog()
-  {
-    final Properties props = new Properties();
-    props.setProperty("com.io7m.renderer.logs.tests", "true");
-    return new Log(props, "com.io7m.renderer", "tests");
   }
 }
