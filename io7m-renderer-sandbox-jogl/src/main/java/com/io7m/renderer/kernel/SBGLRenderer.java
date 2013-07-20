@@ -249,15 +249,10 @@ final class SBGLRenderer implements GLEventListener
   private @CheckForNull GLImplementationJOGL                            gi;
   private final @Nonnull TextureLoader                                  texture_loader;
   private final @Nonnull ConcurrentLinkedQueue<TextureLoadFuture>       texture_load_queue;
-
   private final @Nonnull ConcurrentLinkedQueue<TextureDeleteFuture>     texture_delete_queue;
-
   private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>          mesh_load_queue;
-
   private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>        mesh_delete_queue;
-
   private final @Nonnull ConcurrentHashMap<File, Texture2DStatic>       textures;
-
   private final @Nonnull ConcurrentHashMap<File, Model<ModelObjectVBO>> meshes;
 
   public SBGLRenderer(
