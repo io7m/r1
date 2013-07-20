@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
 import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLException;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JCheckBoxMenuItem;
@@ -332,16 +333,20 @@ final class SBMainWindow extends JFrame
       }
     });
 
-    final GLProfile profile = GLProfile.getDefault();
-    final GLCapabilities caps = new GLCapabilities(profile);
-    final GLCanvas canvas = new GLCanvas(caps);
-    canvas.addGLEventListener(renderer);
+    try {
+      final GLProfile profile = GLProfile.getDefault();
+      final GLCapabilities caps = new GLCapabilities(profile);
+      final GLCanvas canvas = new GLCanvas(caps);
+      canvas.addGLEventListener(renderer);
 
-    final FPSAnimator animator = new FPSAnimator(canvas, 60);
-    animator.start();
+      final FPSAnimator animator = new FPSAnimator(canvas, 60);
+      animator.start();
 
-    final Container pane = this.getContentPane();
-    pane.add(canvas);
+      final Container pane = this.getContentPane();
+      pane.add(canvas);
+    } catch (final GLException e) {
+      SBErrorBox.showError(log, "Renderer disabled", e);
+    }
 
     this.setJMenuBar(SBMainWindow.makeMenuBar(
       controller,
