@@ -95,4 +95,9 @@ public final class SBObjectDescription
   {
     return this.position;
   }
+
+  @Override public String toString()
+  {
+    return "[SBObjectDescription " + this.id + "]";
+  }
 }
