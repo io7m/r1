@@ -178,8 +178,9 @@ final class SBSceneState implements
       final @Nonnull File file,
       final @Nonnull String flat)
     {
-      assert this.flat_names.contains(flat);
-      assert this.flat_to_files.containsKey(flat);
+      assert this.flat_names.contains(flat) == false;
+      assert this.flat_to_files.containsKey(flat) == false;
+
       this.flat_names.add(flat);
       this.flat_to_files.put(flat, file);
       this.files_to_flat.put(file, flat);
@@ -264,6 +265,9 @@ final class SBSceneState implements
       eoy.appendChild(Float.toString(o.getOrientation().getYF()));
       final Element eoz = new Element("s:z", uri);
       eoz.appendChild(Float.toString(o.getOrientation().getZF()));
+      eo.appendChild(eox);
+      eo.appendChild(eoy);
+      eo.appendChild(eoz);
 
       final Element ep = new Element("s:position", uri);
       final Element epx = new Element("s:x", uri);
@@ -272,6 +276,9 @@ final class SBSceneState implements
       epy.appendChild(Float.toString(o.getPosition().getYF()));
       final Element epz = new Element("s:z", uri);
       epz.appendChild(Float.toString(o.getPosition().getZF()));
+      ep.appendChild(epx);
+      ep.appendChild(epy);
+      ep.appendChild(epz);
 
       final Element emo = new Element("s:model", uri);
       emo.appendChild(this.files_to_flat.get(o.getModel()));
@@ -358,6 +365,11 @@ final class SBSceneState implements
       }
 
       throw new UnreachableCodeException();
+    }
+
+    @Nonnull Map<String, File> getFileMappings()
+    {
+      return this.flat_to_files;
     }
   }
 
