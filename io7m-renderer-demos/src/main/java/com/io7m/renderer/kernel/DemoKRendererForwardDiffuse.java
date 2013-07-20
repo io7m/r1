@@ -199,6 +199,7 @@ public final class DemoKRendererForwardDiffuse implements Demo
 
   private static @Nonnull KMeshInstance makeMesh(
     final @Nonnull GLImplementation gi,
+    final @Nonnull Integer id,
     final @Nonnull KTransform transform,
     final @Nonnull TextureLoader texture_loader,
     final @Nonnull FSCapabilityRead fs,
@@ -215,7 +216,7 @@ public final class DemoKRendererForwardDiffuse implements Demo
       DemoUtilities.texturedSquare(g, 1);
     final KMaterial material =
       DemoKRendererForwardDiffuse.makeMaterial(texture_loader, fs, g);
-    return new KMeshInstance(transform, p.first, p.second, material);
+    return new KMeshInstance(id, transform, p.first, p.second, material);
   }
 
   private static @Nonnull KScene makeScene(
@@ -399,6 +400,8 @@ public final class DemoKRendererForwardDiffuse implements Demo
     final HashSet<KMeshInstance> meshes = new HashSet<KMeshInstance>();
 
     {
+      int index = 0;
+
       for (int y = -9; y < 9; y += 3) {
         for (int x = -9; x < 9; x += 3) {
 
@@ -414,11 +417,14 @@ public final class DemoKRendererForwardDiffuse implements Demo
 
           final KMeshInstance mesh =
             new KMeshInstance(
+              Integer.valueOf(index),
               new KTransform(new VectorI3F(x, y, 0), orientation),
               this.suzanne.getArrayBuffer(),
               this.suzanne.getIndexBuffer(),
               this.mesh_material);
           meshes.add(mesh);
+
+          ++index;
         }
       }
     }

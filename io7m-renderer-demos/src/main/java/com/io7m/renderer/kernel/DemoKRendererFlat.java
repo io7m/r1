@@ -186,6 +186,7 @@ public final class DemoKRendererFlat implements Demo
 
   private static @Nonnull KMeshInstance makeMesh(
     final @Nonnull GLImplementation gi,
+    final @Nonnull Integer id,
     final @Nonnull KTransform transform,
     final @Nonnull TextureLoader texture_loader,
     final @Nonnull FSCapabilityRead fs,
@@ -202,7 +203,7 @@ public final class DemoKRendererFlat implements Demo
       DemoUtilities.texturedSquare(g, 1);
     final KMaterial material =
       DemoKRendererFlat.makeMaterial(texture_loader, fs, g);
-    return new KMeshInstance(transform, p.first, p.second, material);
+    return new KMeshInstance(id, transform, p.first, p.second, material);
   }
 
   private static @Nonnull KScene makeScene(
@@ -313,6 +314,7 @@ public final class DemoKRendererFlat implements Demo
     final HashSet<KLight> lights = new HashSet<KLight>();
     final HashSet<KMeshInstance> meshes = new HashSet<KMeshInstance>();
 
+    int index = 0;
     for (int x = -5; x < 10; ++x) {
       final QuaternionM4F orientation = new QuaternionM4F();
       QuaternionM4F.makeFromAxisAngle(
@@ -322,11 +324,14 @@ public final class DemoKRendererFlat implements Demo
 
       final KMeshInstance mesh =
         new KMeshInstance(
+          Integer.valueOf(index),
           new KTransform(new VectorI3F(x, 0, -1), orientation),
           this.quad_in_scene.first,
           this.quad_in_scene.second,
           this.mesh_material);
       meshes.add(mesh);
+
+      ++index;
     }
 
     final KScene scene = new KScene(this.camera, lights, meshes);

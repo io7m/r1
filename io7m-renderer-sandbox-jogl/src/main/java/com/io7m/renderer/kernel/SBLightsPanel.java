@@ -20,7 +20,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -39,7 +41,6 @@ import javax.swing.table.AbstractTableModel;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.IRowCreator;
 import net.java.dev.designgridlayout.RowGroup;
-import net.java.dev.designgridlayout.Tag;
 
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
@@ -48,6 +49,7 @@ import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorM3F;
 import com.io7m.renderer.RVectorReadable3F;
+import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
 final class SBLightsPanel extends JPanel
 {
@@ -62,18 +64,24 @@ final class SBLightsPanel extends JPanel
     private final @Nonnull LightEditDialogPanel panel;
 
     public LightEditDialog(
+      final @Nonnull SBSceneControllerLights controller,
       final @Nonnull KLight light,
-      final @Nonnull LightsTableModel data)
+      final @Nonnull LightsTableModel light_table_model)
+      throws IOException
     {
-      this.panel = new LightEditDialogPanel(this, light, data);
+      this.panel =
+        new LightEditDialogPanel(this, controller, light, light_table_model);
       this.setTitle("Edit light...");
       this.getContentPane().add(this.panel);
     }
 
     public LightEditDialog(
-      final @Nonnull LightsTableModel data)
+      final @Nonnull SBSceneControllerLights controller,
+      final @Nonnull LightsTableModel light_table_model)
+      throws IOException
     {
-      this.panel = new LightEditDialogPanel(this, null, data);
+      this.panel =
+        new LightEditDialogPanel(this, controller, null, light_table_model);
       this.setTitle("Create light...");
       this.getContentPane().add(this.panel);
     }
@@ -131,11 +139,12 @@ final class SBLightsPanel extends JPanel
       }
 
       @Nonnull RVectorM3F<RSpaceWorld> getDirection()
+        throws SBExceptionInputError
       {
         final RVectorM3F<RSpaceWorld> v = new RVectorM3F<RSpaceWorld>();
-        v.x = Float.parseFloat(this.direction_x.getText());
-        v.y = Float.parseFloat(this.direction_y.getText());
-        v.z = Float.parseFloat(this.direction_z.getText());
+        v.x = SBTextFieldUtilities.getFieldFloatOrError(this.direction_x);
+        v.y = SBTextFieldUtilities.getFieldFloatOrError(this.direction_y);
+        v.z = SBTextFieldUtilities.getFieldFloatOrError(this.direction_z);
         return v;
       }
 
@@ -174,26 +183,40 @@ final class SBLightsPanel extends JPanel
       }
     }
 
-    private static final long                    serialVersionUID;
+    private static final long                      serialVersionUID;
 
     static {
       serialVersionUID = -3467271842953066384L;
     }
 
-    protected final @Nonnull JTextField          colour_r;
-    protected final @Nonnull JTextField          colour_g;
-    protected final @Nonnull JTextField          colour_b;
-    protected final @Nonnull JTextField          intensity;
-    protected final @Nonnull SBLightTypeSelector type_select;
-    private final LightControlsDirectional       directional_controls;
-    private final LightControlsPoint             point_controls;
-    private final LightControlsCone              cone_controls;
+    protected final @Nonnull JTextField            colour_r;
+    protected final @Nonnull JTextField            colour_g;
+    protected final @Nonnull JTextField            colour_b;
+    protected final @Nonnull JTextField            intensity;
+    protected final @Nonnull SBLightTypeSelector   type_select;
+    private final LightControlsDirectional         directional_controls;
+    private final LightControlsPoint               point_controls;
+    private final LightControlsCone                cone_controls;
+    private final @Nonnull JLabel                  error_text;
+    private final @Nonnull JLabel                  error_icon;
+    private final @Nonnull SBSceneControllerLights controller;
+    private final @Nonnull LightsTableModel        light_table_model;
 
     public LightEditDialogPanel(
       final @Nonnull LightEditDialog window,
+      final @Nonnull SBSceneControllerLights controller,
       final @CheckForNull KLight light,
-      final @Nonnull LightsTableModel data)
+      final @Nonnull LightsTableModel light_table_model)
+      throws IOException
     {
+      this.controller = controller;
+      this.light_table_model = light_table_model;
+
+      this.error_text = new JLabel("Some informative error text");
+      this.error_icon = SBIcons.makeErrorIcon();
+      this.error_text.setVisible(false);
+      this.error_icon.setVisible(false);
+
       this.type_select = new SBLightTypeSelector();
       this.colour_r = new JTextField("1.0");
       this.colour_g = new JTextField("1.0");
@@ -231,9 +254,9 @@ final class SBLightsPanel extends JPanel
       this.point_controls.add(dg.row().group(point_group));
       this.cone_controls.add(dg.row().group(cone_group));
 
-      directional_group.show();
       point_group.hide();
       cone_group.hide();
+      directional_group.forceShow();
 
       final JButton cancel = new JButton("Cancel");
       cancel.addActionListener(new ActionListener() {
@@ -249,7 +272,11 @@ final class SBLightsPanel extends JPanel
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
         {
-          LightEditDialogPanel.this.saveLight(data, light);
+          try {
+            LightEditDialogPanel.this.saveLight(light);
+          } catch (final SBExceptionInputError x) {
+            LightEditDialogPanel.this.setError(x.getMessage());
+          }
         }
       });
 
@@ -258,17 +285,19 @@ final class SBLightsPanel extends JPanel
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
         {
-          LightEditDialogPanel.this.saveLight(data, light);
-          SBWindowUtilities.closeWindow(window);
+          try {
+            LightEditDialogPanel.this.saveLight(light);
+            SBWindowUtilities.closeWindow(window);
+          } catch (final SBExceptionInputError x) {
+            LightEditDialogPanel.this.setError(x.getMessage());
+          }
         }
       });
 
-      dg
-        .row()
-        .bar()
-        .add(cancel, Tag.CANCEL)
-        .add(apply, Tag.APPLY)
-        .add(finish, Tag.FINISH);
+      dg.emptyRow();
+      dg.row().grid().add(apply).add(cancel).add(finish);
+      dg.emptyRow();
+      dg.row().left().add(this.error_icon).add(this.error_text);
 
       this.type_select.addItemListener(new ItemListener() {
         @Override public void itemStateChanged(
@@ -283,24 +312,21 @@ final class SBLightsPanel extends JPanel
             {
               directional_group.hide();
               point_group.hide();
-              cone_group.show();
-              cone_group.show();
+              cone_group.forceShow();
               break;
             }
             case LIGHT_DIRECTIONAL:
             {
               cone_group.hide();
               point_group.hide();
-              directional_group.show();
-              directional_group.show();
+              directional_group.forceShow();
               break;
             }
             case LIGHT_POINT:
             {
               directional_group.hide();
               cone_group.hide();
-              point_group.show();
-              point_group.show();
+              point_group.forceShow();
               break;
             }
           }
@@ -333,24 +359,41 @@ final class SBLightsPanel extends JPanel
       }
     }
 
+    protected void setError(
+      final @Nonnull String message)
+    {
+      this.error_icon.setVisible(true);
+      this.error_text.setText(message);
+      this.error_text.setVisible(true);
+    }
+
+    protected void unsetError()
+    {
+      this.error_icon.setVisible(false);
+      this.error_text.setVisible(false);
+    }
+
     private @Nonnull RVectorReadable3F<RSpaceRGB> getColour()
+      throws SBExceptionInputError
     {
       final RVectorM3F<RSpaceRGB> v = new RVectorM3F<RSpaceRGB>();
-      v.x = Float.parseFloat(this.colour_r.getText());
-      v.y = Float.parseFloat(this.colour_g.getText());
-      v.z = Float.parseFloat(this.colour_b.getText());
+      v.x = SBTextFieldUtilities.getFieldFloatOrError(this.colour_r);
+      v.y = SBTextFieldUtilities.getFieldFloatOrError(this.colour_g);
+      v.z = SBTextFieldUtilities.getFieldFloatOrError(this.colour_b);
       return v;
     }
 
     private float getIntensity()
+      throws SBExceptionInputError
     {
-      return Float.parseFloat(this.intensity.getText());
+      return SBTextFieldUtilities.getFieldFloatOrError(this.intensity);
     }
 
     protected @Nonnull KLight makeLight(
       final @Nonnull Integer id,
       final @Nonnull KLight.Type type,
       final @Nonnull RVectorReadable3F<RSpaceRGB> colour)
+      throws SBExceptionInputError
     {
       switch (type) {
         case LIGHT_CONE:
@@ -380,11 +423,11 @@ final class SBLightsPanel extends JPanel
     }
 
     protected void saveLight(
-      final @Nonnull LightsTableModel data,
       final @CheckForNull KLight initial)
+      throws SBExceptionInputError
     {
       final Integer id =
-        (initial == null) ? data.lightFreshID() : initial.getID();
+        (initial == null) ? this.controller.lightFreshID() : initial.getID();
 
       final KLight light =
         this.makeLight(
@@ -392,7 +435,9 @@ final class SBLightsPanel extends JPanel
           (KLight.Type) this.type_select.getSelectedItem(),
           this.getColour());
 
-      data.addLight(light);
+      this.controller.lightAdd(light);
+      this.light_table_model.refreshLights();
+      this.unsetError();
     }
 
     private void setColour(
@@ -437,18 +482,6 @@ final class SBLightsPanel extends JPanel
 
       this.model = model;
     }
-
-    protected @Nonnull KLight getLightAt(
-      final int row)
-    {
-      return this.model.getLightAt(row);
-    }
-
-    protected void removeLightAt(
-      final int row)
-    {
-      this.model.removeLightAt(row);
-    }
   }
 
   private static class LightsTableModel extends AbstractTableModel
@@ -473,34 +506,17 @@ final class SBLightsPanel extends JPanel
       this.controller = controller;
     }
 
-    void addLight(
-      final @Nonnull KLight light)
+    void refreshLights()
     {
-      if (this.controller.lightExists(light.getID())) {
-        this.log.debug("Replacing light "
-          + light.getID()
-          + " with type "
-          + light.getType());
-
-        for (final ArrayList<String> row : this.data) {
-          final Integer id = Integer.valueOf(row.get(0));
-          if (id.equals(light.getID())) {
-            row.set(1, light.getType().getName());
-          }
-        }
-      } else {
-        this.log.debug("Adding light "
-          + light.getID()
-          + " of type "
-          + light.getType());
-
+      this.data.clear();
+      final List<KLight> lights = this.controller.lightsGetAll();
+      for (final KLight l : lights) {
         final ArrayList<String> row = new ArrayList<String>();
-        row.add(light.getID().toString());
-        row.add(light.getType().getName());
+        row.add(l.getID().toString());
+        row.add(l.getType().getName());
         this.data.add(row);
       }
 
-      this.controller.lightAdd(light);
       this.fireTableDataChanged();
     }
 
@@ -518,9 +534,12 @@ final class SBLightsPanel extends JPanel
     protected @Nonnull KLight getLightAt(
       final int row)
     {
-      final Integer key = Integer.valueOf(row);
-      assert this.controller.lightExists(key);
-      return this.controller.lightGet(key);
+      final ArrayList<String> row_data = this.data.get(row);
+      assert row_data != null;
+      final String id_text = row_data.get(0);
+      final Integer id = Integer.valueOf(id_text);
+      assert this.controller.lightExists(id);
+      return this.controller.lightGet(id);
     }
 
     @Override public int getRowCount()
@@ -534,26 +553,6 @@ final class SBLightsPanel extends JPanel
     {
       return this.data.get(rowIndex).get(columnIndex);
     }
-
-    @Nonnull Integer lightFreshID()
-    {
-      return this.controller.lightFreshID();
-    }
-
-    void removeLightAt(
-      final int row)
-    {
-      assert row != -1;
-      assert row < this.data.size();
-
-      final ArrayList<String> row_data = this.data.get(row);
-      final Integer id = Integer.valueOf(row_data.get(0));
-
-      this.log.debug("Removing light " + id);
-      this.controller.lightRemove(id);
-      this.data.remove(row);
-      this.fireTableDataChanged();
-    }
   }
 
   private static final long serialVersionUID;
@@ -563,10 +562,11 @@ final class SBLightsPanel extends JPanel
   }
 
   public SBLightsPanel(
-    final @Nonnull SBSceneControllerLights state,
+    final @Nonnull SBSceneControllerLights controller,
     final @Nonnull Log log)
   {
-    final LightsTableModel lights_model = new LightsTableModel(state, log);
+    final LightsTableModel lights_model =
+      new LightsTableModel(controller, log);
     final LightsTable lights = new LightsTable(lights_model);
     final JScrollPane scroller = new JScrollPane(lights);
 
@@ -575,9 +575,14 @@ final class SBLightsPanel extends JPanel
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final LightEditDialog dialog = new LightEditDialog(lights_model);
-        dialog.pack();
-        dialog.setVisible(true);
+        try {
+          final LightEditDialog dialog =
+            new LightEditDialog(controller, lights_model);
+          dialog.pack();
+          dialog.setVisible(true);
+        } catch (final IOException x) {
+          log.critical("Unable to open edit dialogue: " + x.getMessage());
+        }
       }
     });
 
@@ -587,15 +592,20 @@ final class SBLightsPanel extends JPanel
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final int row = lights.getSelectedRow();
-        assert row != -1;
-        final KLight light = lights.getLightAt(row);
+        final int view_row = lights.getSelectedRow();
+        assert view_row != -1;
+        final int model_row = lights.convertRowIndexToModel(view_row);
+        final KLight light = lights_model.getLightAt(model_row);
         assert light != null;
 
-        final LightEditDialog dialog =
-          new LightEditDialog(light, lights_model);
-        dialog.pack();
-        dialog.setVisible(true);
+        try {
+          final LightEditDialog dialog =
+            new LightEditDialog(controller, light, lights_model);
+          dialog.pack();
+          dialog.setVisible(true);
+        } catch (final IOException x) {
+          log.critical("Unable to open edit dialogue: " + x.getMessage());
+        }
       }
     });
 
@@ -605,9 +615,14 @@ final class SBLightsPanel extends JPanel
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final int row = lights.getSelectedRow();
-        assert row != -1;
-        lights.removeLightAt(row);
+        final int view_row = lights.getSelectedRow();
+        assert view_row != -1;
+        final int model_row = lights.convertRowIndexToModel(view_row);
+        final KLight light = lights_model.getLightAt(model_row);
+        assert light != null;
+
+        controller.lightRemove(light.getID());
+        lights_model.refreshLights();
       }
     });
 

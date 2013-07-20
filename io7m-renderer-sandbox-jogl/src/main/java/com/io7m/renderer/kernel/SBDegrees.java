@@ -16,28 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-import javax.swing.JFrame;
-import javax.swing.JTextField;
+import com.io7m.renderer.RSpace;
 
-import com.io7m.jlog.Log;
-
-final class SBTexturesWindow extends JFrame
+interface SBDegrees extends RSpace
 {
-  private static final long serialVersionUID;
-
-  static {
-    serialVersionUID = -3617746303911390018L;
-  }
-
-  public SBTexturesWindow(
-    final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull JTextField result,
-    final @Nonnull Log log)
-  {
-    super("Textures");
-    this.getContentPane().add(
-      new SBTexturesPanel(this, controller, result, log));
-    this.pack();
-  }
+  // No value-level representation.
 }

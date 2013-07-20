@@ -16,23 +16,27 @@
 
 package com.io7m.renderer.kernel;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Enumeration;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.SwingWorker;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -62,6 +66,7 @@ final class SBMeshesPanel extends JPanel
     protected final @Nonnull JTree                  tree;
     protected final @Nonnull DefaultMutableTreeNode tree_root;
     protected final @Nonnull Log                    log_meshes;
+    protected @Nonnull Map<File, SortedSet<String>> meshes;
 
     protected @CheckForNull DefaultMutableTreeNode findTreeNode(
       final @Nonnull String name)
@@ -81,17 +86,62 @@ final class SBMeshesPanel extends JPanel
     }
 
     ObjectsPanel(
+      final @Nonnull JFrame window,
       final @Nonnull SBSceneControllerMeshes controller,
+      final @Nonnull JTextField model,
+      final @Nonnull JTextField model_object,
       final @Nonnull Log log)
     {
       this.log_meshes = new Log(log, "meshes");
 
-      this.setBorder(BorderFactory.createTitledBorder("Meshes"));
+      this.meshes = controller.meshesGet();
+
+      final JButton cancel = new JButton("Cancel");
+      cancel.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          SBWindowUtilities.closeWindow(window);
+        }
+      });
+
+      final JButton select = new JButton("Select");
+      select.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          final DefaultMutableTreeNode leaf =
+            (DefaultMutableTreeNode) ObjectsPanel.this.tree
+              .getLastSelectedPathComponent();
+          assert leaf.getParent() != null;
+
+          final DefaultMutableTreeNode file =
+            (DefaultMutableTreeNode) leaf.getParent();
+          assert file != null;
+          assert file.getUserObject() instanceof File;
+
+          model.setText(file.getUserObject().toString());
+          model_object.setText((String) leaf.getUserObject());
+
+          SBWindowUtilities.closeWindow(window);
+        }
+      });
 
       this.tree_root = new DefaultMutableTreeNode("Meshes");
       this.tree = new JTree(this.tree_root);
       this.tree.getSelectionModel().setSelectionMode(
         TreeSelectionModel.SINGLE_TREE_SELECTION);
+      this.tree.addTreeSelectionListener(new TreeSelectionListener() {
+        @Override public void valueChanged(
+          final @Nonnull TreeSelectionEvent e)
+        {
+          ObjectsPanel.enableOrDisableSelect(ObjectsPanel.this.tree, select);
+        }
+      });
+
+      this.meshesRefresh(this.meshes);
+      ObjectsPanel.enableOrDisableSelect(this.tree, select);
+
       final JScrollPane scroller = new JScrollPane(this.tree);
 
       final JButton load = new JButton("Load...");
@@ -121,25 +171,15 @@ final class SBMeshesPanel extends JPanel
                   @Override protected void done()
                   {
                     try {
-                      final Pair<File, SortedSet<String>> v = this.get();
+                      this.get();
 
-                      final DefaultMutableTreeNode original =
-                        ObjectsPanel.this.findTreeNode(file.toString());
-
-                      final DefaultMutableTreeNode category =
-                        (original == null) ? new DefaultMutableTreeNode(file
-                          .toString()) : original;
-
-                      category.removeAllChildren();
-                      for (final String object_name : v.second) {
-                        log.debug("Loaded object " + object_name);
-                        category.add(new DefaultMutableTreeNode(object_name));
-                      }
-                      if (category != original) {
-                        ObjectsPanel.this.tree_root.add(category);
-                      }
-
+                      ObjectsPanel.this.meshes = controller.meshesGet();
+                      ObjectsPanel.this
+                        .meshesRefresh(ObjectsPanel.this.meshes);
                       ObjectsPanel.this.tree.repaint();
+                      ObjectsPanel.enableOrDisableSelect(
+                        ObjectsPanel.this.tree,
+                        select);
 
                     } catch (final InterruptedException x) {
                       SBErrorBox.showError(log, "Interrupted operation", x);
@@ -166,21 +206,63 @@ final class SBMeshesPanel extends JPanel
 
       final DesignGridLayout dg = new DesignGridLayout(this);
       dg.row().grid().add(scroller);
-      dg.row().grid().add(load);
+      dg.row().grid().add(load).add(cancel).add(select);
+    }
+
+    protected static void enableOrDisableSelect(
+      final @Nonnull JTree t,
+      final @Nonnull JButton button)
+    {
+      final DefaultMutableTreeNode node =
+        (DefaultMutableTreeNode) t.getLastSelectedPathComponent();
+
+      button.setEnabled(false);
+      if (node != null) {
+        if (node.isRoot() == false) {
+          if (node.isLeaf()) {
+            button.setEnabled(true);
+          }
+        }
+      }
+    }
+
+    protected void meshesRefresh(
+      final @Nonnull Map<File, SortedSet<String>> m)
+    {
+      this.tree_root.removeAllChildren();
+
+      for (final Entry<File, SortedSet<String>> e : m.entrySet()) {
+        final DefaultMutableTreeNode category =
+          new DefaultMutableTreeNode(e.getKey());
+
+        for (final String name : e.getValue()) {
+          final DefaultMutableTreeNode node =
+            new DefaultMutableTreeNode(name);
+          category.add(node);
+        }
+
+        this.tree_root.add(category);
+      }
+
+      for (int row = 0; row < this.tree.getRowCount(); ++row) {
+        this.tree.expandRow(row);
+      }
     }
   }
 
   private final @Nonnull Log log;
 
   public SBMeshesPanel(
+    final @Nonnull JFrame window,
     final @Nonnull SBSceneControllerMeshes controller,
+    final @Nonnull JTextField model,
+    final @Nonnull JTextField model_object,
     final @Nonnull Log log)
   {
     this.log = new Log(log, "meshes");
 
-    this.setPreferredSize(new Dimension(640, 480));
-
-    this.objects = new ObjectsPanel(controller, this.log);
+    this.objects =
+      new ObjectsPanel(window, controller, model, model_object, this.log);
 
     final DesignGridLayout dg = new DesignGridLayout(this);
     dg.row().grid().add(this.objects);

@@ -26,7 +26,8 @@ abstract class SBException extends Exception
 
   static enum Type
   {
-    SB_EXCEPTION_IMAGE_LOADING
+    SB_EXCEPTION_IMAGE_LOADING,
+    SB_EXCEPTION_INPUT_ERROR,
   }
 
   private final @Nonnull Type type;
@@ -50,6 +51,17 @@ abstract class SBException extends Exception
     {
       super(Type.SB_EXCEPTION_IMAGE_LOADING, file + ": " + message);
       this.file = file;
+    }
+  }
+
+  final static class SBExceptionInputError extends SBException
+  {
+    private static final long serialVersionUID = 4254147123710014337L;
+
+    @SuppressWarnings("synthetic-access") SBExceptionInputError(
+      final @Nonnull String message)
+    {
+      super(Type.SB_EXCEPTION_INPUT_ERROR, message);
     }
   }
 }
