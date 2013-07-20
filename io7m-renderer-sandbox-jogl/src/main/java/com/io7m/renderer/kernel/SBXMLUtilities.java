@@ -31,20 +31,6 @@ import com.io7m.renderer.RVectorI3F;
 
 final class SBXMLUtilities
 {
-  static boolean isElement(
-    final @Nonnull Element e,
-    final @Nonnull String name,
-    final @Nonnull URI uri)
-  {
-    if (e.getNamespaceURI().equals(uri.toString()) == false) {
-      return false;
-    }
-    if (e.getLocalName().equals(name) == false) {
-      return false;
-    }
-    return true;
-  }
-
   static @Nonnull Element checkIsElement(
     final @Nonnull Element e,
     final @Nonnull String name,
@@ -89,6 +75,41 @@ final class SBXMLUtilities
     }
   }
 
+  static @Nonnull Integer getInteger(
+    final @Nonnull Element e)
+    throws ValidityException
+  {
+    try {
+      return Integer.valueOf(e.getValue());
+    } catch (final NumberFormatException x) {
+      throw new ValidityException("Expected an integer but got '"
+        + e.getValue()
+        + "'");
+    }
+  }
+
+  static @Nonnull String getNonEmptyString(
+    final @Nonnull Element e)
+    throws ValidityException
+  {
+    if (e.getValue().length() == 0) {
+      throw new ValidityException("Expected a non-empty string");
+    }
+    return e.getValue();
+  }
+
+  static @CheckForNull Element getOptionalChild(
+    final @Nonnull Element e,
+    final @Nonnull String name,
+    final @Nonnull URI uri)
+  {
+    final Elements es = e.getChildElements(name, uri.toString());
+    if (es.size() == 0) {
+      return null;
+    }
+    return es.get(0);
+  }
+
   static @Nonnull RVectorI3F<RSpaceRGB> getRGB(
     final @Nonnull Element e,
     final @Nonnull URI uri)
@@ -117,39 +138,18 @@ final class SBXMLUtilities
       SBXMLUtilities.getFloat(ez));
   }
 
-  static @CheckForNull Element getOptionalChild(
+  static boolean isElement(
     final @Nonnull Element e,
     final @Nonnull String name,
     final @Nonnull URI uri)
   {
-    final Elements es = e.getChildElements(name, uri.toString());
-    if (es.size() == 0) {
-      return null;
+    if (e.getNamespaceURI().equals(uri.toString()) == false) {
+      return false;
     }
-    return es.get(0);
-  }
-
-  static @Nonnull Integer getInteger(
-    final @Nonnull Element e)
-    throws ValidityException
-  {
-    try {
-      return Integer.valueOf(e.getValue());
-    } catch (final NumberFormatException x) {
-      throw new ValidityException("Expected an integer but got '"
-        + e.getValue()
-        + "'");
+    if (e.getLocalName().equals(name) == false) {
+      return false;
     }
-  }
-
-  static @Nonnull String getNonEmptyString(
-    final @Nonnull Element e)
-    throws ValidityException
-  {
-    if (e.getValue().length() == 0) {
-      throw new ValidityException("Expected a non-empty string");
-    }
-    return e.getValue();
+    return true;
   }
 
 }

@@ -626,11 +626,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     controller.changeListenerAdd(this);
   }
 
-  @Override public String toString()
-  {
-    return "[SBObjectsPanel]";
-  }
-
   @Override public void sceneChanged()
   {
     SwingUtilities.invokeLater(new Runnable() {
@@ -639,6 +634,11 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         SBObjectsPanel.this.objects_model.refreshObjects();
       }
     });
+  }
+
+  @Override public String toString()
+  {
+    return "[SBObjectsPanel]";
   }
 
 }

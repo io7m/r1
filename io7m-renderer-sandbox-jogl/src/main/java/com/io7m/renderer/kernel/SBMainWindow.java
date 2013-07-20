@@ -48,75 +48,27 @@ import com.jogamp.opengl.util.FPSAnimator;
 
 final class SBMainWindow extends JFrame
 {
-  private static final long             serialVersionUID;
+  private static final long                  serialVersionUID;
 
   static {
     serialVersionUID = -4478810823021843490L;
   }
 
-  protected final @Nonnull SBGLRenderer renderer;
+  protected final static @Nonnull FileFilter SCENE_FILTER;
 
-  public SBMainWindow(
-    final @Nonnull SBSceneController controller,
-    final @Nonnull SBGLRenderer renderer,
-    final @Nonnull Log log)
-  {
-    this.renderer = renderer;
-
-    final SBLightsWindow lights_window = new SBLightsWindow(controller, log);
-    final SBLogsWindow logs_window = new SBLogsWindow();
-    final SBObjectsWindow objects_window =
-      new SBObjectsWindow(controller, log);
-
-    log.setCallback(new Callbacks() {
-      private final @Nonnull StringBuilder builder = new StringBuilder();
-
-      @SuppressWarnings("boxing") @Override public void call(
-        final @Nonnull OutputStream out,
-        final @Nonnull String destination,
-        final @Nonnull Level level,
-        final @Nonnull String message)
+  static {
+    SCENE_FILTER = new FileFilter() {
+      @Override public boolean accept(
+        final File f)
       {
-        final Calendar cal = Calendar.getInstance();
-        final String timestamp =
-          String.format(
-            "%02d:%02d:%02d ",
-            cal.get(Calendar.HOUR_OF_DAY),
-            cal.get(Calendar.MINUTE),
-            cal.get(Calendar.SECOND));
-
-        this.builder.setLength(0);
-        this.builder.append(timestamp);
-        this.builder.append(level);
-        this.builder.append(": ");
-        this.builder.append(destination);
-        this.builder.append(": ");
-        this.builder.append(message);
-        this.builder.append("\n");
-
-        logs_window.addText(this.builder.toString());
-        System.err.print(this.builder.toString());
+        return f.isDirectory() || f.toString().endsWith(".zs");
       }
-    });
 
-    final GLProfile profile = GLProfile.getDefault();
-    final GLCapabilities caps = new GLCapabilities(profile);
-    final GLCanvas canvas = new GLCanvas(caps);
-    canvas.addGLEventListener(renderer);
-
-    final FPSAnimator animator = new FPSAnimator(canvas, 60);
-    animator.start();
-
-    final Container pane = this.getContentPane();
-    pane.add(canvas);
-
-    this.setJMenuBar(SBMainWindow.makeMenuBar(
-      controller,
-      this,
-      lights_window,
-      logs_window,
-      objects_window,
-      log));
+      @Override public String getDescription()
+      {
+        return "Compressed scenes (*.zs)";
+      }
+    };
   }
 
   private static @Nonnull JMenuBar makeMenuBar(
@@ -132,6 +84,23 @@ final class SBMainWindow extends JFrame
     bar.add(SBMainWindow.makeMenuEdit(lights_window, objects_window));
     bar.add(SBMainWindow.makeMenuDebug(logs_window));
     return bar;
+  }
+
+  private static @Nonnull JMenu makeMenuDebug(
+    final @Nonnull SBLogsWindow log_window)
+  {
+    final JMenu menu = new JMenu("Debug");
+    final JCheckBoxMenuItem logs =
+      SBMainWindow.makeMenuDebugLogsMenuItem(log_window);
+
+    menu.add(logs);
+    return menu;
+  }
+
+  private static JCheckBoxMenuItem makeMenuDebugLogsMenuItem(
+    final @Nonnull SBLogsWindow log_window)
+  {
+    return SBMainWindow.makeWindowCheckbox("Logs...", log_window);
   }
 
   private static @Nonnull JMenu makeMenuEdit(
@@ -150,58 +119,6 @@ final class SBMainWindow extends JFrame
     return menu;
   }
 
-  private static @Nonnull JMenu makeMenuDebug(
-    final @Nonnull SBLogsWindow log_window)
-  {
-    final JMenu menu = new JMenu("Debug");
-    final JCheckBoxMenuItem logs =
-      SBMainWindow.makeMenuDebugLogsMenuItem(log_window);
-
-    menu.add(logs);
-    return menu;
-  }
-
-  private static @Nonnull JCheckBoxMenuItem makeWindowCheckbox(
-    final @Nonnull String text,
-    final @Nonnull JFrame window)
-  {
-    final JCheckBoxMenuItem cb = new JCheckBoxMenuItem(text);
-    cb.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
-      {
-        if (window.isShowing()) {
-          SBWindowUtilities.closeWindow(window);
-        } else {
-          window.setVisible(true);
-        }
-      }
-    });
-
-    final WindowAdapter listener = new WindowAdapter() {
-      @Override public void windowOpened(
-        final WindowEvent e)
-      {
-        cb.setSelected(true);
-      }
-
-      @Override public void windowClosing(
-        final WindowEvent e)
-      {
-        cb.setSelected(false);
-      }
-    };
-
-    window.addWindowListener(listener);
-    return cb;
-  }
-
-  private static JCheckBoxMenuItem makeMenuDebugLogsMenuItem(
-    final @Nonnull SBLogsWindow log_window)
-  {
-    return SBMainWindow.makeWindowCheckbox("Logs...", log_window);
-  }
-
   private static @Nonnull JCheckBoxMenuItem makeMenuEditLightsMenuItem(
     final @Nonnull SBLightsWindow lights_window)
   {
@@ -212,23 +129,6 @@ final class SBMainWindow extends JFrame
     final @Nonnull SBObjectsWindow objects_window)
   {
     return SBMainWindow.makeWindowCheckbox("Objects...", objects_window);
-  }
-
-  protected final static @Nonnull FileFilter SCENE_FILTER;
-
-  static {
-    SCENE_FILTER = new FileFilter() {
-      @Override public String getDescription()
-      {
-        return "Compressed scenes (*.zs)";
-      }
-
-      @Override public boolean accept(
-        final File f)
-      {
-        return f.isDirectory() || f.toString().endsWith(".zs");
-      }
-    };
   }
 
   private static @Nonnull JMenu makeMenuFile(
@@ -350,5 +250,105 @@ final class SBMainWindow extends JFrame
     menu.add(new JSeparator());
     menu.add(quit);
     return menu;
+  }
+
+  private static @Nonnull JCheckBoxMenuItem makeWindowCheckbox(
+    final @Nonnull String text,
+    final @Nonnull JFrame window)
+  {
+    final JCheckBoxMenuItem cb = new JCheckBoxMenuItem(text);
+    cb.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        if (window.isShowing()) {
+          SBWindowUtilities.closeWindow(window);
+        } else {
+          window.setVisible(true);
+        }
+      }
+    });
+
+    final WindowAdapter listener = new WindowAdapter() {
+      @Override public void windowClosing(
+        final WindowEvent e)
+      {
+        cb.setSelected(false);
+      }
+
+      @Override public void windowOpened(
+        final WindowEvent e)
+      {
+        cb.setSelected(true);
+      }
+    };
+
+    window.addWindowListener(listener);
+    return cb;
+  }
+
+  protected final @Nonnull SBGLRenderer renderer;
+
+  public SBMainWindow(
+    final @Nonnull SBSceneController controller,
+    final @Nonnull SBGLRenderer renderer,
+    final @Nonnull Log log)
+  {
+    this.renderer = renderer;
+
+    final SBLightsWindow lights_window = new SBLightsWindow(controller, log);
+    final SBLogsWindow logs_window = new SBLogsWindow();
+    final SBObjectsWindow objects_window =
+      new SBObjectsWindow(controller, log);
+
+    log.setCallback(new Callbacks() {
+      private final @Nonnull StringBuilder builder = new StringBuilder();
+
+      @SuppressWarnings("boxing") @Override public void call(
+        final @Nonnull OutputStream out,
+        final @Nonnull String destination,
+        final @Nonnull Level level,
+        final @Nonnull String message)
+      {
+        final Calendar cal = Calendar.getInstance();
+        final String timestamp =
+          String.format(
+            "%02d:%02d:%02d ",
+            cal.get(Calendar.HOUR_OF_DAY),
+            cal.get(Calendar.MINUTE),
+            cal.get(Calendar.SECOND));
+
+        this.builder.setLength(0);
+        this.builder.append(timestamp);
+        this.builder.append(level);
+        this.builder.append(": ");
+        this.builder.append(destination);
+        this.builder.append(": ");
+        this.builder.append(message);
+        this.builder.append("\n");
+
+        logs_window.addText(this.builder.toString());
+        System.err.print(this.builder.toString());
+      }
+    });
+
+    final GLProfile profile = GLProfile.getDefault();
+    final GLCapabilities caps = new GLCapabilities(profile);
+    final GLCanvas canvas = new GLCanvas(caps);
+    canvas.addGLEventListener(renderer);
+
+    final FPSAnimator animator = new FPSAnimator(canvas, 60);
+    animator.start();
+
+    final Container pane = this.getContentPane();
+    pane.add(canvas);
+
+    this.setJMenuBar(SBMainWindow.makeMenuBar(
+      controller,
+      this,
+      lights_window,
+      logs_window,
+      objects_window,
+      log));
   }
 }
