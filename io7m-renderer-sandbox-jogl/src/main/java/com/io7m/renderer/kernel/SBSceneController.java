@@ -19,13 +19,17 @@ package com.io7m.renderer.kernel;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -45,6 +49,7 @@ import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jlog.Log;
+import com.io7m.renderer.kernel.SBException.SBExceptionImageLoading;
 import com.io7m.renderer.kernel.SBSceneState.SBSceneNormalized;
 
 public final class SBSceneController implements
@@ -54,6 +59,80 @@ public final class SBSceneController implements
   SBSceneControllerObjects,
   SBSceneControllerIO
 {
+  private static void ioSaveSceneActualSerializeXML(
+    final @Nonnull SBSceneNormalized nstate,
+    final @Nonnull ZipOutputStream fo)
+    throws UnsupportedEncodingException,
+      IOException
+  {
+    final Element xml = nstate.toXML();
+    final Document doc = new Document(xml);
+    final Serializer s = new Serializer(fo, "UTF-8");
+    s.setIndent(2);
+    s.setMaxLength(80);
+
+    final ZipEntry entry = new ZipEntry("scene.xml");
+    fo.putNextEntry(entry);
+    s.write(doc);
+    fo.closeEntry();
+  }
+
+  private static void ioSaveSceneActualCopyFiles(
+    final @Nonnull SBSceneNormalized nstate,
+    final @Nonnull ZipOutputStream fo)
+    throws IOException
+  {
+    final Map<String, File> mappings = nstate.getFileMappings();
+    final byte[] buffer = new byte[8192];
+
+    for (final Entry<String, File> e : mappings.entrySet()) {
+      final String file_output = e.getKey();
+      final File file_input = e.getValue();
+
+      final FileInputStream stream = new FileInputStream(file_input);
+      try {
+        final ZipEntry entry = new ZipEntry(file_output);
+        fo.putNextEntry(entry);
+
+        for (;;) {
+          final int r = stream.read(buffer);
+          if (r == -1) {
+            break;
+          }
+          fo.write(buffer, 0, r);
+        }
+
+        fo.flush();
+        fo.closeEntry();
+      } finally {
+        stream.close();
+      }
+    }
+  }
+
+  private static @Nonnull BufferedImage textureLoadImageIOActual(
+    final @Nonnull File file)
+    throws FileNotFoundException,
+      IOException,
+      SBExceptionImageLoading
+  {
+    FileInputStream stream = null;
+    try {
+      stream = new FileInputStream(file);
+      final BufferedImage image = ImageIO.read(stream);
+      if (null == image) {
+        throw new SBException.SBExceptionImageLoading(
+          file,
+          "Unable to parse image");
+      }
+      return image;
+    } finally {
+      if (stream != null) {
+        stream.close();
+      }
+    }
+  }
+
   private final @Nonnull SBSceneState state;
   private final @Nonnull Log          log;
   protected final @Nonnull Log        log_textures;
@@ -70,6 +149,49 @@ public final class SBSceneController implements
     this.state = state;
     this.renderer = renderer;
     this.exec_pool = Executors.newCachedThreadPool();
+  }
+
+  @Override public @Nonnull Future<Void> ioSaveScene(
+    final @Nonnull File file)
+  {
+    final FutureTask<Void> f = new FutureTask<Void>(new Callable<Void>() {
+      @SuppressWarnings("synthetic-access") @Override public Void call()
+        throws Exception
+      {
+        SBSceneController.this.ioSaveSceneActual(file);
+        return null;
+      }
+    });
+
+    this.exec_pool.execute(f);
+    return f;
+  }
+
+  private void ioSaveSceneActual(
+    final @Nonnull File file)
+    throws FileNotFoundException,
+      UnsupportedEncodingException,
+      IOException
+  {
+    SBSceneController.this.log.debug("Writing scene to " + file);
+
+    final SBSceneNormalized nstate =
+      new SBSceneState.SBSceneNormalized(
+        SBSceneController.this.log,
+        SBSceneController.this.state);
+
+    final ZipOutputStream fo =
+      new ZipOutputStream(new FileOutputStream(file));
+    fo.setLevel(9);
+
+    SBSceneController.ioSaveSceneActualSerializeXML(nstate, fo);
+    SBSceneController.ioSaveSceneActualCopyFiles(nstate, fo);
+
+    fo.finish();
+    fo.flush();
+    fo.close();
+
+    SBSceneController.this.log.debug("Scene written to " + file);
   }
 
   @Override public void lightAdd(
@@ -99,6 +221,11 @@ public final class SBSceneController implements
     final @Nonnull Integer id)
   {
     this.state.lightRemove(id);
+  }
+
+  @Override public @Nonnull List<KLight> lightsGetAll()
+  {
+    return this.state.lightsGetAll();
   }
 
   @Override public @Nonnull Map<File, SortedSet<String>> meshesGet()
@@ -179,6 +306,11 @@ public final class SBSceneController implements
     throw new UnimplementedCodeException();
   }
 
+  @Override public @Nonnull List<SBObjectDescription> objectsGetAll()
+  {
+    return this.state.objectsGetAll();
+  }
+
   @Override public @Nonnull Future<BufferedImage> textureLoad(
     final @Nonnull File file)
   {
@@ -189,32 +321,7 @@ public final class SBSceneController implements
           call()
             throws Exception
         {
-          FileInputStream stream = null;
-
-          try {
-            stream = new FileInputStream(file);
-
-            final Future<BufferedImage> f_image =
-              SBSceneController.this.textureLoadImageIO(file);
-            final Future<Texture2DStaticUsable> f_texture =
-              SBSceneController.this.renderer.textureLoad(file, stream);
-
-            final Texture2DStaticUsable rf = f_texture.get();
-            final BufferedImage ri = f_image.get();
-
-            SBSceneController.this.state.textureAdd(
-              file,
-              new Pair<BufferedImage, Texture2DStaticUsable>(ri, rf));
-            return ri;
-          } finally {
-            if (stream != null) {
-              try {
-                stream.close();
-              } catch (final IOException e) {
-                e.printStackTrace();
-              }
-            }
-          }
+          return SBSceneController.this.textureLoadActual(file);
         }
       });
 
@@ -222,29 +329,51 @@ public final class SBSceneController implements
     return f;
   }
 
+  private BufferedImage textureLoadActual(
+    final File file)
+    throws FileNotFoundException,
+      InterruptedException,
+      ExecutionException
+  {
+    FileInputStream stream = null;
+
+    try {
+      stream = new FileInputStream(file);
+
+      final Future<BufferedImage> f_image =
+        SBSceneController.this.textureLoadImageIO(file);
+      final Future<Texture2DStaticUsable> f_texture =
+        SBSceneController.this.renderer.textureLoad(file, stream);
+
+      final Texture2DStaticUsable rf = f_texture.get();
+      final BufferedImage ri = f_image.get();
+
+      SBSceneController.this.state.textureAdd(
+        file,
+        new Pair<BufferedImage, Texture2DStaticUsable>(ri, rf));
+      return ri;
+    } finally {
+      if (stream != null) {
+        try {
+          stream.close();
+        } catch (final IOException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+
   private Future<BufferedImage> textureLoadImageIO(
     final @Nonnull File file)
   {
     final FutureTask<BufferedImage> f =
       new FutureTask<BufferedImage>(new Callable<BufferedImage>() {
-        @Override public BufferedImage call()
-          throws Exception
+        @SuppressWarnings("synthetic-access") @Override public
+          BufferedImage
+          call()
+            throws Exception
         {
-          FileInputStream stream = null;
-          try {
-            stream = new FileInputStream(file);
-            final BufferedImage image = ImageIO.read(stream);
-            if (null == image) {
-              throw new SBException.SBExceptionImageLoading(
-                file,
-                "Unable to parse image");
-            }
-            return image;
-          } finally {
-            if (stream != null) {
-              stream.close();
-            }
-          }
+          return SBSceneController.textureLoadImageIOActual(file);
         }
       });
 
@@ -256,58 +385,12 @@ public final class SBSceneController implements
   {
     return this.state.texturesGet();
   }
+}
 
-  @Override public @Nonnull List<SBObjectDescription> objectsGetAll()
-  {
-    return this.state.objectsGetAll();
-  }
-
-  @Override public @Nonnull List<KLight> lightsGetAll()
-  {
-    return this.state.lightsGetAll();
-  }
-
-  @Override public @Nonnull Future<Void> ioSaveScene(
-    final @Nonnull File file)
-  {
-    final FutureTask<Void> f = new FutureTask<Void>(new Callable<Void>() {
-      @SuppressWarnings("synthetic-access") @Override public Void call()
-        throws Exception
-      {
-        SBSceneController.this.log.debug("Writing scene to " + file);
-
-        final ZipOutputStream fo =
-          new ZipOutputStream(new FileOutputStream(file));
-        fo.setLevel(9);
-
-        final SBSceneNormalized nstate =
-          new SBSceneState.SBSceneNormalized(
-            SBSceneController.this.log,
-            SBSceneController.this.state);
-
-        final Element xml = nstate.toXML();
-        final Document doc = new Document(xml);
-        final Serializer s = new Serializer(fo, "UTF-8");
-        s.setIndent(2);
-        s.setMaxLength(80);
-
-        final ZipEntry entry = new ZipEntry("scene.xml");
-        fo.putNextEntry(entry);
-        s.write(doc);
-        fo.closeEntry();
-
-        fo.finish();
-        fo.flush();
-        fo.close();
-
-        SBSceneController.this.log.debug("Scene written to " + file);
-        return null;
-      }
-    });
-
-    this.exec_pool.execute(f);
-    return f;
-  }
+interface SBSceneControllerIO
+{
+  public @Nonnull Future<Void> ioSaveScene(
+    final @Nonnull File file);
 }
 
 interface SBSceneControllerLights
@@ -362,10 +445,4 @@ interface SBSceneControllerTextures
     final @Nonnull File file);
 
   public @Nonnull Map<File, BufferedImage> texturesGet();
-}
-
-interface SBSceneControllerIO
-{
-  public @Nonnull Future<Void> ioSaveScene(
-    final @Nonnull File file);
 }
