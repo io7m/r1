@@ -288,7 +288,7 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull FSCapabilityAll                                filesystem;
   private @CheckForNull FramebufferConfigurationGLES2Actual             framebuffer_config;
   private @CheckForNull Framebuffer                                     framebuffer;
-  private boolean                                                       initialized;
+  private boolean                                                       running;
   private final @Nonnull MatrixM4x4F                                    matrix_projection;
   private final @Nonnull MatrixM4x4F                                    matrix_modelview;
   private @CheckForNull TextureUnit[]                                   texture_units;
@@ -314,13 +314,15 @@ final class SBGLRenderer implements GLEventListener
       PathVirtual.ROOT);
     this.matrix_modelview = new MatrixM4x4F();
     this.matrix_projection = new MatrixM4x4F();
-    this.initialized = false;
+    this.running = false;
   }
 
   @Override public void display(
     final @Nonnull GLAutoDrawable drawable)
   {
-    assert this.initialized;
+    if (this.running == false) {
+      return;
+    }
 
     try {
       final GLInterfaceCommon gl = this.gi.getGLCommon();
@@ -333,11 +335,9 @@ final class SBGLRenderer implements GLEventListener
       this.renderScene(gl);
       this.renderResultsToScreen(drawable, gl);
     } catch (final GLException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      this.failed(e);
     } catch (final ConstraintError e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      this.failed(e);
     }
   }
 
@@ -373,6 +373,13 @@ final class SBGLRenderer implements GLEventListener
     throw new UnreachableCodeException();
   }
 
+  private void failed(
+    final @CheckForNull Throwable e)
+  {
+    SBErrorBox.showError(this.log, "Renderer disabled", e);
+    this.running = false;
+  }
+
   @Override public void init(
     final @Nonnull GLAutoDrawable drawable)
   {
@@ -398,16 +405,16 @@ final class SBGLRenderer implements GLEventListener
       this.program_uv.compile(this.filesystem, gl);
 
       this.reloadSizedResources(drawable, gl);
+      this.running = true;
 
-      this.initialized = true;
     } catch (final GLException e) {
-      e.printStackTrace();
+      this.failed(e);
     } catch (final GLUnsupportedException e) {
-      e.printStackTrace();
+      this.failed(e);
     } catch (final ConstraintError e) {
-      e.printStackTrace();
+      this.failed(e);
     } catch (final GLCompileException e) {
-      e.printStackTrace();
+      this.failed(e);
     }
   }
 
@@ -603,17 +610,15 @@ final class SBGLRenderer implements GLEventListener
     final int width,
     final int height)
   {
-    assert this.initialized;
+    assert this.running;
 
     try {
       final GLInterfaceCommon gl = this.gi.getGLCommon();
       this.reloadSizedResources(drawable, gl);
     } catch (final GLException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      this.failed(e);
     } catch (final ConstraintError e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      this.failed(e);
     }
   }
 
