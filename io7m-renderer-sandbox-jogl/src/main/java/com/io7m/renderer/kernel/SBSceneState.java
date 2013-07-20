@@ -18,6 +18,8 @@ package com.io7m.renderer.kernel;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,10 +35,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+import nu.xom.Attribute;
+import nu.xom.Element;
+
+import com.io7m.jaux.CheckedMath;
 import com.io7m.jaux.UnimplementedCodeException;
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jlog.Log;
+import com.io7m.renderer.kernel.KLight.KDirectional;
 
 final class SBSceneState implements
   SBSceneStateLights,
@@ -44,6 +52,315 @@ final class SBSceneState implements
   SBSceneStateTextures,
   SBSceneStateObjects
 {
+  static class SBSceneNormalized
+  {
+    private static final @Nonnull URI                     SCENE_URI;
+    private static final @Nonnull String                  SCENE_VERSION;
+
+    static {
+      try {
+        SCENE_URI = new URI("http://io7m.com/software/renderer");
+        SCENE_VERSION = "1";
+      } catch (final URISyntaxException e) {
+        throw new UnreachableCodeException();
+      }
+    }
+
+    private final @Nonnull SortedSet<String>              flat_names;
+    private final @Nonnull Map<String, File>              flat_to_files;
+    private final @Nonnull Map<File, String>              files_to_flat;
+    private final @Nonnull Log                            log;
+    private final @Nonnull SortedSet<String>              textures;
+    private final @Nonnull Map<String, SortedSet<String>> meshes;
+    private final @Nonnull ArrayList<KLight>              lights;
+    private final @Nonnull ArrayList<SBObjectDescription> instances;
+
+    SBSceneNormalized(
+      final @Nonnull Log log,
+      final @Nonnull SBSceneState state)
+    {
+      this.log = new Log(log, "normalizer");
+      this.flat_to_files = new HashMap<String, File>();
+      this.files_to_flat = new HashMap<File, String>();
+      this.flat_names = new TreeSet<String>();
+      this.textures = new TreeSet<String>();
+      this.meshes = new HashMap<String, SortedSet<String>>();
+      this.lights = new ArrayList<KLight>();
+      this.instances = new ArrayList<SBObjectDescription>();
+
+      this.normalizeAndSaveTextures(state);
+      this.normalizeAndSaveMeshes(state);
+      this.saveLights(state);
+      this.saveObjects(state);
+    }
+
+    private @Nonnull String addName(
+      final @Nonnull File file)
+    {
+      String suffix = null;
+      String prefix = null;
+
+      if (this.flat_names.contains(file.getName()) == false) {
+        this.putName(file, file.getName());
+        return file.getName();
+      }
+
+      final String name = file.getName();
+      final int dot = name.lastIndexOf('.');
+      if (dot != -1) {
+        suffix = name.substring(dot + 1);
+        prefix = name.substring(0, dot);
+      } else {
+        prefix = name;
+      }
+
+      final StringBuilder buffer = new StringBuilder();
+      long n = 0;
+
+      /**
+       * Loop terminates when a unique name is found, or n overflows.
+       */
+
+      for (;;) {
+        buffer.setLength(0);
+        buffer.append(prefix);
+        buffer.append("_");
+        buffer.append(n);
+        n = CheckedMath.add(n, 1);
+
+        if (suffix != null) {
+          buffer.append(".");
+          buffer.append(suffix);
+        }
+        if (this.flat_names.contains(buffer.toString()) == false) {
+          this.putName(file, buffer.toString());
+          return buffer.toString();
+        }
+      }
+    }
+
+    @SuppressWarnings("synthetic-access") private
+      void
+      normalizeAndSaveMeshes(
+        final SBSceneState state)
+    {
+      for (final Entry<File, SortedSet<SBMesh>> e : state.meshes.entrySet()) {
+        final File file = e.getKey();
+        final SortedSet<SBMesh> ms = e.getValue();
+
+        final TreeSet<String> mesh_names = new TreeSet<String>();
+        for (final SBMesh m : ms) {
+          mesh_names.add(m.getName());
+        }
+
+        final String name = this.addName(file);
+        assert this.meshes.containsKey(name) == false;
+        this.meshes.put(name, mesh_names);
+
+        this.log.debug("Saved mesh " + name + " containing " + mesh_names);
+      }
+    }
+
+    @SuppressWarnings("synthetic-access") private
+      void
+      normalizeAndSaveTextures(
+        final SBSceneState state)
+    {
+      for (final File file : state.textures.keySet()) {
+        final String name = this.addName(file);
+        assert this.textures.contains(name) == false;
+        this.textures.add(name);
+        this.log.debug("Saved texture " + name);
+      }
+    }
+
+    private void putName(
+      final @Nonnull File file,
+      final @Nonnull String flat)
+    {
+      assert this.flat_names.contains(flat);
+      assert this.flat_to_files.containsKey(flat);
+      this.flat_names.add(flat);
+      this.flat_to_files.put(flat, file);
+      this.files_to_flat.put(file, flat);
+
+      this.log.debug("Map " + flat + " <-> " + file);
+    }
+
+    @SuppressWarnings("synthetic-access") private void saveLights(
+      final @Nonnull SBSceneState state)
+    {
+      for (final KLight light : state.light_descriptions.values()) {
+        this.lights.add(light);
+        this.log.debug("Saved light " + light);
+      }
+    }
+
+    @SuppressWarnings("synthetic-access") private void saveObjects(
+      final @Nonnull SBSceneState state)
+    {
+      for (final SBObjectDescription o : state.object_instances.values()) {
+        this.instances.add(o);
+        this.log.debug("Saved object " + o);
+      }
+    }
+
+    @Nonnull Element toXML()
+    {
+      final String uri = SBSceneNormalized.SCENE_URI.toString();
+
+      final Element e_scene = new Element("s:scene", uri);
+      e_scene.addAttribute(new Attribute(
+        "s:version",
+        uri,
+        SBSceneNormalized.SCENE_VERSION));
+
+      final Element e_textures = new Element("s:textures", uri);
+      for (final String t : this.textures) {
+        final Element e_texture = new Element("s:texture", uri);
+        e_texture.appendChild(t);
+        e_textures.appendChild(e_texture);
+      }
+
+      final Element e_meshes = new Element("s:meshes", uri);
+      for (final String mesh : this.meshes.keySet()) {
+        final Element e_mesh = new Element("s:mesh", uri);
+        e_mesh.appendChild(mesh);
+        e_meshes.appendChild(e_mesh);
+      }
+
+      final Element e_lights = new Element("s:lights", uri);
+      for (final KLight light : this.lights) {
+        final Element e_light = SBSceneNormalized.lightToXML(light);
+        e_lights.appendChild(e_light);
+      }
+
+      final Element e_instances = new Element("s:instances", uri);
+      for (final SBObjectDescription o : this.instances) {
+        final Element e_instance = this.instanceToXML(o);
+        e_instances.appendChild(e_instance);
+      }
+
+      e_scene.appendChild(e_textures);
+      e_scene.appendChild(e_meshes);
+      e_scene.appendChild(e_lights);
+      e_scene.appendChild(e_instances);
+      return e_scene;
+    }
+
+    private @Nonnull Element instanceToXML(
+      final @Nonnull SBObjectDescription o)
+    {
+      final String uri = SBSceneNormalized.SCENE_URI.toString();
+      final Element e = new Element("s:instance", uri);
+
+      final Element eid = new Element("s:id", uri);
+      eid.appendChild(o.getID().toString());
+
+      final Element eo = new Element("s:orientation", uri);
+      final Element eox = new Element("s:x", uri);
+      eox.appendChild(Float.toString(o.getOrientation().getXF()));
+      final Element eoy = new Element("s:y", uri);
+      eoy.appendChild(Float.toString(o.getOrientation().getYF()));
+      final Element eoz = new Element("s:z", uri);
+      eoz.appendChild(Float.toString(o.getOrientation().getZF()));
+
+      final Element ep = new Element("s:position", uri);
+      final Element epx = new Element("s:x", uri);
+      epx.appendChild(Float.toString(o.getPosition().getXF()));
+      final Element epy = new Element("s:y", uri);
+      epy.appendChild(Float.toString(o.getPosition().getYF()));
+      final Element epz = new Element("s:z", uri);
+      epz.appendChild(Float.toString(o.getPosition().getZF()));
+
+      final Element emo = new Element("s:model", uri);
+      emo.appendChild(this.files_to_flat.get(o.getModel()));
+      final Element eme = new Element("s:mesh", uri);
+      eme.appendChild(o.getModelObject());
+
+      final Element ed = new Element("s:diffuse", uri);
+      if (o.getDiffuseTexture() != null) {
+        ed.appendChild(this.files_to_flat.get(o.getDiffuseTexture()));
+      }
+      final Element en = new Element("s:normal", uri);
+      if (o.getNormalTexture() != null) {
+        en.appendChild(this.files_to_flat.get(o.getNormalTexture()));
+      }
+      final Element es = new Element("s:specular", uri);
+      if (o.getSpecularTexture() != null) {
+        es.appendChild(this.files_to_flat.get(o.getSpecularTexture()));
+      }
+
+      e.appendChild(eid);
+      e.appendChild(eo);
+      e.appendChild(ep);
+      e.appendChild(emo);
+      e.appendChild(eme);
+      e.appendChild(ed);
+      e.appendChild(en);
+      e.appendChild(es);
+      return e;
+    }
+
+    private static @Nonnull Element lightToXML(
+      final @Nonnull KLight light)
+    {
+      final String uri = SBSceneNormalized.SCENE_URI.toString();
+
+      final Element eid = new Element("s:id", uri);
+      eid.appendChild(light.getID().toString());
+
+      final Element ei = new Element("s:intensity", uri);
+      ei.appendChild(Float.toString(light.getIntensity()));
+
+      final Element ec = new Element("s:colour", uri);
+      final Element ecr = new Element("s:r", uri);
+      ecr.appendChild(Float.toString(light.getColour().getXF()));
+      final Element ecg = new Element("s:g", uri);
+      ecg.appendChild(Float.toString(light.getColour().getYF()));
+      final Element ecb = new Element("s:b", uri);
+      ecb.appendChild(Float.toString(light.getColour().getZF()));
+      ec.appendChild(ecr);
+      ec.appendChild(ecg);
+      ec.appendChild(ecb);
+
+      switch (light.getType()) {
+        case LIGHT_CONE:
+        {
+          throw new UnimplementedCodeException();
+        }
+        case LIGHT_DIRECTIONAL:
+        {
+          final KDirectional d = (KLight.KDirectional) light;
+          final Element e = new Element("s:light-directional", uri);
+
+          final Element ed = new Element("s:direction", uri);
+          final Element edx = new Element("s:x", uri);
+          edx.appendChild(Float.toString(d.getDirection().getXF()));
+          final Element edy = new Element("s:y", uri);
+          edy.appendChild(Float.toString(d.getDirection().getYF()));
+          final Element edz = new Element("s:z", uri);
+          edz.appendChild(Float.toString(d.getDirection().getZF()));
+          ed.appendChild(edx);
+          ed.appendChild(edy);
+          ed.appendChild(edz);
+
+          e.appendChild(eid);
+          e.appendChild(ec);
+          e.appendChild(ei);
+          e.appendChild(ed);
+          return e;
+        }
+        case LIGHT_POINT:
+        {
+          throw new UnimplementedCodeException();
+        }
+      }
+
+      throw new UnreachableCodeException();
+    }
+  }
+
   private final @Nonnull ConcurrentHashMap<Integer, KLight>                                  light_descriptions;
   private final @Nonnull AtomicInteger                                                       light_id_pool;
   private final @Nonnull Log                                                                 log;

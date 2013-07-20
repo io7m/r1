@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -29,21 +30,29 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 
+import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.Serializer;
+
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jlog.Log;
+import com.io7m.renderer.kernel.SBSceneState.SBSceneNormalized;
 
 public final class SBSceneController implements
   SBSceneControllerTextures,
   SBSceneControllerLights,
   SBSceneControllerMeshes,
-  SBSceneControllerObjects
+  SBSceneControllerObjects,
+  SBSceneControllerIO
 {
   private final @Nonnull SBSceneState state;
   private final @Nonnull Log          log;
@@ -257,6 +266,48 @@ public final class SBSceneController implements
   {
     return this.state.lightsGetAll();
   }
+
+  @Override public @Nonnull Future<Void> ioSaveScene(
+    final @Nonnull File file)
+  {
+    final FutureTask<Void> f = new FutureTask<Void>(new Callable<Void>() {
+      @SuppressWarnings("synthetic-access") @Override public Void call()
+        throws Exception
+      {
+        SBSceneController.this.log.debug("Writing scene to " + file);
+
+        final ZipOutputStream fo =
+          new ZipOutputStream(new FileOutputStream(file));
+        fo.setLevel(9);
+
+        final SBSceneNormalized nstate =
+          new SBSceneState.SBSceneNormalized(
+            SBSceneController.this.log,
+            SBSceneController.this.state);
+
+        final Element xml = nstate.toXML();
+        final Document doc = new Document(xml);
+        final Serializer s = new Serializer(fo, "UTF-8");
+        s.setIndent(2);
+        s.setMaxLength(80);
+
+        final ZipEntry entry = new ZipEntry("scene.xml");
+        fo.putNextEntry(entry);
+        s.write(doc);
+        fo.closeEntry();
+
+        fo.finish();
+        fo.flush();
+        fo.close();
+
+        SBSceneController.this.log.debug("Scene written to " + file);
+        return null;
+      }
+    });
+
+    this.exec_pool.execute(f);
+    return f;
+  }
 }
 
 interface SBSceneControllerLights
@@ -311,4 +362,10 @@ interface SBSceneControllerTextures
     final @Nonnull File file);
 
   public @Nonnull Map<File, BufferedImage> texturesGet();
+}
+
+interface SBSceneControllerIO
+{
+  public @Nonnull Future<Void> ioSaveScene(
+    final @Nonnull File file);
 }
