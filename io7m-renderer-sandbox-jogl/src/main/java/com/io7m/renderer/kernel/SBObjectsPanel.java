@@ -33,6 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -42,11 +43,11 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 
 import com.io7m.jlog.Log;
 import com.io7m.renderer.RSpaceWorld;
-import com.io7m.renderer.RVectorM3F;
+import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.RVectorReadable3F;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
-final class SBObjectsPanel extends JPanel
+final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 {
   private static class ObjectEditDialog extends JFrame
   {
@@ -356,19 +357,17 @@ final class SBObjectsPanel extends JPanel
       final Integer id =
         (initial == null) ? controller.objectFreshID() : initial.getID();
 
-      final RVectorM3F<RSpaceWorld> position = new RVectorM3F<RSpaceWorld>();
-      final RVectorM3F<SBDegrees> orientation = new RVectorM3F<SBDegrees>();
+      final RVectorI3F<RSpaceWorld> position =
+        new RVectorI3F<RSpaceWorld>(
+          SBTextFieldUtilities.getFieldFloatOrError(this.position_x),
+          SBTextFieldUtilities.getFieldFloatOrError(this.position_y),
+          SBTextFieldUtilities.getFieldFloatOrError(this.position_z));
 
-      position.x = SBTextFieldUtilities.getFieldFloatOrError(this.position_x);
-      position.y = SBTextFieldUtilities.getFieldFloatOrError(this.position_y);
-      position.z = SBTextFieldUtilities.getFieldFloatOrError(this.position_z);
-
-      orientation.x =
-        SBTextFieldUtilities.getFieldFloatOrError(this.orientation_x);
-      orientation.y =
-        SBTextFieldUtilities.getFieldFloatOrError(this.orientation_y);
-      orientation.z =
-        SBTextFieldUtilities.getFieldFloatOrError(this.orientation_z);
+      final RVectorI3F<SBDegrees> orientation =
+        new RVectorI3F<SBDegrees>(
+          SBTextFieldUtilities.getFieldFloatOrError(this.orientation_x),
+          SBTextFieldUtilities.getFieldFloatOrError(this.orientation_y),
+          SBTextFieldUtilities.getFieldFloatOrError(this.orientation_z));
 
       final File diffuse =
         (this.diffuse_texture.getText().equals("")) ? null : new File(
@@ -520,20 +519,23 @@ final class SBObjectsPanel extends JPanel
     }
   }
 
-  private static final long serialVersionUID;
+  private static final long                  serialVersionUID;
 
   static {
     serialVersionUID = -941448169051827275L;
   }
 
+  protected final @Nonnull ObjectsTableModel objects_model;
+  protected final @Nonnull ObjectsTable      objects;
+  private final @Nonnull JScrollPane         scroller;
+
   public <C extends SBSceneControllerMeshes & SBSceneControllerObjects & SBSceneControllerTextures> SBObjectsPanel(
     final @Nonnull C controller,
     final @Nonnull Log log)
   {
-    final ObjectsTableModel objects_model =
-      new ObjectsTableModel(controller, log);
-    final ObjectsTable objects = new ObjectsTable(objects_model);
-    final JScrollPane scroller = new JScrollPane(objects);
+    this.objects_model = new ObjectsTableModel(controller, log);
+    this.objects = new ObjectsTable(this.objects_model);
+    this.scroller = new JScrollPane(this.objects);
 
     final JButton add = new JButton("Add...");
     add.addActionListener(new ActionListener() {
@@ -542,7 +544,10 @@ final class SBObjectsPanel extends JPanel
       {
         try {
           final ObjectEditDialog dialog =
-            new ObjectEditDialog(controller, objects_model, log);
+            new ObjectEditDialog(
+              controller,
+              SBObjectsPanel.this.objects_model,
+              log);
           dialog.pack();
           dialog.setVisible(true);
         } catch (final IOException x) {
@@ -558,15 +563,20 @@ final class SBObjectsPanel extends JPanel
         final @Nonnull ActionEvent e)
       {
         try {
-          final int view_row = objects.getSelectedRow();
+          final int view_row = SBObjectsPanel.this.objects.getSelectedRow();
           assert view_row != -1;
-          final int model_row = objects.convertRowIndexToModel(view_row);
+          final int model_row =
+            SBObjectsPanel.this.objects.convertRowIndexToModel(view_row);
           final SBObjectDescription object =
-            objects_model.getObjectAt(model_row);
+            SBObjectsPanel.this.objects_model.getObjectAt(model_row);
           assert object != null;
 
           final ObjectEditDialog dialog =
-            new ObjectEditDialog(controller, object, objects_model, log);
+            new ObjectEditDialog(
+              controller,
+              object,
+              SBObjectsPanel.this.objects_model,
+              log);
           dialog.pack();
           dialog.setVisible(true);
         } catch (final IOException x) {
@@ -581,24 +591,25 @@ final class SBObjectsPanel extends JPanel
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final int view_row = objects.getSelectedRow();
+        final int view_row = SBObjectsPanel.this.objects.getSelectedRow();
         assert view_row != -1;
-        final int model_row = objects.convertRowIndexToModel(view_row);
+        final int model_row =
+          SBObjectsPanel.this.objects.convertRowIndexToModel(view_row);
         final SBObjectDescription object =
-          objects_model.getObjectAt(model_row);
+          SBObjectsPanel.this.objects_model.getObjectAt(model_row);
         assert object != null;
 
         controller.objectRemove(object.getID());
-        objects_model.refreshObjects();
+        SBObjectsPanel.this.objects_model.refreshObjects();
       }
     });
 
-    objects.getSelectionModel().addListSelectionListener(
+    this.objects.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
         @Override public void valueChanged(
           final @Nonnull ListSelectionEvent e)
         {
-          if (objects.getSelectedRow() == -1) {
+          if (SBObjectsPanel.this.objects.getSelectedRow() == -1) {
             edit.setEnabled(false);
             remove.setEnabled(false);
           } else {
@@ -609,8 +620,25 @@ final class SBObjectsPanel extends JPanel
       });
 
     final DesignGridLayout dg = new DesignGridLayout(this);
-    dg.row().grid().add(scroller);
+    dg.row().grid().add(this.scroller);
     dg.row().grid().add(add).add(edit).add(remove);
+
+    controller.changeListenerAdd(this);
+  }
+
+  @Override public String toString()
+  {
+    return "[SBObjectsPanel]";
+  }
+
+  @Override public void sceneChanged()
+  {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override public void run()
+      {
+        SBObjectsPanel.this.objects_model.refreshObjects();
+      }
+    });
   }
 
 }

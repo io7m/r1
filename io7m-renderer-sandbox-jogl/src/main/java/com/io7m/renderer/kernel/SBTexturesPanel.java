@@ -38,7 +38,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
-import net.java.dev.designgridlayout.Tag;
 
 import com.io7m.jlog.Log;
 
@@ -201,9 +200,9 @@ final class SBTexturesPanel extends JPanel
     });
 
     final DesignGridLayout dg = new DesignGridLayout(this);
-    dg.row().grid().add(this.selector).add(open);
+    dg.row().grid().add(this.selector, 3).add(open);
     dg.row().grid().add(image_pane);
-    dg.row().bar().add(select, Tag.OK).add(cancel, Tag.CANCEL);
+    dg.row().grid().empty(2).add(cancel).add(select);
   }
 
   protected void selectorRefresh(

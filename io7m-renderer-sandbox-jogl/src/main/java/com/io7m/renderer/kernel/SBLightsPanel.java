@@ -34,6 +34,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -51,7 +52,7 @@ import com.io7m.renderer.RVectorM3F;
 import com.io7m.renderer.RVectorReadable3F;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
-final class SBLightsPanel extends JPanel
+final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 {
   private static class LightEditDialog extends JFrame
   {
@@ -200,7 +201,7 @@ final class SBLightsPanel extends JPanel
     private final @Nonnull JLabel                  error_text;
     private final @Nonnull JLabel                  error_icon;
     private final @Nonnull SBSceneControllerLights controller;
-    private final @Nonnull LightsTableModel        light_table_model;
+    protected final @Nonnull LightsTableModel      light_table_model;
 
     public LightEditDialogPanel(
       final @Nonnull LightEditDialog window,
@@ -510,6 +511,7 @@ final class SBLightsPanel extends JPanel
     {
       this.data.clear();
       final List<KLight> lights = this.controller.lightsGetAll();
+
       for (final KLight l : lights) {
         final ArrayList<String> row = new ArrayList<String>();
         row.add(l.getID().toString());
@@ -555,20 +557,23 @@ final class SBLightsPanel extends JPanel
     }
   }
 
-  private static final long serialVersionUID;
+  private static final long                 serialVersionUID;
 
   static {
     serialVersionUID = -941448169051827275L;
   }
 
+  protected final @Nonnull LightsTableModel lights_model;
+  protected final @Nonnull LightsTable      lights;
+  protected final @Nonnull JScrollPane      scroller;
+
   public SBLightsPanel(
     final @Nonnull SBSceneControllerLights controller,
     final @Nonnull Log log)
   {
-    final LightsTableModel lights_model =
-      new LightsTableModel(controller, log);
-    final LightsTable lights = new LightsTable(lights_model);
-    final JScrollPane scroller = new JScrollPane(lights);
+    this.lights_model = new LightsTableModel(controller, log);
+    this.lights = new LightsTable(this.lights_model);
+    this.scroller = new JScrollPane(this.lights);
 
     final JButton add = new JButton("Add...");
     add.addActionListener(new ActionListener() {
@@ -577,7 +582,7 @@ final class SBLightsPanel extends JPanel
       {
         try {
           final LightEditDialog dialog =
-            new LightEditDialog(controller, lights_model);
+            new LightEditDialog(controller, SBLightsPanel.this.lights_model);
           dialog.pack();
           dialog.setVisible(true);
         } catch (final IOException x) {
@@ -592,15 +597,20 @@ final class SBLightsPanel extends JPanel
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final int view_row = lights.getSelectedRow();
+        final int view_row = SBLightsPanel.this.lights.getSelectedRow();
         assert view_row != -1;
-        final int model_row = lights.convertRowIndexToModel(view_row);
-        final KLight light = lights_model.getLightAt(model_row);
+        final int model_row =
+          SBLightsPanel.this.lights.convertRowIndexToModel(view_row);
+        final KLight light =
+          SBLightsPanel.this.lights_model.getLightAt(model_row);
         assert light != null;
 
         try {
           final LightEditDialog dialog =
-            new LightEditDialog(controller, light, lights_model);
+            new LightEditDialog(
+              controller,
+              light,
+              SBLightsPanel.this.lights_model);
           dialog.pack();
           dialog.setVisible(true);
         } catch (final IOException x) {
@@ -615,23 +625,25 @@ final class SBLightsPanel extends JPanel
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final int view_row = lights.getSelectedRow();
+        final int view_row = SBLightsPanel.this.lights.getSelectedRow();
         assert view_row != -1;
-        final int model_row = lights.convertRowIndexToModel(view_row);
-        final KLight light = lights_model.getLightAt(model_row);
+        final int model_row =
+          SBLightsPanel.this.lights.convertRowIndexToModel(view_row);
+        final KLight light =
+          SBLightsPanel.this.lights_model.getLightAt(model_row);
         assert light != null;
 
         controller.lightRemove(light.getID());
-        lights_model.refreshLights();
+        SBLightsPanel.this.lights_model.refreshLights();
       }
     });
 
-    lights.getSelectionModel().addListSelectionListener(
+    this.lights.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
         @Override public void valueChanged(
           final @Nonnull ListSelectionEvent e)
         {
-          if (lights.getSelectedRow() == -1) {
+          if (SBLightsPanel.this.lights.getSelectedRow() == -1) {
             edit.setEnabled(false);
             remove.setEnabled(false);
           } else {
@@ -642,8 +654,24 @@ final class SBLightsPanel extends JPanel
       });
 
     final DesignGridLayout dg = new DesignGridLayout(this);
-    dg.row().grid().add(scroller);
+    dg.row().grid().add(this.scroller);
     dg.row().grid().add(add).add(edit).add(remove);
+
+    controller.changeListenerAdd(this);
   }
 
+  @Override public String toString()
+  {
+    return "[SBLightsPanel]";
+  }
+
+  @Override public void sceneChanged()
+  {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override public void run()
+      {
+        SBLightsPanel.this.lights_model.refreshLights();
+      }
+    });
+  }
 }

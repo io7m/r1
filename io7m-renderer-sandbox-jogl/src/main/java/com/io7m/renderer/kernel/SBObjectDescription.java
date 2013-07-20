@@ -22,14 +22,14 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.renderer.RSpaceWorld;
-import com.io7m.renderer.RVectorM3F;
+import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.RVectorReadable3F;
 
 public final class SBObjectDescription
 {
   private final @Nonnull Integer                 id;
-  private final @Nonnull RVectorM3F<RSpaceWorld> position;
-  private final @Nonnull RVectorM3F<SBDegrees>   orientation;
+  private final @Nonnull RVectorI3F<RSpaceWorld> position;
+  private final @Nonnull RVectorI3F<SBDegrees>   orientation;
   private final @CheckForNull File               diffuse_texture;
   private final @CheckForNull File               normal_texture;
   private final @CheckForNull File               specular_texture;
@@ -40,8 +40,8 @@ public final class SBObjectDescription
     final @Nonnull Integer id,
     final @Nonnull File model,
     final @Nonnull String model_object,
-    final @Nonnull RVectorM3F<RSpaceWorld> position,
-    final @Nonnull RVectorM3F<SBDegrees> orientation,
+    final @Nonnull RVectorI3F<RSpaceWorld> position,
+    final @Nonnull RVectorI3F<SBDegrees> orientation,
     final @CheckForNull File diffuse_texture,
     final @CheckForNull File normal_texture,
     final @CheckForNull File specular_texture)

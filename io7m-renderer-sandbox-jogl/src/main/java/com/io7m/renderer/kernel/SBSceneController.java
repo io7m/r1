@@ -23,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,16 +42,19 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 
+import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
+import nu.xom.ParsingException;
 import nu.xom.Serializer;
+import nu.xom.ValidityException;
 
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.functional.Pair;
-import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.SBException.SBExceptionImageLoading;
 import com.io7m.renderer.kernel.SBSceneState.SBSceneNormalized;
+import com.io7m.renderer.kernel.SBZipUtilities.TemporaryDirectory;
 
 public final class SBSceneController implements
   SBSceneControllerTextures,
@@ -133,11 +137,12 @@ public final class SBSceneController implements
     }
   }
 
-  private final @Nonnull SBSceneState state;
-  private final @Nonnull Log          log;
-  protected final @Nonnull Log        log_textures;
-  private final @Nonnull SBGLRenderer renderer;
-  private final @Nonnull Executor     exec_pool;
+  private final @Nonnull SBSceneState                      state;
+  private final @Nonnull Log                               log;
+  protected final @Nonnull Log                             log_textures;
+  private final @Nonnull SBGLRenderer                      renderer;
+  private final @Nonnull Executor                          exec_pool;
+  private final @Nonnull LinkedList<SBSceneChangeListener> listeners;
 
   public SBSceneController(
     final @Nonnull SBSceneState state,
@@ -149,6 +154,14 @@ public final class SBSceneController implements
     this.state = state;
     this.renderer = renderer;
     this.exec_pool = Executors.newCachedThreadPool();
+    this.listeners = new LinkedList<SBSceneChangeListener>();
+  }
+
+  private void sceneChanged()
+  {
+    for (final SBSceneChangeListener l : this.listeners) {
+      l.sceneChanged();
+    }
   }
 
   @Override public @Nonnull Future<Void> ioSaveScene(
@@ -165,6 +178,65 @@ public final class SBSceneController implements
 
     this.exec_pool.execute(f);
     return f;
+  }
+
+  @Override public @Nonnull Future<Void> ioLoadScene(
+    final @Nonnull File file)
+  {
+    final FutureTask<Void> f = new FutureTask<Void>(new Callable<Void>() {
+      @SuppressWarnings("synthetic-access") @Override public Void call()
+        throws Exception
+      {
+        SBSceneController.this.ioLoadSceneActual(file);
+        return null;
+      }
+    });
+
+    this.exec_pool.execute(f);
+    return f;
+  }
+
+  private void ioLoadSceneActual(
+    final @Nonnull File file)
+    throws FileNotFoundException,
+      IOException,
+      ValidityException,
+      ParsingException
+  {
+    SBSceneController.this.log.debug("Loading scene from " + file);
+
+    final TemporaryDirectory d = SBZipUtilities.unzip(this.log, file);
+
+    final Builder parser = new Builder();
+    final Document doc = parser.build(new File(d.getFile(), "scene.xml"));
+
+    final SBSceneNormalized nstate =
+      new SBSceneState.SBSceneNormalized(this.log, d.getFile(), doc);
+
+    final Pair<List<Texture2DStatic>, List<SBMesh>> deletions =
+      this.state.deleteAll();
+
+    for (final KLight light : nstate.getLights()) {
+      this.lightAdd(light);
+    }
+    for (final File texture : nstate.getTextures()) {
+      this.textureLoad(texture);
+    }
+    for (final File mesh : nstate.getMeshes()) {
+      this.meshLoad(mesh);
+    }
+    for (final SBObjectDescription object : nstate.getObjects()) {
+      this.objectAdd(object);
+    }
+
+    for (final Texture2DStatic t : deletions.first) {
+      this.renderer.textureDelete(t);
+    }
+    for (final SBMesh m : deletions.second) {
+      this.renderer.meshDelete(m);
+    }
+
+    this.sceneChanged();
   }
 
   private void ioSaveSceneActual(
@@ -192,12 +264,15 @@ public final class SBSceneController implements
     fo.close();
 
     SBSceneController.this.log.debug("Scene written to " + file);
+
+    this.sceneChanged();
   }
 
   @Override public void lightAdd(
     final @Nonnull KLight light)
   {
     this.state.lightAdd(light);
+    this.sceneChanged();
   }
 
   @Override public boolean lightExists(
@@ -221,6 +296,7 @@ public final class SBSceneController implements
     final @Nonnull Integer id)
   {
     this.state.lightRemove(id);
+    this.sceneChanged();
   }
 
   @Override public @Nonnull List<KLight> lightsGetAll()
@@ -260,6 +336,7 @@ public final class SBSceneController implements
                 names.add(mesh.getName());
               }
 
+              SBSceneController.this.sceneChanged();
               return new Pair<File, SortedSet<String>>(file, names);
             } finally {
               if (stream != null) {
@@ -281,6 +358,7 @@ public final class SBSceneController implements
     @Nonnull final SBObjectDescription object)
   {
     this.state.objectAdd(object);
+    this.sceneChanged();
   }
 
   @Override public boolean objectExists(
@@ -303,7 +381,8 @@ public final class SBSceneController implements
   @Override public void objectRemove(
     @Nonnull final Integer id)
   {
-    throw new UnimplementedCodeException();
+    this.state.objectDelete(id);
+    this.sceneChanged();
   }
 
   @Override public @Nonnull List<SBObjectDescription> objectsGetAll()
@@ -342,15 +421,17 @@ public final class SBSceneController implements
 
       final Future<BufferedImage> f_image =
         SBSceneController.this.textureLoadImageIO(file);
-      final Future<Texture2DStaticUsable> f_texture =
+      final Future<Texture2DStatic> f_texture =
         SBSceneController.this.renderer.textureLoad(file, stream);
 
-      final Texture2DStaticUsable rf = f_texture.get();
+      final Texture2DStatic rf = f_texture.get();
       final BufferedImage ri = f_image.get();
 
       SBSceneController.this.state.textureAdd(
         file,
-        new Pair<BufferedImage, Texture2DStaticUsable>(ri, rf));
+        new Pair<BufferedImage, Texture2DStatic>(ri, rf));
+
+      this.sceneChanged();
       return ri;
     } finally {
       if (stream != null) {
@@ -385,15 +466,36 @@ public final class SBSceneController implements
   {
     return this.state.texturesGet();
   }
+
+  @Override public void changeListenerAdd(
+    final @Nonnull SBSceneChangeListener listener)
+  {
+    this.log.debug("Registered change listener " + listener);
+    this.listeners.add(listener);
+  }
 }
 
 interface SBSceneControllerIO
 {
   public @Nonnull Future<Void> ioSaveScene(
     final @Nonnull File file);
+
+  public @Nonnull Future<Void> ioLoadScene(
+    final @Nonnull File file);
 }
 
-interface SBSceneControllerLights
+interface SBSceneChangeListenerRegistration
+{
+  public void changeListenerAdd(
+    final @Nonnull SBSceneChangeListener listener);
+}
+
+interface SBSceneChangeListener
+{
+  public void sceneChanged();
+}
+
+interface SBSceneControllerLights extends SBSceneChangeListenerRegistration
 {
   public void lightAdd(
     final @Nonnull KLight light);
@@ -412,7 +514,7 @@ interface SBSceneControllerLights
   public @Nonnull List<KLight> lightsGetAll();
 }
 
-interface SBSceneControllerMeshes
+interface SBSceneControllerMeshes extends SBSceneChangeListenerRegistration
 {
   public @Nonnull Map<File, SortedSet<String>> meshesGet();
 
@@ -420,7 +522,7 @@ interface SBSceneControllerMeshes
     final @Nonnull File file);
 }
 
-interface SBSceneControllerObjects
+interface SBSceneControllerObjects extends SBSceneChangeListenerRegistration
 {
   public void objectAdd(
     final @Nonnull SBObjectDescription object);
@@ -439,7 +541,7 @@ interface SBSceneControllerObjects
   public @Nonnull List<SBObjectDescription> objectsGetAll();
 }
 
-interface SBSceneControllerTextures
+interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration
 {
   public @Nonnull Future<BufferedImage> textureLoad(
     final @Nonnull File file);
