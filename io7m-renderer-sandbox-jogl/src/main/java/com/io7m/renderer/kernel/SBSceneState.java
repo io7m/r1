@@ -16,29 +16,41 @@
 
 package com.io7m.renderer.kernel;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.UnimplementedCodeException;
+import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jlog.Log;
 
 final class SBSceneState implements
   SBSceneStateLights,
   SBSceneStateMeshes,
-  SBSceneStateTextures
+  SBSceneStateTextures,
+  SBSceneStateObjects
 {
-  private final @Nonnull ConcurrentHashMap<Integer, KLight>             light_descriptions;
-  private final @Nonnull AtomicInteger                                  light_id_pool;
-  private final @Nonnull Log                                            log;
-  private final @Nonnull ConcurrentHashMap<File, Texture2DStaticUsable> textures;
-  private final @Nonnull ConcurrentHashMap<File, SortedSet<SBMesh>>     meshes;
+  private final @Nonnull ConcurrentHashMap<Integer, KLight>                                  light_descriptions;
+  private final @Nonnull AtomicInteger                                                       light_id_pool;
+  private final @Nonnull Log                                                                 log;
+  private final @Nonnull ConcurrentHashMap<File, Pair<BufferedImage, Texture2DStaticUsable>> textures;
+  private final @Nonnull ConcurrentHashMap<File, SortedSet<SBMesh>>                          meshes;
+  private final @Nonnull AtomicInteger                                                       object_id_pool;
+  private final @Nonnull ConcurrentHashMap<Integer, SBObjectDescription>                     object_instances;
 
   SBSceneState(
     final @Nonnull Log log)
@@ -46,8 +58,12 @@ final class SBSceneState implements
     this.log = new Log(log, "scene");
     this.light_descriptions = new ConcurrentHashMap<Integer, KLight>();
     this.light_id_pool = new AtomicInteger(0);
-    this.textures = new ConcurrentHashMap<File, Texture2DStaticUsable>();
+    this.textures =
+      new ConcurrentHashMap<File, Pair<BufferedImage, Texture2DStaticUsable>>();
     this.meshes = new ConcurrentHashMap<File, SortedSet<SBMesh>>();
+    this.object_id_pool = new AtomicInteger(0);
+    this.object_instances =
+      new ConcurrentHashMap<Integer, SBObjectDescription>();
   }
 
   @Override public void lightAdd(
@@ -90,6 +106,15 @@ final class SBSceneState implements
     this.light_descriptions.remove(id);
   }
 
+  @Override public @Nonnull List<KLight> lightsGetAll()
+  {
+    final ArrayList<KLight> ls = new ArrayList<KLight>();
+    for (final KLight l : this.light_descriptions.values()) {
+      ls.add(l);
+    }
+    return ls;
+  }
+
   @Nonnull KScene makeScene()
   {
     final Set<KLight> lights = this.makeSceneLights();
@@ -100,8 +125,7 @@ final class SBSceneState implements
 
   private @Nonnull KCamera makeSceneCamera()
   {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnimplementedCodeException();
   }
 
   private @Nonnull Set<KLight> makeSceneLights()
@@ -117,22 +141,97 @@ final class SBSceneState implements
 
   private @Nonnull Set<KMeshInstance> makeSceneMeshes()
   {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnimplementedCodeException();
   }
 
   @Override public void meshAdd(
     final @Nonnull File model,
     final @Nonnull SortedSet<SBMesh> objects)
   {
+    if (this.meshes.containsKey(model)) {
+      this.log.debug("Replacing model " + model);
+    } else {
+      this.log.debug("Adding model " + model);
+    }
+
     this.meshes.put(model, objects);
+  }
+
+  @Override public @Nonnull Map<File, SortedSet<String>> meshesGet()
+  {
+    final HashMap<File, SortedSet<String>> results =
+      new HashMap<File, SortedSet<String>>();
+
+    for (final Entry<File, SortedSet<SBMesh>> e : this.meshes.entrySet()) {
+      final File f = e.getKey();
+      final SortedSet<SBMesh> ms = e.getValue();
+      final TreeSet<String> ns = new TreeSet<String>();
+      for (final SBMesh m : ms) {
+        ns.add(m.getName());
+      }
+      results.put(f, ns);
+    }
+
+    return results;
+  }
+
+  @Override public void objectAdd(
+    final @Nonnull SBObjectDescription object)
+  {
+    if (this.object_instances.containsKey(object.getID())) {
+      this.log.debug("Replacing object " + object.getID());
+    } else {
+      this.log.debug("Adding object " + object.getID());
+    }
+
+    this.object_instances.put(object.getID(), object);
+  }
+
+  @Override public boolean objectExists(
+    final @Nonnull Integer id)
+  {
+    return this.object_instances.containsKey(id);
+  }
+
+  @Override public Integer objectFreshID()
+  {
+    return Integer.valueOf(this.object_id_pool.getAndIncrement());
+  }
+
+  @Override public @CheckForNull SBObjectDescription objectGet(
+    final @Nonnull Integer id)
+  {
+    return this.object_instances.get(id);
+  }
+
+  @Override public @Nonnull List<SBObjectDescription> objectsGetAll()
+  {
+    final ArrayList<SBObjectDescription> os =
+      new ArrayList<SBObjectDescription>();
+    for (final SBObjectDescription o : this.object_instances.values()) {
+      os.add(o);
+    }
+    return os;
   }
 
   @Override public void textureAdd(
     final @Nonnull File file,
-    final @Nonnull Texture2DStaticUsable texture)
+    final @Nonnull Pair<BufferedImage, Texture2DStaticUsable> texture)
   {
     this.textures.put(file, texture);
+  }
+
+  @Override public @Nonnull Map<File, BufferedImage> texturesGet()
+  {
+    final HashMap<File, BufferedImage> m = new HashMap<File, BufferedImage>();
+    final Set<Entry<File, Pair<BufferedImage, Texture2DStaticUsable>>> es =
+      this.textures.entrySet();
+
+    for (final Entry<File, Pair<BufferedImage, Texture2DStaticUsable>> e : es) {
+      m.put(e.getKey(), e.getValue().first);
+    }
+
+    return m;
   }
 }
 
@@ -151,6 +250,8 @@ interface SBSceneStateLights
 
   public void lightRemove(
     final @Nonnull Integer id);
+
+  public @Nonnull List<KLight> lightsGetAll();
 }
 
 interface SBSceneStateMeshes
@@ -158,11 +259,31 @@ interface SBSceneStateMeshes
   public void meshAdd(
     final @Nonnull File model,
     final @Nonnull SortedSet<SBMesh> objects);
+
+  public @Nonnull Map<File, SortedSet<String>> meshesGet();
+}
+
+interface SBSceneStateObjects
+{
+  public void objectAdd(
+    final @Nonnull SBObjectDescription object);
+
+  public boolean objectExists(
+    final @Nonnull Integer id);
+
+  public @Nonnull Integer objectFreshID();
+
+  public @CheckForNull SBObjectDescription objectGet(
+    final @Nonnull Integer id);
+
+  public @Nonnull List<SBObjectDescription> objectsGetAll();
 }
 
 interface SBSceneStateTextures
 {
   public void textureAdd(
     final @Nonnull File file,
-    final @Nonnull Texture2DStaticUsable texture);
+    final @Nonnull Pair<BufferedImage, Texture2DStaticUsable> texture);
+
+  public @Nonnull Map<File, BufferedImage> texturesGet();
 }

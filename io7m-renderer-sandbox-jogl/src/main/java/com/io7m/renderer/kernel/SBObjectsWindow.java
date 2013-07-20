@@ -21,7 +21,7 @@ import javax.swing.JFrame;
 
 import com.io7m.jlog.Log;
 
-final class SBInstancesWindow extends JFrame
+final class SBObjectsWindow extends JFrame
 {
   private static final long serialVersionUID;
 
@@ -29,12 +29,12 @@ final class SBInstancesWindow extends JFrame
     serialVersionUID = -312314551231238L;
   }
 
-  public SBInstancesWindow(
-    final @Nonnull SBSceneControllerMeshes controller,
+  public <C extends SBSceneControllerMeshes & SBSceneControllerObjects & SBSceneControllerTextures> SBObjectsWindow(
+    final @Nonnull C controller,
     final @Nonnull Log log)
   {
     super("Instances");
-    this.getContentPane().add(new SBInstancesPanel(controller, log));
+    this.getContentPane().add(new SBObjectsPanel(controller, log));
     this.pack();
   }
 }

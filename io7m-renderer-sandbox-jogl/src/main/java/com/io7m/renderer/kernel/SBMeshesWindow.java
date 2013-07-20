@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 import javax.swing.JFrame;
+import javax.swing.JTextField;
 
 import com.io7m.jlog.Log;
 
@@ -31,10 +32,13 @@ final class SBMeshesWindow extends JFrame
 
   public SBMeshesWindow(
     final @Nonnull SBSceneControllerMeshes controller,
+    final @Nonnull JTextField model,
+    final @Nonnull JTextField model_object,
     final @Nonnull Log log)
   {
     super("Meshes");
-    this.getContentPane().add(new SBMeshesPanel(controller, log));
+    this.getContentPane().add(
+      new SBMeshesPanel(this, controller, model, model_object, log));
     this.pack();
   }
 }

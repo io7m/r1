@@ -57,12 +57,9 @@ final class SBMainWindow extends JFrame
     this.renderer = renderer;
 
     final SBLightsWindow lights_window = new SBLightsWindow(controller, log);
-    final SBMeshesWindow meshes_window = new SBMeshesWindow(controller, log);
-    final SBTexturesWindow textures_window =
-      new SBTexturesWindow(controller, log);
     final SBLogsWindow logs_window = new SBLogsWindow();
-    final SBInstancesWindow instances_window =
-      new SBInstancesWindow(controller, log);
+    final SBObjectsWindow objects_window =
+      new SBObjectsWindow(controller, log);
 
     log.setCallback(new Callbacks() {
       private final @Nonnull StringBuilder builder = new StringBuilder();
@@ -110,51 +107,35 @@ final class SBMainWindow extends JFrame
       this,
       lights_window,
       logs_window,
-      meshes_window,
-      textures_window,
-      instances_window));
+      objects_window));
   }
 
   private static @Nonnull JMenuBar makeMenuBar(
     final @Nonnull SBMainWindow window,
     final @Nonnull SBLightsWindow lights_window,
     final @Nonnull SBLogsWindow logs_window,
-    final @Nonnull SBMeshesWindow meshes_window,
-    final @Nonnull SBTexturesWindow textures_window,
-    final @Nonnull SBInstancesWindow instances_window)
+    final @Nonnull SBObjectsWindow objects_window)
   {
     final JMenuBar bar = new JMenuBar();
     bar.add(SBMainWindow.makeMenuFile(window));
-    bar.add(SBMainWindow.makeMenuEdit(
-      lights_window,
-      meshes_window,
-      textures_window,
-      instances_window));
+    bar.add(SBMainWindow.makeMenuEdit(lights_window, objects_window));
     bar.add(SBMainWindow.makeMenuDebug(logs_window));
     return bar;
   }
 
   private static @Nonnull JMenu makeMenuEdit(
     final @Nonnull SBLightsWindow lights_window,
-    final @Nonnull SBMeshesWindow meshes_window,
-    final @Nonnull SBTexturesWindow textures_window,
-    final @Nonnull SBInstancesWindow instances_window)
+    final @Nonnull SBObjectsWindow objects_window)
   {
     final JMenu menu = new JMenu("Edit");
 
-    final JCheckBoxMenuItem instances =
-      SBMainWindow.makeMenuEditInstancesMenuItem(instances_window);
+    final JCheckBoxMenuItem objects =
+      SBMainWindow.makeMenuEditObjectsMenuItem(objects_window);
     final JCheckBoxMenuItem lights =
       SBMainWindow.makeMenuEditLightsMenuItem(lights_window);
-    final JCheckBoxMenuItem meshes =
-      SBMainWindow.makeMenuEditMeshesMenuItem(meshes_window);
-    final JCheckBoxMenuItem textures =
-      SBMainWindow.makeMenuEditTexturesMenuItem(textures_window);
 
-    menu.add(instances);
     menu.add(lights);
-    menu.add(meshes);
-    menu.add(textures);
+    menu.add(objects);
     return menu;
   }
 
@@ -216,22 +197,10 @@ final class SBMainWindow extends JFrame
     return SBMainWindow.makeWindowCheckbox("Lights...", lights_window);
   }
 
-  private static @Nonnull JCheckBoxMenuItem makeMenuEditInstancesMenuItem(
-    final @Nonnull SBInstancesWindow instances_window)
+  private static @Nonnull JCheckBoxMenuItem makeMenuEditObjectsMenuItem(
+    final @Nonnull SBObjectsWindow objects_window)
   {
-    return SBMainWindow.makeWindowCheckbox("Instances...", instances_window);
-  }
-
-  private static @Nonnull JCheckBoxMenuItem makeMenuEditMeshesMenuItem(
-    final @Nonnull SBMeshesWindow meshes_window)
-  {
-    return SBMainWindow.makeWindowCheckbox("Meshes...", meshes_window);
-  }
-
-  private static @Nonnull JCheckBoxMenuItem makeMenuEditTexturesMenuItem(
-    final @Nonnull SBTexturesWindow textures_window)
-  {
-    return SBMainWindow.makeWindowCheckbox("Textures...", textures_window);
+    return SBMainWindow.makeWindowCheckbox("Objects...", objects_window);
   }
 
   private static @Nonnull JMenu makeMenuFile(

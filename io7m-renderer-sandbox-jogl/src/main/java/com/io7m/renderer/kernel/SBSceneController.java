@@ -20,6 +20,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -32,6 +34,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jlog.Log;
@@ -39,7 +42,8 @@ import com.io7m.jlog.Log;
 public final class SBSceneController implements
   SBSceneControllerTextures,
   SBSceneControllerLights,
-  SBSceneControllerMeshes
+  SBSceneControllerMeshes,
+  SBSceneControllerObjects
 {
   private final @Nonnull SBSceneState state;
   private final @Nonnull Log          log;
@@ -88,75 +92,9 @@ public final class SBSceneController implements
     this.state.lightRemove(id);
   }
 
-  private Future<BufferedImage> textureLoadImageIO(
-    final @Nonnull File file)
+  @Override public @Nonnull Map<File, SortedSet<String>> meshesGet()
   {
-    final FutureTask<BufferedImage> f =
-      new FutureTask<BufferedImage>(new Callable<BufferedImage>() {
-        @Override public BufferedImage call()
-          throws Exception
-        {
-          FileInputStream stream = null;
-          try {
-            stream = new FileInputStream(file);
-            final BufferedImage image = ImageIO.read(stream);
-            if (null == image) {
-              throw new SBException.SBExceptionImageLoading(
-                file,
-                "Unable to parse image");
-            }
-            return image;
-          } finally {
-            if (stream != null) {
-              stream.close();
-            }
-          }
-        }
-      });
-
-    this.exec_pool.execute(f);
-    return f;
-  }
-
-  @Override public @Nonnull Future<BufferedImage> textureLoad(
-    final @Nonnull File file)
-  {
-    final FutureTask<BufferedImage> f =
-      new FutureTask<BufferedImage>(new Callable<BufferedImage>() {
-        @SuppressWarnings("synthetic-access") @Override public
-          BufferedImage
-          call()
-            throws Exception
-        {
-          FileInputStream stream = null;
-
-          try {
-            stream = new FileInputStream(file);
-
-            final Future<BufferedImage> f_image =
-              SBSceneController.this.textureLoadImageIO(file);
-            final Future<Texture2DStaticUsable> f_texture =
-              SBSceneController.this.renderer.textureLoad(file, stream);
-
-            final Texture2DStaticUsable rf = f_texture.get();
-            final BufferedImage ri = f_image.get();
-
-            SBSceneController.this.state.textureAdd(file, rf);
-            return ri;
-          } finally {
-            if (stream != null) {
-              try {
-                stream.close();
-              } catch (final IOException e) {
-                e.printStackTrace();
-              }
-            }
-          }
-        }
-      });
-
-    this.exec_pool.execute(f);
-    return f;
+    return this.state.meshesGet();
   }
 
   @Override public @Nonnull Future<Pair<File, SortedSet<String>>> meshLoad(
@@ -202,6 +140,123 @@ public final class SBSceneController implements
     this.exec_pool.execute(f);
     return f;
   }
+
+  @Override public void objectAdd(
+    @Nonnull final SBObjectDescription object)
+  {
+    this.state.objectAdd(object);
+  }
+
+  @Override public boolean objectExists(
+    @Nonnull final Integer id)
+  {
+    return this.state.objectExists(id);
+  }
+
+  @Override public @Nonnull Integer objectFreshID()
+  {
+    return this.state.objectFreshID();
+  }
+
+  @Override public @Nonnull SBObjectDescription objectGet(
+    final @Nonnull Integer id)
+  {
+    return this.state.objectGet(id);
+  }
+
+  @Override public void objectRemove(
+    @Nonnull final Integer id)
+  {
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public @Nonnull Future<BufferedImage> textureLoad(
+    final @Nonnull File file)
+  {
+    final FutureTask<BufferedImage> f =
+      new FutureTask<BufferedImage>(new Callable<BufferedImage>() {
+        @SuppressWarnings("synthetic-access") @Override public
+          BufferedImage
+          call()
+            throws Exception
+        {
+          FileInputStream stream = null;
+
+          try {
+            stream = new FileInputStream(file);
+
+            final Future<BufferedImage> f_image =
+              SBSceneController.this.textureLoadImageIO(file);
+            final Future<Texture2DStaticUsable> f_texture =
+              SBSceneController.this.renderer.textureLoad(file, stream);
+
+            final Texture2DStaticUsable rf = f_texture.get();
+            final BufferedImage ri = f_image.get();
+
+            SBSceneController.this.state.textureAdd(
+              file,
+              new Pair<BufferedImage, Texture2DStaticUsable>(ri, rf));
+            return ri;
+          } finally {
+            if (stream != null) {
+              try {
+                stream.close();
+              } catch (final IOException e) {
+                e.printStackTrace();
+              }
+            }
+          }
+        }
+      });
+
+    this.exec_pool.execute(f);
+    return f;
+  }
+
+  private Future<BufferedImage> textureLoadImageIO(
+    final @Nonnull File file)
+  {
+    final FutureTask<BufferedImage> f =
+      new FutureTask<BufferedImage>(new Callable<BufferedImage>() {
+        @Override public BufferedImage call()
+          throws Exception
+        {
+          FileInputStream stream = null;
+          try {
+            stream = new FileInputStream(file);
+            final BufferedImage image = ImageIO.read(stream);
+            if (null == image) {
+              throw new SBException.SBExceptionImageLoading(
+                file,
+                "Unable to parse image");
+            }
+            return image;
+          } finally {
+            if (stream != null) {
+              stream.close();
+            }
+          }
+        }
+      });
+
+    this.exec_pool.execute(f);
+    return f;
+  }
+
+  @Override public @Nonnull Map<File, BufferedImage> texturesGet()
+  {
+    return this.state.texturesGet();
+  }
+
+  @Override public @Nonnull List<SBObjectDescription> objectsGetAll()
+  {
+    return this.state.objectsGetAll();
+  }
+
+  @Override public @Nonnull List<KLight> lightsGetAll()
+  {
+    return this.state.lightsGetAll();
+  }
 }
 
 interface SBSceneControllerLights
@@ -215,20 +270,45 @@ interface SBSceneControllerLights
   public @Nonnull Integer lightFreshID();
 
   public @CheckForNull KLight lightGet(
-    final @Nonnull Integer key);
+    final @Nonnull Integer id);
 
   public void lightRemove(
     final @Nonnull Integer id);
+
+  public @Nonnull List<KLight> lightsGetAll();
 }
 
 interface SBSceneControllerMeshes
 {
+  public @Nonnull Map<File, SortedSet<String>> meshesGet();
+
   public @Nonnull Future<Pair<File, SortedSet<String>>> meshLoad(
     final @Nonnull File file);
+}
+
+interface SBSceneControllerObjects
+{
+  public void objectAdd(
+    final @Nonnull SBObjectDescription object);
+
+  public boolean objectExists(
+    final @Nonnull Integer id);
+
+  public @Nonnull Integer objectFreshID();
+
+  public @Nonnull SBObjectDescription objectGet(
+    final @Nonnull Integer id);
+
+  public void objectRemove(
+    final @Nonnull Integer id);
+
+  public @Nonnull List<SBObjectDescription> objectsGetAll();
 }
 
 interface SBSceneControllerTextures
 {
   public @Nonnull Future<BufferedImage> textureLoad(
     final @Nonnull File file);
+
+  public @Nonnull Map<File, BufferedImage> texturesGet();
 }

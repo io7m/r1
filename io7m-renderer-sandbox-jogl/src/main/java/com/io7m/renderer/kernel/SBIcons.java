@@ -16,25 +16,25 @@
 
 package com.io7m.renderer.kernel;
 
-import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 
 import javax.annotation.Nonnull;
-import javax.swing.JPanel;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 
-import com.io7m.jlog.Log;
-
-final class SBInstancesPanel extends JPanel
+final class SBIcons
 {
-  private static final long serialVersionUID;
-
-  static {
-    serialVersionUID = -5384220536844757178L;
-  }
-
-  SBInstancesPanel(
-    final @Nonnull SBSceneControllerMeshes controller,
-    final @Nonnull Log log)
+  static @Nonnull JLabel makeErrorIcon()
+    throws IOException
   {
-    this.setPreferredSize(new Dimension(640, 480));
+    final InputStream stream =
+      SBIcons.class
+        .getResourceAsStream("/com/io7m/renderer/sandbox/error.png");
+    final BufferedImage image = ImageIO.read(stream);
+    stream.close();
+    return new JLabel(new ImageIcon(image));
   }
 }
