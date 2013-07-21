@@ -17,10 +17,10 @@
 package com.io7m.renderer.kernel;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
@@ -661,7 +661,8 @@ final class SBGLRenderer implements GLEventListener
 
       final KCamera camera = new KCamera(transform, projection);
 
-      final Pair<Set<KLight>, Set<KMeshInstance>> p = c.rendererGetScene();
+      final Pair<Collection<KLight>, Collection<KMeshInstance>> p =
+        c.rendererGetScene();
       final KScene scene = new KScene(camera, p.first, p.second);
 
       renderer.setBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 1.0f));

@@ -39,9 +39,24 @@ import com.io7m.jcanephora.Texture2DStatic;
     this.description = description;
   }
 
+  public @Nonnull SBTextureDescription getDescription()
+  {
+    return this.description;
+  }
+
+  public @Nonnull BufferedImage getImage()
+  {
+    return this.image;
+  }
+
   @Nonnull String getName()
   {
     return this.texture.getName();
+  }
+
+  public @Nonnull Texture2DStatic getTexture()
+  {
+    return this.texture;
   }
 
   @Override public String toString()

@@ -54,9 +54,44 @@ import com.io7m.renderer.RVectorI3F;
     this.specular = specular;
   }
 
+  public @CheckForNull SBTexture getDiffuse()
+  {
+    return this.diffuse;
+  }
+
   public @Nonnull Integer getID()
   {
     return this.id;
+  }
+
+  public @Nonnull String getModel()
+  {
+    return this.model;
+  }
+
+  public @Nonnull String getModelObject()
+  {
+    return this.model_object;
+  }
+
+  public @CheckForNull SBTexture getNormal()
+  {
+    return this.normal;
+  }
+
+  public @Nonnull RVectorI3F<SBDegrees> getOrientation()
+  {
+    return this.orientation;
+  }
+
+  public @Nonnull RVectorI3F<RSpaceWorld> getPosition()
+  {
+    return this.position;
+  }
+
+  public @CheckForNull SBTexture getSpecular()
+  {
+    return this.specular;
   }
 
   @Override public String toString()
