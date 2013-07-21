@@ -57,15 +57,11 @@ public final class Sandbox
           window.pack();
           window.setVisible(true);
         } catch (final FilesystemError e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          SBErrorBox.showError(log, "Filesystem error", e);
           System.exit(1);
         } catch (final ConstraintError e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          SBErrorBox.showError(log, "Internal constraint error", e);
           System.exit(1);
-        } finally {
-
         }
       }
     });
