@@ -84,22 +84,24 @@ import com.io7m.renderer.RVectorI3F;
   private final @CheckForNull String             normal;
   private final @CheckForNull String             specular;
 
-  @Override public int hashCode()
+  public SBInstanceDescription(
+    final @Nonnull Integer id,
+    final @Nonnull RVectorI3F<RSpaceWorld> position,
+    final @Nonnull RVectorI3F<SBDegrees> orientation,
+    final @Nonnull String model,
+    final @Nonnull String model_object,
+    final @CheckForNull String diffuse,
+    final @CheckForNull String normal,
+    final @CheckForNull String specular)
   {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.diffuse.hashCode();
-    result = (prime * result) + this.id.hashCode();
-    result = (prime * result) + this.model.hashCode();
-    result = (prime * result) + this.model_object.hashCode();
-    result =
-      (prime * result) + ((this.normal == null) ? 0 : this.normal.hashCode());
-    result = (prime * result) + this.orientation.hashCode();
-    result = (prime * result) + this.position.hashCode();
-    result =
-      (prime * result)
-        + ((this.specular == null) ? 0 : this.specular.hashCode());
-    return result;
+    this.id = id;
+    this.position = position;
+    this.orientation = orientation;
+    this.model = model;
+    this.model_object = model_object;
+    this.diffuse = diffuse;
+    this.normal = normal;
+    this.specular = specular;
   }
 
   @Override public boolean equals(
@@ -122,25 +124,13 @@ import com.io7m.renderer.RVectorI3F;
     } else if (!this.diffuse.equals(other.diffuse)) {
       return false;
     }
-    if (this.id == null) {
-      if (other.id != null) {
-        return false;
-      }
-    } else if (!this.id.equals(other.id)) {
+    if (!this.id.equals(other.id)) {
       return false;
     }
-    if (this.model == null) {
-      if (other.model != null) {
-        return false;
-      }
-    } else if (!this.model.equals(other.model)) {
+    if (!this.model.equals(other.model)) {
       return false;
     }
-    if (this.model_object == null) {
-      if (other.model_object != null) {
-        return false;
-      }
-    } else if (!this.model_object.equals(other.model_object)) {
+    if (!this.model_object.equals(other.model_object)) {
       return false;
     }
     if (this.normal == null) {
@@ -150,18 +140,10 @@ import com.io7m.renderer.RVectorI3F;
     } else if (!this.normal.equals(other.normal)) {
       return false;
     }
-    if (this.orientation == null) {
-      if (other.orientation != null) {
-        return false;
-      }
-    } else if (!this.orientation.equals(other.orientation)) {
+    if (!this.orientation.equals(other.orientation)) {
       return false;
     }
-    if (this.position == null) {
-      if (other.position != null) {
-        return false;
-      }
-    } else if (!this.position.equals(other.position)) {
+    if (!this.position.equals(other.position)) {
       return false;
     }
     if (this.specular == null) {
@@ -174,29 +156,64 @@ import com.io7m.renderer.RVectorI3F;
     return true;
   }
 
-  public SBInstanceDescription(
-    final @Nonnull Integer id,
-    final @Nonnull RVectorI3F<RSpaceWorld> position,
-    final @Nonnull RVectorI3F<SBDegrees> orientation,
-    final @Nonnull String model,
-    final @Nonnull String model_object,
-    final @CheckForNull String diffuse,
-    final @CheckForNull String normal,
-    final @CheckForNull String specular)
+  public @CheckForNull String getDiffuse()
   {
-    this.id = id;
-    this.position = position;
-    this.orientation = orientation;
-    this.model = model;
-    this.model_object = model_object;
-    this.diffuse = diffuse;
-    this.normal = normal;
-    this.specular = specular;
+    return this.diffuse;
   }
 
   public @Nonnull Integer getID()
   {
     return this.id;
+  }
+
+  public @Nonnull String getModel()
+  {
+    return this.model;
+  }
+
+  public @Nonnull String getModelObject()
+  {
+    return this.model_object;
+  }
+
+  public @CheckForNull String getNormal()
+  {
+    return this.normal;
+  }
+
+  public @Nonnull RVectorI3F<SBDegrees> getOrientation()
+  {
+    return this.orientation;
+  }
+
+  public @Nonnull RVectorI3F<RSpaceWorld> getPosition()
+  {
+    return this.position;
+  }
+
+  public @CheckForNull String getSpecular()
+  {
+    return this.specular;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result =
+      (prime * result)
+        + ((this.diffuse == null) ? 0 : this.diffuse.hashCode());
+    result = (prime * result) + this.id.hashCode();
+    result = (prime * result) + this.model.hashCode();
+    result = (prime * result) + this.model_object.hashCode();
+    result =
+      (prime * result) + ((this.normal == null) ? 0 : this.normal.hashCode());
+    result = (prime * result) + this.orientation.hashCode();
+    result = (prime * result) + this.position.hashCode();
+    result =
+      (prime * result)
+        + ((this.specular == null) ? 0 : this.specular.hashCode());
+    return result;
   }
 
   @Override public String toString()

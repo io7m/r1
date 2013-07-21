@@ -414,7 +414,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       throws SBExceptionInputError
     {
       final Integer id =
-        (initial == null) ? this.controller.lightFreshID() : initial.getID();
+        (initial == null) ? this.controller.sceneLightFreshID() : initial.getID();
 
       final KLight light =
         this.makeLight(
@@ -422,7 +422,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           (KLight.Type) this.type_select.getSelectedItem(),
           this.getColour());
 
-      this.controller.lightAdd(light);
+      this.controller.sceneLightAdd(light);
       this.light_table_model.refreshLights();
       this.unsetError();
     }
@@ -525,8 +525,8 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       assert row_data != null;
       final String id_text = row_data.get(0);
       final Integer id = Integer.valueOf(id_text);
-      assert this.controller.lightExists(id);
-      return this.controller.lightGet(id);
+      assert this.controller.sceneLightExists(id);
+      return this.controller.sceneLightGet(id);
     }
 
     @Override public int getRowCount()
@@ -544,7 +544,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
     void refreshLights()
     {
       this.data.clear();
-      final List<KLight> lights = this.controller.lightsGetAll();
+      final List<KLight> lights = this.controller.sceneLightsGetAll();
 
       for (final KLight l : lights) {
         final ArrayList<String> row = new ArrayList<String>();
@@ -633,7 +633,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           SBLightsPanel.this.lights_model.getLightAt(model_row);
         assert light != null;
 
-        controller.lightRemove(light.getID());
+        controller.sceneLightRemove(light.getID());
         SBLightsPanel.this.lights_model.refreshLights();
       }
     });

@@ -16,16 +16,12 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -35,6 +31,8 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
+
+import org.pcollections.HashTreePMap;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
@@ -127,20 +125,19 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private class MeshLoadFuture extends
-    FutureTask<Pair<File, SortedSet<SBMesh>>>
+  private class ModelLoadFuture extends FutureTask<SBModel>
   {
-    MeshLoadFuture(
-      final @Nonnull File file,
+    ModelLoadFuture(
+      final @Nonnull SBModelDescription description,
       final @Nonnull InputStream stream)
     {
-      super(new Callable<Pair<File, SortedSet<SBMesh>>>() {
+      super(new Callable<SBModel>() {
         @SuppressWarnings("synthetic-access") @Override public @Nonnull
-          Pair<File, SortedSet<SBMesh>>
+          SBModel
           call()
             throws Exception
         {
-          SBGLRenderer.this.log.debug("Loading " + file);
+          SBGLRenderer.this.log.debug("Loading " + description.getName());
 
           if (SBGLRenderer.this.gi != null) {
             final GLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
@@ -155,7 +152,7 @@ final class SBGLRenderer implements GLEventListener
 
               final ModelObjectParser<ModelObjectVBO, GLException> op =
                 new ModelObjectParserVBOImmediate<GLInterfaceCommon>(
-                  file.toString(),
+                  description.getName(),
                   stream,
                   name_position_attribute,
                   name_normal_attribute,
@@ -167,24 +164,28 @@ final class SBGLRenderer implements GLEventListener
                 new ModelParser<ModelObjectVBO, GLException>(op);
 
               final Model<ModelObjectVBO> m = mp.model();
-              if (SBGLRenderer.this.meshes.containsKey(file)) {
-                SBGLRenderer.this.log.debug("Reloading " + file);
+              if (SBGLRenderer.this.models.containsKey(description.getName())) {
+                SBGLRenderer.this.log.debug("Reloading "
+                  + description.getName());
               }
-              SBGLRenderer.this.meshes.put(file, m);
+              SBGLRenderer.this.models.put(description.getName(), m);
 
-              final TreeSet<SBMesh> objects = new TreeSet<SBMesh>();
+              final HashMap<String, SBMesh> meshes =
+                new HashMap<String, SBMesh>();
               m.forEachObject(new Function<ModelObjectVBO, Unit>() {
                 @Override public Unit call(
                   final ModelObjectVBO x)
                 {
-                  objects.add(new SBMesh(x.getName(), x.getArrayBuffer(), x
-                    .getIndexBuffer()));
+                  final SBMesh mesh =
+                    new SBMesh(x.getName(), x.getArrayBuffer(), x
+                      .getIndexBuffer());
+                  meshes.put(x.getName(), mesh);
                   return Unit.value;
                 }
               });
 
-              SBGLRenderer.this.log.debug("Loaded " + file);
-              return new Pair<File, SortedSet<SBMesh>>(file, objects);
+              SBGLRenderer.this.log.debug("Loaded " + description.getName());
+              return new SBModel(description, HashTreePMap.from(meshes));
             } catch (final ConstraintError e) {
               throw new UnreachableCodeException();
             }
@@ -227,7 +228,7 @@ final class SBGLRenderer implements GLEventListener
   private class TextureLoadFuture extends FutureTask<Texture2DStatic>
   {
     TextureLoadFuture(
-      final @Nonnull File file,
+      final @Nonnull String name,
       final @Nonnull InputStream stream)
     {
       super(new Callable<Texture2DStatic>() {
@@ -236,7 +237,7 @@ final class SBGLRenderer implements GLEventListener
           call()
             throws Exception
         {
-          SBGLRenderer.this.log.debug("Loading " + file);
+          SBGLRenderer.this.log.debug("Loading " + name);
 
           if (SBGLRenderer.this.gi != null) {
             final GLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
@@ -249,15 +250,15 @@ final class SBGLRenderer implements GLEventListener
                   TextureFilterMinification.TEXTURE_FILTER_NEAREST,
                   TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
                   stream,
-                  file.toString());
-              if (SBGLRenderer.this.textures.containsKey(file)) {
-                SBGLRenderer.this.log.debug("Reloading " + file);
+                  name.toString());
+              if (SBGLRenderer.this.textures.containsKey(name)) {
+                SBGLRenderer.this.log.debug("Reloading " + name);
                 final Texture2DStatic u =
-                  SBGLRenderer.this.textures.get(file);
+                  SBGLRenderer.this.textures.get(name);
                 gl.texture2DStaticDelete(u);
               }
-              SBGLRenderer.this.textures.put(file, t);
-              SBGLRenderer.this.log.debug("Loaded " + file);
+              SBGLRenderer.this.textures.put(name, t);
+              SBGLRenderer.this.log.debug("Loaded " + name);
               return t;
             } catch (final ConstraintError e) {
               throw new UnreachableCodeException();
@@ -282,29 +283,29 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private final @Nonnull Log                                            log;
-  private @CheckForNull GLImplementationJOGL                            gi;
-  private final @Nonnull TextureLoader                                  texture_loader;
-  private final @Nonnull ConcurrentLinkedQueue<TextureLoadFuture>       texture_load_queue;
-  private final @Nonnull ConcurrentLinkedQueue<TextureDeleteFuture>     texture_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>          mesh_load_queue;
-  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>        mesh_delete_queue;
-  private final @Nonnull ConcurrentHashMap<File, Texture2DStatic>       textures;
-  private final @Nonnull ConcurrentHashMap<File, Model<ModelObjectVBO>> meshes;
-  private @CheckForNull SBQuad                                          screen_quad;
-  private Program                                                       program_uv;
-  private final @Nonnull FSCapabilityAll                                filesystem;
-  private @CheckForNull FramebufferConfigurationGLES2Actual             framebuffer_config;
-  private @CheckForNull Framebuffer                                     framebuffer;
-  private boolean                                                       running;
-  private final @Nonnull MatrixM4x4F                                    matrix_projection;
-  private final @Nonnull MatrixM4x4F                                    matrix_modelview;
-  private @CheckForNull TextureUnit[]                                   texture_units;
-  private @CheckForNull FramebufferColorAttachmentPoint[]               framebuffer_points;
-  private final @Nonnull Map<SBRendererType, KRenderer>                 renderers;
-  private final @Nonnull AtomicReference<SBRendererType>                renderer_current;
-  private final @Nonnull AtomicReference<SBSceneControllerRenderer>     controller;
-  private final @Nonnull QuaternionI4F.Context                          qi4f_context;
+  private final @Nonnull Log                                        log;
+  private @CheckForNull GLImplementationJOGL                        gi;
+  private final @Nonnull TextureLoader                              texture_loader;
+  private final @Nonnull ConcurrentLinkedQueue<TextureLoadFuture>   texture_load_queue;
+  private final @Nonnull ConcurrentLinkedQueue<TextureDeleteFuture> texture_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<ModelLoadFuture>     mesh_load_queue;
+  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>    mesh_delete_queue;
+  private final @Nonnull HashMap<String, Texture2DStatic>           textures;
+  private final @Nonnull HashMap<String, Model<ModelObjectVBO>>     models;
+  private @CheckForNull SBQuad                                      screen_quad;
+  private Program                                                   program_uv;
+  private final @Nonnull FSCapabilityAll                            filesystem;
+  private @CheckForNull FramebufferConfigurationGLES2Actual         framebuffer_config;
+  private @CheckForNull Framebuffer                                 framebuffer;
+  private boolean                                                   running;
+  private final @Nonnull MatrixM4x4F                                matrix_projection;
+  private final @Nonnull MatrixM4x4F                                matrix_modelview;
+  private @CheckForNull TextureUnit[]                               texture_units;
+  private @CheckForNull FramebufferColorAttachmentPoint[]           framebuffer_points;
+  private final @Nonnull Map<SBRendererType, KRenderer>             renderers;
+  private final @Nonnull AtomicReference<SBRendererType>            renderer_current;
+  private final @Nonnull AtomicReference<SBSceneControllerRenderer> controller;
+  private final @Nonnull QuaternionI4F.Context                      qi4f_context;
 
   public SBGLRenderer(
     final @Nonnull Log log)
@@ -320,10 +321,10 @@ final class SBGLRenderer implements GLEventListener
     this.texture_load_queue = new ConcurrentLinkedQueue<TextureLoadFuture>();
     this.texture_delete_queue =
       new ConcurrentLinkedQueue<TextureDeleteFuture>();
-    this.textures = new ConcurrentHashMap<File, Texture2DStatic>();
-    this.mesh_load_queue = new ConcurrentLinkedQueue<MeshLoadFuture>();
+    this.textures = new HashMap<String, Texture2DStatic>();
+    this.mesh_load_queue = new ConcurrentLinkedQueue<ModelLoadFuture>();
     this.mesh_delete_queue = new ConcurrentLinkedQueue<MeshDeleteFuture>();
-    this.meshes = new ConcurrentHashMap<File, Model<ModelObjectVBO>>();
+    this.models = new HashMap<String, Model<ModelObjectVBO>>();
 
     this.filesystem = Filesystem.makeWithoutArchiveDirectory(log);
     this.filesystem.mountClasspathArchive(
@@ -461,11 +462,11 @@ final class SBGLRenderer implements GLEventListener
     this.mesh_delete_queue.add(f);
   }
 
-  Future<Pair<File, SortedSet<SBMesh>>> meshLoad(
-    final @Nonnull File file,
+  Future<SBModel> modelLoad(
+    final @Nonnull SBModelDescription description,
     final @Nonnull InputStream stream)
   {
-    final MeshLoadFuture f = new MeshLoadFuture(file, stream);
+    final ModelLoadFuture f = new ModelLoadFuture(description, stream);
     this.mesh_load_queue.add(f);
     return f;
   }
@@ -695,10 +696,10 @@ final class SBGLRenderer implements GLEventListener
   }
 
   Future<Texture2DStatic> textureLoad(
-    final @Nonnull File file,
+    final @Nonnull String name,
     final @Nonnull InputStream stream)
   {
-    final TextureLoadFuture f = new TextureLoadFuture(file, stream);
+    final TextureLoadFuture f = new TextureLoadFuture(name, stream);
     this.texture_load_queue.add(f);
     return f;
   }

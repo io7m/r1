@@ -19,16 +19,16 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import org.pcollections.PSet;
+import org.pcollections.PMap;
 
 @Immutable final class SBModel
 {
-  private final @Nonnull PSet<SBMesh>       meshes;
-  private final @Nonnull SBModelDescription description;
+  private final @Nonnull PMap<String, SBMesh> meshes;
+  private final @Nonnull SBModelDescription   description;
 
   public SBModel(
     final @Nonnull SBModelDescription description,
-    final @Nonnull PSet<SBMesh> meshes)
+    final @Nonnull PMap<String, SBMesh> meshes)
   {
     this.meshes = meshes;
     this.description = description;
