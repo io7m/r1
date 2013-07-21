@@ -107,12 +107,12 @@
     <dependency>
       <groupId>org.jogamp.gluegen</groupId>
       <artifactId>gluegen-rt-main</artifactId>
-      <version>2.0.2-rc-20130717</version>
+      <version>2.0.2</version>
     </dependency>
     <dependency>
       <groupId>org.jogamp.jogl</groupId>
       <artifactId>jogl-all-main</artifactId>
-      <version>2.0.2-rc-20130717</version>
+      <version>2.0.2</version>
     </dependency>
     <dependency>
     	<groupId>net.java.dev.designgridlayout</groupId>
@@ -123,6 +123,17 @@
     	<groupId>xom</groupId>
     	<artifactId>xom</artifactId>
     	<version>1.2.5</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.pcollections</groupId>
+    	<artifactId>pcollections</artifactId>
+    	<version>2.1.2</version>
+    </dependency>
+    <dependency>
+    	<groupId>net.java</groupId>
+    	<artifactId>quickcheck</artifactId>
+    	<version>0.6</version>
+    	<scope>test</scope>
     </dependency>
   </dependencies>
 
