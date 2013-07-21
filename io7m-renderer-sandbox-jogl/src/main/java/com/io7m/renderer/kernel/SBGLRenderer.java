@@ -45,6 +45,7 @@ import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.ArrayBufferDescriptor;
 import com.io7m.jcanephora.AttachmentColor;
 import com.io7m.jcanephora.AttachmentColor.AttachmentColorTexture2DStatic;
+import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.Framebuffer;
 import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
 import com.io7m.jcanephora.FramebufferConfigurationGLES2Actual;
@@ -499,6 +500,10 @@ final class SBGLRenderer implements GLEventListener
 
     gl.viewportSet(VectorI2I.ZERO, size);
     gl.colorBufferClear3f(0.0f, 0.0f, 1.0f);
+    gl.depthBufferWriteEnable();
+    gl.depthBufferClear(1.0f);
+    gl.depthBufferEnable(DepthFunction.DEPTH_LESS_THAN);
+    gl.blendingDisable();
 
     MatrixM4x4F.setIdentity(this.matrix_projection);
     ProjectionMatrix.makeOrthographic(
@@ -599,6 +604,10 @@ final class SBGLRenderer implements GLEventListener
     {
       gl.viewportSet(VectorI2I.ZERO, size);
       gl.colorBufferClear3f(0.0f, 1.0f, 0.0f);
+      gl.depthBufferWriteEnable();
+      gl.depthBufferClear(1.0f);
+      gl.depthBufferEnable(DepthFunction.DEPTH_LESS_THAN);
+      gl.blendingDisable();
     }
     gl.framebufferDrawUnbind();
   }
