@@ -649,12 +649,16 @@ final class SBGLRenderer implements GLEventListener
           cam_tar,
           new VectorI3F(0, 1, 0));
 
-      final KCamera camera =
-        new KCamera(new KTransform(new VectorI3F(
-          -cam_pos.x,
-          -cam_pos.y,
-          -cam_pos.z), cam_ori), new KProjection.BEPerspective(1, 100, size.x
-          / size.y, Math.toRadians(30)));
+      final KTransform transform =
+        new KTransform(
+          new VectorI3F(-cam_pos.x, -cam_pos.y, -cam_pos.z),
+          cam_ori);
+
+      final double aspect = (double) size.x / (double) size.y;
+      final KProjection.KPerspective projection =
+        new KProjection.KPerspective(1, 100, aspect, Math.toRadians(30));
+
+      final KCamera camera = new KCamera(transform, projection);
 
       final Pair<Set<KLight>, Set<KMeshInstance>> p = c.rendererGetScene();
       final KScene scene = new KScene(camera, p.first, p.second);

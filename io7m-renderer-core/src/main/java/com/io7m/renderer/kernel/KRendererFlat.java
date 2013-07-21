@@ -40,6 +40,8 @@ import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.VectorI2I;
+import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
@@ -137,6 +139,7 @@ final class KRendererFlat implements KRenderer
   private final @Nonnull Program             program;
   private final @Nonnull Log                 log;
   private final @Nonnull VectorM4F           background;
+  private final @Nonnull VectorM2I           viewport_size;
 
   KRendererFlat(
     final @Nonnull GLImplementation gl,
@@ -156,6 +159,7 @@ final class KRendererFlat implements KRenderer
     this.matrix_context = new MatrixM4x4F.Context();
     this.transform_context = new KTransform.Context();
     this.program = KRendererFlat.makeProgram(gl.getGLCommon(), fs, this.log);
+    this.viewport_size = new VectorM2I();
   }
 
   @Override public void render(
@@ -172,8 +176,12 @@ final class KRendererFlat implements KRenderer
 
     final GLInterfaceCommon gc = this.gl.getGLCommon();
 
+    this.viewport_size.x = result.getWidth();
+    this.viewport_size.y = result.getHeight();
+
     try {
       gc.framebufferDrawBind(result.getFramebuffer());
+      gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
 
       gc.depthBufferEnable(DepthFunction.DEPTH_LESS_THAN);
       gc.depthBufferClear(1.0f);

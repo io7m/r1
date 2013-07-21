@@ -29,7 +29,7 @@ import com.io7m.jtensors.MatrixM4x4F;
 
 @Immutable abstract class KProjection
 {
-  @Immutable static final class BEOrthographic extends KProjection
+  @Immutable static final class KOrthographic extends KProjection
   {
     private final double left;
     private final double right;
@@ -38,7 +38,7 @@ import com.io7m.jtensors.MatrixM4x4F;
     private final double near;
     private final double far;
 
-    @SuppressWarnings("synthetic-access") BEOrthographic(
+    @SuppressWarnings("synthetic-access") KOrthographic(
       final double left,
       final double right,
       final double bottom,
@@ -67,7 +67,7 @@ import com.io7m.jtensors.MatrixM4x4F;
       if (this.getClass() != obj.getClass()) {
         return false;
       }
-      final BEOrthographic other = (BEOrthographic) obj;
+      final KOrthographic other = (KOrthographic) obj;
       if (Double.doubleToLongBits(this.bottom) != Double
         .doubleToLongBits(other.bottom)) {
         return false;
@@ -132,7 +132,7 @@ import com.io7m.jtensors.MatrixM4x4F;
     @Override public String toString()
     {
       final StringBuilder builder = new StringBuilder();
-      builder.append("[BEOrthographic  ");
+      builder.append("[KOrthographic  ");
       builder.append(this.left);
       builder.append(" ");
       builder.append(this.right);
@@ -149,14 +149,14 @@ import com.io7m.jtensors.MatrixM4x4F;
     }
   }
 
-  @Immutable static final class BEPerspective extends KProjection
+  @Immutable static final class KPerspective extends KProjection
   {
     private final double z_near;
     private final double z_far;
     private final double aspect;
     private final double fov_radians;
 
-    @SuppressWarnings("synthetic-access") BEPerspective(
+    @SuppressWarnings("synthetic-access") KPerspective(
       final double z_near,
       final double z_far,
       final double aspect,
@@ -181,7 +181,7 @@ import com.io7m.jtensors.MatrixM4x4F;
       if (this.getClass() != obj.getClass()) {
         return false;
       }
-      final BEPerspective other = (BEPerspective) obj;
+      final KPerspective other = (KPerspective) obj;
       if (Double.doubleToLongBits(this.aspect) != Double
         .doubleToLongBits(other.aspect)) {
         return false;
@@ -232,7 +232,7 @@ import com.io7m.jtensors.MatrixM4x4F;
     @Override public String toString()
     {
       final StringBuilder builder = new StringBuilder();
-      builder.append("[BEPerspective ");
+      builder.append("[KPerspective ");
       builder.append(this.z_near);
       builder.append(" ");
       builder.append(this.z_far);
