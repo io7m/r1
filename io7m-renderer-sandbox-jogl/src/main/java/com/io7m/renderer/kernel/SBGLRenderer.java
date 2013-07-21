@@ -18,7 +18,10 @@ package com.io7m.renderer.kernel;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -26,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -80,7 +84,10 @@ import com.io7m.jsom0.parser.ModelObjectParser;
 import com.io7m.jsom0.parser.ModelObjectParserVBOImmediate;
 import com.io7m.jsom0.parser.ModelParser;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI2I;
+import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.jvvfs.FSCapabilityAll;
@@ -294,6 +301,10 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull MatrixM4x4F                                    matrix_modelview;
   private @CheckForNull TextureUnit[]                                   texture_units;
   private @CheckForNull FramebufferColorAttachmentPoint[]               framebuffer_points;
+  private final @Nonnull Map<SBRendererType, KRenderer>                 renderers;
+  private final @Nonnull AtomicReference<SBRendererType>                renderer_current;
+  private final @Nonnull AtomicReference<SBSceneControllerRenderer>     controller;
+  private final @Nonnull QuaternionI4F.Context                          qi4f_context;
 
   public SBGLRenderer(
     final @Nonnull Log log)
@@ -301,6 +312,10 @@ final class SBGLRenderer implements GLEventListener
       FilesystemError
   {
     this.log = new Log(log, "gl");
+
+    this.controller = new AtomicReference<SBSceneControllerRenderer>();
+    this.qi4f_context = new QuaternionI4F.Context();
+
     this.texture_loader = new TextureLoaderImageIO();
     this.texture_load_queue = new ConcurrentLinkedQueue<TextureLoadFuture>();
     this.texture_delete_queue =
@@ -309,12 +324,19 @@ final class SBGLRenderer implements GLEventListener
     this.mesh_load_queue = new ConcurrentLinkedQueue<MeshLoadFuture>();
     this.mesh_delete_queue = new ConcurrentLinkedQueue<MeshDeleteFuture>();
     this.meshes = new ConcurrentHashMap<File, Model<ModelObjectVBO>>();
+
     this.filesystem = Filesystem.makeWithoutArchiveDirectory(log);
     this.filesystem.mountClasspathArchive(
       SBGLRenderer.class,
       PathVirtual.ROOT);
+    this.filesystem.mountClasspathArchive(KRenderer.class, PathVirtual.ROOT);
+
     this.matrix_modelview = new MatrixM4x4F();
     this.matrix_projection = new MatrixM4x4F();
+    this.renderers = new HashMap<SBRendererType, KRenderer>();
+    this.renderer_current =
+      new AtomicReference<SBRendererType>(SBRendererType.RENDERER_FLAT_UV);
+
     this.running = false;
   }
 
@@ -333,7 +355,7 @@ final class SBGLRenderer implements GLEventListener
       SBGLRenderer.processQueue(this.texture_load_queue);
       SBGLRenderer.processQueue(this.mesh_load_queue);
 
-      this.renderScene(gl);
+      this.renderScene();
       this.renderResultsToScreen(drawable, gl);
     } catch (final GLException e) {
       this.failed(e);
@@ -389,6 +411,8 @@ final class SBGLRenderer implements GLEventListener
       this.gi = new GLImplementationJOGL(drawable.getContext(), this.log);
       final GLInterfaceCommon gl = this.gi.getGLCommon();
 
+      this.initRenderers();
+
       this.texture_units = gl.textureGetUnits();
       this.framebuffer_points = gl.framebufferGetColorAttachmentPoints();
 
@@ -417,6 +441,17 @@ final class SBGLRenderer implements GLEventListener
     } catch (final GLCompileException e) {
       this.failed(e);
     }
+  }
+
+  private void initRenderers()
+    throws GLCompileException,
+      GLUnsupportedException,
+      ConstraintError
+  {
+    this.renderers.put(SBRendererType.RENDERER_FLAT_UV, new KRendererFlat(
+      this.gi,
+      this.filesystem,
+      this.log));
   }
 
   void meshDelete(
@@ -591,25 +626,42 @@ final class SBGLRenderer implements GLEventListener
     this.program_uv.deactivate(gl);
   }
 
-  private void renderScene(
-    final @Nonnull GLInterfaceCommon gl)
+  private void renderScene()
     throws GLException,
       ConstraintError
   {
-    final VectorM2I size = new VectorM2I();
-    size.x = this.framebuffer.getWidth();
-    size.y = this.framebuffer.getHeight();
+    final SBSceneControllerRenderer c = this.controller.get();
 
-    gl.framebufferDrawBind(this.framebuffer.getFramebuffer());
-    {
-      gl.viewportSet(VectorI2I.ZERO, size);
-      gl.colorBufferClear3f(0.0f, 1.0f, 0.0f);
-      gl.depthBufferWriteEnable();
-      gl.depthBufferClear(1.0f);
-      gl.depthBufferEnable(DepthFunction.DEPTH_LESS_THAN);
-      gl.blendingDisable();
+    if (c != null) {
+      final VectorM2I size = new VectorM2I();
+      size.x = this.framebuffer.getWidth();
+      size.y = this.framebuffer.getHeight();
+
+      final KRenderer renderer =
+        this.renderers.get(this.renderer_current.get());
+
+      final VectorI3F cam_pos = new VectorI3F(0, 0, 5);
+      final VectorI3F cam_tar = new VectorI3F(0, 0, -5);
+      final QuaternionI4F cam_ori =
+        QuaternionI4F.lookAtWithContext(
+          this.qi4f_context,
+          cam_pos,
+          cam_tar,
+          new VectorI3F(0, 1, 0));
+
+      final KCamera camera =
+        new KCamera(new KTransform(new VectorI3F(
+          -cam_pos.x,
+          -cam_pos.y,
+          -cam_pos.z), cam_ori), new KProjection.BEPerspective(1, 100, size.x
+          / size.y, Math.toRadians(30)));
+
+      final Pair<Set<KLight>, Set<KMeshInstance>> p = c.rendererGetScene();
+      final KScene scene = new KScene(camera, p.first, p.second);
+
+      renderer.setBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 1.0f));
+      renderer.render(this.framebuffer, scene);
     }
-    gl.framebufferDrawUnbind();
   }
 
   @Override public void reshape(
@@ -645,5 +697,11 @@ final class SBGLRenderer implements GLEventListener
     final TextureLoadFuture f = new TextureLoadFuture(file, stream);
     this.texture_load_queue.add(f);
     return f;
+  }
+
+  void setController(
+    final @Nonnull SBSceneControllerRenderer renderer)
+  {
+    this.controller.set(renderer);
   }
 }
