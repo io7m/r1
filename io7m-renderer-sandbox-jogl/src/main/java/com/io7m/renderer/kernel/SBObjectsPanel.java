@@ -355,7 +355,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       throws SBExceptionInputError
     {
       final Integer id =
-        (initial == null) ? controller.objectFreshID() : initial.getID();
+        (initial == null) ? controller.sceneObjectFreshID() : initial.getID();
 
       final RVectorI3F<RSpaceWorld> position =
         new RVectorI3F<RSpaceWorld>(
@@ -395,7 +395,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           normal,
           specular);
 
-      controller.objectAdd(o);
+      controller.sceneObjectAdd(o);
 
       this.objects_table_model.refreshObjects();
       this.unsetError();
@@ -486,8 +486,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       assert row_data != null;
       final String id_text = row_data.get(0);
       final Integer id = Integer.valueOf(id_text);
-      assert this.controller.objectExists(id);
-      return this.controller.objectGet(id);
+      assert this.controller.sceneObjectExists(id);
+      return this.controller.sceneObjectGet(id);
     }
 
     @Override public int getRowCount()
@@ -506,7 +506,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     {
       this.data.clear();
       final List<SBObjectDescription> objects =
-        this.controller.objectsGetAll();
+        this.controller.sceneObjectsGetAll();
       for (final SBObjectDescription o : objects) {
         final ArrayList<String> row = new ArrayList<String>();
         row.add(o.getID().toString());
@@ -599,7 +599,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           SBObjectsPanel.this.objects_model.getObjectAt(model_row);
         assert object != null;
 
-        controller.objectRemove(object.getID());
+        controller.sceneObjectRemove(object.getID());
         SBObjectsPanel.this.objects_model.refreshObjects();
       }
     });

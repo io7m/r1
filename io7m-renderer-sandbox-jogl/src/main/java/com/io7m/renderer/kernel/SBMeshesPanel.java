@@ -43,7 +43,6 @@ import javax.swing.tree.TreeSelectionModel;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
-import com.io7m.jaux.functional.Pair;
 import com.io7m.jlog.Log;
 
 final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
@@ -87,7 +86,7 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
   {
     this.log = new Log(log, "meshes");
     this.controller = controller;
-    this.meshes = controller.meshesGet();
+    this.meshes = controller.sceneMeshesGet();
 
     final JButton cancel = new JButton("Cancel");
     cancel.addActionListener(new ActionListener() {
@@ -151,14 +150,12 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
           {
             final File file = chooser.getSelectedFile();
 
-            final SwingWorker<Pair<File, SortedSet<String>>, Void> worker =
-              new SwingWorker<Pair<File, SortedSet<String>>, Void>() {
-                @Override protected
-                  Pair<File, SortedSet<String>>
-                  doInBackground()
-                    throws Exception
+            final SwingWorker<SBModel, Void> worker =
+              new SwingWorker<SBModel, Void>() {
+                @Override protected SBModel doInBackground()
+                  throws Exception
                 {
-                  return controller.meshLoad(file).get();
+                  return controller.sceneMeshLoad(file).get();
                 }
 
                 @Override protected void done()
@@ -166,7 +163,7 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
                   try {
                     this.get();
 
-                    SBMeshesPanel.this.meshes = controller.meshesGet();
+                    SBMeshesPanel.this.meshes = controller.sceneMeshesGet();
                     SBMeshesPanel.this
                       .meshesRefresh(SBMeshesPanel.this.meshes);
                     SBMeshesPanel.this.tree.repaint();
@@ -249,7 +246,8 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
 
       @Override public void run()
       {
-        SBMeshesPanel.this.meshes = SBMeshesPanel.this.controller.meshesGet();
+        SBMeshesPanel.this.meshes =
+          SBMeshesPanel.this.controller.sceneMeshesGet();
         SBMeshesPanel.this.meshesRefresh(SBMeshesPanel.this.meshes);
       }
     });

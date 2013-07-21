@@ -92,7 +92,7 @@ final class SBTexturesPanel extends JPanel
     final @Nonnull Log log)
   {
     this.log_textures = new Log(log, "textures");
-    this.images = controller.texturesGet();
+    this.images = controller.sceneTexturesGet();
 
     this.setPreferredSize(new Dimension(640, 480));
 
@@ -131,12 +131,12 @@ final class SBTexturesPanel extends JPanel
           {
             final File file = chooser.getSelectedFile();
 
-            final SwingWorker<BufferedImage, Void> worker =
-              new SwingWorker<BufferedImage, Void>() {
-                @Override protected @Nonnull BufferedImage doInBackground()
+            final SwingWorker<SBTexture, Void> worker =
+              new SwingWorker<SBTexture, Void>() {
+                @Override protected @Nonnull SBTexture doInBackground()
                   throws Exception
                 {
-                  return controller.textureLoad(file).get();
+                  return controller.sceneTextureLoad(file).get();
                 }
 
                 @Override protected void done()
@@ -144,9 +144,11 @@ final class SBTexturesPanel extends JPanel
                   try {
                     this.get();
 
-                    SBTexturesPanel.this.images = controller.texturesGet();
+                    SBTexturesPanel.this.images =
+                      controller.sceneTexturesGet();
                     SBTexturesPanel.this
                       .selectorRefresh(SBTexturesPanel.this.selector);
+
                   } catch (final InterruptedException x) {
                     SBErrorBox.showError(
                       SBTexturesPanel.this.log_textures,

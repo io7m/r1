@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
@@ -71,9 +72,11 @@ import org.pcollections.PMap;
   public @Nonnull SBScene addModel(
     final @Nonnull SBModel model)
   {
-    return new SBScene(this.textures, this.models.plus(
-      model.getName(),
-      model), this.lights, this.instances);
+    return new SBScene(
+      this.textures,
+      this.models.plus(model.getName(), model),
+      this.lights,
+      this.instances);
   }
 
   public @Nonnull SBScene addTexture(
@@ -84,5 +87,11 @@ import org.pcollections.PMap;
       this.models,
       this.lights,
       this.instances);
+  }
+
+  public @CheckForNull SBTexture getTexture(
+    final @Nonnull String texture)
+  {
+    return this.textures.get(texture);
   }
 }

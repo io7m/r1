@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.HashMap;
 
 import javax.annotation.Nonnull;
@@ -109,10 +110,7 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
     final HashMap<Integer, KLight> m = new HashMap<Integer, KLight>();
 
     final Element ec =
-      SBXMLUtilities.getChild(
-        e,
-        "lights",
-        SBSceneDescription.SCENE_XML_URI);
+      SBXMLUtilities.getChild(e, "lights", SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc = ec.getChildElements();
 
@@ -133,10 +131,7 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
       new HashMap<String, SBModelDescription>();
 
     final Element ec =
-      SBXMLUtilities.getChild(
-        e,
-        "models",
-        SBSceneDescription.SCENE_XML_URI);
+      SBXMLUtilities.getChild(e, "models", SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc =
       ec.getChildElements(
@@ -160,10 +155,8 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
       new HashMap<String, SBTextureDescription>();
 
     final Element ec =
-      SBXMLUtilities.getChild(
-        e,
-        "textures",
-        SBSceneDescription.SCENE_XML_URI);
+      SBXMLUtilities
+        .getChild(e, "textures", SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc =
       ec.getChildElements(
@@ -312,6 +305,26 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
       return false;
     }
     return true;
+  }
+
+  public @Nonnull Collection<SBInstanceDescription> getInstanceDescriptions()
+  {
+    return this.instances.values();
+  }
+
+  public @Nonnull Collection<KLight> getLights()
+  {
+    return this.lights.values();
+  }
+
+  public @Nonnull Collection<SBModelDescription> getModelDescriptions()
+  {
+    return this.models.values();
+  }
+
+  public @Nonnull Collection<SBTextureDescription> getTextureDescriptions()
+  {
+    return this.textures.values();
   }
 
   @Override public int hashCode()
