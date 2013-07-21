@@ -87,7 +87,7 @@ import com.io7m.renderer.DemoUtilities;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.kernel.KProjection.BEPerspective;
+import com.io7m.renderer.kernel.KProjection.KPerspective;
 
 /**
  * Example program that draws something with {@link KRendererFlat}.
@@ -118,8 +118,8 @@ public final class DemoKRendererForwardDiffuse implements Demo
     final double aspect =
       (double) window_size.getXI() / (double) window_size.getYI();
 
-    final BEPerspective projection =
-      new KProjection.BEPerspective(1, 100, aspect, Math.toRadians(30));
+    final KPerspective projection =
+      new KProjection.KPerspective(1, 100, aspect, Math.toRadians(30));
 
     return new KCamera(transform, projection);
   }

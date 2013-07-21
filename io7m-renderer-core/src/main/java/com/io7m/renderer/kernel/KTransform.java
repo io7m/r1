@@ -135,7 +135,7 @@ import com.io7m.jtensors.VectorReadable3F;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[BETransform ");
+    builder.append("[KTransform ");
     builder.append(this.translation);
     builder.append(" ");
     builder.append(this.orientation);
