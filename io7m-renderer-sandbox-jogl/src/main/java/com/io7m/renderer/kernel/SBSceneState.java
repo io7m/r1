@@ -46,20 +46,25 @@ import nu.xom.ValidityException;
 import com.io7m.jaux.CheckedMath;
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jlog.Log;
+import com.io7m.jtensors.QuaternionM4F;
+import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.VectorReadable3F;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 
 final class SBSceneState implements
+  SBSceneStateDeletion,
   SBSceneStateLights,
   SBSceneStateMeshes,
-  SBSceneStateTextures,
   SBSceneStateObjects,
-  SBSceneStateDeletion
+  SBSceneStateRenderer,
+  SBSceneStateTextures
 {
   static class SBSceneNormalized
   {
@@ -252,17 +257,11 @@ final class SBSceneState implements
 
     private final @Nonnull SortedSet<String>              flat_names;
     private final @Nonnull Map<String, File>              flat_to_files;
-
     private final @Nonnull Map<File, String>              files_to_flat;
-
     private final @Nonnull Log                            log;
-
     private final @Nonnull SortedSet<String>              textures;
-
     private final @Nonnull Map<String, SortedSet<String>> meshes;
-
     private final @Nonnull ArrayList<KLight>              lights;
-
     private final @Nonnull ArrayList<SBObjectDescription> instances;
 
     public SBSceneNormalized(
@@ -523,9 +522,10 @@ final class SBSceneState implements
       normalizeAndSaveMeshes(
         final SBSceneState state)
     {
-      for (final Entry<File, SortedSet<SBMesh>> e : state.meshes.entrySet()) {
+      for (final Entry<File, ConcurrentHashMap<String, SBMesh>> e : state.meshes
+        .entrySet()) {
         final File file = e.getKey();
-        final SortedSet<SBMesh> ms = e.getValue();
+        final Collection<SBMesh> ms = e.getValue().values();
 
         final TreeSet<String> mesh_names = new TreeSet<String>();
         for (final SBMesh m : ms) {
@@ -633,7 +633,7 @@ final class SBSceneState implements
   private final @Nonnull AtomicInteger                                                 light_id_pool;
   private final @Nonnull Log                                                           log;
   private final @Nonnull ConcurrentHashMap<File, Pair<BufferedImage, Texture2DStatic>> textures;
-  private final @Nonnull ConcurrentHashMap<File, SortedSet<SBMesh>>                    meshes;
+  private final @Nonnull ConcurrentHashMap<File, ConcurrentHashMap<String, SBMesh>>    meshes;
   private final @Nonnull AtomicInteger                                                 object_id_pool;
   private final @Nonnull ConcurrentHashMap<Integer, SBObjectDescription>               object_instances;
 
@@ -645,13 +645,14 @@ final class SBSceneState implements
     this.light_id_pool = new AtomicInteger(0);
     this.textures =
       new ConcurrentHashMap<File, Pair<BufferedImage, Texture2DStatic>>();
-    this.meshes = new ConcurrentHashMap<File, SortedSet<SBMesh>>();
+    this.meshes =
+      new ConcurrentHashMap<File, ConcurrentHashMap<String, SBMesh>>();
     this.object_id_pool = new AtomicInteger(0);
     this.object_instances =
       new ConcurrentHashMap<Integer, SBObjectDescription>();
   }
 
-  @Override public @Nonnull
+  @Override synchronized public @Nonnull
     Pair<List<Texture2DStatic>, List<SBMesh>>
     deleteAll()
   {
@@ -665,8 +666,8 @@ final class SBSceneState implements
       tr.add(p.second);
     }
 
-    for (final SortedSet<SBMesh> ms : this.meshes.values()) {
-      mr.addAll(ms);
+    for (final ConcurrentHashMap<String, SBMesh> mmap : this.meshes.values()) {
+      mr.addAll(mmap.values());
     }
 
     this.light_descriptions.clear();
@@ -677,7 +678,7 @@ final class SBSceneState implements
     return new Pair<List<Texture2DStatic>, List<SBMesh>>(tr, mr);
   }
 
-  @Override public void lightAdd(
+  @Override synchronized public void lightAdd(
     final @Nonnull KLight light)
   {
     final Integer id = light.getID();
@@ -693,31 +694,31 @@ final class SBSceneState implements
     this.light_descriptions.put(id, light);
   }
 
-  @Override public boolean lightExists(
+  @Override synchronized public boolean lightExists(
     final @Nonnull Integer id)
   {
     return this.light_descriptions.containsKey(id);
   }
 
-  @Override public @Nonnull Integer lightFreshID()
+  @Override synchronized public @Nonnull Integer lightFreshID()
   {
     return Integer.valueOf(this.light_id_pool.getAndIncrement());
   }
 
-  @Override public @CheckForNull KLight lightGet(
+  @Override synchronized public @CheckForNull KLight lightGet(
     final @Nonnull Integer key)
   {
     return this.light_descriptions.get(key);
   }
 
-  @Override public void lightRemove(
+  @Override synchronized public void lightRemove(
     final @Nonnull Integer id)
   {
     this.log.debug("Removing light " + id);
     this.light_descriptions.remove(id);
   }
 
-  @Override public @Nonnull List<KLight> lightsGetAll()
+  @Override synchronized public @Nonnull List<KLight> lightsGetAll()
   {
     final ArrayList<KLight> ls = new ArrayList<KLight>();
     for (final KLight l : this.light_descriptions.values()) {
@@ -755,7 +756,7 @@ final class SBSceneState implements
     throw new UnimplementedCodeException();
   }
 
-  @Override public void meshAdd(
+  @Override synchronized public void meshAdd(
     final @Nonnull File model,
     final @Nonnull SortedSet<SBMesh> objects)
   {
@@ -765,17 +766,27 @@ final class SBSceneState implements
       this.log.debug("Adding model " + model);
     }
 
-    this.meshes.put(model, objects);
+    final ConcurrentHashMap<String, SBMesh> ms =
+      new ConcurrentHashMap<String, SBMesh>();
+    for (final SBMesh m : objects) {
+      this.log.debug("Adding mesh " + m.getName() + " for model " + model);
+      ms.put(m.getName(), m);
+    }
+
+    this.meshes.put(model, ms);
   }
 
-  @Override public @Nonnull Map<File, SortedSet<String>> meshesGet()
+  @Override synchronized public @Nonnull
+    Map<File, SortedSet<String>>
+    meshesGet()
   {
     final HashMap<File, SortedSet<String>> results =
       new HashMap<File, SortedSet<String>>();
 
-    for (final Entry<File, SortedSet<SBMesh>> e : this.meshes.entrySet()) {
+    for (final Entry<File, ConcurrentHashMap<String, SBMesh>> e : this.meshes
+      .entrySet()) {
       final File f = e.getKey();
-      final SortedSet<SBMesh> ms = e.getValue();
+      final Collection<SBMesh> ms = e.getValue().values();
       final TreeSet<String> ns = new TreeSet<String>();
       for (final SBMesh m : ms) {
         ns.add(m.getName());
@@ -786,7 +797,7 @@ final class SBSceneState implements
     return results;
   }
 
-  @Override public void objectAdd(
+  @Override synchronized public void objectAdd(
     final @Nonnull SBObjectDescription object)
   {
     if (this.object_instances.containsKey(object.getID())) {
@@ -798,30 +809,32 @@ final class SBSceneState implements
     this.object_instances.put(object.getID(), object);
   }
 
-  @Override public void objectDelete(
+  @Override synchronized public void objectDelete(
     final @Nonnull Integer id)
   {
     this.object_instances.remove(id);
   }
 
-  @Override public boolean objectExists(
+  @Override synchronized public boolean objectExists(
     final @Nonnull Integer id)
   {
     return this.object_instances.containsKey(id);
   }
 
-  @Override public Integer objectFreshID()
+  @Override synchronized public Integer objectFreshID()
   {
     return Integer.valueOf(this.object_id_pool.getAndIncrement());
   }
 
-  @Override public @CheckForNull SBObjectDescription objectGet(
+  @Override synchronized public @CheckForNull SBObjectDescription objectGet(
     final @Nonnull Integer id)
   {
     return this.object_instances.get(id);
   }
 
-  @Override public @Nonnull List<SBObjectDescription> objectsGetAll()
+  @Override synchronized public @Nonnull
+    List<SBObjectDescription>
+    objectsGetAll()
   {
     final ArrayList<SBObjectDescription> os =
       new ArrayList<SBObjectDescription>();
@@ -831,14 +844,16 @@ final class SBSceneState implements
     return os;
   }
 
-  @Override public void textureAdd(
+  @Override synchronized public void textureAdd(
     final @Nonnull File file,
     final @Nonnull Pair<BufferedImage, Texture2DStatic> texture)
   {
     this.textures.put(file, texture);
   }
 
-  @Override public @Nonnull Map<File, BufferedImage> texturesGet()
+  @Override synchronized public @Nonnull
+    Map<File, BufferedImage>
+    texturesGet()
   {
     final HashMap<File, BufferedImage> m = new HashMap<File, BufferedImage>();
     final Set<Entry<File, Pair<BufferedImage, Texture2DStatic>>> es =
@@ -849,6 +864,67 @@ final class SBSceneState implements
     }
 
     return m;
+  }
+
+  @Override synchronized public
+    Pair<Set<KLight>, Set<KMeshInstance>>
+    rendererGetScene()
+  {
+    final HashSet<KLight> lights =
+      new HashSet<KLight>(this.light_descriptions.values());
+    final HashSet<KMeshInstance> instances = new HashSet<KMeshInstance>();
+
+    for (final SBObjectDescription odesc : this.object_instances.values()) {
+      final Integer id = odesc.getID();
+
+      final File m = odesc.getModel();
+      assert m != null;
+      final ConcurrentHashMap<String, SBMesh> mesh_set = this.meshes.get(m);
+      assert mesh_set != null;
+      final String mo = odesc.getModelObject();
+      assert mo != null;
+      final SBMesh mesh = mesh_set.get(mo);
+      assert mesh != null;
+
+      final VectorReadable3F translation = odesc.getPosition();
+      final QuaternionM4F orientation = new QuaternionM4F();
+      final VectorReadable3F diffuse = new VectorI3F(1, 1, 1);
+
+      final List<Texture2DStatic> diffuse_maps =
+        new LinkedList<Texture2DStatic>();
+      if (odesc.getDiffuseTexture() != null) {
+        final Pair<BufferedImage, Texture2DStatic> p =
+          this.textures.get(odesc.getDiffuseTexture());
+        assert p != null;
+        diffuse_maps.add(p.second);
+      }
+
+      final Option<Texture2DStatic> normal_map =
+        (odesc.getNormalTexture() != null)
+          ? new Option.Some<Texture2DStatic>(this.textures.get(odesc
+            .getNormalTexture()).second) : new Option.None<Texture2DStatic>();
+
+      final Option<Texture2DStatic> specular_map =
+        (odesc.getSpecularTexture() != null)
+          ? new Option.Some<Texture2DStatic>(this.textures.get(odesc
+            .getSpecularTexture()).second)
+          : new Option.None<Texture2DStatic>();
+
+      final KMaterial material =
+        new KMaterial(diffuse, diffuse_maps, normal_map, specular_map);
+      final KTransform transform = new KTransform(translation, orientation);
+
+      final KMeshInstance mi =
+        new KMeshInstance(
+          id,
+          transform,
+          mesh.getArrayBuffer(),
+          mesh.getIndexBuffer(),
+          material);
+      instances.add(mi);
+    }
+
+    return new Pair<Set<KLight>, Set<KMeshInstance>>(lights, instances);
   }
 }
 
@@ -902,6 +978,11 @@ interface SBSceneStateObjects
     final @Nonnull Integer id);
 
   public @Nonnull List<SBObjectDescription> objectsGetAll();
+}
+
+interface SBSceneStateRenderer
+{
+  public @Nonnull Pair<Set<KLight>, Set<KMeshInstance>> rendererGetScene();
 }
 
 interface SBSceneStateTextures

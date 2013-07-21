@@ -49,6 +49,8 @@ public final class Sandbox
           final SBSceneState state = new SBSceneState(log);
           final SBSceneController controller =
             new SBSceneController(state, renderer, log);
+          renderer.setController(controller);
+
           final SBMainWindow window =
             new SBMainWindow(controller, renderer, log);
           window.setTitle("Sandbox");

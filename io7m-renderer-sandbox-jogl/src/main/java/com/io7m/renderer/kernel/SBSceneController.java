@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -68,11 +69,12 @@ interface SBSceneChangeListenerRegistration
 }
 
 public final class SBSceneController implements
-  SBSceneControllerTextures,
+  SBSceneControllerIO,
   SBSceneControllerLights,
   SBSceneControllerMeshes,
   SBSceneControllerObjects,
-  SBSceneControllerIO
+  SBSceneControllerRenderer,
+  SBSceneControllerTextures
 {
   private static void ioSaveSceneActualCopyFiles(
     final @Nonnull SBSceneNormalized nstate,
@@ -401,6 +403,13 @@ public final class SBSceneController implements
     return this.state.objectsGetAll();
   }
 
+  @Override public @Nonnull
+    Pair<Set<KLight>, Set<KMeshInstance>>
+    rendererGetScene()
+  {
+    return this.state.rendererGetScene();
+  }
+
   private void sceneChanged()
   {
     for (final SBSceneChangeListener l : this.listeners) {
@@ -539,6 +548,11 @@ interface SBSceneControllerObjects extends SBSceneChangeListenerRegistration
     final @Nonnull Integer id);
 
   public @Nonnull List<SBObjectDescription> objectsGetAll();
+}
+
+interface SBSceneControllerRenderer
+{
+  public @Nonnull Pair<Set<KLight>, Set<KMeshInstance>> rendererGetScene();
 }
 
 interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration
