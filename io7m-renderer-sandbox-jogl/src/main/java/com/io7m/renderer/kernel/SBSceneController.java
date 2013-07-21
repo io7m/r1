@@ -23,11 +23,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -50,10 +50,17 @@ import nu.xom.ParsingException;
 import nu.xom.Serializer;
 import nu.xom.ValidityException;
 
+import org.pcollections.HashTreePSet;
+import org.pcollections.MapPSet;
+
 import com.io7m.jaux.UnimplementedCodeException;
+import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jlog.Log;
+import com.io7m.jtensors.QuaternionM4F;
+import com.io7m.renderer.RSpaceRGB;
+import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.SBException.SBExceptionImageLoading;
 import com.io7m.renderer.kernel.SBSceneState.SBSceneNormalized;
 import com.io7m.renderer.kernel.SBZipUtilities.TemporaryDirectory;
@@ -346,10 +353,64 @@ public final class SBSceneController implements
   }
 
   @Override public @Nonnull
-    Pair<Set<KLight>, Set<KMeshInstance>>
+    Pair<Collection<KLight>, Collection<KMeshInstance>>
     rendererGetScene()
   {
-    throw new UnimplementedCodeException();
+    final SBScene scene = this.scene_current.get();
+    if (scene != null) {
+      final Collection<KLight> lights = scene.getLights();
+      MapPSet<KMeshInstance> meshes = HashTreePSet.empty();
+
+      for (final SBInstance i : scene.getInstances()) {
+        final SBModel model = scene.getModel(i.getModel());
+        final SBMesh mesh = model.getMesh(i.getModelObject());
+
+        final QuaternionM4F orientation = new QuaternionM4F();
+        final Integer id = i.getID();
+
+        final KTransform transform =
+          new KTransform(i.getPosition(), orientation);
+
+        final RVectorI3F<RSpaceRGB> diffuse =
+          new RVectorI3F<RSpaceRGB>(1.0f, 1.0f, 1.0f);
+
+        final List<Texture2DStatic> diffuse_maps =
+          new LinkedList<Texture2DStatic>();
+        if (i.getDiffuse() != null) {
+          diffuse_maps.add(i.getDiffuse().getTexture());
+        }
+
+        final Option<Texture2DStatic> normal_map =
+          (i.getNormal() == null)
+            ? new Option.None<Texture2DStatic>()
+            : new Option.Some<Texture2DStatic>(i.getNormal().getTexture());
+        final Option<Texture2DStatic> specular_map =
+          (i.getSpecular() == null)
+            ? new Option.None<Texture2DStatic>()
+            : new Option.Some<Texture2DStatic>(i.getSpecular().getTexture());
+
+        final KMaterial material =
+          new KMaterial(diffuse, diffuse_maps, normal_map, specular_map);
+
+        meshes =
+          meshes.plus(new KMeshInstance(
+            id,
+            transform,
+            mesh.getArrayBuffer(),
+            mesh.getIndexBuffer(),
+            material));
+      }
+
+      return new Pair<Collection<KLight>, Collection<KMeshInstance>>(
+        lights,
+        meshes);
+    }
+
+    final Collection<KLight> first = HashTreePSet.empty();
+    final Collection<KMeshInstance> second = HashTreePSet.empty();
+    return new Pair<Collection<KLight>, Collection<KMeshInstance>>(
+      first,
+      second);
   }
 
   private void stateChangedNotifyListeners()
@@ -583,7 +644,9 @@ interface SBSceneControllerObjects extends SBSceneChangeListenerRegistration
 
 interface SBSceneControllerRenderer
 {
-  public @Nonnull Pair<Set<KLight>, Set<KMeshInstance>> rendererGetScene();
+  public @Nonnull
+    Pair<Collection<KLight>, Collection<KMeshInstance>>
+    rendererGetScene();
 }
 
 interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration

@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
@@ -32,6 +33,12 @@ import org.pcollections.PMap;
   {
     this.meshes = meshes;
     this.description = description;
+  }
+
+  public @CheckForNull SBMesh getMesh(
+    final @Nonnull String name)
+  {
+    return this.meshes.get(name);
   }
 
   @Nonnull String getName()

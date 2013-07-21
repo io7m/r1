@@ -16,6 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.Collection;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -87,6 +89,22 @@ import org.pcollections.PMap;
       this.models,
       this.lights,
       this.instances);
+  }
+
+  public @Nonnull Collection<SBInstance> getInstances()
+  {
+    return this.instances.values();
+  }
+
+  public @Nonnull Collection<KLight> getLights()
+  {
+    return this.lights.values();
+  }
+
+  public @CheckForNull SBModel getModel(
+    final @Nonnull String name)
+  {
+    return this.models.get(name);
   }
 
   public @CheckForNull SBTexture getTexture(
