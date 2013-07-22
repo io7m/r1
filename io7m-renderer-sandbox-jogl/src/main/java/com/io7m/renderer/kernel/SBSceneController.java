@@ -27,8 +27,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -53,7 +51,6 @@ import nu.xom.ValidityException;
 import org.pcollections.HashTreePSet;
 import org.pcollections.MapPSet;
 
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.Texture2DStatic;
@@ -62,7 +59,6 @@ import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.SBException.SBExceptionImageLoading;
-import com.io7m.renderer.kernel.SBSceneState.SBSceneNormalized;
 import com.io7m.renderer.kernel.SBZipUtilities.TemporaryDirectory;
 
 interface SBSceneChangeListener
@@ -79,51 +75,87 @@ interface SBSceneChangeListenerRegistration
 public final class SBSceneController implements
   SBSceneControllerIO,
   SBSceneControllerLights,
-  SBSceneControllerMeshes,
-  SBSceneControllerObjects,
+  SBSceneControllerModels,
+  SBSceneControllerInstances,
   SBSceneControllerRenderer,
   SBSceneControllerTextures
 {
   private static void ioSaveSceneActualCopyFiles(
-    final @Nonnull SBSceneNormalized nstate,
+    final @Nonnull Log log,
+    final @Nonnull SBSceneDescription scene_desc_current,
+    final @Nonnull SBSceneDescription scene_desc_saving,
     final @Nonnull ZipOutputStream fo)
     throws IOException
   {
-    final Map<String, File> mappings = nstate.getFileMappings();
     final byte[] buffer = new byte[8192];
 
-    for (final Entry<String, File> e : mappings.entrySet()) {
-      final String file_output = e.getKey();
-      final File file_input = e.getValue();
+    for (final SBTextureDescription source : scene_desc_current
+      .getTextureDescriptions()) {
 
-      final FileInputStream stream = new FileInputStream(file_input);
-      try {
-        final ZipEntry entry = new ZipEntry(file_output);
-        fo.putNextEntry(entry);
+      final SBTextureDescription target =
+        scene_desc_saving.getTexture(source.getName());
 
-        for (;;) {
-          final int r = stream.read(buffer);
-          if (r == -1) {
-            break;
-          }
-          fo.write(buffer, 0, r);
+      SBSceneController.ioSaveSceneCopyFileIntoZip(
+        log,
+        fo,
+        buffer,
+        source.getFile(),
+        target.getFile());
+    }
+
+    for (final SBModelDescription source : scene_desc_current
+      .getModelDescriptions()) {
+
+      final SBModelDescription target =
+        scene_desc_saving.getModel(source.getName());
+
+      SBSceneController.ioSaveSceneCopyFileIntoZip(
+        log,
+        fo,
+        buffer,
+        source.getFile(),
+        target.getFile());
+    }
+  }
+
+  private static void ioSaveSceneCopyFileIntoZip(
+    final @Nonnull Log log,
+    final @Nonnull ZipOutputStream fo,
+    final @Nonnull byte[] buffer,
+    final @Nonnull File file_input,
+    final @Nonnull File file_output)
+    throws FileNotFoundException,
+      IOException
+  {
+    log.debug("Copying " + file_input + " into zip at " + file_output);
+
+    final FileInputStream stream = new FileInputStream(file_input);
+    try {
+      final ZipEntry entry = new ZipEntry(file_output.toString());
+      fo.putNextEntry(entry);
+
+      for (;;) {
+        final int r = stream.read(buffer);
+        if (r == -1) {
+          break;
         }
-
-        fo.flush();
-        fo.closeEntry();
-      } finally {
-        stream.close();
+        fo.write(buffer, 0, r);
       }
+
+      fo.flush();
+      fo.closeEntry();
+    } finally {
+      stream.close();
     }
   }
 
   private static void ioSaveSceneActualSerializeXML(
-    final @Nonnull SBSceneNormalized nstate,
+    final @Nonnull SBSceneDescription scene,
     final @Nonnull ZipOutputStream fo)
     throws UnsupportedEncodingException,
       IOException
   {
-    final Element xml = nstate.toXML();
+    final Element xml = scene.toXML();
     final Document doc = new Document(xml);
     final Serializer s = new Serializer(fo, "UTF-8");
     s.setIndent(2);
@@ -158,7 +190,6 @@ public final class SBSceneController implements
     }
   }
 
-  private final @Nonnull SBSceneState                      state;
   private final @Nonnull Log                               log;
   protected final @Nonnull Log                             log_textures;
   private final @Nonnull SBGLRenderer                      renderer;
@@ -168,18 +199,16 @@ public final class SBSceneController implements
   private final @Nonnull AtomicReference<SBScene>          scene_current;
 
   public SBSceneController(
-    final @Nonnull SBSceneState state,
     final @Nonnull SBGLRenderer renderer,
     final @Nonnull Log log)
   {
     this.log = new Log(log, "control");
     this.log_textures = new Log(this.log, "textures");
-    this.state = state;
     this.renderer = renderer;
     this.exec_pool = Executors.newCachedThreadPool();
     this.listeners = new LinkedList<SBSceneChangeListener>();
     this.names = new SBUniqueNames();
-    this.scene_current = new AtomicReference<SBScene>();
+    this.scene_current = new AtomicReference<SBScene>(SBScene.empty());
   }
 
   @Override public void changeListenerAdd(
@@ -222,44 +251,26 @@ public final class SBSceneController implements
     final Document doc = parser.build(new File(d.getFile(), "scene.xml"));
 
     final SBSceneDescription desc =
-      SBSceneDescription.fromXML(doc.getRootElement());
+      SBSceneDescription.fromXML(d, doc.getRootElement());
 
     SBScene scene = SBScene.empty();
 
     for (final SBTextureDescription t : desc.getTextureDescriptions()) {
       final Future<SBTexture> tf = this.textureLoad(t);
-      scene = scene.addTexture(tf.get());
+      scene = scene.textureAdd(tf.get());
     }
 
     for (final SBModelDescription m : desc.getModelDescriptions()) {
       final Future<SBModel> mf = this.modelLoad(m);
-      scene = scene.addModel(mf.get());
+      scene = scene.modelAdd(mf.get());
     }
 
     for (final KLight light : desc.getLights()) {
-      scene = scene.addLight(light);
+      scene = scene.lightAdd(light);
     }
 
-    for (final SBInstanceDescription o : desc.getInstanceDescriptions()) {
-      final SBTexture diff =
-        (o.getDiffuse() == null) ? null : scene.getTexture(o.getDiffuse());
-      final SBTexture norm =
-        (o.getNormal() == null) ? null : scene.getTexture(o.getNormal());
-      final SBTexture spec =
-        (o.getSpecular() == null) ? null : scene.getTexture(o.getSpecular());
-
-      final SBInstance instance =
-        new SBInstance(
-          o.getID(),
-          o.getPosition(),
-          o.getOrientation(),
-          o.getModel(),
-          o.getModelObject(),
-          diff,
-          norm,
-          spec);
-
-      scene = scene.addInstance(instance);
+    for (final SBInstanceDescription idesc : desc.getInstanceDescriptions()) {
+      scene = scene.instanceAddByDescription(idesc);
     }
 
     this.stateUpdate(scene);
@@ -283,31 +294,48 @@ public final class SBSceneController implements
 
   private void ioSaveSceneActual(
     final @Nonnull File file)
-    throws FileNotFoundException,
-      UnsupportedEncodingException,
+    throws UnsupportedEncodingException,
       IOException
   {
     SBSceneController.this.log.debug("Writing scene to " + file);
 
-    final SBSceneNormalized nstate =
-      new SBSceneState.SBSceneNormalized(
-        SBSceneController.this.log,
-        SBSceneController.this.state);
+    final SBScene scene = this.scene_current.get();
+    final SBSceneDescription scene_desc_current =
+      scene.makeDescription(false);
+    final SBSceneDescription scene_desc_saving = scene.makeDescription(true);
 
     final ZipOutputStream fo =
       new ZipOutputStream(new FileOutputStream(file));
     fo.setLevel(9);
 
-    SBSceneController.ioSaveSceneActualSerializeXML(nstate, fo);
-    SBSceneController.ioSaveSceneActualCopyFiles(nstate, fo);
+    SBSceneController.ioSaveSceneActualSerializeXML(scene_desc_saving, fo);
+    SBSceneController.ioSaveSceneActualCopyFiles(
+      this.log,
+      scene_desc_current,
+      scene_desc_saving,
+      fo);
 
     fo.finish();
     fo.flush();
     fo.close();
 
-    SBSceneController.this.log.debug("Scene written to " + file);
+    SBSceneController.this.log.debug("Wrote scene to " + file);
+  }
 
-    this.stateChangedNotifyListeners();
+  private @Nonnull Future<SBModel> modelLoad(
+    final @Nonnull SBModelDescription m)
+  {
+    final FutureTask<SBModel> f =
+      new FutureTask<SBModel>(new Callable<SBModel>() {
+        @SuppressWarnings("synthetic-access") @Override public SBModel call()
+          throws Exception
+        {
+          return SBSceneController.this.modelLoadActual(m);
+        }
+      });
+
+    this.exec_pool.execute(f);
+    return f;
   }
 
   private @Nonnull SBModel modelLoadActual(
@@ -336,15 +364,155 @@ public final class SBSceneController implements
     }
   }
 
-  private @Nonnull Future<SBModel> modelLoad(
-    final @Nonnull SBModelDescription m)
+  @Override public @Nonnull
+    Pair<Collection<KLight>, Collection<KMeshInstance>>
+    rendererGetScene()
   {
+    final SBScene scene = this.scene_current.get();
+
+    final Collection<KLight> lights = scene.lightsGet();
+    MapPSet<KMeshInstance> meshes = HashTreePSet.empty();
+
+    for (final SBInstance i : scene.instancesGet()) {
+      final SBModel model = scene.modelGet(i.getModel());
+      final SBMesh mesh = model.getMesh(i.getModelObject());
+
+      final QuaternionM4F orientation = new QuaternionM4F();
+      final Integer id = i.getID();
+
+      final KTransform transform =
+        new KTransform(i.getPosition(), orientation);
+
+      final RVectorI3F<RSpaceRGB> diffuse =
+        new RVectorI3F<RSpaceRGB>(1.0f, 1.0f, 1.0f);
+
+      final List<Texture2DStatic> diffuse_maps =
+        new LinkedList<Texture2DStatic>();
+      if (i.getDiffuse() != null) {
+        diffuse_maps.add(i.getDiffuse().getTexture());
+      }
+
+      final Option<Texture2DStatic> normal_map =
+        (i.getNormal() == null)
+          ? new Option.None<Texture2DStatic>()
+          : new Option.Some<Texture2DStatic>(i.getNormal().getTexture());
+      final Option<Texture2DStatic> specular_map =
+        (i.getSpecular() == null)
+          ? new Option.None<Texture2DStatic>()
+          : new Option.Some<Texture2DStatic>(i.getSpecular().getTexture());
+
+      final KMaterial material =
+        new KMaterial(diffuse, diffuse_maps, normal_map, specular_map);
+
+      meshes =
+        meshes.plus(new KMeshInstance(
+          id,
+          transform,
+          mesh.getArrayBuffer(),
+          mesh.getIndexBuffer(),
+          material));
+    }
+
+    return new Pair<Collection<KLight>, Collection<KMeshInstance>>(
+      lights,
+      meshes);
+  }
+
+  @Override public void sceneInstanceAdd(
+    final @Nonnull SBInstance instance)
+  {
+    this.stateUpdate(this.scene_current.get().instanceAdd(instance));
+  }
+
+  @Override public void sceneInstanceAddByDescription(
+    final @Nonnull SBInstanceDescription desc)
+  {
+    this.stateUpdate(this.scene_current.get().instanceAddByDescription(desc));
+  }
+
+  @Override public boolean sceneInstanceExists(
+    final @Nonnull Integer id)
+  {
+    return this.scene_current.get().instanceExists(id);
+  }
+
+  @Override public @Nonnull Integer sceneInstanceFreshID()
+  {
+    final Pair<SBScene, Integer> p =
+      this.scene_current.get().instanceFreshID();
+    this.stateUpdate(p.first);
+    return p.second;
+  }
+
+  @Override public @Nonnull SBInstance sceneInstanceGet(
+    final @Nonnull Integer id)
+  {
+    return this.scene_current.get().instanceGet(id);
+  }
+
+  @Override public void sceneInstanceRemove(
+    final @Nonnull Integer id)
+  {
+    this.stateUpdate(this.scene_current.get().removeInstance(id));
+  }
+
+  @Override public @Nonnull Collection<SBInstance> sceneInstancesGetAll()
+  {
+    return this.scene_current.get().instancesGet();
+  }
+
+  @Override public void sceneLightAdd(
+    final @Nonnull KLight light)
+  {
+    this.stateUpdate(this.scene_current.get().lightAdd(light));
+  }
+
+  @Override public boolean sceneLightExists(
+    final @Nonnull Integer id)
+  {
+    return this.scene_current.get().lightExists(id);
+  }
+
+  @Override public @Nonnull Integer sceneLightFreshID()
+  {
+    final Pair<SBScene, Integer> p = this.scene_current.get().lightFreshID();
+    this.stateUpdate(p.first);
+    return p.second;
+  }
+
+  @Override public @CheckForNull KLight sceneLightGet(
+    final @Nonnull Integer id)
+  {
+    return this.scene_current.get().lightGet(id);
+  }
+
+  @Override public void sceneLightRemove(
+    final @Nonnull Integer id)
+  {
+    this.stateUpdate(this.scene_current.get().lightRemove(id));
+  }
+
+  @Override public @Nonnull Collection<KLight> sceneLightsGetAll()
+  {
+    return this.scene_current.get().lightsGet();
+  }
+
+  @Override public @Nonnull Future<SBModel> sceneModelLoad(
+    final @Nonnull File file)
+  {
+    final SBModelDescription desc =
+      new SBModelDescription(file, this.names.get(file.getName()));
+
     final FutureTask<SBModel> f =
       new FutureTask<SBModel>(new Callable<SBModel>() {
         @SuppressWarnings("synthetic-access") @Override public SBModel call()
           throws Exception
         {
-          return SBSceneController.this.modelLoadActual(m);
+          final SBModel m = SBSceneController.this.modelLoadActual(desc);
+          SBSceneController.this
+            .stateUpdate(SBSceneController.this.scene_current.get().modelAdd(
+              m));
+          return m;
         }
       });
 
@@ -352,65 +520,40 @@ public final class SBSceneController implements
     return f;
   }
 
-  @Override public @Nonnull
-    Pair<Collection<KLight>, Collection<KMeshInstance>>
-    rendererGetScene()
+  @Override public @Nonnull Map<String, SBModel> sceneModelsGet()
   {
-    final SBScene scene = this.scene_current.get();
-    if (scene != null) {
-      final Collection<KLight> lights = scene.getLights();
-      MapPSet<KMeshInstance> meshes = HashTreePSet.empty();
+    return this.scene_current.get().modelsGet();
+  }
 
-      for (final SBInstance i : scene.getInstances()) {
-        final SBModel model = scene.getModel(i.getModel());
-        final SBMesh mesh = model.getMesh(i.getModelObject());
+  @Override public @Nonnull Future<SBTexture> sceneTextureLoad(
+    final @Nonnull File file)
+  {
+    final SBTextureDescription desc =
+      new SBTextureDescription(file, this.names.get(file.getName()));
 
-        final QuaternionM4F orientation = new QuaternionM4F();
-        final Integer id = i.getID();
-
-        final KTransform transform =
-          new KTransform(i.getPosition(), orientation);
-
-        final RVectorI3F<RSpaceRGB> diffuse =
-          new RVectorI3F<RSpaceRGB>(1.0f, 1.0f, 1.0f);
-
-        final List<Texture2DStatic> diffuse_maps =
-          new LinkedList<Texture2DStatic>();
-        if (i.getDiffuse() != null) {
-          diffuse_maps.add(i.getDiffuse().getTexture());
+    final FutureTask<SBTexture> f =
+      new FutureTask<SBTexture>(new Callable<SBTexture>() {
+        @SuppressWarnings("synthetic-access") @Override public
+          SBTexture
+          call()
+            throws Exception
+        {
+          final SBTexture t = SBSceneController.this.textureLoadActual(desc);
+          SBSceneController.this
+            .stateUpdate(SBSceneController.this.scene_current
+              .get()
+              .textureAdd(t));
+          return t;
         }
+      });
 
-        final Option<Texture2DStatic> normal_map =
-          (i.getNormal() == null)
-            ? new Option.None<Texture2DStatic>()
-            : new Option.Some<Texture2DStatic>(i.getNormal().getTexture());
-        final Option<Texture2DStatic> specular_map =
-          (i.getSpecular() == null)
-            ? new Option.None<Texture2DStatic>()
-            : new Option.Some<Texture2DStatic>(i.getSpecular().getTexture());
+    this.exec_pool.execute(f);
+    return f;
+  }
 
-        final KMaterial material =
-          new KMaterial(diffuse, diffuse_maps, normal_map, specular_map);
-
-        meshes =
-          meshes.plus(new KMeshInstance(
-            id,
-            transform,
-            mesh.getArrayBuffer(),
-            mesh.getIndexBuffer(),
-            material));
-      }
-
-      return new Pair<Collection<KLight>, Collection<KMeshInstance>>(
-        lights,
-        meshes);
-    }
-
-    final Collection<KLight> first = HashTreePSet.empty();
-    final Collection<KMeshInstance> second = HashTreePSet.empty();
-    return new Pair<Collection<KLight>, Collection<KMeshInstance>>(
-      first,
-      second);
+  @Override public @Nonnull Map<String, SBTexture> sceneTexturesGet()
+  {
+    return this.scene_current.get().texturesGet();
   }
 
   private void stateChangedNotifyListeners()
@@ -418,96 +561,6 @@ public final class SBSceneController implements
     for (final SBSceneChangeListener l : this.listeners) {
       l.sceneChanged();
     }
-  }
-
-  @Override public void sceneLightAdd(
-    final @Nonnull KLight light)
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public boolean sceneLightExists(
-    final @Nonnull Integer id)
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public @Nonnull Integer sceneLightFreshID()
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public @CheckForNull KLight sceneLightGet(
-    final @Nonnull Integer id)
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public void sceneLightRemove(
-    final @Nonnull Integer id)
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public @Nonnull List<KLight> sceneLightsGetAll()
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public @Nonnull Map<File, SortedSet<String>> sceneMeshesGet()
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public @Nonnull Future<SBModel> sceneMeshLoad(
-    final @Nonnull File file)
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public void sceneObjectAdd(
-    @Nonnull final SBObjectDescription object)
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public boolean sceneObjectExists(
-    @Nonnull final Integer id)
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public @Nonnull Integer sceneObjectFreshID()
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public @Nonnull SBObjectDescription sceneObjectGet(
-    final @Nonnull Integer id)
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public void sceneObjectRemove(
-    @Nonnull final Integer id)
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public @Nonnull List<SBObjectDescription> sceneObjectsGetAll()
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public @Nonnull Future<SBTexture> sceneTextureLoad(
-    final @Nonnull File file)
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public @Nonnull Map<File, BufferedImage> sceneTexturesGet()
-  {
-    throw new UnimplementedCodeException();
   }
 
   private void stateUpdate(
@@ -587,6 +640,29 @@ public final class SBSceneController implements
   }
 }
 
+interface SBSceneControllerInstances extends
+  SBSceneChangeListenerRegistration
+{
+  public void sceneInstanceAdd(
+    final @Nonnull SBInstance instance);
+
+  public void sceneInstanceAddByDescription(
+    final @Nonnull SBInstanceDescription desc);
+
+  public boolean sceneInstanceExists(
+    final @Nonnull Integer id);
+
+  public @Nonnull Integer sceneInstanceFreshID();
+
+  public @CheckForNull SBInstance sceneInstanceGet(
+    final @Nonnull Integer id);
+
+  public void sceneInstanceRemove(
+    final @Nonnull Integer id);
+
+  public @Nonnull Collection<SBInstance> sceneInstancesGetAll();
+}
+
 interface SBSceneControllerIO
 {
   public @Nonnull Future<Void> ioLoadScene(
@@ -612,34 +688,15 @@ interface SBSceneControllerLights extends SBSceneChangeListenerRegistration
   public void sceneLightRemove(
     final @Nonnull Integer id);
 
-  public @Nonnull List<KLight> sceneLightsGetAll();
+  public @Nonnull Collection<KLight> sceneLightsGetAll();
 }
 
-interface SBSceneControllerMeshes extends SBSceneChangeListenerRegistration
+interface SBSceneControllerModels extends SBSceneChangeListenerRegistration
 {
-  public @Nonnull Map<File, SortedSet<String>> sceneMeshesGet();
-
-  public @Nonnull Future<SBModel> sceneMeshLoad(
+  public @Nonnull Future<SBModel> sceneModelLoad(
     final @Nonnull File file);
-}
 
-interface SBSceneControllerObjects extends SBSceneChangeListenerRegistration
-{
-  public void sceneObjectAdd(
-    final @Nonnull SBObjectDescription object);
-
-  public boolean sceneObjectExists(
-    final @Nonnull Integer id);
-
-  public @Nonnull Integer sceneObjectFreshID();
-
-  public @Nonnull SBObjectDescription sceneObjectGet(
-    final @Nonnull Integer id);
-
-  public void sceneObjectRemove(
-    final @Nonnull Integer id);
-
-  public @Nonnull List<SBObjectDescription> sceneObjectsGetAll();
+  public @Nonnull Map<String, SBModel> sceneModelsGet();
 }
 
 interface SBSceneControllerRenderer
@@ -654,5 +711,5 @@ interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration
   public @Nonnull Future<SBTexture> sceneTextureLoad(
     final @Nonnull File file);
 
-  public @Nonnull Map<File, BufferedImage> sceneTexturesGet();
+  public @Nonnull Map<String, SBTexture> sceneTexturesGet();
 }

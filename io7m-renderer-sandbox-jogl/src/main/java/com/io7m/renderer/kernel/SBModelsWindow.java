@@ -22,7 +22,7 @@ import javax.swing.JTextField;
 
 import com.io7m.jlog.Log;
 
-final class SBMeshesWindow extends JFrame
+final class SBModelsWindow extends JFrame
 {
   private static final long serialVersionUID;
 
@@ -30,15 +30,15 @@ final class SBMeshesWindow extends JFrame
     serialVersionUID = -3617746303911390018L;
   }
 
-  public SBMeshesWindow(
-    final @Nonnull SBSceneControllerMeshes controller,
+  public SBModelsWindow(
+    final @Nonnull SBSceneControllerModels controller,
     final @Nonnull JTextField model,
     final @Nonnull JTextField model_object,
     final @Nonnull Log log)
   {
     super("Meshes");
     this.getContentPane().add(
-      new SBMeshesPanel(this, controller, model, model_object, log));
+      new SBModelsPanel(this, controller, model, model_object, log));
     this.pack();
   }
 }

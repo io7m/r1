@@ -58,7 +58,9 @@ public class SBModelDescriptionTest
           final @Nonnull SBModelDescription desc)
           throws Throwable
         {
-          Assert.assertEquals(desc, SBModelDescription.fromXML(desc.toXML()));
+          Assert.assertEquals(
+            desc,
+            SBModelDescription.fromXML(null, desc.toXML()));
         }
       });
   }

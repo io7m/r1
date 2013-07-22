@@ -25,33 +25,26 @@ import com.io7m.renderer.RVectorI3F;
 
 @Immutable final class SBInstance
 {
-  private final @Nonnull Integer                 id;
-  private final @Nonnull RVectorI3F<RSpaceWorld> position;
-  private final @Nonnull RVectorI3F<SBDegrees>   orientation;
-  private final @Nonnull String                  model;
-  private final @Nonnull String                  model_object;
-  private final @CheckForNull SBTexture          diffuse;
-  private final @CheckForNull SBTexture          normal;
-  private final @CheckForNull SBTexture          specular;
+  private final @Nonnull SBInstanceDescription description;
+  private final @CheckForNull SBTexture        diffuse;
+  private final @CheckForNull SBTexture        normal;
+  private final @CheckForNull SBTexture        specular;
 
   public SBInstance(
-    final @Nonnull Integer id,
-    final @Nonnull RVectorI3F<RSpaceWorld> position,
-    final @Nonnull RVectorI3F<SBDegrees> orientation,
-    final @Nonnull String model,
-    final @Nonnull String model_object,
+    final @Nonnull SBInstanceDescription description,
     final @CheckForNull SBTexture diffuse,
     final @CheckForNull SBTexture normal,
     final @CheckForNull SBTexture specular)
   {
-    this.id = id;
-    this.position = position;
-    this.orientation = orientation;
-    this.model = model;
-    this.model_object = model_object;
+    this.description = description;
     this.diffuse = diffuse;
     this.normal = normal;
     this.specular = specular;
+  }
+
+  public @Nonnull SBInstanceDescription getDescription()
+  {
+    return this.description;
   }
 
   public @CheckForNull SBTexture getDiffuse()
@@ -61,17 +54,17 @@ import com.io7m.renderer.RVectorI3F;
 
   public @Nonnull Integer getID()
   {
-    return this.id;
+    return this.description.getID();
   }
 
   public @Nonnull String getModel()
   {
-    return this.model;
+    return this.description.getModel();
   }
 
   public @Nonnull String getModelObject()
   {
-    return this.model_object;
+    return this.description.getModelObject();
   }
 
   public @CheckForNull SBTexture getNormal()
@@ -81,12 +74,12 @@ import com.io7m.renderer.RVectorI3F;
 
   public @Nonnull RVectorI3F<SBDegrees> getOrientation()
   {
-    return this.orientation;
+    return this.description.getOrientation();
   }
 
   public @Nonnull RVectorI3F<RSpaceWorld> getPosition()
   {
-    return this.position;
+    return this.description.getPosition();
   }
 
   public @CheckForNull SBTexture getSpecular()
@@ -98,7 +91,7 @@ import com.io7m.renderer.RVectorI3F;
   {
     final StringBuilder builder = new StringBuilder();
     builder.append("[SBInstance  ");
-    builder.append(this.id);
+    builder.append(this.getID());
     builder.append("]");
     return builder.toString();
   }

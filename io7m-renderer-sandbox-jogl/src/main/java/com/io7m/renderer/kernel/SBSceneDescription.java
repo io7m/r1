@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
@@ -37,6 +38,7 @@ import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
+import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
 
 @Immutable final class SBSceneDescription
 {
@@ -64,12 +66,13 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
   }
 
   static @Nonnull SBSceneDescription fromXML(
+    final @Nonnull BaseDirectory base,
     final @Nonnull Element e)
     throws ValidityException
   {
     return new SBSceneDescription(
-      SBSceneDescription.fromXMLTextures(e),
-      SBSceneDescription.fromXMLModels(e),
+      SBSceneDescription.fromXMLTextures(base, e),
+      SBSceneDescription.fromXMLModels(base, e),
       SBSceneDescription.fromXMLLights(e),
       SBSceneDescription.fromXMLInstances(e));
   }
@@ -124,6 +127,7 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
   }
 
   private static @Nonnull PMap<String, SBModelDescription> fromXMLModels(
+    final @Nonnull BaseDirectory base,
     final @Nonnull Element e)
     throws ValidityException
   {
@@ -140,7 +144,7 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
 
     for (int index = 0; index < ecc.size(); ++index) {
       final Element ei = ecc.get(index);
-      final SBModelDescription d = SBModelDescription.fromXML(ei);
+      final SBModelDescription d = SBModelDescription.fromXML(base, ei);
       m.put(d.getName(), d);
     }
 
@@ -148,6 +152,7 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
   }
 
   private static @Nonnull PMap<String, SBTextureDescription> fromXMLTextures(
+    final @Nonnull BaseDirectory base,
     final @Nonnull Element e)
     throws ValidityException
   {
@@ -165,7 +170,7 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
 
     for (int index = 0; index < ecc.size(); ++index) {
       final Element ei = ecc.get(index);
-      final SBTextureDescription d = SBTextureDescription.fromXML(ei);
+      final SBTextureDescription d = SBTextureDescription.fromXML(base, ei);
       m.put(d.getName(), d);
     }
 
@@ -338,6 +343,44 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
     return result;
   }
 
+  public @Nonnull SBSceneDescription instanceAdd(
+    final @Nonnull SBInstanceDescription d)
+  {
+    return new SBSceneDescription(
+      this.textures,
+      this.models,
+      this.lights,
+      this.instances.plus(d.getID(), d));
+  }
+
+  public @Nonnull SBSceneDescription lightAdd(
+    final @Nonnull KLight l)
+  {
+    return new SBSceneDescription(
+      this.textures,
+      this.models,
+      this.lights.plus(l.getID(), l),
+      this.instances);
+  }
+
+  public @Nonnull SBSceneDescription modelAdd(
+    final @Nonnull SBModelDescription d)
+  {
+    return new SBSceneDescription(this.textures, this.models.plus(
+      d.getName(),
+      d), this.lights, this.instances);
+  }
+
+  public @Nonnull SBSceneDescription textureAdd(
+    final @Nonnull SBTextureDescription t)
+  {
+    return new SBSceneDescription(
+      this.textures.plus(t.getName(), t),
+      this.models,
+      this.lights,
+      this.instances);
+  }
+
   @Nonnull Element toXML()
   {
     final String uri = SBSceneDescription.SCENE_XML_URI.toString();
@@ -368,5 +411,17 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
     e.appendChild(el);
     e.appendChild(ei);
     return e;
+  }
+
+  public @CheckForNull SBTextureDescription getTexture(
+    final @Nonnull String name)
+  {
+    return this.textures.get(name);
+  }
+
+  public @CheckForNull SBModelDescription getModel(
+    final @Nonnull String name)
+  {
+    return this.models.get(name);
   }
 }
