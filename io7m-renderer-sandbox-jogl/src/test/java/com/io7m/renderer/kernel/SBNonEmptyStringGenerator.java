@@ -18,18 +18,23 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-final class SBMeshDescription
-{
-  private final @Nonnull Integer id;
+import net.java.quickcheck.Generator;
+import net.java.quickcheck.generator.support.CharacterGenerator;
+import net.java.quickcheck.generator.support.StringGenerator;
 
-  private SBMeshDescription(
-    final @Nonnull Integer id)
+final class SBNonEmptyStringGenerator implements Generator<String>
+{
+  private final @Nonnull StringGenerator    string_gen;
+  private final @Nonnull CharacterGenerator char_gen;
+
+  public SBNonEmptyStringGenerator()
   {
-    this.id = id;
+    this.string_gen = new StringGenerator();
+    this.char_gen = new CharacterGenerator();
   }
 
-  @Nonnull Integer getID()
+  @Override public String next()
   {
-    return this.id;
+    return this.char_gen.next() + this.string_gen.next();
   }
 }
