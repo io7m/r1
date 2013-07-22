@@ -60,7 +60,7 @@ public class SBTextureDescriptionTest
         {
           Assert.assertEquals(
             desc,
-            SBTextureDescription.fromXML(desc.toXML()));
+            SBTextureDescription.fromXML(null, desc.toXML()));
         }
       });
   }

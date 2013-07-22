@@ -22,7 +22,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -414,7 +414,8 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       throws SBExceptionInputError
     {
       final Integer id =
-        (initial == null) ? this.controller.sceneLightFreshID() : initial.getID();
+        (initial == null) ? this.controller.sceneLightFreshID() : initial
+          .getID();
 
       final KLight light =
         this.makeLight(
@@ -544,7 +545,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
     void refreshLights()
     {
       this.data.clear();
-      final List<KLight> lights = this.controller.sceneLightsGetAll();
+      final Collection<KLight> lights = this.controller.sceneLightsGetAll();
 
       for (final KLight l : lights) {
         final ArrayList<String> row = new ArrayList<String>();

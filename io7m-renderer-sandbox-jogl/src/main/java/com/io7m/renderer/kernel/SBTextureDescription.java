@@ -19,15 +19,19 @@ package com.io7m.renderer.kernel;
 import java.io.File;
 import java.net.URI;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import nu.xom.Element;
 import nu.xom.ValidityException;
 
+import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
+
 @Immutable final class SBTextureDescription
 {
   static @Nonnull SBTextureDescription fromXML(
+    final @CheckForNull BaseDirectory base,
     final @Nonnull Element e)
     throws ValidityException
   {
@@ -39,7 +43,11 @@ import nu.xom.ValidityException;
     final String f = SBXMLUtilities.getNonEmptyString(ef);
     final String n = SBXMLUtilities.getNonEmptyString(en);
 
-    return new SBTextureDescription(new File(f), n);
+    if (base == null) {
+      return new SBTextureDescription(new File(f), n);
+    }
+
+    return new SBTextureDescription(new File(base.getFile(), f), n);
   }
 
   private final @Nonnull File   file;

@@ -46,9 +46,8 @@ public final class Sandbox
         log.debug("starting");
         try {
           final SBGLRenderer renderer = new SBGLRenderer(log);
-          final SBSceneState state = new SBSceneState(log);
           final SBSceneController controller =
-            new SBSceneController(state, renderer, log);
+            new SBSceneController(renderer, log);
           renderer.setController(controller);
 
           final SBMainWindow window =

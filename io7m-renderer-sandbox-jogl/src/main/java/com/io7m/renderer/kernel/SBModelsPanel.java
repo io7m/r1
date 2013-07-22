@@ -22,7 +22,6 @@ import java.io.File;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.SortedSet;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.CheckForNull;
@@ -45,7 +44,7 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 
 import com.io7m.jlog.Log;
 
-final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
+final class SBModelsPanel extends JPanel implements SBSceneChangeListener
 {
   private static final long serialVersionUID;
 
@@ -73,20 +72,19 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
   private final @Nonnull Log                       log;
   protected final @Nonnull JTree                   tree;
   protected final @Nonnull DefaultMutableTreeNode  tree_root;
-  protected @Nonnull Map<File, SortedSet<String>>  meshes;
+  protected @Nonnull Map<String, SBModel>          models;
+  protected final @Nonnull SBSceneControllerModels controller;
 
-  protected final @Nonnull SBSceneControllerMeshes controller;
-
-  SBMeshesPanel(
+  SBModelsPanel(
     final @Nonnull JFrame window,
-    final @Nonnull SBSceneControllerMeshes controller,
+    final @Nonnull SBSceneControllerModels controller,
     final @Nonnull JTextField model,
     final @Nonnull JTextField model_object,
     final @Nonnull Log log)
   {
     this.log = new Log(log, "meshes");
     this.controller = controller;
-    this.meshes = controller.sceneMeshesGet();
+    this.models = controller.sceneModelsGet();
 
     final JButton cancel = new JButton("Cancel");
     cancel.addActionListener(new ActionListener() {
@@ -103,16 +101,16 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
         final @Nonnull ActionEvent e)
       {
         final DefaultMutableTreeNode leaf =
-          (DefaultMutableTreeNode) SBMeshesPanel.this.tree
+          (DefaultMutableTreeNode) SBModelsPanel.this.tree
             .getLastSelectedPathComponent();
         assert leaf.getParent() != null;
 
-        final DefaultMutableTreeNode file =
+        final DefaultMutableTreeNode model_node =
           (DefaultMutableTreeNode) leaf.getParent();
-        assert file != null;
-        assert file.getUserObject() instanceof File;
+        assert model_node != null;
+        assert model_node.getUserObject() instanceof String;
 
-        model.setText(file.getUserObject().toString());
+        model.setText((String) model_node.getUserObject());
         model_object.setText((String) leaf.getUserObject());
 
         SBWindowUtilities.closeWindow(window);
@@ -127,12 +125,12 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
       @Override public void valueChanged(
         final @Nonnull TreeSelectionEvent e)
       {
-        SBMeshesPanel.enableOrDisableSelect(SBMeshesPanel.this.tree, select);
+        SBModelsPanel.enableOrDisableSelect(SBModelsPanel.this.tree, select);
       }
     });
 
-    this.meshesRefresh(this.meshes);
-    SBMeshesPanel.enableOrDisableSelect(this.tree, select);
+    this.modelsRefresh(this.models);
+    SBModelsPanel.enableOrDisableSelect(this.tree, select);
 
     final JScrollPane scroller = new JScrollPane(this.tree);
 
@@ -144,7 +142,7 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
         final JFileChooser chooser = new JFileChooser();
         chooser.setMultiSelectionEnabled(false);
 
-        final int r = chooser.showOpenDialog(SBMeshesPanel.this);
+        final int r = chooser.showOpenDialog(SBModelsPanel.this);
         switch (r) {
           case JFileChooser.APPROVE_OPTION:
           {
@@ -155,7 +153,7 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
                 @Override protected SBModel doInBackground()
                   throws Exception
                 {
-                  return controller.sceneMeshLoad(file).get();
+                  return controller.sceneModelLoad(file).get();
                 }
 
                 @Override protected void done()
@@ -163,12 +161,12 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
                   try {
                     this.get();
 
-                    SBMeshesPanel.this.meshes = controller.sceneMeshesGet();
-                    SBMeshesPanel.this
-                      .meshesRefresh(SBMeshesPanel.this.meshes);
-                    SBMeshesPanel.this.tree.repaint();
-                    SBMeshesPanel.enableOrDisableSelect(
-                      SBMeshesPanel.this.tree,
+                    SBModelsPanel.this.models = controller.sceneModelsGet();
+                    SBModelsPanel.this
+                      .modelsRefresh(SBModelsPanel.this.models);
+                    SBModelsPanel.this.tree.repaint();
+                    SBModelsPanel.enableOrDisableSelect(
+                      SBModelsPanel.this.tree,
                       select);
 
                   } catch (final InterruptedException x) {
@@ -218,16 +216,16 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
     return null;
   }
 
-  protected void meshesRefresh(
-    final @Nonnull Map<File, SortedSet<String>> m)
+  protected void modelsRefresh(
+    final @Nonnull Map<String, SBModel> new_models)
   {
     this.tree_root.removeAllChildren();
 
-    for (final Entry<File, SortedSet<String>> e : m.entrySet()) {
+    for (final Entry<String, SBModel> e : new_models.entrySet()) {
       final DefaultMutableTreeNode category =
         new DefaultMutableTreeNode(e.getKey());
 
-      for (final String name : e.getValue()) {
+      for (final String name : e.getValue().getMeshes().keySet()) {
         final DefaultMutableTreeNode node = new DefaultMutableTreeNode(name);
         category.add(node);
       }
@@ -246,9 +244,9 @@ final class SBMeshesPanel extends JPanel implements SBSceneChangeListener
 
       @Override public void run()
       {
-        SBMeshesPanel.this.meshes =
-          SBMeshesPanel.this.controller.sceneMeshesGet();
-        SBMeshesPanel.this.meshesRefresh(SBMeshesPanel.this.meshes);
+        SBModelsPanel.this.models =
+          SBModelsPanel.this.controller.sceneModelsGet();
+        SBModelsPanel.this.modelsRefresh(SBModelsPanel.this.models);
       }
     });
   }
