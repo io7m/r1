@@ -33,7 +33,12 @@ import com.io7m.jlog.Log;
 
 final class SBZipUtilities
 {
-  static class TemporaryDirectory
+  interface BaseDirectory
+  {
+    @Nonnull File getFile();
+  }
+
+  static class TemporaryDirectory implements BaseDirectory
   {
     private final @Nonnull File file;
 
@@ -82,7 +87,7 @@ final class SBZipUtilities
       SBZipUtilities.deleteOnExit(log, this.file);
     }
 
-    public @Nonnull File getFile()
+    @Override public @Nonnull File getFile()
     {
       return this.file;
     }

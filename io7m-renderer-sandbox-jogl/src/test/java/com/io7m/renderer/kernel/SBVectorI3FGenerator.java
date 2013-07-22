@@ -16,25 +16,22 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-import javax.swing.JFrame;
+import net.java.quickcheck.Generator;
 
-import com.io7m.jlog.Log;
+import com.io7m.renderer.RSpace;
+import com.io7m.renderer.RVectorI3F;
 
-final class SBObjectsWindow extends JFrame
+public final class SBVectorI3FGenerator<T extends RSpace> implements
+  Generator<RVectorI3F<T>>
 {
-  private static final long serialVersionUID;
-
-  static {
-    serialVersionUID = -312314551231238L;
-  }
-
-  public <C extends SBSceneControllerModels & SBSceneControllerInstances & SBSceneControllerTextures> SBObjectsWindow(
-    final @Nonnull C controller,
-    final @Nonnull Log log)
+  @Override public RVectorI3F<T> next()
   {
-    super("Instances");
-    this.getContentPane().add(new SBObjectsPanel(controller, log));
-    this.pack();
+    final double x =
+      Float.MIN_VALUE + (Math.random() * (Float.MAX_VALUE - Float.MIN_VALUE));
+    final double y =
+      Float.MIN_VALUE + (Math.random() * (Float.MAX_VALUE - Float.MIN_VALUE));
+    final double z =
+      Float.MIN_VALUE + (Math.random() * (Float.MAX_VALUE - Float.MIN_VALUE));
+    return new RVectorI3F<T>((float) x, (float) y, (float) z);
   }
 }

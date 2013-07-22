@@ -74,16 +74,15 @@ final class SBTexturesPanel extends JPanel
     }
   }
 
-  private static final long                   serialVersionUID;
+  private static final long                  serialVersionUID;
 
   static {
     serialVersionUID = -941448169051827275L;
   }
-  protected final @Nonnull Log                log_textures;
-  protected final @Nonnull JComboBox<File>    selector;
-  protected @Nonnull Map<File, BufferedImage> images;
-
-  protected @Nonnull ImageDisplay             image_display;
+  protected final @Nonnull Log               log_textures;
+  protected final @Nonnull JComboBox<String> selector;
+  protected @Nonnull Map<String, SBTexture>  images;
+  protected @Nonnull ImageDisplay            image_display;
 
   public SBTexturesPanel(
     final @Nonnull JFrame window,
@@ -92,7 +91,7 @@ final class SBTexturesPanel extends JPanel
     final @Nonnull Log log)
   {
     this.log_textures = new Log(log, "textures");
-    this.images = controller.texturesGet();
+    this.images = controller.sceneTexturesGet();
 
     this.setPreferredSize(new Dimension(640, 480));
 
@@ -100,17 +99,17 @@ final class SBTexturesPanel extends JPanel
     final JScrollPane image_pane = new JScrollPane(this.image_display);
     image_pane.setMinimumSize(new Dimension(256, 256));
 
-    this.selector = new JComboBox<File>();
+    this.selector = new JComboBox<String>();
     this.selector.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final File file =
-          (File) SBTexturesPanel.this.selector.getSelectedItem();
+        final String name =
+          (String) SBTexturesPanel.this.selector.getSelectedItem();
 
-        if (file != null) {
-          final BufferedImage bi = SBTexturesPanel.this.images.get(file);
-          SBTexturesPanel.this.image_display.setImage(bi);
+        if (name != null) {
+          final SBTexture t = SBTexturesPanel.this.images.get(name);
+          SBTexturesPanel.this.image_display.setImage(t.getImage());
           SBTexturesPanel.this.image_display.repaint();
         }
       }
@@ -131,12 +130,12 @@ final class SBTexturesPanel extends JPanel
           {
             final File file = chooser.getSelectedFile();
 
-            final SwingWorker<BufferedImage, Void> worker =
-              new SwingWorker<BufferedImage, Void>() {
-                @Override protected @Nonnull BufferedImage doInBackground()
+            final SwingWorker<SBTexture, Void> worker =
+              new SwingWorker<SBTexture, Void>() {
+                @Override protected @Nonnull SBTexture doInBackground()
                   throws Exception
                 {
-                  return controller.textureLoad(file).get();
+                  return controller.sceneTextureLoad(file).get();
                 }
 
                 @Override protected void done()
@@ -144,9 +143,11 @@ final class SBTexturesPanel extends JPanel
                   try {
                     this.get();
 
-                    SBTexturesPanel.this.images = controller.texturesGet();
+                    SBTexturesPanel.this.images =
+                      controller.sceneTexturesGet();
                     SBTexturesPanel.this
                       .selectorRefresh(SBTexturesPanel.this.selector);
+
                   } catch (final InterruptedException x) {
                     SBErrorBox.showError(
                       SBTexturesPanel.this.log_textures,
@@ -178,10 +179,10 @@ final class SBTexturesPanel extends JPanel
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final File file =
-          (File) SBTexturesPanel.this.selector.getSelectedItem();
-        if (file != null) {
-          select_result.setText(file.toString());
+        final String name =
+          (String) SBTexturesPanel.this.selector.getSelectedItem();
+        if (name != null) {
+          select_result.setText(name.toString());
         } else {
           select_result.setText("");
         }
@@ -210,17 +211,17 @@ final class SBTexturesPanel extends JPanel
   {
     final File file = (File) select.getSelectedItem();
     if (file != null) {
-      final BufferedImage bi = SBTexturesPanel.this.images.get(file);
-      this.image_display.setImage(bi);
+      final SBTexture t = SBTexturesPanel.this.images.get(file);
+      this.image_display.setImage(t.getImage());
       this.image_display.repaint();
     }
   }
 
   protected void selectorRefresh(
-    final JComboBox<File> select)
+    final JComboBox<String> select)
   {
     select.removeAllItems();
-    for (final Entry<File, BufferedImage> e : this.images.entrySet()) {
+    for (final Entry<String, SBTexture> e : this.images.entrySet()) {
       select.addItem(e.getKey());
     }
   }

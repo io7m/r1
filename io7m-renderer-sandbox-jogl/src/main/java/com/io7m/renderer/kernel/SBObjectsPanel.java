@@ -18,10 +18,9 @@ package com.io7m.renderer.kernel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -59,7 +58,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 
     private final @Nonnull ObjectEditDialogPanel panel;
 
-    public <C extends SBSceneControllerMeshes & SBSceneControllerObjects & SBSceneControllerTextures> ObjectEditDialog(
+    public <C extends SBSceneControllerModels & SBSceneControllerInstances & SBSceneControllerTextures> ObjectEditDialog(
       final @Nonnull C controller,
       final @Nonnull ObjectsTableModel data,
       final @Nonnull Log log)
@@ -71,15 +70,15 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.getContentPane().add(this.panel);
     }
 
-    public <C extends SBSceneControllerMeshes & SBSceneControllerObjects & SBSceneControllerTextures> ObjectEditDialog(
+    public <C extends SBSceneControllerModels & SBSceneControllerInstances & SBSceneControllerTextures> ObjectEditDialog(
       final @Nonnull C controller,
-      final @Nonnull SBObjectDescription object,
+      final @Nonnull SBInstanceDescription initial_desc,
       final @Nonnull ObjectsTableModel data,
       final @Nonnull Log log)
       throws IOException
     {
       this.panel =
-        new ObjectEditDialogPanel(this, controller, object, data, log);
+        new ObjectEditDialogPanel(this, controller, initial_desc, data, log);
       this.setTitle("Edit object...");
       this.getContentPane().add(this.panel);
     }
@@ -118,10 +117,10 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     private final @Nonnull ObjectsTableModel objects_table_model;
     private final @Nonnull Border            default_field_border;
 
-    public <C extends SBSceneControllerMeshes & SBSceneControllerObjects & SBSceneControllerTextures> ObjectEditDialogPanel(
+    public <C extends SBSceneControllerModels & SBSceneControllerInstances & SBSceneControllerTextures> ObjectEditDialogPanel(
       final @Nonnull ObjectEditDialog window,
       final @Nonnull C controller,
-      final @CheckForNull SBObjectDescription object,
+      final @CheckForNull SBInstanceDescription initial_desc,
       final @Nonnull ObjectsTableModel objects_table_model,
       final @Nonnull Log log)
       throws IOException
@@ -130,8 +129,9 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 
       final DesignGridLayout dg = new DesignGridLayout(this);
 
-      if (object != null) {
-        final JTextField id_field = new JTextField(object.getID().toString());
+      if (initial_desc != null) {
+        final JTextField id_field =
+          new JTextField(initial_desc.getID().toString());
         id_field.setEditable(false);
         dg.row().grid().add(new JLabel("ID")).add(id_field, 3);
       }
@@ -211,8 +211,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
         {
-          final SBMeshesWindow mwindow =
-            new SBMeshesWindow(
+          final SBModelsWindow mwindow =
+            new SBModelsWindow(
               controller,
               ObjectEditDialogPanel.this.model,
               ObjectEditDialogPanel.this.model_object,
@@ -237,7 +237,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           final @Nonnull ActionEvent e)
         {
           try {
-            ObjectEditDialogPanel.this.saveObject(controller, object);
+            ObjectEditDialogPanel.this.saveObject(controller, initial_desc);
           } catch (final SBExceptionInputError x) {
             ObjectEditDialogPanel.this.setError(x.getMessage());
           }
@@ -250,7 +250,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           final @Nonnull ActionEvent e)
         {
           try {
-            ObjectEditDialogPanel.this.saveObject(controller, object);
+            ObjectEditDialogPanel.this.saveObject(controller, initial_desc);
             SBWindowUtilities.closeWindow(window);
           } catch (final SBExceptionInputError x) {
             ObjectEditDialogPanel.this.setError(x.getMessage());
@@ -316,16 +316,16 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       dg.emptyRow();
       dg.row().left().add(this.error_icon).add(this.error_text);
 
-      if (object != null) {
-        this.loadObject(object);
+      if (initial_desc != null) {
+        this.loadObject(initial_desc);
       }
     }
 
     private void loadObject(
-      final @Nonnull SBObjectDescription object)
+      final @Nonnull SBInstanceDescription initial_desc)
     {
-      final RVectorReadable3F<RSpaceWorld> pos = object.getPosition();
-      final RVectorReadable3F<SBDegrees> ori = object.getOrientation();
+      final RVectorReadable3F<RSpaceWorld> pos = initial_desc.getPosition();
+      final RVectorReadable3F<SBDegrees> ori = initial_desc.getOrientation();
 
       this.position_x.setText(Float.toString(pos.getXF()));
       this.position_y.setText(Float.toString(pos.getYF()));
@@ -335,27 +335,28 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.orientation_y.setText(Float.toString(ori.getYF()));
       this.orientation_z.setText(Float.toString(ori.getZF()));
 
-      this.diffuse_texture.setText(object.getDiffuseTexture() == null
+      this.diffuse_texture.setText(initial_desc.getDiffuse() == null
         ? ""
-        : object.getDiffuseTexture().toString());
-      this.normal_texture.setText(object.getNormalTexture() == null
+        : initial_desc.getDiffuse().toString());
+      this.normal_texture.setText(initial_desc.getNormal() == null
         ? ""
-        : object.getNormalTexture().toString());
-      this.specular_texture.setText(object.getSpecularTexture() == null
+        : initial_desc.getNormal().toString());
+      this.specular_texture.setText(initial_desc.getSpecular() == null
         ? ""
-        : object.getSpecularTexture().toString());
+        : initial_desc.getSpecular().toString());
 
-      this.model.setText(object.getModel().toString());
-      this.model_object.setText(object.getModelObject());
+      this.model.setText(initial_desc.getModel());
+      this.model_object.setText(initial_desc.getModelObject());
     }
 
     protected void saveObject(
-      final @Nonnull SBSceneControllerObjects controller,
-      final @CheckForNull SBObjectDescription initial)
+      final @Nonnull SBSceneControllerInstances controller,
+      final @CheckForNull SBInstanceDescription initial)
       throws SBExceptionInputError
     {
       final Integer id =
-        (initial == null) ? controller.objectFreshID() : initial.getID();
+        (initial == null) ? controller.sceneInstanceFreshID() : initial
+          .getID();
 
       final RVectorI3F<RSpaceWorld> position =
         new RVectorI3F<RSpaceWorld>(
@@ -369,33 +370,36 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           SBTextFieldUtilities.getFieldFloatOrError(this.orientation_y),
           SBTextFieldUtilities.getFieldFloatOrError(this.orientation_z));
 
-      final File diffuse =
-        (this.diffuse_texture.getText().equals("")) ? null : new File(
-          this.diffuse_texture.getText());
-      final File normal =
-        (this.normal_texture.getText().equals("")) ? null : new File(
-          this.normal_texture.getText());
-      final File specular =
-        (this.specular_texture.getText().equals("")) ? null : new File(
-          this.specular_texture.getText());
+      final String diffuse =
+        (this.diffuse_texture.getText().equals(""))
+          ? null
+          : this.diffuse_texture.getText();
+      final String normal =
+        (this.normal_texture.getText().equals(""))
+          ? null
+          : this.normal_texture.getText();
+      final String specular =
+        (this.specular_texture.getText().equals(""))
+          ? null
+          : this.specular_texture.getText();
 
       final String model_name =
         SBTextFieldUtilities.getFieldNonEmptyStringOrError(this.model);
       final String model_object_name =
         SBTextFieldUtilities.getFieldNonEmptyStringOrError(this.model_object);
 
-      final SBObjectDescription o =
-        new SBObjectDescription(
+      final SBInstanceDescription d =
+        new SBInstanceDescription(
           id,
-          new File(model_name),
-          model_object_name,
           position,
           orientation,
+          model_name,
+          model_object_name,
           diffuse,
           normal,
           specular);
 
-      controller.objectAdd(o);
+      controller.sceneInstanceAddByDescription(d);
 
       this.objects_table_model.refreshObjects();
       this.unsetError();
@@ -452,14 +456,14 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     private final @Nonnull String[]                     column_names;
     private final @Nonnull ArrayList<ArrayList<String>> data;
     private final @Nonnull Log                          log;
-    private final @Nonnull SBSceneControllerObjects     controller;
+    private final @Nonnull SBSceneControllerInstances   controller;
 
     static {
       serialVersionUID = 6499860137289000995L;
     }
 
     public ObjectsTableModel(
-      final @Nonnull SBSceneControllerObjects controller,
+      final @Nonnull SBSceneControllerInstances controller,
       final @Nonnull Log log)
     {
       this.log = new Log(log, "object-table");
@@ -479,15 +483,15 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       return this.column_names[column];
     }
 
-    protected @Nonnull SBObjectDescription getObjectAt(
+    protected @Nonnull SBInstance getInstanceAt(
       final int row)
     {
       final ArrayList<String> row_data = this.data.get(row);
       assert row_data != null;
       final String id_text = row_data.get(0);
       final Integer id = Integer.valueOf(id_text);
-      assert this.controller.objectExists(id);
-      return this.controller.objectGet(id);
+      assert this.controller.sceneInstanceExists(id);
+      return this.controller.sceneInstanceGet(id);
     }
 
     @Override public int getRowCount()
@@ -505,12 +509,12 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     protected void refreshObjects()
     {
       this.data.clear();
-      final List<SBObjectDescription> objects =
-        this.controller.objectsGetAll();
-      for (final SBObjectDescription o : objects) {
+      final Collection<SBInstance> objects =
+        this.controller.sceneInstancesGetAll();
+      for (final SBInstance o : objects) {
         final ArrayList<String> row = new ArrayList<String>();
         row.add(o.getID().toString());
-        row.add(o.getModel().getName());
+        row.add(o.getModel());
         row.add(o.getModelObject());
         this.data.add(row);
       }
@@ -529,7 +533,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
   protected final @Nonnull ObjectsTable      objects;
   private final @Nonnull JScrollPane         scroller;
 
-  public <C extends SBSceneControllerMeshes & SBSceneControllerObjects & SBSceneControllerTextures> SBObjectsPanel(
+  public <C extends SBSceneControllerModels & SBSceneControllerInstances & SBSceneControllerTextures> SBObjectsPanel(
     final @Nonnull C controller,
     final @Nonnull Log log)
   {
@@ -567,14 +571,14 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           assert view_row != -1;
           final int model_row =
             SBObjectsPanel.this.objects.convertRowIndexToModel(view_row);
-          final SBObjectDescription object =
-            SBObjectsPanel.this.objects_model.getObjectAt(model_row);
+          final SBInstance object =
+            SBObjectsPanel.this.objects_model.getInstanceAt(model_row);
           assert object != null;
 
           final ObjectEditDialog dialog =
             new ObjectEditDialog(
               controller,
-              object,
+              object.getDescription(),
               SBObjectsPanel.this.objects_model,
               log);
           dialog.pack();
@@ -595,11 +599,11 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         assert view_row != -1;
         final int model_row =
           SBObjectsPanel.this.objects.convertRowIndexToModel(view_row);
-        final SBObjectDescription object =
-          SBObjectsPanel.this.objects_model.getObjectAt(model_row);
+        final SBInstance object =
+          SBObjectsPanel.this.objects_model.getInstanceAt(model_row);
         assert object != null;
 
-        controller.objectRemove(object.getID());
+        controller.sceneInstanceRemove(object.getID());
         SBObjectsPanel.this.objects_model.refreshObjects();
       }
     });
