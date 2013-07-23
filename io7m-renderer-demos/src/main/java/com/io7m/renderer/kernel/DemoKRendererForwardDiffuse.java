@@ -90,7 +90,7 @@ import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.KProjection.KPerspective;
 
 /**
- * Example program that draws something with {@link KRendererFlat}.
+ * Example program that draws something with {@link KRendererFlatTextured}.
  */
 
 public final class DemoKRendererForwardDiffuse implements Demo

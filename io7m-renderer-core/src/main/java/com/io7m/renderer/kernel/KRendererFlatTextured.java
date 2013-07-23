@@ -46,9 +46,8 @@ import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
-import com.io7m.jvvfs.PathVirtual;
 
-final class KRendererFlat implements KRenderer
+final class KRendererFlatTextured implements KRenderer
 {
   private static @Nonnull Program makeProgram(
     final @Nonnull GLInterfaceCommon gl,
@@ -78,57 +77,6 @@ final class KRendererFlat implements KRenderer
     return program;
   }
 
-  private static @Nonnull PathVirtual shaderPathFragment(
-    final boolean is_es,
-    final int version_major,
-    final int version_minor)
-    throws ConstraintError
-  {
-    if (is_es) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gles2_flat_uv.f");
-    }
-
-    if (version_major == 2) {
-      return PathVirtual.ofString("/com/io7m/renderer/kernel/gl21_flat_uv.f");
-    }
-
-    if (version_major == 3) {
-      if (version_minor == 0) {
-        return PathVirtual
-          .ofString("/com/io7m/renderer/kernel/gl30_flat_uv.f");
-      }
-    }
-
-    return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_flat_uv.f");
-  }
-
-  private static @Nonnull PathVirtual shaderPathVertex(
-    final boolean is_es,
-    final int version_major,
-    final int version_minor)
-    throws ConstraintError
-  {
-    if (is_es) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gles2_standard.v");
-    }
-
-    if (version_major == 2) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gl21_standard.v");
-    }
-
-    if (version_major == 3) {
-      if (version_minor == 0) {
-        return PathVirtual
-          .ofString("/com/io7m/renderer/kernel/gl30_standard.v");
-      }
-    }
-
-    return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_standard.v");
-  }
-
   private final @Nonnull MatrixM4x4F         matrix_modelview;
   private final @Nonnull MatrixM4x4F         matrix_model;
   private final @Nonnull MatrixM4x4F         matrix_view;
@@ -141,7 +89,7 @@ final class KRendererFlat implements KRenderer
   private final @Nonnull VectorM4F           background;
   private final @Nonnull VectorM2I           viewport_size;
 
-  KRendererFlat(
+  KRendererFlatTextured(
     final @Nonnull GLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
@@ -158,7 +106,7 @@ final class KRendererFlat implements KRenderer
     this.matrix_view = new MatrixM4x4F();
     this.matrix_context = new MatrixM4x4F.Context();
     this.transform_context = new KTransform.Context();
-    this.program = KRendererFlat.makeProgram(gl.getGLCommon(), fs, this.log);
+    this.program = KRendererFlatTextured.makeProgram(gl.getGLCommon(), fs, this.log);
     this.viewport_size = new VectorM2I();
   }
 
