@@ -33,12 +33,14 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLException;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSeparator;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileFilter;
@@ -73,19 +75,50 @@ final class SBMainWindow extends JFrame
     };
   }
 
-  private static @Nonnull JMenuBar makeMenuBar(
-    final @Nonnull SBSceneControllerIO controller,
-    final @Nonnull SBMainWindow window,
-    final @Nonnull SBLightsWindow lights_window,
-    final @Nonnull SBLogsWindow logs_window,
-    final @Nonnull SBObjectsWindow objects_window,
-    final @Nonnull Log log)
+  private static @Nonnull
+    <C extends SBSceneControllerRenderer & SBSceneControllerIO>
+    JMenuBar
+    makeMenuBar(
+      final @Nonnull C controller,
+      final @Nonnull SBMainWindow window,
+      final @Nonnull SBLightsWindow lights_window,
+      final @Nonnull SBLogsWindow logs_window,
+      final @Nonnull SBObjectsWindow objects_window,
+      final @Nonnull Log log)
   {
     final JMenuBar bar = new JMenuBar();
     bar.add(SBMainWindow.makeMenuFile(controller, window, log));
     bar.add(SBMainWindow.makeMenuEdit(lights_window, objects_window));
+    bar.add(SBMainWindow.makeMenuRenderer(controller));
     bar.add(SBMainWindow.makeMenuDebug(logs_window));
     return bar;
+  }
+
+  private static @Nonnull JMenu makeMenuRenderer(
+    final @Nonnull SBSceneControllerRenderer controller)
+  {
+    final JMenu menu = new JMenu("Renderer");
+    final ButtonGroup group = new ButtonGroup();
+
+    boolean first = true;
+    for (final SBRendererType type : SBRendererType.values()) {
+      final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
+
+      b.setSelected(first);
+      b.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          controller.rendererSetType(type);
+        }
+      });
+
+      group.add(b);
+      menu.add(b);
+      first = false;
+    }
+
+    return menu;
   }
 
   private static @Nonnull JMenu makeMenuDebug(

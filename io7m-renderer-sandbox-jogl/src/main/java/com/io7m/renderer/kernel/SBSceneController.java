@@ -638,6 +638,13 @@ public final class SBSceneController implements
     this.exec_pool.execute(f);
     return f;
   }
+
+  @Override public void rendererSetType(
+    final @Nonnull SBRendererType type)
+  {
+    this.log.debug("Selecting renderer " + type);
+    this.renderer.setRenderer(type);
+  }
 }
 
 interface SBSceneControllerInstances extends
@@ -704,6 +711,9 @@ interface SBSceneControllerRenderer
   public @Nonnull
     Pair<Collection<KLight>, Collection<KMeshInstance>>
     rendererGetScene();
+
+  public void rendererSetType(
+    final @Nonnull SBRendererType type);
 }
 
 interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration
