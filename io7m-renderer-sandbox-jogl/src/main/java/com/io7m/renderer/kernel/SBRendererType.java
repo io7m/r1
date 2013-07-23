@@ -20,7 +20,8 @@ import javax.annotation.Nonnull;
 
 enum SBRendererType
 {
-  RENDERER_FLAT_UV("flat-uv");
+  RENDERER_FLAT_TEXTURED("flat-textured"),
+  RENDERER_FORWARD_DIFFUSE_ONLY("forward-diffuse-only");
 
   private final @Nonnull String name;
 

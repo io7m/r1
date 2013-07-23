@@ -344,7 +344,8 @@ final class SBGLRenderer implements GLEventListener
     this.matrix_projection = new MatrixM4x4F();
     this.renderers = new HashMap<SBRendererType, KRenderer>();
     this.renderer_current =
-      new AtomicReference<SBRendererType>(SBRendererType.RENDERER_FLAT_UV);
+      new AtomicReference<SBRendererType>(
+        SBRendererType.RENDERER_FLAT_TEXTURED);
 
     this.camera = new SBFirstPersonCamera(0.0f, 1.0f, 5.0f);
     this.input_state = new SBInputState();
@@ -516,8 +517,11 @@ final class SBGLRenderer implements GLEventListener
       ConstraintError
   {
     this.renderers.put(
-      SBRendererType.RENDERER_FLAT_UV,
+      SBRendererType.RENDERER_FLAT_TEXTURED,
       new KRendererFlatTextured(this.gi, this.filesystem, this.log));
+    this.renderers.put(
+      SBRendererType.RENDERER_FORWARD_DIFFUSE_ONLY,
+      new KRendererForwardDiffuseOnly(this.gi, this.filesystem, this.log));
   }
 
   void meshDelete(
@@ -808,5 +812,11 @@ final class SBGLRenderer implements GLEventListener
   @Nonnull SBInputState getInputState()
   {
     return this.input_state;
+  }
+
+  void setRenderer(
+    final @Nonnull SBRendererType type)
+  {
+    this.renderer_current.set(type);
   }
 }
