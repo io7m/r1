@@ -97,7 +97,7 @@ final class KRendererFlatTextured implements KRenderer
       ConstraintError,
       GLUnsupportedException
   {
-    this.log = new Log(log, "krenderer-flat");
+    this.log = new Log(log, "krenderer-flat-textured");
     this.gl = gl;
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrix_modelview = new MatrixM4x4F();
@@ -106,7 +106,8 @@ final class KRendererFlatTextured implements KRenderer
     this.matrix_view = new MatrixM4x4F();
     this.matrix_context = new MatrixM4x4F.Context();
     this.transform_context = new KTransform.Context();
-    this.program = KRendererFlatTextured.makeProgram(gl.getGLCommon(), fs, this.log);
+    this.program =
+      KRendererFlatTextured.makeProgram(gl.getGLCommon(), fs, this.log);
     this.viewport_size = new VectorM2I();
   }
 
