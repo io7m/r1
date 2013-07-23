@@ -20,6 +20,7 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -338,6 +339,61 @@ final class SBMainWindow extends JFrame
       final GLCapabilities caps = new GLCapabilities(profile);
       final GLCanvas canvas = new GLCanvas(caps);
       canvas.addGLEventListener(renderer);
+      canvas.addKeyListener(new KeyListener() {
+        private final @Nonnull SBInputState input = renderer.getInputState();
+
+        @Override public void keyTyped(
+          final @Nonnull KeyEvent e)
+        {
+          // Nothing
+        }
+
+        @Override public void keyReleased(
+          final @Nonnull KeyEvent e)
+        {
+          switch (e.getKeyChar()) {
+            case 'a':
+              this.input.setMovingLeft(false);
+              break;
+            case 'd':
+              this.input.setMovingRight(false);
+              break;
+            case 'w':
+              break;
+            case 's':
+              break;
+            case 'f':
+              this.input.setMovingUp(false);
+              break;
+            case 'v':
+              this.input.setMovingDown(false);
+              break;
+          }
+        }
+
+        @Override public void keyPressed(
+          final @Nonnull KeyEvent e)
+        {
+          switch (e.getKeyChar()) {
+            case 'a':
+              this.input.setMovingLeft(true);
+              break;
+            case 'd':
+              this.input.setMovingRight(true);
+              break;
+            case 'w':
+              break;
+            case 's':
+              break;
+            case 'f':
+              this.input.setMovingUp(true);
+              break;
+            case 'v':
+              this.input.setMovingDown(true);
+              break;
+          }
+        }
+      });
 
       final FPSAnimator animator = new FPSAnimator(canvas, 60);
       animator.start();
