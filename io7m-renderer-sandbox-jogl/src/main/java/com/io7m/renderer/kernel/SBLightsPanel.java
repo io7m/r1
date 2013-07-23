@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -27,6 +28,7 @@ import java.util.Collection;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -111,7 +113,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           .add(new JLabel("Position"))
           .add(this.position_x)
           .add(this.position_y)
-          .add(this.position_z);
+          .add(this.position_z, 2);
       }
     }
 
@@ -136,7 +138,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           .add(new JLabel("Direction"))
           .add(this.direction_x)
           .add(this.direction_y)
-          .add(this.direction_z);
+          .add(this.direction_z, 2);
       }
 
       @Nonnull RVectorM3F<RSpaceWorld> getDirection()
@@ -180,7 +182,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           .add(new JLabel("Position"))
           .add(this.position_x)
           .add(this.position_y)
-          .add(this.position_z);
+          .add(this.position_z, 2);
       }
     }
 
@@ -193,6 +195,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
     protected final @Nonnull JTextField            colour_r;
     protected final @Nonnull JTextField            colour_g;
     protected final @Nonnull JTextField            colour_b;
+    protected final @Nonnull JButton               colour_select;
     protected final @Nonnull JTextField            intensity;
     protected final @Nonnull SBLightTypeSelector   type_select;
     private final LightControlsDirectional         directional_controls;
@@ -222,6 +225,25 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       this.colour_r = new JTextField("1.0");
       this.colour_g = new JTextField("1.0");
       this.colour_b = new JTextField("1.0");
+      this.colour_select = new JButton("Select...");
+      this.colour_select.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          final Color c =
+            JColorChooser.showDialog(
+              LightEditDialogPanel.this,
+              "Select colour...",
+              Color.WHITE);
+          if (c != null) {
+            final float[] rgb = c.getRGBColorComponents(null);
+            LightEditDialogPanel.this.colour_r.setText(Float.toString(rgb[0]));
+            LightEditDialogPanel.this.colour_g.setText(Float.toString(rgb[1]));
+            LightEditDialogPanel.this.colour_b.setText(Float.toString(rgb[2]));
+          }
+        }
+      });
+
       this.intensity = new JTextField("1.0");
 
       final DesignGridLayout dg = new DesignGridLayout(this);
@@ -229,7 +251,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       if (light != null) {
         final JTextField id_field = new JTextField(light.getID().toString());
         id_field.setEditable(false);
-        dg.row().grid().add(new JLabel("ID")).add(id_field, 3);
+        dg.row().grid().add(new JLabel("ID")).add(id_field, 4);
       }
 
       dg
@@ -238,10 +260,11 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         .add(new JLabel("Colour"))
         .add(this.colour_r)
         .add(this.colour_g)
-        .add(this.colour_b);
+        .add(this.colour_b)
+        .add(this.colour_select);
 
-      dg.row().grid().add(new JLabel("Intensity")).add(this.intensity, 3);
-      dg.row().grid().add(new JLabel("Type")).add(this.type_select, 3);
+      dg.row().grid().add(new JLabel("Intensity")).add(this.intensity, 4);
+      dg.row().grid().add(new JLabel("Type")).add(this.type_select, 4);
 
       this.directional_controls = new LightControlsDirectional();
       this.point_controls = new LightControlsPoint();
