@@ -62,9 +62,11 @@ public final class SBVisibleGridPlane
     throws ConstraintError,
       GLException
   {
-    final ArrayBufferAttribute[] attributes = new ArrayBufferAttribute[1];
+    final ArrayBufferAttribute[] attributes = new ArrayBufferAttribute[2];
     attributes[0] =
       new ArrayBufferAttribute("v_position", GLScalarType.TYPE_FLOAT, 3);
+    attributes[1] =
+      new ArrayBufferAttribute("v_colour", GLScalarType.TYPE_FLOAT, 3);
     final ArrayBufferDescriptor type = new ArrayBufferDescriptor(attributes);
 
     final long elements = SBVisibleGridPlane.elementsRequired(x, z);
@@ -79,21 +81,26 @@ public final class SBVisibleGridPlane
       new IndexBufferWritableData(this.indices);
 
     final CursorWritable3f pc = array_map.getCursor3f("v_position");
+    final CursorWritable3f cc = array_map.getCursor3f("v_colour");
     final CursorWritableIndex ic = index_map.getCursor();
 
     int index = 0;
     for (int cx = -x; cx <= x; ++cx) {
+      cc.put3f(1.0f, 1.0f, 1.0f);
       pc.put3f(cx, y, -z);
       ic.putIndex(index);
       ++index;
+      cc.put3f(1.0f, 1.0f, 1.0f);
       pc.put3f(cx, y, z);
       ic.putIndex(index);
       ++index;
     }
     for (int cz = -z; cz <= z; ++cz) {
+      cc.put3f(1.0f, 1.0f, 1.0f);
       pc.put3f(-z, y, cz);
       ic.putIndex(index);
       ++index;
+      cc.put3f(1.0f, 1.0f, 1.0f);
       pc.put3f(x, y, cz);
       ic.putIndex(index);
       ++index;
