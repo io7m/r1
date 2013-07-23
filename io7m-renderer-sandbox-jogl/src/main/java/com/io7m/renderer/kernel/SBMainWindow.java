@@ -358,15 +358,33 @@ final class SBMainWindow extends JFrame
             case 'd':
               this.input.setMovingRight(false);
               break;
+
             case 'w':
+              this.input.setMovingForward(false);
               break;
             case 's':
+              this.input.setMovingBackward(false);
               break;
-            case 'f':
+
+            case 'g':
               this.input.setMovingUp(false);
               break;
-            case 'v':
+            case 'b':
               this.input.setMovingDown(false);
+              break;
+
+            case 'f':
+              this.input.setRotatingUp(false);
+              break;
+            case 'v':
+              this.input.setRotatingDown(false);
+              break;
+
+            case 'q':
+              this.input.setRotatingLeft(false);
+              break;
+            case 'e':
+              this.input.setRotatingRight(false);
               break;
           }
         }
@@ -381,15 +399,33 @@ final class SBMainWindow extends JFrame
             case 'd':
               this.input.setMovingRight(true);
               break;
+
             case 'w':
+              this.input.setMovingForward(true);
               break;
             case 's':
+              this.input.setMovingBackward(true);
               break;
+
             case 'f':
-              this.input.setMovingUp(true);
+              this.input.setRotatingUp(true);
               break;
             case 'v':
+              this.input.setRotatingDown(true);
+              break;
+
+            case 'g':
+              this.input.setMovingUp(true);
+              break;
+            case 'b':
               this.input.setMovingDown(true);
+              break;
+
+            case 'q':
+              this.input.setRotatingLeft(true);
+              break;
+            case 'e':
+              this.input.setRotatingRight(true);
               break;
           }
         }
