@@ -47,6 +47,7 @@ import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.ArrayBufferDescriptor;
 import com.io7m.jcanephora.AttachmentColor;
 import com.io7m.jcanephora.AttachmentColor.AttachmentColorTexture2DStatic;
+import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.Framebuffer;
 import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
@@ -82,12 +83,13 @@ import com.io7m.jsom0.parser.ModelObjectParser;
 import com.io7m.jsom0.parser.ModelObjectParserVBOImmediate;
 import com.io7m.jsom0.parser.ModelParser;
 import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM3F;
+import com.io7m.jtensors.VectorReadable3F;
 import com.io7m.jvvfs.FSCapabilityAll;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
@@ -271,6 +273,8 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
+  private static final VectorReadable3F AXIS_Y = new VectorI3F(0, 1, 0);
+
   private static <A, B extends FutureTask<A>> void processQueue(
     final @Nonnull Queue<B> q)
   {
@@ -293,7 +297,8 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull HashMap<String, Texture2DStatic>           textures;
   private final @Nonnull HashMap<String, Model<ModelObjectVBO>>     models;
   private @CheckForNull SBQuad                                      screen_quad;
-  private Program                                                   program_uv;
+  private @CheckForNull Program                                     program_uv;
+  private @CheckForNull Program                                     program_vcolour;
   private final @Nonnull FSCapabilityAll                            filesystem;
   private @CheckForNull FramebufferConfigurationGLES2Actual         framebuffer_config;
   private @CheckForNull Framebuffer                                 framebuffer;
@@ -305,7 +310,15 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull Map<SBRendererType, KRenderer>             renderers;
   private final @Nonnull AtomicReference<SBRendererType>            renderer_current;
   private final @Nonnull AtomicReference<SBSceneControllerRenderer> controller;
-  private final @Nonnull QuaternionI4F.Context                      qi4f_context;
+
+  private @Nonnull SBVisibleAxes                                    axes;
+  private @Nonnull SBVisibleGridPlane                               grid;
+
+  private final @Nonnull QuaternionM4F.Context                      qm4f_context;
+  private final @Nonnull VectorM3F                                  camera_position;
+  private final @Nonnull VectorM3F                                  camera_inverse;
+  private final @Nonnull VectorM3F                                  camera_target;
+  private final @Nonnull QuaternionM4F                              camera_orientation;
 
   public SBGLRenderer(
     final @Nonnull Log log)
@@ -315,7 +328,7 @@ final class SBGLRenderer implements GLEventListener
     this.log = new Log(log, "gl");
 
     this.controller = new AtomicReference<SBSceneControllerRenderer>();
-    this.qi4f_context = new QuaternionI4F.Context();
+    this.qm4f_context = new QuaternionM4F.Context();
 
     this.texture_loader = new TextureLoaderImageIO();
     this.texture_load_queue = new ConcurrentLinkedQueue<TextureLoadFuture>();
@@ -337,6 +350,11 @@ final class SBGLRenderer implements GLEventListener
     this.renderers = new HashMap<SBRendererType, KRenderer>();
     this.renderer_current =
       new AtomicReference<SBRendererType>(SBRendererType.RENDERER_FLAT_UV);
+
+    this.camera_position = new VectorM3F(0.0f, 1.0f, 5.0f);
+    this.camera_inverse = new VectorM3F();
+    this.camera_orientation = new QuaternionM4F();
+    this.camera_target = new VectorM3F();
 
     this.running = false;
   }
@@ -414,8 +432,24 @@ final class SBGLRenderer implements GLEventListener
 
       this.initRenderers();
 
+      this.axes = new SBVisibleAxes(gl, 50, 50, 50);
+      this.grid = new SBVisibleGridPlane(gl, 50, 0, 50);
+
       this.texture_units = gl.textureGetUnits();
       this.framebuffer_points = gl.framebufferGetColorAttachmentPoints();
+
+      this.program_vcolour = new Program("vcolour", this.log);
+      this.program_vcolour.addVertexShader(SBShaderPaths.getShader(
+        gl.metaGetVersionMajor(),
+        gl.metaGetVersionMinor(),
+        gl.metaIsES(),
+        "standard.v"));
+      this.program_vcolour.addFragmentShader(SBShaderPaths.getShader(
+        gl.metaGetVersionMajor(),
+        gl.metaGetVersionMinor(),
+        gl.metaIsES(),
+        "vertex_colour.f"));
+      this.program_vcolour.compile(this.filesystem, gl);
 
       this.program_uv = new Program("uv", this.log);
       this.program_uv.addVertexShader(SBShaderPaths.getShader(
@@ -449,10 +483,9 @@ final class SBGLRenderer implements GLEventListener
       GLUnsupportedException,
       ConstraintError
   {
-    this.renderers.put(SBRendererType.RENDERER_FLAT_UV, new KRendererFlatTextured(
-      this.gi,
-      this.filesystem,
-      this.log));
+    this.renderers.put(
+      SBRendererType.RENDERER_FLAT_UV,
+      new KRendererFlatTextured(this.gi, this.filesystem, this.log));
   }
 
   void meshDelete(
@@ -539,7 +572,72 @@ final class SBGLRenderer implements GLEventListener
     gl.depthBufferWriteEnable();
     gl.depthBufferClear(1.0f);
     gl.depthBufferEnable(DepthFunction.DEPTH_LESS_THAN);
-    gl.blendingDisable();
+    gl.blendingEnable(
+      BlendFunction.BLEND_SOURCE_ALPHA,
+      BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
+
+    MatrixM4x4F.setIdentity(this.matrix_modelview);
+    MatrixM4x4F.translateByVector3FInPlace(
+      this.matrix_modelview,
+      this.camera_inverse);
+
+    MatrixM4x4F.setIdentity(this.matrix_projection);
+    ProjectionMatrix.makePerspective(
+      this.matrix_projection,
+      1,
+      100,
+      (double) drawable.getWidth() / (double) drawable.getHeight(),
+      Math.toRadians(30));
+
+    this.program_vcolour.activate(gl);
+    {
+      final ProgramUniform u_proj =
+        this.program_vcolour.getUniform("m_projection");
+      final ProgramUniform u_model =
+        this.program_vcolour.getUniform("m_modelview");
+
+      gl.programPutUniformMatrix4x4f(u_proj, this.matrix_projection);
+      gl.programPutUniformMatrix4x4f(u_model, this.matrix_modelview);
+
+      final ProgramAttribute p_pos =
+        this.program_vcolour.getAttribute("v_position");
+      final ProgramAttribute p_col =
+        this.program_vcolour.getAttribute("v_colour");
+
+      {
+        final ArrayBuffer array = this.axes.getArrayBuffer();
+        final ArrayBufferDescriptor array_type = array.getDescriptor();
+        final ArrayBufferAttribute b_pos =
+          array_type.getAttribute("v_position");
+        final ArrayBufferAttribute b_uv = array_type.getAttribute("v_colour");
+
+        gl.arrayBufferBind(array);
+        gl.arrayBufferBindVertexAttribute(array, b_pos, p_pos);
+        gl.arrayBufferBindVertexAttribute(array, b_uv, p_col);
+
+        final IndexBuffer indices = this.axes.getIndexBuffer();
+        gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
+        gl.arrayBufferUnbind();
+      }
+
+      {
+        final ArrayBuffer array = this.grid.getArrayBuffer();
+        final ArrayBufferDescriptor array_type = array.getDescriptor();
+        final ArrayBufferAttribute b_pos =
+          array_type.getAttribute("v_position");
+        final ArrayBufferAttribute b_col =
+          array_type.getAttribute("v_colour");
+
+        gl.arrayBufferBind(array);
+        gl.arrayBufferBindVertexAttribute(array, b_pos, p_pos);
+        gl.arrayBufferBindVertexAttribute(array, b_col, p_col);
+
+        final IndexBuffer indices = this.grid.getIndexBuffer();
+        gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
+        gl.arrayBufferUnbind();
+      }
+    }
+    this.program_vcolour.deactivate(gl);
 
     MatrixM4x4F.setIdentity(this.matrix_projection);
     ProjectionMatrix.makeOrthographic(
@@ -551,21 +649,8 @@ final class SBGLRenderer implements GLEventListener
       1,
       100);
 
-    final VectorM3F translation = new VectorM3F();
-    translation.x = 0;
-    translation.y = 0;
-    translation.z = -1;
-
-    MatrixM4x4F.setIdentity(this.matrix_modelview);
-    MatrixM4x4F
-      .translateByVector3FInPlace(this.matrix_modelview, translation);
-
     this.program_uv.activate(gl);
     {
-      /**
-       * Get references to the program's uniform variable inputs.
-       */
-
       final ProgramUniform u_proj =
         this.program_uv.getUniform("m_projection");
       final ProgramUniform u_model =
@@ -573,52 +658,26 @@ final class SBGLRenderer implements GLEventListener
       final ProgramUniform u_texture =
         this.program_uv.getUniform("t_diffuse_0");
 
-      /**
-       * Upload the matrices to the uniform variable inputs.
-       */
-
       gl.programPutUniformMatrix4x4f(u_proj, this.matrix_projection);
       gl.programPutUniformMatrix4x4f(u_model, this.matrix_modelview);
-
-      /**
-       * Bind the texture to the first available texture unit, then upload the
-       * texture unit reference to the shader.
-       */
 
       gl.texture2DStaticBind(
         this.texture_units[0],
         this.getRenderedFramebufferTexture());
       gl.programPutUniformTextureUnit(u_texture, this.texture_units[0]);
 
-      /**
-       * Get references to the program's vertex attribute inputs.
-       */
-
       final ProgramAttribute p_pos =
         this.program_uv.getAttribute("v_position");
       final ProgramAttribute p_uv = this.program_uv.getAttribute("v_uv");
-
-      /**
-       * Get references to the array buffer's vertex attributes.
-       */
 
       final ArrayBuffer array = this.screen_quad.getArrayBuffer();
       final ArrayBufferDescriptor array_type = array.getDescriptor();
       final ArrayBufferAttribute b_pos = array_type.getAttribute("position");
       final ArrayBufferAttribute b_uv = array_type.getAttribute("uv");
 
-      /**
-       * Bind the array buffer, and associate program vertex attribute inputs
-       * with array vertex attributes.
-       */
-
       gl.arrayBufferBind(array);
       gl.arrayBufferBindVertexAttribute(array, b_pos, p_pos);
       gl.arrayBufferBindVertexAttribute(array, b_uv, p_uv);
-
-      /**
-       * Draw primitives, using the array buffer and the given index buffer.
-       */
 
       final IndexBuffer indices = this.screen_quad.getIndexBuffer();
       gl.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
@@ -641,19 +700,21 @@ final class SBGLRenderer implements GLEventListener
       final KRenderer renderer =
         this.renderers.get(this.renderer_current.get());
 
-      final VectorI3F cam_pos = new VectorI3F(0, 0, 5);
-      final VectorI3F cam_tar = new VectorI3F(0, 0, -5);
-      final QuaternionI4F cam_ori =
-        QuaternionI4F.lookAtWithContext(
-          this.qi4f_context,
-          cam_pos,
-          cam_tar,
-          new VectorI3F(0, 1, 0));
+      QuaternionM4F.lookAtWithContext(
+        this.qm4f_context,
+        this.camera_position,
+        this.camera_target,
+        SBGLRenderer.AXIS_Y,
+        this.camera_orientation);
+
+      this.camera_inverse.x = -this.camera_position.x;
+      this.camera_inverse.y = -this.camera_position.y;
+      this.camera_inverse.z = -this.camera_position.z;
 
       final KTransform transform =
         new KTransform(
-          new VectorI3F(-cam_pos.x, -cam_pos.y, -cam_pos.z),
-          cam_ori);
+          new VectorI3F(this.camera_inverse),
+          this.camera_orientation);
 
       final double aspect = (double) size.x / (double) size.y;
       final KProjection.KPerspective projection =
@@ -665,7 +726,7 @@ final class SBGLRenderer implements GLEventListener
         c.rendererGetScene();
       final KScene scene = new KScene(camera, p.first, p.second);
 
-      renderer.setBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 1.0f));
+      renderer.setBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f));
       renderer.render(this.framebuffer, scene);
     }
   }
