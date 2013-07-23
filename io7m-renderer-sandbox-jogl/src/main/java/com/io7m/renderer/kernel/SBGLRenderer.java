@@ -87,8 +87,6 @@ import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorM2I;
-import com.io7m.jtensors.VectorM3F;
-import com.io7m.jtensors.VectorReadable3F;
 import com.io7m.jvvfs.FSCapabilityAll;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
@@ -272,8 +270,6 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private static final VectorReadable3F AXIS_Y = new VectorI3F(0, 1, 0);
-
   private static <A, B extends FutureTask<A>> void processQueue(
     final @Nonnull Queue<B> q)
   {
@@ -314,15 +310,10 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull SBVisibleGridPlane                               grid;
 
   private final @Nonnull QuaternionM4F.Context                      qm4f_context;
-  private final @Nonnull VectorM3F                                  camera_acceleration;
-  private final @Nonnull VectorM3F                                  camera_velocity;
-  private final @Nonnull VectorM3F                                  camera_position;
-  private final @Nonnull VectorM3F                                  camera_inverse;
-  private final @Nonnull VectorM3F                                  camera_target;
-  private final @Nonnull QuaternionM4F                              camera_orientation;
   private @Nonnull KTransform                                       camera_transform;
   private final @Nonnull SBInputState                               input_state;
-  private @Nonnull final KTransform.Context                         camera_transform_ctx;
+  private final @Nonnull SBFirstPersonCamera                                camera;
+  private @Nonnull KMatrix4x4F<KMatrixView>                         camera_matrix;
 
   public SBGLRenderer(
     final @Nonnull Log log)
@@ -355,16 +346,8 @@ final class SBGLRenderer implements GLEventListener
     this.renderer_current =
       new AtomicReference<SBRendererType>(SBRendererType.RENDERER_FLAT_UV);
 
-    this.camera_acceleration = new VectorM3F();
-    this.camera_velocity = new VectorM3F();
-    this.camera_position = new VectorM3F(0.0f, 1.0f, 5.0f);
-    this.camera_inverse = new VectorM3F();
-    this.camera_orientation = new QuaternionM4F();
-    this.camera_target = new VectorM3F();
-    this.camera_transform_ctx = new KTransform.Context();
-
+    this.camera = new SBFirstPersonCamera(0.0f, 1.0f, 5.0f);
     this.input_state = new SBInputState();
-
     this.running = false;
   }
 
@@ -395,41 +378,41 @@ final class SBGLRenderer implements GLEventListener
 
   private void moveCamera()
   {
-    VectorM3F.copy(VectorI3F.ZERO, this.camera_acceleration);
-
+    final double speed = 0.01;
+    if (this.input_state.isMovingForward()) {
+      this.camera.moveForward(speed);
+    }
+    if (this.input_state.isMovingBackward()) {
+      this.camera.moveBackward(speed);
+    }
     if (this.input_state.isMovingUp()) {
-      this.camera_acceleration.y = 0.01f;
+      this.camera.moveUp(speed);
     }
     if (this.input_state.isMovingDown()) {
-      this.camera_acceleration.y = -0.01f;
+      this.camera.moveDown(speed);
     }
     if (this.input_state.isMovingLeft()) {
-      this.camera_acceleration.x = -0.01f;
+      this.camera.moveStrafeLeft(speed);
     }
     if (this.input_state.isMovingRight()) {
-      this.camera_acceleration.x = 0.01f;
+      this.camera.moveStrafeRight(speed);
     }
 
-    VectorM3F.addInPlace(this.camera_velocity, this.camera_acceleration);
-    VectorM3F.scaleInPlace(this.camera_velocity, 0.9);
-    VectorM3F.clampInPlace(this.camera_velocity, -10.0f, 10.0f);
-    VectorM3F.addInPlace(this.camera_position, this.camera_velocity);
+    if (this.input_state.isRotatingLeft()) {
+      this.camera.moveRotateLeft(speed);
+    }
+    if (this.input_state.isRotatingRight()) {
+      this.camera.moveRotateRight(speed);
+    }
 
-    QuaternionM4F.lookAtWithContext(
-      this.qm4f_context,
-      this.camera_position,
-      this.camera_target,
-      SBGLRenderer.AXIS_Y,
-      this.camera_orientation);
+    if (this.input_state.isRotatingUp()) {
+      this.camera.moveRotateUp(speed);
+    }
+    if (this.input_state.isRotatingDown()) {
+      this.camera.moveRotateDown(speed);
+    }
 
-    this.camera_inverse.x = -this.camera_position.x;
-    this.camera_inverse.y = -this.camera_position.y;
-    this.camera_inverse.z = -this.camera_position.z;
-
-    this.camera_transform =
-      new KTransform(
-        new VectorI3F(this.camera_inverse),
-        this.camera_orientation);
+    this.camera_matrix = this.camera.makeViewMatrix();
   }
 
   @Override public void dispose(
@@ -617,7 +600,7 @@ final class SBGLRenderer implements GLEventListener
     size.y = drawable.getHeight();
 
     gl.viewportSet(VectorI2I.ZERO, size);
-    gl.colorBufferClear3f(0.0f, 0.0f, 1.0f);
+    gl.colorBufferClear3f(0.0f, 0.1f, 0.1f);
     gl.depthBufferWriteEnable();
     gl.depthBufferClear(1.0f);
     gl.depthBufferDisable();
@@ -625,10 +608,8 @@ final class SBGLRenderer implements GLEventListener
       BlendFunction.BLEND_SOURCE_ALPHA,
       BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
 
-    MatrixM4x4F.setIdentity(this.matrix_modelview);
-    this.camera_transform.makeMatrix4x4F(
-      this.camera_transform_ctx,
-      this.matrix_modelview);
+    final KMatrix4x4F<KMatrixView> m = this.camera.makeViewMatrix();
+    m.makeMatrixM4x4F(this.matrix_modelview);
 
     MatrixM4x4F.setIdentity(this.matrix_projection);
     ProjectionMatrix.makePerspective(
@@ -654,22 +635,6 @@ final class SBGLRenderer implements GLEventListener
         this.program_vcolour.getAttribute("v_colour");
 
       {
-        final ArrayBuffer array = this.axes.getArrayBuffer();
-        final ArrayBufferDescriptor array_type = array.getDescriptor();
-        final ArrayBufferAttribute b_pos =
-          array_type.getAttribute("v_position");
-        final ArrayBufferAttribute b_uv = array_type.getAttribute("v_colour");
-
-        gl.arrayBufferBind(array);
-        gl.arrayBufferBindVertexAttribute(array, b_pos, p_pos);
-        gl.arrayBufferBindVertexAttribute(array, b_uv, p_col);
-
-        final IndexBuffer indices = this.axes.getIndexBuffer();
-        gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
-        gl.arrayBufferUnbind();
-      }
-
-      {
         final ArrayBuffer array = this.grid.getArrayBuffer();
         final ArrayBufferDescriptor array_type = array.getDescriptor();
         final ArrayBufferAttribute b_pos =
@@ -682,6 +647,22 @@ final class SBGLRenderer implements GLEventListener
         gl.arrayBufferBindVertexAttribute(array, b_col, p_col);
 
         final IndexBuffer indices = this.grid.getIndexBuffer();
+        gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
+        gl.arrayBufferUnbind();
+      }
+
+      {
+        final ArrayBuffer array = this.axes.getArrayBuffer();
+        final ArrayBufferDescriptor array_type = array.getDescriptor();
+        final ArrayBufferAttribute b_pos =
+          array_type.getAttribute("v_position");
+        final ArrayBufferAttribute b_uv = array_type.getAttribute("v_colour");
+
+        gl.arrayBufferBind(array);
+        gl.arrayBufferBindVertexAttribute(array, b_pos, p_pos);
+        gl.arrayBufferBindVertexAttribute(array, b_uv, p_col);
+
+        final IndexBuffer indices = this.axes.getIndexBuffer();
         gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
         gl.arrayBufferUnbind();
       }
@@ -755,14 +736,23 @@ final class SBGLRenderer implements GLEventListener
         this.renderers.get(this.renderer_current.get());
 
       final double aspect = (double) size.x / (double) size.y;
-      final KProjection.KPerspective projection =
-        new KProjection.KPerspective(1, 100, aspect, Math.toRadians(30));
 
-      final KCamera camera = new KCamera(this.camera_transform, projection);
+      MatrixM4x4F.setIdentity(this.matrix_projection);
+      ProjectionMatrix.makePerspective(
+        this.matrix_projection,
+        1,
+        100,
+        aspect,
+        Math.toRadians(30));
+
+      final KMatrix4x4F<KMatrixProjection> projection =
+        new KMatrix4x4F<KMatrixProjection>(this.matrix_projection);
+
+      final KCamera kcamera = new KCamera(this.camera_matrix, projection);
 
       final Pair<Collection<KLight>, Collection<KMeshInstance>> p =
         c.rendererGetScene();
-      final KScene scene = new KScene(camera, p.first, p.second);
+      final KScene scene = new KScene(kcamera, p.first, p.second);
 
       renderer.setBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f));
       renderer.render(this.framebuffer, scene);
