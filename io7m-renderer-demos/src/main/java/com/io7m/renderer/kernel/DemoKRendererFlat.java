@@ -77,7 +77,7 @@ import com.io7m.renderer.DemoUtilities;
 import com.io7m.renderer.kernel.KProjection.KPerspective;
 
 /**
- * Example program that draws something with {@link KRendererFlat}.
+ * Example program that draws something with {@link KRendererFlatTextured}.
  */
 
 public final class DemoKRendererFlat implements Demo
@@ -220,7 +220,7 @@ public final class DemoKRendererFlat implements Demo
   private boolean                                       has_shut_down = false;
   private final @Nonnull GLImplementation               gi;
   private final @Nonnull GLInterfaceCommon              gl;
-  private final @Nonnull KRendererFlat                  renderer;
+  private final @Nonnull KRendererFlatTextured                  renderer;
   private final @Nonnull Log                            log;
   private final @Nonnull QuaternionI4F.Context          quat_context;
   private final @Nonnull Program                        program;
@@ -250,7 +250,7 @@ public final class DemoKRendererFlat implements Demo
     this.gi = config.getGL();
     this.gl = this.gi.getGLCommon();
     this.renderer =
-      new KRendererFlat(
+      new KRendererFlatTextured(
         config.getGL(),
         config.getFilesystem(),
         config.getLog());
