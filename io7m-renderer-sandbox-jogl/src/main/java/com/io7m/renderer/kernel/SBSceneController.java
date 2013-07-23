@@ -78,6 +78,7 @@ public final class SBSceneController implements
   SBSceneControllerModels,
   SBSceneControllerInstances,
   SBSceneControllerRenderer,
+  SBSceneControllerRendererControl,
   SBSceneControllerTextures
 {
   private static void ioSaveSceneActualCopyFiles(
@@ -118,6 +119,24 @@ public final class SBSceneController implements
     }
   }
 
+  private static void ioSaveSceneActualSerializeXML(
+    final @Nonnull SBSceneDescription scene,
+    final @Nonnull ZipOutputStream fo)
+    throws UnsupportedEncodingException,
+      IOException
+  {
+    final Element xml = scene.toXML();
+    final Document doc = new Document(xml);
+    final Serializer s = new Serializer(fo, "UTF-8");
+    s.setIndent(2);
+    s.setMaxLength(80);
+
+    final ZipEntry entry = new ZipEntry("scene.xml");
+    fo.putNextEntry(entry);
+    s.write(doc);
+    fo.closeEntry();
+  }
+
   private static void ioSaveSceneCopyFileIntoZip(
     final @Nonnull Log log,
     final @Nonnull ZipOutputStream fo,
@@ -147,24 +166,6 @@ public final class SBSceneController implements
     } finally {
       stream.close();
     }
-  }
-
-  private static void ioSaveSceneActualSerializeXML(
-    final @Nonnull SBSceneDescription scene,
-    final @Nonnull ZipOutputStream fo)
-    throws UnsupportedEncodingException,
-      IOException
-  {
-    final Element xml = scene.toXML();
-    final Document doc = new Document(xml);
-    final Serializer s = new Serializer(fo, "UTF-8");
-    s.setIndent(2);
-    s.setMaxLength(80);
-
-    final ZipEntry entry = new ZipEntry("scene.xml");
-    fo.putNextEntry(entry);
-    s.write(doc);
-    fo.closeEntry();
   }
 
   private static @Nonnull BufferedImage textureLoadImageIOActual(
@@ -418,6 +419,25 @@ public final class SBSceneController implements
       meshes);
   }
 
+  @Override public void rendererSetType(
+    final @Nonnull SBRendererType type)
+  {
+    this.log.debug("Selecting renderer " + type);
+    this.renderer.setRenderer(type);
+  }
+
+  @Override public void rendererShowAxes(
+    final boolean enabled)
+  {
+    this.renderer.setShowAxes(enabled);
+  }
+
+  @Override public void rendererShowGrid(
+    final boolean enabled)
+  {
+    this.renderer.setShowGrid(enabled);
+  }
+
   @Override public void sceneInstanceAdd(
     final @Nonnull SBInstance instance)
   {
@@ -638,13 +658,6 @@ public final class SBSceneController implements
     this.exec_pool.execute(f);
     return f;
   }
-
-  @Override public void rendererSetType(
-    final @Nonnull SBRendererType type)
-  {
-    this.log.debug("Selecting renderer " + type);
-    this.renderer.setRenderer(type);
-  }
 }
 
 interface SBSceneControllerInstances extends
@@ -711,9 +724,18 @@ interface SBSceneControllerRenderer
   public @Nonnull
     Pair<Collection<KLight>, Collection<KMeshInstance>>
     rendererGetScene();
+}
 
+interface SBSceneControllerRendererControl
+{
   public void rendererSetType(
     final @Nonnull SBRendererType type);
+
+  public void rendererShowAxes(
+    final boolean enabled);
+
+  public void rendererShowGrid(
+    final boolean enabled);
 }
 
 interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration
