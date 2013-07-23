@@ -18,24 +18,48 @@ package com.io7m.renderer.kernel;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.Nonnull;
+
 final class SBInputState
 {
-  private final AtomicBoolean moving_left;
-  private final AtomicBoolean moving_right;
-  private final AtomicBoolean moving_up;
-  private final AtomicBoolean moving_down;
+  private final @Nonnull AtomicBoolean moving_forward;
+  private final @Nonnull AtomicBoolean moving_backward;
+  private final @Nonnull AtomicBoolean moving_left;
+  private final @Nonnull AtomicBoolean moving_right;
+  private final @Nonnull AtomicBoolean moving_up;
+  private final @Nonnull AtomicBoolean moving_down;
+  private final @Nonnull AtomicBoolean rotating_left;
+  private final @Nonnull AtomicBoolean rotating_right;
+  private final @Nonnull AtomicBoolean rotating_up;
+  private final @Nonnull AtomicBoolean rotating_down;
 
   public SBInputState()
   {
+    this.moving_forward = new AtomicBoolean();
+    this.moving_backward = new AtomicBoolean();
     this.moving_left = new AtomicBoolean();
     this.moving_right = new AtomicBoolean();
     this.moving_up = new AtomicBoolean();
     this.moving_down = new AtomicBoolean();
+    this.rotating_left = new AtomicBoolean();
+    this.rotating_right = new AtomicBoolean();
+    this.rotating_up = new AtomicBoolean();
+    this.rotating_down = new AtomicBoolean();
+  }
+
+  boolean isMovingBackward()
+  {
+    return this.moving_backward.get();
   }
 
   boolean isMovingDown()
   {
     return this.moving_down.get();
+  }
+
+  boolean isMovingForward()
+  {
+    return this.moving_forward.get();
   }
 
   boolean isMovingLeft()
@@ -53,10 +77,42 @@ final class SBInputState
     return this.moving_up.get();
   }
 
+  boolean isRotatingDown()
+  {
+    return this.rotating_down.get();
+  }
+
+  boolean isRotatingLeft()
+  {
+    return this.rotating_left.get();
+  }
+
+  boolean isRotatingRight()
+  {
+    return this.rotating_right.get();
+  }
+
+  boolean isRotatingUp()
+  {
+    return this.rotating_up.get();
+  }
+
+  void setMovingBackward(
+    final boolean r)
+  {
+    this.moving_backward.set(r);
+  }
+
   void setMovingDown(
     final boolean moving_down)
   {
     this.moving_down.set(moving_down);
+  }
+
+  void setMovingForward(
+    final boolean r)
+  {
+    this.moving_forward.set(r);
   }
 
   void setMovingLeft(
@@ -75,5 +131,29 @@ final class SBInputState
     final boolean moving_up)
   {
     this.moving_up.set(moving_up);
+  }
+
+  void setRotatingDown(
+    final boolean r)
+  {
+    this.rotating_down.set(r);
+  }
+
+  void setRotatingLeft(
+    final boolean r)
+  {
+    this.rotating_left.set(r);
+  }
+
+  void setRotatingRight(
+    final boolean r)
+  {
+    this.rotating_right.set(r);
+  }
+
+  void setRotatingUp(
+    final boolean r)
+  {
+    this.rotating_up.set(r);
   }
 }

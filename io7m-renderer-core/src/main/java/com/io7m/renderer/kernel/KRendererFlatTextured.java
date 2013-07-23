@@ -118,10 +118,8 @@ final class KRendererFlatTextured implements KRenderer
       ConstraintError
   {
     final KCamera camera = scene.getCamera();
-    camera.getProjection().makeMatrix4x4F(this.matrix_projection);
-    camera.getTransform().makeMatrix4x4F(
-      this.transform_context,
-      this.matrix_view);
+    camera.getProjectionMatrix().makeMatrixM4x4F(this.matrix_projection);
+    camera.getViewMatrix().makeMatrixM4x4F(this.matrix_view);
 
     final GLInterfaceCommon gc = this.gl.getGLCommon();
 
