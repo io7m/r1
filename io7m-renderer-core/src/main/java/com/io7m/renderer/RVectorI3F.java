@@ -20,7 +20,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jtensors.VectorI3F;
 
-public final class RVectorI3F<T extends RSpace> extends VectorI3F implements
+public class RVectorI3F<T extends RSpace> extends VectorI3F implements
   RVectorReadable3F<T>
 {
   public RVectorI3F(
