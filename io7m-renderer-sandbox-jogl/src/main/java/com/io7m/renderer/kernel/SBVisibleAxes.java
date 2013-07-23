@@ -49,7 +49,7 @@ public final class SBVisibleAxes
     attributes[0] =
       new ArrayBufferAttribute("v_position", GLScalarType.TYPE_FLOAT, 3);
     attributes[1] =
-      new ArrayBufferAttribute("v_color", GLScalarType.TYPE_FLOAT, 3);
+      new ArrayBufferAttribute("v_colour", GLScalarType.TYPE_FLOAT, 3);
     final ArrayBufferDescriptor type = new ArrayBufferDescriptor(attributes);
 
     this.array = gl.arrayBufferAllocate(6, type, UsageHint.USAGE_STATIC_READ);
@@ -62,7 +62,7 @@ public final class SBVisibleAxes
       new IndexBufferWritableData(this.indices);
 
     final CursorWritable3f pc = array_map.getCursor3f("v_position");
-    final CursorWritable3f cc = array_map.getCursor3f("v_color");
+    final CursorWritable3f cc = array_map.getCursor3f("v_colour");
     final CursorWritableIndex ic = index_map.getCursor();
 
     int index = 0;
