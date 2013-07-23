@@ -76,7 +76,7 @@ final class SBMainWindow extends JFrame
   }
 
   private static @Nonnull
-    <C extends SBSceneControllerRenderer & SBSceneControllerIO>
+    <C extends SBSceneControllerRendererControl & SBSceneControllerIO>
     JMenuBar
     makeMenuBar(
       final @Nonnull C controller,
@@ -95,7 +95,7 @@ final class SBMainWindow extends JFrame
   }
 
   private static @Nonnull JMenu makeMenuRenderer(
-    final @Nonnull SBSceneControllerRenderer controller)
+    final @Nonnull SBSceneControllerRendererControl controller)
   {
     final JMenu menu = new JMenu("Renderer");
     final ButtonGroup group = new ButtonGroup();
@@ -118,6 +118,29 @@ final class SBMainWindow extends JFrame
       first = false;
     }
 
+    final JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Show grid");
+    grid.setSelected(true);
+    grid.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        controller.rendererShowGrid(grid.isSelected());
+      }
+    });
+
+    final JCheckBoxMenuItem axes = new JCheckBoxMenuItem("Show axes");
+    axes.setSelected(true);
+    axes.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        controller.rendererShowAxes(axes.isSelected());
+      }
+    });
+
+    menu.add(new JSeparator());
+    menu.add(grid);
+    menu.add(axes);
     return menu;
   }
 

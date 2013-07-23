@@ -25,6 +25,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.CheckForNull;
@@ -307,7 +308,9 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull AtomicReference<SBSceneControllerRenderer> controller;
 
   private @Nonnull SBVisibleAxes                                    axes;
+  private final @Nonnull AtomicBoolean                              axes_show;
   private @Nonnull SBVisibleGridPlane                               grid;
+  private final @Nonnull AtomicBoolean                              grid_show;
 
   private final @Nonnull QuaternionM4F.Context                      qm4f_context;
   private @Nonnull KTransform                                       camera_transform;
@@ -346,6 +349,9 @@ final class SBGLRenderer implements GLEventListener
     this.renderer_current =
       new AtomicReference<SBRendererType>(
         SBRendererType.RENDERER_FLAT_TEXTURED);
+
+    this.axes_show = new AtomicBoolean(true);
+    this.grid_show = new AtomicBoolean(true);
 
     this.camera = new SBFirstPersonCamera(0.0f, 1.0f, 5.0f);
     this.input_state = new SBInputState();
@@ -641,7 +647,7 @@ final class SBGLRenderer implements GLEventListener
       final ProgramAttribute p_col =
         this.program_vcolour.getAttribute("v_colour");
 
-      {
+      if (this.grid_show.get()) {
         final ArrayBuffer array = this.grid.getArrayBuffer();
         final ArrayBufferDescriptor array_type = array.getDescriptor();
         final ArrayBufferAttribute b_pos =
@@ -660,7 +666,7 @@ final class SBGLRenderer implements GLEventListener
 
       gl.programPutUniformFloat(u_alpha, 1.0f);
 
-      {
+      if (this.axes_show.get()) {
         final ArrayBuffer array = this.axes.getArrayBuffer();
         final ArrayBufferDescriptor array_type = array.getDescriptor();
         final ArrayBufferAttribute b_pos =
@@ -818,5 +824,17 @@ final class SBGLRenderer implements GLEventListener
     final @Nonnull SBRendererType type)
   {
     this.renderer_current.set(type);
+  }
+
+  void setShowGrid(
+    final boolean enabled)
+  {
+    this.grid_show.set(enabled);
+  }
+
+  void setShowAxes(
+    final boolean enabled)
+  {
+    this.axes_show.set(enabled);
   }
 }
