@@ -449,7 +449,7 @@ final class SBGLRenderer implements GLEventListener
       GLUnsupportedException,
       ConstraintError
   {
-    this.renderers.put(SBRendererType.RENDERER_FLAT_UV, new KRendererFlat(
+    this.renderers.put(SBRendererType.RENDERER_FLAT_UV, new KRendererFlatTextured(
       this.gi,
       this.filesystem,
       this.log));
