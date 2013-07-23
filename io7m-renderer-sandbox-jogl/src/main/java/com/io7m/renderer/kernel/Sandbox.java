@@ -45,6 +45,8 @@ public final class Sandbox
       {
         log.debug("starting");
         try {
+          new SBRepeatingReleasedEventsFixer().install();
+
           final SBGLRenderer renderer = new SBGLRenderer(log);
           final SBSceneController controller =
             new SBSceneController(renderer, log);

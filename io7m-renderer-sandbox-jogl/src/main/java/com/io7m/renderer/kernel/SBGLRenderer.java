@@ -48,7 +48,6 @@ import com.io7m.jcanephora.ArrayBufferDescriptor;
 import com.io7m.jcanephora.AttachmentColor;
 import com.io7m.jcanephora.AttachmentColor.AttachmentColorTexture2DStatic;
 import com.io7m.jcanephora.BlendFunction;
-import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.Framebuffer;
 import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
 import com.io7m.jcanephora.FramebufferConfigurationGLES2Actual;
@@ -315,10 +314,15 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull SBVisibleGridPlane                               grid;
 
   private final @Nonnull QuaternionM4F.Context                      qm4f_context;
+  private final @Nonnull VectorM3F                                  camera_acceleration;
+  private final @Nonnull VectorM3F                                  camera_velocity;
   private final @Nonnull VectorM3F                                  camera_position;
   private final @Nonnull VectorM3F                                  camera_inverse;
   private final @Nonnull VectorM3F                                  camera_target;
   private final @Nonnull QuaternionM4F                              camera_orientation;
+  private @Nonnull KTransform                                       camera_transform;
+  private final @Nonnull SBInputState                               input_state;
+  private @Nonnull final KTransform.Context                         camera_transform_ctx;
 
   public SBGLRenderer(
     final @Nonnull Log log)
@@ -351,10 +355,15 @@ final class SBGLRenderer implements GLEventListener
     this.renderer_current =
       new AtomicReference<SBRendererType>(SBRendererType.RENDERER_FLAT_UV);
 
+    this.camera_acceleration = new VectorM3F();
+    this.camera_velocity = new VectorM3F();
     this.camera_position = new VectorM3F(0.0f, 1.0f, 5.0f);
     this.camera_inverse = new VectorM3F();
     this.camera_orientation = new QuaternionM4F();
     this.camera_target = new VectorM3F();
+    this.camera_transform_ctx = new KTransform.Context();
+
+    this.input_state = new SBInputState();
 
     this.running = false;
   }
@@ -374,6 +383,7 @@ final class SBGLRenderer implements GLEventListener
       SBGLRenderer.processQueue(this.texture_load_queue);
       SBGLRenderer.processQueue(this.mesh_load_queue);
 
+      this.moveCamera();
       this.renderScene();
       this.renderResultsToScreen(drawable, gl);
     } catch (final GLException e) {
@@ -381,6 +391,45 @@ final class SBGLRenderer implements GLEventListener
     } catch (final ConstraintError e) {
       this.failed(e);
     }
+  }
+
+  private void moveCamera()
+  {
+    VectorM3F.copy(VectorI3F.ZERO, this.camera_acceleration);
+
+    if (this.input_state.isMovingUp()) {
+      this.camera_acceleration.y = 0.01f;
+    }
+    if (this.input_state.isMovingDown()) {
+      this.camera_acceleration.y = -0.01f;
+    }
+    if (this.input_state.isMovingLeft()) {
+      this.camera_acceleration.x = -0.01f;
+    }
+    if (this.input_state.isMovingRight()) {
+      this.camera_acceleration.x = 0.01f;
+    }
+
+    VectorM3F.addInPlace(this.camera_velocity, this.camera_acceleration);
+    VectorM3F.scaleInPlace(this.camera_velocity, 0.9);
+    VectorM3F.clampInPlace(this.camera_velocity, -10.0f, 10.0f);
+    VectorM3F.addInPlace(this.camera_position, this.camera_velocity);
+
+    QuaternionM4F.lookAtWithContext(
+      this.qm4f_context,
+      this.camera_position,
+      this.camera_target,
+      SBGLRenderer.AXIS_Y,
+      this.camera_orientation);
+
+    this.camera_inverse.x = -this.camera_position.x;
+    this.camera_inverse.y = -this.camera_position.y;
+    this.camera_inverse.z = -this.camera_position.z;
+
+    this.camera_transform =
+      new KTransform(
+        new VectorI3F(this.camera_inverse),
+        this.camera_orientation);
   }
 
   @Override public void dispose(
@@ -571,15 +620,15 @@ final class SBGLRenderer implements GLEventListener
     gl.colorBufferClear3f(0.0f, 0.0f, 1.0f);
     gl.depthBufferWriteEnable();
     gl.depthBufferClear(1.0f);
-    gl.depthBufferEnable(DepthFunction.DEPTH_LESS_THAN);
+    gl.depthBufferDisable();
     gl.blendingEnable(
       BlendFunction.BLEND_SOURCE_ALPHA,
       BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
 
     MatrixM4x4F.setIdentity(this.matrix_modelview);
-    MatrixM4x4F.translateByVector3FInPlace(
-      this.matrix_modelview,
-      this.camera_inverse);
+    this.camera_transform.makeMatrix4x4F(
+      this.camera_transform_ctx,
+      this.matrix_modelview);
 
     MatrixM4x4F.setIdentity(this.matrix_projection);
     ProjectionMatrix.makePerspective(
@@ -638,6 +687,11 @@ final class SBGLRenderer implements GLEventListener
       }
     }
     this.program_vcolour.deactivate(gl);
+
+    MatrixM4x4F.setIdentity(this.matrix_modelview);
+    MatrixM4x4F.translateByVector3FInPlace(
+      this.matrix_modelview,
+      new VectorI3F(0, 0, -1));
 
     MatrixM4x4F.setIdentity(this.matrix_projection);
     ProjectionMatrix.makeOrthographic(
@@ -700,27 +754,11 @@ final class SBGLRenderer implements GLEventListener
       final KRenderer renderer =
         this.renderers.get(this.renderer_current.get());
 
-      QuaternionM4F.lookAtWithContext(
-        this.qm4f_context,
-        this.camera_position,
-        this.camera_target,
-        SBGLRenderer.AXIS_Y,
-        this.camera_orientation);
-
-      this.camera_inverse.x = -this.camera_position.x;
-      this.camera_inverse.y = -this.camera_position.y;
-      this.camera_inverse.z = -this.camera_position.z;
-
-      final KTransform transform =
-        new KTransform(
-          new VectorI3F(this.camera_inverse),
-          this.camera_orientation);
-
       final double aspect = (double) size.x / (double) size.y;
       final KProjection.KPerspective projection =
         new KProjection.KPerspective(1, 100, aspect, Math.toRadians(30));
 
-      final KCamera camera = new KCamera(transform, projection);
+      final KCamera camera = new KCamera(this.camera_transform, projection);
 
       final Pair<Collection<KLight>, Collection<KMeshInstance>> p =
         c.rendererGetScene();
@@ -770,5 +808,10 @@ final class SBGLRenderer implements GLEventListener
     final @Nonnull SBSceneControllerRenderer renderer)
   {
     this.controller.set(renderer);
+  }
+
+  @Nonnull SBInputState getInputState()
+  {
+    return this.input_state;
   }
 }
