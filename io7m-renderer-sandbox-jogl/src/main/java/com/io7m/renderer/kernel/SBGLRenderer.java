@@ -312,7 +312,7 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull QuaternionM4F.Context                      qm4f_context;
   private @Nonnull KTransform                                       camera_transform;
   private final @Nonnull SBInputState                               input_state;
-  private final @Nonnull SBFirstPersonCamera                                camera;
+  private final @Nonnull SBFirstPersonCamera                        camera;
   private @Nonnull KMatrix4x4F<KMatrixView>                         camera_matrix;
 
   public SBGLRenderer(
@@ -625,9 +625,12 @@ final class SBGLRenderer implements GLEventListener
         this.program_vcolour.getUniform("m_projection");
       final ProgramUniform u_model =
         this.program_vcolour.getUniform("m_modelview");
+      final ProgramUniform u_alpha =
+        this.program_vcolour.getUniform("f_alpha");
 
       gl.programPutUniformMatrix4x4f(u_proj, this.matrix_projection);
       gl.programPutUniformMatrix4x4f(u_model, this.matrix_modelview);
+      gl.programPutUniformFloat(u_alpha, 0.1f);
 
       final ProgramAttribute p_pos =
         this.program_vcolour.getAttribute("v_position");
@@ -650,6 +653,8 @@ final class SBGLRenderer implements GLEventListener
         gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
         gl.arrayBufferUnbind();
       }
+
+      gl.programPutUniformFloat(u_alpha, 1.0f);
 
       {
         final ArrayBuffer array = this.axes.getArrayBuffer();
