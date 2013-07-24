@@ -658,6 +658,14 @@ public final class SBSceneController implements
     this.exec_pool.execute(f);
     return f;
   }
+
+  @Override public void rendererSetBackgroundColour(
+    final float r,
+    final float g,
+    final float b)
+  {
+    this.renderer.setBackgroundColour(r, g, b);
+  }
 }
 
 interface SBSceneControllerInstances extends
@@ -736,6 +744,11 @@ interface SBSceneControllerRendererControl
 
   public void rendererShowGrid(
     final boolean enabled);
+
+  public void rendererSetBackgroundColour(
+    float r,
+    float g,
+    float b);
 }
 
 interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration

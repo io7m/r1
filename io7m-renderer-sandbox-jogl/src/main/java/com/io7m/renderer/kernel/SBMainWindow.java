@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,6 +36,7 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -138,9 +140,24 @@ final class SBMainWindow extends JFrame
       }
     });
 
+    final JMenuItem bg_colour = new JMenuItem("Background colour...");
+    bg_colour.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        final Color c =
+          JColorChooser
+            .showDialog(bg_colour, "Select colour...", Color.BLACK);
+        final float[] rgb = c.getColorComponents(null);
+        controller.rendererSetBackgroundColour(rgb[0], rgb[1], rgb[2]);
+      }
+    });
+
     menu.add(new JSeparator());
     menu.add(grid);
     menu.add(axes);
+    menu.add(new JSeparator());
+    menu.add(bg_colour);
     return menu;
   }
 
