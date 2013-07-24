@@ -306,6 +306,7 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull Map<SBRendererType, KRenderer>             renderers;
   private final @Nonnull AtomicReference<SBRendererType>            renderer_current;
   private final @Nonnull AtomicReference<SBSceneControllerRenderer> controller;
+  private final @Nonnull AtomicReference<VectorI3F>                 background_colour;
 
   private @Nonnull SBVisibleAxes                                    axes;
   private final @Nonnull AtomicBoolean                              axes_show;
@@ -342,6 +343,9 @@ final class SBGLRenderer implements GLEventListener
       SBGLRenderer.class,
       PathVirtual.ROOT);
     this.filesystem.mountClasspathArchive(KRenderer.class, PathVirtual.ROOT);
+
+    this.background_colour =
+      new AtomicReference<VectorI3F>(new VectorI3F(0.1f, 0.1f, 0.1f));
 
     this.matrix_modelview = new MatrixM4x4F();
     this.matrix_projection = new MatrixM4x4F();
@@ -610,7 +614,7 @@ final class SBGLRenderer implements GLEventListener
     size.y = drawable.getHeight();
 
     gl.viewportSet(VectorI2I.ZERO, size);
-    gl.colorBufferClear3f(0.0f, 0.1f, 0.1f);
+    gl.colorBufferClearV3f(this.background_colour.get());
     gl.depthBufferWriteEnable();
     gl.depthBufferClear(1.0f);
     gl.depthBufferDisable();
@@ -836,5 +840,13 @@ final class SBGLRenderer implements GLEventListener
     final boolean enabled)
   {
     this.axes_show.set(enabled);
+  }
+
+  void setBackgroundColour(
+    final float r,
+    final float g,
+    final float b)
+  {
+    this.background_colour.set(new VectorI3F(r, g, b));
   }
 }
