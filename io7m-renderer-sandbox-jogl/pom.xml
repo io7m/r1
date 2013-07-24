@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer.sandbox-jogl</groupId>
   <artifactId>io7m-renderer-sandbox-jogl</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-sandbox-jogl</name>
   <description>JOGL renderer sandbox</description>
@@ -91,7 +91,7 @@
     <dependency>
       <groupId>com.io7m.jsom0.core</groupId>
       <artifactId>io7m-jsom0-core</artifactId>
-      <version>0.9.2</version>
+      <version>0.9.3</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
