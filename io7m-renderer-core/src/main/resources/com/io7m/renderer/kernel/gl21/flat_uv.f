@@ -2,7 +2,7 @@
 
 uniform sampler2D t_diffuse_0;
 
-attribute vec2 f_uv;
+varying vec2 f_uv;
 
 void
 main (void)
