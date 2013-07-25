@@ -11,13 +11,15 @@ uniform mat3 m_normal;
 
 varying vec2 f_uv;
 varying vec3 f_normal;
+varying vec3 f_normal_tangent;
 varying vec3 f_colour;
 
 void
 main()
 {
-  gl_Position = m_projection * m_modelview * vec4(v_position, 1.0);
-  f_uv        = v_uv;
-  f_normal    = m_normal * v_normal;
-  f_colour    = v_colour;
+  gl_Position      = m_projection * m_modelview * vec4(v_position, 1.0);
+  f_uv             = v_uv;
+  f_normal         = m_normal * v_normal;
+  f_normal_tangent = v_normal;
+  f_colour         = v_colour;
 }
