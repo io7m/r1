@@ -107,7 +107,13 @@ final class KRendererFlatTextured implements KRenderer
     this.matrix_context = new MatrixM4x4F.Context();
     this.transform_context = new KTransform.Context();
     this.program =
-      KRendererFlatTextured.makeProgram(gl.getGLCommon(), fs, this.log);
+      KShaderUtilities.makeProgram(
+        gl.getGLCommon(),
+        fs,
+        "flat-uv",
+        "standard.v",
+        "flat_uv.f",
+        log);
     this.viewport_size = new VectorM2I();
   }
 
