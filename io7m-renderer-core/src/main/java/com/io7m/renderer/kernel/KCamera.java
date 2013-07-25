@@ -23,37 +23,37 @@ import javax.annotation.concurrent.Immutable;
  * An orientable "camera" with a specific projection.
  */
 
-@Immutable final class KCamera implements KTransformable
+@Immutable final class KCamera
 {
-  private final @Nonnull KTransform  transform;
-  private final @Nonnull KProjection projection;
+  private final @Nonnull KMatrix4x4F<KMatrixView>       view;
+  private final @Nonnull KMatrix4x4F<KMatrixProjection> projection;
 
   KCamera(
-    final @Nonnull KTransform transform,
-    final @Nonnull KProjection projection)
+    final @Nonnull KMatrix4x4F<KMatrixView> view,
+    final @Nonnull KMatrix4x4F<KMatrixProjection> projection)
   {
-    this.transform = transform;
+    this.view = view;
     this.projection = projection;
   }
 
-  @Nonnull KProjection getProjection()
+  public @Nonnull KMatrix4x4F<KMatrixProjection> getProjectionMatrix()
   {
     return this.projection;
   }
 
-  @Override public @Nonnull KTransform getTransform()
+  public @Nonnull KMatrix4x4F<KMatrixView> getViewMatrix()
   {
-    return this.transform;
+    return this.view;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KCamera  ");
-    builder.append(this.transform);
-    builder.append(" ");
+    builder.append("[KCamera [view ");
+    builder.append(this.view);
+    builder.append("] [projection ");
     builder.append(this.projection);
-    builder.append("]");
+    builder.append("]]");
     return builder.toString();
   }
 }

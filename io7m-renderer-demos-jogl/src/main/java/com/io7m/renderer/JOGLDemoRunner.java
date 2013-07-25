@@ -48,7 +48,7 @@ import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.FPSAnimator;
 
-final class JOGLDemoRunner implements GLEventListener, KeyListener
+public final class JOGLDemoRunner implements GLEventListener, KeyListener
 {
   private enum Command
   {
