@@ -116,7 +116,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
     this.transform_context = new KTransform.Context();
 
     this.program_directional =
-      KRendererForwardDiffuseOnly.makeProgram(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         fs,
         "fw_diffuse_directional",
@@ -125,7 +125,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
         this.log);
 
     this.program_depth =
-      KRendererForwardDiffuseOnly.makeProgram(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         fs,
         "depth_only",
@@ -135,20 +135,20 @@ final class KRendererForwardDiffuseOnly implements KRenderer
   }
 
   /**
-   * Produce a normal matrix from the model matrix.
+   * Produce a normal matrix from the modelview matrix.
    */
 
   private void makeNormalMatrix()
   {
-    this.matrix_normal.set(0, 0, this.matrix_model.get(0, 0));
-    this.matrix_normal.set(1, 0, this.matrix_model.get(1, 0));
-    this.matrix_normal.set(2, 0, this.matrix_model.get(2, 0));
-    this.matrix_normal.set(0, 1, this.matrix_model.get(0, 1));
-    this.matrix_normal.set(1, 1, this.matrix_model.get(1, 1));
-    this.matrix_normal.set(2, 1, this.matrix_model.get(2, 1));
-    this.matrix_normal.set(0, 2, this.matrix_model.get(0, 2));
-    this.matrix_normal.set(1, 2, this.matrix_model.get(1, 2));
-    this.matrix_normal.set(2, 2, this.matrix_model.get(2, 2));
+    this.matrix_normal.set(0, 0, this.matrix_modelview.get(0, 0));
+    this.matrix_normal.set(1, 0, this.matrix_modelview.get(1, 0));
+    this.matrix_normal.set(2, 0, this.matrix_modelview.get(2, 0));
+    this.matrix_normal.set(0, 1, this.matrix_modelview.get(0, 1));
+    this.matrix_normal.set(1, 1, this.matrix_modelview.get(1, 1));
+    this.matrix_normal.set(2, 1, this.matrix_modelview.get(2, 1));
+    this.matrix_normal.set(0, 2, this.matrix_modelview.get(0, 2));
+    this.matrix_normal.set(1, 2, this.matrix_modelview.get(1, 2));
+    this.matrix_normal.set(2, 2, this.matrix_modelview.get(2, 2));
     MatrixM3x3F.invertInPlace(this.matrix_normal);
     MatrixM3x3F.transposeInPlace(this.matrix_normal);
   }
@@ -160,10 +160,8 @@ final class KRendererForwardDiffuseOnly implements KRenderer
       ConstraintError
   {
     final KCamera camera = scene.getCamera();
-    camera.getProjection().makeMatrix4x4F(this.matrix_projection);
-    camera.getTransform().makeMatrix4x4F(
-      this.transform_context,
-      this.matrix_view);
+    camera.getProjectionMatrix().makeMatrixM4x4F(this.matrix_projection);
+    camera.getViewMatrix().makeMatrixM4x4F(this.matrix_view);
 
     final GLInterfaceCommon gc = this.gl.getGLCommon();
 
@@ -200,12 +198,12 @@ final class KRendererForwardDiffuseOnly implements KRenderer
 
       for (final KLight light : scene.getLights()) {
         switch (light.getType()) {
-          case CONE:
-          case POINT:
+          case LIGHT_CONE:
+          case LIGHT_POINT:
           {
             throw new UnimplementedCodeException();
           }
-          case DIRECTIONAL:
+          case LIGHT_DIRECTIONAL:
           {
             final KDirectional dlight = (KLight.KDirectional) light;
             this.renderLightPassMeshesDirectional(scene, gc, dlight);
@@ -226,7 +224,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
   private void renderDepthPassMesh(
     final @Nonnull GLInterfaceCommon gc,
     final @Nonnull Program program,
-    final @Nonnull KMesh mesh)
+    final @Nonnull KMeshInstance mesh)
     throws ConstraintError,
       GLException
   {
@@ -288,7 +286,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
         this.program_depth.getUniform("m_projection");
       gc.programPutUniformMatrix4x4f(u_mproj, this.matrix_projection);
 
-      for (final KMesh mesh : scene.getMeshes()) {
+      for (final KMeshInstance mesh : scene.getMeshes()) {
         this.renderDepthPassMesh(gc, this.program_depth, mesh);
       }
     } finally {
@@ -303,7 +301,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
   private void renderLightPassMeshDirectional(
     final @Nonnull GLInterfaceCommon gc,
     final @Nonnull Program program,
-    final @Nonnull KMesh mesh)
+    final @Nonnull KMeshInstance mesh)
     throws ConstraintError,
       GLException
   {
@@ -406,12 +404,10 @@ final class KRendererForwardDiffuseOnly implements KRenderer
 
       gc.programPutUniformMatrix4x4f(u_mproj, this.matrix_projection);
       gc.programPutUniformVector3f(l_direction, light_cs);
-      gc.programPutUniformVector3f(l_color, light
-        .getColor()
-        .rgbAsVectorReadable3F());
+      gc.programPutUniformVector3f(l_color, light.getColour());
       gc.programPutUniformFloat(l_intensity, light.getIntensity());
 
-      for (final KMesh mesh : scene.getMeshes()) {
+      for (final KMeshInstance mesh : scene.getMeshes()) {
         this.renderLightPassMeshDirectional(
           gc,
           this.program_directional,

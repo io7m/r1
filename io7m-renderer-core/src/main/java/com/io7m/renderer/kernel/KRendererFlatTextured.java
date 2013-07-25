@@ -40,13 +40,14 @@ import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.VectorI2I;
+import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
-import com.io7m.jvvfs.PathVirtual;
 
-final class KRendererFlat implements KRenderer
+final class KRendererFlatTextured implements KRenderer
 {
   private static @Nonnull Program makeProgram(
     final @Nonnull GLInterfaceCommon gl,
@@ -76,57 +77,6 @@ final class KRendererFlat implements KRenderer
     return program;
   }
 
-  private static @Nonnull PathVirtual shaderPathFragment(
-    final boolean is_es,
-    final int version_major,
-    final int version_minor)
-    throws ConstraintError
-  {
-    if (is_es) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gles2_flat_uv.f");
-    }
-
-    if (version_major == 2) {
-      return PathVirtual.ofString("/com/io7m/renderer/kernel/gl21_flat_uv.f");
-    }
-
-    if (version_major == 3) {
-      if (version_minor == 0) {
-        return PathVirtual
-          .ofString("/com/io7m/renderer/kernel/gl30_flat_uv.f");
-      }
-    }
-
-    return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_flat_uv.f");
-  }
-
-  private static @Nonnull PathVirtual shaderPathVertex(
-    final boolean is_es,
-    final int version_major,
-    final int version_minor)
-    throws ConstraintError
-  {
-    if (is_es) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gles2_standard.v");
-    }
-
-    if (version_major == 2) {
-      return PathVirtual
-        .ofString("/com/io7m/renderer/kernel/gl21_standard.v");
-    }
-
-    if (version_major == 3) {
-      if (version_minor == 0) {
-        return PathVirtual
-          .ofString("/com/io7m/renderer/kernel/gl30_standard.v");
-      }
-    }
-
-    return PathVirtual.ofString("/com/io7m/renderer/kernel/gl31_standard.v");
-  }
-
   private final @Nonnull MatrixM4x4F         matrix_modelview;
   private final @Nonnull MatrixM4x4F         matrix_model;
   private final @Nonnull MatrixM4x4F         matrix_view;
@@ -137,8 +87,9 @@ final class KRendererFlat implements KRenderer
   private final @Nonnull Program             program;
   private final @Nonnull Log                 log;
   private final @Nonnull VectorM4F           background;
+  private final @Nonnull VectorM2I           viewport_size;
 
-  KRendererFlat(
+  KRendererFlatTextured(
     final @Nonnull GLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
@@ -146,7 +97,7 @@ final class KRendererFlat implements KRenderer
       ConstraintError,
       GLUnsupportedException
   {
-    this.log = new Log(log, "krenderer-flat");
+    this.log = new Log(log, "krenderer-flat-textured");
     this.gl = gl;
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrix_modelview = new MatrixM4x4F();
@@ -155,7 +106,15 @@ final class KRendererFlat implements KRenderer
     this.matrix_view = new MatrixM4x4F();
     this.matrix_context = new MatrixM4x4F.Context();
     this.transform_context = new KTransform.Context();
-    this.program = KRendererFlat.makeProgram(gl.getGLCommon(), fs, this.log);
+    this.program =
+      KShaderUtilities.makeProgram(
+        gl.getGLCommon(),
+        fs,
+        "flat-uv",
+        "standard.v",
+        "flat_uv.f",
+        log);
+    this.viewport_size = new VectorM2I();
   }
 
   @Override public void render(
@@ -165,15 +124,17 @@ final class KRendererFlat implements KRenderer
       ConstraintError
   {
     final KCamera camera = scene.getCamera();
-    camera.getProjection().makeMatrix4x4F(this.matrix_projection);
-    camera.getTransform().makeMatrix4x4F(
-      this.transform_context,
-      this.matrix_view);
+    camera.getProjectionMatrix().makeMatrixM4x4F(this.matrix_projection);
+    camera.getViewMatrix().makeMatrixM4x4F(this.matrix_view);
 
     final GLInterfaceCommon gc = this.gl.getGLCommon();
 
+    this.viewport_size.x = result.getWidth();
+    this.viewport_size.y = result.getHeight();
+
     try {
       gc.framebufferDrawBind(result.getFramebuffer());
+      gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
 
       gc.depthBufferEnable(DepthFunction.DEPTH_LESS_THAN);
       gc.depthBufferClear(1.0f);
@@ -188,7 +149,7 @@ final class KRendererFlat implements KRenderer
 
         gc.programPutUniformMatrix4x4f(u_mproj, this.matrix_projection);
 
-        for (final KMesh mesh : scene.getMeshes()) {
+        for (final KMeshInstance mesh : scene.getMeshes()) {
           this.renderMesh(gc, mesh);
         }
       } finally {
@@ -202,7 +163,7 @@ final class KRendererFlat implements KRenderer
 
   private void renderMesh(
     final @Nonnull GLInterfaceCommon gc,
-    final @Nonnull KMesh mesh)
+    final @Nonnull KMeshInstance mesh)
     throws ConstraintError,
       GLException
   {
