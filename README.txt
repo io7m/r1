@@ -39,6 +39,12 @@ R.G) Shadows.
   Perhaps only hard-edged shadows, unless soft shadows are easy to
   implement.
 
+R.L) Lighting.
+
+  Directional
+  Cone
+  Point
+
 DESIGN QUESTIONS
 ------------------------------------------------------------------------
 
