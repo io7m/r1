@@ -16,30 +16,30 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.Set;
+import java.util.Collection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * The set of {@link KMesh} objects and {@link KLight} objects that overlap
- * the view frustum of the given {@link KCamera}.
+ * The set of {@link KMeshInstance} objects and {@link KLight} objects that
+ * overlap the view frustum of the given {@link KCamera}.
  */
 
 @Immutable final class KScene
 {
-  private final @Nonnull KCamera     camera;
-  private final @Nonnull Set<KLight> lights;
-  private final @Nonnull Set<KMesh>  meshes;
+  private final @Nonnull KCamera                   camera;
+  private final @Nonnull Collection<KLight>        lights;
+  private final @Nonnull Collection<KMeshInstance> meshes;
 
   KScene(
     final @Nonnull KCamera camera,
-    final @Nonnull Set<KLight> lights,
-    final @Nonnull Set<KMesh> meshes)
+    final @Nonnull Collection<KLight> first,
+    final @Nonnull Collection<KMeshInstance> second)
   {
     this.camera = camera;
-    this.lights = lights;
-    this.meshes = meshes;
+    this.lights = first;
+    this.meshes = second;
   }
 
   @Nonnull KCamera getCamera()
@@ -47,12 +47,12 @@ import javax.annotation.concurrent.Immutable;
     return this.camera;
   }
 
-  @Nonnull Set<KLight> getLights()
+  @Nonnull Collection<KLight> getLights()
   {
     return this.lights;
   }
 
-  @Nonnull Set<KMesh> getMeshes()
+  @Nonnull Collection<KMeshInstance> getMeshes()
   {
     return this.meshes;
   }

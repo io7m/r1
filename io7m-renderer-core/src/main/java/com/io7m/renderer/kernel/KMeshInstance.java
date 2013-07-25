@@ -23,22 +23,25 @@ import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.IndexBuffer;
 
 /**
- * A polygon mesh on the GPU.
+ * An instance of a polygon mesh on the GPU.
  */
 
-@Immutable final class KMesh implements KTransformable
+@Immutable final class KMeshInstance implements KTransformable
 {
+  private final @Nonnull Integer     id;
   private final @Nonnull KTransform  transform;
   private final @Nonnull ArrayBuffer vbo;
   private final @Nonnull IndexBuffer ibo;
   private final @Nonnull KMaterial   material;
 
-  public KMesh(
+  public KMeshInstance(
+    final @Nonnull Integer id,
     final @Nonnull KTransform transform,
     final @Nonnull ArrayBuffer vbo,
     final @Nonnull IndexBuffer ibo,
     final @Nonnull KMaterial material)
   {
+    this.id = id;
     this.transform = transform;
     this.vbo = vbo;
     this.ibo = ibo;
@@ -48,6 +51,11 @@ import com.io7m.jcanephora.IndexBuffer;
   @Nonnull ArrayBuffer getArrayBuffer()
   {
     return this.vbo;
+  }
+
+  @Nonnull Integer getID()
+  {
+    return this.id;
   }
 
   @Nonnull IndexBuffer getIndexBuffer()

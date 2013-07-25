@@ -62,6 +62,7 @@ import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI3F;
@@ -74,10 +75,9 @@ import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.Demo;
 import com.io7m.renderer.DemoConfig;
 import com.io7m.renderer.DemoUtilities;
-import com.io7m.renderer.kernel.KProjection.BEPerspective;
 
 /**
- * Example program that draws something with {@link KRendererFlat}.
+ * Example program that draws something with {@link KRendererFlatTextured}.
  */
 
 public final class DemoKRendererFlat implements Demo
@@ -88,27 +88,32 @@ public final class DemoKRendererFlat implements Demo
   }
 
   private static @Nonnull KCamera makeCamera(
-    final @Nonnull QuaternionI4F.Context quat_context,
     final @Nonnull VectorReadable2I window_size,
     final @Nonnull Log log)
+    throws ConstraintError
   {
     log.debug("making camera");
 
-    final VectorI3F translation = new VectorI3F(0, 0, -5);
-    final QuaternionI4F orientation =
-      QuaternionI4F.lookAtWithContext(
-        quat_context,
-        translation,
-        new VectorI3F(0, 0, 5),
-        new VectorI3F(0, 1, 0));
-    final KTransform transform = new KTransform(translation, orientation);
     final double aspect =
       (double) window_size.getXI() / (double) window_size.getYI();
 
-    final BEPerspective projection =
-      new KProjection.BEPerspective(1, 100, aspect, Math.toRadians(30));
+    final MatrixM4x4F m = new MatrixM4x4F();
+    ProjectionMatrix.makePerspective(m, 1, 100, aspect, Math.toRadians(30));
 
-    return new KCamera(transform, projection);
+    final KMatrix4x4F<KMatrixProjection> projection =
+      new KMatrix4x4F<KMatrixProjection>(m);
+
+    MatrixM4x4F.setIdentity(m);
+    final Context context = new MatrixM4x4F.Context();
+    MatrixM4x4F.lookAtWithContext(
+      context,
+      new VectorI3F(0, 0, 5),
+      new VectorI3F(0, 1, 0),
+      new VectorI3F(0, 1, 0),
+      m);
+
+    final KMatrix4x4F<KMatrixView> view = new KMatrix4x4F<KMatrixView>(m);
+    return new KCamera(view, projection);
   }
 
   private static @CheckForNull Framebuffer makeFramebuffer(
@@ -184,8 +189,9 @@ public final class DemoKRendererFlat implements Demo
     }
   }
 
-  private static @Nonnull KMesh makeMesh(
+  private static @Nonnull KMeshInstance makeMesh(
     final @Nonnull GLImplementation gi,
+    final @Nonnull Integer id,
     final @Nonnull KTransform transform,
     final @Nonnull TextureLoader texture_loader,
     final @Nonnull FSCapabilityRead fs,
@@ -202,15 +208,15 @@ public final class DemoKRendererFlat implements Demo
       DemoUtilities.texturedSquare(g, 1);
     final KMaterial material =
       DemoKRendererFlat.makeMaterial(texture_loader, fs, g);
-    return new KMesh(transform, p.first, p.second, material);
+    return new KMeshInstance(id, transform, p.first, p.second, material);
   }
 
   private static @Nonnull KScene makeScene(
-    final @Nonnull KMesh mesh,
+    final @Nonnull KMeshInstance mesh,
     final @Nonnull KCamera camera)
   {
     final HashSet<KLight> lights = new HashSet<KLight>();
-    final HashSet<KMesh> meshes = new HashSet<KMesh>();
+    final HashSet<KMeshInstance> meshes = new HashSet<KMeshInstance>();
     meshes.add(mesh);
     return new KScene(camera, lights, meshes);
   }
@@ -219,7 +225,7 @@ public final class DemoKRendererFlat implements Demo
   private boolean                                       has_shut_down = false;
   private final @Nonnull GLImplementation               gi;
   private final @Nonnull GLInterfaceCommon              gl;
-  private final @Nonnull KRendererFlat                  renderer;
+  private final @Nonnull KRendererFlatTextured          renderer;
   private final @Nonnull Log                            log;
   private final @Nonnull QuaternionI4F.Context          quat_context;
   private final @Nonnull Program                        program;
@@ -249,7 +255,7 @@ public final class DemoKRendererFlat implements Demo
     this.gi = config.getGL();
     this.gl = this.gi.getGLCommon();
     this.renderer =
-      new KRendererFlat(
+      new KRendererFlatTextured(
         config.getGL(),
         config.getFilesystem(),
         config.getLog());
@@ -274,10 +280,7 @@ public final class DemoKRendererFlat implements Demo
      */
 
     this.camera =
-      DemoKRendererFlat.makeCamera(
-        this.quat_context,
-        this.config.getWindowSize(),
-        this.log);
+      DemoKRendererFlat.makeCamera(this.config.getWindowSize(), this.log);
 
     /**
      * Initialize mesh data.
@@ -311,8 +314,9 @@ public final class DemoKRendererFlat implements Demo
       ConstraintError
   {
     final HashSet<KLight> lights = new HashSet<KLight>();
-    final HashSet<KMesh> meshes = new HashSet<KMesh>();
+    final HashSet<KMeshInstance> meshes = new HashSet<KMeshInstance>();
 
+    int index = 0;
     for (int x = -5; x < 10; ++x) {
       final QuaternionM4F orientation = new QuaternionM4F();
       QuaternionM4F.makeFromAxisAngle(
@@ -320,13 +324,16 @@ public final class DemoKRendererFlat implements Demo
         Math.toRadians((frame + x) % 360),
         orientation);
 
-      final KMesh mesh =
-        new KMesh(
+      final KMeshInstance mesh =
+        new KMeshInstance(
+          Integer.valueOf(index),
           new KTransform(new VectorI3F(x, 0, -1), orientation),
           this.quad_in_scene.first,
           this.quad_in_scene.second,
           this.mesh_material);
       meshes.add(mesh);
+
+      ++index;
     }
 
     final KScene scene = new KScene(this.camera, lights, meshes);
@@ -493,8 +500,7 @@ public final class DemoKRendererFlat implements Demo
      * Initialize camera.
      */
 
-    this.camera =
-      DemoKRendererFlat.makeCamera(this.quat_context, size, this.log);
+    this.camera = DemoKRendererFlat.makeCamera(size, this.log);
 
     /**
      * Initialize destination framebuffer.

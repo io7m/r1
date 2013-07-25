@@ -71,6 +71,7 @@ import com.io7m.jsom0.parser.Error;
 import com.io7m.jsom0.parser.ModelObjectParserVBOImmediate;
 import com.io7m.jsom0.parser.ModelParser;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI3F;
@@ -84,11 +85,12 @@ import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.Demo;
 import com.io7m.renderer.DemoConfig;
 import com.io7m.renderer.DemoUtilities;
-import com.io7m.renderer.kernel.KLight.KDirectional;
-import com.io7m.renderer.kernel.KProjection.BEPerspective;
+import com.io7m.renderer.RSpaceRGB;
+import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RVectorI3F;
 
 /**
- * Example program that draws something with {@link KRendererFlat}.
+ * Example program that draws something with {@link KRendererFlatTextured}.
  */
 
 public final class DemoKRendererForwardDiffuse implements Demo
@@ -99,27 +101,32 @@ public final class DemoKRendererForwardDiffuse implements Demo
   }
 
   private static @Nonnull KCamera makeCamera(
-    final @Nonnull QuaternionI4F.Context quat_context,
     final @Nonnull VectorReadable2I window_size,
     final @Nonnull Log log)
+    throws ConstraintError
   {
     log.debug("making camera");
 
-    final VectorI3F translation = new VectorI3F(0, 0, -10);
-    final QuaternionI4F orientation =
-      QuaternionI4F.lookAtWithContext(
-        quat_context,
-        translation,
-        new VectorI3F(0, 0, 5),
-        new VectorI3F(0, 1, 0));
-    final KTransform transform = new KTransform(translation, orientation);
     final double aspect =
       (double) window_size.getXI() / (double) window_size.getYI();
 
-    final BEPerspective projection =
-      new KProjection.BEPerspective(1, 100, aspect, Math.toRadians(30));
+    final MatrixM4x4F m = new MatrixM4x4F();
+    ProjectionMatrix.makePerspective(m, 1, 100, aspect, Math.toRadians(30));
 
-    return new KCamera(transform, projection);
+    final KMatrix4x4F<KMatrixProjection> projection =
+      new KMatrix4x4F<KMatrixProjection>(m);
+
+    MatrixM4x4F.setIdentity(m);
+    final Context context = new MatrixM4x4F.Context();
+    MatrixM4x4F.lookAtWithContext(
+      context,
+      new VectorI3F(0, 0, 5),
+      new VectorI3F(0, 1, 0),
+      new VectorI3F(0, 1, 0),
+      m);
+
+    final KMatrix4x4F<KMatrixView> view = new KMatrix4x4F<KMatrixView>(m);
+    return new KCamera(view, projection);
   }
 
   private static @CheckForNull Framebuffer makeFramebuffer(
@@ -195,8 +202,9 @@ public final class DemoKRendererForwardDiffuse implements Demo
     }
   }
 
-  private static @Nonnull KMesh makeMesh(
+  private static @Nonnull KMeshInstance makeMesh(
     final @Nonnull GLImplementation gi,
+    final @Nonnull Integer id,
     final @Nonnull KTransform transform,
     final @Nonnull TextureLoader texture_loader,
     final @Nonnull FSCapabilityRead fs,
@@ -213,15 +221,15 @@ public final class DemoKRendererForwardDiffuse implements Demo
       DemoUtilities.texturedSquare(g, 1);
     final KMaterial material =
       DemoKRendererForwardDiffuse.makeMaterial(texture_loader, fs, g);
-    return new KMesh(transform, p.first, p.second, material);
+    return new KMeshInstance(id, transform, p.first, p.second, material);
   }
 
   private static @Nonnull KScene makeScene(
-    final @Nonnull KMesh mesh,
+    final @Nonnull KMeshInstance mesh,
     final @Nonnull KCamera camera)
   {
     final HashSet<KLight> lights = new HashSet<KLight>();
-    final HashSet<KMesh> meshes = new HashSet<KMesh>();
+    final HashSet<KMeshInstance> meshes = new HashSet<KMeshInstance>();
     meshes.add(mesh);
     return new KScene(camera, lights, meshes);
   }
@@ -322,7 +330,6 @@ public final class DemoKRendererForwardDiffuse implements Demo
 
     this.camera =
       DemoKRendererForwardDiffuse.makeCamera(
-        this.quat_context,
         this.config.getWindowSize(),
         this.log);
 
@@ -360,28 +367,32 @@ public final class DemoKRendererForwardDiffuse implements Demo
     final HashSet<KLight> lights = new HashSet<KLight>();
 
     {
-      final KDirectional light0 =
+      final KLight light0 =
         new KLight.KDirectional(
-          new VectorI3F(0, -1, 0),
-          new KRGBIF(1, 0, 0),
+          0,
+          new RVectorI3F<RSpaceWorld>(0, -1, 0),
+          new RVectorI3F<RSpaceRGB>(1, 0, 0),
           1.0f);
 
-      final KDirectional light1 =
+      final KLight light1 =
         new KLight.KDirectional(
-          new VectorI3F(1, 0, 0),
-          new KRGBIF(0, 0, 1),
+          1,
+          new RVectorI3F<RSpaceWorld>(1, 0, 0),
+          new RVectorI3F<RSpaceRGB>(0, 0, 1),
           2.0f);
 
-      final KDirectional light2 =
+      final KLight light2 =
         new KLight.KDirectional(
-          new VectorI3F(-1, 0, 0),
-          new KRGBIF(0, 1, 0),
+          2,
+          new RVectorI3F<RSpaceWorld>(-1, 0, 0),
+          new RVectorI3F<RSpaceRGB>(0, 1, 0),
           1.0f);
 
-      final KDirectional light3 =
+      final KLight light3 =
         new KLight.KDirectional(
-          new VectorI3F(0, 1, 0),
-          new KRGBIF(1, 1, 1),
+          3,
+          new RVectorI3F<RSpaceWorld>(0, 1, 0),
+          new RVectorI3F<RSpaceRGB>(1, 1, 1),
           1.0f);
 
       lights.add(light0);
@@ -390,9 +401,11 @@ public final class DemoKRendererForwardDiffuse implements Demo
       lights.add(light3);
     }
 
-    final HashSet<KMesh> meshes = new HashSet<KMesh>();
+    final HashSet<KMeshInstance> meshes = new HashSet<KMeshInstance>();
 
     {
+      int index = 0;
+
       for (int y = -9; y < 9; y += 3) {
         for (int x = -9; x < 9; x += 3) {
 
@@ -406,13 +419,16 @@ public final class DemoKRendererForwardDiffuse implements Demo
 
           QuaternionM4F.multiplyInPlace(orientation, y_rot);
 
-          final KMesh mesh =
-            new KMesh(
+          final KMeshInstance mesh =
+            new KMeshInstance(
+              Integer.valueOf(index),
               new KTransform(new VectorI3F(x, y, 0), orientation),
               this.suzanne.getArrayBuffer(),
               this.suzanne.getIndexBuffer(),
               this.mesh_material);
           meshes.add(mesh);
+
+          ++index;
         }
       }
     }
@@ -582,11 +598,7 @@ public final class DemoKRendererForwardDiffuse implements Demo
      * Initialize camera.
      */
 
-    this.camera =
-      DemoKRendererForwardDiffuse.makeCamera(
-        this.quat_context,
-        size,
-        this.log);
+    this.camera = DemoKRendererForwardDiffuse.makeCamera(size, this.log);
 
     /**
      * Initialize destination framebuffer.
