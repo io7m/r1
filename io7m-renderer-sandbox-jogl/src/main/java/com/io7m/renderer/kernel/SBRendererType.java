@@ -22,7 +22,9 @@ enum SBRendererType
 {
   RENDERER_FLAT_TEXTURED("flat-textured"),
   RENDERER_FORWARD_DIFFUSE_ONLY("forward-diffuse-only"),
-  RENDERER_FORWARD_DIFFUSE_SPECULAR("forward-diffuse-specular");
+  RENDERER_FORWARD_DIFFUSE_SPECULAR("forward-diffuse-specular"),
+  RENDERER_FORWARD_DIFFUSE_SPECULAR_NO_ALPHA(
+    "forward-diffuse-specular-no-alpha");
 
   private final @Nonnull String name;
 
