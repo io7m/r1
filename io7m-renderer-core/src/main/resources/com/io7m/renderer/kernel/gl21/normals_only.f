@@ -1,6 +1,6 @@
 #version 110
 
-attribute vec3 f_normal_tangent;
+varying vec3 f_normal_tangent;
 
 void
 main (void)
