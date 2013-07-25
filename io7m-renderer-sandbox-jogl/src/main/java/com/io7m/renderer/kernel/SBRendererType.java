@@ -21,7 +21,8 @@ import javax.annotation.Nonnull;
 enum SBRendererType
 {
   RENDERER_FLAT_TEXTURED("flat-textured"),
-  RENDERER_FORWARD_DIFFUSE_ONLY("forward-diffuse-only");
+  RENDERER_FORWARD_DIFFUSE_ONLY("forward-diffuse-only"),
+  RENDERER_FORWARD_DIFFUSE_SPECULAR("forward-diffuse-specular");
 
   private final @Nonnull String name;
 

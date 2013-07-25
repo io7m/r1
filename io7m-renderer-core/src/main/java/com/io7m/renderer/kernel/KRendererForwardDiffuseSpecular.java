@@ -51,38 +51,8 @@ import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 
-final class KRendererForwardDiffuseOnly implements KRenderer
+final class KRendererForwardDiffuseSpecular implements KRenderer
 {
-  private static @Nonnull Program makeProgram(
-    final @Nonnull GLInterfaceCommon gl,
-    final @Nonnull FSCapabilityRead fs,
-    final @Nonnull String name,
-    final @Nonnull String vertex_shader,
-    final @Nonnull String fragment_shader,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      GLCompileException,
-      GLUnsupportedException
-  {
-    final boolean is_es = gl.metaIsES();
-    final int version_major = gl.metaGetVersionMajor();
-    final int version_minor = gl.metaGetVersionMinor();
-
-    final Program program = new Program(name, log);
-    program.addVertexShader(KShaderPaths.getShader(
-      is_es,
-      version_major,
-      version_minor,
-      vertex_shader));
-    program.addFragmentShader(KShaderPaths.getShader(
-      is_es,
-      version_major,
-      version_minor,
-      fragment_shader));
-    program.compile(fs, gl);
-    return program;
-  }
-
   private final @Nonnull MatrixM4x4F         matrix_modelview;
   private final @Nonnull MatrixM4x4F         matrix_model;
   private final @Nonnull MatrixM4x4F         matrix_view;
@@ -96,7 +66,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
   private final @Nonnull Log                 log;
   private final @Nonnull VectorM4F           background;
 
-  KRendererForwardDiffuseOnly(
+  KRendererForwardDiffuseSpecular(
     final @Nonnull GLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
@@ -104,7 +74,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
       ConstraintError,
       GLUnsupportedException
   {
-    this.log = new Log(log, "krenderer-forward-diffuse");
+    this.log = new Log(log, "krenderer-forward-diffuse-specular");
     this.gl = gl;
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrix_modelview = new MatrixM4x4F();
@@ -119,9 +89,9 @@ final class KRendererForwardDiffuseOnly implements KRenderer
       KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         fs,
-        "fw_diffuse_directional",
-        "fw_diffuse_directional.v",
-        "fw_diffuse_directional.f",
+        "fw_diffspec_directional",
+        "fw_diffspec_directional.v",
+        "fw_diffspec_directional.f",
         this.log);
 
     this.program_depth =
