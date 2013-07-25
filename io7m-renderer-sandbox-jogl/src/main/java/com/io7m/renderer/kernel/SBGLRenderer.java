@@ -527,11 +527,21 @@ final class SBGLRenderer implements GLEventListener
       ConstraintError
   {
     this.renderers.put(
+      SBRendererType.RENDERER_DEBUG_UV_ONLY,
+      new KRendererDebugUVOnly(this.gi, this.filesystem, this.log));
+
+    this.renderers.put(
+      SBRendererType.RENDERER_DEBUG_NORMALS_ONLY,
+      new KRendererDebugNormalsOnly(this.gi, this.filesystem, this.log));
+
+    this.renderers.put(
       SBRendererType.RENDERER_FLAT_TEXTURED,
       new KRendererFlatTextured(this.gi, this.filesystem, this.log));
+
     this.renderers.put(
       SBRendererType.RENDERER_FORWARD_DIFFUSE_ONLY,
       new KRendererForwardDiffuseOnly(this.gi, this.filesystem, this.log));
+
     this.renderers
       .put(
         SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR,
@@ -539,6 +549,7 @@ final class SBGLRenderer implements GLEventListener
           this.gi,
           this.filesystem,
           this.log));
+
     this.renderers.put(
       SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR_NO_ALPHA,
       new KRendererForwardDiffuseSpecularNoAlpha(

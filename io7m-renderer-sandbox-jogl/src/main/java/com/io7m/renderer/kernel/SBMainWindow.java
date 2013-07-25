@@ -102,11 +102,10 @@ final class SBMainWindow extends JFrame
     final JMenu menu = new JMenu("Renderer");
     final ButtonGroup group = new ButtonGroup();
 
-    boolean first = true;
     for (final SBRendererType type : SBRendererType.values()) {
       final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
+      b.setSelected(type == SBRendererType.RENDERER_FLAT_TEXTURED);
 
-      b.setSelected(first);
       b.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
@@ -117,7 +116,6 @@ final class SBMainWindow extends JFrame
 
       group.add(b);
       menu.add(b);
-      first = false;
     }
 
     final JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Show grid");

@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -36,8 +34,6 @@ import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Program;
 import com.io7m.jcanephora.ProgramAttribute;
 import com.io7m.jcanephora.ProgramUniform;
-import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI2I;
@@ -47,7 +43,7 @@ import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 
-final class KRendererFlatTextured implements KRenderer
+final class KRendererDebugNormalsOnly implements KRenderer
 {
   private final @Nonnull MatrixM4x4F         matrix_modelview;
   private final @Nonnull MatrixM4x4F         matrix_model;
@@ -61,7 +57,7 @@ final class KRendererFlatTextured implements KRenderer
   private final @Nonnull VectorM4F           background;
   private final @Nonnull VectorM2I           viewport_size;
 
-  KRendererFlatTextured(
+  KRendererDebugNormalsOnly(
     final @Nonnull GLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
@@ -69,7 +65,7 @@ final class KRendererFlatTextured implements KRenderer
       ConstraintError,
       GLUnsupportedException
   {
-    this.log = new Log(log, "krenderer-flat-textured");
+    this.log = new Log(log, "krenderer-debug-normals-only");
     this.gl = gl;
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrix_modelview = new MatrixM4x4F();
@@ -82,9 +78,9 @@ final class KRendererFlatTextured implements KRenderer
       KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         fs,
-        "flat-uv",
+        "normals-only",
         "standard.v",
-        "flat_uv.f",
+        "normals_only.f",
         log);
     this.viewport_size = new VectorM2I();
   }
@@ -152,19 +148,7 @@ final class KRendererFlatTextured implements KRenderer
      */
 
     final ProgramUniform u_mmview = this.program.getUniform("m_modelview");
-    final ProgramUniform u_tdiff_0 = this.program.getUniform("t_diffuse_0");
-
-    final KMaterial material = mesh.getMaterial();
-    final TextureUnit[] texture_units = gc.textureGetUnits();
-    final List<Texture2DStatic> diffuse_maps = material.getDiffuseMaps();
-
-    final int mappable = Math.min(texture_units.length, diffuse_maps.size());
-    for (int index = 0; index < mappable; ++index) {
-      gc.texture2DStaticBind(texture_units[index], diffuse_maps.get(index));
-    }
-
     gc.programPutUniformMatrix4x4f(u_mmview, this.matrix_modelview);
-    gc.programPutUniformTextureUnit(u_tdiff_0, texture_units[0]);
 
     /**
      * Associate array attributes with program attributes.
@@ -174,10 +158,10 @@ final class KRendererFlatTextured implements KRenderer
     final IndexBuffer indices = mesh.getIndexBuffer();
 
     final ProgramAttribute p_pos = this.program.getAttribute("v_position");
-    final ProgramAttribute p_uv = this.program.getAttribute("v_uv");
+    final ProgramAttribute p_nor = this.program.getAttribute("v_normal");
     final ArrayBufferDescriptor array_type = array.getDescriptor();
     final ArrayBufferAttribute a_pos = array_type.getAttribute("position");
-    final ArrayBufferAttribute a_uv = array_type.getAttribute("uv");
+    final ArrayBufferAttribute a_nor = array_type.getAttribute("normal");
 
     /**
      * Draw mesh.
@@ -186,7 +170,7 @@ final class KRendererFlatTextured implements KRenderer
     try {
       gc.arrayBufferBind(array);
       gc.arrayBufferBindVertexAttribute(array, a_pos, p_pos);
-      gc.arrayBufferBindVertexAttribute(array, a_uv, p_uv);
+      gc.arrayBufferBindVertexAttribute(array, a_nor, p_nor);
       gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
     } finally {
       gc.arrayBufferUnbind();
