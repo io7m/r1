@@ -45,6 +45,18 @@ R.L) Lighting.
   Cone
   Point
 
+R.M) Resource streaming (from any URI).
+
+  Ideally, an object will show more detail as more of a given resource
+  is streamed in. An object with a green texture will show a flat green
+  colour until the texture is fully loaded.
+
+R.N) Procedural textures
+
+  For things like simple projected caustics. Applying displacement
+  to normal maps allows for simulating things like cloth in wind
+  without too much work.
+
 DESIGN QUESTIONS
 ------------------------------------------------------------------------
 

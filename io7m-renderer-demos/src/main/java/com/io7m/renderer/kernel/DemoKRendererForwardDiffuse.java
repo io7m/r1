@@ -40,7 +40,7 @@ import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.Framebuffer;
 import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
-import com.io7m.jcanephora.FramebufferConfigurationGLES2Actual;
+import com.io7m.jcanephora.FramebufferConfigurationGL3ES2Actual;
 import com.io7m.jcanephora.FramebufferStatus;
 import com.io7m.jcanephora.GLCompileException;
 import com.io7m.jcanephora.GLException;
@@ -138,8 +138,8 @@ public final class DemoKRendererForwardDiffuse implements Demo
   {
     log.debug("making framebuffer");
 
-    final FramebufferConfigurationGLES2Actual fbc =
-      new FramebufferConfigurationGLES2Actual(
+    final FramebufferConfigurationGL3ES2Actual fbc =
+      new FramebufferConfigurationGL3ES2Actual(
         window_size.getXI(),
         window_size.getYI());
     fbc.requestBestRGBAColorTexture2D(
@@ -175,7 +175,7 @@ public final class DemoKRendererForwardDiffuse implements Demo
 
     try {
       final Texture2DStatic t =
-        texture_loader.load2DStaticInferredGLES2(
+        texture_loader.load2DStaticInferredCommon(
           g,
           TextureWrapS.TEXTURE_WRAP_REPEAT,
           TextureWrapT.TEXTURE_WRAP_REPEAT,
