@@ -51,7 +51,7 @@ import com.io7m.jcanephora.AttachmentColor.AttachmentColorTexture2DStatic;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.Framebuffer;
 import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
-import com.io7m.jcanephora.FramebufferConfigurationGLES2Actual;
+import com.io7m.jcanephora.FramebufferConfigurationGL3ES2Actual;
 import com.io7m.jcanephora.FramebufferStatus;
 import com.io7m.jcanephora.GLCompileException;
 import com.io7m.jcanephora.GLException;
@@ -243,7 +243,7 @@ final class SBGLRenderer implements GLEventListener
             final GLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
             try {
               final Texture2DStatic t =
-                SBGLRenderer.this.texture_loader.load2DStaticInferredGLES2(
+                SBGLRenderer.this.texture_loader.load2DStaticInferredCommon(
                   gl,
                   TextureWrapS.TEXTURE_WRAP_REPEAT,
                   TextureWrapT.TEXTURE_WRAP_REPEAT,
@@ -296,7 +296,7 @@ final class SBGLRenderer implements GLEventListener
   private @CheckForNull Program                                     program_uv;
   private @CheckForNull Program                                     program_vcolour;
   private final @Nonnull FSCapabilityAll                            filesystem;
-  private @CheckForNull FramebufferConfigurationGLES2Actual         framebuffer_config;
+  private @CheckForNull FramebufferConfigurationGL3ES2Actual         framebuffer_config;
   private @CheckForNull Framebuffer                                 framebuffer;
   private boolean                                                   running;
   private final @Nonnull MatrixM4x4F                                matrix_projection;
@@ -586,7 +586,7 @@ final class SBGLRenderer implements GLEventListener
       GLException
   {
     this.framebuffer_config =
-      new FramebufferConfigurationGLES2Actual(
+      new FramebufferConfigurationGL3ES2Actual(
         drawable.getWidth(),
         drawable.getHeight());
     this.framebuffer_config.requestBestRGBAColorTexture2D(
