@@ -20,18 +20,18 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.ArrayBufferAttribute;
-import com.io7m.jcanephora.ArrayBufferDescriptor;
+import com.io7m.jcanephora.ArrayBufferAttributeDescriptor;
+import com.io7m.jcanephora.ArrayBufferTypeDescriptor;
 import com.io7m.jcanephora.ArrayBufferWritableData;
 import com.io7m.jcanephora.CursorWritable2f;
 import com.io7m.jcanephora.CursorWritable3f;
 import com.io7m.jcanephora.CursorWritableIndex;
-import com.io7m.jcanephora.GLArrayBuffers;
-import com.io7m.jcanephora.GLException;
-import com.io7m.jcanephora.GLIndexBuffers;
-import com.io7m.jcanephora.GLScalarType;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.IndexBufferWritableData;
+import com.io7m.jcanephora.JCGLArrayBuffers;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLIndexBuffers;
+import com.io7m.jcanephora.JCGLScalarType;
 import com.io7m.jcanephora.UsageHint;
 
 public final class SBQuad
@@ -39,19 +39,30 @@ public final class SBQuad
   private final @Nonnull ArrayBuffer array;
   private final @Nonnull IndexBuffer indices;
 
-  <G extends GLArrayBuffers & GLIndexBuffers> SBQuad(
+  <G extends JCGLArrayBuffers & JCGLIndexBuffers> SBQuad(
     final @Nonnull G gl,
     final int width,
     final int height,
     final int z)
     throws ConstraintError,
-      GLException
+      JCGLException
   {
-    final ArrayBufferAttribute[] ab = new ArrayBufferAttribute[3];
-    ab[0] = new ArrayBufferAttribute("position", GLScalarType.TYPE_FLOAT, 3);
-    ab[1] = new ArrayBufferAttribute("normal", GLScalarType.TYPE_FLOAT, 3);
-    ab[2] = new ArrayBufferAttribute("uv", GLScalarType.TYPE_FLOAT, 2);
-    final ArrayBufferDescriptor array_type = new ArrayBufferDescriptor(ab);
+    final ArrayBufferAttributeDescriptor[] ab =
+      new ArrayBufferAttributeDescriptor[3];
+    ab[0] =
+      new ArrayBufferAttributeDescriptor(
+        "position",
+        JCGLScalarType.TYPE_FLOAT,
+        3);
+    ab[1] =
+      new ArrayBufferAttributeDescriptor(
+        "normal",
+        JCGLScalarType.TYPE_FLOAT,
+        3);
+    ab[2] =
+      new ArrayBufferAttributeDescriptor("uv", JCGLScalarType.TYPE_FLOAT, 2);
+    final ArrayBufferTypeDescriptor array_type =
+      new ArrayBufferTypeDescriptor(ab);
     this.array =
       gl.arrayBufferAllocate(4, array_type, UsageHint.USAGE_STATIC_DRAW);
 
@@ -80,7 +91,7 @@ public final class SBQuad
     }
 
     gl.arrayBufferBind(this.array);
-    gl.arrayBufferUpdate(this.array, array_data);
+    gl.arrayBufferUpdate(array_data);
 
     this.indices = gl.indexBufferAllocate(this.array, 6);
     final IndexBufferWritableData indices_data =
@@ -97,7 +108,7 @@ public final class SBQuad
       ind_cursor.putIndex(3);
     }
 
-    gl.indexBufferUpdate(this.indices, indices_data);
+    gl.indexBufferUpdate(indices_data);
   }
 
   @Nonnull ArrayBuffer getArrayBuffer()

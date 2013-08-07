@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,7 +46,6 @@ import com.io7m.jaux.functional.Pair;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
-import com.io7m.jcanephora.ArrayBufferDescriptor;
 import com.io7m.jcanephora.AttachmentColor;
 import com.io7m.jcanephora.AttachmentColor.AttachmentColorTexture2DStatic;
 import com.io7m.jcanephora.BlendFunction;
@@ -53,16 +53,15 @@ import com.io7m.jcanephora.Framebuffer;
 import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
 import com.io7m.jcanephora.FramebufferConfigurationGL3ES2Actual;
 import com.io7m.jcanephora.FramebufferStatus;
-import com.io7m.jcanephora.GLCompileException;
-import com.io7m.jcanephora.GLException;
-import com.io7m.jcanephora.GLImplementationJOGL;
-import com.io7m.jcanephora.GLInterfaceCommon;
-import com.io7m.jcanephora.GLUnsupportedException;
 import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.jcanephora.JCGLCompileException;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLImplementationJOGL;
+import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jcanephora.JCGLSLVersion;
+import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Program;
-import com.io7m.jcanephora.ProgramAttribute;
-import com.io7m.jcanephora.ProgramUniform;
+import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.Texture2DStaticUsable;
@@ -73,6 +72,7 @@ import com.io7m.jcanephora.TextureLoaderImageIO;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jsom0.Model;
 import com.io7m.jsom0.ModelObjectVBO;
@@ -109,7 +109,7 @@ final class SBGLRenderer implements GLEventListener
           SBGLRenderer.this.log.debug("Deleting mesh " + mesh);
 
           if (SBGLRenderer.this.gi != null) {
-            final GLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
+            final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
 
             try {
               gl.arrayBufferDelete(mesh.getArrayBuffer());
@@ -119,7 +119,7 @@ final class SBGLRenderer implements GLEventListener
             }
           }
 
-          throw new GLException(-1, "OpenGL not ready!");
+          throw new JCGLException(-1, "OpenGL not ready!");
         }
       });
     }
@@ -140,7 +140,7 @@ final class SBGLRenderer implements GLEventListener
           SBGLRenderer.this.log.debug("Loading " + description.getName());
 
           if (SBGLRenderer.this.gi != null) {
-            final GLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
+            final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
 
             try {
               final NamePositionAttribute name_position_attribute =
@@ -150,8 +150,8 @@ final class SBGLRenderer implements GLEventListener
               final NameUVAttribute name_uv_attribute =
                 new NameUVAttribute("uv");
 
-              final ModelObjectParser<ModelObjectVBO, GLException> op =
-                new ModelObjectParserVBOImmediate<GLInterfaceCommon>(
+              final ModelObjectParser<ModelObjectVBO, JCGLException> op =
+                new ModelObjectParserVBOImmediate<JCGLInterfaceCommon>(
                   description.getName(),
                   stream,
                   name_position_attribute,
@@ -160,8 +160,8 @@ final class SBGLRenderer implements GLEventListener
                   SBGLRenderer.this.log,
                   gl);
 
-              final ModelParser<ModelObjectVBO, GLException> mp =
-                new ModelParser<ModelObjectVBO, GLException>(op);
+              final ModelParser<ModelObjectVBO, JCGLException> mp =
+                new ModelParser<ModelObjectVBO, JCGLException>(op);
 
               final Model<ModelObjectVBO> m = mp.model();
               if (SBGLRenderer.this.models.containsKey(description.getName())) {
@@ -191,7 +191,7 @@ final class SBGLRenderer implements GLEventListener
             }
           }
 
-          throw new GLException(-1, "OpenGL not ready!");
+          throw new JCGLException(-1, "OpenGL not ready!");
         }
       });
     }
@@ -211,7 +211,7 @@ final class SBGLRenderer implements GLEventListener
           SBGLRenderer.this.log.debug("Deleting " + texture);
 
           if (SBGLRenderer.this.gi != null) {
-            final GLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
+            final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
             try {
               gl.texture2DStaticDelete(texture);
             } catch (final ConstraintError e) {
@@ -219,7 +219,7 @@ final class SBGLRenderer implements GLEventListener
             }
           }
 
-          throw new GLException(-1, "OpenGL not ready!");
+          throw new JCGLException(-1, "OpenGL not ready!");
         }
       });
     }
@@ -240,7 +240,7 @@ final class SBGLRenderer implements GLEventListener
           SBGLRenderer.this.log.debug("Loading " + name);
 
           if (SBGLRenderer.this.gi != null) {
-            final GLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
+            final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
             try {
               final Texture2DStatic t =
                 SBGLRenderer.this.texture_loader.load2DStaticInferredCommon(
@@ -265,7 +265,7 @@ final class SBGLRenderer implements GLEventListener
             }
           }
 
-          throw new GLException(-1, "OpenGL not ready!");
+          throw new JCGLException(-1, "OpenGL not ready!");
         }
       });
     }
@@ -284,7 +284,7 @@ final class SBGLRenderer implements GLEventListener
   }
 
   private final @Nonnull Log                                        log;
-  private @CheckForNull GLImplementationJOGL                        gi;
+  private @CheckForNull JCGLImplementationJOGL                      gi;
   private final @Nonnull TextureLoader                              texture_loader;
   private final @Nonnull ConcurrentLinkedQueue<TextureLoadFuture>   texture_load_queue;
   private final @Nonnull ConcurrentLinkedQueue<TextureDeleteFuture> texture_delete_queue;
@@ -293,10 +293,10 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull HashMap<String, Texture2DStatic>           textures;
   private final @Nonnull HashMap<String, Model<ModelObjectVBO>>     models;
   private @CheckForNull SBQuad                                      screen_quad;
-  private @CheckForNull Program                                     program_uv;
-  private @CheckForNull Program                                     program_vcolour;
+  private @CheckForNull ProgramReference                            program_uv;
+  private @CheckForNull ProgramReference                            program_vcolour;
   private final @Nonnull FSCapabilityAll                            filesystem;
-  private @CheckForNull FramebufferConfigurationGL3ES2Actual         framebuffer_config;
+  private @CheckForNull FramebufferConfigurationGL3ES2Actual        framebuffer_config;
   private @CheckForNull Framebuffer                                 framebuffer;
   private boolean                                                   running;
   private final @Nonnull MatrixM4x4F                                matrix_projection;
@@ -318,6 +318,8 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull SBInputState                               input_state;
   private final @Nonnull SBFirstPersonCamera                        camera;
   private @Nonnull KMatrix4x4F<KMatrixView>                         camera_matrix;
+  private @Nonnull JCCEExecutionCallable                            exec_vcolour;
+  private @Nonnull JCCEExecutionCallable                            exec_uv;
 
   public SBGLRenderer(
     final @Nonnull Log log)
@@ -370,7 +372,7 @@ final class SBGLRenderer implements GLEventListener
     }
 
     try {
-      final GLInterfaceCommon gl = this.gi.getGLCommon();
+      final JCGLInterfaceCommon gl = this.gi.getGLCommon();
 
       SBGLRenderer.processQueue(this.mesh_delete_queue);
       SBGLRenderer.processQueue(this.texture_delete_queue);
@@ -380,9 +382,11 @@ final class SBGLRenderer implements GLEventListener
       this.moveCamera();
       this.renderScene();
       this.renderResultsToScreen(drawable, gl);
-    } catch (final GLException e) {
+    } catch (final JCGLException e) {
       this.failed(e);
     } catch (final ConstraintError e) {
+      this.failed(e);
+    } catch (final Exception e) {
       this.failed(e);
     }
   }
@@ -470,8 +474,9 @@ final class SBGLRenderer implements GLEventListener
   {
     this.log.debug("initialized");
     try {
-      this.gi = new GLImplementationJOGL(drawable.getContext(), this.log);
-      final GLInterfaceCommon gl = this.gi.getGLCommon();
+      this.gi = new JCGLImplementationJOGL(drawable.getContext(), this.log);
+      final JCGLInterfaceCommon gl = this.gi.getGLCommon();
+      final JCGLSLVersion version = gl.metaGetSLVersion();
 
       this.initRenderers();
 
@@ -481,50 +486,56 @@ final class SBGLRenderer implements GLEventListener
       this.texture_units = gl.textureGetUnits();
       this.framebuffer_points = gl.framebufferGetColorAttachmentPoints();
 
-      this.program_vcolour = new Program("vcolour", this.log);
-      this.program_vcolour.addVertexShader(SBShaderPaths.getShader(
-        gl.metaGetVersionMajor(),
-        gl.metaGetVersionMinor(),
-        gl.metaIsES(),
-        "standard.v"));
-      this.program_vcolour.addFragmentShader(SBShaderPaths.getShader(
-        gl.metaGetVersionMajor(),
-        gl.metaGetVersionMinor(),
-        gl.metaIsES(),
-        "vertex_colour.f"));
-      this.program_vcolour.compile(this.filesystem, gl);
+      this.program_vcolour =
+        KShaderUtilities.makeProgramSingleOutput(
+          gl,
+          version.getNumber(),
+          version.getAPI(),
+          this.filesystem,
+          "vcolour",
+          "standard.v",
+          "vertex_colour.f",
+          this.log);
 
-      this.program_uv = new Program("uv", this.log);
-      this.program_uv.addVertexShader(SBShaderPaths.getShader(
-        gl.metaGetVersionMajor(),
-        gl.metaGetVersionMinor(),
-        gl.metaIsES(),
-        "standard.v"));
-      this.program_uv.addFragmentShader(SBShaderPaths.getShader(
-        gl.metaGetVersionMajor(),
-        gl.metaGetVersionMinor(),
-        gl.metaIsES(),
-        "flat_uv.f"));
-      this.program_uv.compile(this.filesystem, gl);
+      this.exec_vcolour = new JCCEExecutionCallable(this.program_vcolour);
+
+      this.program_uv =
+        KShaderUtilities.makeProgramSingleOutput(
+          gl,
+          version.getNumber(),
+          version.getAPI(),
+          this.filesystem,
+          "uv",
+          "standard.v",
+          "flat_uv.f",
+          this.log);
+
+      this.exec_uv = new JCCEExecutionCallable(this.program_uv);
 
       this.reloadSizedResources(drawable, gl);
       this.running = true;
-
-    } catch (final GLException e) {
+    } catch (final JCGLException e) {
       this.failed(e);
-    } catch (final GLUnsupportedException e) {
+    } catch (final JCGLUnsupportedException e) {
       this.failed(e);
     } catch (final ConstraintError e) {
       this.failed(e);
-    } catch (final GLCompileException e) {
+    } catch (final JCGLCompileException e) {
+      this.failed(e);
+    } catch (final FilesystemError e) {
+      this.failed(e);
+    } catch (final IOException e) {
       this.failed(e);
     }
   }
 
   private void initRenderers()
-    throws GLCompileException,
-      GLUnsupportedException,
-      ConstraintError
+    throws JCGLCompileException,
+      JCGLUnsupportedException,
+      ConstraintError,
+      JCGLException,
+      FilesystemError,
+      IOException
   {
     this.renderers.put(
       SBRendererType.RENDERER_DEBUG_UV_ONLY,
@@ -581,9 +592,9 @@ final class SBGLRenderer implements GLEventListener
 
   private void reloadSizedResources(
     final GLAutoDrawable drawable,
-    final GLInterfaceCommon gl)
+    final JCGLInterfaceCommon gl)
     throws ConstraintError,
-      GLException
+      JCGLException
   {
     this.framebuffer_config =
       new FramebufferConfigurationGL3ES2Actual(
@@ -603,7 +614,8 @@ final class SBGLRenderer implements GLEventListener
       {
         final Failure<Framebuffer, FramebufferStatus> f =
           (Indeterminate.Failure<Framebuffer, FramebufferStatus>) fb;
-        throw new GLException(-1, "Could not create framebuffer: " + f.value);
+        throw new JCGLException(-1, "Could not create framebuffer: "
+          + f.value);
       }
       case SUCCESS:
       {
@@ -629,9 +641,9 @@ final class SBGLRenderer implements GLEventListener
 
   private void renderResultsToScreen(
     final @Nonnull GLAutoDrawable drawable,
-    final @Nonnull GLInterfaceCommon gl)
+    final @Nonnull JCGLInterfaceCommon gl)
     throws ConstraintError,
-      GLException
+      Exception
   {
     final VectorM2I size = new VectorM2I();
     size.x = drawable.getWidth();
@@ -641,7 +653,7 @@ final class SBGLRenderer implements GLEventListener
     gl.colorBufferClearV3f(this.background_colour.get());
     gl.depthBufferWriteEnable();
     gl.depthBufferClear(1.0f);
-    gl.depthBufferDisable();
+    gl.depthBufferTestDisable();
     gl.blendingEnable(
       BlendFunction.BLEND_SOURCE_ALPHA,
       BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
@@ -657,60 +669,64 @@ final class SBGLRenderer implements GLEventListener
       (double) drawable.getWidth() / (double) drawable.getHeight(),
       Math.toRadians(30));
 
-    this.program_vcolour.activate(gl);
-    {
-      final ProgramUniform u_proj =
-        this.program_vcolour.getUniform("m_projection");
-      final ProgramUniform u_model =
-        this.program_vcolour.getUniform("m_modelview");
-      final ProgramUniform u_alpha =
-        this.program_vcolour.getUniform("f_alpha");
+    if (this.grid_show.get()) {
+      final JCCEExecutionCallable e = this.exec_vcolour;
+      e.execPrepare(gl);
+      e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
+      e.execUniformPutMatrix4x4F(gl, "m_modelview", this.matrix_modelview);
+      e.execUniformPutFloat(gl, "f_alpha", 0.1f);
 
-      gl.programPutUniformMatrix4x4f(u_proj, this.matrix_projection);
-      gl.programPutUniformMatrix4x4f(u_model, this.matrix_modelview);
-      gl.programPutUniformFloat(u_alpha, 0.1f);
+      final IndexBuffer indices = this.grid.getIndexBuffer();
+      final ArrayBuffer array = this.grid.getArrayBuffer();
+      final ArrayBufferAttribute b_pos = array.getAttribute("v_position");
+      final ArrayBufferAttribute b_col = array.getAttribute("v_colour");
+      gl.arrayBufferBind(array);
+      e.execAttributeBind(gl, "v_position", b_pos);
+      e.execAttributeBind(gl, "v_colour", b_col);
 
-      final ProgramAttribute p_pos =
-        this.program_vcolour.getAttribute("v_position");
-      final ProgramAttribute p_col =
-        this.program_vcolour.getAttribute("v_colour");
-
-      if (this.grid_show.get()) {
-        final ArrayBuffer array = this.grid.getArrayBuffer();
-        final ArrayBufferDescriptor array_type = array.getDescriptor();
-        final ArrayBufferAttribute b_pos =
-          array_type.getAttribute("v_position");
-        final ArrayBufferAttribute b_col =
-          array_type.getAttribute("v_colour");
-
-        gl.arrayBufferBind(array);
-        gl.arrayBufferBindVertexAttribute(array, b_pos, p_pos);
-        gl.arrayBufferBindVertexAttribute(array, b_col, p_col);
-
-        final IndexBuffer indices = this.grid.getIndexBuffer();
-        gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
-        gl.arrayBufferUnbind();
-      }
-
-      gl.programPutUniformFloat(u_alpha, 1.0f);
-
-      if (this.axes_show.get()) {
-        final ArrayBuffer array = this.axes.getArrayBuffer();
-        final ArrayBufferDescriptor array_type = array.getDescriptor();
-        final ArrayBufferAttribute b_pos =
-          array_type.getAttribute("v_position");
-        final ArrayBufferAttribute b_uv = array_type.getAttribute("v_colour");
-
-        gl.arrayBufferBind(array);
-        gl.arrayBufferBindVertexAttribute(array, b_pos, p_pos);
-        gl.arrayBufferBindVertexAttribute(array, b_uv, p_col);
-
-        final IndexBuffer indices = this.axes.getIndexBuffer();
-        gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
-        gl.arrayBufferUnbind();
-      }
+      e.execSetCallable(new Callable<Void>() {
+        @Override public Void call()
+          throws Exception
+        {
+          try {
+            gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
+          } catch (final ConstraintError x) {
+            throw new UnreachableCodeException();
+          }
+          return null;
+        }
+      });
+      e.execRun(gl);
     }
-    this.program_vcolour.deactivate(gl);
+
+    if (this.axes_show.get()) {
+      final JCCEExecutionCallable e = this.exec_vcolour;
+      e.execPrepare(gl);
+      e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
+      e.execUniformPutMatrix4x4F(gl, "m_modelview", this.matrix_modelview);
+      e.execUniformPutFloat(gl, "f_alpha", 1.0f);
+
+      final IndexBuffer indices = this.axes.getIndexBuffer();
+      final ArrayBuffer array = this.axes.getArrayBuffer();
+      final ArrayBufferAttribute b_pos = array.getAttribute("v_position");
+      final ArrayBufferAttribute b_col = array.getAttribute("v_colour");
+      gl.arrayBufferBind(array);
+      e.execAttributeBind(gl, "v_position", b_pos);
+      e.execAttributeBind(gl, "v_colour", b_col);
+      e.execSetCallable(new Callable<Void>() {
+        @Override public Void call()
+          throws Exception
+        {
+          try {
+            gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
+          } catch (final ConstraintError x) {
+            throw new UnreachableCodeException();
+          }
+          return null;
+        }
+      });
+      e.execRun(gl);
+    }
 
     MatrixM4x4F.setIdentity(this.matrix_modelview);
     MatrixM4x4F.translateByVector3FInPlace(
@@ -727,45 +743,46 @@ final class SBGLRenderer implements GLEventListener
       1,
       100);
 
-    this.program_uv.activate(gl);
-    {
-      final ProgramUniform u_proj =
-        this.program_uv.getUniform("m_projection");
-      final ProgramUniform u_model =
-        this.program_uv.getUniform("m_modelview");
-      final ProgramUniform u_texture =
-        this.program_uv.getUniform("t_diffuse_0");
+    /**
+     * Draw textured, screen-aligned quad.
+     */
 
-      gl.programPutUniformMatrix4x4f(u_proj, this.matrix_projection);
-      gl.programPutUniformMatrix4x4f(u_model, this.matrix_modelview);
+    {
+      final JCCEExecutionCallable e = this.exec_uv;
+      e.execPrepare(gl);
+      e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
+      e.execUniformPutMatrix4x4F(gl, "m_modelview", this.matrix_modelview);
 
       gl.texture2DStaticBind(
         this.texture_units[0],
         this.getRenderedFramebufferTexture());
-      gl.programPutUniformTextureUnit(u_texture, this.texture_units[0]);
-
-      final ProgramAttribute p_pos =
-        this.program_uv.getAttribute("v_position");
-      final ProgramAttribute p_uv = this.program_uv.getAttribute("v_uv");
-
-      final ArrayBuffer array = this.screen_quad.getArrayBuffer();
-      final ArrayBufferDescriptor array_type = array.getDescriptor();
-      final ArrayBufferAttribute b_pos = array_type.getAttribute("position");
-      final ArrayBufferAttribute b_uv = array_type.getAttribute("uv");
-
-      gl.arrayBufferBind(array);
-      gl.arrayBufferBindVertexAttribute(array, b_pos, p_pos);
-      gl.arrayBufferBindVertexAttribute(array, b_uv, p_uv);
+      e.execUniformPutTextureUnit(gl, "t_diffuse_0", this.texture_units[0]);
 
       final IndexBuffer indices = this.screen_quad.getIndexBuffer();
-      gl.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-      gl.arrayBufferUnbind();
+      final ArrayBuffer array = this.screen_quad.getArrayBuffer();
+      final ArrayBufferAttribute b_pos = array.getAttribute("position");
+      final ArrayBufferAttribute b_uv = array.getAttribute("uv");
+      gl.arrayBufferBind(array);
+      e.execAttributeBind(gl, "v_position", b_pos);
+      e.execAttributeBind(gl, "v_uv", b_uv);
+      e.execSetCallable(new Callable<Void>() {
+        @Override public Void call()
+          throws Exception
+        {
+          try {
+            gl.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+          } catch (final ConstraintError x) {
+            throw new UnreachableCodeException();
+          }
+          return null;
+        }
+      });
+      e.execRun(gl);
     }
-    this.program_uv.deactivate(gl);
   }
 
   private void renderScene()
-    throws GLException,
+    throws JCGLException,
       ConstraintError
   {
     final SBSceneControllerRenderer c = this.controller.get();
@@ -812,9 +829,9 @@ final class SBGLRenderer implements GLEventListener
     assert this.running;
 
     try {
-      final GLInterfaceCommon gl = this.gi.getGLCommon();
+      final JCGLInterfaceCommon gl = this.gi.getGLCommon();
       this.reloadSizedResources(drawable, gl);
-    } catch (final GLException e) {
+    } catch (final JCGLException e) {
       this.failed(e);
     } catch (final ConstraintError e) {
       this.failed(e);
