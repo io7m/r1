@@ -16,24 +16,27 @@
 
 package com.io7m.renderer.kernel;
 
+import java.io.IOException;
+import java.util.concurrent.Callable;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
-import com.io7m.jcanephora.ArrayBufferDescriptor;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.Framebuffer;
-import com.io7m.jcanephora.GLCompileException;
-import com.io7m.jcanephora.GLException;
-import com.io7m.jcanephora.GLImplementation;
-import com.io7m.jcanephora.GLInterfaceCommon;
-import com.io7m.jcanephora.GLUnsupportedException;
 import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.jcanephora.JCGLCompileException;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jcanephora.JCGLSLVersion;
+import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Program;
-import com.io7m.jcanephora.ProgramAttribute;
-import com.io7m.jcanephora.ProgramUniform;
+import com.io7m.jcanephora.ProgramReference;
+import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI2I;
@@ -45,28 +48,35 @@ import com.io7m.jvvfs.FilesystemError;
 
 final class KRendererDebugUVOnly implements KRenderer
 {
-  private final @Nonnull MatrixM4x4F         matrix_modelview;
-  private final @Nonnull MatrixM4x4F         matrix_model;
-  private final @Nonnull MatrixM4x4F         matrix_view;
-  private final @Nonnull MatrixM4x4F         matrix_projection;
-  private final @Nonnull MatrixM4x4F.Context matrix_context;
-  private final @Nonnull KTransform.Context  transform_context;
-  private final @Nonnull GLImplementation    gl;
-  private final @Nonnull Program             program;
-  private final @Nonnull Log                 log;
-  private final @Nonnull VectorM4F           background;
-  private final @Nonnull VectorM2I           viewport_size;
+  private final @Nonnull MatrixM4x4F           matrix_modelview;
+  private final @Nonnull MatrixM4x4F           matrix_model;
+  private final @Nonnull MatrixM4x4F           matrix_view;
+  private final @Nonnull MatrixM4x4F           matrix_projection;
+  private final @Nonnull MatrixM4x4F.Context   matrix_context;
+  private final @Nonnull KTransform.Context    transform_context;
+  private final @Nonnull JCGLImplementation    gl;
+  private final @Nonnull ProgramReference      program;
+  private final @Nonnull Log                   log;
+  private final @Nonnull VectorM4F             background;
+  private final @Nonnull VectorM2I             viewport_size;
+  private final @Nonnull JCCEExecutionCallable exec;
 
   KRendererDebugUVOnly(
-    final @Nonnull GLImplementation gl,
+    final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
-    throws GLCompileException,
+    throws JCGLCompileException,
       ConstraintError,
-      GLUnsupportedException
+      JCGLUnsupportedException,
+      JCGLException,
+      FilesystemError,
+      IOException
   {
     this.log = new Log(log, "krenderer-debug-uv-only");
     this.gl = gl;
+
+    final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
+
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrix_modelview = new MatrixM4x4F();
     this.matrix_projection = new MatrixM4x4F();
@@ -74,28 +84,33 @@ final class KRendererDebugUVOnly implements KRenderer
     this.matrix_view = new MatrixM4x4F();
     this.matrix_context = new MatrixM4x4F.Context();
     this.transform_context = new KTransform.Context();
+    this.viewport_size = new VectorM2I();
+
     this.program =
-      KShaderUtilities.makeProgram(
+      KShaderUtilities.makeProgramSingleOutput(
         gl.getGLCommon(),
+        version.getNumber(),
+        version.getAPI(),
         fs,
         "uv-only",
         "standard.v",
         "uv_only.f",
         log);
-    this.viewport_size = new VectorM2I();
+
+    this.exec = new JCCEExecutionCallable(this.program);
   }
 
   @Override public void render(
     final @Nonnull Framebuffer result,
     final @Nonnull KScene scene)
-    throws GLException,
+    throws JCGLException,
       ConstraintError
   {
     final KCamera camera = scene.getCamera();
     camera.getProjectionMatrix().makeMatrixM4x4F(this.matrix_projection);
     camera.getViewMatrix().makeMatrixM4x4F(this.matrix_view);
 
-    final GLInterfaceCommon gc = this.gl.getGLCommon();
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
     this.viewport_size.x = result.getWidth();
     this.viewport_size.y = result.getHeight();
@@ -104,36 +119,30 @@ final class KRendererDebugUVOnly implements KRenderer
       gc.framebufferDrawBind(result.getFramebuffer());
       gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
 
-      gc.depthBufferEnable(DepthFunction.DEPTH_LESS_THAN);
+      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
       gc.depthBufferClear(1.0f);
       gc.colorBufferClearV4f(this.background);
       gc.blendingDisable();
 
-      try {
-        this.program.activate(gc);
+      this.exec.execPrepare(gc);
+      this.exec.execUniformPutMatrix4x4F(
+        gc,
+        "m_projection",
+        this.matrix_projection);
 
-        final ProgramUniform u_mproj =
-          this.program.getUniform("m_projection");
-
-        gc.programPutUniformMatrix4x4f(u_mproj, this.matrix_projection);
-
-        for (final KMeshInstance mesh : scene.getMeshes()) {
-          this.renderMesh(gc, mesh);
-        }
-      } finally {
-        this.program.deactivate(gc);
+      for (final KMeshInstance mesh : scene.getMeshes()) {
+        this.renderMesh(gc, mesh);
       }
-
     } finally {
       gc.framebufferDrawUnbind();
     }
   }
 
   private void renderMesh(
-    final @Nonnull GLInterfaceCommon gc,
+    final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMeshInstance mesh)
     throws ConstraintError,
-      GLException
+      JCGLException
   {
     final KTransform transform = mesh.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
@@ -144,34 +153,48 @@ final class KRendererDebugUVOnly implements KRenderer
       this.matrix_modelview);
 
     /**
-     * Upload matrices, set textures.
+     * Upload matrices.
      */
 
-    final ProgramUniform u_mmview = this.program.getUniform("m_modelview");
-    gc.programPutUniformMatrix4x4f(u_mmview, this.matrix_modelview);
+    this.exec.execPrepare(gc);
+    this.exec.execUniformUseExisting("m_projection");
+    this.exec.execUniformPutMatrix4x4F(
+      gc,
+      "m_modelview",
+      this.matrix_modelview);
 
     /**
-     * Associate array attributes with program attributes.
-     */
-
-    final ArrayBuffer array = mesh.getArrayBuffer();
-    final IndexBuffer indices = mesh.getIndexBuffer();
-
-    final ProgramAttribute p_pos = this.program.getAttribute("v_position");
-    final ProgramAttribute p_uv = this.program.getAttribute("v_uv");
-    final ArrayBufferDescriptor array_type = array.getDescriptor();
-    final ArrayBufferAttribute a_pos = array_type.getAttribute("position");
-    final ArrayBufferAttribute a_uv = array_type.getAttribute("uv");
-
-    /**
-     * Draw mesh.
+     * Associate array attributes with program attributes, and draw mesh.
      */
 
     try {
+      final ArrayBuffer array = mesh.getArrayBuffer();
+      final IndexBuffer indices = mesh.getIndexBuffer();
+      final ArrayBufferAttribute a_pos = array.getAttribute("position");
+      final ArrayBufferAttribute a_uv = array.getAttribute("uv");
+
       gc.arrayBufferBind(array);
-      gc.arrayBufferBindVertexAttribute(array, a_pos, p_pos);
-      gc.arrayBufferBindVertexAttribute(array, a_uv, p_uv);
-      gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+      this.exec.execAttributeBind(gc, "v_position", a_pos);
+      this.exec.execAttributeBind(gc, "v_uv", a_uv);
+      this.exec.execSetCallable(new Callable<Void>() {
+        @Override public Void call()
+          throws Exception
+        {
+          try {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+          } catch (final ConstraintError e) {
+            throw new UnreachableCodeException();
+          }
+          return null;
+        }
+      });
+
+      try {
+        this.exec.execRun(gc);
+      } catch (final Exception e) {
+        throw new UnreachableCodeException();
+      }
+
     } finally {
       gc.arrayBufferUnbind();
     }
@@ -181,17 +204,5 @@ final class KRendererDebugUVOnly implements KRenderer
     final @Nonnull VectorReadable4F rgba)
   {
     VectorM4F.copy(rgba, this.background);
-  }
-
-  @Override public void updateShaders(
-    final @Nonnull FSCapabilityRead fs)
-    throws FilesystemError,
-      GLCompileException,
-      ConstraintError
-  {
-    final GLInterfaceCommon gc = this.gl.getGLCommon();
-    if (this.program.requiresCompilation(fs, gc)) {
-      this.program.compile(fs, gc);
-    }
   }
 }

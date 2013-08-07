@@ -16,65 +16,131 @@
 
 package com.io7m.renderer;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.ArrayBufferAttribute;
-import com.io7m.jcanephora.ArrayBufferDescriptor;
+import com.io7m.jcanephora.ArrayBufferAttributeDescriptor;
+import com.io7m.jcanephora.ArrayBufferTypeDescriptor;
 import com.io7m.jcanephora.ArrayBufferWritableData;
 import com.io7m.jcanephora.CursorWritable2f;
 import com.io7m.jcanephora.CursorWritable3f;
 import com.io7m.jcanephora.CursorWritableIndex;
-import com.io7m.jcanephora.GLArrayBuffers;
-import com.io7m.jcanephora.GLCompileException;
-import com.io7m.jcanephora.GLException;
-import com.io7m.jcanephora.GLIndexBuffers;
-import com.io7m.jcanephora.GLInterfaceCommon;
-import com.io7m.jcanephora.GLMeta;
-import com.io7m.jcanephora.GLScalarType;
-import com.io7m.jcanephora.GLShaders;
-import com.io7m.jcanephora.GLUnsupportedException;
+import com.io7m.jcanephora.FragmentShader;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.IndexBufferWritableData;
-import com.io7m.jcanephora.Program;
+import com.io7m.jcanephora.JCGLApi;
+import com.io7m.jcanephora.JCGLArrayBuffers;
+import com.io7m.jcanephora.JCGLCompileException;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLIndexBuffers;
+import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jcanephora.JCGLMeta;
+import com.io7m.jcanephora.JCGLSLVersionNumber;
+import com.io7m.jcanephora.JCGLScalarType;
+import com.io7m.jcanephora.JCGLShadersCommon;
+import com.io7m.jcanephora.JCGLUnsupportedException;
+import com.io7m.jcanephora.ProgramReference;
+import com.io7m.jcanephora.ShaderUtilities;
 import com.io7m.jcanephora.UsageHint;
+import com.io7m.jcanephora.VertexShader;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FSCapabilityRead;
+import com.io7m.jvvfs.FilesystemError;
+import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.KShaderPaths;
 
 public final class DemoUtilities
 {
+  static @Nonnull ProgramReference makeProgramSingleOutput(
+    final @Nonnull JCGLShadersCommon gl,
+    final @Nonnull JCGLSLVersionNumber version,
+    final @Nonnull JCGLApi api,
+    final @Nonnull FSCapabilityRead fs,
+    final @Nonnull String name,
+    final @Nonnull String vertex_shader,
+    final @Nonnull String fragment_shader,
+    final @Nonnull Log log)
+    throws ConstraintError,
+      JCGLCompileException,
+      JCGLUnsupportedException,
+      FilesystemError,
+      IOException,
+      JCGLException
+  {
+    InputStream stream = null;
+    VertexShader v = null;
+    FragmentShader f = null;
+
+    final PathVirtual pv =
+      KShaderPaths.getShaderPath(version, api, vertex_shader);
+    final PathVirtual pf =
+      KShaderPaths.getShaderPath(version, api, fragment_shader);
+
+    log.debug("Compiling vertex shader: " + pv);
+    log.debug("Compiling fragment shader: " + pf);
+
+    try {
+      stream = fs.openFile(pv);
+      final List<String> lines = ShaderUtilities.readLines(stream);
+      v = gl.vertexShaderCompile(vertex_shader, lines);
+    } finally {
+      if (stream != null) {
+        stream.close();
+        stream = null;
+      }
+    }
+
+    try {
+      stream = fs.openFile(pf);
+      final List<String> lines = ShaderUtilities.readLines(stream);
+      f = gl.fragmentShaderCompile(fragment_shader, lines);
+    } finally {
+      if (stream != null) {
+        stream.close();
+        stream = null;
+      }
+    }
+
+    assert v != null;
+    assert f != null;
+
+    final ProgramReference p = gl.programCreateCommon(name, v, f);
+    gl.vertexShaderDelete(v);
+    gl.fragmentShaderDelete(f);
+    return p;
+  }
+
   public static @Nonnull
-    <G extends GLShaders & GLMeta>
-    Program
+    <G extends JCGLShadersCommon & JCGLMeta>
+    ProgramReference
     makeFlatUVProgram(
-      final @Nonnull GLInterfaceCommon gl,
+      final @Nonnull JCGLInterfaceCommon gl,
       final @Nonnull FSCapabilityRead fs,
+      final @Nonnull JCGLSLVersionNumber version,
+      final @Nonnull JCGLApi api,
       final @Nonnull Log log)
       throws ConstraintError,
-        GLCompileException,
-        GLUnsupportedException
+        JCGLCompileException,
+        JCGLUnsupportedException,
+        FilesystemError,
+        IOException,
+        JCGLException
   {
-    final boolean is_es = gl.metaIsES();
-    final int version_major = gl.metaGetVersionMajor();
-    final int version_minor = gl.metaGetVersionMinor();
-
-    final Program program = new Program("flat-uv", log);
-    program.addVertexShader(KShaderPaths.getShader(
-      is_es,
-      version_major,
-      version_minor,
-      "standard.v"));
-    program.addFragmentShader(KShaderPaths.getShader(
-      is_es,
-      version_major,
-      version_minor,
-      "flat_uv.f"));
-
-    program.compile(fs, gl);
-    return program;
+    return DemoUtilities.makeProgramSingleOutput(
+      gl,
+      version,
+      api,
+      fs,
+      "flat-uv",
+      "standard.v",
+      "flat_uv.f",
+      log);
   }
 
   /**
@@ -83,19 +149,30 @@ public final class DemoUtilities
    */
 
   public static @Nonnull
-    <G extends GLArrayBuffers & GLIndexBuffers>
+    <G extends JCGLArrayBuffers & JCGLIndexBuffers>
     Pair<ArrayBuffer, IndexBuffer>
     texturedSquare(
       final G gl,
       final int size)
       throws ConstraintError,
-        GLException
+        JCGLException
   {
-    final ArrayBufferAttribute[] ab = new ArrayBufferAttribute[3];
-    ab[0] = new ArrayBufferAttribute("position", GLScalarType.TYPE_FLOAT, 3);
-    ab[1] = new ArrayBufferAttribute("normal", GLScalarType.TYPE_FLOAT, 3);
-    ab[2] = new ArrayBufferAttribute("uv", GLScalarType.TYPE_FLOAT, 2);
-    final ArrayBufferDescriptor array_type = new ArrayBufferDescriptor(ab);
+    final ArrayBufferAttributeDescriptor[] ab =
+      new ArrayBufferAttributeDescriptor[3];
+    ab[0] =
+      new ArrayBufferAttributeDescriptor(
+        "position",
+        JCGLScalarType.TYPE_FLOAT,
+        3);
+    ab[1] =
+      new ArrayBufferAttributeDescriptor(
+        "normal",
+        JCGLScalarType.TYPE_FLOAT,
+        3);
+    ab[2] =
+      new ArrayBufferAttributeDescriptor("uv", JCGLScalarType.TYPE_FLOAT, 2);
+    final ArrayBufferTypeDescriptor array_type =
+      new ArrayBufferTypeDescriptor(ab);
     final ArrayBuffer array =
       gl.arrayBufferAllocate(4, array_type, UsageHint.USAGE_STATIC_DRAW);
 
@@ -124,7 +201,7 @@ public final class DemoUtilities
     }
 
     gl.arrayBufferBind(array);
-    gl.arrayBufferUpdate(array, array_data);
+    gl.arrayBufferUpdate(array_data);
 
     final IndexBuffer indices = gl.indexBufferAllocate(array, 6);
     final IndexBufferWritableData indices_data =
@@ -141,7 +218,7 @@ public final class DemoUtilities
       ind_cursor.putIndex(3);
     }
 
-    gl.indexBufferUpdate(indices, indices_data);
+    gl.indexBufferUpdate(indices_data);
     return new Pair<ArrayBuffer, IndexBuffer>(array, indices);
   }
 }

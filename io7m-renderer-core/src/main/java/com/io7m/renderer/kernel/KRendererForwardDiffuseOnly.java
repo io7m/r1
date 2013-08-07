@@ -16,32 +16,34 @@
 
 package com.io7m.renderer.kernel;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnimplementedCodeException;
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
-import com.io7m.jcanephora.ArrayBufferDescriptor;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.Framebuffer;
-import com.io7m.jcanephora.GLCompileException;
-import com.io7m.jcanephora.GLException;
-import com.io7m.jcanephora.GLImplementation;
-import com.io7m.jcanephora.GLInterfaceCommon;
-import com.io7m.jcanephora.GLUnsupportedException;
 import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.jcanephora.JCGLCompileException;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jcanephora.JCGLSLVersion;
+import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Program;
-import com.io7m.jcanephora.ProgramAttribute;
-import com.io7m.jcanephora.ProgramUniform;
+import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureUnit;
+import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
@@ -53,59 +55,37 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
 
 final class KRendererForwardDiffuseOnly implements KRenderer
 {
-  private static @Nonnull Program makeProgram(
-    final @Nonnull GLInterfaceCommon gl,
-    final @Nonnull FSCapabilityRead fs,
-    final @Nonnull String name,
-    final @Nonnull String vertex_shader,
-    final @Nonnull String fragment_shader,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      GLCompileException,
-      GLUnsupportedException
-  {
-    final boolean is_es = gl.metaIsES();
-    final int version_major = gl.metaGetVersionMajor();
-    final int version_minor = gl.metaGetVersionMinor();
-
-    final Program program = new Program(name, log);
-    program.addVertexShader(KShaderPaths.getShader(
-      is_es,
-      version_major,
-      version_minor,
-      vertex_shader));
-    program.addFragmentShader(KShaderPaths.getShader(
-      is_es,
-      version_major,
-      version_minor,
-      fragment_shader));
-    program.compile(fs, gl);
-    return program;
-  }
-
-  private final @Nonnull MatrixM4x4F         matrix_modelview;
-  private final @Nonnull MatrixM4x4F         matrix_model;
-  private final @Nonnull MatrixM4x4F         matrix_view;
-  private final @Nonnull MatrixM3x3F         matrix_normal;
-  private final @Nonnull MatrixM4x4F         matrix_projection;
-  private final @Nonnull MatrixM4x4F.Context matrix_context;
-  private final @Nonnull KTransform.Context  transform_context;
-  private final @Nonnull GLImplementation    gl;
-  private final @Nonnull Program             program_directional;
-  private final @Nonnull Program             program_depth;
-  private final @Nonnull Log                 log;
-  private final @Nonnull VectorM4F           background;
+  private final @Nonnull MatrixM4x4F           matrix_modelview;
+  private final @Nonnull MatrixM4x4F           matrix_model;
+  private final @Nonnull MatrixM4x4F           matrix_view;
+  private final @Nonnull MatrixM3x3F           matrix_normal;
+  private final @Nonnull MatrixM4x4F           matrix_projection;
+  private final @Nonnull MatrixM4x4F.Context   matrix_context;
+  private final @Nonnull KTransform.Context    transform_context;
+  private final @Nonnull JCGLImplementation    gl;
+  private final @Nonnull ProgramReference      program_directional;
+  private final @Nonnull ProgramReference      program_depth;
+  private final @Nonnull Log                   log;
+  private final @Nonnull VectorM4F             background;
+  private final @Nonnull JCCEExecutionCallable exec_directional;
+  private final @Nonnull JCCEExecutionCallable exec_depth;
 
   KRendererForwardDiffuseOnly(
-    final @Nonnull GLImplementation gl,
+    final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
-    throws GLCompileException,
+    throws JCGLCompileException,
       ConstraintError,
-      GLUnsupportedException
+      JCGLUnsupportedException,
+      JCGLException,
+      FilesystemError,
+      IOException
   {
     this.log = new Log(log, "krenderer-forward-diffuse");
     this.gl = gl;
+
+    final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
+
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrix_modelview = new MatrixM4x4F();
     this.matrix_projection = new MatrixM4x4F();
@@ -116,22 +96,31 @@ final class KRendererForwardDiffuseOnly implements KRenderer
     this.transform_context = new KTransform.Context();
 
     this.program_directional =
-      KShaderUtilities.makeProgram(
+      KShaderUtilities.makeProgramSingleOutput(
         gl.getGLCommon(),
+        version.getNumber(),
+        version.getAPI(),
         fs,
         "fw_diffuse_directional",
         "fw_diffuse_directional.v",
         "fw_diffuse_directional.f",
         this.log);
 
+    this.exec_directional =
+      new JCCEExecutionCallable(this.program_directional);
+
     this.program_depth =
-      KShaderUtilities.makeProgram(
+      KShaderUtilities.makeProgramSingleOutput(
         gl.getGLCommon(),
+        version.getNumber(),
+        version.getAPI(),
         fs,
         "depth_only",
         "standard.v",
         "depth_only.f",
         this.log);
+
+    this.exec_depth = new JCCEExecutionCallable(this.program_depth);
   }
 
   /**
@@ -156,14 +145,14 @@ final class KRendererForwardDiffuseOnly implements KRenderer
   @Override public void render(
     final @Nonnull Framebuffer result,
     final @Nonnull KScene scene)
-    throws GLException,
+    throws JCGLException,
       ConstraintError
   {
     final KCamera camera = scene.getCamera();
     camera.getProjectionMatrix().makeMatrixM4x4F(this.matrix_projection);
     camera.getViewMatrix().makeMatrixM4x4F(this.matrix_view);
 
-    final GLInterfaceCommon gc = this.gl.getGLCommon();
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
     try {
       gc.framebufferDrawBind(result.getFramebuffer());
@@ -179,7 +168,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
        * color buffer.
        */
 
-      gc.depthBufferEnable(DepthFunction.DEPTH_LESS_THAN);
+      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
       gc.depthBufferWriteEnable();
       gc.depthBufferClear(1.0f);
       gc.colorBufferMask(false, false, false, false);
@@ -191,7 +180,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
        * framebuffer.
        */
 
-      gc.depthBufferEnable(DepthFunction.DEPTH_EQUAL);
+      gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
       gc.depthBufferWriteDisable();
       gc.colorBufferMask(true, true, true, true);
       gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
@@ -222,11 +211,11 @@ final class KRendererForwardDiffuseOnly implements KRenderer
    */
 
   private void renderDepthPassMesh(
-    final @Nonnull GLInterfaceCommon gc,
-    final @Nonnull Program program,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable exec,
     final @Nonnull KMeshInstance mesh)
     throws ConstraintError,
-      GLException
+      JCGLException
   {
     final KTransform transform = mesh.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
@@ -236,34 +225,44 @@ final class KRendererForwardDiffuseOnly implements KRenderer
       this.matrix_model,
       this.matrix_modelview);
 
-    this.makeNormalMatrix();
-
     /**
      * Upload matrices, set textures.
      */
 
-    final ProgramUniform u_mmview = program.getUniform("m_modelview");
-    gc.programPutUniformMatrix4x4f(u_mmview, this.matrix_modelview);
+    exec.execPrepare(gc);
+    exec.execUniformUseExisting("m_projection");
+    exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
 
     /**
-     * Associate array attributes with program attributes.
-     */
-
-    final ArrayBuffer array = mesh.getArrayBuffer();
-    final IndexBuffer indices = mesh.getIndexBuffer();
-
-    final ProgramAttribute p_pos = program.getAttribute("v_position");
-    final ArrayBufferDescriptor array_type = array.getDescriptor();
-    final ArrayBufferAttribute a_pos = array_type.getAttribute("position");
-
-    /**
-     * Draw mesh.
+     * Associate array attributes with program attributes, and draw mesh.
      */
 
     try {
+      final ArrayBuffer array = mesh.getArrayBuffer();
+      final IndexBuffer indices = mesh.getIndexBuffer();
+      final ArrayBufferAttribute a_pos = array.getAttribute("position");
+
       gc.arrayBufferBind(array);
-      gc.arrayBufferBindVertexAttribute(array, a_pos, p_pos);
-      gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+      exec.execAttributeBind(gc, "v_position", a_pos);
+      exec.execSetCallable(new Callable<Void>() {
+        @Override public Void call()
+          throws Exception
+        {
+          try {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+          } catch (final ConstraintError e) {
+            throw new UnreachableCodeException();
+          }
+          return null;
+        }
+      });
+
+      try {
+        exec.execRun(gc);
+      } catch (final Exception e) {
+        throw new UnreachableCodeException();
+      }
+
     } finally {
       gc.arrayBufferUnbind();
     }
@@ -276,21 +275,18 @@ final class KRendererForwardDiffuseOnly implements KRenderer
 
   private void renderDepthPassMeshes(
     final @Nonnull KScene scene,
-    final @Nonnull GLInterfaceCommon gc)
+    final @Nonnull JCGLInterfaceCommon gc)
     throws ConstraintError,
-      GLException
+      JCGLException
   {
-    this.program_depth.activate(gc);
-    try {
-      final ProgramUniform u_mproj =
-        this.program_depth.getUniform("m_projection");
-      gc.programPutUniformMatrix4x4f(u_mproj, this.matrix_projection);
+    this.exec_depth.execPrepare(gc);
+    this.exec_depth.execUniformPutMatrix4x4F(
+      gc,
+      "m_projection",
+      this.matrix_projection);
 
-      for (final KMeshInstance mesh : scene.getMeshes()) {
-        this.renderDepthPassMesh(gc, this.program_depth, mesh);
-      }
-    } finally {
-      this.program_depth.deactivate(gc);
+    for (final KMeshInstance mesh : scene.getMeshes()) {
+      this.renderDepthPassMesh(gc, this.exec_depth, mesh);
     }
   }
 
@@ -299,11 +295,11 @@ final class KRendererForwardDiffuseOnly implements KRenderer
    */
 
   private void renderLightPassMeshDirectional(
-    final @Nonnull GLInterfaceCommon gc,
-    final @Nonnull Program program,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable exec,
     final @Nonnull KMeshInstance mesh)
     throws ConstraintError,
-      GLException
+      JCGLException
   {
     final KTransform transform = mesh.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
@@ -319,10 +315,6 @@ final class KRendererForwardDiffuseOnly implements KRenderer
      * Upload matrices, set textures.
      */
 
-    final ProgramUniform u_mmview = program.getUniform("m_modelview");
-    final ProgramUniform u_mnormal = program.getUniform("m_normal");
-    final ProgramUniform u_tdiff_0 = program.getUniform("t_diffuse_0");
-
     final KMaterial material = mesh.getMaterial();
     final TextureUnit[] texture_units = gc.textureGetUnits();
     final List<Texture2DStatic> diffuse_maps = material.getDiffuseMaps();
@@ -332,36 +324,49 @@ final class KRendererForwardDiffuseOnly implements KRenderer
       gc.texture2DStaticBind(texture_units[index], diffuse_maps.get(index));
     }
 
-    gc.programPutUniformMatrix4x4f(u_mmview, this.matrix_modelview);
-    gc.programPutUniformMatrix3x3f(u_mnormal, this.matrix_normal);
-    gc.programPutUniformTextureUnit(u_tdiff_0, texture_units[0]);
+    exec.execPrepare(gc);
+    exec.execUniformUseExisting("m_projection");
+    exec.execUniformUseExisting("l_intensity");
+    exec.execUniformUseExisting("l_color");
+    exec.execUniformUseExisting("l_direction");
+    exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
+    exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
+    exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
 
     /**
-     * Associate array attributes with program attributes.
-     */
-
-    final ArrayBuffer array = mesh.getArrayBuffer();
-    final IndexBuffer indices = mesh.getIndexBuffer();
-
-    final ProgramAttribute p_pos = program.getAttribute("v_position");
-    final ProgramAttribute p_normal = program.getAttribute("v_normal");
-    final ProgramAttribute p_uv = program.getAttribute("v_uv");
-
-    final ArrayBufferDescriptor array_type = array.getDescriptor();
-    final ArrayBufferAttribute a_pos = array_type.getAttribute("position");
-    final ArrayBufferAttribute a_normal = array_type.getAttribute("normal");
-    final ArrayBufferAttribute a_uv = array_type.getAttribute("uv");
-
-    /**
-     * Draw mesh.
+     * Associate array attributes with program attributes, and draw mesh.
      */
 
     try {
+      final ArrayBuffer array = mesh.getArrayBuffer();
+      final IndexBuffer indices = mesh.getIndexBuffer();
+      final ArrayBufferAttribute a_pos = array.getAttribute("position");
+      final ArrayBufferAttribute a_uv = array.getAttribute("uv");
+      final ArrayBufferAttribute a_normal = array.getAttribute("normal");
+
       gc.arrayBufferBind(array);
-      gc.arrayBufferBindVertexAttribute(array, a_pos, p_pos);
-      gc.arrayBufferBindVertexAttribute(array, a_normal, p_normal);
-      gc.arrayBufferBindVertexAttribute(array, a_uv, p_uv);
-      gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+      exec.execAttributeBind(gc, "v_position", a_pos);
+      exec.execAttributeBind(gc, "v_uv", a_uv);
+      exec.execAttributeBind(gc, "v_normal", a_normal);
+      exec.execSetCallable(new Callable<Void>() {
+        @Override public Void call()
+          throws Exception
+        {
+          try {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+          } catch (final ConstraintError e) {
+            throw new UnreachableCodeException();
+          }
+          return null;
+        }
+      });
+
+      try {
+        exec.execRun(gc);
+      } catch (final Exception e) {
+        throw new UnreachableCodeException();
+      }
+
     } finally {
       gc.arrayBufferUnbind();
     }
@@ -374,10 +379,10 @@ final class KRendererForwardDiffuseOnly implements KRenderer
 
   private void renderLightPassMeshesDirectional(
     final @Nonnull KScene scene,
-    final @Nonnull GLInterfaceCommon gc,
+    final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KDirectional light)
     throws ConstraintError,
-      GLException
+      JCGLException
   {
     final VectorM4F light_cs = new VectorM4F();
     light_cs.x = light.getDirection().getXF();
@@ -391,30 +396,15 @@ final class KRendererForwardDiffuseOnly implements KRenderer
       light_cs,
       light_cs);
 
-    this.program_directional.activate(gc);
-    try {
-      final ProgramUniform u_mproj =
-        this.program_directional.getUniform("m_projection");
-      final ProgramUniform l_color =
-        this.program_directional.getUniform("l_color");
-      final ProgramUniform l_direction =
-        this.program_directional.getUniform("l_direction");
-      final ProgramUniform l_intensity =
-        this.program_directional.getUniform("l_intensity");
+    final JCCEExecutionCallable e = this.exec_directional;
+    e.execPrepare(gc);
+    e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
+    e.execUniformPutVector3F(gc, "l_direction", light_cs);
+    e.execUniformPutVector3F(gc, "l_color", light.getColour());
+    e.execUniformPutFloat(gc, "l_intensity", light.getIntensity());
 
-      gc.programPutUniformMatrix4x4f(u_mproj, this.matrix_projection);
-      gc.programPutUniformVector3f(l_direction, light_cs);
-      gc.programPutUniformVector3f(l_color, light.getColour());
-      gc.programPutUniformFloat(l_intensity, light.getIntensity());
-
-      for (final KMeshInstance mesh : scene.getMeshes()) {
-        this.renderLightPassMeshDirectional(
-          gc,
-          this.program_directional,
-          mesh);
-      }
-    } finally {
-      this.program_directional.deactivate(gc);
+    for (final KMeshInstance mesh : scene.getMeshes()) {
+      this.renderLightPassMeshDirectional(gc, e, mesh);
     }
   }
 
@@ -422,17 +412,5 @@ final class KRendererForwardDiffuseOnly implements KRenderer
     final @Nonnull VectorReadable4F rgba)
   {
     VectorM4F.copy(rgba, this.background);
-  }
-
-  @Override public void updateShaders(
-    final @Nonnull FSCapabilityRead fs)
-    throws FilesystemError,
-      GLCompileException,
-      ConstraintError
-  {
-    final GLInterfaceCommon gc = this.gl.getGLCommon();
-    if (this.program_directional.requiresCompilation(fs, gc)) {
-      this.program_directional.compile(fs, gc);
-    }
   }
 }

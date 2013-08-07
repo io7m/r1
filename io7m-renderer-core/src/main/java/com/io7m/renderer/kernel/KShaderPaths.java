@@ -20,7 +20,9 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcanephora.GLUnsupportedException;
+import com.io7m.jcanephora.JCGLApi;
+import com.io7m.jcanephora.JCGLSLVersionNumber;
+import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jvvfs.PathVirtual;
 
 public final class KShaderPaths
@@ -36,50 +38,87 @@ public final class KShaderPaths
   }
 
   private static @Nonnull String getShaderDirectoryName(
-    final boolean is_es,
-    final int version_major,
-    final int version_minor)
-    throws GLUnsupportedException
+    final @Nonnull JCGLSLVersionNumber version,
+    final @Nonnull JCGLApi api)
+    throws JCGLUnsupportedException
   {
-    if (is_es) {
-      if (version_major == 2) {
-        return "gles2";
+    switch (api) {
+      case JCGL_ES:
+      {
+        if (version.getVersionMajor() == 1) {
+          return "glsl110";
+        }
+        if (version.getVersionMajor() == 3) {
+          return "glsl300";
+        }
+        throw new JCGLUnsupportedException("Unsupported GLSL ES version: "
+          + version);
       }
-      if (version_major == 3) {
-        return "gles3";
+      case JCGL_FULL:
+      {
+        switch (version.getVersionMajor()) {
+          case 1:
+          {
+            switch (version.getVersionMinor()) {
+              case 10:
+                return "glsl110";
+              case 20:
+                return "glsl120";
+              case 30:
+                return "glsl130";
+              case 40:
+                return "glsl140";
+              case 50:
+                return "glsl150";
+            }
+            throw new JCGLUnsupportedException("Unsupported GLSL version: "
+              + version);
+          }
+          case 3:
+          {
+            switch (version.getVersionMinor()) {
+              case 30:
+                return "glsl330";
+            }
+            throw new JCGLUnsupportedException("Unsupported GLSL version: "
+              + version);
+          }
+          case 4:
+          {
+            switch (version.getVersionMinor()) {
+              case 0:
+                return "glsl400";
+              case 10:
+                return "glsl410";
+              case 20:
+                return "glsl420";
+              case 30:
+                return "glsl430";
+              case 40:
+                return "glsl440";
+            }
+
+            throw new JCGLUnsupportedException("Unsupported GLSL version: "
+              + version);
+          }
+          default:
+            throw new JCGLUnsupportedException("Unsupported GLSL version: "
+              + version);
+        }
       }
-      throw new GLUnsupportedException("Unsupported ES version "
-        + version_major
-        + "."
-        + version_minor);
     }
 
-    if (version_major == 2) {
-      return "gl21";
-    }
-
-    if (version_major == 3) {
-      if (version_minor == 0) {
-        return "gl30";
-      }
-    }
-
-    return "gl31";
+    throw new UnreachableCodeException();
   }
 
-  public static @Nonnull PathVirtual getShader(
-    final boolean is_es,
-    final int version_major,
-    final int version_minor,
+  public static @Nonnull PathVirtual getShaderPath(
+    final @Nonnull JCGLSLVersionNumber version,
+    final @Nonnull JCGLApi api,
     final @Nonnull String name)
-    throws GLUnsupportedException,
+    throws JCGLUnsupportedException,
       ConstraintError
   {
-    return KShaderPaths.BASE
-      .appendName(
-        KShaderPaths.getShaderDirectoryName(
-          is_es,
-          version_major,
-          version_minor)).appendName(name);
+    return KShaderPaths.BASE.appendName(
+      KShaderPaths.getShaderDirectoryName(version, api)).appendName(name);
   }
 }

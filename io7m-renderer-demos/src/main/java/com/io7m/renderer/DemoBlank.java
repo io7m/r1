@@ -19,9 +19,9 @@ package com.io7m.renderer;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.GLCompileException;
-import com.io7m.jcanephora.GLException;
-import com.io7m.jcanephora.GLInterfaceCommon;
+import com.io7m.jcanephora.JCGLCompileException;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorReadable2I;
 
@@ -36,11 +36,10 @@ public final class DemoBlank implements Demo
     return "ZBlank";
   }
 
-  private final DemoConfig        config;
-  private boolean                 has_shut_down;
-  private final GLInterfaceCommon gl;
-
-  private final Log               log;
+  private final DemoConfig          config;
+  private boolean                   has_shut_down;
+  private final JCGLInterfaceCommon gl;
+  private final Log                 log;
 
   public DemoBlank(
     final @Nonnull DemoConfig config)
@@ -52,8 +51,8 @@ public final class DemoBlank implements Demo
 
   @Override public void display(
     final int frame)
-    throws GLException,
-      GLCompileException,
+    throws JCGLException,
+      JCGLCompileException,
       ConstraintError
   {
     this.gl.colorBufferClear3f(0.15f, 0.2f, 0.15f);
@@ -67,17 +66,17 @@ public final class DemoBlank implements Demo
   @Override public void reshape(
     final @Nonnull VectorReadable2I position,
     final @Nonnull VectorReadable2I size)
-    throws GLException,
+    throws JCGLException,
       ConstraintError,
-      GLCompileException
+      JCGLCompileException
   {
     this.gl.viewportSet(position, size);
   }
 
   @Override public void shutdown()
-    throws GLException,
+    throws JCGLException,
       ConstraintError,
-      GLCompileException
+      JCGLCompileException
   {
     this.has_shut_down = true;
   }

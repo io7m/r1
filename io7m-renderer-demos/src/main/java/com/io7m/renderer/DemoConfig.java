@@ -19,7 +19,7 @@ package com.io7m.renderer;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jcanephora.GLImplementation;
+import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.TextureLoader;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorM2I;
@@ -28,15 +28,15 @@ import com.io7m.jvvfs.FSCapabilityAll;
 
 @Immutable public final class DemoConfig
 {
-  private final @Nonnull GLImplementation gl_implementation;
-  private final @Nonnull Log              log;
-  private final @Nonnull FSCapabilityAll  filesystem;
-  private final @Nonnull TextureLoader    texture_loader;
-  private final @Nonnull VectorM2I        window_position;
-  private final @Nonnull VectorM2I        window_size;
+  private final @Nonnull JCGLImplementation gl_implementation;
+  private final @Nonnull Log                log;
+  private final @Nonnull FSCapabilityAll    filesystem;
+  private final @Nonnull TextureLoader      texture_loader;
+  private final @Nonnull VectorM2I          window_position;
+  private final @Nonnull VectorM2I          window_size;
 
   public DemoConfig(
-    final @Nonnull GLImplementation gl,
+    final @Nonnull JCGLImplementation gl,
     final @Nonnull TextureLoader texture_loader,
     final @Nonnull Log log,
     final @Nonnull FSCapabilityAll filesystem,
@@ -56,7 +56,7 @@ import com.io7m.jvvfs.FSCapabilityAll;
     return this.filesystem;
   }
 
-  public @Nonnull GLImplementation getGL()
+  public @Nonnull JCGLImplementation getGL()
   {
     return this.gl_implementation;
   }

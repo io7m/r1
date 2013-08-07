@@ -20,16 +20,16 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.ArrayBufferAttribute;
-import com.io7m.jcanephora.ArrayBufferDescriptor;
+import com.io7m.jcanephora.ArrayBufferAttributeDescriptor;
+import com.io7m.jcanephora.ArrayBufferTypeDescriptor;
 import com.io7m.jcanephora.ArrayBufferWritableData;
 import com.io7m.jcanephora.CursorWritable3f;
 import com.io7m.jcanephora.CursorWritableIndex;
-import com.io7m.jcanephora.GLException;
-import com.io7m.jcanephora.GLInterfaceCommon;
-import com.io7m.jcanephora.GLScalarType;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.IndexBufferWritableData;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jcanephora.JCGLScalarType;
 import com.io7m.jcanephora.UsageHint;
 
 public final class SBVisibleAxes
@@ -38,19 +38,27 @@ public final class SBVisibleAxes
   private final @Nonnull IndexBuffer indices;
 
   SBVisibleAxes(
-    final @Nonnull GLInterfaceCommon gl,
+    final @Nonnull JCGLInterfaceCommon gl,
     final int x,
     final int y,
     final int z)
     throws ConstraintError,
-      GLException
+      JCGLException
   {
-    final ArrayBufferAttribute[] attributes = new ArrayBufferAttribute[2];
+    final ArrayBufferAttributeDescriptor[] attributes =
+      new ArrayBufferAttributeDescriptor[2];
     attributes[0] =
-      new ArrayBufferAttribute("v_position", GLScalarType.TYPE_FLOAT, 3);
+      new ArrayBufferAttributeDescriptor(
+        "v_position",
+        JCGLScalarType.TYPE_FLOAT,
+        3);
     attributes[1] =
-      new ArrayBufferAttribute("v_colour", GLScalarType.TYPE_FLOAT, 3);
-    final ArrayBufferDescriptor type = new ArrayBufferDescriptor(attributes);
+      new ArrayBufferAttributeDescriptor(
+        "v_colour",
+        JCGLScalarType.TYPE_FLOAT,
+        3);
+    final ArrayBufferTypeDescriptor type =
+      new ArrayBufferTypeDescriptor(attributes);
 
     this.array = gl.arrayBufferAllocate(6, type, UsageHint.USAGE_STATIC_READ);
 
@@ -106,8 +114,8 @@ public final class SBVisibleAxes
     ic.putIndex(index);
     ++index;
 
-    gl.arrayBufferUpdate(this.array, array_map);
-    gl.indexBufferUpdate(this.indices, index_map);
+    gl.arrayBufferUpdate(array_map);
+    gl.indexBufferUpdate(index_map);
   }
 
   @Nonnull ArrayBuffer getArrayBuffer()

@@ -18,18 +18,14 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.Framebuffer;
-import com.io7m.jcanephora.GLCompileException;
-import com.io7m.jcanephora.GLImplementation;
+import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jtensors.VectorReadable4F;
-import com.io7m.jvvfs.FSCapabilityRead;
-import com.io7m.jvvfs.FilesystemError;
 
 final class KRendererDeferred implements KRenderer
 {
   KRendererDeferred(
-    final @Nonnull GLImplementation gl)
+    final @Nonnull JCGLImplementation gl)
   {
     // Nothing
   }
@@ -44,16 +40,6 @@ final class KRendererDeferred implements KRenderer
   @Override public void setBackgroundRGBA(
     final @Nonnull VectorReadable4F rgba)
   {
-
-  }
-
-  @Override public void updateShaders(
-    final @Nonnull FSCapabilityRead fs)
-    throws FilesystemError,
-      GLCompileException,
-      ConstraintError
-  {
-    // TODO Auto-generated method stub
 
   }
 }
