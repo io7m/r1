@@ -53,7 +53,7 @@ import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 
-final class KRendererForwardDiffuseOnly implements KRenderer
+final class KRendererForwardDiffuseSpecular implements KRenderer
 {
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
@@ -70,7 +70,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
   private final @Nonnull JCCEExecutionCallable exec_directional;
   private final @Nonnull JCCEExecutionCallable exec_depth;
 
-  KRendererForwardDiffuseOnly(
+  KRendererForwardDiffuseSpecular(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
@@ -81,7 +81,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
       FilesystemError,
       IOException
   {
-    this.log = new Log(log, "krenderer-forward-diffuse");
+    this.log = new Log(log, "krenderer-forward-diffuse-specular");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
@@ -101,9 +101,9 @@ final class KRendererForwardDiffuseOnly implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "fw_diffuse_directional",
-        "fw_diffuse_directional.v",
-        "fw_diffuse_directional.f",
+        "fw_diffspec_directional",
+        "fw_diffspec_directional.v",
+        "fw_diffspec_directional.f",
         this.log);
 
     this.exec_directional =
@@ -279,14 +279,12 @@ final class KRendererForwardDiffuseOnly implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    this.exec_depth.execPrepare(gc);
-    this.exec_depth.execUniformPutMatrix4x4F(
-      gc,
-      "m_projection",
-      this.matrix_projection);
+    final JCCEExecutionCallable e = this.exec_depth;
+    e.execPrepare(gc);
+    e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
-      this.renderDepthPassMesh(gc, this.exec_depth, mesh);
+      this.renderDepthPassMesh(gc, e, mesh);
     }
   }
 

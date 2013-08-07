@@ -30,9 +30,9 @@ import javax.media.opengl.GLProfile;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.PartialFunction;
-import com.io7m.jcanephora.GLCompileException;
-import com.io7m.jcanephora.GLException;
-import com.io7m.jcanephora.GLImplementationJOGL;
+import com.io7m.jcanephora.JCGLCompileException;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLImplementationJOGL;
 import com.io7m.jcanephora.TextureLoader;
 import com.io7m.jcanephora.TextureLoaderImageIO;
 import com.io7m.jlog.Log;
@@ -80,7 +80,7 @@ public final class JOGLDemoRunner implements GLEventListener, KeyListener
 
   protected final @Nonnull GLWindow                                                    window;
   private final @Nonnull FPSAnimator                                                   animator;
-  private @Nonnull GLImplementationJOGL                                                gl_implementation;
+  private @Nonnull JCGLImplementationJOGL                                              gl_implementation;
   private final @Nonnull Filesystem                                                    filesystem;
   private final @Nonnull VectorM2I                                                     window_position;
   private final @Nonnull VectorM2I                                                     window_size;
@@ -304,9 +304,9 @@ public final class JOGLDemoRunner implements GLEventListener, KeyListener
       if (this.demo_current.hasShutDown() == false) {
         this.demo_current.display(++this.frame);
       }
-    } catch (final GLException e) {
+    } catch (final JCGLException e) {
       JOGLDemoRunner.fatal(e);
-    } catch (final GLCompileException e) {
+    } catch (final JCGLCompileException e) {
       JOGLDemoRunner.fatal(e);
     } catch (final ConstraintError e) {
       JOGLDemoRunner.fatal(e);
@@ -325,7 +325,7 @@ public final class JOGLDemoRunner implements GLEventListener, KeyListener
     try {
       this.texture_loader = new TextureLoaderImageIO();
       this.gl_implementation =
-        new GLImplementationJOGL(drawable.getContext(), this.log);
+        new JCGLImplementationJOGL(drawable.getContext(), this.log);
 
       this.config =
         new DemoConfig(
@@ -338,7 +338,7 @@ public final class JOGLDemoRunner implements GLEventListener, KeyListener
 
       this.demoFirst();
 
-    } catch (final GLException e) {
+    } catch (final JCGLException e) {
       JOGLDemoRunner.fatal(e);
     } catch (final ConstraintError e) {
       JOGLDemoRunner.fatal(e);
@@ -391,9 +391,9 @@ public final class JOGLDemoRunner implements GLEventListener, KeyListener
 
     try {
       this.demo_current.reshape(this.window_position, this.window_size);
-    } catch (final GLException e) {
+    } catch (final JCGLException e) {
       JOGLDemoRunner.fatal(e);
-    } catch (final GLCompileException e) {
+    } catch (final JCGLCompileException e) {
       JOGLDemoRunner.fatal(e);
     } catch (final ConstraintError e) {
       JOGLDemoRunner.fatal(e);

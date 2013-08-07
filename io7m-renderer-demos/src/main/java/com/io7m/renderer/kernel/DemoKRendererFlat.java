@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -32,7 +33,6 @@ import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
-import com.io7m.jcanephora.ArrayBufferDescriptor;
 import com.io7m.jcanephora.AttachmentColor;
 import com.io7m.jcanephora.AttachmentColor.AttachmentColorTexture2DStatic;
 import com.io7m.jcanephora.BlendFunction;
@@ -41,16 +41,15 @@ import com.io7m.jcanephora.Framebuffer;
 import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
 import com.io7m.jcanephora.FramebufferConfigurationGL3ES2Actual;
 import com.io7m.jcanephora.FramebufferStatus;
-import com.io7m.jcanephora.GLCompileException;
-import com.io7m.jcanephora.GLException;
-import com.io7m.jcanephora.GLImplementation;
-import com.io7m.jcanephora.GLInterfaceCommon;
-import com.io7m.jcanephora.GLUnsupportedException;
 import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.jcanephora.JCGLCompileException;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jcanephora.JCGLSLVersion;
+import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Program;
-import com.io7m.jcanephora.ProgramAttribute;
-import com.io7m.jcanephora.ProgramUniform;
+import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.Texture2DStaticUsable;
@@ -60,6 +59,7 @@ import com.io7m.jcanephora.TextureLoader;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.MatrixM4x4F.Context;
@@ -117,11 +117,11 @@ public final class DemoKRendererFlat implements Demo
   }
 
   private static @CheckForNull Framebuffer makeFramebuffer(
-    final @Nonnull GLImplementation gi,
+    final @Nonnull JCGLImplementation gi,
     final @Nonnull VectorReadable2I window_size,
     final @Nonnull Log log)
     throws ConstraintError,
-      GLException
+      JCGLException
   {
     log.debug("making framebuffer");
 
@@ -150,10 +150,10 @@ public final class DemoKRendererFlat implements Demo
   private static @Nonnull KMaterial makeMaterial(
     final @Nonnull TextureLoader texture_loader,
     final @Nonnull FSCapabilityRead fs,
-    final @Nonnull GLInterfaceCommon g)
+    final @Nonnull JCGLInterfaceCommon g)
     throws FilesystemError,
       ConstraintError,
-      GLException,
+      JCGLException,
       IOException
   {
     final InputStream stream =
@@ -190,20 +190,20 @@ public final class DemoKRendererFlat implements Demo
   }
 
   private static @Nonnull KMeshInstance makeMesh(
-    final @Nonnull GLImplementation gi,
+    final @Nonnull JCGLImplementation gi,
     final @Nonnull Integer id,
     final @Nonnull KTransform transform,
     final @Nonnull TextureLoader texture_loader,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
     throws ConstraintError,
-      GLException,
+      JCGLException,
       FilesystemError,
       IOException
   {
     log.debug("creating mesh");
 
-    final GLInterfaceCommon g = gi.getGLCommon();
+    final JCGLInterfaceCommon g = gi.getGLCommon();
     final Pair<ArrayBuffer, IndexBuffer> p =
       DemoUtilities.texturedSquare(g, 1);
     final KMaterial material =
@@ -223,12 +223,12 @@ public final class DemoKRendererFlat implements Demo
 
   private final @Nonnull DemoConfig                     config;
   private boolean                                       has_shut_down = false;
-  private final @Nonnull GLImplementation               gi;
-  private final @Nonnull GLInterfaceCommon              gl;
+  private final @Nonnull JCGLImplementation             gi;
+  private final @Nonnull JCGLInterfaceCommon            gl;
   private final @Nonnull KRendererFlatTextured          renderer;
   private final @Nonnull Log                            log;
   private final @Nonnull QuaternionI4F.Context          quat_context;
-  private final @Nonnull Program                        program;
+  private final @Nonnull ProgramReference               program;
   private final @Nonnull MatrixM4x4F                    matrix_projection;
 
   private final @Nonnull MatrixM4x4F                    matrix_modelview;
@@ -240,20 +240,24 @@ public final class DemoKRendererFlat implements Demo
 
   private FramebufferColorAttachmentPoint[]             framebuffer_color_points;
   private final @Nonnull KMaterial                      mesh_material;
+  private final @Nonnull JCCEExecutionCallable          exec;
 
   public DemoKRendererFlat(
     final @Nonnull DemoConfig config)
-    throws GLCompileException,
+    throws JCGLCompileException,
       ConstraintError,
-      GLException,
+      JCGLException,
       FilesystemError,
       IOException,
-      GLUnsupportedException
+      JCGLUnsupportedException
   {
     this.config = config;
     this.log = new Log(config.getLog(), DemoKRendererFlat.getName());
     this.gi = config.getGL();
     this.gl = this.gi.getGLCommon();
+
+    final JCGLSLVersion version = this.gl.metaGetSLVersion();
+
     this.renderer =
       new KRendererFlatTextured(
         config.getGL(),
@@ -270,7 +274,10 @@ public final class DemoKRendererFlat implements Demo
       DemoUtilities.makeFlatUVProgram(
         this.gl,
         config.getFilesystem(),
+        version.getNumber(),
+        version.getAPI(),
         this.log);
+    this.exec = new JCCEExecutionCallable(this.program);
 
     this.quad = DemoUtilities.texturedSquare(this.gl, 200);
     this.quad_in_scene = DemoUtilities.texturedSquare(this.gl, 1);
@@ -309,8 +316,8 @@ public final class DemoKRendererFlat implements Demo
 
   @Override public void display(
     final int frame)
-    throws GLException,
-      GLCompileException,
+    throws JCGLException,
+      JCGLCompileException,
       ConstraintError
   {
     final HashSet<KLight> lights = new HashSet<KLight>();
@@ -338,24 +345,16 @@ public final class DemoKRendererFlat implements Demo
 
     final KScene scene = new KScene(this.camera, lights, meshes);
 
-    try {
-      this.renderer.updateShaders(this.config.getFilesystem());
-    } catch (final GLCompileException e) {
-      this.log.error("Compile error: " + e);
-    } catch (final FilesystemError e) {
-      this.log.error("Compile error: " + e);
-    }
-
     this.renderer.render(this.framebuffer, scene);
 
-    {
+    try {
       this.gl.blendingEnable(
         BlendFunction.BLEND_SOURCE_ALPHA,
         BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
 
       this.gl.colorBufferClear3f(0.2f, 0.15f, 0.15f);
       this.gl.depthBufferClear(1.0f);
-      this.gl.depthBufferEnable(DepthFunction.DEPTH_LESS_THAN);
+      this.gl.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
 
       /**
        * Initialize the projection matrix to an orthographic projection.
@@ -387,75 +386,58 @@ public final class DemoKRendererFlat implements Demo
         translation);
 
       /**
-       * Activate shading program, and associate parts of the array buffer
-       * with inputs to the shader.
+       * Upload matrices and set textures.
        */
 
-      this.program.activate(this.gl);
-      {
-        /**
-         * Get references to the program's uniform variable inputs.
-         */
+      this.gl.texture2DStaticBind(
+        this.texture_units[0],
+        this.getRenderedFramebufferTexture());
 
-        final ProgramUniform u_proj = this.program.getUniform("m_projection");
-        final ProgramUniform u_model = this.program.getUniform("m_modelview");
-        final ProgramUniform u_texture =
-          this.program.getUniform("t_diffuse_0");
+      this.exec.execPrepare(this.gl);
+      this.exec.execUniformPutMatrix4x4F(
+        this.gl,
+        "m_projection",
+        this.matrix_projection);
+      this.exec.execUniformPutMatrix4x4F(
+        this.gl,
+        "m_modelview",
+        this.matrix_modelview);
+      this.exec.execUniformPutTextureUnit(
+        this.gl,
+        "t_diffuse_0",
+        this.texture_units[0]);
 
-        /**
-         * Upload the matrices to the uniform variable inputs.
-         */
+      /**
+       * Bind the textured quad's attributes to program attributes.
+       */
 
-        this.gl.programPutUniformMatrix4x4f(u_proj, this.matrix_projection);
-        this.gl.programPutUniformMatrix4x4f(u_model, this.matrix_modelview);
+      final IndexBuffer indices = this.quad.second;
+      final ArrayBuffer array = this.quad.first;
+      this.gl.arrayBufferBind(array);
+      final ArrayBufferAttribute a_uv = array.getAttribute("uv");
+      final ArrayBufferAttribute a_pos = array.getAttribute("position");
 
-        /**
-         * Bind the texture to the first available texture unit, then upload
-         * the texture unit reference to the shader.
-         */
+      this.exec.execAttributeBind(this.gl, "v_position", a_pos);
+      this.exec.execAttributeBind(this.gl, "v_uv", a_uv);
+      this.exec.execSetCallable(new Callable<Void>() {
+        @Override public Void call()
+          throws Exception
+        {
+          try {
+            DemoKRendererFlat.this.gl.drawElements(
+              Primitives.PRIMITIVE_TRIANGLES,
+              indices);
+          } catch (final ConstraintError e) {
+            throw new UnreachableCodeException();
+          }
+          return null;
+        }
+      });
 
-        this.gl.texture2DStaticBind(
-          this.texture_units[0],
-          this.getRenderedFramebufferTexture());
-        this.gl
-          .programPutUniformTextureUnit(u_texture, this.texture_units[0]);
-
-        /**
-         * Get references to the program's vertex attribute inputs.
-         */
-
-        final ProgramAttribute p_pos =
-          this.program.getAttribute("v_position");
-        final ProgramAttribute p_uv = this.program.getAttribute("v_uv");
-
-        /**
-         * Get references to the array buffer's vertex attributes.
-         */
-
-        final ArrayBuffer array = this.quad.first;
-        final ArrayBufferDescriptor array_type = array.getDescriptor();
-        final ArrayBufferAttribute b_pos =
-          array_type.getAttribute("position");
-        final ArrayBufferAttribute b_uv = array_type.getAttribute("uv");
-
-        /**
-         * Bind the array buffer, and associate program vertex attribute
-         * inputs with array vertex attributes.
-         */
-
-        this.gl.arrayBufferBind(array);
-        this.gl.arrayBufferBindVertexAttribute(array, b_pos, p_pos);
-        this.gl.arrayBufferBindVertexAttribute(array, b_uv, p_uv);
-
-        /**
-         * Draw primitives, using the array buffer and the given index buffer.
-         */
-
-        final IndexBuffer indices = this.quad.second;
-        this.gl.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-        this.gl.arrayBufferUnbind();
-      }
-      this.program.deactivate(this.gl);
+      this.exec.execRun(this.gl);
+    } catch (final Exception e) {
+      e.printStackTrace();
+      this.has_shut_down = true;
     }
   }
 
@@ -490,9 +472,9 @@ public final class DemoKRendererFlat implements Demo
   @Override public void reshape(
     final @Nonnull VectorReadable2I position,
     final @Nonnull VectorReadable2I size)
-    throws GLException,
+    throws JCGLException,
       ConstraintError,
-      GLCompileException
+      JCGLCompileException
   {
     this.gl.viewportSet(position, size);
 
@@ -520,9 +502,9 @@ public final class DemoKRendererFlat implements Demo
   }
 
   @Override public void shutdown()
-    throws GLException,
+    throws JCGLException,
       ConstraintError,
-      GLCompileException
+      JCGLCompileException
   {
     this.has_shut_down = true;
     if (this.framebuffer != null) {
