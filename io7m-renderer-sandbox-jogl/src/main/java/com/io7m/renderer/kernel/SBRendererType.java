@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 
 enum SBRendererType
 {
+  RENDERER_DEBUG_DEPTH_ONLY("debug-depth-only"),
   RENDERER_DEBUG_UV_ONLY("debug-uv-only"),
   RENDERER_DEBUG_NORMALS_ONLY("debug-normals-only"),
   RENDERER_FLAT_TEXTURED("flat-textured"),
