@@ -284,6 +284,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
       gc,
       "m_projection",
       this.matrix_projection);
+    this.exec_depth.execCancel();
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
       this.renderDepthPassMesh(gc, this.exec_depth, mesh);
@@ -402,6 +403,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
     e.execUniformPutVector3F(gc, "l_direction", light_cs);
     e.execUniformPutVector3F(gc, "l_color", light.getColour());
     e.execUniformPutFloat(gc, "l_intensity", light.getIntensity());
+    e.execCancel();
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
       this.renderLightPassMeshDirectional(gc, e, mesh);
