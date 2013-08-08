@@ -564,13 +564,6 @@ final class SBGLRenderer implements GLEventListener
           this.gi,
           this.filesystem,
           this.log));
-
-    this.renderers.put(
-      SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR_NO_ALPHA,
-      new KRendererForwardDiffuseSpecularNoAlpha(
-        this.gi,
-        this.filesystem,
-        this.log));
   }
 
   void meshDelete(
