@@ -66,17 +66,17 @@
     <dependency>
       <groupId>com.io7m.jcanephora.jogl</groupId>
       <artifactId>io7m-jcanephora-jogl</artifactId>
-      <version>0.9.14</version>
+      <version>0.9.15</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.texload-imageio</groupId>
       <artifactId>io7m-jcanephora-texload-imageio</artifactId>
-      <version>0.9.14</version>
+      <version>0.9.15</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.framebuffer</groupId>
       <artifactId>io7m-jcanephora-framebuffer</artifactId>
-      <version>0.9.14</version>
+      <version>0.9.15</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.renderer.core</groupId>
