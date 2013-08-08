@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -42,6 +43,8 @@ import com.io7m.jaux.functional.Function;
 import com.io7m.jaux.functional.Indeterminate;
 import com.io7m.jaux.functional.Indeterminate.Failure;
 import com.io7m.jaux.functional.Indeterminate.Success;
+import com.io7m.jaux.functional.Option;
+import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.ArrayBuffer;
@@ -79,6 +82,7 @@ import com.io7m.jsom0.ModelObjectVBO;
 import com.io7m.jsom0.NameNormalAttribute;
 import com.io7m.jsom0.NamePositionAttribute;
 import com.io7m.jsom0.NameUVAttribute;
+import com.io7m.jsom0.parser.Error;
 import com.io7m.jsom0.parser.ModelObjectParser;
 import com.io7m.jsom0.parser.ModelObjectParserVBOImmediate;
 import com.io7m.jsom0.parser.ModelParser;
@@ -89,6 +93,7 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jvvfs.FSCapabilityAll;
+import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
@@ -143,25 +148,12 @@ final class SBGLRenderer implements GLEventListener
             final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
 
             try {
-              final NamePositionAttribute name_position_attribute =
-                new NamePositionAttribute("position");
-              final NameNormalAttribute name_normal_attribute =
-                new NameNormalAttribute("normal");
-              final NameUVAttribute name_uv_attribute =
-                new NameUVAttribute("uv");
-
-              final ModelObjectParser<ModelObjectVBO, JCGLException> op =
-                new ModelObjectParserVBOImmediate<JCGLInterfaceCommon>(
-                  description.getName(),
-                  stream,
-                  name_position_attribute,
-                  name_normal_attribute,
-                  name_uv_attribute,
-                  SBGLRenderer.this.log,
-                  gl);
-
               final ModelParser<ModelObjectVBO, JCGLException> mp =
-                new ModelParser<ModelObjectVBO, JCGLException>(op);
+                SBGLRenderer.modelParserForStream(
+                  description,
+                  stream,
+                  gl,
+                  SBGLRenderer.this.log);
 
               final Model<ModelObjectVBO> m = mp.model();
               if (SBGLRenderer.this.models.containsKey(description.getName())) {
@@ -271,6 +263,38 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
+  protected static @Nonnull
+    ModelParser<ModelObjectVBO, JCGLException>
+    modelParserForStream(
+      final @Nonnull SBModelDescription description,
+      final @Nonnull InputStream stream,
+      final @Nonnull JCGLInterfaceCommon gl,
+      final @Nonnull Log log)
+      throws ConstraintError,
+        IOException,
+        Error
+  {
+    final NamePositionAttribute name_position_attribute =
+      new NamePositionAttribute("position");
+    final NameNormalAttribute name_normal_attribute =
+      new NameNormalAttribute("normal");
+    final NameUVAttribute name_uv_attribute = new NameUVAttribute("uv");
+
+    final ModelObjectParser<ModelObjectVBO, JCGLException> op =
+      new ModelObjectParserVBOImmediate<JCGLInterfaceCommon>(
+        description.getName(),
+        stream,
+        name_position_attribute,
+        name_normal_attribute,
+        name_uv_attribute,
+        log,
+        gl);
+
+    final ModelParser<ModelObjectVBO, JCGLException> mp =
+      new ModelParser<ModelObjectVBO, JCGLException>(op);
+    return mp;
+  }
+
   private static <A, B extends FutureTask<A>> void processQueue(
     final @Nonnull Queue<B> q)
   {
@@ -293,33 +317,42 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull HashMap<String, Texture2DStatic>           textures;
   private final @Nonnull HashMap<String, Model<ModelObjectVBO>>     models;
   private @CheckForNull SBQuad                                      screen_quad;
-  private @CheckForNull ProgramReference                            program_uv;
-  private @CheckForNull ProgramReference                            program_vcolour;
+
   private final @Nonnull FSCapabilityAll                            filesystem;
   private @CheckForNull FramebufferConfigurationGL3ES2Actual        framebuffer_config;
   private @CheckForNull Framebuffer                                 framebuffer;
   private boolean                                                   running;
   private final @Nonnull MatrixM4x4F                                matrix_projection;
   private final @Nonnull MatrixM4x4F                                matrix_modelview;
+  private final @Nonnull MatrixM4x4F                                matrix_model;
+  private final @Nonnull MatrixM4x4F                                matrix_view;
   private @CheckForNull TextureUnit[]                               texture_units;
   private @CheckForNull FramebufferColorAttachmentPoint[]           framebuffer_points;
   private final @Nonnull Map<SBRendererType, KRenderer>             renderers;
   private final @Nonnull AtomicReference<SBRendererType>            renderer_current;
   private final @Nonnull AtomicReference<SBSceneControllerRenderer> controller;
-  private final @Nonnull AtomicReference<VectorI3F>                 background_colour;
 
+  private final @Nonnull AtomicReference<VectorI3F>                 background_colour;
   private @Nonnull SBVisibleAxes                                    axes;
   private final @Nonnull AtomicBoolean                              axes_show;
   private @Nonnull SBVisibleGridPlane                               grid;
   private final @Nonnull AtomicBoolean                              grid_show;
+  private @Nonnull Model<ModelObjectVBO>                            spheres;
+  private final @Nonnull AtomicBoolean                              lights_show;
 
   private final @Nonnull QuaternionM4F.Context                      qm4f_context;
   private @Nonnull KTransform                                       camera_transform;
   private final @Nonnull SBInputState                               input_state;
   private final @Nonnull SBFirstPersonCamera                        camera;
   private @Nonnull KMatrix4x4F<KMatrixView>                         camera_matrix;
+  private @CheckForNull KScene                                      rendered_scene;
+
+  private @CheckForNull ProgramReference                            program_uv;
+  private @CheckForNull ProgramReference                            program_vcolour;
+  private @CheckForNull ProgramReference                            program_ccolour;
   private @Nonnull JCCEExecutionCallable                            exec_vcolour;
   private @Nonnull JCCEExecutionCallable                            exec_uv;
+  private @Nonnull JCCEExecutionCallable                            exec_ccolour;
 
   public SBGLRenderer(
     final @Nonnull Log log)
@@ -349,6 +382,8 @@ final class SBGLRenderer implements GLEventListener
     this.background_colour =
       new AtomicReference<VectorI3F>(new VectorI3F(0.1f, 0.1f, 0.1f));
 
+    this.matrix_model = new MatrixM4x4F();
+    this.matrix_view = new MatrixM4x4F();
     this.matrix_modelview = new MatrixM4x4F();
     this.matrix_projection = new MatrixM4x4F();
     this.renderers = new HashMap<SBRendererType, KRenderer>();
@@ -358,6 +393,7 @@ final class SBGLRenderer implements GLEventListener
 
     this.axes_show = new AtomicBoolean(true);
     this.grid_show = new AtomicBoolean(true);
+    this.lights_show = new AtomicBoolean(true);
 
     this.camera = new SBFirstPersonCamera(0.0f, 1.0f, 5.0f);
     this.input_state = new SBInputState();
@@ -391,49 +427,22 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private void moveCamera()
-  {
-    final double speed = 0.01;
-    if (this.input_state.isMovingForward()) {
-      this.camera.moveForward(speed);
-    }
-    if (this.input_state.isMovingBackward()) {
-      this.camera.moveBackward(speed);
-    }
-    if (this.input_state.isMovingUp()) {
-      this.camera.moveUp(speed);
-    }
-    if (this.input_state.isMovingDown()) {
-      this.camera.moveDown(speed);
-    }
-    if (this.input_state.isMovingLeft()) {
-      this.camera.moveStrafeLeft(speed);
-    }
-    if (this.input_state.isMovingRight()) {
-      this.camera.moveStrafeRight(speed);
-    }
-
-    if (this.input_state.isRotatingLeft()) {
-      this.camera.moveRotateLeft(speed);
-    }
-    if (this.input_state.isRotatingRight()) {
-      this.camera.moveRotateRight(speed);
-    }
-
-    if (this.input_state.isRotatingUp()) {
-      this.camera.moveRotateUp(speed);
-    }
-    if (this.input_state.isRotatingDown()) {
-      this.camera.moveRotateDown(speed);
-    }
-
-    this.camera_matrix = this.camera.makeViewMatrix();
-  }
-
   @Override public void dispose(
     final @Nonnull GLAutoDrawable drawable)
   {
     // TODO Auto-generated method stub
+  }
+
+  private void failed(
+    final @CheckForNull Throwable e)
+  {
+    SBErrorBox.showError(this.log, "Renderer disabled", e);
+    this.running = false;
+  }
+
+  @Nonnull SBInputState getInputState()
+  {
+    return this.input_state;
   }
 
   private @Nonnull Texture2DStaticUsable getRenderedFramebufferTexture()
@@ -462,13 +471,6 @@ final class SBGLRenderer implements GLEventListener
     throw new UnreachableCodeException();
   }
 
-  private void failed(
-    final @CheckForNull Throwable e)
-  {
-    SBErrorBox.showError(this.log, "Renderer disabled", e);
-    this.running = false;
-  }
-
   @Override public void init(
     final @Nonnull GLAutoDrawable drawable)
   {
@@ -482,6 +484,8 @@ final class SBGLRenderer implements GLEventListener
 
       this.axes = new SBVisibleAxes(gl, 50, 50, 50);
       this.grid = new SBVisibleGridPlane(gl, 50, 0, 50);
+      this.spheres =
+        SBGLRenderer.initBuiltInSpheres(this.filesystem, gl, this.log);
 
       this.texture_units = gl.textureGetUnits();
       this.framebuffer_points = gl.framebufferGetColorAttachmentPoints();
@@ -498,6 +502,19 @@ final class SBGLRenderer implements GLEventListener
           this.log);
 
       this.exec_vcolour = new JCCEExecutionCallable(this.program_vcolour);
+
+      this.program_ccolour =
+        KShaderUtilities.makeProgramSingleOutput(
+          gl,
+          version.getNumber(),
+          version.getAPI(),
+          this.filesystem,
+          "ccolour",
+          "standard.v",
+          "constant_colour.f",
+          this.log);
+
+      this.exec_ccolour = new JCCEExecutionCallable(this.program_ccolour);
 
       this.program_uv =
         KShaderUtilities.makeProgramSingleOutput(
@@ -526,6 +543,32 @@ final class SBGLRenderer implements GLEventListener
       this.failed(e);
     } catch (final IOException e) {
       this.failed(e);
+    } catch (final Error e) {
+      this.failed(e);
+    }
+  }
+
+  private static @Nonnull Model<ModelObjectVBO> initBuiltInSpheres(
+    final @Nonnull FSCapabilityRead fs,
+    final @Nonnull JCGLInterfaceCommon gl,
+    final @Nonnull Log log)
+    throws IOException,
+      Error,
+      ConstraintError,
+      FilesystemError,
+      JCGLException
+  {
+    final File file = new File("/com/io7m/renderer/sandbox/spheres.so0");
+    final SBModelDescription description =
+      new SBModelDescription(file, "spheres");
+    final InputStream stream =
+      fs.openFile(PathVirtual.ofString(file.toString()));
+    try {
+      final ModelParser<ModelObjectVBO, JCGLException> mp =
+        SBGLRenderer.modelParserForStream(description, stream, gl, log);
+      return mp.model();
+    } finally {
+      stream.close();
     }
   }
 
@@ -580,6 +623,45 @@ final class SBGLRenderer implements GLEventListener
     final ModelLoadFuture f = new ModelLoadFuture(description, stream);
     this.mesh_load_queue.add(f);
     return f;
+  }
+
+  private void moveCamera()
+  {
+    final double speed = 0.01;
+    if (this.input_state.isMovingForward()) {
+      this.camera.moveForward(speed);
+    }
+    if (this.input_state.isMovingBackward()) {
+      this.camera.moveBackward(speed);
+    }
+    if (this.input_state.isMovingUp()) {
+      this.camera.moveUp(speed);
+    }
+    if (this.input_state.isMovingDown()) {
+      this.camera.moveDown(speed);
+    }
+    if (this.input_state.isMovingLeft()) {
+      this.camera.moveStrafeLeft(speed);
+    }
+    if (this.input_state.isMovingRight()) {
+      this.camera.moveStrafeRight(speed);
+    }
+
+    if (this.input_state.isRotatingLeft()) {
+      this.camera.moveRotateLeft(speed);
+    }
+    if (this.input_state.isRotatingRight()) {
+      this.camera.moveRotateRight(speed);
+    }
+
+    if (this.input_state.isRotatingUp()) {
+      this.camera.moveRotateUp(speed);
+    }
+    if (this.input_state.isRotatingDown()) {
+      this.camera.moveRotateDown(speed);
+    }
+
+    this.camera_matrix = this.camera.makeViewMatrix();
   }
 
   /**
@@ -656,7 +738,10 @@ final class SBGLRenderer implements GLEventListener
       BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
 
     final KMatrix4x4F<KMatrixView> m = this.camera.makeViewMatrix();
-    m.makeMatrixM4x4F(this.matrix_modelview);
+    m.makeMatrixM4x4F(this.matrix_view);
+
+    MatrixM4x4F.setIdentity(this.matrix_model);
+    MatrixM4x4F.setIdentity(this.matrix_modelview);
 
     MatrixM4x4F.setIdentity(this.matrix_projection);
     ProjectionMatrix.makePerspective(
@@ -666,7 +751,16 @@ final class SBGLRenderer implements GLEventListener
       (double) drawable.getWidth() / (double) drawable.getHeight(),
       Math.toRadians(30));
 
+    /**
+     * Render the axis-aligned grid, if desired.
+     */
+
     if (this.grid_show.get()) {
+      MatrixM4x4F.multiply(
+        this.matrix_view,
+        this.matrix_model,
+        this.matrix_modelview);
+
       final JCCEExecutionCallable e = this.exec_vcolour;
       e.execPrepare(gl);
       e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
@@ -696,7 +790,16 @@ final class SBGLRenderer implements GLEventListener
       e.execRun(gl);
     }
 
+    /**
+     * Render the axes, if desired.
+     */
+
     if (this.axes_show.get()) {
+      MatrixM4x4F.multiply(
+        this.matrix_view,
+        this.matrix_model,
+        this.matrix_modelview);
+
       final JCCEExecutionCallable e = this.exec_vcolour;
       e.execPrepare(gl);
       e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
@@ -725,6 +828,82 @@ final class SBGLRenderer implements GLEventListener
       e.execRun(gl);
     }
 
+    /**
+     * Render primitive shapes representing the scene lights, if desired.
+     */
+
+    if (this.lights_show.get()) {
+      MatrixM4x4F.multiply(
+        this.matrix_view,
+        this.matrix_model,
+        this.matrix_modelview);
+
+      for (final KLight light : this.rendered_scene.getLights()) {
+        switch (light.getType()) {
+          case LIGHT_CONE:
+          {
+            break;
+          }
+          case LIGHT_DIRECTIONAL:
+          {
+            break;
+          }
+          case LIGHT_POINT:
+          {
+            final JCCEExecutionCallable e = this.exec_ccolour;
+            e.execPrepare(gl);
+            e.execUniformPutMatrix4x4F(
+              gl,
+              "m_projection",
+              this.matrix_projection);
+            e.execUniformPutMatrix4x4F(
+              gl,
+              "m_modelview",
+              this.matrix_modelview);
+
+            final Option<ModelObjectVBO> sphere =
+              this.spheres.get("sphere_16_8_mesh");
+            assert sphere.isSome();
+            final Some<ModelObjectVBO> sphere_s =
+              (Option.Some<ModelObjectVBO>) sphere;
+
+            final VectorI4F colour =
+              new VectorI4F(
+                light.getColour().x,
+                light.getColour().y,
+                light.getColour().z,
+                1.0f);
+
+            final IndexBuffer indices = sphere_s.value.getIndexBuffer();
+            final ArrayBuffer array = sphere_s.value.getArrayBuffer();
+            final ArrayBufferAttribute b_pos = array.getAttribute("position");
+            gl.arrayBufferBind(array);
+            e.execAttributeBind(gl, "v_position", b_pos);
+            e.execUniformPutVector4F(gl, "f_ccolour", colour);
+            e.execSetCallable(new Callable<Void>() {
+              @Override public Void call()
+                throws Exception
+              {
+                try {
+                  gl.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+                } catch (final ConstraintError x) {
+                  throw new UnreachableCodeException();
+                }
+                return null;
+              }
+            });
+            e.execRun(gl);
+            break;
+          }
+        }
+      }
+    }
+
+    /**
+     * Draw textured, screen-aligned quad containing the results of rendering
+     * the scene in the kernel.
+     */
+
     MatrixM4x4F.setIdentity(this.matrix_modelview);
     MatrixM4x4F.translateByVector3FInPlace(
       this.matrix_modelview,
@@ -739,10 +918,6 @@ final class SBGLRenderer implements GLEventListener
       drawable.getHeight(),
       1,
       100);
-
-    /**
-     * Draw textured, screen-aligned quad.
-     */
 
     {
       final JCCEExecutionCallable e = this.exec_uv;
@@ -810,6 +985,7 @@ final class SBGLRenderer implements GLEventListener
       final Pair<Collection<KLight>, Collection<KMeshInstance>> p =
         c.rendererGetScene();
       final KScene scene = new KScene(kcamera, p.first, p.second);
+      this.rendered_scene = scene;
 
       renderer.setBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f));
       renderer.render(this.framebuffer, scene);
@@ -835,6 +1011,38 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
+  void setBackgroundColour(
+    final float r,
+    final float g,
+    final float b)
+  {
+    this.background_colour.set(new VectorI3F(r, g, b));
+  }
+
+  void setController(
+    final @Nonnull SBSceneControllerRenderer renderer)
+  {
+    this.controller.set(renderer);
+  }
+
+  void setRenderer(
+    final @Nonnull SBRendererType type)
+  {
+    this.renderer_current.set(type);
+  }
+
+  void setShowAxes(
+    final boolean enabled)
+  {
+    this.axes_show.set(enabled);
+  }
+
+  void setShowGrid(
+    final boolean enabled)
+  {
+    this.grid_show.set(enabled);
+  }
+
   void textureDelete(
     final @Nonnull Texture2DStatic t)
   {
@@ -849,42 +1057,5 @@ final class SBGLRenderer implements GLEventListener
     final TextureLoadFuture f = new TextureLoadFuture(name, stream);
     this.texture_load_queue.add(f);
     return f;
-  }
-
-  void setController(
-    final @Nonnull SBSceneControllerRenderer renderer)
-  {
-    this.controller.set(renderer);
-  }
-
-  @Nonnull SBInputState getInputState()
-  {
-    return this.input_state;
-  }
-
-  void setRenderer(
-    final @Nonnull SBRendererType type)
-  {
-    this.renderer_current.set(type);
-  }
-
-  void setShowGrid(
-    final boolean enabled)
-  {
-    this.grid_show.set(enabled);
-  }
-
-  void setShowAxes(
-    final boolean enabled)
-  {
-    this.axes_show.set(enabled);
-  }
-
-  void setBackgroundColour(
-    final float r,
-    final float g,
-    final float b)
-  {
-    this.background_colour.set(new VectorI3F(r, g, b));
   }
 }
