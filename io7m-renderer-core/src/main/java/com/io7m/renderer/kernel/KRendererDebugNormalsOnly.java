@@ -129,6 +129,7 @@ final class KRendererDebugNormalsOnly implements KRenderer
         gc,
         "m_projection",
         this.matrix_projection);
+      this.exec.execCancel();
 
       for (final KMeshInstance mesh : scene.getMeshes()) {
         this.renderMesh(gc, mesh);

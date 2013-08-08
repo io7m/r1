@@ -282,6 +282,7 @@ final class KRendererForwardDiffuseSpecularNoAlpha implements KRenderer
     final JCCEExecutionCallable e = this.exec_depth;
     e.execPrepare(gc);
     e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
+    e.execCancel();
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
       this.renderDepthPassMesh(gc, e, mesh);
@@ -400,6 +401,7 @@ final class KRendererForwardDiffuseSpecularNoAlpha implements KRenderer
     e.execUniformPutVector3F(gc, "l_direction", light_cs);
     e.execUniformPutVector3F(gc, "l_color", light.getColour());
     e.execUniformPutFloat(gc, "l_intensity", light.getIntensity());
+    e.execCancel();
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
       this.renderLightPassMeshDirectional(gc, e, mesh);
