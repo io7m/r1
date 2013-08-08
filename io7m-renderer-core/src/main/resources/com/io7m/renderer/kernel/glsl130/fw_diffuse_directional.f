@@ -16,8 +16,10 @@ main (void)
   vec3 N = normalize(f_normal);
   vec3 L = normalize(-l_direction);
 
-  float l_diffuse_factor = max(0, dot (L, N));
-  vec4 l_diffuse_color   = vec4(l_color, 1.0) * l_intensity * l_diffuse_factor;
+  float l_diffuse_factor = max (0, dot (L, N));
+  vec3 l_diffuse_color   = l_color * l_intensity * l_diffuse_factor;
 
-  out_frag_color = texture2D(t_diffuse_0, f_uv) * l_diffuse_color;
+  vec3 surface = texture2D(t_diffuse_0, f_uv).rgb;
+
+  out_frag_color = vec4 (surface * l_diffuse_color, 1.0);
 }
