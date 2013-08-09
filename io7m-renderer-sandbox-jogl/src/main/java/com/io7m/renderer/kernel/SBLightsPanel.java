@@ -33,10 +33,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -52,6 +56,7 @@ import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorM3F;
 import com.io7m.renderer.RVectorReadable3F;
+import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
 final class SBLightsPanel extends JPanel implements SBSceneChangeListener
@@ -161,17 +166,55 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       }
     }
 
-    private static class LightControlsPoint
+    private static class LightControlsSphere
     {
-      private final @Nonnull JTextField position_x;
-      private final @Nonnull JTextField position_y;
-      private final @Nonnull JTextField position_z;
+      private final @Nonnull JTextField   position_x;
+      private final @Nonnull JTextField   position_y;
+      private final @Nonnull JTextField   position_z;
+      protected final @Nonnull JSlider    r_slider;
+      protected final @Nonnull JSlider    e_slider;
+      protected final @Nonnull JTextField r_value;
+      protected final @Nonnull JTextField e_value;
 
-      public LightControlsPoint()
+      public LightControlsSphere()
       {
         this.position_x = new JTextField("0.0");
         this.position_y = new JTextField("1.0");
         this.position_z = new JTextField("0.0");
+
+        this.r_value = new JTextField("1.0");
+        this.r_value.setEditable(false);
+        this.e_value = new JTextField("1.0");
+        this.e_value.setEditable(false);
+
+        this.r_slider = new JSlider(SwingConstants.HORIZONTAL);
+        this.r_slider.setValue(0);
+        this.e_slider = new JSlider(SwingConstants.HORIZONTAL);
+        this.e_slider.setValue(0);
+
+        this.r_slider.addChangeListener(new ChangeListener() {
+          @SuppressWarnings("boxing") @Override public void stateChanged(
+            final @Nonnull ChangeEvent ev)
+          {
+            final double x =
+              LightControlsSphere.this.r_slider.getValue() * 0.01;
+            final double r = (x * 99) + 1.0;
+            LightControlsSphere.this.r_value.setText(String.format("%f", r));
+          }
+        });
+
+        this.e_slider.addChangeListener(new ChangeListener() {
+          @SuppressWarnings("boxing") @Override public void stateChanged(
+            final @Nonnull ChangeEvent ev)
+          {
+            final double x =
+              LightControlsSphere.this.e_slider.getValue() * 0.01;
+            final double e = (x * 63) + 1.0;
+
+            LightControlsSphere.this.e_value.setText(String.format("%f", e));
+          }
+        });
+
       }
 
       public void add(
@@ -183,28 +226,72 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           .add(this.position_x)
           .add(this.position_y)
           .add(this.position_z, 2);
+
+        group
+          .grid()
+          .add(new JLabel("Radius"))
+          .add(this.r_slider, 3)
+          .add(this.r_value);
+
+        group
+          .grid()
+          .add(new JLabel("Falloff"))
+          .add(this.e_slider, 3)
+          .add(this.e_value);
+      }
+
+      public @Nonnull RVectorM3F<RSpaceWorld> getPosition()
+        throws SBExceptionInputError
+      {
+        final RVectorM3F<RSpaceWorld> v = new RVectorM3F<RSpaceWorld>();
+        v.x = SBTextFieldUtilities.getFieldFloatOrError(this.position_x);
+        v.y = SBTextFieldUtilities.getFieldFloatOrError(this.position_y);
+        v.z = SBTextFieldUtilities.getFieldFloatOrError(this.position_z);
+        return v;
+      }
+
+      public void setContents(
+        final KLight.KSphere light)
+      {
+        final RVectorReadable3F<RSpaceWorld> p = light.getPosition();
+        this.position_x.setText(Float.toString(p.getXF()));
+        this.position_y.setText(Float.toString(p.getYF()));
+        this.position_z.setText(Float.toString(p.getZF()));
+      }
+
+      public float getRadius()
+        throws SBExceptionInputError
+      {
+        return SBTextFieldUtilities.getFieldFloatOrError(this.r_value);
+      }
+
+      public float getExponent()
+        throws SBExceptionInputError
+      {
+        return SBTextFieldUtilities.getFieldFloatOrError(this.e_value);
       }
     }
 
-    private static final long                      serialVersionUID;
+    private static final long                       serialVersionUID;
 
     static {
       serialVersionUID = -3467271842953066384L;
     }
 
-    protected final @Nonnull JTextField            colour_r;
-    protected final @Nonnull JTextField            colour_g;
-    protected final @Nonnull JTextField            colour_b;
-    protected final @Nonnull JButton               colour_select;
-    protected final @Nonnull JTextField            intensity;
-    protected final @Nonnull SBLightTypeSelector   type_select;
-    private final LightControlsDirectional         directional_controls;
-    private final LightControlsPoint               point_controls;
-    private final LightControlsCone                cone_controls;
-    private final @Nonnull JLabel                  error_text;
-    private final @Nonnull JLabel                  error_icon;
-    private final @Nonnull SBSceneControllerLights controller;
-    protected final @Nonnull LightsTableModel      light_table_model;
+    protected final @Nonnull JTextField             colour_r;
+    protected final @Nonnull JTextField             colour_g;
+    protected final @Nonnull JTextField             colour_b;
+    protected final @Nonnull JButton                colour_select;
+    protected final @Nonnull JTextField             intensity;
+    protected final @Nonnull JSlider                intensity_slider;
+    protected final @Nonnull SBLightTypeSelector    type_select;
+    private final @Nonnull LightControlsDirectional directional_controls;
+    private final @Nonnull LightControlsSphere      sphere_controls;
+    private final @Nonnull LightControlsCone        cone_controls;
+    private final @Nonnull JLabel                   error_text;
+    private final @Nonnull JLabel                   error_icon;
+    private final @Nonnull SBSceneControllerLights  controller;
+    protected final @Nonnull LightsTableModel       light_table_model;
 
     public LightEditDialogPanel(
       final @Nonnull LightEditDialog window,
@@ -245,6 +332,17 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       });
 
       this.intensity = new JTextField("1.0");
+      this.intensity_slider = new JSlider(SwingConstants.HORIZONTAL);
+      this.intensity_slider.setValue(100);
+      this.intensity_slider.addChangeListener(new ChangeListener() {
+        @SuppressWarnings("boxing") @Override public void stateChanged(
+          final ChangeEvent e)
+        {
+          final double x =
+            LightEditDialogPanel.this.intensity_slider.getValue() * 0.01;
+          LightEditDialogPanel.this.intensity.setText(String.format("%f", x));
+        }
+      });
 
       final DesignGridLayout dg = new DesignGridLayout(this);
 
@@ -263,22 +361,27 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         .add(this.colour_b)
         .add(this.colour_select);
 
-      dg.row().grid().add(new JLabel("Intensity")).add(this.intensity, 4);
+      dg
+        .row()
+        .grid()
+        .add(new JLabel("Intensity"))
+        .add(this.intensity_slider, 3)
+        .add(this.intensity);
       dg.row().grid().add(new JLabel("Type")).add(this.type_select, 4);
 
       this.directional_controls = new LightControlsDirectional();
-      this.point_controls = new LightControlsPoint();
+      this.sphere_controls = new LightControlsSphere();
       this.cone_controls = new LightControlsCone();
 
       final RowGroup directional_group = new RowGroup();
-      final RowGroup point_group = new RowGroup();
+      final RowGroup sphere_group = new RowGroup();
       final RowGroup cone_group = new RowGroup();
 
       this.directional_controls.add(dg.row().group(directional_group));
-      this.point_controls.add(dg.row().group(point_group));
+      this.sphere_controls.add(dg.row().group(sphere_group));
       this.cone_controls.add(dg.row().group(cone_group));
 
-      point_group.hide();
+      sphere_group.hide();
       cone_group.hide();
       directional_group.forceShow();
 
@@ -335,22 +438,25 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
             case LIGHT_CONE:
             {
               directional_group.hide();
-              point_group.hide();
+              sphere_group.hide();
               cone_group.forceShow();
+              window.pack();
               break;
             }
             case LIGHT_DIRECTIONAL:
             {
               cone_group.hide();
-              point_group.hide();
+              sphere_group.hide();
               directional_group.forceShow();
+              window.pack();
               break;
             }
-            case LIGHT_POINT:
+            case LIGHT_SPHERE:
             {
               directional_group.hide();
               cone_group.hide();
-              point_group.forceShow();
+              sphere_group.forceShow();
+              window.pack();
               break;
             }
           }
@@ -375,8 +481,10 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
             this.directional_controls.setContents(d);
             break;
           }
-          case LIGHT_POINT:
+          case LIGHT_SPHERE:
           {
+            final KSphere p = (KLight.KSphere) light;
+            this.sphere_controls.setContents(p);
             break;
           }
         }
@@ -423,9 +531,22 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
               this.getIntensity());
           return l;
         }
-        case LIGHT_POINT:
+        case LIGHT_SPHERE:
         {
-          throw new UnimplementedCodeException();
+          final RVectorM3F<RSpaceWorld> position =
+            this.sphere_controls.getPosition();
+          final float radius = this.sphere_controls.getRadius();
+          final float exponent = this.sphere_controls.getExponent();
+
+          final KLight l =
+            new KLight.KSphere(
+              id,
+              colour,
+              this.getIntensity(),
+              position,
+              radius,
+              exponent);
+          return l;
         }
       }
 

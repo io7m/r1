@@ -51,7 +51,11 @@ import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.RSpaceEye;
+import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RVectorM4F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
+import com.io7m.renderer.kernel.KLight.KSphere;
 
 final class KRendererForwardDiffuseSpecular implements KRenderer
 {
@@ -63,12 +67,14 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
   private final @Nonnull MatrixM4x4F.Context   matrix_context;
   private final @Nonnull KTransform.Context    transform_context;
   private final @Nonnull JCGLImplementation    gl;
+  private final @Nonnull ProgramReference      program_spherical;
   private final @Nonnull ProgramReference      program_directional;
   private final @Nonnull ProgramReference      program_depth;
   private final @Nonnull Log                   log;
   private final @Nonnull VectorM4F             background;
   private final @Nonnull JCCEExecutionCallable exec_directional;
   private final @Nonnull JCCEExecutionCallable exec_depth;
+  private final @Nonnull JCCEExecutionCallable exec_spherical;
 
   KRendererForwardDiffuseSpecular(
     final @Nonnull JCGLImplementation gl,
@@ -105,9 +111,20 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
         "fw_diffspec_directional.v",
         "fw_diffspec_directional.f",
         this.log);
-
     this.exec_directional =
       new JCCEExecutionCallable(this.program_directional);
+
+    this.program_spherical =
+      KShaderUtilities.makeProgramSingleOutput(
+        gl.getGLCommon(),
+        version.getNumber(),
+        version.getAPI(),
+        fs,
+        "fw_diffspec_spherical",
+        "fw_diffspec_spherical.v",
+        "fw_diffspec_spherical.f",
+        this.log);
+    this.exec_spherical = new JCCEExecutionCallable(this.program_spherical);
 
     this.program_depth =
       KShaderUtilities.makeProgramSingleOutput(
@@ -119,7 +136,6 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
         "standard.v",
         "depth_only.f",
         this.log);
-
     this.exec_depth = new JCCEExecutionCallable(this.program_depth);
   }
 
@@ -188,9 +204,14 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       for (final KLight light : scene.getLights()) {
         switch (light.getType()) {
           case LIGHT_CONE:
-          case LIGHT_POINT:
           {
             throw new UnimplementedCodeException();
+          }
+          case LIGHT_SPHERE:
+          {
+            final KSphere slight = (KLight.KSphere) light;
+            this.renderLightPassMeshesSpherical(scene, gc, slight);
+            break;
           }
           case LIGHT_DIRECTIONAL:
           {
@@ -405,6 +426,131 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
       this.renderLightPassMeshDirectional(gc, e, mesh);
+    }
+  }
+
+  /**
+   * Render all meshes with a spherical light shader, using <code>light</code>
+   * as input.
+   */
+
+  private void renderLightPassMeshesSpherical(
+    final @Nonnull KScene scene,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KSphere light)
+    throws ConstraintError,
+      JCGLException
+  {
+    final RVectorM4F<RSpaceWorld> light_world = new RVectorM4F<RSpaceWorld>();
+    final RVectorM4F<RSpaceEye> light_eye = new RVectorM4F<RSpaceEye>();
+
+    light_world.x = light.getPosition().getXF();
+    light_world.y = light.getPosition().getYF();
+    light_world.z = light.getPosition().getZF();
+    light_world.w = 1.0f;
+
+    MatrixM4x4F.multiplyVector4FWithContext(
+      this.matrix_context,
+      this.matrix_view,
+      light_world,
+      light_eye);
+
+    final JCCEExecutionCallable e = this.exec_spherical;
+    e.execPrepare(gc);
+    e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
+    e.execUniformPutVector3F(gc, "l_position", light_eye);
+    e.execUniformPutVector3F(gc, "l_color", light.getColour());
+    e.execUniformPutFloat(gc, "l_intensity", light.getIntensity());
+    e.execUniformPutFloat(gc, "l_radius", light.getRadius());
+    e.execUniformPutFloat(gc, "l_falloff", light.getExponent());
+    e.execCancel();
+
+    for (final KMeshInstance mesh : scene.getMeshes()) {
+      this.renderLightPassMeshSpherical(gc, e, mesh);
+    }
+  }
+
+  /**
+   * Render the given mesh, lit with the given program.
+   */
+
+  private void renderLightPassMeshSpherical(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull KMeshInstance mesh)
+    throws ConstraintError,
+      JCGLException
+  {
+    final KTransform transform = mesh.getTransform();
+    transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
+
+    MatrixM4x4F.multiply(
+      this.matrix_view,
+      this.matrix_model,
+      this.matrix_modelview);
+
+    this.makeNormalMatrix();
+
+    /**
+     * Upload matrices, set textures.
+     */
+
+    final KMaterial material = mesh.getMaterial();
+    final TextureUnit[] texture_units = gc.textureGetUnits();
+    final List<Texture2DStatic> diffuse_maps = material.getDiffuseMaps();
+
+    final int mappable = Math.min(texture_units.length, diffuse_maps.size());
+    for (int index = 0; index < mappable; ++index) {
+      gc.texture2DStaticBind(texture_units[index], diffuse_maps.get(index));
+    }
+
+    exec.execPrepare(gc);
+    exec.execUniformUseExisting("m_projection");
+    exec.execUniformUseExisting("l_position");
+    exec.execUniformUseExisting("l_color");
+    exec.execUniformUseExisting("l_intensity");
+    exec.execUniformUseExisting("l_radius");
+    exec.execUniformUseExisting("l_falloff");
+    exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
+    exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
+    exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
+
+    /**
+     * Associate array attributes with program attributes, and draw mesh.
+     */
+
+    try {
+      final ArrayBuffer array = mesh.getArrayBuffer();
+      final IndexBuffer indices = mesh.getIndexBuffer();
+      final ArrayBufferAttribute a_pos = array.getAttribute("position");
+      final ArrayBufferAttribute a_uv = array.getAttribute("uv");
+      final ArrayBufferAttribute a_normal = array.getAttribute("normal");
+
+      gc.arrayBufferBind(array);
+      exec.execAttributeBind(gc, "v_position", a_pos);
+      exec.execAttributeBind(gc, "v_uv", a_uv);
+      exec.execAttributeBind(gc, "v_normal", a_normal);
+      exec.execSetCallable(new Callable<Void>() {
+        @Override public Void call()
+          throws Exception
+        {
+          try {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+          } catch (final ConstraintError e) {
+            throw new UnreachableCodeException();
+          }
+          return null;
+        }
+      });
+
+      try {
+        exec.execRun(gc);
+      } catch (final Exception e) {
+        throw new UnreachableCodeException();
+      }
+
+    } finally {
+      gc.arrayBufferUnbind();
     }
   }
 
