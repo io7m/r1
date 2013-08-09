@@ -245,13 +245,19 @@ final class SBGLRenderer implements GLEventListener
                   TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
                   stream,
                   name.toString());
-              if (SBGLRenderer.this.textures.containsKey(name)) {
-                SBGLRenderer.this.log.debug("Reloading " + name);
-                final Texture2DStatic u =
-                  SBGLRenderer.this.textures.get(name);
-                gl.texture2DStaticDelete(u);
+
+              /**
+               * XXX: The texture cannot be deleted, because another scene
+               * might still hold a reference to it. What's the correct way to
+               * handle this?
+               */
+
+              final Texture2DStatic old =
+                SBGLRenderer.this.textures.put(name, t);
+              if (old != null) {
+                SBGLRenderer.this.log.error("Leaking texture " + old);
               }
-              SBGLRenderer.this.textures.put(name, t);
+
               SBGLRenderer.this.log.debug("Loaded " + name);
               return t;
             } catch (final ConstraintError e) {
