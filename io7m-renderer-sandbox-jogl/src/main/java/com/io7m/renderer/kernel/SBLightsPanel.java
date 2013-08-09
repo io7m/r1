@@ -257,6 +257,8 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         this.position_x.setText(Float.toString(p.getXF()));
         this.position_y.setText(Float.toString(p.getYF()));
         this.position_z.setText(Float.toString(p.getZF()));
+        this.r_value.setText(Float.toString(light.getRadius()));
+        this.e_value.setText(Float.toString(light.getExponent()));
       }
 
       public float getRadius()

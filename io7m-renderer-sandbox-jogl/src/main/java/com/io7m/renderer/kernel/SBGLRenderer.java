@@ -1120,4 +1120,16 @@ final class SBGLRenderer implements GLEventListener
     this.texture_load_queue.add(f);
     return f;
   }
+
+  void setShowLights(
+    final boolean enabled)
+  {
+    this.lights_show.set(enabled);
+  }
+
+  void setShowLightRadii(
+    final boolean enabled)
+  {
+    this.lights_show_surface.set(enabled);
+  }
 }
