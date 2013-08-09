@@ -60,6 +60,8 @@ final class KShaderUtilities
     VertexShader v = null;
     FragmentShader f = null;
 
+    log.debug("Shading language " + version + " " + api);
+
     final PathVirtual pv =
       KShaderPaths.getShaderPath(version, api, vertex_shader);
     final PathVirtual pf =
