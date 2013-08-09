@@ -2,7 +2,7 @@
 
 uniform float f_alpha;
 
-in vec3 f_colour;
+varying vec3 f_colour;
 
 void
 main (void)

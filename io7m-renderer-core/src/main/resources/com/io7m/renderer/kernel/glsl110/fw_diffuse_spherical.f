@@ -7,9 +7,9 @@ uniform float     l_intensity;
 uniform float     l_radius;
 uniform float     l_falloff;
 
-attribute vec2 f_uv;
-attribute vec3 f_normal;
-attribute vec4 f_position;
+varying vec2 f_uv;
+varying vec3 f_normal;
+varying vec4 f_position;
 
 void
 main (void)
@@ -23,7 +23,7 @@ main (void)
   vec3 l_diffuse         = l_color * l_intensity * l_diffuse_factor;
 
   vec3 surface = texture2D (t_diffuse_0, f_uv).rgb;
-  
+
   float at_lin = -D * (1 / l_radius) + 1.0;
   float at_exp = clamp (pow (at_lin, l_falloff), 0.0, 1.0);
 
