@@ -26,8 +26,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.prefs.Preferences;
 
 import javax.annotation.Nonnull;
 import javax.media.opengl.GLCapabilities;
@@ -97,31 +100,6 @@ final class SBMainWindow extends JFrame
     return bar;
   }
 
-  private static @Nonnull JMenu makeMenuRenderer(
-    final @Nonnull SBSceneControllerRendererControl controller)
-  {
-    final JMenu menu = new JMenu("Renderer");
-    final ButtonGroup group = new ButtonGroup();
-
-    for (final SBRendererType type : SBRendererType.values()) {
-      final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
-      b.setSelected(type == SBRendererType.RENDERER_FLAT_TEXTURED);
-
-      b.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
-        {
-          controller.rendererSetType(type);
-        }
-      });
-
-      group.add(b);
-      menu.add(b);
-    }
-
-    return menu;
-  }
-
   private static @Nonnull JMenu makeMenuDebug(
     final @Nonnull SBLogsWindow log_window)
   {
@@ -167,78 +145,15 @@ final class SBMainWindow extends JFrame
     return SBMainWindow.makeWindowCheckbox("Objects...", objects_window);
   }
 
-  private static @Nonnull JMenu makeMenuView(
-    final @Nonnull SBSceneControllerRendererControl controller)
-  {
-    final JMenu menu = new JMenu("View");
-
-    final JMenuItem bg_colour = new JMenuItem("Background colour...");
-    bg_colour.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
-      {
-        final Color c =
-          JColorChooser
-            .showDialog(bg_colour, "Select colour...", Color.BLACK);
-        final float[] rgb = c.getColorComponents(null);
-        controller.rendererSetBackgroundColour(rgb[0], rgb[1], rgb[2]);
-      }
-    });
-
-    final JCheckBoxMenuItem axes = new JCheckBoxMenuItem("Show axes");
-    axes.setSelected(true);
-    axes.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
-      {
-        controller.rendererShowAxes(axes.isSelected());
-      }
-    });
-
-    final JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Show grid");
-    grid.setSelected(true);
-    grid.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
-      {
-        controller.rendererShowGrid(grid.isSelected());
-      }
-    });
-
-    final JCheckBoxMenuItem lights_radii =
-      new JCheckBoxMenuItem("Show light radii");
-    final JCheckBoxMenuItem lights = new JCheckBoxMenuItem("Show lights");
-    lights.setSelected(true);
-    lights.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
-      {
-        controller.rendererShowLights(lights.isSelected());
-        lights_radii.setEnabled(lights.isSelected());
-      }
-    });
-    lights_radii.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
-      {
-        controller.rendererShowLightRadii(lights_radii.isSelected());
-      }
-    });
-
-    menu.add(bg_colour);
-    menu.add(axes);
-    menu.add(grid);
-    menu.add(lights);
-    menu.add(lights_radii);
-    return menu;
-  }
-
   private static @Nonnull JMenu makeMenuFile(
     final @Nonnull SBSceneControllerIO controller,
     final @Nonnull SBMainWindow window,
     final @Nonnull Log log)
   {
     final JMenu menu = new JMenu("File");
+
+    final JMenu open_recent = new JMenu("Open recent");
+    SBMainWindow.makeOpenRecentMenu(controller, log, open_recent);
 
     final JMenuItem open = new JMenuItem("Open...", KeyEvent.VK_O);
     open.addActionListener(new ActionListener() {
@@ -248,6 +163,7 @@ final class SBMainWindow extends JFrame
         final JFileChooser chooser = new JFileChooser();
         chooser.setFileFilter(SBMainWindow.SCENE_FILTER);
         final int r = chooser.showOpenDialog(window);
+        final File selected = chooser.getSelectedFile();
 
         switch (r) {
           case JFileChooser.APPROVE_OPTION:
@@ -257,15 +173,20 @@ final class SBMainWindow extends JFrame
                 @Override protected Void doInBackground()
                   throws Exception
                 {
-                  return controller
-                    .ioLoadScene(chooser.getSelectedFile())
-                    .get();
+                  return controller.ioLoadScene(selected).get();
                 }
 
-                @Override protected void done()
+                @SuppressWarnings("synthetic-access") @Override protected
+                  void
+                  done()
                 {
                   try {
                     this.get();
+                    SBMainWindow.recentlyUsedSave(selected);
+                    SBMainWindow.makeOpenRecentMenu(
+                      controller,
+                      log,
+                      open_recent);
                   } catch (final InterruptedException x) {
                     SBErrorBox.showError(log, "Interrupted", x);
                   } catch (final ExecutionException x) {
@@ -348,9 +269,147 @@ final class SBMainWindow extends JFrame
     });
 
     menu.add(open);
+    menu.add(open_recent);
+    menu.add(new JSeparator());
     menu.add(save);
     menu.add(new JSeparator());
     menu.add(quit);
+    return menu;
+  }
+
+  private static void makeOpenRecentMenu(
+    final @Nonnull SBSceneControllerIO controller,
+    final @Nonnull Log log,
+    final @Nonnull JMenu open_recent)
+  {
+    final List<File> recent_items = SBMainWindow.recentlyUsedLoad();
+    open_recent.removeAll();
+
+    for (final File file : recent_items) {
+      final JMenuItem item = new JMenuItem(file.toString());
+      item.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          final SwingWorker<Void, Void> worker =
+            new SwingWorker<Void, Void>() {
+              @Override protected Void doInBackground()
+                throws Exception
+              {
+                return controller.ioLoadScene(file).get();
+              }
+
+              @SuppressWarnings("synthetic-access") @Override protected
+                void
+                done()
+              {
+                try {
+                  this.get();
+                } catch (final InterruptedException x) {
+                  SBErrorBox.showError(log, "Interrupted", x);
+                } catch (final ExecutionException x) {
+                  SBErrorBox.showError(log, "I/O error", x.getCause());
+                }
+              }
+            };
+
+          worker.execute();
+        }
+      });
+      open_recent.add(item);
+    }
+
+    open_recent.setEnabled(recent_items.size() > 0);
+  }
+
+  private static @Nonnull JMenu makeMenuRenderer(
+    final @Nonnull SBSceneControllerRendererControl controller)
+  {
+    final JMenu menu = new JMenu("Renderer");
+    final ButtonGroup group = new ButtonGroup();
+
+    for (final SBRendererType type : SBRendererType.values()) {
+      final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
+      b.setSelected(type == SBRendererType.RENDERER_FLAT_TEXTURED);
+
+      b.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          controller.rendererSetType(type);
+        }
+      });
+
+      group.add(b);
+      menu.add(b);
+    }
+
+    return menu;
+  }
+
+  private static @Nonnull JMenu makeMenuView(
+    final @Nonnull SBSceneControllerRendererControl controller)
+  {
+    final JMenu menu = new JMenu("View");
+
+    final JMenuItem bg_colour = new JMenuItem("Background colour...");
+    bg_colour.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        final Color c =
+          JColorChooser
+            .showDialog(bg_colour, "Select colour...", Color.BLACK);
+        final float[] rgb = c.getColorComponents(null);
+        controller.rendererSetBackgroundColour(rgb[0], rgb[1], rgb[2]);
+      }
+    });
+
+    final JCheckBoxMenuItem axes = new JCheckBoxMenuItem("Show axes");
+    axes.setSelected(true);
+    axes.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        controller.rendererShowAxes(axes.isSelected());
+      }
+    });
+
+    final JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Show grid");
+    grid.setSelected(true);
+    grid.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        controller.rendererShowGrid(grid.isSelected());
+      }
+    });
+
+    final JCheckBoxMenuItem lights_radii =
+      new JCheckBoxMenuItem("Show light radii");
+    final JCheckBoxMenuItem lights = new JCheckBoxMenuItem("Show lights");
+    lights.setSelected(true);
+    lights.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        controller.rendererShowLights(lights.isSelected());
+        lights_radii.setEnabled(lights.isSelected());
+      }
+    });
+    lights_radii.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        controller.rendererShowLightRadii(lights_radii.isSelected());
+      }
+    });
+
+    menu.add(bg_colour);
+    menu.add(axes);
+    menu.add(grid);
+    menu.add(lights);
+    menu.add(lights_radii);
     return menu;
   }
 
@@ -387,6 +446,44 @@ final class SBMainWindow extends JFrame
 
     window.addWindowListener(listener);
     return cb;
+  }
+
+  protected static @Nonnull List<File> recentlyUsedLoad()
+  {
+    final Preferences p =
+      Preferences.userRoot().node("/com/io7m/renderer/kernel/sandbox");
+    final String data = p.get("recently-used", "");
+    if (data.equals("")) {
+      return new ArrayList<File>();
+    }
+
+    final String[] items = data.split(":");
+    final ArrayList<File> files = new ArrayList<File>();
+    for (final String name : items) {
+      files.add(new File(name));
+    }
+    return files;
+  }
+
+  protected static void recentlyUsedSave(
+    final @Nonnull File file)
+  {
+    final StringBuilder b = new StringBuilder();
+
+    final List<File> files = SBMainWindow.recentlyUsedLoad();
+    files.add(file);
+    if (files.size() > 10) {
+      files.remove(0);
+    }
+
+    for (final File f : files) {
+      b.append(f);
+      b.append(":");
+    }
+
+    final Preferences p =
+      Preferences.userRoot().node("/com/io7m/renderer/kernel/sandbox");
+    p.put("recently-used", b.toString());
   }
 
   protected final @Nonnull SBGLRenderer renderer;
@@ -442,10 +539,45 @@ final class SBMainWindow extends JFrame
       canvas.addKeyListener(new KeyListener() {
         private final @Nonnull SBInputState input = renderer.getInputState();
 
-        @Override public void keyTyped(
+        @Override public void keyPressed(
           final @Nonnull KeyEvent e)
         {
-          // Nothing
+          switch (e.getKeyChar()) {
+            case 'a':
+              this.input.setMovingLeft(true);
+              break;
+            case 'd':
+              this.input.setMovingRight(true);
+              break;
+
+            case 'w':
+              this.input.setMovingForward(true);
+              break;
+            case 's':
+              this.input.setMovingBackward(true);
+              break;
+
+            case 'f':
+              this.input.setRotatingUp(true);
+              break;
+            case 'v':
+              this.input.setRotatingDown(true);
+              break;
+
+            case 'g':
+              this.input.setMovingUp(true);
+              break;
+            case 'b':
+              this.input.setMovingDown(true);
+              break;
+
+            case 'q':
+              this.input.setRotatingLeft(true);
+              break;
+            case 'e':
+              this.input.setRotatingRight(true);
+              break;
+          }
         }
 
         @Override public void keyReleased(
@@ -489,45 +621,10 @@ final class SBMainWindow extends JFrame
           }
         }
 
-        @Override public void keyPressed(
+        @Override public void keyTyped(
           final @Nonnull KeyEvent e)
         {
-          switch (e.getKeyChar()) {
-            case 'a':
-              this.input.setMovingLeft(true);
-              break;
-            case 'd':
-              this.input.setMovingRight(true);
-              break;
-
-            case 'w':
-              this.input.setMovingForward(true);
-              break;
-            case 's':
-              this.input.setMovingBackward(true);
-              break;
-
-            case 'f':
-              this.input.setRotatingUp(true);
-              break;
-            case 'v':
-              this.input.setRotatingDown(true);
-              break;
-
-            case 'g':
-              this.input.setMovingUp(true);
-              break;
-            case 'b':
-              this.input.setMovingDown(true);
-              break;
-
-            case 'q':
-              this.input.setRotatingLeft(true);
-              break;
-            case 'e':
-              this.input.setRotatingRight(true);
-              break;
-          }
+          // Nothing
         }
       });
 
