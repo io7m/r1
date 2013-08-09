@@ -5,8 +5,8 @@ uniform vec3  l_color;
 uniform float l_intensity;
 uniform vec3  l_direction;
 
-attribute vec2 f_uv;
-attribute vec3 f_normal;
+varying vec2 f_uv;
+varying vec3 f_normal;
 
 void
 main (void)
