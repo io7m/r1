@@ -532,7 +532,7 @@ final class SBMainWindow extends JFrame
     });
 
     try {
-      final GLProfile profile = GLProfile.getDefault();
+      final GLProfile profile = this.getGLProfile();
       final GLCapabilities caps = new GLCapabilities(profile);
       final GLCanvas canvas = new GLCanvas(caps);
       canvas.addGLEventListener(renderer);
@@ -644,5 +644,10 @@ final class SBMainWindow extends JFrame
       logs_window,
       objects_window,
       log));
+  }
+
+  private @Nonnull GLProfile getGLProfile()
+  {
+    return GLProfile.getDefault();
   }
 }
