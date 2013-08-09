@@ -432,6 +432,18 @@ public final class SBSceneController implements
     this.renderer.setShowAxes(enabled);
   }
 
+  @Override public void rendererShowLights(
+    final boolean enabled)
+  {
+    this.renderer.setShowLights(enabled);
+  }
+
+  @Override public void rendererShowLightRadii(
+    final boolean enabled)
+  {
+    this.renderer.setShowLightRadii(enabled);
+  }
+
   @Override public void rendererShowGrid(
     final boolean enabled)
   {
@@ -738,6 +750,12 @@ interface SBSceneControllerRendererControl
 {
   public void rendererSetType(
     final @Nonnull SBRendererType type);
+
+  public void rendererShowLightRadii(
+    final boolean enabled);
+
+  public void rendererShowLights(
+    final boolean enabled);
 
   public void rendererShowAxes(
     final boolean enabled);

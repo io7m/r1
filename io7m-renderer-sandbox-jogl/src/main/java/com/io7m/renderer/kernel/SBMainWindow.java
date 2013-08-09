@@ -92,6 +92,7 @@ final class SBMainWindow extends JFrame
     bar.add(SBMainWindow.makeMenuFile(controller, window, log));
     bar.add(SBMainWindow.makeMenuEdit(lights_window, objects_window));
     bar.add(SBMainWindow.makeMenuRenderer(controller));
+    bar.add(SBMainWindow.makeMenuView(controller));
     bar.add(SBMainWindow.makeMenuDebug(logs_window));
     return bar;
   }
@@ -118,44 +119,6 @@ final class SBMainWindow extends JFrame
       menu.add(b);
     }
 
-    final JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Show grid");
-    grid.setSelected(true);
-    grid.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
-      {
-        controller.rendererShowGrid(grid.isSelected());
-      }
-    });
-
-    final JCheckBoxMenuItem axes = new JCheckBoxMenuItem("Show axes");
-    axes.setSelected(true);
-    axes.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
-      {
-        controller.rendererShowAxes(axes.isSelected());
-      }
-    });
-
-    final JMenuItem bg_colour = new JMenuItem("Background colour...");
-    bg_colour.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
-      {
-        final Color c =
-          JColorChooser
-            .showDialog(bg_colour, "Select colour...", Color.BLACK);
-        final float[] rgb = c.getColorComponents(null);
-        controller.rendererSetBackgroundColour(rgb[0], rgb[1], rgb[2]);
-      }
-    });
-
-    menu.add(new JSeparator());
-    menu.add(grid);
-    menu.add(axes);
-    menu.add(new JSeparator());
-    menu.add(bg_colour);
     return menu;
   }
 
@@ -202,6 +165,72 @@ final class SBMainWindow extends JFrame
     final @Nonnull SBObjectsWindow objects_window)
   {
     return SBMainWindow.makeWindowCheckbox("Objects...", objects_window);
+  }
+
+  private static @Nonnull JMenu makeMenuView(
+    final @Nonnull SBSceneControllerRendererControl controller)
+  {
+    final JMenu menu = new JMenu("View");
+
+    final JMenuItem bg_colour = new JMenuItem("Background colour...");
+    bg_colour.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        final Color c =
+          JColorChooser
+            .showDialog(bg_colour, "Select colour...", Color.BLACK);
+        final float[] rgb = c.getColorComponents(null);
+        controller.rendererSetBackgroundColour(rgb[0], rgb[1], rgb[2]);
+      }
+    });
+
+    final JCheckBoxMenuItem axes = new JCheckBoxMenuItem("Show axes");
+    axes.setSelected(true);
+    axes.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        controller.rendererShowAxes(axes.isSelected());
+      }
+    });
+
+    final JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Show grid");
+    grid.setSelected(true);
+    grid.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        controller.rendererShowGrid(grid.isSelected());
+      }
+    });
+
+    final JCheckBoxMenuItem lights_radii =
+      new JCheckBoxMenuItem("Show light radii");
+    final JCheckBoxMenuItem lights = new JCheckBoxMenuItem("Show lights");
+    lights.setSelected(true);
+    lights.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        controller.rendererShowLights(lights.isSelected());
+        lights_radii.setEnabled(lights.isSelected());
+      }
+    });
+    lights_radii.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        controller.rendererShowLightRadii(lights_radii.isSelected());
+      }
+    });
+
+    menu.add(bg_colour);
+    menu.add(axes);
+    menu.add(grid);
+    menu.add(lights);
+    menu.add(lights_radii);
+    return menu;
   }
 
   private static @Nonnull JMenu makeMenuFile(
