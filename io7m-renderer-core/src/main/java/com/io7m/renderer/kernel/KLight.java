@@ -61,20 +61,45 @@ import com.io7m.renderer.RVectorReadable3F;
     }
   }
 
-  @Immutable static final class KPoint extends KLight
+  @Immutable static final class KSphere extends KLight
   {
-    @SuppressWarnings("synthetic-access") KPoint(
+    private final @Nonnull RVectorReadable3F<RSpaceWorld>                        position;
+    private final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius;
+    private final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float           exponent;
+
+    @SuppressWarnings("synthetic-access") KSphere(
       final @Nonnull Integer id,
       final @Nonnull RVectorReadable3F<RSpaceRGB> colour,
-      final float intensity)
+      final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity,
+      final @Nonnull RVectorReadable3F<RSpaceWorld> position,
+      final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius,
+      final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float exponent)
     {
-      super(Type.LIGHT_POINT, id, colour, intensity);
+      super(Type.LIGHT_SPHERE, id, colour, intensity);
+      this.position = new RVectorI3F<RSpaceWorld>(position);
+      this.radius = radius;
+      this.exponent = exponent;
+    }
+
+    public float getRadius()
+    {
+      return this.radius;
+    }
+
+    public float getExponent()
+    {
+      return this.exponent;
+    }
+
+    public @Nonnull RVectorReadable3F<RSpaceWorld> getPosition()
+    {
+      return this.position;
     }
   }
 
   static enum Type
   {
-    LIGHT_POINT("Point"),
+    LIGHT_SPHERE("Sphere"),
     LIGHT_DIRECTIONAL("Directional"),
     LIGHT_CONE("Cone");
 
@@ -92,26 +117,21 @@ import com.io7m.renderer.RVectorReadable3F;
     }
   }
 
-  private final @Nonnull Integer               id;
-  private final @Nonnull Type                  type;
-  private final @Nonnull RVectorI3F<RSpaceRGB> colour;
-  private final float                          intensity;
+  private final @Nonnull Integer                                    id;
+  private final @Nonnull Type                                       type;
+  private final @Nonnull RVectorI3F<RSpaceRGB>                      colour;
+  private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
 
   private KLight(
     final @Nonnull Type type,
     final @Nonnull Integer id,
     final @Nonnull RVectorReadable3F<RSpaceRGB> color,
-    final float intensity)
+    final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity)
   {
     this.id = id;
     this.type = type;
     this.colour = new RVectorI3F<RSpaceRGB>(color);
     this.intensity = intensity;
-  }
-
-  @Nonnull Type getType()
-  {
-    return this.type;
   }
 
   @Nonnull RVectorI3F<RSpaceRGB> getColour()
@@ -127,5 +147,10 @@ import com.io7m.renderer.RVectorReadable3F;
   float getIntensity()
   {
     return this.intensity;
+  }
+
+  @Nonnull Type getType()
+  {
+    return this.type;
   }
 }

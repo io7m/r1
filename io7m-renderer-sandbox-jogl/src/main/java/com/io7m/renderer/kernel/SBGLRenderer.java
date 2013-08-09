@@ -92,11 +92,13 @@ import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorM2I;
+import com.io7m.jtensors.VectorM4F;
 import com.io7m.jvvfs.FSCapabilityAll;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.kernel.KLight.KSphere;
 
 final class SBGLRenderer implements GLEventListener
 {
@@ -339,6 +341,7 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull AtomicBoolean                              grid_show;
   private @Nonnull Model<ModelObjectVBO>                            spheres;
   private final @Nonnull AtomicBoolean                              lights_show;
+  private final @Nonnull AtomicBoolean                              lights_show_surface;
 
   private final @Nonnull QuaternionM4F.Context                      qm4f_context;
   private @Nonnull KTransform                                       camera_transform;
@@ -394,6 +397,7 @@ final class SBGLRenderer implements GLEventListener
     this.axes_show = new AtomicBoolean(true);
     this.grid_show = new AtomicBoolean(true);
     this.lights_show = new AtomicBoolean(true);
+    this.lights_show_surface = new AtomicBoolean(false);
 
     this.camera = new SBFirstPersonCamera(0.0f, 1.0f, 5.0f);
     this.input_state = new SBInputState();
@@ -742,8 +746,8 @@ final class SBGLRenderer implements GLEventListener
 
     MatrixM4x4F.setIdentity(this.matrix_model);
     MatrixM4x4F.setIdentity(this.matrix_modelview);
-
     MatrixM4x4F.setIdentity(this.matrix_projection);
+
     ProjectionMatrix.makePerspective(
       this.matrix_projection,
       1,
@@ -829,77 +833,6 @@ final class SBGLRenderer implements GLEventListener
     }
 
     /**
-     * Render primitive shapes representing the scene lights, if desired.
-     */
-
-    if (this.lights_show.get()) {
-      MatrixM4x4F.multiply(
-        this.matrix_view,
-        this.matrix_model,
-        this.matrix_modelview);
-
-      for (final KLight light : this.rendered_scene.getLights()) {
-        switch (light.getType()) {
-          case LIGHT_CONE:
-          {
-            break;
-          }
-          case LIGHT_DIRECTIONAL:
-          {
-            break;
-          }
-          case LIGHT_POINT:
-          {
-            final JCCEExecutionCallable e = this.exec_ccolour;
-            e.execPrepare(gl);
-            e.execUniformPutMatrix4x4F(
-              gl,
-              "m_projection",
-              this.matrix_projection);
-            e.execUniformPutMatrix4x4F(
-              gl,
-              "m_modelview",
-              this.matrix_modelview);
-
-            final Option<ModelObjectVBO> sphere =
-              this.spheres.get("sphere_16_8_mesh");
-            assert sphere.isSome();
-            final Some<ModelObjectVBO> sphere_s =
-              (Option.Some<ModelObjectVBO>) sphere;
-
-            final VectorI4F colour =
-              new VectorI4F(
-                light.getColour().x,
-                light.getColour().y,
-                light.getColour().z,
-                1.0f);
-
-            final IndexBuffer indices = sphere_s.value.getIndexBuffer();
-            final ArrayBuffer array = sphere_s.value.getArrayBuffer();
-            final ArrayBufferAttribute b_pos = array.getAttribute("position");
-            gl.arrayBufferBind(array);
-            e.execAttributeBind(gl, "v_position", b_pos);
-            e.execUniformPutVector4F(gl, "f_ccolour", colour);
-            e.execSetCallable(new Callable<Void>() {
-              @Override public Void call()
-                throws Exception
-              {
-                try {
-                  gl.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                } catch (final ConstraintError x) {
-                  throw new UnreachableCodeException();
-                }
-                return null;
-              }
-            });
-            e.execRun(gl);
-            break;
-          }
-        }
-      }
-    }
-
-    /**
      * Draw textured, screen-aligned quad containing the results of rendering
      * the scene in the kernel.
      */
@@ -950,6 +883,135 @@ final class SBGLRenderer implements GLEventListener
         }
       });
       e.execRun(gl);
+    }
+
+    /**
+     * Render primitive shapes representing the scene lights, if desired.
+     */
+
+    if (this.lights_show.get()) {
+      MatrixM4x4F.setIdentity(this.matrix_model);
+      MatrixM4x4F.setIdentity(this.matrix_modelview);
+      MatrixM4x4F.setIdentity(this.matrix_projection);
+
+      ProjectionMatrix.makePerspective(
+        this.matrix_projection,
+        1,
+        100,
+        (double) drawable.getWidth() / (double) drawable.getHeight(),
+        Math.toRadians(30));
+
+      MatrixM4x4F.multiply(
+        this.matrix_view,
+        this.matrix_model,
+        this.matrix_modelview);
+
+      for (final KLight light : this.rendered_scene.getLights()) {
+        switch (light.getType()) {
+          case LIGHT_CONE:
+          {
+            break;
+          }
+          case LIGHT_DIRECTIONAL:
+          {
+            break;
+          }
+          case LIGHT_SPHERE:
+          {
+            final KLight.KSphere lp = (KSphere) light;
+
+            final Option<ModelObjectVBO> sphere =
+              this.spheres.get("sphere_16_8_mesh");
+            assert sphere.isSome();
+            final Some<ModelObjectVBO> sphere_s =
+              (Option.Some<ModelObjectVBO>) sphere;
+
+            final VectorM4F colour =
+              new VectorM4F(
+                light.getColour().x,
+                light.getColour().y,
+                light.getColour().z,
+                1.0f);
+
+            final IndexBuffer indices = sphere_s.value.getIndexBuffer();
+            final ArrayBuffer array = sphere_s.value.getArrayBuffer();
+            final ArrayBufferAttribute b_pos = array.getAttribute("position");
+            gl.arrayBufferBind(array);
+
+            /**
+             * Render center.
+             */
+
+            MatrixM4x4F.setIdentity(this.matrix_model);
+            MatrixM4x4F.translateByVector3FInPlace(
+              this.matrix_model,
+              lp.getPosition());
+            MatrixM4x4F.set(this.matrix_model, 0, 0, 0.05f);
+            MatrixM4x4F.set(this.matrix_model, 1, 1, 0.05f);
+            MatrixM4x4F.set(this.matrix_model, 2, 2, 0.05f);
+
+            MatrixM4x4F.multiply(
+              this.matrix_view,
+              this.matrix_model,
+              this.matrix_modelview);
+
+            final JCCEExecutionCallable e = this.exec_ccolour;
+            e.execPrepare(gl);
+            e.execUniformPutMatrix4x4F(
+              gl,
+              "m_projection",
+              this.matrix_projection);
+            e.execUniformPutMatrix4x4F(
+              gl,
+              "m_modelview",
+              this.matrix_modelview);
+
+            e.execAttributeBind(gl, "v_position", b_pos);
+            e.execUniformPutVector4F(gl, "f_ccolour", colour);
+            e.execSetCallable(new Callable<Void>() {
+              @Override public Void call()
+                throws Exception
+              {
+                try {
+                  gl.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+                } catch (final ConstraintError x) {
+                  throw new UnreachableCodeException();
+                }
+                return null;
+              }
+            });
+            e.execRun(gl);
+
+            /**
+             * Render surface.
+             */
+
+            if (this.lights_show_surface.get()) {
+              MatrixM4x4F.set(this.matrix_model, 0, 0, lp.getRadius());
+              MatrixM4x4F.set(this.matrix_model, 1, 1, lp.getRadius());
+              MatrixM4x4F.set(this.matrix_model, 2, 2, lp.getRadius());
+
+              MatrixM4x4F.multiply(
+                this.matrix_view,
+                this.matrix_model,
+                this.matrix_modelview);
+
+              colour.w = 0.1f;
+
+              e.execPrepare(gl);
+              e.execUniformUseExisting("m_projection");
+              e.execUniformPutMatrix4x4F(
+                gl,
+                "m_modelview",
+                this.matrix_modelview);
+              e.execAttributeBind(gl, "v_position", b_pos);
+              e.execUniformPutVector4F(gl, "f_ccolour", colour);
+              e.execRun(gl);
+            }
+            break;
+          }
+        }
+      }
     }
   }
 
