@@ -599,24 +599,24 @@ final class SBGLRenderer implements GLEventListener
       IOException
   {
     this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_DEPTH_ONLY,
-      new KRendererDebugDepthOnly(this.gi, this.filesystem, this.log));
+      SBRendererType.RENDERER_DEBUG_DEPTH,
+      new KRendererDebugDepth(this.gi, this.filesystem, this.log));
 
     this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_UV_ONLY,
-      new KRendererDebugUVOnly(this.gi, this.filesystem, this.log));
+      SBRendererType.RENDERER_DEBUG_VERTEX_UV,
+      new KRendererDebugVertexUV(this.gi, this.filesystem, this.log));
 
     this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_NORMALS_ONLY,
-      new KRendererDebugNormalsOnly(this.gi, this.filesystem, this.log));
+      SBRendererType.RENDERER_DEBUG_VERTEX_NORMALS,
+      new KRendererDebugVertexNormals(this.gi, this.filesystem, this.log));
 
     this.renderers.put(
       SBRendererType.RENDERER_FLAT_TEXTURED,
       new KRendererFlatTextured(this.gi, this.filesystem, this.log));
 
     this.renderers.put(
-      SBRendererType.RENDERER_FORWARD_DIFFUSE_ONLY,
-      new KRendererForwardDiffuseOnly(this.gi, this.filesystem, this.log));
+      SBRendererType.RENDERER_FORWARD_DIFFUSE,
+      new KRendererForwardDiffuse(this.gi, this.filesystem, this.log));
 
     this.renderers
       .put(

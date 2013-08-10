@@ -20,11 +20,11 @@ import javax.annotation.Nonnull;
 
 enum SBRendererType
 {
-  RENDERER_DEBUG_DEPTH_ONLY("debug-depth-only"),
-  RENDERER_DEBUG_UV_ONLY("debug-uv-only"),
-  RENDERER_DEBUG_NORMALS_ONLY("debug-normals-only"),
+  RENDERER_DEBUG_DEPTH("debug-depth"),
+  RENDERER_DEBUG_VERTEX_UV("debug-vertex-uv"),
+  RENDERER_DEBUG_VERTEX_NORMALS("debug-vertex-normals"),
   RENDERER_FLAT_TEXTURED("flat-textured"),
-  RENDERER_FORWARD_DIFFUSE_ONLY("forward-diffuse-only"),
+  RENDERER_FORWARD_DIFFUSE("forward-diffuse"),
   RENDERER_FORWARD_DIFFUSE_SPECULAR("forward-diffuse-specular");
 
   private final @Nonnull String name;
