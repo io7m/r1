@@ -106,25 +106,6 @@ final class KRendererDebugNormalsMap implements KRenderer
     this.exec = new JCCEExecutionCallable(this.program);
   }
 
-  /**
-   * Produce a normal matrix from the modelview matrix.
-   */
-
-  private void makeNormalMatrix()
-  {
-    this.matrix_normal.set(0, 0, this.matrix_modelview.get(0, 0));
-    this.matrix_normal.set(1, 0, this.matrix_modelview.get(1, 0));
-    this.matrix_normal.set(2, 0, this.matrix_modelview.get(2, 0));
-    this.matrix_normal.set(0, 1, this.matrix_modelview.get(0, 1));
-    this.matrix_normal.set(1, 1, this.matrix_modelview.get(1, 1));
-    this.matrix_normal.set(2, 1, this.matrix_modelview.get(2, 1));
-    this.matrix_normal.set(0, 2, this.matrix_modelview.get(0, 2));
-    this.matrix_normal.set(1, 2, this.matrix_modelview.get(1, 2));
-    this.matrix_normal.set(2, 2, this.matrix_modelview.get(2, 2));
-    MatrixM3x3F.invertInPlace(this.matrix_normal);
-    MatrixM3x3F.transposeInPlace(this.matrix_normal);
-  }
-
   @Override public void render(
     final @Nonnull Framebuffer result,
     final @Nonnull KScene scene)
@@ -178,7 +159,9 @@ final class KRendererDebugNormalsMap implements KRenderer
       this.matrix_model,
       this.matrix_modelview);
 
-    this.makeNormalMatrix();
+    KRendererCommon.makeNormalMatrix(
+      this.matrix_modelview,
+      this.matrix_normal);
 
     /**
      * Upload matrices, set textures.
