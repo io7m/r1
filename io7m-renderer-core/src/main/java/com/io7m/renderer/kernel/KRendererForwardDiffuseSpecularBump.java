@@ -87,7 +87,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
       FilesystemError,
       IOException
   {
-    this.log = new Log(log, "krenderer-forward-diffuse-specular");
+    this.log = new Log(log, "krenderer-forward-diffuse-specular-bump");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
