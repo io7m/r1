@@ -171,8 +171,10 @@ final class KRendererDebugNormalsOnly implements KRenderer
     try {
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
-      final ArrayBufferAttribute a_pos = array.getAttribute("position");
-      final ArrayBufferAttribute a_nor = array.getAttribute("normal");
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+      final ArrayBufferAttribute a_nor =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
 
       gc.arrayBufferBind(array);
       this.exec.execAttributeBind(gc, "v_position", a_pos);

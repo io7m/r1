@@ -24,12 +24,12 @@ import com.io7m.jcanephora.ArrayBufferAttributeDescriptor;
 import com.io7m.jcanephora.ArrayBufferTypeDescriptor;
 import com.io7m.jcanephora.ArrayBufferWritableData;
 import com.io7m.jcanephora.CursorWritable3f;
+import com.io7m.jcanephora.CursorWritable4f;
 import com.io7m.jcanephora.CursorWritableIndex;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.IndexBufferWritableData;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLScalarType;
 import com.io7m.jcanephora.UsageHint;
 
 public final class SBVisibleAxes
@@ -45,23 +45,13 @@ public final class SBVisibleAxes
     throws ConstraintError,
       JCGLException
   {
-    final ArrayBufferAttributeDescriptor[] attributes =
+    final ArrayBufferAttributeDescriptor[] ab =
       new ArrayBufferAttributeDescriptor[2];
-    attributes[0] =
-      new ArrayBufferAttributeDescriptor(
-        "v_position",
-        JCGLScalarType.TYPE_FLOAT,
-        3);
-    attributes[1] =
-      new ArrayBufferAttributeDescriptor(
-        "v_colour",
-        JCGLScalarType.TYPE_FLOAT,
-        3);
-    final ArrayBufferTypeDescriptor type =
-      new ArrayBufferTypeDescriptor(attributes);
+    ab[0] = KMeshAttributes.ATTRIBUTE_POSITION;
+    ab[1] = KMeshAttributes.ATTRIBUTE_COLOUR;
+    final ArrayBufferTypeDescriptor type = new ArrayBufferTypeDescriptor(ab);
 
     this.array = gl.arrayBufferAllocate(6, type, UsageHint.USAGE_STATIC_READ);
-
     this.indices = gl.indexBufferAllocate(this.array, 6);
 
     final ArrayBufferWritableData array_map =
@@ -69,8 +59,10 @@ public final class SBVisibleAxes
     final IndexBufferWritableData index_map =
       new IndexBufferWritableData(this.indices);
 
-    final CursorWritable3f pc = array_map.getCursor3f("v_position");
-    final CursorWritable3f cc = array_map.getCursor3f("v_colour");
+    final CursorWritable3f pc =
+      array_map.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+    final CursorWritable4f cc =
+      array_map.getCursor4f(KMeshAttributes.ATTRIBUTE_COLOUR.getName());
     final CursorWritableIndex ic = index_map.getCursor();
 
     int index = 0;
@@ -79,11 +71,11 @@ public final class SBVisibleAxes
      * Line from -x to x, fading towards black at -x and red at +x.
      */
 
-    cc.put3f(0.2f, 0, 0);
+    cc.put4f(0.2f, 0, 0, 1.0f);
     pc.put3f(-x, 0, 0);
     ic.putIndex(index);
     ++index;
-    cc.put3f(1.0f, 0, 0);
+    cc.put4f(1.0f, 0, 0, 1.0f);
     pc.put3f(x, 0, 0);
     ic.putIndex(index);
     ++index;
@@ -92,11 +84,11 @@ public final class SBVisibleAxes
      * Line from -y to y, fading towards black at -y and green at +y.
      */
 
-    cc.put3f(0, 0.2f, 0);
+    cc.put4f(0, 0.2f, 0, 1.0f);
     pc.put3f(0, -y, 0);
     ic.putIndex(index);
     ++index;
-    cc.put3f(0, 1.0f, 0);
+    cc.put4f(0, 1.0f, 0, 1.0f);
     pc.put3f(0, y, 0);
     ic.putIndex(index);
     ++index;
@@ -105,11 +97,11 @@ public final class SBVisibleAxes
      * Line from -z to z, fading towards black at -z and blue at +z.
      */
 
-    cc.put3f(0, 0, 0.2f);
+    cc.put4f(0, 0, 0.2f, 1.0f);
     pc.put3f(0, 0, -z);
     ic.putIndex(index);
     ++index;
-    cc.put3f(0, 0, 1.0f);
+    cc.put4f(0, 0, 1.0f, 1.0f);
     pc.put3f(0, 0, z);
     ic.putIndex(index);
     ++index;

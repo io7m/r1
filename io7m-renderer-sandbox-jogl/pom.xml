@@ -71,17 +71,17 @@
     <dependency>
       <groupId>com.io7m.jcanephora.jogl</groupId>
       <artifactId>io7m-jcanephora-jogl</artifactId>
-      <version>0.9.15</version>
+      <version>0.9.16</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.texload-imageio</groupId>
       <artifactId>io7m-jcanephora-texload-imageio</artifactId>
-      <version>0.9.15</version>
+      <version>0.9.16</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.framebuffer</groupId>
       <artifactId>io7m-jcanephora-framebuffer</artifactId>
-      <version>0.9.15</version>
+      <version>0.9.16</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.renderer.core</groupId>
@@ -91,7 +91,7 @@
     <dependency>
       <groupId>com.io7m.jsom0.core</groupId>
       <artifactId>io7m-jsom0-core</artifactId>
-      <version>0.9.7</version>
+      <version>0.9.8</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

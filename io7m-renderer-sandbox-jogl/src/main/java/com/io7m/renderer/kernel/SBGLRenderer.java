@@ -93,6 +93,7 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
+import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityAll;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.Filesystem;
@@ -283,10 +284,11 @@ final class SBGLRenderer implements GLEventListener
         Error
   {
     final NamePositionAttribute name_position_attribute =
-      new NamePositionAttribute("position");
+      new NamePositionAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
     final NameNormalAttribute name_normal_attribute =
-      new NameNormalAttribute("normal");
-    final NameUVAttribute name_uv_attribute = new NameUVAttribute("uv");
+      new NameNormalAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+    final NameUVAttribute name_uv_attribute =
+      new NameUVAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
 
     final ModelObjectParser<ModelObjectVBO, JCGLException> op =
       new ModelObjectParserVBOImmediate<JCGLInterfaceCommon>(
@@ -362,6 +364,12 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull JCCEExecutionCallable                            exec_vcolour;
   private @Nonnull JCCEExecutionCallable                            exec_uv;
   private @Nonnull JCCEExecutionCallable                            exec_ccolour;
+
+  private static final @Nonnull VectorReadable4F                    GRID_COLOUR;
+
+  static {
+    GRID_COLOUR = new VectorI4F(1.0f, 1.0f, 1.0f, 0.1f);
+  }
 
   public SBGLRenderer(
     final @Nonnull Log log)
@@ -771,19 +779,18 @@ final class SBGLRenderer implements GLEventListener
         this.matrix_model,
         this.matrix_modelview);
 
-      final JCCEExecutionCallable e = this.exec_vcolour;
+      final JCCEExecutionCallable e = this.exec_ccolour;
       e.execPrepare(gl);
       e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
       e.execUniformPutMatrix4x4F(gl, "m_modelview", this.matrix_modelview);
-      e.execUniformPutFloat(gl, "f_alpha", 0.1f);
+      e.execUniformPutVector4F(gl, "f_ccolour", SBGLRenderer.GRID_COLOUR);
 
       final IndexBuffer indices = this.grid.getIndexBuffer();
       final ArrayBuffer array = this.grid.getArrayBuffer();
-      final ArrayBufferAttribute b_pos = array.getAttribute("v_position");
-      final ArrayBufferAttribute b_col = array.getAttribute("v_colour");
+      final ArrayBufferAttribute b_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       gl.arrayBufferBind(array);
       e.execAttributeBind(gl, "v_position", b_pos);
-      e.execAttributeBind(gl, "v_colour", b_col);
 
       e.execSetCallable(new Callable<Void>() {
         @Override public Void call()
@@ -814,12 +821,13 @@ final class SBGLRenderer implements GLEventListener
       e.execPrepare(gl);
       e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
       e.execUniformPutMatrix4x4F(gl, "m_modelview", this.matrix_modelview);
-      e.execUniformPutFloat(gl, "f_alpha", 1.0f);
 
       final IndexBuffer indices = this.axes.getIndexBuffer();
       final ArrayBuffer array = this.axes.getArrayBuffer();
-      final ArrayBufferAttribute b_pos = array.getAttribute("v_position");
-      final ArrayBufferAttribute b_col = array.getAttribute("v_colour");
+      final ArrayBufferAttribute b_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+      final ArrayBufferAttribute b_col =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_COLOUR.getName());
       gl.arrayBufferBind(array);
       e.execAttributeBind(gl, "v_position", b_pos);
       e.execAttributeBind(gl, "v_colour", b_col);
@@ -871,8 +879,10 @@ final class SBGLRenderer implements GLEventListener
 
       final IndexBuffer indices = this.screen_quad.getIndexBuffer();
       final ArrayBuffer array = this.screen_quad.getArrayBuffer();
-      final ArrayBufferAttribute b_pos = array.getAttribute("position");
-      final ArrayBufferAttribute b_uv = array.getAttribute("uv");
+      final ArrayBufferAttribute b_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+      final ArrayBufferAttribute b_uv =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
       gl.arrayBufferBind(array);
       e.execAttributeBind(gl, "v_position", b_pos);
       e.execAttributeBind(gl, "v_uv", b_uv);
@@ -941,7 +951,9 @@ final class SBGLRenderer implements GLEventListener
 
             final IndexBuffer indices = sphere_s.value.getIndexBuffer();
             final ArrayBuffer array = sphere_s.value.getArrayBuffer();
-            final ArrayBufferAttribute b_pos = array.getAttribute("position");
+            final ArrayBufferAttribute b_pos =
+              array
+                .getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
             gl.arrayBufferBind(array);
 
             /**
