@@ -24,16 +24,17 @@ import com.io7m.jcanephora.ArrayBufferAttributeDescriptor;
 import com.io7m.jcanephora.ArrayBufferTypeDescriptor;
 import com.io7m.jcanephora.ArrayBufferWritableData;
 import com.io7m.jcanephora.CursorWritable3f;
+import com.io7m.jcanephora.CursorWritable4f;
 import com.io7m.jcanephora.CursorWritableIndex;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.IndexBufferWritableData;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLScalarType;
 import com.io7m.jcanephora.UsageHint;
 
 public final class SBVisibleGridPlane
 {
+
   private final @Nonnull ArrayBuffer array;
   private final @Nonnull IndexBuffer indices;
 
@@ -64,16 +65,8 @@ public final class SBVisibleGridPlane
   {
     final ArrayBufferAttributeDescriptor[] attributes =
       new ArrayBufferAttributeDescriptor[2];
-    attributes[0] =
-      new ArrayBufferAttributeDescriptor(
-        "v_position",
-        JCGLScalarType.TYPE_FLOAT,
-        3);
-    attributes[1] =
-      new ArrayBufferAttributeDescriptor(
-        "v_colour",
-        JCGLScalarType.TYPE_FLOAT,
-        3);
+    attributes[0] = KMeshAttributes.ATTRIBUTE_POSITION;
+    attributes[1] = KMeshAttributes.ATTRIBUTE_COLOUR;
     final ArrayBufferTypeDescriptor type =
       new ArrayBufferTypeDescriptor(attributes);
 
@@ -88,27 +81,29 @@ public final class SBVisibleGridPlane
     final IndexBufferWritableData index_map =
       new IndexBufferWritableData(this.indices);
 
-    final CursorWritable3f pc = array_map.getCursor3f("v_position");
-    final CursorWritable3f cc = array_map.getCursor3f("v_colour");
+    final CursorWritable3f pc =
+      array_map.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+    final CursorWritable4f cc =
+      array_map.getCursor4f(KMeshAttributes.ATTRIBUTE_COLOUR.getName());
     final CursorWritableIndex ic = index_map.getCursor();
 
     int index = 0;
     for (int cx = -x; cx <= x; ++cx) {
-      cc.put3f(1.0f, 1.0f, 1.0f);
+      cc.put4f(1.0f, 1.0f, 1.0f, 1.0f);
       pc.put3f(cx, y, -z);
       ic.putIndex(index);
       ++index;
-      cc.put3f(1.0f, 1.0f, 1.0f);
+      cc.put4f(1.0f, 1.0f, 1.0f, 1.0f);
       pc.put3f(cx, y, z);
       ic.putIndex(index);
       ++index;
     }
     for (int cz = -z; cz <= z; ++cz) {
-      cc.put3f(1.0f, 1.0f, 1.0f);
+      cc.put4f(1.0f, 1.0f, 1.0f, 1.0f);
       pc.put3f(-z, y, cz);
       ic.putIndex(index);
       ++index;
-      cc.put3f(1.0f, 1.0f, 1.0f);
+      cc.put4f(1.0f, 1.0f, 1.0f, 1.0f);
       pc.put3f(x, y, cz);
       ic.putIndex(index);
       ++index;

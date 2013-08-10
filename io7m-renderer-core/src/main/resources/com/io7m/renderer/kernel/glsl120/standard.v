@@ -1,6 +1,6 @@
 #version 120
 
-attribute vec3 v_colour;
+attribute vec4 v_colour;
 attribute vec3 v_position;
 attribute vec3 v_normal;
 attribute vec2 v_uv;
@@ -12,7 +12,7 @@ uniform mat3 m_normal;
 varying vec2 f_uv;
 varying vec3 f_normal;
 varying vec3 f_normal_tangent;
-varying vec3 f_colour;
+varying vec4 f_colour;
 
 void
 main()
