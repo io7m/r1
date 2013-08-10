@@ -18,9 +18,7 @@ package com.io7m.renderer.kernel;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import javax.annotation.CheckForNull;
@@ -172,14 +170,12 @@ public final class DemoKRendererFlat implements Demo
           "ref8888");
 
       final VectorReadable3F diffuse = new VectorI3F(1, 1, 1);
-      final List<Texture2DStatic> diffuse_maps =
-        new ArrayList<Texture2DStatic>();
-      diffuse_maps.add(t);
 
       final KMaterial material =
         new KMaterial(
           diffuse,
-          diffuse_maps,
+          new Option.Some<Texture2DStatic>(t),
+          new Option.None<Texture2DStatic>(),
           new Option.None<Texture2DStatic>(),
           new Option.None<Texture2DStatic>());
 
