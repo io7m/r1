@@ -636,6 +636,13 @@ final class SBGLRenderer implements GLEventListener
         this.gi,
         this.filesystem,
         this.log));
+
+    this.renderers.put(
+      SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR_MAPPED_BUMP,
+      new KRendererForwardDiffuseSpecularMappedBump(
+        this.gi,
+        this.filesystem,
+        this.log));
   }
 
   void meshDelete(
