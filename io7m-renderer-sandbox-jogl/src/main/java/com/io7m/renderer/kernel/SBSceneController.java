@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -387,11 +386,10 @@ public final class SBSceneController implements
       final RVectorI3F<RSpaceRGB> diffuse =
         new RVectorI3F<RSpaceRGB>(1.0f, 1.0f, 1.0f);
 
-      final List<Texture2DStatic> diffuse_maps =
-        new LinkedList<Texture2DStatic>();
-      if (i.getDiffuse() != null) {
-        diffuse_maps.add(i.getDiffuse().getTexture());
-      }
+      final Option<Texture2DStatic> diffuse_map =
+        (i.getDiffuse() != null) ? new Option.Some<Texture2DStatic>(i
+          .getDiffuse()
+          .getTexture()) : new Option.None<Texture2DStatic>();
 
       final Option<Texture2DStatic> normal_map =
         (i.getNormal() == null)
@@ -403,7 +401,12 @@ public final class SBSceneController implements
           : new Option.Some<Texture2DStatic>(i.getSpecular().getTexture());
 
       final KMaterial material =
-        new KMaterial(diffuse, diffuse_maps, normal_map, specular_map);
+        new KMaterial(
+          diffuse,
+          diffuse_map,
+          new Option.None<Texture2DStatic>(),
+          normal_map,
+          specular_map);
 
       meshes =
         meshes.plus(new KMeshInstance(

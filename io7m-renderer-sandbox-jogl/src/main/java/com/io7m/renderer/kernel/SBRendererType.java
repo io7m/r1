@@ -23,9 +23,11 @@ enum SBRendererType
   RENDERER_DEBUG_DEPTH("debug-depth"),
   RENDERER_DEBUG_VERTEX_UV("debug-vertex-uv"),
   RENDERER_DEBUG_VERTEX_NORMALS("debug-vertex-normals"),
+  RENDERER_DEBUG_NORMALS_MAP("debug-normals-map"),
   RENDERER_FLAT_TEXTURED("flat-textured"),
   RENDERER_FORWARD_DIFFUSE("forward-diffuse"),
-  RENDERER_FORWARD_DIFFUSE_SPECULAR("forward-diffuse-specular");
+  RENDERER_FORWARD_DIFFUSE_SPECULAR("forward-diffuse-specular"),
+  RENDERER_FORWARD_DIFFUSE_SPECULAR_BUMP("forward-diffuse-specular-bump");
 
   private final @Nonnull String name;
 

@@ -57,7 +57,7 @@ import com.io7m.renderer.RVectorM4F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KSphere;
 
-final class KRendererForwardDiffuse implements KRenderer
+final class KRendererForwardDiffuseSpecularBump implements KRenderer
 {
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
@@ -67,16 +67,16 @@ final class KRendererForwardDiffuse implements KRenderer
   private final @Nonnull MatrixM4x4F.Context   matrix_context;
   private final @Nonnull KTransform.Context    transform_context;
   private final @Nonnull JCGLImplementation    gl;
+  private final @Nonnull ProgramReference      program_spherical;
+  private final @Nonnull ProgramReference      program_directional;
+  private final @Nonnull ProgramReference      program_depth;
   private final @Nonnull Log                   log;
   private final @Nonnull VectorM4F             background;
-  private final @Nonnull ProgramReference      program_directional;
-  private final @Nonnull ProgramReference      program_spherical;
-  private final @Nonnull ProgramReference      program_depth;
   private final @Nonnull JCCEExecutionCallable exec_directional;
-  private final @Nonnull JCCEExecutionCallable exec_spherical;
   private final @Nonnull JCCEExecutionCallable exec_depth;
+  private final @Nonnull JCCEExecutionCallable exec_spherical;
 
-  KRendererForwardDiffuse(
+  KRendererForwardDiffuseSpecularBump(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
@@ -87,7 +87,7 @@ final class KRendererForwardDiffuse implements KRenderer
       FilesystemError,
       IOException
   {
-    this.log = new Log(log, "krenderer-forward-diffuse");
+    this.log = new Log(log, "krenderer-forward-diffuse-specular");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
@@ -107,9 +107,9 @@ final class KRendererForwardDiffuse implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "fw_diffuse_directional",
-        "fw_diffuse_directional.v",
-        "fw_diffuse_directional.f",
+        "fw_dsb_directional",
+        "fw_dsb_directional.v",
+        "fw_dsb_directional.f",
         this.log);
     this.exec_directional =
       new JCCEExecutionCallable(this.program_directional);
@@ -120,9 +120,9 @@ final class KRendererForwardDiffuse implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "fw_diffuse_spherical",
-        "fw_diffuse_spherical.v",
-        "fw_diffuse_spherical.f",
+        "fw_dsb_spherical",
+        "fw_dsb_spherical.v",
+        "fw_dsb_spherical.f",
         this.log);
     this.exec_spherical = new JCCEExecutionCallable(this.program_spherical);
 
@@ -261,8 +261,7 @@ final class KRendererForwardDiffuse implements KRenderer
     try {
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+      final ArrayBufferAttribute a_pos = array.getAttribute("position");
 
       gc.arrayBufferBind(array);
       exec.execAttributeBind(gc, "v_position", a_pos);
@@ -301,15 +300,13 @@ final class KRendererForwardDiffuse implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    this.exec_depth.execPrepare(gc);
-    this.exec_depth.execUniformPutMatrix4x4F(
-      gc,
-      "m_projection",
-      this.matrix_projection);
-    this.exec_depth.execCancel();
+    final JCCEExecutionCallable e = this.exec_depth;
+    e.execPrepare(gc);
+    e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
+    e.execCancel();
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
-      this.renderDepthPassMesh(gc, this.exec_depth, mesh);
+      this.renderDepthPassMesh(gc, e, mesh);
     }
   }
 
@@ -348,8 +345,6 @@ final class KRendererForwardDiffuse implements KRenderer
         gc.texture2DStaticBind(
           texture_units[0],
           ((Option.Some<Texture2DStatic>) diffuse_0_opt).value);
-      } else {
-        gc.texture2DStaticUnbind(texture_units[0]);
       }
     }
 
@@ -360,8 +355,15 @@ final class KRendererForwardDiffuse implements KRenderer
         gc.texture2DStaticBind(
           texture_units[1],
           ((Option.Some<Texture2DStatic>) diffuse_1_opt).value);
-      } else {
-        gc.texture2DStaticUnbind(texture_units[1]);
+      }
+    }
+
+    {
+      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      if (normal_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units[2],
+          ((Option.Some<Texture2DStatic>) normal_opt).value);
       }
     }
 
@@ -373,6 +375,7 @@ final class KRendererForwardDiffuse implements KRenderer
     exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
+    exec.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -567,6 +570,7 @@ final class KRendererForwardDiffuse implements KRenderer
     exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
+    exec.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
 
     /**
      * Associate array attributes with program attributes, and draw mesh.

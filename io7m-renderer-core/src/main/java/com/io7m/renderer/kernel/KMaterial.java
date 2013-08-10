@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
@@ -33,20 +31,23 @@ import com.io7m.jtensors.VectorReadable3F;
 @Immutable final class KMaterial
 {
   private final @Nonnull VectorI3F               diffuse;
-  private final @Nonnull List<Texture2DStatic>   diffuse_maps;
-  private final @Nonnull Option<Texture2DStatic> normal_map;
-  private final @Nonnull Option<Texture2DStatic> specular_map;
+  private final @Nonnull Option<Texture2DStatic> texture_diffuse_0;
+  private final @Nonnull Option<Texture2DStatic> texture_diffuse_1;
+  private final @Nonnull Option<Texture2DStatic> texture_normal;
+  private final @Nonnull Option<Texture2DStatic> texture_specular;
 
   KMaterial(
     final @Nonnull VectorReadable3F diffuse,
-    final @Nonnull List<Texture2DStatic> diffuse_maps,
-    final @Nonnull Option<Texture2DStatic> normal_map,
-    final @Nonnull Option<Texture2DStatic> specular_map)
+    final @Nonnull Option<Texture2DStatic> texture_diffuse_0,
+    final @Nonnull Option<Texture2DStatic> texture_diffuse_1,
+    final @Nonnull Option<Texture2DStatic> texture_normal,
+    final @Nonnull Option<Texture2DStatic> texture_specular)
   {
     this.diffuse = new VectorI3F(diffuse);
-    this.diffuse_maps = diffuse_maps;
-    this.normal_map = normal_map;
-    this.specular_map = specular_map;
+    this.texture_diffuse_0 = texture_diffuse_0;
+    this.texture_diffuse_1 = texture_diffuse_1;
+    this.texture_normal = texture_normal;
+    this.texture_specular = texture_specular;
   }
 
   @Nonnull VectorReadable3F getDiffuse()
@@ -54,18 +55,23 @@ import com.io7m.jtensors.VectorReadable3F;
     return this.diffuse;
   }
 
-  @Nonnull List<Texture2DStatic> getDiffuseMaps()
+  @Nonnull Option<Texture2DStatic> getTextureDiffuse0()
   {
-    return this.diffuse_maps;
+    return this.texture_diffuse_0;
   }
 
-  @Nonnull Option<Texture2DStatic> getNormalMap()
+  @Nonnull Option<Texture2DStatic> getTextureDiffuse1()
   {
-    return this.normal_map;
+    return this.texture_diffuse_1;
   }
 
-  @Nonnull Option<Texture2DStatic> getSpecularMap()
+  @Nonnull Option<Texture2DStatic> getTextureNormal()
   {
-    return this.specular_map;
+    return this.texture_normal;
+  }
+
+  @Nonnull Option<Texture2DStatic> getTextureSpecular()
+  {
+    return this.texture_specular;
   }
 }

@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.DepthFunction;
@@ -36,8 +37,11 @@ import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.ProgramReference;
+import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
+import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
@@ -46,8 +50,9 @@ import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 
-final class KRendererDebugDepth implements KRenderer
+final class KRendererDebugNormalsMap implements KRenderer
 {
+  private final @Nonnull MatrixM3x3F           matrix_normal;
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
   private final @Nonnull MatrixM4x4F           matrix_view;
@@ -61,18 +66,18 @@ final class KRendererDebugDepth implements KRenderer
   private final @Nonnull VectorM2I             viewport_size;
   private final @Nonnull JCCEExecutionCallable exec;
 
-  KRendererDebugDepth(
+  KRendererDebugNormalsMap(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
     throws JCGLCompileException,
       ConstraintError,
       JCGLUnsupportedException,
-      JCGLException,
       FilesystemError,
-      IOException
+      IOException,
+      JCGLException
   {
-    this.log = new Log(log, "krenderer-debug-depth");
+    this.log = new Log(log, "krenderer-debug-normals-map");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
@@ -82,6 +87,7 @@ final class KRendererDebugDepth implements KRenderer
     this.matrix_projection = new MatrixM4x4F();
     this.matrix_model = new MatrixM4x4F();
     this.matrix_view = new MatrixM4x4F();
+    this.matrix_normal = new MatrixM3x3F();
     this.matrix_context = new MatrixM4x4F.Context();
     this.transform_context = new KTransform.Context();
     this.viewport_size = new VectorM2I();
@@ -92,12 +98,31 @@ final class KRendererDebugDepth implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "depth-only",
+        "debug-normals-map",
         "standard.v",
-        "depth_only.f",
+        "debug-normals-map.f",
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);
+  }
+
+  /**
+   * Produce a normal matrix from the modelview matrix.
+   */
+
+  private void makeNormalMatrix()
+  {
+    this.matrix_normal.set(0, 0, this.matrix_modelview.get(0, 0));
+    this.matrix_normal.set(1, 0, this.matrix_modelview.get(1, 0));
+    this.matrix_normal.set(2, 0, this.matrix_modelview.get(2, 0));
+    this.matrix_normal.set(0, 1, this.matrix_modelview.get(0, 1));
+    this.matrix_normal.set(1, 1, this.matrix_modelview.get(1, 1));
+    this.matrix_normal.set(2, 1, this.matrix_modelview.get(2, 1));
+    this.matrix_normal.set(0, 2, this.matrix_modelview.get(0, 2));
+    this.matrix_normal.set(1, 2, this.matrix_modelview.get(1, 2));
+    this.matrix_normal.set(2, 2, this.matrix_modelview.get(2, 2));
+    MatrixM3x3F.invertInPlace(this.matrix_normal);
+    MatrixM3x3F.transposeInPlace(this.matrix_normal);
   }
 
   @Override public void render(
@@ -153,8 +178,10 @@ final class KRendererDebugDepth implements KRenderer
       this.matrix_model,
       this.matrix_modelview);
 
+    this.makeNormalMatrix();
+
     /**
-     * Upload matrices.
+     * Upload matrices, set textures.
      */
 
     this.exec.execPrepare(gc);
@@ -163,6 +190,23 @@ final class KRendererDebugDepth implements KRenderer
       gc,
       "m_modelview",
       this.matrix_modelview);
+    this.exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
+
+    final TextureUnit[] texture_units = gc.textureGetUnits();
+    final KMaterial material = mesh.getMaterial();
+
+    {
+      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      if (normal_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units[0],
+          ((Option.Some<Texture2DStatic>) normal_opt).value);
+      } else {
+        gc.texture2DStaticUnbind(texture_units[0]);
+      }
+    }
+
+    this.exec.execUniformPutTextureUnit(gc, "t_normal", texture_units[0]);
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -173,9 +217,15 @@ final class KRendererDebugDepth implements KRenderer
       final IndexBuffer indices = mesh.getIndexBuffer();
       final ArrayBufferAttribute a_pos =
         array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+      final ArrayBufferAttribute a_nor =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+      final ArrayBufferAttribute a_uv =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
 
       gc.arrayBufferBind(array);
       this.exec.execAttributeBind(gc, "v_position", a_pos);
+      this.exec.execAttributeBind(gc, "v_normal", a_nor);
+      this.exec.execAttributeBind(gc, "v_uv", a_uv);
       this.exec.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception
