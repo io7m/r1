@@ -611,6 +611,10 @@ final class SBGLRenderer implements GLEventListener
       new KRendererDebugVertexNormals(this.gi, this.filesystem, this.log));
 
     this.renderers.put(
+      SBRendererType.RENDERER_DEBUG_NORMALS_MAP,
+      new KRendererDebugNormalsMap(this.gi, this.filesystem, this.log));
+
+    this.renderers.put(
       SBRendererType.RENDERER_FLAT_TEXTURED,
       new KRendererFlatTextured(this.gi, this.filesystem, this.log));
 
@@ -625,6 +629,13 @@ final class SBGLRenderer implements GLEventListener
           this.gi,
           this.filesystem,
           this.log));
+
+    this.renderers.put(
+      SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR_BUMP,
+      new KRendererForwardDiffuseSpecularBump(
+        this.gi,
+        this.filesystem,
+        this.log));
   }
 
   void meshDelete(

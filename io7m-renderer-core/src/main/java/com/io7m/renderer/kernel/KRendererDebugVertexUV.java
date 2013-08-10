@@ -72,7 +72,7 @@ final class KRendererDebugVertexUV implements KRenderer
       FilesystemError,
       IOException
   {
-    this.log = new Log(log, "krenderer-debug-uv-only");
+    this.log = new Log(log, "krenderer-debug-uv-vertex");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();

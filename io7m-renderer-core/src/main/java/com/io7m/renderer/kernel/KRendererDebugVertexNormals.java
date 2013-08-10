@@ -72,7 +72,7 @@ final class KRendererDebugVertexNormals implements KRenderer
       IOException,
       JCGLException
   {
-    this.log = new Log(log, "krenderer-debug-normals-only");
+    this.log = new Log(log, "krenderer-debug-normals-vertex");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();

@@ -17,13 +17,13 @@
 package com.io7m.renderer.kernel;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.DepthFunction;
@@ -162,11 +162,29 @@ final class KRendererFlatTextured implements KRenderer
 
     final KMaterial material = mesh.getMaterial();
     final TextureUnit[] texture_units = gc.textureGetUnits();
-    final List<Texture2DStatic> diffuse_maps = material.getDiffuseMaps();
 
-    final int mappable = Math.min(texture_units.length, diffuse_maps.size());
-    for (int index = 0; index < mappable; ++index) {
-      gc.texture2DStaticBind(texture_units[index], diffuse_maps.get(index));
+    {
+      final Option<Texture2DStatic> diffuse_0_opt =
+        material.getTextureDiffuse0();
+      if (diffuse_0_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units[0],
+          ((Option.Some<Texture2DStatic>) diffuse_0_opt).value);
+      } else {
+        gc.texture2DStaticUnbind(texture_units[0]);
+      }
+    }
+
+    {
+      final Option<Texture2DStatic> diffuse_1_opt =
+        material.getTextureDiffuse1();
+      if (diffuse_1_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units[1],
+          ((Option.Some<Texture2DStatic>) diffuse_1_opt).value);
+      } else {
+        gc.texture2DStaticUnbind(texture_units[1]);
+      }
     }
 
     this.exec.execPrepare(gc);
