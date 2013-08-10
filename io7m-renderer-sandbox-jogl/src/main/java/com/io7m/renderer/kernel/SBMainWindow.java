@@ -648,6 +648,6 @@ final class SBMainWindow extends JFrame
 
   private @Nonnull GLProfile getGLProfile()
   {
-    return GLProfile.getDefault();
+    return GLProfile.get(GLProfile.GL3);
   }
 }

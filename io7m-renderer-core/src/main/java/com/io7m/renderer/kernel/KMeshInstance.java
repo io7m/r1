@@ -23,16 +23,24 @@ import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.IndexBuffer;
 
 /**
+ * <p>
  * An instance of a polygon mesh on the GPU.
+ * </p>
+ * <p>
+ * The given array buffer is expected, at a minimum, to have an attribute of
+ * type {@link KMeshAttributes#ATTRIBUTE_POSITION}. If the mesh has per-vertex normals, they
+ * must be of type {@link KMeshAttributes#ATTRIBUTE_NORMAL}. If the mesh has texture
+ * coordinates, they must be of type {@link KMeshAttributes#ATTRIBUTE_UV}.
+ * </p>
  */
 
 @Immutable final class KMeshInstance implements KTransformable
 {
-  private final @Nonnull Integer     id;
-  private final @Nonnull KTransform  transform;
-  private final @Nonnull ArrayBuffer vbo;
-  private final @Nonnull IndexBuffer ibo;
-  private final @Nonnull KMaterial   material;
+  private final @Nonnull Integer                              id;
+  private final @Nonnull KTransform                           transform;
+  private final @Nonnull ArrayBuffer                          vbo;
+  private final @Nonnull IndexBuffer                          ibo;
+  private final @Nonnull KMaterial                            material;
 
   public KMeshInstance(
     final @Nonnull Integer id,

@@ -1,6 +1,6 @@
 #version 140
 
-in vec3 v_colour;
+in vec4 v_colour;
 in vec3 v_position;
 in vec3 v_normal;
 in vec2 v_uv;
@@ -12,7 +12,7 @@ uniform mat3 m_normal;
 out vec2 f_uv;
 out vec3 f_normal;
 out vec3 f_normal_tangent;
-out vec3 f_colour;
+out vec4 f_colour;
 
 void
 main()

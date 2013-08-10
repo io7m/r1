@@ -31,7 +31,6 @@ import com.io7m.jcanephora.IndexBufferWritableData;
 import com.io7m.jcanephora.JCGLArrayBuffers;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLIndexBuffers;
-import com.io7m.jcanephora.JCGLScalarType;
 import com.io7m.jcanephora.UsageHint;
 
 public final class SBQuad
@@ -49,18 +48,11 @@ public final class SBQuad
   {
     final ArrayBufferAttributeDescriptor[] ab =
       new ArrayBufferAttributeDescriptor[3];
-    ab[0] =
-      new ArrayBufferAttributeDescriptor(
-        "position",
-        JCGLScalarType.TYPE_FLOAT,
-        3);
-    ab[1] =
-      new ArrayBufferAttributeDescriptor(
-        "normal",
-        JCGLScalarType.TYPE_FLOAT,
-        3);
-    ab[2] =
-      new ArrayBufferAttributeDescriptor("uv", JCGLScalarType.TYPE_FLOAT, 2);
+
+    ab[0] = KMeshAttributes.ATTRIBUTE_POSITION;
+    ab[1] = KMeshAttributes.ATTRIBUTE_NORMAL;
+    ab[2] = KMeshAttributes.ATTRIBUTE_UV;
+
     final ArrayBufferTypeDescriptor array_type =
       new ArrayBufferTypeDescriptor(ab);
     this.array =
@@ -70,9 +62,12 @@ public final class SBQuad
       new ArrayBufferWritableData(this.array);
 
     {
-      final CursorWritable3f pos_cursor = array_data.getCursor3f("position");
-      final CursorWritable3f norm_cursor = array_data.getCursor3f("normal");
-      final CursorWritable2f uv_cursor = array_data.getCursor2f("uv");
+      final CursorWritable3f pos_cursor =
+        array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+      final CursorWritable3f norm_cursor =
+        array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+      final CursorWritable2f uv_cursor =
+        array_data.getCursor2f(KMeshAttributes.ATTRIBUTE_UV.getName());
 
       pos_cursor.put3f(0, height, z);
       pos_cursor.put3f(0, 0, z);
