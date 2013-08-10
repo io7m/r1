@@ -107,9 +107,9 @@ final class KRendererForwardDiffuse implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "fw_diffuse_directional",
-        "fw_diffuse_directional.v",
-        "fw_diffuse_directional.f",
+        "fw_d_directional",
+        "fw_d_directional.v",
+        "fw_d_directional.f",
         this.log);
     this.exec_directional =
       new JCCEExecutionCallable(this.program_directional);
@@ -120,9 +120,9 @@ final class KRendererForwardDiffuse implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "fw_diffuse_spherical",
-        "fw_diffuse_spherical.v",
-        "fw_diffuse_spherical.f",
+        "fw_d_spherical",
+        "fw_d_spherical.v",
+        "fw_d_spherical.f",
         this.log);
     this.exec_spherical = new JCCEExecutionCallable(this.program_spherical);
 
