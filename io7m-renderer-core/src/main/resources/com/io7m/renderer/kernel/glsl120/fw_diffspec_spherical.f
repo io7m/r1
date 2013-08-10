@@ -28,7 +28,7 @@ main (void)
   vec3 l_specular     = l_color * l_intensity * l_spec_factor;
 
   vec3 surface = texture2D (t_diffuse_0, f_uv).rgb;
-
+  
   float at_lin = -D * (1 / l_radius) + 1.0;
   float at_exp = clamp (pow (at_lin, l_falloff), 0.0, 1.0);
 

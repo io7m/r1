@@ -46,7 +46,7 @@ import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 
-final class KRendererDebugVertexNormals implements KRenderer
+final class KRendererDebugUVVertex implements KRenderer
 {
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
@@ -61,18 +61,18 @@ final class KRendererDebugVertexNormals implements KRenderer
   private final @Nonnull VectorM2I             viewport_size;
   private final @Nonnull JCCEExecutionCallable exec;
 
-  KRendererDebugVertexNormals(
+  KRendererDebugUVVertex(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
     throws JCGLCompileException,
       ConstraintError,
       JCGLUnsupportedException,
+      JCGLException,
       FilesystemError,
-      IOException,
-      JCGLException
+      IOException
   {
-    this.log = new Log(log, "krenderer-debug-normals-vertex");
+    this.log = new Log(log, "krenderer-debug-uv-vertex");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
@@ -92,9 +92,9 @@ final class KRendererDebugVertexNormals implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "normals-only",
+        "debug-uv-vertex",
         "standard.v",
-        "normals_only.f",
+        "debug-uv-vertex.f",
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);
@@ -173,12 +173,12 @@ final class KRendererDebugVertexNormals implements KRenderer
       final IndexBuffer indices = mesh.getIndexBuffer();
       final ArrayBufferAttribute a_pos =
         array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final ArrayBufferAttribute a_nor =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+      final ArrayBufferAttribute a_uv =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
 
       gc.arrayBufferBind(array);
       this.exec.execAttributeBind(gc, "v_position", a_pos);
-      this.exec.execAttributeBind(gc, "v_normal", a_nor);
+      this.exec.execAttributeBind(gc, "v_uv", a_uv);
       this.exec.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception
