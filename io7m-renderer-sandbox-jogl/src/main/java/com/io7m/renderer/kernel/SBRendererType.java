@@ -27,7 +27,9 @@ enum SBRendererType
   RENDERER_FLAT_TEXTURED("flat-textured"),
   RENDERER_FORWARD_DIFFUSE("forward-diffuse"),
   RENDERER_FORWARD_DIFFUSE_SPECULAR("forward-diffuse-specular"),
-  RENDERER_FORWARD_DIFFUSE_SPECULAR_BUMP("forward-diffuse-specular-bump");
+  RENDERER_FORWARD_DIFFUSE_SPECULAR_BUMP("forward-diffuse-specular-bump"),
+  RENDERER_FORWARD_DIFFUSE_SPECULAR_MAPPED_BUMP(
+    "forward-diffuse-specular-mapped-bump");
 
   private final @Nonnull String name;
 
