@@ -57,7 +57,7 @@ import com.io7m.renderer.RVectorM4F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KSphere;
 
-final class KRendererForwardDiffuseOnly implements KRenderer
+final class KRendererForwardDiffuse implements KRenderer
 {
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
@@ -76,7 +76,7 @@ final class KRendererForwardDiffuseOnly implements KRenderer
   private final @Nonnull JCCEExecutionCallable exec_spherical;
   private final @Nonnull JCCEExecutionCallable exec_depth;
 
-  KRendererForwardDiffuseOnly(
+  KRendererForwardDiffuse(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)

@@ -238,7 +238,7 @@ public final class DemoKRendererForwardDiffuse implements Demo
   private boolean                                       has_shut_down = false;
   private final @Nonnull JCGLImplementation             gi;
   private final @Nonnull JCGLInterfaceCommon            gl;
-  private final @Nonnull KRendererForwardDiffuseOnly    renderer;
+  private final @Nonnull KRendererForwardDiffuse    renderer;
   private final @Nonnull Log                            log;
   private final @Nonnull QuaternionI4F.Context          quat_context;
   private final @Nonnull ProgramReference               program;
@@ -324,7 +324,7 @@ public final class DemoKRendererForwardDiffuse implements Demo
      */
 
     this.renderer =
-      new KRendererForwardDiffuseOnly(
+      new KRendererForwardDiffuse(
         config.getGL(),
         config.getFilesystem(),
         config.getLog());
