@@ -603,12 +603,12 @@ final class SBGLRenderer implements GLEventListener
       new KRendererDebugDepth(this.gi, this.filesystem, this.log));
 
     this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_VERTEX_UV,
-      new KRendererDebugVertexUV(this.gi, this.filesystem, this.log));
+      SBRendererType.RENDERER_DEBUG_UV_VERTEX,
+      new KRendererDebugUVVertex(this.gi, this.filesystem, this.log));
 
     this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_VERTEX_NORMALS,
-      new KRendererDebugVertexNormals(this.gi, this.filesystem, this.log));
+      SBRendererType.RENDERER_DEBUG_NORMALS_VERTEX,
+      new KRendererDebugNormalsVertex(this.gi, this.filesystem, this.log));
 
     this.renderers.put(
       SBRendererType.RENDERER_DEBUG_NORMALS_MAP,
