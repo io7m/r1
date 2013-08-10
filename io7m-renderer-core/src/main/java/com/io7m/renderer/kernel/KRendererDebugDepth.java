@@ -46,7 +46,7 @@ import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 
-final class KRendererDebugUVOnly implements KRenderer
+final class KRendererDebugDepth implements KRenderer
 {
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
@@ -61,7 +61,7 @@ final class KRendererDebugUVOnly implements KRenderer
   private final @Nonnull VectorM2I             viewport_size;
   private final @Nonnull JCCEExecutionCallable exec;
 
-  KRendererDebugUVOnly(
+  KRendererDebugDepth(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
@@ -72,7 +72,7 @@ final class KRendererDebugUVOnly implements KRenderer
       FilesystemError,
       IOException
   {
-    this.log = new Log(log, "krenderer-debug-uv-only");
+    this.log = new Log(log, "krenderer-debug-depth-only");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
@@ -92,9 +92,9 @@ final class KRendererDebugUVOnly implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "uv-only",
+        "depth-only",
         "standard.v",
-        "uv_only.f",
+        "depth_only.f",
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);
@@ -173,12 +173,9 @@ final class KRendererDebugUVOnly implements KRenderer
       final IndexBuffer indices = mesh.getIndexBuffer();
       final ArrayBufferAttribute a_pos =
         array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final ArrayBufferAttribute a_uv =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
 
       gc.arrayBufferBind(array);
       this.exec.execAttributeBind(gc, "v_position", a_pos);
-      this.exec.execAttributeBind(gc, "v_uv", a_uv);
       this.exec.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception
