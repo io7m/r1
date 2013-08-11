@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright © 2013 <code@io7m.com> http://io7m.com
+  
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+  
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://schemas.io7m.com/renderer/1.0.0/types" xmlns:rt="http://schemas.io7m.com/renderer/1.0.0/types" xmlns:rm="http://schemas.io7m.com/renderer/1.0.0/meshes">
+  <xs:import namespace="http://schemas.io7m.com/renderer/1.0.0/meshes" schemaLocation="meshes.xsd"/>
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+  <xs:element name="rgb3f">
+    <xs:complexType>
+      <xs:attribute name="r" use="required" form="qualified" type="xs:float"/>
+      <xs:attribute name="g" use="required" form="qualified" type="xs:float"/>
+      <xs:attribute name="b" use="required" form="qualified" type="xs:float"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:attributeGroup name="io7m.renderer.types.xml-id">
+    <xs:attribute ref="xml:id" use="required"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="io7m.renderer.types.standard-attributes">
+    <xs:attribute ref="xml:base"/>
+    <xs:attribute ref="xml:lang"/>
+    <xs:attribute name="type" type="xs:token"/>
+  </xs:attributeGroup>
+</xs:schema>

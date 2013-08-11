@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.w3.org/XML/1998/namespace" xmlns:rt="http://schemas.io7m.com/renderer/1.0.0/types" xmlns:rm="http://schemas.io7m.com/renderer/1.0.0/meshes">
+  <xs:import namespace="http://schemas.io7m.com/renderer/1.0.0/meshes" schemaLocation="meshes.xsd"/>
+  <xs:import namespace="http://schemas.io7m.com/renderer/1.0.0/types" schemaLocation="types.xsd"/>
+  <xs:attribute name="id" type="xs:ID"/>
+  <xs:attribute name="base"/>
+  <xs:attribute name="lang"/>
+</xs:schema>
