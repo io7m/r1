@@ -40,6 +40,7 @@ import com.jogamp.common.util.VersionNumber;
 public final class JOGLTestContext
 {
   private static GLOffscreenAutoDrawable buffer;
+  static final String                    LOG_DESTINATION_OPENGL;
   static final String                    LOG_DESTINATION_OPENGL_ES_3_0;
   static final String                    LOG_DESTINATION_OPENGL_ES_2_0;
   static final String                    LOG_DESTINATION_OPENGL_3_0;
@@ -47,6 +48,7 @@ public final class JOGLTestContext
   static final String                    LOG_DESTINATION_OPENGL_2_1;
 
   static {
+    LOG_DESTINATION_OPENGL = "jogl-test";
     LOG_DESTINATION_OPENGL_ES_3_0 = "jogl_es_3_0-test";
     LOG_DESTINATION_OPENGL_ES_2_0 = "jogl_es_2_0-test";
     LOG_DESTINATION_OPENGL_3_0 = "jogl_3_0-test";
@@ -326,6 +328,20 @@ public final class JOGLTestContext
         + " is not 3.p");
     }
 
+    return new TestContext(fs, gi, log);
+  }
+
+  public static TestContext makeContextWithDefault()
+    throws JCGLException,
+      JCGLUnsupportedException,
+      ConstraintError
+  {
+    final Log log =
+      JOGLTestContext.getLog(JOGLTestContext.LOG_DESTINATION_OPENGL);
+    final FSCapabilityAll fs = JOGLTestContext.getFS(log);
+
+    final GLContext ctx = JOGLTestContext.getContext(GLProfile.getDefault());
+    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
     return new TestContext(fs, gi, log);
   }
 

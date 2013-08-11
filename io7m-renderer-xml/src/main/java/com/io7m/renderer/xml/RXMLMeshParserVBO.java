@@ -48,209 +48,207 @@ import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.KMeshAttributes;
 
-final class RXMLMeshParserVBO
+final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffers> implements
+  RXMLMeshParserEvents<JCGLException>
 {
-  private static final class Events<G extends JCGLArrayBuffers & JCGLIndexBuffers> implements
-    RXMLMeshParserEvents<JCGLException>
+  private final @Nonnull G                        gl;
+  private @CheckForNull RXMLMeshType              mtype;
+  private @CheckForNull ArrayBufferTypeDescriptor type;
+  private final @Nonnull UsageHint                usage;
+  private @CheckForNull ArrayBuffer               array;
+  private @CheckForNull ArrayBufferWritableData   array_data;
+  private @CheckForNull IndexBuffer               indices;
+  private @CheckForNull IndexBufferWritableData   indices_data;
+  private @CheckForNull CursorWritableIndex       cursor_index;
+  private @CheckForNull CursorWritable3f          cursor_pos;
+  private @CheckForNull CursorWritable3f          cursor_normal;
+  private @CheckForNull CursorWritable2f          cursor_uv;
+  private @CheckForNull CursorWritable3f          cursor_tangent;
+
+  RXMLMeshParserVBO(
+    final @Nonnull G g,
+    final @Nonnull UsageHint hint)
+    throws ConstraintError
   {
-    private final @Nonnull G                        gl;
-    private @CheckForNull RXMLMeshType              mtype;
-    private @CheckForNull ArrayBufferTypeDescriptor type;
-    private final @Nonnull UsageHint                usage;
-    private @CheckForNull ArrayBuffer               array;
-    private @CheckForNull ArrayBufferWritableData   array_data;
-    private @CheckForNull IndexBuffer               indices;
-    private @CheckForNull IndexBufferWritableData   indices_data;
-    private @CheckForNull CursorWritableIndex       cursor_index;
-    private @CheckForNull CursorWritable3f          cursor_pos;
-    private @CheckForNull CursorWritable3f          cursor_normal;
-    private @CheckForNull CursorWritable2f          cursor_uv;
-    private @CheckForNull CursorWritable3f          cursor_tangent;
+    this.gl = Constraints.constrainNotNull(g, "OpenGL interface");
+    this.usage = Constraints.constrainNotNull(hint, "Usage hint");
+  }
 
-    Events(
-      final @Nonnull G g,
-      final @Nonnull UsageHint hint)
-    {
-      this.gl = g;
-      this.usage = hint;
+  @Override public void eventMeshTriangle(
+    final int index,
+    final int v0,
+    final int v1,
+    final int v2)
+    throws ConstraintError
+  {
+    this.cursor_index.putIndex(v0);
+    this.cursor_index.putIndex(v1);
+    this.cursor_index.putIndex(v2);
+  }
+
+  @Override public void eventMeshTrianglesEnded()
+    throws JCGLException,
+      ConstraintError
+  {
+    Constraints.constrainArbitrary(
+      this.cursor_index.canWrite() == false,
+      "Index buffer completely assigned");
+
+    this.gl.indexBufferUpdate(this.indices_data);
+  }
+
+  @Override public void eventMeshTrianglesStarted(
+    final int count)
+    throws JCGLException,
+      ConstraintError
+  {
+    this.indices = this.gl.indexBufferAllocate(this.array, count * 3);
+    this.indices_data = new IndexBufferWritableData(this.indices);
+    this.cursor_index = this.indices_data.getCursor();
+  }
+
+  @Override public void eventMeshType(
+    final @Nonnull RXMLMeshType mt)
+    throws JCGLException,
+      ConstraintError
+  {
+    final ArrayList<ArrayBufferAttributeDescriptor> a =
+      new ArrayList<ArrayBufferAttributeDescriptor>();
+
+    a.add(KMeshAttributes.ATTRIBUTE_POSITION);
+
+    if (mt.hasNormal()) {
+      a.add(KMeshAttributes.ATTRIBUTE_NORMAL);
     }
 
-    @Override public void eventMeshTriangle(
-      final int index,
-      final int v0,
-      final int v1,
-      final int v2)
-      throws ConstraintError
-    {
-      this.cursor_index.putIndex(v0);
-      this.cursor_index.putIndex(v1);
-      this.cursor_index.putIndex(v2);
+    if (mt.hasTangent()) {
+      a.add(KMeshAttributes.ATTRIBUTE_TANGENT);
     }
 
-    @Override public void eventMeshTrianglesEnded()
-      throws JCGLException,
-        ConstraintError
-    {
+    if (mt.hasUV()) {
+      a.add(KMeshAttributes.ATTRIBUTE_UV);
+    }
+
+    final ArrayBufferAttributeDescriptor[] ab =
+      new ArrayBufferAttributeDescriptor[a.size()];
+    a.toArray(ab);
+
+    this.type = new ArrayBufferTypeDescriptor(ab);
+    this.mtype = mt;
+  }
+
+  @Override public void eventMeshVertexEnded(
+    final int index)
+  {
+    // Nothing.
+  }
+
+  @Override public void eventMeshVertexStarted(
+    final int index)
+  {
+    // Nothing.
+  }
+
+  @Override public void eventMeshVerticesEnded()
+    throws JCGLException,
+      ConstraintError
+  {
+    if (this.cursor_pos != null) {
       Constraints.constrainArbitrary(
-        this.cursor_index.canWrite() == false,
-        "Index buffer completely assigned");
-
-      this.gl.indexBufferUpdate(this.indices_data);
+        this.cursor_pos.canWrite() == false,
+        "Position attributes completely assigned");
+    }
+    if (this.cursor_normal != null) {
+      Constraints.constrainArbitrary(
+        this.cursor_normal.canWrite() == false,
+        "Normal attributes completely assigned");
+    }
+    if (this.cursor_tangent != null) {
+      Constraints.constrainArbitrary(
+        this.cursor_tangent.canWrite() == false,
+        "Tangent attributes completely assigned");
+    }
+    if (this.cursor_uv != null) {
+      Constraints.constrainArbitrary(
+        this.cursor_uv.canWrite() == false,
+        "UV attributes completely assigned");
     }
 
-    @Override public void eventMeshTrianglesStarted(
-      final int count)
-      throws JCGLException,
-        ConstraintError
-    {
-      this.indices = this.gl.indexBufferAllocate(this.array, count * 3);
-      this.indices_data = new IndexBufferWritableData(this.indices);
-      this.cursor_index = this.indices_data.getCursor();
-    }
+    this.gl.arrayBufferUpdate(this.array_data);
+  }
 
-    @Override public void eventMeshType(
-      final @Nonnull RXMLMeshType mt)
-      throws JCGLException,
-        ConstraintError
-    {
-      final ArrayList<ArrayBufferAttributeDescriptor> a =
-        new ArrayList<ArrayBufferAttributeDescriptor>();
+  @Override public void eventMeshVerticesStarted(
+    final int count)
+    throws JCGLException,
+      ConstraintError
+  {
+    this.array = this.gl.arrayBufferAllocate(count, this.type, this.usage);
+    this.array_data = new ArrayBufferWritableData(this.array);
 
-      a.add(KMeshAttributes.ATTRIBUTE_POSITION);
+    this.cursor_pos =
+      this.array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION
+        .getName());
 
-      if (mt.hasNormal()) {
-        a.add(KMeshAttributes.ATTRIBUTE_NORMAL);
-      }
-
-      if (mt.hasTangent()) {
-        a.add(KMeshAttributes.ATTRIBUTE_TANGENT);
-      }
-
-      if (mt.hasUV()) {
-        a.add(KMeshAttributes.ATTRIBUTE_UV);
-      }
-
-      final ArrayBufferAttributeDescriptor[] ab =
-        new ArrayBufferAttributeDescriptor[a.size()];
-      a.toArray(ab);
-
-      this.type = new ArrayBufferTypeDescriptor(ab);
-      this.mtype = mt;
-    }
-
-    @Override public void eventMeshVertexEnded(
-      final int index)
-    {
-      // Nothing.
-    }
-
-    @Override public void eventMeshVertexStarted(
-      final int index)
-    {
-      // Nothing.
-    }
-
-    @Override public void eventMeshVerticesEnded()
-      throws JCGLException,
-        ConstraintError
-    {
-      if (this.cursor_pos != null) {
-        Constraints.constrainArbitrary(
-          this.cursor_pos.canWrite() == false,
-          "Position attributes completely assigned");
-      }
-      if (this.cursor_normal != null) {
-        Constraints.constrainArbitrary(
-          this.cursor_normal.canWrite() == false,
-          "Normal attributes completely assigned");
-      }
-      if (this.cursor_tangent != null) {
-        Constraints.constrainArbitrary(
-          this.cursor_tangent.canWrite() == false,
-          "Tangent attributes completely assigned");
-      }
-      if (this.cursor_uv != null) {
-        Constraints.constrainArbitrary(
-          this.cursor_uv.canWrite() == false,
-          "UV attributes completely assigned");
-      }
-
-      this.gl.arrayBufferUpdate(this.array_data);
-    }
-
-    @Override public void eventMeshVerticesStarted(
-      final int count)
-      throws JCGLException,
-        ConstraintError
-    {
-      this.array = this.gl.arrayBufferAllocate(count, this.type, this.usage);
-      this.array_data = new ArrayBufferWritableData(this.array);
-
-      this.cursor_pos =
-        this.array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION
+    if (this.mtype.hasNormal()) {
+      this.cursor_normal =
+        this.array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_NORMAL
           .getName());
-
-      if (this.mtype.hasNormal()) {
-        this.cursor_normal =
-          this.array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_NORMAL
-            .getName());
-      }
-
-      if (this.mtype.hasUV()) {
-        this.cursor_uv =
-          this.array_data.getCursor2f(KMeshAttributes.ATTRIBUTE_UV.getName());
-      }
-
-      if (this.mtype.hasTangent()) {
-        this.cursor_tangent =
-          this.array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_TANGENT
-            .getName());
-      }
     }
 
-    @Override public void eventVertexNormal(
-      final int index,
-      final @Nonnull RVectorI3F<RSpaceObject> normal)
-      throws ConstraintError
-    {
-      this.cursor_normal.put3f(normal.x, normal.y, normal.z);
+    if (this.mtype.hasUV()) {
+      this.cursor_uv =
+        this.array_data.getCursor2f(KMeshAttributes.ATTRIBUTE_UV.getName());
     }
 
-    @Override public void eventVertexPosition(
-      final int index,
-      final @Nonnull RVectorI3F<RSpaceObject> position)
-      throws ConstraintError
-    {
-      this.cursor_pos.put3f(position.x, position.y, position.z);
+    if (this.mtype.hasTangent()) {
+      this.cursor_tangent =
+        this.array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_TANGENT
+          .getName());
     }
+  }
 
-    @Override public void eventVertexTangent(
-      final int index,
-      final @Nonnull RVectorI3F<RSpaceTangent> tangent)
-      throws ConstraintError
-    {
-      this.cursor_tangent.put3f(tangent.x, tangent.y, tangent.z);
+  @Override public void eventVertexNormal(
+    final int index,
+    final @Nonnull RVectorI3F<RSpaceObject> normal)
+    throws ConstraintError
+  {
+    this.cursor_normal.put3f(normal.x, normal.y, normal.z);
+  }
+
+  @Override public void eventVertexPosition(
+    final int index,
+    final @Nonnull RVectorI3F<RSpaceObject> position)
+    throws ConstraintError
+  {
+    this.cursor_pos.put3f(position.x, position.y, position.z);
+  }
+
+  @Override public void eventVertexTangent(
+    final int index,
+    final @Nonnull RVectorI3F<RSpaceTangent> tangent)
+    throws ConstraintError
+  {
+    this.cursor_tangent.put3f(tangent.x, tangent.y, tangent.z);
+  }
+
+  @Override public void eventVertexUV(
+    final int index,
+    final @Nonnull RVectorI2F<RSpaceTexture> uv)
+    throws ConstraintError
+  {
+    this.cursor_uv.put2f(uv.x, uv.y);
+  }
+
+  @Override public void eventXMLError(
+    final @Nonnull RXMLException e)
+    throws JCGLException,
+      ConstraintError
+  {
+    if (this.array != null) {
+      this.gl.arrayBufferDelete(this.array);
     }
-
-    @Override public void eventVertexUV(
-      final int index,
-      final @Nonnull RVectorI2F<RSpaceTexture> uv)
-      throws ConstraintError
-    {
-      this.cursor_uv.put2f(uv.x, uv.y);
-    }
-
-    @Override public void eventXMLError(
-      final @Nonnull RXMLException e)
-      throws JCGLException,
-        ConstraintError
-    {
-      if (this.array != null) {
-        this.gl.arrayBufferDelete(this.array);
-      }
-      if (this.indices != null) {
-        this.gl.indexBufferDelete(this.indices);
-      }
+    if (this.indices != null) {
+      this.gl.indexBufferDelete(this.indices);
     }
   }
 
@@ -266,7 +264,9 @@ final class RXMLMeshParserVBO
         RXMLException
   {
     Constraints.constrainNotNull(d, "Document");
-    return RXMLMeshParser.parseFromDocument(d, new Events<G>(g, hint));
+    return RXMLMeshParser.parseFromDocument(d, new RXMLMeshParserVBO<G>(
+      g,
+      hint));
   }
 
   static @Nonnull
@@ -281,7 +281,9 @@ final class RXMLMeshParserVBO
         RXMLException
   {
     Constraints.constrainNotNull(e, "Element");
-    return RXMLMeshParser.parseFromElement(e, new Events<G>(g, hint));
+    return RXMLMeshParser.parseFromElement(e, new RXMLMeshParserVBO<G>(
+      g,
+      hint));
   }
 
   static @Nonnull
@@ -297,7 +299,8 @@ final class RXMLMeshParserVBO
         RXMLException
   {
     Constraints.constrainNotNull(s, "Stream");
-    return RXMLMeshParser
-      .parseFromStreamValidating(s, new Events<G>(g, hint));
+    return RXMLMeshParser.parseFromStreamValidating(
+      s,
+      new RXMLMeshParserVBO<G>(g, hint));
   }
 }
