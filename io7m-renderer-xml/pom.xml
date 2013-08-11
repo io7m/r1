@@ -1,24 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.io7m.renderer</groupId>
-  <artifactId>io7m-renderer</artifactId>
+  <groupId>com.io7m.renderer.xml</groupId>
+  <artifactId>io7m-renderer-xml</artifactId>
   <version>0.2.1</version>
-  <packaging>pom</packaging>
-  <name>io7m-renderer</name>
-  <description>3D renderer</description>
-  <url>http://mvn.io7m.com/renderer/</url>
-
-  <modules>
-    <module>io7m-renderer-core</module>
-    <module>io7m-renderer-demos-jogl</module>
-    <module>io7m-renderer-demos</module>
-    <module>io7m-renderer-sandbox-jogl</module>
-    <module>io7m-renderer-tests-jogl</module>
-    <module>io7m-renderer-tests</module>
-    <module>io7m-renderer-xml</module>
-  </modules>
+  <packaging>jar</packaging>
+  <name>io7m-renderer-xml</name>
+  <description>3D renderer (XML functions)</description>
+  <url>http://mvn.io7m.com/renderer-xml/</url>
 
   <licenses>
     <license>
@@ -51,7 +44,7 @@
     <site>
       <id>io7m</id>
       <name>io7m.com</name>
-      <url>http://mvn.io7m.com/renderer/</url>
+      <url>http://mvn.io7m.com/renderer-xml/</url>
     </site>
   </distributionManagement>
 
@@ -63,6 +56,45 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.io7m.jtensors</groupId>
+      <artifactId>io7m-jtensors</artifactId>
+      <version>[5.0.0, 6.0.0)</version>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.jvvfs.core</groupId>
+      <artifactId>io7m-jvvfs-core</artifactId>
+      <version>[3.0.0, 4.0.0)</version>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.renderer.core</groupId>
+      <artifactId>io7m-renderer-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.jcanephora.core</groupId>
+      <artifactId>io7m-jcanephora-core</artifactId>
+      <version>0.9.16</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+      <version>4.11</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>xom</groupId>
+      <artifactId>xom</artifactId>
+      <version>1.2.5</version>
+    </dependency>
+  </dependencies>
 
   <reporting>
     <plugins>
@@ -111,65 +143,110 @@
         <version>2.6</version>
       </plugin>
 
-      <!-- Validate XML documentation -->
+      <!-- Require JDK >= 1.6 -->
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>xml-maven-plugin</artifactId>
-        <version>1.0</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>validate</goal>
-            </goals>
-          </execution>
-        </executions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
         <configuration>
-          <validationSets>
-            <validationSet>
-              <dir>src/main/xml</dir>
-            </validationSet>
-          </validationSets>
+          <source>1.6</source>
+          <target>1.6</target>
         </configuration>
       </plugin>
 
-      <!-- Transform XML documentation with Saxon -->
+      <!-- Produce jar files -->
       <plugin>
-        <groupId>com.io7m.saxon-plugin</groupId>
-        <artifactId>io7m-saxon-plugin</artifactId>
-        <version>1.1.0</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>transform</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <transformation>
-            <stylesheetFile>src/main/xsl/structural-1_0_0-standalone-x20.xsl</stylesheetFile>
-            <documentFile>src/main/xml/documentation.xml</documentFile>
-            <outputDirectory>${project.build.directory}/xhtml</outputDirectory>
-            <outputDirectoryParameterName>io7m.structural-1_0_0.output_directory</outputDirectoryParameterName>
-            <outputFile>out.txt</outputFile>
-          </transformation>
-        </configuration>
-      </plugin>
-
-      <!-- Produce documentation archive -->
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
         <version>2.4</version>
-        <configuration>
-          <descriptors>
-            <descriptor>assembly-doc.xml</descriptor>
-          </descriptors>
-        </configuration>
+        <executions>
+          <!-- Produce custom manifest in jar files -->
+          <execution>
+            <id>code-jar</id>
+            <configuration>
+              <archive>
+                <manifestEntries>
+                  <Specification-Title>${project.name}</Specification-Title>
+                  <Specification-Version>${project.version}</Specification-Version>
+                  <Specification-Vendor>io7m.com</Specification-Vendor>
+                  <Implementation-Title>${project.name}</Implementation-Title>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                  <Implementation-Vendor>io7m.com</Implementation-Vendor>
+                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  <Built-By>io7m</Built-By>
+                </manifestEntries>
+                <manifestSection>
+                  <name>com/io7m/renderer</name>
+                  <manifestEntries>
+                    <Sealed>true</Sealed>
+                  </manifestEntries>
+                </manifestSection>
+              </archive>
+            </configuration>
+          </execution>
+          <!-- Produce jar file of tests -->
+          <execution>
+            <id>test-jar</id>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Create source jar -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
         <executions>
           <execution>
-            <id>make-assembly</id>
             <phase>package</phase>
             <goals>
-              <goal>single</goal>
+               <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Tell the surefire plugin to fork only once per set of unit tests, -->
+      <!-- and redirect test output -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.15</version>
+        <configuration>
+          <forkMode>once</forkMode>
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+        </configuration>
+      </plugin>
+
+      <!-- Create javadoc jar -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <phase>package</phase>
+            <goals>
+               <goal>jar</goal>
+            </goals>
+         </execution>
+        </executions>
+      </plugin>
+
+      <!-- Enable code coverage for unit tests -->
+      <plugin>
+        <groupId>org.sonatype.maven.plugin</groupId>
+        <artifactId>emma-maven-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
+          <execution>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>instrument</goal>
             </goals>
           </execution>
         </executions>
