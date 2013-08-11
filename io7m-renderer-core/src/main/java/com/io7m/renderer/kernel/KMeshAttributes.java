@@ -27,7 +27,7 @@ import com.io7m.jcanephora.JCGLScalarType;
  * Standard names and types for attributes in vertex data.
  */
 
-class KMeshAttributes
+public class KMeshAttributes
 {
   static {
     try {
@@ -40,6 +40,12 @@ class KMeshAttributes
       ATTRIBUTE_NORMAL =
         new ArrayBufferAttributeDescriptor(
           "normal",
+          JCGLScalarType.TYPE_FLOAT,
+          3);
+
+      ATTRIBUTE_TANGENT =
+        new ArrayBufferAttributeDescriptor(
+          "tangent",
           JCGLScalarType.TYPE_FLOAT,
           3);
 
@@ -59,6 +65,7 @@ class KMeshAttributes
 
   public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_POSITION;
   public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_NORMAL;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT;
   public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_UV;
   public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_COLOUR;
 }

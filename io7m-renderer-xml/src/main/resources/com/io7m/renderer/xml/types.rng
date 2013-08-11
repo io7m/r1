@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2013 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+
+<r:grammar
+  xmlns:rt="http://schemas.io7m.com/renderer/1.0.0/types"
+  xmlns:r="http://relaxng.org/ns/structure/1.0"
+  datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+  <r:define name="io7m.renderer.types.rgb3f">
+    <r:element name="rt:rgb3f">
+      <r:attribute name="rt:r"><r:data type="float"/></r:attribute>
+      <r:attribute name="rt:g"><r:data type="float"/></r:attribute>
+      <r:attribute name="rt:b"><r:data type="float"/></r:attribute>
+    </r:element>
+  </r:define>
+
+  <r:define name="io7m.renderer.types.xml-id">
+    <r:attribute name="xml:id">
+      <r:data type="ID"/>
+    </r:attribute>
+  </r:define>
+
+  <r:define name="io7m.renderer.types.standard-attributes">
+    <r:optional>
+      <r:attribute name="xml:base">
+        <r:text/>
+      </r:attribute>
+    </r:optional>
+    <r:optional>
+      <r:attribute name="xml:lang">
+        <r:text/>
+      </r:attribute>
+    </r:optional>
+    <r:optional>
+      <r:attribute name="type">
+        <r:data type="token"/>
+      </r:attribute>
+    </r:optional>
+  </r:define>
+
+</r:grammar>

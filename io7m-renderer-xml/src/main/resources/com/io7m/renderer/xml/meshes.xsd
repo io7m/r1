@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright © 2013 <code@io7m.com> http://io7m.com
+  
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+  
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://schemas.io7m.com/renderer/1.0.0/meshes" xmlns:rt="http://schemas.io7m.com/renderer/1.0.0/types" xmlns:rm="http://schemas.io7m.com/renderer/1.0.0/meshes">
+  <xs:import namespace="http://schemas.io7m.com/renderer/1.0.0/types" schemaLocation="types.xsd"/>
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+  <xs:element name="attribute-position-3f">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="attribute-normal-3f">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="attribute-tangent-3f">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="attribute-uv-2f">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="type">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="rm:attribute-position-3f"/>
+        <xs:element ref="rm:attribute-normal-3f"/>
+        <xs:element ref="rm:attribute-tangent-3f"/>
+        <xs:element ref="rm:attribute-uv-2f"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="p">
+    <xs:complexType>
+      <xs:attribute name="x" use="required" form="qualified" type="xs:float"/>
+      <xs:attribute name="y" use="required" form="qualified" type="xs:float"/>
+      <xs:attribute name="z" use="required" form="qualified" type="xs:float"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="n">
+    <xs:complexType>
+      <xs:attribute name="x" use="required" form="qualified" type="xs:float"/>
+      <xs:attribute name="y" use="required" form="qualified" type="xs:float"/>
+      <xs:attribute name="z" use="required" form="qualified" type="xs:float"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="t">
+    <xs:complexType>
+      <xs:attribute name="x" use="required" form="qualified" type="xs:float"/>
+      <xs:attribute name="y" use="required" form="qualified" type="xs:float"/>
+      <xs:attribute name="z" use="required" form="qualified" type="xs:float"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="u">
+    <xs:complexType>
+      <xs:attribute name="x" use="required" form="qualified" type="xs:float"/>
+      <xs:attribute name="y" use="required" form="qualified" type="xs:float"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="v">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="rm:p"/>
+        <xs:element ref="rm:n"/>
+        <xs:element ref="rm:t"/>
+        <xs:element ref="rm:u"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="vertices">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="rm:v"/>
+      </xs:sequence>
+      <xs:attribute name="count" use="required" form="qualified" type="xs:positiveInteger"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="tri">
+    <xs:complexType>
+      <xs:attribute name="v0" use="required" form="qualified" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="v1" use="required" form="qualified" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="v2" use="required" form="qualified" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="triangles">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="rm:tri"/>
+      </xs:sequence>
+      <xs:attribute name="count" use="required" form="qualified" type="xs:positiveInteger"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="mesh">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="rm:type"/>
+        <xs:element ref="rm:vertices"/>
+        <xs:element ref="rm:triangles"/>
+      </xs:sequence>
+      <xs:attribute name="version" use="required" form="qualified" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
