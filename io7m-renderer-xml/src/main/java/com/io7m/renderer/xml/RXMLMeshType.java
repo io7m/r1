@@ -34,6 +34,41 @@ import javax.annotation.concurrent.Immutable;
     this.uv = uv;
   }
 
+  @Override public boolean equals(
+    final Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final RXMLMeshType other = (RXMLMeshType) obj;
+    if (this.normal != other.normal) {
+      return false;
+    }
+    if (this.tangent != other.tangent) {
+      return false;
+    }
+    if (this.uv != other.uv) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + (this.normal ? 1231 : 1237);
+    result = (prime * result) + (this.tangent ? 1231 : 1237);
+    result = (prime * result) + (this.uv ? 1231 : 1237);
+    return result;
+  }
+
   public boolean hasNormal()
   {
     return this.normal;
@@ -47,5 +82,18 @@ import javax.annotation.concurrent.Immutable;
   public boolean hasUV()
   {
     return this.uv;
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder builder = new StringBuilder();
+    builder.append("[RXMLMeshType [normal ");
+    builder.append(this.normal);
+    builder.append("] [tangent ");
+    builder.append(this.tangent);
+    builder.append("] [uv ");
+    builder.append(this.uv);
+    builder.append("]");
+    return builder.toString();
   }
 }

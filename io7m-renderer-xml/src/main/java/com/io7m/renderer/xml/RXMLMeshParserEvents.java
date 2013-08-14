@@ -27,6 +27,20 @@ import com.io7m.renderer.RVectorI3F;
 
 public interface RXMLMeshParserEvents<E extends Throwable>
 {
+  public void eventError(
+    final @Nonnull RXMLException e)
+    throws E,
+      ConstraintError;
+
+  public void eventMeshEnded()
+    throws E,
+      ConstraintError;
+
+  public void eventMeshStarted(
+    final @Nonnull String name)
+    throws E,
+      ConstraintError;
+
   public void eventMeshTriangle(
     final int index,
     final int v0,
@@ -54,8 +68,32 @@ public interface RXMLMeshParserEvents<E extends Throwable>
     throws E,
       ConstraintError;
 
+  public void eventMeshVertexNormal(
+    final int index,
+    final @Nonnull RVectorI3F<RSpaceObject> normal)
+    throws E,
+      ConstraintError;
+
+  public void eventMeshVertexPosition(
+    final int index,
+    final @Nonnull RVectorI3F<RSpaceObject> position)
+    throws E,
+      ConstraintError;
+
   public void eventMeshVertexStarted(
     final int index)
+    throws E,
+      ConstraintError;
+
+  public void eventMeshVertexTangent(
+    final int index,
+    final @Nonnull RVectorI3F<RSpaceTangent> tangent)
+    throws E,
+      ConstraintError;
+
+  public void eventMeshVertexUV(
+    final int index,
+    final @Nonnull RVectorI2F<RSpaceTexture> uv)
     throws E,
       ConstraintError;
 
@@ -65,35 +103,6 @@ public interface RXMLMeshParserEvents<E extends Throwable>
 
   public void eventMeshVerticesStarted(
     final int count)
-    throws E,
-      ConstraintError;
-
-  public void eventVertexNormal(
-    final int index,
-    final @Nonnull RVectorI3F<RSpaceObject> normal)
-    throws E,
-      ConstraintError;
-
-  public void eventVertexPosition(
-    final int index,
-    final @Nonnull RVectorI3F<RSpaceObject> position)
-    throws E,
-      ConstraintError;
-
-  public void eventVertexTangent(
-    final int index,
-    final @Nonnull RVectorI3F<RSpaceTangent> tangent)
-    throws E,
-      ConstraintError;
-
-  public void eventVertexUV(
-    final int index,
-    final @Nonnull RVectorI2F<RSpaceTexture> uv)
-    throws E,
-      ConstraintError;
-
-  public void eventXMLError(
-    final @Nonnull RXMLException e)
     throws E,
       ConstraintError;
 }

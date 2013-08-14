@@ -82,7 +82,7 @@
     <dependency>
       <groupId>com.io7m.jcanephora.core</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
-      <version>0.9.16</version>
+      <version>0.9.17</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -99,6 +99,11 @@
       <groupId>xom</groupId>
       <artifactId>xom</artifactId>
       <version>1.2.5</version>
+    </dependency>
+    <dependency>
+    	<groupId>net.java</groupId>
+    	<artifactId>quickcheck</artifactId>
+    	<version>0.6</version>
     </dependency>
   </dependencies>
 

@@ -35,6 +35,29 @@ public final class RXMLMeshParserTests
 {
   class Show implements RXMLMeshParserEvents<Throwable>
   {
+    @Override public void eventError(
+      final RXMLException e)
+      throws Throwable,
+        ConstraintError
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshEnded()
+      throws Throwable,
+        ConstraintError
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshStarted(
+      final String name)
+      throws Throwable,
+        ConstraintError
+    {
+      // Nothing
+    }
+
     @Override public void eventMeshTriangle(
       final int index,
       final int v0,
@@ -77,8 +100,44 @@ public final class RXMLMeshParserTests
       // Nothing
     }
 
+    @Override public void eventMeshVertexNormal(
+      final int index,
+      final RVectorI3F<RSpaceObject> normal)
+      throws Throwable,
+        ConstraintError
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVertexPosition(
+      final int index,
+      final RVectorI3F<RSpaceObject> position)
+      throws Throwable,
+        ConstraintError
+    {
+      // Nothing
+    }
+
     @Override public void eventMeshVertexStarted(
       final int index)
+      throws Throwable,
+        ConstraintError
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVertexTangent(
+      final int index,
+      final RVectorI3F<RSpaceTangent> tangent)
+      throws Throwable,
+        ConstraintError
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVertexUV(
+      final int index,
+      final RVectorI2F<RSpaceTexture> uv)
       throws Throwable,
         ConstraintError
     {
@@ -94,50 +153,6 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVerticesStarted(
       final int count)
-      throws Throwable,
-        ConstraintError
-    {
-      // Nothing
-    }
-
-    @Override public void eventVertexNormal(
-      final int index,
-      final RVectorI3F<RSpaceObject> normal)
-      throws Throwable,
-        ConstraintError
-    {
-      // Nothing
-    }
-
-    @Override public void eventVertexPosition(
-      final int index,
-      final RVectorI3F<RSpaceObject> position)
-      throws Throwable,
-        ConstraintError
-    {
-      // Nothing
-    }
-
-    @Override public void eventVertexTangent(
-      final int index,
-      final RVectorI3F<RSpaceTangent> tangent)
-      throws Throwable,
-        ConstraintError
-    {
-      // Nothing
-    }
-
-    @Override public void eventVertexUV(
-      final int index,
-      final RVectorI2F<RSpaceTexture> uv)
-      throws Throwable,
-        ConstraintError
-    {
-      // Nothing
-    }
-
-    @Override public void eventXMLError(
-      final RXMLException e)
       throws Throwable,
         ConstraintError
     {
@@ -260,6 +275,220 @@ public final class RXMLMeshParserTests
     } catch (final ConstraintError e) {
       throw new AssertionError(e);
     } catch (final Throwable e) {
+      throw new AssertionError(e);
+    }
+  }
+
+  static class Checked implements RXMLMeshParserEvents<Throwable>
+  {
+    private boolean                     mesh_ended;
+    private boolean                     mesh_started;
+    private final @Nonnull String       expected_name;
+    private boolean                     triangle_called;
+    private boolean                     triangles_ended;
+    private boolean                     triangles_started;
+    private final int                   expected_triangles;
+    private boolean                     mesh_type_called;
+    private final @Nonnull RXMLMeshType expected_type;
+    private boolean                     mesh_vertex_ended;
+    private boolean                     vertex_normal_called;
+    private boolean                     vertex_position_called;
+    private boolean                     vertex_started_called;
+    private boolean                     vertex_tangent_called;
+    private boolean                     vertex_uv_called;
+    private boolean                     vertices_ended;
+    private boolean                     vertices_started;
+    private final int                   expected_vertices;
+    private int                         triangle = 0;
+    private int                         vertices = 0;
+
+    Checked(
+      final @Nonnull String expected_name,
+      final int expected_triangles,
+      final @Nonnull RXMLMeshType expected_type,
+      final int vertices_expected)
+    {
+      this.expected_name = expected_name;
+      this.expected_triangles = expected_triangles;
+      this.expected_type = expected_type;
+      this.expected_vertices = vertices_expected;
+    }
+
+    @Override public void eventError(
+      final RXMLException e)
+      throws Throwable,
+        ConstraintError
+    {
+      throw new AssertionError(e);
+    }
+
+    @Override public void eventMeshEnded()
+      throws Throwable,
+        ConstraintError
+    {
+      this.mesh_ended = true;
+    }
+
+    @Override public void eventMeshStarted(
+      final String name)
+      throws Throwable,
+        ConstraintError
+    {
+      this.mesh_started = true;
+      Assert.assertEquals(this.expected_name, name);
+    }
+
+    @Override public void eventMeshTriangle(
+      final int index,
+      final int v0,
+      final int v1,
+      final int v2)
+      throws Throwable,
+        ConstraintError
+    {
+      this.triangle_called = true;
+      ++this.triangle;
+    }
+
+    @Override public void eventMeshTrianglesEnded()
+      throws Throwable,
+        ConstraintError
+    {
+      this.triangles_ended = true;
+      Assert.assertEquals(this.expected_triangles, this.triangle);
+    }
+
+    @Override public void eventMeshTrianglesStarted(
+      final int count)
+      throws Throwable,
+        ConstraintError
+    {
+      this.triangles_started = true;
+      Assert.assertEquals(this.expected_triangles, count);
+    }
+
+    @Override public void eventMeshType(
+      final RXMLMeshType mt)
+      throws Throwable,
+        ConstraintError
+    {
+      this.mesh_type_called = true;
+      Assert.assertEquals(this.expected_type, mt);
+    }
+
+    @Override public void eventMeshVertexEnded(
+      final int index)
+      throws Throwable,
+        ConstraintError
+    {
+      this.mesh_vertex_ended = true;
+    }
+
+    @Override public void eventMeshVertexNormal(
+      final int index,
+      final RVectorI3F<RSpaceObject> normal)
+      throws Throwable,
+        ConstraintError
+    {
+      this.vertex_normal_called = true;
+    }
+
+    @Override public void eventMeshVertexPosition(
+      final int index,
+      final RVectorI3F<RSpaceObject> position)
+      throws Throwable,
+        ConstraintError
+    {
+      this.vertex_position_called = true;
+    }
+
+    @Override public void eventMeshVertexStarted(
+      final int index)
+      throws Throwable,
+        ConstraintError
+    {
+      this.vertex_started_called = true;
+      ++this.vertices;
+    }
+
+    @Override public void eventMeshVertexTangent(
+      final int index,
+      final RVectorI3F<RSpaceTangent> tangent)
+      throws Throwable,
+        ConstraintError
+    {
+      this.vertex_tangent_called = true;
+    }
+
+    @Override public void eventMeshVertexUV(
+      final int index,
+      final RVectorI2F<RSpaceTexture> uv)
+      throws Throwable,
+        ConstraintError
+    {
+      this.vertex_uv_called = true;
+    }
+
+    @Override public void eventMeshVerticesEnded()
+      throws Throwable,
+        ConstraintError
+    {
+      this.vertices_ended = true;
+      Assert.assertEquals(this.expected_vertices, this.vertices);
+    }
+
+    @Override public void eventMeshVerticesStarted(
+      final int count)
+      throws Throwable,
+        ConstraintError
+    {
+      this.vertices_started = true;
+      Assert.assertEquals(this.expected_vertices, count);
+    }
+  }
+
+  @SuppressWarnings("synthetic-access") @Test public
+    void
+    testXMLStreamAllCalled()
+      throws Throwable
+  {
+    try {
+      final String expected_name = "some-mesh";
+      final int expected_triangles = 3;
+      final RXMLMeshType expected_type = new RXMLMeshType(true, true, true);
+      final int expected_vertices = 3;
+
+      final Checked c =
+        new Checked(
+          expected_name,
+          expected_triangles,
+          expected_type,
+          expected_vertices);
+
+      final InputStream s = this.getFile("valid.xml");
+      RXMLMeshParser.parseFromStreamValidating(s, c);
+
+      Assert.assertTrue(c.mesh_ended);
+      Assert.assertTrue(c.mesh_started);
+      Assert.assertTrue(c.mesh_type_called);
+      Assert.assertTrue(c.mesh_vertex_ended);
+      Assert.assertTrue(c.triangle_called);
+      Assert.assertTrue(c.triangles_ended);
+      Assert.assertTrue(c.triangles_started);
+      Assert.assertTrue(c.vertex_normal_called);
+      Assert.assertTrue(c.vertex_position_called);
+      Assert.assertTrue(c.vertex_started_called);
+      Assert.assertTrue(c.vertex_tangent_called);
+      Assert.assertTrue(c.vertex_uv_called);
+      Assert.assertTrue(c.vertices_ended);
+      Assert.assertTrue(c.vertices_started);
+
+    } catch (final IOException e) {
+      throw new AssertionError(e);
+    } catch (final RXMLException e) {
+      Assert.assertEquals(RXMLException.Type.XML_VALIDITY_ERROR, e.getType());
+      throw e;
+    } catch (final ConstraintError e) {
       throw new AssertionError(e);
     }
   }

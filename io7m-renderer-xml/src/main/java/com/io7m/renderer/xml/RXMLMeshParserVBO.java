@@ -51,6 +51,55 @@ import com.io7m.renderer.kernel.KMeshAttributes;
 final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffers> implements
   RXMLMeshParserEvents<JCGLException>
 {
+  static @Nonnull
+    <G extends JCGLArrayBuffers & JCGLIndexBuffers>
+    RXMLMeshParser<JCGLException>
+    parseFromDocument(
+      final @Nonnull G g,
+      final @Nonnull UsageHint hint,
+      final @Nonnull Document d)
+      throws JCGLException,
+        ConstraintError,
+        RXMLException
+  {
+    Constraints.constrainNotNull(d, "Document");
+    return RXMLMeshParser.parseFromDocument(d, new RXMLMeshParserVBO<G>(
+      g,
+      hint));
+  }
+  static @Nonnull
+    <G extends JCGLArrayBuffers & JCGLIndexBuffers>
+    RXMLMeshParser<JCGLException>
+    parseFromElement(
+      final @Nonnull G g,
+      final @Nonnull UsageHint hint,
+      final @Nonnull Element e)
+      throws JCGLException,
+        ConstraintError,
+        RXMLException
+  {
+    Constraints.constrainNotNull(e, "Element");
+    return RXMLMeshParser.parseFromElement(e, new RXMLMeshParserVBO<G>(
+      g,
+      hint));
+  }
+  static @Nonnull
+    <G extends JCGLArrayBuffers & JCGLIndexBuffers>
+    RXMLMeshParser<JCGLException>
+    parseFromStream(
+      final @Nonnull G g,
+      final @Nonnull UsageHint hint,
+      final @Nonnull InputStream s)
+      throws JCGLException,
+        ConstraintError,
+        IOException,
+        RXMLException
+  {
+    Constraints.constrainNotNull(s, "Stream");
+    return RXMLMeshParser.parseFromStreamValidating(
+      s,
+      new RXMLMeshParserVBO<G>(g, hint));
+  }
   private final @Nonnull G                        gl;
   private @CheckForNull RXMLMeshType              mtype;
   private @CheckForNull ArrayBufferTypeDescriptor type;
@@ -61,8 +110,11 @@ final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffers> imp
   private @CheckForNull IndexBufferWritableData   indices_data;
   private @CheckForNull CursorWritableIndex       cursor_index;
   private @CheckForNull CursorWritable3f          cursor_pos;
+
   private @CheckForNull CursorWritable3f          cursor_normal;
+
   private @CheckForNull CursorWritable2f          cursor_uv;
+
   private @CheckForNull CursorWritable3f          cursor_tangent;
 
   RXMLMeshParserVBO(
@@ -72,6 +124,34 @@ final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffers> imp
   {
     this.gl = Constraints.constrainNotNull(g, "OpenGL interface");
     this.usage = Constraints.constrainNotNull(hint, "Usage hint");
+  }
+
+  @Override public void eventError(
+    final @Nonnull RXMLException e)
+    throws JCGLException,
+      ConstraintError
+  {
+    if (this.array != null) {
+      this.gl.arrayBufferDelete(this.array);
+    }
+    if (this.indices != null) {
+      this.gl.indexBufferDelete(this.indices);
+    }
+  }
+
+  @Override public void eventMeshEnded()
+    throws JCGLException,
+      ConstraintError
+  {
+    // Nothing
+  }
+
+  @Override public void eventMeshStarted(
+    final @Nonnull String name)
+    throws JCGLException,
+      ConstraintError
+  {
+    // Nothing
   }
 
   @Override public void eventMeshTriangle(
@@ -143,10 +223,42 @@ final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffers> imp
     // Nothing.
   }
 
+  @Override public void eventMeshVertexNormal(
+    final int index,
+    final @Nonnull RVectorI3F<RSpaceObject> normal)
+    throws ConstraintError
+  {
+    this.cursor_normal.put3f(normal.x, normal.y, normal.z);
+  }
+
+  @Override public void eventMeshVertexPosition(
+    final int index,
+    final @Nonnull RVectorI3F<RSpaceObject> position)
+    throws ConstraintError
+  {
+    this.cursor_pos.put3f(position.x, position.y, position.z);
+  }
+
   @Override public void eventMeshVertexStarted(
     final int index)
   {
     // Nothing.
+  }
+
+  @Override public void eventMeshVertexTangent(
+    final int index,
+    final @Nonnull RVectorI3F<RSpaceTangent> tangent)
+    throws ConstraintError
+  {
+    this.cursor_tangent.put3f(tangent.x, tangent.y, tangent.z);
+  }
+
+  @Override public void eventMeshVertexUV(
+    final int index,
+    final @Nonnull RVectorI2F<RSpaceTexture> uv)
+    throws ConstraintError
+  {
+    this.cursor_uv.put2f(uv.x, uv.y);
   }
 
   @Override public void eventMeshVerticesEnded()
@@ -205,102 +317,5 @@ final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffers> imp
         this.array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_TANGENT
           .getName());
     }
-  }
-
-  @Override public void eventVertexNormal(
-    final int index,
-    final @Nonnull RVectorI3F<RSpaceObject> normal)
-    throws ConstraintError
-  {
-    this.cursor_normal.put3f(normal.x, normal.y, normal.z);
-  }
-
-  @Override public void eventVertexPosition(
-    final int index,
-    final @Nonnull RVectorI3F<RSpaceObject> position)
-    throws ConstraintError
-  {
-    this.cursor_pos.put3f(position.x, position.y, position.z);
-  }
-
-  @Override public void eventVertexTangent(
-    final int index,
-    final @Nonnull RVectorI3F<RSpaceTangent> tangent)
-    throws ConstraintError
-  {
-    this.cursor_tangent.put3f(tangent.x, tangent.y, tangent.z);
-  }
-
-  @Override public void eventVertexUV(
-    final int index,
-    final @Nonnull RVectorI2F<RSpaceTexture> uv)
-    throws ConstraintError
-  {
-    this.cursor_uv.put2f(uv.x, uv.y);
-  }
-
-  @Override public void eventXMLError(
-    final @Nonnull RXMLException e)
-    throws JCGLException,
-      ConstraintError
-  {
-    if (this.array != null) {
-      this.gl.arrayBufferDelete(this.array);
-    }
-    if (this.indices != null) {
-      this.gl.indexBufferDelete(this.indices);
-    }
-  }
-
-  static @Nonnull
-    <G extends JCGLArrayBuffers & JCGLIndexBuffers>
-    RXMLMeshParser<JCGLException>
-    parseFromDocument(
-      final @Nonnull G g,
-      final @Nonnull UsageHint hint,
-      final @Nonnull Document d)
-      throws JCGLException,
-        ConstraintError,
-        RXMLException
-  {
-    Constraints.constrainNotNull(d, "Document");
-    return RXMLMeshParser.parseFromDocument(d, new RXMLMeshParserVBO<G>(
-      g,
-      hint));
-  }
-
-  static @Nonnull
-    <G extends JCGLArrayBuffers & JCGLIndexBuffers>
-    RXMLMeshParser<JCGLException>
-    parseFromElement(
-      final @Nonnull G g,
-      final @Nonnull UsageHint hint,
-      final @Nonnull Element e)
-      throws JCGLException,
-        ConstraintError,
-        RXMLException
-  {
-    Constraints.constrainNotNull(e, "Element");
-    return RXMLMeshParser.parseFromElement(e, new RXMLMeshParserVBO<G>(
-      g,
-      hint));
-  }
-
-  static @Nonnull
-    <G extends JCGLArrayBuffers & JCGLIndexBuffers>
-    RXMLMeshParser<JCGLException>
-    parseFromStream(
-      final @Nonnull G g,
-      final @Nonnull UsageHint hint,
-      final @Nonnull InputStream s)
-      throws JCGLException,
-        ConstraintError,
-        IOException,
-        RXMLException
-  {
-    Constraints.constrainNotNull(s, "Stream");
-    return RXMLMeshParser.parseFromStreamValidating(
-      s,
-      new RXMLMeshParserVBO<G>(g, hint));
   }
 }

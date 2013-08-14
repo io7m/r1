@@ -107,6 +107,7 @@
         <xs:element ref="rm:triangles"/>
       </xs:sequence>
       <xs:attribute name="version" use="required" form="qualified" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="name" use="required" form="qualified" type="xs:token"/>
     </xs:complexType>
   </xs:element>
 </xs:schema>
