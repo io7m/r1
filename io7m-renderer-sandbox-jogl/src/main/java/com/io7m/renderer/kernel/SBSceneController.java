@@ -50,6 +50,8 @@ import nu.xom.ValidityException;
 import org.pcollections.HashTreePSet;
 import org.pcollections.MapPSet;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.Texture2DStatic;
@@ -59,6 +61,7 @@ import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.SBException.SBExceptionImageLoading;
 import com.io7m.renderer.kernel.SBZipUtilities.TemporaryDirectory;
+import com.io7m.renderer.xml.RXMLException;
 
 interface SBSceneChangeListener
 {
@@ -225,7 +228,11 @@ public final class SBSceneController implements
       @SuppressWarnings("synthetic-access") @Override public Void call()
         throws Exception
       {
-        SBSceneController.this.ioLoadSceneActual(file);
+        try {
+          SBSceneController.this.ioLoadSceneActual(file);
+        } catch (final ConstraintError e) {
+          throw new UnreachableCodeException();
+        }
         return null;
       }
     });
@@ -236,7 +243,9 @@ public final class SBSceneController implements
 
   private void ioLoadSceneActual(
     final @Nonnull File file)
-    throws FileNotFoundException,
+    throws RXMLException,
+      ConstraintError,
+      FileNotFoundException,
       IOException,
       ValidityException,
       ParsingException,
