@@ -129,6 +129,7 @@
   <r:define name="io7m.renderer.meshes.mesh">
     <r:element name="rm:mesh">
       <r:attribute name="rm:version"><r:data type="nonNegativeInteger"/></r:attribute>
+      <r:attribute name="rm:name"><r:data type="token"/></r:attribute>
       <r:ref name="io7m.renderer.meshes.type"/>
       <r:ref name="io7m.renderer.meshes.vertices"/>
       <r:ref name="io7m.renderer.meshes.triangles"/>

@@ -18,8 +18,6 @@ package com.io7m.renderer.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -44,7 +42,6 @@ import org.xml.sax.XMLReader;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RSpaceTangent;
 import com.io7m.renderer.RSpaceTexture;
@@ -57,32 +54,20 @@ import com.io7m.renderer.xml.RXMLException.RXMLExceptionValiditySAXErrors;
 
 final class RXMLMeshParser<E extends Throwable>
 {
-  public static final @Nonnull URI MESHES_URI;
-  public static final int          MESHES_VERSION;
-
-  static {
-    try {
-      MESHES_URI = new URI("http://schemas.io7m.com/renderer/1.0.0/meshes");
-      MESHES_VERSION = 1;
-    } catch (final URISyntaxException e) {
-      throw new UnreachableCodeException();
-    }
-  }
-
   private static void checkVersion(
     final @Nonnull Element e)
     throws RXMLException,
       ConstraintError
   {
     final Attribute a =
-      RXMLUtilities.getAttribute(e, "version", RXMLMeshParser.MESHES_URI);
+      RXMLUtilities.getAttribute(e, "version", RXMLConstants.MESHES_URI);
     final int version = RXMLUtilities.getAttributeInteger(a);
-    if (version != RXMLMeshParser.MESHES_VERSION) {
+    if (version != RXMLConstants.MESHES_VERSION) {
       final StringBuilder message = new StringBuilder();
       message.append("Unexpected version ");
       message.append(version);
       message.append(", supported version is ");
-      message.append(RXMLMeshParser.MESHES_VERSION);
+      message.append(RXMLConstants.MESHES_VERSION);
       throw new RXMLException.RXMLExceptionValidityError(
         new ValidityException(message.toString()));
     }
@@ -110,7 +95,6 @@ final class RXMLMeshParser<E extends Throwable>
     Constraints.constrainNotNull(s, "Stream");
 
     try {
-
       final URL schema_url =
         RXMLMeshParser.class.getResource("/com/io7m/renderer/xml/meshes.xsd");
 
@@ -196,10 +180,10 @@ final class RXMLMeshParser<E extends Throwable>
       RXMLUtilities.getAttributeInteger(RXMLUtilities.getAttribute(
         e,
         "count",
-        RXMLMeshParser.MESHES_URI));
+        RXMLConstants.MESHES_URI));
 
     final Elements ets =
-      RXMLUtilities.getChildren(e, "tri", RXMLMeshParser.MESHES_URI);
+      RXMLUtilities.getChildren(e, "tri", RXMLConstants.MESHES_URI);
 
     final int size = ets.size();
     if (size != count) {
@@ -221,17 +205,17 @@ final class RXMLMeshParser<E extends Throwable>
         RXMLUtilities.getAttributeInteger(RXMLUtilities.getAttribute(
           t,
           "v0",
-          RXMLMeshParser.MESHES_URI));
+          RXMLConstants.MESHES_URI));
       final int v1 =
         RXMLUtilities.getAttributeInteger(RXMLUtilities.getAttribute(
           t,
           "v1",
-          RXMLMeshParser.MESHES_URI));
+          RXMLConstants.MESHES_URI));
       final int v2 =
         RXMLUtilities.getAttributeInteger(RXMLUtilities.getAttribute(
           t,
           "v2",
-          RXMLMeshParser.MESHES_URI));
+          RXMLConstants.MESHES_URI));
 
       events.eventMeshTriangle(index, v0, v1, v2);
     }
@@ -248,19 +232,19 @@ final class RXMLMeshParser<E extends Throwable>
       RXMLUtilities.getOptionalChild(
         e,
         "attribute-normal-3f",
-        RXMLMeshParser.MESHES_URI);
+        RXMLConstants.MESHES_URI);
 
     final Element et =
       RXMLUtilities.getOptionalChild(
         e,
         "attribute-tangent-3f",
-        RXMLMeshParser.MESHES_URI);
+        RXMLConstants.MESHES_URI);
 
     final Element eu =
       RXMLUtilities.getOptionalChild(
         e,
         "attribute-uv-2f",
-        RXMLMeshParser.MESHES_URI);
+        RXMLConstants.MESHES_URI);
 
     return new RXMLMeshType(en != null, et != null, eu != null);
   }
@@ -273,10 +257,10 @@ final class RXMLMeshParser<E extends Throwable>
     assert v.getLocalName().equals("v");
 
     final Element p =
-      RXMLUtilities.getChild(v, "p", RXMLMeshParser.MESHES_URI);
+      RXMLUtilities.getChild(v, "p", RXMLConstants.MESHES_URI);
     return RXMLUtilities.getElementAttributesVector3f(
       p,
-      RXMLMeshParser.MESHES_URI);
+      RXMLConstants.MESHES_URI);
   }
 
   private static <E extends Throwable> void parseVertices(
@@ -293,10 +277,10 @@ final class RXMLMeshParser<E extends Throwable>
       RXMLUtilities.getAttributeInteger(RXMLUtilities.getAttribute(
         ev,
         "count",
-        RXMLMeshParser.MESHES_URI));
+        RXMLConstants.MESHES_URI));
 
     final Elements evs =
-      RXMLUtilities.getChildren(ev, "v", RXMLMeshParser.MESHES_URI);
+      RXMLUtilities.getChildren(ev, "v", RXMLConstants.MESHES_URI);
 
     final int size = evs.size();
     if (size != count) {
@@ -316,37 +300,38 @@ final class RXMLMeshParser<E extends Throwable>
       final Element v = evs.get(index);
 
       events.eventMeshVertexStarted(index);
-      events
-        .eventVertexPosition(index, RXMLMeshParser.parseVertexPosition(v));
+      events.eventMeshVertexPosition(
+        index,
+        RXMLMeshParser.parseVertexPosition(v));
 
       if (type.hasNormal()) {
         final Element n =
-          RXMLUtilities.getChild(v, "n", RXMLMeshParser.MESHES_URI);
+          RXMLUtilities.getChild(v, "n", RXMLConstants.MESHES_URI);
         final RVectorI3F<RSpaceObject> vn =
           RXMLUtilities.getElementAttributesVector3f(
             n,
-            RXMLMeshParser.MESHES_URI);
-        events.eventVertexNormal(index, vn);
+            RXMLConstants.MESHES_URI);
+        events.eventMeshVertexNormal(index, vn);
       }
 
       if (type.hasTangent()) {
         final Element t =
-          RXMLUtilities.getChild(v, "t", RXMLMeshParser.MESHES_URI);
+          RXMLUtilities.getChild(v, "t", RXMLConstants.MESHES_URI);
         final RVectorI3F<RSpaceTangent> vt =
           RXMLUtilities.getElementAttributesVector3f(
             t,
-            RXMLMeshParser.MESHES_URI);
-        events.eventVertexTangent(index, vt);
+            RXMLConstants.MESHES_URI);
+        events.eventMeshVertexTangent(index, vt);
       }
 
       if (type.hasUV()) {
         final Element u =
-          RXMLUtilities.getChild(v, "u", RXMLMeshParser.MESHES_URI);
+          RXMLUtilities.getChild(v, "u", RXMLConstants.MESHES_URI);
         final RVectorI2F<RSpaceTexture> vu =
           RXMLUtilities.getElementAttributesVector2f(
             u,
-            RXMLMeshParser.MESHES_URI);
-        events.eventVertexUV(index, vu);
+            RXMLConstants.MESHES_URI);
+        events.eventMeshVertexUV(index, vu);
       }
 
       events.eventMeshVertexEnded(index);
@@ -367,23 +352,29 @@ final class RXMLMeshParser<E extends Throwable>
     this.events = Constraints.constrainNotNull(events, "Parser events");
 
     try {
-      RXMLUtilities.checkIsElement(e, "mesh", RXMLMeshParser.MESHES_URI);
+      RXMLUtilities.checkIsElement(e, "mesh", RXMLConstants.MESHES_URI);
       RXMLMeshParser.checkVersion(e);
 
+      final Attribute na =
+        RXMLUtilities.getAttribute(e, "name", RXMLConstants.MESHES_URI);
+      events.eventMeshStarted(na.getValue());
+
       final Element et =
-        RXMLUtilities.getChild(e, "type", RXMLMeshParser.MESHES_URI);
+        RXMLUtilities.getChild(e, "type", RXMLConstants.MESHES_URI);
       final RXMLMeshType mt = RXMLMeshParser.parseType(et);
       events.eventMeshType(mt);
 
       final Element ev =
-        RXMLUtilities.getChild(e, "vertices", RXMLMeshParser.MESHES_URI);
+        RXMLUtilities.getChild(e, "vertices", RXMLConstants.MESHES_URI);
       RXMLMeshParser.parseVertices(ev, mt, events);
 
       final Element etr =
-        RXMLUtilities.getChild(e, "triangles", RXMLMeshParser.MESHES_URI);
+        RXMLUtilities.getChild(e, "triangles", RXMLConstants.MESHES_URI);
       RXMLMeshParser.parseTriangles(etr, events);
+
+      events.eventMeshEnded();
     } catch (final RXMLException x) {
-      events.eventXMLError(x);
+      events.eventError(x);
       throw x;
     }
   }
