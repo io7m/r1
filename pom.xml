@@ -12,8 +12,6 @@
 
   <modules>
     <module>io7m-renderer-core</module>
-    <module>io7m-renderer-demos-jogl</module>
-    <module>io7m-renderer-demos</module>
     <module>io7m-renderer-sandbox-jogl</module>
     <module>io7m-renderer-tests-jogl</module>
     <module>io7m-renderer-tests</module>
