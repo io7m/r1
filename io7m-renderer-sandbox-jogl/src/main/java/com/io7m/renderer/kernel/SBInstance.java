@@ -26,20 +26,20 @@ import com.io7m.renderer.RVectorI3F;
 @Immutable final class SBInstance
 {
   private final @Nonnull SBInstanceDescription description;
-  private final @CheckForNull SBTexture        diffuse;
-  private final @CheckForNull SBTexture        normal;
-  private final @CheckForNull SBTexture        specular;
+  private final @CheckForNull SBTexture        map_diffuse;
+  private final @CheckForNull SBTexture        map_normal;
+  private final @CheckForNull SBTexture        map_specular;
 
   public SBInstance(
     final @Nonnull SBInstanceDescription description,
-    final @CheckForNull SBTexture diffuse,
-    final @CheckForNull SBTexture normal,
-    final @CheckForNull SBTexture specular)
+    final @CheckForNull SBTexture map_diffuse,
+    final @CheckForNull SBTexture map_normal,
+    final @CheckForNull SBTexture map_specular)
   {
     this.description = description;
-    this.diffuse = diffuse;
-    this.normal = normal;
-    this.specular = specular;
+    this.map_diffuse = map_diffuse;
+    this.map_normal = map_normal;
+    this.map_specular = map_specular;
   }
 
   public @Nonnull SBInstanceDescription getDescription()
@@ -47,9 +47,9 @@ import com.io7m.renderer.RVectorI3F;
     return this.description;
   }
 
-  public @CheckForNull SBTexture getDiffuse()
+  public @CheckForNull SBTexture getDiffuseMap()
   {
-    return this.diffuse;
+    return this.map_diffuse;
   }
 
   public @Nonnull Integer getID()
@@ -57,19 +57,14 @@ import com.io7m.renderer.RVectorI3F;
     return this.description.getID();
   }
 
-  public @Nonnull String getModel()
+  public @Nonnull String getMesh()
   {
-    return this.description.getModel();
+    return this.description.getMesh();
   }
 
-  public @Nonnull String getModelObject()
+  public @CheckForNull SBTexture getNormalMap()
   {
-    return this.description.getModelObject();
-  }
-
-  public @CheckForNull SBTexture getNormal()
-  {
-    return this.normal;
+    return this.map_normal;
   }
 
   public @Nonnull RVectorI3F<SBDegrees> getOrientation()
@@ -82,9 +77,9 @@ import com.io7m.renderer.RVectorI3F;
     return this.description.getPosition();
   }
 
-  public @CheckForNull SBTexture getSpecular()
+  public @CheckForNull SBTexture getSpecularMap()
   {
-    return this.specular;
+    return this.map_specular;
   }
 
   @Override public String toString()

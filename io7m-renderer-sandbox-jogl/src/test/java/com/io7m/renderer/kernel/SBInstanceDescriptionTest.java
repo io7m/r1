@@ -55,7 +55,6 @@ public class SBInstanceDescriptionTest
         this.string_gen.next(),
         this.string_gen.next(),
         this.string_gen.next(),
-        this.string_gen.next(),
         this.string_gen.next());
     }
   }

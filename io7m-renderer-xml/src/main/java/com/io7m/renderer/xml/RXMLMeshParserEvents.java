@@ -32,11 +32,25 @@ public interface RXMLMeshParserEvents<E extends Throwable>
     throws E,
       ConstraintError;
 
+  /**
+   * Called when parsing of the mesh starts. This function is called
+   * unconditionally.
+   */
+
+  public void eventMeshStarted()
+    throws E,
+      ConstraintError;
+
+  /**
+   * Called when parsing of the mesh finishes. This function is called
+   * regardless of whether any error was raised during parsing.
+   */
+
   public void eventMeshEnded()
     throws E,
       ConstraintError;
 
-  public void eventMeshStarted(
+  public void eventMeshName(
     final @Nonnull String name)
     throws E,
       ConstraintError;

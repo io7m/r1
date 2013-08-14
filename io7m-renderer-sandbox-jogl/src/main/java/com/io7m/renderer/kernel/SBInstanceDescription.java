@@ -44,8 +44,7 @@ import com.io7m.renderer.RVectorI3F;
     final Element ed = SBXMLUtilities.getChild(e, "diffuse", uri);
     final Element en = SBXMLUtilities.getChild(e, "normal", uri);
     final Element es = SBXMLUtilities.getChild(e, "specular", uri);
-    final Element em = SBXMLUtilities.getChild(e, "model", uri);
-    final Element emm = SBXMLUtilities.getChild(e, "model-object", uri);
+    final Element em = SBXMLUtilities.getChild(e, "mesh", uri);
 
     final Integer id = SBXMLUtilities.getInteger(eid);
 
@@ -61,15 +60,13 @@ import com.io7m.renderer.RVectorI3F;
     final String specular =
       (es.getValue().length() == 0) ? null : es.getValue();
 
-    final String model = SBXMLUtilities.getNonEmptyString(em);
-    final String object = SBXMLUtilities.getNonEmptyString(emm);
+    final String mesh = SBXMLUtilities.getNonEmptyString(em);
 
     return new SBInstanceDescription(
       id,
       position,
       orientation,
-      model,
-      object,
+      mesh,
       diffuse,
       normal,
       specular);
@@ -78,8 +75,7 @@ import com.io7m.renderer.RVectorI3F;
   private final @Nonnull Integer                 id;
   private final @Nonnull RVectorI3F<RSpaceWorld> position;
   private final @Nonnull RVectorI3F<SBDegrees>   orientation;
-  private final @Nonnull String                  model;
-  private final @Nonnull String                  model_object;
+  private final @Nonnull String                  mesh;
   private final @CheckForNull String             diffuse;
   private final @CheckForNull String             normal;
   private final @CheckForNull String             specular;
@@ -88,8 +84,7 @@ import com.io7m.renderer.RVectorI3F;
     final @Nonnull Integer id,
     final @Nonnull RVectorI3F<RSpaceWorld> position,
     final @Nonnull RVectorI3F<SBDegrees> orientation,
-    final @Nonnull String model,
-    final @Nonnull String model_object,
+    final @Nonnull String mesh,
     final @CheckForNull String diffuse,
     final @CheckForNull String normal,
     final @CheckForNull String specular)
@@ -97,8 +92,7 @@ import com.io7m.renderer.RVectorI3F;
     this.id = id;
     this.position = position;
     this.orientation = orientation;
-    this.model = model;
-    this.model_object = model_object;
+    this.mesh = mesh;
     this.diffuse = diffuse;
     this.normal = normal;
     this.specular = specular;
@@ -127,10 +121,7 @@ import com.io7m.renderer.RVectorI3F;
     if (!this.id.equals(other.id)) {
       return false;
     }
-    if (!this.model.equals(other.model)) {
-      return false;
-    }
-    if (!this.model_object.equals(other.model_object)) {
+    if (!this.mesh.equals(other.mesh)) {
       return false;
     }
     if (this.normal == null) {
@@ -166,14 +157,9 @@ import com.io7m.renderer.RVectorI3F;
     return this.id;
   }
 
-  public @Nonnull String getModel()
+  public @Nonnull String getMesh()
   {
-    return this.model;
-  }
-
-  public @Nonnull String getModelObject()
-  {
-    return this.model_object;
+    return this.mesh;
   }
 
   public @CheckForNull String getNormal()
@@ -204,8 +190,7 @@ import com.io7m.renderer.RVectorI3F;
       (prime * result)
         + ((this.diffuse == null) ? 0 : this.diffuse.hashCode());
     result = (prime * result) + this.id.hashCode();
-    result = (prime * result) + this.model.hashCode();
-    result = (prime * result) + this.model_object.hashCode();
+    result = (prime * result) + this.mesh.hashCode();
     result =
       (prime * result) + ((this.normal == null) ? 0 : this.normal.hashCode());
     result = (prime * result) + this.orientation.hashCode();
@@ -226,9 +211,7 @@ import com.io7m.renderer.RVectorI3F;
     builder.append(" ");
     builder.append(this.orientation);
     builder.append(" ");
-    builder.append(this.model);
-    builder.append(" ");
-    builder.append(this.model_object);
+    builder.append(this.mesh);
     builder.append(" ");
     builder.append(this.diffuse);
     builder.append(" ");
@@ -269,10 +252,8 @@ import com.io7m.renderer.RVectorI3F;
     ep.appendChild(epy);
     ep.appendChild(epz);
 
-    final Element emo = new Element("s:model", uri);
-    emo.appendChild(this.model);
-    final Element eme = new Element("s:model-object", uri);
-    eme.appendChild(this.model_object);
+    final Element em = new Element("s:mesh", uri);
+    em.appendChild(this.mesh);
 
     final Element ed = new Element("s:diffuse", uri);
     if (this.diffuse != null) {
@@ -290,8 +271,7 @@ import com.io7m.renderer.RVectorI3F;
     e.appendChild(eid);
     e.appendChild(eo);
     e.appendChild(ep);
-    e.appendChild(emo);
-    e.appendChild(eme);
+    e.appendChild(em);
     e.appendChild(ed);
     e.appendChild(en);
     e.appendChild(es);

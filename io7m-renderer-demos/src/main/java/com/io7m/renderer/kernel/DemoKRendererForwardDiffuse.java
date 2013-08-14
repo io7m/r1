@@ -217,7 +217,8 @@ public final class DemoKRendererForwardDiffuse implements Demo
       DemoUtilities.texturedSquare(g, 1);
     final KMaterial material =
       DemoKRendererForwardDiffuse.makeMaterial(texture_loader, fs, g);
-    return new KMeshInstance(id, transform, p.first, p.second, material);
+    final KMesh mesh = new KMesh(p.first, p.second);
+    return new KMeshInstance(id, transform, mesh, material);
   }
 
   private static @Nonnull KScene makeScene(
@@ -408,6 +409,11 @@ public final class DemoKRendererForwardDiffuse implements Demo
       {
         int index = 0;
 
+        final KMesh mesh =
+          new KMesh(
+            this.suzanne.getArrayBuffer(),
+            this.suzanne.getIndexBuffer());
+
         for (int y = -9; y < 9; y += 3) {
           for (int x = -9; x < 9; x += 3) {
 
@@ -420,15 +426,11 @@ public final class DemoKRendererForwardDiffuse implements Demo
               y_rot);
 
             QuaternionM4F.multiplyInPlace(orientation, y_rot);
-
-            final KMeshInstance mesh =
-              new KMeshInstance(
-                Integer.valueOf(index),
-                new KTransform(new VectorI3F(x, y, 0), orientation),
-                this.suzanne.getArrayBuffer(),
-                this.suzanne.getIndexBuffer(),
-                this.mesh_material);
-            meshes.add(mesh);
+            final KMeshInstance instance =
+              new KMeshInstance(Integer.valueOf(index), new KTransform(
+                new VectorI3F(x, y, 0),
+                orientation), mesh, this.mesh_material);
+            meshes.add(instance);
 
             ++index;
           }
