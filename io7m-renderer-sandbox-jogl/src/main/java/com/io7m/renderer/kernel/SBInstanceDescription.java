@@ -23,35 +23,38 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import nu.xom.Element;
-import nu.xom.ValidityException;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.xml.RXMLUtilities;
 
 @Immutable final class SBInstanceDescription
 {
   static @Nonnull SBInstanceDescription fromXML(
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     final URI uri = SBSceneDescription.SCENE_XML_URI;
 
-    SBXMLUtilities.checkIsElement(e, "instance", uri);
+    RXMLUtilities.checkIsElement(e, "instance", uri);
 
-    final Element eid = SBXMLUtilities.getChild(e, "id", uri);
-    final Element ep = SBXMLUtilities.getChild(e, "position", uri);
-    final Element eo = SBXMLUtilities.getChild(e, "orientation", uri);
-    final Element ed = SBXMLUtilities.getChild(e, "diffuse", uri);
-    final Element en = SBXMLUtilities.getChild(e, "normal", uri);
-    final Element es = SBXMLUtilities.getChild(e, "specular", uri);
-    final Element em = SBXMLUtilities.getChild(e, "mesh", uri);
+    final Element eid = RXMLUtilities.getChild(e, "id", uri);
+    final Element ep = RXMLUtilities.getChild(e, "position", uri);
+    final Element eo = RXMLUtilities.getChild(e, "orientation", uri);
+    final Element ed = RXMLUtilities.getChild(e, "diffuse", uri);
+    final Element en = RXMLUtilities.getChild(e, "normal", uri);
+    final Element es = RXMLUtilities.getChild(e, "specular", uri);
+    final Element em = RXMLUtilities.getChild(e, "mesh", uri);
 
-    final Integer id = SBXMLUtilities.getInteger(eid);
+    final int id = RXMLUtilities.getElementInteger(eid);
 
     final RVectorI3F<RSpaceWorld> position =
-      SBXMLUtilities.getVector3f(ep, uri);
+      RXMLUtilities.getElementVector3f(ep, uri);
     final RVectorI3F<SBDegrees> orientation =
-      SBXMLUtilities.getVector3f(eo, uri);
+      RXMLUtilities.getElementVector3f(eo, uri);
 
     final String diffuse =
       (ed.getValue().length() == 0) ? null : ed.getValue();
@@ -60,10 +63,10 @@ import com.io7m.renderer.RVectorI3F;
     final String specular =
       (es.getValue().length() == 0) ? null : es.getValue();
 
-    final String mesh = SBXMLUtilities.getNonEmptyString(em);
+    final String mesh = RXMLUtilities.getElementNonEmptyString(em);
 
     return new SBInstanceDescription(
-      id,
+      Integer.valueOf(id),
       position,
       orientation,
       mesh,

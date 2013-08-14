@@ -27,11 +27,11 @@ import javax.annotation.concurrent.Immutable;
 
 import nu.xom.Element;
 import nu.xom.Elements;
-import nu.xom.ValidityException;
 
 import org.pcollections.HashTreePMap;
 import org.pcollections.PMap;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.renderer.RSpaceRGB;
@@ -40,6 +40,8 @@ import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
+import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.xml.RXMLUtilities;
 
 @Immutable final class SBSceneDescription
 {
@@ -69,7 +71,8 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   static @Nonnull SBSceneDescription fromXML(
     final @Nonnull BaseDirectory base,
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     return new SBSceneDescription(
       SBSceneDescription.fromXMLTextures(base, e),
@@ -82,16 +85,15 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     PMap<Integer, SBInstanceDescription>
     fromXMLInstances(
       final @Nonnull Element e)
-      throws ValidityException
+      throws RXMLException,
+        ConstraintError
   {
     final HashMap<Integer, SBInstanceDescription> m =
       new HashMap<Integer, SBInstanceDescription>();
 
     final Element ec =
-      SBXMLUtilities.getChild(
-        e,
-        "instances",
-        SBSceneDescription.SCENE_XML_URI);
+      RXMLUtilities
+        .getChild(e, "instances", SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc =
       ec.getChildElements(
@@ -109,12 +111,13 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
 
   private static @Nonnull PMap<Integer, KLight> fromXMLLights(
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     final HashMap<Integer, KLight> m = new HashMap<Integer, KLight>();
 
     final Element ec =
-      SBXMLUtilities.getChild(e, "lights", SBSceneDescription.SCENE_XML_URI);
+      RXMLUtilities.getChild(e, "lights", SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc = ec.getChildElements();
 
@@ -130,13 +133,14 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   private static @Nonnull PMap<String, SBMeshDescription> fromXMLMeshes(
     final @Nonnull BaseDirectory base,
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     final HashMap<String, SBMeshDescription> m =
       new HashMap<String, SBMeshDescription>();
 
     final Element ec =
-      SBXMLUtilities.getChild(e, "meshes", SBSceneDescription.SCENE_XML_URI);
+      RXMLUtilities.getChild(e, "meshes", SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc =
       ec
@@ -154,14 +158,14 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   private static @Nonnull PMap<String, SBTextureDescription> fromXMLTextures(
     final @Nonnull BaseDirectory base,
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     final HashMap<String, SBTextureDescription> m =
       new HashMap<String, SBTextureDescription>();
 
     final Element ec =
-      SBXMLUtilities
-        .getChild(e, "textures", SBSceneDescription.SCENE_XML_URI);
+      RXMLUtilities.getChild(e, "textures", SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc =
       ec.getChildElements(
@@ -262,7 +266,8 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
 
   private static @Nonnull KLight loadLight(
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     if (e.getLocalName().equals("light-directional")) {
       return SBSceneDescription.loadLightDirectional(e);
@@ -276,49 +281,55 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
 
   private static @Nonnull KLight.KDirectional loadLightDirectional(
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     final URI uri = SBSceneDescription.SCENE_XML_URI;
-    SBXMLUtilities.checkIsElement(e, "light-directional", uri);
+    RXMLUtilities.checkIsElement(e, "light-directional", uri);
 
-    final Element ed = SBXMLUtilities.getChild(e, "direction", uri);
-    final Element ec = SBXMLUtilities.getChild(e, "colour", uri);
-    final Element ei = SBXMLUtilities.getChild(e, "intensity", uri);
-    final Element eid = SBXMLUtilities.getChild(e, "id", uri);
+    final Element ed = RXMLUtilities.getChild(e, "direction", uri);
+    final Element ec = RXMLUtilities.getChild(e, "colour", uri);
+    final Element ei = RXMLUtilities.getChild(e, "intensity", uri);
+    final Element eid = RXMLUtilities.getChild(e, "id", uri);
 
     final RVectorI3F<RSpaceWorld> direction =
-      SBXMLUtilities.getVector3f(ed, uri);
-    final RVectorI3F<RSpaceRGB> colour = SBXMLUtilities.getRGB(ec, uri);
-    final Integer id = SBXMLUtilities.getInteger(eid);
-    final float intensity = SBXMLUtilities.getFloat(ei);
+      RXMLUtilities.getElementVector3f(ed, uri);
+    final RVectorI3F<RSpaceRGB> colour = RXMLUtilities.getElementRGB(ec, uri);
+    final int id = RXMLUtilities.getElementInteger(eid);
+    final float intensity = RXMLUtilities.getElementFloat(ei);
 
-    return new KLight.KDirectional(id, direction, colour, intensity);
+    return new KLight.KDirectional(
+      Integer.valueOf(id),
+      direction,
+      colour,
+      intensity);
   }
 
   private static @Nonnull KSphere loadLightSpherical(
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     final URI uri = SBSceneDescription.SCENE_XML_URI;
-    SBXMLUtilities.checkIsElement(e, "light-spherical", uri);
+    RXMLUtilities.checkIsElement(e, "light-spherical", uri);
 
-    final Element ep = SBXMLUtilities.getChild(e, "position", uri);
-    final Element ec = SBXMLUtilities.getChild(e, "colour", uri);
-    final Element ei = SBXMLUtilities.getChild(e, "intensity", uri);
-    final Element eid = SBXMLUtilities.getChild(e, "id", uri);
-    final Element er = SBXMLUtilities.getChild(e, "radius", uri);
-    final Element ef = SBXMLUtilities.getChild(e, "falloff", uri);
+    final Element ep = RXMLUtilities.getChild(e, "position", uri);
+    final Element ec = RXMLUtilities.getChild(e, "colour", uri);
+    final Element ei = RXMLUtilities.getChild(e, "intensity", uri);
+    final Element eid = RXMLUtilities.getChild(e, "id", uri);
+    final Element er = RXMLUtilities.getChild(e, "radius", uri);
+    final Element ef = RXMLUtilities.getChild(e, "falloff", uri);
 
     final RVectorI3F<RSpaceWorld> position =
-      SBXMLUtilities.getVector3f(ep, uri);
-    final RVectorI3F<RSpaceRGB> colour = SBXMLUtilities.getRGB(ec, uri);
-    final Integer id = SBXMLUtilities.getInteger(eid);
-    final float intensity = SBXMLUtilities.getFloat(ei);
-    final float radius = SBXMLUtilities.getFloat(er);
-    final float falloff = SBXMLUtilities.getFloat(ef);
+      RXMLUtilities.getElementVector3f(ep, uri);
+    final RVectorI3F<RSpaceRGB> colour = RXMLUtilities.getElementRGB(ec, uri);
+    final int id = RXMLUtilities.getElementInteger(eid);
+    final float intensity = RXMLUtilities.getElementFloat(ei);
+    final float radius = RXMLUtilities.getElementFloat(er);
+    final float falloff = RXMLUtilities.getElementFloat(ef);
 
     return new KLight.KSphere(
-      id,
+      Integer.valueOf(id),
       colour,
       intensity,
       position,
