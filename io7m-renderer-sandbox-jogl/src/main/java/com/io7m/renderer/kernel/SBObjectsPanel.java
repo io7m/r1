@@ -43,6 +43,7 @@ import javax.swing.SwingWorker;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
@@ -130,6 +131,23 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       for (final String name : this.meshes.keySet()) {
         this.mesh_selector.addItem(name);
       }
+    }
+
+    protected final static @Nonnull FileFilter MESH_FILE_FILTER;
+
+    static {
+      MESH_FILE_FILTER = new FileFilter() {
+        @Override public boolean accept(
+          final File f)
+        {
+          return f.isDirectory() || f.toString().endsWith(".rmx");
+        }
+
+        @Override public String getDescription()
+        {
+          return "RXML mesh files (*.rmx)";
+        }
+      };
     }
 
     public <C extends SBSceneControllerMeshes & SBSceneControllerInstances & SBSceneControllerTextures> ObjectEditDialogPanel(
@@ -227,6 +245,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         {
           final JFileChooser chooser = new JFileChooser();
           chooser.setMultiSelectionEnabled(false);
+          chooser.setFileFilter(ObjectEditDialogPanel.MESH_FILE_FILTER);
 
           final int r = chooser.showOpenDialog(ObjectEditDialogPanel.this);
           switch (r) {
