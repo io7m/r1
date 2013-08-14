@@ -14,10 +14,27 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.xml;
+package com.io7m.renderer.kernel;
 
-public abstract class RXMLMeshParserVBOContract<E extends Throwable> extends
-  RXMLMeshParserContract<E>
+import javax.annotation.Nonnull;
+import javax.swing.JFrame;
+
+import com.io7m.jlog.Log;
+
+final class SBObjectsWindow extends JFrame
 {
+  private static final long serialVersionUID;
 
+  static {
+    serialVersionUID = -312314551231238L;
+  }
+
+  public <C extends SBSceneControllerMeshes & SBSceneControllerInstances & SBSceneControllerTextures> SBObjectsWindow(
+    final @Nonnull C controller,
+    final @Nonnull Log log)
+  {
+    super("Instances");
+    this.getContentPane().add(new SBObjectsPanel(controller, log));
+    this.pack();
+  }
 }

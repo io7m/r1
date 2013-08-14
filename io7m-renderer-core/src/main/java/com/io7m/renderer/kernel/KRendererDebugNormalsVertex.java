@@ -141,11 +141,11 @@ final class KRendererDebugNormalsVertex implements KRenderer
 
   private void renderMesh(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMeshInstance mesh)
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = mesh.getTransform();
+    final KTransform transform = instance.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
 
     MatrixM4x4F.multiply(
@@ -169,6 +169,7 @@ final class KRendererDebugNormalsVertex implements KRenderer
      */
 
     try {
+      final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
       final ArrayBufferAttribute a_pos =

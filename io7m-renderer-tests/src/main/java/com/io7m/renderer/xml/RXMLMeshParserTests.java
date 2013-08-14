@@ -21,6 +21,8 @@ import java.io.InputStream;
 
 import javax.annotation.Nonnull;
 
+import nu.xom.Document;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -50,7 +52,7 @@ public final class RXMLMeshParserTests
       // Nothing
     }
 
-    @Override public void eventMeshStarted(
+    @Override public void eventMeshName(
       final String name)
       throws Throwable,
         ConstraintError
@@ -158,6 +160,13 @@ public final class RXMLMeshParserTests
     {
       // Nothing
     }
+
+    @Override public void eventMeshStarted()
+      throws Throwable,
+        ConstraintError
+    {
+      // Nothing
+    }
   }
 
   private @Nonnull InputStream getFile(
@@ -175,7 +184,8 @@ public final class RXMLMeshParserTests
   {
     try {
       final InputStream s = this.getFile("malformed.xml");
-      RXMLMeshParser.parseFromStreamValidating(s, new Show());
+      RXMLMeshDocument.parseFromStreamValidating(s);
+      s.close();
     } catch (final IOException e) {
       throw new AssertionError(e);
     } catch (final RXMLException e) {
@@ -195,7 +205,8 @@ public final class RXMLMeshParserTests
   {
     try {
       final InputStream s = this.getFile("invalid.xml");
-      RXMLMeshParser.parseFromStreamValidating(s, new Show());
+      RXMLMeshDocument.parseFromStreamValidating(s);
+      s.close();
     } catch (final IOException e) {
       throw new AssertionError(e);
     } catch (final RXMLException e) {
@@ -216,7 +227,8 @@ public final class RXMLMeshParserTests
       Throwable
   {
     final InputStream s = this.getFile("valid.xml");
-    RXMLMeshParser.parseFromStreamValidating(s, new Show());
+    RXMLMeshDocument.parseFromStreamValidating(s);
+    s.close();
   }
 
   @Test(expected = RXMLException.class) public
@@ -226,7 +238,9 @@ public final class RXMLMeshParserTests
   {
     try {
       final InputStream s = this.getFile("wrongtrianglecount.xml");
-      RXMLMeshParser.parseFromStreamValidating(s, new Show());
+      final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
+      RXMLMeshParser.parseFromDocument(d, new Show());
+      s.close();
     } catch (final IOException e) {
       throw new AssertionError(e);
     } catch (final RXMLException e) {
@@ -246,7 +260,9 @@ public final class RXMLMeshParserTests
   {
     try {
       final InputStream s = this.getFile("wrongversion.xml");
-      RXMLMeshParser.parseFromStreamValidating(s, new Show());
+      final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
+      RXMLMeshParser.parseFromDocument(d, new Show());
+      s.close();
     } catch (final IOException e) {
       throw new AssertionError(e);
     } catch (final RXMLException e) {
@@ -266,7 +282,9 @@ public final class RXMLMeshParserTests
   {
     try {
       final InputStream s = this.getFile("wrongvertexcount.xml");
-      RXMLMeshParser.parseFromStreamValidating(s, new Show());
+      final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
+      RXMLMeshParser.parseFromDocument(d, new Show());
+      s.close();
     } catch (final IOException e) {
       throw new AssertionError(e);
     } catch (final RXMLException e) {
@@ -329,12 +347,11 @@ public final class RXMLMeshParserTests
       this.mesh_ended = true;
     }
 
-    @Override public void eventMeshStarted(
+    @Override public void eventMeshName(
       final String name)
       throws Throwable,
         ConstraintError
     {
-      this.mesh_started = true;
       Assert.assertEquals(this.expected_name, name);
     }
 
@@ -445,6 +462,13 @@ public final class RXMLMeshParserTests
       this.vertices_started = true;
       Assert.assertEquals(this.expected_vertices, count);
     }
+
+    @Override public void eventMeshStarted()
+      throws Throwable,
+        ConstraintError
+    {
+      this.mesh_started = true;
+    }
   }
 
   @SuppressWarnings("synthetic-access") @Test public
@@ -466,7 +490,9 @@ public final class RXMLMeshParserTests
           expected_vertices);
 
       final InputStream s = this.getFile("valid.xml");
-      RXMLMeshParser.parseFromStreamValidating(s, c);
+      final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
+      RXMLMeshParser.parseFromDocument(d, c);
+      s.close();
 
       Assert.assertTrue(c.mesh_ended);
       Assert.assertTrue(c.mesh_started);

@@ -89,9 +89,9 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.jsom0.core</groupId>
-      <artifactId>io7m-jsom0-core</artifactId>
-      <version>0.9.9</version>
+      <groupId>com.io7m.renderer.xml</groupId>
+      <artifactId>io7m-renderer-xml</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

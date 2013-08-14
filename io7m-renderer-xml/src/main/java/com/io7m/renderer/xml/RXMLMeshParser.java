@@ -16,29 +16,13 @@
 
 package com.io7m.renderer.xml;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-
 import javax.annotation.Nonnull;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.validation.SchemaFactory;
 
 import nu.xom.Attribute;
-import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
-import nu.xom.ParsingException;
 import nu.xom.ValidityException;
-
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -47,12 +31,8 @@ import com.io7m.renderer.RSpaceTangent;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.xml.RXMLException.RXMLExceptionParseError;
-import com.io7m.renderer.xml.RXMLException.RXMLExceptionParserConfigurationError;
-import com.io7m.renderer.xml.RXMLException.RXMLExceptionValidityError;
-import com.io7m.renderer.xml.RXMLException.RXMLExceptionValiditySAXErrors;
 
-final class RXMLMeshParser<E extends Throwable>
+public final class RXMLMeshParser<E extends Throwable>
 {
   private static void checkVersion(
     final @Nonnull Element e)
@@ -73,7 +53,7 @@ final class RXMLMeshParser<E extends Throwable>
     }
   }
 
-  static <E extends Throwable> RXMLMeshParser<E> parseFromDocument(
+  public static <E extends Throwable> RXMLMeshParser<E> parseFromDocument(
     final @Nonnull Document d,
     final @Nonnull RXMLMeshParserEvents<E> events)
     throws ConstraintError,
@@ -84,79 +64,7 @@ final class RXMLMeshParser<E extends Throwable>
     return new RXMLMeshParser<E>(d.getRootElement(), events);
   }
 
-  static <E extends Throwable> RXMLMeshParser<E> parseFromStreamValidating(
-    final @Nonnull InputStream s,
-    final @Nonnull RXMLMeshParserEvents<E> events)
-    throws ConstraintError,
-      E,
-      IOException,
-      RXMLException
-  {
-    Constraints.constrainNotNull(s, "Stream");
-
-    try {
-      final URL schema_url =
-        RXMLMeshParser.class.getResource("/com/io7m/renderer/xml/meshes.xsd");
-
-      final SAXParserFactory spf = SAXParserFactory.newInstance();
-      spf.setValidating(false);
-      spf.setNamespaceAware(true);
-
-      final SchemaFactory sf =
-        SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
-      spf.setSchema(sf.newSchema(schema_url));
-
-      final ArrayList<SAXException> exceptions =
-        new ArrayList<SAXException>();
-
-      final SAXParser sp = spf.newSAXParser();
-      final XMLReader xr = sp.getXMLReader();
-      xr.setErrorHandler(new ErrorHandler() {
-        @Override public void warning(
-          final SAXParseException exception)
-          throws SAXException
-        {
-          exceptions.add(exception);
-        }
-
-        @Override public void fatalError(
-          final SAXParseException exception)
-          throws SAXException
-        {
-          exceptions.add(exception);
-        }
-
-        @Override public void error(
-          final SAXParseException exception)
-          throws SAXException
-        {
-          exceptions.add(exception);
-        }
-      });
-
-      final Builder builder = new Builder(xr);
-      final Document d = builder.build(s);
-
-      if (exceptions.size() > 0) {
-        throw new RXMLExceptionValiditySAXErrors(exceptions);
-      }
-
-      return new RXMLMeshParser<E>(d.getRootElement(), events);
-
-    } catch (final SAXException e) {
-      final ArrayList<SAXException> es = new ArrayList<SAXException>();
-      es.add(e);
-      throw new RXMLExceptionValiditySAXErrors(es);
-    } catch (final ValidityException e) {
-      throw new RXMLExceptionValidityError(e);
-    } catch (final ParsingException e) {
-      throw new RXMLExceptionParseError(e);
-    } catch (final ParserConfigurationException e) {
-      throw new RXMLExceptionParserConfigurationError(e);
-    }
-  }
-
-  static <E extends Throwable> RXMLMeshParser<E> parseFromElement(
+  public static <E extends Throwable> RXMLMeshParser<E> parseFromElement(
     final @Nonnull Element e,
     final @Nonnull RXMLMeshParserEvents<E> events)
     throws ConstraintError,
@@ -352,12 +260,14 @@ final class RXMLMeshParser<E extends Throwable>
     this.events = Constraints.constrainNotNull(events, "Parser events");
 
     try {
+      this.events.eventMeshStarted();
+
       RXMLUtilities.checkIsElement(e, "mesh", RXMLConstants.MESHES_URI);
       RXMLMeshParser.checkVersion(e);
 
       final Attribute na =
         RXMLUtilities.getAttribute(e, "name", RXMLConstants.MESHES_URI);
-      events.eventMeshStarted(na.getValue());
+      events.eventMeshName(na.getValue());
 
       final Element et =
         RXMLUtilities.getChild(e, "type", RXMLConstants.MESHES_URI);
@@ -371,11 +281,11 @@ final class RXMLMeshParser<E extends Throwable>
       final Element etr =
         RXMLUtilities.getChild(e, "triangles", RXMLConstants.MESHES_URI);
       RXMLMeshParser.parseTriangles(etr, events);
-
-      events.eventMeshEnded();
     } catch (final RXMLException x) {
       events.eventError(x);
       throw x;
+    } finally {
+      events.eventMeshEnded();
     }
   }
 }

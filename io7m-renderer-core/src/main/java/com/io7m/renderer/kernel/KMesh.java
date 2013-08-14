@@ -17,11 +17,13 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+
+import com.io7m.jcanephora.ArrayBuffer;
+import com.io7m.jcanephora.IndexBuffer;
 
 /**
  * <p>
- * An instance of a polygon mesh on the GPU.
+ * A polygon mesh on the GPU.
  * </p>
  * <p>
  * The polygon mesh is expected to have the following type(s):
@@ -38,42 +40,26 @@ import javax.annotation.concurrent.Immutable;
  * <ul>
  */
 
-@Immutable final class KMeshInstance implements KTransformable
+public final class KMesh
 {
-  private final @Nonnull Integer    id;
-  private final @Nonnull KTransform transform;
-  private final @Nonnull KMesh      mesh;
-  private final @Nonnull KMaterial  material;
+  private final @Nonnull ArrayBuffer array;
+  private final @Nonnull IndexBuffer indices;
 
-  public KMeshInstance(
-    final @Nonnull Integer id,
-    final @Nonnull KTransform transform,
-    final @Nonnull KMesh mesh,
-    final @Nonnull KMaterial material)
+  KMesh(
+    final @Nonnull ArrayBuffer array,
+    final @Nonnull IndexBuffer indices)
   {
-    this.id = id;
-    this.transform = transform;
-    this.mesh = mesh;
-    this.material = material;
+    this.array = array;
+    this.indices = indices;
   }
 
-  @Nonnull Integer getID()
+  @Nonnull ArrayBuffer getArrayBuffer()
   {
-    return this.id;
+    return this.array;
   }
 
-  @Nonnull KMaterial getMaterial()
+  @Nonnull IndexBuffer getIndexBuffer()
   {
-    return this.material;
-  }
-
-  @Nonnull KMesh getMesh()
-  {
-    return this.mesh;
-  }
-
-  @Override public @Nonnull KTransform getTransform()
-  {
-    return this.transform;
+    return this.indices;
   }
 }
