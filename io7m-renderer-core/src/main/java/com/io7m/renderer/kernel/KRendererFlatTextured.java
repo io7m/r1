@@ -42,6 +42,7 @@ import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
@@ -203,14 +204,21 @@ final class KRendererFlatTextured implements KRenderer
       final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final ArrayBufferAttribute a_uv =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
 
       gc.arrayBufferBind(array);
+
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       this.exec.execAttributeBind(gc, "v_position", a_pos);
-      this.exec.execAttributeBind(gc, "v_uv", a_uv);
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+        final ArrayBufferAttribute a_uv =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
+        this.exec.execAttributeBind(gc, "v_uv", a_uv);
+      } else {
+        this.exec.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
+      }
+
       this.exec.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception

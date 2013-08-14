@@ -40,6 +40,7 @@ import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI2I;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
@@ -172,14 +173,21 @@ final class KRendererDebugNormalsVertex implements KRenderer
       final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final ArrayBufferAttribute a_nor =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
 
       gc.arrayBufferBind(array);
+
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       this.exec.execAttributeBind(gc, "v_position", a_pos);
-      this.exec.execAttributeBind(gc, "v_normal", a_nor);
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
+        final ArrayBufferAttribute a_nor =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+        this.exec.execAttributeBind(gc, "v_normal", a_nor);
+      } else {
+        this.exec.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
+      }
+
       this.exec.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception
