@@ -215,11 +215,11 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
   private void renderDepthPassMesh(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable exec,
-    final @Nonnull KMeshInstance mesh)
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = mesh.getTransform();
+    final KTransform transform = instance.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
 
     MatrixM4x4F.multiply(
@@ -240,6 +240,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
      */
 
     try {
+      final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
       final ArrayBufferAttribute a_pos = array.getAttribute("position");
@@ -298,11 +299,11 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
   private void renderLightPassMeshDirectional(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable exec,
-    final @Nonnull KMeshInstance mesh)
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = mesh.getTransform();
+    final KTransform transform = instance.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
 
     MatrixM4x4F.multiply(
@@ -318,7 +319,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
      * Upload matrices, set textures.
      */
 
-    final KMaterial material = mesh.getMaterial();
+    final KMaterial material = instance.getMaterial();
     final TextureUnit[] texture_units = gc.textureGetUnits();
 
     {
@@ -365,6 +366,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
      */
 
     try {
+      final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
       final ArrayBufferAttribute a_pos =
@@ -487,11 +489,11 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
   private void renderLightPassMeshSpherical(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable exec,
-    final @Nonnull KMeshInstance mesh)
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = mesh.getTransform();
+    final KTransform transform = instance.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
 
     MatrixM4x4F.multiply(
@@ -507,7 +509,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
      * Upload matrices, set textures.
      */
 
-    final KMaterial material = mesh.getMaterial();
+    final KMaterial material = instance.getMaterial();
     final TextureUnit[] texture_units = gc.textureGetUnits();
 
     {
@@ -562,6 +564,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
      */
 
     try {
+      final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
       final ArrayBufferAttribute a_pos =

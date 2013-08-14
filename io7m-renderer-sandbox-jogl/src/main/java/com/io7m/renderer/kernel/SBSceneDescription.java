@@ -49,7 +49,7 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   static {
     try {
       SCENE_XML_URI = new URI("http://io7m.com/software/renderer");
-      SCENE_XML_VERSION = "1";
+      SCENE_XML_VERSION = "2";
     } catch (final URISyntaxException e) {
       throw new UnreachableCodeException();
     }
@@ -58,12 +58,12 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   public static @Nonnull SBSceneDescription empty()
   {
     final PMap<String, SBTextureDescription> textures = HashTreePMap.empty();
-    final PMap<String, SBModelDescription> models = HashTreePMap.empty();
+    final PMap<String, SBMeshDescription> meshes = HashTreePMap.empty();
     final PMap<Integer, KLight> lights = HashTreePMap.empty();
     final PMap<Integer, SBInstanceDescription> instances =
       HashTreePMap.empty();
 
-    return new SBSceneDescription(textures, models, lights, instances);
+    return new SBSceneDescription(textures, meshes, lights, instances);
   }
 
   static @Nonnull SBSceneDescription fromXML(
@@ -73,7 +73,7 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   {
     return new SBSceneDescription(
       SBSceneDescription.fromXMLTextures(base, e),
-      SBSceneDescription.fromXMLModels(base, e),
+      SBSceneDescription.fromXMLMeshes(base, e),
       SBSceneDescription.fromXMLLights(e),
       SBSceneDescription.fromXMLInstances(e));
   }
@@ -127,25 +127,24 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     return HashTreePMap.from(m);
   }
 
-  private static @Nonnull PMap<String, SBModelDescription> fromXMLModels(
+  private static @Nonnull PMap<String, SBMeshDescription> fromXMLMeshes(
     final @Nonnull BaseDirectory base,
     final @Nonnull Element e)
     throws ValidityException
   {
-    final HashMap<String, SBModelDescription> m =
-      new HashMap<String, SBModelDescription>();
+    final HashMap<String, SBMeshDescription> m =
+      new HashMap<String, SBMeshDescription>();
 
     final Element ec =
-      SBXMLUtilities.getChild(e, "models", SBSceneDescription.SCENE_XML_URI);
+      SBXMLUtilities.getChild(e, "meshes", SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc =
-      ec.getChildElements(
-        "model",
-        SBSceneDescription.SCENE_XML_URI.toString());
+      ec
+        .getChildElements("mesh", SBSceneDescription.SCENE_XML_URI.toString());
 
     for (int index = 0; index < ecc.size(); ++index) {
       final Element ei = ecc.get(index);
-      final SBModelDescription d = SBModelDescription.fromXML(base, ei);
+      final SBMeshDescription d = SBMeshDescription.fromXML(base, ei);
       m.put(d.getName(), d);
     }
 
@@ -328,18 +327,18 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   }
 
   private final @Nonnull PMap<String, SBTextureDescription>   textures;
-  private final @Nonnull PMap<String, SBModelDescription>     models;
+  private final @Nonnull PMap<String, SBMeshDescription>      meshes;
   private final @Nonnull PMap<Integer, KLight>                lights;
   private final @Nonnull PMap<Integer, SBInstanceDescription> instances;
 
   private SBSceneDescription(
     final @Nonnull PMap<String, SBTextureDescription> textures,
-    final @Nonnull PMap<String, SBModelDescription> models,
+    final @Nonnull PMap<String, SBMeshDescription> models,
     final @Nonnull PMap<Integer, KLight> lights,
     final @Nonnull PMap<Integer, SBInstanceDescription> instances)
   {
     this.textures = textures;
-    this.models = models;
+    this.meshes = models;
     this.lights = lights;
     this.instances = instances;
   }
@@ -363,7 +362,7 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     if (!this.lights.equals(other.lights)) {
       return false;
     }
-    if (!this.models.equals(other.models)) {
+    if (!this.meshes.equals(other.meshes)) {
       return false;
     }
     if (!this.textures.equals(other.textures)) {
@@ -382,9 +381,21 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     return this.lights.values();
   }
 
-  public @Nonnull Collection<SBModelDescription> getModelDescriptions()
+  public @CheckForNull SBMeshDescription getMesh(
+    final @Nonnull String name)
   {
-    return this.models.values();
+    return this.meshes.get(name);
+  }
+
+  public @Nonnull Collection<SBMeshDescription> getMeshDescriptions()
+  {
+    return this.meshes.values();
+  }
+
+  public @CheckForNull SBTextureDescription getTexture(
+    final @Nonnull String name)
+  {
+    return this.textures.get(name);
   }
 
   public @Nonnull Collection<SBTextureDescription> getTextureDescriptions()
@@ -398,7 +409,7 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     int result = 1;
     result = (prime * result) + this.instances.hashCode();
     result = (prime * result) + this.lights.hashCode();
-    result = (prime * result) + this.models.hashCode();
+    result = (prime * result) + this.meshes.hashCode();
     result = (prime * result) + this.textures.hashCode();
     return result;
   }
@@ -408,7 +419,7 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   {
     return new SBSceneDescription(
       this.textures,
-      this.models,
+      this.meshes,
       this.lights,
       this.instances.plus(d.getID(), d));
   }
@@ -418,15 +429,15 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   {
     return new SBSceneDescription(
       this.textures,
-      this.models,
+      this.meshes,
       this.lights.plus(l.getID(), l),
       this.instances);
   }
 
-  public @Nonnull SBSceneDescription modelAdd(
-    final @Nonnull SBModelDescription d)
+  public @Nonnull SBSceneDescription meshAdd(
+    final @Nonnull SBMeshDescription d)
   {
-    return new SBSceneDescription(this.textures, this.models.plus(
+    return new SBSceneDescription(this.textures, this.meshes.plus(
       d.getName(),
       d), this.lights, this.instances);
   }
@@ -436,7 +447,7 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   {
     return new SBSceneDescription(
       this.textures.plus(t.getName(), t),
-      this.models,
+      this.meshes,
       this.lights,
       this.instances);
   }
@@ -451,8 +462,8 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
       et.appendChild(t.toXML());
     }
 
-    final Element em = new Element("s:models", uri);
-    for (final SBModelDescription m : this.models.values()) {
+    final Element em = new Element("s:meshes", uri);
+    for (final SBMeshDescription m : this.meshes.values()) {
       em.appendChild(m.toXML());
     }
 
@@ -471,17 +482,5 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     e.appendChild(el);
     e.appendChild(ei);
     return e;
-  }
-
-  public @CheckForNull SBTextureDescription getTexture(
-    final @Nonnull String name)
-  {
-    return this.textures.get(name);
-  }
-
-  public @CheckForNull SBModelDescription getModel(
-    final @Nonnull String name)
-  {
-    return this.models.get(name);
   }
 }

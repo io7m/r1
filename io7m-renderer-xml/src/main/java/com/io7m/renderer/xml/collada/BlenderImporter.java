@@ -506,16 +506,19 @@ public final class BlenderImporter
     assert (indices.length % 3) == 0;
 
     final ColladaVertexType type = mesh.getType();
-    final int stride = type.getTriangleIndexCount();
+    final int tri_indices = type.getIndicesPerTriangle();
+    final int vert_indices = type.getIndicesPerVertex();
 
     log.debug("vertex position index offset : " + type.getOffsetPosition());
     log.debug("vertex normal index offset   : " + type.getOffsetNormal());
     log.debug("vertex uv index offset       : " + type.getOffsetUV());
+    log.debug("triangle indices             : " + tri_indices);
+    log.debug("vertex indices               : " + vert_indices);
 
-    for (int offset = 0; offset < indices.length; offset += stride) {
-      final int tri0_off = 0 + offset;
-      final int tri1_off = 3 + offset;
-      final int tri2_off = 6 + offset;
+    for (int offset = 0; offset < indices.length; offset += tri_indices) {
+      final int tri0_off = offset;
+      final int tri1_off = offset + vert_indices;
+      final int tri2_off = offset + vert_indices + vert_indices;
 
       final int p_offset = type.getOffsetPosition();
       final int p_count = mesh.positionCount();
@@ -653,10 +656,10 @@ public final class BlenderImporter
       new ColladaMesh(name, vertex_type, axis);
 
     BlenderImporter.populateVertexArray(xpc, mesh, e, log);
-    if (vertex_type.getOffsetNormal() != -1) {
+    if (vertex_type.hasNormal()) {
       BlenderImporter.populateNormalArray(xpc, mesh, e, log);
     }
-    if (vertex_type.getOffsetUV() != -1) {
+    if (vertex_type.hasUV()) {
       BlenderImporter.populateTexCoordArray(xpc, mesh, e, log);
     }
 

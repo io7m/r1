@@ -54,16 +54,25 @@ import javax.annotation.concurrent.Immutable;
    * of vertex.
    */
 
-  public int getTriangleIndexCount()
+  public int getIndicesPerTriangle()
   {
-    int stride = 3;
+    return this.getIndicesPerVertex() * 3;
+  }
+
+  /**
+   * Return the number of indices requires to express a vertex of this type.
+   */
+
+  public int getIndicesPerVertex()
+  {
+    int indices = 1;
     if (this.hasNormal()) {
-      stride += 3;
+      indices += 1;
     }
     if (this.hasUV()) {
-      stride += 3;
+      indices += 1;
     }
-    return stride;
+    return indices;
   }
 
   public boolean hasNormal()

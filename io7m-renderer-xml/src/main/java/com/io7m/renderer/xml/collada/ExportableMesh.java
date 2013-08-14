@@ -45,7 +45,7 @@ final class ExportableMesh
 {
   @Immutable static class Triangle
   {
-    private final int v0;
+    final int         v0;
     private final int v1;
     private final int v2;
 
@@ -242,14 +242,23 @@ final class ExportableMesh
     v2.updateTangent(tangent);
   }
 
+  @SuppressWarnings("boxing") private static @Nonnull String outFloat(
+    final float x)
+  {
+    return String.format("%.6f", x);
+  }
+
   private static @Nonnull Element toXMLVertexNormal(
     final RVectorReadable3F<RSpaceObject> normal)
   {
     final String uri = RXMLConstants.MESHES_URI.toString();
     final Element e = new Element("m:n", uri);
-    e.addAttribute(new Attribute("m:x", uri, Float.toString(normal.getXF())));
-    e.addAttribute(new Attribute("m:y", uri, Float.toString(normal.getYF())));
-    e.addAttribute(new Attribute("m:z", uri, Float.toString(normal.getZF())));
+    e.addAttribute(new Attribute("m:x", uri, ExportableMesh.outFloat(normal
+      .getXF())));
+    e.addAttribute(new Attribute("m:y", uri, ExportableMesh.outFloat(normal
+      .getYF())));
+    e.addAttribute(new Attribute("m:z", uri, ExportableMesh.outFloat(normal
+      .getZF())));
     return e;
   }
 
@@ -258,9 +267,12 @@ final class ExportableMesh
   {
     final String u = RXMLConstants.MESHES_URI.toString();
     final Element e = new Element("m:p", u);
-    e.addAttribute(new Attribute("m:x", u, Float.toString(position.getXF())));
-    e.addAttribute(new Attribute("m:y", u, Float.toString(position.getYF())));
-    e.addAttribute(new Attribute("m:z", u, Float.toString(position.getZF())));
+    e.addAttribute(new Attribute("m:x", u, ExportableMesh.outFloat(position
+      .getXF())));
+    e.addAttribute(new Attribute("m:y", u, ExportableMesh.outFloat(position
+      .getYF())));
+    e.addAttribute(new Attribute("m:z", u, ExportableMesh.outFloat(position
+      .getZF())));
     return e;
   }
 
@@ -269,9 +281,12 @@ final class ExportableMesh
   {
     final String u = RXMLConstants.MESHES_URI.toString();
     final Element e = new Element("m:t", u);
-    e.addAttribute(new Attribute("m:x", u, Float.toString(tangent.getXF())));
-    e.addAttribute(new Attribute("m:y", u, Float.toString(tangent.getYF())));
-    e.addAttribute(new Attribute("m:z", u, Float.toString(tangent.getZF())));
+    e.addAttribute(new Attribute("m:x", u, ExportableMesh.outFloat(tangent
+      .getXF())));
+    e.addAttribute(new Attribute("m:y", u, ExportableMesh.outFloat(tangent
+      .getYF())));
+    e.addAttribute(new Attribute("m:z", u, ExportableMesh.outFloat(tangent
+      .getZF())));
     return e;
   }
 
@@ -280,8 +295,10 @@ final class ExportableMesh
   {
     final String uri = RXMLConstants.MESHES_URI.toString();
     final Element e = new Element("m:u", uri);
-    e.addAttribute(new Attribute("m:x", uri, Float.toString(uv.getXF())));
-    e.addAttribute(new Attribute("m:y", uri, Float.toString(uv.getYF())));
+    e.addAttribute(new Attribute("m:x", uri, ExportableMesh.outFloat(uv
+      .getXF())));
+    e.addAttribute(new Attribute("m:y", uri, ExportableMesh.outFloat(uv
+      .getYF())));
     return e;
   }
 
@@ -478,7 +495,9 @@ final class ExportableMesh
     return e;
   }
 
-  private @Nonnull Element toXMLTriangles()
+  @SuppressWarnings("synthetic-access") private @Nonnull
+    Element
+    toXMLTriangles()
   {
     final String u = RXMLConstants.MESHES_URI.toString();
     final Element ets = new Element("m:triangles", u);
@@ -522,7 +541,9 @@ final class ExportableMesh
     return et;
   }
 
-  private @Nonnull Element toXMLVertices()
+  @SuppressWarnings("synthetic-access") private @Nonnull
+    Element
+    toXMLVertices()
   {
     final String uri = RXMLConstants.MESHES_URI.toString();
     final Element evs = new Element("m:vertices", uri);

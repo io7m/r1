@@ -30,7 +30,7 @@ import org.junit.Test;
 public class SBModelDescriptionTest
 {
   private static class ModelGenerator implements
-    Generator<SBModelDescription>
+    Generator<SBMeshDescription>
   {
     private final @Nonnull SBNonEmptyStringGenerator string_gen;
 
@@ -39,9 +39,9 @@ public class SBModelDescriptionTest
       this.string_gen = new SBNonEmptyStringGenerator();
     }
 
-    @Override public SBModelDescription next()
+    @Override public SBMeshDescription next()
     {
-      return new SBModelDescription(
+      return new SBMeshDescription(
         new File(this.string_gen.next()),
         this.string_gen.next());
     }
@@ -53,14 +53,14 @@ public class SBModelDescriptionTest
   {
     QuickCheck.forAllVerbose(
       new ModelGenerator(),
-      new AbstractCharacteristic<SBModelDescription>() {
+      new AbstractCharacteristic<SBMeshDescription>() {
         @Override protected void doSpecify(
-          final @Nonnull SBModelDescription desc)
+          final @Nonnull SBMeshDescription desc)
           throws Throwable
         {
           Assert.assertEquals(
             desc,
-            SBModelDescription.fromXML(null, desc.toXML()));
+            SBMeshDescription.fromXML(null, desc.toXML()));
         }
       });
   }

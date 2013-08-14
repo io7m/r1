@@ -204,7 +204,8 @@ public final class DemoKRendererFlat implements Demo
       DemoUtilities.texturedSquare(g, 1);
     final KMaterial material =
       DemoKRendererFlat.makeMaterial(texture_loader, fs, g);
-    return new KMeshInstance(id, transform, p.first, p.second, material);
+    final KMesh mesh = new KMesh(p.first, p.second);
+    return new KMeshInstance(id, transform, mesh, material);
   }
 
   private static @Nonnull KScene makeScene(
@@ -327,14 +328,13 @@ public final class DemoKRendererFlat implements Demo
         Math.toRadians((frame + x) % 360),
         orientation);
 
-      final KMeshInstance mesh =
-        new KMeshInstance(
-          Integer.valueOf(index),
-          new KTransform(new VectorI3F(x, 0, -1), orientation),
-          this.quad_in_scene.first,
-          this.quad_in_scene.second,
-          this.mesh_material);
-      meshes.add(mesh);
+      final KMesh mesh =
+        new KMesh(this.quad_in_scene.first, this.quad_in_scene.second);
+      final KMeshInstance instance =
+        new KMeshInstance(Integer.valueOf(index), new KTransform(
+          new VectorI3F(x, 0, -1),
+          orientation), mesh, this.mesh_material);
+      meshes.add(instance);
 
       ++index;
     }

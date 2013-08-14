@@ -29,34 +29,32 @@ import org.xml.sax.SAXException;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 
-abstract class RXMLException extends Exception
+public abstract class RXMLException extends Exception
 {
-  private static final long serialVersionUID = 5005826249892823232L;
-
-  static enum Type
+  public static final class RXMLExceptionParseError extends RXMLException
   {
-    XML_PARSE_ERROR,
-    XML_VALIDITY_SAX_ERROR,
-    XML_VALIDITY_ERROR
+    private static final long               serialVersionUID;
+    private final @Nonnull ParsingException e;
+
+    static {
+      serialVersionUID = -5639465367483354396L;
+    }
+
+    @SuppressWarnings("synthetic-access") RXMLExceptionParseError(
+      final @Nonnull ParsingException e)
+      throws ConstraintError
+    {
+      super(e, Type.XML_PARSE_ERROR);
+      this.e = Constraints.constrainNotNull(e, "Exception");
+    }
+
+    public @Nonnull ParsingException getException()
+    {
+      return this.e;
+    }
   }
 
-  private final @Nonnull Type type;
-
-  private RXMLException(
-    final @Nonnull Exception exception,
-    final @Nonnull Type type)
-    throws ConstraintError
-  {
-    super(exception);
-    this.type = Constraints.constrainNotNull(type, "Type");
-  }
-
-  public @Nonnull Type getType()
-  {
-    return this.type;
-  }
-
-  static final class RXMLExceptionParserConfigurationError extends
+  public static final class RXMLExceptionParserConfigurationError extends
     RXMLException
   {
     private static final long                           serialVersionUID;
@@ -80,30 +78,31 @@ abstract class RXMLException extends Exception
     }
   }
 
-  static final class RXMLExceptionParseError extends RXMLException
+  public static final class RXMLExceptionValidityError extends RXMLException
   {
-    private static final long               serialVersionUID;
-    private final @Nonnull ParsingException e;
+    private static final long                serialVersionUID;
+    private final @Nonnull ValidityException e;
 
     static {
-      serialVersionUID = -5639465367483354396L;
+      serialVersionUID = -6695888203449564788L;
     }
 
-    @SuppressWarnings("synthetic-access") RXMLExceptionParseError(
-      final @Nonnull ParsingException e)
+    @SuppressWarnings("synthetic-access") RXMLExceptionValidityError(
+      final @Nonnull ValidityException e)
       throws ConstraintError
     {
-      super(e, Type.XML_PARSE_ERROR);
+      super(e, Type.XML_VALIDITY_ERROR);
       this.e = Constraints.constrainNotNull(e, "Exception");
     }
 
-    public @Nonnull ParsingException getException()
+    public @Nonnull ValidityException getException()
     {
       return this.e;
     }
   }
 
-  static final class RXMLExceptionValiditySAXErrors extends RXMLException
+  public static final class RXMLExceptionValiditySAXErrors extends
+    RXMLException
   {
     private static final long                 serialVersionUID;
     private final @Nonnull List<SAXException> es;
@@ -126,26 +125,27 @@ abstract class RXMLException extends Exception
     }
   }
 
-  static final class RXMLExceptionValidityError extends RXMLException
+  static enum Type
   {
-    private static final long                serialVersionUID;
-    private final @Nonnull ValidityException e;
+    XML_PARSE_ERROR,
+    XML_VALIDITY_SAX_ERROR,
+    XML_VALIDITY_ERROR
+  }
 
-    static {
-      serialVersionUID = -6695888203449564788L;
-    }
+  private static final long   serialVersionUID = 5005826249892823232L;
+  private final @Nonnull Type type;
 
-    @SuppressWarnings("synthetic-access") RXMLExceptionValidityError(
-      final @Nonnull ValidityException e)
-      throws ConstraintError
-    {
-      super(e, Type.XML_VALIDITY_ERROR);
-      this.e = Constraints.constrainNotNull(e, "Exception");
-    }
+  private RXMLException(
+    final @Nonnull Exception exception,
+    final @Nonnull Type type)
+    throws ConstraintError
+  {
+    super(exception);
+    this.type = Constraints.constrainNotNull(type, "Type");
+  }
 
-    public @Nonnull ValidityException getException()
-    {
-      return this.e;
-    }
+  public @Nonnull Type getType()
+  {
+    return this.type;
   }
 }

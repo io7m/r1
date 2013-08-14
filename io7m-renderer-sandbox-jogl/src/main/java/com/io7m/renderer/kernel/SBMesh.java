@@ -19,70 +19,32 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.IndexBuffer;
-
 @Immutable final class SBMesh implements Comparable<SBMesh>
 {
-  private final @Nonnull String      name;
-  private final @Nonnull ArrayBuffer vbo;
-  private final @Nonnull IndexBuffer ibo;
+  private final @Nonnull SBMeshDescription description;
+  private final @Nonnull KMesh             mesh;
 
   SBMesh(
-    final @Nonnull String name,
-    final @Nonnull ArrayBuffer vbo,
-    final @Nonnull IndexBuffer ibo)
+    final @Nonnull SBMeshDescription description,
+    final @Nonnull KMesh mesh)
   {
-    this.name = name;
-    this.vbo = vbo;
-    this.ibo = ibo;
+    this.description = description;
+    this.mesh = mesh;
   }
 
   @Override public int compareTo(
     final @Nonnull SBMesh o)
   {
-    return this.name.compareTo(o.name);
+    return this.description.compareTo(this.description);
   }
 
-  @Override public boolean equals(
-    final Object obj)
+  public @Nonnull SBMeshDescription getDescription()
   {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final SBMesh other = (SBMesh) obj;
-    return this.name.equals(other.name);
+    return this.description;
   }
 
-  @Nonnull ArrayBuffer getArrayBuffer()
+  public @Nonnull KMesh getMesh()
   {
-    return this.vbo;
+    return this.mesh;
   }
-
-  @Nonnull IndexBuffer getIndexBuffer()
-  {
-    return this.ibo;
-  }
-
-  @Nonnull String getName()
-  {
-    return this.name;
-  }
-
-  @Override public int hashCode()
-  {
-    return this.name.hashCode();
-  }
-
-  @Override public String toString()
-  {
-    return "[SBMesh " + this.name + "]";
-  }
-
 }

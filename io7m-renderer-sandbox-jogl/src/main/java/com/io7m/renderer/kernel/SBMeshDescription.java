@@ -28,37 +28,53 @@ import nu.xom.ValidityException;
 
 import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
 
-@Immutable final class SBModelDescription
+@Immutable final class SBMeshDescription implements
+  Comparable<SBMeshDescription>
 {
-  static @Nonnull SBModelDescription fromXML(
+  static @Nonnull SBMeshDescription fromXML(
     final @CheckForNull BaseDirectory base,
     final @Nonnull Element e)
     throws ValidityException
   {
     final URI uri = SBSceneDescription.SCENE_XML_URI;
 
-    SBXMLUtilities.checkIsElement(e, "model", uri);
+    SBXMLUtilities.checkIsElement(e, "mesh", uri);
     final Element ef = SBXMLUtilities.getChild(e, "file", uri);
     final Element en = SBXMLUtilities.getChild(e, "name", uri);
     final String f = SBXMLUtilities.getNonEmptyString(ef);
     final String n = SBXMLUtilities.getNonEmptyString(en);
 
     if (base == null) {
-      return new SBModelDescription(new File(f), n);
+      return new SBMeshDescription(new File(f), n);
     }
 
-    return new SBModelDescription(new File(base.getFile(), f), n);
+    return new SBMeshDescription(new File(base.getFile(), f), n);
   }
 
   private final @Nonnull File   file;
   private final @Nonnull String name;
 
-  SBModelDescription(
+  SBMeshDescription(
     final @Nonnull File file,
     final @Nonnull String name)
   {
     this.file = file;
     this.name = name;
+  }
+
+  @Override public int compareTo(
+    final @Nonnull SBMeshDescription o)
+  {
+    if (this.equals(o)) {
+      return 0;
+    }
+
+    final int nc = this.name.compareTo(o.name);
+    if (nc == 0) {
+      return this.file.compareTo(o.file);
+    }
+
+    return nc;
   }
 
   @Override public boolean equals(
@@ -73,7 +89,7 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final SBModelDescription other = (SBModelDescription) obj;
+    final SBMeshDescription other = (SBMeshDescription) obj;
     if (!this.file.equals(other.file)) {
       return false;
     }
@@ -81,17 +97,6 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
       return false;
     }
     return true;
-  }
-
-  @Override public String toString()
-  {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("[SBModelDescription ");
-    builder.append(this.file);
-    builder.append(" ");
-    builder.append(this.name);
-    builder.append("]");
-    return builder.toString();
   }
 
   @Nonnull File getFile()
@@ -113,10 +118,21 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     return result;
   }
 
+  @Override public String toString()
+  {
+    final StringBuilder builder = new StringBuilder();
+    builder.append("[SBMeshDescription ");
+    builder.append(this.file);
+    builder.append(" ");
+    builder.append(this.name);
+    builder.append("]");
+    return builder.toString();
+  }
+
   @Nonnull Element toXML()
   {
     final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-    final Element e = new Element("s:model", uri);
+    final Element e = new Element("s:mesh", uri);
     final Element ef = new Element("s:file", uri);
     ef.appendChild(this.file.toString());
     final Element en = new Element("s:name", uri);

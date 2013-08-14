@@ -35,18 +35,14 @@ import javax.annotation.Nonnull;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
-import org.pcollections.HashTreePMap;
+import nu.xom.Document;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Function;
 import com.io7m.jaux.functional.Indeterminate;
 import com.io7m.jaux.functional.Indeterminate.Failure;
 import com.io7m.jaux.functional.Indeterminate.Success;
-import com.io7m.jaux.functional.Option;
-import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.Pair;
-import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.AttachmentColor;
@@ -75,17 +71,9 @@ import com.io7m.jcanephora.TextureLoaderImageIO;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
-import com.io7m.jsom0.Model;
-import com.io7m.jsom0.ModelObjectVBO;
-import com.io7m.jsom0.NameNormalAttribute;
-import com.io7m.jsom0.NamePositionAttribute;
-import com.io7m.jsom0.NameUVAttribute;
-import com.io7m.jsom0.parser.Error;
-import com.io7m.jsom0.parser.ModelObjectParser;
-import com.io7m.jsom0.parser.ModelObjectParserVBOImmediate;
-import com.io7m.jsom0.parser.ModelParser;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI2I;
@@ -100,6 +88,9 @@ import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.KLight.KSphere;
+import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.xml.RXMLMeshDocument;
+import com.io7m.renderer.xml.RXMLMeshParserVBO;
 
 final class SBGLRenderer implements GLEventListener
 {
@@ -120,8 +111,9 @@ final class SBGLRenderer implements GLEventListener
             final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
 
             try {
-              gl.arrayBufferDelete(mesh.getArrayBuffer());
-              gl.indexBufferDelete(mesh.getIndexBuffer());
+              final KMesh km = mesh.getMesh();
+              gl.arrayBufferDelete(km.getArrayBuffer());
+              gl.indexBufferDelete(km.getIndexBuffer());
             } catch (final ConstraintError e) {
               throw new UnreachableCodeException();
             }
@@ -133,54 +125,54 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private class ModelLoadFuture extends FutureTask<SBModel>
+  private class MeshLoadFuture extends FutureTask<SBMesh>
   {
-    ModelLoadFuture(
-      final @Nonnull SBModelDescription description,
+    MeshLoadFuture(
+      final @Nonnull File file,
       final @Nonnull InputStream stream)
     {
-      super(new Callable<SBModel>() {
+      super(new Callable<SBMesh>() {
         @SuppressWarnings("synthetic-access") @Override public @Nonnull
-          SBModel
+          SBMesh
           call()
             throws Exception
         {
-          SBGLRenderer.this.log.debug("Loading " + description.getName());
+          final StringBuilder message = new StringBuilder();
+
+          message.append("Loading mesh from ");
+          message.append(file);
+          SBGLRenderer.this.log.debug(message.toString());
 
           if (SBGLRenderer.this.gi != null) {
             final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
 
             try {
-              final ModelParser<ModelObjectVBO, JCGLException> mp =
-                SBGLRenderer.modelParserForStream(
-                  description,
-                  stream,
+              final Document document =
+                RXMLMeshDocument.parseFromStreamValidating(stream);
+              final RXMLMeshParserVBO<JCGLInterfaceCommon> p =
+                RXMLMeshParserVBO.parseFromDocument(
+                  document,
                   gl,
-                  SBGLRenderer.this.log);
+                  UsageHint.USAGE_STATIC_DRAW);
 
-              final Model<ModelObjectVBO> m = mp.model();
-              if (SBGLRenderer.this.models.containsKey(description.getName())) {
-                SBGLRenderer.this.log.debug("Reloading "
-                  + description.getName());
+              final KMesh km =
+                new KMesh(p.getArrayBuffer(), p.getIndexBuffer());
+              final String name = p.getName();
+
+              if (SBGLRenderer.this.meshes.containsKey(name)) {
+                message.setLength(0);
+                message.append("Reloading mesh ");
+                message.append(name);
+                SBGLRenderer.this.log.debug(message.toString());
               }
-              SBGLRenderer.this.models.put(description.getName(), m);
+              SBGLRenderer.this.meshes.put(name, km);
 
-              final HashMap<String, SBMesh> meshes =
-                new HashMap<String, SBMesh>();
-              m.forEachObject(new Function<ModelObjectVBO, Unit>() {
-                @Override public Unit call(
-                  final ModelObjectVBO x)
-                {
-                  final SBMesh mesh =
-                    new SBMesh(x.getName(), x.getArrayBuffer(), x
-                      .getIndexBuffer());
-                  meshes.put(x.getName(), mesh);
-                  return Unit.value;
-                }
-              });
+              message.setLength(0);
+              message.append("Loaded mesh ");
+              message.append(name);
+              SBGLRenderer.this.log.debug(message.toString());
 
-              SBGLRenderer.this.log.debug("Loaded " + description.getName());
-              return new SBModel(description, HashTreePMap.from(meshes));
+              return new SBMesh(new SBMeshDescription(file, name), km);
             } catch (final ConstraintError e) {
               throw new UnreachableCodeException();
             }
@@ -272,39 +264,6 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  protected static @Nonnull
-    ModelParser<ModelObjectVBO, JCGLException>
-    modelParserForStream(
-      final @Nonnull SBModelDescription description,
-      final @Nonnull InputStream stream,
-      final @Nonnull JCGLInterfaceCommon gl,
-      final @Nonnull Log log)
-      throws ConstraintError,
-        IOException,
-        Error
-  {
-    final NamePositionAttribute name_position_attribute =
-      new NamePositionAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-    final NameNormalAttribute name_normal_attribute =
-      new NameNormalAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
-    final NameUVAttribute name_uv_attribute =
-      new NameUVAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-
-    final ModelObjectParser<ModelObjectVBO, JCGLException> op =
-      new ModelObjectParserVBOImmediate<JCGLInterfaceCommon>(
-        description.getName(),
-        stream,
-        name_position_attribute,
-        name_normal_attribute,
-        name_uv_attribute,
-        log,
-        gl);
-
-    final ModelParser<ModelObjectVBO, JCGLException> mp =
-      new ModelParser<ModelObjectVBO, JCGLException>(op);
-    return mp;
-  }
-
   private static <A, B extends FutureTask<A>> void processQueue(
     final @Nonnull Queue<B> q)
   {
@@ -322,10 +281,11 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull TextureLoader                              texture_loader;
   private final @Nonnull ConcurrentLinkedQueue<TextureLoadFuture>   texture_load_queue;
   private final @Nonnull ConcurrentLinkedQueue<TextureDeleteFuture> texture_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<ModelLoadFuture>     mesh_load_queue;
+  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>      mesh_load_queue;
   private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>    mesh_delete_queue;
   private final @Nonnull HashMap<String, Texture2DStatic>           textures;
-  private final @Nonnull HashMap<String, Model<ModelObjectVBO>>     models;
+
+  private final @Nonnull HashMap<String, KMesh>                     meshes;
   private @CheckForNull SBQuad                                      screen_quad;
 
   private final @Nonnull FSCapabilityAll                            filesystem;
@@ -347,7 +307,7 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull AtomicBoolean                              axes_show;
   private @Nonnull SBVisibleGridPlane                               grid;
   private final @Nonnull AtomicBoolean                              grid_show;
-  private @Nonnull Model<ModelObjectVBO>                            spheres;
+  private @Nonnull HashMap<String, KMesh>                           sphere_meshes;
   private final @Nonnull AtomicBoolean                              lights_show;
   private final @Nonnull AtomicBoolean                              lights_show_surface;
 
@@ -386,9 +346,9 @@ final class SBGLRenderer implements GLEventListener
     this.texture_delete_queue =
       new ConcurrentLinkedQueue<TextureDeleteFuture>();
     this.textures = new HashMap<String, Texture2DStatic>();
-    this.mesh_load_queue = new ConcurrentLinkedQueue<ModelLoadFuture>();
+    this.mesh_load_queue = new ConcurrentLinkedQueue<MeshLoadFuture>();
     this.mesh_delete_queue = new ConcurrentLinkedQueue<MeshDeleteFuture>();
-    this.models = new HashMap<String, Model<ModelObjectVBO>>();
+    this.meshes = new HashMap<String, KMesh>();
 
     this.filesystem = Filesystem.makeWithoutArchiveDirectory(log);
     this.filesystem.mountClasspathArchive(
@@ -502,8 +462,10 @@ final class SBGLRenderer implements GLEventListener
 
       this.axes = new SBVisibleAxes(gl, 50, 50, 50);
       this.grid = new SBVisibleGridPlane(gl, 50, 0, 50);
-      this.spheres =
-        SBGLRenderer.initBuiltInSpheres(this.filesystem, gl, this.log);
+
+      this.sphere_meshes = new HashMap<String, KMesh>();
+      SBGLRenderer
+        .initBuiltInSpheres(this.sphere_meshes, this.filesystem, gl);
 
       this.texture_units = gl.textureGetUnits();
       this.framebuffer_points = gl.framebufferGetColorAttachmentPoints();
@@ -561,32 +523,70 @@ final class SBGLRenderer implements GLEventListener
       this.failed(e);
     } catch (final IOException e) {
       this.failed(e);
-    } catch (final Error e) {
+    } catch (final RXMLException e) {
       this.failed(e);
     }
   }
 
-  private static @Nonnull Model<ModelObjectVBO> initBuiltInSpheres(
+  private static @Nonnull SBMesh loadMesh(
+    final @Nonnull InputStream stream,
+    final @Nonnull JCGLInterfaceCommon g)
+    throws ConstraintError,
+      IOException,
+      JCGLException,
+      RXMLException
+  {
+    try {
+      final Document d = RXMLMeshDocument.parseFromStreamValidating(stream);
+      final RXMLMeshParserVBO<JCGLInterfaceCommon> p =
+        RXMLMeshParserVBO
+          .parseFromDocument(d, g, UsageHint.USAGE_STATIC_DRAW);
+
+      final ArrayBuffer ab = p.getArrayBuffer();
+      final IndexBuffer ib = p.getIndexBuffer();
+      final String name = p.getName();
+
+      return new SBMesh(
+        new SBMeshDescription(new File(name), name),
+        new KMesh(ab, ib));
+    } finally {
+      stream.close();
+    }
+  }
+
+  private static void initBuiltInSpheres(
+    final @Nonnull Map<String, KMesh> meshes,
     final @Nonnull FSCapabilityRead fs,
-    final @Nonnull JCGLInterfaceCommon gl,
-    final @Nonnull Log log)
+    final @Nonnull JCGLInterfaceCommon gl)
     throws IOException,
       Error,
       ConstraintError,
       FilesystemError,
-      JCGLException
+      JCGLException,
+      RXMLException
   {
-    final File file = new File("/com/io7m/renderer/sandbox/spheres.so0");
-    final SBModelDescription description =
-      new SBModelDescription(file, "spheres");
-    final InputStream stream =
-      fs.openFile(PathVirtual.ofString(file.toString()));
-    try {
-      final ModelParser<ModelObjectVBO, JCGLException> mp =
-        SBGLRenderer.modelParserForStream(description, stream, gl, log);
-      return mp.model();
-    } finally {
-      stream.close();
+    {
+      final InputStream stream =
+        fs.openFile(PathVirtual
+          .ofString("/com/io7m/renderer/sandbox/sphere_16_8_mesh.rmx"));
+      try {
+        final SBMesh m = SBGLRenderer.loadMesh(stream, gl);
+        meshes.put(m.getDescription().getName(), m.getMesh());
+      } finally {
+        stream.close();
+      }
+    }
+
+    {
+      final InputStream stream =
+        fs.openFile(PathVirtual
+          .ofString("/com/io7m/renderer/sandbox/sphere_32_16_mesh.rmx"));
+      try {
+        final SBMesh m = SBGLRenderer.loadMesh(stream, gl);
+        meshes.put(m.getDescription().getName(), m.getMesh());
+      } finally {
+        stream.close();
+      }
     }
   }
 
@@ -652,11 +652,11 @@ final class SBGLRenderer implements GLEventListener
     this.mesh_delete_queue.add(f);
   }
 
-  Future<SBModel> modelLoad(
-    final @Nonnull SBModelDescription description,
+  Future<SBMesh> meshLoad(
+    final @Nonnull File file,
     final @Nonnull InputStream stream)
   {
-    final ModelLoadFuture f = new ModelLoadFuture(description, stream);
+    final MeshLoadFuture f = new MeshLoadFuture(file, stream);
     this.mesh_load_queue.add(f);
     return f;
   }
@@ -953,12 +953,7 @@ final class SBGLRenderer implements GLEventListener
           case LIGHT_SPHERE:
           {
             final KLight.KSphere lp = (KSphere) light;
-
-            final Option<ModelObjectVBO> sphere =
-              this.spheres.get("sphere_16_8_mesh");
-            assert sphere.isSome();
-            final Some<ModelObjectVBO> sphere_s =
-              (Option.Some<ModelObjectVBO>) sphere;
+            final KMesh mesh = this.sphere_meshes.get("sphere_16_8_mesh");
 
             final VectorM4F colour =
               new VectorM4F(
@@ -967,8 +962,8 @@ final class SBGLRenderer implements GLEventListener
                 light.getColour().z,
                 1.0f);
 
-            final IndexBuffer indices = sphere_s.value.getIndexBuffer();
-            final ArrayBuffer array = sphere_s.value.getArrayBuffer();
+            final IndexBuffer indices = mesh.getIndexBuffer();
+            final ArrayBuffer array = mesh.getArrayBuffer();
             final ArrayBufferAttribute b_pos =
               array
                 .getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
