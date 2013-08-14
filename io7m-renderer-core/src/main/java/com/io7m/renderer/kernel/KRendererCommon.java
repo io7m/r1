@@ -27,7 +27,6 @@ import com.io7m.jtensors.MatrixReadable4x4F;
 
 final class KRendererCommon
 {
-
   /**
    * <p>
    * Produce a "normal" matrix from the given matrix <code>m</code>, writing
@@ -56,5 +55,4 @@ final class KRendererCommon
     MatrixM3x3F.invertInPlace(mr);
     MatrixM3x3F.transposeInPlace(mr);
   }
-
 }

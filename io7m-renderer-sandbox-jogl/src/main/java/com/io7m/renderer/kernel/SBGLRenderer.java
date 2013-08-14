@@ -316,7 +316,9 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull SBInputState                               input_state;
   private final @Nonnull SBFirstPersonCamera                        camera;
   private @Nonnull KMatrix4x4F<KMatrixView>                         camera_matrix;
-  private @CheckForNull KScene                                      rendered_scene;
+  private @CheckForNull KScene                                      scene_current;
+  private @CheckForNull KScene                                      scene_previous;
+  private @CheckForNull KScene                                      scene_validated_previous;
 
   private @CheckForNull ProgramReference                            program_uv;
   private @CheckForNull ProgramReference                            program_vcolour;
@@ -940,7 +942,7 @@ final class SBGLRenderer implements GLEventListener
         this.matrix_model,
         this.matrix_modelview);
 
-      for (final KLight light : this.rendered_scene.getLights()) {
+      for (final KLight light : this.scene_current.getLights()) {
         switch (light.getType()) {
           case LIGHT_CONE:
           {
@@ -1078,7 +1080,8 @@ final class SBGLRenderer implements GLEventListener
       final Pair<Collection<KLight>, Collection<KMeshInstance>> p =
         c.rendererGetScene();
       final KScene scene = new KScene(kcamera, p.first, p.second);
-      this.rendered_scene = scene;
+      this.scene_previous = this.scene_current;
+      this.scene_current = scene;
 
       renderer.setBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f));
       renderer.render(this.framebuffer, scene);

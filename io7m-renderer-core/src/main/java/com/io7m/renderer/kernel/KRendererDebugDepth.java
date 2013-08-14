@@ -172,11 +172,13 @@ final class KRendererDebugDepth implements KRenderer
       final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
 
       gc.arrayBufferBind(array);
+
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       this.exec.execAttributeBind(gc, "v_position", a_pos);
+
       this.exec.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception

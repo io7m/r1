@@ -26,11 +26,13 @@ import com.io7m.jtensors.VectorReadable4F;
 interface KRenderer
 {
   /**
+   * <p>
    * Render the scene <code>scene</code> to the framebuffer
    * <code>result</code>.
+   * </p>
    * 
    * @throws ConstraintError
-   * @throws GLException
+   *           Iff <code>result == null || scene == null</code>.
    */
 
   void render(
@@ -40,8 +42,10 @@ interface KRenderer
       ConstraintError;
 
   /**
+   * <p>
    * Set the colour to which the renderer will clear the given framebuffer
    * when rendering.
+   * </p>
    */
 
   void setBackgroundRGBA(
