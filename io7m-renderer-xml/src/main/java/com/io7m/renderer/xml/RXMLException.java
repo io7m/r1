@@ -40,7 +40,7 @@ public abstract class RXMLException extends Exception
       serialVersionUID = -5639465367483354396L;
     }
 
-    @SuppressWarnings("synthetic-access") RXMLExceptionParseError(
+    public @SuppressWarnings("synthetic-access") RXMLExceptionParseError(
       final @Nonnull ParsingException e)
       throws ConstraintError
     {
@@ -64,7 +64,7 @@ public abstract class RXMLException extends Exception
       serialVersionUID = -5639465367483354396L;
     }
 
-    @SuppressWarnings("synthetic-access") RXMLExceptionParserConfigurationError(
+    public @SuppressWarnings("synthetic-access") RXMLExceptionParserConfigurationError(
       final @Nonnull ParserConfigurationException e)
       throws ConstraintError
     {
@@ -87,7 +87,7 @@ public abstract class RXMLException extends Exception
       serialVersionUID = -6695888203449564788L;
     }
 
-    @SuppressWarnings("synthetic-access") RXMLExceptionValidityError(
+    public @SuppressWarnings("synthetic-access") RXMLExceptionValidityError(
       final @Nonnull ValidityException e)
       throws ConstraintError
     {
@@ -111,7 +111,7 @@ public abstract class RXMLException extends Exception
       serialVersionUID = 8405145698494143173L;
     }
 
-    @SuppressWarnings("synthetic-access") RXMLExceptionValiditySAXErrors(
+    public @SuppressWarnings("synthetic-access") RXMLExceptionValiditySAXErrors(
       final @Nonnull List<SAXException> es)
       throws ConstraintError
     {
