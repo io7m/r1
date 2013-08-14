@@ -30,10 +30,9 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
 import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.RXMLUtilities;
 
-@Immutable final class SBMeshDescription implements
-  Comparable<SBMeshDescription>
+@Immutable final class SBTextureDescription
 {
-  static @Nonnull SBMeshDescription fromXML(
+  static @Nonnull SBTextureDescription fromXML(
     final @CheckForNull BaseDirectory base,
     final @Nonnull Element e)
     throws RXMLException,
@@ -41,23 +40,23 @@ import com.io7m.renderer.xml.RXMLUtilities;
   {
     final URI uri = SBSceneDescription.SCENE_XML_URI;
 
-    RXMLUtilities.checkIsElement(e, "mesh", uri);
+    RXMLUtilities.checkIsElement(e, "texture", uri);
     final Element ef = RXMLUtilities.getChild(e, "file", uri);
     final Element en = RXMLUtilities.getChild(e, "name", uri);
     final String f = RXMLUtilities.getElementNonEmptyString(ef);
     final String n = RXMLUtilities.getElementNonEmptyString(en);
 
     if (base == null) {
-      return new SBMeshDescription(new File(f), n);
+      return new SBTextureDescription(new File(f), n);
     }
 
-    return new SBMeshDescription(new File(base.getFile(), f), n);
+    return new SBTextureDescription(new File(base.getFile(), f), n);
   }
 
   private final @Nonnull File   file;
   private final @Nonnull String name;
 
-  SBMeshDescription(
+  SBTextureDescription(
     final @Nonnull File file,
     final @Nonnull String name)
   {
@@ -65,19 +64,15 @@ import com.io7m.renderer.xml.RXMLUtilities;
     this.name = name;
   }
 
-  @Override public int compareTo(
-    final @Nonnull SBMeshDescription o)
+  @Override public String toString()
   {
-    if (this.equals(o)) {
-      return 0;
-    }
-
-    final int nc = this.name.compareTo(o.name);
-    if (nc == 0) {
-      return this.file.compareTo(o.file);
-    }
-
-    return nc;
+    final StringBuilder builder = new StringBuilder();
+    builder.append("[SBTextureDescription ");
+    builder.append(this.file);
+    builder.append(" ");
+    builder.append(this.name);
+    builder.append("]");
+    return builder.toString();
   }
 
   @Override public boolean equals(
@@ -92,7 +87,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final SBMeshDescription other = (SBMeshDescription) obj;
+    final SBTextureDescription other = (SBTextureDescription) obj;
     if (!this.file.equals(other.file)) {
       return false;
     }
@@ -121,21 +116,10 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return result;
   }
 
-  @Override public String toString()
-  {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("[SBMeshDescription ");
-    builder.append(this.file);
-    builder.append(" ");
-    builder.append(this.name);
-    builder.append("]");
-    return builder.toString();
-  }
-
   @Nonnull Element toXML()
   {
     final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-    final Element e = new Element("s:mesh", uri);
+    final Element e = new Element("s:texture", uri);
     final Element ef = new Element("s:file", uri);
     ef.appendChild(this.file.toString());
     final Element en = new Element("s:name", uri);
