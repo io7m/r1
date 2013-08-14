@@ -25,8 +25,10 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Elements;
+import nu.xom.ValidityException;
 
 import org.pcollections.HashTreePMap;
 import org.pcollections.PMap;
@@ -45,13 +47,14 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
 @Immutable final class SBSceneDescription
 {
-  static final @Nonnull URI    SCENE_XML_URI;
-  static final @Nonnull String SCENE_XML_VERSION;
+  static final @Nonnull URI SCENE_XML_URI;
+  static final int          SCENE_XML_VERSION;
 
   static {
     try {
-      SCENE_XML_URI = new URI("http://io7m.com/software/renderer");
-      SCENE_XML_VERSION = "2";
+      SCENE_XML_URI =
+        new URI("http://schemas.io7m.com/renderer/1.0.0/sandbox-scene");
+      SCENE_XML_VERSION = 2;
     } catch (final URISyntaxException e) {
       throw new UnreachableCodeException();
     }
@@ -74,6 +77,25 @@ import com.io7m.renderer.xml.RXMLUtilities;
     throws RXMLException,
       ConstraintError
   {
+    RXMLUtilities
+      .checkIsElement(e, "scene", SBSceneDescription.SCENE_XML_URI);
+    final Attribute a =
+      RXMLUtilities.getAttribute(
+        e,
+        "version",
+        SBSceneDescription.SCENE_XML_URI);
+
+    final int version = RXMLUtilities.getAttributeInteger(a);
+    if (version != SBSceneDescription.SCENE_XML_VERSION) {
+      final StringBuilder message = new StringBuilder();
+      message.append("Scene version is ");
+      message.append(version);
+      message.append(" but supported versions are: ");
+      message.append(SBSceneDescription.SCENE_XML_VERSION);
+      throw new RXMLException.RXMLExceptionValidityError(
+        new ValidityException(message.toString()));
+    }
+
     return new SBSceneDescription(
       SBSceneDescription.fromXMLTextures(base, e),
       SBSceneDescription.fromXMLMeshes(base, e),
@@ -467,6 +489,8 @@ import com.io7m.renderer.xml.RXMLUtilities;
   {
     final String uri = SBSceneDescription.SCENE_XML_URI.toString();
     final Element e = new Element("s:scene", uri);
+    e.addAttribute(new Attribute("s:version", uri, Integer
+      .toString(SBSceneDescription.SCENE_XML_VERSION)));
 
     final Element et = new Element("s:textures", uri);
     for (final SBTextureDescription t : this.textures.values()) {
