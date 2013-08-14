@@ -47,6 +47,8 @@ import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.VectorI2F;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
@@ -369,17 +371,29 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
       final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final ArrayBufferAttribute a_uv =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-      final ArrayBufferAttribute a_normal =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
 
       gc.arrayBufferBind(array);
+
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       exec.execAttributeBind(gc, "v_position", a_pos);
-      exec.execAttributeBind(gc, "v_uv", a_uv);
-      exec.execAttributeBind(gc, "v_normal", a_normal);
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
+        final ArrayBufferAttribute a_nor =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+        exec.execAttributeBind(gc, "v_normal", a_nor);
+      } else {
+        exec.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
+      }
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+        final ArrayBufferAttribute a_uv =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
+        exec.execAttributeBind(gc, "v_uv", a_uv);
+      } else {
+        exec.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
+      }
+
       exec.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception
@@ -567,17 +581,29 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
       final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final ArrayBufferAttribute a_uv =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-      final ArrayBufferAttribute a_normal =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
 
       gc.arrayBufferBind(array);
+
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       exec.execAttributeBind(gc, "v_position", a_pos);
-      exec.execAttributeBind(gc, "v_uv", a_uv);
-      exec.execAttributeBind(gc, "v_normal", a_normal);
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
+        final ArrayBufferAttribute a_nor =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+        exec.execAttributeBind(gc, "v_normal", a_nor);
+      } else {
+        exec.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
+      }
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+        final ArrayBufferAttribute a_uv =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
+        exec.execAttributeBind(gc, "v_uv", a_uv);
+      } else {
+        exec.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
+      }
+
       exec.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception
