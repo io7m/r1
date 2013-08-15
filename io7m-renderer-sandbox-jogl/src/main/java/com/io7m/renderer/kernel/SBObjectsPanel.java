@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -125,8 +124,11 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     private final @Nonnull ObjectsTableModel objects_table_model;
     private final @Nonnull Border            default_field_border;
 
-    protected void meshesRefresh()
+    protected void meshesRefresh(
+      final @Nonnull SBSceneControllerMeshes controller)
     {
+      ObjectEditDialogPanel.this.meshes = controller.sceneMeshesGet();
+
       this.mesh_selector.removeAllItems();
       for (final String name : this.meshes.keySet()) {
         this.mesh_selector.addItem(name);
@@ -235,8 +237,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         }
       });
 
-      this.meshes = new HashMap<String, SBMesh>();
       this.mesh_selector = new JComboBox<String>();
+      this.meshesRefresh(controller);
 
       this.mesh_load = new JButton("Open...");
       this.mesh_load.addActionListener(new ActionListener() {
@@ -266,9 +268,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
                     try {
                       this.get();
 
-                      ObjectEditDialogPanel.this.meshes =
-                        controller.sceneMeshesGet();
-                      ObjectEditDialogPanel.this.meshesRefresh();
+                      ObjectEditDialogPanel.this.meshesRefresh(controller);
 
                     } catch (final InterruptedException x) {
                       SBErrorBox.showError(log, "Interrupted operation", x);

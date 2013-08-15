@@ -478,9 +478,9 @@ final class SBGLRenderer implements GLEventListener
           version.getNumber(),
           version.getAPI(),
           this.filesystem,
-          "vcolour",
-          "standard.v",
-          "vertex_colour.f",
+          "v-colour",
+          "v-colour.v",
+          "v-colour.f",
           this.log);
 
       this.exec_vcolour = new JCCEExecutionCallable(this.program_vcolour);
@@ -491,9 +491,9 @@ final class SBGLRenderer implements GLEventListener
           version.getNumber(),
           version.getAPI(),
           this.filesystem,
-          "ccolour",
-          "standard.v",
-          "constant_colour.f",
+          "c-colour",
+          "c-colour.v",
+          "c-colour.f",
           this.log);
 
       this.exec_ccolour = new JCCEExecutionCallable(this.program_ccolour);
@@ -504,9 +504,9 @@ final class SBGLRenderer implements GLEventListener
           version.getNumber(),
           version.getAPI(),
           this.filesystem,
-          "uv",
-          "standard.v",
-          "flat_uv.f",
+          "flat-uv",
+          "flat-uv.v",
+          "flat-uv.f",
           this.log);
 
       this.exec_uv = new JCCEExecutionCallable(this.program_uv);
@@ -609,12 +609,46 @@ final class SBGLRenderer implements GLEventListener
       new KRendererDebugUVVertex(this.gi, this.filesystem, this.log));
 
     this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_NORMALS_VERTEX,
-      new KRendererDebugNormalsVertex(this.gi, this.filesystem, this.log));
+      SBRendererType.RENDERER_DEBUG_BITANGENTS_VERTEX_LOCAL,
+      new KRendererDebugBitangentsVertexLocal(
+        this.gi,
+        this.filesystem,
+        this.log));
+
+    this.renderers
+      .put(
+        SBRendererType.RENDERER_DEBUG_TANGENTS_VERTEX_EYE,
+        new KRendererDebugTangentsVertexEye(
+          this.gi,
+          this.filesystem,
+          this.log));
+    this.renderers.put(
+      SBRendererType.RENDERER_DEBUG_TANGENTS_VERTEX_LOCAL,
+      new KRendererDebugTangentsVertexLocal(
+        this.gi,
+        this.filesystem,
+        this.log));
 
     this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_NORMALS_MAP,
-      new KRendererDebugNormalsMap(this.gi, this.filesystem, this.log));
+      SBRendererType.RENDERER_DEBUG_NORMALS_VERTEX_EYE,
+      new KRendererDebugNormalsVertexEye(this.gi, this.filesystem, this.log));
+    this.renderers
+      .put(
+        SBRendererType.RENDERER_DEBUG_NORMALS_VERTEX_LOCAL,
+        new KRendererDebugNormalsVertexLocal(
+          this.gi,
+          this.filesystem,
+          this.log));
+
+    this.renderers.put(
+      SBRendererType.RENDERER_DEBUG_NORMALS_MAP_EYE,
+      new KRendererDebugNormalsMapEye(this.gi, this.filesystem, this.log));
+    this.renderers.put(
+      SBRendererType.RENDERER_DEBUG_NORMALS_MAP_LOCAL,
+      new KRendererDebugNormalsMapLocal(this.gi, this.filesystem, this.log));
+    this.renderers.put(
+      SBRendererType.RENDERER_DEBUG_NORMALS_MAP_RAW,
+      new KRendererDebugNormalsMapRaw(this.gi, this.filesystem, this.log));
 
     this.renderers.put(
       SBRendererType.RENDERER_FLAT_TEXTURED,
@@ -623,7 +657,6 @@ final class SBGLRenderer implements GLEventListener
     this.renderers.put(
       SBRendererType.RENDERER_FORWARD_DIFFUSE,
       new KRendererForwardDiffuse(this.gi, this.filesystem, this.log));
-
     this.renderers
       .put(
         SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR,
@@ -631,14 +664,12 @@ final class SBGLRenderer implements GLEventListener
           this.gi,
           this.filesystem,
           this.log));
-
     this.renderers.put(
       SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR_BUMP,
       new KRendererForwardDiffuseSpecularBump(
         this.gi,
         this.filesystem,
         this.log));
-
     this.renderers.put(
       SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR_MAPPED_BUMP,
       new KRendererForwardDiffuseSpecularMappedBump(
@@ -665,7 +696,7 @@ final class SBGLRenderer implements GLEventListener
 
   private void moveCamera()
   {
-    final double speed = 0.01;
+    final double speed = 0.05;
     if (this.input_state.isMovingForward()) {
       this.camera.moveForward(speed);
     }

@@ -134,9 +134,9 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "depth_only",
-        "standard.v",
-        "depth_only.f",
+        "depth",
+        "depth.v",
+        "depth.f",
         this.log);
     this.exec_depth = new JCCEExecutionCallable(this.program_depth);
   }
@@ -379,17 +379,25 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
       exec.execAttributeBind(gc, "v_position", a_pos);
 
       if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
-        final ArrayBufferAttribute a_nor =
+        final ArrayBufferAttribute a =
           array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
-        exec.execAttributeBind(gc, "v_normal", a_nor);
+        exec.execAttributeBind(gc, "v_normal", a);
       } else {
         exec.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
       }
 
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName())) {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName());
+        exec.execAttributeBind(gc, "v_tangent", a);
+      } else {
+        exec.execAttributePutVector3F(gc, "v_tangent", VectorI3F.ZERO);
+      }
+
       if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
-        final ArrayBufferAttribute a_uv =
+        final ArrayBufferAttribute a =
           array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-        exec.execAttributeBind(gc, "v_uv", a_uv);
+        exec.execAttributeBind(gc, "v_uv", a);
       } else {
         exec.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
       }
@@ -589,11 +597,19 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
       exec.execAttributeBind(gc, "v_position", a_pos);
 
       if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
-        final ArrayBufferAttribute a_nor =
+        final ArrayBufferAttribute a =
           array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
-        exec.execAttributeBind(gc, "v_normal", a_nor);
+        exec.execAttributeBind(gc, "v_normal", a);
       } else {
         exec.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
+      }
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName())) {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName());
+        exec.execAttributeBind(gc, "v_tangent", a);
+      } else {
+        exec.execAttributePutVector3F(gc, "v_tangent", VectorI3F.ZERO);
       }
 
       if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {

@@ -97,8 +97,8 @@ final class KRendererFlatTextured implements KRenderer
         version.getAPI(),
         fs,
         "flat-uv",
-        "standard.v",
-        "flat_uv.f",
+        "flat-uv.v",
+        "flat-uv.f",
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);

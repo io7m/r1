@@ -31,10 +31,8 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.VectorM2F;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.renderer.RSpaceObject;
-import com.io7m.renderer.RSpaceTangent;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorM3F;
 import com.io7m.renderer.RVectorReadable2F;
@@ -110,15 +108,15 @@ final class ExportableMesh
 
   static class Vertex
   {
-    final @Nonnull RVectorReadable3F<RSpaceObject>         position;
-    final @CheckForNull RVectorReadable3F<RSpaceObject>    normal;
-    private @CheckForNull RVectorReadable3F<RSpaceTangent> tangent;
-    final @CheckForNull RVectorReadable2F<RSpaceTexture>   uv;
+    final @Nonnull RVectorReadable3F<RSpaceObject>        position;
+    final @CheckForNull RVectorReadable3F<RSpaceObject>   normal;
+    private @CheckForNull RVectorReadable3F<RSpaceObject> tangent;
+    final @CheckForNull RVectorReadable2F<RSpaceTexture>  uv;
 
     Vertex(
       final @Nonnull RVectorReadable3F<RSpaceObject> position,
       final @CheckForNull RVectorReadable3F<RSpaceObject> normal,
-      final @CheckForNull RVectorReadable3F<RSpaceTangent> tangent,
+      final @CheckForNull RVectorReadable3F<RSpaceObject> tangent,
       final @CheckForNull RVectorReadable2F<RSpaceTexture> uv)
     {
       this.position = position;
@@ -126,11 +124,6 @@ final class ExportableMesh
       this.tangent = tangent;
       this.uv = uv;
     }
-
-    /**
-     * Note that two vertices that are identical except for their tangents are
-     * considered equal.
-     */
 
     @Override public boolean equals(
       final Object obj)
@@ -145,11 +138,6 @@ final class ExportableMesh
         return false;
       }
       final Vertex other = (Vertex) obj;
-
-      if (!this.position.equals(other.position)) {
-        return false;
-      }
-
       if (this.normal == null) {
         if (other.normal != null) {
           return false;
@@ -157,7 +145,20 @@ final class ExportableMesh
       } else if (!this.normal.equals(other.normal)) {
         return false;
       }
-
+      if (this.position == null) {
+        if (other.position != null) {
+          return false;
+        }
+      } else if (!this.position.equals(other.position)) {
+        return false;
+      }
+      if (this.tangent == null) {
+        if (other.tangent != null) {
+          return false;
+        }
+      } else if (!this.tangent.equals(other.tangent)) {
+        return false;
+      }
       if (this.uv == null) {
         if (other.uv != null) {
           return false;
@@ -168,19 +169,19 @@ final class ExportableMesh
       return true;
     }
 
-    /**
-     * Note that two vertices that are identical except for their tangents are
-     * considered equal.
-     */
-
     @Override public int hashCode()
     {
       final int prime = 31;
       int result = 1;
-      result = (prime * result) + (this.position.hashCode());
       result =
         (prime * result)
           + ((this.normal == null) ? 0 : this.normal.hashCode());
+      result =
+        (prime * result)
+          + ((this.position == null) ? 0 : this.position.hashCode());
+      result =
+        (prime * result)
+          + ((this.tangent == null) ? 0 : this.tangent.hashCode());
       result =
         (prime * result) + ((this.uv == null) ? 0 : this.uv.hashCode());
       return result;
@@ -191,55 +192,71 @@ final class ExportableMesh
       final StringBuilder builder = new StringBuilder();
       builder.append("[Vertex [position ");
       builder.append(this.position);
-      builder.append("]  [normal ");
+      builder.append("] [normal ");
       builder.append(this.normal);
-      builder.append("]  [tangent ");
+      builder.append("] [tangent ");
       builder.append(this.tangent);
-      builder.append("]  [uv ");
+      builder.append("] [uv ");
       builder.append(this.uv);
       builder.append("]]");
       return builder.toString();
     }
 
-    void updateTangent(
-      final @Nonnull RVectorReadable3F<RSpaceTangent> t)
+    void setTangent(
+      final @Nonnull RVectorReadable3F<RSpaceObject> t)
     {
       this.tangent = t;
     }
   }
 
   private static void makeTangents(
-    final @Nonnull Vertex v0,
     final @Nonnull Vertex v1,
-    final @Nonnull Vertex v2)
+    final @Nonnull Vertex v2,
+    final @Nonnull Vertex v3,
+    final @Nonnull Log log)
   {
-    assert v0.uv != null;
     assert v1.uv != null;
     assert v2.uv != null;
+    assert v3.uv != null;
 
-    final VectorM3F edge0 = new VectorM3F();
-    final VectorM3F edge1 = new VectorM3F();
+    final float x1 = v2.position.getXF() - v1.position.getXF();
+    final float x2 = v3.position.getXF() - v1.position.getXF();
 
-    VectorM3F.subtract(v1.position, v0.position, edge0);
-    VectorM3F.subtract(v2.position, v0.position, edge1);
+    final float y1 = v2.position.getYF() - v1.position.getYF();
+    final float y2 = v3.position.getYF() - v1.position.getYF();
 
-    final VectorM2F delta0 = new VectorM2F();
-    final VectorM2F delta1 = new VectorM2F();
+    final float z1 = v2.position.getZF() - v1.position.getZF();
+    final float z2 = v3.position.getZF() - v1.position.getZF();
 
-    VectorM2F.subtract(v1.uv, v0.uv, delta0);
-    VectorM2F.subtract(v2.uv, v0.uv, delta1);
+    final float s1 = v2.uv.getXF() - v1.uv.getXF();
+    final float s2 = v3.uv.getXF() - v1.uv.getXF();
+    final float t1 = v2.uv.getYF() - v1.uv.getYF();
+    final float t2 = v3.uv.getYF() - v1.uv.getYF();
 
-    final float f = 1.0f / ((delta0.x * delta1.y) - (delta1.x - delta0.y));
+    final float r = 1.0F / ((s1 * t2) - (s2 * t1));
 
-    final RVectorM3F<RSpaceTangent> tangent = new RVectorM3F<RSpaceTangent>();
-    tangent.x = f * ((delta1.y * edge0.x) - (delta0.y * edge1.x));
-    tangent.y = f * ((delta1.y * edge0.y) - (delta0.y * edge1.y));
-    tangent.z = f * ((delta1.y * edge0.z) - (delta0.y * edge1.z));
-    VectorM3F.normalizeInPlace(tangent);
+    final float t_x = ((t2 * x1) - (t1 * x2)) * r;
+    final float t_y = ((t2 * y1) - (t1 * y2)) * r;
+    final float t_z = ((t2 * z1) - (t1 * z2)) * r;
+    final RVectorM3F<RSpaceObject> tv =
+      new RVectorM3F<RSpaceObject>(t_x, t_y, t_z);
+    VectorM3F.normalizeInPlace(tv);
 
-    v0.updateTangent(tangent);
-    v1.updateTangent(tangent);
-    v2.updateTangent(tangent);
+    final float b_x = ((s1 * x2) - (s2 * x1)) * r;
+    final float b_y = ((s1 * y2) - (s2 * y1)) * r;
+    final float b_z = ((s1 * z2) - (s2 * z1)) * r;
+    final RVectorM3F<RSpaceObject> bv =
+      new RVectorM3F<RSpaceObject>(b_x, b_y, b_z);
+    VectorM3F.normalizeInPlace(bv);
+
+    v1.setTangent(tv);
+    v2.setTangent(tv);
+    v3.setTangent(tv);
+
+    log.debug("v1 : " + v1.normal + " " + tv + " " + bv);
+    log.debug("v2 : " + v1.normal + " " + tv + " " + bv);
+    log.debug("v3 : " + v1.normal + " " + tv + " " + bv);
+    log.debug("--");
   }
 
   @SuppressWarnings("boxing") private static @Nonnull String outFloat(
@@ -277,7 +294,7 @@ final class ExportableMesh
   }
 
   private static @Nonnull Element toXMLVertexTangent(
-    final RVectorReadable3F<RSpaceTangent> tangent)
+    final RVectorReadable3F<RSpaceObject> tangent)
   {
     final String u = RXMLConstants.MESHES_URI.toString();
     final Element e = new Element("m:t", u);
@@ -412,21 +429,21 @@ final class ExportableMesh
       final Vertex v2 = new Vertex(p2, n2, null, u2);
 
       if (this.type.hasUV()) {
-        ExportableMesh.makeTangents(v0, v1, v2);
+        ExportableMesh.makeTangents(v0, v1, v2, log);
       }
 
       this.makeTriangle(v0, v1, v2);
     }
 
-    this.log.debug("Mesh has "
-      + this.vertices.size()
-      + " vertices after sharing");
-    this.log.debug("Mesh has " + this.polygons.size() + " polygons");
+    this.log
+      .debug("Resulting mesh has " + this.vertices.size() + " vertices");
+    this.log
+      .debug("Resulting mesh has " + this.polygons.size() + " polygons");
   }
 
   private boolean calculatedTangents()
   {
-    return this.type.hasUV();
+    return this.type.hasUV() && this.type.hasNormal();
   }
 
   /**
