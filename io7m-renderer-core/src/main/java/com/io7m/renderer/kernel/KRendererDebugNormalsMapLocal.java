@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.DepthFunction;
@@ -36,19 +37,24 @@ import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.ProgramReference;
+import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
+import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI2I;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 
-final class KRendererDebugUVVertex implements KRenderer
+final class KRendererDebugNormalsMapLocal implements KRenderer
 {
+  private final @Nonnull MatrixM3x3F           matrix_normal;
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
   private final @Nonnull MatrixM4x4F           matrix_view;
@@ -62,18 +68,18 @@ final class KRendererDebugUVVertex implements KRenderer
   private final @Nonnull VectorM2I             viewport_size;
   private final @Nonnull JCCEExecutionCallable exec;
 
-  KRendererDebugUVVertex(
+  KRendererDebugNormalsMapLocal(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
     throws JCGLCompileException,
       ConstraintError,
       JCGLUnsupportedException,
-      JCGLException,
       FilesystemError,
-      IOException
+      IOException,
+      JCGLException
   {
-    this.log = new Log(log, "krenderer-debug-uv-vertex");
+    this.log = new Log(log, "krenderer-debug-normals-map-local");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
@@ -83,6 +89,7 @@ final class KRendererDebugUVVertex implements KRenderer
     this.matrix_projection = new MatrixM4x4F();
     this.matrix_model = new MatrixM4x4F();
     this.matrix_view = new MatrixM4x4F();
+    this.matrix_normal = new MatrixM3x3F();
     this.matrix_context = new MatrixM4x4F.Context();
     this.transform_context = new KTransform.Context();
     this.viewport_size = new VectorM2I();
@@ -93,9 +100,9 @@ final class KRendererDebugUVVertex implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "debug-uv-vertex",
-        "debug-uv-vertex.v",
-        "debug-uv-vertex.f",
+        "debug-normals-map-local",
+        "debug-normals-map-local.v",
+        "debug-normals-map-local.f",
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);
@@ -154,8 +161,12 @@ final class KRendererDebugUVVertex implements KRenderer
       this.matrix_model,
       this.matrix_modelview);
 
+    KRendererCommon.makeNormalMatrix(
+      this.matrix_modelview,
+      this.matrix_normal);
+
     /**
-     * Upload matrices.
+     * Upload matrices, set textures.
      */
 
     this.exec.execPrepare(gc);
@@ -164,6 +175,22 @@ final class KRendererDebugUVVertex implements KRenderer
       gc,
       "m_modelview",
       this.matrix_modelview);
+
+    final TextureUnit[] texture_units = gc.textureGetUnits();
+    final KMaterial material = instance.getMaterial();
+
+    {
+      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      if (normal_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units[0],
+          ((Option.Some<Texture2DStatic>) normal_opt).value);
+      } else {
+        gc.texture2DStaticUnbind(texture_units[0]);
+      }
+    }
+
+    this.exec.execUniformPutTextureUnit(gc, "t_normal", texture_units[0]);
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -179,6 +206,22 @@ final class KRendererDebugUVVertex implements KRenderer
       final ArrayBufferAttribute a_pos =
         array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       this.exec.execAttributeBind(gc, "v_position", a_pos);
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+        this.exec.execAttributeBind(gc, "v_normal", a);
+      } else {
+        this.exec.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
+      }
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName())) {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName());
+        this.exec.execAttributeBind(gc, "v_tangent", a);
+      } else {
+        this.exec.execAttributePutVector3F(gc, "v_tangent", VectorI3F.ZERO);
+      }
 
       if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
         final ArrayBufferAttribute a_uv =
