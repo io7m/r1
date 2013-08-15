@@ -39,15 +39,15 @@ import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI2I;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 
-final class KRendererDebugUVVertex implements KRenderer
+final class KRendererDebugNormalsVertexLocal implements KRenderer
 {
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
@@ -62,18 +62,18 @@ final class KRendererDebugUVVertex implements KRenderer
   private final @Nonnull VectorM2I             viewport_size;
   private final @Nonnull JCCEExecutionCallable exec;
 
-  KRendererDebugUVVertex(
+  KRendererDebugNormalsVertexLocal(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
     throws JCGLCompileException,
       ConstraintError,
       JCGLUnsupportedException,
-      JCGLException,
       FilesystemError,
-      IOException
+      IOException,
+      JCGLException
   {
-    this.log = new Log(log, "krenderer-debug-uv-vertex");
+    this.log = new Log(log, "krenderer-debug-normals-vertex-eye");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
@@ -93,9 +93,9 @@ final class KRendererDebugUVVertex implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "debug-uv-vertex",
-        "debug-uv-vertex.v",
-        "debug-uv-vertex.f",
+        "debug-normals-vertex-local",
+        "debug-normals-vertex-local.v",
+        "debug-normals-vertex-local.f",
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);
@@ -180,12 +180,12 @@ final class KRendererDebugUVVertex implements KRenderer
         array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       this.exec.execAttributeBind(gc, "v_position", a_pos);
 
-      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
-        final ArrayBufferAttribute a_uv =
-          array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-        this.exec.execAttributeBind(gc, "v_uv", a_uv);
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
+        final ArrayBufferAttribute a_nor =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+        this.exec.execAttributeBind(gc, "v_normal", a_nor);
       } else {
-        this.exec.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
+        this.exec.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
       }
 
       this.exec.execSetCallable(new Callable<Void>() {

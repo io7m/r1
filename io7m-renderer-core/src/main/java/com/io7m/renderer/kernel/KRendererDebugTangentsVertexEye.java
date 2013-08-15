@@ -38,21 +38,23 @@ import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
+import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI2I;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 
-final class KRendererDebugUVVertex implements KRenderer
+final class KRendererDebugTangentsVertexEye implements KRenderer
 {
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
   private final @Nonnull MatrixM4x4F           matrix_view;
   private final @Nonnull MatrixM4x4F           matrix_projection;
+  private final @Nonnull MatrixM3x3F           matrix_normal;
   private final @Nonnull MatrixM4x4F.Context   matrix_context;
   private final @Nonnull KTransform.Context    transform_context;
   private final @Nonnull JCGLImplementation    gl;
@@ -62,18 +64,18 @@ final class KRendererDebugUVVertex implements KRenderer
   private final @Nonnull VectorM2I             viewport_size;
   private final @Nonnull JCCEExecutionCallable exec;
 
-  KRendererDebugUVVertex(
+  KRendererDebugTangentsVertexEye(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
     throws JCGLCompileException,
       ConstraintError,
       JCGLUnsupportedException,
-      JCGLException,
       FilesystemError,
-      IOException
+      IOException,
+      JCGLException
   {
-    this.log = new Log(log, "krenderer-debug-uv-vertex");
+    this.log = new Log(log, "krenderer-debug-tangents-vertex-eye");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
@@ -84,6 +86,7 @@ final class KRendererDebugUVVertex implements KRenderer
     this.matrix_model = new MatrixM4x4F();
     this.matrix_view = new MatrixM4x4F();
     this.matrix_context = new MatrixM4x4F.Context();
+    this.matrix_normal = new MatrixM3x3F();
     this.transform_context = new KTransform.Context();
     this.viewport_size = new VectorM2I();
 
@@ -93,9 +96,9 @@ final class KRendererDebugUVVertex implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "debug-uv-vertex",
-        "debug-uv-vertex.v",
-        "debug-uv-vertex.f",
+        "debug-tangents-vertex-eye",
+        "debug-tangents-vertex-eye.v",
+        "debug-tangents-vertex-eye.f",
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);
@@ -154,6 +157,10 @@ final class KRendererDebugUVVertex implements KRenderer
       this.matrix_model,
       this.matrix_modelview);
 
+    KRendererCommon.makeNormalMatrix(
+      this.matrix_modelview,
+      this.matrix_normal);
+
     /**
      * Upload matrices.
      */
@@ -164,6 +171,7 @@ final class KRendererDebugUVVertex implements KRenderer
       gc,
       "m_modelview",
       this.matrix_modelview);
+    this.exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -180,12 +188,12 @@ final class KRendererDebugUVVertex implements KRenderer
         array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       this.exec.execAttributeBind(gc, "v_position", a_pos);
 
-      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
-        final ArrayBufferAttribute a_uv =
-          array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-        this.exec.execAttributeBind(gc, "v_uv", a_uv);
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName())) {
+        final ArrayBufferAttribute a_nor =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName());
+        this.exec.execAttributeBind(gc, "v_tangent", a_nor);
       } else {
-        this.exec.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
+        this.exec.execAttributePutVector3F(gc, "v_tangent", VectorI3F.ZERO);
       }
 
       this.exec.execSetCallable(new Callable<Void>() {

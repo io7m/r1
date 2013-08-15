@@ -134,9 +134,9 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "depth_only",
-        "standard.v",
-        "depth_only.f",
+        "depth",
+        "depth.v",
+        "depth.f",
         this.log);
     this.exec_depth = new JCCEExecutionCallable(this.program_depth);
   }

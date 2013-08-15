@@ -11,24 +11,33 @@ uniform float     l_falloff;
 
 in vec2 f_uv;
 in vec3 f_normal;
+in vec3 f_tangent;
 in vec4 f_position;
 
 out vec4 out_frag_color;
 
+vec3
+bumped_normal (void)
+{
+  vec3 N = normalize (f_normal);
+  vec3 T = normalize (f_tangent);
+       T = normalize (T - (dot (T, N) * N));
+  vec3 B = cross (T, N);
+  vec3 M = texture2D (t_normal, f_uv).xyz;
+
+  mat3 TBN = mat3 (T, B, N);
+  return normalize (TBN * M);
+}
+
 void
 main (void)
 {
-  vec3 NM = texture2D(t_normal, f_uv).rgb;
-  NM = (NM * 2.0) - 1.0;
-  
   vec3 V  = normalize (f_position.xyz);
-  vec3 N  = normalize (f_normal);
-  vec3 NT = normalize (N + NM);
-  
+  vec3 N  = bumped_normal ();
   vec3 L  = f_position.xyz - l_position;
   float D = length (L);
   L = normalize (-L);
-  vec3 R = reflect (V, NT);
+  vec3 R = reflect (V, N);
 
   float l_diffuse_factor = max (0, dot (L, N));
   vec3 l_diffuse         = l_color * l_intensity * l_diffuse_factor;

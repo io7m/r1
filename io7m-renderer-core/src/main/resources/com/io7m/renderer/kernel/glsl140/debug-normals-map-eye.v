@@ -12,7 +12,6 @@ uniform mat3 m_normal;
 out vec2 f_uv;
 out vec3 f_normal;
 out vec3 f_tangent;
-out vec4 f_position;
 
 void
 main()
@@ -21,5 +20,4 @@ main()
   f_uv        = v_uv;
   f_normal    = m_normal * v_normal;
   f_tangent   = m_normal * v_tangent;
-  f_position  = m_modelview * vec4(v_position, 1.0);
 }

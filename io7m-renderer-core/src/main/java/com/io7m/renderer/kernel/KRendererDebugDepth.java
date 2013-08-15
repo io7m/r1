@@ -92,9 +92,9 @@ final class KRendererDebugDepth implements KRenderer
         version.getNumber(),
         version.getAPI(),
         fs,
-        "depth-only",
-        "standard.v",
-        "depth_only.f",
+        "depth",
+        "depth.v",
+        "depth.f",
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);
