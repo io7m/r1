@@ -108,7 +108,8 @@ public class MeshBasicColladaImporter
   private static void loadColladaPolygons(
     final @Nonnull MeshBasic m,
     final @Nonnull Offsets offsets,
-    final @Nonnull List<ColladaPoly> polygons)
+    final @Nonnull List<ColladaPoly> polygons,
+    final @Nonnull Log log)
     throws ConstraintError
   {
     for (final ColladaPoly poly : polygons) {
@@ -148,6 +149,9 @@ public class MeshBasicColladaImporter
       final int v2i = m.vertexAdd(position_v2, normal_v2, uv_v2);
       m.triangleAdd(v0i, v1i, v2i);
     }
+
+    log.debug("Loaded " + m.verticesGet().size() + " vertices");
+    log.debug("Loaded " + m.trianglesGet().size() + " triangles");
   }
 
   private static void loadColladaTexCoords(
@@ -340,7 +344,11 @@ public class MeshBasicColladaImporter
         m.setHasUV(offsets.texture_index >= 0);
         final List<ColladaPoly> polys = pl.getPolygons();
         this.loadColladaSources(doc, m, inputs);
-        MeshBasicColladaImporter.loadColladaPolygons(m, offsets, polys);
+        MeshBasicColladaImporter.loadColladaPolygons(
+          m,
+          offsets,
+          polys,
+          this.log);
         break;
       }
     }

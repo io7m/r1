@@ -18,6 +18,7 @@ package com.io7m.renderer.xml.normal;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -80,6 +81,54 @@ public final class MeshBasic
       this.uv = uv;
     }
 
+    @Override public String toString()
+    {
+      final StringBuilder builder = new StringBuilder();
+      builder.append("[Vertex [position ");
+      builder.append(this.position);
+      builder.append("] [normal ");
+      builder.append(this.normal);
+      builder.append("] [uv ");
+      builder.append(this.uv);
+      builder.append("]]");
+      return builder.toString();
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + this.normal;
+      result = (prime * result) + this.position;
+      result = (prime * result) + this.uv;
+      return result;
+    }
+
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final Vertex other = (Vertex) obj;
+      if (this.normal != other.normal) {
+        return false;
+      }
+      if (this.position != other.position) {
+        return false;
+      }
+      if (this.uv != other.uv) {
+        return false;
+      }
+      return true;
+    }
+
     public int getNormal()
     {
       return this.normal;
@@ -107,6 +156,7 @@ public final class MeshBasic
   private final @Nonnull ArrayList<RVectorI3F<RSpaceObject>>  positions;
   private final @Nonnull ArrayList<RVectorI2F<RSpaceTexture>> uvs;
   private final @Nonnull ArrayList<Vertex>                    vertices;
+  private final @Nonnull HashMap<Vertex, Integer>             vertex_map;
   private final @Nonnull ArrayList<Triangle>                  triangles;
   private final @Nonnull String                               name;
   private boolean                                             has_uv;
@@ -120,6 +170,7 @@ public final class MeshBasic
     this.positions = new ArrayList<RVectorI3F<RSpaceObject>>();
     this.uvs = new ArrayList<RVectorI2F<RSpaceTexture>>();
     this.vertices = new ArrayList<Vertex>();
+    this.vertex_map = new HashMap<MeshBasic.Vertex, Integer>();
     this.triangles = new ArrayList<Triangle>();
     this.has_uv = false;
   }
@@ -187,6 +238,7 @@ public final class MeshBasic
       0,
       this.vertices.size() - 1,
       "Vertex 2 in range");
+
     this.triangles.add(new Triangle(v0, v1, v2));
     return this.triangles.size() - 1;
   }
@@ -218,6 +270,24 @@ public final class MeshBasic
     final int uv)
     throws ConstraintError
   {
+    final Vertex v = this.createVertex(position, normal, uv);
+
+    if (this.vertex_map.containsKey(v)) {
+      return this.vertex_map.get(v).intValue();
+    }
+
+    this.vertices.add(v);
+    final int index = this.vertices.size() - 1;
+    this.vertex_map.put(v, Integer.valueOf(index));
+    return index;
+  }
+
+  private @Nonnull Vertex createVertex(
+    final int position,
+    final int normal,
+    final int uv)
+    throws ConstraintError
+  {
     Constraints.constrainRange(
       position,
       0,
@@ -237,8 +307,8 @@ public final class MeshBasic
       }
     }
 
-    this.vertices.add(new Vertex(position, normal, uv));
-    return this.vertices.size() - 1;
+    final Vertex v = new Vertex(position, normal, uv);
+    return v;
   }
 
   public @Nonnull List<Vertex> verticesGet()
