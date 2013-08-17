@@ -10,7 +10,6 @@
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
-  <library_images/>
   <library_geometries>
     <geometry id="Cube_001-mesh" name="Cube.001">
       <mesh>
@@ -57,16 +56,4 @@
       <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
     </geometry>
   </library_geometries>
-  <library_controllers/>
-  <library_visual_scenes>
-    <visual_scene id="Scene" name="Scene">
-      <node id="Cube" name="Cube" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cube_001-mesh"/>
-      </node>
-    </visual_scene>
-  </library_visual_scenes>
-  <scene>
-    <instance_visual_scene url="#Scene"/>
-  </scene>
 </COLLADA>

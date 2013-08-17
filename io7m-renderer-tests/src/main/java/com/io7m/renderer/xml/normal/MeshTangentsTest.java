@@ -203,6 +203,23 @@ public class MeshTangentsTest
     MeshTangentsTest.dumpXML(x);
   }
 
+  @SuppressWarnings("static-method") @Test public void testMeshSphere()
+    throws RXMLException,
+      ConstraintError,
+      IOException
+  {
+    final Log log = ColladaDocumentTest.getLog();
+    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
+    final MeshTangents mt =
+      MeshTangentsTest.makeAndCheckTangents(
+        log,
+        "sphere.dae",
+        new ColladaGeometryID("sphere_16_8_textured-mesh"));
+
+    final Element x = exporter.toXML(mt);
+    MeshTangentsTest.dumpXML(x);
+  }
+
   private static void dumpXML(
     final Element x)
     throws IOException
