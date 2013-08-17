@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.xml;
+package com.io7m.renderer.xml.rmx;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +39,7 @@ import org.xml.sax.XMLReader;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.RXMLException.RXMLExceptionParseError;
 import com.io7m.renderer.xml.RXMLException.RXMLExceptionParserConfigurationError;
 import com.io7m.renderer.xml.RXMLException.RXMLExceptionValidityError;

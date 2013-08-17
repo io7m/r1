@@ -31,6 +31,31 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
 public abstract class RXMLException extends Exception
 {
+  public static final class RXMLExceptionNumberFormatError extends
+    RXMLException
+  {
+    private static final long                    serialVersionUID;
+    private final @Nonnull NumberFormatException e;
+
+    static {
+      serialVersionUID = -5639465367483354396L;
+    }
+
+    public @SuppressWarnings("synthetic-access") RXMLExceptionNumberFormatError(
+      final @Nonnull NumberFormatException e,
+      final @Nonnull String message)
+      throws ConstraintError
+    {
+      super(e, Type.XML_NUMBER_FORMAT_ERROR, message);
+      this.e = Constraints.constrainNotNull(e, "Exception");
+    }
+
+    public @Nonnull NumberFormatException getException()
+    {
+      return this.e;
+    }
+  }
+
   public static final class RXMLExceptionParseError extends RXMLException
   {
     private static final long               serialVersionUID;
@@ -125,11 +150,12 @@ public abstract class RXMLException extends Exception
     }
   }
 
-  static enum Type
+  public static enum Type
   {
     XML_PARSE_ERROR,
     XML_VALIDITY_SAX_ERROR,
-    XML_VALIDITY_ERROR
+    XML_VALIDITY_ERROR,
+    XML_NUMBER_FORMAT_ERROR,
   }
 
   private static final long   serialVersionUID = 5005826249892823232L;
@@ -141,6 +167,16 @@ public abstract class RXMLException extends Exception
     throws ConstraintError
   {
     super(exception);
+    this.type = Constraints.constrainNotNull(type, "Type");
+  }
+
+  private RXMLException(
+    final @Nonnull Exception exception,
+    final @Nonnull Type type,
+    final @Nonnull String message)
+    throws ConstraintError
+  {
+    super(message, exception);
     this.type = Constraints.constrainNotNull(type, "Type");
   }
 
