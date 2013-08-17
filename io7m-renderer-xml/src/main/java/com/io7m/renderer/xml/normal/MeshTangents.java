@@ -325,7 +325,10 @@ public final class MeshTangents
     }
 
     /**
-     * Normalize tangents and bitangents.
+     * Orthonormalize tangents and bitangents.
+     * 
+     * The normal, tangent, and bitangent vectors must form an orthonormal
+     * right-handed basis.
      */
 
     for (int index = 0; index < mt.tangents.size(); ++index) {
@@ -337,9 +340,23 @@ public final class MeshTangents
       final VectorI3F ot = o.getV1();
       final VectorI3F ob = o.getV2();
 
-      mt.tangents.set(index, new RVectorI3F<RSpaceObject>(ot.x, ot.y, ot.z));
-      mt.bitangents
-        .set(index, new RVectorI3F<RSpaceObject>(ob.x, ob.y, ob.z));
+      final RVectorI3F<RSpaceObject> rt =
+        new RVectorI3F<RSpaceObject>(ot.x, ot.y, ot.z);
+
+      /**
+       * Invert the bitangent if the resulting coordinate system is not
+       * right-handed.
+       */
+
+      RVectorI3F<RSpaceObject> rb;
+      if (VectorI3F.dotProduct(VectorI3F.crossProduct(n, t), b) < 0.0f) {
+        rb = new RVectorI3F<RSpaceObject>(-ob.x, -ob.y, -ob.z);
+      } else {
+        rb = new RVectorI3F<RSpaceObject>(ob.x, ob.y, ob.z);
+      }
+
+      mt.tangents.set(index, rt);
+      mt.bitangents.set(index, rb);
     }
 
     return mt;

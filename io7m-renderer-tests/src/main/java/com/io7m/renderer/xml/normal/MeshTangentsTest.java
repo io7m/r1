@@ -70,7 +70,7 @@ public class MeshTangentsTest
     final List<RVectorI3F<RSpaceObject>> bitangents = mt.bitangentsGet();
 
     final ContextRelative context = new ContextRelative();
-    context.setMaxAbsoluteDifference(0.000001f);
+    context.setMaxAbsoluteDifference(0.0009f);
 
     for (int index = 0; index < normals.size(); ++index) {
       final RVectorI3F<RSpaceObject> n = normals.get(index);
@@ -203,6 +203,23 @@ public class MeshTangentsTest
     MeshTangentsTest.dumpXML(x);
   }
 
+  @SuppressWarnings("static-method") @Test public void testMeshMonkeys()
+    throws RXMLException,
+      ConstraintError,
+      IOException
+  {
+    final Log log = ColladaDocumentTest.getLog();
+    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
+    final MeshTangents mt =
+      MeshTangentsTest.makeAndCheckTangents(
+        log,
+        "monkeys.dae",
+        new ColladaGeometryID("monkey_textured_mesh-mesh"));
+
+    final Element x = exporter.toXML(mt);
+    MeshTangentsTest.dumpXML(x);
+  }
+
   @SuppressWarnings("static-method") @Test public void testMeshSphere()
     throws RXMLException,
       ConstraintError,
@@ -230,5 +247,39 @@ public class MeshTangentsTest
     s.setLineSeparator("\n");
     s.setMaxLength(80);
     s.write(doc);
+  }
+
+  @SuppressWarnings("static-method") @Test public void testMeshTriLH()
+    throws RXMLException,
+      ConstraintError,
+      IOException
+  {
+    final Log log = ColladaDocumentTest.getLog();
+    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
+    final MeshTangents mt =
+      MeshTangentsTest.makeAndCheckTangents(
+        log,
+        "tri_LHRH.dae",
+        new ColladaGeometryID("tri_lh-mesh"));
+
+    final Element x = exporter.toXML(mt);
+    MeshTangentsTest.dumpXML(x);
+  }
+
+  @SuppressWarnings("static-method") @Test public void testMeshTriRH()
+    throws RXMLException,
+      ConstraintError,
+      IOException
+  {
+    final Log log = ColladaDocumentTest.getLog();
+    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
+    final MeshTangents mt =
+      MeshTangentsTest.makeAndCheckTangents(
+        log,
+        "tri_LHRH.dae",
+        new ColladaGeometryID("tri_rh-mesh"));
+
+    final Element x = exporter.toXML(mt);
+    MeshTangentsTest.dumpXML(x);
   }
 }
