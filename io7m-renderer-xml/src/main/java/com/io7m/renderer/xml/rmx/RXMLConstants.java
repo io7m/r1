@@ -14,30 +14,26 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.xml.collada;
+package com.io7m.renderer.xml.rmx;
 
-import java.util.Collections;
-import java.util.List;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnreachableCodeException;
 
-@Immutable public final class ColladaPoly
+public final class RXMLConstants
 {
-  private final @Nonnull List<ColladaVertex> vertices;
+  public static final @Nonnull URI MESHES_URI;
+  public static final int          MESHES_VERSION;
 
-  public ColladaPoly(
-    final @Nonnull List<ColladaVertex> vertices)
-    throws ConstraintError
-  {
-    this.vertices = Constraints.constrainNotNull(vertices, "Vertices");
-  }
-
-  public @Nonnull List<ColladaVertex> getVertices()
-  {
-    return Collections.unmodifiableList(this.vertices);
+  static {
+    try {
+      MESHES_URI = new URI("http://schemas.io7m.com/renderer/1.0.0/meshes");
+      MESHES_VERSION = 1;
+    } catch (final URISyntaxException e) {
+      throw new UnreachableCodeException();
+    }
   }
 }

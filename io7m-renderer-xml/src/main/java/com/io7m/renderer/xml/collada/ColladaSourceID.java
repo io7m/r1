@@ -16,28 +16,58 @@
 
 package com.io7m.renderer.xml.collada;
 
-import java.util.Collections;
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 
-@Immutable public final class ColladaPoly
+@Immutable public final class ColladaSourceID implements
+  Comparable<ColladaSourceID>
 {
-  private final @Nonnull List<ColladaVertex> vertices;
+  private final @Nonnull String actual;
 
-  public ColladaPoly(
-    final @Nonnull List<ColladaVertex> vertices)
+  public ColladaSourceID(
+    final @Nonnull String actual)
     throws ConstraintError
   {
-    this.vertices = Constraints.constrainNotNull(vertices, "Vertices");
+    this.actual = Constraints.constrainNotNull(actual, "Actual");
   }
 
-  public @Nonnull List<ColladaVertex> getVertices()
+  @Override public boolean equals(
+    final Object obj)
   {
-    return Collections.unmodifiableList(this.vertices);
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final ColladaSourceID other = (ColladaSourceID) obj;
+    return this.actual.equals(other.actual);
+  }
+
+  public @Nonnull String getActual()
+  {
+    return this.actual;
+  }
+
+  @Override public int hashCode()
+  {
+    return this.actual.hashCode();
+  }
+
+  @Override public String toString()
+  {
+    return this.actual;
+  }
+
+  @Override public int compareTo(
+    final @Nonnull ColladaSourceID o)
+  {
+    return this.actual.compareTo(o.actual);
   }
 }

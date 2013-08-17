@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.xml;
+package com.io7m.renderer.xml.rmx;
 
 import javax.annotation.concurrent.Immutable;
 
