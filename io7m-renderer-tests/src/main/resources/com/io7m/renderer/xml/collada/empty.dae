@@ -10,12 +10,4 @@
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
-  <library_images/>
-  <library_controllers/>
-  <library_visual_scenes>
-    <visual_scene id="Scene" name="Scene"/>
-  </library_visual_scenes>
-  <scene>
-    <instance_visual_scene url="#Scene"/>
-  </scene>
 </COLLADA>
