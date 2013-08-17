@@ -27,8 +27,7 @@ import org.junit.Test;
 
 import com.io7m.jaux.AlmostEqualFloat;
 import com.io7m.jaux.AlmostEqualFloat.ContextRelative;
-import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.MatrixM4x4F.Context;
+import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.renderer.RSpace;
 import com.io7m.renderer.RSpaceObject;
@@ -62,8 +61,7 @@ public final class ColladaAxisTest
 
   @SuppressWarnings("static-method") @Test public void testXUpToXUp()
   {
-    final MatrixM4x4F matrix = new MatrixM4x4F();
-    final Context context = new MatrixM4x4F.Context();
+    final MatrixM3x3F matrix = new MatrixM3x3F();
 
     QuickCheck.forAllVerbose(
       new RVectorI3FGenerator<RSpaceObject>(),
@@ -73,7 +71,6 @@ public final class ColladaAxisTest
           throws Throwable
         {
           Assert.assertEquals(v, ColladaAxis.convertAxes(
-            context,
             matrix,
             ColladaAxis.COLLADA_AXIS_X_UP,
             v,
@@ -84,8 +81,7 @@ public final class ColladaAxisTest
 
   @SuppressWarnings("static-method") @Test public void testXUpToYUp()
   {
-    final MatrixM4x4F matrix = new MatrixM4x4F();
-    final Context context = new MatrixM4x4F.Context();
+    final MatrixM3x3F matrix = new MatrixM3x3F();
     final ContextRelative cr = ColladaAxisTest.makeRelativeContext();
 
     final RVectorI3F<RSpaceObject> v_in =
@@ -94,7 +90,6 @@ public final class ColladaAxisTest
       new RVectorI3F<RSpaceObject>(0, 1, 0);
     final RVectorI3F<RSpaceObject> v_out =
       ColladaAxis.convertAxes(
-        context,
         matrix,
         ColladaAxis.COLLADA_AXIS_X_UP,
         v_in,
@@ -109,8 +104,7 @@ public final class ColladaAxisTest
 
   @SuppressWarnings("static-method") @Test public void testXUpToZUp()
   {
-    final MatrixM4x4F matrix = new MatrixM4x4F();
-    final Context context = new MatrixM4x4F.Context();
+    final MatrixM3x3F matrix = new MatrixM3x3F();
     final ContextRelative cr = ColladaAxisTest.makeRelativeContext();
 
     final RVectorI3F<RSpaceObject> v_in =
@@ -119,7 +113,6 @@ public final class ColladaAxisTest
       new RVectorI3F<RSpaceObject>(0, 0, 1);
     final RVectorI3F<RSpaceObject> v_out =
       ColladaAxis.convertAxes(
-        context,
         matrix,
         ColladaAxis.COLLADA_AXIS_X_UP,
         v_in,
@@ -134,8 +127,7 @@ public final class ColladaAxisTest
 
   @SuppressWarnings("static-method") @Test public void testYUpToXUp()
   {
-    final MatrixM4x4F matrix = new MatrixM4x4F();
-    final Context context = new MatrixM4x4F.Context();
+    final MatrixM3x3F matrix = new MatrixM3x3F();
     final ContextRelative cr = ColladaAxisTest.makeRelativeContext();
 
     final RVectorI3F<RSpaceObject> v_in =
@@ -144,7 +136,6 @@ public final class ColladaAxisTest
       new RVectorI3F<RSpaceObject>(1, 0, 0);
     final RVectorI3F<RSpaceObject> v_out =
       ColladaAxis.convertAxes(
-        context,
         matrix,
         ColladaAxis.COLLADA_AXIS_Y_UP,
         v_in,
@@ -159,8 +150,7 @@ public final class ColladaAxisTest
 
   @SuppressWarnings("static-method") @Test public void testYUpToYUp()
   {
-    final MatrixM4x4F matrix = new MatrixM4x4F();
-    final Context context = new MatrixM4x4F.Context();
+    final MatrixM3x3F matrix = new MatrixM3x3F();
 
     QuickCheck.forAllVerbose(
       new RVectorI3FGenerator<RSpaceObject>(),
@@ -170,7 +160,6 @@ public final class ColladaAxisTest
           throws Throwable
         {
           Assert.assertEquals(v, ColladaAxis.convertAxes(
-            context,
             matrix,
             ColladaAxis.COLLADA_AXIS_Y_UP,
             v,
@@ -181,8 +170,7 @@ public final class ColladaAxisTest
 
   @SuppressWarnings("static-method") @Test public void testYUpToZUp()
   {
-    final MatrixM4x4F matrix = new MatrixM4x4F();
-    final Context context = new MatrixM4x4F.Context();
+    final MatrixM3x3F matrix = new MatrixM3x3F();
     final ContextRelative cr = ColladaAxisTest.makeRelativeContext();
 
     final RVectorI3F<RSpaceObject> v_in =
@@ -191,7 +179,6 @@ public final class ColladaAxisTest
       new RVectorI3F<RSpaceObject>(0, 0, 1);
     final RVectorI3F<RSpaceObject> v_out =
       ColladaAxis.convertAxes(
-        context,
         matrix,
         ColladaAxis.COLLADA_AXIS_Y_UP,
         v_in,
@@ -206,8 +193,7 @@ public final class ColladaAxisTest
 
   @SuppressWarnings("static-method") @Test public void testZUpToXUp()
   {
-    final MatrixM4x4F matrix = new MatrixM4x4F();
-    final Context context = new MatrixM4x4F.Context();
+    final MatrixM3x3F matrix = new MatrixM3x3F();
     final ContextRelative cr = ColladaAxisTest.makeRelativeContext();
 
     final RVectorI3F<RSpaceObject> v_in =
@@ -216,7 +202,6 @@ public final class ColladaAxisTest
       new RVectorI3F<RSpaceObject>(1, 0, 0);
     final RVectorI3F<RSpaceObject> v_out =
       ColladaAxis.convertAxes(
-        context,
         matrix,
         ColladaAxis.COLLADA_AXIS_Z_UP,
         v_in,
@@ -231,8 +216,7 @@ public final class ColladaAxisTest
 
   @SuppressWarnings("static-method") @Test public void testZUpToYUp()
   {
-    final MatrixM4x4F matrix = new MatrixM4x4F();
-    final Context context = new MatrixM4x4F.Context();
+    final MatrixM3x3F matrix = new MatrixM3x3F();
     final ContextRelative cr = ColladaAxisTest.makeRelativeContext();
 
     final RVectorI3F<RSpaceObject> v_in =
@@ -241,7 +225,6 @@ public final class ColladaAxisTest
       new RVectorI3F<RSpaceObject>(0, 1, 0);
     final RVectorI3F<RSpaceObject> v_out =
       ColladaAxis.convertAxes(
-        context,
         matrix,
         ColladaAxis.COLLADA_AXIS_Z_UP,
         v_in,
@@ -256,8 +239,7 @@ public final class ColladaAxisTest
 
   @SuppressWarnings("static-method") @Test public void testZUpToZUp()
   {
-    final MatrixM4x4F matrix = new MatrixM4x4F();
-    final Context context = new MatrixM4x4F.Context();
+    final MatrixM3x3F matrix = new MatrixM3x3F();
 
     QuickCheck.forAllVerbose(
       new RVectorI3FGenerator<RSpaceObject>(),
@@ -267,7 +249,6 @@ public final class ColladaAxisTest
           throws Throwable
         {
           Assert.assertEquals(v, ColladaAxis.convertAxes(
-            context,
             matrix,
             ColladaAxis.COLLADA_AXIS_Z_UP,
             v,

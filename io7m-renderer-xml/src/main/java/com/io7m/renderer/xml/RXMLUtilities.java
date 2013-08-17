@@ -31,6 +31,7 @@ import com.io7m.renderer.RSpace;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.xml.RXMLException.RXMLExceptionValidityError;
 
 public final class RXMLUtilities
 {
@@ -102,6 +103,24 @@ public final class RXMLUtilities
     }
   }
 
+  public static @Nonnull Attribute getAttributeInDefaultNamespace(
+    final @Nonnull Element e,
+    final @Nonnull String name)
+    throws RXMLExceptionValidityError,
+      ConstraintError
+  {
+    final Attribute a = e.getAttribute(name);
+    if (a == null) {
+      final StringBuilder message = new StringBuilder();
+      message.append("Expected an attribute '");
+      message.append(name);
+      message.append("'");
+      throw new RXMLException.RXMLExceptionValidityError(
+        new ValidityException(message.toString()));
+    }
+    return a;
+  }
+
   public static int getAttributeInteger(
     final @Nonnull Attribute a)
     throws RXMLException,
@@ -117,6 +136,20 @@ public final class RXMLUtilities
       throw new RXMLException.RXMLExceptionValidityError(
         new ValidityException(message.toString()));
     }
+  }
+
+  public static @Nonnull String getAttributeNonEmptyString(
+    final @Nonnull Attribute a)
+    throws RXMLExceptionValidityError,
+      ConstraintError
+  {
+    if (a.getValue().length() == 0) {
+      final StringBuilder message = new StringBuilder();
+      message.append("Expected a non-empty string");
+      throw new RXMLException.RXMLExceptionValidityError(
+        new ValidityException(message.toString()));
+    }
+    return a.getValue();
   }
 
   public static @Nonnull Element getChild(

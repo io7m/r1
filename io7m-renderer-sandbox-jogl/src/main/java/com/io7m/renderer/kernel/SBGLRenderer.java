@@ -89,8 +89,8 @@ import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLMeshDocument;
-import com.io7m.renderer.xml.RXMLMeshParserVBO;
+import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
+import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
 
 final class SBGLRenderer implements GLEventListener
 {

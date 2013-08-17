@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.xml;
+package com.io7m.renderer.xml.rmx;
 
 import java.util.ArrayList;
 
@@ -45,6 +45,7 @@ import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.KMeshAttributes;
+import com.io7m.renderer.xml.RXMLException;
 
 /**
  * An implementation of the {@link RXMLMeshParserEvents} interface that
