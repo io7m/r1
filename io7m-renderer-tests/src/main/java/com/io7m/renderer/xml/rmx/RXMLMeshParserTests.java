@@ -184,7 +184,7 @@ public final class RXMLMeshParserTests
     throws RXMLException
   {
     try {
-      final InputStream s = this.getFile("malformed.xml");
+      final InputStream s = this.getFile("malformed.rmx");
       RXMLMeshDocument.parseFromStreamValidating(s);
       s.close();
     } catch (final IOException e) {
@@ -205,7 +205,7 @@ public final class RXMLMeshParserTests
       throws RXMLException
   {
     try {
-      final InputStream s = this.getFile("invalid.xml");
+      final InputStream s = this.getFile("invalid.rmx");
       RXMLMeshDocument.parseFromStreamValidating(s);
       s.close();
     } catch (final IOException e) {
@@ -227,7 +227,7 @@ public final class RXMLMeshParserTests
       ConstraintError,
       Throwable
   {
-    final InputStream s = this.getFile("valid.xml");
+    final InputStream s = this.getFile("valid.rmx");
     RXMLMeshDocument.parseFromStreamValidating(s);
     s.close();
   }
@@ -238,7 +238,7 @@ public final class RXMLMeshParserTests
       throws RXMLException
   {
     try {
-      final InputStream s = this.getFile("wrongtrianglecount.xml");
+      final InputStream s = this.getFile("wrongtrianglecount.rmx");
       final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
       RXMLMeshParser.parseFromDocument(d, new Show());
       s.close();
@@ -260,7 +260,7 @@ public final class RXMLMeshParserTests
       throws RXMLException
   {
     try {
-      final InputStream s = this.getFile("wrongversion.xml");
+      final InputStream s = this.getFile("wrongversion.rmx");
       final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
       RXMLMeshParser.parseFromDocument(d, new Show());
       s.close();
@@ -282,7 +282,7 @@ public final class RXMLMeshParserTests
       throws RXMLException
   {
     try {
-      final InputStream s = this.getFile("wrongvertexcount.xml");
+      final InputStream s = this.getFile("wrongvertexcount.rmx");
       final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
       RXMLMeshParser.parseFromDocument(d, new Show());
       s.close();
@@ -490,7 +490,7 @@ public final class RXMLMeshParserTests
           expected_type,
           expected_vertices);
 
-      final InputStream s = this.getFile("valid.xml");
+      final InputStream s = this.getFile("valid.rmx");
       final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
       RXMLMeshParser.parseFromDocument(d, c);
       s.close();
