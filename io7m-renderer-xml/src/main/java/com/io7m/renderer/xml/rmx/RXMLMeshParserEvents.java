@@ -20,7 +20,6 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RSpaceObject;
-import com.io7m.renderer.RSpaceTangent;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
@@ -30,15 +29,6 @@ public interface RXMLMeshParserEvents<E extends Throwable>
 {
   public void eventError(
     final @Nonnull RXMLException e)
-    throws E,
-      ConstraintError;
-
-  /**
-   * Called when parsing of the mesh starts. This function is called
-   * unconditionally.
-   */
-
-  public void eventMeshStarted()
     throws E,
       ConstraintError;
 
@@ -53,6 +43,15 @@ public interface RXMLMeshParserEvents<E extends Throwable>
 
   public void eventMeshName(
     final @Nonnull String name)
+    throws E,
+      ConstraintError;
+
+  /**
+   * Called when parsing of the mesh starts. This function is called
+   * unconditionally.
+   */
+
+  public void eventMeshStarted()
     throws E,
       ConstraintError;
 
@@ -75,6 +74,12 @@ public interface RXMLMeshParserEvents<E extends Throwable>
 
   public void eventMeshType(
     final @Nonnull RXMLMeshType mt)
+    throws E,
+      ConstraintError;
+
+  public void eventMeshVertexBitangent(
+    final int index,
+    final @Nonnull RVectorI3F<RSpaceObject> bitangent)
     throws E,
       ConstraintError;
 
@@ -102,7 +107,7 @@ public interface RXMLMeshParserEvents<E extends Throwable>
 
   public void eventMeshVertexTangent(
     final int index,
-    final @Nonnull RVectorI3F<RSpaceTangent> tangent)
+    final @Nonnull RVectorI3F<RSpaceObject> tangent)
     throws E,
       ConstraintError;
 
