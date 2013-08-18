@@ -43,6 +43,12 @@ public class KMeshAttributes
           JCGLScalarType.TYPE_FLOAT,
           3);
 
+      ATTRIBUTE_BITANGENT =
+        new ArrayBufferAttributeDescriptor(
+          "bitangent",
+          JCGLScalarType.TYPE_FLOAT,
+          3);
+
       ATTRIBUTE_TANGENT =
         new ArrayBufferAttributeDescriptor(
           "tangent",
@@ -65,6 +71,7 @@ public class KMeshAttributes
 
   public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_POSITION;
   public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_NORMAL;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_BITANGENT;
   public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT;
   public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_UV;
   public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_COLOUR;

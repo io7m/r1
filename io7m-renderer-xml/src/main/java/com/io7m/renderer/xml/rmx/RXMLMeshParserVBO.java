@@ -40,7 +40,6 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLIndexBuffers;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.renderer.RSpaceObject;
-import com.io7m.renderer.RSpaceTangent;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
@@ -67,6 +66,7 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
     private @CheckForNull CursorWritable3f          cursor_normal;
     private @CheckForNull CursorWritable2f          cursor_uv;
     private @CheckForNull CursorWritable3f          cursor_tangent;
+    private @CheckForNull CursorWritable3f          cursor_bitangent;
 
     public Events(
       final @Nonnull G g,
@@ -75,7 +75,6 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
     {
       this.gl = Constraints.constrainNotNull(g, "OpenGL interface");
       this.usage = Constraints.constrainNotNull(hint, "Usage hint");
-
     }
 
     @Override public void eventError(
@@ -194,6 +193,10 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
         a.add(KMeshAttributes.ATTRIBUTE_TANGENT);
       }
 
+      if (mt.hasBitangent()) {
+        a.add(KMeshAttributes.ATTRIBUTE_BITANGENT);
+      }
+
       if (mt.hasUV()) {
         a.add(KMeshAttributes.ATTRIBUTE_UV);
       }
@@ -248,13 +251,25 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
 
     @Override public void eventMeshVertexTangent(
       final int index,
-      final @Nonnull RVectorI3F<RSpaceTangent> tangent)
+      final @Nonnull RVectorI3F<RSpaceObject> tangent)
       throws ConstraintError
     {
       Constraints.constrainArbitrary(
         RXMLMeshParserVBO.this.parsing,
         "Parsing in progress");
       this.cursor_tangent.put3f(tangent.x, tangent.y, tangent.z);
+    }
+
+    @Override public void eventMeshVertexBitangent(
+      final int index,
+      final @Nonnull RVectorI3F<RSpaceObject> bitangent)
+      throws JCGLException,
+        ConstraintError
+    {
+      Constraints.constrainArbitrary(
+        RXMLMeshParserVBO.this.parsing,
+        "Parsing in progress");
+      this.cursor_bitangent.put3f(bitangent.x, bitangent.y, bitangent.z);
     }
 
     @Override public void eventMeshVertexUV(

@@ -16,22 +16,19 @@
 
 package com.io7m.renderer.xml.rmx;
 
+import java.util.EnumSet;
+
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable final class RXMLMeshType
 {
-  private final boolean normal;
-  private final boolean tangent;
-  private final boolean uv;
+  private final @Nonnull EnumSet<RXMLMeshAttribute> attributes;
 
   RXMLMeshType(
-    final boolean normal,
-    final boolean tangent,
-    final boolean uv)
+    final @Nonnull EnumSet<RXMLMeshAttribute> attributes)
   {
-    this.normal = normal;
-    this.tangent = tangent;
-    this.uv = uv;
+    this.attributes = attributes;
   }
 
   @Override public boolean equals(
@@ -47,52 +44,47 @@ import javax.annotation.concurrent.Immutable;
       return false;
     }
     final RXMLMeshType other = (RXMLMeshType) obj;
-    if (this.normal != other.normal) {
-      return false;
-    }
-    if (this.tangent != other.tangent) {
-      return false;
-    }
-    if (this.uv != other.uv) {
+    if (!this.attributes.equals(other.attributes)) {
       return false;
     }
     return true;
+  }
+
+  public boolean hasBitangent()
+  {
+    return this.attributes.contains(RXMLMeshAttribute.BITANGENT_3F);
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + (this.normal ? 1231 : 1237);
-    result = (prime * result) + (this.tangent ? 1231 : 1237);
-    result = (prime * result) + (this.uv ? 1231 : 1237);
+    result =
+      (prime * result)
+        + ((this.attributes == null) ? 0 : this.attributes.hashCode());
     return result;
   }
 
   public boolean hasNormal()
   {
-    return this.normal;
+    return this.attributes.contains(RXMLMeshAttribute.NORMAL_3F);
   }
 
   public boolean hasTangent()
   {
-    return this.tangent;
+    return this.attributes.contains(RXMLMeshAttribute.TANGENT_3F);
   }
 
   public boolean hasUV()
   {
-    return this.uv;
+    return this.attributes.contains(RXMLMeshAttribute.UV_2F);
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[RXMLMeshType [normal ");
-    builder.append(this.normal);
-    builder.append("] [tangent ");
-    builder.append(this.tangent);
-    builder.append("] [uv ");
-    builder.append(this.uv);
+    builder.append("[RXMLMeshType ");
+    builder.append(this.attributes);
     builder.append("]");
     return builder.toString();
   }

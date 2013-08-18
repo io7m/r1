@@ -18,6 +18,7 @@ package com.io7m.renderer.xml.rmx;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.EnumSet;
 
 import javax.annotation.Nonnull;
 
@@ -28,7 +29,6 @@ import org.junit.Test;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RSpaceObject;
-import com.io7m.renderer.RSpaceTangent;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
@@ -131,7 +131,16 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexTangent(
       final int index,
-      final RVectorI3F<RSpaceTangent> tangent)
+      final RVectorI3F<RSpaceObject> tangent)
+      throws Throwable,
+        ConstraintError
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVertexBitangent(
+      final int index,
+      final RVectorI3F<RSpaceObject> bitangent)
       throws Throwable,
         ConstraintError
     {
@@ -314,6 +323,7 @@ public final class RXMLMeshParserTests
     private boolean                     vertex_position_called;
     private boolean                     vertex_started_called;
     private boolean                     vertex_tangent_called;
+    private boolean                     vertex_bitangent_called;
     private boolean                     vertex_uv_called;
     private boolean                     vertices_ended;
     private boolean                     vertices_started;
@@ -431,7 +441,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexTangent(
       final int index,
-      final RVectorI3F<RSpaceTangent> tangent)
+      final RVectorI3F<RSpaceObject> tangent)
       throws Throwable,
         ConstraintError
     {
@@ -470,6 +480,15 @@ public final class RXMLMeshParserTests
     {
       this.mesh_started = true;
     }
+
+    @Override public void eventMeshVertexBitangent(
+      final int index,
+      final RVectorI3F<RSpaceObject> bitangent)
+      throws Throwable,
+        ConstraintError
+    {
+      this.vertex_bitangent_called = true;
+    }
   }
 
   @SuppressWarnings("synthetic-access") @Test public
@@ -480,7 +499,8 @@ public final class RXMLMeshParserTests
     try {
       final String expected_name = "some-mesh";
       final int expected_triangles = 3;
-      final RXMLMeshType expected_type = new RXMLMeshType(true, true, true);
+      final RXMLMeshType expected_type =
+        new RXMLMeshType(EnumSet.allOf(RXMLMeshAttribute.class));
       final int expected_vertices = 3;
 
       final Checked c =

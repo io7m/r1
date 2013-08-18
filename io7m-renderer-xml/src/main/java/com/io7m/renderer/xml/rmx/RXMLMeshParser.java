@@ -16,6 +16,8 @@
 
 package com.io7m.renderer.xml.rmx;
 
+import java.util.EnumSet;
+
 import javax.annotation.Nonnull;
 
 import nu.xom.Attribute;
@@ -27,7 +29,6 @@ import nu.xom.ValidityException;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RSpaceObject;
-import com.io7m.renderer.RSpaceTangent;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
@@ -138,11 +139,18 @@ public final class RXMLMeshParser<E extends Throwable>
   {
     assert e.getLocalName().equals("type");
 
+    final EnumSet<RXMLMeshAttribute> attributes =
+      EnumSet.noneOf(RXMLMeshAttribute.class);
+
     final Element en =
       RXMLUtilities.getOptionalChild(
         e,
         "attribute-normal-3f",
         RXMLConstants.MESHES_URI);
+
+    if (en != null) {
+      attributes.add(RXMLMeshAttribute.NORMAL_3F);
+    }
 
     final Element et =
       RXMLUtilities.getOptionalChild(
@@ -150,13 +158,31 @@ public final class RXMLMeshParser<E extends Throwable>
         "attribute-tangent-3f",
         RXMLConstants.MESHES_URI);
 
+    if (et != null) {
+      attributes.add(RXMLMeshAttribute.TANGENT_3F);
+    }
+
+    final Element eb =
+      RXMLUtilities.getOptionalChild(
+        e,
+        "attribute-bitangent-3f",
+        RXMLConstants.MESHES_URI);
+
+    if (eb != null) {
+      attributes.add(RXMLMeshAttribute.BITANGENT_3F);
+    }
+
     final Element eu =
       RXMLUtilities.getOptionalChild(
         e,
         "attribute-uv-2f",
         RXMLConstants.MESHES_URI);
 
-    return new RXMLMeshType(en != null, et != null, eu != null);
+    if (eu != null) {
+      attributes.add(RXMLMeshAttribute.UV_2F);
+    }
+
+    return new RXMLMeshType(attributes);
   }
 
   private static RVectorI3F<RSpaceObject> parseVertexPosition(
@@ -227,11 +253,21 @@ public final class RXMLMeshParser<E extends Throwable>
       if (type.hasTangent()) {
         final Element t =
           RXMLUtilities.getChild(v, "t", RXMLConstants.MESHES_URI);
-        final RVectorI3F<RSpaceTangent> vt =
+        final RVectorI3F<RSpaceObject> vt =
           RXMLUtilities.getElementAttributesVector3f(
             t,
             RXMLConstants.MESHES_URI);
         events.eventMeshVertexTangent(index, vt);
+      }
+
+      if (type.hasBitangent()) {
+        final Element t =
+          RXMLUtilities.getChild(v, "b", RXMLConstants.MESHES_URI);
+        final RVectorI3F<RSpaceObject> vb =
+          RXMLUtilities.getElementAttributesVector3f(
+            t,
+            RXMLConstants.MESHES_URI);
+        events.eventMeshVertexBitangent(index, vb);
       }
 
       if (type.hasUV()) {
