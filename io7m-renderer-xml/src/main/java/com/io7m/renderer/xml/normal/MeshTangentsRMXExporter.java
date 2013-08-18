@@ -107,7 +107,8 @@ public class MeshTangentsRMXExporter
     return ets;
   }
 
-  private static @Nonnull Element toXMLType()
+  private static @Nonnull Element toXMLType(
+    final boolean write_bitangents)
   {
     final String uri = RXMLConstants.MESHES_URI.toString();
     final Element et = new Element("m:type", uri);
@@ -115,12 +116,15 @@ public class MeshTangentsRMXExporter
     et.appendChild(new Element("m:attribute-normal-3f", uri));
     et.appendChild(new Element("m:attribute-uv-2f", uri));
     et.appendChild(new Element("m:attribute-tangent-3f", uri));
-    et.appendChild(new Element("m:attribute-bitangent-3f", uri));
+    if (write_bitangents) {
+      et.appendChild(new Element("m:attribute-bitangent-3f", uri));
+    }
     return et;
   }
 
   private static @Nonnull Element toXMLVertices(
-    final @Nonnull MeshTangents m)
+    final @Nonnull MeshTangents m,
+    final boolean write_bitangents)
   {
     final String uri = RXMLConstants.MESHES_URI.toString();
     final List<Vertex> vertices = m.verticesGet();
@@ -159,12 +163,14 @@ public class MeshTangentsRMXExporter
       et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", t.z));
       ev.appendChild(et);
 
-      final Element eb = new Element("m:b", uri);
-      final RVectorI3F<RSpaceObject> b = bitangents.get(v.getTangent());
-      eb.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:x", b.x));
-      eb.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:y", b.y));
-      eb.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", b.z));
-      ev.appendChild(eb);
+      if (write_bitangents) {
+        final Element eb = new Element("m:b", uri);
+        final RVectorI3F<RSpaceObject> b = bitangents.get(v.getTangent());
+        eb.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:x", b.x));
+        eb.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:y", b.y));
+        eb.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", b.z));
+        ev.appendChild(eb);
+      }
 
       final Element eu = new Element("m:u", uri);
       final RVectorI2F<RSpaceTexture> u = uvs.get(v.getUV());
@@ -191,11 +197,12 @@ public class MeshTangentsRMXExporter
   }
 
   @SuppressWarnings("static-method") public @Nonnull Element toXML(
-    final @Nonnull MeshTangents m)
+    final @Nonnull MeshTangents m,
+    final boolean bitangents)
   {
     final Element e = MeshTangentsRMXExporter.toXMLRoot(m);
-    final Element et = MeshTangentsRMXExporter.toXMLType();
-    final Element ev = MeshTangentsRMXExporter.toXMLVertices(m);
+    final Element et = MeshTangentsRMXExporter.toXMLType(bitangents);
+    final Element ev = MeshTangentsRMXExporter.toXMLVertices(m, bitangents);
     final Element etr = MeshTangentsRMXExporter.toXMLTriangles(m);
     e.appendChild(et);
     e.appendChild(ev);

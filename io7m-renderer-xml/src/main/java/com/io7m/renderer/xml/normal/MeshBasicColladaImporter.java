@@ -329,11 +329,25 @@ public class MeshBasicColladaImporter
   {
     Constraints.constrainNotNull(doc, "Document");
     Constraints.constrainNotNull(geom, "Geometry");
+    return this.newMeshFromColladaGeometryWithName(doc, geom, geom
+      .getID()
+      .getActual());
+  }
+
+  public @Nonnull MeshBasic newMeshFromColladaGeometryWithName(
+    final @Nonnull ColladaDocument doc,
+    final @Nonnull ColladaGeometry geom,
+    final @Nonnull String name)
+    throws ConstraintError
+  {
+    Constraints.constrainNotNull(doc, "Document");
+    Constraints.constrainNotNull(geom, "Geometry");
+    Constraints.constrainNotNull(name, "Name");
     Constraints.constrainArbitrary(
       geom.getDocument() == doc,
       "Geometry came from the given document");
 
-    final MeshBasic m = MeshBasic.newMesh(geom.getID().getActual());
+    final MeshBasic m = MeshBasic.newMesh(name);
     switch (geom.getType()) {
       case GEOMETRY_MESH:
       {

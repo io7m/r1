@@ -148,7 +148,7 @@ public class MeshTangentsTest
         "tri.dae",
         new ColladaGeometryID("tri_textured-mesh"));
 
-    final Element x = exporter.toXML(mt);
+    final Element x = exporter.toXML(mt, true);
     MeshTangentsTest.dumpXML(x);
   }
 
@@ -165,7 +165,7 @@ public class MeshTangentsTest
         "cube.dae",
         new ColladaGeometryID("cube_textured_mesh-mesh"));
 
-    final Element x = exporter.toXML(mt);
+    final Element x = exporter.toXML(mt, true);
     MeshTangentsTest.dumpXML(x);
   }
 
@@ -182,7 +182,7 @@ public class MeshTangentsTest
         "cube_oneface.dae",
         new ColladaGeometryID("Cube_001-mesh"));
 
-    final Element x = exporter.toXML(mt);
+    final Element x = exporter.toXML(mt, true);
     MeshTangentsTest.dumpXML(x);
   }
 
@@ -199,7 +199,7 @@ public class MeshTangentsTest
         "cylinder.dae",
         new ColladaGeometryID("cylinder_textured-mesh"));
 
-    final Element x = exporter.toXML(mt);
+    final Element x = exporter.toXML(mt, true);
     MeshTangentsTest.dumpXML(x);
   }
 
@@ -216,7 +216,7 @@ public class MeshTangentsTest
         "monkeys.dae",
         new ColladaGeometryID("monkey_textured_mesh-mesh"));
 
-    final Element x = exporter.toXML(mt);
+    final Element x = exporter.toXML(mt, true);
     MeshTangentsTest.dumpXML(x);
   }
 
@@ -233,7 +233,7 @@ public class MeshTangentsTest
         "sphere.dae",
         new ColladaGeometryID("sphere_16_8_textured-mesh"));
 
-    final Element x = exporter.toXML(mt);
+    final Element x = exporter.toXML(mt, true);
     MeshTangentsTest.dumpXML(x);
   }
 
@@ -262,7 +262,7 @@ public class MeshTangentsTest
         "tri_LHRH.dae",
         new ColladaGeometryID("tri_lh-mesh"));
 
-    final Element x = exporter.toXML(mt);
+    final Element x = exporter.toXML(mt, true);
     MeshTangentsTest.dumpXML(x);
   }
 
@@ -279,7 +279,7 @@ public class MeshTangentsTest
         "tri_LHRH.dae",
         new ColladaGeometryID("tri_rh-mesh"));
 
-    final Element x = exporter.toXML(mt);
+    final Element x = exporter.toXML(mt, true);
     MeshTangentsTest.dumpXML(x);
   }
 }
