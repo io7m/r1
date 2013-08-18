@@ -31,6 +31,7 @@ import com.io7m.renderer.RSpace;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.xml.RXMLException.RXMLExceptionValidityError;
 
 public final class RXMLUtilities
@@ -211,6 +212,26 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(ax),
       RXMLUtilities.getAttributeFloat(ay),
       RXMLUtilities.getAttributeFloat(az));
+  }
+
+  public static @Nonnull
+    <T extends RSpace>
+    RVectorI4F<T>
+    getElementAttributesVector4f(
+      final @Nonnull Element e,
+      final @Nonnull URI uri)
+      throws RXMLException,
+        ConstraintError
+  {
+    final Attribute ax = RXMLUtilities.getAttribute(e, "x", uri);
+    final Attribute ay = RXMLUtilities.getAttribute(e, "y", uri);
+    final Attribute az = RXMLUtilities.getAttribute(e, "z", uri);
+    final Attribute aw = RXMLUtilities.getAttribute(e, "w", uri);
+    return new RVectorI4F<T>(
+      RXMLUtilities.getAttributeFloat(ax),
+      RXMLUtilities.getAttributeFloat(ay),
+      RXMLUtilities.getAttributeFloat(az),
+      RXMLUtilities.getAttributeFloat(aw));
   }
 
   public static float getElementFloat(

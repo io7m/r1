@@ -30,6 +30,7 @@ import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.xml.normal.MeshTangents.Triangle;
 import com.io7m.renderer.xml.normal.MeshTangents.Vertex;
 import com.io7m.renderer.xml.rmx.RXMLConstants;
@@ -115,10 +116,14 @@ public class MeshTangentsRMXExporter
     et.appendChild(new Element("m:attribute-position-3f", uri));
     et.appendChild(new Element("m:attribute-normal-3f", uri));
     et.appendChild(new Element("m:attribute-uv-2f", uri));
-    et.appendChild(new Element("m:attribute-tangent-3f", uri));
+
     if (write_bitangents) {
+      et.appendChild(new Element("m:attribute-tangent-3f", uri));
       et.appendChild(new Element("m:attribute-bitangent-3f", uri));
+    } else {
+      et.appendChild(new Element("m:attribute-tangent-4f", uri));
     }
+
     return et;
   }
 
@@ -131,7 +136,7 @@ public class MeshTangentsRMXExporter
     final List<RVectorI3F<RSpaceObject>> positions = m.positionsGet();
     final List<RVectorI3F<RSpaceObject>> normals = m.normalsGet();
     final List<RVectorI2F<RSpaceTexture>> uvs = m.uvsGet();
-    final List<RVectorI3F<RSpaceObject>> tangents = m.tangentsGet();
+    final List<RVectorI4F<RSpaceObject>> tangents = m.tangentsGet();
     final List<RVectorI3F<RSpaceObject>> bitangents = m.bitangentsGet();
 
     final Element evs = new Element("m:vertices", uri);
@@ -156,20 +161,28 @@ public class MeshTangentsRMXExporter
       en.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", n.z));
       ev.appendChild(en);
 
-      final Element et = new Element("m:t", uri);
-      final RVectorI3F<RSpaceObject> t = tangents.get(v.getTangent());
-      et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:x", t.x));
-      et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:y", t.y));
-      et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", t.z));
-      ev.appendChild(et);
-
       if (write_bitangents) {
+        final Element et = new Element("m:t3", uri);
+        final RVectorI4F<RSpaceObject> t = tangents.get(v.getTangent());
+        et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:x", t.x));
+        et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:y", t.y));
+        et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", t.z));
+        ev.appendChild(et);
+
         final Element eb = new Element("m:b", uri);
         final RVectorI3F<RSpaceObject> b = bitangents.get(v.getTangent());
         eb.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:x", b.x));
         eb.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:y", b.y));
         eb.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", b.z));
         ev.appendChild(eb);
+      } else {
+        final Element et = new Element("m:t4", uri);
+        final RVectorI4F<RSpaceObject> t = tangents.get(v.getTangent());
+        et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:x", t.x));
+        et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:y", t.y));
+        et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", t.z));
+        et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:w", t.w));
+        ev.appendChild(et);
       }
 
       final Element eu = new Element("m:u", uri);

@@ -36,7 +36,7 @@ import com.io7m.jcanephora.IndexBuffer;
  * <li>If the mesh has texture coordinates, they must be of type
  * {@link KMeshAttributes#ATTRIBUTE_UV}.</li>
  * <li>If the mesh has per-vertex tangents, they must be of type
- * {@link KMeshAttributes#ATTRIBUTE_TANGENT}.</li>
+ * {@link KMeshAttributes#ATTRIBUTE_TANGENT3}.</li>
  * <ul>
  */
 

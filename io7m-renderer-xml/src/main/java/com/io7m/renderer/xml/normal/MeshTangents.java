@@ -32,6 +32,7 @@ import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.RVectorM3F;
 
 public final class MeshTangents
@@ -238,9 +239,9 @@ public final class MeshTangents
       final RVectorI3F<RSpaceObject> v1p = mt.positions.get(v1.getPosition());
       final RVectorI3F<RSpaceObject> v2p = mt.positions.get(v2.getPosition());
 
-      final RVectorI3F<RSpaceObject> v0t = mt.tangents.get(v0.getTangent());
-      final RVectorI3F<RSpaceObject> v1t = mt.tangents.get(v1.getTangent());
-      final RVectorI3F<RSpaceObject> v2t = mt.tangents.get(v2.getTangent());
+      final RVectorI4F<RSpaceObject> v0t = mt.tangents.get(v0.getTangent());
+      final RVectorI4F<RSpaceObject> v1t = mt.tangents.get(v1.getTangent());
+      final RVectorI4F<RSpaceObject> v2t = mt.tangents.get(v2.getTangent());
 
       final RVectorI3F<RSpaceObject> v0b =
         mt.bitangents.get(v0.getBitangent());
@@ -283,21 +284,24 @@ public final class MeshTangents
       bitangent.y = (float) by;
       bitangent.z = (float) bz;
 
-      final RVectorI3F<RSpaceObject> v0t_acc =
-        new RVectorI3F<RSpaceObject>(
+      final RVectorI4F<RSpaceObject> v0t_acc =
+        new RVectorI4F<RSpaceObject>(
           v0t.x + tangent.x,
           v0t.y + tangent.y,
-          v0t.z + tangent.z);
-      final RVectorI3F<RSpaceObject> v1t_acc =
-        new RVectorI3F<RSpaceObject>(
+          v0t.z + tangent.z,
+          1.0f);
+      final RVectorI4F<RSpaceObject> v1t_acc =
+        new RVectorI4F<RSpaceObject>(
           v1t.x + tangent.x,
           v1t.y + tangent.y,
-          v1t.z + tangent.z);
-      final RVectorI3F<RSpaceObject> v2t_acc =
-        new RVectorI3F<RSpaceObject>(
+          v1t.z + tangent.z,
+          1.0f);
+      final RVectorI4F<RSpaceObject> v2t_acc =
+        new RVectorI4F<RSpaceObject>(
           v2t.x + tangent.x,
           v2t.y + tangent.y,
-          v2t.z + tangent.z);
+          v2t.z + tangent.z,
+          1.0f);
 
       mt.tangents.set(v0.getTangent(), v0t_acc);
       mt.tangents.set(v1.getTangent(), v1t_acc);
@@ -329,10 +333,17 @@ public final class MeshTangents
      * 
      * The normal, tangent, and bitangent vectors must form an orthonormal
      * right-handed basis.
+     * 
+     * Because precomputed bitangents are optional, this code does two things:
+     * It calculates bintangents, inverting them if necessary to form a
+     * right-handed coordinate space, and it also saves a value in the w
+     * component of the tangent vector in order to allow shading language
+     * programs to perform this inversion themselves, if they are calculating
+     * the bitangents at runtime (with <code>cross (N, T.xyz) * T.w</code>).
      */
 
     for (int index = 0; index < mt.tangents.size(); ++index) {
-      final RVectorI3F<RSpaceObject> t = mt.tangents.get(index);
+      final RVectorI4F<RSpaceObject> t = mt.tangents.get(index);
       final RVectorI3F<RSpaceObject> b = mt.bitangents.get(index);
       final RVectorI3F<RSpaceObject> n = mt.normals.get(index);
 
@@ -340,18 +351,19 @@ public final class MeshTangents
       final VectorI3F ot = o.getV1();
       final VectorI3F ob = o.getV2();
 
-      final RVectorI3F<RSpaceObject> rt =
-        new RVectorI3F<RSpaceObject>(ot.x, ot.y, ot.z);
-
       /**
        * Invert the bitangent if the resulting coordinate system is not
-       * right-handed.
+       * right-handed (and save the fact that the inversion occurred in the w
+       * component of the tangent vector).
        */
 
+      RVectorI4F<RSpaceObject> rt;
       RVectorI3F<RSpaceObject> rb;
       if (VectorI3F.dotProduct(VectorI3F.crossProduct(n, t), b) < 0.0f) {
+        rt = new RVectorI4F<RSpaceObject>(ot.x, ot.y, ot.z, -1.0f);
         rb = new RVectorI3F<RSpaceObject>(-ob.x, -ob.y, -ob.z);
       } else {
+        rt = new RVectorI4F<RSpaceObject>(ot.x, ot.y, ot.z, 1.0f);
         rb = new RVectorI3F<RSpaceObject>(ob.x, ob.y, ob.z);
       }
 
@@ -363,7 +375,7 @@ public final class MeshTangents
   }
 
   private final @Nonnull ArrayList<RVectorI3F<RSpaceObject>>  normals;
-  private final @Nonnull ArrayList<RVectorI3F<RSpaceObject>>  tangents;
+  private final @Nonnull ArrayList<RVectorI4F<RSpaceObject>>  tangents;
   private final @Nonnull ArrayList<RVectorI3F<RSpaceObject>>  bitangents;
   private final @Nonnull ArrayList<RVectorI3F<RSpaceObject>>  positions;
   private final @Nonnull ArrayList<RVectorI2F<RSpaceTexture>> uvs;
@@ -395,12 +407,12 @@ public final class MeshTangents
         "UVs"));
 
     this.tangents =
-      new ArrayList<RVectorI3F<RSpaceObject>>(this.normals.size());
+      new ArrayList<RVectorI4F<RSpaceObject>>(this.normals.size());
     this.bitangents =
       new ArrayList<RVectorI3F<RSpaceObject>>(this.normals.size());
 
     for (int index = 0; index < this.normals.size(); ++index) {
-      this.tangents.add(new RVectorI3F<RSpaceObject>(0, 0, 0));
+      this.tangents.add(new RVectorI4F<RSpaceObject>(0, 0, 0, 0));
     }
 
     for (int index = 0; index < this.normals.size(); ++index) {
@@ -432,7 +444,7 @@ public final class MeshTangents
     return Collections.unmodifiableList(this.positions);
   }
 
-  public @Nonnull List<RVectorI3F<RSpaceObject>> tangentsGet()
+  public @Nonnull List<RVectorI4F<RSpaceObject>> tangentsGet()
   {
     return Collections.unmodifiableList(this.tangents);
   }

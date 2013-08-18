@@ -21,13 +21,32 @@ import java.util.EnumSet;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jaux.Constraints;
+import com.io7m.jaux.Constraints.ConstraintError;
+
 @Immutable final class RXMLMeshType
 {
   private final @Nonnull EnumSet<RXMLMeshAttribute> attributes;
 
   RXMLMeshType(
     final @Nonnull EnumSet<RXMLMeshAttribute> attributes)
+    throws ConstraintError
   {
+    Constraints.constrainNotNull(attributes, "Attributes");
+
+    if (attributes.contains(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F)) {
+      Constraints.constrainArbitrary(
+        attributes.contains(RXMLMeshAttribute.TANGENT_4F) == false,
+        "Mesh does not contain both 3D and 4D tangents");
+    }
+
+    if (attributes.contains(RXMLMeshAttribute.TANGENT_4F)) {
+      Constraints
+        .constrainArbitrary(
+          attributes.contains(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F) == false,
+          "Mesh does not contain both 3D and 4D tangents");
+    }
+
     this.attributes = attributes;
   }
 
@@ -52,7 +71,8 @@ import javax.annotation.concurrent.Immutable;
 
   public boolean hasBitangent()
   {
-    return this.attributes.contains(RXMLMeshAttribute.BITANGENT_3F);
+    return this.attributes
+      .contains(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F);
   }
 
   @Override public int hashCode()
@@ -70,9 +90,15 @@ import javax.annotation.concurrent.Immutable;
     return this.attributes.contains(RXMLMeshAttribute.NORMAL_3F);
   }
 
-  public boolean hasTangent()
+  public boolean hasTangent3f()
   {
-    return this.attributes.contains(RXMLMeshAttribute.TANGENT_3F);
+    return this.attributes
+      .contains(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F);
+  }
+
+  public boolean hasTangent4f()
+  {
+    return this.attributes.contains(RXMLMeshAttribute.TANGENT_4F);
   }
 
   public boolean hasUV()

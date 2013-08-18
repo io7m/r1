@@ -3,6 +3,7 @@
 in vec3 v_position;
 in vec3 v_normal;
 in vec3 v_tangent;
+in vec3 v_bitangent;
 in vec2 v_uv;
 
 uniform mat4 m_modelview;
@@ -12,6 +13,7 @@ uniform mat3 m_normal;
 out vec2 f_uv;
 out vec3 f_normal;
 out vec3 f_tangent;
+out vec3 f_bitangent;
 
 void
 main()
@@ -20,4 +22,5 @@ main()
   f_uv        = v_uv;
   f_normal    = v_normal;
   f_tangent   = v_tangent;
+  f_bitangent = v_bitangent;
 }
