@@ -19,7 +19,7 @@ package com.io7m.renderer.xml.rmx;
 enum RXMLMeshAttribute
 {
   NORMAL_3F,
-  TANGENT_3F,
-  BITANGENT_3F,
+  TANGENT_4F,
+  TANGENT_3F_BITANGENT_3F,
   UV_2F
 }

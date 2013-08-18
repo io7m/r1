@@ -3,14 +3,14 @@
   <m:type>
     <m:attribute-position-3f/>
     <m:attribute-normal-3f/>
-    <m:attribute-tangent-3f/>
+    <m:attribute-tangent-4f/>
     <m:attribute-uv-2f/>
   </m:type>
   <m:vertices m:count="2">
     <m:v>
       <m:p m:x="0.0" m:y="0.0" m:z="0.0"/>
       <m:n m:x="0.0" m:y="0.0" m:z="1.0"/>
-      <m:t m:x="0.0" m:y="0.0" m:z="1.0"/>
+      <m:t4 m:x="0.0" m:y="0.0" m:z="1.0" m:w="1.0"/>
       <m:u m:x="0.0" m:y="0.0"/>
     </m:v>
   </m:vertices>

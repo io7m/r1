@@ -4,9 +4,15 @@ in vec3 f_normal;
 
 out vec4 out_frag_color;
 
+vec4
+normal_display(
+  vec3 N)
+{
+  return vec4 (normalize ((N + 1.0) * 0.5), 1.0);
+}
+
 void
 main (void)
 {
-  vec3 N = normalize ((f_normal + 1.0) * 0.5);
-  out_frag_color = vec4(N, 1);
+  out_frag_color = normal_display (f_normal);
 }

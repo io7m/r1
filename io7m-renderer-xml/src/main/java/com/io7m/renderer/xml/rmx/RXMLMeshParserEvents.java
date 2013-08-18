@@ -23,6 +23,7 @@ import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.xml.RXMLException;
 
 public interface RXMLMeshParserEvents<E extends Throwable>
@@ -105,9 +106,15 @@ public interface RXMLMeshParserEvents<E extends Throwable>
     throws E,
       ConstraintError;
 
-  public void eventMeshVertexTangent(
+  public void eventMeshVertexTangent3f(
     final int index,
     final @Nonnull RVectorI3F<RSpaceObject> tangent)
+    throws E,
+      ConstraintError;
+
+  public void eventMeshVertexTangent4f(
+    final int index,
+    final @Nonnull RVectorI4F<RSpaceObject> tangent)
     throws E,
       ConstraintError;
 

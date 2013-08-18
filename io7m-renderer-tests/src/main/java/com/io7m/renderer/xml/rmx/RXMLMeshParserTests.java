@@ -32,6 +32,7 @@ import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.xml.RXMLException;
 
 public final class RXMLMeshParserTests
@@ -129,9 +130,18 @@ public final class RXMLMeshParserTests
       // Nothing
     }
 
-    @Override public void eventMeshVertexTangent(
+    @Override public void eventMeshVertexTangent3f(
       final int index,
       final RVectorI3F<RSpaceObject> tangent)
+      throws Throwable,
+        ConstraintError
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVertexTangent4f(
+      final int index,
+      final RVectorI4F<RSpaceObject> tangent)
       throws Throwable,
         ConstraintError
     {
@@ -322,7 +332,8 @@ public final class RXMLMeshParserTests
     private boolean                     vertex_normal_called;
     private boolean                     vertex_position_called;
     private boolean                     vertex_started_called;
-    private boolean                     vertex_tangent_called;
+    private boolean                     vertex_tangent3f_called;
+    private boolean                     vertex_tangent4f_called;
     private boolean                     vertex_bitangent_called;
     private boolean                     vertex_uv_called;
     private boolean                     vertices_ended;
@@ -439,13 +450,22 @@ public final class RXMLMeshParserTests
       ++this.vertices;
     }
 
-    @Override public void eventMeshVertexTangent(
+    @Override public void eventMeshVertexTangent3f(
       final int index,
       final RVectorI3F<RSpaceObject> tangent)
       throws Throwable,
         ConstraintError
     {
-      this.vertex_tangent_called = true;
+      this.vertex_tangent3f_called = true;
+    }
+
+    @Override public void eventMeshVertexTangent4f(
+      final int index,
+      final RVectorI4F<RSpaceObject> tangent)
+      throws Throwable,
+        ConstraintError
+    {
+      this.vertex_tangent4f_called = true;
     }
 
     @Override public void eventMeshVertexUV(
@@ -499,8 +519,14 @@ public final class RXMLMeshParserTests
     try {
       final String expected_name = "some-mesh";
       final int expected_triangles = 3;
-      final RXMLMeshType expected_type =
-        new RXMLMeshType(EnumSet.allOf(RXMLMeshAttribute.class));
+
+      final EnumSet<RXMLMeshAttribute> attribs =
+        EnumSet.noneOf(RXMLMeshAttribute.class);
+      attribs.add(RXMLMeshAttribute.NORMAL_3F);
+      attribs.add(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F);
+      attribs.add(RXMLMeshAttribute.UV_2F);
+
+      final RXMLMeshType expected_type = new RXMLMeshType(attribs);
       final int expected_vertices = 3;
 
       final Checked c =
@@ -525,7 +551,7 @@ public final class RXMLMeshParserTests
       Assert.assertTrue(c.vertex_normal_called);
       Assert.assertTrue(c.vertex_position_called);
       Assert.assertTrue(c.vertex_started_called);
-      Assert.assertTrue(c.vertex_tangent_called);
+      Assert.assertTrue(c.vertex_tangent3f_called);
       Assert.assertTrue(c.vertex_uv_called);
       Assert.assertTrue(c.vertices_ended);
       Assert.assertTrue(c.vertices_started);

@@ -26,6 +26,9 @@
   <xs:element name="attribute-tangent-3f">
     <xs:complexType/>
   </xs:element>
+  <xs:element name="attribute-tangent-4f">
+    <xs:complexType/>
+  </xs:element>
   <xs:element name="attribute-bitangent-3f">
     <xs:complexType/>
   </xs:element>
@@ -37,8 +40,13 @@
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="rm:attribute-position-3f"/>
         <xs:element ref="rm:attribute-normal-3f"/>
-        <xs:element ref="rm:attribute-tangent-3f"/>
-        <xs:element ref="rm:attribute-bitangent-3f"/>
+        <xs:choice>
+          <xs:choice>
+            <xs:element ref="rm:attribute-tangent-3f"/>
+            <xs:element ref="rm:attribute-bitangent-3f"/>
+          </xs:choice>
+          <xs:element ref="rm:attribute-tangent-4f"/>
+        </xs:choice>
         <xs:element ref="rm:attribute-uv-2f"/>
       </xs:choice>
     </xs:complexType>
@@ -57,11 +65,19 @@
       <xs:attribute name="z" use="required" form="qualified" type="xs:float"/>
     </xs:complexType>
   </xs:element>
-  <xs:element name="t">
+  <xs:element name="t3">
     <xs:complexType>
       <xs:attribute name="x" use="required" form="qualified" type="xs:float"/>
       <xs:attribute name="y" use="required" form="qualified" type="xs:float"/>
       <xs:attribute name="z" use="required" form="qualified" type="xs:float"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="t4">
+    <xs:complexType>
+      <xs:attribute name="x" use="required" form="qualified" type="xs:float"/>
+      <xs:attribute name="y" use="required" form="qualified" type="xs:float"/>
+      <xs:attribute name="z" use="required" form="qualified" type="xs:float"/>
+      <xs:attribute name="w" use="required" form="qualified" type="xs:float"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="b">
@@ -82,8 +98,13 @@
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="rm:p"/>
         <xs:element ref="rm:n"/>
-        <xs:element ref="rm:t"/>
-        <xs:element ref="rm:b"/>
+        <xs:choice>
+          <xs:choice>
+            <xs:element ref="rm:t3"/>
+            <xs:element ref="rm:b"/>
+          </xs:choice>
+          <xs:element ref="rm:t4"/>
+        </xs:choice>
         <xs:element ref="rm:u"/>
       </xs:choice>
     </xs:complexType>
