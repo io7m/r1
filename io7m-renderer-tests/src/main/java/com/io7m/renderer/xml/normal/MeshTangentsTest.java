@@ -35,6 +35,7 @@ import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.collada.ColladaDocument;
 import com.io7m.renderer.xml.collada.ColladaDocumentTest;
@@ -66,7 +67,7 @@ public class MeshTangentsTest
     final MeshTangents mt = MeshTangents.makeWithTangents(m);
 
     final List<RVectorI3F<RSpaceObject>> normals = mt.normalsGet();
-    final List<RVectorI3F<RSpaceObject>> tangents = mt.tangentsGet();
+    final List<RVectorI4F<RSpaceObject>> tangents = mt.tangentsGet();
     final List<RVectorI3F<RSpaceObject>> bitangents = mt.bitangentsGet();
 
     final ContextRelative context = new ContextRelative();
@@ -74,7 +75,7 @@ public class MeshTangentsTest
 
     for (int index = 0; index < normals.size(); ++index) {
       final RVectorI3F<RSpaceObject> n = normals.get(index);
-      final RVectorI3F<RSpaceObject> t = tangents.get(index);
+      final RVectorI4F<RSpaceObject> t = tangents.get(index);
       final RVectorI3F<RSpaceObject> b = bitangents.get(index);
 
       /**

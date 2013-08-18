@@ -32,6 +32,7 @@ import com.io7m.jcanephora.ArrayBufferTypeDescriptor;
 import com.io7m.jcanephora.ArrayBufferWritableData;
 import com.io7m.jcanephora.CursorWritable2f;
 import com.io7m.jcanephora.CursorWritable3f;
+import com.io7m.jcanephora.CursorWritable4f;
 import com.io7m.jcanephora.CursorWritableIndex;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.IndexBufferWritableData;
@@ -43,6 +44,7 @@ import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.kernel.KMeshAttributes;
 import com.io7m.renderer.xml.RXMLException;
 
@@ -65,7 +67,8 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
     private @CheckForNull CursorWritable3f          cursor_pos;
     private @CheckForNull CursorWritable3f          cursor_normal;
     private @CheckForNull CursorWritable2f          cursor_uv;
-    private @CheckForNull CursorWritable3f          cursor_tangent;
+    private @CheckForNull CursorWritable3f          cursor_tangent3f;
+    private @CheckForNull CursorWritable4f          cursor_tangent4f;
     private @CheckForNull CursorWritable3f          cursor_bitangent;
 
     public Events(
@@ -189,8 +192,12 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
         a.add(KMeshAttributes.ATTRIBUTE_NORMAL);
       }
 
-      if (mt.hasTangent()) {
-        a.add(KMeshAttributes.ATTRIBUTE_TANGENT);
+      if (mt.hasTangent3f()) {
+        a.add(KMeshAttributes.ATTRIBUTE_TANGENT3);
+      }
+
+      if (mt.hasTangent4f()) {
+        a.add(KMeshAttributes.ATTRIBUTE_TANGENT4);
       }
 
       if (mt.hasBitangent()) {
@@ -249,7 +256,7 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
         "Parsing in progress");
     }
 
-    @Override public void eventMeshVertexTangent(
+    @Override public void eventMeshVertexTangent3f(
       final int index,
       final @Nonnull RVectorI3F<RSpaceObject> tangent)
       throws ConstraintError
@@ -257,7 +264,18 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
       Constraints.constrainArbitrary(
         RXMLMeshParserVBO.this.parsing,
         "Parsing in progress");
-      this.cursor_tangent.put3f(tangent.x, tangent.y, tangent.z);
+      this.cursor_tangent3f.put3f(tangent.x, tangent.y, tangent.z);
+    }
+
+    @Override public void eventMeshVertexTangent4f(
+      final int index,
+      final @Nonnull RVectorI4F<RSpaceObject> tangent)
+      throws ConstraintError
+    {
+      Constraints.constrainArbitrary(
+        RXMLMeshParserVBO.this.parsing,
+        "Parsing in progress");
+      this.cursor_tangent4f.put4f(tangent.x, tangent.y, tangent.z, tangent.w);
     }
 
     @Override public void eventMeshVertexBitangent(
@@ -301,10 +319,20 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
           this.cursor_normal.canWrite() == false,
           "Normal attributes completely assigned");
       }
-      if (this.cursor_tangent != null) {
+      if (this.cursor_tangent3f != null) {
         Constraints.constrainArbitrary(
-          this.cursor_tangent.canWrite() == false,
-          "Tangent attributes completely assigned");
+          this.cursor_tangent3f.canWrite() == false,
+          "Tangent3f attributes completely assigned");
+      }
+      if (this.cursor_tangent4f != null) {
+        Constraints.constrainArbitrary(
+          this.cursor_tangent4f.canWrite() == false,
+          "Tangent4f attributes completely assigned");
+      }
+      if (this.cursor_bitangent != null) {
+        Constraints.constrainArbitrary(
+          this.cursor_bitangent.canWrite() == false,
+          "Bitangent attributes completely assigned");
       }
       if (this.cursor_uv != null) {
         Constraints.constrainArbitrary(
@@ -344,9 +372,21 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
           this.array_data.getCursor2f(KMeshAttributes.ATTRIBUTE_UV.getName());
       }
 
-      if (this.mtype.hasTangent()) {
-        this.cursor_tangent =
-          this.array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_TANGENT
+      if (this.mtype.hasTangent3f()) {
+        this.cursor_tangent3f =
+          this.array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_TANGENT3
+            .getName());
+      }
+
+      if (this.mtype.hasTangent4f()) {
+        this.cursor_tangent4f =
+          this.array_data.getCursor4f(KMeshAttributes.ATTRIBUTE_TANGENT4
+            .getName());
+      }
+
+      if (this.mtype.hasBitangent()) {
+        this.cursor_bitangent =
+          this.array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_BITANGENT
             .getName());
       }
     }

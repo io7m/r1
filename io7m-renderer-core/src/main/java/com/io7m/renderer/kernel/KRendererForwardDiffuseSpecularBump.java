@@ -386,9 +386,9 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
         exec.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
       }
 
-      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName())) {
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3.getName())) {
         final ArrayBufferAttribute a =
-          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName());
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3.getName());
         exec.execAttributeBind(gc, "v_tangent", a);
       } else {
         exec.execAttributePutVector3F(gc, "v_tangent", VectorI3F.ZERO);
@@ -604,9 +604,9 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
         exec.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
       }
 
-      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName())) {
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3.getName())) {
         final ArrayBufferAttribute a =
-          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName());
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3.getName());
         exec.execAttributeBind(gc, "v_tangent", a);
       } else {
         exec.execAttributePutVector3F(gc, "v_tangent", VectorI3F.ZERO);

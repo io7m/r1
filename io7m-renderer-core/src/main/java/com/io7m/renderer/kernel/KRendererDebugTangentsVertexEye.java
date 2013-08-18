@@ -188,9 +188,9 @@ final class KRendererDebugTangentsVertexEye implements KRenderer
         array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       this.exec.execAttributeBind(gc, "v_position", a_pos);
 
-      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName())) {
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3.getName())) {
         final ArrayBufferAttribute a_nor =
-          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT.getName());
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3.getName());
         this.exec.execAttributeBind(gc, "v_tangent", a_nor);
       } else {
         this.exec.execAttributePutVector3F(gc, "v_tangent", VectorI3F.ZERO);
