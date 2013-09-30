@@ -61,8 +61,6 @@ import com.io7m.renderer.kernel.KLight.KSphere;
 
 final class KRendererForwardDiffuseSpecular implements KRenderer
 {
-  private static final int                     SHININESS = 64;
-
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
   private final @Nonnull MatrixM4x4F           matrix_view;
@@ -349,7 +347,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     exec.execUniformUseExisting("light.intensity");
     exec.execUniformUseExisting("light.color");
     exec.execUniformUseExisting("light.direction");
-    exec.execUniformUseExisting("shininess");
+    exec.execUniformPutFloat(gc, "shininess", material.getSpecularExponent());
     exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
@@ -439,10 +437,6 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     e.execUniformPutVector3F(gc, "light.direction", light_cs);
     e.execUniformPutVector3F(gc, "light.color", light.getColour());
     e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
-    e.execUniformPutFloat(
-      gc,
-      "shininess",
-      KRendererForwardDiffuseSpecular.SHININESS);
     e.execCancel();
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
@@ -484,10 +478,6 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
     e.execUniformPutFloat(gc, "light.radius", light.getRadius());
     e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
-    e.execUniformPutFloat(
-      gc,
-      "shininess",
-      KRendererForwardDiffuseSpecular.SHININESS);
     e.execCancel();
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
@@ -567,7 +557,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     exec.execUniformUseExisting("light.intensity");
     exec.execUniformUseExisting("light.radius");
     exec.execUniformUseExisting("light.falloff");
-    exec.execUniformUseExisting("shininess");
+    exec.execUniformPutFloat(gc, "shininess", material.getSpecularExponent());
     exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);

@@ -62,8 +62,6 @@ import com.io7m.renderer.kernel.KLight.KSphere;
 
 final class KRendererForwardDiffuseSpecularBump implements KRenderer
 {
-  private static final int                     SHININESS = 64;
-
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
   private final @Nonnull MatrixM4x4F           matrix_view;
@@ -419,10 +417,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
     e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
     e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
-    e.execUniformPutFloat(
-      gc,
-      "shininess",
-      KRendererForwardDiffuseSpecularBump.SHININESS);
+    e.execUniformPutFloat(gc, "shininess", material.getSpecularExponent());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -554,10 +549,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
     e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
     e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
-    e.execUniformPutFloat(
-      gc,
-      "shininess",
-      KRendererForwardDiffuseSpecularBump.SHININESS);
+    e.execUniformPutFloat(gc, "shininess", material.getSpecularExponent());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -863,10 +855,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
     e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
     e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
-    e.execUniformPutFloat(
-      gc,
-      "shininess",
-      KRendererForwardDiffuseSpecularBump.SHININESS);
+    e.execUniformPutFloat(gc, "shininess", material.getSpecularExponent());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -1006,10 +995,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
     e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
     e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
-    e.execUniformPutFloat(
-      gc,
-      "shininess",
-      KRendererForwardDiffuseSpecularBump.SHININESS);
+    e.execUniformPutFloat(gc, "shininess", material.getSpecularExponent());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
