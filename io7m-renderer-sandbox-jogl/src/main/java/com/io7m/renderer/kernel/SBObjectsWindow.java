@@ -29,7 +29,7 @@ final class SBObjectsWindow extends JFrame
     serialVersionUID = -312314551231238L;
   }
 
-  public <C extends SBSceneControllerModels & SBSceneControllerInstances & SBSceneControllerTextures> SBObjectsWindow(
+  public <C extends SBSceneControllerMeshes & SBSceneControllerInstances & SBSceneControllerTextures> SBObjectsWindow(
     final @Nonnull C controller,
     final @Nonnull Log log)
   {

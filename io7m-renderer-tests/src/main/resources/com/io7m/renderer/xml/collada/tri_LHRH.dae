@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 2.68.0 runknown</authoring_tool>
+    </contributor>
+    <created>2013-08-17T20:31:21</created>
+    <modified>2013-08-17T20:31:21</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_geometries>
+    <geometry id="tri_rh-mesh" name="tri_rh">
+      <mesh>
+        <source id="tri_rh-mesh-positions">
+          <float_array id="tri_rh-mesh-positions-array" count="9">1 0 0 0 0 0 0 1 0</float_array>
+          <technique_common>
+            <accessor source="#tri_rh-mesh-positions-array" count="3" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="tri_rh-mesh-normals">
+          <float_array id="tri_rh-mesh-normals-array" count="3">0 0 1</float_array>
+          <technique_common>
+            <accessor source="#tri_rh-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="tri_rh-mesh-map-0">
+          <float_array id="tri_rh-mesh-map-0-array" count="6">0 1 0 0 1 0</float_array>
+          <technique_common>
+            <accessor source="#tri_rh-mesh-map-0-array" count="3" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="tri_rh-mesh-vertices">
+          <input semantic="POSITION" source="#tri_rh-mesh-positions"/>
+        </vertices>
+        <polylist material="rg-material" count="1">
+          <input semantic="VERTEX" source="#tri_rh-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#tri_rh-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#tri_rh-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 </vcount>
+          <p>2 0 0 1 0 1 0 0 2</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="tri_lh-mesh" name="tri_lh">
+      <mesh>
+        <source id="tri_lh-mesh-positions">
+          <float_array id="tri_lh-mesh-positions-array" count="9">1 0 0 0 0 0 0 1 0</float_array>
+          <technique_common>
+            <accessor source="#tri_lh-mesh-positions-array" count="3" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="tri_lh-mesh-normals">
+          <float_array id="tri_lh-mesh-normals-array" count="3">0 0 1</float_array>
+          <technique_common>
+            <accessor source="#tri_lh-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="tri_lh-mesh-map-0">
+          <float_array id="tri_lh-mesh-map-0-array" count="6">0 1 1 0 0 0</float_array>
+          <technique_common>
+            <accessor source="#tri_lh-mesh-map-0-array" count="3" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="tri_lh-mesh-vertices">
+          <input semantic="POSITION" source="#tri_lh-mesh-positions"/>
+        </vertices>
+        <polylist material="rg-material" count="1">
+          <input semantic="VERTEX" source="#tri_lh-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#tri_lh-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#tri_lh-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 </vcount>
+          <p>2 0 0 1 0 1 0 0 2</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+  </library_geometries>
+</COLLADA>

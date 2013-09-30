@@ -24,24 +24,27 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import nu.xom.Element;
-import nu.xom.ValidityException;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
+import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.xml.RXMLUtilities;
 
 @Immutable final class SBTextureDescription
 {
   static @Nonnull SBTextureDescription fromXML(
     final @CheckForNull BaseDirectory base,
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     final URI uri = SBSceneDescription.SCENE_XML_URI;
 
-    SBXMLUtilities.checkIsElement(e, "texture", uri);
-    final Element ef = SBXMLUtilities.getChild(e, "file", uri);
-    final Element en = SBXMLUtilities.getChild(e, "name", uri);
-    final String f = SBXMLUtilities.getNonEmptyString(ef);
-    final String n = SBXMLUtilities.getNonEmptyString(en);
+    RXMLUtilities.checkIsElement(e, "texture", uri);
+    final Element ef = RXMLUtilities.getChild(e, "file", uri);
+    final Element en = RXMLUtilities.getChild(e, "name", uri);
+    final String f = RXMLUtilities.getElementNonEmptyString(ef);
+    final String n = RXMLUtilities.getElementNonEmptyString(en);
 
     if (base == null) {
       return new SBTextureDescription(new File(f), n);

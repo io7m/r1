@@ -31,10 +31,12 @@ import com.io7m.renderer.RSpace;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorI4F;
+import com.io7m.renderer.xml.RXMLException.RXMLExceptionValidityError;
 
-final class RXMLUtilities
+public final class RXMLUtilities
 {
-  static @Nonnull Element checkIsElement(
+  public static @Nonnull Element checkIsElement(
     final @Nonnull Element e,
     final @Nonnull String name,
     final @Nonnull URI uri)
@@ -60,7 +62,7 @@ final class RXMLUtilities
     return e;
   }
 
-  static @Nonnull Attribute getAttribute(
+  public static @Nonnull Attribute getAttribute(
     final @Nonnull Element e,
     final @Nonnull String name,
     final @Nonnull URI uri)
@@ -85,7 +87,7 @@ final class RXMLUtilities
     return Boolean.valueOf(a.getValue()).booleanValue();
   }
 
-  static float getAttributeFloat(
+  public static float getAttributeFloat(
     final @Nonnull Attribute a)
     throws RXMLException,
       ConstraintError
@@ -102,7 +104,25 @@ final class RXMLUtilities
     }
   }
 
-  static int getAttributeInteger(
+  public static @Nonnull Attribute getAttributeInDefaultNamespace(
+    final @Nonnull Element e,
+    final @Nonnull String name)
+    throws RXMLExceptionValidityError,
+      ConstraintError
+  {
+    final Attribute a = e.getAttribute(name);
+    if (a == null) {
+      final StringBuilder message = new StringBuilder();
+      message.append("Expected an attribute '");
+      message.append(name);
+      message.append("'");
+      throw new RXMLException.RXMLExceptionValidityError(
+        new ValidityException(message.toString()));
+    }
+    return a;
+  }
+
+  public static int getAttributeInteger(
     final @Nonnull Attribute a)
     throws RXMLException,
       ConstraintError
@@ -119,7 +139,21 @@ final class RXMLUtilities
     }
   }
 
-  static @Nonnull Element getChild(
+  public static @Nonnull String getAttributeNonEmptyString(
+    final @Nonnull Attribute a)
+    throws RXMLExceptionValidityError,
+      ConstraintError
+  {
+    if (a.getValue().length() == 0) {
+      final StringBuilder message = new StringBuilder();
+      message.append("Expected a non-empty string");
+      throw new RXMLException.RXMLExceptionValidityError(
+        new ValidityException(message.toString()));
+    }
+    return a.getValue();
+  }
+
+  public static @Nonnull Element getChild(
     final @Nonnull Element e,
     final @Nonnull String name,
     final @Nonnull URI uri)
@@ -138,7 +172,7 @@ final class RXMLUtilities
     return RXMLUtilities.checkIsElement(es.get(0), name, uri);
   }
 
-  static @Nonnull Elements getChildren(
+  public static @Nonnull Elements getChildren(
     final @Nonnull Element e,
     final @Nonnull String name,
     final @Nonnull URI uri)
@@ -146,7 +180,7 @@ final class RXMLUtilities
     return e.getChildElements(name, uri.toString());
   }
 
-  static @Nonnull
+  public static @Nonnull
     <T extends RSpace>
     RVectorI2F<T>
     getElementAttributesVector2f(
@@ -162,7 +196,7 @@ final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(ay));
   }
 
-  static @Nonnull
+  public static @Nonnull
     <T extends RSpace>
     RVectorI3F<T>
     getElementAttributesVector3f(
@@ -180,7 +214,27 @@ final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(az));
   }
 
-  static float getElementFloat(
+  public static @Nonnull
+    <T extends RSpace>
+    RVectorI4F<T>
+    getElementAttributesVector4f(
+      final @Nonnull Element e,
+      final @Nonnull URI uri)
+      throws RXMLException,
+        ConstraintError
+  {
+    final Attribute ax = RXMLUtilities.getAttribute(e, "x", uri);
+    final Attribute ay = RXMLUtilities.getAttribute(e, "y", uri);
+    final Attribute az = RXMLUtilities.getAttribute(e, "z", uri);
+    final Attribute aw = RXMLUtilities.getAttribute(e, "w", uri);
+    return new RVectorI4F<T>(
+      RXMLUtilities.getAttributeFloat(ax),
+      RXMLUtilities.getAttributeFloat(ay),
+      RXMLUtilities.getAttributeFloat(az),
+      RXMLUtilities.getAttributeFloat(aw));
+  }
+
+  public static float getElementFloat(
     final @Nonnull Element e)
     throws RXMLException,
       ConstraintError
@@ -197,7 +251,7 @@ final class RXMLUtilities
     }
   }
 
-  static int getElementInteger(
+  public static int getElementInteger(
     final @Nonnull Element e)
     throws RXMLException,
       ConstraintError
@@ -214,7 +268,7 @@ final class RXMLUtilities
     }
   }
 
-  static @Nonnull String getElementNonEmptyString(
+  public static @Nonnull String getElementNonEmptyString(
     final @Nonnull Element e)
     throws RXMLException,
       ConstraintError
@@ -228,7 +282,7 @@ final class RXMLUtilities
     return e.getValue();
   }
 
-  static @Nonnull RVectorI3F<RSpaceRGB> getElementRGB(
+  public static @Nonnull RVectorI3F<RSpaceRGB> getElementRGB(
     final @Nonnull Element e,
     final @Nonnull URI uri)
     throws RXMLException,
@@ -243,7 +297,7 @@ final class RXMLUtilities
       RXMLUtilities.getElementFloat(eb));
   }
 
-  static @Nonnull <T extends RSpace> RVectorI3F<T> getElementVector3f(
+  public static @Nonnull <T extends RSpace> RVectorI3F<T> getElementVector3f(
     final @Nonnull Element e,
     final @Nonnull URI uri)
     throws RXMLException,
@@ -258,7 +312,7 @@ final class RXMLUtilities
       RXMLUtilities.getElementFloat(ez));
   }
 
-  static @CheckForNull Element getOptionalChild(
+  public static @CheckForNull Element getOptionalChild(
     final @Nonnull Element e,
     final @Nonnull String name,
     final @Nonnull URI uri)
@@ -270,7 +324,7 @@ final class RXMLUtilities
     return es.get(0);
   }
 
-  static boolean isElement(
+  public static boolean isElement(
     final @Nonnull Element e,
     final @Nonnull String name,
     final @Nonnull URI uri)

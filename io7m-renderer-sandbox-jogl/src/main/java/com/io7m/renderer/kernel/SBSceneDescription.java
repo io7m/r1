@@ -25,6 +25,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Elements;
 import nu.xom.ValidityException;
@@ -32,6 +33,7 @@ import nu.xom.ValidityException;
 import org.pcollections.HashTreePMap;
 import org.pcollections.PMap;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.renderer.RSpaceRGB;
@@ -40,16 +42,19 @@ import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
+import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.xml.RXMLUtilities;
 
 @Immutable final class SBSceneDescription
 {
-  static final @Nonnull URI    SCENE_XML_URI;
-  static final @Nonnull String SCENE_XML_VERSION;
+  static final @Nonnull URI SCENE_XML_URI;
+  static final int          SCENE_XML_VERSION;
 
   static {
     try {
-      SCENE_XML_URI = new URI("http://io7m.com/software/renderer");
-      SCENE_XML_VERSION = "1";
+      SCENE_XML_URI =
+        new URI("http://schemas.io7m.com/renderer/1.0.0/sandbox-scene");
+      SCENE_XML_VERSION = 2;
     } catch (final URISyntaxException e) {
       throw new UnreachableCodeException();
     }
@@ -58,22 +63,42 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   public static @Nonnull SBSceneDescription empty()
   {
     final PMap<String, SBTextureDescription> textures = HashTreePMap.empty();
-    final PMap<String, SBModelDescription> models = HashTreePMap.empty();
+    final PMap<String, SBMeshDescription> meshes = HashTreePMap.empty();
     final PMap<Integer, KLight> lights = HashTreePMap.empty();
     final PMap<Integer, SBInstanceDescription> instances =
       HashTreePMap.empty();
 
-    return new SBSceneDescription(textures, models, lights, instances);
+    return new SBSceneDescription(textures, meshes, lights, instances);
   }
 
   static @Nonnull SBSceneDescription fromXML(
     final @Nonnull BaseDirectory base,
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
+    RXMLUtilities
+      .checkIsElement(e, "scene", SBSceneDescription.SCENE_XML_URI);
+    final Attribute a =
+      RXMLUtilities.getAttribute(
+        e,
+        "version",
+        SBSceneDescription.SCENE_XML_URI);
+
+    final int version = RXMLUtilities.getAttributeInteger(a);
+    if (version != SBSceneDescription.SCENE_XML_VERSION) {
+      final StringBuilder message = new StringBuilder();
+      message.append("Scene version is ");
+      message.append(version);
+      message.append(" but supported versions are: ");
+      message.append(SBSceneDescription.SCENE_XML_VERSION);
+      throw new RXMLException.RXMLExceptionValidityError(
+        new ValidityException(message.toString()));
+    }
+
     return new SBSceneDescription(
       SBSceneDescription.fromXMLTextures(base, e),
-      SBSceneDescription.fromXMLModels(base, e),
+      SBSceneDescription.fromXMLMeshes(base, e),
       SBSceneDescription.fromXMLLights(e),
       SBSceneDescription.fromXMLInstances(e));
   }
@@ -82,16 +107,15 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     PMap<Integer, SBInstanceDescription>
     fromXMLInstances(
       final @Nonnull Element e)
-      throws ValidityException
+      throws RXMLException,
+        ConstraintError
   {
     final HashMap<Integer, SBInstanceDescription> m =
       new HashMap<Integer, SBInstanceDescription>();
 
     final Element ec =
-      SBXMLUtilities.getChild(
-        e,
-        "instances",
-        SBSceneDescription.SCENE_XML_URI);
+      RXMLUtilities
+        .getChild(e, "instances", SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc =
       ec.getChildElements(
@@ -109,12 +133,13 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
 
   private static @Nonnull PMap<Integer, KLight> fromXMLLights(
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     final HashMap<Integer, KLight> m = new HashMap<Integer, KLight>();
 
     final Element ec =
-      SBXMLUtilities.getChild(e, "lights", SBSceneDescription.SCENE_XML_URI);
+      RXMLUtilities.getChild(e, "lights", SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc = ec.getChildElements();
 
@@ -127,25 +152,25 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     return HashTreePMap.from(m);
   }
 
-  private static @Nonnull PMap<String, SBModelDescription> fromXMLModels(
+  private static @Nonnull PMap<String, SBMeshDescription> fromXMLMeshes(
     final @Nonnull BaseDirectory base,
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
-    final HashMap<String, SBModelDescription> m =
-      new HashMap<String, SBModelDescription>();
+    final HashMap<String, SBMeshDescription> m =
+      new HashMap<String, SBMeshDescription>();
 
     final Element ec =
-      SBXMLUtilities.getChild(e, "models", SBSceneDescription.SCENE_XML_URI);
+      RXMLUtilities.getChild(e, "meshes", SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc =
-      ec.getChildElements(
-        "model",
-        SBSceneDescription.SCENE_XML_URI.toString());
+      ec
+        .getChildElements("mesh", SBSceneDescription.SCENE_XML_URI.toString());
 
     for (int index = 0; index < ecc.size(); ++index) {
       final Element ei = ecc.get(index);
-      final SBModelDescription d = SBModelDescription.fromXML(base, ei);
+      final SBMeshDescription d = SBMeshDescription.fromXML(base, ei);
       m.put(d.getName(), d);
     }
 
@@ -155,14 +180,14 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   private static @Nonnull PMap<String, SBTextureDescription> fromXMLTextures(
     final @Nonnull BaseDirectory base,
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     final HashMap<String, SBTextureDescription> m =
       new HashMap<String, SBTextureDescription>();
 
     final Element ec =
-      SBXMLUtilities
-        .getChild(e, "textures", SBSceneDescription.SCENE_XML_URI);
+      RXMLUtilities.getChild(e, "textures", SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc =
       ec.getChildElements(
@@ -263,7 +288,8 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
 
   private static @Nonnull KLight loadLight(
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     if (e.getLocalName().equals("light-directional")) {
       return SBSceneDescription.loadLightDirectional(e);
@@ -277,49 +303,55 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
 
   private static @Nonnull KLight.KDirectional loadLightDirectional(
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     final URI uri = SBSceneDescription.SCENE_XML_URI;
-    SBXMLUtilities.checkIsElement(e, "light-directional", uri);
+    RXMLUtilities.checkIsElement(e, "light-directional", uri);
 
-    final Element ed = SBXMLUtilities.getChild(e, "direction", uri);
-    final Element ec = SBXMLUtilities.getChild(e, "colour", uri);
-    final Element ei = SBXMLUtilities.getChild(e, "intensity", uri);
-    final Element eid = SBXMLUtilities.getChild(e, "id", uri);
+    final Element ed = RXMLUtilities.getChild(e, "direction", uri);
+    final Element ec = RXMLUtilities.getChild(e, "colour", uri);
+    final Element ei = RXMLUtilities.getChild(e, "intensity", uri);
+    final Element eid = RXMLUtilities.getChild(e, "id", uri);
 
     final RVectorI3F<RSpaceWorld> direction =
-      SBXMLUtilities.getVector3f(ed, uri);
-    final RVectorI3F<RSpaceRGB> colour = SBXMLUtilities.getRGB(ec, uri);
-    final Integer id = SBXMLUtilities.getInteger(eid);
-    final float intensity = SBXMLUtilities.getFloat(ei);
+      RXMLUtilities.getElementVector3f(ed, uri);
+    final RVectorI3F<RSpaceRGB> colour = RXMLUtilities.getElementRGB(ec, uri);
+    final int id = RXMLUtilities.getElementInteger(eid);
+    final float intensity = RXMLUtilities.getElementFloat(ei);
 
-    return new KLight.KDirectional(id, direction, colour, intensity);
+    return new KLight.KDirectional(
+      Integer.valueOf(id),
+      direction,
+      colour,
+      intensity);
   }
 
   private static @Nonnull KSphere loadLightSpherical(
     final @Nonnull Element e)
-    throws ValidityException
+    throws RXMLException,
+      ConstraintError
   {
     final URI uri = SBSceneDescription.SCENE_XML_URI;
-    SBXMLUtilities.checkIsElement(e, "light-spherical", uri);
+    RXMLUtilities.checkIsElement(e, "light-spherical", uri);
 
-    final Element ep = SBXMLUtilities.getChild(e, "position", uri);
-    final Element ec = SBXMLUtilities.getChild(e, "colour", uri);
-    final Element ei = SBXMLUtilities.getChild(e, "intensity", uri);
-    final Element eid = SBXMLUtilities.getChild(e, "id", uri);
-    final Element er = SBXMLUtilities.getChild(e, "radius", uri);
-    final Element ef = SBXMLUtilities.getChild(e, "falloff", uri);
+    final Element ep = RXMLUtilities.getChild(e, "position", uri);
+    final Element ec = RXMLUtilities.getChild(e, "colour", uri);
+    final Element ei = RXMLUtilities.getChild(e, "intensity", uri);
+    final Element eid = RXMLUtilities.getChild(e, "id", uri);
+    final Element er = RXMLUtilities.getChild(e, "radius", uri);
+    final Element ef = RXMLUtilities.getChild(e, "falloff", uri);
 
     final RVectorI3F<RSpaceWorld> position =
-      SBXMLUtilities.getVector3f(ep, uri);
-    final RVectorI3F<RSpaceRGB> colour = SBXMLUtilities.getRGB(ec, uri);
-    final Integer id = SBXMLUtilities.getInteger(eid);
-    final float intensity = SBXMLUtilities.getFloat(ei);
-    final float radius = SBXMLUtilities.getFloat(er);
-    final float falloff = SBXMLUtilities.getFloat(ef);
+      RXMLUtilities.getElementVector3f(ep, uri);
+    final RVectorI3F<RSpaceRGB> colour = RXMLUtilities.getElementRGB(ec, uri);
+    final int id = RXMLUtilities.getElementInteger(eid);
+    final float intensity = RXMLUtilities.getElementFloat(ei);
+    final float radius = RXMLUtilities.getElementFloat(er);
+    final float falloff = RXMLUtilities.getElementFloat(ef);
 
     return new KLight.KSphere(
-      id,
+      Integer.valueOf(id),
       colour,
       intensity,
       position,
@@ -328,18 +360,18 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   }
 
   private final @Nonnull PMap<String, SBTextureDescription>   textures;
-  private final @Nonnull PMap<String, SBModelDescription>     models;
+  private final @Nonnull PMap<String, SBMeshDescription>      meshes;
   private final @Nonnull PMap<Integer, KLight>                lights;
   private final @Nonnull PMap<Integer, SBInstanceDescription> instances;
 
   private SBSceneDescription(
     final @Nonnull PMap<String, SBTextureDescription> textures,
-    final @Nonnull PMap<String, SBModelDescription> models,
+    final @Nonnull PMap<String, SBMeshDescription> models,
     final @Nonnull PMap<Integer, KLight> lights,
     final @Nonnull PMap<Integer, SBInstanceDescription> instances)
   {
     this.textures = textures;
-    this.models = models;
+    this.meshes = models;
     this.lights = lights;
     this.instances = instances;
   }
@@ -363,7 +395,7 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     if (!this.lights.equals(other.lights)) {
       return false;
     }
-    if (!this.models.equals(other.models)) {
+    if (!this.meshes.equals(other.meshes)) {
       return false;
     }
     if (!this.textures.equals(other.textures)) {
@@ -382,9 +414,21 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     return this.lights.values();
   }
 
-  public @Nonnull Collection<SBModelDescription> getModelDescriptions()
+  public @CheckForNull SBMeshDescription getMesh(
+    final @Nonnull String name)
   {
-    return this.models.values();
+    return this.meshes.get(name);
+  }
+
+  public @Nonnull Collection<SBMeshDescription> getMeshDescriptions()
+  {
+    return this.meshes.values();
+  }
+
+  public @CheckForNull SBTextureDescription getTexture(
+    final @Nonnull String name)
+  {
+    return this.textures.get(name);
   }
 
   public @Nonnull Collection<SBTextureDescription> getTextureDescriptions()
@@ -398,7 +442,7 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     int result = 1;
     result = (prime * result) + this.instances.hashCode();
     result = (prime * result) + this.lights.hashCode();
-    result = (prime * result) + this.models.hashCode();
+    result = (prime * result) + this.meshes.hashCode();
     result = (prime * result) + this.textures.hashCode();
     return result;
   }
@@ -408,7 +452,7 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   {
     return new SBSceneDescription(
       this.textures,
-      this.models,
+      this.meshes,
       this.lights,
       this.instances.plus(d.getID(), d));
   }
@@ -418,15 +462,15 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   {
     return new SBSceneDescription(
       this.textures,
-      this.models,
+      this.meshes,
       this.lights.plus(l.getID(), l),
       this.instances);
   }
 
-  public @Nonnull SBSceneDescription modelAdd(
-    final @Nonnull SBModelDescription d)
+  public @Nonnull SBSceneDescription meshAdd(
+    final @Nonnull SBMeshDescription d)
   {
-    return new SBSceneDescription(this.textures, this.models.plus(
+    return new SBSceneDescription(this.textures, this.meshes.plus(
       d.getName(),
       d), this.lights, this.instances);
   }
@@ -436,7 +480,7 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   {
     return new SBSceneDescription(
       this.textures.plus(t.getName(), t),
-      this.models,
+      this.meshes,
       this.lights,
       this.instances);
   }
@@ -445,14 +489,16 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
   {
     final String uri = SBSceneDescription.SCENE_XML_URI.toString();
     final Element e = new Element("s:scene", uri);
+    e.addAttribute(new Attribute("s:version", uri, Integer
+      .toString(SBSceneDescription.SCENE_XML_VERSION)));
 
     final Element et = new Element("s:textures", uri);
     for (final SBTextureDescription t : this.textures.values()) {
       et.appendChild(t.toXML());
     }
 
-    final Element em = new Element("s:models", uri);
-    for (final SBModelDescription m : this.models.values()) {
+    final Element em = new Element("s:meshes", uri);
+    for (final SBMeshDescription m : this.meshes.values()) {
       em.appendChild(m.toXML());
     }
 
@@ -471,17 +517,5 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
     e.appendChild(el);
     e.appendChild(ei);
     return e;
-  }
-
-  public @CheckForNull SBTextureDescription getTexture(
-    final @Nonnull String name)
-  {
-    return this.textures.get(name);
-  }
-
-  public @CheckForNull SBModelDescription getModel(
-    final @Nonnull String name)
-  {
-    return this.models.get(name);
   }
 }

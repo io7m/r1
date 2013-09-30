@@ -21,6 +21,7 @@ import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
@@ -47,6 +48,8 @@ import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.VectorI2F;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
@@ -59,6 +62,8 @@ import com.io7m.renderer.kernel.KLight.KSphere;
 
 final class KRendererForwardDiffuseSpecularBump implements KRenderer
 {
+  private static final int                     SHININESS = 64;
+
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
   private final @Nonnull MatrixM4x4F           matrix_view;
@@ -67,14 +72,18 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
   private final @Nonnull MatrixM4x4F.Context   matrix_context;
   private final @Nonnull KTransform.Context    transform_context;
   private final @Nonnull JCGLImplementation    gl;
-  private final @Nonnull ProgramReference      program_spherical;
-  private final @Nonnull ProgramReference      program_directional;
   private final @Nonnull ProgramReference      program_depth;
   private final @Nonnull Log                   log;
   private final @Nonnull VectorM4F             background;
-  private final @Nonnull JCCEExecutionCallable exec_directional;
   private final @Nonnull JCCEExecutionCallable exec_depth;
-  private final @Nonnull JCCEExecutionCallable exec_spherical;
+  private final @Nonnull ProgramReference      program_pb_directional;
+  private final @Nonnull JCCEExecutionCallable exec_pb_directional;
+  private final @Nonnull ProgramReference      program_pb_spherical;
+  private final @Nonnull JCCEExecutionCallable exec_pb_spherical;
+  private final @Nonnull ProgramReference      program_cb_directional;
+  private final @Nonnull JCCEExecutionCallable exec_cb_directional;
+  private final @Nonnull ProgramReference      program_cb_spherical;
+  private final @Nonnull JCCEExecutionCallable exec_cb_spherical;
 
   KRendererForwardDiffuseSpecularBump(
     final @Nonnull JCGLImplementation gl,
@@ -101,41 +110,58 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
     this.matrix_context = new MatrixM4x4F.Context();
     this.transform_context = new KTransform.Context();
 
-    this.program_directional =
-      KShaderUtilities.makeProgramSingleOutput(
+    this.program_pb_directional =
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "fw_dsb_directional",
-        "fw_dsb_directional.v",
-        "fw_dsb_directional.f",
-        this.log);
-    this.exec_directional =
-      new JCCEExecutionCallable(this.program_directional);
+        "forward_dsn_pb_directional",
+        log);
+    this.exec_pb_directional =
+      new JCCEExecutionCallable(this.program_pb_directional);
 
-    this.program_spherical =
-      KShaderUtilities.makeProgramSingleOutput(
+    this.program_pb_spherical =
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "fw_dsb_spherical",
-        "fw_dsb_spherical.v",
-        "fw_dsb_spherical.f",
-        this.log);
-    this.exec_spherical = new JCCEExecutionCallable(this.program_spherical);
+        "forward_dsn_pb_spherical",
+        log);
+    this.exec_pb_spherical =
+      new JCCEExecutionCallable(this.program_pb_spherical);
+
+    this.program_cb_directional =
+      KShaderUtilities.makeParasolProgramSingleOutput(
+        gl.getGLCommon(),
+        version.getNumber(),
+        version.getAPI(),
+        fs,
+        "forward_dsn_cb_directional",
+        log);
+    this.exec_cb_directional =
+      new JCCEExecutionCallable(this.program_cb_directional);
+
+    this.program_cb_spherical =
+      KShaderUtilities.makeParasolProgramSingleOutput(
+        gl.getGLCommon(),
+        version.getNumber(),
+        version.getAPI(),
+        fs,
+        "forward_dsn_cb_spherical",
+        log);
+    this.exec_cb_spherical =
+      new JCCEExecutionCallable(this.program_cb_spherical);
 
     this.program_depth =
-      KShaderUtilities.makeProgramSingleOutput(
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "depth_only",
-        "standard.v",
-        "depth_only.f",
-        this.log);
+        "depth",
+        log);
     this.exec_depth = new JCCEExecutionCallable(this.program_depth);
   }
 
@@ -215,11 +241,11 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
   private void renderDepthPassMesh(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable exec,
-    final @Nonnull KMeshInstance mesh)
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = mesh.getTransform();
+    final KTransform transform = instance.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
 
     MatrixM4x4F.multiply(
@@ -240,6 +266,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
      */
 
     try {
+      final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
       final ArrayBufferAttribute a_pos = array.getAttribute("position");
@@ -297,12 +324,44 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
 
   private void renderLightPassMeshDirectional(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCCEExecutionCallable exec,
-    final @Nonnull KMeshInstance mesh)
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = mesh.getTransform();
+    final KMesh mesh = instance.getMesh();
+    final ArrayBuffer array = mesh.getArrayBuffer();
+
+    /**
+     * If the mesh has a bitangent attribute, then it must also have a
+     * tangent3 attribute. Otherwise, it must have a tangent4 attribute and
+     * the bitangent is computed by the fragment shader.
+     */
+
+    if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_BITANGENT.getName())) {
+      Constraints.constrainArbitrary(
+        array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3.getName()),
+        "Mesh has tangent3");
+      this.renderLightPassMeshDirectionalWithProvidedBitangents(gc, instance);
+    } else {
+      Constraints.constrainArbitrary(
+        array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4.getName()),
+        "Mesh has tangent4");
+      this.renderLightPassMeshDirectionalWithComputedBitangents(gc, instance);
+    }
+  }
+
+  /**
+   * Render the given mesh, lit with the given program, assuming computed
+   * bitangents.
+   */
+
+  private void renderLightPassMeshDirectionalWithComputedBitangents(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMeshInstance instance)
+    throws ConstraintError,
+      JCGLException
+  {
+    final KTransform transform = instance.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
 
     MatrixM4x4F.multiply(
@@ -318,7 +377,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
      * Upload matrices, set textures.
      */
 
-    final KMaterial material = mesh.getMaterial();
+    final KMaterial material = instance.getMaterial();
     final TextureUnit[] texture_units = gc.textureGetUnits();
 
     {
@@ -350,41 +409,65 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
       }
     }
 
-    exec.execPrepare(gc);
-    exec.execUniformUseExisting("m_projection");
-    exec.execUniformUseExisting("l_intensity");
-    exec.execUniformUseExisting("l_color");
-    exec.execUniformUseExisting("l_direction");
-    exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
-    exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
-    exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
-    exec.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
+    final JCCEExecutionCallable e = this.exec_cb_directional;
+    e.execPrepare(gc);
+    e.execUniformUseExisting("m_projection");
+    e.execUniformUseExisting("light.intensity");
+    e.execUniformUseExisting("light.color");
+    e.execUniformUseExisting("light.direction");
+    e.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
+    e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
+    e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
+    e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
+    e.execUniformPutFloat(
+      gc,
+      "shininess",
+      KRendererForwardDiffuseSpecularBump.SHININESS);
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
      */
 
     try {
+      final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final ArrayBufferAttribute a_uv =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-      final ArrayBufferAttribute a_normal =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
 
       gc.arrayBufferBind(array);
-      exec.execAttributeBind(gc, "v_position", a_pos);
-      exec.execAttributeBind(gc, "v_uv", a_uv);
-      exec.execAttributeBind(gc, "v_normal", a_normal);
-      exec.execSetCallable(new Callable<Void>() {
+
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+      e.execAttributeBind(gc, "v_position", a_pos);
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+        e.execAttributeBind(gc, "v_normal", a);
+      } else {
+        e.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
+      }
+
+      {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4.getName());
+        e.execAttributeBind(gc, "v_tangent4", a);
+      }
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
+        e.execAttributeBind(gc, "v_uv", a);
+      } else {
+        e.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
+      }
+
+      e.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception
         {
           try {
             gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-          } catch (final ConstraintError e) {
+          } catch (final ConstraintError x) {
             throw new UnreachableCodeException();
           }
           return null;
@@ -392,8 +475,149 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
       });
 
       try {
-        exec.execRun(gc);
-      } catch (final Exception e) {
+        e.execRun(gc);
+      } catch (final Exception x) {
+        throw new UnreachableCodeException();
+      }
+
+    } finally {
+      gc.arrayBufferUnbind();
+    }
+  }
+
+  /**
+   * Render the given mesh, lit with the given program, assuming provided
+   * bitangents.
+   */
+
+  private void renderLightPassMeshDirectionalWithProvidedBitangents(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMeshInstance instance)
+    throws ConstraintError,
+      JCGLException
+  {
+    final KTransform transform = instance.getTransform();
+    transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
+
+    MatrixM4x4F.multiply(
+      this.matrix_view,
+      this.matrix_model,
+      this.matrix_modelview);
+
+    KRendererCommon.makeNormalMatrix(
+      this.matrix_modelview,
+      this.matrix_normal);
+
+    /**
+     * Upload matrices, set textures.
+     */
+
+    final KMaterial material = instance.getMaterial();
+    final TextureUnit[] texture_units = gc.textureGetUnits();
+
+    {
+      final Option<Texture2DStatic> diffuse_0_opt =
+        material.getTextureDiffuse0();
+      if (diffuse_0_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units[0],
+          ((Option.Some<Texture2DStatic>) diffuse_0_opt).value);
+      }
+    }
+
+    {
+      final Option<Texture2DStatic> diffuse_1_opt =
+        material.getTextureDiffuse1();
+      if (diffuse_1_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units[1],
+          ((Option.Some<Texture2DStatic>) diffuse_1_opt).value);
+      }
+    }
+
+    {
+      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      if (normal_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units[2],
+          ((Option.Some<Texture2DStatic>) normal_opt).value);
+      }
+    }
+
+    final JCCEExecutionCallable e = this.exec_pb_directional;
+    e.execPrepare(gc);
+    e.execUniformUseExisting("m_projection");
+    e.execUniformUseExisting("light.intensity");
+    e.execUniformUseExisting("light.color");
+    e.execUniformUseExisting("light.direction");
+    e.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
+    e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
+    e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
+    e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
+    e.execUniformPutFloat(
+      gc,
+      "shininess",
+      KRendererForwardDiffuseSpecularBump.SHININESS);
+
+    /**
+     * Associate array attributes with program attributes, and draw mesh.
+     */
+
+    try {
+      final KMesh mesh = instance.getMesh();
+      final ArrayBuffer array = mesh.getArrayBuffer();
+      final IndexBuffer indices = mesh.getIndexBuffer();
+
+      gc.arrayBufferBind(array);
+
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+      e.execAttributeBind(gc, "v_position", a_pos);
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+        e.execAttributeBind(gc, "v_normal", a);
+      } else {
+        e.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
+      }
+
+      {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3.getName());
+        e.execAttributeBind(gc, "v_tangent3", a);
+      }
+
+      {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_BITANGENT.getName());
+        e.execAttributeBind(gc, "v_bitangent", a);
+      }
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
+        e.execAttributeBind(gc, "v_uv", a);
+      } else {
+        e.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
+      }
+
+      e.execSetCallable(new Callable<Void>() {
+        @Override public Void call()
+          throws Exception
+        {
+          try {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+          } catch (final ConstraintError x) {
+            throw new UnreachableCodeException();
+          }
+          return null;
+        }
+      });
+
+      try {
+        e.execRun(gc);
+      } catch (final Exception x) {
         throw new UnreachableCodeException();
       }
 
@@ -426,16 +650,28 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
       light_cs,
       light_cs);
 
-    final JCCEExecutionCallable e = this.exec_directional;
-    e.execPrepare(gc);
-    e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
-    e.execUniformPutVector3F(gc, "l_direction", light_cs);
-    e.execUniformPutVector3F(gc, "l_color", light.getColour());
-    e.execUniformPutFloat(gc, "l_intensity", light.getIntensity());
-    e.execCancel();
+    {
+      final JCCEExecutionCallable e = this.exec_cb_directional;
+      e.execPrepare(gc);
+      e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
+      e.execUniformPutVector3F(gc, "light.direction", light_cs);
+      e.execUniformPutVector3F(gc, "light.color", light.getColour());
+      e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
+      e.execCancel();
+    }
+
+    {
+      final JCCEExecutionCallable e = this.exec_pb_directional;
+      e.execPrepare(gc);
+      e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
+      e.execUniformPutVector3F(gc, "light.direction", light_cs);
+      e.execUniformPutVector3F(gc, "light.color", light.getColour());
+      e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
+      e.execCancel();
+    }
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
-      this.renderLightPassMeshDirectional(gc, e, mesh);
+      this.renderLightPassMeshDirectional(gc, mesh);
     }
   }
 
@@ -465,18 +701,56 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
       light_world,
       light_eye);
 
-    final JCCEExecutionCallable e = this.exec_spherical;
-    e.execPrepare(gc);
-    e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
-    e.execUniformPutVector3F(gc, "l_position", light_eye);
-    e.execUniformPutVector3F(gc, "l_color", light.getColour());
-    e.execUniformPutFloat(gc, "l_intensity", light.getIntensity());
-    e.execUniformPutFloat(gc, "l_radius", light.getRadius());
-    e.execUniformPutFloat(gc, "l_falloff", light.getExponent());
-    e.execCancel();
+    {
+      final JCCEExecutionCallable e = this.exec_pb_spherical;
+      e.execPrepare(gc);
+      e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
+      e.execUniformPutVector3F(gc, "light.position", light_eye);
+      e.execUniformPutVector3F(gc, "light.color", light.getColour());
+      e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
+      e.execUniformPutFloat(gc, "light.radius", light.getRadius());
+      e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+      e.execCancel();
+    }
+
+    {
+      final JCCEExecutionCallable e = this.exec_pb_spherical;
+      e.execPrepare(gc);
+      e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
+      e.execUniformPutVector3F(gc, "light.position", light_eye);
+      e.execUniformPutVector3F(gc, "light.color", light.getColour());
+      e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
+      e.execUniformPutFloat(gc, "light.radius", light.getRadius());
+      e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+      e.execCancel();
+    }
+
+    {
+      final JCCEExecutionCallable e = this.exec_cb_spherical;
+      e.execPrepare(gc);
+      e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
+      e.execUniformPutVector3F(gc, "light.position", light_eye);
+      e.execUniformPutVector3F(gc, "light.color", light.getColour());
+      e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
+      e.execUniformPutFloat(gc, "light.radius", light.getRadius());
+      e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+      e.execCancel();
+    }
+
+    {
+      final JCCEExecutionCallable e = this.exec_cb_spherical;
+      e.execPrepare(gc);
+      e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
+      e.execUniformPutVector3F(gc, "light.position", light_eye);
+      e.execUniformPutVector3F(gc, "light.color", light.getColour());
+      e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
+      e.execUniformPutFloat(gc, "light.radius", light.getRadius());
+      e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+      e.execCancel();
+    }
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
-      this.renderLightPassMeshSpherical(gc, e, mesh);
+      this.renderLightPassMeshSpherical(gc, mesh);
     }
   }
 
@@ -486,12 +760,44 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
 
   private void renderLightPassMeshSpherical(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCCEExecutionCallable exec,
-    final @Nonnull KMeshInstance mesh)
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = mesh.getTransform();
+    final KMesh mesh = instance.getMesh();
+    final ArrayBuffer array = mesh.getArrayBuffer();
+
+    /**
+     * If the mesh has a bitangent attribute, then it must also have a
+     * tangent3 attribute. Otherwise, it must have a tangent4 attribute and
+     * the bitangent is computed by the fragment shader.
+     */
+
+    if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_BITANGENT.getName())) {
+      Constraints.constrainArbitrary(
+        array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3.getName()),
+        "Mesh has tangent3");
+      this.renderLightPassMeshSphericalWithProvidedBitangents(gc, instance);
+    } else {
+      Constraints.constrainArbitrary(
+        array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4.getName()),
+        "Mesh has tangent4");
+      this.renderLightPassMeshSphericalWithComputedBitangents(gc, instance);
+    }
+  }
+
+  /**
+   * Render the given mesh, lit with the given program, assuming provided
+   * bitangents.
+   */
+
+  private void renderLightPassMeshSphericalWithComputedBitangents(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMeshInstance instance)
+    throws ConstraintError,
+      JCGLException
+  {
+    final KTransform transform = instance.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
 
     MatrixM4x4F.multiply(
@@ -507,7 +813,7 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
      * Upload matrices, set textures.
      */
 
-    final KMaterial material = mesh.getMaterial();
+    final KMaterial material = instance.getMaterial();
     final TextureUnit[] texture_units = gc.textureGetUnits();
 
     {
@@ -545,43 +851,67 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
       }
     }
 
-    exec.execPrepare(gc);
-    exec.execUniformUseExisting("m_projection");
-    exec.execUniformUseExisting("l_position");
-    exec.execUniformUseExisting("l_color");
-    exec.execUniformUseExisting("l_intensity");
-    exec.execUniformUseExisting("l_radius");
-    exec.execUniformUseExisting("l_falloff");
-    exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
-    exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
-    exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
-    exec.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
+    final JCCEExecutionCallable e = this.exec_cb_spherical;
+    e.execPrepare(gc);
+    e.execUniformUseExisting("m_projection");
+    e.execUniformUseExisting("light.position");
+    e.execUniformUseExisting("light.color");
+    e.execUniformUseExisting("light.intensity");
+    e.execUniformUseExisting("light.radius");
+    e.execUniformUseExisting("light.falloff");
+    e.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
+    e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
+    e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
+    e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
+    e.execUniformPutFloat(
+      gc,
+      "shininess",
+      KRendererForwardDiffuseSpecularBump.SHININESS);
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
      */
 
     try {
+      final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final ArrayBufferAttribute a_uv =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-      final ArrayBufferAttribute a_normal =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
 
       gc.arrayBufferBind(array);
-      exec.execAttributeBind(gc, "v_position", a_pos);
-      exec.execAttributeBind(gc, "v_uv", a_uv);
-      exec.execAttributeBind(gc, "v_normal", a_normal);
-      exec.execSetCallable(new Callable<Void>() {
+
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+      e.execAttributeBind(gc, "v_position", a_pos);
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+        e.execAttributeBind(gc, "v_normal", a);
+      } else {
+        e.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
+      }
+
+      {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4.getName());
+        e.execAttributeBind(gc, "v_tangent4", a);
+      }
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+        final ArrayBufferAttribute a_uv =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
+        e.execAttributeBind(gc, "v_uv", a_uv);
+      } else {
+        e.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
+      }
+
+      e.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception
         {
           try {
             gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-          } catch (final ConstraintError e) {
+          } catch (final ConstraintError x) {
             throw new UnreachableCodeException();
           }
           return null;
@@ -589,8 +919,157 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
       });
 
       try {
-        exec.execRun(gc);
-      } catch (final Exception e) {
+        e.execRun(gc);
+      } catch (final Exception x) {
+        throw new UnreachableCodeException();
+      }
+
+    } finally {
+      gc.arrayBufferUnbind();
+    }
+  }
+
+  /**
+   * Render the given mesh, lit with the given program, assuming provided
+   * bitangents.
+   */
+
+  private void renderLightPassMeshSphericalWithProvidedBitangents(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMeshInstance instance)
+    throws ConstraintError,
+      JCGLException
+  {
+    final KTransform transform = instance.getTransform();
+    transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
+
+    MatrixM4x4F.multiply(
+      this.matrix_view,
+      this.matrix_model,
+      this.matrix_modelview);
+
+    KRendererCommon.makeNormalMatrix(
+      this.matrix_modelview,
+      this.matrix_normal);
+
+    /**
+     * Upload matrices, set textures.
+     */
+
+    final KMaterial material = instance.getMaterial();
+    final TextureUnit[] texture_units = gc.textureGetUnits();
+
+    {
+      final Option<Texture2DStatic> diffuse_0_opt =
+        material.getTextureDiffuse0();
+      if (diffuse_0_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units[0],
+          ((Option.Some<Texture2DStatic>) diffuse_0_opt).value);
+      } else {
+        gc.texture2DStaticUnbind(texture_units[0]);
+      }
+    }
+
+    {
+      final Option<Texture2DStatic> diffuse_1_opt =
+        material.getTextureDiffuse1();
+      if (diffuse_1_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units[1],
+          ((Option.Some<Texture2DStatic>) diffuse_1_opt).value);
+      } else {
+        gc.texture2DStaticUnbind(texture_units[1]);
+      }
+    }
+
+    {
+      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      if (normal_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units[2],
+          ((Option.Some<Texture2DStatic>) normal_opt).value);
+      } else {
+        gc.texture2DStaticUnbind(texture_units[2]);
+      }
+    }
+
+    final JCCEExecutionCallable e = this.exec_pb_spherical;
+    e.execPrepare(gc);
+    e.execUniformUseExisting("m_projection");
+    e.execUniformUseExisting("light.position");
+    e.execUniformUseExisting("light.color");
+    e.execUniformUseExisting("light.intensity");
+    e.execUniformUseExisting("light.radius");
+    e.execUniformUseExisting("light.falloff");
+    e.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
+    e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
+    e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
+    e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
+    e.execUniformPutFloat(
+      gc,
+      "shininess",
+      KRendererForwardDiffuseSpecularBump.SHININESS);
+
+    /**
+     * Associate array attributes with program attributes, and draw mesh.
+     */
+
+    try {
+      final KMesh mesh = instance.getMesh();
+      final ArrayBuffer array = mesh.getArrayBuffer();
+      final IndexBuffer indices = mesh.getIndexBuffer();
+
+      gc.arrayBufferBind(array);
+
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+      e.execAttributeBind(gc, "v_position", a_pos);
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+        e.execAttributeBind(gc, "v_normal", a);
+      } else {
+        e.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
+      }
+
+      {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3.getName());
+        e.execAttributeBind(gc, "v_tangent3", a);
+      }
+
+      {
+        final ArrayBufferAttribute a =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_BITANGENT.getName());
+        e.execAttributeBind(gc, "v_bitangent", a);
+      }
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+        final ArrayBufferAttribute a_uv =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
+        e.execAttributeBind(gc, "v_uv", a_uv);
+      } else {
+        e.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
+      }
+
+      e.execSetCallable(new Callable<Void>() {
+        @Override public Void call()
+          throws Exception
+        {
+          try {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+          } catch (final ConstraintError x) {
+            throw new UnreachableCodeException();
+          }
+          return null;
+        }
+      });
+
+      try {
+        e.execRun(gc);
+      } catch (final Exception x) {
         throw new UnreachableCodeException();
       }
 
