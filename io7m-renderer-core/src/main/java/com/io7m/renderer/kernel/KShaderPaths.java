@@ -37,6 +37,91 @@ public final class KShaderPaths
     }
   }
 
+  private static @Nonnull String getShadingLanguageName(
+    final @Nonnull JCGLSLVersionNumber version,
+    final @Nonnull JCGLApi api)
+    throws JCGLUnsupportedException
+  {
+    switch (api) {
+      case JCGL_ES:
+      {
+        if (version.getVersionMajor() == 1) {
+          return "glsl-es-100";
+        }
+        if (version.getVersionMajor() == 3) {
+          return "glsl-es-300";
+        }
+        throw new JCGLUnsupportedException("Unsupported GLSL ES version: "
+          + version);
+      }
+      case JCGL_FULL:
+      {
+        switch (version.getVersionMajor()) {
+          case 1:
+          {
+            switch (version.getVersionMinor()) {
+              case 10:
+                return "glsl-110";
+              case 20:
+                return "glsl-120";
+              case 30:
+                return "glsl-130";
+              case 40:
+                return "glsl-140";
+              case 50:
+                return "glsl-150";
+            }
+            throw new JCGLUnsupportedException("Unsupported GLSL version: "
+              + version);
+          }
+          case 3:
+          {
+            switch (version.getVersionMinor()) {
+              case 30:
+                return "glsl-330";
+            }
+            throw new JCGLUnsupportedException("Unsupported GLSL version: "
+              + version);
+          }
+          case 4:
+          {
+            switch (version.getVersionMinor()) {
+              case 0:
+                return "glsl-400";
+              case 10:
+                return "glsl-410";
+              case 20:
+                return "glsl-420";
+              case 30:
+                return "glsl-430";
+              case 40:
+                return "glsl-440";
+            }
+
+            throw new JCGLUnsupportedException("Unsupported GLSL version: "
+              + version);
+          }
+          default:
+            throw new JCGLUnsupportedException("Unsupported GLSL version: "
+              + version);
+        }
+      }
+    }
+
+    throw new UnreachableCodeException();
+  }
+
+  public static @Nonnull PathVirtual getShaderPathParasol(
+    final @Nonnull JCGLSLVersionNumber version,
+    final @Nonnull JCGLApi api,
+    final @Nonnull String name)
+    throws ConstraintError,
+      JCGLUnsupportedException
+  {
+    return KShaderPaths.BASE.appendName(name).appendName(
+      KShaderPaths.getShadingLanguageName(version, api));
+  }
+
   private static @Nonnull String getShaderDirectoryName(
     final @Nonnull JCGLSLVersionNumber version,
     final @Nonnull JCGLApi api)

@@ -91,14 +91,12 @@ final class KRendererFlatTextured implements KRenderer
     this.viewport_size = new VectorM2I();
 
     this.program =
-      KShaderUtilities.makeProgramSingleOutput(
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "flat-uv",
-        "flat-uv.v",
-        "flat-uv.f",
+        "flat_uv",
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);
