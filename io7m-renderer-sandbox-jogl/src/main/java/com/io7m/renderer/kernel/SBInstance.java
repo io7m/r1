@@ -77,6 +77,11 @@ import com.io7m.renderer.RVectorI3F;
     return this.description.getPosition();
   }
 
+  public float getSpecularExponent()
+  {
+    return this.description.getSpecularExponent();
+  }
+
   public @CheckForNull SBTexture getSpecularMap()
   {
     return this.map_specular;

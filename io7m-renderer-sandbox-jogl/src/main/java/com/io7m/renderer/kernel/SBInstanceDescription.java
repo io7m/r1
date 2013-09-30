@@ -47,6 +47,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final Element ed = RXMLUtilities.getChild(e, "diffuse", uri);
     final Element en = RXMLUtilities.getChild(e, "normal", uri);
     final Element es = RXMLUtilities.getChild(e, "specular", uri);
+    final Element ese = RXMLUtilities.getChild(e, "specular-exponent", uri);
     final Element em = RXMLUtilities.getChild(e, "mesh", uri);
 
     final int id = RXMLUtilities.getElementInteger(eid);
@@ -63,6 +64,8 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final String specular =
       (es.getValue().length() == 0) ? null : es.getValue();
 
+    final float specular_exponent = RXMLUtilities.getElementFloat(ese);
+
     final String mesh = RXMLUtilities.getElementNonEmptyString(em);
 
     return new SBInstanceDescription(
@@ -72,7 +75,8 @@ import com.io7m.renderer.xml.RXMLUtilities;
       mesh,
       diffuse,
       normal,
-      specular);
+      specular,
+      specular_exponent);
   }
 
   private final @Nonnull Integer                 id;
@@ -82,6 +86,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
   private final @CheckForNull String             diffuse;
   private final @CheckForNull String             normal;
   private final @CheckForNull String             specular;
+  private final float                            specular_exponent;
 
   public SBInstanceDescription(
     final @Nonnull Integer id,
@@ -90,7 +95,8 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final @Nonnull String mesh,
     final @CheckForNull String diffuse,
     final @CheckForNull String normal,
-    final @CheckForNull String specular)
+    final @CheckForNull String specular,
+    final float specular_exponent)
   {
     this.id = id;
     this.position = position;
@@ -99,6 +105,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     this.diffuse = diffuse;
     this.normal = normal;
     this.specular = specular;
+    this.specular_exponent = specular_exponent;
   }
 
   @Override public boolean equals(
@@ -121,10 +128,18 @@ import com.io7m.renderer.xml.RXMLUtilities;
     } else if (!this.diffuse.equals(other.diffuse)) {
       return false;
     }
-    if (!this.id.equals(other.id)) {
+    if (this.id == null) {
+      if (other.id != null) {
+        return false;
+      }
+    } else if (!this.id.equals(other.id)) {
       return false;
     }
-    if (!this.mesh.equals(other.mesh)) {
+    if (this.mesh == null) {
+      if (other.mesh != null) {
+        return false;
+      }
+    } else if (!this.mesh.equals(other.mesh)) {
       return false;
     }
     if (this.normal == null) {
@@ -134,10 +149,18 @@ import com.io7m.renderer.xml.RXMLUtilities;
     } else if (!this.normal.equals(other.normal)) {
       return false;
     }
-    if (!this.orientation.equals(other.orientation)) {
+    if (this.orientation == null) {
+      if (other.orientation != null) {
+        return false;
+      }
+    } else if (!this.orientation.equals(other.orientation)) {
       return false;
     }
-    if (!this.position.equals(other.position)) {
+    if (this.position == null) {
+      if (other.position != null) {
+        return false;
+      }
+    } else if (!this.position.equals(other.position)) {
       return false;
     }
     if (this.specular == null) {
@@ -145,6 +168,10 @@ import com.io7m.renderer.xml.RXMLUtilities;
         return false;
       }
     } else if (!this.specular.equals(other.specular)) {
+      return false;
+    }
+    if (Float.floatToIntBits(this.specular_exponent) != Float
+      .floatToIntBits(other.specular_exponent)) {
       return false;
     }
     return true;
@@ -185,6 +212,11 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return this.specular;
   }
 
+  public float getSpecularExponent()
+  {
+    return this.specular_exponent;
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;
@@ -192,15 +224,21 @@ import com.io7m.renderer.xml.RXMLUtilities;
     result =
       (prime * result)
         + ((this.diffuse == null) ? 0 : this.diffuse.hashCode());
-    result = (prime * result) + this.id.hashCode();
-    result = (prime * result) + this.mesh.hashCode();
+    result = (prime * result) + ((this.id == null) ? 0 : this.id.hashCode());
+    result =
+      (prime * result) + ((this.mesh == null) ? 0 : this.mesh.hashCode());
     result =
       (prime * result) + ((this.normal == null) ? 0 : this.normal.hashCode());
-    result = (prime * result) + this.orientation.hashCode();
-    result = (prime * result) + this.position.hashCode();
+    result =
+      (prime * result)
+        + ((this.orientation == null) ? 0 : this.orientation.hashCode());
+    result =
+      (prime * result)
+        + ((this.position == null) ? 0 : this.position.hashCode());
     result =
       (prime * result)
         + ((this.specular == null) ? 0 : this.specular.hashCode());
+    result = (prime * result) + Float.floatToIntBits(this.specular_exponent);
     return result;
   }
 
@@ -221,11 +259,13 @@ import com.io7m.renderer.xml.RXMLUtilities;
     builder.append(this.normal);
     builder.append(" ");
     builder.append(this.specular);
+    builder.append(" ");
+    builder.append(this.specular_exponent);
     builder.append("]");
     return builder.toString();
   }
 
-  @Nonnull Element toXML()
+  @SuppressWarnings("boxing") @Nonnull Element toXML()
   {
     final String uri = SBSceneDescription.SCENE_XML_URI.toString();
     final Element e = new Element("s:instance", uri);
@@ -270,6 +310,8 @@ import com.io7m.renderer.xml.RXMLUtilities;
     if (this.specular != null) {
       es.appendChild(this.specular);
     }
+    final Element ese = new Element("s:specular-exponent", uri);
+    es.appendChild(String.format("%.6f", this.specular_exponent));
 
     e.appendChild(eid);
     e.appendChild(eo);
@@ -278,6 +320,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     e.appendChild(ed);
     e.appendChild(en);
     e.appendChild(es);
+    e.appendChild(ese);
     return e;
   }
 }
