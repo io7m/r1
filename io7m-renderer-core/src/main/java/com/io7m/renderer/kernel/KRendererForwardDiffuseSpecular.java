@@ -127,15 +127,13 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     this.exec_spherical = new JCCEExecutionCallable(this.program_spherical);
 
     this.program_depth =
-      KShaderUtilities.makeProgramSingleOutput(
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
         "depth",
-        "depth.v",
-        "depth.f",
-        this.log);
+        log);
     this.exec_depth = new JCCEExecutionCallable(this.program_depth);
   }
 

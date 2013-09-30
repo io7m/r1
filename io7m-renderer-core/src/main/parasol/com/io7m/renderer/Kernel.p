@@ -28,6 +28,69 @@ module Kernel is
   import com.io7m.renderer.Normals          as N;
 
   --
+  -- Trivial constant-color shader.
+  --
+
+  shader vertex c_colour_vertex is
+    in        v_position   : vector_3f;
+    parameter m_modelview  : matrix_4x4f;
+    parameter m_projection : matrix_4x4f;
+  with
+    value position =
+      M4.multiply_vector (
+        M4.multiply (m_projection, m_modelview),
+        new vector_4f (v_position, 1.0)
+      );
+  as
+    out gl_Position = position;
+  end;
+
+  shader fragment c_colour_fragment is
+    parameter f_ccolour : vector_4f;
+    out       out_0     : vector_4f as 0;
+  as
+    out out_0 = f_ccolour;
+  end;
+
+  shader program c_colour is
+    vertex   c_colour_vertex;
+    fragment c_colour_fragment;
+  end;
+
+  --
+  -- Trivial interpolated vertex-color shader.
+  --
+
+  shader vertex v_colour_vertex is
+    in        v_position   : vector_3f;
+    in        v_colour     : vector_4f;
+    parameter m_modelview  : matrix_4x4f;
+    parameter m_projection : matrix_4x4f;
+    out       f_colour     : vector_4f;
+  with
+    value position =
+      M4.multiply_vector (
+        M4.multiply (m_projection, m_modelview),
+        new vector_4f (v_position, 1.0)
+      );
+  as
+    out gl_Position = position;
+    out f_colour    = v_colour;
+  end;
+
+  shader fragment v_colour_fragment is
+    in  f_colour : vector_4f;
+    out out_0    : vector_4f as 0;
+  as
+    out out_0 = f_colour;
+  end;
+
+  shader program v_colour is
+    vertex   v_colour_vertex;
+    fragment v_colour_fragment;
+  end;
+
+  --
   -- Trivial depth-only shader.
   --
 
