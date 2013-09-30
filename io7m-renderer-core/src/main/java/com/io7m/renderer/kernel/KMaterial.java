@@ -35,19 +35,27 @@ import com.io7m.jtensors.VectorReadable3F;
   private final @Nonnull Option<Texture2DStatic> texture_diffuse_1;
   private final @Nonnull Option<Texture2DStatic> texture_normal;
   private final @Nonnull Option<Texture2DStatic> texture_specular;
+  private final float                            specular_exponent;
 
   KMaterial(
     final @Nonnull VectorReadable3F diffuse,
     final @Nonnull Option<Texture2DStatic> texture_diffuse_0,
     final @Nonnull Option<Texture2DStatic> texture_diffuse_1,
     final @Nonnull Option<Texture2DStatic> texture_normal,
-    final @Nonnull Option<Texture2DStatic> texture_specular)
+    final @Nonnull Option<Texture2DStatic> texture_specular,
+    final float specular_exponent)
   {
     this.diffuse = new VectorI3F(diffuse);
     this.texture_diffuse_0 = texture_diffuse_0;
     this.texture_diffuse_1 = texture_diffuse_1;
     this.texture_normal = texture_normal;
     this.texture_specular = texture_specular;
+    this.specular_exponent = specular_exponent;
+  }
+
+  public float getSpecularExponent()
+  {
+    return this.specular_exponent;
   }
 
   @Nonnull VectorReadable3F getDiffuse()

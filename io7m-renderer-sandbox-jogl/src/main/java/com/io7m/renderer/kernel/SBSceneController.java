@@ -414,7 +414,8 @@ public final class SBSceneController implements
           diffuse_map,
           new Option.None<Texture2DStatic>(),
           normal_map,
-          specular_map);
+          specular_map,
+          64);
 
       meshes =
         meshes
