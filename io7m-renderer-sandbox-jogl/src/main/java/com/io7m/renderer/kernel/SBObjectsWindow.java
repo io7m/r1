@@ -17,37 +17,24 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
+import javax.swing.JFrame;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.Framebuffer;
-import com.io7m.jcanephora.JCGLException;
-import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.jlog.Log;
 
-interface KRenderer
+final class SBObjectsWindow extends JFrame
 {
-  /**
-   * <p>
-   * Render the scene <code>scene</code> to the framebuffer
-   * <code>result</code>.
-   * </p>
-   * 
-   * @throws ConstraintError
-   *           Iff <code>result == null || scene == null</code>.
-   */
+  private static final long serialVersionUID;
 
-  void render(
-    final @Nonnull Framebuffer result,
-    final @Nonnull KScene scene)
-    throws JCGLException,
-      ConstraintError;
+  static {
+    serialVersionUID = -312314551231238L;
+  }
 
-  /**
-   * <p>
-   * Set the colour to which the renderer will clear the given framebuffer
-   * when rendering.
-   * </p>
-   */
-
-  void setBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba);
+  public <C extends SBSceneControllerMeshes & SBSceneControllerInstances & SBSceneControllerTextures> SBObjectsWindow(
+    final @Nonnull C controller,
+    final @Nonnull Log log)
+  {
+    super("Instances");
+    this.getContentPane().add(new SBObjectsPanel(controller, log));
+    this.pack();
+  }
 }

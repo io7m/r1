@@ -17,37 +17,34 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.Framebuffer;
-import com.io7m.jcanephora.JCGLException;
-import com.io7m.jtensors.VectorReadable4F;
-
-interface KRenderer
+@Immutable final class SBMesh implements Comparable<SBMesh>
 {
-  /**
-   * <p>
-   * Render the scene <code>scene</code> to the framebuffer
-   * <code>result</code>.
-   * </p>
-   * 
-   * @throws ConstraintError
-   *           Iff <code>result == null || scene == null</code>.
-   */
+  private final @Nonnull SBMeshDescription description;
+  private final @Nonnull KMesh             mesh;
 
-  void render(
-    final @Nonnull Framebuffer result,
-    final @Nonnull KScene scene)
-    throws JCGLException,
-      ConstraintError;
+  SBMesh(
+    final @Nonnull SBMeshDescription description,
+    final @Nonnull KMesh mesh)
+  {
+    this.description = description;
+    this.mesh = mesh;
+  }
 
-  /**
-   * <p>
-   * Set the colour to which the renderer will clear the given framebuffer
-   * when rendering.
-   * </p>
-   */
+  @Override public int compareTo(
+    final @Nonnull SBMesh o)
+  {
+    return this.description.compareTo(this.description);
+  }
 
-  void setBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba);
+  public @Nonnull SBMeshDescription getDescription()
+  {
+    return this.description;
+  }
+
+  public @Nonnull KMesh getMesh()
+  {
+    return this.mesh;
+  }
 }

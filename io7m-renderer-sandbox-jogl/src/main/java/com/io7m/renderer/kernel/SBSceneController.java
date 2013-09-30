@@ -50,6 +50,8 @@ import nu.xom.ValidityException;
 import org.pcollections.HashTreePSet;
 import org.pcollections.MapPSet;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.Texture2DStatic;
@@ -59,6 +61,7 @@ import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.SBException.SBExceptionImageLoading;
 import com.io7m.renderer.kernel.SBZipUtilities.TemporaryDirectory;
+import com.io7m.renderer.xml.RXMLException;
 
 interface SBSceneChangeListener
 {
@@ -74,7 +77,7 @@ interface SBSceneChangeListenerRegistration
 public final class SBSceneController implements
   SBSceneControllerIO,
   SBSceneControllerLights,
-  SBSceneControllerModels,
+  SBSceneControllerMeshes,
   SBSceneControllerInstances,
   SBSceneControllerRenderer,
   SBSceneControllerRendererControl,
@@ -103,11 +106,11 @@ public final class SBSceneController implements
         target.getFile());
     }
 
-    for (final SBModelDescription source : scene_desc_current
-      .getModelDescriptions()) {
+    for (final SBMeshDescription source : scene_desc_current
+      .getMeshDescriptions()) {
 
-      final SBModelDescription target =
-        scene_desc_saving.getModel(source.getName());
+      final SBMeshDescription target =
+        scene_desc_saving.getMesh(source.getName());
 
       SBSceneController.ioSaveSceneCopyFileIntoZip(
         log,
@@ -225,7 +228,11 @@ public final class SBSceneController implements
       @SuppressWarnings("synthetic-access") @Override public Void call()
         throws Exception
       {
-        SBSceneController.this.ioLoadSceneActual(file);
+        try {
+          SBSceneController.this.ioLoadSceneActual(file);
+        } catch (final ConstraintError e) {
+          throw new UnreachableCodeException();
+        }
         return null;
       }
     });
@@ -236,7 +243,9 @@ public final class SBSceneController implements
 
   private void ioLoadSceneActual(
     final @Nonnull File file)
-    throws FileNotFoundException,
+    throws RXMLException,
+      ConstraintError,
+      FileNotFoundException,
       IOException,
       ValidityException,
       ParsingException,
@@ -260,9 +269,9 @@ public final class SBSceneController implements
       scene = scene.textureAdd(tf.get());
     }
 
-    for (final SBModelDescription m : desc.getModelDescriptions()) {
-      final Future<SBModel> mf = this.modelLoad(m);
-      scene = scene.modelAdd(mf.get());
+    for (final SBMeshDescription m : desc.getMeshDescriptions()) {
+      final Future<SBMesh> mf = this.meshLoad(m.getFile());
+      scene = scene.meshAdd(mf.get());
     }
 
     for (final KLight light : desc.getLights()) {
@@ -322,15 +331,15 @@ public final class SBSceneController implements
     SBSceneController.this.log.debug("Wrote scene to " + file);
   }
 
-  private @Nonnull Future<SBModel> modelLoad(
-    final @Nonnull SBModelDescription m)
+  private @Nonnull Future<SBMesh> meshLoad(
+    final @Nonnull File file)
   {
-    final FutureTask<SBModel> f =
-      new FutureTask<SBModel>(new Callable<SBModel>() {
-        @SuppressWarnings("synthetic-access") @Override public SBModel call()
+    final FutureTask<SBMesh> f =
+      new FutureTask<SBMesh>(new Callable<SBMesh>() {
+        @SuppressWarnings("synthetic-access") @Override public SBMesh call()
           throws Exception
         {
-          return SBSceneController.this.modelLoadActual(m);
+          return SBSceneController.this.meshLoadActual(file);
         }
       });
 
@@ -338,8 +347,8 @@ public final class SBSceneController implements
     return f;
   }
 
-  private @Nonnull SBModel modelLoadActual(
-    final @Nonnull SBModelDescription description)
+  private @Nonnull SBMesh meshLoadActual(
+    final @Nonnull File file)
     throws FileNotFoundException,
       InterruptedException,
       ExecutionException
@@ -347,12 +356,12 @@ public final class SBSceneController implements
     FileInputStream stream = null;
 
     try {
-      stream = new FileInputStream(description.getFile());
+      stream = new FileInputStream(file);
 
-      final Future<SBModel> f_model =
-        SBSceneController.this.renderer.modelLoad(description, stream);
+      final Future<SBMesh> f_mesh =
+        SBSceneController.this.renderer.meshLoad(file, stream);
 
-      return f_model.get();
+      return f_mesh.get();
     } finally {
       if (stream != null) {
         try {
@@ -374,8 +383,7 @@ public final class SBSceneController implements
     MapPSet<KMeshInstance> meshes = HashTreePSet.empty();
 
     for (final SBInstance i : scene.instancesGet()) {
-      final SBModel model = scene.modelGet(i.getModel());
-      final SBMesh mesh = model.getMesh(i.getModelObject());
+      final SBMesh mesh = scene.meshGet(i.getMesh());
 
       final QuaternionM4F orientation = new QuaternionM4F();
       final Integer id = i.getID();
@@ -387,18 +395,18 @@ public final class SBSceneController implements
         new RVectorI3F<RSpaceRGB>(1.0f, 1.0f, 1.0f);
 
       final Option<Texture2DStatic> diffuse_map =
-        (i.getDiffuse() != null) ? new Option.Some<Texture2DStatic>(i
-          .getDiffuse()
+        (i.getDiffuseMap() != null) ? new Option.Some<Texture2DStatic>(i
+          .getDiffuseMap()
           .getTexture()) : new Option.None<Texture2DStatic>();
 
       final Option<Texture2DStatic> normal_map =
-        (i.getNormal() == null)
+        (i.getNormalMap() == null)
           ? new Option.None<Texture2DStatic>()
-          : new Option.Some<Texture2DStatic>(i.getNormal().getTexture());
+          : new Option.Some<Texture2DStatic>(i.getNormalMap().getTexture());
       final Option<Texture2DStatic> specular_map =
-        (i.getSpecular() == null)
+        (i.getSpecularMap() == null)
           ? new Option.None<Texture2DStatic>()
-          : new Option.Some<Texture2DStatic>(i.getSpecular().getTexture());
+          : new Option.Some<Texture2DStatic>(i.getSpecularMap().getTexture());
 
       final KMaterial material =
         new KMaterial(
@@ -409,17 +417,21 @@ public final class SBSceneController implements
           specular_map);
 
       meshes =
-        meshes.plus(new KMeshInstance(
-          id,
-          transform,
-          mesh.getArrayBuffer(),
-          mesh.getIndexBuffer(),
-          material));
+        meshes
+          .plus(new KMeshInstance(id, transform, mesh.getMesh(), material));
     }
 
     return new Pair<Collection<KLight>, Collection<KMeshInstance>>(
       lights,
       meshes);
+  }
+
+  @Override public void rendererSetBackgroundColour(
+    final float r,
+    final float g,
+    final float b)
+  {
+    this.renderer.setBackgroundColour(r, g, b);
   }
 
   @Override public void rendererSetType(
@@ -435,10 +447,10 @@ public final class SBSceneController implements
     this.renderer.setShowAxes(enabled);
   }
 
-  @Override public void rendererShowLights(
+  @Override public void rendererShowGrid(
     final boolean enabled)
   {
-    this.renderer.setShowLights(enabled);
+    this.renderer.setShowGrid(enabled);
   }
 
   @Override public void rendererShowLightRadii(
@@ -447,10 +459,10 @@ public final class SBSceneController implements
     this.renderer.setShowLightRadii(enabled);
   }
 
-  @Override public void rendererShowGrid(
+  @Override public void rendererShowLights(
     final boolean enabled)
   {
-    this.renderer.setShowGrid(enabled);
+    this.renderer.setShowLights(enabled);
   }
 
   @Override public void sceneInstanceAdd(
@@ -532,32 +544,30 @@ public final class SBSceneController implements
     return this.scene_current.get().lightsGet();
   }
 
-  @Override public @Nonnull Future<SBModel> sceneModelLoad(
+  @Override public @Nonnull Map<String, SBMesh> sceneMeshesGet()
+  {
+    return this.scene_current.get().meshesGet();
+  }
+
+  @Override public @Nonnull Future<SBMesh> sceneMeshLoad(
     final @Nonnull File file)
   {
-    final SBModelDescription desc =
-      new SBModelDescription(file, this.names.get(file.getName()));
-
-    final FutureTask<SBModel> f =
-      new FutureTask<SBModel>(new Callable<SBModel>() {
-        @SuppressWarnings("synthetic-access") @Override public SBModel call()
+    final FutureTask<SBMesh> f =
+      new FutureTask<SBMesh>(new Callable<SBMesh>() {
+        @SuppressWarnings("synthetic-access") @Override public SBMesh call()
           throws Exception
         {
-          final SBModel m = SBSceneController.this.modelLoadActual(desc);
+          final SBMesh m = SBSceneController.this.meshLoadActual(file);
           SBSceneController.this
-            .stateUpdate(SBSceneController.this.scene_current.get().modelAdd(
-              m));
+            .stateUpdate(SBSceneController.this.scene_current
+              .get()
+              .meshAdd(m));
           return m;
         }
       });
 
     this.exec_pool.execute(f);
     return f;
-  }
-
-  @Override public @Nonnull Map<String, SBModel> sceneModelsGet()
-  {
-    return this.scene_current.get().modelsGet();
   }
 
   @Override public @Nonnull Future<SBTexture> sceneTextureLoad(
@@ -673,14 +683,6 @@ public final class SBSceneController implements
     this.exec_pool.execute(f);
     return f;
   }
-
-  @Override public void rendererSetBackgroundColour(
-    final float r,
-    final float g,
-    final float b)
-  {
-    this.renderer.setBackgroundColour(r, g, b);
-  }
 }
 
 interface SBSceneControllerInstances extends
@@ -734,12 +736,12 @@ interface SBSceneControllerLights extends SBSceneChangeListenerRegistration
   public @Nonnull Collection<KLight> sceneLightsGetAll();
 }
 
-interface SBSceneControllerModels extends SBSceneChangeListenerRegistration
+interface SBSceneControllerMeshes extends SBSceneChangeListenerRegistration
 {
-  public @Nonnull Future<SBModel> sceneModelLoad(
-    final @Nonnull File file);
+  public @Nonnull Map<String, SBMesh> sceneMeshesGet();
 
-  public @Nonnull Map<String, SBModel> sceneModelsGet();
+  public @Nonnull Future<SBMesh> sceneMeshLoad(
+    final @Nonnull File file);
 }
 
 interface SBSceneControllerRenderer
@@ -751,14 +753,13 @@ interface SBSceneControllerRenderer
 
 interface SBSceneControllerRendererControl
 {
+  public void rendererSetBackgroundColour(
+    float r,
+    float g,
+    float b);
+
   public void rendererSetType(
     final @Nonnull SBRendererType type);
-
-  public void rendererShowLightRadii(
-    final boolean enabled);
-
-  public void rendererShowLights(
-    final boolean enabled);
 
   public void rendererShowAxes(
     final boolean enabled);
@@ -766,10 +767,11 @@ interface SBSceneControllerRendererControl
   public void rendererShowGrid(
     final boolean enabled);
 
-  public void rendererSetBackgroundColour(
-    float r,
-    float g,
-    float b);
+  public void rendererShowLightRadii(
+    final boolean enabled);
+
+  public void rendererShowLights(
+    final boolean enabled);
 }
 
 interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration

@@ -19,10 +19,9 @@ package com.io7m.renderer.xml.collada;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.jtensors.VectorI4F;
-import com.io7m.jtensors.VectorM4F;
+import com.io7m.jtensors.VectorM3F;
 import com.io7m.renderer.RSpace;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.RVectorReadable3F;
@@ -45,7 +44,7 @@ import com.io7m.renderer.RVectorReadable3F;
  * </ul>
  */
 
-enum ColladaAxis
+public enum ColladaAxis
 {
   COLLADA_AXIS_X_UP,
   COLLADA_AXIS_Y_UP,
@@ -69,9 +68,8 @@ enum ColladaAxis
    * </p>
    */
 
-  static @Nonnull <R extends RSpace> RVectorI3F<R> convertAxes(
-    final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull MatrixM4x4F matrix,
+  public static @Nonnull <R extends RSpace> RVectorI3F<R> convertAxes(
+    final @Nonnull MatrixM3x3F matrix,
     final @Nonnull ColladaAxis source_axes,
     final @Nonnull RVectorReadable3F<R> source,
     final @Nonnull ColladaAxis dest_axes)
@@ -86,40 +84,28 @@ enum ColladaAxis
           }
           case COLLADA_AXIS_Y_UP:
           {
-            final VectorI4F v =
-              new VectorI4F(
-                source.getXF(),
-                source.getYF(),
-                source.getZF(),
-                1.0f);
-            final VectorM4F out = new VectorM4F();
+            final VectorM3F out = new VectorM3F();
 
-            MatrixM4x4F.setIdentity(matrix);
-            MatrixM4x4F.makeRotation(
+            MatrixM3x3F.setIdentity(matrix);
+            MatrixM3x3F.makeRotation(
               Math.toRadians(90),
               ColladaAxis.AXIS_Z,
               matrix);
 
-            MatrixM4x4F.multiplyVector4FWithContext(context, matrix, v, out);
+            MatrixM3x3F.multiplyVector3F(matrix, source, out);
             return new RVectorI3F<R>(out.x, out.y, out.z);
           }
           case COLLADA_AXIS_Z_UP:
           {
-            final VectorI4F v =
-              new VectorI4F(
-                source.getXF(),
-                source.getYF(),
-                source.getZF(),
-                1.0f);
-            final VectorM4F out = new VectorM4F();
+            final VectorM3F out = new VectorM3F();
 
-            MatrixM4x4F.setIdentity(matrix);
-            MatrixM4x4F.makeRotation(
+            MatrixM3x3F.setIdentity(matrix);
+            MatrixM3x3F.makeRotation(
               Math.toRadians(-90),
               ColladaAxis.AXIS_Y,
               matrix);
 
-            MatrixM4x4F.multiplyVector4FWithContext(context, matrix, v, out);
+            MatrixM3x3F.multiplyVector3F(matrix, source, out);
             return new RVectorI3F<R>(out.x, out.y, out.z);
           }
         }
@@ -130,21 +116,15 @@ enum ColladaAxis
         switch (dest_axes) {
           case COLLADA_AXIS_X_UP:
           {
-            final VectorI4F v =
-              new VectorI4F(
-                source.getXF(),
-                source.getYF(),
-                source.getZF(),
-                1.0f);
-            final VectorM4F out = new VectorM4F();
+            final VectorM3F out = new VectorM3F();
 
-            MatrixM4x4F.setIdentity(matrix);
-            MatrixM4x4F.makeRotation(
+            MatrixM3x3F.setIdentity(matrix);
+            MatrixM3x3F.makeRotation(
               Math.toRadians(-90),
               ColladaAxis.AXIS_Z,
               matrix);
 
-            MatrixM4x4F.multiplyVector4FWithContext(context, matrix, v, out);
+            MatrixM3x3F.multiplyVector3F(matrix, source, out);
             return new RVectorI3F<R>(out.x, out.y, out.z);
           }
           case COLLADA_AXIS_Y_UP:
@@ -153,21 +133,15 @@ enum ColladaAxis
           }
           case COLLADA_AXIS_Z_UP:
           {
-            final VectorI4F v =
-              new VectorI4F(
-                source.getXF(),
-                source.getYF(),
-                source.getZF(),
-                1.0f);
-            final VectorM4F out = new VectorM4F();
+            final VectorM3F out = new VectorM3F();
 
-            MatrixM4x4F.setIdentity(matrix);
-            MatrixM4x4F.makeRotation(
+            MatrixM3x3F.setIdentity(matrix);
+            MatrixM3x3F.makeRotation(
               Math.toRadians(90),
               ColladaAxis.AXIS_X,
               matrix);
 
-            MatrixM4x4F.multiplyVector4FWithContext(context, matrix, v, out);
+            MatrixM3x3F.multiplyVector3F(matrix, source, out);
             return new RVectorI3F<R>(out.x, out.y, out.z);
           }
         }
@@ -178,40 +152,28 @@ enum ColladaAxis
         switch (dest_axes) {
           case COLLADA_AXIS_X_UP:
           {
-            final VectorI4F v =
-              new VectorI4F(
-                source.getXF(),
-                source.getYF(),
-                source.getZF(),
-                1.0f);
-            final VectorM4F out = new VectorM4F();
+            final VectorM3F out = new VectorM3F();
 
-            MatrixM4x4F.setIdentity(matrix);
-            MatrixM4x4F.makeRotation(
+            MatrixM3x3F.setIdentity(matrix);
+            MatrixM3x3F.makeRotation(
               Math.toRadians(90),
               ColladaAxis.AXIS_Y,
               matrix);
 
-            MatrixM4x4F.multiplyVector4FWithContext(context, matrix, v, out);
+            MatrixM3x3F.multiplyVector3F(matrix, source, out);
             return new RVectorI3F<R>(out.x, out.y, out.z);
           }
           case COLLADA_AXIS_Y_UP:
           {
-            final VectorI4F v =
-              new VectorI4F(
-                source.getXF(),
-                source.getYF(),
-                source.getZF(),
-                1.0f);
-            final VectorM4F out = new VectorM4F();
+            final VectorM3F out = new VectorM3F();
 
-            MatrixM4x4F.setIdentity(matrix);
-            MatrixM4x4F.makeRotation(
+            MatrixM3x3F.setIdentity(matrix);
+            MatrixM3x3F.makeRotation(
               Math.toRadians(-90),
               ColladaAxis.AXIS_X,
               matrix);
 
-            MatrixM4x4F.multiplyVector4FWithContext(context, matrix, v, out);
+            MatrixM3x3F.multiplyVector3F(matrix, source, out);
             return new RVectorI3F<R>(out.x, out.y, out.z);
           }
           case COLLADA_AXIS_Z_UP:

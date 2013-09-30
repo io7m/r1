@@ -47,6 +47,8 @@ import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.VectorI2F;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
@@ -59,6 +61,8 @@ import com.io7m.renderer.kernel.KLight.KSphere;
 
 final class KRendererForwardDiffuseSpecular implements KRenderer
 {
+  private static final int                     SHININESS = 64;
+
   private final @Nonnull MatrixM4x4F           matrix_modelview;
   private final @Nonnull MatrixM4x4F           matrix_model;
   private final @Nonnull MatrixM4x4F           matrix_view;
@@ -102,40 +106,34 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     this.transform_context = new KTransform.Context();
 
     this.program_directional =
-      KShaderUtilities.makeProgramSingleOutput(
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "fw_ds_directional",
-        "fw_ds_directional.v",
-        "fw_ds_directional.f",
-        this.log);
+        "forward_ds_directional",
+        log);
     this.exec_directional =
       new JCCEExecutionCallable(this.program_directional);
 
     this.program_spherical =
-      KShaderUtilities.makeProgramSingleOutput(
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "fw_ds_spherical",
-        "fw_ds_spherical.v",
-        "fw_ds_spherical.f",
-        this.log);
+        "forward_ds_spherical",
+        log);
     this.exec_spherical = new JCCEExecutionCallable(this.program_spherical);
 
     this.program_depth =
-      KShaderUtilities.makeProgramSingleOutput(
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "depth_only",
-        "standard.v",
-        "depth_only.f",
-        this.log);
+        "depth",
+        log);
     this.exec_depth = new JCCEExecutionCallable(this.program_depth);
   }
 
@@ -215,11 +213,11 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
   private void renderDepthPassMesh(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable exec,
-    final @Nonnull KMeshInstance mesh)
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = mesh.getTransform();
+    final KTransform transform = instance.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
 
     MatrixM4x4F.multiply(
@@ -240,6 +238,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
      */
 
     try {
+      final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
       final ArrayBufferAttribute a_pos = array.getAttribute("position");
@@ -298,11 +297,11 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
   private void renderLightPassMeshDirectional(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable exec,
-    final @Nonnull KMeshInstance mesh)
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = mesh.getTransform();
+    final KTransform transform = instance.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
 
     MatrixM4x4F.multiply(
@@ -318,7 +317,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
      * Upload matrices, set textures.
      */
 
-    final KMaterial material = mesh.getMaterial();
+    final KMaterial material = instance.getMaterial();
     final TextureUnit[] texture_units = gc.textureGetUnits();
 
     {
@@ -347,9 +346,10 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     exec.execPrepare(gc);
     exec.execUniformUseExisting("m_projection");
-    exec.execUniformUseExisting("l_intensity");
-    exec.execUniformUseExisting("l_color");
-    exec.execUniformUseExisting("l_direction");
+    exec.execUniformUseExisting("light.intensity");
+    exec.execUniformUseExisting("light.color");
+    exec.execUniformUseExisting("light.direction");
+    exec.execUniformUseExisting("shininess");
     exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
@@ -359,19 +359,32 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
      */
 
     try {
+      final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final ArrayBufferAttribute a_uv =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-      final ArrayBufferAttribute a_normal =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
 
       gc.arrayBufferBind(array);
+
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       exec.execAttributeBind(gc, "v_position", a_pos);
-      exec.execAttributeBind(gc, "v_uv", a_uv);
-      exec.execAttributeBind(gc, "v_normal", a_normal);
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
+        final ArrayBufferAttribute a_nor =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+        exec.execAttributeBind(gc, "v_normal", a_nor);
+      } else {
+        exec.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
+      }
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+        final ArrayBufferAttribute a_uv =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
+        exec.execAttributeBind(gc, "v_uv", a_uv);
+      } else {
+        exec.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
+      }
+
       exec.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception
@@ -423,9 +436,13 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     final JCCEExecutionCallable e = this.exec_directional;
     e.execPrepare(gc);
     e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
-    e.execUniformPutVector3F(gc, "l_direction", light_cs);
-    e.execUniformPutVector3F(gc, "l_color", light.getColour());
-    e.execUniformPutFloat(gc, "l_intensity", light.getIntensity());
+    e.execUniformPutVector3F(gc, "light.direction", light_cs);
+    e.execUniformPutVector3F(gc, "light.color", light.getColour());
+    e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
+    e.execUniformPutFloat(
+      gc,
+      "shininess",
+      KRendererForwardDiffuseSpecular.SHININESS);
     e.execCancel();
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
@@ -462,11 +479,15 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     final JCCEExecutionCallable e = this.exec_spherical;
     e.execPrepare(gc);
     e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
-    e.execUniformPutVector3F(gc, "l_position", light_eye);
-    e.execUniformPutVector3F(gc, "l_color", light.getColour());
-    e.execUniformPutFloat(gc, "l_intensity", light.getIntensity());
-    e.execUniformPutFloat(gc, "l_radius", light.getRadius());
-    e.execUniformPutFloat(gc, "l_falloff", light.getExponent());
+    e.execUniformPutVector3F(gc, "light.position", light_eye);
+    e.execUniformPutVector3F(gc, "light.color", light.getColour());
+    e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
+    e.execUniformPutFloat(gc, "light.radius", light.getRadius());
+    e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+    e.execUniformPutFloat(
+      gc,
+      "shininess",
+      KRendererForwardDiffuseSpecular.SHININESS);
     e.execCancel();
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
@@ -481,11 +502,11 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
   private void renderLightPassMeshSpherical(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable exec,
-    final @Nonnull KMeshInstance mesh)
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = mesh.getTransform();
+    final KTransform transform = instance.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
 
     MatrixM4x4F.multiply(
@@ -501,7 +522,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
      * Upload matrices, set textures.
      */
 
-    final KMaterial material = mesh.getMaterial();
+    final KMaterial material = instance.getMaterial();
     final TextureUnit[] texture_units = gc.textureGetUnits();
 
     {
@@ -541,11 +562,12 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     exec.execPrepare(gc);
     exec.execUniformUseExisting("m_projection");
-    exec.execUniformUseExisting("l_position");
-    exec.execUniformUseExisting("l_color");
-    exec.execUniformUseExisting("l_intensity");
-    exec.execUniformUseExisting("l_radius");
-    exec.execUniformUseExisting("l_falloff");
+    exec.execUniformUseExisting("light.position");
+    exec.execUniformUseExisting("light.color");
+    exec.execUniformUseExisting("light.intensity");
+    exec.execUniformUseExisting("light.radius");
+    exec.execUniformUseExisting("light.falloff");
+    exec.execUniformUseExisting("shininess");
     exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
@@ -555,19 +577,32 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
      */
 
     try {
+      final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final ArrayBufferAttribute a_uv =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-      final ArrayBufferAttribute a_normal =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
 
       gc.arrayBufferBind(array);
+
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       exec.execAttributeBind(gc, "v_position", a_pos);
-      exec.execAttributeBind(gc, "v_uv", a_uv);
-      exec.execAttributeBind(gc, "v_normal", a_normal);
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
+        final ArrayBufferAttribute a_nor =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+        exec.execAttributeBind(gc, "v_normal", a_nor);
+      } else {
+        exec.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
+      }
+
+      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+        final ArrayBufferAttribute a_uv =
+          array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
+        exec.execAttributeBind(gc, "v_uv", a_uv);
+      } else {
+        exec.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
+      }
+
       exec.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception

@@ -183,9 +183,9 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         this.position_z = new JTextField("0.0");
 
         this.r_value = new JTextField("1.0");
-        this.r_value.setEditable(false);
+        this.r_value.setEditable(true);
         this.e_value = new JTextField("1.0");
-        this.e_value.setEditable(false);
+        this.e_value.setEditable(true);
 
         this.r_slider = new JSlider(SwingConstants.HORIZONTAL);
         this.r_slider.setValue(0);
@@ -198,7 +198,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           {
             final double x =
               LightControlsSphere.this.r_slider.getValue() * 0.01;
-            final double r = (x * 99) + 1.0;
+            final double r = (x * 24) + 1.0;
             LightControlsSphere.this.r_value.setText(String.format("%f", r));
           }
         });
