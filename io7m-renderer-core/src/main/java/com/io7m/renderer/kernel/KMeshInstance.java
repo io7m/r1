@@ -19,46 +19,42 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.IndexBuffer;
-
 /**
  * <p>
  * An instance of a polygon mesh on the GPU.
  * </p>
  * <p>
- * The given array buffer is expected, at a minimum, to have an attribute of
- * type {@link KMeshAttributes#ATTRIBUTE_POSITION}. If the mesh has per-vertex normals, they
- * must be of type {@link KMeshAttributes#ATTRIBUTE_NORMAL}. If the mesh has texture
- * coordinates, they must be of type {@link KMeshAttributes#ATTRIBUTE_UV}.
+ * The polygon mesh is expected to have the following type(s):
  * </p>
+ * <ul>
+ * <li>The array buffer must have an attribute of type
+ * {@link KMeshAttributes#ATTRIBUTE_POSITION}.</li>
+ * <li>If the mesh has per-vertex normals, they must be of type
+ * {@link KMeshAttributes#ATTRIBUTE_NORMAL}.</li>
+ * <li>If the mesh has texture coordinates, they must be of type
+ * {@link KMeshAttributes#ATTRIBUTE_UV}.</li>
+ * <li>If the mesh has per-vertex tangents, they must be of type
+ * {@link KMeshAttributes#ATTRIBUTE_TANGENT3}.</li>
+ * <ul>
  */
 
 @Immutable final class KMeshInstance implements KTransformable
 {
-  private final @Nonnull Integer                              id;
-  private final @Nonnull KTransform                           transform;
-  private final @Nonnull ArrayBuffer                          vbo;
-  private final @Nonnull IndexBuffer                          ibo;
-  private final @Nonnull KMaterial                            material;
+  private final @Nonnull Integer    id;
+  private final @Nonnull KTransform transform;
+  private final @Nonnull KMesh      mesh;
+  private final @Nonnull KMaterial  material;
 
   public KMeshInstance(
     final @Nonnull Integer id,
     final @Nonnull KTransform transform,
-    final @Nonnull ArrayBuffer vbo,
-    final @Nonnull IndexBuffer ibo,
+    final @Nonnull KMesh mesh,
     final @Nonnull KMaterial material)
   {
     this.id = id;
     this.transform = transform;
-    this.vbo = vbo;
-    this.ibo = ibo;
+    this.mesh = mesh;
     this.material = material;
-  }
-
-  @Nonnull ArrayBuffer getArrayBuffer()
-  {
-    return this.vbo;
   }
 
   @Nonnull Integer getID()
@@ -66,14 +62,14 @@ import com.io7m.jcanephora.IndexBuffer;
     return this.id;
   }
 
-  @Nonnull IndexBuffer getIndexBuffer()
-  {
-    return this.ibo;
-  }
-
   @Nonnull KMaterial getMaterial()
   {
     return this.material;
+  }
+
+  @Nonnull KMesh getMesh()
+  {
+    return this.mesh;
   }
 
   @Override public @Nonnull KTransform getTransform()

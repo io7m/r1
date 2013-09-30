@@ -100,4 +100,66 @@ final class KShaderUtilities
     gl.fragmentShaderDelete(f);
     return p;
   }
+
+  static @Nonnull ProgramReference makeParasolProgramSingleOutput(
+    final @Nonnull JCGLShadersCommon gl,
+    final @Nonnull JCGLSLVersionNumber version,
+    final @Nonnull JCGLApi api,
+    final @Nonnull FSCapabilityRead fs,
+    final @Nonnull String name,
+    final @Nonnull Log log)
+    throws ConstraintError,
+      JCGLCompileException,
+      JCGLUnsupportedException,
+      FilesystemError,
+      IOException,
+      JCGLException
+  {
+    InputStream stream = null;
+    VertexShader v = null;
+    FragmentShader f = null;
+
+    log.debug("Shading language " + version + " " + api);
+
+    final PathVirtual pv =
+      KShaderPaths.getShaderPathParasol(version, api, name);
+    final PathVirtual pf =
+      KShaderPaths.getShaderPathParasol(version, api, name);
+
+    final PathVirtual pvn = PathVirtual.ofString(pv.toString() + ".v");
+    final PathVirtual pfn = PathVirtual.ofString(pf.toString() + ".f");
+
+    log.debug("Compiling vertex shader: " + pvn);
+    log.debug("Compiling fragment shader: " + pfn);
+
+    try {
+      stream = fs.openFile(pvn);
+      final List<String> lines = ShaderUtilities.readLines(stream);
+      v = gl.vertexShaderCompile(name, lines);
+    } finally {
+      if (stream != null) {
+        stream.close();
+        stream = null;
+      }
+    }
+
+    try {
+      stream = fs.openFile(pfn);
+      final List<String> lines = ShaderUtilities.readLines(stream);
+      f = gl.fragmentShaderCompile(name, lines);
+    } finally {
+      if (stream != null) {
+        stream.close();
+        stream = null;
+      }
+    }
+
+    assert v != null;
+    assert f != null;
+
+    final ProgramReference p = gl.programCreateCommon(name, v, f);
+    gl.vertexShaderDelete(v);
+    gl.fragmentShaderDelete(f);
+    return p;
+  }
 }

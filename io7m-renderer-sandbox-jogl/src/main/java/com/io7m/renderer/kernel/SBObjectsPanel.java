@@ -18,13 +18,18 @@ package com.io7m.renderer.kernel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,9 +38,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
@@ -58,7 +65,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 
     private final @Nonnull ObjectEditDialogPanel panel;
 
-    public <C extends SBSceneControllerModels & SBSceneControllerInstances & SBSceneControllerTextures> ObjectEditDialog(
+    public <C extends SBSceneControllerMeshes & SBSceneControllerInstances & SBSceneControllerTextures> ObjectEditDialog(
       final @Nonnull C controller,
       final @Nonnull ObjectsTableModel data,
       final @Nonnull Log log)
@@ -70,7 +77,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.getContentPane().add(this.panel);
     }
 
-    public <C extends SBSceneControllerModels & SBSceneControllerInstances & SBSceneControllerTextures> ObjectEditDialog(
+    public <C extends SBSceneControllerMeshes & SBSceneControllerInstances & SBSceneControllerTextures> ObjectEditDialog(
       final @Nonnull C controller,
       final @Nonnull SBInstanceDescription initial_desc,
       final @Nonnull ObjectsTableModel data,
@@ -99,9 +106,9 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     protected final @Nonnull JTextField      specular_texture;
     private final @Nonnull JButton           specular_texture_select;
 
-    protected final JTextField               model;
-    protected final JTextField               model_object;
-    private final JButton                    model_select;
+    protected @Nonnull Map<String, SBMesh>   meshes;
+    protected final JComboBox<String>        mesh_selector;
+    private final JButton                    mesh_load;
 
     protected final @Nonnull JTextField      position_x;
     protected final @Nonnull JTextField      position_y;
@@ -117,7 +124,35 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     private final @Nonnull ObjectsTableModel objects_table_model;
     private final @Nonnull Border            default_field_border;
 
-    public <C extends SBSceneControllerModels & SBSceneControllerInstances & SBSceneControllerTextures> ObjectEditDialogPanel(
+    protected void meshesRefresh(
+      final @Nonnull SBSceneControllerMeshes controller)
+    {
+      ObjectEditDialogPanel.this.meshes = controller.sceneMeshesGet();
+
+      this.mesh_selector.removeAllItems();
+      for (final String name : this.meshes.keySet()) {
+        this.mesh_selector.addItem(name);
+      }
+    }
+
+    protected final static @Nonnull FileFilter MESH_FILE_FILTER;
+
+    static {
+      MESH_FILE_FILTER = new FileFilter() {
+        @Override public boolean accept(
+          final File f)
+        {
+          return f.isDirectory() || f.toString().endsWith(".rmx");
+        }
+
+        @Override public String getDescription()
+        {
+          return "RXML mesh files (*.rmx)";
+        }
+      };
+    }
+
+    public <C extends SBSceneControllerMeshes & SBSceneControllerInstances & SBSceneControllerTextures> ObjectEditDialogPanel(
       final @Nonnull ObjectEditDialog window,
       final @Nonnull C controller,
       final @CheckForNull SBInstanceDescription initial_desc,
@@ -202,23 +237,59 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         }
       });
 
-      this.model = new JTextField();
-      this.model.setEditable(false);
-      this.model_object = new JTextField();
-      this.model_object.setEditable(false);
-      this.model_select = new JButton("Select...");
-      this.model_select.addActionListener(new ActionListener() {
+      this.mesh_selector = new JComboBox<String>();
+      this.meshesRefresh(controller);
+
+      this.mesh_load = new JButton("Open...");
+      this.mesh_load.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
         {
-          final SBModelsWindow mwindow =
-            new SBModelsWindow(
-              controller,
-              ObjectEditDialogPanel.this.model,
-              ObjectEditDialogPanel.this.model_object,
-              log);
-          mwindow.pack();
-          mwindow.setVisible(true);
+          final JFileChooser chooser = new JFileChooser();
+          chooser.setMultiSelectionEnabled(false);
+          chooser.setFileFilter(ObjectEditDialogPanel.MESH_FILE_FILTER);
+
+          final int r = chooser.showOpenDialog(ObjectEditDialogPanel.this);
+          switch (r) {
+            case JFileChooser.APPROVE_OPTION:
+            {
+              final File file = chooser.getSelectedFile();
+
+              final SwingWorker<SBMesh, Void> worker =
+                new SwingWorker<SBMesh, Void>() {
+                  @Override protected SBMesh doInBackground()
+                    throws Exception
+                  {
+                    return controller.sceneMeshLoad(file).get();
+                  }
+
+                  @Override protected void done()
+                  {
+                    try {
+                      this.get();
+
+                      ObjectEditDialogPanel.this.meshesRefresh(controller);
+
+                    } catch (final InterruptedException x) {
+                      SBErrorBox.showError(log, "Interrupted operation", x);
+                    } catch (final ExecutionException x) {
+                      SBErrorBox.showError(
+                        log,
+                        "Mesh loading error",
+                        x.getCause());
+                    }
+                  }
+                };
+
+              worker.execute();
+              break;
+            }
+            case JFileChooser.CANCEL_OPTION:
+            case JFileChooser.ERROR_OPTION:
+            {
+              break;
+            }
+          }
         }
       });
 
@@ -282,16 +353,9 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       dg
         .row()
         .grid()
-        .add(new JLabel("Model"))
-        .add(this.model, 2)
-        .add(this.model_select);
-
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Object"))
-        .add(this.model_object, 2)
-        .spanRow();
+        .add(new JLabel("Mesh"))
+        .add(this.mesh_selector, 2)
+        .add(this.mesh_load);
 
       dg.emptyRow();
 
@@ -344,9 +408,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.specular_texture.setText(initial_desc.getSpecular() == null
         ? ""
         : initial_desc.getSpecular().toString());
-
-      this.model.setText(initial_desc.getModel());
-      this.model_object.setText(initial_desc.getModelObject());
     }
 
     protected void saveObject(
@@ -383,18 +444,14 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           ? null
           : this.specular_texture.getText();
 
-      final String model_name =
-        SBTextFieldUtilities.getFieldNonEmptyStringOrError(this.model);
-      final String model_object_name =
-        SBTextFieldUtilities.getFieldNonEmptyStringOrError(this.model_object);
+      final String mesh_name = (String) this.mesh_selector.getSelectedItem();
 
       final SBInstanceDescription d =
         new SBInstanceDescription(
           id,
           position,
           orientation,
-          model_name,
-          model_object_name,
+          mesh_name,
           diffuse,
           normal,
           specular);
@@ -437,8 +494,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 
       this.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
       this.getColumnModel().getColumn(0).setPreferredWidth(16);
-      this.getColumnModel().getColumn(1).setPreferredWidth(32);
-      this.getColumnModel().getColumn(2).setPreferredWidth(300);
+      this.getColumnModel().getColumn(1).setPreferredWidth(300);
 
       this.setAutoCreateRowSorter(true);
       this.setAutoCreateColumnsFromModel(true);
@@ -467,7 +523,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       final @Nonnull Log log)
     {
       this.log = new Log(log, "object-table");
-      this.column_names = new String[] { "ID", "File", "Mesh" };
+      this.column_names = new String[] { "ID", "Mesh" };
       this.data = new ArrayList<ArrayList<String>>();
       this.controller = controller;
     }
@@ -514,8 +570,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       for (final SBInstance o : objects) {
         final ArrayList<String> row = new ArrayList<String>();
         row.add(o.getID().toString());
-        row.add(o.getModel());
-        row.add(o.getModelObject());
+        row.add(o.getMesh());
         this.data.add(row);
       }
 
@@ -533,7 +588,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
   protected final @Nonnull ObjectsTable      objects;
   private final @Nonnull JScrollPane         scroller;
 
-  public <C extends SBSceneControllerModels & SBSceneControllerInstances & SBSceneControllerTextures> SBObjectsPanel(
+  public <C extends SBSceneControllerMeshes & SBSceneControllerInstances & SBSceneControllerTextures> SBObjectsPanel(
     final @Nonnull C controller,
     final @Nonnull Log log)
   {

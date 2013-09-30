@@ -34,7 +34,7 @@ import com.io7m.jaux.functional.Pair;
   public static @Nonnull SBScene empty()
   {
     final PMap<String, SBTexture> textures = HashTreePMap.empty();
-    final PMap<String, SBModel> meshes = HashTreePMap.empty();
+    final PMap<String, SBMesh> meshes = HashTreePMap.empty();
     final PMap<Integer, KLight> lights = HashTreePMap.empty();
     final PMap<Integer, SBInstance> instances = HashTreePMap.empty();
     return new SBScene(
@@ -54,7 +54,7 @@ import com.io7m.jaux.functional.Pair;
   }
 
   private final @Nonnull PMap<String, SBTexture>   textures;
-  private final @Nonnull PMap<String, SBModel>     models;
+  private final @Nonnull PMap<String, SBMesh>      meshes;
   private final @Nonnull PMap<Integer, KLight>     lights;
   private final @Nonnull Integer                   light_id_pool;
   private final @Nonnull PMap<Integer, SBInstance> instances;
@@ -62,14 +62,14 @@ import com.io7m.jaux.functional.Pair;
 
   private SBScene(
     final @Nonnull PMap<String, SBTexture> textures,
-    final @Nonnull PMap<String, SBModel> models,
+    final @Nonnull PMap<String, SBMesh> meshes,
     final @Nonnull PMap<Integer, KLight> lights,
     final @Nonnull Integer light_id_pool,
     final @Nonnull PMap<Integer, SBInstance> instances,
     final @Nonnull Integer instance_id_pool)
   {
     this.textures = textures;
-    this.models = models;
+    this.meshes = meshes;
     this.lights = lights;
     this.light_id_pool = light_id_pool;
     this.instances = instances;
@@ -81,7 +81,7 @@ import com.io7m.jaux.functional.Pair;
   {
     return new SBScene(
       this.textures,
-      this.models,
+      this.meshes,
       this.lights,
       this.light_id_pool,
       this.instances.plus(instance.getID(), instance),
@@ -99,7 +99,7 @@ import com.io7m.jaux.functional.Pair;
     final Integer id = Integer.valueOf(this.instance_id_pool.intValue() + 1);
     return new Pair<SBScene, Integer>(new SBScene(
       this.textures,
-      this.models,
+      this.meshes,
       this.lights,
       id,
       this.instances,
@@ -122,7 +122,7 @@ import com.io7m.jaux.functional.Pair;
   {
     return new SBScene(
       this.textures,
-      this.models,
+      this.meshes,
       this.lights.plus(light.getID(), light),
       SBScene.currentMaxID(this.light_id_pool, light.getID()),
       this.instances,
@@ -140,7 +140,7 @@ import com.io7m.jaux.functional.Pair;
     final Integer id = Integer.valueOf(this.light_id_pool.intValue() + 1);
     return new Pair<SBScene, Integer>(new SBScene(
       this.textures,
-      this.models,
+      this.meshes,
       this.lights,
       id,
       this.instances,
@@ -158,7 +158,7 @@ import com.io7m.jaux.functional.Pair;
   {
     return new SBScene(
       this.textures,
-      this.models,
+      this.meshes,
       this.lights.minus(id),
       this.light_id_pool,
       this.instances,
@@ -170,27 +170,27 @@ import com.io7m.jaux.functional.Pair;
     return this.lights.values();
   }
 
-  public @Nonnull SBScene modelAdd(
-    final @Nonnull SBModel model)
+  public @Nonnull SBScene meshAdd(
+    final @Nonnull SBMesh mesh)
   {
     return new SBScene(
       this.textures,
-      this.models.plus(model.getName(), model),
+      this.meshes.plus(mesh.getDescription().getName(), mesh),
       this.lights,
       this.light_id_pool,
       this.instances,
       this.instance_id_pool);
   }
 
-  public @CheckForNull SBModel modelGet(
+  public @CheckForNull SBMesh meshGet(
     final @Nonnull String name)
   {
-    return this.models.get(name);
+    return this.meshes.get(name);
   }
 
-  public @Nonnull Map<String, SBModel> modelsGet()
+  public @Nonnull Map<String, SBMesh> meshesGet()
   {
-    return this.models;
+    return this.meshes;
   }
 
   public @Nonnull SBScene removeInstance(
@@ -198,7 +198,7 @@ import com.io7m.jaux.functional.Pair;
   {
     return new SBScene(
       this.textures,
-      this.models,
+      this.meshes,
       this.lights,
       this.light_id_pool,
       this.instances.minus(id),
@@ -210,7 +210,7 @@ import com.io7m.jaux.functional.Pair;
   {
     return new SBScene(
       this.textures.plus(texture.getName(), texture),
-      this.models,
+      this.meshes,
       this.lights,
       this.light_id_pool,
       this.instances,
@@ -260,13 +260,13 @@ import com.io7m.jaux.functional.Pair;
       }
     }
 
-    for (final SBModel m : this.models.values()) {
+    for (final SBMesh m : this.meshes.values()) {
       if (normalize) {
+        final String name = m.getDescription().getName();
         desc =
-          desc.modelAdd(new SBModelDescription(new File(m.getName()), m
-            .getName()));
+          desc.meshAdd(new SBMeshDescription(new File(name + ".rmx"), name));
       } else {
-        desc = desc.modelAdd(m.getDescription());
+        desc = desc.meshAdd(m.getDescription());
       }
     }
 

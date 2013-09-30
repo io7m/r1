@@ -31,26 +31,11 @@ public class KMeshAttributes
 {
   static {
     try {
-      ATTRIBUTE_POSITION =
+      ATTRIBUTE_BITANGENT =
         new ArrayBufferAttributeDescriptor(
-          "position",
+          "bitangent",
           JCGLScalarType.TYPE_FLOAT,
           3);
-
-      ATTRIBUTE_NORMAL =
-        new ArrayBufferAttributeDescriptor(
-          "normal",
-          JCGLScalarType.TYPE_FLOAT,
-          3);
-
-      ATTRIBUTE_TANGENT =
-        new ArrayBufferAttributeDescriptor(
-          "tangent",
-          JCGLScalarType.TYPE_FLOAT,
-          3);
-
-      ATTRIBUTE_UV =
-        new ArrayBufferAttributeDescriptor("uv", JCGLScalarType.TYPE_FLOAT, 2);
 
       ATTRIBUTE_COLOUR =
         new ArrayBufferAttributeDescriptor(
@@ -58,14 +43,42 @@ public class KMeshAttributes
           JCGLScalarType.TYPE_FLOAT,
           4);
 
+      ATTRIBUTE_NORMAL =
+        new ArrayBufferAttributeDescriptor(
+          "normal",
+          JCGLScalarType.TYPE_FLOAT,
+          3);
+
+      ATTRIBUTE_POSITION =
+        new ArrayBufferAttributeDescriptor(
+          "position",
+          JCGLScalarType.TYPE_FLOAT,
+          3);
+
+      ATTRIBUTE_TANGENT3 =
+        new ArrayBufferAttributeDescriptor(
+          "tangent3",
+          JCGLScalarType.TYPE_FLOAT,
+          3);
+
+      ATTRIBUTE_TANGENT4 =
+        new ArrayBufferAttributeDescriptor(
+          "tangent4",
+          JCGLScalarType.TYPE_FLOAT,
+          4);
+
+      ATTRIBUTE_UV =
+        new ArrayBufferAttributeDescriptor("uv", JCGLScalarType.TYPE_FLOAT, 2);
     } catch (final ConstraintError x) {
       throw new UnreachableCodeException();
     }
   }
 
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_POSITION;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_NORMAL;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_UV;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_BITANGENT;
   public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_COLOUR;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_NORMAL;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_POSITION;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT3;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT4;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_UV;
 }

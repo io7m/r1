@@ -45,6 +45,18 @@
     </r:element>
   </r:define>
 
+  <r:define name="io7m.renderer.meshes.vertex-type.attribute-tangent-4f">
+    <r:element name="rm:attribute-tangent-4f">
+      <r:empty/>
+    </r:element>
+  </r:define>
+
+  <r:define name="io7m.renderer.meshes.vertex-type.attribute-bitangent-3f">
+    <r:element name="rm:attribute-bitangent-3f">
+      <r:empty/>
+    </r:element>
+  </r:define>
+
   <r:define name="io7m.renderer.meshes.vertex-type.attribute-uv-2f">
     <r:element name="rm:attribute-uv-2f">
       <r:empty/>
@@ -56,7 +68,15 @@
       <r:interleave>
         <r:ref name="io7m.renderer.meshes.vertex-type.attribute-position-3f"/>
         <r:optional><r:ref name="io7m.renderer.meshes.vertex-type.attribute-normal-3f"/></r:optional>
-        <r:optional><r:ref name="io7m.renderer.meshes.vertex-type.attribute-tangent-3f"/></r:optional>
+        <r:optional>
+          <r:choice>
+            <r:interleave>
+              <r:ref name="io7m.renderer.meshes.vertex-type.attribute-tangent-3f"/>
+              <r:ref name="io7m.renderer.meshes.vertex-type.attribute-bitangent-3f"/>
+            </r:interleave>
+            <r:ref name="io7m.renderer.meshes.vertex-type.attribute-tangent-4f"/>
+          </r:choice>
+        </r:optional>
         <r:optional><r:ref name="io7m.renderer.meshes.vertex-type.attribute-uv-2f"/></r:optional>
       </r:interleave>
     </r:element>
@@ -79,7 +99,24 @@
   </r:define>
 
   <r:define name="io7m.renderer.meshes.vertex.tangent-3f">
-    <r:element name="rm:t">
+    <r:element name="rm:t3">
+      <r:attribute name="rm:x"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:y"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:z"><r:data type="float"/></r:attribute>
+    </r:element>
+  </r:define>
+
+  <r:define name="io7m.renderer.meshes.vertex.tangent-4f">
+    <r:element name="rm:t4">
+      <r:attribute name="rm:x"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:y"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:z"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:w"><r:data type="float"/></r:attribute>
+    </r:element>
+  </r:define>
+
+  <r:define name="io7m.renderer.meshes.vertex.bitangent-3f">
+    <r:element name="rm:b">
       <r:attribute name="rm:x"><r:data type="float"/></r:attribute>
       <r:attribute name="rm:y"><r:data type="float"/></r:attribute>
       <r:attribute name="rm:z"><r:data type="float"/></r:attribute>
@@ -98,7 +135,15 @@
       <r:interleave>
         <r:ref name="io7m.renderer.meshes.vertex.position-3f"/>
         <r:optional><r:ref name="io7m.renderer.meshes.vertex.normal-3f"/></r:optional>
-        <r:optional><r:ref name="io7m.renderer.meshes.vertex.tangent-3f"/></r:optional>
+        <r:optional>
+          <r:choice>
+            <r:interleave>
+              <r:ref name="io7m.renderer.meshes.vertex.tangent-3f"/>
+              <r:ref name="io7m.renderer.meshes.vertex.bitangent-3f"/>
+            </r:interleave>
+            <r:ref name="io7m.renderer.meshes.vertex.tangent-4f"/>
+          </r:choice>
+        </r:optional>
         <r:optional><r:ref name="io7m.renderer.meshes.vertex.uv-2f"/></r:optional>
       </r:interleave>
     </r:element>

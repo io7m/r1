@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<m:mesh xmlns:m="http://schemas.io7m.com/renderer/1.0.0/meshes" m:name="test" m:version="1">
+  <m:nonsense/>
+</m:mesh>

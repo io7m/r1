@@ -87,14 +87,12 @@ final class KRendererDebugDepth implements KRenderer
     this.viewport_size = new VectorM2I();
 
     this.program =
-      KShaderUtilities.makeProgramSingleOutput(
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "depth-only",
-        "standard.v",
-        "depth_only.f",
+        "debug_depth",
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);
@@ -141,11 +139,11 @@ final class KRendererDebugDepth implements KRenderer
 
   private void renderMesh(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMeshInstance mesh)
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = mesh.getTransform();
+    final KTransform transform = instance.getTransform();
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
 
     MatrixM4x4F.multiply(
@@ -169,13 +167,16 @@ final class KRendererDebugDepth implements KRenderer
      */
 
     try {
+      final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
 
       gc.arrayBufferBind(array);
+
+      final ArrayBufferAttribute a_pos =
+        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
       this.exec.execAttributeBind(gc, "v_position", a_pos);
+
       this.exec.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception
