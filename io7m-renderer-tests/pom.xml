@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer.tests</groupId>
   <artifactId>io7m-renderer-tests</artifactId>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-tests</name>
   <description>3D renderer (unit tests)</description>
