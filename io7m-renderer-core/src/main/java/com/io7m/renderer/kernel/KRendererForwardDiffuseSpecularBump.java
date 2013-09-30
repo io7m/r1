@@ -155,15 +155,13 @@ final class KRendererForwardDiffuseSpecularBump implements KRenderer
       new JCCEExecutionCallable(this.program_cb_spherical);
 
     this.program_depth =
-      KShaderUtilities.makeProgramSingleOutput(
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
         "depth",
-        "depth.v",
-        "depth.f",
-        this.log);
+        log);
     this.exec_depth = new JCCEExecutionCallable(this.program_depth);
   }
 
