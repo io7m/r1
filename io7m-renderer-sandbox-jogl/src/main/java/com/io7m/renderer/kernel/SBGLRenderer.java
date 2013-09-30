@@ -609,11 +609,12 @@ final class SBGLRenderer implements GLEventListener
       new KRendererDebugUVVertex(this.gi, this.filesystem, this.log));
 
     this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_BITANGENTS_VERTEX_LOCAL,
-      new KRendererDebugBitangentsVertexLocal(
-        this.gi,
-        this.filesystem,
-        this.log));
+      SBRendererType.RENDERER_DEBUG_BITANGENTS_LOCAL,
+      new KRendererDebugBitangentsLocal(this.gi, this.filesystem, this.log));
+
+    this.renderers.put(
+      SBRendererType.RENDERER_DEBUG_BITANGENTS_EYE,
+      new KRendererDebugBitangentsEye(this.gi, this.filesystem, this.log));
 
     this.renderers
       .put(
@@ -646,9 +647,13 @@ final class SBGLRenderer implements GLEventListener
     this.renderers.put(
       SBRendererType.RENDERER_DEBUG_NORMALS_MAP_LOCAL,
       new KRendererDebugNormalsMapLocal(this.gi, this.filesystem, this.log));
-    this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_NORMALS_MAP_RAW,
-      new KRendererDebugNormalsMapRaw(this.gi, this.filesystem, this.log));
+    this.renderers
+      .put(
+        SBRendererType.RENDERER_DEBUG_NORMALS_MAP_TANGENT,
+        new KRendererDebugNormalsMapTangent(
+          this.gi,
+          this.filesystem,
+          this.log));
 
     this.renderers.put(
       SBRendererType.RENDERER_FLAT_TEXTURED,
@@ -667,12 +672,6 @@ final class SBGLRenderer implements GLEventListener
     this.renderers.put(
       SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR_BUMP,
       new KRendererForwardDiffuseSpecularBump(
-        this.gi,
-        this.filesystem,
-        this.log));
-    this.renderers.put(
-      SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR_MAPPED_BUMP,
-      new KRendererForwardDiffuseSpecularMappedBump(
         this.gi,
         this.filesystem,
         this.log));

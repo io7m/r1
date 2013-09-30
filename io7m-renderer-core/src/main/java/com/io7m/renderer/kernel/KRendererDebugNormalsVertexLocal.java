@@ -88,14 +88,12 @@ final class KRendererDebugNormalsVertexLocal implements KRenderer
     this.viewport_size = new VectorM2I();
 
     this.program =
-      KShaderUtilities.makeProgramSingleOutput(
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "debug-normals-vertex-local",
-        "debug-normals-vertex-local.v",
-        "debug-normals-vertex-local.f",
+        "debug_normals_vertex_local",
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);

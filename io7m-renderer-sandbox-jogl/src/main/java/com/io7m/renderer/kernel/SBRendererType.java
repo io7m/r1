@@ -22,20 +22,19 @@ enum SBRendererType
 {
   RENDERER_DEBUG_DEPTH("debug-depth"),
   RENDERER_DEBUG_UV_VERTEX("debug-uv-vertex"),
-  RENDERER_DEBUG_BITANGENTS_VERTEX_LOCAL("debug-bitangents-vertex-local"),
+  RENDERER_DEBUG_BITANGENTS_LOCAL("debug-bitangents-local"),
+  RENDERER_DEBUG_BITANGENTS_EYE("debug-bitangents-eye"),
   RENDERER_DEBUG_TANGENTS_VERTEX_LOCAL("debug-tangents-vertex-local"),
   RENDERER_DEBUG_TANGENTS_VERTEX_EYE("debug-tangents-vertex-eye"),
   RENDERER_DEBUG_NORMALS_VERTEX_LOCAL("debug-normals-vertex-local"),
   RENDERER_DEBUG_NORMALS_VERTEX_EYE("debug-normals-vertex-eye"),
   RENDERER_DEBUG_NORMALS_MAP_LOCAL("debug-normals-map-local"),
   RENDERER_DEBUG_NORMALS_MAP_EYE("debug-normals-map-eye"),
-  RENDERER_DEBUG_NORMALS_MAP_RAW("debug-normals-map-raw"),
+  RENDERER_DEBUG_NORMALS_MAP_TANGENT("debug-normals-map-tangent"),
   RENDERER_FLAT_TEXTURED("flat-textured"),
   RENDERER_FORWARD_DIFFUSE("forward-diffuse"),
   RENDERER_FORWARD_DIFFUSE_SPECULAR("forward-diffuse-specular"),
-  RENDERER_FORWARD_DIFFUSE_SPECULAR_BUMP("forward-diffuse-specular-bump"),
-  RENDERER_FORWARD_DIFFUSE_SPECULAR_MAPPED_BUMP(
-    "forward-diffuse-specular-mapped-bump");
+  RENDERER_FORWARD_DIFFUSE_SPECULAR_BUMP("forward-diffuse-specular-bump");
 
   private final @Nonnull String name;
 

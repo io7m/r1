@@ -104,28 +104,24 @@ final class KRendererForwardDiffuse implements KRenderer
     this.transform_context = new KTransform.Context();
 
     this.program_directional =
-      KShaderUtilities.makeProgramSingleOutput(
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "fw_d_directional",
-        "fw_d_directional.v",
-        "fw_d_directional.f",
-        this.log);
+        "forward_d_directional",
+        log);
     this.exec_directional =
       new JCCEExecutionCallable(this.program_directional);
 
     this.program_spherical =
-      KShaderUtilities.makeProgramSingleOutput(
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "fw_d_spherical",
-        "fw_d_spherical.v",
-        "fw_d_spherical.f",
-        this.log);
+        "forward_d_spherical",
+        log);
     this.exec_spherical = new JCCEExecutionCallable(this.program_spherical);
 
     this.program_depth =
@@ -353,9 +349,9 @@ final class KRendererForwardDiffuse implements KRenderer
 
     exec.execPrepare(gc);
     exec.execUniformUseExisting("m_projection");
-    exec.execUniformUseExisting("l_intensity");
-    exec.execUniformUseExisting("l_color");
-    exec.execUniformUseExisting("l_direction");
+    exec.execUniformUseExisting("light.intensity");
+    exec.execUniformUseExisting("light.color");
+    exec.execUniformUseExisting("light.direction");
     exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
@@ -442,9 +438,9 @@ final class KRendererForwardDiffuse implements KRenderer
     final JCCEExecutionCallable e = this.exec_directional;
     e.execPrepare(gc);
     e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
-    e.execUniformPutVector3F(gc, "l_direction", light_cs);
-    e.execUniformPutVector3F(gc, "l_color", light.getColour());
-    e.execUniformPutFloat(gc, "l_intensity", light.getIntensity());
+    e.execUniformPutVector3F(gc, "light.direction", light_cs);
+    e.execUniformPutVector3F(gc, "light.color", light.getColour());
+    e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
     e.execCancel();
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
@@ -481,11 +477,11 @@ final class KRendererForwardDiffuse implements KRenderer
     final JCCEExecutionCallable e = this.exec_spherical;
     e.execPrepare(gc);
     e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
-    e.execUniformPutVector3F(gc, "l_position", light_eye);
-    e.execUniformPutVector3F(gc, "l_color", light.getColour());
-    e.execUniformPutFloat(gc, "l_intensity", light.getIntensity());
-    e.execUniformPutFloat(gc, "l_radius", light.getRadius());
-    e.execUniformPutFloat(gc, "l_falloff", light.getExponent());
+    e.execUniformPutVector3F(gc, "light.position", light_eye);
+    e.execUniformPutVector3F(gc, "light.color", light.getColour());
+    e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
+    e.execUniformPutFloat(gc, "light.radius", light.getRadius());
+    e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
     e.execCancel();
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
@@ -560,11 +556,11 @@ final class KRendererForwardDiffuse implements KRenderer
 
     exec.execPrepare(gc);
     exec.execUniformUseExisting("m_projection");
-    exec.execUniformUseExisting("l_position");
-    exec.execUniformUseExisting("l_color");
-    exec.execUniformUseExisting("l_intensity");
-    exec.execUniformUseExisting("l_radius");
-    exec.execUniformUseExisting("l_falloff");
+    exec.execUniformUseExisting("light.position");
+    exec.execUniformUseExisting("light.color");
+    exec.execUniformUseExisting("light.intensity");
+    exec.execUniformUseExisting("light.radius");
+    exec.execUniformUseExisting("light.falloff");
     exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
