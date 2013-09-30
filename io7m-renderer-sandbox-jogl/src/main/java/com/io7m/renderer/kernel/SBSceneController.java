@@ -415,7 +415,7 @@ public final class SBSceneController implements
           new Option.None<Texture2DStatic>(),
           normal_map,
           specular_map,
-          64);
+          i.getSpecularExponent());
 
       meshes =
         meshes

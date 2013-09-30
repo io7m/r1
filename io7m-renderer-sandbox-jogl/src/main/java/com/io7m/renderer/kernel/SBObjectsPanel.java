@@ -34,12 +34,16 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
@@ -109,6 +113,9 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     protected @Nonnull Map<String, SBMesh>   meshes;
     protected final JComboBox<String>        mesh_selector;
     private final JButton                    mesh_load;
+
+    protected final @Nonnull JSlider         specular_exponent_slider;
+    protected final @Nonnull JTextField      specular_exponent;
 
     protected final @Nonnull JTextField      position_x;
     protected final @Nonnull JTextField      position_y;
@@ -293,6 +300,23 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         }
       });
 
+      this.specular_exponent = new JTextField("1.0");
+      this.specular_exponent.setEditable(false);
+      this.specular_exponent_slider = new JSlider(SwingConstants.HORIZONTAL);
+      this.specular_exponent_slider.setMinimum(1);
+      this.specular_exponent_slider.setMaximum(128);
+      this.specular_exponent_slider.setValue(1);
+      this.specular_exponent_slider.addChangeListener(new ChangeListener() {
+        @Override public void stateChanged(
+          final @Nonnull ChangeEvent ev)
+        {
+          final int current =
+            ObjectEditDialogPanel.this.specular_exponent_slider.getValue();
+          final String ctext = Integer.toString(current);
+          ObjectEditDialogPanel.this.specular_exponent.setText(ctext);
+        }
+      });
+
       final JButton cancel = new JButton("Cancel");
       cancel.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
@@ -357,6 +381,13 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         .add(this.mesh_selector, 2)
         .add(this.mesh_load);
 
+      dg
+        .row()
+        .grid()
+        .add(new JLabel("Shininess"))
+        .add(this.specular_exponent_slider, 2)
+        .add(this.specular_exponent);
+
       dg.emptyRow();
 
       dg
@@ -408,6 +439,12 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.specular_texture.setText(initial_desc.getSpecular() == null
         ? ""
         : initial_desc.getSpecular().toString());
+
+      {
+        final float e = initial_desc.getSpecularExponent();
+        this.specular_exponent.setText(Float.toString(e));
+        this.specular_exponent_slider.setValue((int) e);
+      }
     }
 
     protected void saveObject(
@@ -444,6 +481,9 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           ? null
           : this.specular_texture.getText();
 
+      final float specular_exponent_value =
+        this.specular_exponent_slider.getValue();
+
       final String mesh_name = (String) this.mesh_selector.getSelectedItem();
 
       final SBInstanceDescription d =
@@ -454,7 +494,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           mesh_name,
           diffuse,
           normal,
-          specular);
+          specular,
+          specular_exponent_value);
 
       controller.sceneInstanceAddByDescription(d);
 

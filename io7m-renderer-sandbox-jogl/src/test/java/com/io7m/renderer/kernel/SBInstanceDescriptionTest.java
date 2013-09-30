@@ -46,7 +46,7 @@ public class SBInstanceDescriptionTest
       this.ori_gen = new SBVectorI3FGenerator<SBDegrees>();
     }
 
-    @Override public SBInstanceDescription next()
+    @SuppressWarnings("boxing") @Override public SBInstanceDescription next()
     {
       return new SBInstanceDescription(
         this.int_gen.next(),
@@ -55,7 +55,8 @@ public class SBInstanceDescriptionTest
         this.string_gen.next(),
         this.string_gen.next(),
         this.string_gen.next(),
-        this.string_gen.next());
+        this.string_gen.next(),
+        this.int_gen.next());
     }
   }
 
