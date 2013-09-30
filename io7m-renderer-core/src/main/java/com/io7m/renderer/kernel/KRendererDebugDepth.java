@@ -87,14 +87,12 @@ final class KRendererDebugDepth implements KRenderer
     this.viewport_size = new VectorM2I();
 
     this.program =
-      KShaderUtilities.makeProgramSingleOutput(
+      KShaderUtilities.makeParasolProgramSingleOutput(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "depth",
-        "depth.v",
-        "depth.f",
+        "debug_depth",
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);
