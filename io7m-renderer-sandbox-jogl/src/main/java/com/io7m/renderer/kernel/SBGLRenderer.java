@@ -234,8 +234,8 @@ final class SBGLRenderer implements GLEventListener
                   gl,
                   TextureWrapS.TEXTURE_WRAP_REPEAT,
                   TextureWrapT.TEXTURE_WRAP_REPEAT,
-                  TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-                  TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
+                  TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+                  TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
                   stream,
                   name.toString());
 
@@ -664,8 +664,8 @@ final class SBGLRenderer implements GLEventListener
           this.filesystem,
           this.log));
     this.renderers.put(
-      SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR_BUMP,
-      new KRendererForwardDiffuseSpecularBump(
+      SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR_NORMAL,
+      new KRendererForwardDiffuseSpecularNormal(
         this.gi,
         this.filesystem,
         this.log));
