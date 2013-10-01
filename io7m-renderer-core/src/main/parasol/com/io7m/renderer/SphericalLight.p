@@ -18,8 +18,9 @@ package com.io7m.renderer;
 
 module SphericalLight is
 
-  import com.io7m.parasol.Vector3f as V3;
-  import com.io7m.parasol.Float    as F;
+  import com.io7m.parasol.Vector3f   as V3;
+  import com.io7m.parasol.Float      as F;
+  import com.io7m.renderer.Materials as M;
 
   type t is record
     color     : vector_3f,
@@ -129,37 +130,36 @@ module SphericalLight is
   --
 
   function specular_color (
-    light : t,
-    d     : directions,
-    s     : float
+    light    : t,
+    d        : directions,
+    material : M.t
   ) : vector_3f =
     let
       value factor =
-        F.power (F.maximum (0.0, V3.dot (d.reflection, d.stl)), s);
+        F.power (F.maximum (0.0, V3.dot (d.reflection, d.stl)), material.specular_exponent);
       value color =
         V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor);
     in
-      color
+      V3.multiply_scalar (color, material.specular_intensity)
     end;
 
   --
   -- Given a spherical light [light], a surface normal [n],
-  -- the shininess of the surface [s] in the range [1, 128],
-  -- and assuming an observer at [p], calculate the diffuse
-  -- and specular terms for the surface.
+  -- surface properties [material], and assuming an observer at [p],
+  -- calculate the diffuse and specular terms for the surface.
   --
 
   function diffuse_specular (
-    light : t,
-    n     : vector_3f,
-    p     : vector_3f,
-    s     : float
+    light    : t,
+    n        : vector_3f,
+    p        : vector_3f,
+    material : M.t
   ) : vector_3f =
     let
       value d  = directions (light, p, n);
       value a  = attenuation (light, d.distance);
       value dc = diffuse_color (light, d);
-      value sc = specular_color (light, d, s);
+      value sc = specular_color (light, d, material);
     in
       V3.multiply_scalar (V3.add (dc, sc), a)
     end;

@@ -311,7 +311,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
       es.appendChild(this.specular);
     }
     final Element ese = new Element("s:specular-exponent", uri);
-    es.appendChild(String.format("%.6f", this.specular_exponent));
+    ese.appendChild(String.format("%.6f", this.specular_exponent));
 
     e.appendChild(eid);
     e.appendChild(eo);
