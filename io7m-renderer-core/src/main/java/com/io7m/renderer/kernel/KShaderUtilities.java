@@ -40,68 +40,7 @@ import com.io7m.jvvfs.PathVirtual;
 
 final class KShaderUtilities
 {
-  static @Nonnull ProgramReference makeProgramSingleOutput(
-    final @Nonnull JCGLShadersCommon gl,
-    final @Nonnull JCGLSLVersionNumber version,
-    final @Nonnull JCGLApi api,
-    final @Nonnull FSCapabilityRead fs,
-    final @Nonnull String name,
-    final @Nonnull String vertex_shader,
-    final @Nonnull String fragment_shader,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      JCGLCompileException,
-      JCGLUnsupportedException,
-      FilesystemError,
-      IOException,
-      JCGLException
-  {
-    InputStream stream = null;
-    VertexShader v = null;
-    FragmentShader f = null;
-
-    log.debug("Shading language " + version + " " + api);
-
-    final PathVirtual pv =
-      KShaderPaths.getShaderPath(version, api, vertex_shader);
-    final PathVirtual pf =
-      KShaderPaths.getShaderPath(version, api, fragment_shader);
-
-    log.debug("Compiling vertex shader: " + pv);
-    log.debug("Compiling fragment shader: " + pf);
-
-    try {
-      stream = fs.openFile(pv);
-      final List<String> lines = ShaderUtilities.readLines(stream);
-      v = gl.vertexShaderCompile(vertex_shader, lines);
-    } finally {
-      if (stream != null) {
-        stream.close();
-        stream = null;
-      }
-    }
-
-    try {
-      stream = fs.openFile(pf);
-      final List<String> lines = ShaderUtilities.readLines(stream);
-      f = gl.fragmentShaderCompile(fragment_shader, lines);
-    } finally {
-      if (stream != null) {
-        stream.close();
-        stream = null;
-      }
-    }
-
-    assert v != null;
-    assert f != null;
-
-    final ProgramReference p = gl.programCreateCommon(name, v, f);
-    gl.vertexShaderDelete(v);
-    gl.fragmentShaderDelete(f);
-    return p;
-  }
-
-  static @Nonnull ProgramReference makeParasolProgramSingleOutput(
+  static @Nonnull ProgramReference makeProgram(
     final @Nonnull JCGLShadersCommon gl,
     final @Nonnull JCGLSLVersionNumber version,
     final @Nonnull JCGLApi api,
@@ -122,9 +61,9 @@ final class KShaderUtilities
     log.debug("Shading language " + version + " " + api);
 
     final PathVirtual pv =
-      KShaderPaths.getShaderPathParasol(version, api, name);
+      KShaderPaths.getShaderPath(version, api, name);
     final PathVirtual pf =
-      KShaderPaths.getShaderPathParasol(version, api, name);
+      KShaderPaths.getShaderPath(version, api, name);
 
     final PathVirtual pvn = PathVirtual.ofString(pv.toString() + ".v");
     final PathVirtual pfn = PathVirtual.ofString(pf.toString() + ".f");

@@ -90,7 +90,7 @@ final class KRendererDebugBitangentsLocal implements KRenderer
     this.viewport_size = new VectorM2I();
 
     this.program_computed =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -99,7 +99,7 @@ final class KRendererDebugBitangentsLocal implements KRenderer
         log);
 
     this.program_provided =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),

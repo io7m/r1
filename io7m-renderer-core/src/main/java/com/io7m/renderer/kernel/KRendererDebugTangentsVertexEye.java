@@ -93,7 +93,7 @@ final class KRendererDebugTangentsVertexEye implements KRenderer
     this.viewport_size = new VectorM2I();
 
     this.program3 =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -103,7 +103,7 @@ final class KRendererDebugTangentsVertexEye implements KRenderer
     this.exec3 = new JCCEExecutionCallable(this.program3);
 
     this.program4 =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
