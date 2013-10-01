@@ -71,4 +71,30 @@ module Normals is
       V3.normalize (M3.multiply_vector (mat, m))
     end;
 
+  --
+  -- Given a texture consisting of normal vectors [t_normal],
+  -- an object-to-eye-space matrix [m_normal], object-space
+  -- normal [n], object-space tangent [t], object-space bitangent [b],
+  -- and texture coordinates [uv], [unpack] and [transform] a
+  -- vector from the texture, and transform it to eye-space.
+  --
+
+  function bump (
+    t_normal : sampler_2d,
+    m_normal : matrix_3x3f,
+    n        : vector_3f,
+    t        : vector_3f,
+    b        : vector_3f,
+    uv       : vector_2f
+  ) : vector_3f =
+    let
+      value m  = unpack (t_normal, uv);
+      value nn = V3.normalize (n);
+      value nt = V3.normalize (t);
+      value nb = V3.normalize (b);
+      value r  = transform (m, nt, nb, nn);
+    in
+      M3.multiply_vector (m_normal, r)
+    end;
+
 end;

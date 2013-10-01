@@ -49,6 +49,28 @@ p_com_io7m_renderer_Normals_unpack (sampler2D map, vec2 uv)
   }
 }
 
+vec3
+p_com_io7m_renderer_Normals_transform (vec3 m, vec3 t, vec3 b, vec3 n)
+{
+  mat3 mat = mat3(t, b, n);
+  {
+    return normalize((mat * m));
+  }
+}
+
+vec3
+p_com_io7m_renderer_Normals_bump (sampler2D t_normal, mat3 m_normal, vec3 n, vec3 t, vec3 b, vec2 uv)
+{
+  vec3 m = p_com_io7m_renderer_Normals_unpack(t_normal, uv);
+  vec3 nn = normalize(n);
+  vec3 nt = normalize(t);
+  vec3 nb = normalize(b);
+  vec3 r = p_com_io7m_renderer_Normals_transform(m, nt, nb, nn);
+  {
+    return (m_normal * r);
+  }
+}
+
 pt_com_io7m_renderer_DirectionalLight_directions
 p_com_io7m_renderer_DirectionalLight_directions (pt_com_io7m_renderer_DirectionalLight_t light, vec3 p, vec3 n)
 {
@@ -59,15 +81,6 @@ p_com_io7m_renderer_DirectionalLight_directions (pt_com_io7m_renderer_Directiona
     vec3 _tmp_3 = normalize((-light.direction));
     vec3 _tmp_4 = reflect(otl, n);
     return pt_com_io7m_renderer_DirectionalLight_directions(_tmp_1, _tmp_2, _tmp_3, _tmp_4);
-  }
-}
-
-vec3
-p_com_io7m_renderer_Normals_transform (vec3 m, vec3 t, vec3 b, vec3 n)
-{
-  mat3 mat = mat3(t, b, n);
-  {
-    return normalize((mat * m));
   }
 }
 
@@ -96,13 +109,8 @@ p_com_io7m_renderer_DirectionalLight_diffuse_specular (pt_com_io7m_renderer_Dire
 void
 main (void)
 {
-  vec3 m = p_com_io7m_renderer_Normals_unpack(t_normal, f_uv);
-  vec3 n = normalize(f_normal);
-  vec3 t = normalize(f_tangent);
-  vec3 b = normalize(f_bitangent);
-  vec3 r = p_com_io7m_renderer_Normals_transform(m, t, b, n);
-  vec3 e = (m_normal * r);
-  vec3 light_term = p_com_io7m_renderer_DirectionalLight_diffuse_specular(light, e, f_position.xyz, material);
+  vec3 n = p_com_io7m_renderer_Normals_bump(t_normal, m_normal, normalize(f_normal), normalize(f_tangent), normalize(f_bitangent), f_uv);
+  vec3 light_term = p_com_io7m_renderer_DirectionalLight_diffuse_specular(light, n, f_position.xyz, material);
   vec3 albedo = texture(t_diffuse_0, f_uv).xyz;
   vec4 rgba = vec4((albedo * light_term), 1.0);
   out_0 = rgba;

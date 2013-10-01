@@ -194,10 +194,13 @@ module Kernel is
   with
     value n =
       V3.normalize (f_normal);
+      
     value light_term =
       DL.diffuse_only (light, n);
+      
     value albedo =
       S.texture (t_diffuse_0, f_uv) [x y z];
+      
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
   as
@@ -255,10 +258,13 @@ module Kernel is
   with
     value n =
       V3.normalize (f_normal);
+      
     value light_term =
       SL.diffuse_only (light, n, f_position [x y z]);
+      
     value albedo =
       S.texture (t_diffuse_0, f_uv) [x y z];
+      
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
   as
@@ -590,15 +596,16 @@ module Kernel is
     parameter m_normal    : matrix_3x3f;
     out       out_0       : vector_4f as 0;    
   with
-    value m = N.unpack (t_normal, f_uv);
-    value n = V3.normalize (f_normal);
-    value t = V3.normalize (f_tangent);
-    value b = V3.normalize (f_bitangent);
-    value r = N.transform (m, t, b, n);
-    value e = M3.multiply_vector (m_normal, r);
+    value n = N.bump(
+      t_normal,
+      m_normal,
+      V3.normalize (f_normal),
+      V3.normalize (f_tangent),
+      V3.normalize (f_bitangent),
+      f_uv);
 
     value light_term =
-      DL.diffuse_specular (light, e, f_position [x y z], material);
+      DL.diffuse_specular (light, n, f_position [x y z], material);
 
     value albedo =
       S.texture (t_diffuse_0, f_uv) [x y z];
@@ -627,12 +634,13 @@ module Kernel is
     parameter m_normal    : matrix_3x3f;
     out       out_0       : vector_4f as 0;    
   with
-    value m = N.unpack (t_normal, f_uv);
-    value n = V3.normalize (f_normal);
-    value t = V3.normalize (f_tangent);
-    value b = V3.normalize (f_bitangent);
-    value r = N.transform (m, t, b, n);
-    value e = M3.multiply_vector (m_normal, r);
+    value n = N.bump(
+      t_normal,
+      m_normal,
+      V3.normalize (f_normal),
+      V3.normalize (f_tangent),
+      V3.normalize (f_bitangent),
+      f_uv);
 
     value mp =
       record M.t {
@@ -641,7 +649,7 @@ module Kernel is
       };
 
     value light_term =
-      DL.diffuse_specular (light, e, f_position [x y z], mp);
+      DL.diffuse_specular (light, n, f_position [x y z], mp);
 
     value albedo =
       S.texture (t_diffuse_0, f_uv) [x y z];
@@ -772,15 +780,16 @@ module Kernel is
     parameter m_normal    : matrix_3x3f;
     out       out_0       : vector_4f as 0;    
   with
-    value m = N.unpack (t_normal, f_uv);
-    value n = V3.normalize (f_normal);
-    value t = V3.normalize (f_tangent);
-    value b = V3.normalize (f_bitangent);
-    value r = N.transform (m, t, b, n);
-    value e = M3.multiply_vector (m_normal, r);
+    value n = N.bump(
+      t_normal,
+      m_normal,
+      V3.normalize (f_normal),
+      V3.normalize (f_tangent),
+      V3.normalize (f_bitangent),
+      f_uv);
 
     value light_term =
-      SL.diffuse_specular (light, e, f_position [x y z], material);
+      SL.diffuse_specular (light, n, f_position [x y z], material);
 
     value albedo =
       S.texture (t_diffuse_0, f_uv) [x y z];
@@ -809,12 +818,13 @@ module Kernel is
     parameter m_normal    : matrix_3x3f;
     out       out_0       : vector_4f as 0;    
   with
-    value m = N.unpack (t_normal, f_uv);
-    value n = V3.normalize (f_normal);
-    value t = V3.normalize (f_tangent);
-    value b = V3.normalize (f_bitangent);
-    value r = N.transform (m, t, b, n);
-    value e = M3.multiply_vector (m_normal, r);
+    value n = N.bump(
+      t_normal,
+      m_normal,
+      V3.normalize (f_normal),
+      V3.normalize (f_tangent),
+      V3.normalize (f_bitangent),
+      f_uv);
 
     value mp =
       record M.t {
@@ -823,7 +833,7 @@ module Kernel is
       };
 
     value light_term =
-      SL.diffuse_specular (light, e, f_position [x y z], mp);
+      SL.diffuse_specular (light, n, f_position [x y z], mp);
 
     value albedo =
       S.texture (t_diffuse_0, f_uv) [x y z];
