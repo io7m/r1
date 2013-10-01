@@ -26,6 +26,7 @@ module Kernel is
   import com.io7m.renderer.DirectionalLight as DL;
   import com.io7m.renderer.SphericalLight   as SL;
   import com.io7m.renderer.Normals          as N;
+  import com.io7m.renderer.Materials        as M;
 
   --
   -- Trivial constant-color shader.
@@ -305,21 +306,63 @@ module Kernel is
     out f_normal    = normal;
   end;
 
+  --
+  -- Fragment shader without specular maps.
+  --
+
   shader fragment forward_ds_directional_fragment is
     in        f_uv        : vector_2f;
     in        f_normal    : vector_3f;
     in        f_position  : vector_4f;
     parameter light       : DL.t;
-    parameter shininess   : float;
+    parameter material    : M.t;
     parameter t_diffuse_0 : sampler_2d;
     out       out_0       : vector_4f as 0;    
   with
     value n =
       V3.normalize (f_normal);
+
     value light_term =
-      DL.diffuse_specular (light, n, f_position [x y z], shininess);
+      DL.diffuse_specular (light, n, f_position [x y z], material);
+
     value albedo =
       S.texture (t_diffuse_0, f_uv) [x y z];
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  --
+  -- Fragment shader with specular maps.
+  --
+
+  shader fragment forward_dsm_directional_fragment is
+    in        f_uv        : vector_2f;
+    in        f_normal    : vector_3f;
+    in        f_position  : vector_4f;
+    parameter light       : DL.t;
+    parameter material    : M.t;
+    parameter t_diffuse_0 : sampler_2d;
+    parameter t_specular  : sampler_2d;
+    out       out_0       : vector_4f as 0;    
+  with
+    value n =
+      V3.normalize (f_normal);
+
+    value m =
+      record M.t {
+        specular_exponent  = material.specular_exponent,
+        specular_intensity = S.texture (t_specular, f_uv)[x]
+      };
+      
+    value light_term =
+      DL.diffuse_specular (light, n, f_position [x y z], m);
+
+    value albedo =
+      S.texture (t_diffuse_0, f_uv) [x y z];
+
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
   as
@@ -329,6 +372,11 @@ module Kernel is
   shader program forward_ds_directional is
     vertex   forward_ds_directional_vertex;
     fragment forward_ds_directional_fragment;
+  end;
+
+  shader program forward_dsm_directional is
+    vertex   forward_ds_directional_vertex;
+    fragment forward_dsm_directional_fragment;
   end;
 
   --
@@ -367,21 +415,63 @@ module Kernel is
     out f_normal    = normal;
   end;
 
+  --
+  -- Fragment shader without specular maps
+  --
+
   shader fragment forward_ds_spherical_fragment is
     in        f_uv        : vector_2f;
     in        f_normal    : vector_3f;
     in        f_position  : vector_4f;
     parameter light       : SL.t;
-    parameter shininess   : float;
+    parameter material    : M.t;
     parameter t_diffuse_0 : sampler_2d;
     out       out_0       : vector_4f as 0;    
   with
     value n =
       V3.normalize (f_normal);
+
     value light_term =
-      SL.diffuse_specular (light, n, f_position [x y z], shininess);
+      SL.diffuse_specular (light, n, f_position [x y z], material);
+
     value albedo =
       S.texture (t_diffuse_0, f_uv) [x y z];
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+  
+  --
+  -- Fragment shader with specular maps
+  --
+
+  shader fragment forward_dsm_spherical_fragment is
+    in        f_uv        : vector_2f;
+    in        f_normal    : vector_3f;
+    in        f_position  : vector_4f;
+    parameter light       : SL.t;
+    parameter material    : M.t;
+    parameter t_diffuse_0 : sampler_2d;
+    parameter t_specular  : sampler_2d;
+    out       out_0       : vector_4f as 0;    
+  with
+    value n =
+      V3.normalize (f_normal);
+
+    value m =
+      record M.t {
+        specular_exponent  = material.specular_exponent,
+        specular_intensity = S.texture (t_specular, f_uv)[x]
+      };
+
+    value light_term =
+      SL.diffuse_specular (light, n, f_position [x y z], m);
+
+    value albedo =
+      S.texture (t_diffuse_0, f_uv) [x y z];
+
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
   as
@@ -391,6 +481,11 @@ module Kernel is
   shader program forward_ds_spherical is
     vertex   forward_ds_spherical_vertex;
     fragment forward_ds_spherical_fragment;
+  end;
+  
+  shader program forward_dsm_spherical is
+    vertex   forward_ds_spherical_vertex;
+    fragment forward_dsm_spherical_fragment;
   end;
 
   --
@@ -478,6 +573,10 @@ module Kernel is
     out f_bitangent = bitangent;
   end;
 
+  --
+  -- Fragment shader without specular maps.
+  --
+
   shader fragment forward_dsn_directional_fragment is
     in        f_normal    : vector_3f;
     in        f_tangent   : vector_3f;
@@ -485,7 +584,7 @@ module Kernel is
     in        f_uv        : vector_2f;
     in        f_position  : vector_4f;
     parameter light       : DL.t;
-    parameter shininess   : float;
+    parameter material    : M.t;
     parameter t_diffuse_0 : sampler_2d;
     parameter t_normal    : sampler_2d;
     parameter m_normal    : matrix_3x3f;
@@ -499,9 +598,54 @@ module Kernel is
     value e = M3.multiply_vector (m_normal, r);
 
     value light_term =
-      DL.diffuse_specular (light, e, f_position [x y z], shininess);
+      DL.diffuse_specular (light, e, f_position [x y z], material);
+
     value albedo =
       S.texture (t_diffuse_0, f_uv) [x y z];
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  --
+  -- Fragment shader with specular maps.
+  --
+
+  shader fragment forward_dsmn_directional_fragment is
+    in        f_normal    : vector_3f;
+    in        f_tangent   : vector_3f;
+    in        f_bitangent : vector_3f;
+    in        f_uv        : vector_2f;
+    in        f_position  : vector_4f;
+    parameter light       : DL.t;
+    parameter material    : M.t;
+    parameter t_diffuse_0 : sampler_2d;
+    parameter t_specular  : sampler_2d;
+    parameter t_normal    : sampler_2d;
+    parameter m_normal    : matrix_3x3f;
+    out       out_0       : vector_4f as 0;    
+  with
+    value m = N.unpack (t_normal, f_uv);
+    value n = V3.normalize (f_normal);
+    value t = V3.normalize (f_tangent);
+    value b = V3.normalize (f_bitangent);
+    value r = N.transform (m, t, b, n);
+    value e = M3.multiply_vector (m_normal, r);
+
+    value mp =
+      record M.t {
+        specular_exponent  = material.specular_exponent,
+        specular_intensity = S.texture (t_specular, f_uv)[x]
+      };
+
+    value light_term =
+      DL.diffuse_specular (light, e, f_position [x y z], mp);
+
+    value albedo =
+      S.texture (t_diffuse_0, f_uv) [x y z];
+
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
   as
@@ -516,6 +660,16 @@ module Kernel is
   shader program forward_dsn_cb_directional is
     vertex   forward_dsn_cb_directional_vertex;
     fragment forward_dsn_directional_fragment;
+  end;
+  
+  shader program forward_dsmn_pb_directional is
+    vertex   forward_dsn_pb_directional_vertex;
+    fragment forward_dsmn_directional_fragment;
+  end;
+
+  shader program forward_dsmn_cb_directional is
+    vertex   forward_dsn_cb_directional_vertex;
+    fragment forward_dsmn_directional_fragment;
   end;
 
   --
@@ -601,6 +755,10 @@ module Kernel is
     out f_bitangent = bitangent;
   end;
 
+  --
+  -- Fragment shader without specular maps.
+  --
+
   shader fragment forward_dsn_spherical_fragment is
     in        f_normal    : vector_3f;
     in        f_tangent   : vector_3f;
@@ -608,7 +766,7 @@ module Kernel is
     in        f_uv        : vector_2f;
     in        f_position  : vector_4f;
     parameter light       : SL.t;
-    parameter shininess   : float;
+    parameter material    : M.t;
     parameter t_diffuse_0 : sampler_2d;
     parameter t_normal    : sampler_2d;
     parameter m_normal    : matrix_3x3f;
@@ -622,9 +780,54 @@ module Kernel is
     value e = M3.multiply_vector (m_normal, r);
 
     value light_term =
-      SL.diffuse_specular (light, e, f_position [x y z], shininess);
+      SL.diffuse_specular (light, e, f_position [x y z], material);
+
     value albedo =
       S.texture (t_diffuse_0, f_uv) [x y z];
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+  
+  --
+  -- Fragment shader with specular maps.
+  --
+
+  shader fragment forward_dsmn_spherical_fragment is
+    in        f_normal    : vector_3f;
+    in        f_tangent   : vector_3f;
+    in        f_bitangent : vector_3f;
+    in        f_uv        : vector_2f;
+    in        f_position  : vector_4f;
+    parameter light       : SL.t;
+    parameter material    : M.t;
+    parameter t_diffuse_0 : sampler_2d;
+    parameter t_specular  : sampler_2d;
+    parameter t_normal    : sampler_2d;
+    parameter m_normal    : matrix_3x3f;
+    out       out_0       : vector_4f as 0;    
+  with
+    value m = N.unpack (t_normal, f_uv);
+    value n = V3.normalize (f_normal);
+    value t = V3.normalize (f_tangent);
+    value b = V3.normalize (f_bitangent);
+    value r = N.transform (m, t, b, n);
+    value e = M3.multiply_vector (m_normal, r);
+
+    value mp =
+      record M.t {
+        specular_exponent  = material.specular_exponent,
+        specular_intensity = S.texture (t_specular, f_uv)[x]
+      };
+
+    value light_term =
+      SL.diffuse_specular (light, e, f_position [x y z], mp);
+
+    value albedo =
+      S.texture (t_diffuse_0, f_uv) [x y z];
+
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
   as
@@ -639,6 +842,16 @@ module Kernel is
   shader program forward_dsn_cb_spherical is
     vertex   forward_dsn_cb_spherical_vertex;
     fragment forward_dsn_spherical_fragment;
+  end;
+  
+  shader program forward_dsmn_pb_spherical is
+    vertex   forward_dsn_pb_spherical_vertex;
+    fragment forward_dsn_spherical_fragment;
+  end;
+
+  shader program forward_dsmn_cb_spherical is
+    vertex   forward_dsn_cb_spherical_vertex;
+    fragment forward_dsmn_spherical_fragment;
   end;
 
 end;
