@@ -93,7 +93,7 @@ final class KRendererDebugNormalsMapLocal implements KRenderer
     this.viewport_size = new VectorM2I();
 
     this.program_computed =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -104,7 +104,7 @@ final class KRendererDebugNormalsMapLocal implements KRenderer
     this.exec_computed = new JCCEExecutionCallable(this.program_computed);
 
     this.program_provided =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),

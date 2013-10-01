@@ -94,7 +94,7 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
     this.viewport_size = new VectorM2I();
 
     this.program =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),

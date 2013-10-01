@@ -117,7 +117,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     this.transform_context = new KTransform.Context();
 
     this.program_pb_directional =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -128,7 +128,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       new JCCEExecutionCallable(this.program_pb_directional);
 
     this.program_pb_spherical =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -139,7 +139,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       new JCCEExecutionCallable(this.program_pb_spherical);
 
     this.program_cb_directional =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -150,7 +150,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       new JCCEExecutionCallable(this.program_cb_directional);
 
     this.program_cb_spherical =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -161,7 +161,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       new JCCEExecutionCallable(this.program_cb_spherical);
 
     this.program_pb_directional_map =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -172,7 +172,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       new JCCEExecutionCallable(this.program_pb_directional_map);
 
     this.program_pb_spherical_map =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -183,7 +183,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       new JCCEExecutionCallable(this.program_pb_spherical_map);
 
     this.program_cb_directional_map =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -194,7 +194,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       new JCCEExecutionCallable(this.program_cb_directional_map);
 
     this.program_cb_spherical_map =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -205,7 +205,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       new JCCEExecutionCallable(this.program_cb_spherical_map);
 
     this.program_depth =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
