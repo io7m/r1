@@ -473,7 +473,7 @@ final class SBGLRenderer implements GLEventListener
       this.framebuffer_points = gl.framebufferGetColorAttachmentPoints();
 
       this.program_vcolour =
-        KShaderUtilities.makeParasolProgramSingleOutput(
+        KShaderUtilities.makeProgram(
           gl,
           version.getNumber(),
           version.getAPI(),
@@ -484,7 +484,7 @@ final class SBGLRenderer implements GLEventListener
       this.exec_vcolour = new JCCEExecutionCallable(this.program_vcolour);
 
       this.program_ccolour =
-        KShaderUtilities.makeParasolProgramSingleOutput(
+        KShaderUtilities.makeProgram(
           gl,
           version.getNumber(),
           version.getAPI(),
@@ -495,7 +495,7 @@ final class SBGLRenderer implements GLEventListener
       this.exec_ccolour = new JCCEExecutionCallable(this.program_ccolour);
 
       this.program_uv =
-        KShaderUtilities.makeParasolProgramSingleOutput(
+        KShaderUtilities.makeProgram(
           gl,
           version.getNumber(),
           version.getAPI(),

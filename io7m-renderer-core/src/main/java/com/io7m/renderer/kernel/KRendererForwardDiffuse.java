@@ -104,7 +104,7 @@ final class KRendererForwardDiffuse implements KRenderer
     this.transform_context = new KTransform.Context();
 
     this.program_directional =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -115,7 +115,7 @@ final class KRendererForwardDiffuse implements KRenderer
       new JCCEExecutionCallable(this.program_directional);
 
     this.program_spherical =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
@@ -125,7 +125,7 @@ final class KRendererForwardDiffuse implements KRenderer
     this.exec_spherical = new JCCEExecutionCallable(this.program_spherical);
 
     this.program_depth =
-      KShaderUtilities.makeParasolProgramSingleOutput(
+      KShaderUtilities.makeProgram(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
