@@ -38,9 +38,9 @@ import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 
-final class KShaderUtilities
+public final class KShaderUtilities
 {
-  static @Nonnull ProgramReference makeProgram(
+  public static @Nonnull ProgramReference makeProgram(
     final @Nonnull JCGLShadersCommon gl,
     final @Nonnull JCGLSLVersionNumber version,
     final @Nonnull JCGLApi api,
@@ -60,10 +60,8 @@ final class KShaderUtilities
 
     log.debug("Shading language " + version + " " + api);
 
-    final PathVirtual pv =
-      KShaderPaths.getShaderPath(version, api, name);
-    final PathVirtual pf =
-      KShaderPaths.getShaderPath(version, api, name);
+    final PathVirtual pv = KShaderPaths.getShaderPath(version, api, name);
+    final PathVirtual pf = KShaderPaths.getShaderPath(version, api, name);
 
     final PathVirtual pvn = PathVirtual.ofString(pv.toString() + ".v");
     final PathVirtual pfn = PathVirtual.ofString(pf.toString() + ".f");

@@ -368,7 +368,7 @@ final class SBGLRenderer implements GLEventListener
     this.renderers = new HashMap<SBRendererType, KRenderer>();
     this.renderer_current =
       new AtomicReference<SBRendererType>(
-        SBRendererType.RENDERER_FLAT_TEXTURED);
+        SBRendererType.RENDERER_FORWARD_UNLIT);
 
     this.axes_show = new AtomicBoolean(true);
     this.grid_show = new AtomicBoolean(true);
@@ -650,8 +650,8 @@ final class SBGLRenderer implements GLEventListener
           this.log));
 
     this.renderers.put(
-      SBRendererType.RENDERER_FLAT_TEXTURED,
-      new KRendererFlatTextured(this.gi, this.filesystem, this.log));
+      SBRendererType.RENDERER_FORWARD_UNLIT,
+      new KRendererForwardUnlit(this.gi, this.filesystem, this.log));
 
     this.renderers.put(
       SBRendererType.RENDERER_FORWARD_DIFFUSE,
