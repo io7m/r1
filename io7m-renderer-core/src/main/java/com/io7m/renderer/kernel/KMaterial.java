@@ -28,7 +28,7 @@ import com.io7m.jtensors.VectorReadable3F;
  * Object materials.
  */
 
-@Immutable final class KMaterial
+@Immutable public final class KMaterial
 {
   private final @Nonnull VectorI3F               diffuse;
   private final @Nonnull Option<Texture2DStatic> texture_diffuse_0;
@@ -58,27 +58,27 @@ import com.io7m.jtensors.VectorReadable3F;
     return this.specular_exponent;
   }
 
-  @Nonnull VectorReadable3F getDiffuse()
+  public @Nonnull VectorReadable3F getDiffuse()
   {
     return this.diffuse;
   }
 
-  @Nonnull Option<Texture2DStatic> getTextureDiffuse0()
+  public @Nonnull Option<Texture2DStatic> getTextureDiffuse0()
   {
     return this.texture_diffuse_0;
   }
 
-  @Nonnull Option<Texture2DStatic> getTextureDiffuse1()
+  public @Nonnull Option<Texture2DStatic> getTextureDiffuse1()
   {
     return this.texture_diffuse_1;
   }
 
-  @Nonnull Option<Texture2DStatic> getTextureNormal()
+  public @Nonnull Option<Texture2DStatic> getTextureNormal()
   {
     return this.texture_normal;
   }
 
-  @Nonnull Option<Texture2DStatic> getTextureSpecular()
+  public @Nonnull Option<Texture2DStatic> getTextureSpecular()
   {
     return this.texture_specular;
   }
