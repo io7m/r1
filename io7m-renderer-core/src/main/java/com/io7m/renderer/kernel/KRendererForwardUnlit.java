@@ -22,6 +22,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.Framebuffer;
 import com.io7m.jcanephora.JCGLCompileException;
@@ -141,7 +142,13 @@ final class KRendererForwardUnlit implements KRenderer
       this.matrix_modelview);
 
     try {
-      if (instance.getMaterial().getTextureDiffuse0().isSome()) {
+      final KMaterial mat = instance.getMaterial();
+      final ArrayBuffer arr = instance.getMesh().getArrayBuffer();
+      final boolean can_texture =
+        mat.getTextureDiffuse0().isSome()
+          && arr.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
+
+      if (can_texture) {
         this.fwd_t.ksRenderWithMeshInstance(
           gc,
           this.matrix_modelview,
