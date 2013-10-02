@@ -157,6 +157,37 @@ module Kernel is
     vertex   flat_uv_vertex;
     fragment flat_uv_fragment;
   end;
+  
+  shader program fwd_t is
+    vertex   flat_uv_vertex;
+    fragment flat_uv_fragment;
+  end;
+
+  shader vertex fwd_vertex is
+    in        v_position   : vector_3f;
+    parameter m_modelview  : matrix_4x4f;
+    parameter m_projection : matrix_4x4f;
+  with
+    value position =
+      M4.multiply_vector (
+        M4.multiply (m_projection, m_modelview),
+        new vector_4f (v_position, 1.0)
+      );
+  as
+    out gl_Position = position;
+  end;
+
+  shader fragment fwd_fragment is
+    parameter f_diffuse : vector_4f;
+    out       out_0     : vector_4f as 0;
+  as
+    out out_0 = f_diffuse;
+  end;
+
+  shader program fwd is
+    vertex   fwd_vertex;
+    fragment fwd_fragment;
+  end;
 
   --
   -- Simple diffuse-only shader for directional lights.

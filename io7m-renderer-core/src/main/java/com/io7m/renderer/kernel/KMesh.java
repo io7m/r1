@@ -53,12 +53,12 @@ public final class KMesh
     this.indices = indices;
   }
 
-  @Nonnull ArrayBuffer getArrayBuffer()
+  public @Nonnull ArrayBuffer getArrayBuffer()
   {
     return this.array;
   }
 
-  @Nonnull IndexBuffer getIndexBuffer()
+  public @Nonnull IndexBuffer getIndexBuffer()
   {
     return this.indices;
   }

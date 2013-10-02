@@ -330,7 +330,7 @@ final class SBMainWindow extends JFrame
 
     for (final SBRendererType type : SBRendererType.values()) {
       final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
-      b.setSelected(type == SBRendererType.RENDERER_FLAT_TEXTURED);
+      b.setSelected(type == SBRendererType.RENDERER_FORWARD_UNLIT);
 
       b.addActionListener(new ActionListener() {
         @Override public void actionPerformed(

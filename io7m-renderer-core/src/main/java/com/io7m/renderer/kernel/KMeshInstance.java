@@ -38,7 +38,7 @@ import javax.annotation.concurrent.Immutable;
  * <ul>
  */
 
-@Immutable final class KMeshInstance implements KTransformable
+@Immutable public final class KMeshInstance implements KTransformable
 {
   private final @Nonnull Integer    id;
   private final @Nonnull KTransform transform;
@@ -57,17 +57,17 @@ import javax.annotation.concurrent.Immutable;
     this.material = material;
   }
 
-  @Nonnull Integer getID()
+  public @Nonnull Integer getID()
   {
     return this.id;
   }
 
-  @Nonnull KMaterial getMaterial()
+  public @Nonnull KMaterial getMaterial()
   {
     return this.material;
   }
 
-  @Nonnull KMesh getMesh()
+  public @Nonnull KMesh getMesh()
   {
     return this.mesh;
   }
