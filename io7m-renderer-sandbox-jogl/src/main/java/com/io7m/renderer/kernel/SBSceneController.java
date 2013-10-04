@@ -376,6 +376,7 @@ public final class SBSceneController implements
   @Override public @Nonnull
     Pair<Collection<KLight>, Collection<KMeshInstance>>
     rendererGetScene()
+      throws ConstraintError
   {
     final SBScene scene = this.scene_current.get();
 
@@ -749,7 +750,8 @@ interface SBSceneControllerRenderer
 {
   public @Nonnull
     Pair<Collection<KLight>, Collection<KMeshInstance>>
-    rendererGetScene();
+    rendererGetScene()
+      throws ConstraintError;
 }
 
 interface SBSceneControllerRendererControl

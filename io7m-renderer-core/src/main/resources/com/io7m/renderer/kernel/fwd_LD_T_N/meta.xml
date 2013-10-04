@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<g:meta g:version="1" xmlns:g="http://schemas.io7m.com/parasol/glsl-meta">
+  <g:program-name>com.io7m.renderer.ForwardLitDirectionalNormalMapped.fwd_LD_T_N</g:program-name>
+  <g:supports>
+    <g:version g:number="130" g:api="glsl"/>
+    <g:version g:number="100" g:api="glsl-es"/>
+    <g:version g:number="400" g:api="glsl"/>
+    <g:version g:number="140" g:api="glsl"/>
+    <g:version g:number="110" g:api="glsl"/>
+    <g:version g:number="410" g:api="glsl"/>
+    <g:version g:number="430" g:api="glsl"/>
+    <g:version g:number="420" g:api="glsl"/>
+    <g:version g:number="330" g:api="glsl"/>
+    <g:version g:number="150" g:api="glsl"/>
+    <g:version g:number="120" g:api="glsl"/>
+    <g:version g:number="300" g:api="glsl-es"/>
+  </g:supports>
+  <g:outputs>
+    <g:output g:name="out_0" g:type="vec4" g:index="0"/>
+  </g:outputs>
+</g:meta>

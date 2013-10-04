@@ -35,32 +35,36 @@ import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionAPI;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
+import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.renderer.RMatrixM3x3F;
+import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RMatrixReadable4x4F;
 import com.io7m.renderer.RTransformModelView;
+import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
+import com.io7m.renderer.RTransformView;
+import com.io7m.renderer.kernel.KLight.KDirectional;
+import com.io7m.renderer.kernel.KLight.KSphere;
+import com.io7m.renderer.kernel.KRenderingCapabilities.SpecularCapability;
+import com.io7m.renderer.kernel.KRenderingCapabilities.TextureCapability;
 
 public final class KShadingProgramCommon
 {
-  public static final class TextureBindingConfig
+  public static void attributeNormalBind(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull ArrayBufferUsable array)
+    throws ConstraintError,
+      JCGLException
   {
-    public boolean bindDiffuse0 = false;
-    public boolean bindDiffuse1 = false;
-    public boolean bindNormal   = false;
-    public boolean bindSpecular = false;
-
-    int unitsRequired()
-    {
-      int r = 0;
-      r += this.bindDiffuse0 ? 1 : 0;
-      r += this.bindDiffuse1 ? 1 : 0;
-      r += this.bindNormal ? 1 : 0;
-      r += this.bindSpecular ? 1 : 0;
-      return r;
-    }
+    final ArrayBufferAttribute a =
+      array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+    exec.execAttributeBind(gc, "v_normal", a);
   }
 
-  public static void bindAttributePosition(
+  public static void attributePositionBind(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull ArrayBufferUsable array)
@@ -72,7 +76,19 @@ public final class KShadingProgramCommon
     exec.execAttributeBind(gc, "v_position", a);
   }
 
-  public static void bindAttributeUV(
+  public static void attributeTangent4Bind(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull ArrayBufferUsable array)
+    throws ConstraintError,
+      JCGLException
+  {
+    final ArrayBufferAttribute a =
+      array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4.getName());
+    exec.execAttributeBind(gc, "v_tangent4", a);
+  }
+
+  public static void attributeUVBind(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull ArrayBufferUsable array)
@@ -84,93 +100,7 @@ public final class KShadingProgramCommon
     exec.execAttributeBind(gc, "v_uv", a);
   }
 
-  public static void bindMaterialTextures(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCCEExecutionAPI exec,
-    final @Nonnull TextureBindingConfig c,
-    final @Nonnull KMaterial m)
-    throws ConstraintError,
-      JCGLException
-  {
-    final TextureUnit[] texture_units = gc.textureGetUnits();
-    Constraints.constrainRange(
-      c.unitsRequired(),
-      0,
-      texture_units.length,
-      "Required number of texture units");
-
-    int current_unit = 0;
-
-    if (c.bindDiffuse0) {
-      Constraints.constrainArbitrary(
-        m.getTextureDiffuse0().isSome(),
-        "Material contains diffuse texture 0");
-
-      final Option<Texture2DStatic> opt = m.getTextureDiffuse0();
-      if (opt.isSome()) {
-        final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
-        final TextureUnit u = texture_units[current_unit];
-        gc.texture2DStaticBind(u, some.value);
-        KShadingProgramCommon.putTextureDiffuse0(exec, gc, u);
-        ++current_unit;
-      } else {
-        gc.texture2DStaticUnbind(texture_units[current_unit]);
-      }
-    }
-
-    if (c.bindDiffuse1) {
-      Constraints.constrainArbitrary(
-        m.getTextureDiffuse1().isSome(),
-        "Material contains diffuse texture 1");
-
-      final Option<Texture2DStatic> opt = m.getTextureDiffuse1();
-      if (opt.isSome()) {
-        final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
-        final TextureUnit u = texture_units[current_unit];
-        gc.texture2DStaticBind(u, some.value);
-        KShadingProgramCommon.putTextureDiffuse1(exec, gc, u);
-        ++current_unit;
-      } else {
-        gc.texture2DStaticUnbind(texture_units[current_unit]);
-      }
-    }
-
-    if (c.bindNormal) {
-      Constraints.constrainArbitrary(
-        m.getTextureNormal().isSome(),
-        "Material contains a normal texture");
-
-      final Option<Texture2DStatic> opt = m.getTextureNormal();
-      if (opt.isSome()) {
-        final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
-        final TextureUnit u = texture_units[current_unit];
-        gc.texture2DStaticBind(u, some.value);
-        KShadingProgramCommon.putTextureNormal(exec, gc, u);
-        ++current_unit;
-      } else {
-        gc.texture2DStaticUnbind(texture_units[current_unit]);
-      }
-    }
-
-    if (c.bindSpecular) {
-      Constraints.constrainArbitrary(
-        m.getTextureSpecular().isSome(),
-        "Material contains a specular texture");
-
-      final Option<Texture2DStatic> opt = m.getTextureSpecular();
-      if (opt.isSome()) {
-        final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
-        final TextureUnit u = texture_units[current_unit];
-        gc.texture2DStaticBind(u, some.value);
-        KShadingProgramCommon.putTextureSpecular(exec, gc, u);
-        ++current_unit;
-      } else {
-        gc.texture2DStaticUnbind(texture_units[current_unit]);
-      }
-    }
-  }
-
-  public static void putColourDiffuse(
+  public static void colourDiffusePut(
     final @Nonnull JCCEExecutionCallable exec,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull VectorReadable4F diffuse)
@@ -180,7 +110,134 @@ public final class KShadingProgramCommon
     exec.execUniformPutVector4F(gc, "f_diffuse", diffuse);
   }
 
-  public static void putModelViewMatrix(
+  public static void directionalLightPut(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI e,
+    final @Nonnull MatrixM4x4F.Context matrix_context,
+    final @Nonnull RMatrixM4x4F<RTransformView> m,
+    final @Nonnull KDirectional light)
+    throws JCGLException,
+      ConstraintError
+  {
+    final VectorM4F light_eye = new VectorM4F();
+    final VectorM4F light_world = new VectorM4F();
+    light_world.x = light.getDirection().getXF();
+    light_world.y = light.getDirection().getYF();
+    light_world.z = light.getDirection().getZF();
+    light_world.w = 0.0f;
+
+    MatrixM4x4F.multiplyVector4FWithContext(
+      matrix_context,
+      m,
+      light_world,
+      light_eye);
+
+    e.execUniformPutVector3F(gc, "light.direction", light_eye);
+    e.execUniformPutVector3F(gc, "light.color", light.getColour());
+    e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
+  }
+
+  public static void directionalLightReuse(
+    final @Nonnull JCCEExecutionAPI e)
+    throws JCGLException,
+      ConstraintError
+  {
+    e.execUniformUseExisting("light.direction");
+    e.execUniformUseExisting("light.color");
+    e.execUniformUseExisting("light.intensity");
+  }
+
+  public static void materialPut(
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KRenderingCapabilities.SpecularCapability shader_caps,
+    final @Nonnull KMaterial m)
+    throws JCGLException,
+      ConstraintError
+  {
+    switch (shader_caps) {
+      case SPECULAR_CAP_CONSTANT:
+      {
+        exec.execUniformPutFloat(
+          gc,
+          "material.specular_exponent",
+          m.getSpecularExponent());
+
+        exec.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
+        break;
+      }
+      case SPECULAR_CAP_MAPPED:
+      {
+        exec.execUniformPutFloat(
+          gc,
+          "material.specular_exponent",
+          m.getSpecularExponent());
+
+        exec.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
+        break;
+      }
+      case SPECULAR_CAP_NONE:
+      {
+        break;
+      }
+    }
+  }
+
+  public static void materialTexturesAndAttributesBind(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull KRenderingCapabilities required,
+    final @Nonnull KMaterial m,
+    final @Nonnull ArrayBufferUsable array)
+    throws ConstraintError,
+      JCGLException
+  {
+    final TextureUnit[] texture_units = gc.textureGetUnits();
+    Constraints.constrainRange(
+      required.textureUnitsRequired(),
+      0,
+      texture_units.length,
+      "Required number of texture units");
+
+    int current_unit = 0;
+    if (required.getTexture() == TextureCapability.TEXTURE_CAP_DIFFUSE) {
+      final TextureUnit texture_unit = texture_units[current_unit];
+      KShadingProgramCommon.textureDiffuse0Bind(gc, exec, m, texture_unit);
+      KShadingProgramCommon.attributeUVBind(gc, exec, array);
+      ++current_unit;
+    }
+
+    switch (required.getNormal()) {
+      case NORMAL_CAP_MAPPED:
+      {
+        final TextureUnit texture_unit = texture_units[current_unit];
+        KShadingProgramCommon.textureNormalBind(gc, exec, m, texture_unit);
+        KShadingProgramCommon.attributeUVBind(gc, exec, array);
+        KShadingProgramCommon.attributeNormalBind(gc, exec, array);
+        KShadingProgramCommon.attributeTangent4Bind(gc, exec, array);
+        ++current_unit;
+        break;
+      }
+      case NORMAL_CAP_NONE:
+      {
+        break;
+      }
+      case NORMAL_CAP_VERTEX:
+      {
+        KShadingProgramCommon.attributeNormalBind(gc, exec, array);
+        break;
+      }
+    }
+
+    if (required.getSpecular() == SpecularCapability.SPECULAR_CAP_MAPPED) {
+      final TextureUnit texture_unit = texture_units[current_unit];
+      KShadingProgramCommon.textureSpecularBind(gc, exec, m, texture_unit);
+      KShadingProgramCommon.attributeUVBind(gc, exec, array);
+      ++current_unit;
+    }
+  }
+
+  public static void modelViewMatrixPut(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull RMatrixReadable4x4F<RTransformModelView> m)
@@ -190,7 +247,17 @@ public final class KShadingProgramCommon
     exec.execUniformPutMatrix4x4F(gc, "m_modelview", m);
   }
 
-  public static void putProjectionMatrix(
+  public static void normalMatrixPut(
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull RMatrixM3x3F<RTransformNormal> mn)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutMatrix3x3F(gc, "m_normal", mn);
+  }
+
+  public static void projectionMatrixPut(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull RMatrixReadable4x4F<RTransformProjection> m)
@@ -200,44 +267,12 @@ public final class KShadingProgramCommon
     exec.execUniformPutMatrix4x4F(gc, "m_projection", m);
   }
 
-  public static void putTextureDiffuse0(
-    final @Nonnull JCCEExecutionAPI exec,
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull TextureUnit unit)
+  public static void projectionMatrixReuse(
+    final @Nonnull JCCEExecutionCallable exec)
     throws JCGLException,
       ConstraintError
   {
-    exec.execUniformPutTextureUnit(gc, "t_diffuse_0", unit);
-  }
-
-  public static void putTextureDiffuse1(
-    final @Nonnull JCCEExecutionAPI exec,
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull TextureUnit unit)
-    throws JCGLException,
-      ConstraintError
-  {
-    exec.execUniformPutTextureUnit(gc, "t_diffuse_1", unit);
-  }
-
-  public static void putTextureNormal(
-    final @Nonnull JCCEExecutionAPI exec,
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull TextureUnit unit)
-    throws JCGLException,
-      ConstraintError
-  {
-    exec.execUniformPutTextureUnit(gc, "t_normal", unit);
-  }
-
-  public static void putTextureSpecular(
-    final @Nonnull JCCEExecutionAPI exec,
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull TextureUnit unit)
-    throws JCGLException,
-      ConstraintError
-  {
-    exec.execUniformPutTextureUnit(gc, "t_specular", unit);
+    exec.execUniformUseExisting("m_projection");
   }
 
   public static void renderWithIndices(
@@ -266,11 +301,138 @@ public final class KShadingProgramCommon
     }
   }
 
-  public static void reuseProjectionMatrix(
-    final @Nonnull JCCEExecutionCallable exec)
+  public static void sphericalLightPut(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull MatrixM4x4F.Context matrix_context,
+    final @Nonnull RMatrixM4x4F<RTransformView> m,
+    final @Nonnull KSphere light)
     throws JCGLException,
       ConstraintError
   {
-    exec.execUniformUseExisting("m_projection");
+    final VectorM4F light_eye = new VectorM4F();
+    final VectorM4F light_world = new VectorM4F();
+    light_world.x = light.getPosition().getXF();
+    light_world.y = light.getPosition().getYF();
+    light_world.z = light.getPosition().getZF();
+    light_world.w = 1.0f;
+
+    MatrixM4x4F.multiplyVector4FWithContext(
+      matrix_context,
+      m,
+      light_world,
+      light_eye);
+
+    exec.execUniformPutVector3F(gc, "light.position", light_eye);
+    exec.execUniformPutVector3F(gc, "light.color", light.getColour());
+    exec.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
+    exec.execUniformPutFloat(gc, "light.radius", light.getRadius());
+    exec.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+  }
+
+  public static void sphericalLightReuse(
+    final @Nonnull JCCEExecutionAPI exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformUseExisting("light.position");
+    exec.execUniformUseExisting("light.color");
+    exec.execUniformUseExisting("light.intensity");
+    exec.execUniformUseExisting("light.radius");
+    exec.execUniformUseExisting("light.falloff");
+  }
+
+  private static void textureDiffuse0Bind(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull KMaterial m,
+    final @Nonnull TextureUnit texture_unit)
+    throws ConstraintError,
+      JCGLException
+  {
+    Constraints.constrainArbitrary(
+      m.getTextureDiffuse0().isSome(),
+      "Material contains diffuse texture 0");
+
+    final Option<Texture2DStatic> opt = m.getTextureDiffuse0();
+    final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
+    gc.texture2DStaticBind(texture_unit, some.value);
+    KShadingProgramCommon.textureDiffuse0Put(exec, gc, texture_unit);
+  }
+
+  public static void textureDiffuse0Put(
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull TextureUnit unit)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutTextureUnit(gc, "t_diffuse_0", unit);
+  }
+
+  public static void textureDiffuse1Put(
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull TextureUnit unit)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutTextureUnit(gc, "t_diffuse_1", unit);
+  }
+
+  private static void textureNormalBind(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull KMaterial m,
+    final @Nonnull TextureUnit texture_unit)
+    throws ConstraintError,
+      JCGLException
+  {
+    Constraints.constrainArbitrary(
+      m.getTextureNormal().isSome(),
+      "Material contains a normal texture");
+
+    final Option<Texture2DStatic> opt = m.getTextureNormal();
+    final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
+    gc.texture2DStaticBind(texture_unit, some.value);
+    KShadingProgramCommon.textureNormalPut(exec, gc, texture_unit);
+  }
+
+  public static void textureNormalPut(
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull TextureUnit unit)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutTextureUnit(gc, "t_normal", unit);
+  }
+
+  private static void textureSpecularBind(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull KMaterial m,
+    final @Nonnull TextureUnit texture_unit)
+    throws ConstraintError,
+      JCGLException
+  {
+    Constraints.constrainArbitrary(
+      m.getTextureSpecular().isSome(),
+      "Material contains a specular texture");
+
+    final Option<Texture2DStatic> opt = m.getTextureSpecular();
+    final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
+    gc.texture2DStaticBind(texture_unit, some.value);
+    KShadingProgramCommon.textureSpecularPut(exec, gc, texture_unit);
+  }
+
+  public static void textureSpecularPut(
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull TextureUnit unit)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutTextureUnit(gc, "t_specular", unit);
   }
 }

@@ -222,7 +222,11 @@ final class KRendererForwardDiffuse implements KRenderer
       this.matrix_modelview);
 
     try {
-      program.ksRenderWithMeshInstance(gc, this.matrix_modelview, instance);
+      program.ksRenderWithMeshInstance(
+        gc,
+        this.matrix_modelview,
+        this.matrix_normal,
+        instance);
     } catch (final Exception e) {
       throw new UnreachableCodeException();
     }
