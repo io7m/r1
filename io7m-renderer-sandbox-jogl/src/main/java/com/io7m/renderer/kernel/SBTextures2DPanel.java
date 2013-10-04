@@ -41,7 +41,7 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 
 import com.io7m.jlog.Log;
 
-final class SBTexturesPanel extends JPanel
+final class SBTextures2DPanel extends JPanel
 {
   private static final class ImageDisplay extends JPanel
   {
@@ -81,17 +81,17 @@ final class SBTexturesPanel extends JPanel
   }
   protected final @Nonnull Log               log_textures;
   protected final @Nonnull JComboBox<String> selector;
-  protected @Nonnull Map<String, SBTexture>  images;
+  protected @Nonnull Map<String, SBTexture2D>  images;
   protected @Nonnull ImageDisplay            image_display;
 
-  public SBTexturesPanel(
+  public SBTextures2DPanel(
     final @Nonnull JFrame window,
     final @Nonnull SBSceneControllerTextures controller,
     final @Nonnull JTextField select_result,
     final @Nonnull Log log)
   {
     this.log_textures = new Log(log, "textures");
-    this.images = controller.sceneTexturesGet();
+    this.images = controller.sceneTextures2DGet();
 
     this.setPreferredSize(new Dimension(640, 480));
 
@@ -105,12 +105,12 @@ final class SBTexturesPanel extends JPanel
         final @Nonnull ActionEvent e)
       {
         final String name =
-          (String) SBTexturesPanel.this.selector.getSelectedItem();
+          (String) SBTextures2DPanel.this.selector.getSelectedItem();
 
         if (name != null) {
-          final SBTexture t = SBTexturesPanel.this.images.get(name);
-          SBTexturesPanel.this.image_display.setImage(t.getImage());
-          SBTexturesPanel.this.image_display.repaint();
+          final SBTexture2D t = SBTextures2DPanel.this.images.get(name);
+          SBTextures2DPanel.this.image_display.setImage(t.getImage());
+          SBTextures2DPanel.this.image_display.repaint();
         }
       }
     });
@@ -124,18 +124,18 @@ final class SBTexturesPanel extends JPanel
         final JFileChooser chooser = new JFileChooser();
         chooser.setMultiSelectionEnabled(false);
 
-        final int r = chooser.showOpenDialog(SBTexturesPanel.this);
+        final int r = chooser.showOpenDialog(SBTextures2DPanel.this);
         switch (r) {
           case JFileChooser.APPROVE_OPTION:
           {
             final File file = chooser.getSelectedFile();
 
-            final SwingWorker<SBTexture, Void> worker =
-              new SwingWorker<SBTexture, Void>() {
-                @Override protected @Nonnull SBTexture doInBackground()
+            final SwingWorker<SBTexture2D, Void> worker =
+              new SwingWorker<SBTexture2D, Void>() {
+                @Override protected @Nonnull SBTexture2D doInBackground()
                   throws Exception
                 {
-                  return controller.sceneTextureLoad(file).get();
+                  return controller.sceneTexture2DLoad(file).get();
                 }
 
                 @Override protected void done()
@@ -143,19 +143,19 @@ final class SBTexturesPanel extends JPanel
                   try {
                     this.get();
 
-                    SBTexturesPanel.this.images =
-                      controller.sceneTexturesGet();
-                    SBTexturesPanel.this
-                      .selectorRefresh(SBTexturesPanel.this.selector);
+                    SBTextures2DPanel.this.images =
+                      controller.sceneTextures2DGet();
+                    SBTextures2DPanel.this
+                      .selectorRefresh(SBTextures2DPanel.this.selector);
 
                   } catch (final InterruptedException x) {
                     SBErrorBox.showError(
-                      SBTexturesPanel.this.log_textures,
+                      SBTextures2DPanel.this.log_textures,
                       "Error loading image",
                       x);
                   } catch (final ExecutionException x) {
                     SBErrorBox.showError(
-                      SBTexturesPanel.this.log_textures,
+                      SBTextures2DPanel.this.log_textures,
                       "Error loading image",
                       x.getCause());
                   }
@@ -180,7 +180,7 @@ final class SBTexturesPanel extends JPanel
         final @Nonnull ActionEvent e)
       {
         final String name =
-          (String) SBTexturesPanel.this.selector.getSelectedItem();
+          (String) SBTextures2DPanel.this.selector.getSelectedItem();
         if (name != null) {
           select_result.setText(name.toString());
         } else {
@@ -211,7 +211,7 @@ final class SBTexturesPanel extends JPanel
   {
     final File file = (File) select.getSelectedItem();
     if (file != null) {
-      final SBTexture t = SBTexturesPanel.this.images.get(file);
+      final SBTexture2D t = SBTextures2DPanel.this.images.get(file);
       this.image_display.setImage(t.getImage());
       this.image_display.repaint();
     }
@@ -221,7 +221,7 @@ final class SBTexturesPanel extends JPanel
     final JComboBox<String> select)
   {
     select.removeAllItems();
-    for (final Entry<String, SBTexture> e : this.images.entrySet()) {
+    for (final Entry<String, SBTexture2D> e : this.images.entrySet()) {
       select.addItem(e.getKey());
     }
   }

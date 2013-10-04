@@ -51,6 +51,7 @@ import org.pcollections.HashTreePSet;
 import org.pcollections.MapPSet;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
@@ -94,10 +95,10 @@ public final class SBSceneController implements
   {
     final byte[] buffer = new byte[8192];
 
-    for (final SBTextureDescription source : scene_desc_current
+    for (final SBTexture2DDescription source : scene_desc_current
       .getTextureDescriptions()) {
 
-      final SBTextureDescription target =
+      final SBTexture2DDescription target =
         scene_desc_saving.getTexture(source.getName());
 
       SBSceneController.ioSaveSceneCopyFileIntoZip(
@@ -266,9 +267,9 @@ public final class SBSceneController implements
 
     SBScene scene = SBScene.empty();
 
-    for (final SBTextureDescription t : desc.getTextureDescriptions()) {
-      final Future<SBTexture> tf = this.textureLoad(t);
-      scene = scene.textureAdd(tf.get());
+    for (final SBTexture2DDescription t : desc.getTextureDescriptions()) {
+      final Future<SBTexture2D> tf = this.texture2DLoad(t);
+      scene = scene.texture2DAdd(tf.get());
     }
 
     for (final SBMeshDescription m : desc.getMeshDescriptions()) {
@@ -579,24 +580,25 @@ public final class SBSceneController implements
     return f;
   }
 
-  @Override public @Nonnull Future<SBTexture> sceneTextureLoad(
+  @Override public @Nonnull Future<SBTexture2D> sceneTexture2DLoad(
     final @Nonnull File file)
   {
-    final SBTextureDescription desc =
-      new SBTextureDescription(file, this.names.get(file.getName()));
+    final SBTexture2DDescription desc =
+      new SBTexture2DDescription(file, this.names.get(file.getName()));
 
-    final FutureTask<SBTexture> f =
-      new FutureTask<SBTexture>(new Callable<SBTexture>() {
+    final FutureTask<SBTexture2D> f =
+      new FutureTask<SBTexture2D>(new Callable<SBTexture2D>() {
         @SuppressWarnings("synthetic-access") @Override public
-          SBTexture
+          SBTexture2D
           call()
             throws Exception
         {
-          final SBTexture t = SBSceneController.this.textureLoadActual(desc);
+          final SBTexture2D t =
+            SBSceneController.this.texture2DLoadActual(desc);
           SBSceneController.this
             .stateUpdate(SBSceneController.this.scene_current
               .get()
-              .textureAdd(t));
+              .texture2DAdd(t));
           return t;
         }
       });
@@ -605,9 +607,9 @@ public final class SBSceneController implements
     return f;
   }
 
-  @Override public @Nonnull Map<String, SBTexture> sceneTexturesGet()
+  @Override public @Nonnull Map<String, SBTexture2D> sceneTextures2DGet()
   {
-    return this.scene_current.get().texturesGet();
+    return this.scene_current.get().textures2DGet();
   }
 
   private void stateChangedNotifyListeners()
@@ -625,17 +627,17 @@ public final class SBSceneController implements
     this.stateChangedNotifyListeners();
   }
 
-  private @Nonnull Future<SBTexture> textureLoad(
-    final @Nonnull SBTextureDescription t)
+  private @Nonnull Future<SBTexture2D> texture2DLoad(
+    final @Nonnull SBTexture2DDescription t)
   {
-    final FutureTask<SBTexture> f =
-      new FutureTask<SBTexture>(new Callable<SBTexture>() {
+    final FutureTask<SBTexture2D> f =
+      new FutureTask<SBTexture2D>(new Callable<SBTexture2D>() {
         @SuppressWarnings("synthetic-access") @Override public
-          SBTexture
+          SBTexture2D
           call()
             throws Exception
         {
-          return SBSceneController.this.textureLoadActual(t);
+          return SBSceneController.this.texture2DLoadActual(t);
         }
       });
 
@@ -643,8 +645,8 @@ public final class SBSceneController implements
     return f;
   }
 
-  private @Nonnull SBTexture textureLoadActual(
-    final @Nonnull SBTextureDescription description)
+  private @Nonnull SBTexture2D texture2DLoadActual(
+    final @Nonnull SBTexture2DDescription description)
     throws FileNotFoundException,
       InterruptedException,
       ExecutionException
@@ -655,7 +657,7 @@ public final class SBSceneController implements
       stream = new FileInputStream(description.getFile());
 
       final Future<BufferedImage> f_image =
-        SBSceneController.this.textureLoadImageIO(description.getFile());
+        SBSceneController.this.texture2DLoadImageIO(description.getFile());
       final Future<Texture2DStatic> f_texture =
         SBSceneController.this.renderer.textureLoad(
           description.getName(),
@@ -663,7 +665,7 @@ public final class SBSceneController implements
 
       final Texture2DStatic rf = f_texture.get();
       final BufferedImage ri = f_image.get();
-      return new SBTexture(rf, ri, description);
+      return new SBTexture2D(rf, ri, description);
     } finally {
       if (stream != null) {
         try {
@@ -675,7 +677,7 @@ public final class SBSceneController implements
     }
   }
 
-  private Future<BufferedImage> textureLoadImageIO(
+  private Future<BufferedImage> texture2DLoadImageIO(
     final @Nonnull File file)
   {
     final FutureTask<BufferedImage> f =
@@ -691,6 +693,28 @@ public final class SBSceneController implements
 
     this.exec_pool.execute(f);
     return f;
+  }
+
+  @Override public Future<SBTextureCube> sceneTextureCubeLoad(
+    final @Nonnull File file)
+  {
+    final FutureTask<SBTextureCube> f =
+      new FutureTask<SBTextureCube>(new Callable<SBTextureCube>() {
+        @Override public SBTextureCube call()
+          throws Exception
+        {
+          throw new UnimplementedCodeException();
+        }
+      });
+
+    this.exec_pool.execute(f);
+    return f;
+  }
+
+  @Override public Map<String, SBTextureCube> sceneTexturesCubeGet()
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }
 
@@ -786,8 +810,13 @@ interface SBSceneControllerRendererControl
 
 interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration
 {
-  public @Nonnull Future<SBTexture> sceneTextureLoad(
+  public @Nonnull Future<SBTexture2D> sceneTexture2DLoad(
     final @Nonnull File file);
 
-  public @Nonnull Map<String, SBTexture> sceneTexturesGet();
+  public @Nonnull Map<String, SBTexture2D> sceneTextures2DGet();
+
+  public @Nonnull Future<SBTextureCube> sceneTextureCubeLoad(
+    final @Nonnull File file);
+
+  public @Nonnull Map<String, SBTextureCube> sceneTexturesCubeGet();
 }

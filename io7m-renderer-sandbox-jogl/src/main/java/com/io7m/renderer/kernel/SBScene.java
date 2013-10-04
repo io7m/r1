@@ -33,12 +33,12 @@ import com.io7m.jaux.functional.Pair;
 {
   public static @Nonnull SBScene empty()
   {
-    final PMap<String, SBTexture> textures = HashTreePMap.empty();
+    final PMap<String, SBTexture2D> textures2d = HashTreePMap.empty();
     final PMap<String, SBMesh> meshes = HashTreePMap.empty();
     final PMap<Integer, KLight> lights = HashTreePMap.empty();
     final PMap<Integer, SBInstance> instances = HashTreePMap.empty();
     return new SBScene(
-      textures,
+      textures2d,
       meshes,
       lights,
       Integer.valueOf(0),
@@ -53,7 +53,7 @@ import com.io7m.jaux.functional.Pair;
     return Integer.valueOf(Math.max(x.intValue(), y.intValue()));
   }
 
-  private final @Nonnull PMap<String, SBTexture>   textures;
+  private final @Nonnull PMap<String, SBTexture2D>   textures;
   private final @Nonnull PMap<String, SBMesh>      meshes;
   private final @Nonnull PMap<Integer, KLight>     lights;
   private final @Nonnull Integer                   light_id_pool;
@@ -61,7 +61,7 @@ import com.io7m.jaux.functional.Pair;
   private final @Nonnull Integer                   instance_id_pool;
 
   private SBScene(
-    final @Nonnull PMap<String, SBTexture> textures,
+    final @Nonnull PMap<String, SBTexture2D> textures,
     final @Nonnull PMap<String, SBMesh> meshes,
     final @Nonnull PMap<Integer, KLight> lights,
     final @Nonnull Integer light_id_pool,
@@ -205,8 +205,8 @@ import com.io7m.jaux.functional.Pair;
       this.instance_id_pool);
   }
 
-  public @Nonnull SBScene textureAdd(
-    final @Nonnull SBTexture texture)
+  public @Nonnull SBScene texture2DAdd(
+    final @Nonnull SBTexture2D texture)
   {
     return new SBScene(
       this.textures.plus(texture.getName(), texture),
@@ -217,13 +217,13 @@ import com.io7m.jaux.functional.Pair;
       this.instance_id_pool);
   }
 
-  public @CheckForNull SBTexture textureGet(
+  public @CheckForNull SBTexture2D texture2DGet(
     final @Nonnull String texture)
   {
     return this.textures.get(texture);
   }
 
-  public @Nonnull Map<String, SBTexture> texturesGet()
+  public @Nonnull Map<String, SBTexture2D> textures2DGet()
   {
     return this.textures;
   }
@@ -233,14 +233,14 @@ import com.io7m.jaux.functional.Pair;
   {
     final SBMaterialDescription md = d.getMaterial();
 
-    final SBTexture diff =
-      (md.getTextureDiffuse() == null) ? null : this.textureGet(md
+    final SBTexture2D diff =
+      (md.getTextureDiffuse() == null) ? null : this.texture2DGet(md
         .getTextureDiffuse());
-    final SBTexture norm =
-      (md.getTextureNormal() == null) ? null : this.textureGet(md
+    final SBTexture2D norm =
+      (md.getTextureNormal() == null) ? null : this.texture2DGet(md
         .getTextureNormal());
-    final SBTexture spec =
-      (md.getTextureSpecular() == null) ? null : this.textureGet(md
+    final SBTexture2D spec =
+      (md.getTextureSpecular() == null) ? null : this.texture2DGet(md
         .getTextureSpecular());
 
     final SBMaterial m = new SBMaterial(md, diff, norm, spec);
@@ -257,10 +257,10 @@ import com.io7m.jaux.functional.Pair;
       desc = desc.lightAdd(l);
     }
 
-    for (final SBTexture t : this.textures.values()) {
+    for (final SBTexture2D t : this.textures.values()) {
       if (normalize) {
         desc =
-          desc.textureAdd(new SBTextureDescription(new File(t.getName()), t
+          desc.textureAdd(new SBTexture2DDescription(new File(t.getName()), t
             .getName()));
       } else {
         desc = desc.textureAdd(t.getDescription());

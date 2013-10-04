@@ -237,8 +237,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
         {
-          final SBTexturesWindow twindow =
-            new SBTexturesWindow(
+          final SBTextures2DWindow twindow =
+            new SBTextures2DWindow(
               controller,
               ObjectEditDialogPanel.this.diffuse_texture,
               log);
@@ -254,8 +254,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
         {
-          final SBTexturesWindow twindow =
-            new SBTexturesWindow(
+          final SBTextures2DWindow twindow =
+            new SBTextures2DWindow(
               controller,
               ObjectEditDialogPanel.this.normal_texture,
               log);
@@ -271,8 +271,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
         {
-          final SBTexturesWindow twindow =
-            new SBTexturesWindow(
+          final SBTextures2DWindow twindow =
+            new SBTextures2DWindow(
               controller,
               ObjectEditDialogPanel.this.specular_texture,
               log);

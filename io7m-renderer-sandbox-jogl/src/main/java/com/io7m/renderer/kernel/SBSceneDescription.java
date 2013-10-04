@@ -54,7 +54,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     try {
       SCENE_XML_URI =
         new URI("http://schemas.io7m.com/renderer/1.0.0/sandbox-scene");
-      SCENE_XML_VERSION = 4;
+      SCENE_XML_VERSION = 5;
     } catch (final URISyntaxException e) {
       throw new UnreachableCodeException();
     }
@@ -62,7 +62,8 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
   public static @Nonnull SBSceneDescription empty()
   {
-    final PMap<String, SBTextureDescription> textures = HashTreePMap.empty();
+    final PMap<String, SBTexture2DDescription> textures =
+      HashTreePMap.empty();
     final PMap<String, SBMeshDescription> meshes = HashTreePMap.empty();
     final PMap<Integer, KLight> lights = HashTreePMap.empty();
     final PMap<Integer, SBInstanceDescription> instances =
@@ -177,14 +178,16 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return HashTreePMap.from(m);
   }
 
-  private static @Nonnull PMap<String, SBTextureDescription> fromXMLTextures(
-    final @Nonnull BaseDirectory base,
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
+  private static @Nonnull
+    PMap<String, SBTexture2DDescription>
+    fromXMLTextures(
+      final @Nonnull BaseDirectory base,
+      final @Nonnull Element e)
+      throws RXMLException,
+        ConstraintError
   {
-    final HashMap<String, SBTextureDescription> m =
-      new HashMap<String, SBTextureDescription>();
+    final HashMap<String, SBTexture2DDescription> m =
+      new HashMap<String, SBTexture2DDescription>();
 
     final Element ec =
       RXMLUtilities.getChild(e, "textures", SBSceneDescription.SCENE_XML_URI);
@@ -196,7 +199,8 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
     for (int index = 0; index < ecc.size(); ++index) {
       final Element ei = ecc.get(index);
-      final SBTextureDescription d = SBTextureDescription.fromXML(base, ei);
+      final SBTexture2DDescription d =
+        SBTexture2DDescription.fromXML(base, ei);
       m.put(d.getName(), d);
     }
 
@@ -359,13 +363,13 @@ import com.io7m.renderer.xml.RXMLUtilities;
       falloff);
   }
 
-  private final @Nonnull PMap<String, SBTextureDescription>   textures;
+  private final @Nonnull PMap<String, SBTexture2DDescription> textures;
   private final @Nonnull PMap<String, SBMeshDescription>      meshes;
   private final @Nonnull PMap<Integer, KLight>                lights;
   private final @Nonnull PMap<Integer, SBInstanceDescription> instances;
 
   private SBSceneDescription(
-    final @Nonnull PMap<String, SBTextureDescription> textures,
+    final @Nonnull PMap<String, SBTexture2DDescription> textures,
     final @Nonnull PMap<String, SBMeshDescription> models,
     final @Nonnull PMap<Integer, KLight> lights,
     final @Nonnull PMap<Integer, SBInstanceDescription> instances)
@@ -425,13 +429,13 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return this.meshes.values();
   }
 
-  public @CheckForNull SBTextureDescription getTexture(
+  public @CheckForNull SBTexture2DDescription getTexture(
     final @Nonnull String name)
   {
     return this.textures.get(name);
   }
 
-  public @Nonnull Collection<SBTextureDescription> getTextureDescriptions()
+  public @Nonnull Collection<SBTexture2DDescription> getTextureDescriptions()
   {
     return this.textures.values();
   }
@@ -476,7 +480,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
   }
 
   public @Nonnull SBSceneDescription textureAdd(
-    final @Nonnull SBTextureDescription t)
+    final @Nonnull SBTexture2DDescription t)
   {
     return new SBSceneDescription(
       this.textures.plus(t.getName(), t),
@@ -493,7 +497,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
       .toString(SBSceneDescription.SCENE_XML_VERSION)));
 
     final Element et = new Element("s:textures", uri);
-    for (final SBTextureDescription t : this.textures.values()) {
+    for (final SBTexture2DDescription t : this.textures.values()) {
       et.appendChild(t.toXML());
     }
 
