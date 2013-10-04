@@ -21,8 +21,8 @@ import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.jtensors.VectorI3F;
-import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.renderer.RSpaceRGB;
+import com.io7m.renderer.RVectorI3F;
 
 /**
  * Object materials.
@@ -30,27 +30,35 @@ import com.io7m.jtensors.VectorReadable3F;
 
 @Immutable public final class KMaterial
 {
-  private final @Nonnull VectorI3F               diffuse;
+  private final @Nonnull RVectorI3F<RSpaceRGB>   diffuse;
   private final @Nonnull Option<Texture2DStatic> texture_diffuse_0;
   private final @Nonnull Option<Texture2DStatic> texture_diffuse_1;
   private final @Nonnull Option<Texture2DStatic> texture_normal;
   private final @Nonnull Option<Texture2DStatic> texture_specular;
+  private final float                            specular_intensity;
   private final float                            specular_exponent;
 
   KMaterial(
-    final @Nonnull VectorReadable3F diffuse,
+    final @Nonnull RVectorI3F<RSpaceRGB> diffuse,
     final @Nonnull Option<Texture2DStatic> texture_diffuse_0,
     final @Nonnull Option<Texture2DStatic> texture_diffuse_1,
     final @Nonnull Option<Texture2DStatic> texture_normal,
     final @Nonnull Option<Texture2DStatic> texture_specular,
+    final float specular_intensity,
     final float specular_exponent)
   {
-    this.diffuse = new VectorI3F(diffuse);
+    this.diffuse = new RVectorI3F<RSpaceRGB>(diffuse);
     this.texture_diffuse_0 = texture_diffuse_0;
     this.texture_diffuse_1 = texture_diffuse_1;
     this.texture_normal = texture_normal;
     this.texture_specular = texture_specular;
+    this.specular_intensity = specular_intensity;
     this.specular_exponent = specular_exponent;
+  }
+
+  public float getSpecularIntensity()
+  {
+    return this.specular_intensity;
   }
 
   public float getSpecularExponent()
@@ -58,7 +66,7 @@ import com.io7m.jtensors.VectorReadable3F;
     return this.specular_exponent;
   }
 
-  public @Nonnull VectorReadable3F getDiffuse()
+  public @Nonnull RVectorI3F<RSpaceRGB> getDiffuse()
   {
     return this.diffuse;
   }

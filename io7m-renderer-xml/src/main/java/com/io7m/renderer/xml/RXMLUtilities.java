@@ -29,6 +29,7 @@ import nu.xom.ValidityException;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RSpace;
 import com.io7m.renderer.RSpaceRGB;
+import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.RVectorI4F;
@@ -232,6 +233,44 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(ay),
       RXMLUtilities.getAttributeFloat(az),
       RXMLUtilities.getAttributeFloat(aw));
+  }
+
+  public static @Nonnull RVectorI4F<RSpaceRGBA> getElementAttributesRGBA(
+    final @Nonnull Element e,
+    final @Nonnull URI uri)
+    throws RXMLException,
+      ConstraintError
+  {
+    final Attribute ax = RXMLUtilities.getAttribute(e, "r", uri);
+    final Attribute ay = RXMLUtilities.getAttribute(e, "g", uri);
+    final Attribute az = RXMLUtilities.getAttribute(e, "b", uri);
+    final Attribute aw = RXMLUtilities.getAttribute(e, "a", uri);
+    return new RVectorI4F<RSpaceRGBA>(
+      RXMLUtilities.getAttributeFloat(ax),
+      RXMLUtilities.getAttributeFloat(ay),
+      RXMLUtilities.getAttributeFloat(az),
+      RXMLUtilities.getAttributeFloat(aw));
+  }
+
+  public static void putElementAttributesRGBA(
+    final @Nonnull Element e,
+    final @Nonnull RVectorI4F<RSpaceRGBA> rgba,
+    final @Nonnull String prefix,
+    final @Nonnull URI uri)
+  {
+    final Attribute ar =
+      new Attribute(prefix + ":r", uri.toString(), Float.toString(rgba.x));
+    final Attribute ag =
+      new Attribute(prefix + ":g", uri.toString(), Float.toString(rgba.y));
+    final Attribute ab =
+      new Attribute(prefix + ":b", uri.toString(), Float.toString(rgba.z));
+    final Attribute aa =
+      new Attribute(prefix + ":a", uri.toString(), Float.toString(rgba.w));
+
+    e.addAttribute(ar);
+    e.addAttribute(ag);
+    e.addAttribute(ab);
+    e.addAttribute(aa);
   }
 
   public static float getElementFloat(

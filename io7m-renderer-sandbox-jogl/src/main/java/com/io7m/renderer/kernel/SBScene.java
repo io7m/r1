@@ -231,13 +231,20 @@ import com.io7m.jaux.functional.Pair;
   public @Nonnull SBScene instanceAddByDescription(
     final @Nonnull SBInstanceDescription d)
   {
+    final SBMaterialDescription md = d.getMaterial();
+
     final SBTexture diff =
-      (d.getDiffuse() == null) ? null : this.textureGet(d.getDiffuse());
+      (md.getTextureDiffuse() == null) ? null : this.textureGet(md
+        .getTextureDiffuse());
     final SBTexture norm =
-      (d.getNormal() == null) ? null : this.textureGet(d.getNormal());
+      (md.getTextureNormal() == null) ? null : this.textureGet(md
+        .getTextureNormal());
     final SBTexture spec =
-      (d.getSpecular() == null) ? null : this.textureGet(d.getSpecular());
-    final SBInstance instance = new SBInstance(d, diff, norm, spec);
+      (md.getTextureSpecular() == null) ? null : this.textureGet(md
+        .getTextureSpecular());
+
+    final SBMaterial m = new SBMaterial(md, diff, norm, spec);
+    final SBInstance instance = new SBInstance(d, m);
     return this.instanceAdd(instance);
   }
 
