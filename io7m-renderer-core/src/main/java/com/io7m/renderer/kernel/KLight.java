@@ -28,9 +28,9 @@ import com.io7m.renderer.RVectorReadable3F;
  * Lights.
  */
 
-@Immutable abstract class KLight
+public @Immutable abstract class KLight
 {
-  @Immutable static final class KCone extends KLight
+  @Immutable public static final class KCone extends KLight
   {
     @SuppressWarnings("synthetic-access") KCone(
       final @Nonnull Integer id,
@@ -41,7 +41,7 @@ import com.io7m.renderer.RVectorReadable3F;
     }
   }
 
-  @Immutable static final class KDirectional extends KLight
+  @Immutable public static final class KDirectional extends KLight
   {
     private final @Nonnull RVectorReadable3F<RSpaceWorld> direction;
 
@@ -55,13 +55,13 @@ import com.io7m.renderer.RVectorReadable3F;
       this.direction = new RVectorI3F<RSpaceWorld>(direction);
     }
 
-    @Nonnull RVectorReadable3F<RSpaceWorld> getDirection()
+    public @Nonnull RVectorReadable3F<RSpaceWorld> getDirection()
     {
       return this.direction;
     }
   }
 
-  @Immutable static final class KSphere extends KLight
+  @Immutable public static final class KSphere extends KLight
   {
     private final @Nonnull RVectorReadable3F<RSpaceWorld>                        position;
     private final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius;
@@ -134,22 +134,22 @@ import com.io7m.renderer.RVectorReadable3F;
     this.intensity = intensity;
   }
 
-  @Nonnull RVectorI3F<RSpaceRGB> getColour()
+  public @Nonnull RVectorI3F<RSpaceRGB> getColour()
   {
     return this.colour;
   }
 
-  @Nonnull Integer getID()
+  public @Nonnull Integer getID()
   {
     return this.id;
   }
 
-  float getIntensity()
+  public float getIntensity()
   {
     return this.intensity;
   }
 
-  @Nonnull Type getType()
+  public @Nonnull Type getType()
   {
     return this.type;
   }

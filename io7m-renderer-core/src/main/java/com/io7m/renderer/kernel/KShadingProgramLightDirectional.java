@@ -18,14 +18,20 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RTransformView;
 
-interface KShadingProgramLightDirectional extends KShadingProgram
+public interface KShadingProgramLightDirectional extends KShadingProgram
 {
   void ksPrepareWithLightDirectional(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull RMatrixM4x4F<RTransformView> m,
-    final @Nonnull KLight.KDirectional light);
+    final @Nonnull MatrixM4x4F.Context context,
+    final @Nonnull RMatrixM4x4F<RTransformView> mv,
+    final @Nonnull KLight.KDirectional light)
+    throws JCGLException,
+      ConstraintError;
 }

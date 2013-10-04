@@ -31,6 +31,7 @@ enum SBRendererType
   RENDERER_DEBUG_NORMALS_MAP_LOCAL("debug-normals-map-local"),
   RENDERER_DEBUG_NORMALS_MAP_EYE("debug-normals-map-eye"),
   RENDERER_DEBUG_NORMALS_MAP_TANGENT("debug-normals-map-tangent"),
+  RENDERER_FORWARD("forward"),
   RENDERER_FORWARD_UNLIT("forward-unlit"),
   RENDERER_FORWARD_DIFFUSE("forward-diffuse"),
   RENDERER_FORWARD_DIFFUSE_SPECULAR("forward-diffuse-specular"),

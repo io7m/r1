@@ -33,8 +33,10 @@ import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.RMatrixM3x3F;
 import com.io7m.renderer.RMatrixReadable4x4F;
 import com.io7m.renderer.RTransformModelView;
+import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.kernel.KMesh;
 import com.io7m.renderer.kernel.KMeshInstance;
@@ -92,20 +94,21 @@ public final class KSPDepth implements KShadingProgram
       ConstraintError
   {
     this.exec.execPrepare(gc);
-    KShadingProgramCommon.putProjectionMatrix(this.exec, gc, m);
+    KShadingProgramCommon.projectionMatrixPut(this.exec, gc, m);
     this.exec.execCancel();
   }
 
   @Override public void ksRenderWithMeshInstance(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull RMatrixReadable4x4F<RTransformModelView> mv,
+    final @Nonnull RMatrixM3x3F<RTransformNormal> mn,
     final @Nonnull KMeshInstance m)
     throws ConstraintError,
       Exception
   {
     this.exec.execPrepare(gc);
-    KShadingProgramCommon.reuseProjectionMatrix(this.exec);
-    KShadingProgramCommon.putModelViewMatrix(this.exec, gc, mv);
+    KShadingProgramCommon.projectionMatrixReuse(this.exec);
+    KShadingProgramCommon.modelViewMatrixPut(this.exec, gc, mv);
 
     final KMesh mesh = m.getMesh();
     final ArrayBuffer array = mesh.getArrayBuffer();
@@ -113,7 +116,7 @@ public final class KSPDepth implements KShadingProgram
 
     gc.arrayBufferBind(array);
     try {
-      KShadingProgramCommon.bindAttributePosition(gc, this.exec, array);
+      KShadingProgramCommon.attributePositionBind(gc, this.exec, array);
       KShadingProgramCommon.renderWithIndices(gc, this.exec, indices);
     } finally {
       gc.arrayBufferUnbind();
