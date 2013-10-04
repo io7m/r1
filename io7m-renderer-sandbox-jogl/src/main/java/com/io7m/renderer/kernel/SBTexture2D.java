@@ -23,23 +23,23 @@ import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jcanephora.Texture2DStatic;
 
-@Immutable public final class SBTexture
+@Immutable public final class SBTexture2D
 {
-  private final @Nonnull SBTextureDescription description;
-  private final @Nonnull Texture2DStatic      texture;
-  private final @Nonnull BufferedImage        image;
+  private final @Nonnull SBTexture2DDescription description;
+  private final @Nonnull Texture2DStatic        texture;
+  private final @Nonnull BufferedImage          image;
 
-  public SBTexture(
+  public SBTexture2D(
     final @Nonnull Texture2DStatic texture,
     final @Nonnull BufferedImage image,
-    final @Nonnull SBTextureDescription description)
+    final @Nonnull SBTexture2DDescription description)
   {
     this.texture = texture;
     this.image = image;
     this.description = description;
   }
 
-  public @Nonnull SBTextureDescription getDescription()
+  public @Nonnull SBTexture2DDescription getDescription()
   {
     return this.description;
   }
@@ -62,7 +62,7 @@ import com.io7m.jcanephora.Texture2DStatic;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBTexture ");
+    builder.append("[SBTexture2D ");
     builder.append(this.texture);
     builder.append(" ");
     builder.append(this.description.getFile());

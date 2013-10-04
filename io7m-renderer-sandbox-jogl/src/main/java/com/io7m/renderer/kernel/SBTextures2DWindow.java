@@ -22,7 +22,7 @@ import javax.swing.JTextField;
 
 import com.io7m.jlog.Log;
 
-final class SBTexturesWindow extends JFrame
+final class SBTextures2DWindow extends JFrame
 {
   private static final long serialVersionUID;
 
@@ -30,14 +30,14 @@ final class SBTexturesWindow extends JFrame
     serialVersionUID = -3617746303911390018L;
   }
 
-  public SBTexturesWindow(
+  public SBTextures2DWindow(
     final @Nonnull SBSceneControllerTextures controller,
     final @Nonnull JTextField result,
     final @Nonnull Log log)
   {
     super("Textures");
     this.getContentPane().add(
-      new SBTexturesPanel(this, controller, result, log));
+      new SBTextures2DPanel(this, controller, result, log));
     this.pack();
   }
 }

@@ -30,7 +30,7 @@ import org.junit.Test;
 public class SBTextureDescriptionTest
 {
   private static class TextureGenerator implements
-    Generator<SBTextureDescription>
+    Generator<SBTexture2DDescription>
   {
     private final @Nonnull SBNonEmptyStringGenerator string_gen;
 
@@ -39,9 +39,9 @@ public class SBTextureDescriptionTest
       this.string_gen = new SBNonEmptyStringGenerator();
     }
 
-    @Override public SBTextureDescription next()
+    @Override public SBTexture2DDescription next()
     {
-      return new SBTextureDescription(
+      return new SBTexture2DDescription(
         new File(this.string_gen.next()),
         this.string_gen.next());
     }
@@ -53,14 +53,14 @@ public class SBTextureDescriptionTest
   {
     QuickCheck.forAllVerbose(
       new TextureGenerator(),
-      new AbstractCharacteristic<SBTextureDescription>() {
+      new AbstractCharacteristic<SBTexture2DDescription>() {
         @Override protected void doSpecify(
-          final @Nonnull SBTextureDescription desc)
+          final @Nonnull SBTexture2DDescription desc)
           throws Throwable
         {
           Assert.assertEquals(
             desc,
-            SBTextureDescription.fromXML(null, desc.toXML()));
+            SBTexture2DDescription.fromXML(null, desc.toXML()));
         }
       });
   }

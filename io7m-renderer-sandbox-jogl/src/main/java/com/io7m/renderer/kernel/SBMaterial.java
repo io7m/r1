@@ -22,15 +22,15 @@ import javax.annotation.Nonnull;
 public final class SBMaterial
 {
   private final @Nonnull SBMaterialDescription description;
-  private final @CheckForNull SBTexture        map_diffuse;
-  private final @CheckForNull SBTexture        map_normal;
-  private final @CheckForNull SBTexture        map_specular;
+  private final @CheckForNull SBTexture2D        map_diffuse;
+  private final @CheckForNull SBTexture2D        map_normal;
+  private final @CheckForNull SBTexture2D        map_specular;
 
   public SBMaterial(
     final @Nonnull SBMaterialDescription description,
-    final @CheckForNull SBTexture map_diffuse,
-    final @CheckForNull SBTexture map_normal,
-    final @CheckForNull SBTexture map_specular)
+    final @CheckForNull SBTexture2D map_diffuse,
+    final @CheckForNull SBTexture2D map_normal,
+    final @CheckForNull SBTexture2D map_specular)
   {
     this.description = description;
     this.map_diffuse = map_diffuse;
@@ -43,12 +43,12 @@ public final class SBMaterial
     return this.description;
   }
 
-  public @CheckForNull SBTexture getDiffuseMap()
+  public @CheckForNull SBTexture2D getDiffuseMap()
   {
     return this.map_diffuse;
   }
 
-  public @CheckForNull SBTexture getNormalMap()
+  public @CheckForNull SBTexture2D getNormalMap()
   {
     return this.map_normal;
   }
@@ -116,7 +116,7 @@ public final class SBMaterial
     return true;
   }
 
-  public @CheckForNull SBTexture getSpecularMap()
+  public @CheckForNull SBTexture2D getSpecularMap()
   {
     return this.map_specular;
   }
