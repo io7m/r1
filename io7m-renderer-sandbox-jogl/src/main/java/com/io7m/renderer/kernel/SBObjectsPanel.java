@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -28,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -52,8 +54,10 @@ import javax.swing.table.AbstractTableModel;
 import net.java.dev.designgridlayout.DesignGridLayout;
 
 import com.io7m.jlog.Log;
+import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.RVectorReadable3F;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
@@ -103,6 +107,11 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       serialVersionUID = -3467271842953066384L;
     }
 
+    protected final @Nonnull JTextField      diffuse_r;
+    protected final @Nonnull JTextField      diffuse_g;
+    protected final @Nonnull JTextField      diffuse_b;
+    protected final @Nonnull JButton         diffuse_select;
+
     protected final @Nonnull JTextField      diffuse_texture;
     private final @Nonnull JButton           diffuse_texture_select;
     protected final @Nonnull JTextField      normal_texture;
@@ -113,6 +122,9 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     protected @Nonnull Map<String, SBMesh>   meshes;
     protected final JComboBox<String>        mesh_selector;
     private final JButton                    mesh_load;
+
+    protected final @Nonnull JSlider         specular_intensity_slider;
+    protected final @Nonnull JTextField      specular_intensity;
 
     protected final @Nonnull JSlider         specular_exponent_slider;
     protected final @Nonnull JTextField      specular_exponent;
@@ -175,7 +187,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         final JTextField id_field =
           new JTextField(initial_desc.getID().toString());
         id_field.setEditable(false);
-        dg.row().grid().add(new JLabel("ID")).add(id_field, 3);
+        dg.row().grid().add(new JLabel("ID")).add(id_field, 4);
       }
 
       this.error_text = new JLabel("Some informative error text");
@@ -192,6 +204,31 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.orientation_z = new JTextField("0.0");
 
       this.default_field_border = this.position_x.getBorder();
+
+      this.diffuse_r = new JTextField("1.0");
+      this.diffuse_g = new JTextField("1.0");
+      this.diffuse_b = new JTextField("1.0");
+      this.diffuse_select = new JButton("Select...");
+      this.diffuse_select.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          final Color c =
+            JColorChooser.showDialog(
+              ObjectEditDialogPanel.this,
+              "Select colour...",
+              Color.WHITE);
+          if (c != null) {
+            final float[] rgb = c.getRGBColorComponents(null);
+            ObjectEditDialogPanel.this.diffuse_r.setText(Float
+              .toString(rgb[0]));
+            ObjectEditDialogPanel.this.diffuse_g.setText(Float
+              .toString(rgb[1]));
+            ObjectEditDialogPanel.this.diffuse_b.setText(Float
+              .toString(rgb[2]));
+          }
+        }
+      });
 
       this.diffuse_texture = new JTextField();
       this.diffuse_texture.setEditable(false);
@@ -317,6 +354,23 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         }
       });
 
+      this.specular_intensity = new JTextField("1.0");
+      this.specular_intensity.setEditable(false);
+      this.specular_intensity_slider = new JSlider(SwingConstants.HORIZONTAL);
+      this.specular_intensity_slider.setMinimum(0);
+      this.specular_intensity_slider.setMaximum(100);
+      this.specular_intensity_slider.setValue(100);
+      this.specular_intensity_slider.addChangeListener(new ChangeListener() {
+        @Override public void stateChanged(
+          final @Nonnull ChangeEvent ev)
+        {
+          final int current =
+            ObjectEditDialogPanel.this.specular_intensity_slider.getValue();
+          final String ctext = Float.toString(current / 100.f);
+          ObjectEditDialogPanel.this.specular_intensity.setText(ctext);
+        }
+      });
+
       final JButton cancel = new JButton("Cancel");
       cancel.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
@@ -356,36 +410,52 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       dg
         .row()
         .grid()
+        .add(new JLabel("Diffuse colour"))
+        .add(this.diffuse_r)
+        .add(this.diffuse_g)
+        .add(this.diffuse_b)
+        .add(this.diffuse_select);
+
+      dg
+        .row()
+        .grid()
         .add(new JLabel("Diffuse texture"))
-        .add(this.diffuse_texture, 2)
+        .add(this.diffuse_texture, 3)
         .add(this.diffuse_texture_select);
 
       dg
         .row()
         .grid()
         .add(new JLabel("Normal map"))
-        .add(this.normal_texture, 2)
+        .add(this.normal_texture, 3)
         .add(this.normal_texture_select);
 
       dg
         .row()
         .grid()
         .add(new JLabel("Specular map"))
-        .add(this.specular_texture, 2)
+        .add(this.specular_texture, 3)
         .add(this.specular_texture_select);
 
       dg
         .row()
         .grid()
         .add(new JLabel("Mesh"))
-        .add(this.mesh_selector, 2)
+        .add(this.mesh_selector, 3)
         .add(this.mesh_load);
 
       dg
         .row()
         .grid()
-        .add(new JLabel("Shininess"))
-        .add(this.specular_exponent_slider, 2)
+        .add(new JLabel("Specular intensity"))
+        .add(this.specular_intensity_slider, 3)
+        .add(this.specular_intensity);
+
+      dg
+        .row()
+        .grid()
+        .add(new JLabel("Specular exponent"))
+        .add(this.specular_exponent_slider, 3)
         .add(this.specular_exponent);
 
       dg.emptyRow();
@@ -422,6 +492,17 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       final RVectorReadable3F<RSpaceWorld> pos = initial_desc.getPosition();
       final RVectorReadable3F<SBDegrees> ori = initial_desc.getOrientation();
 
+      {
+        final int count = this.mesh_selector.getItemCount();
+        for (int index = 0; index < count; ++index) {
+          final String item = this.mesh_selector.getItemAt(index);
+          if (item.equals(initial_desc.getMesh())) {
+            this.mesh_selector.setSelectedIndex(index);
+            break;
+          }
+        }
+      }
+
       this.position_x.setText(Float.toString(pos.getXF()));
       this.position_y.setText(Float.toString(pos.getYF()));
       this.position_z.setText(Float.toString(pos.getZF()));
@@ -430,20 +511,32 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.orientation_y.setText(Float.toString(ori.getYF()));
       this.orientation_z.setText(Float.toString(ori.getZF()));
 
-      this.diffuse_texture.setText(initial_desc.getDiffuse() == null
+      final SBMaterialDescription mat = initial_desc.getMaterial();
+
+      this.diffuse_r.setText(Float.toString(mat.getDiffuse().x));
+      this.diffuse_g.setText(Float.toString(mat.getDiffuse().y));
+      this.diffuse_b.setText(Float.toString(mat.getDiffuse().z));
+
+      this.diffuse_texture.setText(mat.getTextureDiffuse() == null ? "" : mat
+        .getTextureDiffuse()
+        .toString());
+      this.normal_texture.setText(mat.getTextureNormal() == null ? "" : mat
+        .getTextureNormal()
+        .toString());
+      this.specular_texture.setText(mat.getTextureSpecular() == null
         ? ""
-        : initial_desc.getDiffuse().toString());
-      this.normal_texture.setText(initial_desc.getNormal() == null
-        ? ""
-        : initial_desc.getNormal().toString());
-      this.specular_texture.setText(initial_desc.getSpecular() == null
-        ? ""
-        : initial_desc.getSpecular().toString());
+        : mat.getTextureSpecular().toString());
 
       {
-        final float e = initial_desc.getSpecularExponent();
+        final float e = mat.getSpecularExponent();
         this.specular_exponent.setText(Float.toString(e));
         this.specular_exponent_slider.setValue((int) e);
+      }
+
+      {
+        final float e = mat.getSpecularIntensity();
+        this.specular_intensity.setText(Float.toString(e));
+        this.specular_intensity_slider.setValue((int) e * 100);
       }
     }
 
@@ -468,21 +561,41 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           SBTextFieldUtilities.getFieldFloatOrError(this.orientation_y),
           SBTextFieldUtilities.getFieldFloatOrError(this.orientation_z));
 
-      final String diffuse =
+      final RVectorI4F<RSpaceRGBA> diffuse_colour =
+        new RVectorI4F<RSpaceRGBA>(
+          SBTextFieldUtilities.getFieldFloatOrError(this.diffuse_r),
+          SBTextFieldUtilities.getFieldFloatOrError(this.diffuse_g),
+          SBTextFieldUtilities.getFieldFloatOrError(this.diffuse_b),
+          1.0f);
+
+      final String texture_diffuse =
         (this.diffuse_texture.getText().equals(""))
           ? null
           : this.diffuse_texture.getText();
-      final String normal =
+
+      final String texture_normal =
         (this.normal_texture.getText().equals(""))
           ? null
           : this.normal_texture.getText();
-      final String specular =
+
+      final String texture_specular =
         (this.specular_texture.getText().equals(""))
           ? null
           : this.specular_texture.getText();
 
       final float specular_exponent_value =
         this.specular_exponent_slider.getValue();
+      final float specular_intensity_value =
+        this.specular_intensity_slider.getValue() / 100.0f;
+
+      final SBMaterialDescription material =
+        new SBMaterialDescription(
+          diffuse_colour,
+          texture_diffuse,
+          texture_normal,
+          texture_specular,
+          specular_intensity_value,
+          specular_exponent_value);
 
       final String mesh_name = (String) this.mesh_selector.getSelectedItem();
 
@@ -492,10 +605,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           position,
           orientation,
           mesh_name,
-          diffuse,
-          normal,
-          specular,
-          specular_exponent_value);
+          material);
 
       controller.sceneInstanceAddByDescription(d);
 

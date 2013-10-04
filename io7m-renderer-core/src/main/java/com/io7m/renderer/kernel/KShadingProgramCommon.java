@@ -163,7 +163,10 @@ public final class KShadingProgramCommon
           "material.specular_exponent",
           m.getSpecularExponent());
 
-        exec.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
+        exec.execUniformPutFloat(
+          gc,
+          "material.specular_intensity",
+          m.getSpecularIntensity());
         break;
       }
       case SPECULAR_CAP_MAPPED:
@@ -173,7 +176,10 @@ public final class KShadingProgramCommon
           "material.specular_exponent",
           m.getSpecularExponent());
 
-        exec.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
+        exec.execUniformPutFloat(
+          gc,
+          "material.specular_intensity",
+          m.getSpecularIntensity());
         break;
       }
       case SPECULAR_CAP_NONE:

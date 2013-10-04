@@ -26,10 +26,37 @@ import net.java.quickcheck.generator.support.IntegerGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RSpaceWorld;
 
 public class SBInstanceDescriptionTest
 {
+  private static class MaterialGenerator implements
+    Generator<SBMaterialDescription>
+  {
+    private final @Nonnull SBNonEmptyStringGenerator        string_gen;
+    private final @Nonnull IntegerGenerator                 int_gen;
+    private final @Nonnull SBVectorI4FGenerator<RSpaceRGBA> rgba_gen;
+
+    public MaterialGenerator()
+    {
+      this.string_gen = new SBNonEmptyStringGenerator();
+      this.int_gen = new IntegerGenerator();
+      this.rgba_gen = new SBVectorI4FGenerator<RSpaceRGBA>();
+    }
+
+    @Override public SBMaterialDescription next()
+    {
+      return new SBMaterialDescription(
+        this.rgba_gen.next(),
+        this.string_gen.next(),
+        this.string_gen.next(),
+        this.string_gen.next(),
+        (float) Math.random(),
+        (float) Math.random());
+    }
+  }
+
   private static class InstanceGenerator implements
     Generator<SBInstanceDescription>
   {
@@ -37,6 +64,7 @@ public class SBInstanceDescriptionTest
     private final @Nonnull IntegerGenerator                  int_gen;
     private final @Nonnull SBVectorI3FGenerator<RSpaceWorld> pos_gen;
     private final @Nonnull SBVectorI3FGenerator<SBDegrees>   ori_gen;
+    private final @Nonnull MaterialGenerator                 mat_gen;
 
     public InstanceGenerator()
     {
@@ -44,19 +72,17 @@ public class SBInstanceDescriptionTest
       this.int_gen = new IntegerGenerator();
       this.pos_gen = new SBVectorI3FGenerator<RSpaceWorld>();
       this.ori_gen = new SBVectorI3FGenerator<SBDegrees>();
+      this.mat_gen = new MaterialGenerator();
     }
 
-    @SuppressWarnings("boxing") @Override public SBInstanceDescription next()
+    @Override public SBInstanceDescription next()
     {
       return new SBInstanceDescription(
         this.int_gen.next(),
         this.pos_gen.next(),
         this.ori_gen.next(),
         this.string_gen.next(),
-        this.string_gen.next(),
-        this.string_gen.next(),
-        this.string_gen.next(),
-        this.int_gen.next());
+        this.mat_gen.next());
     }
   }
 
