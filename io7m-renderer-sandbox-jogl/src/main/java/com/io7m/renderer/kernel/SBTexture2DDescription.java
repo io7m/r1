@@ -30,9 +30,9 @@ import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
 import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.RXMLUtilities;
 
-@Immutable final class SBTextureDescription
+@Immutable final class SBTexture2DDescription
 {
-  static @Nonnull SBTextureDescription fromXML(
+  static @Nonnull SBTexture2DDescription fromXML(
     final @CheckForNull BaseDirectory base,
     final @Nonnull Element e)
     throws RXMLException,
@@ -40,23 +40,23 @@ import com.io7m.renderer.xml.RXMLUtilities;
   {
     final URI uri = SBSceneDescription.SCENE_XML_URI;
 
-    RXMLUtilities.checkIsElement(e, "texture", uri);
+    RXMLUtilities.checkIsElement(e, "texture-2d", uri);
     final Element ef = RXMLUtilities.getChild(e, "file", uri);
     final Element en = RXMLUtilities.getChild(e, "name", uri);
     final String f = RXMLUtilities.getElementNonEmptyString(ef);
     final String n = RXMLUtilities.getElementNonEmptyString(en);
 
     if (base == null) {
-      return new SBTextureDescription(new File(f), n);
+      return new SBTexture2DDescription(new File(f), n);
     }
 
-    return new SBTextureDescription(new File(base.getFile(), f), n);
+    return new SBTexture2DDescription(new File(base.getFile(), f), n);
   }
 
   private final @Nonnull File   file;
   private final @Nonnull String name;
 
-  SBTextureDescription(
+  SBTexture2DDescription(
     final @Nonnull File file,
     final @Nonnull String name)
   {
@@ -67,7 +67,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBTextureDescription ");
+    builder.append("[SBTexture2DDescription ");
     builder.append(this.file);
     builder.append(" ");
     builder.append(this.name);
@@ -87,7 +87,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final SBTextureDescription other = (SBTextureDescription) obj;
+    final SBTexture2DDescription other = (SBTexture2DDescription) obj;
     if (!this.file.equals(other.file)) {
       return false;
     }
@@ -119,7 +119,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
   @Nonnull Element toXML()
   {
     final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-    final Element e = new Element("s:texture", uri);
+    final Element e = new Element("s:texture-2d", uri);
     final Element ef = new Element("s:file", uri);
     ef.appendChild(this.file.toString());
     final Element en = new Element("s:name", uri);
