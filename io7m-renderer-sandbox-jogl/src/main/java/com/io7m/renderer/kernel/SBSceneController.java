@@ -58,7 +58,9 @@ import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.renderer.RSpaceRGB;
+import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.kernel.SBException.SBExceptionImageLoading;
 import com.io7m.renderer.kernel.SBZipUtilities.TemporaryDirectory;
 import com.io7m.renderer.xml.RXMLException;
@@ -385,6 +387,7 @@ public final class SBSceneController implements
 
     for (final SBInstance i : scene.instancesGet()) {
       final SBMesh mesh = scene.meshGet(i.getMesh());
+      final SBMaterial mat = i.getMaterial();
 
       final QuaternionM4F orientation = new QuaternionM4F();
       final Integer id = i.getID();
@@ -392,22 +395,25 @@ public final class SBSceneController implements
       final KTransform transform =
         new KTransform(i.getPosition(), orientation);
 
+      final RVectorI4F<RSpaceRGBA> md = mat.getDescription().getDiffuse();
       final RVectorI3F<RSpaceRGB> diffuse =
-        new RVectorI3F<RSpaceRGB>(1.0f, 1.0f, 1.0f);
+        new RVectorI3F<RSpaceRGB>(md.x, md.y, md.z);
 
       final Option<Texture2DStatic> diffuse_map =
-        (i.getDiffuseMap() != null) ? new Option.Some<Texture2DStatic>(i
+        (mat.getDiffuseMap() != null) ? new Option.Some<Texture2DStatic>(mat
           .getDiffuseMap()
           .getTexture()) : new Option.None<Texture2DStatic>();
 
       final Option<Texture2DStatic> normal_map =
-        (i.getNormalMap() == null)
+        (mat.getNormalMap() == null)
           ? new Option.None<Texture2DStatic>()
-          : new Option.Some<Texture2DStatic>(i.getNormalMap().getTexture());
+          : new Option.Some<Texture2DStatic>(mat.getNormalMap().getTexture());
       final Option<Texture2DStatic> specular_map =
-        (i.getSpecularMap() == null)
+        (mat.getSpecularMap() == null)
           ? new Option.None<Texture2DStatic>()
-          : new Option.Some<Texture2DStatic>(i.getSpecularMap().getTexture());
+          : new Option.Some<Texture2DStatic>(mat
+            .getSpecularMap()
+            .getTexture());
 
       final KMaterial material =
         new KMaterial(
@@ -416,7 +422,8 @@ public final class SBSceneController implements
           new Option.None<Texture2DStatic>(),
           normal_map,
           specular_map,
-          i.getSpecularExponent());
+          mat.getDescription().getSpecularIntensity(),
+          mat.getDescription().getSpecularExponent());
 
       meshes =
         meshes
