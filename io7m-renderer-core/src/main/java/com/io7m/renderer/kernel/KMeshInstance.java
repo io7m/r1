@@ -19,6 +19,8 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+
 /**
  * <p>
  * An instance of a polygon mesh on the GPU.
@@ -34,27 +36,37 @@ import javax.annotation.concurrent.Immutable;
  * <li>If the mesh has texture coordinates, they must be of type
  * {@link KMeshAttributes#ATTRIBUTE_UV}.</li>
  * <li>If the mesh has per-vertex tangents, they must be of type
- * {@link KMeshAttributes#ATTRIBUTE_TANGENT3}.</li>
+ * {@link KMeshAttributes#ATTRIBUTE_TANGENT4}.</li>
+ * <li>If the mesh has both per-vertex tangents, they must be of type
+ * {@link KMeshAttributes#ATTRIBUTE_TANGENT4}.</li>
  * <ul>
  */
 
 @Immutable public final class KMeshInstance implements KTransformable
 {
-  private final @Nonnull Integer    id;
-  private final @Nonnull KTransform transform;
-  private final @Nonnull KMesh      mesh;
-  private final @Nonnull KMaterial  material;
+  private final @Nonnull Integer                   id;
+  private final @Nonnull KTransform                transform;
+  private final @Nonnull KMesh                     mesh;
+  private final @Nonnull KMaterial                 material;
+  private final @Nonnull KRenderingCapabilities capabilities;
 
   public KMeshInstance(
     final @Nonnull Integer id,
     final @Nonnull KTransform transform,
     final @Nonnull KMesh mesh,
     final @Nonnull KMaterial material)
+    throws ConstraintError
   {
     this.id = id;
     this.transform = transform;
     this.mesh = mesh;
     this.material = material;
+    this.capabilities = KRenderingCapabilities.make(mesh, material);
+  }
+
+  public @Nonnull KRenderingCapabilities getCapabilities()
+  {
+    return this.capabilities;
   }
 
   public @Nonnull Integer getID()

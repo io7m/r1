@@ -617,6 +617,7 @@ final class SBGLRenderer implements GLEventListener
           this.gi,
           this.filesystem,
           this.log));
+
     this.renderers.put(
       SBRendererType.RENDERER_DEBUG_TANGENTS_VERTEX_LOCAL,
       new KRendererDebugTangentsVertexLocal(
@@ -627,6 +628,7 @@ final class SBGLRenderer implements GLEventListener
     this.renderers.put(
       SBRendererType.RENDERER_DEBUG_NORMALS_VERTEX_EYE,
       new KRendererDebugNormalsVertexEye(this.gi, this.filesystem, this.log));
+
     this.renderers
       .put(
         SBRendererType.RENDERER_DEBUG_NORMALS_VERTEX_LOCAL,
@@ -638,9 +640,11 @@ final class SBGLRenderer implements GLEventListener
     this.renderers.put(
       SBRendererType.RENDERER_DEBUG_NORMALS_MAP_EYE,
       new KRendererDebugNormalsMapEye(this.gi, this.filesystem, this.log));
+
     this.renderers.put(
       SBRendererType.RENDERER_DEBUG_NORMALS_MAP_LOCAL,
       new KRendererDebugNormalsMapLocal(this.gi, this.filesystem, this.log));
+
     this.renderers
       .put(
         SBRendererType.RENDERER_DEBUG_NORMALS_MAP_TANGENT,
@@ -649,6 +653,11 @@ final class SBGLRenderer implements GLEventListener
           this.filesystem,
           this.log));
 
+    this.renderers.put(SBRendererType.RENDERER_FORWARD, new KRendererForward(
+      this.gi,
+      this.filesystem,
+      this.log));
+
     this.renderers.put(
       SBRendererType.RENDERER_FORWARD_UNLIT,
       new KRendererForwardUnlit(this.gi, this.filesystem, this.log));
@@ -656,6 +665,7 @@ final class SBGLRenderer implements GLEventListener
     this.renderers.put(
       SBRendererType.RENDERER_FORWARD_DIFFUSE,
       new KRendererForwardDiffuse(this.gi, this.filesystem, this.log));
+
     this.renderers
       .put(
         SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR,
@@ -663,6 +673,7 @@ final class SBGLRenderer implements GLEventListener
           this.gi,
           this.filesystem,
           this.log));
+
     this.renderers.put(
       SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR_NORMAL,
       new KRendererForwardDiffuseSpecularNormal(

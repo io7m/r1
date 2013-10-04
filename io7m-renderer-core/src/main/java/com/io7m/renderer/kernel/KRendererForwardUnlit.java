@@ -22,7 +22,6 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.Framebuffer;
 import com.io7m.jcanephora.JCGLCompileException;
@@ -45,14 +44,15 @@ import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
-import com.io7m.renderer.kernel.programs.KSPForward;
-import com.io7m.renderer.kernel.programs.KSPForwardTextured;
+import com.io7m.renderer.kernel.KRenderingCapabilities.TextureCapability;
+import com.io7m.renderer.kernel.programs.KSPF_U;
+import com.io7m.renderer.kernel.programs.KSPF_U_T;
 
 final class KRendererForwardUnlit implements KRenderer
 {
   private final @Nonnull JCGLImplementation                 gl;
-  private final @Nonnull KSPForwardTextured                 fwd_t;
-  private final @Nonnull KSPForward                         fwd;
+  private final @Nonnull KSPF_U_T                           fwd_U_t;
+  private final @Nonnull KSPF_U                             fwd_U;
   private final @Nonnull Log                                log;
   private final @Nonnull VectorM4F                          background;
   private final @Nonnull VectorM2I                          viewport_size;
@@ -89,8 +89,8 @@ final class KRendererForwardUnlit implements KRenderer
     this.transform_context = new KTransform.Context();
     this.viewport_size = new VectorM2I();
 
-    this.fwd_t = KSPForwardTextured.make(gl.getGLCommon(), fs, log);
-    this.fwd = KSPForward.make(gl.getGLCommon(), fs, log);
+    this.fwd_U_t = KSPF_U_T.make(gl.getGLCommon(), fs, log);
+    this.fwd_U = KSPF_U.make(gl.getGLCommon(), fs, log);
   }
 
   @Override public void render(
@@ -117,8 +117,8 @@ final class KRendererForwardUnlit implements KRenderer
       gc.colorBufferClearV4f(this.background);
       gc.blendingDisable();
 
-      this.fwd_t.ksPreparePass(gc, this.matrix_projection);
-      this.fwd.ksPreparePass(gc, this.matrix_projection);
+      this.fwd_U_t.ksPreparePass(gc, this.matrix_projection);
+      this.fwd_U.ksPreparePass(gc, this.matrix_projection);
 
       for (final KMeshInstance mesh : scene.getMeshes()) {
         this.renderMesh(gc, mesh);
@@ -142,21 +142,22 @@ final class KRendererForwardUnlit implements KRenderer
       this.matrix_modelview);
 
     try {
-      final KMaterial mat = instance.getMaterial();
-      final ArrayBuffer arr = instance.getMesh().getArrayBuffer();
-      final boolean can_texture =
-        mat.getTextureDiffuse0().isSome()
-          && arr.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
+      final KRenderingCapabilities caps = instance.getCapabilities();
 
-      if (can_texture) {
-        this.fwd_t.ksRenderWithMeshInstance(
+      if (caps.getTexture() == TextureCapability.TEXTURE_CAP_DIFFUSE) {
+        this.fwd_U_t.ksRenderWithMeshInstance(
           gc,
           this.matrix_modelview,
+          this.matrix_normal,
           instance);
       } else {
-        this.fwd
-          .ksRenderWithMeshInstance(gc, this.matrix_modelview, instance);
+        this.fwd_U.ksRenderWithMeshInstance(
+          gc,
+          this.matrix_modelview,
+          this.matrix_normal,
+          instance);
       }
+
     } catch (final Exception e) {
       throw new UnreachableCodeException();
     }
