@@ -53,7 +53,10 @@ import javax.swing.table.AbstractTableModel;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Log;
+import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorI3F;
@@ -101,47 +104,57 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 
   private static class ObjectEditDialogPanel extends JPanel
   {
-    private static final long                serialVersionUID;
+    private static final long                       serialVersionUID;
 
     static {
       serialVersionUID = -3467271842953066384L;
     }
 
-    protected final @Nonnull JTextField      diffuse_r;
-    protected final @Nonnull JTextField      diffuse_g;
-    protected final @Nonnull JTextField      diffuse_b;
-    protected final @Nonnull JButton         diffuse_select;
+    protected final @Nonnull JTextField             diffuse_r;
+    protected final @Nonnull JTextField             diffuse_g;
+    protected final @Nonnull JTextField             diffuse_b;
+    protected final @Nonnull JButton                diffuse_select;
 
-    protected final @Nonnull JTextField      diffuse_texture;
-    private final @Nonnull JButton           diffuse_texture_select;
-    protected final @Nonnull JTextField      normal_texture;
-    private final @Nonnull JButton           normal_texture_select;
-    protected final @Nonnull JTextField      specular_texture;
-    private final @Nonnull JButton           specular_texture_select;
+    protected final @Nonnull JTextField             diffuse_texture;
+    protected final @Nonnull JButton                diffuse_texture_select;
 
-    protected @Nonnull Map<String, SBMesh>   meshes;
-    protected final JComboBox<String>        mesh_selector;
-    private final JButton                    mesh_load;
+    protected final @Nonnull JSlider                diffuse_mix_slider;
+    protected final @Nonnull JTextField             diffuse_mix;
 
-    protected final @Nonnull JSlider         specular_intensity_slider;
-    protected final @Nonnull JTextField      specular_intensity;
+    protected final @Nonnull JTextField             normal_texture;
+    protected final @Nonnull JButton                normal_texture_select;
+    protected final @Nonnull JTextField             specular_texture;
+    protected final @Nonnull JButton                specular_texture_select;
 
-    protected final @Nonnull JSlider         specular_exponent_slider;
-    protected final @Nonnull JTextField      specular_exponent;
+    protected final @Nonnull JTextField             environment_texture;
+    protected final @Nonnull JButton                environment_texture_select;
 
-    protected final @Nonnull JTextField      position_x;
-    protected final @Nonnull JTextField      position_y;
-    protected final @Nonnull JTextField      position_z;
+    protected final @Nonnull JSlider                environment_mix_slider;
+    protected final @Nonnull JTextField             environment_mix;
 
-    protected final @Nonnull JTextField      orientation_x;
-    protected final @Nonnull JTextField      orientation_y;
-    protected final @Nonnull JTextField      orientation_z;
+    protected @Nonnull Map<PathVirtual, SBMesh>     meshes;
+    protected final @Nonnull JComboBox<PathVirtual> mesh_selector;
+    protected final @Nonnull JButton                mesh_load;
 
-    protected final @Nonnull JLabel          error_icon;
-    protected final @Nonnull JLabel          error_text;
+    protected final @Nonnull JSlider                specular_intensity_slider;
+    protected final @Nonnull JTextField             specular_intensity;
 
-    private final @Nonnull ObjectsTableModel objects_table_model;
-    private final @Nonnull Border            default_field_border;
+    protected final @Nonnull JSlider                specular_exponent_slider;
+    protected final @Nonnull JTextField             specular_exponent;
+
+    protected final @Nonnull JTextField             position_x;
+    protected final @Nonnull JTextField             position_y;
+    protected final @Nonnull JTextField             position_z;
+
+    protected final @Nonnull JTextField             orientation_x;
+    protected final @Nonnull JTextField             orientation_y;
+    protected final @Nonnull JTextField             orientation_z;
+
+    protected final @Nonnull JLabel                 error_icon;
+    protected final @Nonnull JLabel                 error_text;
+
+    private final @Nonnull ObjectsTableModel        objects_table_model;
+    private final @Nonnull Border                   default_field_border;
 
     protected void meshesRefresh(
       final @Nonnull SBSceneControllerMeshes controller)
@@ -149,7 +162,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       ObjectEditDialogPanel.this.meshes = controller.sceneMeshesGet();
 
       this.mesh_selector.removeAllItems();
-      for (final String name : this.meshes.keySet()) {
+      for (final PathVirtual name : this.meshes.keySet()) {
         this.mesh_selector.addItem(name);
       }
     }
@@ -247,6 +260,23 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         }
       });
 
+      this.diffuse_mix = new JTextField("1.0");
+      this.diffuse_mix.setEditable(false);
+      this.diffuse_mix_slider = new JSlider(SwingConstants.HORIZONTAL);
+      this.diffuse_mix_slider.setMinimum(0);
+      this.diffuse_mix_slider.setMaximum(100);
+      this.diffuse_mix_slider.setValue(50);
+      this.diffuse_mix_slider.addChangeListener(new ChangeListener() {
+        @Override public void stateChanged(
+          final @Nonnull ChangeEvent ev)
+        {
+          final int current =
+            ObjectEditDialogPanel.this.diffuse_mix_slider.getValue();
+          final String ctext = Integer.toString(current);
+          ObjectEditDialogPanel.this.diffuse_mix.setText(ctext);
+        }
+      });
+
       this.normal_texture = new JTextField();
       this.normal_texture.setEditable(false);
       this.normal_texture_select = new JButton("Select...");
@@ -281,7 +311,41 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         }
       });
 
-      this.mesh_selector = new JComboBox<String>();
+      this.environment_texture = new JTextField();
+      this.environment_texture.setEditable(false);
+      this.environment_texture_select = new JButton("Select...");
+      this.environment_texture_select.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          final SBTexturesCubeWindow twindow =
+            new SBTexturesCubeWindow(
+              controller,
+              ObjectEditDialogPanel.this.environment_texture,
+              log);
+          twindow.pack();
+          twindow.setVisible(true);
+        }
+      });
+
+      this.environment_mix = new JTextField("1.0");
+      this.environment_mix.setEditable(false);
+      this.environment_mix_slider = new JSlider(SwingConstants.HORIZONTAL);
+      this.environment_mix_slider.setMinimum(0);
+      this.environment_mix_slider.setMaximum(100);
+      this.environment_mix_slider.setValue(50);
+      this.environment_mix_slider.addChangeListener(new ChangeListener() {
+        @Override public void stateChanged(
+          final @Nonnull ChangeEvent ev)
+        {
+          final int current =
+            ObjectEditDialogPanel.this.environment_mix_slider.getValue();
+          final String ctext = Integer.toString(current);
+          ObjectEditDialogPanel.this.environment_mix.setText(ctext);
+        }
+      });
+
+      this.mesh_selector = new JComboBox<PathVirtual>();
       this.meshesRefresh(controller);
 
       this.mesh_load = new JButton("Open...");
@@ -304,7 +368,11 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
                   @Override protected SBMesh doInBackground()
                     throws Exception
                   {
-                    return controller.sceneMeshLoad(file).get();
+                    try {
+                      return controller.sceneMeshLoad(file).get();
+                    } catch (final ConstraintError x) {
+                      throw new IOException(x);
+                    }
                   }
 
                   @Override protected void done()
@@ -389,6 +457,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
             ObjectEditDialogPanel.this.saveObject(controller, initial_desc);
           } catch (final SBExceptionInputError x) {
             ObjectEditDialogPanel.this.setError(x.getMessage());
+          } catch (final ConstraintError x) {
+            ObjectEditDialogPanel.this.setError(x.getMessage());
           }
         }
       });
@@ -402,6 +472,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
             ObjectEditDialogPanel.this.saveObject(controller, initial_desc);
             SBWindowUtilities.closeWindow(window);
           } catch (final SBExceptionInputError x) {
+            ObjectEditDialogPanel.this.setError(x.getMessage());
+          } catch (final ConstraintError x) {
             ObjectEditDialogPanel.this.setError(x.getMessage());
           }
         }
@@ -426,6 +498,15 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       dg
         .row()
         .grid()
+        .add(new JLabel("Diffuse mix"))
+        .add(this.diffuse_mix_slider, 3)
+        .add(this.diffuse_mix);
+
+      dg.emptyRow();
+
+      dg
+        .row()
+        .grid()
         .add(new JLabel("Normal map"))
         .add(this.normal_texture, 3)
         .add(this.normal_texture_select);
@@ -436,13 +517,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         .add(new JLabel("Specular map"))
         .add(this.specular_texture, 3)
         .add(this.specular_texture_select);
-
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Mesh"))
-        .add(this.mesh_selector, 3)
-        .add(this.mesh_load);
 
       dg
         .row()
@@ -463,10 +537,35 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       dg
         .row()
         .grid()
+        .add(new JLabel("Environment map"))
+        .add(this.environment_texture, 3)
+        .add(this.environment_texture_select);
+
+      dg
+        .row()
+        .grid()
+        .add(new JLabel("Environment mix"))
+        .add(this.environment_mix_slider, 3)
+        .add(this.environment_mix);
+
+      dg.emptyRow();
+
+      dg
+        .row()
+        .grid()
+        .add(new JLabel("Mesh"))
+        .add(this.mesh_selector, 3)
+        .add(this.mesh_load);
+
+      dg.emptyRow();
+
+      dg
+        .row()
+        .grid()
         .add(new JLabel("Position"))
         .add(this.position_x)
         .add(this.position_y)
-        .add(this.position_z);
+        .add(this.position_z, 2);
 
       dg
         .row()
@@ -474,7 +573,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         .add(new JLabel("Orientation"))
         .add(this.orientation_x)
         .add(this.orientation_y)
-        .add(this.orientation_z);
+        .add(this.orientation_z, 2);
 
       dg.emptyRow();
       dg.row().grid().add(apply).add(cancel).add(finish);
@@ -495,7 +594,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       {
         final int count = this.mesh_selector.getItemCount();
         for (int index = 0; index < count; ++index) {
-          final String item = this.mesh_selector.getItemAt(index);
+          final PathVirtual item = this.mesh_selector.getItemAt(index);
           if (item.equals(initial_desc.getMesh())) {
             this.mesh_selector.setSelectedIndex(index);
             break;
@@ -512,29 +611,39 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.orientation_z.setText(Float.toString(ori.getZF()));
 
       final SBMaterialDescription mat = initial_desc.getMaterial();
+      final SBMaterialDiffuseDescription mat_d = mat.getDiffuse();
+      final SBMaterialNormalDescription mat_n = mat.getNormal();
+      final SBMaterialSpecularDescription mat_s = mat.getSpecular();
+      final SBMaterialEnvironmentDescription mat_e = mat.getEnvironment();
 
-      this.diffuse_r.setText(Float.toString(mat.getDiffuse().x));
-      this.diffuse_g.setText(Float.toString(mat.getDiffuse().y));
-      this.diffuse_b.setText(Float.toString(mat.getDiffuse().z));
+      this.diffuse_r.setText(Float.toString(mat_d.getColour().x));
+      this.diffuse_g.setText(Float.toString(mat_d.getColour().y));
+      this.diffuse_b.setText(Float.toString(mat_d.getColour().z));
 
-      this.diffuse_texture.setText(mat.getTextureDiffuse() == null ? "" : mat
-        .getTextureDiffuse()
+      this.diffuse_texture.setText(mat_d.getTexture() == null ? "" : mat_d
+        .getTexture()
         .toString());
-      this.normal_texture.setText(mat.getTextureNormal() == null ? "" : mat
-        .getTextureNormal()
+
+      this.normal_texture.setText(mat_n.getTexture() == null ? "" : mat_n
+        .getTexture()
         .toString());
-      this.specular_texture.setText(mat.getTextureSpecular() == null
+
+      this.specular_texture.setText(mat_s.getTexture() == null ? "" : mat_s
+        .getTexture()
+        .toString());
+
+      this.environment_texture.setText(mat_e.getTexture() == null
         ? ""
-        : mat.getTextureSpecular().toString());
+        : mat_e.getTexture().toString());
 
       {
-        final float e = mat.getSpecularExponent();
+        final float e = mat_s.getExponent();
         this.specular_exponent.setText(Float.toString(e));
         this.specular_exponent_slider.setValue((int) e);
       }
 
       {
-        final float e = mat.getSpecularIntensity();
+        final float e = mat_s.getIntensity();
         this.specular_intensity.setText(Float.toString(e));
         this.specular_intensity_slider.setValue((int) e * 100);
       }
@@ -543,7 +652,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     protected void saveObject(
       final @Nonnull SBSceneControllerInstances controller,
       final @CheckForNull SBInstanceDescription initial)
-      throws SBExceptionInputError
+      throws SBExceptionInputError,
+        ConstraintError
     {
       final Integer id =
         (initial == null) ? controller.sceneInstanceFreshID() : initial
@@ -568,36 +678,55 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           SBTextFieldUtilities.getFieldFloatOrError(this.diffuse_b),
           1.0f);
 
-      final String texture_diffuse =
-        (this.diffuse_texture.getText().equals(""))
-          ? null
-          : this.diffuse_texture.getText();
+      final PathVirtual diffuse_texture_value =
+        (this.diffuse_texture.getText().equals("")) ? null : PathVirtual
+          .ofString(this.diffuse_texture.getText());
+      final float diffuse_mix_value =
+        this.diffuse_mix_slider.getValue() / 100.0f;
 
-      final String texture_normal =
-        (this.normal_texture.getText().equals(""))
-          ? null
-          : this.normal_texture.getText();
+      final PathVirtual texture_normal =
+        (this.normal_texture.getText().equals("")) ? null : PathVirtual
+          .ofString(this.normal_texture.getText());
 
-      final String texture_specular =
-        (this.specular_texture.getText().equals(""))
-          ? null
-          : this.specular_texture.getText();
-
+      final PathVirtual specular_texture_value =
+        (this.specular_texture.getText().equals("")) ? null : PathVirtual
+          .ofString(this.specular_texture.getText());
       final float specular_exponent_value =
         this.specular_exponent_slider.getValue();
       final float specular_intensity_value =
         this.specular_intensity_slider.getValue() / 100.0f;
 
-      final SBMaterialDescription material =
-        new SBMaterialDescription(
+      final PathVirtual environment_texture_value =
+        (this.environment_texture.getText().equals("")) ? null : PathVirtual
+          .ofString(this.environment_texture.getText());
+      final float environment_mix_value =
+        this.environment_mix_slider.getValue() / 100.0f;
+
+      final SBMaterialDiffuseDescription diffuse =
+        new SBMaterialDiffuseDescription(
           diffuse_colour,
-          texture_diffuse,
-          texture_normal,
-          texture_specular,
+          diffuse_mix_value,
+          diffuse_texture_value);
+
+      final SBMaterialSpecularDescription specular =
+        new SBMaterialSpecularDescription(
+          specular_texture_value,
           specular_intensity_value,
           specular_exponent_value);
 
-      final String mesh_name = (String) this.mesh_selector.getSelectedItem();
+      final SBMaterialEnvironmentDescription environment =
+        new SBMaterialEnvironmentDescription(
+          environment_texture_value,
+          environment_mix_value);
+
+      final SBMaterialNormalDescription normal =
+        new SBMaterialNormalDescription(texture_normal);
+
+      final SBMaterialDescription material =
+        new SBMaterialDescription(diffuse, specular, environment, normal);
+
+      final PathVirtual mesh_name =
+        (PathVirtual) this.mesh_selector.getSelectedItem();
 
       final SBInstanceDescription d =
         new SBInstanceDescription(
@@ -692,6 +821,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 
     protected @Nonnull SBInstance getInstanceAt(
       final int row)
+      throws ConstraintError
     {
       final ArrayList<String> row_data = this.data.get(row);
       assert row_data != null;
@@ -718,10 +848,11 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.data.clear();
       final Collection<SBInstance> objects =
         this.controller.sceneInstancesGetAll();
+
       for (final SBInstance o : objects) {
         final ArrayList<String> row = new ArrayList<String>();
         row.add(o.getID().toString());
-        row.add(o.getMesh());
+        row.add(o.getMesh().toString());
         this.data.add(row);
       }
 
@@ -791,6 +922,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           dialog.setVisible(true);
         } catch (final IOException x) {
           log.critical("Unable to open edit dialog: " + x.getMessage());
+        } catch (final ConstraintError x) {
+          log.critical("Unable to open edit dialog: " + x.getMessage());
         }
       }
     });
@@ -801,16 +934,20 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final int view_row = SBObjectsPanel.this.objects.getSelectedRow();
-        assert view_row != -1;
-        final int model_row =
-          SBObjectsPanel.this.objects.convertRowIndexToModel(view_row);
-        final SBInstance object =
-          SBObjectsPanel.this.objects_model.getInstanceAt(model_row);
-        assert object != null;
+        try {
+          final int view_row = SBObjectsPanel.this.objects.getSelectedRow();
+          assert view_row != -1;
+          final int model_row =
+            SBObjectsPanel.this.objects.convertRowIndexToModel(view_row);
+          final SBInstance object =
+            SBObjectsPanel.this.objects_model.getInstanceAt(model_row);
+          assert object != null;
 
-        controller.sceneInstanceRemove(object.getID());
-        SBObjectsPanel.this.objects_model.refreshObjects();
+          controller.sceneInstanceRemove(object.getID());
+          SBObjectsPanel.this.objects_model.refreshObjects();
+        } catch (final ConstraintError x) {
+          throw new UnreachableCodeException();
+        }
       }
     });
 
@@ -833,7 +970,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     dg.row().grid().add(this.scroller);
     dg.row().grid().add(add).add(edit).add(remove);
 
-    controller.changeListenerAdd(this);
+    controller.sceneChangeListenerAdd(this);
   }
 
   @Override public void sceneChanged()

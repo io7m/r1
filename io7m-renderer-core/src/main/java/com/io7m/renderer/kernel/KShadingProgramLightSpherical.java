@@ -21,17 +21,13 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.renderer.RMatrixM4x4F;
-import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.kernel.KLight.KSphere;
 
 public interface KShadingProgramLightSpherical extends KShadingProgram
 {
   void ksPrepareWithLightSpherical(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull MatrixM4x4F.Context matrix_context,
-    final @Nonnull RMatrixM4x4F<RTransformView> mv,
+    final @Nonnull KMatrices matrices,
     final @Nonnull KSphere light)
     throws JCGLException,
       ConstraintError;

@@ -27,6 +27,9 @@ module ForwardLitSphericalDiffuseOnly is
   import com.io7m.parasol.Vector3f          as V3;
   import com.io7m.parasol.Sampler2D         as S;
   import com.io7m.parasol.Float             as F;
+
+  import com.io7m.renderer.CubeMap          as CM;
+  import com.io7m.renderer.Diffuse          as D;
   import com.io7m.renderer.DirectionalLight as DL;
   import com.io7m.renderer.SphericalLight   as SL;
   import com.io7m.renderer.Normals          as N;
@@ -68,8 +71,8 @@ module ForwardLitSphericalDiffuseOnly is
   shader fragment fwd_LS_fragment is
     in        f_normal   : vector_3f;
     in        f_position : vector_4f;
+    parameter material   : M.t;
     parameter light      : SL.t;
-    parameter f_diffuse  : vector_4f;
     out       out_0      : vector_4f as 0;    
   with
     value n =
@@ -79,7 +82,7 @@ module ForwardLitSphericalDiffuseOnly is
       SL.diffuse_only (light, n, f_position [x y z]);
       
     value albedo =
-      f_diffuse [x y z];
+      material.diffuse.colour [x y z];
       
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
@@ -132,6 +135,7 @@ module ForwardLitSphericalDiffuseOnly is
     in        f_uv        : vector_2f;
     in        f_normal    : vector_3f;
     in        f_position  : vector_4f;
+    parameter material    : M.t;
     parameter light       : SL.t;
     parameter t_diffuse_0 : sampler_2d;
     out       out_0       : vector_4f as 0;    
@@ -141,10 +145,10 @@ module ForwardLitSphericalDiffuseOnly is
       
     value light_term =
       SL.diffuse_only (light, n, f_position [x y z]);
-      
+
     value albedo =
-      S.texture (t_diffuse_0, f_uv) [x y z];
-      
+      D.diffuse (t_diffuse_0, f_uv, material.diffuse) [x y z];
+
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
   as
@@ -154,6 +158,83 @@ module ForwardLitSphericalDiffuseOnly is
   shader program fwd_LS_T is
     vertex   fwd_LS_T_vertex;
     fragment fwd_LS_T_fragment;
+  end;
+
+  --
+  -- Diffuse-only, untextured, environment mapped.
+  --
+
+  shader fragment fwd_LS_E_fragment is
+    in        f_normal      : vector_3f;
+    in        f_position    : vector_4f;
+    parameter material      : M.t;
+    parameter light         : SL.t;
+    parameter t_environment : sampler_cube;
+    parameter m_view_inv    : matrix_4x4f;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n =
+      V3.normalize (f_normal);
+      
+    value light_term =
+      SL.diffuse_only (light, n, f_position [x y z]);
+
+    value env =
+      CM.reflection (t_environment, f_position [x y z], f_normal, m_view_inv);
+
+    value albedo =
+      V3.interpolate (material.diffuse.colour [x y z], env [x y z], material.environment.mix);
+      
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LS_E is
+    vertex   fwd_LS_vertex;
+    fragment fwd_LS_E_fragment;
+  end;
+
+  --
+  -- Diffuse-only, textured, environment mapped.
+  --
+
+  shader fragment fwd_LS_T_E_fragment is
+    in        f_normal      : vector_3f;
+    in        f_position    : vector_4f;
+    in        f_uv          : vector_2f;
+    parameter material      : M.t;
+    parameter light         : SL.t;
+    parameter t_environment : sampler_cube;
+    parameter t_diffuse_0   : sampler_2d;
+    parameter m_view_inv    : matrix_4x4f;
+    out       out_0         : vector_4f as 0;   
+  with
+    value n =
+      V3.normalize (f_normal);
+      
+    value light_term =
+      SL.diffuse_only (light, n, f_position [x y z]);
+
+    value env =
+      CM.reflection (t_environment, f_position [x y z], f_normal, m_view_inv);
+
+    value diff =
+      D.diffuse (t_diffuse_0, f_uv, material.diffuse) [x y z];
+
+    value albedo =
+      V3.interpolate (diff [x y z], env [x y z], material.environment.mix);
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LS_T_E is
+    vertex   fwd_LS_T_vertex;
+    fragment fwd_LS_T_E_fragment;
   end;
 
 end;

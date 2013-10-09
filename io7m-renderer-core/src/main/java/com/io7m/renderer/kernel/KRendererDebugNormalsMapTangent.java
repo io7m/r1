@@ -177,7 +177,8 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
     final KMaterial material = instance.getMaterial();
 
     {
-      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],

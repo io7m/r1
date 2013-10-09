@@ -181,6 +181,23 @@ public final class RXMLUtilities
     return e.getChildElements(name, uri.toString());
   }
 
+  public static @Nonnull RVectorI4F<RSpaceRGBA> getElementAttributesRGBA(
+    final @Nonnull Element e,
+    final @Nonnull URI uri)
+    throws RXMLException,
+      ConstraintError
+  {
+    final Attribute ax = RXMLUtilities.getAttribute(e, "r", uri);
+    final Attribute ay = RXMLUtilities.getAttribute(e, "g", uri);
+    final Attribute az = RXMLUtilities.getAttribute(e, "b", uri);
+    final Attribute aw = RXMLUtilities.getAttribute(e, "a", uri);
+    return new RVectorI4F<RSpaceRGBA>(
+      RXMLUtilities.getAttributeFloat(ax),
+      RXMLUtilities.getAttributeFloat(ay),
+      RXMLUtilities.getAttributeFloat(az),
+      RXMLUtilities.getAttributeFloat(aw));
+  }
+
   public static @Nonnull
     <T extends RSpace>
     RVectorI2F<T>
@@ -233,44 +250,6 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(ay),
       RXMLUtilities.getAttributeFloat(az),
       RXMLUtilities.getAttributeFloat(aw));
-  }
-
-  public static @Nonnull RVectorI4F<RSpaceRGBA> getElementAttributesRGBA(
-    final @Nonnull Element e,
-    final @Nonnull URI uri)
-    throws RXMLException,
-      ConstraintError
-  {
-    final Attribute ax = RXMLUtilities.getAttribute(e, "r", uri);
-    final Attribute ay = RXMLUtilities.getAttribute(e, "g", uri);
-    final Attribute az = RXMLUtilities.getAttribute(e, "b", uri);
-    final Attribute aw = RXMLUtilities.getAttribute(e, "a", uri);
-    return new RVectorI4F<RSpaceRGBA>(
-      RXMLUtilities.getAttributeFloat(ax),
-      RXMLUtilities.getAttributeFloat(ay),
-      RXMLUtilities.getAttributeFloat(az),
-      RXMLUtilities.getAttributeFloat(aw));
-  }
-
-  public static void putElementAttributesRGBA(
-    final @Nonnull Element e,
-    final @Nonnull RVectorI4F<RSpaceRGBA> rgba,
-    final @Nonnull String prefix,
-    final @Nonnull URI uri)
-  {
-    final Attribute ar =
-      new Attribute(prefix + ":r", uri.toString(), Float.toString(rgba.x));
-    final Attribute ag =
-      new Attribute(prefix + ":g", uri.toString(), Float.toString(rgba.y));
-    final Attribute ab =
-      new Attribute(prefix + ":b", uri.toString(), Float.toString(rgba.z));
-    final Attribute aa =
-      new Attribute(prefix + ":a", uri.toString(), Float.toString(rgba.w));
-
-    e.addAttribute(ar);
-    e.addAttribute(ag);
-    e.addAttribute(ab);
-    e.addAttribute(aa);
   }
 
   public static float getElementFloat(
@@ -375,5 +354,65 @@ public final class RXMLUtilities
       return false;
     }
     return true;
+  }
+
+  public static void putElementAttributeInteger(
+    final @Nonnull Element e,
+    final @Nonnull String prefix,
+    final @Nonnull String name,
+    final int value,
+    final @Nonnull URI uri)
+  {
+    final Attribute a =
+      new Attribute(
+        prefix + ":" + name,
+        uri.toString(),
+        Integer.toString(value));
+    e.addAttribute(a);
+  }
+
+  public static void putElementAttributeString(
+    final @Nonnull Element e,
+    final @Nonnull String prefix,
+    final @Nonnull String name,
+    final @Nonnull String value,
+    final @Nonnull URI uri)
+  {
+    final Attribute a =
+      new Attribute(prefix + ":" + name, uri.toString(), value);
+    e.addAttribute(a);
+  }
+
+  public static void putElementAttributesRGBA(
+    final @Nonnull Element e,
+    final @Nonnull RVectorI4F<RSpaceRGBA> rgba,
+    final @Nonnull String prefix,
+    final @Nonnull URI uri)
+  {
+    final Attribute ar =
+      new Attribute(prefix + ":r", uri.toString(), Float.toString(rgba.x));
+    final Attribute ag =
+      new Attribute(prefix + ":g", uri.toString(), Float.toString(rgba.y));
+    final Attribute ab =
+      new Attribute(prefix + ":b", uri.toString(), Float.toString(rgba.z));
+    final Attribute aa =
+      new Attribute(prefix + ":a", uri.toString(), Float.toString(rgba.w));
+
+    e.addAttribute(ar);
+    e.addAttribute(ag);
+    e.addAttribute(ab);
+    e.addAttribute(aa);
+  }
+
+  public static void putElementString(
+    final @Nonnull Element e,
+    final @Nonnull String prefix,
+    final @Nonnull String name,
+    final @Nonnull String value,
+    final @Nonnull URI uri)
+  {
+    final Element en = new Element(prefix + ":" + name, uri.toString());
+    en.appendChild(value);
+    e.appendChild(en);
   }
 }

@@ -29,12 +29,42 @@ import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.kernel.KRenderingCapabilities;
+import com.io7m.renderer.kernel.KRenderingCapabilities.EnvironmentCapability;
+import com.io7m.renderer.kernel.KRenderingCapabilities.NormalCapability;
+import com.io7m.renderer.kernel.KRenderingCapabilities.SpecularCapability;
+import com.io7m.renderer.kernel.KRenderingCapabilities.TextureCapability;
 import com.io7m.renderer.kernel.KShadingProgram;
 
 public enum KSPForwardUnlitPrograms
 {
-  KSP_FORWARD_UNLIT("fwd_U"),
-  KSP_FORWARD_UNLIT_TEXTURED("fwd_U_T");
+  KSP_FORWARD_UNLIT("fwd_U", new KRenderingCapabilities(
+    TextureCapability.TEXTURE_CAP_NONE,
+    NormalCapability.NORMAL_CAP_NONE,
+    SpecularCapability.SPECULAR_CAP_NONE,
+    EnvironmentCapability.ENVIRONMENT_NONE)),
+
+  KSP_FORWARD_UNLIT_ENVIRONMENTMAPPED("fwd_U_E", new KRenderingCapabilities(
+    TextureCapability.TEXTURE_CAP_NONE,
+    NormalCapability.NORMAL_CAP_NONE,
+    SpecularCapability.SPECULAR_CAP_NONE,
+    EnvironmentCapability.ENVIRONMENT_MAPPED)),
+
+  KSP_FORWARD_UNLIT_TEXTURED("fwd_U_T", new KRenderingCapabilities(
+    TextureCapability.TEXTURE_CAP_DIFFUSE,
+    NormalCapability.NORMAL_CAP_NONE,
+    SpecularCapability.SPECULAR_CAP_NONE,
+    EnvironmentCapability.ENVIRONMENT_NONE)),
+
+  KSP_FORWARD_UNLIT_TEXTURED_ENVIRONMENTMAPPED(
+    "fwd_U_T_E",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_DIFFUSE,
+      NormalCapability.NORMAL_CAP_NONE,
+      SpecularCapability.SPECULAR_CAP_NONE,
+      EnvironmentCapability.ENVIRONMENT_MAPPED))
+
+  ;
 
   public static @Nonnull KShadingProgram make(
     final @Nonnull JCGLInterfaceCommon gc,
@@ -53,21 +83,33 @@ public enum KSPForwardUnlitPrograms
         return KSPF_U.make(gc, fs, log);
       case KSP_FORWARD_UNLIT_TEXTURED:
         return KSPF_U_T.make(gc, fs, log);
+      case KSP_FORWARD_UNLIT_ENVIRONMENTMAPPED:
+        return KSPF_U_T_E.make(gc, fs, log);
+      case KSP_FORWARD_UNLIT_TEXTURED_ENVIRONMENTMAPPED:
+        return KSPF_U_E.make(gc, fs, log);
     }
 
     throw new UnreachableCodeException();
   }
 
-  private final @Nonnull String name;
+  private final @Nonnull String                 name;
+  private final @Nonnull KRenderingCapabilities required;
 
   private KSPForwardUnlitPrograms(
-    final @Nonnull String name)
+    final @Nonnull String name,
+    final @Nonnull KRenderingCapabilities required)
   {
     this.name = name;
+    this.required = required;
   }
 
   public @Nonnull String getName()
   {
     return this.name;
+  }
+
+  public @Nonnull KRenderingCapabilities getRequiredCapabilities()
+  {
+    return this.required;
   }
 }

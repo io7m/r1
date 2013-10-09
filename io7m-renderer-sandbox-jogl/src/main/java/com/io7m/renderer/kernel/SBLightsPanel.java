@@ -49,6 +49,7 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.IRowCreator;
 import net.java.dev.designgridlayout.RowGroup;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Log;
@@ -405,6 +406,8 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
             LightEditDialogPanel.this.saveLight(light);
           } catch (final SBExceptionInputError x) {
             LightEditDialogPanel.this.setError(x.getMessage());
+          } catch (final ConstraintError x) {
+            LightEditDialogPanel.this.setError(x.getMessage());
           }
         }
       });
@@ -418,6 +421,8 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
             LightEditDialogPanel.this.saveLight(light);
             SBWindowUtilities.closeWindow(window);
           } catch (final SBExceptionInputError x) {
+            LightEditDialogPanel.this.setError(x.getMessage());
+          } catch (final ConstraintError x) {
             LightEditDialogPanel.this.setError(x.getMessage());
           }
         }
@@ -557,7 +562,8 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
     protected void saveLight(
       final @CheckForNull KLight initial)
-      throws SBExceptionInputError
+      throws SBExceptionInputError,
+        ConstraintError
     {
       final Integer id =
         (initial == null) ? this.controller.sceneLightFreshID() : initial
@@ -667,6 +673,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
     protected @Nonnull KLight getLightAt(
       final int row)
+      throws ConstraintError
     {
       final ArrayList<String> row_data = this.data.get(row);
       assert row_data != null;
@@ -748,8 +755,13 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         assert view_row != -1;
         final int model_row =
           SBLightsPanel.this.lights.convertRowIndexToModel(view_row);
-        final KLight light =
-          SBLightsPanel.this.lights_model.getLightAt(model_row);
+        KLight light;
+
+        try {
+          light = SBLightsPanel.this.lights_model.getLightAt(model_row);
+        } catch (final ConstraintError x) {
+          throw new UnreachableCodeException();
+        }
         assert light != null;
 
         try {
@@ -772,16 +784,21 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final int view_row = SBLightsPanel.this.lights.getSelectedRow();
-        assert view_row != -1;
-        final int model_row =
-          SBLightsPanel.this.lights.convertRowIndexToModel(view_row);
-        final KLight light =
-          SBLightsPanel.this.lights_model.getLightAt(model_row);
-        assert light != null;
+        try {
+          final int view_row = SBLightsPanel.this.lights.getSelectedRow();
+          assert view_row != -1;
+          final int model_row =
+            SBLightsPanel.this.lights.convertRowIndexToModel(view_row);
+          KLight light;
 
-        controller.sceneLightRemove(light.getID());
-        SBLightsPanel.this.lights_model.refreshLights();
+          light = SBLightsPanel.this.lights_model.getLightAt(model_row);
+          assert light != null;
+          controller.sceneLightRemove(light.getID());
+
+          SBLightsPanel.this.lights_model.refreshLights();
+        } catch (final ConstraintError x) {
+          throw new UnreachableCodeException();
+        }
       }
     });
 
@@ -804,7 +821,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
     dg.row().grid().add(this.scroller);
     dg.row().grid().add(add).add(edit).add(remove);
 
-    controller.changeListenerAdd(this);
+    controller.sceneChangeListenerAdd(this);
   }
 
   @Override public void sceneChanged()

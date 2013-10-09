@@ -30,40 +30,30 @@ import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
-import com.io7m.renderer.RMatrixM3x3F;
-import com.io7m.renderer.RMatrixM4x4F;
-import com.io7m.renderer.RTransformModel;
-import com.io7m.renderer.RTransformModelView;
-import com.io7m.renderer.RTransformNormal;
+import com.io7m.renderer.RMatrixReadable4x4F;
 import com.io7m.renderer.RTransformProjection;
-import com.io7m.renderer.RTransformView;
-import com.io7m.renderer.kernel.KRenderingCapabilities.TextureCapability;
 import com.io7m.renderer.kernel.programs.KSPF_U;
+import com.io7m.renderer.kernel.programs.KSPF_U_E;
 import com.io7m.renderer.kernel.programs.KSPF_U_T;
+import com.io7m.renderer.kernel.programs.KSPF_U_T_E;
 
 final class KRendererForwardUnlit implements KRenderer
 {
-  private final @Nonnull JCGLImplementation                 gl;
-  private final @Nonnull KSPF_U_T                           fwd_U_t;
-  private final @Nonnull KSPF_U                             fwd_U;
-  private final @Nonnull Log                                log;
-  private final @Nonnull VectorM4F                          background;
-  private final @Nonnull VectorM2I                          viewport_size;
-
-  private final @Nonnull KTransform.Context                 transform_context;
-  private final @Nonnull MatrixM4x4F.Context                matrix_context;
-  private final @Nonnull RMatrixM4x4F<RTransformModelView>  matrix_modelview;
-  private final @Nonnull RMatrixM4x4F<RTransformProjection> matrix_projection;
-  private final @Nonnull RMatrixM4x4F<RTransformModel>      matrix_model;
-  private final @Nonnull RMatrixM4x4F<RTransformView>       matrix_view;
-  private final @Nonnull RMatrixM3x3F<RTransformNormal>     matrix_normal;
+  private final @Nonnull JCGLImplementation gl;
+  private final @Nonnull KSPF_U_T           fwd_U_T;
+  private final @Nonnull KSPF_U             fwd_U;
+  private final @Nonnull KSPF_U_T_E         fwd_U_T_E;
+  private final @Nonnull KSPF_U_E           fwd_U_E;
+  private final @Nonnull Log                log;
+  private final @Nonnull VectorM4F          background;
+  private final @Nonnull VectorM2I          viewport_size;
+  private final @Nonnull KMatrices          matrices;
 
   KRendererForwardUnlit(
     final @Nonnull JCGLImplementation gl,
@@ -80,17 +70,13 @@ final class KRendererForwardUnlit implements KRenderer
     this.gl = gl;
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrix_modelview = new RMatrixM4x4F<RTransformModelView>();
-    this.matrix_projection = new RMatrixM4x4F<RTransformProjection>();
-    this.matrix_model = new RMatrixM4x4F<RTransformModel>();
-    this.matrix_view = new RMatrixM4x4F<RTransformView>();
-    this.matrix_normal = new RMatrixM3x3F<RTransformNormal>();
-    this.matrix_context = new MatrixM4x4F.Context();
-    this.transform_context = new KTransform.Context();
+    this.matrices = new KMatrices();
     this.viewport_size = new VectorM2I();
 
-    this.fwd_U_t = KSPF_U_T.make(gl.getGLCommon(), fs, log);
+    this.fwd_U_T = KSPF_U_T.make(gl.getGLCommon(), fs, log);
     this.fwd_U = KSPF_U.make(gl.getGLCommon(), fs, log);
+    this.fwd_U_T_E = KSPF_U_T_E.make(gl.getGLCommon(), fs, log);
+    this.fwd_U_E = KSPF_U_E.make(gl.getGLCommon(), fs, log);
   }
 
   @Override public void render(
@@ -99,9 +85,8 @@ final class KRendererForwardUnlit implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-    final KCamera camera = scene.getCamera();
-    camera.getProjectionMatrix().makeMatrixM4x4F(this.matrix_projection);
-    camera.getViewMatrix().makeMatrixM4x4F(this.matrix_view);
+    this.matrices.matricesBegin();
+    this.matrices.matricesMakeFromCamera(scene.getCamera());
 
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
@@ -117,8 +102,13 @@ final class KRendererForwardUnlit implements KRenderer
       gc.colorBufferClearV4f(this.background);
       gc.blendingDisable();
 
-      this.fwd_U_t.ksPreparePass(gc, this.matrix_projection);
-      this.fwd_U.ksPreparePass(gc, this.matrix_projection);
+      final RMatrixReadable4x4F<RTransformProjection> mp =
+        this.matrices.getMatrixProjection();
+
+      this.fwd_U_T.ksPreparePass(gc, mp);
+      this.fwd_U.ksPreparePass(gc, mp);
+      this.fwd_U_T_E.ksPreparePass(gc, mp);
+      this.fwd_U_E.ksPreparePass(gc, mp);
 
       for (final KMeshInstance mesh : scene.getMeshes()) {
         this.renderMesh(gc, mesh);
@@ -133,29 +123,54 @@ final class KRendererForwardUnlit implements KRenderer
     final @Nonnull KMeshInstance instance)
     throws ConstraintError
   {
-    final KTransform transform = instance.getTransform();
-    transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
-
-    MatrixM4x4F.multiply(
-      this.matrix_view,
-      this.matrix_model,
-      this.matrix_modelview);
+    this.matrices.matricesMakeFromTransform(instance.getTransform());
 
     try {
       final KRenderingCapabilities caps = instance.getCapabilities();
 
-      if (caps.getTexture() == TextureCapability.TEXTURE_CAP_DIFFUSE) {
-        this.fwd_U_t.ksRenderWithMeshInstance(
-          gc,
-          this.matrix_modelview,
-          this.matrix_normal,
-          instance);
-      } else {
-        this.fwd_U.ksRenderWithMeshInstance(
-          gc,
-          this.matrix_modelview,
-          this.matrix_normal,
-          instance);
+      switch (caps.getTexture()) {
+        case TEXTURE_CAP_DIFFUSE:
+        {
+          switch (caps.getEnvironment()) {
+            case ENVIRONMENT_MAPPED:
+            {
+              this.fwd_U_T_E.ksRenderWithMeshInstance(
+                gc,
+                this.matrices,
+                instance);
+              break;
+            }
+            case ENVIRONMENT_NONE:
+            {
+              this.fwd_U_T.ksRenderWithMeshInstance(
+                gc,
+                this.matrices,
+                instance);
+              break;
+            }
+          }
+          break;
+        }
+        case TEXTURE_CAP_NONE:
+        {
+          switch (caps.getEnvironment()) {
+            case ENVIRONMENT_MAPPED:
+            {
+              this.fwd_U_E.ksRenderWithMeshInstance(
+                gc,
+                this.matrices,
+                instance);
+              break;
+            }
+            case ENVIRONMENT_NONE:
+            {
+              this.fwd_U
+                .ksRenderWithMeshInstance(gc, this.matrices, instance);
+              break;
+            }
+          }
+          break;
+        }
       }
 
     } catch (final Exception e) {

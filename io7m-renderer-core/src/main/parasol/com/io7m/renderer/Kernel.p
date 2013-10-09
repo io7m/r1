@@ -390,8 +390,12 @@ module Kernel is
 
     value m =
       record M.t {
-        specular_exponent  = material.specular_exponent,
-        specular_intensity = S.texture (t_specular, f_uv)[x]
+        diffuse     = material.diffuse,
+        environment = material.environment,
+        specular    = record M.specular {
+          exponent  = material.specular.exponent,
+          intensity = S.texture (t_specular, f_uv)[x]
+        }
       };
       
     value light_term =
@@ -499,8 +503,12 @@ module Kernel is
 
     value m =
       record M.t {
-        specular_exponent  = material.specular_exponent,
-        specular_intensity = S.texture (t_specular, f_uv)[x]
+        diffuse     = material.diffuse,
+        environment = material.environment,
+        specular    = record M.specular {
+          exponent  = material.specular.exponent,
+          intensity = S.texture (t_specular, f_uv)[x]
+        }
       };
 
     value light_term =
@@ -673,14 +681,18 @@ module Kernel is
       V3.normalize (f_bitangent),
       f_uv);
 
-    value mp =
+    value m =
       record M.t {
-        specular_exponent  = material.specular_exponent,
-        specular_intensity = S.texture (t_specular, f_uv)[x]
+        diffuse     = material.diffuse,
+        environment = material.environment,
+        specular    = record M.specular {
+          exponent  = material.specular.exponent,
+          intensity = S.texture (t_specular, f_uv)[x]
+        }
       };
 
     value light_term =
-      DL.diffuse_specular (light, n, f_position [x y z], mp);
+      DL.diffuse_specular (light, n, f_position [x y z], m);
 
     value albedo =
       S.texture (t_diffuse_0, f_uv) [x y z];
@@ -857,14 +869,18 @@ module Kernel is
       V3.normalize (f_bitangent),
       f_uv);
 
-    value mp =
+    value m =
       record M.t {
-        specular_exponent  = material.specular_exponent,
-        specular_intensity = S.texture (t_specular, f_uv)[x]
+        diffuse     = material.diffuse,
+        environment = material.environment,
+        specular    = record M.specular {
+          exponent  = material.specular.exponent,
+          intensity = S.texture (t_specular, f_uv)[x]
+        }
       };
 
     value light_term =
-      SL.diffuse_specular (light, n, f_position [x y z], mp);
+      SL.diffuse_specular (light, n, f_position [x y z], m);
 
     value albedo =
       S.texture (t_diffuse_0, f_uv) [x y z];

@@ -19,12 +19,39 @@ package com.io7m.renderer;
 module Materials is
 
   --
+  -- Material information relating to diffuse terms
+  --
+
+  type diffuse is record
+    colour : vector_4f -- The base surface diffuse colour
+    mix    : float     -- The linear mix between the diffuse colour and texture, in the range [0, 1]
+  end;
+
+  --
+  -- Material information relating to specular terms
+  --
+
+  type specular is record
+    exponent  : float, -- The specular exponent in the range [1, 127]
+    intensity : float  -- The specular intensity in the range [0, 1]
+  end;
+
+  --
+  -- Material information relating to environment mapping
+  --
+
+  type environment is record
+    mix : float -- The linear mix between the environment map and the diffuse mix, in the range [0, 1]
+  end;
+
+  --
   -- The type of surface materials.
   --
 
   type t is record
-    specular_exponent  : float,
-    specular_intensity : float
+    diffuse     : diffuse,
+    specular    : specular,
+    environment : environment
   end;
 
 end;

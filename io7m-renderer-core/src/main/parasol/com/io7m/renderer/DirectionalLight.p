@@ -16,6 +16,11 @@
 
 package com.io7m.renderer;
 
+--
+-- Directional lighting functions. All calculations are assumed to take
+-- place in eye-space (where the observer is always at (0, 0, 0)).
+--
+
 module DirectionalLight is
 
   import com.io7m.parasol.Vector3f   as V3;
@@ -34,7 +39,7 @@ module DirectionalLight is
   --
 
   type directions is record
-    otl        : vector_3f, -- Direction from observer to light source ("V")
+    ots        : vector_3f, -- Direction from observer to surface ("V")
     normal     : vector_3f, -- Surface normal ("N")
     stl        : vector_3f, -- Direction from surface to light source ("L")
     reflection : vector_3f  -- Reflection between observer and normal ("R")
@@ -45,6 +50,9 @@ module DirectionalLight is
   -- and an observer at [p], calculate all relevant directions
   -- for simulating lighting.
   --
+  -- Note that calculations are in eye-space and therefore the
+  -- observer is assumed to be at (0.0, 0.0, 0.0).
+  --
 
   function directions (
     light : t,
@@ -52,13 +60,13 @@ module DirectionalLight is
     n     : vector_3f
   ) : directions =
     let
-      value otl = V3.normalize (p);
+      value ots = V3.normalize (p);
     in
       record directions {
-        otl        = otl,
+        ots        = ots,
         normal     = n,
         stl        = V3.normalize (V3.negate (light.direction)),
-        reflection = V3.reflect (otl, n)
+        reflection = V3.reflect (ots, n)
       }
     end;
 
@@ -102,24 +110,24 @@ module DirectionalLight is
   --
 
   function specular_color (
-    light    : t,
-    d        : directions,
-    material : M.t
+    light : t,
+    d     : directions,
+    s     : M.specular
   ) : vector_3f =
     let
       value factor =
-        F.power (F.maximum (0.0, V3.dot (d.reflection, d.stl)), material.specular_exponent);
+        F.power (F.maximum (0.0, V3.dot (d.reflection, d.stl)), s.exponent);
       value color =
         V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor);
     in
-      V3.multiply_scalar (color, material.specular_intensity)
+      V3.multiply_scalar (color, s.intensity)
     end;
 
   --
   -- Given a directional light [light], a surface normal [n],
   -- surface properties given by [material],
-  -- and assuming an observer at [p], calculate the diffuse
-  -- and specular terms for the surface.
+  -- and the current point [p] on the surface to be lit,
+  -- calculate the diffuse and specular terms for the surface.
   --
 
   function diffuse_specular (
@@ -131,7 +139,7 @@ module DirectionalLight is
     let
       value d  = directions (light, p, n);
       value dc = diffuse_color (light, d);
-      value sc = specular_color (light, d, material);
+      value sc = specular_color (light, d, material.specular);
     in
       V3.add (dc, sc)
     end;

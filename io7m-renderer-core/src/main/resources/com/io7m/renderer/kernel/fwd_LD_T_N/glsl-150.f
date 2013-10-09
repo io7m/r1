@@ -1,19 +1,31 @@
 #version 150
 
+struct pt_com_io7m_renderer_Materials_diffuse {
+  vec4 colour;
+  float mix;
+};
+struct pt_com_io7m_renderer_DirectionalLight_directions {
+  vec3 ots;
+  vec3 normal;
+  vec3 stl;
+  vec3 reflection;
+};
+struct pt_com_io7m_renderer_Materials_specular {
+  float exponent;
+  float intensity;
+};
+struct pt_com_io7m_renderer_Materials_environment {
+  float mix;
+};
+struct pt_com_io7m_renderer_Materials_t {
+  pt_com_io7m_renderer_Materials_diffuse diffuse;
+  pt_com_io7m_renderer_Materials_specular specular;
+  pt_com_io7m_renderer_Materials_environment environment;
+};
 struct pt_com_io7m_renderer_DirectionalLight_t {
   vec3 color;
   vec3 direction;
   float intensity;
-};
-struct pt_com_io7m_renderer_Materials_t {
-  float specular_exponent;
-  float specular_intensity;
-};
-struct pt_com_io7m_renderer_DirectionalLight_directions {
-  vec3 otl;
-  vec3 normal;
-  vec3 stl;
-  vec3 reflection;
 };
 
 uniform pt_com_io7m_renderer_DirectionalLight_t light;
@@ -71,12 +83,12 @@ p_com_io7m_renderer_Normals_bump (sampler2D t_normal, mat3 m_normal, vec3 n, vec
 pt_com_io7m_renderer_DirectionalLight_directions
 p_com_io7m_renderer_DirectionalLight_directions (pt_com_io7m_renderer_DirectionalLight_t light, vec3 p, vec3 n)
 {
-  vec3 otl = normalize(p);
+  vec3 ots = normalize(p);
   {
-    vec3 _tmp_1 = otl;
+    vec3 _tmp_1 = ots;
     vec3 _tmp_2 = n;
     vec3 _tmp_3 = normalize((-light.direction));
-    vec3 _tmp_4 = reflect(otl, n);
+    vec3 _tmp_4 = reflect(ots, n);
     return pt_com_io7m_renderer_DirectionalLight_directions(_tmp_1, _tmp_2, _tmp_3, _tmp_4);
   }
 }

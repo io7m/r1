@@ -61,7 +61,7 @@
     <dependency>
       <groupId>com.io7m.jvvfs.core</groupId>
       <artifactId>io7m-jvvfs-core</artifactId>
-      <version>[3.0.0, 4.0.0)</version>
+      <version>[3.1.0, 4.0.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jtensors</groupId>
@@ -71,17 +71,17 @@
     <dependency>
       <groupId>com.io7m.jcanephora.jogl</groupId>
       <artifactId>io7m-jcanephora-jogl</artifactId>
-      <version>0.9.17</version>
+      <version>0.9.20</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.texload-imageio</groupId>
       <artifactId>io7m-jcanephora-texload-imageio</artifactId>
-      <version>0.9.17</version>
+      <version>0.9.20</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.framebuffer</groupId>
       <artifactId>io7m-jcanephora-framebuffer</artifactId>
-      <version>0.9.17</version>
+      <version>0.9.20</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.renderer.core</groupId>
