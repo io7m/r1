@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
@@ -39,7 +40,9 @@ import javax.swing.SwingWorker;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
+import com.io7m.jvvfs.PathVirtual;
 
 final class SBTextures2DPanel extends JPanel
 {
@@ -74,15 +77,16 @@ final class SBTextures2DPanel extends JPanel
     }
   }
 
-  private static final long                  serialVersionUID;
+  private static final long                        serialVersionUID;
 
   static {
     serialVersionUID = -941448169051827275L;
   }
-  protected final @Nonnull Log               log_textures;
-  protected final @Nonnull JComboBox<String> selector;
-  protected @Nonnull Map<String, SBTexture2D>  images;
-  protected @Nonnull ImageDisplay            image_display;
+
+  protected final @Nonnull Log                     log_textures;
+  protected final @Nonnull JComboBox<PathVirtual>  selector;
+  protected @Nonnull Map<PathVirtual, SBTexture2D> images;
+  protected @Nonnull ImageDisplay                  image_display;
 
   public SBTextures2DPanel(
     final @Nonnull JFrame window,
@@ -99,13 +103,13 @@ final class SBTextures2DPanel extends JPanel
     final JScrollPane image_pane = new JScrollPane(this.image_display);
     image_pane.setMinimumSize(new Dimension(256, 256));
 
-    this.selector = new JComboBox<String>();
+    this.selector = new JComboBox<PathVirtual>();
     this.selector.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final String name =
-          (String) SBTextures2DPanel.this.selector.getSelectedItem();
+        final PathVirtual name =
+          (PathVirtual) SBTextures2DPanel.this.selector.getSelectedItem();
 
         if (name != null) {
           final SBTexture2D t = SBTextures2DPanel.this.images.get(name);
@@ -135,7 +139,11 @@ final class SBTextures2DPanel extends JPanel
                 @Override protected @Nonnull SBTexture2D doInBackground()
                   throws Exception
                 {
-                  return controller.sceneTexture2DLoad(file).get();
+                  try {
+                    return controller.sceneTexture2DLoad(file).get();
+                  } catch (final ConstraintError x) {
+                    throw new IOException(x);
+                  }
                 }
 
                 @Override protected void done()
@@ -179,8 +187,9 @@ final class SBTextures2DPanel extends JPanel
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final String name =
-          (String) SBTextures2DPanel.this.selector.getSelectedItem();
+        final PathVirtual name =
+          (PathVirtual) SBTextures2DPanel.this.selector.getSelectedItem();
+
         if (name != null) {
           select_result.setText(name.toString());
         } else {
@@ -218,10 +227,10 @@ final class SBTextures2DPanel extends JPanel
   }
 
   protected void selectorRefresh(
-    final JComboBox<String> select)
+    final JComboBox<PathVirtual> select)
   {
     select.removeAllItems();
-    for (final Entry<String, SBTexture2D> e : this.images.entrySet()) {
+    for (final Entry<PathVirtual, SBTexture2D> e : this.images.entrySet()) {
       select.addItem(e.getKey());
     }
   }

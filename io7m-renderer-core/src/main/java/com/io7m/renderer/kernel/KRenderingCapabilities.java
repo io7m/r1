@@ -17,12 +17,19 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.ArrayBuffer;
 
-public final class KRenderingCapabilities
+@Immutable public final class KRenderingCapabilities
 {
+  public static enum EnvironmentCapability
+  {
+    ENVIRONMENT_NONE,
+    ENVIRONMENT_MAPPED
+  }
+
   public static enum NormalCapability
   {
     NORMAL_CAP_NONE,
@@ -43,7 +50,7 @@ public final class KRenderingCapabilities
     TEXTURE_CAP_DIFFUSE
   }
 
-  public static @Nonnull KRenderingCapabilities make(
+  public static @Nonnull KRenderingCapabilities fromMeshAndMaterial(
     final @Nonnull KMesh mesh,
     final @Nonnull KMaterial material)
     throws ConstraintError
@@ -60,46 +67,74 @@ public final class KRenderingCapabilities
     final TextureCapability texture;
     final NormalCapability normal;
     final SpecularCapability specular;
+    final EnvironmentCapability environment;
 
-    if (mesh_has_uv && material.getTextureDiffuse0().isSome()) {
-      texture = TextureCapability.TEXTURE_CAP_DIFFUSE;
-    } else {
-      texture = TextureCapability.TEXTURE_CAP_NONE;
-    }
-
-    if (mesh_has_normal) {
-      if (material.getTextureNormal().isSome()
-        && mesh_has_uv
-        && mesh_has_tangents) {
-        normal = NormalCapability.NORMAL_CAP_MAPPED;
+    {
+      final KMaterialDiffuse md = material.getDiffuse();
+      if (mesh_has_uv && md.getTexture().isSome()) {
+        texture = TextureCapability.TEXTURE_CAP_DIFFUSE;
       } else {
-        normal = NormalCapability.NORMAL_CAP_VERTEX;
+        texture = TextureCapability.TEXTURE_CAP_NONE;
       }
-    } else {
-      normal = NormalCapability.NORMAL_CAP_NONE;
     }
 
-    if (mesh_has_uv && material.getTextureSpecular().isSome()) {
-      specular = SpecularCapability.SPECULAR_CAP_MAPPED;
-    } else {
-      specular = SpecularCapability.SPECULAR_CAP_CONSTANT;
+    {
+      final KMaterialEnvironment me = material.getEnvironment();
+      if (mesh_has_normal && me.getTexture().isSome()) {
+        if (me.getMix() > 0.0) {
+          environment = EnvironmentCapability.ENVIRONMENT_MAPPED;
+        } else {
+          environment = EnvironmentCapability.ENVIRONMENT_NONE;
+        }
+      } else {
+        environment = EnvironmentCapability.ENVIRONMENT_NONE;
+      }
     }
 
-    return new KRenderingCapabilities(texture, normal, specular);
+    {
+      if (mesh_has_normal) {
+        final KMaterialNormal mn = material.getNormal();
+        if (mn.getTexture().isSome() && mesh_has_uv && mesh_has_tangents) {
+          normal = NormalCapability.NORMAL_CAP_MAPPED;
+        } else {
+          normal = NormalCapability.NORMAL_CAP_VERTEX;
+        }
+      } else {
+        normal = NormalCapability.NORMAL_CAP_NONE;
+      }
+    }
+
+    {
+      final KMaterialSpecular ms = material.getSpecular();
+      if (mesh_has_uv && ms.getTexture().isSome()) {
+        specular = SpecularCapability.SPECULAR_CAP_MAPPED;
+      } else {
+        if (ms.getIntensity() > 0.0) {
+          specular = SpecularCapability.SPECULAR_CAP_CONSTANT;
+        } else {
+          specular = SpecularCapability.SPECULAR_CAP_NONE;
+        }
+      }
+    }
+
+    return new KRenderingCapabilities(texture, normal, specular, environment);
   }
 
-  private final @Nonnull TextureCapability  texture;
-  private final @Nonnull NormalCapability   normal;
-  private final @Nonnull SpecularCapability specular;
+  private final @Nonnull TextureCapability     texture;
+  private final @Nonnull NormalCapability      normal;
+  private final @Nonnull SpecularCapability    specular;
+  private final @Nonnull EnvironmentCapability environment;
 
   public KRenderingCapabilities(
     final @Nonnull TextureCapability texture,
     final @Nonnull NormalCapability normal,
-    final @Nonnull SpecularCapability specular)
+    final @Nonnull SpecularCapability specular,
+    final @Nonnull EnvironmentCapability environment)
   {
     this.texture = texture;
     this.normal = normal;
     this.specular = specular;
+    this.environment = environment;
   }
 
   @Override public boolean equals(
@@ -115,6 +150,9 @@ public final class KRenderingCapabilities
       return false;
     }
     final KRenderingCapabilities other = (KRenderingCapabilities) obj;
+    if (this.environment != other.environment) {
+      return false;
+    }
     if (this.normal != other.normal) {
       return false;
     }
@@ -125,6 +163,11 @@ public final class KRenderingCapabilities
       return false;
     }
     return true;
+  }
+
+  public @Nonnull EnvironmentCapability getEnvironment()
+  {
+    return this.environment;
   }
 
   public @Nonnull NormalCapability getNormal()
@@ -146,23 +189,11 @@ public final class KRenderingCapabilities
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + this.environment.hashCode();
     result = (prime * result) + this.normal.hashCode();
     result = (prime * result) + this.specular.hashCode();
     result = (prime * result) + this.texture.hashCode();
     return result;
-  }
-
-  @Override public String toString()
-  {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("[KMeshInstanceCapabilities ");
-    builder.append(this.texture);
-    builder.append(" ");
-    builder.append(this.normal);
-    builder.append(" ");
-    builder.append(this.specular);
-    builder.append("]");
-    return builder.toString();
   }
 
   public int textureUnitsRequired()
@@ -207,7 +238,34 @@ public final class KRenderingCapabilities
       }
     }
 
+    switch (this.environment) {
+      case ENVIRONMENT_MAPPED:
+      {
+        required += 1;
+        break;
+      }
+      case ENVIRONMENT_NONE:
+      {
+        break;
+      }
+    }
+
     return required;
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder builder = new StringBuilder();
+    builder.append("[KRenderingCapabilities [texture=");
+    builder.append(this.texture);
+    builder.append(" normal=");
+    builder.append(this.normal);
+    builder.append(" specular=");
+    builder.append(this.specular);
+    builder.append(" environment=");
+    builder.append(this.environment);
+    builder.append("]");
+    return builder.toString();
   }
 
 }

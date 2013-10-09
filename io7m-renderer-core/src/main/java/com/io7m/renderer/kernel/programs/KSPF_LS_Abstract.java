@@ -31,19 +31,13 @@ import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
-import com.io7m.renderer.RMatrixM3x3F;
-import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RMatrixReadable4x4F;
-import com.io7m.renderer.RTransformModelView;
-import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
-import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.kernel.KLight.KSphere;
-import com.io7m.renderer.kernel.KMaterial;
+import com.io7m.renderer.kernel.KMatrices;
 import com.io7m.renderer.kernel.KMesh;
 import com.io7m.renderer.kernel.KMeshInstance;
 import com.io7m.renderer.kernel.KRenderingCapabilities;
@@ -95,66 +89,61 @@ abstract class KSPF_LS_Abstract implements KShadingProgramLightSpherical
       ConstraintError
   {
     this.exec.execPrepare(gc);
-    KShadingProgramCommon.projectionMatrixPut(this.exec, gc, m);
+    KShadingProgramCommon.putMatrixProjection(this.exec, gc, m);
     this.exec.execCancel();
   }
 
   @Override public final void ksPrepareWithLightSpherical(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull MatrixM4x4F.Context matrix_context,
-    final @Nonnull RMatrixM4x4F<RTransformView> mv,
+    final @Nonnull KMatrices matrices,
     final @Nonnull KSphere light)
     throws JCGLException,
       ConstraintError
   {
     this.exec.execPrepare(gc);
-    KShadingProgramCommon.projectionMatrixReuse(this.exec);
-    KShadingProgramCommon.sphericalLightPut(
-      gc,
-      this.exec,
-      matrix_context,
-      mv,
-      light);
+    KShadingProgramCommon.putMatrixProjectionReuse(this.exec);
+    KShadingProgramCommon.putLightSpherical(gc, this.exec, matrices, light);
     this.exec.execCancel();
   }
 
   @Override public final void ksRenderWithMeshInstance(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull RMatrixReadable4x4F<RTransformModelView> mv,
-    final @Nonnull RMatrixM3x3F<RTransformNormal> mn,
+    final @Nonnull KMatrices matrices,
     final @Nonnull KMeshInstance m)
     throws ConstraintError,
       Exception
   {
-    final KMaterial mat = m.getMaterial();
-    this.diffuse.x = mat.getDiffuse().getXF();
-    this.diffuse.y = mat.getDiffuse().getYF();
-    this.diffuse.z = mat.getDiffuse().getZF();
-    this.diffuse.w = 1.0f;
-
     this.exec.execPrepare(gc);
-    KShadingProgramCommon.projectionMatrixReuse(this.exec);
-    KShadingProgramCommon.sphericalLightReuse(this.exec);
-    KShadingProgramCommon.modelViewMatrixPut(this.exec, gc, mv);
-    KShadingProgramCommon.normalMatrixPut(this.exec, gc, mn);
+    KShadingProgramCommon.putMatrixProjectionReuse(this.exec);
+    KShadingProgramCommon.putLightSphericalReuse(this.exec);
+    KShadingProgramCommon.putMatrixModelView(
+      this.exec,
+      gc,
+      matrices.getMatrixModelView());
+    KShadingProgramCommon.putMatrixNormal(
+      this.exec,
+      gc,
+      matrices.getMatrixNormal());
+    KShadingProgramCommon.putMaterial(
+      this.exec,
+      gc,
+      this.required,
+      m.getMaterial());
 
-    switch (this.required.getTexture()) {
-      case TEXTURE_CAP_DIFFUSE:
+    switch (this.required.getEnvironment()) {
+      case ENVIRONMENT_MAPPED:
       {
+        KShadingProgramCommon.putMatrixInverseView(
+          this.exec,
+          gc,
+          matrices.getMatrixViewInverse());
         break;
       }
-      case TEXTURE_CAP_NONE:
+      case ENVIRONMENT_NONE:
       {
-        KShadingProgramCommon.colourDiffusePut(this.exec, gc, this.diffuse);
         break;
       }
     }
-
-    KShadingProgramCommon.materialPut(
-      this.exec,
-      gc,
-      this.required.getSpecular(),
-      mat);
 
     final KMesh mesh = m.getMesh();
     final ArrayBuffer array = mesh.getArrayBuffer();
@@ -162,8 +151,8 @@ abstract class KSPF_LS_Abstract implements KShadingProgramLightSpherical
 
     gc.arrayBufferBind(array);
     try {
-      KShadingProgramCommon.attributePositionBind(gc, this.exec, array);
-      KShadingProgramCommon.materialTexturesAndAttributesBind(
+      KShadingProgramCommon.bindAttributePosition(gc, this.exec, array);
+      KShadingProgramCommon.bindTexturesAttributesMaterial(
         gc,
         this.exec,
         this.required,

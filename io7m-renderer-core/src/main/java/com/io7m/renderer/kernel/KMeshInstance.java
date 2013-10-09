@@ -61,7 +61,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     this.transform = transform;
     this.mesh = mesh;
     this.material = material;
-    this.capabilities = KRenderingCapabilities.make(mesh, material);
+    this.capabilities = KRenderingCapabilities.fromMeshAndMaterial(mesh, material);
   }
 
   public @Nonnull KRenderingCapabilities getCapabilities()

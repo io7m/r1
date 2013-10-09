@@ -46,20 +46,16 @@ import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
-import com.io7m.renderer.RMatrixM3x3F;
-import com.io7m.renderer.RMatrixM4x4F;
+import com.io7m.renderer.RMatrixReadable4x4F;
 import com.io7m.renderer.RSpaceEye;
 import com.io7m.renderer.RSpaceWorld;
-import com.io7m.renderer.RTransformModel;
-import com.io7m.renderer.RTransformModelView;
-import com.io7m.renderer.RTransformNormal;
-import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.RVectorM4F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
@@ -68,22 +64,15 @@ import com.io7m.renderer.kernel.programs.KSPDepth;
 
 final class KRendererForwardDiffuse implements KRenderer
 {
-  private final @Nonnull JCGLImplementation                 gl;
-  private final @Nonnull Log                                log;
-  private final @Nonnull VectorM4F                          background;
-  private final @Nonnull ProgramReference                   program_directional;
-  private final @Nonnull ProgramReference                   program_spherical;
-  private final @Nonnull JCCEExecutionCallable              exec_directional;
-  private final @Nonnull JCCEExecutionCallable              exec_spherical;
-  private final KSPDepth                                    program_depth;
-
-  private final @Nonnull KTransform.Context                 transform_context;
-  private final @Nonnull MatrixM4x4F.Context                matrix_context;
-  private final @Nonnull RMatrixM4x4F<RTransformModelView>  matrix_modelview;
-  private final @Nonnull RMatrixM4x4F<RTransformProjection> matrix_projection;
-  private final @Nonnull RMatrixM4x4F<RTransformModel>      matrix_model;
-  private final @Nonnull RMatrixM4x4F<RTransformView>       matrix_view;
-  private final @Nonnull RMatrixM3x3F<RTransformNormal>     matrix_normal;
+  private final @Nonnull JCGLImplementation    gl;
+  private final @Nonnull Log                   log;
+  private final @Nonnull VectorM4F             background;
+  private final @Nonnull ProgramReference      program_directional;
+  private final @Nonnull ProgramReference      program_spherical;
+  private final @Nonnull JCCEExecutionCallable exec_directional;
+  private final @Nonnull JCCEExecutionCallable exec_spherical;
+  private final @Nonnull KSPDepth              program_depth;
+  private final @Nonnull KMatrices             matrices;
 
   KRendererForwardDiffuse(
     final @Nonnull JCGLImplementation gl,
@@ -102,14 +91,7 @@ final class KRendererForwardDiffuse implements KRenderer
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrix_modelview = new RMatrixM4x4F<RTransformModelView>();
-    this.matrix_projection = new RMatrixM4x4F<RTransformProjection>();
-    this.matrix_model = new RMatrixM4x4F<RTransformModel>();
-    this.matrix_view = new RMatrixM4x4F<RTransformView>();
-    this.matrix_normal = new RMatrixM3x3F<RTransformNormal>();
-    this.matrix_context = new MatrixM4x4F.Context();
-    this.transform_context = new KTransform.Context();
-
+    this.matrices = new KMatrices();
     this.program_depth = KSPDepth.make(gl.getGLCommon(), fs, log);
 
     this.program_directional =
@@ -140,9 +122,8 @@ final class KRendererForwardDiffuse implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-    final KCamera camera = scene.getCamera();
-    camera.getProjectionMatrix().makeMatrixM4x4F(this.matrix_projection);
-    camera.getViewMatrix().makeMatrixM4x4F(this.matrix_view);
+    this.matrices.matricesBegin();
+    this.matrices.matricesMakeFromCamera(scene.getCamera());
 
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
@@ -213,20 +194,10 @@ final class KRendererForwardDiffuse implements KRenderer
     final @Nonnull KMeshInstance instance)
     throws ConstraintError
   {
-    final KTransform transform = instance.getTransform();
-    transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
-
-    MatrixM4x4F.multiply(
-      this.matrix_view,
-      this.matrix_model,
-      this.matrix_modelview);
+    this.matrices.matricesMakeFromTransform(instance.getTransform());
 
     try {
-      program.ksRenderWithMeshInstance(
-        gc,
-        this.matrix_modelview,
-        this.matrix_normal,
-        instance);
+      program.ksRenderWithMeshInstance(gc, this.matrices, instance);
     } catch (final Exception e) {
       throw new UnreachableCodeException();
     }
@@ -243,7 +214,7 @@ final class KRendererForwardDiffuse implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    this.program_depth.ksPreparePass(gc, this.matrix_projection);
+    this.program_depth.ksPreparePass(gc, this.matrices.getMatrixProjection());
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
       this.renderDepthPassMesh(gc, this.program_depth, mesh);
@@ -261,17 +232,7 @@ final class KRendererForwardDiffuse implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = instance.getTransform();
-    transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
-
-    MatrixM4x4F.multiply(
-      this.matrix_view,
-      this.matrix_model,
-      this.matrix_modelview);
-
-    KRendererCommon.makeNormalMatrix(
-      this.matrix_modelview,
-      this.matrix_normal);
+    this.matrices.matricesMakeFromTransform(instance.getTransform());
 
     /**
      * Upload matrices, set textures.
@@ -282,7 +243,7 @@ final class KRendererForwardDiffuse implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -292,25 +253,19 @@ final class KRendererForwardDiffuse implements KRenderer
       }
     }
 
-    {
-      final Option<Texture2DStatic> diffuse_1_opt =
-        material.getTextureDiffuse1();
-      if (diffuse_1_opt.isSome()) {
-        gc.texture2DStaticBind(
-          texture_units[1],
-          ((Option.Some<Texture2DStatic>) diffuse_1_opt).value);
-      } else {
-        gc.texture2DStaticUnbind(texture_units[1]);
-      }
-    }
-
     exec.execPrepare(gc);
     exec.execUniformUseExisting("m_projection");
     exec.execUniformUseExisting("light.intensity");
     exec.execUniformUseExisting("light.color");
     exec.execUniformUseExisting("light.direction");
-    exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
-    exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
+    exec.execUniformPutMatrix4x4F(
+      gc,
+      "m_modelview",
+      this.matrices.getMatrixModelView());
+    exec.execUniformPutMatrix3x3F(
+      gc,
+      "m_normal",
+      this.matrices.getMatrixNormal());
     exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
 
     /**
@@ -386,15 +341,18 @@ final class KRendererForwardDiffuse implements KRenderer
     light_cs.z = light.getDirection().getZF();
     light_cs.w = 0.0f;
 
-    MatrixM4x4F.multiplyVector4FWithContext(
-      this.matrix_context,
-      this.matrix_view,
-      light_cs,
-      light_cs);
+    final Context mc = this.matrices.getMatrixContext();
+    final RMatrixReadable4x4F<RTransformView> mv =
+      this.matrices.getMatrixView();
+
+    MatrixM4x4F.multiplyVector4FWithContext(mc, mv, light_cs, light_cs);
 
     final JCCEExecutionCallable e = this.exec_directional;
     e.execPrepare(gc);
-    e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
+    e.execUniformPutMatrix4x4F(
+      gc,
+      "m_projection",
+      this.matrices.getMatrixProjection());
     e.execUniformPutVector3F(gc, "light.direction", light_cs);
     e.execUniformPutVector3F(gc, "light.color", light.getColour());
     e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
@@ -425,15 +383,18 @@ final class KRendererForwardDiffuse implements KRenderer
     light_world.z = light.getPosition().getZF();
     light_world.w = 1.0f;
 
-    MatrixM4x4F.multiplyVector4FWithContext(
-      this.matrix_context,
-      this.matrix_view,
-      light_world,
-      light_eye);
+    final Context mc = this.matrices.getMatrixContext();
+    final RMatrixReadable4x4F<RTransformView> mv =
+      this.matrices.getMatrixView();
+
+    MatrixM4x4F.multiplyVector4FWithContext(mc, mv, light_world, light_eye);
 
     final JCCEExecutionCallable e = this.exec_spherical;
     e.execPrepare(gc);
-    e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
+    e.execUniformPutMatrix4x4F(
+      gc,
+      "m_projection",
+      this.matrices.getMatrixProjection());
     e.execUniformPutVector3F(gc, "light.position", light_eye);
     e.execUniformPutVector3F(gc, "light.color", light.getColour());
     e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
@@ -457,17 +418,7 @@ final class KRendererForwardDiffuse implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = instance.getTransform();
-    transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
-
-    MatrixM4x4F.multiply(
-      this.matrix_view,
-      this.matrix_model,
-      this.matrix_modelview);
-
-    KRendererCommon.makeNormalMatrix(
-      this.matrix_modelview,
-      this.matrix_normal);
+    this.matrices.matricesMakeFromTransform(instance.getTransform());
 
     /**
      * Upload matrices, set textures.
@@ -478,7 +429,7 @@ final class KRendererForwardDiffuse implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -489,19 +440,8 @@ final class KRendererForwardDiffuse implements KRenderer
     }
 
     {
-      final Option<Texture2DStatic> diffuse_1_opt =
-        material.getTextureDiffuse1();
-      if (diffuse_1_opt.isSome()) {
-        gc.texture2DStaticBind(
-          texture_units[1],
-          ((Option.Some<Texture2DStatic>) diffuse_1_opt).value);
-      } else {
-        gc.texture2DStaticUnbind(texture_units[1]);
-      }
-    }
-
-    {
-      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[2],
@@ -518,8 +458,14 @@ final class KRendererForwardDiffuse implements KRenderer
     exec.execUniformUseExisting("light.intensity");
     exec.execUniformUseExisting("light.radius");
     exec.execUniformUseExisting("light.falloff");
-    exec.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
-    exec.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
+    exec.execUniformPutMatrix4x4F(
+      gc,
+      "m_modelview",
+      this.matrices.getMatrixModelView());
+    exec.execUniformPutMatrix3x3F(
+      gc,
+      "m_normal",
+      this.matrices.getMatrixNormal());
     exec.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
 
     /**

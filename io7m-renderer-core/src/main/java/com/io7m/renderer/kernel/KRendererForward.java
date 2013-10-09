@@ -19,7 +19,6 @@ package com.io7m.renderer.kernel;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import javax.annotation.Nonnull;
 
@@ -40,19 +39,11 @@ import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
-import com.io7m.renderer.RMatrixM3x3F;
-import com.io7m.renderer.RMatrixM4x4F;
-import com.io7m.renderer.RTransformModel;
-import com.io7m.renderer.RTransformModelView;
-import com.io7m.renderer.RTransformNormal;
-import com.io7m.renderer.RTransformProjection;
-import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.programs.KSPDepth;
@@ -78,45 +69,115 @@ public final class KRendererForward implements KRenderer
             switch (caps.getSpecular()) {
               case SPECULAR_CAP_CONSTANT:
               {
-                return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULAR_NORMALMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_SPECULAR_NORMALMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULAR_NORMALMAPPED);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_MAPPED:
               {
-                return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULARMAPPED_NORMALMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_SPECULARMAPPED_NORMALMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULARMAPPED_NORMALMAPPED);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_NONE:
               {
-                return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_NORMALMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_NORMALMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_NORMALMAPPED);
+                  }
+                }
               }
             }
 
             throw new UnreachableCodeException();
           }
+
           case NORMAL_CAP_NONE:
           {
             return new Failure<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
               KSPForwardUnlitPrograms.KSP_FORWARD_UNLIT_TEXTURED);
           }
+
           case NORMAL_CAP_VERTEX:
           {
             switch (caps.getSpecular()) {
               case SPECULAR_CAP_CONSTANT:
               {
-                return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULAR);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_SPECULAR);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULAR);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_MAPPED:
               {
-                return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULARMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_SPECULARMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULARMAPPED);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_NONE:
               {
-                return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED);
+                  }
+                }
               }
             }
 
@@ -126,6 +187,7 @@ public final class KRendererForward implements KRenderer
 
         throw new UnreachableCodeException();
       }
+
       case TEXTURE_CAP_NONE:
       {
         switch (caps.getNormal()) {
@@ -134,18 +196,52 @@ public final class KRendererForward implements KRenderer
             switch (caps.getSpecular()) {
               case SPECULAR_CAP_CONSTANT:
               {
-                return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_SPECULAR_NORMALMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_SPECULAR_NORMALMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_SPECULAR_NORMALMAPPED);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_MAPPED:
               {
-                return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_SPECULARMAPPED_NORMALMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_SPECULARMAPPED_NORMALMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_SPECULARMAPPED_NORMALMAPPED);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_NONE:
               {
-                return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_NORMALMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_NORMALMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_NORMALMAPPED);
+                  }
+                }
               }
             }
 
@@ -161,18 +257,52 @@ public final class KRendererForward implements KRenderer
             switch (caps.getSpecular()) {
               case SPECULAR_CAP_CONSTANT:
               {
-                return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_SPECULAR);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_SPECULAR);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_SPECULAR);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_MAPPED:
               {
-                return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_SPECULARMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_SPECULARMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_SPECULARMAPPED);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_NONE:
               {
-                return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitDirectionalPrograms.KSP_FORWARD_LIT_DIRECTIONAL);
+                  }
+                }
               }
             }
 
@@ -193,6 +323,7 @@ public final class KRendererForward implements KRenderer
       final @Nonnull KMeshInstance m)
   {
     final KRenderingCapabilities caps = m.getCapabilities();
+
     switch (caps.getTexture()) {
       case TEXTURE_CAP_DIFFUSE:
       {
@@ -202,45 +333,115 @@ public final class KRendererForward implements KRenderer
             switch (caps.getSpecular()) {
               case SPECULAR_CAP_CONSTANT:
               {
-                return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_SPECULAR_NORMALMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_ENVIRONMENTMAPPED_SPECULAR_NORMALMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_SPECULAR_NORMALMAPPED);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_MAPPED:
               {
-                return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_SPECULARMAPPED_NORMALMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_ENVIRONMENTMAPPED_SPECULARMAPPED_NORMALMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_SPECULARMAPPED_NORMALMAPPED);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_NONE:
               {
-                return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_NORMALMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_ENVIRONMENTMAPPED_NORMALMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_NORMALMAPPED);
+                  }
+                }
               }
             }
 
             throw new UnreachableCodeException();
           }
+
           case NORMAL_CAP_NONE:
           {
             return new Failure<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
               KSPForwardUnlitPrograms.KSP_FORWARD_UNLIT_TEXTURED);
           }
+
           case NORMAL_CAP_VERTEX:
           {
             switch (caps.getSpecular()) {
               case SPECULAR_CAP_CONSTANT:
               {
-                return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_SPECULAR);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_ENVIRONMENTMAPPED_SPECULAR);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_SPECULAR);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_MAPPED:
               {
-                return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_SPECULARMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_ENVIRONMENTMAPPED_SPECULARMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_SPECULARMAPPED);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_NONE:
               {
-                return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_ENVIRONMENTMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED);
+                  }
+                }
               }
             }
 
@@ -250,6 +451,7 @@ public final class KRendererForward implements KRenderer
 
         throw new UnreachableCodeException();
       }
+
       case TEXTURE_CAP_NONE:
       {
         switch (caps.getNormal()) {
@@ -258,18 +460,52 @@ public final class KRendererForward implements KRenderer
             switch (caps.getSpecular()) {
               case SPECULAR_CAP_CONSTANT:
               {
-                return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_SPECULAR_NORMALMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_ENVIRONMENTMAPPED_SPECULAR_NORMALMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_SPECULAR_NORMALMAPPED);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_MAPPED:
               {
-                return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_SPECULARMAPPED_NORMALMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_ENVIRONMENTMAPPED_SPECULARMAPPED_NORMALMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_SPECULARMAPPED_NORMALMAPPED);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_NONE:
               {
-                return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED_NORMALMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_ENVIRONMENTMAPPED_NORMALMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_NORMALMAPPED);
+                  }
+                }
               }
             }
 
@@ -285,18 +521,52 @@ public final class KRendererForward implements KRenderer
             switch (caps.getSpecular()) {
               case SPECULAR_CAP_CONSTANT:
               {
-                return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_SPECULAR);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_ENVIRONMENTMAPPED_SPECULAR);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_SPECULAR);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_MAPPED:
               {
-                return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_SPECULARMAPPED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_ENVIRONMENTMAPPED_SPECULARMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_SPECULARMAPPED);
+                  }
+                }
+
+                throw new UnreachableCodeException();
               }
               case SPECULAR_CAP_NONE:
               {
-                return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
-                  KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_TEXTURED);
+                switch (caps.getEnvironment()) {
+                  case ENVIRONMENT_MAPPED:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL_ENVIRONMENTMAPPED);
+                  }
+                  case ENVIRONMENT_NONE:
+                  {
+                    return new Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>(
+                      KSPForwardLitSphericalPrograms.KSP_FORWARD_LIT_SPHERICAL);
+                  }
+                }
               }
             }
 
@@ -318,14 +588,7 @@ public final class KRendererForward implements KRenderer
   private final @Nonnull HashMap<KSPForwardLitSphericalPrograms, KShadingProgramLightSpherical>     programs_lit_spherical;
   private final @Nonnull HashMap<KSPForwardUnlitPrograms, KShadingProgram>                          programs_unlit;
 
-  private final @Nonnull KTransform.Context                                                         transform_context;
-  private final @Nonnull MatrixM4x4F.Context                                                        matrix_context;
-  private final @Nonnull RMatrixM4x4F<RTransformModelView>                                          matrix_modelview;
-  private final @Nonnull RMatrixM4x4F<RTransformProjection>                                         matrix_projection;
-  private final @Nonnull RMatrixM4x4F<RTransformModel>                                              matrix_model;
-  private final @Nonnull RMatrixM4x4F<RTransformView>                                               matrix_view;
-  private final @Nonnull RMatrixM3x3F<RTransformNormal>                                             matrix_normal;
-
+  private final @Nonnull KMatrices                                                                  matrices;
   private final @Nonnull VectorM2I                                                                  viewport_size;
   private final @Nonnull VectorM4F                                                                  background;
 
@@ -344,13 +607,7 @@ public final class KRendererForward implements KRenderer
     this.gl = gl;
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrix_modelview = new RMatrixM4x4F<RTransformModelView>();
-    this.matrix_projection = new RMatrixM4x4F<RTransformProjection>();
-    this.matrix_model = new RMatrixM4x4F<RTransformModel>();
-    this.matrix_view = new RMatrixM4x4F<RTransformView>();
-    this.matrix_normal = new RMatrixM3x3F<RTransformNormal>();
-    this.matrix_context = new MatrixM4x4F.Context();
-    this.transform_context = new KTransform.Context();
+    this.matrices = new KMatrices();
     this.viewport_size = new VectorM2I();
 
     final JCGLInterfaceCommon gc = gl.getGLCommon();
@@ -417,9 +674,8 @@ public final class KRendererForward implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-    final KCamera camera = scene.getCamera();
-    camera.getProjectionMatrix().makeMatrixM4x4F(this.matrix_projection);
-    camera.getViewMatrix().makeMatrixM4x4F(this.matrix_view);
+    this.matrices.matricesBegin();
+    this.matrices.matricesMakeFromCamera(scene.getCamera());
 
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
@@ -494,20 +750,11 @@ public final class KRendererForward implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = instance.getTransform();
-    transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
-
-    MatrixM4x4F.multiply(
-      this.matrix_view,
-      this.matrix_model,
-      this.matrix_modelview);
+    this.matrices.matricesMakeFromTransform(instance.getTransform());
 
     try {
-      this.program_depth.ksRenderWithMeshInstance(
-        gc,
-        this.matrix_modelview,
-        this.matrix_normal,
-        instance);
+      this.program_depth
+        .ksRenderWithMeshInstance(gc, this.matrices, instance);
     } catch (final JCGLException x) {
       throw x;
     } catch (final ConstraintError x) {
@@ -528,7 +775,7 @@ public final class KRendererForward implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    this.program_depth.ksPreparePass(gc, this.matrix_projection);
+    this.program_depth.ksPreparePass(gc, this.matrices.getMatrixProjection());
 
     for (final KMeshInstance mesh : scene.getMeshes()) {
       this.renderDepthPassMesh(gc, mesh);
@@ -538,7 +785,6 @@ public final class KRendererForward implements KRenderer
   private void renderLightPassMeshDirectional(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KDirectional light,
-    final @Nonnull HashSet<KSPForwardLitDirectionalPrograms> lit_used,
     final @Nonnull KMeshInstance m,
     final @Nonnull KSPForwardLitDirectionalPrograms name)
     throws JCGLException,
@@ -547,26 +793,25 @@ public final class KRendererForward implements KRenderer
     final KShadingProgramLightDirectional s =
       this.programs_lit_directional.get(name);
 
-    if (lit_used.contains(name) == false) {
-      s.ksPreparePass(gc, this.matrix_projection);
-      s.ksPrepareWithLightDirectional(
-        gc,
-        this.matrix_context,
-        this.matrix_view,
-        light);
-    }
-    lit_used.add(name);
-
     try {
-      s.ksRenderWithMeshInstance(
-        gc,
-        this.matrix_modelview,
-        this.matrix_normal,
-        m);
+      s.ksPreparePass(gc, this.matrices.getMatrixProjection());
+      s.ksPrepareWithLightDirectional(gc, this.matrices, light);
+      s.ksRenderWithMeshInstance(gc, this.matrices, m);
     } catch (final JCGLException e) {
+      final StringBuilder x = new StringBuilder();
+      x.append("Program ");
+      x.append(name);
+      x.append(" raised OpenGL error: ");
+      x.append(e.getMessage());
+      this.log.error(s.toString());
       throw e;
     } catch (final ConstraintError e) {
-      this.log.error(name + " raised constraint error");
+      final StringBuilder x = new StringBuilder();
+      x.append("Program ");
+      x.append(name);
+      x.append(" raised constraint error: ");
+      x.append(e.getMessage());
+      this.log.error(s.toString());
       throw e;
     } catch (final Exception e) {
       throw new UnreachableCodeException();
@@ -580,24 +825,8 @@ public final class KRendererForward implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-    final HashSet<KSPForwardLitDirectionalPrograms> lit_used =
-      new HashSet<KSPForwardLitDirectionalPrograms>();
-    final HashSet<KSPForwardUnlitPrograms> unlit_used =
-      new HashSet<KSPForwardUnlitPrograms>();
-
     for (final KMeshInstance m : meshes) {
-
-      final KTransform transform = m.getTransform();
-      transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
-
-      MatrixM4x4F.multiply(
-        this.matrix_view,
-        this.matrix_model,
-        this.matrix_modelview);
-
-      KRendererCommon.makeNormalMatrix(
-        this.matrix_modelview,
-        this.matrix_normal);
+      this.matrices.matricesMakeFromTransform(m.getTransform());
 
       final Indeterminate<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms> name_opt =
         KRendererForward.decideLitDirectionalShader(m);
@@ -608,7 +837,7 @@ public final class KRendererForward implements KRenderer
           final KSPForwardLitDirectionalPrograms name =
             ((Success<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>) name_opt).value;
 
-          this.renderLightPassMeshDirectional(gc, light, lit_used, m, name);
+          this.renderLightPassMeshDirectional(gc, light, m, name);
           break;
         }
 
@@ -617,7 +846,7 @@ public final class KRendererForward implements KRenderer
           final KSPForwardUnlitPrograms name =
             ((Failure<KSPForwardLitDirectionalPrograms, KSPForwardUnlitPrograms>) name_opt).value;
 
-          this.renderLightPassMeshUnlit(gc, unlit_used, m, name);
+          this.renderLightPassMeshUnlit(gc, m, name);
           break;
         }
       }
@@ -631,24 +860,8 @@ public final class KRendererForward implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-    final HashSet<KSPForwardLitSphericalPrograms> lit_used =
-      new HashSet<KSPForwardLitSphericalPrograms>();
-    final HashSet<KSPForwardUnlitPrograms> unlit_used =
-      new HashSet<KSPForwardUnlitPrograms>();
-
     for (final KMeshInstance m : meshes) {
-
-      final KTransform transform = m.getTransform();
-      transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
-
-      MatrixM4x4F.multiply(
-        this.matrix_view,
-        this.matrix_model,
-        this.matrix_modelview);
-
-      KRendererCommon.makeNormalMatrix(
-        this.matrix_modelview,
-        this.matrix_normal);
+      this.matrices.matricesMakeFromTransform(m.getTransform());
 
       final Indeterminate<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms> name_opt =
         KRendererForward.decideLitSphericalShader(m);
@@ -659,7 +872,7 @@ public final class KRendererForward implements KRenderer
           final KSPForwardLitSphericalPrograms name =
             ((Success<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>) name_opt).value;
 
-          this.renderLightPassMeshSpherical(gc, light, lit_used, m, name);
+          this.renderLightPassMeshSpherical(gc, light, m, name);
           break;
         }
 
@@ -668,7 +881,7 @@ public final class KRendererForward implements KRenderer
           final KSPForwardUnlitPrograms name =
             ((Failure<KSPForwardLitSphericalPrograms, KSPForwardUnlitPrograms>) name_opt).value;
 
-          this.renderLightPassMeshUnlit(gc, unlit_used, m, name);
+          this.renderLightPassMeshUnlit(gc, m, name);
           break;
         }
       }
@@ -678,7 +891,6 @@ public final class KRendererForward implements KRenderer
   private void renderLightPassMeshSpherical(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KSphere light,
-    final @Nonnull HashSet<KSPForwardLitSphericalPrograms> lit_used,
     final @Nonnull KMeshInstance m,
     final @Nonnull KSPForwardLitSphericalPrograms name)
     throws JCGLException,
@@ -687,33 +899,25 @@ public final class KRendererForward implements KRenderer
     final KShadingProgramLightSpherical s =
       this.programs_lit_spherical.get(name);
 
-    if (lit_used.contains(name) == false) {
-      s.ksPreparePass(gc, this.matrix_projection);
-      s.ksPrepareWithLightSpherical(
-        gc,
-        this.matrix_context,
-        this.matrix_view,
-        light);
-    }
-    lit_used.add(name);
-
     try {
-      s.ksRenderWithMeshInstance(
-        gc,
-        this.matrix_modelview,
-        this.matrix_normal,
-        m);
+      s.ksPreparePass(gc, this.matrices.getMatrixProjection());
+      s.ksPrepareWithLightSpherical(gc, this.matrices, light);
+      s.ksRenderWithMeshInstance(gc, this.matrices, m);
     } catch (final JCGLException e) {
-      this.log.error("Program "
-        + name
-        + " raised OpenGL error"
-        + e.getMessage());
+      final StringBuilder x = new StringBuilder();
+      x.append("Program ");
+      x.append(name);
+      x.append(" raised OpenGL error: ");
+      x.append(e.getMessage());
+      this.log.error(s.toString());
       throw e;
     } catch (final ConstraintError e) {
-      this.log.error("Program "
-        + name
-        + " raised constraint error"
-        + e.getMessage());
+      final StringBuilder x = new StringBuilder();
+      x.append("Program ");
+      x.append(name);
+      x.append(" raised constraint error: ");
+      x.append(e.getMessage());
+      this.log.error(s.toString());
       throw e;
     } catch (final Exception e) {
       throw new UnreachableCodeException();
@@ -722,7 +926,6 @@ public final class KRendererForward implements KRenderer
 
   private void renderLightPassMeshUnlit(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull HashSet<KSPForwardUnlitPrograms> unlit_used,
     final @Nonnull KMeshInstance m,
     final @Nonnull KSPForwardUnlitPrograms name)
     throws JCGLException,
@@ -730,20 +933,24 @@ public final class KRendererForward implements KRenderer
   {
     final KShadingProgram s = this.programs_unlit.get(name);
 
-    if (unlit_used.contains(name) == false) {
-      s.ksPreparePass(gc, this.matrix_projection);
-    }
-    unlit_used.add(name);
-
     try {
-      s.ksRenderWithMeshInstance(
-        gc,
-        this.matrix_modelview,
-        this.matrix_normal,
-        m);
+      s.ksPreparePass(gc, this.matrices.getMatrixProjection());
+      s.ksRenderWithMeshInstance(gc, this.matrices, m);
     } catch (final JCGLException e) {
+      final StringBuilder x = new StringBuilder();
+      x.append("Program ");
+      x.append(name);
+      x.append(" raised OpenGL error: ");
+      x.append(e.getMessage());
+      this.log.error(s.toString());
       throw e;
     } catch (final ConstraintError e) {
+      final StringBuilder x = new StringBuilder();
+      x.append("Program ");
+      x.append(name);
+      x.append(" raised constraint error: ");
+      x.append(e.getMessage());
+      this.log.error(s.toString());
       throw e;
     } catch (final Exception e) {
       throw new UnreachableCodeException();

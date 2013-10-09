@@ -27,6 +27,9 @@ module ForwardLitDirectionalDiffuseOnly is
   import com.io7m.parasol.Vector3f          as V3;
   import com.io7m.parasol.Sampler2D         as S;
   import com.io7m.parasol.Float             as F;
+
+  import com.io7m.renderer.CubeMap          as CM;
+  import com.io7m.renderer.Diffuse          as D;
   import com.io7m.renderer.DirectionalLight as DL;
   import com.io7m.renderer.SphericalLight   as SL;
   import com.io7m.renderer.Normals          as N;
@@ -58,8 +61,8 @@ module ForwardLitDirectionalDiffuseOnly is
 
   shader fragment fwd_LD_fragment is
     in        f_normal  : vector_3f;
+    parameter material  : M.t;
     parameter light     : DL.t;
-    parameter f_diffuse : vector_4f;
     out       out_0     : vector_4f as 0;    
   with
     value n =
@@ -69,7 +72,7 @@ module ForwardLitDirectionalDiffuseOnly is
       DL.diffuse_only (light, n);
       
     value albedo =
-      f_diffuse [x y z];
+      material.diffuse.colour [x y z];
       
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
@@ -112,6 +115,7 @@ module ForwardLitDirectionalDiffuseOnly is
   shader fragment fwd_LD_T_fragment is
     in        f_uv        : vector_2f;
     in        f_normal    : vector_3f;
+    parameter material    : M.t;
     parameter light       : DL.t;
     parameter t_diffuse_0 : sampler_2d;
     out       out_0       : vector_4f as 0;    
@@ -123,7 +127,7 @@ module ForwardLitDirectionalDiffuseOnly is
       DL.diffuse_only (light, n);
       
     value albedo =
-      S.texture (t_diffuse_0, f_uv) [x y z];
+      D.diffuse (t_diffuse_0, f_uv, material.diffuse) [x y z];
       
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
@@ -134,6 +138,116 @@ module ForwardLitDirectionalDiffuseOnly is
   shader program fwd_LD_T is
     vertex   fwd_LD_T_vertex;
     fragment fwd_LD_T_fragment;
+  end;
+
+  --
+  -- Diffuse-only, environment mapped.
+  --
+
+  shader vertex fwd_LD_E_vertex is
+    in        v_normal     : vector_3f;
+    in        v_position   : vector_3f;
+    in        v_uv         : vector_2f;
+    parameter m_normal     : matrix_3x3f;
+    parameter m_modelview  : matrix_4x4f;
+    parameter m_projection : matrix_4x4f;
+    out       f_uv         : vector_2f;
+    out       f_normal     : vector_3f;
+    out       f_position   : vector_4f;
+  with
+    value clip_position =
+      M4.multiply_vector (
+        M4.multiply (m_projection, m_modelview),
+        new vector_4f (v_position, 1.0)
+      );
+
+    value position =
+      M4.multiply_vector (
+        m_modelview,
+        new vector_4f (v_position, 1.0)
+      );
+
+    value normal =
+      M3.multiply_vector (m_normal, v_normal);
+  as
+    out gl_Position = clip_position;
+    out f_uv        = v_uv;
+    out f_normal    = normal;
+    out f_position  = position;
+  end;
+
+  shader fragment fwd_LD_E_fragment is
+    in        f_position    : vector_4f;
+    in        f_uv          : vector_2f;
+    in        f_normal      : vector_3f;
+    parameter m_view_inv    : matrix_4x4f;
+    parameter material      : M.t;
+    parameter light         : DL.t;
+    parameter t_environment : sampler_cube;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n =
+      V3.normalize (f_normal);
+      
+    value light_term =
+      DL.diffuse_only (light, n);
+    
+    value env =
+      CM.reflection (t_environment, f_position [x y z], f_normal, m_view_inv);
+    
+    value albedo =
+      V3.interpolate (material.diffuse.colour [x y z], env [x y z], material.environment.mix);
+      
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LD_E is
+    vertex   fwd_LD_E_vertex;
+    fragment fwd_LD_E_fragment;
+  end;
+
+  --
+  -- Diffuse-only, textured, environment mapped.
+  --
+
+  shader fragment fwd_LD_T_E_fragment is
+    in        f_position    : vector_4f;
+    in        f_uv          : vector_2f;
+    in        f_normal      : vector_3f;
+    parameter m_view_inv    : matrix_4x4f;
+    parameter material      : M.t;
+    parameter light         : DL.t;
+    parameter t_diffuse_0   : sampler_2d;
+    parameter t_environment : sampler_cube;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n =
+      V3.normalize (f_normal);
+      
+    value light_term =
+      DL.diffuse_only (light, n);
+      
+    value diffuse =
+      D.diffuse (t_diffuse_0, f_uv, material.diffuse);
+      
+    value env =
+      CM.reflection (t_environment, f_position [x y z], f_normal, m_view_inv);
+    
+    value albedo =
+      V3.interpolate (diffuse [x y z], env [x y z], material.environment.mix);
+      
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LD_T_E is
+    vertex   fwd_LD_E_vertex;
+    fragment fwd_LD_T_E_fragment;
   end;
 
 end;

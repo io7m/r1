@@ -47,9 +47,7 @@ public class SBSceneDescriptionTest
           final @Nonnull SBSceneDescription desc)
           throws Throwable
         {
-          Assert.assertEquals(
-            desc,
-            SBSceneDescription.fromXML(null, desc.toXML()));
+          Assert.assertEquals(desc, SBSceneDescription.fromXML(desc.toXML()));
         }
       });
   }

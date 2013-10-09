@@ -27,6 +27,9 @@ module ForwardLitDirectionalNormalMapped is
   import com.io7m.parasol.Vector3f          as V3;
   import com.io7m.parasol.Sampler2D         as S;
   import com.io7m.parasol.Float             as F;
+
+  import com.io7m.renderer.CubeMap          as CM;
+  import com.io7m.renderer.Diffuse          as D;
   import com.io7m.renderer.DirectionalLight as DL;
   import com.io7m.renderer.SphericalLight   as SL;
   import com.io7m.renderer.Normals          as N;
@@ -39,6 +42,7 @@ module ForwardLitDirectionalNormalMapped is
     in        v_uv         : vector_2f;
     parameter m_modelview  : matrix_4x4f;
     parameter m_projection : matrix_4x4f;
+    out       f_position   : vector_4f;
     out       f_uv         : vector_2f;
     out       f_normal     : vector_3f;
     out       f_tangent    : vector_3f;
@@ -47,6 +51,12 @@ module ForwardLitDirectionalNormalMapped is
     value clip_position =
       M4.multiply_vector (
         M4.multiply (m_projection, m_modelview),
+        new vector_4f (v_position, 1.0)
+      );
+      
+    value position =
+      M4.multiply_vector (
+        m_modelview,
         new vector_4f (v_position, 1.0)
       );
 
@@ -61,6 +71,7 @@ module ForwardLitDirectionalNormalMapped is
     out f_normal    = v_normal;
     out f_tangent   = tangent;
     out f_bitangent = bitangent;
+    out f_position  = position;
   end;
 
   --
@@ -74,7 +85,6 @@ module ForwardLitDirectionalNormalMapped is
     in        f_uv        : vector_2f;
     parameter light       : DL.t;
     parameter material    : M.t;
-    parameter f_diffuse   : vector_4f;
     parameter t_normal    : sampler_2d;
     parameter m_normal    : matrix_3x3f;
     out       out_0       : vector_4f as 0;    
@@ -91,7 +101,7 @@ module ForwardLitDirectionalNormalMapped is
       DL.diffuse_only (light, n);
 
     value albedo =
-      f_diffuse [x y z];
+      material.diffuse.colour [x y z];
 
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
@@ -143,6 +153,102 @@ module ForwardLitDirectionalNormalMapped is
   shader program fwd_LD_T_N is
     vertex   fwd_LD_N_vertex;
     fragment fwd_LD_T_N_fragment;
+  end;
+
+  --
+  -- Untextured, diffuse-only, environment mapped, normal mapped.
+  --
+
+  shader fragment fwd_LD_E_N_fragment is
+    in        f_position    : vector_4f;
+    in        f_normal      : vector_3f;
+    in        f_tangent     : vector_3f;
+    in        f_bitangent   : vector_3f;
+    in        f_uv          : vector_2f;
+    parameter light         : DL.t;
+    parameter material      : M.t;
+    parameter t_normal      : sampler_2d;
+    parameter t_environment : sampler_cube;
+    parameter m_normal      : matrix_3x3f;
+    parameter m_view_inv    : matrix_4x4f;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n = N.bump(
+      t_normal,
+      m_normal,
+      V3.normalize (f_normal),
+      V3.normalize (f_tangent),
+      V3.normalize (f_bitangent),
+      f_uv);
+
+    value env =
+      CM.reflection (t_environment, f_position [x y z], n, m_view_inv);
+
+    value light_term =
+      DL.diffuse_only (light, n);
+
+    value albedo =
+      V3.interpolate (material.diffuse.colour [x y z], env [x y z], material.environment.mix);
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LD_E_N is
+    vertex   fwd_LD_N_vertex;
+    fragment fwd_LD_E_N_fragment;
+  end;
+
+  --
+  -- Textured, diffuse-only, environment mapped, normal mapped.
+  --
+
+  shader fragment fwd_LD_T_E_N_fragment is
+    in        f_position    : vector_4f;
+    in        f_normal      : vector_3f;
+    in        f_tangent     : vector_3f;
+    in        f_bitangent   : vector_3f;
+    in        f_uv          : vector_2f;
+    parameter light         : DL.t;
+    parameter material      : M.t;
+    parameter t_diffuse_0   : sampler_2d;
+    parameter t_normal      : sampler_2d;
+    parameter t_environment : sampler_cube;
+    parameter m_normal      : matrix_3x3f;
+    parameter m_view_inv    : matrix_4x4f;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n = N.bump(
+      t_normal,
+      m_normal,
+      V3.normalize (f_normal),
+      V3.normalize (f_tangent),
+      V3.normalize (f_bitangent),
+      f_uv);
+
+    value env =
+      CM.reflection (t_environment, f_position [x y z], n, m_view_inv);
+
+    value light_term =
+      DL.diffuse_only (light, n);
+
+    value diff =
+      D.diffuse (t_diffuse_0, f_uv, material.diffuse);
+
+    value albedo =
+      V3.interpolate (diff [x y z], env [x y z], material.environment.mix);
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LD_T_E_N is
+    vertex   fwd_LD_N_vertex;
+    fragment fwd_LD_T_E_N_fragment;
   end;
 
 end;

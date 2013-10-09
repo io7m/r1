@@ -27,6 +27,9 @@ module ForwardLitDirectionalSpecularNormalMapped is
   import com.io7m.parasol.Vector3f          as V3;
   import com.io7m.parasol.Sampler2D         as S;
   import com.io7m.parasol.Float             as F;
+
+  import com.io7m.renderer.CubeMap          as CM;
+  import com.io7m.renderer.Diffuse          as D;
   import com.io7m.renderer.DirectionalLight as DL;
   import com.io7m.renderer.SphericalLight   as SL;
   import com.io7m.renderer.Normals          as N;
@@ -83,7 +86,6 @@ module ForwardLitDirectionalSpecularNormalMapped is
     in        f_position  : vector_4f;
     parameter light       : DL.t;
     parameter material    : M.t;
-    parameter f_diffuse   : vector_4f;
     parameter t_normal    : sampler_2d;
     parameter m_normal    : matrix_3x3f;
     out       out_0       : vector_4f as 0;    
@@ -100,7 +102,7 @@ module ForwardLitDirectionalSpecularNormalMapped is
       DL.diffuse_specular (light, n, f_position [x y z], material);
       
     value albedo =
-      f_diffuse [x y z];
+      material.diffuse.colour [x y z];
 
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
@@ -125,7 +127,6 @@ module ForwardLitDirectionalSpecularNormalMapped is
     in        f_position  : vector_4f;
     parameter light       : DL.t;
     parameter material    : M.t;
-    parameter f_diffuse   : vector_4f;
     parameter t_specular  : sampler_2d;
     parameter t_normal    : sampler_2d;
     parameter m_normal    : matrix_3x3f;
@@ -141,15 +142,19 @@ module ForwardLitDirectionalSpecularNormalMapped is
 
     value m =
       record M.t {
-        specular_exponent  = material.specular_exponent,
-        specular_intensity = S.texture (t_specular, f_uv)[x]
+        diffuse     = material.diffuse,
+        environment = material.environment,
+        specular    = record M.specular {
+          exponent  = material.specular.exponent,
+          intensity = S.texture (t_specular, f_uv)[x]
+        }
       };
       
     value light_term =
       DL.diffuse_specular (light, n, f_position [x y z], m);
       
     value albedo =
-      f_diffuse [x y z];
+      m.diffuse.colour [x y z];
 
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
@@ -232,8 +237,12 @@ module ForwardLitDirectionalSpecularNormalMapped is
 
     value m =
       record M.t {
-        specular_exponent  = material.specular_exponent,
-        specular_intensity = S.texture (t_specular, f_uv)[x]
+        diffuse     = material.diffuse,
+        environment = material.environment,
+        specular    = record M.specular {
+          exponent  = material.specular.exponent,
+          intensity = S.texture (t_specular, f_uv)[x]
+        }
       };
       
     value light_term =
@@ -251,6 +260,220 @@ module ForwardLitDirectionalSpecularNormalMapped is
   shader program fwd_LD_T_SM_N is
     vertex   fwd_LD_S_N_vertex;
     fragment fwd_LD_T_SM_N_fragment;
+  end;
+
+  --
+  -- Untextured, environment mapped, constant specular, normal mapped.
+  --
+
+  shader fragment fwd_LD_E_S_N_fragment is
+    in        f_normal      : vector_3f;
+    in        f_tangent     : vector_3f;
+    in        f_bitangent   : vector_3f;
+    in        f_uv          : vector_2f;
+    in        f_position    : vector_4f;
+    parameter light         : DL.t;
+    parameter material      : M.t;
+    parameter t_environment : sampler_cube;
+    parameter t_normal      : sampler_2d;
+    parameter m_normal      : matrix_3x3f;
+    parameter m_view_inv    : matrix_4x4f;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n = N.bump(
+      t_normal,
+      m_normal,
+      V3.normalize (f_normal),
+      V3.normalize (f_tangent),
+      V3.normalize (f_bitangent),
+      f_uv);
+
+    value env =
+      CM.reflection (t_environment, f_position [x y z], n, m_view_inv);
+
+    value light_term =
+      DL.diffuse_specular (light, n, f_position [x y z], material);
+
+    value albedo =
+      V3.interpolate (material.diffuse.colour [x y z], env [x y z], material.environment.mix);
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LD_E_S_N is
+    vertex   fwd_LD_S_N_vertex;
+    fragment fwd_LD_E_S_N_fragment;
+  end;
+
+  --
+  -- Textured, environment mapped, constant specular, normal mapped.
+  --
+
+  shader fragment fwd_LD_T_E_S_N_fragment is
+    in        f_normal      : vector_3f;
+    in        f_tangent     : vector_3f;
+    in        f_bitangent   : vector_3f;
+    in        f_uv          : vector_2f;
+    in        f_position    : vector_4f;
+    parameter light         : DL.t;
+    parameter material      : M.t;
+    parameter t_environment : sampler_cube;
+    parameter t_diffuse_0   : sampler_2d;
+    parameter t_normal      : sampler_2d;
+    parameter m_normal      : matrix_3x3f;
+    parameter m_view_inv    : matrix_4x4f;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n = N.bump(
+      t_normal,
+      m_normal,
+      V3.normalize (f_normal),
+      V3.normalize (f_tangent),
+      V3.normalize (f_bitangent),
+      f_uv);
+
+    value env =
+      CM.reflection (t_environment, f_position [x y z], n, m_view_inv);
+
+    value light_term =
+      DL.diffuse_specular (light, n, f_position [x y z], material);
+
+    value diff =
+      D.diffuse (t_diffuse_0, f_uv, material.diffuse);
+
+    value albedo =
+      V3.interpolate (diff [x y z], env [x y z], material.environment.mix);
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LD_T_E_S_N is
+    vertex   fwd_LD_S_N_vertex;
+    fragment fwd_LD_T_E_S_N_fragment;
+  end;
+
+  --
+  -- Untextured, environment mapped, mapped specular, normal mapped.
+  --
+
+  shader fragment fwd_LD_E_SM_N_fragment is
+    in        f_normal      : vector_3f;
+    in        f_tangent     : vector_3f;
+    in        f_bitangent   : vector_3f;
+    in        f_uv          : vector_2f;
+    in        f_position    : vector_4f;
+    parameter light         : DL.t;
+    parameter material      : M.t;
+    parameter t_environment : sampler_cube;
+    parameter t_normal      : sampler_2d;
+    parameter t_specular    : sampler_2d;
+    parameter m_normal      : matrix_3x3f;
+    parameter m_view_inv    : matrix_4x4f;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n = N.bump(
+      t_normal,
+      m_normal,
+      V3.normalize (f_normal),
+      V3.normalize (f_tangent),
+      V3.normalize (f_bitangent),
+      f_uv);
+
+    value m =
+      record M.t {
+        diffuse     = material.diffuse,
+        environment = material.environment,
+        specular    = record M.specular {
+          exponent  = material.specular.exponent,
+          intensity = S.texture (t_specular, f_uv)[x]
+        }
+      };
+
+    value env =
+      CM.reflection (t_environment, f_position [x y z], n, m_view_inv);
+
+    value light_term =
+      DL.diffuse_specular (light, n, f_position [x y z], m);
+
+    value albedo =
+      V3.interpolate (m.diffuse.colour [x y z], env [x y z], F.multiply (m.environment.mix, m.specular.intensity));
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LD_E_SM_N is
+    vertex   fwd_LD_S_N_vertex;
+    fragment fwd_LD_E_SM_N_fragment;
+  end;
+
+  --
+  -- Textured, environment mapped, mapped specular, normal mapped.
+  --
+
+  shader fragment fwd_LD_T_E_SM_N_fragment is
+    in        f_normal      : vector_3f;
+    in        f_tangent     : vector_3f;
+    in        f_bitangent   : vector_3f;
+    in        f_uv          : vector_2f;
+    in        f_position    : vector_4f;
+    parameter light         : DL.t;
+    parameter material      : M.t;
+    parameter t_diffuse_0   : sampler_2d;
+    parameter t_environment : sampler_cube;
+    parameter t_normal      : sampler_2d;
+    parameter t_specular    : sampler_2d;
+    parameter m_normal      : matrix_3x3f;
+    parameter m_view_inv    : matrix_4x4f;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n = N.bump(
+      t_normal,
+      m_normal,
+      V3.normalize (f_normal),
+      V3.normalize (f_tangent),
+      V3.normalize (f_bitangent),
+      f_uv);
+
+    value m =
+      record M.t {
+        diffuse     = material.diffuse,
+        environment = material.environment,
+        specular    = record M.specular {
+          exponent  = material.specular.exponent,
+          intensity = S.texture (t_specular, f_uv)[x]
+        }
+      };
+
+    value env =
+      CM.reflection (t_environment, f_position [x y z], n, m_view_inv);
+
+    value light_term =
+      DL.diffuse_specular (light, n, f_position [x y z], m);
+
+    value diff =
+      D.diffuse (t_diffuse_0, f_uv, material.diffuse);
+
+    value albedo =
+      V3.interpolate (diff [x y z], env [x y z], F.multiply (m.environment.mix, m.specular.intensity));
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LD_T_E_SM_N is
+    vertex   fwd_LD_S_N_vertex;
+    fragment fwd_LD_T_E_SM_N_fragment;
   end;
 
 end;

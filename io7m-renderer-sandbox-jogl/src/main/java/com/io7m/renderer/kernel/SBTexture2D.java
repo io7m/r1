@@ -22,26 +22,22 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jvvfs.PathVirtual;
 
 @Immutable public final class SBTexture2D
 {
-  private final @Nonnull SBTexture2DDescription description;
-  private final @Nonnull Texture2DStatic        texture;
-  private final @Nonnull BufferedImage          image;
+  private final @Nonnull PathVirtual     path;
+  private final @Nonnull Texture2DStatic texture;
+  private final @Nonnull BufferedImage   image;
 
   public SBTexture2D(
+    final @Nonnull PathVirtual path,
     final @Nonnull Texture2DStatic texture,
-    final @Nonnull BufferedImage image,
-    final @Nonnull SBTexture2DDescription description)
+    final @Nonnull BufferedImage image)
   {
+    this.path = path;
     this.texture = texture;
     this.image = image;
-    this.description = description;
-  }
-
-  public @Nonnull SBTexture2DDescription getDescription()
-  {
-    return this.description;
   }
 
   public @Nonnull BufferedImage getImage()
@@ -49,9 +45,9 @@ import com.io7m.jcanephora.Texture2DStatic;
     return this.image;
   }
 
-  @Nonnull String getName()
+  public @Nonnull PathVirtual getPath()
   {
-    return this.texture.getName();
+    return this.path;
   }
 
   public @Nonnull Texture2DStatic getTexture()
@@ -64,8 +60,6 @@ import com.io7m.jcanephora.Texture2DStatic;
     final StringBuilder builder = new StringBuilder();
     builder.append("[SBTexture2D ");
     builder.append(this.texture);
-    builder.append(" ");
-    builder.append(this.description.getFile());
     builder.append("]");
     return builder.toString();
   }

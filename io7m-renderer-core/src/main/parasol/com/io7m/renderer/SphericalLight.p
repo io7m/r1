@@ -16,6 +16,11 @@
 
 package com.io7m.renderer;
 
+--
+-- Spherical lighting functions. All calculations are assumed to take
+-- place in eye-space (where the observer is always at (0, 0, 0)).
+--
+
 module SphericalLight is
 
   import com.io7m.parasol.Vector3f   as V3;
@@ -36,7 +41,7 @@ module SphericalLight is
   --
 
   type directions is record
-    otl        : vector_3f, -- Direction from observer to light source ("V")
+    ots        : vector_3f, -- Direction from observer to surface ("V")
     normal     : vector_3f, -- Surface normal ("N")
     stl        : vector_3f, -- Direction from surface to light source ("L")
     distance   : float,     -- Distance to light from observer
@@ -45,8 +50,11 @@ module SphericalLight is
 
   --
   -- Given a spherical light [light], a surface normal [n],
-  -- and an observer at [p], calculate all relevant directions
-  -- for simulating lighting.
+  -- and the point [p] on the surface to be lit, calculate all
+  -- relevant directions for simulating lighting.
+  --
+  -- Note that calculations are in eye-space and therefore the
+  -- observer is assumed to be at (0.0, 0.0, 0.0).
   --
 
   function directions (
@@ -57,21 +65,21 @@ module SphericalLight is
     let
       value position_diff =
         V3.subtract (p, light.position);
-      value otl =
+      value ots =
         V3.normalize (p);
     in
       record directions {
-        otl        = otl,
+        ots        = ots,
         normal     = n,
         stl        = V3.normalize (V3.negate (position_diff)),
         distance   = V3.magnitude (position_diff),
-        reflection = V3.reflect (otl, n)
+        reflection = V3.reflect (ots, n)
       }
     end;
 
   --
   -- Given a spherical light [light], at distance [distance]
-  -- from the observer, calculate the amount of attenuation.
+  -- from the point on the surface, calculate the amount of attenuation.
   --
 
   function attenuation (
@@ -107,8 +115,8 @@ module SphericalLight is
 
   --
   -- Given a spherical light [light], a surface normal [n],
-  -- and assuming an observer at [p], calculate the diffuse 
-  -- term for the surface.
+  -- and assuming the current point on the surface is at [p],
+  -- calculate the diffuse term for the surface.
   --
 
   function diffuse_only (
@@ -130,17 +138,17 @@ module SphericalLight is
   --
 
   function specular_color (
-    light    : t,
-    d        : directions,
-    material : M.t
+    light : t,
+    d     : directions,
+    s     : M.specular
   ) : vector_3f =
     let
       value factor =
-        F.power (F.maximum (0.0, V3.dot (d.reflection, d.stl)), material.specular_exponent);
+        F.power (F.maximum (0.0, V3.dot (d.reflection, d.stl)), s.exponent);
       value color =
         V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor);
     in
-      V3.multiply_scalar (color, material.specular_intensity)
+      V3.multiply_scalar (color, s.intensity)
     end;
 
   --
@@ -159,7 +167,7 @@ module SphericalLight is
       value d  = directions (light, p, n);
       value a  = attenuation (light, d.distance);
       value dc = diffuse_color (light, d);
-      value sc = specular_color (light, d, material);
+      value sc = specular_color (light, d, material.specular);
     in
       V3.multiply_scalar (V3.add (dc, sc), a)
     end;
