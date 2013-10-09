@@ -21,10 +21,7 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.renderer.RMatrixM3x3F;
 import com.io7m.renderer.RMatrixReadable4x4F;
-import com.io7m.renderer.RTransformModelView;
-import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
 
 public interface KShadingProgram
@@ -37,8 +34,7 @@ public interface KShadingProgram
 
   void ksRenderWithMeshInstance(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull RMatrixReadable4x4F<RTransformModelView> mv,
-    final @Nonnull RMatrixM3x3F<RTransformNormal> mn,
+    final @Nonnull KMatrices matrices,
     final @Nonnull KMeshInstance m)
     throws JCGLException,
       ConstraintError,

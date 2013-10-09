@@ -30,6 +30,7 @@ import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.renderer.kernel.KRenderingCapabilities;
+import com.io7m.renderer.kernel.KRenderingCapabilities.EnvironmentCapability;
 import com.io7m.renderer.kernel.KRenderingCapabilities.NormalCapability;
 import com.io7m.renderer.kernel.KRenderingCapabilities.SpecularCapability;
 import com.io7m.renderer.kernel.KRenderingCapabilities.TextureCapability;
@@ -44,14 +45,16 @@ public enum KSPForwardLitDirectionalPrograms
   KSP_FORWARD_LIT_DIRECTIONAL("fwd_LD", new KRenderingCapabilities(
     TextureCapability.TEXTURE_CAP_NONE,
     NormalCapability.NORMAL_CAP_VERTEX,
-    SpecularCapability.SPECULAR_CAP_CONSTANT)),
+    SpecularCapability.SPECULAR_CAP_CONSTANT,
+    EnvironmentCapability.ENVIRONMENT_NONE)),
 
   KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED(
     "fwd_LD_T",
     new KRenderingCapabilities(
       TextureCapability.TEXTURE_CAP_DIFFUSE,
       NormalCapability.NORMAL_CAP_VERTEX,
-      SpecularCapability.SPECULAR_CAP_CONSTANT)),
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_NONE)),
 
   /*
    * Directional, with specular terms.
@@ -62,28 +65,32 @@ public enum KSPForwardLitDirectionalPrograms
     new KRenderingCapabilities(
       TextureCapability.TEXTURE_CAP_NONE,
       NormalCapability.NORMAL_CAP_VERTEX,
-      SpecularCapability.SPECULAR_CAP_CONSTANT)),
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_NONE)),
 
   KSP_FORWARD_LIT_DIRECTIONAL_SPECULARMAPPED(
     "fwd_LD_SM",
     new KRenderingCapabilities(
       TextureCapability.TEXTURE_CAP_NONE,
       NormalCapability.NORMAL_CAP_VERTEX,
-      SpecularCapability.SPECULAR_CAP_MAPPED)),
+      SpecularCapability.SPECULAR_CAP_MAPPED,
+      EnvironmentCapability.ENVIRONMENT_NONE)),
 
   KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULAR(
     "fwd_LD_T_S",
     new KRenderingCapabilities(
       TextureCapability.TEXTURE_CAP_DIFFUSE,
       NormalCapability.NORMAL_CAP_VERTEX,
-      SpecularCapability.SPECULAR_CAP_CONSTANT)),
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_NONE)),
 
   KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULARMAPPED(
     "fwd_LD_T_SM",
     new KRenderingCapabilities(
       TextureCapability.TEXTURE_CAP_DIFFUSE,
       NormalCapability.NORMAL_CAP_VERTEX,
-      SpecularCapability.SPECULAR_CAP_MAPPED)),
+      SpecularCapability.SPECULAR_CAP_MAPPED,
+      EnvironmentCapability.ENVIRONMENT_NONE)),
 
   /*
    * Directional, with normal mapping.
@@ -94,14 +101,16 @@ public enum KSPForwardLitDirectionalPrograms
     new KRenderingCapabilities(
       TextureCapability.TEXTURE_CAP_NONE,
       NormalCapability.NORMAL_CAP_MAPPED,
-      SpecularCapability.SPECULAR_CAP_CONSTANT)),
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_NONE)),
 
   KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_NORMALMAPPED(
     "fwd_LD_T_N",
     new KRenderingCapabilities(
       TextureCapability.TEXTURE_CAP_DIFFUSE,
       NormalCapability.NORMAL_CAP_MAPPED,
-      SpecularCapability.SPECULAR_CAP_CONSTANT)),
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_NONE)),
 
   /*
    * Directional, with normal mapping, with specular terms.
@@ -112,32 +121,150 @@ public enum KSPForwardLitDirectionalPrograms
     new KRenderingCapabilities(
       TextureCapability.TEXTURE_CAP_NONE,
       NormalCapability.NORMAL_CAP_MAPPED,
-      SpecularCapability.SPECULAR_CAP_CONSTANT)),
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_NONE)),
 
   KSP_FORWARD_LIT_DIRECTIONAL_SPECULARMAPPED_NORMALMAPPED(
     "fwd_LD_SM_N",
     new KRenderingCapabilities(
       TextureCapability.TEXTURE_CAP_NONE,
       NormalCapability.NORMAL_CAP_MAPPED,
-      SpecularCapability.SPECULAR_CAP_MAPPED)),
+      SpecularCapability.SPECULAR_CAP_MAPPED,
+      EnvironmentCapability.ENVIRONMENT_NONE)),
 
   KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULAR_NORMALMAPPED(
     "fwd_LD_T_S_N",
     new KRenderingCapabilities(
       TextureCapability.TEXTURE_CAP_DIFFUSE,
       NormalCapability.NORMAL_CAP_MAPPED,
-      SpecularCapability.SPECULAR_CAP_CONSTANT)),
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_NONE)),
 
   KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULARMAPPED_NORMALMAPPED(
     "fwd_LD_T_SM_N",
     new KRenderingCapabilities(
       TextureCapability.TEXTURE_CAP_DIFFUSE,
       NormalCapability.NORMAL_CAP_MAPPED,
-      SpecularCapability.SPECULAR_CAP_MAPPED))
+      SpecularCapability.SPECULAR_CAP_MAPPED,
+      EnvironmentCapability.ENVIRONMENT_NONE)),
+
+  /*
+   * Directional with environment mapping.
+   */
+
+  KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED(
+    "fwd_LD_E",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_NONE,
+      NormalCapability.NORMAL_CAP_VERTEX,
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_MAPPED)),
+
+  KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED(
+    "fwd_LD_T_E",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_DIFFUSE,
+      NormalCapability.NORMAL_CAP_VERTEX,
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_MAPPED)),
+
+  /*
+   * Directional with environment mapping, with specular terms.
+   */
+
+  KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_SPECULAR(
+    "fwd_LD_E_S",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_NONE,
+      NormalCapability.NORMAL_CAP_VERTEX,
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_MAPPED)),
+
+  KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_SPECULARMAPPED(
+    "fwd_LD_E_SM",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_NONE,
+      NormalCapability.NORMAL_CAP_VERTEX,
+      SpecularCapability.SPECULAR_CAP_MAPPED,
+      EnvironmentCapability.ENVIRONMENT_MAPPED)),
+
+  KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_SPECULAR(
+    "fwd_LD_T_E_S",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_DIFFUSE,
+      NormalCapability.NORMAL_CAP_VERTEX,
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_MAPPED)),
+
+  KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_SPECULARMAPPED(
+    "fwd_LD_T_E_SM",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_DIFFUSE,
+      NormalCapability.NORMAL_CAP_VERTEX,
+      SpecularCapability.SPECULAR_CAP_MAPPED,
+      EnvironmentCapability.ENVIRONMENT_MAPPED)),
+
+  /*
+   * Directional with environment mapping, with normal mapping, with specular
+   * terms.
+   */
+
+  KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_NORMALMAPPED(
+    "fwd_LD_E_S_N",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_NONE,
+      NormalCapability.NORMAL_CAP_MAPPED,
+      SpecularCapability.SPECULAR_CAP_NONE,
+      EnvironmentCapability.ENVIRONMENT_MAPPED)),
+
+  KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_NORMALMAPPED(
+    "fwd_LD_T_E_S_N",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_DIFFUSE,
+      NormalCapability.NORMAL_CAP_MAPPED,
+      SpecularCapability.SPECULAR_CAP_NONE,
+      EnvironmentCapability.ENVIRONMENT_MAPPED)),
+
+  /*
+   * Directional with environment mapping, with normal mapping, with specular
+   * terms.
+   */
+
+  KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_SPECULAR_NORMALMAPPED(
+    "fwd_LD_E_S_N",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_NONE,
+      NormalCapability.NORMAL_CAP_MAPPED,
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_MAPPED)),
+
+  KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_SPECULARMAPPED_NORMALMAPPED(
+    "fwd_LD_E_SM_N",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_NONE,
+      NormalCapability.NORMAL_CAP_MAPPED,
+      SpecularCapability.SPECULAR_CAP_MAPPED,
+      EnvironmentCapability.ENVIRONMENT_MAPPED)),
+
+  KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_SPECULAR_NORMALMAPPED(
+    "fwd_LD_T_E_S_N",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_DIFFUSE,
+      NormalCapability.NORMAL_CAP_MAPPED,
+      SpecularCapability.SPECULAR_CAP_CONSTANT,
+      EnvironmentCapability.ENVIRONMENT_MAPPED)),
+
+  KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_SPECULARMAPPED_NORMALMAPPED(
+    "fwd_LD_T_E_SM_N",
+    new KRenderingCapabilities(
+      TextureCapability.TEXTURE_CAP_DIFFUSE,
+      NormalCapability.NORMAL_CAP_MAPPED,
+      SpecularCapability.SPECULAR_CAP_MAPPED,
+      EnvironmentCapability.ENVIRONMENT_MAPPED)),
 
   ;
 
-  private final @Nonnull String                    name;
+  private final @Nonnull String                 name;
   private final @Nonnull KRenderingCapabilities required;
 
   private KSPForwardLitDirectionalPrograms(
@@ -190,6 +317,30 @@ public enum KSPForwardLitDirectionalPrograms
         return new KSPF_LD_T_SM_NM(gc, fs, log);
       case KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_SPECULAR_NORMALMAPPED:
         return new KSPF_LD_T_S_NM(gc, fs, log);
+      case KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED:
+        return new KSPF_LD_E(gc, fs, log);
+      case KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED:
+        return new KSPF_LD_T_E(gc, fs, log);
+      case KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_SPECULAR:
+        return new KSPF_LD_E_S(gc, fs, log);
+      case KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_SPECULARMAPPED:
+        return new KSPF_LD_E_SM(gc, fs, log);
+      case KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_SPECULAR:
+        return new KSPF_LD_T_E_S(gc, fs, log);
+      case KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_SPECULARMAPPED:
+        return new KSPF_LD_T_E_SM(gc, fs, log);
+      case KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_NORMALMAPPED:
+        return new KSPF_LD_E_NM(gc, fs, log);
+      case KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_SPECULARMAPPED_NORMALMAPPED:
+        return new KSPF_LD_E_SM_NM(gc, fs, log);
+      case KSP_FORWARD_LIT_DIRECTIONAL_ENVIRONMENTMAPPED_SPECULAR_NORMALMAPPED:
+        return new KSPF_LD_E_S_NM(gc, fs, log);
+      case KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_NORMALMAPPED:
+        return new KSPF_LD_T_E_NM(gc, fs, log);
+      case KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_SPECULARMAPPED_NORMALMAPPED:
+        return new KSPF_LD_T_E_SM_NM(gc, fs, log);
+      case KSP_FORWARD_LIT_DIRECTIONAL_TEXTURED_ENVIRONMENTMAPPED_SPECULAR_NORMALMAPPED:
+        return new KSPF_LD_T_E_S_NM(gc, fs, log);
     }
 
     throw new UnreachableCodeException();

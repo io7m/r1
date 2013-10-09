@@ -22,54 +22,23 @@ import javax.annotation.Nonnull;
 public final class SBMaterial
 {
   private final @Nonnull SBMaterialDescription description;
-  private final @CheckForNull SBTexture2D        map_diffuse;
-  private final @CheckForNull SBTexture2D        map_normal;
-  private final @CheckForNull SBTexture2D        map_specular;
+  private final @CheckForNull SBTexture2D      map_diffuse;
+  private final @CheckForNull SBTexture2D      map_normal;
+  private final @CheckForNull SBTexture2D      map_specular;
+  private final @CheckForNull SBTextureCube    map_environment;
 
   public SBMaterial(
     final @Nonnull SBMaterialDescription description,
     final @CheckForNull SBTexture2D map_diffuse,
     final @CheckForNull SBTexture2D map_normal,
-    final @CheckForNull SBTexture2D map_specular)
+    final @CheckForNull SBTexture2D map_specular,
+    final @CheckForNull SBTextureCube map_environment)
   {
     this.description = description;
     this.map_diffuse = map_diffuse;
     this.map_normal = map_normal;
     this.map_specular = map_specular;
-  }
-
-  public @Nonnull SBMaterialDescription getDescription()
-  {
-    return this.description;
-  }
-
-  public @CheckForNull SBTexture2D getDiffuseMap()
-  {
-    return this.map_diffuse;
-  }
-
-  public @CheckForNull SBTexture2D getNormalMap()
-  {
-    return this.map_normal;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result =
-      (prime * result)
-        + ((this.description == null) ? 0 : this.description.hashCode());
-    result =
-      (prime * result)
-        + ((this.map_diffuse == null) ? 0 : this.map_diffuse.hashCode());
-    result =
-      (prime * result)
-        + ((this.map_normal == null) ? 0 : this.map_normal.hashCode());
-    result =
-      (prime * result)
-        + ((this.map_specular == null) ? 0 : this.map_specular.hashCode());
-    return result;
+    this.map_environment = map_environment;
   }
 
   @Override public boolean equals(
@@ -99,6 +68,13 @@ public final class SBMaterial
     } else if (!this.map_diffuse.equals(other.map_diffuse)) {
       return false;
     }
+    if (this.map_environment == null) {
+      if (other.map_environment != null) {
+        return false;
+      }
+    } else if (!this.map_environment.equals(other.map_environment)) {
+      return false;
+    }
     if (this.map_normal == null) {
       if (other.map_normal != null) {
         return false;
@@ -116,22 +92,67 @@ public final class SBMaterial
     return true;
   }
 
+  public @Nonnull SBMaterialDescription getDescription()
+  {
+    return this.description;
+  }
+
+  public @CheckForNull SBTexture2D getDiffuseMap()
+  {
+    return this.map_diffuse;
+  }
+
+  public @CheckForNull SBTextureCube getEnvironmentMap()
+  {
+    return this.map_environment;
+  }
+
+  public @CheckForNull SBTexture2D getNormalMap()
+  {
+    return this.map_normal;
+  }
+
   public @CheckForNull SBTexture2D getSpecularMap()
   {
     return this.map_specular;
   }
 
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result =
+      (prime * result)
+        + ((this.description == null) ? 0 : this.description.hashCode());
+    result =
+      (prime * result)
+        + ((this.map_diffuse == null) ? 0 : this.map_diffuse.hashCode());
+    result =
+      (prime * result)
+        + ((this.map_environment == null) ? 0 : this.map_environment
+          .hashCode());
+    result =
+      (prime * result)
+        + ((this.map_normal == null) ? 0 : this.map_normal.hashCode());
+    result =
+      (prime * result)
+        + ((this.map_specular == null) ? 0 : this.map_specular.hashCode());
+    return result;
+  }
+
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBMaterial ");
+    builder.append("[SBMaterial description=");
     builder.append(this.description);
-    builder.append(" ");
+    builder.append(" map_diffuse=");
     builder.append(this.map_diffuse);
-    builder.append(" ");
+    builder.append(" map_normal=");
     builder.append(this.map_normal);
-    builder.append(" ");
+    builder.append(" map_specular=");
     builder.append(this.map_specular);
+    builder.append(" map_environment=");
+    builder.append(this.map_environment);
     builder.append("]");
     return builder.toString();
   }

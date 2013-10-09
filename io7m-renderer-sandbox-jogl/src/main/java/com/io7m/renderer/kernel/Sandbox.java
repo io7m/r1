@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import java.awt.Dimension;
+import java.io.IOException;
 import java.util.Properties;
 
 import javax.swing.SwingUtilities;
@@ -34,6 +35,9 @@ public final class Sandbox
     final Properties props = new Properties();
     props.setProperty("com.io7m.renderer.logs.sandbox", "true");
     props.setProperty("com.io7m.renderer.logs.sandbox.filesystem", "false");
+    props.setProperty(
+      "com.io7m.renderer.logs.sandbox.control.filesystem",
+      "false");
     props.setProperty(
       "com.io7m.renderer.logs.sandbox.gl.object-parser",
       "false");
@@ -64,6 +68,9 @@ public final class Sandbox
           System.exit(1);
         } catch (final ConstraintError e) {
           SBErrorBox.showError(log, "Internal constraint error", e);
+          System.exit(1);
+        } catch (final IOException e) {
+          SBErrorBox.showError(log, "I/O error", e);
           System.exit(1);
         }
       }

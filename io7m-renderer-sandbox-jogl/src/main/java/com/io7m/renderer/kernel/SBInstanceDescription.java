@@ -24,6 +24,7 @@ import javax.annotation.concurrent.Immutable;
 import nu.xom.Element;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.xml.RXMLException;
@@ -53,7 +54,8 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final RVectorI3F<SBDegrees> orientation =
       RXMLUtilities.getElementVector3f(eo, uri);
 
-    final String mesh = RXMLUtilities.getElementNonEmptyString(em);
+    final PathVirtual mesh =
+      PathVirtual.ofString(RXMLUtilities.getElementNonEmptyString(em));
     final SBMaterialDescription mat = SBMaterialDescription.fromXML(emat);
 
     return new SBInstanceDescription(
@@ -67,14 +69,14 @@ import com.io7m.renderer.xml.RXMLUtilities;
   private final @Nonnull Integer                 id;
   private final @Nonnull RVectorI3F<RSpaceWorld> position;
   private final @Nonnull RVectorI3F<SBDegrees>   orientation;
-  private final @Nonnull String                  mesh;
+  private final @Nonnull PathVirtual             mesh;
   private final @Nonnull SBMaterialDescription   material;
 
   public SBInstanceDescription(
     final @Nonnull Integer id,
     final @Nonnull RVectorI3F<RSpaceWorld> position,
     final @Nonnull RVectorI3F<SBDegrees> orientation,
-    final @Nonnull String mesh,
+    final @Nonnull PathVirtual mesh,
     final @Nonnull SBMaterialDescription material)
   {
     this.id = id;
@@ -140,7 +142,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return this.id;
   }
 
-  public @Nonnull String getMesh()
+  public @Nonnull PathVirtual getMesh()
   {
     return this.mesh;
   }
@@ -227,7 +229,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     ep.appendChild(epz);
 
     final Element em = new Element("s:mesh", uri);
-    em.appendChild(this.mesh);
+    em.appendChild(this.mesh.toString());
 
     final Element emat = this.material.toXML();
 

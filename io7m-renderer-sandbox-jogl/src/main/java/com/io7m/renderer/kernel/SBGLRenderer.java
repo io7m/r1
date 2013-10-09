@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -48,6 +47,13 @@ import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.AttachmentColor;
 import com.io7m.jcanephora.AttachmentColor.AttachmentColorTexture2DStatic;
 import com.io7m.jcanephora.BlendFunction;
+import com.io7m.jcanephora.CMFKNegativeX;
+import com.io7m.jcanephora.CMFKNegativeY;
+import com.io7m.jcanephora.CMFKNegativeZ;
+import com.io7m.jcanephora.CMFKPositiveX;
+import com.io7m.jcanephora.CMFKPositiveY;
+import com.io7m.jcanephora.CMFKPositiveZ;
+import com.io7m.jcanephora.CubeMapFaceInputStream;
 import com.io7m.jcanephora.Framebuffer;
 import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
 import com.io7m.jcanephora.FramebufferConfigurationGL3ES2Actual;
@@ -64,11 +70,13 @@ import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureLoader;
 import com.io7m.jcanephora.TextureLoaderImageIO;
 import com.io7m.jcanephora.TextureUnit;
+import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.UsageHint;
@@ -94,6 +102,24 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
 
 final class SBGLRenderer implements GLEventListener
 {
+
+  private static final @Nonnull PathVirtual SPHERE_32_16_MESH;
+  private static final @Nonnull PathVirtual SPHERE_16_8_MESH;
+
+  static {
+    try {
+      SPHERE_32_16_MESH =
+        PathVirtual
+          .ofString("/com/io7m/renderer/sandbox/sphere_32_16_mesh.rmx");
+      SPHERE_16_8_MESH =
+        PathVirtual
+          .ofString("/com/io7m/renderer/sandbox/sphere_16_8_mesh.rmx");
+
+    } catch (final ConstraintError e) {
+      throw new UnreachableCodeException();
+    }
+  }
+
   private class MeshDeleteFuture extends FutureTask<Void>
   {
     MeshDeleteFuture(
@@ -128,7 +154,7 @@ final class SBGLRenderer implements GLEventListener
   private class MeshLoadFuture extends FutureTask<SBMesh>
   {
     MeshLoadFuture(
-      final @Nonnull File file,
+      final @Nonnull PathVirtual path,
       final @Nonnull InputStream stream)
     {
       super(new Callable<SBMesh>() {
@@ -140,7 +166,7 @@ final class SBGLRenderer implements GLEventListener
           final StringBuilder message = new StringBuilder();
 
           message.append("Loading mesh from ");
-          message.append(file);
+          message.append(path);
           SBGLRenderer.this.log.debug(message.toString());
 
           if (SBGLRenderer.this.gi != null) {
@@ -165,14 +191,14 @@ final class SBGLRenderer implements GLEventListener
                 message.append(name);
                 SBGLRenderer.this.log.debug(message.toString());
               }
-              SBGLRenderer.this.meshes.put(name, km);
+              SBGLRenderer.this.meshes.put(path, km);
 
               message.setLength(0);
               message.append("Loaded mesh ");
               message.append(name);
               SBGLRenderer.this.log.debug(message.toString());
 
-              return new SBMesh(new SBMeshDescription(file, name), km);
+              return new SBMesh(path, km);
             } catch (final ConstraintError e) {
               throw new UnreachableCodeException();
             }
@@ -184,9 +210,9 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private class TextureDeleteFuture extends FutureTask<Void>
+  private class Texture2DDeleteFuture extends FutureTask<Void>
   {
-    TextureDeleteFuture(
+    Texture2DDeleteFuture(
       final @Nonnull Texture2DStatic texture)
     {
       super(new Callable<Void>() {
@@ -212,10 +238,10 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private class TextureLoadFuture extends FutureTask<Texture2DStatic>
+  private class Texture2DLoadFuture extends FutureTask<Texture2DStatic>
   {
-    TextureLoadFuture(
-      final @Nonnull String name,
+    Texture2DLoadFuture(
+      final @Nonnull PathVirtual path,
       final @Nonnull InputStream stream)
     {
       super(new Callable<Texture2DStatic>() {
@@ -224,7 +250,7 @@ final class SBGLRenderer implements GLEventListener
           call()
             throws Exception
         {
-          SBGLRenderer.this.log.debug("Loading " + name);
+          SBGLRenderer.this.log.debug("Loading " + path);
 
           if (SBGLRenderer.this.gi != null) {
             final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
@@ -237,7 +263,7 @@ final class SBGLRenderer implements GLEventListener
                   TextureFilterMinification.TEXTURE_FILTER_LINEAR,
                   TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
                   stream,
-                  name.toString());
+                  path.toString());
 
               /**
                * XXX: The texture cannot be deleted, because another scene
@@ -246,13 +272,104 @@ final class SBGLRenderer implements GLEventListener
                */
 
               final Texture2DStatic old =
-                SBGLRenderer.this.textures.put(name, t);
+                SBGLRenderer.this.textures_2d.put(path, t);
               if (old != null) {
                 SBGLRenderer.this.log.error("Leaking texture " + old);
               }
 
-              SBGLRenderer.this.log.debug("Loaded " + name);
+              SBGLRenderer.this.log.debug("Loaded " + path);
               return t;
+            } catch (final ConstraintError e) {
+              throw new UnreachableCodeException();
+            }
+          }
+
+          throw new JCGLException(-1, "OpenGL not ready!");
+        }
+      });
+    }
+  }
+
+  private class TextureCubeLoadFuture extends FutureTask<TextureCubeStatic>
+  {
+    TextureCubeLoadFuture(
+      final @Nonnull PathVirtual path,
+      final @Nonnull CubeMapFaceInputStream<CMFKPositiveZ> positive_z,
+      final @Nonnull CubeMapFaceInputStream<CMFKNegativeZ> negative_z,
+      final @Nonnull CubeMapFaceInputStream<CMFKPositiveY> positive_y,
+      final @Nonnull CubeMapFaceInputStream<CMFKNegativeY> negative_y,
+      final @Nonnull CubeMapFaceInputStream<CMFKPositiveX> positive_x,
+      final @Nonnull CubeMapFaceInputStream<CMFKNegativeX> negative_x)
+    {
+      super(new Callable<TextureCubeStatic>() {
+        @SuppressWarnings("synthetic-access") @Override public @Nonnull
+          TextureCubeStatic
+          call()
+            throws Exception
+        {
+          SBGLRenderer.this.log.debug("Loading " + path);
+
+          if (SBGLRenderer.this.gi != null) {
+            final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
+            try {
+              final TextureCubeStatic t =
+                SBGLRenderer.this.texture_loader.loadCubeRHStaticRGB888(
+                  gl,
+                  TextureWrapR.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                  TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                  TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                  TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+                  TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+                  positive_z,
+                  negative_z,
+                  positive_y,
+                  negative_y,
+                  positive_x,
+                  negative_x,
+                  path.toString());
+
+              /**
+               * XXX: The texture cannot be deleted, because another scene
+               * might still hold a reference to it. What's the correct way to
+               * handle this?
+               */
+
+              final TextureCubeStatic old =
+                SBGLRenderer.this.textures_cube.put(path, t);
+              if (old != null) {
+                SBGLRenderer.this.log.error("Leaking texture " + old);
+              }
+
+              SBGLRenderer.this.log.debug("Loaded " + path);
+              return t;
+            } catch (final ConstraintError e) {
+              throw new UnreachableCodeException();
+            }
+          }
+
+          throw new JCGLException(-1, "OpenGL not ready!");
+        }
+      });
+    }
+  }
+
+  private class TextureCubeDeleteFuture extends FutureTask<Void>
+  {
+    TextureCubeDeleteFuture(
+      final @Nonnull TextureCubeStatic texture)
+    {
+      super(new Callable<Void>() {
+        @SuppressWarnings("synthetic-access") @Override public @Nonnull
+          Void
+          call()
+            throws Exception
+        {
+          SBGLRenderer.this.log.debug("Deleting " + texture);
+
+          if (SBGLRenderer.this.gi != null) {
+            final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
+            try {
+              gl.textureCubeStaticDelete(texture);
             } catch (final ConstraintError e) {
               throw new UnreachableCodeException();
             }
@@ -276,58 +393,61 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private final @Nonnull Log                                        log;
-  private @CheckForNull JCGLImplementationJOGL                      gi;
-  private final @Nonnull TextureLoader                              texture_loader;
-  private final @Nonnull ConcurrentLinkedQueue<TextureLoadFuture>   texture_load_queue;
-  private final @Nonnull ConcurrentLinkedQueue<TextureDeleteFuture> texture_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>      mesh_load_queue;
-  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>    mesh_delete_queue;
-  private final @Nonnull HashMap<String, Texture2DStatic>           textures;
+  private final @Nonnull Log                                            log;
+  private @CheckForNull JCGLImplementationJOGL                          gi;
+  private final @Nonnull TextureLoader                                  texture_loader;
+  private final @Nonnull ConcurrentLinkedQueue<Texture2DLoadFuture>     texture2d_load_queue;
+  private final @Nonnull ConcurrentLinkedQueue<Texture2DDeleteFuture>   texture2d_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>   texture_cube_load_queue;
+  private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture> texture_cube_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>          mesh_load_queue;
+  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>        mesh_delete_queue;
+  private final @Nonnull HashMap<PathVirtual, Texture2DStatic>          textures_2d;
+  private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>        textures_cube;
 
-  private final @Nonnull HashMap<String, KMesh>                     meshes;
-  private @CheckForNull SBQuad                                      screen_quad;
+  private final @Nonnull HashMap<PathVirtual, KMesh>                    meshes;
+  private @CheckForNull SBQuad                                          screen_quad;
 
-  private final @Nonnull FSCapabilityAll                            filesystem;
-  private @CheckForNull FramebufferConfigurationGL3ES2Actual        framebuffer_config;
-  private @CheckForNull Framebuffer                                 framebuffer;
-  private boolean                                                   running;
-  private final @Nonnull MatrixM4x4F                                matrix_projection;
-  private final @Nonnull MatrixM4x4F                                matrix_modelview;
-  private final @Nonnull MatrixM4x4F                                matrix_model;
-  private final @Nonnull MatrixM4x4F                                matrix_view;
-  private @CheckForNull TextureUnit[]                               texture_units;
-  private @CheckForNull FramebufferColorAttachmentPoint[]           framebuffer_points;
-  private final @Nonnull Map<SBRendererType, KRenderer>             renderers;
-  private final @Nonnull AtomicReference<SBRendererType>            renderer_current;
-  private final @Nonnull AtomicReference<SBSceneControllerRenderer> controller;
+  private final @Nonnull FSCapabilityAll                                filesystem;
+  private @CheckForNull FramebufferConfigurationGL3ES2Actual            framebuffer_config;
+  private @CheckForNull Framebuffer                                     framebuffer;
+  private boolean                                                       running;
+  private final @Nonnull MatrixM4x4F                                    matrix_projection;
+  private final @Nonnull MatrixM4x4F                                    matrix_modelview;
+  private final @Nonnull MatrixM4x4F                                    matrix_model;
+  private final @Nonnull MatrixM4x4F                                    matrix_view;
+  private @CheckForNull TextureUnit[]                                   texture_units;
+  private @CheckForNull FramebufferColorAttachmentPoint[]               framebuffer_points;
+  private final @Nonnull Map<SBRendererType, KRenderer>                 renderers;
+  private final @Nonnull AtomicReference<SBRendererType>                renderer_current;
+  private final @Nonnull AtomicReference<SBSceneControllerRenderer>     controller;
 
-  private final @Nonnull AtomicReference<VectorI3F>                 background_colour;
-  private @Nonnull SBVisibleAxes                                    axes;
-  private final @Nonnull AtomicBoolean                              axes_show;
-  private @Nonnull SBVisibleGridPlane                               grid;
-  private final @Nonnull AtomicBoolean                              grid_show;
-  private @Nonnull HashMap<String, KMesh>                           sphere_meshes;
-  private final @Nonnull AtomicBoolean                              lights_show;
-  private final @Nonnull AtomicBoolean                              lights_show_surface;
+  private final @Nonnull AtomicReference<VectorI3F>                     background_colour;
+  private @Nonnull SBVisibleAxes                                        axes;
+  private final @Nonnull AtomicBoolean                                  axes_show;
+  private @Nonnull SBVisibleGridPlane                                   grid;
+  private final @Nonnull AtomicBoolean                                  grid_show;
+  private @Nonnull HashMap<PathVirtual, KMesh>                          sphere_meshes;
+  private final @Nonnull AtomicBoolean                                  lights_show;
+  private final @Nonnull AtomicBoolean                                  lights_show_surface;
 
-  private final @Nonnull QuaternionM4F.Context                      qm4f_context;
-  private @Nonnull KTransform                                       camera_transform;
-  private final @Nonnull SBInputState                               input_state;
-  private final @Nonnull SBFirstPersonCamera                        camera;
-  private @Nonnull KMatrix4x4F<KMatrixView>                         camera_matrix;
-  private @CheckForNull KScene                                      scene_current;
-  private @CheckForNull KScene                                      scene_previous;
-  private @CheckForNull KScene                                      scene_validated_previous;
+  private final @Nonnull QuaternionM4F.Context                          qm4f_context;
+  private @Nonnull KTransform                                           camera_transform;
+  private final @Nonnull SBInputState                                   input_state;
+  private final @Nonnull SBFirstPersonCamera                            camera;
+  private @Nonnull KMatrix4x4F<KMatrixView>                             camera_matrix;
+  private @CheckForNull KScene                                          scene_current;
+  private @CheckForNull KScene                                          scene_previous;
+  private @CheckForNull KScene                                          scene_validated_previous;
 
-  private @CheckForNull ProgramReference                            program_uv;
-  private @CheckForNull ProgramReference                            program_vcolour;
-  private @CheckForNull ProgramReference                            program_ccolour;
-  private @Nonnull JCCEExecutionCallable                            exec_vcolour;
-  private @Nonnull JCCEExecutionCallable                            exec_uv;
-  private @Nonnull JCCEExecutionCallable                            exec_ccolour;
+  private @CheckForNull ProgramReference                                program_uv;
+  private @CheckForNull ProgramReference                                program_vcolour;
+  private @CheckForNull ProgramReference                                program_ccolour;
+  private @Nonnull JCCEExecutionCallable                                exec_vcolour;
+  private @Nonnull JCCEExecutionCallable                                exec_uv;
+  private @Nonnull JCCEExecutionCallable                                exec_ccolour;
 
-  private static final @Nonnull VectorReadable4F                    GRID_COLOUR;
+  private static final @Nonnull VectorReadable4F                        GRID_COLOUR;
 
   static {
     GRID_COLOUR = new VectorI4F(1.0f, 1.0f, 1.0f, 0.1f);
@@ -344,13 +464,21 @@ final class SBGLRenderer implements GLEventListener
     this.qm4f_context = new QuaternionM4F.Context();
 
     this.texture_loader = new TextureLoaderImageIO();
-    this.texture_load_queue = new ConcurrentLinkedQueue<TextureLoadFuture>();
-    this.texture_delete_queue =
-      new ConcurrentLinkedQueue<TextureDeleteFuture>();
-    this.textures = new HashMap<String, Texture2DStatic>();
+    this.texture2d_load_queue =
+      new ConcurrentLinkedQueue<Texture2DLoadFuture>();
+    this.texture2d_delete_queue =
+      new ConcurrentLinkedQueue<Texture2DDeleteFuture>();
+    this.textures_2d = new HashMap<PathVirtual, Texture2DStatic>();
+
+    this.texture_cube_load_queue =
+      new ConcurrentLinkedQueue<TextureCubeLoadFuture>();
+    this.texture_cube_delete_queue =
+      new ConcurrentLinkedQueue<TextureCubeDeleteFuture>();
+    this.textures_cube = new HashMap<PathVirtual, TextureCubeStatic>();
+
     this.mesh_load_queue = new ConcurrentLinkedQueue<MeshLoadFuture>();
     this.mesh_delete_queue = new ConcurrentLinkedQueue<MeshDeleteFuture>();
-    this.meshes = new HashMap<String, KMesh>();
+    this.meshes = new HashMap<PathVirtual, KMesh>();
 
     this.filesystem = Filesystem.makeWithoutArchiveDirectory(log);
     this.filesystem.mountClasspathArchive(
@@ -391,8 +519,11 @@ final class SBGLRenderer implements GLEventListener
       final JCGLInterfaceCommon gl = this.gi.getGLCommon();
 
       SBGLRenderer.processQueue(this.mesh_delete_queue);
-      SBGLRenderer.processQueue(this.texture_delete_queue);
-      SBGLRenderer.processQueue(this.texture_load_queue);
+      SBGLRenderer.processQueue(this.texture2d_delete_queue);
+      SBGLRenderer.processQueue(this.texture_cube_delete_queue);
+
+      SBGLRenderer.processQueue(this.texture2d_load_queue);
+      SBGLRenderer.processQueue(this.texture_cube_load_queue);
       SBGLRenderer.processQueue(this.mesh_load_queue);
 
       this.moveCamera();
@@ -465,7 +596,7 @@ final class SBGLRenderer implements GLEventListener
       this.axes = new SBVisibleAxes(gl, 50, 50, 50);
       this.grid = new SBVisibleGridPlane(gl, 50, 0, 50);
 
-      this.sphere_meshes = new HashMap<String, KMesh>();
+      this.sphere_meshes = new HashMap<PathVirtual, KMesh>();
       SBGLRenderer
         .initBuiltInSpheres(this.sphere_meshes, this.filesystem, gl);
 
@@ -525,6 +656,7 @@ final class SBGLRenderer implements GLEventListener
   }
 
   private static @Nonnull SBMesh loadMesh(
+    final @Nonnull PathVirtual path,
     final @Nonnull InputStream stream,
     final @Nonnull JCGLInterfaceCommon g)
     throws ConstraintError,
@@ -540,18 +672,15 @@ final class SBGLRenderer implements GLEventListener
 
       final ArrayBuffer ab = p.getArrayBuffer();
       final IndexBuffer ib = p.getIndexBuffer();
-      final String name = p.getName();
 
-      return new SBMesh(
-        new SBMeshDescription(new File(name), name),
-        new KMesh(ab, ib));
+      return new SBMesh(path, new KMesh(ab, ib));
     } finally {
       stream.close();
     }
   }
 
   private static void initBuiltInSpheres(
-    final @Nonnull Map<String, KMesh> meshes,
+    final @Nonnull Map<PathVirtual, KMesh> meshes,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull JCGLInterfaceCommon gl)
     throws IOException,
@@ -562,24 +691,23 @@ final class SBGLRenderer implements GLEventListener
       RXMLException
   {
     {
-      final InputStream stream =
-        fs.openFile(PathVirtual
-          .ofString("/com/io7m/renderer/sandbox/sphere_16_8_mesh.rmx"));
+      final PathVirtual path = SBGLRenderer.SPHERE_16_8_MESH;
+
+      final InputStream stream = fs.openFile(path);
       try {
-        final SBMesh m = SBGLRenderer.loadMesh(stream, gl);
-        meshes.put(m.getDescription().getName(), m.getMesh());
+        final SBMesh m = SBGLRenderer.loadMesh(path, stream, gl);
+        meshes.put(path, m.getMesh());
       } finally {
         stream.close();
       }
     }
 
     {
-      final InputStream stream =
-        fs.openFile(PathVirtual
-          .ofString("/com/io7m/renderer/sandbox/sphere_32_16_mesh.rmx"));
+      final PathVirtual path = SBGLRenderer.SPHERE_32_16_MESH;
+      final InputStream stream = fs.openFile(path);
       try {
-        final SBMesh m = SBGLRenderer.loadMesh(stream, gl);
-        meshes.put(m.getDescription().getName(), m.getMesh());
+        final SBMesh m = SBGLRenderer.loadMesh(path, stream, gl);
+        meshes.put(path, m.getMesh());
       } finally {
         stream.close();
       }
@@ -690,17 +818,18 @@ final class SBGLRenderer implements GLEventListener
   }
 
   Future<SBMesh> meshLoad(
-    final @Nonnull File file,
+    final @Nonnull PathVirtual path,
     final @Nonnull InputStream stream)
   {
-    final MeshLoadFuture f = new MeshLoadFuture(file, stream);
+    final MeshLoadFuture f = new MeshLoadFuture(path, stream);
     this.mesh_load_queue.add(f);
     return f;
   }
 
   private void moveCamera()
   {
-    final double speed = 0.05;
+    final double speed = 0.01;
+
     if (this.input_state.isMovingForward()) {
       this.camera.moveForward(speed);
     }
@@ -990,7 +1119,8 @@ final class SBGLRenderer implements GLEventListener
           case LIGHT_SPHERE:
           {
             final KLight.KSphere lp = (KSphere) light;
-            final KMesh mesh = this.sphere_meshes.get("sphere_16_8_mesh");
+            final KMesh mesh =
+              this.sphere_meshes.get(SBGLRenderer.SPHERE_16_8_MESH);
 
             final VectorM4F colour =
               new VectorM4F(
@@ -1114,6 +1244,7 @@ final class SBGLRenderer implements GLEventListener
 
       final Pair<Collection<KLight>, Collection<KMeshInstance>> p =
         c.rendererGetScene();
+
       final KScene scene = new KScene(kcamera, p.first, p.second);
       this.scene_previous = this.scene_current;
       this.scene_current = scene;
@@ -1174,20 +1305,49 @@ final class SBGLRenderer implements GLEventListener
     this.grid_show.set(enabled);
   }
 
-  void textureDelete(
+  void texture2DDelete(
     final @Nonnull Texture2DStatic t)
   {
-    final TextureDeleteFuture f = new TextureDeleteFuture(t);
-    this.texture_delete_queue.add(f);
+    final Texture2DDeleteFuture f = new Texture2DDeleteFuture(t);
+    this.texture2d_delete_queue.add(f);
   }
 
-  Future<Texture2DStatic> textureLoad(
-    final @Nonnull String name,
+  Future<Texture2DStatic> texture2DLoad(
+    final @Nonnull PathVirtual path,
     final @Nonnull InputStream stream)
   {
-    final TextureLoadFuture f = new TextureLoadFuture(name, stream);
-    this.texture_load_queue.add(f);
+    final Texture2DLoadFuture f = new Texture2DLoadFuture(path, stream);
+    this.texture2d_load_queue.add(f);
     return f;
+  }
+
+  Future<TextureCubeStatic> textureCubeLoad(
+    final @Nonnull PathVirtual path,
+    final @Nonnull CubeMapFaceInputStream<CMFKPositiveZ> positive_z,
+    final @Nonnull CubeMapFaceInputStream<CMFKNegativeZ> negative_z,
+    final @Nonnull CubeMapFaceInputStream<CMFKPositiveY> positive_y,
+    final @Nonnull CubeMapFaceInputStream<CMFKNegativeY> negative_y,
+    final @Nonnull CubeMapFaceInputStream<CMFKPositiveX> positive_x,
+    final @Nonnull CubeMapFaceInputStream<CMFKNegativeX> negative_x)
+  {
+    final TextureCubeLoadFuture f =
+      new TextureCubeLoadFuture(
+        path,
+        positive_z,
+        negative_z,
+        positive_y,
+        negative_y,
+        positive_x,
+        negative_x);
+    this.texture_cube_load_queue.add(f);
+    return f;
+  }
+
+  void textureCubeDelete(
+    final @Nonnull TextureCubeStatic t)
+  {
+    final TextureCubeDeleteFuture f = new TextureCubeDeleteFuture(t);
+    this.texture_cube_delete_queue.add(f);
   }
 
   void setShowLights(

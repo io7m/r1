@@ -355,7 +355,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       JCGLException
   {
     final KMaterial material = instance.getMaterial();
-    if (material.getTextureSpecular().isSome()) {
+    if (material.getSpecular().getTexture().isSome()) {
       this.renderLightPassMeshDirectionalWithSpecularMap(gc, instance);
     } else {
       this.renderLightPassMeshDirectionalWithoutSpecularMap(gc, instance);
@@ -389,7 +389,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -406,10 +406,9 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     e.execUniformUseExisting("light.color");
     e.execUniformUseExisting("light.direction");
     e.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
-    e.execUniformPutFloat(
-      gc,
-      "material.specular_exponent",
-      material.getSpecularExponent());
+    e.execUniformPutFloat(gc, "material.specular_exponent", material
+      .getSpecular()
+      .getExponent());
     e.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
@@ -496,7 +495,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -508,7 +507,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> specular_opt =
-        material.getTextureSpecular();
+        material.getSpecular().getTexture();
       gc.texture2DStaticBind(
         texture_units[3],
         ((Option.Some<Texture2DStatic>) specular_opt).value);
@@ -521,10 +520,9 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     e.execUniformUseExisting("light.color");
     e.execUniformUseExisting("light.direction");
     e.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
-    e.execUniformPutFloat(
-      gc,
-      "material.specular_exponent",
-      material.getSpecularExponent());
+    e.execUniformPutFloat(gc, "material.specular_exponent", material
+      .getSpecular()
+      .getExponent());
     e.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
@@ -672,7 +670,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       JCGLException
   {
     final KMaterial material = instance.getMaterial();
-    if (material.getTextureSpecular().isSome()) {
+    if (material.getSpecular().getTexture().isSome()) {
       this.renderLightPassMeshSphericalWithSpecularMap(gc, instance);
     } else {
       this.renderLightPassMeshSphericalWithoutSpecularMap(gc, instance);
@@ -706,7 +704,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -725,10 +723,9 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     e.execUniformUseExisting("light.radius");
     e.execUniformUseExisting("light.falloff");
     e.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
-    e.execUniformPutFloat(
-      gc,
-      "material.specular_exponent",
-      material.getSpecularExponent());
+    e.execUniformPutFloat(gc, "material.specular_exponent", material
+      .getSpecular()
+      .getExponent());
     e.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
@@ -815,7 +812,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -826,7 +823,8 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     }
 
     {
-      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[2],
@@ -838,7 +836,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> specular_opt =
-        material.getTextureSpecular();
+        material.getSpecular().getTexture();
       gc.texture2DStaticBind(
         texture_units[3],
         ((Option.Some<Texture2DStatic>) specular_opt).value);
@@ -853,10 +851,9 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     e.execUniformUseExisting("light.radius");
     e.execUniformUseExisting("light.falloff");
     e.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
-    e.execUniformPutFloat(
-      gc,
-      "material.specular_exponent",
-      material.getSpecularExponent());
+    e.execUniformPutFloat(gc, "material.specular_exponent", material
+      .getSpecular()
+      .getExponent());
     e.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
     e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);

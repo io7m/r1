@@ -27,6 +27,9 @@ module ForwardLitSphericalSpecular is
   import com.io7m.parasol.Vector3f          as V3;
   import com.io7m.parasol.Sampler2D         as S;
   import com.io7m.parasol.Float             as F;
+
+  import com.io7m.renderer.CubeMap          as CM;
+  import com.io7m.renderer.Diffuse          as D;
   import com.io7m.renderer.DirectionalLight as DL;
   import com.io7m.renderer.SphericalLight   as SL;
   import com.io7m.renderer.Normals          as N;
@@ -70,7 +73,6 @@ module ForwardLitSphericalSpecular is
     in        f_position : vector_4f;
     parameter material   : M.t;
     parameter light      : SL.t;
-    parameter f_diffuse  : vector_4f;
     out       out_0      : vector_4f as 0;    
   with
     value n =
@@ -80,7 +82,7 @@ module ForwardLitSphericalSpecular is
       SL.diffuse_specular (light, n, f_position [x y z], material);
       
     value albedo =
-      f_diffuse [x y z];
+      material.diffuse.colour [x y z];
       
     value rgba =
       new vector_4f (V3.multiply (albedo, light_term), 1.0);
@@ -177,8 +179,12 @@ module ForwardLitSphericalSpecular is
 
     value m =
       record M.t {
-        specular_exponent  = material.specular_exponent,
-        specular_intensity = S.texture (t_specular, f_uv)[x]
+        diffuse     = material.diffuse,
+        environment = material.environment,
+        specular    = record M.specular {
+          exponent  = material.specular.exponent,
+          intensity = S.texture (t_specular, f_uv)[x]
+        }
       };
 
     value light_term =
@@ -217,8 +223,12 @@ module ForwardLitSphericalSpecular is
 
     value m =
       record M.t {
-        specular_exponent  = material.specular_exponent,
-        specular_intensity = S.texture (t_specular, f_uv)[x]
+        diffuse     = material.diffuse,
+        environment = material.environment,
+        specular    = record M.specular {
+          exponent  = material.specular.exponent,
+          intensity = S.texture (t_specular, f_uv)[x]
+        }
       };
 
     value light_term =
@@ -236,6 +246,183 @@ module ForwardLitSphericalSpecular is
   shader program fwd_LS_T_SM is
     vertex   fwd_LS_SM_vertex;
     fragment fwd_LS_T_SM_fragment;
+  end;
+
+  --
+  -- Untextured, environment mapped, constant specular.
+  --
+
+  shader fragment fwd_LS_E_S_fragment is
+    in        f_normal      : vector_3f;
+    in        f_position    : vector_4f;
+    parameter material      : M.t;
+    parameter light         : SL.t;
+    parameter m_view_inv    : matrix_4x4f;
+    parameter t_environment : sampler_cube;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n =
+      V3.normalize (f_normal);
+
+    value light_term =
+      SL.diffuse_specular (light, n, f_position [x y z], material);
+
+    value env =
+      CM.reflection (t_environment, f_position [x y z], f_normal, m_view_inv);
+
+    value albedo =
+      V3.interpolate (material.diffuse.colour [x y z], env [x y z], material.environment.mix);
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LS_E_S is
+    vertex   fwd_LS_S_vertex;
+    fragment fwd_LS_E_S_fragment;
+  end;
+  
+  --
+  -- Textured, environment mapped, constant specular.
+  --
+
+  shader fragment fwd_LS_T_E_S_fragment is
+    in        f_normal      : vector_3f;
+    in        f_position    : vector_4f;
+    in        f_uv          : vector_2f;
+    parameter material      : M.t;
+    parameter light         : SL.t;
+    parameter m_view_inv    : matrix_4x4f;
+    parameter t_diffuse_0   : sampler_2d;
+    parameter t_environment : sampler_cube;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n =
+      V3.normalize (f_normal);
+
+    value light_term =
+      SL.diffuse_specular (light, n, f_position [x y z], material);
+
+    value diff =
+      D.diffuse (t_diffuse_0, f_uv, material.diffuse);
+
+    value env =
+      CM.reflection (t_environment, f_position [x y z], f_normal, m_view_inv);
+
+    value albedo =
+      V3.interpolate (material.diffuse.colour [x y z], env [x y z], material.environment.mix);
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LS_T_E_S is
+    vertex   fwd_LS_SM_vertex;
+    fragment fwd_LS_T_E_S_fragment;
+  end;
+
+  --
+  -- Untextured, environment mapped, mapped specular.
+  --
+
+  shader fragment fwd_LS_E_SM_fragment is
+    in        f_normal      : vector_3f;
+    in        f_position    : vector_4f;
+    in        f_uv          : vector_2f;
+    parameter material      : M.t;
+    parameter light         : SL.t;
+    parameter m_view_inv    : matrix_4x4f;
+    parameter t_specular    : sampler_2d;
+    parameter t_environment : sampler_cube;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n =
+      V3.normalize (f_normal);
+
+    value m =
+      record M.t {
+        diffuse     = material.diffuse,
+        environment = material.environment,
+        specular    = record M.specular {
+          exponent  = material.specular.exponent,
+          intensity = S.texture (t_specular, f_uv)[x]
+        }
+      };
+
+    value light_term =
+      SL.diffuse_specular (light, n, f_position [x y z], m);
+
+    value env =
+      CM.reflection (t_environment, f_position [x y z], f_normal, m_view_inv);
+
+    value albedo =
+      V3.interpolate (m.diffuse.colour [x y z], env [x y z], F.multiply (m.specular.intensity, m.environment.mix));
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LS_E_SM is
+    vertex   fwd_LS_SM_vertex;
+    fragment fwd_LS_E_SM_fragment;
+  end;
+
+  --
+  -- Textured, environment mapped, mapped specular.
+  --
+
+  shader fragment fwd_LS_T_E_SM_fragment is
+    in        f_normal      : vector_3f;
+    in        f_position    : vector_4f;
+    in        f_uv          : vector_2f;
+    parameter material      : M.t;
+    parameter light         : SL.t;
+    parameter m_view_inv    : matrix_4x4f;
+    parameter t_specular    : sampler_2d;
+    parameter t_diffuse_0   : sampler_2d;
+    parameter t_environment : sampler_cube;
+    out       out_0         : vector_4f as 0;    
+  with
+    value n =
+      V3.normalize (f_normal);
+
+    value m =
+      record M.t {
+        diffuse     = material.diffuse,
+        environment = material.environment,
+        specular    = record M.specular {
+          exponent  = material.specular.exponent,
+          intensity = S.texture (t_specular, f_uv)[x]
+        }
+      };
+
+    value light_term =
+      SL.diffuse_specular (light, n, f_position [x y z], m);
+
+    value diff =
+      D.diffuse (t_diffuse_0, f_uv, m.diffuse);
+
+    value env =
+      CM.reflection (t_environment, f_position [x y z], f_normal, m_view_inv);
+
+    value albedo =
+      V3.interpolate (diff [x y z], env [x y z], F.multiply (m.specular.intensity, m.environment.mix));
+
+    value rgba =
+      new vector_4f (V3.multiply (albedo, light_term), 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program fwd_LS_T_E_SM is
+    vertex   fwd_LS_SM_vertex;
+    fragment fwd_LS_T_E_SM_fragment;
   end;
 
 end;

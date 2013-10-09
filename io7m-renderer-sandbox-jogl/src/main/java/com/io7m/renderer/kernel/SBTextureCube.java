@@ -1,3 +1,19 @@
+/*
+ * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * 
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+ * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
 package com.io7m.renderer.kernel;
 
 import java.awt.image.BufferedImage;
@@ -5,21 +21,22 @@ import java.awt.image.BufferedImage;
 import javax.annotation.Nonnull;
 
 import com.io7m.jcanephora.TextureCubeStatic;
+import com.io7m.jvvfs.PathVirtual;
 
 public final class SBTextureCube
 {
-  private final @Nonnull SBTextureCubeDescription description;
-  private final @Nonnull TextureCubeStatic        texture;
-  private final @Nonnull BufferedImage            positive_z;
-  private final @Nonnull BufferedImage            negative_z;
-  private final @Nonnull BufferedImage            positive_y;
-  private final @Nonnull BufferedImage            negative_y;
-  private final @Nonnull BufferedImage            positive_x;
-  private final @Nonnull BufferedImage            negative_x;
+  private final @Nonnull PathVirtual       path;
+  private final @Nonnull TextureCubeStatic texture;
+  private final @Nonnull BufferedImage     positive_z;
+  private final @Nonnull BufferedImage     negative_z;
+  private final @Nonnull BufferedImage     positive_y;
+  private final @Nonnull BufferedImage     negative_y;
+  private final @Nonnull BufferedImage     positive_x;
+  private final @Nonnull BufferedImage     negative_x;
 
-  public @Nonnull SBTextureCubeDescription getDescription()
+  public @Nonnull PathVirtual getPath()
   {
-    return this.description;
+    return this.path;
   }
 
   public @Nonnull BufferedImage getPositiveZ()
@@ -52,8 +69,8 @@ public final class SBTextureCube
     return this.negative_x;
   }
 
-  private SBTextureCube(
-    final @Nonnull SBTextureCubeDescription description,
+  SBTextureCube(
+    final @Nonnull PathVirtual path,
     final @Nonnull TextureCubeStatic texture,
     final @Nonnull BufferedImage positive_z,
     final @Nonnull BufferedImage negative_z,
@@ -62,7 +79,7 @@ public final class SBTextureCube
     final @Nonnull BufferedImage positive_x,
     final @Nonnull BufferedImage negative_x)
   {
-    this.description = description;
+    this.path = path;
     this.texture = texture;
     this.positive_z = positive_z;
     this.negative_z = negative_z;
@@ -86,21 +103,9 @@ public final class SBTextureCube
   {
     final StringBuilder builder = new StringBuilder();
     builder.append("[SBTextureCube ");
-    builder.append(this.description);
+    builder.append(this.path);
     builder.append(" ");
     builder.append(this.texture);
-    builder.append(" ");
-    builder.append(this.positive_z);
-    builder.append(" ");
-    builder.append(this.negative_z);
-    builder.append(" ");
-    builder.append(this.positive_y);
-    builder.append(" ");
-    builder.append(this.negative_y);
-    builder.append(" ");
-    builder.append(this.positive_x);
-    builder.append(" ");
-    builder.append(this.negative_x);
     builder.append("]");
     return builder.toString();
   }

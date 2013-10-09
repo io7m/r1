@@ -19,10 +19,8 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jaux.functional.Option;
-import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.renderer.RSpaceRGB;
-import com.io7m.renderer.RVectorI3F;
+import com.io7m.jaux.Constraints;
+import com.io7m.jaux.Constraints.ConstraintError;
 
 /**
  * Object materials.
@@ -30,64 +28,42 @@ import com.io7m.renderer.RVectorI3F;
 
 @Immutable public final class KMaterial
 {
-  private final @Nonnull RVectorI3F<RSpaceRGB>   diffuse;
-  private final @Nonnull Option<Texture2DStatic> texture_diffuse_0;
-  private final @Nonnull Option<Texture2DStatic> texture_diffuse_1;
-  private final @Nonnull Option<Texture2DStatic> texture_normal;
-  private final @Nonnull Option<Texture2DStatic> texture_specular;
-  private final float                            specular_intensity;
-  private final float                            specular_exponent;
+  private final @Nonnull KMaterialDiffuse     diffuse;
+  private final @Nonnull KMaterialSpecular    specular;
+  private final @Nonnull KMaterialEnvironment environment;
+  private final @Nonnull KMaterialNormal      normal;
 
   KMaterial(
-    final @Nonnull RVectorI3F<RSpaceRGB> diffuse,
-    final @Nonnull Option<Texture2DStatic> texture_diffuse_0,
-    final @Nonnull Option<Texture2DStatic> texture_diffuse_1,
-    final @Nonnull Option<Texture2DStatic> texture_normal,
-    final @Nonnull Option<Texture2DStatic> texture_specular,
-    final float specular_intensity,
-    final float specular_exponent)
+    final @Nonnull KMaterialDiffuse diffuse,
+    final @Nonnull KMaterialSpecular specular,
+    final @Nonnull KMaterialEnvironment environment,
+    final @Nonnull KMaterialNormal normal)
+    throws ConstraintError
   {
-    this.diffuse = new RVectorI3F<RSpaceRGB>(diffuse);
-    this.texture_diffuse_0 = texture_diffuse_0;
-    this.texture_diffuse_1 = texture_diffuse_1;
-    this.texture_normal = texture_normal;
-    this.texture_specular = texture_specular;
-    this.specular_intensity = specular_intensity;
-    this.specular_exponent = specular_exponent;
+    this.diffuse = Constraints.constrainNotNull(diffuse, "Diffuse");
+    this.specular = Constraints.constrainNotNull(specular, "Specular");
+    this.environment =
+      Constraints.constrainNotNull(environment, "Environment");
+    this.normal = Constraints.constrainNotNull(normal, "Normal");
   }
 
-  public float getSpecularIntensity()
-  {
-    return this.specular_intensity;
-  }
-
-  public float getSpecularExponent()
-  {
-    return this.specular_exponent;
-  }
-
-  public @Nonnull RVectorI3F<RSpaceRGB> getDiffuse()
+  public @Nonnull KMaterialDiffuse getDiffuse()
   {
     return this.diffuse;
   }
 
-  public @Nonnull Option<Texture2DStatic> getTextureDiffuse0()
+  public @Nonnull KMaterialEnvironment getEnvironment()
   {
-    return this.texture_diffuse_0;
+    return this.environment;
   }
 
-  public @Nonnull Option<Texture2DStatic> getTextureDiffuse1()
+  public @Nonnull KMaterialNormal getNormal()
   {
-    return this.texture_diffuse_1;
+    return this.normal;
   }
 
-  public @Nonnull Option<Texture2DStatic> getTextureNormal()
+  public @Nonnull KMaterialSpecular getSpecular()
   {
-    return this.texture_normal;
-  }
-
-  public @Nonnull Option<Texture2DStatic> getTextureSpecular()
-  {
-    return this.texture_specular;
+    return this.specular;
   }
 }

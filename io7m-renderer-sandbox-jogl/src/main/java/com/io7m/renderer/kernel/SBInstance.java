@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorI3F;
 
@@ -45,7 +46,7 @@ import com.io7m.renderer.RVectorI3F;
     return this.description.getID();
   }
 
-  public @Nonnull String getMesh()
+  public @Nonnull PathVirtual getMesh()
   {
     return this.description.getMesh();
   }

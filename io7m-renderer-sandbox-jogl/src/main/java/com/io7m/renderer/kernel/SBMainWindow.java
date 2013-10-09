@@ -25,6 +25,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,6 +51,7 @@ import javax.swing.JSeparator;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileFilter;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Callbacks;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
@@ -173,7 +175,11 @@ final class SBMainWindow extends JFrame
                 @Override protected Void doInBackground()
                   throws Exception
                 {
-                  return controller.ioLoadScene(selected).get();
+                  try {
+                    return controller.ioLoadScene(selected).get();
+                  } catch (final ConstraintError x) {
+                    throw new IOException(x);
+                  }
                 }
 
                 @SuppressWarnings("synthetic-access") @Override protected
@@ -227,9 +233,13 @@ final class SBMainWindow extends JFrame
                 @Override protected Void doInBackground()
                   throws Exception
                 {
-                  return controller
-                    .ioSaveScene(chooser.getSelectedFile())
-                    .get();
+                  try {
+                    return controller
+                      .ioSaveScene(chooser.getSelectedFile())
+                      .get();
+                  } catch (final ConstraintError x) {
+                    throw new IOException(x);
+                  }
                 }
 
                 @Override protected void done()
@@ -296,12 +306,14 @@ final class SBMainWindow extends JFrame
               @Override protected Void doInBackground()
                 throws Exception
               {
-                return controller.ioLoadScene(file).get();
+                try {
+                  return controller.ioLoadScene(file).get();
+                } catch (final ConstraintError x) {
+                  throw new IOException(x);
+                }
               }
 
-              @SuppressWarnings("synthetic-access") @Override protected
-                void
-                done()
+              @Override protected void done()
               {
                 try {
                   this.get();
@@ -532,7 +544,7 @@ final class SBMainWindow extends JFrame
     });
 
     try {
-      final GLProfile profile = this.getGLProfile();
+      final GLProfile profile = SBMainWindow.getGLProfile();
       final GLCapabilities caps = new GLCapabilities(profile);
       final GLCanvas canvas = new GLCanvas(caps);
       canvas.addGLEventListener(renderer);
@@ -646,7 +658,7 @@ final class SBMainWindow extends JFrame
       log));
   }
 
-  private @Nonnull GLProfile getGLProfile()
+  private static @Nonnull GLProfile getGLProfile()
   {
     if (GLProfile.isAvailable(GLProfile.GL3)) {
       return GLProfile.get(GLProfile.GL3);

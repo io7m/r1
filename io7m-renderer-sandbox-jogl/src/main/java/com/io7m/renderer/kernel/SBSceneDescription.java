@@ -20,8 +20,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
@@ -31,17 +31,19 @@ import nu.xom.Elements;
 import nu.xom.ValidityException;
 
 import org.pcollections.HashTreePMap;
+import org.pcollections.HashTreePSet;
 import org.pcollections.PMap;
+import org.pcollections.PSet;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KSphere;
-import com.io7m.renderer.kernel.SBZipUtilities.BaseDirectory;
 import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.RXMLUtilities;
 
@@ -54,7 +56,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     try {
       SCENE_XML_URI =
         new URI("http://schemas.io7m.com/renderer/1.0.0/sandbox-scene");
-      SCENE_XML_VERSION = 5;
+      SCENE_XML_VERSION = 7;
     } catch (final URISyntaxException e) {
       throw new UnreachableCodeException();
     }
@@ -62,18 +64,22 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
   public static @Nonnull SBSceneDescription empty()
   {
-    final PMap<String, SBTexture2DDescription> textures =
-      HashTreePMap.empty();
-    final PMap<String, SBMeshDescription> meshes = HashTreePMap.empty();
+    final PSet<PathVirtual> textures_2d = HashTreePSet.empty();
+    final PSet<PathVirtual> textures_cube = HashTreePSet.empty();
+    final PSet<PathVirtual> meshes = HashTreePSet.empty();
     final PMap<Integer, KLight> lights = HashTreePMap.empty();
     final PMap<Integer, SBInstanceDescription> instances =
       HashTreePMap.empty();
 
-    return new SBSceneDescription(textures, meshes, lights, instances);
+    return new SBSceneDescription(
+      textures_2d,
+      textures_cube,
+      meshes,
+      lights,
+      instances);
   }
 
   static @Nonnull SBSceneDescription fromXML(
-    final @Nonnull BaseDirectory base,
     final @Nonnull Element e)
     throws RXMLException,
       ConstraintError
@@ -98,8 +104,9 @@ import com.io7m.renderer.xml.RXMLUtilities;
     }
 
     return new SBSceneDescription(
-      SBSceneDescription.fromXMLTextures(base, e),
-      SBSceneDescription.fromXMLMeshes(base, e),
+      SBSceneDescription.fromXMLTextures2D(e),
+      SBSceneDescription.fromXMLTexturesCube(e),
+      SBSceneDescription.fromXMLMeshes(e),
       SBSceneDescription.fromXMLLights(e),
       SBSceneDescription.fromXMLInstances(e));
   }
@@ -153,14 +160,12 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return HashTreePMap.from(m);
   }
 
-  private static @Nonnull PMap<String, SBMeshDescription> fromXMLMeshes(
-    final @Nonnull BaseDirectory base,
+  private static @Nonnull PSet<PathVirtual> fromXMLMeshes(
     final @Nonnull Element e)
     throws RXMLException,
       ConstraintError
   {
-    final HashMap<String, SBMeshDescription> m =
-      new HashMap<String, SBMeshDescription>();
+    final HashSet<PathVirtual> m = new HashSet<PathVirtual>();
 
     final Element ec =
       RXMLUtilities.getChild(e, "meshes", SBSceneDescription.SCENE_XML_URI);
@@ -170,41 +175,66 @@ import com.io7m.renderer.xml.RXMLUtilities;
         .getChildElements("mesh", SBSceneDescription.SCENE_XML_URI.toString());
 
     for (int index = 0; index < ecc.size(); ++index) {
-      final Element ei = ecc.get(index);
-      final SBMeshDescription d = SBMeshDescription.fromXML(base, ei);
-      m.put(d.getName(), d);
+      final Element me = ecc.get(index);
+      final String mep = RXMLUtilities.getElementNonEmptyString(me);
+      m.add(PathVirtual.ofString(mep));
     }
 
-    return HashTreePMap.from(m);
+    return HashTreePSet.from(m);
   }
 
-  private static @Nonnull
-    PMap<String, SBTexture2DDescription>
-    fromXMLTextures(
-      final @Nonnull BaseDirectory base,
-      final @Nonnull Element e)
-      throws RXMLException,
-        ConstraintError
+  private static @Nonnull PSet<PathVirtual> fromXMLTextures2D(
+    final @Nonnull Element e)
+    throws RXMLException,
+      ConstraintError
   {
-    final HashMap<String, SBTexture2DDescription> m =
-      new HashMap<String, SBTexture2DDescription>();
+    final HashSet<PathVirtual> m = new HashSet<PathVirtual>();
 
     final Element ec =
-      RXMLUtilities.getChild(e, "textures", SBSceneDescription.SCENE_XML_URI);
+      RXMLUtilities.getChild(
+        e,
+        "textures-2d",
+        SBSceneDescription.SCENE_XML_URI);
 
     final Elements ecc =
       ec.getChildElements(
-        "texture",
+        "texture-2d",
         SBSceneDescription.SCENE_XML_URI.toString());
 
     for (int index = 0; index < ecc.size(); ++index) {
-      final Element ei = ecc.get(index);
-      final SBTexture2DDescription d =
-        SBTexture2DDescription.fromXML(base, ei);
-      m.put(d.getName(), d);
+      final Element me = ecc.get(index);
+      final String mep = RXMLUtilities.getElementNonEmptyString(me);
+      m.add(PathVirtual.ofString(mep));
     }
 
-    return HashTreePMap.from(m);
+    return HashTreePSet.from(m);
+  }
+
+  private static @Nonnull PSet<PathVirtual> fromXMLTexturesCube(
+    final @Nonnull Element e)
+    throws RXMLException,
+      ConstraintError
+  {
+    final HashSet<PathVirtual> m = new HashSet<PathVirtual>();
+
+    final Element ec =
+      RXMLUtilities.getChild(
+        e,
+        "textures-cube",
+        SBSceneDescription.SCENE_XML_URI);
+
+    final Elements ecc =
+      ec.getChildElements(
+        "texture-cube",
+        SBSceneDescription.SCENE_XML_URI.toString());
+
+    for (int index = 0; index < ecc.size(); ++index) {
+      final Element me = ecc.get(index);
+      final String mep = RXMLUtilities.getElementNonEmptyString(me);
+      m.add(PathVirtual.ofString(mep));
+    }
+
+    return HashTreePSet.from(m);
   }
 
   private static @Nonnull Element lightToXML(
@@ -363,18 +393,36 @@ import com.io7m.renderer.xml.RXMLUtilities;
       falloff);
   }
 
-  private final @Nonnull PMap<String, SBTexture2DDescription> textures;
-  private final @Nonnull PMap<String, SBMeshDescription>      meshes;
+  private final @Nonnull PSet<PathVirtual>                    textures_2d;
+  private final @Nonnull PSet<PathVirtual>                    textures_cube;
+  private final @Nonnull PSet<PathVirtual>                    meshes;
   private final @Nonnull PMap<Integer, KLight>                lights;
   private final @Nonnull PMap<Integer, SBInstanceDescription> instances;
 
+  public @Nonnull PSet<PathVirtual> getTextures2D()
+  {
+    return this.textures_2d;
+  }
+
+  public @Nonnull PSet<PathVirtual> getTexturesCube()
+  {
+    return this.textures_cube;
+  }
+
+  public @Nonnull PSet<PathVirtual> getMeshes()
+  {
+    return this.meshes;
+  }
+
   private SBSceneDescription(
-    final @Nonnull PMap<String, SBTexture2DDescription> textures,
-    final @Nonnull PMap<String, SBMeshDescription> models,
+    final @Nonnull PSet<PathVirtual> textures_2d,
+    final @Nonnull PSet<PathVirtual> textures_cube,
+    final @Nonnull PSet<PathVirtual> models,
     final @Nonnull PMap<Integer, KLight> lights,
     final @Nonnull PMap<Integer, SBInstanceDescription> instances)
   {
-    this.textures = textures;
+    this.textures_2d = textures_2d;
+    this.textures_cube = textures_cube;
     this.meshes = models;
     this.lights = lights;
     this.instances = instances;
@@ -402,7 +450,10 @@ import com.io7m.renderer.xml.RXMLUtilities;
     if (!this.meshes.equals(other.meshes)) {
       return false;
     }
-    if (!this.textures.equals(other.textures)) {
+    if (!this.textures_2d.equals(other.textures_2d)) {
+      return false;
+    }
+    if (!this.textures_cube.equals(other.textures_cube)) {
       return false;
     }
     return true;
@@ -418,28 +469,6 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return this.lights.values();
   }
 
-  public @CheckForNull SBMeshDescription getMesh(
-    final @Nonnull String name)
-  {
-    return this.meshes.get(name);
-  }
-
-  public @Nonnull Collection<SBMeshDescription> getMeshDescriptions()
-  {
-    return this.meshes.values();
-  }
-
-  public @CheckForNull SBTexture2DDescription getTexture(
-    final @Nonnull String name)
-  {
-    return this.textures.get(name);
-  }
-
-  public @Nonnull Collection<SBTexture2DDescription> getTextureDescriptions()
-  {
-    return this.textures.values();
-  }
-
   @Override public int hashCode()
   {
     final int prime = 31;
@@ -447,7 +476,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     result = (prime * result) + this.instances.hashCode();
     result = (prime * result) + this.lights.hashCode();
     result = (prime * result) + this.meshes.hashCode();
-    result = (prime * result) + this.textures.hashCode();
+    result = (prime * result) + this.textures_2d.hashCode();
     return result;
   }
 
@@ -455,7 +484,8 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final @Nonnull SBInstanceDescription d)
   {
     return new SBSceneDescription(
-      this.textures,
+      this.textures_2d,
+      this.textures_cube,
       this.meshes,
       this.lights,
       this.instances.plus(d.getID(), d));
@@ -465,25 +495,41 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final @Nonnull KLight l)
   {
     return new SBSceneDescription(
-      this.textures,
+      this.textures_2d,
+      this.textures_cube,
       this.meshes,
       this.lights.plus(l.getID(), l),
       this.instances);
   }
 
   public @Nonnull SBSceneDescription meshAdd(
-    final @Nonnull SBMeshDescription d)
-  {
-    return new SBSceneDescription(this.textures, this.meshes.plus(
-      d.getName(),
-      d), this.lights, this.instances);
-  }
-
-  public @Nonnull SBSceneDescription textureAdd(
-    final @Nonnull SBTexture2DDescription t)
+    final @Nonnull PathVirtual d)
   {
     return new SBSceneDescription(
-      this.textures.plus(t.getName(), t),
+      this.textures_2d,
+      this.textures_cube,
+      this.meshes.plus(d),
+      this.lights,
+      this.instances);
+  }
+
+  public @Nonnull SBSceneDescription texture2DAdd(
+    final @Nonnull PathVirtual t)
+  {
+    return new SBSceneDescription(
+      this.textures_2d.plus(t),
+      this.textures_cube,
+      this.meshes,
+      this.lights,
+      this.instances);
+  }
+
+  public @Nonnull SBSceneDescription textureCubeAdd(
+    final @Nonnull PathVirtual t)
+  {
+    return new SBSceneDescription(
+      this.textures_2d,
+      this.textures_cube.plus(t),
       this.meshes,
       this.lights,
       this.instances);
@@ -496,14 +542,25 @@ import com.io7m.renderer.xml.RXMLUtilities;
     e.addAttribute(new Attribute("s:version", uri, Integer
       .toString(SBSceneDescription.SCENE_XML_VERSION)));
 
-    final Element et = new Element("s:textures", uri);
-    for (final SBTexture2DDescription t : this.textures.values()) {
-      et.appendChild(t.toXML());
+    final Element et2 = new Element("s:textures-2d", uri);
+    for (final PathVirtual t : this.textures_2d) {
+      final Element ete = new Element("s:texture-2d", uri);
+      ete.appendChild(t.toString());
+      et2.appendChild(ete);
+    }
+
+    final Element etc = new Element("s:textures-cube", uri);
+    for (final PathVirtual t : this.textures_cube) {
+      final Element ete = new Element("s:texture-cube", uri);
+      ete.appendChild(t.toString());
+      etc.appendChild(ete);
     }
 
     final Element em = new Element("s:meshes", uri);
-    for (final SBMeshDescription m : this.meshes.values()) {
-      em.appendChild(m.toXML());
+    for (final PathVirtual m : this.meshes) {
+      final Element eme = new Element("s:mesh", uri);
+      eme.appendChild(m.toString());
+      em.appendChild(eme);
     }
 
     final Element el = new Element("s:lights", uri);
@@ -516,7 +573,8 @@ import com.io7m.renderer.xml.RXMLUtilities;
       ei.appendChild(i.toXML());
     }
 
-    e.appendChild(et);
+    e.appendChild(et2);
+    e.appendChild(etc);
     e.appendChild(em);
     e.appendChild(el);
     e.appendChild(ei);

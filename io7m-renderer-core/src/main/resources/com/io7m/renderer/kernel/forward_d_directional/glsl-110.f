@@ -6,7 +6,7 @@ struct pt_com_io7m_renderer_DirectionalLight_t {
   float intensity;
 };
 struct pt_com_io7m_renderer_DirectionalLight_directions {
-  vec3 otl;
+  vec3 ots;
   vec3 normal;
   vec3 stl;
   vec3 reflection;
@@ -31,12 +31,12 @@ p_com_io7m_renderer_DirectionalLight_diffuse_color (pt_com_io7m_renderer_Directi
 pt_com_io7m_renderer_DirectionalLight_directions
 p_com_io7m_renderer_DirectionalLight_directions (pt_com_io7m_renderer_DirectionalLight_t light, vec3 p, vec3 n)
 {
-  vec3 otl = normalize(p);
+  vec3 ots = normalize(p);
   {
-    vec3 _tmp_1 = otl;
+    vec3 _tmp_1 = ots;
     vec3 _tmp_2 = n;
     vec3 _tmp_3 = normalize((-light.direction));
-    vec3 _tmp_4 = reflect(otl, n);
+    vec3 _tmp_4 = reflect(ots, n);
     return pt_com_io7m_renderer_DirectionalLight_directions(_tmp_1, _tmp_2, _tmp_3, _tmp_4);
   }
 }

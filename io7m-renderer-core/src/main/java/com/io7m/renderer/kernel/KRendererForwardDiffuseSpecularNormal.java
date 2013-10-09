@@ -392,7 +392,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       Constraints.constrainArbitrary(
         array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3.getName()),
         "Mesh has tangent3");
-      if (material.getTextureSpecular().isSome()) {
+      if (material.getSpecular().getTexture().isSome()) {
         this
           .renderLightPassMeshDirectionalWithProvidedBitangentsWithSpecularMap(
             gc,
@@ -407,7 +407,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       Constraints.constrainArbitrary(
         array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4.getName()),
         "Mesh has tangent4");
-      if (material.getTextureSpecular().isSome()) {
+      if (material.getSpecular().getTexture().isSome()) {
         this
           .renderLightPassMeshDirectionalWithComputedBitangentsWithSpecularMap(
             gc,
@@ -455,7 +455,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -464,7 +464,8 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     }
 
     {
-      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[2],
@@ -483,10 +484,9 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
     e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
     e.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
-    e.execUniformPutFloat(
-      gc,
-      "material.specular_exponent",
-      material.getSpecularExponent());
+    e.execUniformPutFloat(gc, "material.specular_exponent", material
+      .getSpecular()
+      .getExponent());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -583,7 +583,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -592,7 +592,8 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     }
 
     {
-      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[2],
@@ -602,7 +603,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> specular_opt =
-        material.getTextureSpecular();
+        material.getSpecular().getTexture();
       gc.texture2DStaticBind(
         texture_units[3],
         ((Option.Some<Texture2DStatic>) specular_opt).value);
@@ -620,10 +621,9 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
     e.execUniformPutTextureUnit(gc, "t_specular", texture_units[3]);
     e.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
-    e.execUniformPutFloat(
-      gc,
-      "material.specular_exponent",
-      material.getSpecularExponent());
+    e.execUniformPutFloat(gc, "material.specular_exponent", material
+      .getSpecular()
+      .getExponent());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -720,7 +720,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -729,7 +729,8 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     }
 
     {
-      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[2],
@@ -748,10 +749,9 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
     e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
     e.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
-    e.execUniformPutFloat(
-      gc,
-      "material.specular_exponent",
-      material.getSpecularExponent());
+    e.execUniformPutFloat(gc, "material.specular_exponent", material
+      .getSpecular()
+      .getExponent());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -854,7 +854,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -863,7 +863,8 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     }
 
     {
-      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[2],
@@ -873,7 +874,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> specular_opt =
-        material.getTextureSpecular();
+        material.getSpecular().getTexture();
       gc.texture2DStaticBind(
         texture_units[3],
         ((Option.Some<Texture2DStatic>) specular_opt).value);
@@ -891,10 +892,9 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
     e.execUniformPutTextureUnit(gc, "t_specular", texture_units[3]);
     e.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
-    e.execUniformPutFloat(
-      gc,
-      "material.specular_exponent",
-      material.getSpecularExponent());
+    e.execUniformPutFloat(gc, "material.specular_exponent", material
+      .getSpecular()
+      .getExponent());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -1116,7 +1116,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
         array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3.getName()),
         "Mesh has tangent3");
 
-      if (material.getTextureSpecular().isSome()) {
+      if (material.getSpecular().getTexture().isSome()) {
         this
           .renderLightPassMeshSphericalWithProvidedBitangentsWithSpecularMap(
             gc,
@@ -1132,7 +1132,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
         array.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4.getName()),
         "Mesh has tangent4");
 
-      if (material.getTextureSpecular().isSome()) {
+      if (material.getSpecular().getTexture().isSome()) {
         this
           .renderLightPassMeshSphericalWithComputedBitangentsWithSpecularMap(
             gc,
@@ -1180,7 +1180,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -1191,7 +1191,8 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     }
 
     {
-      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[2],
@@ -1214,10 +1215,9 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
     e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
     e.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
-    e.execUniformPutFloat(
-      gc,
-      "material.specular_exponent",
-      material.getSpecularExponent());
+    e.execUniformPutFloat(gc, "material.specular_exponent", material
+      .getSpecular()
+      .getExponent());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -1314,7 +1314,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -1325,7 +1325,8 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     }
 
     {
-      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[2],
@@ -1337,7 +1338,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> specular_opt =
-        material.getTextureSpecular();
+        material.getSpecular().getTexture();
       gc.texture2DStaticBind(
         texture_units[3],
         ((Option.Some<Texture2DStatic>) specular_opt).value);
@@ -1357,10 +1358,9 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
     e.execUniformPutTextureUnit(gc, "t_specular", texture_units[3]);
     e.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
-    e.execUniformPutFloat(
-      gc,
-      "material.specular_exponent",
-      material.getSpecularExponent());
+    e.execUniformPutFloat(gc, "material.specular_exponent", material
+      .getSpecular()
+      .getExponent());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -1457,7 +1457,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -1468,7 +1468,8 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     }
 
     {
-      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[2],
@@ -1491,10 +1492,9 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
     e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
     e.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
-    e.execUniformPutFloat(
-      gc,
-      "material.specular_exponent",
-      material.getSpecularExponent());
+    e.execUniformPutFloat(gc, "material.specular_exponent", material
+      .getSpecular()
+      .getExponent());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -1597,7 +1597,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getTextureDiffuse0();
+        material.getDiffuse().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -1608,7 +1608,8 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     }
 
     {
-      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[2],
@@ -1620,7 +1621,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> specular_opt =
-        material.getTextureSpecular();
+        material.getSpecular().getTexture();
       gc.texture2DStaticBind(
         texture_units[3],
         ((Option.Some<Texture2DStatic>) specular_opt).value);
@@ -1640,10 +1641,9 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     e.execUniformPutTextureUnit(gc, "t_normal", texture_units[2]);
     e.execUniformPutTextureUnit(gc, "t_specular", texture_units[3]);
     e.execUniformPutFloat(gc, "material.specular_intensity", 1.0f);
-    e.execUniformPutFloat(
-      gc,
-      "material.specular_exponent",
-      material.getSpecularExponent());
+    e.execUniformPutFloat(gc, "material.specular_exponent", material
+      .getSpecular()
+      .getExponent());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
