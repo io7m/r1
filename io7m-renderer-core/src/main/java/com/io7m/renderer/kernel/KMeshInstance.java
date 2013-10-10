@@ -44,10 +44,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
 @Immutable public final class KMeshInstance implements KTransformable
 {
-  private final @Nonnull Integer                   id;
-  private final @Nonnull KTransform                transform;
-  private final @Nonnull KMesh                     mesh;
-  private final @Nonnull KMaterial                 material;
+  private final @Nonnull Integer                id;
+  private final @Nonnull KTransform             transform;
+  private final @Nonnull KMesh                  mesh;
+  private final @Nonnull KMaterial              material;
   private final @Nonnull KRenderingCapabilities capabilities;
 
   public KMeshInstance(
@@ -61,7 +61,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
     this.transform = transform;
     this.mesh = mesh;
     this.material = material;
-    this.capabilities = KRenderingCapabilities.fromMeshAndMaterial(mesh, material);
+    this.capabilities =
+      KRenderingCapabilities.fromMeshAndMaterial(mesh, material);
   }
 
   public @Nonnull KRenderingCapabilities getCapabilities()
