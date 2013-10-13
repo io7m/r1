@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -64,6 +65,7 @@ import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.parasol.PGLSLMetaXML;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.xml.RXMLException;
@@ -86,14 +88,9 @@ public final class SBSceneController implements
   SBSceneControllerInstances,
   SBSceneControllerRenderer,
   SBSceneControllerRendererControl,
+  SBSceneControllerShaders,
   SBSceneControllerTextures
 {
-  private final @Nonnull SBGLRenderer                        renderer;
-  private final @Nonnull Log                                 log;
-  private final @Nonnull LinkedList<SBSceneChangeListener>   listeners;
-  private final @Nonnull AtomicReference<SceneAndFilesystem> state_current;
-  private final @Nonnull ExecutorService                     exec_pool;
-
   private static class SceneAndFilesystem
   {
     final @Nonnull SBScene           scene;
@@ -108,6 +105,14 @@ public final class SBSceneController implements
     }
   }
 
+  private final @Nonnull SBGLRenderer                        renderer;
+  private final @Nonnull Log                                 log;
+  private final @Nonnull LinkedList<SBSceneChangeListener>   listeners;
+  private final @Nonnull AtomicReference<SceneAndFilesystem> state_current;
+  private final @Nonnull ExecutorService                     exec_pool;
+
+  private final @Nonnull Map<String, SBShader>               shaders;
+
   public SBSceneController(
     final @Nonnull SBGLRenderer renderer,
     final @Nonnull Log log)
@@ -118,6 +123,7 @@ public final class SBSceneController implements
     this.renderer = renderer;
     this.log = new Log(log, "control");
     this.listeners = new LinkedList<SBSceneChangeListener>();
+    this.shaders = new ConcurrentHashMap<String, SBShader>();
     this.state_current =
       new AtomicReference<SceneAndFilesystem>(new SceneAndFilesystem(
         SBScene.empty(),
@@ -229,6 +235,14 @@ public final class SBSceneController implements
     }
   }
 
+  private void internalStateUpdate(
+    final @Nonnull SceneAndFilesystem state)
+  {
+    this.log.debug("state updated");
+    this.state_current.set(state);
+    this.internalStateChangedNotifyListeners();
+  }
+
   private void internalStateUpdateSceneOnly(
     final @Nonnull SBScene scene)
   {
@@ -236,14 +250,6 @@ public final class SBSceneController implements
 
     final SceneAndFilesystem saf = this.state_current.get();
     this.state_current.set(new SceneAndFilesystem(scene, saf.filesystem));
-    this.internalStateChangedNotifyListeners();
-  }
-
-  private void internalStateUpdate(
-    final @Nonnull SceneAndFilesystem state)
-  {
-    this.log.debug("state updated");
-    this.state_current.set(state);
     this.internalStateChangedNotifyListeners();
   }
 
@@ -492,6 +498,11 @@ public final class SBSceneController implements
 
     this.exec_pool.execute(f);
     return f;
+  }
+
+  @Override public void rendererAttemptRecovery()
+  {
+    this.renderer.attemptRecovery();
   }
 
   @Override public @Nonnull
@@ -855,6 +866,56 @@ public final class SBSceneController implements
   {
     return this.state_current.get().scene.texturesCubeGet();
   }
+
+  @Override public @Nonnull Future<SBShader> shaderLoad(
+    final @Nonnull File file)
+    throws ConstraintError
+  {
+    Constraints.constrainNotNull(file, "File");
+
+    final FutureTask<SBShader> f =
+      new FutureTask<SBShader>(new Callable<SBShader>() {
+        @SuppressWarnings("synthetic-access") @Override public
+          SBShader
+          call()
+            throws Exception
+        {
+          try {
+            final SBShader sbt =
+              SBSceneController.this.internalShaderLoad(file);
+
+            SBSceneController.this.shaders.put(sbt.getName(), sbt);
+            return sbt;
+          } catch (final ConstraintError e) {
+            throw new IOException(e);
+          }
+        }
+      });
+
+    this.exec_pool.execute(f);
+    return f;
+  }
+
+  private @Nonnull SBShader internalShaderLoad(
+    final @Nonnull File file)
+    throws ConstraintError,
+      ParsingException,
+      IOException,
+      InterruptedException,
+      ExecutionException
+  {
+    final Builder b = new Builder();
+    final Document d = b.build(file);
+    final PGLSLMetaXML meta = PGLSLMetaXML.fromDocument(d);
+    final Future<SBShader> f =
+      this.renderer.shaderLoad(file.getParentFile(), meta);
+    return f.get();
+  }
+
+  @Override public @Nonnull Map<String, SBShader> shadersGet()
+  {
+    return this.shaders;
+  }
 }
 
 interface SBSceneControllerInstances extends
@@ -938,6 +999,8 @@ interface SBSceneControllerRenderer
 
 interface SBSceneControllerRendererControl
 {
+  public void rendererAttemptRecovery();
+
   public void rendererSetBackgroundColour(
     float r,
     float g,
@@ -957,6 +1020,15 @@ interface SBSceneControllerRendererControl
 
   public void rendererShowLights(
     final boolean enabled);
+}
+
+interface SBSceneControllerShaders
+{
+  public @Nonnull Future<SBShader> shaderLoad(
+    final @Nonnull File file)
+    throws ConstraintError;
+
+  public @Nonnull Map<String, SBShader> shadersGet();
 }
 
 interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration
