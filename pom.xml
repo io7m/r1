@@ -11,8 +11,8 @@
   <url>http://mvn.io7m.com/renderer/</url>
 
   <modules>
-    <module>io7m-renderer-kernel-shaders</module>
     <module>io7m-renderer-core</module>
+    <module>io7m-renderer-kernel-shaders</module>
     <module>io7m-renderer-sandbox-jogl</module>
     <module>io7m-renderer-tests-jogl</module>
     <module>io7m-renderer-tests</module>

@@ -16,6 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -95,14 +97,15 @@ import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.parasol.PGLSLMetaXML;
 import com.io7m.renderer.kernel.KLight.KSphere;
+import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeKernel;
 import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
 import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
 
 final class SBGLRenderer implements GLEventListener
 {
-
   private static final @Nonnull PathVirtual SPHERE_32_16_MESH;
   private static final @Nonnull PathVirtual SPHERE_16_8_MESH;
 
@@ -117,6 +120,108 @@ final class SBGLRenderer implements GLEventListener
 
     } catch (final ConstraintError e) {
       throw new UnreachableCodeException();
+    }
+  }
+
+  private class ShaderLoadFuture extends FutureTask<SBShader>
+  {
+    ShaderLoadFuture(
+      final @Nonnull File directory,
+      final @Nonnull PGLSLMetaXML meta)
+    {
+      super(new Callable<SBShader>() {
+        @SuppressWarnings({ "synthetic-access", "boxing" }) @Override public @Nonnull
+          SBShader
+          call()
+            throws Exception
+        {
+          final StringBuilder message = new StringBuilder();
+          message.append("Loading shader '");
+          message.append(meta.getName());
+          message.append("' from ");
+          message.append(directory);
+          SBGLRenderer.this.log.debug(message.toString());
+
+          if (SBGLRenderer.this.gi != null) {
+            final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
+            final JCGLSLVersion v = gl.metaGetSLVersion();
+
+            final int vmj = v.getVersionMajor() * 100;
+            final int vmn = v.getVersionMinor();
+            final int raw = vmj + vmn;
+
+            switch (v.getAPI()) {
+              case JCGL_ES:
+              {
+                if (meta.getSupportsES().contains(raw) == false) {
+                  message.setLength(0);
+                  message.append("GLSL version ");
+                  message.append(raw);
+                  message.append(" not supported, available versions are: ");
+                  message.append(meta.getSupportsES());
+                  SBGLRenderer.this.log.debug(message.toString());
+                  throw new JCGLUnsupportedException(message.toString());
+                }
+                break;
+              }
+              case JCGL_FULL:
+              {
+                if (meta.getSupportsFull().contains(raw) == false) {
+                  message.setLength(0);
+                  message.append("GLSL version ");
+                  message.append(raw);
+                  message.append(" not supported, available versions are: ");
+                  message.append(meta.getSupportsFull());
+                  SBGLRenderer.this.log.debug(message.toString());
+                  throw new JCGLUnsupportedException(message.toString());
+                }
+                break;
+              }
+            }
+
+            String v_name = null;
+            String f_name = null;
+            switch (v.getAPI()) {
+              case JCGL_ES:
+                v_name = "glsl-es-" + raw + ".v";
+                f_name = "glsl-es-" + raw + ".f";
+                break;
+              case JCGL_FULL:
+                v_name = "glsl-" + raw + ".v";
+                f_name = "glsl-" + raw + ".f";
+                break;
+            }
+
+            final File v_file = new File(directory, v_name);
+            final File f_file = new File(directory, f_name);
+            InputStream v_stream = null;
+            InputStream f_stream = null;
+
+            try {
+              v_stream = new FileInputStream(v_file);
+              f_stream = new FileInputStream(f_file);
+              final ProgramReference p =
+                KShaderUtilities.makeProgramFromStreams(
+                  gl,
+                  meta.getName(),
+                  v_stream,
+                  f_stream);
+              return new SBShader(p, directory, meta);
+            } catch (final ConstraintError x) {
+              throw new UnreachableCodeException();
+            } finally {
+              if (v_stream != null) {
+                v_stream.close();
+              }
+              if (f_stream != null) {
+                f_stream.close();
+              }
+            }
+          }
+
+          throw new JCGLException(-1, "OpenGL not ready!");
+        }
+      });
     }
   }
 
@@ -402,52 +507,62 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture> texture_cube_delete_queue;
   private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>          mesh_load_queue;
   private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>        mesh_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>        shader_load_queue;
+  private final @Nonnull HashMap<String, SBShader>                      shaders;
   private final @Nonnull HashMap<PathVirtual, Texture2DStatic>          textures_2d;
   private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>        textures_cube;
 
   private final @Nonnull HashMap<PathVirtual, KMesh>                    meshes;
   private @CheckForNull SBQuad                                          screen_quad;
 
-  private final @Nonnull FSCapabilityAll                                filesystem;
-  private @CheckForNull FramebufferConfigurationGL3ES2Actual            framebuffer_config;
-  private @CheckForNull Framebuffer                                     framebuffer;
-  private boolean                                                       running;
-  private final @Nonnull MatrixM4x4F                                    matrix_projection;
-  private final @Nonnull MatrixM4x4F                                    matrix_modelview;
-  private final @Nonnull MatrixM4x4F                                    matrix_model;
-  private final @Nonnull MatrixM4x4F                                    matrix_view;
-  private @CheckForNull TextureUnit[]                                   texture_units;
-  private @CheckForNull FramebufferColorAttachmentPoint[]               framebuffer_points;
-  private final @Nonnull Map<SBRendererType, KRenderer>                 renderers;
-  private final @Nonnull AtomicReference<SBRendererType>                renderer_current;
-  private final @Nonnull AtomicReference<SBSceneControllerRenderer>     controller;
+  private static enum RunningState
+  {
+    STATE_INITIAL,
+    STATE_RUNNING,
+    STATE_FAILED,
+    STATE_FAILED_PERMANENTLY
+  }
 
-  private final @Nonnull AtomicReference<VectorI3F>                     background_colour;
-  private @Nonnull SBVisibleAxes                                        axes;
-  private final @Nonnull AtomicBoolean                                  axes_show;
-  private @Nonnull SBVisibleGridPlane                                   grid;
-  private final @Nonnull AtomicBoolean                                  grid_show;
-  private @Nonnull HashMap<PathVirtual, KMesh>                          sphere_meshes;
-  private final @Nonnull AtomicBoolean                                  lights_show;
-  private final @Nonnull AtomicBoolean                                  lights_show_surface;
+  private final @Nonnull FSCapabilityAll                            filesystem;
+  private @CheckForNull FramebufferConfigurationGL3ES2Actual        framebuffer_config;
+  private @CheckForNull Framebuffer                                 framebuffer;
+  private @Nonnull RunningState                                     running;
+  private final @Nonnull MatrixM4x4F                                matrix_projection;
+  private final @Nonnull MatrixM4x4F                                matrix_modelview;
+  private final @Nonnull MatrixM4x4F                                matrix_model;
+  private final @Nonnull MatrixM4x4F                                matrix_view;
+  private @CheckForNull TextureUnit[]                               texture_units;
+  private @CheckForNull FramebufferColorAttachmentPoint[]           framebuffer_points;
+  private final @Nonnull Map<SBKRendererType, KRenderer>            kernel_renderers;
+  private final @Nonnull AtomicReference<SBRendererType>            renderer_current;
+  private final @Nonnull AtomicReference<SBSceneControllerRenderer> controller;
 
-  private final @Nonnull QuaternionM4F.Context                          qm4f_context;
-  private @Nonnull KTransform                                           camera_transform;
-  private final @Nonnull SBInputState                                   input_state;
-  private final @Nonnull SBFirstPersonCamera                            camera;
-  private @Nonnull KMatrix4x4F<KMatrixView>                             camera_matrix;
-  private @CheckForNull KScene                                          scene_current;
-  private @CheckForNull KScene                                          scene_previous;
-  private @CheckForNull KScene                                          scene_validated_previous;
+  private final @Nonnull AtomicReference<VectorI3F>                 background_colour;
+  private @Nonnull SBVisibleAxes                                    axes;
+  private final @Nonnull AtomicBoolean                              axes_show;
+  private @Nonnull SBVisibleGridPlane                               grid;
+  private final @Nonnull AtomicBoolean                              grid_show;
+  private @Nonnull HashMap<PathVirtual, KMesh>                      sphere_meshes;
+  private final @Nonnull AtomicBoolean                              lights_show;
+  private final @Nonnull AtomicBoolean                              lights_show_surface;
 
-  private @CheckForNull ProgramReference                                program_uv;
-  private @CheckForNull ProgramReference                                program_vcolour;
-  private @CheckForNull ProgramReference                                program_ccolour;
-  private @Nonnull JCCEExecutionCallable                                exec_vcolour;
-  private @Nonnull JCCEExecutionCallable                                exec_uv;
-  private @Nonnull JCCEExecutionCallable                                exec_ccolour;
+  private final @Nonnull QuaternionM4F.Context                      qm4f_context;
+  private @Nonnull KTransform                                       camera_transform;
+  private final @Nonnull SBInputState                               input_state;
+  private final @Nonnull SBFirstPersonCamera                        camera;
+  private @Nonnull KMatrix4x4F<KMatrixView>                         camera_matrix;
+  private @CheckForNull KScene                                      scene_current;
+  private @CheckForNull KScene                                      scene_previous;
+  private @CheckForNull KScene                                      scene_validated_previous;
 
-  private static final @Nonnull VectorReadable4F                        GRID_COLOUR;
+  private @CheckForNull ProgramReference                            program_uv;
+  private @CheckForNull ProgramReference                            program_vcolour;
+  private @CheckForNull ProgramReference                            program_ccolour;
+  private @Nonnull JCCEExecutionCallable                            exec_vcolour;
+  private @Nonnull JCCEExecutionCallable                            exec_uv;
+  private @Nonnull JCCEExecutionCallable                            exec_ccolour;
+
+  private static final @Nonnull VectorReadable4F                    GRID_COLOUR;
 
   static {
     GRID_COLOUR = new VectorI4F(1.0f, 1.0f, 1.0f, 0.1f);
@@ -480,6 +595,10 @@ final class SBGLRenderer implements GLEventListener
     this.mesh_delete_queue = new ConcurrentLinkedQueue<MeshDeleteFuture>();
     this.meshes = new HashMap<PathVirtual, KMesh>();
 
+    this.shader_load_queue =
+      new ConcurrentLinkedQueue<SBGLRenderer.ShaderLoadFuture>();
+    this.shaders = new HashMap<String, SBShader>();
+
     this.filesystem = Filesystem.makeWithoutArchiveDirectory(log);
     this.filesystem.mountClasspathArchive(
       SBGLRenderer.class,
@@ -493,10 +612,12 @@ final class SBGLRenderer implements GLEventListener
     this.matrix_view = new MatrixM4x4F();
     this.matrix_modelview = new MatrixM4x4F();
     this.matrix_projection = new MatrixM4x4F();
-    this.renderers = new HashMap<SBRendererType, KRenderer>();
+    this.kernel_renderers = new HashMap<SBKRendererType, KRenderer>();
+
     this.renderer_current =
       new AtomicReference<SBRendererType>(
-        SBRendererType.RENDERER_FORWARD_UNLIT);
+        new SBRendererType.SBRendererTypeKernel(
+          SBKRendererType.KRENDERER_FORWARD_UNLIT));
 
     this.axes_show = new AtomicBoolean(true);
     this.grid_show = new AtomicBoolean(true);
@@ -505,13 +626,13 @@ final class SBGLRenderer implements GLEventListener
 
     this.camera = new SBFirstPersonCamera(0.0f, 1.0f, 5.0f);
     this.input_state = new SBInputState();
-    this.running = false;
+    this.running = RunningState.STATE_INITIAL;
   }
 
   @Override public void display(
     final @Nonnull GLAutoDrawable drawable)
   {
-    if (this.running == false) {
+    if (this.running != RunningState.STATE_RUNNING) {
       return;
     }
 
@@ -525,6 +646,7 @@ final class SBGLRenderer implements GLEventListener
       SBGLRenderer.processQueue(this.texture2d_load_queue);
       SBGLRenderer.processQueue(this.texture_cube_load_queue);
       SBGLRenderer.processQueue(this.mesh_load_queue);
+      SBGLRenderer.processQueue(this.shader_load_queue);
 
       this.moveCamera();
       this.renderScene();
@@ -548,7 +670,14 @@ final class SBGLRenderer implements GLEventListener
     final @CheckForNull Throwable e)
   {
     SBErrorBox.showError(this.log, "Renderer disabled", e);
-    this.running = false;
+    this.running = RunningState.STATE_FAILED;
+  }
+
+  private void failedPermanently(
+    final @CheckForNull Throwable e)
+  {
+    SBErrorBox.showError(this.log, "Renderer disabled", e);
+    this.running = RunningState.STATE_FAILED_PERMANENTLY;
   }
 
   @Nonnull SBInputState getInputState()
@@ -637,21 +766,21 @@ final class SBGLRenderer implements GLEventListener
       this.exec_uv = new JCCEExecutionCallable(this.program_uv);
 
       this.reloadSizedResources(drawable, gl);
-      this.running = true;
+      this.running = RunningState.STATE_RUNNING;
     } catch (final JCGLException e) {
-      this.failed(e);
+      this.failedPermanently(e);
     } catch (final JCGLUnsupportedException e) {
-      this.failed(e);
+      this.failedPermanently(e);
     } catch (final ConstraintError e) {
-      this.failed(e);
+      this.failedPermanently(e);
     } catch (final JCGLCompileException e) {
-      this.failed(e);
+      this.failedPermanently(e);
     } catch (final FilesystemError e) {
-      this.failed(e);
+      this.failedPermanently(e);
     } catch (final IOException e) {
-      this.failed(e);
+      this.failedPermanently(e);
     } catch (final RXMLException e) {
-      this.failed(e);
+      this.failedPermanently(e);
     }
   }
 
@@ -722,88 +851,87 @@ final class SBGLRenderer implements GLEventListener
       FilesystemError,
       IOException
   {
-    this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_DEPTH,
+    this.kernel_renderers.put(
+      SBKRendererType.KRENDERER_DEBUG_DEPTH,
       new KRendererDebugDepth(this.gi, this.filesystem, this.log));
 
-    this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_UV_VERTEX,
+    this.kernel_renderers.put(
+      SBKRendererType.KRENDERER_DEBUG_UV_VERTEX,
       new KRendererDebugUVVertex(this.gi, this.filesystem, this.log));
 
-    this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_BITANGENTS_LOCAL,
+    this.kernel_renderers.put(
+      SBKRendererType.KRENDERER_DEBUG_BITANGENTS_LOCAL,
       new KRendererDebugBitangentsLocal(this.gi, this.filesystem, this.log));
 
-    this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_BITANGENTS_EYE,
+    this.kernel_renderers.put(
+      SBKRendererType.KRENDERER_DEBUG_BITANGENTS_EYE,
       new KRendererDebugBitangentsEye(this.gi, this.filesystem, this.log));
 
-    this.renderers
+    this.kernel_renderers
       .put(
-        SBRendererType.RENDERER_DEBUG_TANGENTS_VERTEX_EYE,
+        SBKRendererType.KRENDERER_DEBUG_TANGENTS_VERTEX_EYE,
         new KRendererDebugTangentsVertexEye(
           this.gi,
           this.filesystem,
           this.log));
 
-    this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_TANGENTS_VERTEX_LOCAL,
+    this.kernel_renderers.put(
+      SBKRendererType.KRENDERER_DEBUG_TANGENTS_VERTEX_LOCAL,
       new KRendererDebugTangentsVertexLocal(
         this.gi,
         this.filesystem,
         this.log));
 
-    this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_NORMALS_VERTEX_EYE,
+    this.kernel_renderers.put(
+      SBKRendererType.KRENDERER_DEBUG_NORMALS_VERTEX_EYE,
       new KRendererDebugNormalsVertexEye(this.gi, this.filesystem, this.log));
 
-    this.renderers
+    this.kernel_renderers
       .put(
-        SBRendererType.RENDERER_DEBUG_NORMALS_VERTEX_LOCAL,
+        SBKRendererType.KRENDERER_DEBUG_NORMALS_VERTEX_LOCAL,
         new KRendererDebugNormalsVertexLocal(
           this.gi,
           this.filesystem,
           this.log));
 
-    this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_NORMALS_MAP_EYE,
+    this.kernel_renderers.put(
+      SBKRendererType.KRENDERER_DEBUG_NORMALS_MAP_EYE,
       new KRendererDebugNormalsMapEye(this.gi, this.filesystem, this.log));
 
-    this.renderers.put(
-      SBRendererType.RENDERER_DEBUG_NORMALS_MAP_LOCAL,
+    this.kernel_renderers.put(
+      SBKRendererType.KRENDERER_DEBUG_NORMALS_MAP_LOCAL,
       new KRendererDebugNormalsMapLocal(this.gi, this.filesystem, this.log));
 
-    this.renderers
+    this.kernel_renderers
       .put(
-        SBRendererType.RENDERER_DEBUG_NORMALS_MAP_TANGENT,
+        SBKRendererType.KRENDERER_DEBUG_NORMALS_MAP_TANGENT,
         new KRendererDebugNormalsMapTangent(
           this.gi,
           this.filesystem,
           this.log));
 
-    this.renderers.put(SBRendererType.RENDERER_FORWARD, new KRendererForward(
-      this.gi,
-      this.filesystem,
-      this.log));
+    this.kernel_renderers.put(
+      SBKRendererType.KRENDERER_FORWARD,
+      new KRendererForward(this.gi, this.filesystem, this.log));
 
-    this.renderers.put(
-      SBRendererType.RENDERER_FORWARD_UNLIT,
+    this.kernel_renderers.put(
+      SBKRendererType.KRENDERER_FORWARD_UNLIT,
       new KRendererForwardUnlit(this.gi, this.filesystem, this.log));
 
-    this.renderers.put(
-      SBRendererType.RENDERER_FORWARD_DIFFUSE,
+    this.kernel_renderers.put(
+      SBKRendererType.KRENDERER_FORWARD_DIFFUSE,
       new KRendererForwardDiffuse(this.gi, this.filesystem, this.log));
 
-    this.renderers
+    this.kernel_renderers
       .put(
-        SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR,
+        SBKRendererType.KRENDERER_FORWARD_DIFFUSE_SPECULAR,
         new KRendererForwardDiffuseSpecular(
           this.gi,
           this.filesystem,
           this.log));
 
-    this.renderers.put(
-      SBRendererType.RENDERER_FORWARD_DIFFUSE_SPECULAR_NORMAL,
+    this.kernel_renderers.put(
+      SBKRendererType.KRENDERER_FORWARD_DIFFUSE_SPECULAR_NORMAL,
       new KRendererForwardDiffuseSpecularNormal(
         this.gi,
         this.filesystem,
@@ -1224,11 +1352,7 @@ final class SBGLRenderer implements GLEventListener
       size.x = this.framebuffer.getWidth();
       size.y = this.framebuffer.getHeight();
 
-      final KRenderer renderer =
-        this.renderers.get(this.renderer_current.get());
-
       final double aspect = (double) size.x / (double) size.y;
-
       MatrixM4x4F.setIdentity(this.matrix_projection);
       ProjectionMatrix.makePerspective(
         this.matrix_projection,
@@ -1239,9 +1363,7 @@ final class SBGLRenderer implements GLEventListener
 
       final KMatrix4x4F<KMatrixProjection> projection =
         new KMatrix4x4F<KMatrixProjection>(this.matrix_projection);
-
       final KCamera kcamera = new KCamera(this.camera_matrix, projection);
-
       final Pair<Collection<KLight>, Collection<KMeshInstance>> p =
         c.rendererGetScene();
 
@@ -1249,8 +1371,22 @@ final class SBGLRenderer implements GLEventListener
       this.scene_previous = this.scene_current;
       this.scene_current = scene;
 
-      renderer.setBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f));
-      renderer.render(this.framebuffer, scene);
+      final SBRendererType r = this.renderer_current.get();
+      switch (r.getType()) {
+        case TYPE_KERNEL:
+        {
+          final SBRendererTypeKernel rk = (SBRendererTypeKernel) r;
+          final KRenderer renderer =
+            this.kernel_renderers.get(rk.getRenderer());
+          renderer.setBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f));
+          renderer.render(this.framebuffer, scene);
+          break;
+        }
+        case TYPE_SPECIFIC:
+        {
+          break;
+        }
+      }
     }
   }
 
@@ -1261,15 +1397,15 @@ final class SBGLRenderer implements GLEventListener
     final int width,
     final int height)
   {
-    assert this.running;
+    assert this.running == RunningState.STATE_RUNNING;
 
     try {
       final JCGLInterfaceCommon gl = this.gi.getGLCommon();
       this.reloadSizedResources(drawable, gl);
     } catch (final JCGLException e) {
-      this.failed(e);
+      this.failedPermanently(e);
     } catch (final ConstraintError e) {
-      this.failed(e);
+      this.failedPermanently(e);
     }
   }
 
@@ -1360,5 +1496,38 @@ final class SBGLRenderer implements GLEventListener
     final boolean enabled)
   {
     this.lights_show_surface.set(enabled);
+  }
+
+  void attemptRecovery()
+  {
+    switch (this.running) {
+      case STATE_FAILED:
+      {
+        this.log.info("Renderer in failed state, attempting restart...");
+        this.running = RunningState.STATE_RUNNING;
+        break;
+      }
+      case STATE_FAILED_PERMANENTLY:
+      {
+        this.log
+          .error("Renderer in permanently failed state, cannot restart!");
+        break;
+      }
+      case STATE_INITIAL:
+      case STATE_RUNNING:
+      {
+        this.log.info("Renderer already running, no recovery necessary");
+        break;
+      }
+    }
+  }
+
+  public Future<SBShader> shaderLoad(
+    final @Nonnull File directory,
+    final @Nonnull PGLSLMetaXML meta)
+  {
+    final ShaderLoadFuture f = new ShaderLoadFuture(directory, meta);
+    this.shader_load_queue.add(f);
+    return f;
   }
 }

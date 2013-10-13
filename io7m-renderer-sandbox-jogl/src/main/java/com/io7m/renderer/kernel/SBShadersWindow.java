@@ -16,34 +16,25 @@
 
 package com.io7m.renderer.kernel;
 
-import java.awt.event.WindowEvent;
-
 import javax.annotation.Nonnull;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 
-final class SBWindowUtilities
-{
-  /**
-   * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given window.
-   */
+import com.io7m.jlog.Log;
 
-  static void closeWindow(
-    final @Nonnull JFrame frame)
-  {
-    final WindowEvent ev = new WindowEvent(frame, WindowEvent.WINDOW_CLOSING);
-    frame.dispatchEvent(ev);
+final class SBShadersWindow extends JFrame
+{
+  private static final long serialVersionUID;
+
+  static {
+    serialVersionUID = -312314551231238L;
   }
 
-  /**
-   * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given dialog.
-   */
-
-  static void closeDialog(
-    final @Nonnull JDialog dialog)
+  public <C extends SBSceneControllerShaders> SBShadersWindow(
+    final @Nonnull C controller,
+    final @Nonnull Log log)
   {
-    final WindowEvent ev =
-      new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING);
-    dialog.dispatchEvent(ev);
+    super("Shaders");
+    this.getContentPane().add(new SBShadersPanel(this, controller, log));
+    this.pack();
   }
 }
