@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.FragmentShader;
 import com.io7m.jcanephora.JCGLApi;
@@ -40,6 +41,38 @@ import com.io7m.jvvfs.PathVirtual;
 
 public final class KShaderUtilities
 {
+  public static @Nonnull ProgramReference makeProgramFromStreams(
+    final @Nonnull JCGLShadersCommon gl,
+    final @Nonnull String name,
+    final @Nonnull InputStream v_stream,
+    final @Nonnull InputStream f_stream)
+    throws IOException,
+      ConstraintError,
+      JCGLCompileException,
+      JCGLException
+  {
+    Constraints.constrainNotNull(gl, "GL");
+    Constraints.constrainNotNull(name, "Name");
+    Constraints.constrainNotNull(v_stream, "Vertex shader stream");
+    Constraints.constrainNotNull(f_stream, "Fragment shader stream");
+
+    VertexShader v = null;
+    FragmentShader f = null;
+
+    final List<String> v_lines = ShaderUtilities.readLines(v_stream);
+    v = gl.vertexShaderCompile(name, v_lines);
+    final List<String> f_lines = ShaderUtilities.readLines(f_stream);
+    f = gl.fragmentShaderCompile(name, f_lines);
+
+    assert v != null;
+    assert f != null;
+
+    final ProgramReference p = gl.programCreateCommon(name, v, f);
+    gl.vertexShaderDelete(v);
+    gl.fragmentShaderDelete(f);
+    return p;
+  }
+
   public static @Nonnull ProgramReference makeProgram(
     final @Nonnull JCGLShadersCommon gl,
     final @Nonnull JCGLSLVersionNumber version,
@@ -54,9 +87,15 @@ public final class KShaderUtilities
       IOException,
       JCGLException
   {
-    InputStream stream = null;
-    VertexShader v = null;
-    FragmentShader f = null;
+    Constraints.constrainNotNull(gl, "GL");
+    Constraints.constrainNotNull(version, "Version");
+    Constraints.constrainNotNull(api, "API");
+    Constraints.constrainNotNull(fs, "Filesystem");
+    Constraints.constrainNotNull(name, "Name");
+    Constraints.constrainNotNull(log, "Log");
+
+    InputStream v_stream = null;
+    InputStream f_stream = null;
 
     log.debug("Shading language " + version + " " + api);
 
@@ -70,33 +109,22 @@ public final class KShaderUtilities
     log.debug("Compiling fragment shader: " + pfn);
 
     try {
-      stream = fs.openFile(pvn);
-      final List<String> lines = ShaderUtilities.readLines(stream);
-      v = gl.vertexShaderCompile(name, lines);
+      v_stream = fs.openFile(pvn);
+      f_stream = fs.openFile(pfn);
+
+      return KShaderUtilities.makeProgramFromStreams(
+        gl,
+        name,
+        v_stream,
+        f_stream);
+
     } finally {
-      if (stream != null) {
-        stream.close();
-        stream = null;
+      if (v_stream != null) {
+        v_stream.close();
+      }
+      if (f_stream != null) {
+        f_stream.close();
       }
     }
-
-    try {
-      stream = fs.openFile(pfn);
-      final List<String> lines = ShaderUtilities.readLines(stream);
-      f = gl.fragmentShaderCompile(name, lines);
-    } finally {
-      if (stream != null) {
-        stream.close();
-        stream = null;
-      }
-    }
-
-    assert v != null;
-    assert f != null;
-
-    final ProgramReference p = gl.programCreateCommon(name, v, f);
-    gl.vertexShaderDelete(v);
-    gl.fragmentShaderDelete(f);
-    return p;
   }
 }

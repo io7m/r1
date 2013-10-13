@@ -18,35 +18,82 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-enum SBRendererType
+import com.io7m.jaux.Constraints;
+import com.io7m.jaux.Constraints.ConstraintError;
+
+abstract class SBRendererType
 {
-  RENDERER_DEBUG_DEPTH("debug-depth"),
-  RENDERER_DEBUG_UV_VERTEX("debug-uv-vertex"),
-  RENDERER_DEBUG_BITANGENTS_LOCAL("debug-bitangents-local"),
-  RENDERER_DEBUG_BITANGENTS_EYE("debug-bitangents-eye"),
-  RENDERER_DEBUG_TANGENTS_VERTEX_LOCAL("debug-tangents-vertex-local"),
-  RENDERER_DEBUG_TANGENTS_VERTEX_EYE("debug-tangents-vertex-eye"),
-  RENDERER_DEBUG_NORMALS_VERTEX_LOCAL("debug-normals-vertex-local"),
-  RENDERER_DEBUG_NORMALS_VERTEX_EYE("debug-normals-vertex-eye"),
-  RENDERER_DEBUG_NORMALS_MAP_LOCAL("debug-normals-map-local"),
-  RENDERER_DEBUG_NORMALS_MAP_EYE("debug-normals-map-eye"),
-  RENDERER_DEBUG_NORMALS_MAP_TANGENT("debug-normals-map-tangent"),
-  RENDERER_FORWARD("forward"),
-  RENDERER_FORWARD_UNLIT("forward-unlit"),
-  RENDERER_FORWARD_DIFFUSE("forward-diffuse"),
-  RENDERER_FORWARD_DIFFUSE_SPECULAR("forward-diffuse-specular"),
-  RENDERER_FORWARD_DIFFUSE_SPECULAR_NORMAL("forward-diffuse-specular-normal");
-
-  private final @Nonnull String name;
-
-  private SBRendererType(
-    final @Nonnull String name)
+  public final static class SBRendererTypeKernel extends SBRendererType
   {
-    this.name = name;
+    private final @Nonnull SBKRendererType renderer;
+
+    public @Nonnull SBKRendererType getRenderer()
+    {
+      return this.renderer;
+    }
+
+    @SuppressWarnings("synthetic-access") public SBRendererTypeKernel(
+      final @Nonnull SBKRendererType renderer)
+      throws ConstraintError
+    {
+      super(Type.TYPE_KERNEL);
+      this.renderer = Constraints.constrainNotNull(renderer, "Renderer");
+    }
   }
 
-  @Nonnull String getName()
+  public final static class SBRendererTypeSpecific extends SBRendererType
   {
-    return this.name;
+    @SuppressWarnings("synthetic-access") public SBRendererTypeSpecific()
+      throws ConstraintError
+    {
+      super(Type.TYPE_SPECIFIC);
+    }
+  }
+
+  public static enum Type
+  {
+    TYPE_KERNEL,
+    TYPE_SPECIFIC
+  }
+
+  private final @Nonnull Type type;
+
+  public @Nonnull Type getType()
+  {
+    return this.type;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = prime * this.type.hashCode();
+    return result;
+  }
+
+  @Override public boolean equals(
+    final Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final SBRendererType other = (SBRendererType) obj;
+    if (this.type != other.type) {
+      return false;
+    }
+    return true;
+  }
+
+  private SBRendererType(
+    final @Nonnull Type type)
+    throws ConstraintError
+  {
+    this.type = Constraints.constrainNotNull(type, "Type");
   }
 }
