@@ -28,6 +28,14 @@ module Materials is
   end;
 
   --
+  -- Material information relating to emissive terms
+  --
+
+  type emissive is record
+    emissive : float  -- The amount of light the surface emits, in the range [0, inf]
+  end;
+
+  --
   -- Material information relating to specular terms
   --
 
@@ -52,6 +60,7 @@ module Materials is
 
   type t is record
     diffuse     : diffuse,
+    emissive    : emissive,
     specular    : specular,
     environment : environment
   end;

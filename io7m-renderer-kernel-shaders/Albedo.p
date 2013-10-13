@@ -17,25 +17,51 @@
 package com.io7m.renderer;
 
 --
--- Functions for calculating raw surface diffuse terms.
+-- Functions for calculating raw albedo terms.
 --
 
-module Diffuse is
+module Albedo is
 
+  import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Sampler2D  as S;
   import com.io7m.parasol.Vector3f   as V3;
+  import com.io7m.parasol.Vector4f   as V4;
+
   import com.io7m.renderer.Materials as M;
 
-  function diffuse (
+  function opaque (
+    d : M.diffuse
+  ) : vector_4f =
+    new vector_4f (d.colour [x y z], 1.0);
+
+  function translucent (
+    d : M.diffuse
+  ) : vector_4f =
+    d.colour;
+
+  function textured_opaque (
     t : sampler_2d,
     u : vector_2f,
-    m : M.diffuse
+    d : M.diffuse
   ) : vector_4f =
-    let 
+    let
       value tc = S.texture (t, u);
-      value c  = V3.interpolate (m.colour [x y z], tc [x y z], m.mix);
+      value m  = F.multiply (tc [w], d.mix);
+      value c  = V3.interpolate (d.colour [x y z], tc [x y z], m);
     in
       new vector_4f (c, 1.0)
+    end;
+
+  function textured_translucent (
+    t : sampler_2d,
+    u : vector_2f,
+    d : M.diffuse
+  ) : vector_4f =
+    let
+      value tc = S.texture (t, u);
+      value m  = F.multiply (tc [w], d.mix);
+    in
+      V4.interpolate (d.colour, tc, m)
     end;
 
 end;
