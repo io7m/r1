@@ -964,7 +964,9 @@ public final class KRendererForward implements KRenderer
   }
 
   @Override public void close()
+    throws JCGLException,
+      ConstraintError
   {
-    // TODO Auto-generated method stub
+    // XXX: Not implemented!
   }
 }

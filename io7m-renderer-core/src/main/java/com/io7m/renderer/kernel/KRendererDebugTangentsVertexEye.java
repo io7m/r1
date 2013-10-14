@@ -335,7 +335,11 @@ final class KRendererDebugTangentsVertexEye implements KRenderer
   }
 
   @Override public void close()
+    throws JCGLException,
+      ConstraintError
   {
-    // TODO Auto-generated method stub
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+    gc.programDelete(this.program3);
+    gc.programDelete(this.program4);
   }
 }
