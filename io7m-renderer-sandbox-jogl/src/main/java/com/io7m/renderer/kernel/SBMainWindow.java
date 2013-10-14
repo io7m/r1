@@ -401,18 +401,6 @@ final class SBMainWindow extends JFrame
     renderer_group.add(b);
     menu.add(b);
 
-    menu.add(new JSeparator());
-
-    final JMenuItem recover = new JMenuItem("Restart renderer");
-    recover.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
-      {
-        controller.rendererAttemptRecovery();
-      }
-    });
-
-    menu.add(recover);
     return menu;
   }
 

@@ -42,4 +42,9 @@ final class KRendererDeferred implements KRenderer
   {
 
   }
+
+  @Override public void close()
+  {
+    // TODO Auto-generated method stub
+  }
 }

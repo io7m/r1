@@ -919,4 +919,9 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
   {
     VectorM4F.copy(rgba, this.background);
   }
+
+  @Override public void close()
+  {
+    // TODO Auto-generated method stub
+  }
 }
