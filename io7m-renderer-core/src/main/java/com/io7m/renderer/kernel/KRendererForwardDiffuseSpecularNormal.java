@@ -1719,7 +1719,18 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
   }
 
   @Override public void close()
+    throws JCGLException,
+      ConstraintError
   {
-    // TODO Auto-generated method stub
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+    gc.programDelete(this.program_cb_directional);
+    gc.programDelete(this.program_cb_directional_map);
+    gc.programDelete(this.program_cb_spherical);
+    gc.programDelete(this.program_cb_spherical_map);
+    gc.programDelete(this.program_pb_directional);
+    gc.programDelete(this.program_pb_directional_map);
+    gc.programDelete(this.program_pb_spherical);
+    gc.programDelete(this.program_pb_spherical_map);
+    gc.programDelete(this.program_depth);
   }
 }
