@@ -55,5 +55,7 @@ interface KRenderer
    * Delete all resources associated with this renderer.
    */
 
-  void close();
+  void close()
+    throws JCGLException,
+      ConstraintError;
 }
