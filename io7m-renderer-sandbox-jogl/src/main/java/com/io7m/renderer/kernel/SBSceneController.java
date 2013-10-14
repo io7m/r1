@@ -500,11 +500,6 @@ public final class SBSceneController implements
     return f;
   }
 
-  @Override public void rendererAttemptRecovery()
-  {
-    this.renderer.attemptRecovery();
-  }
-
   @Override public @Nonnull
     Pair<Collection<KLight>, Collection<KMeshInstance>>
     rendererGetScene()
@@ -999,8 +994,6 @@ interface SBSceneControllerRenderer
 
 interface SBSceneControllerRendererControl
 {
-  public void rendererAttemptRecovery();
-
   public void rendererSetBackgroundColour(
     float r,
     float g,

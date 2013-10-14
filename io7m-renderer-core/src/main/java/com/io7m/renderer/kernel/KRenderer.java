@@ -50,4 +50,10 @@ interface KRenderer
 
   void setBackgroundRGBA(
     final @Nonnull VectorReadable4F rgba);
+
+  /**
+   * Delete all resources associated with this renderer.
+   */
+
+  void close();
 }
