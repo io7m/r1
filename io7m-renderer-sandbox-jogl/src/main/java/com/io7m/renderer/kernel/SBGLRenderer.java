@@ -687,7 +687,11 @@ final class SBGLRenderer implements GLEventListener
           this.renderer_kernel = this.initKernelRenderer(rnk.getRenderer());
           this.renderer_specific = null;
 
-          old_kernel.close();
+          if (old_kernel != null) {
+            old_kernel.close();
+          }
+
+          this.running.set(RunningState.STATE_RUNNING);
           break;
         }
         case TYPE_SPECIFIC:
