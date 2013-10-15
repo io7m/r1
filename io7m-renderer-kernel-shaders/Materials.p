@@ -19,12 +19,12 @@ package com.io7m.renderer;
 module Materials is
 
   --
-  -- Material information relating to diffuse terms
+  -- Material information relating to albedo
   --
 
-  type diffuse is record
-    colour : vector_4f -- The base surface diffuse colour
-    mix    : float     -- The linear mix between the diffuse colour and texture, in the range [0, 1]
+  type albedo is record
+    colour : vector_4f -- The base surface colour
+    mix    : float     -- The linear mix between the colour and texture, in the range [0, 1]
   end;
 
   --
@@ -59,7 +59,7 @@ module Materials is
   --
 
   type t is record
-    diffuse     : diffuse,
+    albedo      : albedo,
     emissive    : emissive,
     specular    : specular,
     environment : environment

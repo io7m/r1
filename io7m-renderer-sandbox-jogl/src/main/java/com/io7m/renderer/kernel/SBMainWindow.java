@@ -57,6 +57,7 @@ import com.io7m.jlog.Callbacks;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeKernel;
+import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeSpecific;
 import com.jogamp.opengl.util.FPSAnimator;
 
 final class SBMainWindow extends JFrame
@@ -357,7 +358,6 @@ final class SBMainWindow extends JFrame
 
     for (final SBKRendererType type : SBKRendererType.values()) {
       final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
-      b.setSelected(type == SBKRendererType.KRENDERER_FORWARD_UNLIT);
       b.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
@@ -391,8 +391,12 @@ final class SBMainWindow extends JFrame
           @Override public void windowClosing(
             final @Nonnull WindowEvent w)
           {
-            final SBShader s = d.getSelectedShader();
-            log.debug("SELECTED " + s);
+            try {
+              final SBShader s = d.getSelectedShader();
+              controller.rendererSetType(new SBRendererTypeSpecific(s));
+            } catch (final ConstraintError x) {
+              throw new UnreachableCodeException();
+            }
           }
         });
       }
@@ -556,8 +560,6 @@ final class SBMainWindow extends JFrame
     final SBLogsWindow logs_window = new SBLogsWindow();
     final SBObjectsWindow objects_window =
       new SBObjectsWindow(controller, log);
-    final SBShadersWindow shaders_window =
-      new SBShadersWindow(controller, log);
 
     log.setCallback(new Callbacks() {
       private final @Nonnull StringBuilder builder = new StringBuilder();

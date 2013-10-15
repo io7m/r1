@@ -28,21 +28,21 @@ let gen_fold
     end
   in k first x
 
-(* Diffuse properties *)
+(* Albedo properties *)
 
-type ldiffuse =
-  | LDiffuseColour
-  | LDiffuseTextured
+type lalbedo =
+  | LAlbedoColour
+  | LAlbedoTextured
 
-let ld_first = LDiffuseColour
+let ld_first = LAlbedoColour
 
 let ld_next = function
-  | LDiffuseColour -> Some LDiffuseTextured
-  | LDiffuseTextured -> None
+  | LAlbedoColour -> Some LAlbedoTextured
+  | LAlbedoTextured -> None
 
 let ld_code = function
-  | LDiffuseColour -> Some "DC"
-  | LDiffuseTextured -> Some "DT"
+  | LAlbedoColour -> Some "BC"
+  | LAlbedoTextured -> Some "BT"
 
 let ld_fold f x = gen_fold f x ld_first ld_next
 
@@ -176,13 +176,13 @@ let light_fold f x = gen_fold f x light_first light_next
 (* Labels *)
 
 type label =
-  | LLit of lalpha * ldiffuse * lemissive * lnormal * lenvironment * light * lspecular
-  | LUnlit of lalpha * ldiffuse * lemissive
+  | LLit of lalpha * lalbedo * lemissive * lnormal * lenvironment * light * lspecular
+  | LUnlit of lalpha * lalbedo * lemissive
 
 let each_light
   (xs : label list)
   (a : lalpha)
-  (d : ldiffuse)
+  (d : lalbedo)
   (m : lemissive)
   (n : lnormal)
   (e : lenvironment)
@@ -192,7 +192,7 @@ let each_light
 let each_environment
   (xs : label list)
   (a : lalpha)
-  (d : ldiffuse)
+  (d : lalbedo)
   (m : lemissive)
   (n : lnormal)
   (e : lenvironment) : label list =
@@ -201,7 +201,7 @@ let each_environment
 let with_normals
   (xs : label list)
   (a : lalpha)
-  (d : ldiffuse)
+  (d : lalbedo)
   (m : lemissive)
   (n : lnormal) : label list =
   le_fold (fun e xs -> each_environment xs a d m n e) xs
@@ -209,14 +209,14 @@ let with_normals
 let without_normals
   (xs : label list)
   (a : lalpha)
-  (d : ldiffuse)
+  (d : lalbedo)
   (m : lemissive) : label list =
   LUnlit (a, d, m) :: xs
 
 let each_normal
   (xs : label list)
   (a : lalpha)
-  (d : ldiffuse)
+  (d : lalbedo)
   (m : lemissive)
   (n : lnormal) : label list =
   begin match n with
@@ -228,20 +228,20 @@ let each_normal
 let each_emissive
   (xs : label list)
   (a : lalpha)
-  (d : ldiffuse)
+  (d : lalbedo)
   (m : lemissive) : label list =
   ln_fold (fun n xs -> each_normal xs a d m n) xs
 
-let each_diffuse
+let each_albedo
   (xs : label list)
   (a : lalpha)
-  (d : ldiffuse) : label list =
+  (d : lalbedo) : label list =
   lm_fold (fun m xs -> each_emissive xs a d m) xs
 
 let each_alpha
   (xs : label list)
   (a : lalpha) : label list =
-  ld_fold (fun d xs -> each_diffuse xs a d) xs
+  ld_fold (fun d xs -> each_albedo xs a d) xs
 
 let label_all (_ : unit) =
   la_fold (fun a xs -> each_alpha xs a) []
@@ -273,8 +273,8 @@ let label_implies_uv l =
   begin match l with
   | LLit (_, d, m, n, _, _, s) ->
     begin match d with
-    | LDiffuseTextured -> true
-    | LDiffuseColour ->
+    | LAlbedoTextured -> true
+    | LAlbedoColour ->
       begin match m with
       | LEmissiveMapped -> true
       | LEmissiveNone | LEmissiveConstant ->
@@ -290,8 +290,8 @@ let label_implies_uv l =
     end
   | LUnlit (_, d, m) ->
     begin match d with
-    | LDiffuseTextured -> true
-    | LDiffuseColour ->
+    | LAlbedoTextured -> true
+    | LAlbedoColour ->
       begin match m with
       | LEmissiveMapped -> true
       | LEmissiveNone | LEmissiveConstant -> false

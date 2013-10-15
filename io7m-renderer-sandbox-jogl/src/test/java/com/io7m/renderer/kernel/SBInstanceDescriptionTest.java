@@ -52,8 +52,8 @@ public class SBInstanceDescriptionTest
     @Override public SBMaterialDescription next()
     {
       try {
-        final SBMaterialDiffuseDescription sd_diff =
-          new SBMaterialDiffuseDescription(
+        final SBMaterialAlbedoDescription sd_diff =
+          new SBMaterialAlbedoDescription(
             this.rgba_gen.next(),
             (float) Math.random(),
             this.path_gen.next());
@@ -67,12 +67,31 @@ public class SBInstanceDescriptionTest
         final SBMaterialEnvironmentDescription sd_envi =
           new SBMaterialEnvironmentDescription(
             this.path_gen.next(),
+            (float) Math.random(),
+            (float) Math.random(),
             (float) Math.random());
 
         final SBMaterialNormalDescription sd_norm =
           new SBMaterialNormalDescription(this.path_gen.next());
 
-        return new SBMaterialDescription(sd_diff, sd_spec, sd_envi, sd_norm);
+        final SBMaterialAlphaDescription sd_alph =
+          new SBMaterialAlphaDescription(
+            (Math.random() % 2) == 0,
+            (float) Math.random());
+
+        final SBMaterialEmissiveDescription sd_emis =
+          new SBMaterialEmissiveDescription(
+            (float) Math.random(),
+            this.path_gen.next());
+
+        return new SBMaterialDescription(
+          sd_alph,
+          sd_diff,
+          sd_emis,
+          sd_spec,
+          sd_envi,
+          sd_norm);
+
       } catch (final ConstraintError x) {
         throw new UnreachableCodeException();
       }

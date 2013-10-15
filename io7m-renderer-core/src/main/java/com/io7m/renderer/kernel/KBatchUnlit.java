@@ -16,23 +16,22 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.ArrayList;
+
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Option;
-import com.io7m.jcanephora.Texture2DStatic;
-
-@Immutable public final class KMaterialNormal
+@Immutable final class KBatchUnlit
 {
-  private final @Nonnull Option<Texture2DStatic> texture;
+  private final @Nonnull KMeshInstanceMaterialLabel label;
+  private final @Nonnull ArrayList<KMeshInstance>   instances;
 
-  KMaterialNormal(
-    final @Nonnull Option<Texture2DStatic> texture)
-    throws ConstraintError
+  private KBatchUnlit(
+    final @Nonnull KMeshInstanceMaterialLabel label,
+    final @Nonnull ArrayList<KMeshInstance> instances)
   {
-    this.texture = Constraints.constrainNotNull(texture, "Texture");
+    this.label = label;
+    this.instances = instances;
   }
 
   @Override public boolean equals(
@@ -47,31 +46,32 @@ import com.io7m.jcanephora.Texture2DStatic;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KMaterialNormal other = (KMaterialNormal) obj;
-    if (!this.texture.equals(other.texture)) {
+    final KBatchUnlit other = (KBatchUnlit) obj;
+    if (!this.instances.equals(other.instances)) {
+      return false;
+    }
+    if (!this.label.equals(other.label)) {
       return false;
     }
     return true;
-  }
-
-  public @Nonnull Option<Texture2DStatic> getTexture()
-  {
-    return this.texture;
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.texture.hashCode();
+    result = (prime * result) + this.instances.hashCode();
+    result = (prime * result) + this.label.hashCode();
     return result;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KMaterialAlbedo ");
-    builder.append(this.texture);
+    builder.append("[KBatchUnlit ");
+    builder.append(this.label);
+    builder.append(" ");
+    builder.append(this.instances);
     builder.append("]");
     return builder.toString();
   }

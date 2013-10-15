@@ -21,21 +21,24 @@ import javax.annotation.Nonnull;
 
 public final class SBMaterial
 {
-  private final @Nonnull SBMaterialDescription description;
-  private final @CheckForNull SBTexture2D      map_diffuse;
-  private final @CheckForNull SBTexture2D      map_normal;
-  private final @CheckForNull SBTexture2D      map_specular;
-  private final @CheckForNull SBTextureCube    map_environment;
+  private final @Nonnull SBMaterialDescription                     description;
+  private final @CheckForNull SBTexture2D<SBTexture2DKindAlbedo>  map_diffuse;
+  private final @CheckForNull SBTexture2D<SBTexture2DKindEmissive> map_emissive;
+  private final @CheckForNull SBTexture2D<SBTexture2DKindNormal>   map_normal;
+  private final @CheckForNull SBTexture2D<SBTexture2DKindSpecular> map_specular;
+  private final @CheckForNull SBTextureCube                        map_environment;
 
   public SBMaterial(
     final @Nonnull SBMaterialDescription description,
-    final @CheckForNull SBTexture2D map_diffuse,
-    final @CheckForNull SBTexture2D map_normal,
-    final @CheckForNull SBTexture2D map_specular,
-    final @CheckForNull SBTextureCube map_environment)
+    final @CheckForNull SBTexture2D<SBTexture2DKindAlbedo> map_diffuse,
+    final @CheckForNull SBTexture2D<SBTexture2DKindEmissive> map_emissive,
+    final @CheckForNull SBTextureCube map_environment,
+    final @CheckForNull SBTexture2D<SBTexture2DKindNormal> map_normal,
+    final @CheckForNull SBTexture2D<SBTexture2DKindSpecular> map_specular)
   {
     this.description = description;
     this.map_diffuse = map_diffuse;
+    this.map_emissive = map_emissive;
     this.map_normal = map_normal;
     this.map_specular = map_specular;
     this.map_environment = map_environment;
@@ -68,6 +71,13 @@ public final class SBMaterial
     } else if (!this.map_diffuse.equals(other.map_diffuse)) {
       return false;
     }
+    if (this.map_emissive == null) {
+      if (other.map_emissive != null) {
+        return false;
+      }
+    } else if (!this.map_emissive.equals(other.map_emissive)) {
+      return false;
+    }
     if (this.map_environment == null) {
       if (other.map_environment != null) {
         return false;
@@ -97,9 +107,14 @@ public final class SBMaterial
     return this.description;
   }
 
-  public @CheckForNull SBTexture2D getDiffuseMap()
+  public @CheckForNull SBTexture2D<SBTexture2DKindAlbedo> getDiffuseMap()
   {
     return this.map_diffuse;
+  }
+
+  public @CheckForNull SBTexture2D<SBTexture2DKindEmissive> getEmissiveMap()
+  {
+    return this.map_emissive;
   }
 
   public @CheckForNull SBTextureCube getEnvironmentMap()
@@ -107,12 +122,12 @@ public final class SBMaterial
     return this.map_environment;
   }
 
-  public @CheckForNull SBTexture2D getNormalMap()
+  public @CheckForNull SBTexture2D<SBTexture2DKindNormal> getNormalMap()
   {
     return this.map_normal;
   }
 
-  public @CheckForNull SBTexture2D getSpecularMap()
+  public @CheckForNull SBTexture2D<SBTexture2DKindSpecular> getSpecularMap()
   {
     return this.map_specular;
   }
@@ -129,6 +144,9 @@ public final class SBMaterial
         + ((this.map_diffuse == null) ? 0 : this.map_diffuse.hashCode());
     result =
       (prime * result)
+        + ((this.map_emissive == null) ? 0 : this.map_emissive.hashCode());
+    result =
+      (prime * result)
         + ((this.map_environment == null) ? 0 : this.map_environment
           .hashCode());
     result =
@@ -143,15 +161,17 @@ public final class SBMaterial
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBMaterial description=");
+    builder.append("SBMaterial [description=");
     builder.append(this.description);
-    builder.append(" map_diffuse=");
+    builder.append(", map_diffuse=");
     builder.append(this.map_diffuse);
-    builder.append(" map_normal=");
+    builder.append(", map_emissive=");
+    builder.append(this.map_emissive);
+    builder.append(", map_normal=");
     builder.append(this.map_normal);
-    builder.append(" map_specular=");
+    builder.append(", map_specular=");
     builder.append(this.map_specular);
-    builder.append(" map_environment=");
+    builder.append(", map_environment=");
     builder.append(this.map_environment);
     builder.append("]");
     return builder.toString();
