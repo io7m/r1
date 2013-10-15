@@ -16,23 +16,19 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Option;
-import com.io7m.jcanephora.Texture2DStatic;
-
-@Immutable public final class KMaterialNormal
+@Immutable public final class KMaterialAlpha
 {
-  private final @Nonnull Option<Texture2DStatic> texture;
+  private final boolean translucent;
+  private final float   opacity;
 
-  KMaterialNormal(
-    final @Nonnull Option<Texture2DStatic> texture)
-    throws ConstraintError
+  KMaterialAlpha(
+    final boolean translucent,
+    final float opacity)
   {
-    this.texture = Constraints.constrainNotNull(texture, "Texture");
+    this.translucent = translucent;
+    this.opacity = opacity;
   }
 
   @Override public boolean equals(
@@ -47,31 +43,43 @@ import com.io7m.jcanephora.Texture2DStatic;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KMaterialNormal other = (KMaterialNormal) obj;
-    if (!this.texture.equals(other.texture)) {
+    final KMaterialAlpha other = (KMaterialAlpha) obj;
+    if (Float.floatToIntBits(this.opacity) != Float
+      .floatToIntBits(other.opacity)) {
+      return false;
+    }
+    if (this.translucent != other.translucent) {
       return false;
     }
     return true;
   }
 
-  public @Nonnull Option<Texture2DStatic> getTexture()
+  public float getOpacity()
   {
-    return this.texture;
+    return this.opacity;
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.texture.hashCode();
+    result = (prime * result) + Float.floatToIntBits(this.opacity);
+    result = (prime * result) + (this.translucent ? 1231 : 1237);
     return result;
+  }
+
+  public boolean isTranslucent()
+  {
+    return this.translucent;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KMaterialAlbedo ");
-    builder.append(this.texture);
+    builder.append("[KMaterialAlpha ");
+    builder.append(this.translucent);
+    builder.append(" ");
+    builder.append(this.opacity);
     builder.append("]");
     return builder.toString();
   }

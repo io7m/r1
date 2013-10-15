@@ -14,12 +14,34 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer;
+package com.io7m.renderer.kernel;
 
-import com.io7m.jtensors.MatrixReadable4x4F;
-
-public interface RMatrixReadable4x4F<T extends RTransform> extends
-  MatrixReadable4x4F
+interface SBTexture2DKind
 {
-  // No extra functions.
+
+}
+
+interface SBTexture2DKindAlbedo extends SBTexture2DKind
+{
+
+}
+
+interface SBTexture2DKindEmissive extends SBTexture2DKind
+{
+
+}
+
+interface SBTexture2DKindEnvironment extends SBTexture2DKind
+{
+
+}
+
+interface SBTexture2DKindNormal extends SBTexture2DKind
+{
+
+}
+
+interface SBTexture2DKindSpecular extends SBTexture2DKind
+{
+
 }

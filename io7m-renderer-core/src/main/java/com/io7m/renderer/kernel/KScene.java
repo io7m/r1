@@ -21,25 +21,23 @@ import java.util.Collection;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-/**
- * The set of {@link KMeshInstance} objects and {@link KLight} objects that
- * overlap the view frustum of the given {@link KCamera}.
- */
-
 @Immutable final class KScene
 {
   private final @Nonnull KCamera                   camera;
   private final @Nonnull Collection<KLight>        lights;
-  private final @Nonnull Collection<KMeshInstance> meshes;
+  private final @Nonnull Collection<KMeshInstance> instances;
+  private final @Nonnull KBatches                  batches;
 
   KScene(
     final @Nonnull KCamera camera,
-    final @Nonnull Collection<KLight> first,
-    final @Nonnull Collection<KMeshInstance> second)
+    final @Nonnull Collection<KLight> lights,
+    final @Nonnull Collection<KMeshInstance> instances,
+    final @Nonnull KBatches batches)
   {
     this.camera = camera;
-    this.lights = first;
-    this.meshes = second;
+    this.lights = lights;
+    this.instances = instances;
+    this.batches = batches;
   }
 
   @Nonnull KCamera getCamera()
@@ -47,13 +45,18 @@ import javax.annotation.concurrent.Immutable;
     return this.camera;
   }
 
-  @Nonnull Collection<KLight> getLights()
+  public @Nonnull Collection<KLight> getLights()
   {
     return this.lights;
   }
 
-  @Nonnull Collection<KMeshInstance> getMeshes()
+  public @Nonnull Collection<KMeshInstance> getInstances()
   {
-    return this.meshes;
+    return this.instances;
+  }
+
+  public @Nonnull KBatches getBatches()
+  {
+    return this.batches;
   }
 }

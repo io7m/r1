@@ -23,50 +23,52 @@ import javax.annotation.Nonnull;
 
 import nu.xom.Element;
 
+import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.RSpaceRGBA;
+import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.RXMLUtilities;
 
-public final class SBMaterialEnvironmentDescription
+public final class SBMaterialAlbedoDescription
 {
-  public static @Nonnull SBMaterialEnvironmentDescription fromXML(
+  public static @Nonnull SBMaterialAlbedoDescription fromXML(
     final @Nonnull Element e)
     throws RXMLException,
       ConstraintError
   {
     final URI uri = SBSceneDescription.SCENE_XML_URI;
-    RXMLUtilities.checkIsElement(e, "environment", uri);
+    RXMLUtilities.checkIsElement(e, "albedo", uri);
+    final Element ec = RXMLUtilities.getChild(e, "colour", uri);
     final Element em = RXMLUtilities.getChild(e, "mix", uri);
-    final Element erm = RXMLUtilities.getChild(e, "reflection-mix", uri);
-    final Element eri = RXMLUtilities.getChild(e, "refraction-index", uri);
     final Element et = RXMLUtilities.getChild(e, "texture", uri);
 
     final PathVirtual texture =
       (et.getValue().length() == 0) ? null : PathVirtual.ofString(et
         .getValue());
 
+    final RVectorI4F<RSpaceRGBA> colour =
+      RXMLUtilities.getElementAttributesRGBA(ec, uri);
+
     final float mix = RXMLUtilities.getElementFloat(em);
-    final float rmix = RXMLUtilities.getElementFloat(erm);
-    final float rind = RXMLUtilities.getElementFloat(eri);
-    return new SBMaterialEnvironmentDescription(texture, mix, rmix, rind);
+
+    return new SBMaterialAlbedoDescription(colour, mix, texture);
   }
 
-  private final @CheckForNull PathVirtual texture;
-  private final float                     mix;
-  private final float                     reflection_mix;
-  private final float                     refraction_index;
+  private final @Nonnull RVectorI4F<RSpaceRGBA> colour;
+  private final float                           mix;
+  private final @CheckForNull PathVirtual       texture;
 
-  SBMaterialEnvironmentDescription(
-    final @CheckForNull PathVirtual texture,
+  public SBMaterialAlbedoDescription(
+    final @Nonnull RVectorI4F<RSpaceRGBA> colour,
     final float mix,
-    final float reflection_mix,
-    final float refraction_index)
+    final @CheckForNull PathVirtual texture)
+    throws ConstraintError
   {
-    this.texture = texture;
+    this.colour = Constraints.constrainNotNull(colour, "Colour");
     this.mix = mix;
-    this.reflection_mix = reflection_mix;
-    this.refraction_index = refraction_index;
+    this.texture = texture;
   }
 
   @Override public boolean equals(
@@ -81,17 +83,12 @@ public final class SBMaterialEnvironmentDescription
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final SBMaterialEnvironmentDescription other =
-      (SBMaterialEnvironmentDescription) obj;
+    final SBMaterialAlbedoDescription other =
+      (SBMaterialAlbedoDescription) obj;
+    if (!this.colour.equals(other.colour)) {
+      return false;
+    }
     if (Float.floatToIntBits(this.mix) != Float.floatToIntBits(other.mix)) {
-      return false;
-    }
-    if (Float.floatToIntBits(this.reflection_mix) != Float
-      .floatToIntBits(other.reflection_mix)) {
-      return false;
-    }
-    if (Float.floatToIntBits(this.refraction_index) != Float
-      .floatToIntBits(other.refraction_index)) {
       return false;
     }
     if (this.texture == null) {
@@ -104,19 +101,14 @@ public final class SBMaterialEnvironmentDescription
     return true;
   }
 
+  public @Nonnull RVectorI4F<RSpaceRGBA> getColour()
+  {
+    return this.colour;
+  }
+
   public float getMix()
   {
     return this.mix;
-  }
-
-  public float getReflectionMix()
-  {
-    return this.reflection_mix;
-  }
-
-  public float getRefractionIndex()
-  {
-    return this.refraction_index;
   }
 
   public @CheckForNull PathVirtual getTexture()
@@ -128,9 +120,8 @@ public final class SBMaterialEnvironmentDescription
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + this.colour.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.mix);
-    result = (prime * result) + Float.floatToIntBits(this.reflection_mix);
-    result = (prime * result) + Float.floatToIntBits(this.refraction_index);
     result =
       (prime * result)
         + ((this.texture == null) ? 0 : this.texture.hashCode());
@@ -140,14 +131,12 @@ public final class SBMaterialEnvironmentDescription
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("SBMaterialEnvironmentDescription [texture=");
-    builder.append(this.texture);
+    builder.append("SBMaterialAlbedoDescription [colour=");
+    builder.append(this.colour);
     builder.append(", mix=");
     builder.append(this.mix);
-    builder.append(", reflection_mix=");
-    builder.append(this.reflection_mix);
-    builder.append(", refraction_index=");
-    builder.append(this.refraction_index);
+    builder.append(", texture=");
+    builder.append(this.texture);
     builder.append("]");
     return builder.toString();
   }
@@ -155,24 +144,26 @@ public final class SBMaterialEnvironmentDescription
   @SuppressWarnings("boxing") @Nonnull Element toXML()
   {
     final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-    final Element e = new Element("s:environment", uri);
+    final Element e = new Element("s:albedo", uri);
 
-    final Element et = new Element("s:texture", uri);
+    final Element ec = new Element("s:colour", uri);
+    RXMLUtilities.putElementAttributesRGBA(
+      ec,
+      this.colour,
+      "s",
+      SBSceneDescription.SCENE_XML_URI);
+
+    final Element ed = new Element("s:texture", uri);
     if (this.texture != null) {
-      et.appendChild(this.texture.toString());
+      ed.appendChild(this.texture.toString());
     }
 
-    final Element ei = new Element("s:mix", uri);
-    ei.appendChild(String.format("%.6f", this.mix));
-    final Element erm = new Element("s:reflection-mix", uri);
-    erm.appendChild(String.format("%.6f", this.reflection_mix));
-    final Element eri = new Element("s:refraction-index", uri);
-    eri.appendChild(String.format("%.6f", this.refraction_index));
+    final Element em = new Element("s:mix", uri);
+    em.appendChild(String.format("%.6f", this.mix));
 
-    e.appendChild(ei);
-    e.appendChild(erm);
-    e.appendChild(eri);
-    e.appendChild(et);
+    e.appendChild(ec);
+    e.appendChild(ed);
+    e.appendChild(em);
     return e;
   }
 }

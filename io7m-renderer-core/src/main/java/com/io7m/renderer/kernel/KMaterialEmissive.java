@@ -23,23 +23,18 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.renderer.RSpaceRGB;
-import com.io7m.renderer.RVectorI3F;
 
-@Immutable public final class KMaterialDiffuse
+@Immutable public final class KMaterialEmissive
 {
-  private final @Nonnull RVectorI3F<RSpaceRGB>   colour;
-  private final float                            mix;
+  private final float                            emission;
   private final @Nonnull Option<Texture2DStatic> texture;
 
-  KMaterialDiffuse(
-    final @Nonnull RVectorI3F<RSpaceRGB> colour,
-    final float mix,
+  KMaterialEmissive(
+    final float emission,
     final @Nonnull Option<Texture2DStatic> texture)
     throws ConstraintError
   {
-    this.colour = Constraints.constrainNotNull(colour, "Colour");
-    this.mix = mix;
+    this.emission = emission;
     this.texture = Constraints.constrainNotNull(texture, "Texture");
   }
 
@@ -55,15 +50,9 @@ import com.io7m.renderer.RVectorI3F;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KMaterialDiffuse other = (KMaterialDiffuse) obj;
-    if (this.colour == null) {
-      if (other.colour != null) {
-        return false;
-      }
-    } else if (!this.colour.equals(other.colour)) {
-      return false;
-    }
-    if (Float.floatToIntBits(this.mix) != Float.floatToIntBits(other.mix)) {
+    final KMaterialEmissive other = (KMaterialEmissive) obj;
+    if (Float.floatToIntBits(this.emission) != Float
+      .floatToIntBits(other.emission)) {
       return false;
     }
     if (!this.texture.equals(other.texture)) {
@@ -72,14 +61,9 @@ import com.io7m.renderer.RVectorI3F;
     return true;
   }
 
-  public @Nonnull RVectorI3F<RSpaceRGB> getColour()
+  public float getEmission()
   {
-    return this.colour;
-  }
-
-  public float getMix()
-  {
-    return this.mix;
+    return this.emission;
   }
 
   public @Nonnull Option<Texture2DStatic> getTexture()
@@ -91,8 +75,7 @@ import com.io7m.renderer.RVectorI3F;
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.colour.hashCode();
-    result = (prime * result) + Float.floatToIntBits(this.mix);
+    result = (prime * result) + Float.floatToIntBits(this.emission);
     result = (prime * result) + this.texture.hashCode();
     return result;
   }
@@ -100,10 +83,8 @@ import com.io7m.renderer.RVectorI3F;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KMaterialDiffuse ");
-    builder.append(this.colour);
-    builder.append(" ");
-    builder.append(this.mix);
+    builder.append("[KMaterialEmissive ");
+    builder.append(this.emission);
     builder.append(" ");
     builder.append(this.texture);
     builder.append("]");

@@ -23,15 +23,23 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.renderer.RSpaceRGBA;
+import com.io7m.renderer.RVectorI4F;
 
-@Immutable public final class KMaterialNormal
+@Immutable public final class KMaterialAlbedo
 {
+  private final @Nonnull RVectorI4F<RSpaceRGBA>  colour;
+  private final float                            mix;
   private final @Nonnull Option<Texture2DStatic> texture;
 
-  KMaterialNormal(
+  KMaterialAlbedo(
+    final @Nonnull RVectorI4F<RSpaceRGBA> colour,
+    final float mix,
     final @Nonnull Option<Texture2DStatic> texture)
     throws ConstraintError
   {
+    this.colour = Constraints.constrainNotNull(colour, "Colour");
+    this.mix = mix;
     this.texture = Constraints.constrainNotNull(texture, "Texture");
   }
 
@@ -47,11 +55,31 @@ import com.io7m.jcanephora.Texture2DStatic;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KMaterialNormal other = (KMaterialNormal) obj;
+    final KMaterialAlbedo other = (KMaterialAlbedo) obj;
+    if (this.colour == null) {
+      if (other.colour != null) {
+        return false;
+      }
+    } else if (!this.colour.equals(other.colour)) {
+      return false;
+    }
+    if (Float.floatToIntBits(this.mix) != Float.floatToIntBits(other.mix)) {
+      return false;
+    }
     if (!this.texture.equals(other.texture)) {
       return false;
     }
     return true;
+  }
+
+  public @Nonnull RVectorI4F<RSpaceRGBA> getColour()
+  {
+    return this.colour;
+  }
+
+  public float getMix()
+  {
+    return this.mix;
   }
 
   public @Nonnull Option<Texture2DStatic> getTexture()
@@ -63,6 +91,8 @@ import com.io7m.jcanephora.Texture2DStatic;
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + this.colour.hashCode();
+    result = (prime * result) + Float.floatToIntBits(this.mix);
     result = (prime * result) + this.texture.hashCode();
     return result;
   }
@@ -71,6 +101,10 @@ import com.io7m.jcanephora.Texture2DStatic;
   {
     final StringBuilder builder = new StringBuilder();
     builder.append("[KMaterialAlbedo ");
+    builder.append(this.colour);
+    builder.append(" ");
+    builder.append(this.mix);
+    builder.append(" ");
     builder.append(this.texture);
     builder.append("]");
     return builder.toString();

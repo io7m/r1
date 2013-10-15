@@ -252,6 +252,26 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(aw));
   }
 
+  public static boolean getElementBoolean(
+    final @Nonnull Element e)
+    throws RXMLException,
+      ConstraintError
+  {
+    final String v = e.getValue();
+    if (v.equals("true")) {
+      return true;
+    } else if (v.equals("false")) {
+      return false;
+    }
+
+    final StringBuilder message = new StringBuilder();
+    message.append("Expected a boolean value but got '");
+    message.append(v);
+    message.append("'");
+    throw new RXMLException.RXMLExceptionValidityError(new ValidityException(
+      message.toString()));
+  }
+
   public static float getElementFloat(
     final @Nonnull Element e)
     throws RXMLException,
@@ -371,18 +391,6 @@ public final class RXMLUtilities
     e.addAttribute(a);
   }
 
-  public static void putElementAttributeString(
-    final @Nonnull Element e,
-    final @Nonnull String prefix,
-    final @Nonnull String name,
-    final @Nonnull String value,
-    final @Nonnull URI uri)
-  {
-    final Attribute a =
-      new Attribute(prefix + ":" + name, uri.toString(), value);
-    e.addAttribute(a);
-  }
-
   public static void putElementAttributesRGBA(
     final @Nonnull Element e,
     final @Nonnull RVectorI4F<RSpaceRGBA> rgba,
@@ -402,6 +410,18 @@ public final class RXMLUtilities
     e.addAttribute(ag);
     e.addAttribute(ab);
     e.addAttribute(aa);
+  }
+
+  public static void putElementAttributeString(
+    final @Nonnull Element e,
+    final @Nonnull String prefix,
+    final @Nonnull String name,
+    final @Nonnull String value,
+    final @Nonnull URI uri)
+  {
+    final Attribute a =
+      new Attribute(prefix + ":" + name, uri.toString(), value);
+    e.addAttribute(a);
   }
 
   public static void putElementString(
