@@ -1,10 +1,10 @@
 
-type ldiffuse = LDiffuseColour | LDiffuseTextured
+type lalbedo = LAlbedoColour | LAlbedoTextured
 
-val ld_first : ldiffuse
-val ld_next : ldiffuse -> ldiffuse option
-val ld_code : ldiffuse -> string option
-val ld_fold : (ldiffuse -> 'a -> 'a) -> 'a -> 'a
+val ld_first : lalbedo
+val ld_next : lalbedo -> lalbedo option
+val ld_code : lalbedo -> string option
+val ld_fold : (lalbedo -> 'a -> 'a) -> 'a -> 'a
 
 type lnormal = LNormalsNone | LNormalsVertex | LNormalsMapped
 
@@ -57,9 +57,9 @@ val light_next : light -> light option
 val light_fold : (light -> 'a -> 'a) -> 'a -> 'a
 
 type label =
-    LLit of lalpha * ldiffuse * lemissive * lnormal * lenvironment * 
-      light * lspecular
-  | LUnlit of lalpha * ldiffuse * lemissive
+    LLit of lalpha * lalbedo * lemissive * lnormal * lenvironment * light *
+      lspecular
+  | LUnlit of lalpha * lalbedo * lemissive
 
 val label_all : unit -> label list
 val label_code : label -> string

@@ -27,7 +27,7 @@ interface KRenderer
 {
   /**
    * <p>
-   * Render the scene <code>scene</code> to the framebuffer
+   * Render the batches <code>batches</code> to the framebuffer
    * <code>result</code>.
    * </p>
    * 

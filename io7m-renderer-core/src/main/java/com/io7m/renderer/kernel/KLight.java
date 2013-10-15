@@ -28,7 +28,7 @@ import com.io7m.renderer.RVectorReadable3F;
  * Lights.
  */
 
-public @Immutable abstract class KLight
+@Immutable public abstract class KLight
 {
   @Immutable public static final class KCone extends KLight
   {
@@ -81,11 +81,6 @@ public @Immutable abstract class KLight
       this.exponent = exponent;
     }
 
-    public float getRadius()
-    {
-      return this.radius;
-    }
-
     public float getExponent()
     {
       return this.exponent;
@@ -95,23 +90,36 @@ public @Immutable abstract class KLight
     {
       return this.position;
     }
+
+    public float getRadius()
+    {
+      return this.radius;
+    }
   }
 
   static enum Type
   {
-    LIGHT_SPHERE("Sphere"),
-    LIGHT_DIRECTIONAL("Directional"),
-    LIGHT_CONE("Cone");
+    LIGHT_SPHERE("Sphere", "LS"),
+    LIGHT_DIRECTIONAL("Directional", "LD"),
+    LIGHT_CONE("Cone", "LC");
 
     private final @Nonnull String name;
+    private final @Nonnull String code;
 
     private Type(
-      final @Nonnull String name)
+      final @Nonnull String name,
+      final @Nonnull String code)
     {
       this.name = name;
+      this.code = code;
     }
 
-    @Nonnull String getName()
+    public @Nonnull String getCode()
+    {
+      return this.code;
+    }
+
+    public @Nonnull String getName()
     {
       return this.name;
     }

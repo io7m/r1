@@ -21,5 +21,5 @@ import com.io7m.jtensors.MatrixM3x3F;
 public final class RMatrixM3x3F<T extends RTransform> extends MatrixM3x3F implements
   RMatrixReadable3x3F<T>
 {
-
+  // No extra functions.
 }

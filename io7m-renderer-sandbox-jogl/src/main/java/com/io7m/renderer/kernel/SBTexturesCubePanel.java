@@ -233,6 +233,15 @@ final class SBTexturesCubePanel extends JPanel
       }
     });
 
+    final JButton clear = new JButton("Clear");
+    clear.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        SBTexturesCubePanel.this.selector.setSelectedItem(null);
+      }
+    });
+
     final JButton select = new JButton("Select");
     select.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
@@ -260,7 +269,7 @@ final class SBTexturesCubePanel extends JPanel
     });
 
     final DesignGridLayout dg = new DesignGridLayout(this);
-    dg.row().grid().add(this.selector, 3).add(open);
+    dg.row().grid().add(this.selector, 2).add(clear).add(open);
     dg.row().grid().add(image_pane);
     dg.row().grid().empty(2).add(cancel).add(select);
   }

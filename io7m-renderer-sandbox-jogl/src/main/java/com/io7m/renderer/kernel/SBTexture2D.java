@@ -24,7 +24,7 @@ import javax.annotation.concurrent.Immutable;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jvvfs.PathVirtual;
 
-@Immutable public final class SBTexture2D
+@Immutable public final class SBTexture2D<K extends SBTexture2DKind>
 {
   private final @Nonnull PathVirtual     path;
   private final @Nonnull Texture2DStatic texture;

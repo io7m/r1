@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
@@ -27,7 +28,7 @@ import com.io7m.jcanephora.JCGLScalarType;
  * Standard names and types for attributes in vertex data.
  */
 
-public class KMeshAttributes
+@Immutable public final class KMeshAttributes
 {
   static {
     try {

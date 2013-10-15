@@ -180,10 +180,10 @@ let fs_standard_inputs = [
 let fs_standard_outputs = [
   "  out out_0 : vector_4f as 0;\n"]
 
-let fs_diffuse_parameters = function
-  | Labels.LDiffuseColour -> []
-  | Labels.LDiffuseTextured ->
-      ["  parameter t_diffuse : sampler_2d;\n"]
+let fs_albedo_parameters = function
+  | Labels.LAlbedoColour -> []
+  | Labels.LAlbedoTextured ->
+      ["  parameter t_albedo : sampler_2d;\n"]
 
 let fs_specular_parameters s =
   begin match s with
@@ -227,7 +227,7 @@ let fs_material_values m s =
       "  value m =\n";
       "    record M.t {\n";
       "      emissive    = material.emissive,\n";
-      "      diffuse     = material.diffuse,\n";
+      "      albedo      = material.albedo,\n";
       "      environment = material.environment,\n";
       "      specular    = record M.specular {\n";
       "        exponent  = material.specular.exponent,\n";
@@ -239,10 +239,10 @@ let fs_material_values m s =
   | (Labels.LEmissiveMapped, Labels.LSpecularMapped) -> [
       "  value m =\n";
       "    record M.t {\n";
-      "      emissive    = record M.emissive {\n";
+      "      emissive   = record M.emissive {\n";
       "        emissive = S.texture (t_emissive, f_uv)[x]\n";
       "      },\n";
-      "      diffuse     = material.diffuse,\n";
+      "      albedo      = material.albedo,\n";
       "      environment = material.environment,\n";
       "      specular    = record M.specular {\n";
       "        exponent  = material.specular.exponent,\n";
@@ -255,10 +255,10 @@ let fs_material_values m s =
   | (Labels.LEmissiveMapped, Labels.LSpecularConstant) -> [
       "  value m =\n";
       "    record M.t {\n";
-      "      emissive    = record M.emissive {\n";
+      "      emissive   = record M.emissive {\n";
       "        emissive = S.texture (t_emissive, f_uv)[x]\n";
       "      },\n";
-      "      diffuse     = material.diffuse,\n";
+      "      albedo      = material.albedo,\n";
       "      environment = material.environment,\n";
       "      specular    = material.specular\n";
       "    };\n";
@@ -372,24 +372,24 @@ let fs_light_values e l s =
 
 let fs_albedo a d =
   begin match (a, d) with
-  | (Labels.LAlphaOpaque, Labels.LDiffuseColour) -> [
+  | (Labels.LAlphaOpaque, Labels.LAlbedoColour) -> [
       "  value albedo =\n";
       "    A.opaque (m.diffuse);\n"
       ]
   
-  | (Labels.LAlphaTranslucent, Labels.LDiffuseColour) -> [
+  | (Labels.LAlphaTranslucent, Labels.LAlbedoColour) -> [
       "  value albedo =\n";
       "    A.translucent (m.diffuse);\n"
       ]
   
-  | (Labels.LAlphaTranslucent, Labels.LDiffuseTextured) -> [
+  | (Labels.LAlphaTranslucent, Labels.LAlbedoTextured) -> [
       "  value albedo =\n";
-      "    A.textured_translucent (t_diffuse, f_uv, m.diffuse);\n"
+      "    A.textured_translucent (t_albedo, f_uv, m.diffuse);\n"
       ]
   
-  | (Labels.LAlphaOpaque, Labels.LDiffuseTextured) -> [
+  | (Labels.LAlphaOpaque, Labels.LAlbedoTextured) -> [
       "  value albedo =\n";
-      "    A.textured_opaque (t_diffuse, f_uv, m.diffuse);\n"
+      "    A.textured_opaque (t_albedo, f_uv, m.albedo);\n"
       ]
   end
 
@@ -426,7 +426,7 @@ let fwd_fragment_shader = function
       fs_standard_outputs @
       (fs_standard_parameters p) @
       (fs_uv_attributes p) @
-      (fs_diffuse_parameters d) @
+      (fs_albedo_parameters d) @
       ["with\n"] @
       ["  -- XXX: EVERYTHING UNIMPLEMENTED\n"] @
       ["  value rgba = new vector_4f (1.0, 0.0, 1.0, 1.0);\n"] @
@@ -440,7 +440,7 @@ let fwd_fragment_shader = function
       fs_standard_outputs @
       (fs_standard_parameters p) @
       (fs_uv_attributes p) @
-      (fs_diffuse_parameters d) @
+      (fs_albedo_parameters d) @
       (fs_normal_attributes n) @
       (fs_normal_parameters n) @
       (fs_environment_parameters e) @

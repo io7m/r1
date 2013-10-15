@@ -27,11 +27,6 @@ abstract class SBRendererType
   {
     private final @Nonnull SBKRendererType renderer;
 
-    public @Nonnull SBKRendererType getRenderer()
-    {
-      return this.renderer;
-    }
-
     @SuppressWarnings("synthetic-access") public SBRendererTypeKernel(
       final @Nonnull SBKRendererType renderer)
       throws ConstraintError
@@ -39,14 +34,28 @@ abstract class SBRendererType
       super(Type.TYPE_KERNEL);
       this.renderer = Constraints.constrainNotNull(renderer, "Renderer");
     }
+
+    public @Nonnull SBKRendererType getRenderer()
+    {
+      return this.renderer;
+    }
   }
 
   public final static class SBRendererTypeSpecific extends SBRendererType
   {
-    @SuppressWarnings("synthetic-access") public SBRendererTypeSpecific()
+    private final @Nonnull SBShader shader;
+
+    @SuppressWarnings("synthetic-access") public SBRendererTypeSpecific(
+      final @Nonnull SBShader s)
       throws ConstraintError
     {
       super(Type.TYPE_SPECIFIC);
+      this.shader = Constraints.constrainNotNull(s, "Shader");
+    }
+
+    public @Nonnull SBShader getShader()
+    {
+      return this.shader;
     }
   }
 
@@ -58,17 +67,11 @@ abstract class SBRendererType
 
   private final @Nonnull Type type;
 
-  public @Nonnull Type getType()
+  private SBRendererType(
+    final @Nonnull Type type)
+    throws ConstraintError
   {
-    return this.type;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = prime * this.type.hashCode();
-    return result;
+    this.type = Constraints.constrainNotNull(type, "Type");
   }
 
   @Override public boolean equals(
@@ -90,10 +93,16 @@ abstract class SBRendererType
     return true;
   }
 
-  private SBRendererType(
-    final @Nonnull Type type)
-    throws ConstraintError
+  public @Nonnull Type getType()
   {
-    this.type = Constraints.constrainNotNull(type, "Type");
+    return this.type;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = prime * this.type.hashCode();
+    return result;
   }
 }

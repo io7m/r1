@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -536,7 +537,7 @@ final class SBGLRenderer implements GLEventListener
   private @CheckForNull FramebufferColorAttachmentPoint[]           framebuffer_points;
   private final @Nonnull AtomicReference<SBRendererType>            renderer_new;
   private @CheckForNull KRenderer                                   renderer_kernel;
-  private @CheckForNull SBRendererTypeSpecific                      renderer_specific;
+  private @CheckForNull SBShader                                    renderer_specific;
   private final @Nonnull AtomicReference<SBSceneControllerRenderer> controller;
 
   private final @Nonnull AtomicReference<VectorI3F>                 background_colour;
@@ -682,7 +683,7 @@ final class SBGLRenderer implements GLEventListener
         {
           final SBRendererTypeKernel rnk = (SBRendererTypeKernel) rn;
           final KRenderer old_kernel = this.renderer_kernel;
-          final SBRendererTypeSpecific old_specific = this.renderer_specific;
+          final SBShader old_specific = this.renderer_specific;
 
           this.renderer_kernel = this.initKernelRenderer(rnk.getRenderer());
           this.renderer_specific = null;
@@ -696,7 +697,19 @@ final class SBGLRenderer implements GLEventListener
         }
         case TYPE_SPECIFIC:
         {
-          throw new UnimplementedCodeException();
+          final SBRendererTypeSpecific rns = (SBRendererTypeSpecific) rn;
+          final KRenderer old_kernel = this.renderer_kernel;
+          final SBShader old_specific = this.renderer_specific;
+
+          this.renderer_kernel = null;
+          this.renderer_specific = rns.getShader();
+
+          if (old_kernel != null) {
+            old_kernel.close();
+          }
+
+          this.running.set(RunningState.STATE_RUNNING);
+          break;
         }
       }
     }
@@ -783,10 +796,6 @@ final class SBGLRenderer implements GLEventListener
       {
         return new KRendererDebugUVVertex(this.gi, this.filesystem, this.log);
       }
-      case KRENDERER_FORWARD:
-      {
-        return new KRendererForward(this.gi, this.filesystem, this.log);
-      }
       case KRENDERER_FORWARD_DIFFUSE:
       {
         return new KRendererForwardDiffuse(this.gi, this.filesystem, this.log);
@@ -804,10 +813,6 @@ final class SBGLRenderer implements GLEventListener
           this.gi,
           this.filesystem,
           this.log);
-      }
-      case KRENDERER_FORWARD_UNLIT:
-      {
-        return new KRendererForwardUnlit(this.gi, this.filesystem, this.log);
       }
     }
 
@@ -1424,7 +1429,14 @@ final class SBGLRenderer implements GLEventListener
       final Pair<Collection<KLight>, Collection<KMeshInstance>> p =
         c.rendererGetScene();
 
-      final KScene scene = new KScene(kcamera, p.first, p.second);
+      final KBatches batches =
+        new KBatches(
+          new ArrayList<KBatchUnlit>(),
+          new ArrayList<KBatchLit>(),
+          new ArrayList<KBatchUnlit>(),
+          new ArrayList<KBatchLit>());
+
+      final KScene scene = new KScene(kcamera, p.first, p.second, batches);
       this.scene_previous = this.scene_current;
       this.scene_current = scene;
 

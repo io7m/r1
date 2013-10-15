@@ -39,31 +39,41 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
     RXMLUtilities.checkIsElement(e, "material", uri);
 
-    final Element ed = RXMLUtilities.getChild(e, "diffuse", uri);
+    final Element ed = RXMLUtilities.getChild(e, "albedo", uri);
+    final Element ea = RXMLUtilities.getChild(e, "alpha", uri);
+    final Element em = RXMLUtilities.getChild(e, "emissive", uri);
     final Element es = RXMLUtilities.getChild(e, "specular", uri);
     final Element en = RXMLUtilities.getChild(e, "normal", uri);
     final Element ee = RXMLUtilities.getChild(e, "environment", uri);
 
     return new SBMaterialDescription(
-      SBMaterialDiffuseDescription.fromXML(ed),
+      SBMaterialAlphaDescription.fromXML(ea),
+      SBMaterialAlbedoDescription.fromXML(ed),
+      SBMaterialEmissiveDescription.fromXML(em),
       SBMaterialSpecularDescription.fromXML(es),
       SBMaterialEnvironmentDescription.fromXML(ee),
       SBMaterialNormalDescription.fromXML(en));
   }
 
-  private final @Nonnull SBMaterialDiffuseDescription     diffuse;
-  private final @Nonnull SBMaterialSpecularDescription    specular;
+  private final @Nonnull SBMaterialAlphaDescription       alpha;
+  private final @Nonnull SBMaterialAlbedoDescription      albedo;
+  private final @Nonnull SBMaterialEmissiveDescription    emissive;
   private final @Nonnull SBMaterialEnvironmentDescription environment;
   private final @Nonnull SBMaterialNormalDescription      normal;
+  private final @Nonnull SBMaterialSpecularDescription    specular;
 
   SBMaterialDescription(
-    final @Nonnull SBMaterialDiffuseDescription diffuse,
+    final @Nonnull SBMaterialAlphaDescription alpha,
+    final @Nonnull SBMaterialAlbedoDescription albedo,
+    final @Nonnull SBMaterialEmissiveDescription emissive,
     final @Nonnull SBMaterialSpecularDescription specular,
     final @Nonnull SBMaterialEnvironmentDescription environment,
     final @Nonnull SBMaterialNormalDescription normal)
     throws ConstraintError
   {
-    this.diffuse = Constraints.constrainNotNull(diffuse, "Diffuse");
+    this.alpha = Constraints.constrainNotNull(alpha, "Alpha");
+    this.albedo = Constraints.constrainNotNull(albedo, "Albedo");
+    this.emissive = Constraints.constrainNotNull(emissive, "Emissive");
     this.specular = Constraints.constrainNotNull(specular, "Specular");
     this.environment =
       Constraints.constrainNotNull(environment, "Environment");
@@ -83,11 +93,18 @@ import com.io7m.renderer.xml.RXMLUtilities;
       return false;
     }
     final SBMaterialDescription other = (SBMaterialDescription) obj;
-    if (this.diffuse == null) {
-      if (other.diffuse != null) {
+    if (this.alpha == null) {
+      if (other.alpha != null) {
         return false;
       }
-    } else if (!this.diffuse.equals(other.diffuse)) {
+    } else if (!this.alpha.equals(other.alpha)) {
+      return false;
+    }
+    if (this.albedo == null) {
+      if (other.albedo != null) {
+        return false;
+      }
+    } else if (!this.albedo.equals(other.albedo)) {
       return false;
     }
     if (this.environment == null) {
@@ -114,9 +131,14 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return true;
   }
 
-  public @Nonnull SBMaterialDiffuseDescription getDiffuse()
+  public @Nonnull SBMaterialEmissiveDescription getEmissive()
   {
-    return this.diffuse;
+    return this.emissive;
+  }
+
+  public @Nonnull SBMaterialAlbedoDescription getAlbedo()
+  {
+    return this.albedo;
   }
 
   public @Nonnull SBMaterialEnvironmentDescription getEnvironment()
@@ -138,25 +160,22 @@ import com.io7m.renderer.xml.RXMLUtilities;
   {
     final int prime = 31;
     int result = 1;
-    result =
-      (prime * result)
-        + ((this.diffuse == null) ? 0 : this.diffuse.hashCode());
-    result =
-      (prime * result)
-        + ((this.environment == null) ? 0 : this.environment.hashCode());
-    result =
-      (prime * result) + ((this.normal == null) ? 0 : this.normal.hashCode());
-    result =
-      (prime * result)
-        + ((this.specular == null) ? 0 : this.specular.hashCode());
+    result = (prime * result) + this.alpha.hashCode();
+    result = (prime * result) + this.albedo.hashCode();
+    result = (prime * result) + this.emissive.hashCode();
+    result = (prime * result) + this.environment.hashCode();
+    result = (prime * result) + this.normal.hashCode();
+    result = (prime * result) + this.specular.hashCode();
     return result;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("SBMaterialDescription [diffuse=");
-    builder.append(this.diffuse);
+    builder.append("SBMaterialDescription [alpha=");
+    builder.append(this.alpha);
+    builder.append(", albedo=");
+    builder.append(this.albedo);
     builder.append(", specular=");
     builder.append(this.specular);
     builder.append(", environment=");
@@ -172,10 +191,17 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final String uri = SBSceneDescription.SCENE_XML_URI.toString();
     final Element e = new Element("s:material", uri);
 
-    e.appendChild(this.diffuse.toXML());
+    e.appendChild(this.alpha.toXML());
+    e.appendChild(this.albedo.toXML());
+    e.appendChild(this.emissive.toXML());
     e.appendChild(this.normal.toXML());
     e.appendChild(this.specular.toXML());
     e.appendChild(this.environment.toXML());
     return e;
+  }
+
+  public @Nonnull SBMaterialAlphaDescription getAlpha()
+  {
+    return this.alpha;
   }
 }

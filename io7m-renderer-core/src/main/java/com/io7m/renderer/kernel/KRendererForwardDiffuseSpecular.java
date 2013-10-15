@@ -309,7 +309,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
     e.execCancel();
 
-    for (final KMeshInstance mesh : scene.getMeshes()) {
+    for (final KMeshInstance mesh : scene.getInstances()) {
       this.renderDepthPassMesh(gc, e, mesh);
     }
   }
@@ -617,7 +617,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       this.renderInitCommonDirectionalUniforms(gc, light, light_cs, e);
     }
 
-    for (final KMeshInstance mesh : scene.getMeshes()) {
+    for (final KMeshInstance mesh : scene.getInstances()) {
       this.renderLightPassMeshDirectional(gc, mesh);
     }
   }
@@ -658,7 +658,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       this.renderInitCommonSphericalUniforms(gc, light, light_eye, e);
     }
 
-    for (final KMeshInstance mesh : scene.getMeshes()) {
+    for (final KMeshInstance mesh : scene.getInstances()) {
       this.renderLightPassMeshSpherical(gc, mesh);
     }
   }

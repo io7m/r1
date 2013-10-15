@@ -77,16 +77,16 @@ final class SBTextures2DPanel extends JPanel
     }
   }
 
-  private static final long                        serialVersionUID;
+  private static final long                           serialVersionUID;
 
   static {
     serialVersionUID = -941448169051827275L;
   }
 
-  protected final @Nonnull Log                     log_textures;
-  protected final @Nonnull JComboBox<PathVirtual>  selector;
-  protected @Nonnull Map<PathVirtual, SBTexture2D> images;
-  protected @Nonnull ImageDisplay                  image_display;
+  protected final @Nonnull Log                        log_textures;
+  protected final @Nonnull JComboBox<PathVirtual>     selector;
+  protected @Nonnull Map<PathVirtual, SBTexture2D<?>> images;
+  protected @Nonnull ImageDisplay                     image_display;
 
   public SBTextures2DPanel(
     final @Nonnull JFrame window,
@@ -112,13 +112,22 @@ final class SBTextures2DPanel extends JPanel
           (PathVirtual) SBTextures2DPanel.this.selector.getSelectedItem();
 
         if (name != null) {
-          final SBTexture2D t = SBTextures2DPanel.this.images.get(name);
+          final SBTexture2D<?> t = SBTextures2DPanel.this.images.get(name);
           SBTextures2DPanel.this.image_display.setImage(t.getImage());
           SBTextures2DPanel.this.image_display.repaint();
         }
       }
     });
     this.selectorRefresh(this.selector);
+
+    final JButton clear = new JButton("Clear");
+    clear.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final ActionEvent e)
+      {
+        SBTextures2DPanel.this.selector.setSelectedItem(null);
+      }
+    });
 
     final JButton open = new JButton("Open...");
     open.addActionListener(new ActionListener() {
@@ -134,9 +143,9 @@ final class SBTextures2DPanel extends JPanel
           {
             final File file = chooser.getSelectedFile();
 
-            final SwingWorker<SBTexture2D, Void> worker =
-              new SwingWorker<SBTexture2D, Void>() {
-                @Override protected @Nonnull SBTexture2D doInBackground()
+            final SwingWorker<SBTexture2D<?>, Void> worker =
+              new SwingWorker<SBTexture2D<?>, Void>() {
+                @Override protected @Nonnull SBTexture2D<?> doInBackground()
                   throws Exception
                 {
                   try {
@@ -210,7 +219,7 @@ final class SBTextures2DPanel extends JPanel
     });
 
     final DesignGridLayout dg = new DesignGridLayout(this);
-    dg.row().grid().add(this.selector, 3).add(open);
+    dg.row().grid().add(this.selector, 2).add(clear).add(open);
     dg.row().grid().add(image_pane);
     dg.row().grid().empty(2).add(cancel).add(select);
   }
@@ -220,7 +229,7 @@ final class SBTextures2DPanel extends JPanel
   {
     final File file = (File) select.getSelectedItem();
     if (file != null) {
-      final SBTexture2D t = SBTextures2DPanel.this.images.get(file);
+      final SBTexture2D<?> t = SBTextures2DPanel.this.images.get(file);
       this.image_display.setImage(t.getImage());
       this.image_display.repaint();
     }
@@ -230,7 +239,7 @@ final class SBTextures2DPanel extends JPanel
     final JComboBox<PathVirtual> select)
   {
     select.removeAllItems();
-    for (final Entry<PathVirtual, SBTexture2D> e : this.images.entrySet()) {
+    for (final Entry<PathVirtual, SBTexture2D<?>> e : this.images.entrySet()) {
       select.addItem(e.getKey());
     }
   }

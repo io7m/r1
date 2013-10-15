@@ -66,8 +66,6 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.parasol.PGLSLMetaXML;
-import com.io7m.renderer.RSpaceRGB;
-import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.xml.RXMLException;
 
 interface SBSceneChangeListener
@@ -157,7 +155,7 @@ public final class SBSceneController implements
       SBScene scene = SBScene.empty();
 
       for (final PathVirtual name : sd.getTextures2D()) {
-        final SBTexture2D t = this.internalTexture2DLoadFromPath(fs, name);
+        final SBTexture2D<?> t = this.internalTexture2DLoadFromPath(fs, name);
         scene = scene.texture2DAdd(t);
       }
 
@@ -253,28 +251,34 @@ public final class SBSceneController implements
     this.internalStateChangedNotifyListeners();
   }
 
-  private @Nonnull SBTexture2D internalTexture2DLoad(
-    final @Nonnull SBSceneFilesystem fs,
-    final @Nonnull File file)
-    throws FileNotFoundException,
-      FilesystemError,
-      IOException,
-      ConstraintError,
-      InterruptedException,
-      ExecutionException
+  private @Nonnull
+    <T extends SBTexture2DKind>
+    SBTexture2D<T>
+    internalTexture2DLoad(
+      final @Nonnull SBSceneFilesystem fs,
+      final @Nonnull File file)
+      throws FileNotFoundException,
+        FilesystemError,
+        IOException,
+        ConstraintError,
+        InterruptedException,
+        ExecutionException
   {
     final PathVirtual path = fs.filesystemCopyInTexture2D(file);
     return this.internalTexture2DLoadFromPath(fs, path);
   }
 
-  private @Nonnull SBTexture2D internalTexture2DLoadFromPath(
-    final @Nonnull SBSceneFilesystem fs,
-    final @Nonnull PathVirtual path)
-    throws FilesystemError,
-      ConstraintError,
-      IOException,
-      InterruptedException,
-      ExecutionException
+  private @Nonnull
+    <T extends SBTexture2DKind>
+    SBTexture2D<T>
+    internalTexture2DLoadFromPath(
+      final @Nonnull SBSceneFilesystem fs,
+      final @Nonnull PathVirtual path)
+      throws FilesystemError,
+        ConstraintError,
+        IOException,
+        InterruptedException,
+        ExecutionException
   {
     final InputStream image_io_stream = fs.filesystemOpenFile(path);
 
@@ -291,7 +295,7 @@ public final class SBSceneController implements
           this.renderer.texture2DLoad(path, gl_stream);
         final Texture2DStatic texture = future.get();
 
-        return new SBTexture2D(path, texture, image);
+        return new SBTexture2D<T>(path, texture, image);
       } finally {
         gl_stream.close();
       }
@@ -539,20 +543,21 @@ public final class SBSceneController implements
       final KTransform transform =
         new KTransform(i.getPosition(), orientation);
 
-      final SBMaterialDiffuseDescription sd_diff =
-        mat.getDescription().getDiffuse();
+      final SBMaterialAlphaDescription sd_alpha =
+        mat.getDescription().getAlpha();
+      final SBMaterialAlbedoDescription sd_albedo =
+        mat.getDescription().getAlbedo();
+      final SBMaterialEmissiveDescription sd_emiss =
+        mat.getDescription().getEmissive();
       final SBMaterialSpecularDescription sd_spec =
         mat.getDescription().getSpecular();
-      final SBMaterialNormalDescription sd_norm =
-        mat.getDescription().getNormal();
       final SBMaterialEnvironmentDescription sd_envi =
         mat.getDescription().getEnvironment();
 
-      final RVectorI3F<RSpaceRGB> diffuse =
-        new RVectorI3F<RSpaceRGB>(
-          sd_diff.getColour().x,
-          sd_diff.getColour().y,
-          sd_diff.getColour().z);
+      final Option<Texture2DStatic> emissive_map =
+        (mat.getEmissiveMap() != null) ? new Option.Some<Texture2DStatic>(mat
+          .getEmissiveMap()
+          .getTexture()) : new Option.None<Texture2DStatic>();
 
       final Option<Texture2DStatic> diffuse_map =
         (mat.getDiffuseMap() != null) ? new Option.Some<Texture2DStatic>(mat
@@ -578,17 +583,35 @@ public final class SBSceneController implements
             .getEnvironmentMap()
             .getTexture());
 
-      final KMaterialDiffuse diff =
-        new KMaterialDiffuse(diffuse, sd_diff.getMix(), diffuse_map);
+      final KMaterialAlpha alpha =
+        new KMaterialAlpha(sd_alpha.isTranslucent(), sd_alpha.getOpacity());
+
+      final KMaterialAlbedo diff =
+        new KMaterialAlbedo(
+          sd_albedo.getColour(),
+          sd_albedo.getMix(),
+          diffuse_map);
+
+      final KMaterialEmissive emiss =
+        new KMaterialEmissive(sd_emiss.getEmission(), emissive_map);
+
       final KMaterialSpecular spec =
         new KMaterialSpecular(
           sd_spec.getIntensity(),
           sd_spec.getExponent(),
           specular_map);
+
       final KMaterialEnvironment envi =
-        new KMaterialEnvironment(sd_envi.getMix(), environment_map);
+        new KMaterialEnvironment(
+          sd_envi.getMix(),
+          environment_map,
+          sd_envi.getRefractionIndex(),
+          sd_envi.getReflectionMix());
+
       final KMaterialNormal norm = new KMaterialNormal(normal_map);
-      final KMaterial material = new KMaterial(diff, spec, envi, norm);
+
+      final KMaterial material =
+        new KMaterial(alpha, diff, emiss, envi, norm, spec);
 
       final KMesh km = mesh.getMesh();
       final KMeshInstance mi = new KMeshInstance(id, transform, km, material);
@@ -778,16 +801,19 @@ public final class SBSceneController implements
     return f;
   }
 
-  @Override public @Nonnull Future<SBTexture2D> sceneTexture2DLoad(
-    final @Nonnull File file)
-    throws ConstraintError
+  @Override public @Nonnull
+    <T extends SBTexture2DKind>
+    Future<SBTexture2D<T>>
+    sceneTexture2DLoad(
+      final @Nonnull File file)
+      throws ConstraintError
   {
     Constraints.constrainNotNull(file, "File");
 
-    final FutureTask<SBTexture2D> f =
-      new FutureTask<SBTexture2D>(new Callable<SBTexture2D>() {
+    final FutureTask<SBTexture2D<T>> f =
+      new FutureTask<SBTexture2D<T>>(new Callable<SBTexture2D<T>>() {
         @SuppressWarnings("synthetic-access") @Override public
-          SBTexture2D
+          SBTexture2D<T>
           call()
             throws Exception
         {
@@ -795,7 +821,7 @@ public final class SBSceneController implements
             final SceneAndFilesystem saf =
               SBSceneController.this.state_current.get();
 
-            final SBTexture2D sbt =
+            final SBTexture2D<T> sbt =
               SBSceneController.this.internalTexture2DLoad(
                 saf.filesystem,
                 file);
@@ -849,7 +875,7 @@ public final class SBSceneController implements
   }
 
   @Override public @Nonnull
-    Map<PathVirtual, SBTexture2D>
+    Map<PathVirtual, SBTexture2D<?>>
     sceneTextures2DGet()
   {
     return this.state_current.get().scene.textures2DGet();
@@ -1026,15 +1052,18 @@ interface SBSceneControllerShaders
 
 interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration
 {
-  public @Nonnull Future<SBTexture2D> sceneTexture2DLoad(
-    final @Nonnull File file)
-    throws ConstraintError;
+  public @Nonnull
+    <T extends SBTexture2DKind>
+    Future<SBTexture2D<T>>
+    sceneTexture2DLoad(
+      final @Nonnull File file)
+      throws ConstraintError;
 
   public @Nonnull Future<SBTextureCube> sceneTextureCubeLoad(
     final @Nonnull File file)
     throws ConstraintError;
 
-  public @Nonnull Map<PathVirtual, SBTexture2D> sceneTextures2DGet();
+  public @Nonnull Map<PathVirtual, SBTexture2D<?>> sceneTextures2DGet();
 
   public @Nonnull Map<PathVirtual, SBTextureCube> sceneTexturesCubeGet();
 }
