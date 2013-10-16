@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer.kernel-shaders</groupId>
   <artifactId>io7m-renderer-kernel-shaders</artifactId>
-  <version>0.4.0</version>
+  <version>0.5.0</version>
   <packaging>jar</packaging>
   <name>io7m-kernel-shaders</name>
   <description>3D renderer (shaders for the kernel)</description>
