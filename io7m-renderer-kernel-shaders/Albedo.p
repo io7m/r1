@@ -30,19 +30,19 @@ module Albedo is
   import com.io7m.renderer.Materials as M;
 
   function opaque (
-    d : M.diffuse
+    d : M.albedo
   ) : vector_4f =
     new vector_4f (d.colour [x y z], 1.0);
 
   function translucent (
-    d : M.diffuse
+    d : M.albedo
   ) : vector_4f =
     d.colour;
 
   function textured_opaque (
     t : sampler_2d,
     u : vector_2f,
-    d : M.diffuse
+    d : M.albedo
   ) : vector_4f =
     let
       value tc = S.texture (t, u);
@@ -55,7 +55,7 @@ module Albedo is
   function textured_translucent (
     t : sampler_2d,
     u : vector_2f,
-    d : M.diffuse
+    d : M.albedo
   ) : vector_4f =
     let
       value tc = S.texture (t, u);

@@ -302,12 +302,13 @@ let fs_light_values e l s =
       "  value light_term =\n";
       "    DL.diffuse_only (light, n);\n"
       ]
+
   | (Labels.LEmissiveNone, Labels.LLightDirectional, Labels.LSpecularMapped)
   | (Labels.LEmissiveNone, Labels.LLightDirectional, Labels.LSpecularConstant) -> [
       "  value light_term =\n";
       "    DL.diffuse_specular (light, n, f_position [x y z], m);\n"
       ]
-  
+
   | (Labels.LEmissiveNone, Labels.LLightSpherical, Labels.LSpecularNone) -> [
       "  value light_term =\n";
       "    SL.diffuse_only (light, n, f_position [x y z]);\n"
@@ -317,13 +318,13 @@ let fs_light_values e l s =
       "  value light_term =\n";
       "    SL.diffuse_specular (light, n, f_position [x y z], m);\n"
       ]
-  
+
   | (Labels.LEmissiveMapped, Labels.LLightDirectional, Labels.LSpecularNone)
   | (Labels.LEmissiveConstant, Labels.LLightDirectional, Labels.LSpecularNone) -> [
       "  value light_term =\n";
       "    DL.diffuse_only_emissive (light, n, m);\n"
       ]
-  
+
   | (Labels.LEmissiveConstant, Labels.LLightDirectional, Labels.LSpecularConstant)
   | (Labels.LEmissiveConstant, Labels.LLightDirectional, Labels.LSpecularMapped)
   | (Labels.LEmissiveMapped, Labels.LLightDirectional, Labels.LSpecularConstant)
@@ -331,13 +332,13 @@ let fs_light_values e l s =
       "  value light_term =\n";
       "    DL.diffuse_specular_emissive (light, n, f_position [x y z], m);\n"
       ]
-  
+
   | (Labels.LEmissiveMapped, Labels.LLightSpherical, Labels.LSpecularNone)
   | (Labels.LEmissiveConstant, Labels.LLightSpherical, Labels.LSpecularNone) -> [
       "  value light_term =\n";
       "    SL.diffuse_only_emissive (light, n, f_position [x y z], m);\n"
       ]
-  
+
   | (Labels.LEmissiveConstant, Labels.LLightSpherical, Labels.LSpecularConstant)
   | (Labels.LEmissiveConstant, Labels.LLightSpherical, Labels.LSpecularMapped)
   | (Labels.LEmissiveMapped, Labels.LLightSpherical, Labels.LSpecularConstant)
@@ -374,17 +375,17 @@ let fs_albedo a d =
   begin match (a, d) with
   | (Labels.LAlphaOpaque, Labels.LAlbedoColour) -> [
       "  value albedo =\n";
-      "    A.opaque (m.diffuse);\n"
+      "    A.opaque (m.albedo);\n"
       ]
   
   | (Labels.LAlphaTranslucent, Labels.LAlbedoColour) -> [
       "  value albedo =\n";
-      "    A.translucent (m.diffuse);\n"
+      "    A.translucent (m.albedo);\n"
       ]
   
   | (Labels.LAlphaTranslucent, Labels.LAlbedoTextured) -> [
       "  value albedo =\n";
-      "    A.textured_translucent (t_albedo, f_uv, m.diffuse);\n"
+      "    A.textured_translucent (t_albedo, f_uv, m.albedo);\n"
       ]
   
   | (Labels.LAlphaOpaque, Labels.LAlbedoTextured) -> [
