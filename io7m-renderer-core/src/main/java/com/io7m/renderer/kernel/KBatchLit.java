@@ -17,6 +17,8 @@
 package com.io7m.renderer.kernel;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -27,7 +29,22 @@ import javax.annotation.concurrent.Immutable;
   private final @Nonnull KMeshInstanceMaterialLabel label;
   private final @Nonnull ArrayList<KMeshInstance>   instances;
 
-  private KBatchLit(
+  public @Nonnull KLight getLight()
+  {
+    return this.light;
+  }
+
+  public @Nonnull KMeshInstanceMaterialLabel getLabel()
+  {
+    return this.label;
+  }
+
+  public @Nonnull List<KMeshInstance> getInstances()
+  {
+    return Collections.unmodifiableList(this.instances);
+  }
+
+  KBatchLit(
     final @Nonnull KLight light,
     final @Nonnull KMeshInstanceMaterialLabel label,
     final @Nonnull ArrayList<KMeshInstance> instances)

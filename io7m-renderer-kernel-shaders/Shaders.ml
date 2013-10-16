@@ -1,4 +1,4 @@
-(*| Copyright © 2013 <code@io7m.com> http://io7m.com                         *)
+(*| Copyright ï¿½ 2013 <code@io7m.com> http://io7m.com                         *)
 (*|                                                                          *)
 (*| Permission to use, copy, modify, and/or distribute this software for any *)
 (*| purpose with or without fee is hereby granted, provided that the above   *)
@@ -101,7 +101,7 @@ let vs_standard_io = [
 
 let fwd_vertex_shader = function
   | Labels.LUnlit _ as p ->
-      ["shader vertex fwd_"; Labels.label_code p; "_vertex is\n"] @
+      ["shader vertex v is\n"] @
       vs_standard_io @
       (vs_uv_attributes p) @
       vs_standard_matrices @
@@ -112,7 +112,7 @@ let fwd_vertex_shader = function
       (vs_uv_writes p) @
       ["end;\n"]
   | Labels.LLit (_, _, _, n, _, _, _) as p ->
-      ["shader vertex fwd_"; Labels.label_code p; "_vertex is\n"] @
+      ["shader vertex v is\n"] @
       vs_standard_io @
       (vs_uv_attributes p) @
       (vs_normal_attributes n) @
@@ -213,7 +213,10 @@ let fs_environment_parameters e =
       ]
   end
 
-let fs_material_values m s =
+let fs_unlit_material_values m =
+  ["  value m = material;\n"]
+
+let fs_lit_material_values m s =
   begin match (m, s) with
   | (Labels.LEmissiveNone, Labels.LSpecularNone)
   | (Labels.LEmissiveConstant, Labels.LSpecularNone)
@@ -266,16 +269,15 @@ let fs_material_values m s =
   end
 
 let fs_standard_parameters = function
-  | Labels.LUnlit _ -> []
+  | Labels.LUnlit _ -> [
+    "  parameter material : M.t;\n"]
   | Labels.LLit (_, _, _, _, _, l, _) ->
       begin match l with
+      | Labels.LLightDirectionalShadowMapped
       | Labels.LLightDirectional ->
           ["  parameter light : DL.t;\n"]
+      | Labels.LLightSphericalShadowMapped
       | Labels.LLightSpherical ->
-          ["  parameter light : SL.t;\n"]
-      | Labels.LLightDirectionalShadowMapped ->
-          ["  parameter light : DL.t;\n"]
-      | Labels.LLightSphericalShadowMapped ->
           ["  parameter light : SL.t;\n"]
       end
       @
@@ -284,68 +286,60 @@ let fs_standard_parameters = function
 let fs_environment_values = function
   | Labels.LEnvironmentNone -> []
   | Labels.LEnvironmentReflective -> [
-      "  value env =\n";
-      "    E.reflection (t_environment, f_position [x y z], n, m_view_inv);\n"
-      ]
+      "  value env : vector_4f =\n";
+      "    E.reflection (t_environment, f_position [x y z], n, m_view_inv);\n"]
+
   | Labels.LEnvironmentRefractive -> [
-      "  value env =\n";
-      "    E.refraction (t_environment, f_position [x y z], n, m_view_inv, m.environment);\n"
-      ]
+      "  value env : vector_4f =\n";
+      "    E.refraction (t_environment, f_position [x y z], n, m_view_inv, m.environment);\n"]
+
   | Labels.LEnvironmentReflectiveRefractive -> [
-      "  value env =\n";
-      "    E.reflection_refraction (t_environment, f_position [x y z], n, m_view_inv, m.environment);\n"
-      ]
+      "  value env : vector_4f =\n";
+      "    E.reflection_refraction (t_environment, f_position [x y z], n, m_view_inv, m.environment);\n"]
 
 let fs_light_values e l s =
   begin match (e, l, s) with
   | (Labels.LEmissiveNone, Labels.LLightDirectional, Labels.LSpecularNone) -> [
-      "  value light_term =\n";
-      "    DL.diffuse_only (light, n);\n"
-      ]
+      "  value light_term : vector_3f =\n";
+      "    DL.diffuse_only (light, n);\n"]
 
   | (Labels.LEmissiveNone, Labels.LLightDirectional, Labels.LSpecularMapped)
   | (Labels.LEmissiveNone, Labels.LLightDirectional, Labels.LSpecularConstant) -> [
-      "  value light_term =\n";
-      "    DL.diffuse_specular (light, n, f_position [x y z], m);\n"
-      ]
+      "  value light_term : vector_3f =\n";
+      "    DL.diffuse_specular (light, n, f_position [x y z], m);\n"]
 
   | (Labels.LEmissiveNone, Labels.LLightSpherical, Labels.LSpecularNone) -> [
-      "  value light_term =\n";
-      "    SL.diffuse_only (light, n, f_position [x y z]);\n"
-      ]
+      "  value light_term : vector_3f =\n";
+      "    SL.diffuse_only (light, n, f_position [x y z]);\n"]
+      
   | (Labels.LEmissiveNone, Labels.LLightSpherical, Labels.LSpecularConstant)
   | (Labels.LEmissiveNone, Labels.LLightSpherical, Labels.LSpecularMapped) -> [
-      "  value light_term =\n";
-      "    SL.diffuse_specular (light, n, f_position [x y z], m);\n"
-      ]
+      "  value light_term : vector_3f =\n";
+      "    SL.diffuse_specular (light, n, f_position [x y z], m);\n"]
 
   | (Labels.LEmissiveMapped, Labels.LLightDirectional, Labels.LSpecularNone)
   | (Labels.LEmissiveConstant, Labels.LLightDirectional, Labels.LSpecularNone) -> [
-      "  value light_term =\n";
-      "    DL.diffuse_only_emissive (light, n, m);\n"
-      ]
+      "  value light_term : vector_3f =\n";
+      "    DL.diffuse_only_emissive (light, n, m);\n"]
 
   | (Labels.LEmissiveConstant, Labels.LLightDirectional, Labels.LSpecularConstant)
   | (Labels.LEmissiveConstant, Labels.LLightDirectional, Labels.LSpecularMapped)
   | (Labels.LEmissiveMapped, Labels.LLightDirectional, Labels.LSpecularConstant)
   | (Labels.LEmissiveMapped, Labels.LLightDirectional, Labels.LSpecularMapped) -> [
-      "  value light_term =\n";
-      "    DL.diffuse_specular_emissive (light, n, f_position [x y z], m);\n"
-      ]
+      "  value light_term : vector_3f =\n";
+      "    DL.diffuse_specular_emissive (light, n, f_position [x y z], m);\n"]
 
   | (Labels.LEmissiveMapped, Labels.LLightSpherical, Labels.LSpecularNone)
   | (Labels.LEmissiveConstant, Labels.LLightSpherical, Labels.LSpecularNone) -> [
-      "  value light_term =\n";
-      "    SL.diffuse_only_emissive (light, n, f_position [x y z], m);\n"
-      ]
+      "  value light_term : vector_3f =\n";
+      "    SL.diffuse_only_emissive (light, n, f_position [x y z], m);\n"]
 
   | (Labels.LEmissiveConstant, Labels.LLightSpherical, Labels.LSpecularConstant)
   | (Labels.LEmissiveConstant, Labels.LLightSpherical, Labels.LSpecularMapped)
   | (Labels.LEmissiveMapped, Labels.LLightSpherical, Labels.LSpecularConstant)
   | (Labels.LEmissiveMapped, Labels.LLightSpherical, Labels.LSpecularMapped) -> [
-      "  value light_term =\n";
-      "    SL.diffuse_specular_emissive (light, n, f_position [x y z], m);\n"
-      ]
+      "  value light_term : vector_3f =\n";
+      "    SL.diffuse_specular_emissive (light, n, f_position [x y z], m);\n"]
   
   | (Labels.LEmissiveConstant, Labels.LLightSphericalShadowMapped, Labels.LSpecularNone)
   | (Labels.LEmissiveConstant, Labels.LLightSphericalShadowMapped, Labels.LSpecularConstant)
@@ -367,81 +361,80 @@ let fs_light_values e l s =
   | (Labels.LEmissiveNone, Labels.LLightDirectionalShadowMapped, Labels.LSpecularNone)
   | (Labels.LEmissiveNone, Labels.LLightDirectionalShadowMapped, Labels.LSpecularConstant)
   | (Labels.LEmissiveNone, Labels.LLightDirectionalShadowMapped, Labels.LSpecularMapped) -> [
-      "  -- XXX: LIGHT TERM SHADOW MAPPING UNIMPLEMENTED\n"
-      ]
+      "  value light_term : vector_3f = new vector_3f (1.0, 1.0, 1.0);\n"]
   end
 
 let fs_albedo a d =
   begin match (a, d) with
   | (Labels.LAlphaOpaque, Labels.LAlbedoColour) -> [
-      "  value albedo =\n";
-      "    A.opaque (m.albedo);\n"
-      ]
+      "  value albedo : vector_4f =\n";
+      "    A.opaque (m.albedo);\n"]
   
   | (Labels.LAlphaTranslucent, Labels.LAlbedoColour) -> [
-      "  value albedo =\n";
-      "    A.translucent (m.albedo);\n"
-      ]
+      "  value albedo : vector_4f =\n";
+      "    A.translucent (m.albedo);\n"]
   
   | (Labels.LAlphaTranslucent, Labels.LAlbedoTextured) -> [
-      "  value albedo =\n";
-      "    A.textured_translucent (t_albedo, f_uv, m.albedo);\n"
-      ]
+      "  value albedo : vector_4f =\n";
+      "    A.textured_translucent (t_albedo, f_uv, m.albedo);\n"]
   
   | (Labels.LAlphaOpaque, Labels.LAlbedoTextured) -> [
-      "  value albedo =\n";
-      "    A.textured_opaque (t_albedo, f_uv, m.albedo);\n"
-      ]
+      "  value albedo : vector_4f =\n";
+      "    A.textured_opaque (t_albedo, f_uv, m.albedo);\n"]
   end
 
 let fs_surface a e =
   begin match (a, e) with
   | (Labels.LAlphaOpaque, Labels.LEnvironmentNone) -> [
-      "  value surface = albedo;\n"
-      ]
+      "  value surface : vector_4f = albedo;\n"]
   | (Labels.LAlphaOpaque, Labels.LEnvironmentReflective)
   | (Labels.LAlphaOpaque, Labels.LEnvironmentRefractive)
   | (Labels.LAlphaOpaque, Labels.LEnvironmentReflectiveRefractive) -> [
-      "  value surface =\n";
-      "    V3.interpolate (albedo [x y z], env [x y z], m.environment.mix);\n"
-      ]
+      "  value surface : vector_4f =\n";
+      "    new vector_4f (\n";
+      "      V3.interpolate (albedo [x y z], env [x y z], m.environment.mix),\n";
+      "      1.0);\n"]
   
   | (Labels.LAlphaTranslucent, Labels.LEnvironmentNone) -> [
-      "  value surface = albedo;\n"
-      ]
+      "  value surface : vector_4f = albedo;\n"]
   | (Labels.LAlphaTranslucent, Labels.LEnvironmentReflective)
   | (Labels.LAlphaTranslucent, Labels.LEnvironmentRefractive)
   | (Labels.LAlphaTranslucent, Labels.LEnvironmentReflectiveRefractive) -> [
-      "  value surface =\n";
-      "    V4.interpolate (albedo, env, m.environment.mix);\n"
-      ]
+      "  value surface : vector_4f =\n";
+      "    V4.interpolate (albedo, env, m.environment.mix);\n"]
   end
 
-let fs_lit_rgba = [
-  "  -- SURFACE NOT IMPLEMENTED\n";
-  "  value rgba = new vector_4f (surface [x y z], 1.0);\n"]
+let fs_lit_rgba a = 
+  begin match a with
+  | Labels.LAlphaOpaque ->  [
+    "  value lit  = V3.multiply (surface [x y z], light_term);\n";
+    "  value rgba = new vector_4f (lit, 1.0);\n"]
+  | Labels.LAlphaTranslucent -> [
+    "  value rgba = surface;\n"]
+  end
 
 let fwd_fragment_shader = function
-  | Labels.LUnlit (a, d, m) as p ->
-      ["shader fragment fwd_"; Labels.label_code p; "_fragment is\n"] @
+  | Labels.LUnlit (a, b, m) as p ->
+      ["shader fragment f is\n"] @
       fs_standard_outputs @
       (fs_standard_parameters p) @
       (fs_uv_attributes p) @
-      (fs_albedo_parameters d) @
+      (fs_albedo_parameters b) @
       ["with\n"] @
-      ["  -- XXX: EVERYTHING UNIMPLEMENTED\n"] @
-      ["  value rgba = new vector_4f (1.0, 0.0, 1.0, 1.0);\n"] @
+      (fs_unlit_material_values m) @
+      (fs_albedo a b) @
+      ["  value rgba = albedo;\n"] @
       ["as\n"] @
       ["  out out_0 = rgba;\n"] @
       ["end;\n"]
   
-  | Labels.LLit (a, d, m, n, e, l, s) as p ->
-      ["shader fragment fwd_"; Labels.label_code p; "_fragment is\n"] @
+  | Labels.LLit (a, b, m, n, e, l, s) as p ->
+      ["shader fragment f is\n"] @
       fs_standard_inputs @
       fs_standard_outputs @
       (fs_standard_parameters p) @
       (fs_uv_attributes p) @
-      (fs_albedo_parameters d) @
+      (fs_albedo_parameters b) @
       (fs_normal_attributes n) @
       (fs_normal_parameters n) @
       (fs_environment_parameters e) @
@@ -449,20 +442,20 @@ let fwd_fragment_shader = function
       (fs_specular_parameters s) @
       ["with\n"] @
       (fs_normal_value n) @
-      (fs_material_values m s) @
+      (fs_lit_material_values m s) @
       (fs_environment_values e) @
       (fs_light_values m l s) @
-      (fs_albedo a d) @
+      (fs_albedo a b) @
       (fs_surface a e) @
-      fs_lit_rgba @
+      (fs_lit_rgba a) @
       ["as\n"] @
       ["  out out_0 = rgba;\n"] @
       ["end;\n"]
 
 let fwd_program_shader p =
-  ["shader program fwd_"; Labels.label_code p; " is\n"] @
-  ["  vertex   fwd_"; Labels.label_code p; "_vertex;\n"] @
-  ["  fragment fwd_"; Labels.label_code p; "_fragment;\n"] @
+  ["shader program p is\n"] @
+  ["  vertex   v;\n"] @
+  ["  fragment f;\n"] @
   ["end;\n"]
 
 let module_start name = [

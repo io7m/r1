@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -101,6 +102,8 @@ import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.parasol.PGLSLMetaXML;
 import com.io7m.renderer.kernel.KLight.KSphere;
+import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Alpha;
+import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Normal;
 import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeKernel;
 import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeSpecific;
 import com.io7m.renderer.xml.RXMLException;
@@ -537,7 +540,7 @@ final class SBGLRenderer implements GLEventListener
   private @CheckForNull FramebufferColorAttachmentPoint[]           framebuffer_points;
   private final @Nonnull AtomicReference<SBRendererType>            renderer_new;
   private @CheckForNull KRenderer                                   renderer_kernel;
-  private @CheckForNull SBShader                                    renderer_specific;
+  private @CheckForNull SBRendererSpecific                          renderer_specific;
   private final @Nonnull AtomicReference<SBSceneControllerRenderer> controller;
 
   private final @Nonnull AtomicReference<VectorI3F>                 background_colour;
@@ -682,14 +685,21 @@ final class SBGLRenderer implements GLEventListener
         case TYPE_KERNEL:
         {
           final SBRendererTypeKernel rnk = (SBRendererTypeKernel) rn;
-          final KRenderer old_kernel = this.renderer_kernel;
-          final SBShader old_specific = this.renderer_specific;
 
-          this.renderer_kernel = this.initKernelRenderer(rnk.getRenderer());
+          final KRenderer kernel_old = this.renderer_kernel;
+          final SBRendererSpecific specific_old = this.renderer_specific;
+
+          final KRenderer kernel_new =
+            this.initKernelRenderer(rnk.getRenderer());
+
+          this.renderer_kernel = kernel_new;
           this.renderer_specific = null;
 
-          if (old_kernel != null) {
-            old_kernel.close();
+          if (kernel_old != null) {
+            kernel_old.close();
+          }
+          if (specific_old != null) {
+            specific_old.close();
           }
 
           this.running.set(RunningState.STATE_RUNNING);
@@ -698,14 +708,21 @@ final class SBGLRenderer implements GLEventListener
         case TYPE_SPECIFIC:
         {
           final SBRendererTypeSpecific rns = (SBRendererTypeSpecific) rn;
-          final KRenderer old_kernel = this.renderer_kernel;
-          final SBShader old_specific = this.renderer_specific;
+          final KRenderer kernel_old = this.renderer_kernel;
+          final SBRendererSpecific specific_old = this.renderer_specific;
+
+          final ProgramReference p = rns.getShader().getProgram();
+          final SBRendererSpecific specific_new =
+            new SBRendererSpecific(this.gi, this.filesystem, this.log, p);
 
           this.renderer_kernel = null;
-          this.renderer_specific = rns.getShader();
+          this.renderer_specific = specific_new;
 
-          if (old_kernel != null) {
-            old_kernel.close();
+          if (kernel_old != null) {
+            kernel_old.close();
+          }
+          if (specific_old != null) {
+            specific_old.close();
           }
 
           this.running.set(RunningState.STATE_RUNNING);
@@ -1429,12 +1446,25 @@ final class SBGLRenderer implements GLEventListener
       final Pair<Collection<KLight>, Collection<KMeshInstance>> p =
         c.rendererGetScene();
 
+      final ArrayList<KBatchUnlit> opaque_unlit =
+        new ArrayList<KBatchUnlit>();
+      final ArrayList<KBatchLit> opaque_lit = new ArrayList<KBatchLit>();
+      final ArrayList<KBatchUnlit> translucent_unlit =
+        new ArrayList<KBatchUnlit>();
+      final ArrayList<KBatchLit> translucent_lit = new ArrayList<KBatchLit>();
+
+      SBGLRenderer.renderSceneMakeUnlitBatches(
+        p,
+        opaque_unlit,
+        translucent_unlit);
+      SBGLRenderer.renderSceneMakeLitBatches(p, opaque_lit, translucent_lit);
+
       final KBatches batches =
         new KBatches(
-          new ArrayList<KBatchUnlit>(),
-          new ArrayList<KBatchLit>(),
-          new ArrayList<KBatchUnlit>(),
-          new ArrayList<KBatchLit>());
+          opaque_unlit,
+          opaque_lit,
+          translucent_unlit,
+          translucent_lit);
 
       final KScene scene = new KScene(kcamera, p.first, p.second, batches);
       this.scene_previous = this.scene_current;
@@ -1445,11 +1475,99 @@ final class SBGLRenderer implements GLEventListener
         kr.setBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f));
         kr.render(this.framebuffer, scene);
       } else if (this.renderer_specific != null) {
-        throw new UnimplementedCodeException();
+        final SBRendererSpecific rs = this.renderer_specific;
+        rs.setBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f));
+        rs.render(this.framebuffer, scene);
       } else {
         this.renderBlankScene();
       }
     }
+  }
+
+  private static void renderSceneMakeLitBatches(
+    final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
+    final @Nonnull ArrayList<KBatchLit> opaque_lit,
+    final @Nonnull ArrayList<KBatchLit> translucent_lit)
+  {
+    for (final KLight l : p.first) {
+      switch (l.getType()) {
+        case LIGHT_CONE:
+        {
+          throw new UnimplementedCodeException();
+        }
+        case LIGHT_DIRECTIONAL:
+        case LIGHT_SPHERE:
+        {
+          final HashMap<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
+            new HashMap<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>>();
+
+          for (final KMeshInstance m : p.second) {
+            final KMeshInstanceMaterialLabel mlabel = m.getMaterialLabel();
+            if (instances_by_label.containsKey(mlabel)) {
+              final ArrayList<KMeshInstance> ins =
+                instances_by_label.get(mlabel);
+              ins.add(m);
+            } else {
+              final ArrayList<KMeshInstance> ins =
+                new ArrayList<KMeshInstance>();
+              ins.add(m);
+              instances_by_label.put(mlabel, ins);
+            }
+          }
+
+          for (final Entry<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
+            .entrySet()) {
+            final KMeshInstanceMaterialLabel label = e.getKey();
+            final ArrayList<KMeshInstance> instances = e.getValue();
+
+            if (label.getAlpha() == Alpha.ALPHA_TRANSLUCENT) {
+              translucent_lit.add(new KBatchLit(l, label, instances));
+            } else {
+              opaque_lit.add(new KBatchLit(l, label, instances));
+            }
+          }
+
+          break;
+        }
+      }
+    }
+  }
+
+  private static void renderSceneMakeUnlitBatches(
+    final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
+    final @Nonnull ArrayList<KBatchUnlit> opaque_unlit,
+    final @Nonnull ArrayList<KBatchUnlit> translucent_unlit)
+  {
+
+    final HashMap<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
+      new HashMap<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>>();
+
+    for (final KMeshInstance i : p.second) {
+      final KMeshInstanceMaterialLabel mlabel = i.getMaterialLabel();
+      if (mlabel.getNormal() == Normal.NORMAL_NONE) {
+        if (instances_by_label.containsKey(mlabel)) {
+          final ArrayList<KMeshInstance> ins = instances_by_label.get(mlabel);
+          ins.add(i);
+        } else {
+          final ArrayList<KMeshInstance> ins = new ArrayList<KMeshInstance>();
+          ins.add(i);
+          instances_by_label.put(mlabel, ins);
+        }
+      }
+    }
+
+    for (final Entry<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
+      .entrySet()) {
+      final KMeshInstanceMaterialLabel label = e.getKey();
+      final ArrayList<KMeshInstance> instances = e.getValue();
+
+      if (label.getAlpha() == Alpha.ALPHA_TRANSLUCENT) {
+        translucent_unlit.add(new KBatchUnlit(label, instances));
+      } else {
+        opaque_unlit.add(new KBatchUnlit(label, instances));
+      }
+    }
+
   }
 
   private void renderBlankScene()
