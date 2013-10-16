@@ -41,17 +41,21 @@ import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.renderer.RMatrixReadable3x3F;
 import com.io7m.renderer.RMatrixReadable4x4F;
+import com.io7m.renderer.RSpaceObject;
+import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RTransformModel;
 import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformViewInverse;
+import com.io7m.renderer.RVectorReadable3F;
+import com.io7m.renderer.RVectorReadable4F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KSphere;
 
 public final class KShadingProgramCommon
 {
-  public static void bindAttributeNormal(
+  static void bindAttributeNormal(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull ArrayBufferUsable array)
@@ -63,7 +67,7 @@ public final class KShadingProgramCommon
     exec.execAttributeBind(gc, "v_normal", a);
   }
 
-  public static void bindAttributePosition(
+  static void bindAttributePosition(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull ArrayBufferUsable array)
@@ -75,7 +79,7 @@ public final class KShadingProgramCommon
     exec.execAttributeBind(gc, "v_position", a);
   }
 
-  public static void bindAttributeTangent4(
+  static void bindAttributeTangent4(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull ArrayBufferUsable array)
@@ -87,7 +91,7 @@ public final class KShadingProgramCommon
     exec.execAttributeBind(gc, "v_tangent4", a);
   }
 
-  public static void bindAttributeUV(
+  static void bindAttributeUV(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull ArrayBufferUsable array)
@@ -171,7 +175,137 @@ public final class KShadingProgramCommon
     KShadingProgramCommon.putTextureSpecular(exec, gc, texture_unit);
   }
 
-  public static void putDirectionalLightReuse(
+  static boolean existsAttributeNormal(
+    final @Nonnull JCCEExecutionAPI e)
+    throws JCGLException,
+      ConstraintError
+  {
+    return e.execGetProgram().getAttributes().containsKey("v_normal");
+  }
+
+  static boolean existsAttributePosition(
+    final @Nonnull JCCEExecutionAPI e)
+    throws JCGLException,
+      ConstraintError
+  {
+    return e.execGetProgram().getAttributes().containsKey("v_position");
+  }
+
+  static boolean existsAttributeTangent4(
+    final @Nonnull JCCEExecutionAPI e)
+    throws JCGLException,
+      ConstraintError
+  {
+    return e.execGetProgram().getAttributes().containsKey("v_tangent4");
+  }
+
+  static boolean existsAttributeUV(
+    final @Nonnull JCCEExecutionAPI e)
+    throws JCGLException,
+      ConstraintError
+  {
+    return e.execGetProgram().getAttributes().containsKey("v_uv");
+  }
+
+  static boolean existsMaterialAlbedoColour(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec
+      .execGetProgram()
+      .getUniforms()
+      .containsKey("material.albedo.colour");
+  }
+
+  static boolean existsMaterialAlbedoMix(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec
+      .execGetProgram()
+      .getUniforms()
+      .containsKey("material.albedo.mix");
+  }
+
+  static boolean existsMaterialEmissiveLevel(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec
+      .execGetProgram()
+      .getUniforms()
+      .containsKey("material.emissive.emissive");
+  }
+
+  static boolean existsMaterialEnvironmentMix(
+    final @Nonnull JCCEExecutionAPI exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec
+      .execGetProgram()
+      .getUniforms()
+      .containsKey("material.environment.mix");
+  }
+
+  static boolean existsMaterialEnvironmentReflectionMix(
+    final JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec
+      .execGetProgram()
+      .getUniforms()
+      .containsKey("material.environment.reflection_mix");
+  }
+
+  static boolean existsMaterialEnvironmentRefractionIndex(
+    final JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec
+      .execGetProgram()
+      .getUniforms()
+      .containsKey("material.environment.refraction_index");
+  }
+
+  static boolean existsMaterialSpecularExponent(
+    final @Nonnull JCCEExecutionAPI exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec
+      .execGetProgram()
+      .getUniforms()
+      .containsKey("material.specular.exponent");
+  }
+
+  static boolean existsMaterialSpecularIntensity(
+    final @Nonnull JCCEExecutionAPI exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec
+      .execGetProgram()
+      .getUniforms()
+      .containsKey("material.specular.intensity");
+  }
+
+  static void putAttributeNormal(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull RVectorReadable3F<RSpaceObject> r)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execAttributePutVector3F(gc, "v_normal", r);
+  }
+
+  static void putDirectionalLightReuse(
     final @Nonnull JCCEExecutionAPI e)
     throws JCGLException,
       ConstraintError
@@ -181,7 +315,7 @@ public final class KShadingProgramCommon
     e.execUniformUseExisting("light.intensity");
   }
 
-  public static void putLightDirectional(
+  static void putLightDirectional(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI e,
     final @Nonnull KMatrices matrices,
@@ -207,7 +341,7 @@ public final class KShadingProgramCommon
     e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
   }
 
-  public static void putLightSpherical(
+  static void putLightSpherical(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull KMatrices matrices,
@@ -235,7 +369,7 @@ public final class KShadingProgramCommon
     exec.execUniformPutFloat(gc, "light.falloff", light.getExponent());
   }
 
-  public static void putLightSphericalReuse(
+  static void putLightSphericalReuse(
     final @Nonnull JCCEExecutionAPI exec)
     throws JCGLException,
       ConstraintError
@@ -254,11 +388,41 @@ public final class KShadingProgramCommon
     throws ConstraintError,
       JCGLException
   {
-    exec.execUniformPutFloat(gc, "material.albedo.mix", albedo.getMix());
-    exec.execUniformPutVector4F(
+    KShadingProgramCommon.putMaterialAlbedoMix(exec, gc, albedo.getMix());
+    KShadingProgramCommon.putMaterialAlbedoColour(
+      exec,
       gc,
-      "material.albedo.colour",
       albedo.getColour());
+  }
+
+  static void putMaterialAlbedoColour(
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull RVectorReadable4F<RSpaceRGBA> rgba)
+    throws ConstraintError,
+      JCGLException
+  {
+    exec.execUniformPutVector4F(gc, "material.albedo.colour", rgba);
+  }
+
+  static void putMaterialAlbedoMix(
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final float mix)
+    throws ConstraintError,
+      JCGLException
+  {
+    exec.execUniformPutFloat(gc, "material.albedo.mix", mix);
+  }
+
+  static void putMaterialEmissiveLevel(
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final float emission)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutFloat(gc, "material.emissive.emissive", emission);
   }
 
   static void putMaterialEnvironment(
@@ -281,6 +445,27 @@ public final class KShadingProgramCommon
     exec.execUniformPutFloat(gc, "material.environment.mix", mix);
   }
 
+  static void putMaterialEnvironmentReflectionMix(
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final float mix)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutFloat(gc, "material.environment.reflection_mix", mix);
+  }
+
+  static void putMaterialEnvironmentRefractionIndex(
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final float mix)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec
+      .execUniformPutFloat(gc, "material.environment.refraction_index", mix);
+  }
+
   static void putMaterialSpecular(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
@@ -298,16 +483,6 @@ public final class KShadingProgramCommon
       m.getIntensity());
   }
 
-  static void putMaterialSpecularIntensity(
-    final @Nonnull JCCEExecutionAPI exec,
-    final @Nonnull JCGLInterfaceCommon gc,
-    final float i)
-    throws ConstraintError,
-      JCGLException
-  {
-    exec.execUniformPutFloat(gc, "material.specular.intensity", i);
-  }
-
   static void putMaterialSpecularExponent(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
@@ -318,7 +493,17 @@ public final class KShadingProgramCommon
     exec.execUniformPutFloat(gc, "material.specular.exponent", e);
   }
 
-  public static void putMatrixInverseView(
+  static void putMaterialSpecularIntensity(
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final float i)
+    throws ConstraintError,
+      JCGLException
+  {
+    exec.execUniformPutFloat(gc, "material.specular.intensity", i);
+  }
+
+  static void putMatrixInverseView(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull RMatrixReadable4x4F<RTransformViewInverse> m)
@@ -328,7 +513,7 @@ public final class KShadingProgramCommon
     exec.execUniformPutMatrix4x4F(gc, "m_view_inv", m);
   }
 
-  public static void putMatrixModel(
+  static void putMatrixModel(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull RMatrixReadable4x4F<RTransformModel> m)
@@ -338,7 +523,7 @@ public final class KShadingProgramCommon
     exec.execUniformPutMatrix4x4F(gc, "m_model", m);
   }
 
-  public static void putMatrixModelView(
+  static void putMatrixModelView(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull RMatrixReadable4x4F<RTransformModelView> m)
@@ -348,7 +533,7 @@ public final class KShadingProgramCommon
     exec.execUniformPutMatrix4x4F(gc, "m_modelview", m);
   }
 
-  public static void putMatrixNormal(
+  static void putMatrixNormal(
     final @Nonnull JCCEExecutionCallable exec,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull RMatrixReadable3x3F<RTransformNormal> mn)
@@ -358,7 +543,7 @@ public final class KShadingProgramCommon
     exec.execUniformPutMatrix3x3F(gc, "m_normal", mn);
   }
 
-  public static void putMatrixProjection(
+  static void putMatrixProjection(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull RMatrixReadable4x4F<RTransformProjection> m)
@@ -368,7 +553,7 @@ public final class KShadingProgramCommon
     exec.execUniformPutMatrix4x4F(gc, "m_projection", m);
   }
 
-  public static void putMatrixProjectionReuse(
+  static void putMatrixProjectionReuse(
     final @Nonnull JCCEExecutionCallable exec)
     throws JCGLException,
       ConstraintError
@@ -376,7 +561,7 @@ public final class KShadingProgramCommon
     exec.execUniformUseExisting("m_projection");
   }
 
-  public static void putTextureAlbedo(
+  static void putTextureAlbedo(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull TextureUnit unit)
@@ -386,7 +571,7 @@ public final class KShadingProgramCommon
     exec.execUniformPutTextureUnit(gc, "t_albedo", unit);
   }
 
-  public static void putTextureEnvironment(
+  static void putTextureEnvironment(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull TextureUnit unit)
@@ -396,7 +581,7 @@ public final class KShadingProgramCommon
     exec.execUniformPutTextureUnit(gc, "t_environment", unit);
   }
 
-  public static void putTextureNormal(
+  static void putTextureNormal(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull TextureUnit unit)
@@ -406,7 +591,7 @@ public final class KShadingProgramCommon
     exec.execUniformPutTextureUnit(gc, "t_normal", unit);
   }
 
-  public static void putTextureSpecular(
+  static void putTextureSpecular(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull TextureUnit unit)
@@ -416,7 +601,7 @@ public final class KShadingProgramCommon
     exec.execUniformPutTextureUnit(gc, "t_specular", unit);
   }
 
-  public static void renderWithIndices(
+  static void renderWithIndices(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable exec,
     final @Nonnull IndexBuffer indices)

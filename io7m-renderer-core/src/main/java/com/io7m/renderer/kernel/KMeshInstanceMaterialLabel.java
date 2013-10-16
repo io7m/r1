@@ -407,9 +407,39 @@ import com.io7m.jcanephora.ArrayBuffer;
     return true;
   }
 
+  public @Nonnull Albedo getAlbedo()
+  {
+    return this.albedo;
+  }
+
+  public @Nonnull Alpha getAlpha()
+  {
+    return this.alpha;
+  }
+
   public @Nonnull String getCode()
   {
     return this.code;
+  }
+
+  public @Nonnull Emissive getEmissive()
+  {
+    return this.emissive;
+  }
+
+  public @Nonnull Environment getEnvironment()
+  {
+    return this.environment;
+  }
+
+  public @Nonnull Normal getNormal()
+  {
+    return this.normal;
+  }
+
+  public @Nonnull Specular getSpecular()
+  {
+    return this.specular;
   }
 
   @Override public int hashCode()

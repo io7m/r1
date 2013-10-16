@@ -6,8 +6,8 @@ rm -rf out-glsl
 mkdir out-glsl
 
 cp *.p out-parasol
-./sources > out-parasol/Kernel.p
-./batch   > out-parasol/batch.txt
+./sources
+./batch > out-parasol/batch.txt
 
 java \
   -jar io7m-parasol-compiler-frontend-0.1.14-parasol-c.jar \

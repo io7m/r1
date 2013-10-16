@@ -393,7 +393,9 @@ final class SBMainWindow extends JFrame
           {
             try {
               final SBShader s = d.getSelectedShader();
-              controller.rendererSetType(new SBRendererTypeSpecific(s));
+              if (s != null) {
+                controller.rendererSetType(new SBRendererTypeSpecific(s));
+              }
             } catch (final ConstraintError x) {
               throw new UnreachableCodeException();
             }

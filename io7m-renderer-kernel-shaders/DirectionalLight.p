@@ -72,18 +72,21 @@ module DirectionalLight is
 
   --
   -- Given a directional light [light], calculate the diffuse
-  -- color based on [d].
+  -- color based on [d], with minimum emission [e].
   --
 
   function diffuse_color (
     light : t,
-    d     : directions
+    d     : directions,
+    e     : float
   ) : vector_3f =
     let
       value factor =
         F.maximum (0.0, V3.dot (d.stl, d.normal));
+      value factor_e =
+        F.maximum (factor, e);
       value color =
-        V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor);
+        V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor_e);
     in
       color
     end;
@@ -99,7 +102,7 @@ module DirectionalLight is
   ) : vector_3f =
     let
       value d = directions (light, new vector_3f(0.0, 0.0, 0.0), n);
-      value c = diffuse_color (light, d);
+      value c = diffuse_color (light, d, 0.0);
     in
       c
     end;
@@ -138,11 +141,20 @@ module DirectionalLight is
   ) : vector_3f =
     let
       value d  = directions (light, p, n);
-      value dc = diffuse_color (light, d);
+      value dc = diffuse_color (light, d, 0.0);
       value sc = specular_color (light, d, material.specular);
     in
       V3.add (dc, sc)
     end;
+
+  --
+  -- Given a directional light [light], a surface normal [n],
+  -- surface properties given by [material],
+  -- and the current point [p] on the surface to be lit,
+  -- calculate the diffuse and specular terms for the surface,
+  -- including the emissive value as the minimum resulting
+  -- light intensity.
+  --
 
   function diffuse_specular_emissive (
     light    : t,
@@ -150,13 +162,30 @@ module DirectionalLight is
     p        : vector_3f,
     material : M.t
   ) : vector_3f =
-    new vector_3f (1.0, 0.0, 1.0);
+    let
+      value d  = directions (light, p, n);
+      value dc = diffuse_color (light, d, material.emissive.emissive);
+      value sc = specular_color (light, d, material.specular);
+    in
+      V3.add (dc, sc)
+    end;
+
+  --
+  -- Given a directional light [light] and a surface normal [n],
+  -- calculate the diffuse term for the surface, including the
+  -- emissive value as the minimum resulting light intensity.
+  --
 
   function diffuse_only_emissive (
     light    : t,
     n        : vector_3f,
     material : M.t
   ) : vector_3f =
-    new vector_3f (1.0, 0.0, 1.0);
+    let
+      value d = directions (light, new vector_3f(0.0, 0.0, 0.0), n);
+      value c = diffuse_color (light, d, material.emissive.emissive);
+    in
+      c
+    end;
 
 end;
