@@ -1,4 +1,4 @@
-(*| Copyright © 2013 <code@io7m.com> http://io7m.com                         *)
+(*| Copyright ï¿½ 2013 <code@io7m.com> http://io7m.com                         *)
 (*|                                                                          *)
 (*| Permission to use, copy, modify, and/or distribute this software for any *)
 (*| purpose with or without fee is hereby granted, provided that the above   *)
@@ -16,9 +16,11 @@ let main (_ : unit) : unit =
   let labels = Labels.label_all () in
     List.iter (fun l ->
       print_endline (String.concat "" [
+        "fwd_";
         Labels.label_code l;
-        " : com.io7m.renderer.Kernel.fwd_";
+        " : com.io7m.renderer.Fwd_";
         Labels.label_code l;
+        ".p"
       ])
     ) labels
 

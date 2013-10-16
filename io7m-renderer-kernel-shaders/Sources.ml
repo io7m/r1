@@ -1,4 +1,4 @@
-(*| Copyright © 2013 <code@io7m.com> http://io7m.com                         *)
+(*| Copyright ï¿½ 2013 <code@io7m.com> http://io7m.com                         *)
 (*|                                                                          *)
 (*| Permission to use, copy, modify, and/or distribute this software for any *)
 (*| purpose with or without fee is hereby granted, provided that the above   *)
@@ -33,14 +33,26 @@ let preamble =
 
 let main (_ : unit) : unit =
   begin let labels = Labels.label_all () in
-    print_endline preamble;
-    print_endline (String.concat "" (Shaders.module_start "Kernel"));
     List.iter (fun l ->
-      print_endline (String.concat "" (Shaders.fwd_vertex_shader l));
-      print_endline (String.concat "" (Shaders.fwd_fragment_shader l));
-      print_endline (String.concat "" (Shaders.fwd_program_shader l));
+      let code = Labels.label_code l in
+      let c = open_out ("out-parasol/fwd_" ^ code ^ ".p") in
+        begin
+          output_string c preamble;
+          output_string c "\n";
+          output_string c (String.concat "" (Shaders.module_start ("Fwd_" ^ code)));
+          output_string c "\n";
+          output_string c (String.concat "" (Shaders.fwd_vertex_shader l));
+          output_string c "\n";
+          output_string c (String.concat "" (Shaders.fwd_fragment_shader l));
+          output_string c "\n";
+          output_string c (String.concat "" (Shaders.fwd_program_shader l));
+          output_string c "\n";
+          output_string c (String.concat "" (Shaders.module_end));
+          output_string c "\n";
+          flush c;
+          close_out c;
+        end
     ) labels;
-    print_endline (String.concat "" (Shaders.module_end));
   end
 
 let _ = main ()

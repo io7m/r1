@@ -74,6 +74,11 @@ import com.io7m.jaux.Constraints.ConstraintError;
     return this.material;
   }
 
+  public @Nonnull KMeshInstanceMaterialLabel getMaterialLabel()
+  {
+    return this.label;
+  }
+
   public @Nonnull KMesh getMesh()
   {
     return this.mesh;
