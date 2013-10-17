@@ -373,7 +373,7 @@ public final class Shaders
           case ALPHA_TRANSLUCENT:
           {
             b.append("  value albedo : vector_4f =\n");
-            b.append("    A.translucent (m.albedo);\n");
+            b.append("    A.translucent (m.albedo, m.alpha.opacity);\n");
             break;
           }
         }
@@ -392,7 +392,7 @@ public final class Shaders
           {
             b.append("  value albedo : vector_4f =\n");
             b
-              .append("    A.textured_translucent (t_albedo, f_uv, m.albedo);\n");
+              .append("    A.textured_translucent (t_albedo, f_uv, m.albedo, m.alpha.opacity);\n");
             break;
           }
         }
@@ -540,6 +540,7 @@ public final class Shaders
             b.append("  value m =\n");
             b.append("    record M.t {\n");
             b.append("      emissive    = material.emissive,\n");
+            b.append("      alpha       = material.alpha,\n");
             b.append("      albedo      = material.albedo,\n");
             b.append("      environment = material.environment,\n");
             b.append("      specular    = record M.specular {\n");
@@ -563,6 +564,7 @@ public final class Shaders
             b.append("      emissive   = record M.emissive {\n");
             b.append("        emissive = S.texture (t_emissive, f_uv)[x]\n");
             b.append("      },\n");
+            b.append("      alpha       = material.alpha,\n");
             b.append("      albedo      = material.albedo,\n");
             b.append("      environment = material.environment,\n");
             b.append("      specular    = material.specular\n");
@@ -576,6 +578,7 @@ public final class Shaders
             b.append("      emissive   = record M.emissive {\n");
             b.append("        emissive = S.texture (t_emissive, f_uv)[x]\n");
             b.append("      },\n");
+            b.append("      alpha       = material.alpha,\n");
             b.append("      albedo      = material.albedo,\n");
             b.append("      environment = material.environment,\n");
             b.append("      specular    = record M.specular {\n");

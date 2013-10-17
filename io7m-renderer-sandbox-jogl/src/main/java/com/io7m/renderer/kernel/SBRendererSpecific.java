@@ -66,6 +66,9 @@ public final class SBRendererSpecific implements KRenderer
     int texture_units = 1;
 
     texture_units +=
+      SBRendererSpecific.setParametersAlpha(gc, i, exec, texture_units);
+
+    texture_units +=
       SBRendererSpecific.setParametersNormal(
         gc,
         i,
@@ -84,6 +87,26 @@ public final class SBRendererSpecific implements KRenderer
 
     texture_units +=
       SBRendererSpecific.setParametersAlbedo(gc, i, exec, texture_units);
+  }
+
+  private static int setParametersAlpha(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMeshInstance i,
+    final @Nonnull JCCEExecutionCallable exec,
+    final int texture_units)
+    throws JCGLException,
+      ConstraintError
+  {
+    final KMaterialAlpha alpha = i.getMaterial().getAlpha();
+
+    if (KShadingProgramCommon.existsMaterialAlphaOpacity(exec)) {
+      KShadingProgramCommon.putMaterialAlphaOpacity(
+        exec,
+        gc,
+        alpha.getOpacity());
+    }
+
+    return 0;
   }
 
   private static int setParametersAlbedo(
