@@ -43,11 +43,13 @@ import com.io7m.renderer.RMatrixReadable3x3F;
 import com.io7m.renderer.RMatrixReadable4x4F;
 import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RSpaceRGBA;
+import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RTransformModel;
 import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformViewInverse;
+import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorReadable3F;
 import com.io7m.renderer.RVectorReadable4F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
@@ -293,6 +295,14 @@ public final class KShadingProgramCommon
       .execGetProgram()
       .getUniforms()
       .containsKey("material.specular.intensity");
+  }
+
+  static boolean existsTextureAlbedo(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec.execGetProgram().getUniforms().containsKey("t_albedo");
   }
 
   static void putAttributeNormal(
@@ -625,5 +635,15 @@ public final class KShadingProgramCommon
     } catch (final Exception e) {
       throw new UnreachableCodeException();
     }
+  }
+
+  static void putAttributeUV(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull RVectorI2F<RSpaceTexture> uv)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execAttributePutVector2F(gc, "v_uv", uv);
   }
 }

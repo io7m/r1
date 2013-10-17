@@ -24,6 +24,7 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
@@ -39,6 +40,8 @@ import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.ProgramReference;
+import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorM4F;
@@ -46,6 +49,8 @@ import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.renderer.RSpaceObject;
+import com.io7m.renderer.RSpaceTexture;
+import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
 
 public final class SBRendererSpecific implements KRenderer
@@ -58,20 +63,39 @@ public final class SBRendererSpecific implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-    SBRendererSpecific.setParametersNormal(gc, i, array, exec);
-    SBRendererSpecific.setParametersEnvironment(gc, i, exec);
-    SBRendererSpecific.setParametersSpecular(gc, i, exec);
-    SBRendererSpecific.setParametersEmissive(gc, i, exec);
-    SBRendererSpecific.setParametersAlbedo(gc, i, exec);
+    int texture_units = 1;
+
+    texture_units +=
+      SBRendererSpecific.setParametersNormal(
+        gc,
+        i,
+        array,
+        exec,
+        texture_units);
+
+    texture_units +=
+      SBRendererSpecific.setParametersEnvironment(gc, i, exec, texture_units);
+
+    texture_units +=
+      SBRendererSpecific.setParametersSpecular(gc, i, exec, texture_units);
+
+    texture_units +=
+      SBRendererSpecific.setParametersEmissive(gc, i, exec, texture_units);
+
+    texture_units +=
+      SBRendererSpecific.setParametersAlbedo(gc, i, exec, texture_units);
   }
 
-  private static void setParametersAlbedo(
+  private static int setParametersAlbedo(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMeshInstance i,
-    final @Nonnull JCCEExecutionCallable exec)
+    final @Nonnull JCCEExecutionCallable exec,
+    final int texture_units)
     throws JCGLException,
       ConstraintError
   {
+    int used_units = 0;
+
     final KMaterialAlbedo albedo = i.getMaterial().getDiffuse();
 
     if (KShadingProgramCommon.existsMaterialAlbedoColour(exec)) {
@@ -83,30 +107,78 @@ public final class SBRendererSpecific implements KRenderer
     if (KShadingProgramCommon.existsMaterialAlbedoMix(exec)) {
       KShadingProgramCommon.putMaterialAlbedoMix(exec, gc, albedo.getMix());
     }
+
+    if (KShadingProgramCommon.existsTextureAlbedo(exec)) {
+      final TextureUnit[] units = gc.textureGetUnits();
+      final TextureUnit unit = units[texture_units];
+
+      switch (i.getMaterialLabel().getAlbedo()) {
+        case ALBEDO_COLOURED:
+        {
+          gc.texture2DStaticUnbind(unit);
+          KShadingProgramCommon.putTextureAlbedo(exec, gc, unit);
+          KShadingProgramCommon.putAttributeUV(
+            gc,
+            exec,
+            new RVectorI2F<RSpaceTexture>(0.0f, 0.0f));
+          break;
+        }
+        case ALBEDO_TEXTURED:
+        {
+          if (albedo.getTexture().isSome()) {
+            final Texture2DStatic t =
+              ((Some<Texture2DStatic>) albedo.getTexture()).value;
+            gc.texture2DStaticBind(unit, t);
+            KShadingProgramCommon.putTextureAlbedo(exec, gc, unit);
+          } else {
+            gc.texture2DStaticUnbind(unit);
+            KShadingProgramCommon.putTextureAlbedo(exec, gc, unit);
+          }
+
+          KShadingProgramCommon.bindAttributeUV(gc, exec, i
+            .getMesh()
+            .getArrayBuffer());
+
+          break;
+        }
+      }
+
+      ++used_units;
+    }
+
+    return used_units;
   }
 
-  private static void setParametersEmissive(
+  private static int setParametersEmissive(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMeshInstance i,
-    final @Nonnull JCCEExecutionCallable exec)
+    final @Nonnull JCCEExecutionCallable exec,
+    final int texture_units)
     throws JCGLException,
       ConstraintError
   {
+    final int used_units = 0;
+
     if (KShadingProgramCommon.existsMaterialEmissiveLevel(exec)) {
       KShadingProgramCommon.putMaterialEmissiveLevel(exec, gc, i
         .getMaterial()
         .getEmissive()
         .getEmission());
     }
+
+    return used_units;
   }
 
-  private static void setParametersEnvironment(
+  private static int setParametersEnvironment(
     final JCGLInterfaceCommon gc,
     final KMeshInstance i,
-    final JCCEExecutionCallable exec)
+    final JCCEExecutionCallable exec,
+    final int texture_units)
     throws JCGLException,
       ConstraintError
   {
+    final int used_units = 0;
+
     final KMaterialEnvironment environment = i.getMaterial().getEnvironment();
     if (KShadingProgramCommon.existsMaterialEnvironmentMix(exec)) {
       KShadingProgramCommon.putMaterialEnvironmentMix(
@@ -126,16 +198,21 @@ public final class SBRendererSpecific implements KRenderer
         gc,
         environment.getRefractionIndex());
     }
+
+    return used_units;
   }
 
-  private static void setParametersNormal(
+  private static int setParametersNormal(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMeshInstance i,
     final @Nonnull ArrayBuffer array,
-    final @Nonnull JCCEExecutionCallable exec)
+    final @Nonnull JCCEExecutionCallable exec,
+    final int texture_units)
     throws JCGLException,
       ConstraintError
   {
+    final int used_units = 0;
+
     if (KShadingProgramCommon.existsAttributeNormal(exec)) {
       switch (i.getMaterialLabel().getNormal()) {
         case NORMAL_MAPPED:
@@ -153,15 +230,20 @@ public final class SBRendererSpecific implements KRenderer
         }
       }
     }
+
+    return used_units;
   }
 
-  private static void setParametersSpecular(
+  private static int setParametersSpecular(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMeshInstance i,
-    final @Nonnull JCCEExecutionCallable exec)
+    final @Nonnull JCCEExecutionCallable exec,
+    final int texture_units)
     throws JCGLException,
       ConstraintError
   {
+    final int used_units = 0;
+
     final KMaterialSpecular specular = i.getMaterial().getSpecular();
     if (KShadingProgramCommon.existsMaterialSpecularIntensity(exec)) {
       KShadingProgramCommon.putMaterialSpecularIntensity(
@@ -175,6 +257,8 @@ public final class SBRendererSpecific implements KRenderer
         gc,
         specular.getExponent());
     }
+
+    return used_units;
   }
 
   private final @Nonnull ProgramReference      program;
