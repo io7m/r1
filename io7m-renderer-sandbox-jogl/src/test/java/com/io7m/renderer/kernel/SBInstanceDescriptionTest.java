@@ -26,8 +26,11 @@ import net.java.quickcheck.generator.support.IntegerGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.io7m.jaux.AlmostEqualFloat;
+import com.io7m.jaux.AlmostEqualFloat.ContextRelative;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jtensors.VectorI4F;
 import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RSpaceWorld;
 
@@ -136,13 +139,102 @@ public class SBInstanceDescriptionTest
     QuickCheck.forAllVerbose(
       new InstanceGenerator(),
       new AbstractCharacteristic<SBInstanceDescription>() {
-        @Override protected void doSpecify(
+        @SuppressWarnings("boxing") @Override protected void doSpecify(
           final @Nonnull SBInstanceDescription desc)
           throws Throwable
         {
-          Assert.assertEquals(
-            desc,
-            SBInstanceDescription.fromXML(desc.toXML()));
+          final ContextRelative ctx = new ContextRelative();
+          ctx.setMaxAbsoluteDifference(0.000001f);
+
+          final SBInstanceDescription desc_r =
+            SBInstanceDescription.fromXML(desc.toXML());
+
+          Assert.assertEquals(desc.getID(), desc_r.getID());
+          Assert.assertEquals(desc.getOrientation(), desc_r.getOrientation());
+          Assert.assertEquals(desc.getPosition(), desc_r.getPosition());
+          Assert.assertEquals(desc.getMesh(), desc_r.getMesh());
+
+          final SBMaterialDescription mat = desc.getMaterial();
+          final SBMaterialDescription mat_r = desc_r.getMaterial();
+
+          {
+            final SBMaterialAlbedoDescription aa = mat.getAlbedo();
+            final SBMaterialAlbedoDescription ar = mat_r.getAlbedo();
+
+            Assert.assertTrue(VectorI4F.almostEqual(
+              ctx,
+              aa.getColour(),
+              ar.getColour()));
+            Assert.assertTrue(AlmostEqualFloat.almostEqual(
+              ctx,
+              aa.getMix(),
+              ar.getMix()));
+            Assert.assertEquals(aa.getTexture(), ar.getTexture());
+          }
+
+          {
+            final SBMaterialAlphaDescription aa = mat.getAlpha();
+            final SBMaterialAlphaDescription ar = mat_r.getAlpha();
+
+            Assert.assertEquals(aa.isTranslucent(), ar.isTranslucent());
+            Assert.assertTrue(AlmostEqualFloat.almostEqual(
+              ctx,
+              aa.getOpacity(),
+              ar.getOpacity()));
+          }
+
+          {
+            final SBMaterialEmissiveDescription me = mat.getEmissive();
+            final SBMaterialEmissiveDescription mr = mat_r.getEmissive();
+
+            Assert.assertTrue(AlmostEqualFloat.almostEqual(
+              ctx,
+              me.getEmission(),
+              mr.getEmission()));
+            Assert.assertEquals(me.getTexture(), mr.getTexture());
+          }
+
+          {
+            final SBMaterialEnvironmentDescription ee = mat.getEnvironment();
+            final SBMaterialEnvironmentDescription er =
+              mat_r.getEnvironment();
+
+            Assert.assertTrue(AlmostEqualFloat.almostEqual(
+              ctx,
+              ee.getMix(),
+              er.getMix()));
+            Assert.assertTrue(AlmostEqualFloat.almostEqual(
+              ctx,
+              ee.getReflectionMix(),
+              er.getReflectionMix()));
+            Assert.assertTrue(AlmostEqualFloat.almostEqual(
+              ctx,
+              ee.getRefractionIndex(),
+              er.getRefractionIndex()));
+            Assert.assertEquals(ee.getTexture(), er.getTexture());
+          }
+
+          {
+            final SBMaterialNormalDescription ne = mat.getNormal();
+            final SBMaterialNormalDescription nr = mat_r.getNormal();
+
+            Assert.assertEquals(ne.getTexture(), nr.getTexture());
+          }
+
+          {
+            final SBMaterialSpecularDescription se = mat.getSpecular();
+            final SBMaterialSpecularDescription sr = mat_r.getSpecular();
+
+            Assert.assertTrue(AlmostEqualFloat.almostEqual(
+              ctx,
+              se.getExponent(),
+              sr.getExponent()));
+            Assert.assertTrue(AlmostEqualFloat.almostEqual(
+              ctx,
+              se.getIntensity(),
+              sr.getIntensity()));
+            Assert.assertEquals(se.getTexture(), sr.getTexture());
+          }
         }
       });
   }
