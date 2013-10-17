@@ -35,7 +35,8 @@ public final class PathVirtualGenerator implements Generator<PathVirtual>
     PathVirtual path = PathVirtual.ROOT;
     for (int index = 0; index < components; ++index) {
       try {
-        path = path.appendName(this.gen.next());
+        final String comp = this.gen.next();
+        path = path.appendName(comp.isEmpty() ? "z" : comp);
       } catch (final ConstraintError e) {
         throw new UnreachableCodeException();
       }
