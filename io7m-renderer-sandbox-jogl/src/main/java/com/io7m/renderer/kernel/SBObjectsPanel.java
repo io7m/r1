@@ -148,10 +148,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         .add(this.texture_mix.getLabel())
         .add(this.texture_mix.getSlider(), 4)
         .add(this.texture_mix.getField());
-
-      dg.emptyRow();
-      dg.row().left().add(new JSeparator()).fill();
-      dg.emptyRow();
     }
 
     @Override public void mpLoadFrom(
@@ -222,10 +218,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       dg.emptyRow();
 
       dg.row().grid().add(new JLabel("Translucent")).add(this.translucent);
-
-      dg.emptyRow();
-      dg.row().left().add(new JSeparator()).fill();
-      dg.emptyRow();
     }
 
     @Override public void mpLoadFrom(
@@ -285,7 +277,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       dg
         .row()
         .grid()
-        .add(new JLabel("Emission"))
+        .add(new JLabel("Texture"))
         .add(this.texture, 3)
         .add(this.texture_select);
 
@@ -295,10 +287,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         .add(this.level.getLabel())
         .add(this.level.getSlider(), 3)
         .add(this.level.getField());
-
-      dg.emptyRow();
-      dg.row().left().add(new JSeparator()).fill();
-      dg.emptyRow();
     }
 
     @Override public void mpLoadFrom(
@@ -391,10 +379,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         .add(this.refraction_index.getLabel())
         .add(this.refraction_index.getSlider(), 3)
         .add(this.refraction_index.getField());
-
-      dg.emptyRow();
-      dg.row().left().add(new JSeparator()).fill();
-      dg.emptyRow();
     }
 
     @Override public void mpLoadFrom(
@@ -479,10 +463,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         .add(new JLabel("Texture"))
         .add(this.texture, 3)
         .add(this.texture_select);
-
-      dg.emptyRow();
-      dg.row().left().add(new JSeparator()).fill();
-      dg.emptyRow();
     }
 
     @Override public void mpLoadFrom(
