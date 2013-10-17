@@ -696,6 +696,15 @@ final class SBMainWindow extends JFrame
 
       final Container pane = this.getContentPane();
       pane.add(canvas);
+
+      this.addWindowFocusListener(new WindowAdapter() {
+        @Override public void windowGainedFocus(
+          final WindowEvent e)
+        {
+          canvas.requestFocusInWindow();
+        }
+      });
+
     } catch (final GLException e) {
       SBErrorBox.showError(log, "Renderer disabled", e);
     }
