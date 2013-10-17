@@ -28,6 +28,14 @@ module Materials is
   end;
 
   --
+  -- Material information relating to alpha
+  --
+
+  type alpha is record
+    opacity : float  -- The upper bound on object opacity, in the range [0, 1]
+  end;
+
+  --
   -- Material information relating to emissive terms
   --
 
@@ -59,6 +67,7 @@ module Materials is
   --
 
   type t is record
+    alpha       : alpha,
     albedo      : albedo,
     emissive    : emissive,
     specular    : specular,

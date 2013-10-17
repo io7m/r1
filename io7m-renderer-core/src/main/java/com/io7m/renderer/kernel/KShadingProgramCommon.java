@@ -646,4 +646,25 @@ public final class KShadingProgramCommon
   {
     exec.execAttributePutVector2F(gc, "v_uv", uv);
   }
+
+  static boolean existsMaterialAlphaOpacity(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec
+      .execGetProgram()
+      .getUniforms()
+      .containsKey("material.alpha.opacity");
+  }
+
+  static void putMaterialAlphaOpacity(
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final float opacity)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutFloat(gc, "material.alpha.opacity", opacity);
+  }
 }
