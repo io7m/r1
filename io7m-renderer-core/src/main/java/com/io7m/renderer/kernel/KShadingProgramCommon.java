@@ -231,6 +231,17 @@ public final class KShadingProgramCommon
       .containsKey("material.albedo.mix");
   }
 
+  static boolean existsMaterialAlphaOpacity(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec
+      .execGetProgram()
+      .getUniforms()
+      .containsKey("material.alpha.opacity");
+  }
+
   static boolean existsMaterialEmissiveLevel(
     final @Nonnull JCCEExecutionCallable exec)
     throws JCGLException,
@@ -297,12 +308,28 @@ public final class KShadingProgramCommon
       .containsKey("material.specular.intensity");
   }
 
+  static boolean existsMatrixNormal(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec.execGetProgram().getUniforms().containsKey("m_normal");
+  }
+
   static boolean existsTextureAlbedo(
     final @Nonnull JCCEExecutionCallable exec)
     throws JCGLException,
       ConstraintError
   {
     return exec.execGetProgram().getUniforms().containsKey("t_albedo");
+  }
+
+  static boolean existsTextureEmissive(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec.execGetProgram().getUniforms().containsKey("t_emissive");
   }
 
   static void putAttributeNormal(
@@ -313,6 +340,16 @@ public final class KShadingProgramCommon
       ConstraintError
   {
     exec.execAttributePutVector3F(gc, "v_normal", r);
+  }
+
+  static void putAttributeUV(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull RVectorI2F<RSpaceTexture> uv)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execAttributePutVector2F(gc, "v_uv", uv);
   }
 
   static void putDirectionalLightReuse(
@@ -423,6 +460,16 @@ public final class KShadingProgramCommon
       JCGLException
   {
     exec.execUniformPutFloat(gc, "material.albedo.mix", mix);
+  }
+
+  static void putMaterialAlphaOpacity(
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final float opacity)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutFloat(gc, "material.alpha.opacity", opacity);
   }
 
   static void putMaterialEmissiveLevel(
@@ -581,6 +628,16 @@ public final class KShadingProgramCommon
     exec.execUniformPutTextureUnit(gc, "t_albedo", unit);
   }
 
+  static void putTextureEmissive(
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull TextureUnit unit)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutTextureUnit(gc, "t_emissive", unit);
+  }
+
   static void putTextureEnvironment(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
@@ -637,34 +694,19 @@ public final class KShadingProgramCommon
     }
   }
 
-  static void putAttributeUV(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCCEExecutionCallable exec,
-    final @Nonnull RVectorI2F<RSpaceTexture> uv)
-    throws JCGLException,
-      ConstraintError
-  {
-    exec.execAttributePutVector2F(gc, "v_uv", uv);
-  }
-
-  static boolean existsMaterialAlphaOpacity(
+  static boolean existsLightDirection(
     final @Nonnull JCCEExecutionCallable exec)
     throws JCGLException,
       ConstraintError
   {
-    return exec
-      .execGetProgram()
-      .getUniforms()
-      .containsKey("material.alpha.opacity");
+    return exec.execGetProgram().getUniforms().containsKey("light.direction");
   }
 
-  static void putMaterialAlphaOpacity(
-    final @Nonnull JCCEExecutionCallable exec,
-    final @Nonnull JCGLInterfaceCommon gc,
-    final float opacity)
+  static boolean existsLightPosition(
+    final @Nonnull JCCEExecutionCallable exec)
     throws JCGLException,
       ConstraintError
   {
-    exec.execUniformPutFloat(gc, "material.alpha.opacity", opacity);
+    return exec.execGetProgram().getUniforms().containsKey("light.position");
   }
 }
