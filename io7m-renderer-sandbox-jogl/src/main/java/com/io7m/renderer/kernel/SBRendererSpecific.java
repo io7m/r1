@@ -41,6 +41,7 @@ import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
@@ -54,8 +55,12 @@ import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KSphere;
+import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Environment;
+import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Normal;
+import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Specular;
 
 public final class SBRendererSpecific implements KRenderer
 {
@@ -84,7 +89,12 @@ public final class SBRendererSpecific implements KRenderer
         texture_units);
 
     texture_units +=
-      SBRendererSpecific.setParametersEnvironment(gc, i, exec, texture_units);
+      SBRendererSpecific.setParametersEnvironment(
+        gc,
+        matrices,
+        i,
+        exec,
+        texture_units);
 
     texture_units +=
       SBRendererSpecific.setParametersSpecular(gc, i, exec, texture_units);
@@ -276,7 +286,7 @@ public final class SBRendererSpecific implements KRenderer
         case EMISSIVE_CONSTANT:
         {
           gc.texture2DStaticUnbind(unit);
-          KShadingProgramCommon.putTextureAlbedo(exec, gc, unit);
+          KShadingProgramCommon.putTextureEmissive(exec, gc, unit);
           KShadingProgramCommon.putAttributeUV(
             gc,
             exec,
@@ -310,33 +320,76 @@ public final class SBRendererSpecific implements KRenderer
   }
 
   private static int setParametersEnvironment(
-    final JCGLInterfaceCommon gc,
-    final KMeshInstance i,
-    final JCCEExecutionCallable exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMatrices matrices,
+    final @Nonnull KMeshInstance i,
+    final @Nonnull JCCEExecutionCallable exec,
     final int texture_units)
     throws JCGLException,
       ConstraintError
   {
-    final int used_units = 0;
+    int used_units = 0;
 
     final KMaterialEnvironment environment = i.getMaterial().getEnvironment();
+    final Environment el = i.getMaterialLabel().getEnvironment();
+
     if (KShadingProgramCommon.existsMaterialEnvironmentMix(exec)) {
       KShadingProgramCommon.putMaterialEnvironmentMix(
         exec,
         gc,
         environment.getMix());
     }
+
     if (KShadingProgramCommon.existsMaterialEnvironmentReflectionMix(exec)) {
       KShadingProgramCommon.putMaterialEnvironmentReflectionMix(
         exec,
         gc,
         environment.getReflectionMix());
     }
+
     if (KShadingProgramCommon.existsMaterialEnvironmentRefractionIndex(exec)) {
       KShadingProgramCommon.putMaterialEnvironmentRefractionIndex(
         exec,
         gc,
         environment.getRefractionIndex());
+    }
+
+    if (KShadingProgramCommon.existsMatrixInverseView(exec)) {
+      KShadingProgramCommon.putMatrixInverseView(
+        exec,
+        gc,
+        matrices.getMatrixViewInverse());
+    }
+
+    if (KShadingProgramCommon.existsTextureEnvironment(exec)) {
+      final TextureUnit[] units = gc.textureGetUnits();
+      final TextureUnit unit = units[texture_units];
+
+      switch (el) {
+        case ENVIRONMENT_NONE:
+        {
+          gc.textureCubeStaticUnbind(unit);
+          KShadingProgramCommon.putTextureEnvironment(exec, gc, unit);
+          break;
+        }
+        case ENVIRONMENT_REFLECTIVE:
+        case ENVIRONMENT_REFRACTIVE:
+        case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+        {
+          if (environment.getTexture().isSome()) {
+            final TextureCubeStatic t =
+              ((Some<TextureCubeStatic>) environment.getTexture()).value;
+            gc.textureCubeStaticBind(unit, t);
+            KShadingProgramCommon.putTextureEnvironment(exec, gc, unit);
+          } else {
+            gc.textureCubeStaticUnbind(unit);
+            KShadingProgramCommon.putTextureEnvironment(exec, gc, unit);
+          }
+          break;
+        }
+      }
+
+      ++used_units;
     }
 
     return used_units;
@@ -352,10 +405,13 @@ public final class SBRendererSpecific implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-    final int used_units = 0;
+    int used_units = 0;
+
+    final KMaterialNormal normal = i.getMaterial().getNormal();
+    final Normal nl = i.getMaterialLabel().getNormal();
 
     if (KShadingProgramCommon.existsAttributeNormal(exec)) {
-      switch (i.getMaterialLabel().getNormal()) {
+      switch (nl) {
         case NORMAL_MAPPED:
         case NORMAL_VERTEX:
         {
@@ -372,6 +428,63 @@ public final class SBRendererSpecific implements KRenderer
       }
     }
 
+    if (KShadingProgramCommon.existsAttributeTangent4(exec)) {
+      switch (nl) {
+        case NORMAL_MAPPED:
+        {
+          KShadingProgramCommon.bindAttributeTangent4(gc, exec, array);
+          break;
+        }
+        case NORMAL_VERTEX:
+        case NORMAL_NONE:
+        {
+          KShadingProgramCommon.putAttributeTangent4(
+            gc,
+            exec,
+            new RVectorI4F<RSpaceObject>(1, 0, 0, 1));
+        }
+      }
+    }
+
+    if (KShadingProgramCommon.existsTextureNormal(exec)) {
+      final TextureUnit[] units = gc.textureGetUnits();
+      final TextureUnit unit = units[texture_units];
+
+      switch (nl) {
+        case NORMAL_NONE:
+        case NORMAL_VERTEX:
+        {
+          gc.texture2DStaticUnbind(unit);
+          KShadingProgramCommon.putTextureNormal(exec, gc, unit);
+          KShadingProgramCommon.putAttributeUV(
+            gc,
+            exec,
+            new RVectorI2F<RSpaceTexture>(0.0f, 0.0f));
+          break;
+        }
+        case NORMAL_MAPPED:
+        {
+          if (normal.getTexture().isSome()) {
+            final Texture2DStatic t =
+              ((Some<Texture2DStatic>) normal.getTexture()).value;
+            gc.texture2DStaticBind(unit, t);
+            KShadingProgramCommon.putTextureNormal(exec, gc, unit);
+          } else {
+            gc.texture2DStaticUnbind(unit);
+            KShadingProgramCommon.putTextureNormal(exec, gc, unit);
+          }
+
+          KShadingProgramCommon.bindAttributeUV(gc, exec, i
+            .getMesh()
+            .getArrayBuffer());
+
+          break;
+        }
+      }
+
+      ++used_units;
+    }
+
     return used_units;
   }
 
@@ -383,9 +496,11 @@ public final class SBRendererSpecific implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-    final int used_units = 0;
+    int used_units = 0;
 
+    final Specular sl = i.getMaterialLabel().getSpecular();
     final KMaterialSpecular specular = i.getMaterial().getSpecular();
+
     if (KShadingProgramCommon.existsMaterialSpecularIntensity(exec)) {
       KShadingProgramCommon.putMaterialSpecularIntensity(
         exec,
@@ -397,6 +512,45 @@ public final class SBRendererSpecific implements KRenderer
         exec,
         gc,
         specular.getExponent());
+    }
+
+    if (KShadingProgramCommon.existsTextureSpecular(exec)) {
+      final TextureUnit[] units = gc.textureGetUnits();
+      final TextureUnit unit = units[texture_units];
+
+      switch (sl) {
+        case SPECULAR_NONE:
+        case SPECULAR_CONSTANT:
+        {
+          gc.texture2DStaticUnbind(unit);
+          KShadingProgramCommon.putTextureSpecular(exec, gc, unit);
+          KShadingProgramCommon.putAttributeUV(
+            gc,
+            exec,
+            new RVectorI2F<RSpaceTexture>(0.0f, 0.0f));
+          break;
+        }
+        case SPECULAR_MAPPED:
+        {
+          if (specular.getTexture().isSome()) {
+            final Texture2DStatic t =
+              ((Some<Texture2DStatic>) specular.getTexture()).value;
+            gc.texture2DStaticBind(unit, t);
+            KShadingProgramCommon.putTextureSpecular(exec, gc, unit);
+          } else {
+            gc.texture2DStaticUnbind(unit);
+            KShadingProgramCommon.putTextureSpecular(exec, gc, unit);
+          }
+
+          KShadingProgramCommon.bindAttributeUV(gc, exec, i
+            .getMesh()
+            .getArrayBuffer());
+
+          break;
+        }
+      }
+
+      ++used_units;
     }
 
     return used_units;
@@ -583,8 +737,6 @@ public final class SBRendererSpecific implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    this.log.debug("Render depth pass");
-
     this.exec_depth.execPrepare(gc);
     KShadingProgramCommon.putMatrixProjection(
       this.exec_depth,
@@ -620,8 +772,6 @@ public final class SBRendererSpecific implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    this.log.debug("Render opaque " + i);
-
     this.matrices.matricesMakeFromTransform(i.getTransform());
 
     /**
@@ -724,8 +874,6 @@ public final class SBRendererSpecific implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    this.log.debug("Render translucent " + i);
-
     this.matrices.matricesMakeFromTransform(i.getTransform());
 
     /**
