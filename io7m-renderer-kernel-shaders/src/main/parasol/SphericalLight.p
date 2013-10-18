@@ -97,18 +97,21 @@ module SphericalLight is
 
   --
   -- Given a spherical light [light], calculate the diffuse
-  -- color based on [d].
+  -- color based on [d], with minimum emission level [e].
   --
 
   function diffuse_color (
     light : t,
-    d     : directions
+    d     : directions,
+    e     : float
   ) : vector_3f =
     let
       value factor =
         F.maximum (0.0, V3.dot (d.stl, d.normal));
+      value factor_e =
+        F.maximum (factor, e);
       value color =
-        V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor);
+        V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor_e);
     in
       color
     end;
@@ -116,7 +119,8 @@ module SphericalLight is
   --
   -- Given a spherical light [light], a surface normal [n],
   -- and assuming the current point on the surface is at [p],
-  -- calculate the diffuse term for the surface.
+  -- with minimum emission level [e], calculate the diffuse 
+  -- term for the surface.
   --
 
   function diffuse_only (
@@ -127,7 +131,7 @@ module SphericalLight is
     let
       value d = directions (light, p, n);
       value a = attenuation (light, d.distance);
-      value c = diffuse_color (light, d);
+      value c = diffuse_color (light, d, 0.0);
     in
       V3.multiply_scalar (c, a)
     end;
@@ -166,11 +170,19 @@ module SphericalLight is
     let
       value d  = directions (light, p, n);
       value a  = attenuation (light, d.distance);
-      value dc = diffuse_color (light, d);
+      value dc = diffuse_color (light, d, 0.0);
       value sc = specular_color (light, d, material.specular);
     in
       V3.multiply_scalar (V3.add (dc, sc), a)
     end;
+
+  --
+  -- Given a spherical light [light], a surface normal [n],
+  -- surface properties [material], and assuming an observer at [p],
+  -- calculate the diffuse and specular terms for the surface,
+  -- including the emissive value as the minimum resulting
+  -- (diffuse) light intensity.
+  --
 
   function diffuse_specular_emissive (
     light    : t,
@@ -178,7 +190,22 @@ module SphericalLight is
     p        : vector_3f,
     material : M.t
   ) : vector_3f =
-    new vector_3f (1.0, 0.0, 1.0);
+    let
+      value d  = directions (light, p, n);
+      value a  = attenuation (light, d.distance);
+      value dc = diffuse_color (light, d, material.emissive.emissive);
+      value sc = specular_color (light, d, material.specular);
+    in
+      V3.multiply_scalar (V3.add (dc, sc), a)
+    end;
+
+  --
+  -- Given a spherical light [light], a surface normal [n],
+  -- and assuming the current point on the surface is at [p],
+  -- with minimum emission level [e], calculate the diffuse 
+  -- term for the surface, including the emissive value as the 
+  -- minimum resulting (diffuse) light intensity.
+  --
 
   function diffuse_only_emissive (
     light    : t,
@@ -186,6 +213,12 @@ module SphericalLight is
     p        : vector_3f,
     material : M.t
   ) : vector_3f =
-    new vector_3f (1.0, 0.0, 1.0);
+    let
+      value d = directions (light, p, n);
+      value a = attenuation (light, d.distance);
+      value c = diffuse_color (light, d, material.emissive.emissive);
+    in
+      V3.multiply_scalar (c, a)
+    end;
 
 end;

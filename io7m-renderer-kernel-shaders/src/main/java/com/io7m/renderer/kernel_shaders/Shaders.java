@@ -121,7 +121,7 @@ public final class Shaders
       }
       case NORMALS_VERTEX:
       {
-        b.append("  value n = f_normal_es;\n");
+        b.append("  value n = V3.normalize (f_normal_es);\n");
       }
     }
   }
