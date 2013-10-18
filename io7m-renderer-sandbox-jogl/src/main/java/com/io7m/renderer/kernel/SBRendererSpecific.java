@@ -426,7 +426,7 @@ public final class SBRendererSpecific implements KRenderer
     this.program = Constraints.constrainNotNull(program, "Program");
     this.exec_program = new JCCEExecutionCallable(program);
 
-    this.log = new Log(log, "krenderer-forward-diffuse");
+    this.log = new Log(log, "sb-renderer-specific");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
