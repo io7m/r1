@@ -276,7 +276,9 @@ public final class Shaders
       }
       case ALPHA_TRANSLUCENT:
       {
-        b.append("  value rgba = surface;\n");
+        b
+          .append("  value lit  = V3.multiply (surface [x y z], light_term);\n");
+        b.append("  value rgba = new vector_4f (lit, surface [w]);\n");
         break;
       }
     }
@@ -545,7 +547,8 @@ public final class Shaders
             b.append("      environment = material.environment,\n");
             b.append("      specular    = record M.specular {\n");
             b.append("        exponent  = material.specular.exponent,\n");
-            b.append("        intensity = S.texture (t_specular, f_uv)[x]\n");
+            b
+              .append("        intensity = S.texture (t_specular, f_uv) [x]\n");
             b.append("      }\n");
             b.append("    };\n");
             break;
@@ -562,7 +565,8 @@ public final class Shaders
             b.append("  value m =\n");
             b.append("    record M.t {\n");
             b.append("      emissive   = record M.emissive {\n");
-            b.append("        emissive = S.texture (t_emissive, f_uv)[x]\n");
+            b
+              .append("        emissive = F.multiply (material.emissive.emissive, S.texture (t_emissive, f_uv) [x])\n");
             b.append("      },\n");
             b.append("      alpha       = material.alpha,\n");
             b.append("      albedo      = material.albedo,\n");
@@ -576,14 +580,16 @@ public final class Shaders
             b.append("  value m =\n");
             b.append("    record M.t {\n");
             b.append("      emissive   = record M.emissive {\n");
-            b.append("        emissive = S.texture (t_emissive, f_uv)[x]\n");
+            b
+              .append("        emissive = F.multiply (material.emissive.emissive, S.texture (t_emissive, f_uv) [x])\n");
             b.append("      },\n");
             b.append("      alpha       = material.alpha,\n");
             b.append("      albedo      = material.albedo,\n");
             b.append("      environment = material.environment,\n");
             b.append("      specular    = record M.specular {\n");
             b.append("        exponent  = material.specular.exponent,\n");
-            b.append("        intensity = S.texture (t_specular, f_uv)[x]\n");
+            b
+              .append("        intensity = S.texture (t_specular, f_uv) [x]\n");
             b.append("      }\n");
             b.append("    };\n");
             break;
