@@ -50,6 +50,7 @@ import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformViewInverse;
 import com.io7m.renderer.RVectorI2F;
+import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.RVectorReadable3F;
 import com.io7m.renderer.RVectorReadable4F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
@@ -209,6 +210,22 @@ public final class KShadingProgramCommon
     return e.execGetProgram().getAttributes().containsKey("v_uv");
   }
 
+  static boolean existsLightDirection(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec.execGetProgram().getUniforms().containsKey("light.direction");
+  }
+
+  static boolean existsLightPosition(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec.execGetProgram().getUniforms().containsKey("light.position");
+  }
+
   static boolean existsMaterialAlbedoColour(
     final @Nonnull JCCEExecutionCallable exec)
     throws JCGLException,
@@ -332,6 +349,30 @@ public final class KShadingProgramCommon
     return exec.execGetProgram().getUniforms().containsKey("t_emissive");
   }
 
+  static boolean existsTextureEnvironment(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec.execGetProgram().getUniforms().containsKey("t_environment");
+  }
+
+  static boolean existsTextureNormal(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec.execGetProgram().getUniforms().containsKey("t_normal");
+  }
+
+  static boolean existsTextureSpecular(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec.execGetProgram().getUniforms().containsKey("t_specular");
+  }
+
   static void putAttributeNormal(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable exec,
@@ -340,6 +381,16 @@ public final class KShadingProgramCommon
       ConstraintError
   {
     exec.execAttributePutVector3F(gc, "v_normal", r);
+  }
+
+  static void putAttributeTangent4(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull RVectorI4F<RSpaceObject> t)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execAttributePutVector4F(gc, "v_tangent4", t);
   }
 
   static void putAttributeUV(
@@ -694,19 +745,11 @@ public final class KShadingProgramCommon
     }
   }
 
-  static boolean existsLightDirection(
+  static boolean existsMatrixInverseView(
     final @Nonnull JCCEExecutionCallable exec)
     throws JCGLException,
       ConstraintError
   {
-    return exec.execGetProgram().getUniforms().containsKey("light.direction");
-  }
-
-  static boolean existsLightPosition(
-    final @Nonnull JCCEExecutionCallable exec)
-    throws JCGLException,
-      ConstraintError
-  {
-    return exec.execGetProgram().getUniforms().containsKey("light.position");
+    return exec.execGetProgram().getUniforms().containsKey("m_view_inv");
   }
 }
