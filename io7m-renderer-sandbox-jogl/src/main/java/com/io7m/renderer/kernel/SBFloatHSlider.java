@@ -60,12 +60,28 @@ public final class SBFloatHSlider
           final @Nonnull ChangeEvent ev)
       {
         final int slider_current = SBFloatHSlider.this.slider.getValue();
-        final float factor = slider_current / 100.0f;
         SBFloatHSlider.this.current =
-          (factor * (maximum - minimum)) + minimum;
+          SBFloatHSlider.convertFromSlider(slider_current, minimum, maximum);
         SBFloatHSlider.this.refreshText();
       }
     });
+  }
+
+  private static int convertToSlider(
+    final float f,
+    final float min,
+    final float max)
+  {
+    return (int) (((f - min) / (max - min)) * 100);
+  }
+
+  private static float convertFromSlider(
+    final int x,
+    final float min,
+    final float max)
+  {
+    final float factor = x / 100.0f;
+    return (factor * (max - min)) + min;
   }
 
   public float getCurrent()
@@ -109,5 +125,9 @@ public final class SBFloatHSlider
   {
     this.current = e;
     this.refreshText();
+    this.slider.setValue(SBFloatHSlider.convertToSlider(
+      e,
+      this.minimum,
+      this.maximum));
   }
 }
