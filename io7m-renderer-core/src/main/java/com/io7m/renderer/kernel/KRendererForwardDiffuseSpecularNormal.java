@@ -23,7 +23,6 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.ArrayBuffer;
@@ -260,10 +259,6 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
       for (final KLight light : scene.getLights()) {
         switch (light.getType()) {
-          case LIGHT_CONE:
-          {
-            throw new UnimplementedCodeException();
-          }
           case LIGHT_SPHERE:
           {
             final KSphere slight = (KLight.KSphere) light;
