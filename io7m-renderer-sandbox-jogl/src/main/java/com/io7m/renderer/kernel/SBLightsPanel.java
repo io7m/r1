@@ -50,7 +50,6 @@ import net.java.dev.designgridlayout.IRowCreator;
 import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.RSpaceRGB;
@@ -98,31 +97,6 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
   private static class LightEditDialogPanel extends JPanel
   {
-    private static class LightControlsCone
-    {
-      private final @Nonnull JTextField position_x;
-      private final @Nonnull JTextField position_y;
-      private final @Nonnull JTextField position_z;
-
-      public LightControlsCone()
-      {
-        this.position_x = new JTextField("0.0");
-        this.position_y = new JTextField("1.0");
-        this.position_z = new JTextField("0.0");
-      }
-
-      public void add(
-        final IRowCreator group)
-      {
-        group
-          .grid()
-          .add(new JLabel("Position"))
-          .add(this.position_x)
-          .add(this.position_y)
-          .add(this.position_z, 2);
-      }
-    }
-
     private static class LightControlsDirectional
     {
       private final @Nonnull JTextField direction_x;
@@ -290,7 +264,6 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
     protected final @Nonnull SBLightTypeSelector    type_select;
     private final @Nonnull LightControlsDirectional directional_controls;
     private final @Nonnull LightControlsSphere      sphere_controls;
-    private final @Nonnull LightControlsCone        cone_controls;
     private final @Nonnull JLabel                   error_text;
     private final @Nonnull JLabel                   error_icon;
     private final @Nonnull SBSceneControllerLights  controller;
@@ -374,18 +347,14 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
       this.directional_controls = new LightControlsDirectional();
       this.sphere_controls = new LightControlsSphere();
-      this.cone_controls = new LightControlsCone();
 
       final RowGroup directional_group = new RowGroup();
       final RowGroup sphere_group = new RowGroup();
-      final RowGroup cone_group = new RowGroup();
 
       this.directional_controls.add(dg.row().group(directional_group));
       this.sphere_controls.add(dg.row().group(sphere_group));
-      this.cone_controls.add(dg.row().group(cone_group));
 
       sphere_group.hide();
-      cone_group.hide();
       directional_group.forceShow();
 
       final JButton cancel = new JButton("Cancel");
@@ -442,17 +411,8 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
               .getSelectedItem();
 
           switch (selected) {
-            case LIGHT_CONE:
-            {
-              directional_group.hide();
-              sphere_group.hide();
-              cone_group.forceShow();
-              window.pack();
-              break;
-            }
             case LIGHT_DIRECTIONAL:
             {
-              cone_group.hide();
               sphere_group.hide();
               directional_group.forceShow();
               window.pack();
@@ -461,7 +421,6 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
             case LIGHT_SPHERE:
             {
               directional_group.hide();
-              cone_group.hide();
               sphere_group.forceShow();
               window.pack();
               break;
@@ -478,10 +437,6 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         this.setIntensity(light.getIntensity());
 
         switch (light.getType()) {
-          case LIGHT_CONE:
-          {
-            break;
-          }
           case LIGHT_DIRECTIONAL:
           {
             final KLight.KDirectional d = (KLight.KDirectional) light;
@@ -521,10 +476,6 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       throws SBExceptionInputError
     {
       switch (type) {
-        case LIGHT_CONE:
-        {
-          throw new UnimplementedCodeException();
-        }
         case LIGHT_DIRECTIONAL:
         {
           final RVectorM3F<RSpaceWorld> direction =
