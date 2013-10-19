@@ -19,6 +19,7 @@ package com.io7m.renderer;
 module Environment is
 
   import com.io7m.parasol.Vector3f    as V3;
+  import com.io7m.parasol.Vector4f    as V4;
   import com.io7m.parasol.SamplerCube as SC;
   import com.io7m.parasol.Float       as F;
   import com.io7m.parasol.Matrix4x4f  as M4;
@@ -47,6 +48,13 @@ module Environment is
       CM.texture (t, ri [x y z])
     end;
 
+  --
+  -- Calculate a refraction from the cube texture [t], assuming
+  -- the view direction [v], surface normal [n], matrix [m]
+  -- transforming from eye-space to world-space, and environment
+  -- properties from [e].
+  --
+
   function refraction (
     t : sampler_cube,
     v : vector_3f,
@@ -54,7 +62,21 @@ module Environment is
     m : matrix_4x4f,
     e : M.environment
   ) : vector_4f =
-    new vector_4f (1.0, 0.0, 1.0, 1.0);
+    let
+      value vn = V3.normalize (v);
+      value nn = V3.normalize (n);
+      value r  = V3.refract (vn, nn, e.refraction_index);
+      value ri = M4.multiply_vector (m, new vector_4f (r, 0.0));
+    in 
+      CM.texture (t, ri [x y z])
+    end;
+
+  --
+  -- Calculate a both a refraction and reflection from the cube 
+  -- texture [t], assuming the view direction [v], surface 
+  -- normal [n], matrix [m] transforming from eye-space to world-space, 
+  -- and environment properties from [e].
+  --
 
   function reflection_refraction (
     t : sampler_cube,
@@ -63,6 +85,19 @@ module Environment is
     m : matrix_4x4f,
     e : M.environment
   ) : vector_4f =
-    new vector_4f (1.0, 0.0, 1.0, 1.0);
+    let
+      value vn  = V3.normalize (v);
+      value nn  = V3.normalize (n);
+
+      value rr  = V3.refract (vn, nn, e.refraction_index);
+      value rrw = M4.multiply_vector (m, new vector_4f (rr, 0.0));
+      value rrc = CM.texture (t, rrw [x y z]);
+      
+      value rl  = V3.reflect (vn, nn);
+      value rlw = M4.multiply_vector (m, new vector_4f (rl, 0.0));
+      value rlc = CM.texture (t, rlw [x y z]);
+    in 
+      V4.interpolate (rrc, rlc, e.reflection_mix)
+    end;
 
 end;
