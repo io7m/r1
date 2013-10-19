@@ -128,7 +128,6 @@ public final class SBRendererSpecific implements KRenderer
             (KDirectional) light);
           break;
         }
-        case LIGHT_CONE:
         case LIGHT_SPHERE:
         {
           final RVectorI3F<RSpaceRGB> lc = new RVectorI3F<RSpaceRGB>(1, 1, 1);
@@ -147,7 +146,6 @@ public final class SBRendererSpecific implements KRenderer
     if (KShadingProgramCommon.existsLightPosition(exec)) {
       switch (light.getType()) {
         case LIGHT_DIRECTIONAL:
-        case LIGHT_CONE:
         {
           KShadingProgramCommon.putLightSpherical(
             gc,

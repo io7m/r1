@@ -41,7 +41,6 @@ import javax.media.opengl.GLEventListener;
 import nu.xom.Document;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Indeterminate;
 import com.io7m.jaux.functional.Indeterminate.Failure;
@@ -1315,10 +1314,6 @@ final class SBGLRenderer implements GLEventListener
 
       for (final KLight light : this.scene_current.getLights()) {
         switch (light.getType()) {
-          case LIGHT_CONE:
-          {
-            break;
-          }
           case LIGHT_DIRECTIONAL:
           {
             break;
@@ -1491,10 +1486,6 @@ final class SBGLRenderer implements GLEventListener
   {
     for (final KLight l : p.first) {
       switch (l.getType()) {
-        case LIGHT_CONE:
-        {
-          throw new UnimplementedCodeException();
-        }
         case LIGHT_DIRECTIONAL:
         case LIGHT_SPHERE:
         {

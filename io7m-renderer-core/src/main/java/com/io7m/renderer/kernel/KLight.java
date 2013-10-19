@@ -30,17 +30,6 @@ import com.io7m.renderer.RVectorReadable3F;
 
 @Immutable public abstract class KLight
 {
-  @Immutable public static final class KCone extends KLight
-  {
-    @SuppressWarnings("synthetic-access") KCone(
-      final @Nonnull Integer id,
-      final @Nonnull RVectorReadable3F<RSpaceRGB> colour,
-      final float intensity)
-    {
-      super(Type.LIGHT_CONE, id, colour, intensity);
-    }
-  }
-
   @Immutable public static final class KDirectional extends KLight
   {
     private final @Nonnull RVectorReadable3F<RSpaceWorld> direction;
@@ -100,8 +89,7 @@ import com.io7m.renderer.RVectorReadable3F;
   static enum Type
   {
     LIGHT_SPHERE("Sphere", "LS"),
-    LIGHT_DIRECTIONAL("Directional", "LD"),
-    LIGHT_CONE("Cone", "LC");
+    LIGHT_DIRECTIONAL("Directional", "LD");
 
     private final @Nonnull String name;
     private final @Nonnull String code;

@@ -260,10 +260,6 @@ import com.io7m.renderer.xml.RXMLUtilities;
     ec.appendChild(ecb);
 
     switch (light.getType()) {
-      case LIGHT_CONE:
-      {
-        throw new UnimplementedCodeException();
-      }
       case LIGHT_DIRECTIONAL:
       {
         final KDirectional d = (KLight.KDirectional) light;
