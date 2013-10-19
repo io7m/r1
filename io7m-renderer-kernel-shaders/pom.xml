@@ -61,7 +61,7 @@
     <dependency>
       <groupId>com.io7m.parasol.compiler.frontend</groupId>
       <artifactId>io7m-parasol-compiler-frontend</artifactId>
-      <version>[0.1.15, 0.2.0)</version>
+      <version>[0.1.16, 0.2.0)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
