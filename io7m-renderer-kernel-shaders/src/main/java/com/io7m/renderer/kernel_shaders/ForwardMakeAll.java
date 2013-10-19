@@ -121,7 +121,7 @@ public final class ForwardMakeAll
 
     final String[] args = new String[argslist.size()];
     argslist.toArray(args);
-    Compiler.main(args);
+    Compiler.run(Compiler.getLog(false), args);
   }
 
   public static void makeSources(
