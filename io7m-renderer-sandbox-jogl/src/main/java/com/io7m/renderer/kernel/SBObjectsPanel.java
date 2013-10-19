@@ -164,6 +164,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       if (t != null) {
         this.texture.setText(t.toString());
       }
+
+      this.texture_mix.setCurrent(mat_d.getMix());
     }
 
     @Override public @Nonnull SBMaterialAlbedoDescription mpSave()
