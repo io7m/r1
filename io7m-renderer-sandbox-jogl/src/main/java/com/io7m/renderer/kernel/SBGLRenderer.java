@@ -527,47 +527,48 @@ final class SBGLRenderer implements GLEventListener
     STATE_FAILED_PERMANENTLY
   }
 
-  private final @Nonnull FSCapabilityAll                            filesystem;
-  private @CheckForNull FramebufferConfigurationGL3ES2Actual        framebuffer_config;
-  private @CheckForNull Framebuffer                                 framebuffer;
-  private final @Nonnull AtomicReference<RunningState>              running;
-  private final @Nonnull MatrixM4x4F                                matrix_projection;
-  private final @Nonnull MatrixM4x4F                                matrix_modelview;
-  private final @Nonnull MatrixM4x4F                                matrix_model;
-  private final @Nonnull MatrixM4x4F                                matrix_view;
-  private @CheckForNull TextureUnit[]                               texture_units;
-  private @CheckForNull FramebufferColorAttachmentPoint[]           framebuffer_points;
-  private final @Nonnull AtomicReference<SBRendererType>            renderer_new;
-  private @CheckForNull KRenderer                                   renderer_kernel;
-  private @CheckForNull SBRendererSpecific                          renderer_specific;
-  private final @Nonnull AtomicReference<SBSceneControllerRenderer> controller;
+  private final @Nonnull FSCapabilityAll                                 filesystem;
+  private @CheckForNull FramebufferConfigurationGL3ES2Actual             framebuffer_config;
+  private @CheckForNull Framebuffer                                      framebuffer;
+  private final @Nonnull AtomicReference<RunningState>                   running;
+  private final @Nonnull AtomicReference<KMatrix4x4F<KMatrixProjection>> custom_projection;
+  private final @Nonnull MatrixM4x4F                                     matrix_projection;
+  private final @Nonnull MatrixM4x4F                                     matrix_modelview;
+  private final @Nonnull MatrixM4x4F                                     matrix_model;
+  private final @Nonnull MatrixM4x4F                                     matrix_view;
+  private @CheckForNull TextureUnit[]                                    texture_units;
+  private @CheckForNull FramebufferColorAttachmentPoint[]                framebuffer_points;
+  private final @Nonnull AtomicReference<SBRendererType>                 renderer_new;
+  private @CheckForNull KRenderer                                        renderer_kernel;
+  private @CheckForNull SBRendererSpecific                               renderer_specific;
+  private final @Nonnull AtomicReference<SBSceneControllerRenderer>      controller;
 
-  private final @Nonnull AtomicReference<VectorI3F>                 background_colour;
-  private @Nonnull SBVisibleAxes                                    axes;
-  private final @Nonnull AtomicBoolean                              axes_show;
-  private @Nonnull SBVisibleGridPlane                               grid;
-  private final @Nonnull AtomicBoolean                              grid_show;
-  private @Nonnull HashMap<PathVirtual, KMesh>                      sphere_meshes;
-  private final @Nonnull AtomicBoolean                              lights_show;
-  private final @Nonnull AtomicBoolean                              lights_show_surface;
+  private final @Nonnull AtomicReference<VectorI3F>                      background_colour;
+  private @Nonnull SBVisibleAxes                                         axes;
+  private final @Nonnull AtomicBoolean                                   axes_show;
+  private @Nonnull SBVisibleGridPlane                                    grid;
+  private final @Nonnull AtomicBoolean                                   grid_show;
+  private @Nonnull HashMap<PathVirtual, KMesh>                           sphere_meshes;
+  private final @Nonnull AtomicBoolean                                   lights_show;
+  private final @Nonnull AtomicBoolean                                   lights_show_surface;
 
-  private final @Nonnull QuaternionM4F.Context                      qm4f_context;
-  private @Nonnull KTransform                                       camera_transform;
-  private final @Nonnull SBInputState                               input_state;
-  private final @Nonnull SBFirstPersonCamera                        camera;
-  private @Nonnull KMatrix4x4F<KMatrixView>                         camera_matrix;
-  private @CheckForNull KScene                                      scene_current;
-  private @CheckForNull KScene                                      scene_previous;
-  private @CheckForNull KScene                                      scene_validated_previous;
+  private final @Nonnull QuaternionM4F.Context                           qm4f_context;
+  private @Nonnull KTransform                                            camera_transform;
+  private final @Nonnull SBInputState                                    input_state;
+  private final @Nonnull SBFirstPersonCamera                             camera;
+  private @Nonnull KMatrix4x4F<KMatrixView>                              camera_matrix;
+  private @CheckForNull KScene                                           scene_current;
+  private @CheckForNull KScene                                           scene_previous;
+  private @CheckForNull KScene                                           scene_validated_previous;
 
-  private @CheckForNull ProgramReference                            program_uv;
-  private @CheckForNull ProgramReference                            program_vcolour;
-  private @CheckForNull ProgramReference                            program_ccolour;
-  private @Nonnull JCCEExecutionCallable                            exec_vcolour;
-  private @Nonnull JCCEExecutionCallable                            exec_uv;
-  private @Nonnull JCCEExecutionCallable                            exec_ccolour;
+  private @CheckForNull ProgramReference                                 program_uv;
+  private @CheckForNull ProgramReference                                 program_vcolour;
+  private @CheckForNull ProgramReference                                 program_ccolour;
+  private @Nonnull JCCEExecutionCallable                                 exec_vcolour;
+  private @Nonnull JCCEExecutionCallable                                 exec_uv;
+  private @Nonnull JCCEExecutionCallable                                 exec_ccolour;
 
-  private static final @Nonnull VectorReadable4F                    GRID_COLOUR;
+  private static final @Nonnull VectorReadable4F                         GRID_COLOUR;
 
   static {
     GRID_COLOUR = new VectorI4F(1.0f, 1.0f, 1.0f, 0.1f);
@@ -617,6 +618,9 @@ final class SBGLRenderer implements GLEventListener
     this.matrix_view = new MatrixM4x4F();
     this.matrix_modelview = new MatrixM4x4F();
     this.matrix_projection = new MatrixM4x4F();
+
+    this.custom_projection =
+      new AtomicReference<KMatrix4x4F<KMatrixProjection>>();
 
     this.axes_show = new AtomicBoolean(true);
     this.grid_show = new AtomicBoolean(true);
@@ -1150,14 +1154,8 @@ final class SBGLRenderer implements GLEventListener
 
     MatrixM4x4F.setIdentity(this.matrix_model);
     MatrixM4x4F.setIdentity(this.matrix_modelview);
-    MatrixM4x4F.setIdentity(this.matrix_projection);
 
-    ProjectionMatrix.makePerspective(
-      this.matrix_projection,
-      1,
-      100,
-      (double) drawable.getWidth() / (double) drawable.getHeight(),
-      Math.toRadians(30));
+    this.makePerspectiveProjection(drawable.getWidth(), drawable.getHeight());
 
     /**
      * Render the axis-aligned grid, if desired.
@@ -1300,12 +1298,9 @@ final class SBGLRenderer implements GLEventListener
       MatrixM4x4F.setIdentity(this.matrix_modelview);
       MatrixM4x4F.setIdentity(this.matrix_projection);
 
-      ProjectionMatrix.makePerspective(
-        this.matrix_projection,
-        1,
-        100,
-        (double) drawable.getWidth() / (double) drawable.getHeight(),
-        Math.toRadians(30));
+      this.makePerspectiveProjection(
+        drawable.getWidth(),
+        drawable.getHeight());
 
       MatrixM4x4F.multiply(
         this.matrix_view,
@@ -1415,6 +1410,31 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
+  private void makePerspectiveProjection(
+    final double width,
+    final double height)
+    throws ConstraintError
+  {
+    final KMatrix4x4F<KMatrixProjection> cp = this.custom_projection.get();
+
+    if (cp != null) {
+      for (int r = 0; r < 4; ++r) {
+        for (int c = 0; c < 4; ++c) {
+          this.matrix_projection.set(r, c, cp.getRowColumnF(r, c));
+        }
+      }
+    } else {
+      final double aspect = width / height;
+      MatrixM4x4F.setIdentity(this.matrix_projection);
+      ProjectionMatrix.makePerspective(
+        this.matrix_projection,
+        1,
+        100,
+        aspect,
+        Math.toRadians(30));
+    }
+  }
+
   private void renderScene()
     throws JCGLException,
       ConstraintError
@@ -1426,14 +1446,7 @@ final class SBGLRenderer implements GLEventListener
       size.x = this.framebuffer.getWidth();
       size.y = this.framebuffer.getHeight();
 
-      final double aspect = (double) size.x / (double) size.y;
-      MatrixM4x4F.setIdentity(this.matrix_projection);
-      ProjectionMatrix.makePerspective(
-        this.matrix_projection,
-        1,
-        100,
-        aspect,
-        Math.toRadians(30));
+      this.makePerspectiveProjection(size.x, size.y);
 
       final KMatrix4x4F<KMatrixProjection> projection =
         new KMatrix4x4F<KMatrixProjection>(this.matrix_projection);
@@ -1682,12 +1695,29 @@ final class SBGLRenderer implements GLEventListener
     this.lights_show_surface.set(enabled);
   }
 
-  public Future<SBShader> shaderLoad(
+  public @Nonnull Future<SBShader> shaderLoad(
     final @Nonnull File directory,
     final @Nonnull PGLSLMetaXML meta)
   {
     final ShaderLoadFuture f = new ShaderLoadFuture(directory, meta);
     this.shader_load_queue.add(f);
     return f;
+  }
+
+  @Nonnull KMatrix4x4F<KMatrixProjection> getProjection()
+  {
+    // XXX: Not thread safe!
+    return new KMatrix4x4F<KMatrixProjection>(this.matrix_projection);
+  }
+
+  void setCustomProjection(
+    final @Nonnull KMatrix4x4F<KMatrixProjection> p)
+  {
+    this.custom_projection.set(p);
+  }
+
+  void unsetCustomProjection()
+  {
+    this.custom_projection.set(null);
   }
 }
