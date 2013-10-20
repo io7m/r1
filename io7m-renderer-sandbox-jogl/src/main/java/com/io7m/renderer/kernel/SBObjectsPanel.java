@@ -567,36 +567,37 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 
   private static class ObjectEditDialogPanel extends JPanel
   {
-    private static final long                       serialVersionUID;
+    private static final long                             serialVersionUID;
 
     static {
       serialVersionUID = -3467271842953066384L;
     }
 
-    protected final @Nonnull AlbedoSettings         albedo_settings;
-    protected final @Nonnull AlphaSettings          alpha_settings;
-    protected final @Nonnull EmissiveSettings       emissive_settings;
-    protected final @Nonnull EnvironmentSettings    environment_settings;
-    protected final @Nonnull NormalSettings         normal_settings;
-    protected final @Nonnull SpecularSettings       specular_settings;
+    protected final @Nonnull AlbedoSettings               albedo_settings;
+    protected final @Nonnull AlphaSettings                alpha_settings;
+    protected final @Nonnull EmissiveSettings             emissive_settings;
+    protected final @Nonnull EnvironmentSettings          environment_settings;
+    protected final @Nonnull NormalSettings               normal_settings;
+    protected final @Nonnull SpecularSettings             specular_settings;
 
-    protected @Nonnull Map<PathVirtual, SBMesh>     meshes;
-    protected final @Nonnull JComboBox<PathVirtual> mesh_selector;
-    protected final @Nonnull JButton                mesh_load;
+    protected @Nonnull Map<PathVirtual, SBMesh>           meshes;
+    protected final @Nonnull JComboBox<PathVirtual>       mesh_selector;
+    protected final @Nonnull JButton                      mesh_load;
 
-    protected final @Nonnull JTextField             position_x;
-    protected final @Nonnull JTextField             position_y;
-    protected final @Nonnull JTextField             position_z;
-    protected final @Nonnull JTextField             orientation_x;
-    protected final @Nonnull JTextField             orientation_y;
-    protected final @Nonnull JTextField             orientation_z;
+    protected final @Nonnull JTextField                   position_x;
+    protected final @Nonnull JTextField                   position_y;
+    protected final @Nonnull JTextField                   position_z;
+    protected final @Nonnull JTextField                   orientation_x;
+    protected final @Nonnull JTextField                   orientation_y;
+    protected final @Nonnull JTextField                   orientation_z;
+    protected final @Nonnull SBMatrix3x3Fields<KMatrixUV> matrix_uv;
 
-    protected final @Nonnull JLabel                 error_icon;
-    protected final @Nonnull JLabel                 error_text;
+    protected final @Nonnull JLabel                       error_icon;
+    protected final @Nonnull JLabel                       error_text;
 
-    private final @Nonnull ObjectsTableModel        objects_table_model;
-    private final @Nonnull GeneralSettings          general_settings;
-    protected final static @Nonnull FileFilter      MESH_FILE_FILTER;
+    private final @Nonnull ObjectsTableModel              objects_table_model;
+    private final @Nonnull GeneralSettings                general_settings;
+    protected final static @Nonnull FileFilter            MESH_FILE_FILTER;
 
     static {
       MESH_FILE_FILTER = new FileFilter() {
@@ -644,6 +645,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.orientation_x = new JTextField("0.0");
       this.orientation_y = new JTextField("0.0");
       this.orientation_z = new JTextField("0.0");
+
+      this.matrix_uv = new SBMatrix3x3Fields<KMatrixUV>();
 
       this.mesh_selector = new JComboBox<PathVirtual>();
       this.meshesRefresh(controller);
@@ -923,7 +926,10 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         this.specular_settings.mpSave();
       final SBMaterialEmissiveDescription emissive =
         this.emissive_settings.mpSave();
-      final KMatrix3x3F<KMatrixUV> uv_matrix = this.general_settings.mpSave();
+      final KMatrix3x3F<KMatrixUV> material_uv_matrix =
+        this.general_settings.mpSave();
+
+      final KMatrix3x3F<KMatrixUV> instance_uv_matrix = material_uv_matrix;
 
       final SBMaterialDescription material =
         new SBMaterialDescription(
@@ -933,7 +939,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           specular,
           environment,
           normal,
-          uv_matrix);
+          material_uv_matrix);
 
       final PathVirtual mesh_name =
         (PathVirtual) this.mesh_selector.getSelectedItem();
@@ -946,7 +952,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           id,
           position,
           orientation,
-          uv_matrix,
+          instance_uv_matrix,
           mesh_name,
           material);
 
