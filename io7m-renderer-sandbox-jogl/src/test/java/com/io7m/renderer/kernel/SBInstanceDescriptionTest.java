@@ -43,6 +43,7 @@ public class SBInstanceDescriptionTest
     private final @Nonnull IntegerGenerator                 int_gen;
     private final @Nonnull SBVectorI4FGenerator<RSpaceRGBA> rgba_gen;
     private final @Nonnull PathVirtualGenerator             path_gen;
+    private final @Nonnull KMatrix3x3FGenerator<KMatrixUV>  matrix_gen;
 
     public MaterialGenerator()
     {
@@ -50,6 +51,7 @@ public class SBInstanceDescriptionTest
       this.int_gen = new IntegerGenerator();
       this.rgba_gen = new SBVectorI4FGenerator<RSpaceRGBA>();
       this.path_gen = new PathVirtualGenerator();
+      this.matrix_gen = new KMatrix3x3FGenerator<KMatrixUV>();
     }
 
     @Override public SBMaterialDescription next()
@@ -93,7 +95,8 @@ public class SBInstanceDescriptionTest
           sd_emis,
           sd_spec,
           sd_envi,
-          sd_norm);
+          sd_norm,
+          this.matrix_gen.next());
 
       } catch (final ConstraintError x) {
         throw new UnreachableCodeException();
@@ -110,6 +113,7 @@ public class SBInstanceDescriptionTest
     private final @Nonnull SBVectorI3FGenerator<SBDegrees>   ori_gen;
     private final @Nonnull MaterialGenerator                 mat_gen;
     private final @Nonnull PathVirtualGenerator              path_gen;
+    private final @Nonnull KMatrix3x3FGenerator<KMatrixUV>   matrix_gen;
 
     public InstanceGenerator()
     {
@@ -119,6 +123,7 @@ public class SBInstanceDescriptionTest
       this.ori_gen = new SBVectorI3FGenerator<SBDegrees>();
       this.mat_gen = new MaterialGenerator();
       this.path_gen = new PathVirtualGenerator();
+      this.matrix_gen = new KMatrix3x3FGenerator<KMatrixUV>();
     }
 
     @Override public SBInstanceDescription next()
@@ -127,6 +132,7 @@ public class SBInstanceDescriptionTest
         this.int_gen.next(),
         this.pos_gen.next(),
         this.ori_gen.next(),
+        this.matrix_gen.next(),
         this.path_gen.next(),
         this.mat_gen.next());
     }

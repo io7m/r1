@@ -66,7 +66,11 @@ import com.io7m.renderer.RVectorI4F;
     if (Float.floatToIntBits(this.mix) != Float.floatToIntBits(other.mix)) {
       return false;
     }
-    if (!this.texture.equals(other.texture)) {
+    if (this.texture == null) {
+      if (other.texture != null) {
+        return false;
+      }
+    } else if (!this.texture.equals(other.texture)) {
       return false;
     }
     return true;

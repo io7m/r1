@@ -39,6 +39,7 @@ import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.jtensors.VectorM4F;
+import com.io7m.renderer.RMatrixM3x3F;
 import com.io7m.renderer.RMatrixReadable3x3F;
 import com.io7m.renderer.RMatrixReadable4x4F;
 import com.io7m.renderer.RSpaceObject;
@@ -48,6 +49,7 @@ import com.io7m.renderer.RTransformModel;
 import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
+import com.io7m.renderer.RTransformTexture;
 import com.io7m.renderer.RTransformViewInverse;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI4F;
@@ -115,10 +117,10 @@ public final class KShadingProgramCommon
       JCGLException
   {
     Constraints.constrainArbitrary(
-      m.getDiffuse().getTexture().isSome(),
+      m.getAlbedo().getTexture().isSome(),
       "Material contains albedo texture");
 
-    final Option<Texture2DStatic> opt = m.getDiffuse().getTexture();
+    final Option<Texture2DStatic> opt = m.getAlbedo().getTexture();
     final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
     gc.texture2DStaticBind(texture_unit, some.value);
     KShadingProgramCommon.putTextureAlbedo(exec, gc, texture_unit);
@@ -325,12 +327,28 @@ public final class KShadingProgramCommon
       .containsKey("material.specular.intensity");
   }
 
+  static boolean existsMatrixInverseView(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec.execGetProgram().getUniforms().containsKey("m_view_inv");
+  }
+
   static boolean existsMatrixNormal(
     final @Nonnull JCCEExecutionCallable exec)
     throws JCGLException,
       ConstraintError
   {
     return exec.execGetProgram().getUniforms().containsKey("m_normal");
+  }
+
+  static boolean existsMatrixUV(
+    final @Nonnull JCCEExecutionCallable exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    return exec.execGetProgram().getUniforms().containsKey("m_uv");
   }
 
   static boolean existsTextureAlbedo(
@@ -669,6 +687,16 @@ public final class KShadingProgramCommon
     exec.execUniformUseExisting("m_projection");
   }
 
+  static void putMatrixUV(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull RMatrixM3x3F<RTransformTexture> m)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutMatrix3x3F(gc, "m_uv", m);
+  }
+
   static void putTextureAlbedo(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
@@ -743,13 +771,5 @@ public final class KShadingProgramCommon
     } catch (final Exception e) {
       throw new UnreachableCodeException();
     }
-  }
-
-  static boolean existsMatrixInverseView(
-    final @Nonnull JCCEExecutionCallable exec)
-    throws JCGLException,
-      ConstraintError
-  {
-    return exec.execGetProgram().getUniforms().containsKey("m_view_inv");
   }
 }

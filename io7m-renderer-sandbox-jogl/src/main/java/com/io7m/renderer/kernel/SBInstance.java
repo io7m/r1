@@ -76,4 +76,9 @@ import com.io7m.renderer.RVectorI3F;
     builder.append("]");
     return builder.toString();
   }
+
+  public @Nonnull KMatrix3x3F<KMatrixUV> getUVMatrix()
+  {
+    return this.description.getUVMatrix();
+  }
 }

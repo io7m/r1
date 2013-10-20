@@ -170,8 +170,8 @@ import com.io7m.jcanephora.ArrayBuffer;
     final ArrayBuffer a = mesh.getArrayBuffer();
 
     if (a.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
-      if (material.getDiffuse().getTexture().isSome()) {
-        if (material.getDiffuse().getMix() == 0.0) {
+      if (material.getAlbedo().getTexture().isSome()) {
+        if (material.getAlbedo().getMix() == 0.0) {
           return Albedo.ALBEDO_COLOURED;
         }
         return Albedo.ALBEDO_TEXTURED;

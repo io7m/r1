@@ -672,6 +672,7 @@ public final class Shaders
     Shaders.vertexShaderStandardIO(b);
     Shaders.vertexShaderStandardParametersMatrices(b);
     Shaders.vertexShaderStandardAttributesUV(b, label);
+    Shaders.vertexShaderStandardParametersUV(b, label);
 
     switch (label.getType()) {
       case Lit:
@@ -681,6 +682,7 @@ public final class Shaders
         b.append("with\n");
         Shaders.vertexShaderStandardValuesPositions(b);
         Shaders.vertexShaderStandardValuesNormals(b, (LabelLit) label);
+        Shaders.vertexShaderStandardValuesUV(b, label);
         b.append("as\n");
         Shaders.vertexShaderStandardWritesNormals(b, (LabelLit) label);
         break;
@@ -689,6 +691,7 @@ public final class Shaders
       {
         b.append("with\n");
         Shaders.vertexShaderStandardValuesPositions(b);
+        Shaders.vertexShaderStandardValuesUV(b, label);
         b.append("as\n");
         break;
       }
@@ -771,6 +774,15 @@ public final class Shaders
     }
   }
 
+  private static void vertexShaderStandardParametersUV(
+    final @Nonnull StringBuilder b,
+    final @Nonnull Label label)
+  {
+    if (label.impliesUV()) {
+      b.append("  parameter m_uv : matrix_3x3f;\n");
+    }
+  }
+
   private static void vertexShaderStandardValuesNormals(
     final @Nonnull StringBuilder b,
     final @Nonnull LabelLit label)
@@ -794,6 +806,16 @@ public final class Shaders
         b.append("    M3.multiply_vector (m_normal, v_normal);\n");
         break;
       }
+    }
+  }
+
+  private static void vertexShaderStandardValuesUV(
+    final @Nonnull StringBuilder b,
+    final @Nonnull Label label)
+  {
+    if (label.impliesUV()) {
+      b
+        .append("  value uv = M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];\n");
     }
   }
 
@@ -849,7 +871,7 @@ public final class Shaders
     final @Nonnull Label label)
   {
     if (label.impliesUV()) {
-      b.append("  out f_uv = v_uv;\n");
+      b.append("  out f_uv = uv;\n");
     }
   }
 }
