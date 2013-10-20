@@ -106,6 +106,16 @@ public final class SBRendererSpecific implements KRenderer
       SBRendererSpecific.setParametersAlbedo(gc, i, exec, texture_units);
 
     SBRendererSpecific.setParametersLight(gc, matrices, light, i, exec);
+
+    if (KShadingProgramCommon.existsAttributeUV(exec)) {
+      KShadingProgramCommon.bindAttributeUV(gc, exec, i
+        .getMesh()
+        .getArrayBuffer());
+    }
+
+    if (KShadingProgramCommon.existsMatrixUV(exec)) {
+      KShadingProgramCommon.putMatrixUV(gc, exec, matrices.getMatrixUV());
+    }
   }
 
   private static void setParametersLight(
@@ -203,7 +213,7 @@ public final class SBRendererSpecific implements KRenderer
   {
     int used_units = 0;
 
-    final KMaterialAlbedo albedo = i.getMaterial().getDiffuse();
+    final KMaterialAlbedo albedo = i.getMaterial().getAlbedo();
 
     if (KShadingProgramCommon.existsMaterialAlbedoColour(exec)) {
       KShadingProgramCommon.putMaterialAlbedoColour(
@@ -241,10 +251,6 @@ public final class SBRendererSpecific implements KRenderer
             gc.texture2DStaticUnbind(unit);
             KShadingProgramCommon.putTextureAlbedo(exec, gc, unit);
           }
-
-          KShadingProgramCommon.bindAttributeUV(gc, exec, i
-            .getMesh()
-            .getArrayBuffer());
 
           break;
         }
@@ -302,10 +308,6 @@ public final class SBRendererSpecific implements KRenderer
             gc.texture2DStaticUnbind(unit);
             KShadingProgramCommon.putTextureEmissive(exec, gc, unit);
           }
-
-          KShadingProgramCommon.bindAttributeUV(gc, exec, i
-            .getMesh()
-            .getArrayBuffer());
 
           break;
         }
@@ -472,10 +474,6 @@ public final class SBRendererSpecific implements KRenderer
             KShadingProgramCommon.putTextureNormal(exec, gc, unit);
           }
 
-          KShadingProgramCommon.bindAttributeUV(gc, exec, i
-            .getMesh()
-            .getArrayBuffer());
-
           break;
         }
       }
@@ -539,10 +537,6 @@ public final class SBRendererSpecific implements KRenderer
             gc.texture2DStaticUnbind(unit);
             KShadingProgramCommon.putTextureSpecular(exec, gc, unit);
           }
-
-          KShadingProgramCommon.bindAttributeUV(gc, exec, i
-            .getMesh()
-            .getArrayBuffer());
 
           break;
         }
@@ -771,6 +765,7 @@ public final class SBRendererSpecific implements KRenderer
       JCGLException
   {
     this.matrices.matricesMakeFromTransform(i.getTransform());
+    this.matrices.matricesMakeTextureFromInstance(i);
 
     /**
      * Upload matrices.
@@ -873,6 +868,7 @@ public final class SBRendererSpecific implements KRenderer
       JCGLException
   {
     this.matrices.matricesMakeFromTransform(i.getTransform());
+    this.matrices.matricesMakeTextureFromInstance(i);
 
     /**
      * Upload matrices.

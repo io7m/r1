@@ -611,10 +611,11 @@ public final class SBSceneController implements
       final KMaterialNormal norm = new KMaterialNormal(normal_map);
 
       final KMaterial material =
-        new KMaterial(alpha, diff, emiss, envi, norm, spec);
+        new KMaterial(alpha, diff, emiss, envi, norm, spec, mat.getUVMatrix());
 
       final KMesh km = mesh.getMesh();
-      final KMeshInstance mi = new KMeshInstance(id, transform, km, material);
+      final KMeshInstance mi =
+        new KMeshInstance(id, transform, i.getUVMatrix(), km, material);
 
       meshes = meshes.plus(mi);
     }

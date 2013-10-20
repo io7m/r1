@@ -64,6 +64,45 @@ import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
 final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 {
+  private static class GeneralSettings implements
+    MaterialPanel<KMatrix3x3F<KMatrixUV>>
+  {
+    protected final @Nonnull SBMatrix3x3Fields<KMatrixUV> matrix;
+
+    GeneralSettings()
+    {
+      this.matrix = new SBMatrix3x3Fields<KMatrixUV>();
+    }
+
+    @Override public void mpLayout(
+      final DesignGridLayout d)
+    {
+      d.row().grid().add(new JLabel("UV matrix"));
+
+      for (int r = 0; r < 3; ++r) {
+        d
+          .row()
+          .grid()
+          .add(this.matrix.getRowColumnField(r, 0))
+          .add(this.matrix.getRowColumnField(r, 1))
+          .add(this.matrix.getRowColumnField(r, 2));
+      }
+    }
+
+    @Override public void mpLoadFrom(
+      final SBInstanceDescription i)
+    {
+      this.matrix.setMatrix(i.getUVMatrix());
+    }
+
+    @Override public KMatrix3x3F<KMatrixUV> mpSave()
+      throws SBExceptionInputError,
+        ConstraintError
+    {
+      return this.matrix.getMatrix3x3f();
+    }
+  }
+
   private static class AlbedoSettings implements
     MaterialPanel<SBMaterialAlbedoDescription>
   {
@@ -556,6 +595,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     protected final @Nonnull JLabel                 error_text;
 
     private final @Nonnull ObjectsTableModel        objects_table_model;
+    private final @Nonnull GeneralSettings          general_settings;
     protected final static @Nonnull FileFilter      MESH_FILE_FILTER;
 
     static {
@@ -590,6 +630,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.emissive_settings = new EmissiveSettings(controller, log);
       this.normal_settings = new NormalSettings(controller, log);
       this.specular_settings = new SpecularSettings(controller, log);
+      this.general_settings = new GeneralSettings();
 
       this.error_text = new JLabel("Some informative error text");
       this.error_icon = SBIcons.makeErrorIcon();
@@ -709,6 +750,13 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       {
         final JPanel p = new JPanel();
         final DesignGridLayout d = new DesignGridLayout(p);
+        this.general_settings.mpLayout(d);
+        tabs.add("General", p);
+      }
+
+      {
+        final JPanel p = new JPanel();
+        final DesignGridLayout d = new DesignGridLayout(p);
         this.albedo_settings.mpLayout(d);
         tabs.add("Albedo", p);
       }
@@ -755,7 +803,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           final JTextField id_field =
             new JTextField(initial_desc.getID().toString());
           id_field.setEditable(false);
-          d.row().grid().add(new JLabel("ID")).add(id_field);
+          d.row().grid().add(new JLabel("ID")).add(id_field, 3);
         }
 
         d
@@ -875,6 +923,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         this.specular_settings.mpSave();
       final SBMaterialEmissiveDescription emissive =
         this.emissive_settings.mpSave();
+      final KMatrix3x3F<KMatrixUV> uv_matrix = this.general_settings.mpSave();
 
       final SBMaterialDescription material =
         new SBMaterialDescription(
@@ -883,7 +932,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           emissive,
           specular,
           environment,
-          normal);
+          normal,
+          uv_matrix);
 
       final PathVirtual mesh_name =
         (PathVirtual) this.mesh_selector.getSelectedItem();
@@ -896,6 +946,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           id,
           position,
           orientation,
+          uv_matrix,
           mesh_name,
           material);
 
@@ -1080,10 +1131,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         .add(this.exponent.getLabel())
         .add(this.exponent.getSlider(), 3)
         .add(this.exponent.getField());
-
-      dg.emptyRow();
-      dg.row().left().add(new JSeparator()).fill();
-      dg.emptyRow();
     }
 
     @Override public void mpLoadFrom(

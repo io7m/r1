@@ -46,6 +46,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final Element eo = RXMLUtilities.getChild(e, "orientation", uri);
     final Element em = RXMLUtilities.getChild(e, "mesh", uri);
     final Element emat = RXMLUtilities.getChild(e, "material", uri);
+    final Element eum = RXMLUtilities.getChild(e, "uv-matrix", uri);
 
     final int id = RXMLUtilities.getElementInteger(eid);
 
@@ -58,10 +59,14 @@ import com.io7m.renderer.xml.RXMLUtilities;
       PathVirtual.ofString(RXMLUtilities.getElementNonEmptyString(em));
     final SBMaterialDescription mat = SBMaterialDescription.fromXML(emat);
 
+    final KMatrix3x3F<KMatrixUV> uvm =
+      SBMaterialDescription.matrix3x3Parse(eum, uri);
+
     return new SBInstanceDescription(
       Integer.valueOf(id),
       position,
       orientation,
+      uvm,
       mesh,
       mat);
   }
@@ -69,6 +74,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
   private final @Nonnull Integer                 id;
   private final @Nonnull RVectorI3F<RSpaceWorld> position;
   private final @Nonnull RVectorI3F<SBDegrees>   orientation;
+  private final @Nonnull KMatrix3x3F<KMatrixUV>  uv_matrix;
   private final @Nonnull PathVirtual             mesh;
   private final @Nonnull SBMaterialDescription   material;
 
@@ -76,6 +82,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final @Nonnull Integer id,
     final @Nonnull RVectorI3F<RSpaceWorld> position,
     final @Nonnull RVectorI3F<SBDegrees> orientation,
+    final @Nonnull KMatrix3x3F<KMatrixUV> uv_matrix,
     final @Nonnull PathVirtual mesh,
     final @Nonnull SBMaterialDescription material)
   {
@@ -84,6 +91,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     this.orientation = orientation;
     this.mesh = mesh;
     this.material = material;
+    this.uv_matrix = uv_matrix;
   }
 
   @Override public boolean equals(
@@ -233,11 +241,20 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
     final Element emat = this.material.toXML();
 
+    final Element eum = new Element("s:uv-matrix", uri);
+    SBMaterialDescription.matrix3x3Write(uri, this.uv_matrix, eum);
+
     e.appendChild(eid);
     e.appendChild(eo);
     e.appendChild(ep);
     e.appendChild(em);
     e.appendChild(emat);
+    e.appendChild(eum);
     return e;
+  }
+
+  public @Nonnull KMatrix3x3F<KMatrixUV> getUVMatrix()
+  {
+    return this.uv_matrix;
   }
 }
