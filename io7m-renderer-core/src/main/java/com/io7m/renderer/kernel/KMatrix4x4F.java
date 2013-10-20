@@ -47,7 +47,7 @@ import com.io7m.jtensors.VectorReadable4F;
     final @Nonnull VectorReadable4F column_2,
     final @Nonnull VectorReadable4F column_3)
   {
-    this.elements = new float[3][3];
+    this.elements = new float[4][4];
 
     this.elements[0][0] = column_0.getXF();
     this.elements[1][0] = column_0.getYF();
@@ -68,6 +68,35 @@ import com.io7m.jtensors.VectorReadable4F;
     this.elements[1][3] = column_3.getYF();
     this.elements[2][3] = column_3.getZF();
     this.elements[3][3] = column_3.getWF();
+  }
+
+  /**
+   * The identity matrix.
+   */
+
+  KMatrix4x4F()
+  {
+    this.elements = new float[4][4];
+
+    this.elements[0][0] = 1.0f;
+    this.elements[1][0] = 0.0f;
+    this.elements[2][0] = 0.0f;
+    this.elements[3][0] = 0.0f;
+
+    this.elements[0][1] = 0.0f;
+    this.elements[1][1] = 1.0f;
+    this.elements[2][1] = 0.0f;
+    this.elements[3][1] = 0.0f;
+
+    this.elements[0][2] = 0.0f;
+    this.elements[1][2] = 0.0f;
+    this.elements[2][2] = 1.0f;
+    this.elements[3][2] = 0.0f;
+
+    this.elements[0][3] = 0.0f;
+    this.elements[1][3] = 0.0f;
+    this.elements[2][3] = 0.0f;
+    this.elements[3][3] = 1.0f;
   }
 
   @Override public boolean equals(
