@@ -226,6 +226,22 @@ public final class SBSceneController implements
     }
   }
 
+  private @Nonnull SBShader internalShaderLoad(
+    final @Nonnull File file)
+    throws ConstraintError,
+      ParsingException,
+      IOException,
+      InterruptedException,
+      ExecutionException
+  {
+    final Builder b = new Builder();
+    final Document d = b.build(file);
+    final PGLSLMetaXML meta = PGLSLMetaXML.fromDocument(d);
+    final Future<SBShader> f =
+      this.renderer.shaderLoad(file.getParentFile(), meta);
+    return f.get();
+  }
+
   private void internalStateChangedNotifyListeners()
   {
     for (final SBSceneChangeListener l : this.listeners) {
@@ -504,6 +520,11 @@ public final class SBSceneController implements
     return f;
   }
 
+  @Override public KMatrix4x4F<KMatrixProjection> rendererGetProjection()
+  {
+    return this.renderer.getProjection();
+  }
+
   @Override public @Nonnull
     Pair<Collection<KLight>, Collection<KMeshInstance>>
     rendererGetScene()
@@ -633,6 +654,12 @@ public final class SBSceneController implements
     this.renderer.setBackgroundColour(r, g, b);
   }
 
+  @Override public void rendererSetCustomProjection(
+    final @Nonnull KMatrix4x4F<KMatrixProjection> p)
+  {
+    this.renderer.setCustomProjection(p);
+  }
+
   @Override public void rendererSetType(
     final @Nonnull SBRendererType type)
   {
@@ -661,6 +688,11 @@ public final class SBSceneController implements
     final boolean enabled)
   {
     this.renderer.setShowLights(enabled);
+  }
+
+  @Override public void rendererUnsetCustomProjection()
+  {
+    this.renderer.unsetCustomProjection();
   }
 
   @Override public void sceneChangeListenerAdd(
@@ -918,22 +950,6 @@ public final class SBSceneController implements
     return f;
   }
 
-  private @Nonnull SBShader internalShaderLoad(
-    final @Nonnull File file)
-    throws ConstraintError,
-      ParsingException,
-      IOException,
-      InterruptedException,
-      ExecutionException
-  {
-    final Builder b = new Builder();
-    final Document d = b.build(file);
-    final PGLSLMetaXML meta = PGLSLMetaXML.fromDocument(d);
-    final Future<SBShader> f =
-      this.renderer.shaderLoad(file.getParentFile(), meta);
-    return f.get();
-  }
-
   @Override public @Nonnull Map<String, SBShader> shadersGet()
   {
     return this.shaders;
@@ -1021,10 +1037,15 @@ interface SBSceneControllerRenderer
 
 interface SBSceneControllerRendererControl
 {
+  public @Nonnull KMatrix4x4F<KMatrixProjection> rendererGetProjection();
+
   public void rendererSetBackgroundColour(
     float r,
     float g,
     float b);
+
+  public void rendererSetCustomProjection(
+    final @Nonnull KMatrix4x4F<KMatrixProjection> p);
 
   public void rendererSetType(
     final @Nonnull SBRendererType type);
@@ -1040,6 +1061,8 @@ interface SBSceneControllerRendererControl
 
   public void rendererShowLights(
     final boolean enabled);
+
+  public void rendererUnsetCustomProjection();
 }
 
 interface SBSceneControllerShaders

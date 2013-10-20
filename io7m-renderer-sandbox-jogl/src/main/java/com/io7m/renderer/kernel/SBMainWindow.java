@@ -91,6 +91,7 @@ final class SBMainWindow extends JFrame
     makeMenuBar(
       final @Nonnull C controller,
       final @Nonnull SBMainWindow window,
+      final @Nonnull SBCameraWindow camera_window,
       final @Nonnull SBLightsWindow lights_window,
       final @Nonnull SBLogsWindow logs_window,
       final @Nonnull SBObjectsWindow objects_window,
@@ -100,7 +101,7 @@ final class SBMainWindow extends JFrame
     bar.add(SBMainWindow.makeMenuFile(controller, window, log));
     bar.add(SBMainWindow.makeMenuEdit(lights_window, objects_window));
     bar.add(SBMainWindow.makeMenuRenderer(window, log, controller));
-    bar.add(SBMainWindow.makeMenuView(controller));
+    bar.add(SBMainWindow.makeMenuView(camera_window, controller));
     bar.add(SBMainWindow.makeMenuDebug(logs_window));
     return bar;
   }
@@ -411,6 +412,7 @@ final class SBMainWindow extends JFrame
   }
 
   private static @Nonnull JMenu makeMenuView(
+    final @Nonnull SBCameraWindow camera_window,
     final @Nonnull SBSceneControllerRendererControl controller)
   {
     final JMenu menu = new JMenu("View");
@@ -468,11 +470,16 @@ final class SBMainWindow extends JFrame
       }
     });
 
-    menu.add(bg_colour);
+    final JCheckBoxMenuItem camera =
+      SBMainWindow.makeWindowCheckbox("Camera...", camera_window);
+
     menu.add(axes);
     menu.add(grid);
     menu.add(lights);
     menu.add(lights_radii);
+    menu.add(new JSeparator());
+    menu.add(bg_colour);
+    menu.add(camera);
     return menu;
   }
 
@@ -562,6 +569,8 @@ final class SBMainWindow extends JFrame
     final SBLogsWindow logs_window = new SBLogsWindow();
     final SBObjectsWindow objects_window =
       new SBObjectsWindow(controller, log);
+
+    final SBCameraWindow camera_window = new SBCameraWindow(controller, log);
 
     log.setCallback(new Callbacks() {
       private final @Nonnull StringBuilder builder = new StringBuilder();
@@ -712,6 +721,7 @@ final class SBMainWindow extends JFrame
     this.setJMenuBar(SBMainWindow.makeMenuBar(
       controller,
       this,
+      camera_window,
       lights_window,
       logs_window,
       objects_window,

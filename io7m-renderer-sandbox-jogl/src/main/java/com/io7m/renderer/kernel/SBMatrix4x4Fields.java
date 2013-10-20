@@ -19,19 +19,19 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.swing.JTextField;
 
-import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.VectorI4F;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
-public final class SBMatrix3x3Fields<T extends KMatrixKind>
+public final class SBMatrix4x4Fields<T extends KMatrixKind>
 {
   private final @Nonnull JTextField fields[][];
 
-  public SBMatrix3x3Fields()
+  public SBMatrix4x4Fields()
   {
-    this.fields = new JTextField[3][3];
+    this.fields = new JTextField[4][4];
 
-    for (int c = 0; c < 3; ++c) {
-      for (int r = 0; r < 3; ++r) {
+    for (int c = 0; c < 4; ++c) {
+      for (int r = 0; r < 4; ++r) {
         final JTextField f = new JTextField();
         if (c == r) {
           f.setText("1.0");
@@ -43,37 +43,54 @@ public final class SBMatrix3x3Fields<T extends KMatrixKind>
     }
   }
 
-  public @Nonnull KMatrix3x3F<T> getMatrix3x3f()
+  public @Nonnull KMatrix4x4F<T> getMatrix4x4f()
     throws SBExceptionInputError
   {
-    final VectorI3F column_0 =
-      new VectorI3F(
+    final VectorI4F column_0 =
+      new VectorI4F(
         SBTextFieldUtilities.getFieldFloatOrError(this
           .getRowColumnField(0, 0)),
         SBTextFieldUtilities.getFieldFloatOrError(this
           .getRowColumnField(1, 0)),
         SBTextFieldUtilities.getFieldFloatOrError(this
-          .getRowColumnField(2, 0)));
+          .getRowColumnField(2, 0)),
+        SBTextFieldUtilities.getFieldFloatOrError(this
+          .getRowColumnField(3, 0)));
 
-    final VectorI3F column_1 =
-      new VectorI3F(
+    final VectorI4F column_1 =
+      new VectorI4F(
         SBTextFieldUtilities.getFieldFloatOrError(this
           .getRowColumnField(0, 1)),
         SBTextFieldUtilities.getFieldFloatOrError(this
           .getRowColumnField(1, 1)),
         SBTextFieldUtilities.getFieldFloatOrError(this
-          .getRowColumnField(2, 1)));
+          .getRowColumnField(2, 1)),
+        SBTextFieldUtilities.getFieldFloatOrError(this
+          .getRowColumnField(3, 1)));
 
-    final VectorI3F column_2 =
-      new VectorI3F(
+    final VectorI4F column_2 =
+      new VectorI4F(
         SBTextFieldUtilities.getFieldFloatOrError(this
           .getRowColumnField(0, 2)),
         SBTextFieldUtilities.getFieldFloatOrError(this
           .getRowColumnField(1, 2)),
         SBTextFieldUtilities.getFieldFloatOrError(this
-          .getRowColumnField(2, 2)));
+          .getRowColumnField(2, 2)),
+        SBTextFieldUtilities.getFieldFloatOrError(this
+          .getRowColumnField(3, 2)));
 
-    return new KMatrix3x3F<T>(column_0, column_1, column_2);
+    final VectorI4F column_3 =
+      new VectorI4F(
+        SBTextFieldUtilities.getFieldFloatOrError(this
+          .getRowColumnField(0, 3)),
+        SBTextFieldUtilities.getFieldFloatOrError(this
+          .getRowColumnField(1, 3)),
+        SBTextFieldUtilities.getFieldFloatOrError(this
+          .getRowColumnField(2, 3)),
+        SBTextFieldUtilities.getFieldFloatOrError(this
+          .getRowColumnField(3, 3)));
+
+    return new KMatrix4x4F<T>(column_0, column_1, column_2, column_3);
   }
 
   public @Nonnull JTextField getRowColumnField(
@@ -84,10 +101,10 @@ public final class SBMatrix3x3Fields<T extends KMatrixKind>
   }
 
   @SuppressWarnings("boxing") public void setMatrix(
-    final @Nonnull KMatrix3x3F<T> m)
+    final @Nonnull KMatrix4x4F<T> m)
   {
-    for (int c = 0; c < 3; ++c) {
-      for (int r = 0; r < 3; ++r) {
+    for (int c = 0; c < 4; ++c) {
+      for (int r = 0; r < 4; ++r) {
         final JTextField f = this.getRowColumnField(r, c);
         final float v = m.getRowColumnF(r, c);
         f.setText(String.format("%6f", v));
