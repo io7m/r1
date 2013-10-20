@@ -31,6 +31,7 @@ import com.io7m.renderer.RTransformModel;
 import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
+import com.io7m.renderer.RTransformTexture;
 import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.RTransformViewInverse;
 
@@ -60,6 +61,8 @@ public final class KMatrices
   private final @Nonnull RMatrixM4x4F<RTransformView>        matrix_view;
   private final @Nonnull RMatrixM4x4F<RTransformViewInverse> matrix_view_inverse;
   private final @Nonnull RMatrixM3x3F<RTransformNormal>      matrix_normal;
+  private final @Nonnull RMatrixM3x3F<RTransformTexture>     matrix_uv;
+  private final @Nonnull RMatrixM3x3F<RTransformTexture>     matrix_uv_temp;
 
   private final @Nonnull KTransform.Context                  transform_context;
 
@@ -69,6 +72,7 @@ public final class KMatrices
   private boolean                                            matrix_view_done;
   private boolean                                            matrix_view_inverse_done;
   private boolean                                            matrix_normal_done;
+  private boolean                                            matrix_uv_done;
 
   public KMatrices()
   {
@@ -79,6 +83,8 @@ public final class KMatrices
     this.matrix_view_inverse = new RMatrixM4x4F<RTransformViewInverse>();
     this.matrix_normal = new RMatrixM3x3F<RTransformNormal>();
     this.matrix_context = new MatrixM4x4F.Context();
+    this.matrix_uv = new RMatrixM3x3F<RTransformTexture>();
+    this.matrix_uv_temp = new RMatrixM3x3F<RTransformTexture>();
     this.transform_context = new KTransform.Context();
     this.matricesBegin();
   }
@@ -128,6 +134,16 @@ public final class KMatrices
     return this.matrix_projection;
   }
 
+  public @Nonnull RMatrixM3x3F<RTransformTexture> getMatrixUV()
+    throws ConstraintError
+  {
+    Constraints.constrainArbitrary(
+      this.matrix_uv_done,
+      "UV matrix calculated");
+
+    return this.matrix_uv;
+  }
+
   public @Nonnull RMatrixReadable4x4F<RTransformView> getMatrixView()
     throws ConstraintError
   {
@@ -154,6 +170,7 @@ public final class KMatrices
     this.matrix_view_done = false;
     this.matrix_view_inverse_done = false;
     this.matrix_normal_done = false;
+    this.matrix_uv_done = false;
   }
 
   public void matricesMakeFromCamera(
@@ -206,6 +223,19 @@ public final class KMatrices
     this.matrix_model_done = true;
     this.matrix_modelview_done = true;
     this.matrix_normal_done = true;
+  }
+
+  public void matricesMakeTextureFromInstance(
+    final @Nonnull KMeshInstance instance)
+  {
+    final KMatrix3x3F<KMatrixUV> km = instance.getMaterial().getUVMatrix();
+    final KMatrix3x3F<KMatrixUV> ki = instance.getUVMatrix();
+
+    km.makeMatrixM3x3F(this.matrix_uv);
+    ki.makeMatrixM3x3F(this.matrix_uv_temp);
+    MatrixM3x3F.multiplyInPlace(this.matrix_uv, this.matrix_uv_temp);
+
+    this.matrix_uv_done = true;
   }
 
 }

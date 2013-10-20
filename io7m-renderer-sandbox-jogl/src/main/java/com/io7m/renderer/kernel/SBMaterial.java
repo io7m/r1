@@ -22,7 +22,7 @@ import javax.annotation.Nonnull;
 public final class SBMaterial
 {
   private final @Nonnull SBMaterialDescription                     description;
-  private final @CheckForNull SBTexture2D<SBTexture2DKindAlbedo>  map_diffuse;
+  private final @CheckForNull SBTexture2D<SBTexture2DKindAlbedo>   map_diffuse;
   private final @CheckForNull SBTexture2D<SBTexture2DKindEmissive> map_emissive;
   private final @CheckForNull SBTexture2D<SBTexture2DKindNormal>   map_normal;
   private final @CheckForNull SBTexture2D<SBTexture2DKindSpecular> map_specular;
@@ -175,5 +175,10 @@ public final class SBMaterial
     builder.append(this.map_environment);
     builder.append("]");
     return builder.toString();
+  }
+
+  public @Nonnull KMatrix3x3F<KMatrixUV> getUVMatrix()
+  {
+    return this.description.getUVMatrix();
   }
 }

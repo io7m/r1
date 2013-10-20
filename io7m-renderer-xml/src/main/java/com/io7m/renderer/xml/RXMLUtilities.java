@@ -27,6 +27,7 @@ import nu.xom.Elements;
 import nu.xom.ValidityException;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jtensors.VectorReadable3F;
 import com.io7m.renderer.RSpace;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceRGBA;
@@ -196,6 +197,24 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(ay),
       RXMLUtilities.getAttributeFloat(az),
       RXMLUtilities.getAttributeFloat(aw));
+  }
+
+  public static @Nonnull
+    <T extends RSpace>
+    RVectorI3F<T>
+    getElementAttributesMatrixColumn3(
+      final @Nonnull Element e,
+      final @Nonnull URI uri)
+      throws RXMLException,
+        ConstraintError
+  {
+    final Attribute a0 = RXMLUtilities.getAttribute(e, "r0", uri);
+    final Attribute a1 = RXMLUtilities.getAttribute(e, "r1", uri);
+    final Attribute a2 = RXMLUtilities.getAttribute(e, "r2", uri);
+    return new RVectorI3F<T>(
+      RXMLUtilities.getAttributeFloat(a0),
+      RXMLUtilities.getAttributeFloat(a1),
+      RXMLUtilities.getAttributeFloat(a2));
   }
 
   public static @Nonnull
@@ -410,6 +429,27 @@ public final class RXMLUtilities
     e.addAttribute(ag);
     e.addAttribute(ab);
     e.addAttribute(aa);
+  }
+
+  public static void putElementAttributesMatrixColumn3(
+    final @Nonnull Element e,
+    final @Nonnull VectorReadable3F column,
+    final @Nonnull String prefix,
+    final @Nonnull URI uri)
+  {
+    final Attribute ar =
+      new Attribute(prefix + ":r0", uri.toString(), Float.toString(column
+        .getXF()));
+    final Attribute ag =
+      new Attribute(prefix + ":r1", uri.toString(), Float.toString(column
+        .getYF()));
+    final Attribute ab =
+      new Attribute(prefix + ":r2", uri.toString(), Float.toString(column
+        .getZF()));
+
+    e.addAttribute(ar);
+    e.addAttribute(ag);
+    e.addAttribute(ab);
   }
 
   public static void putElementAttributeString(

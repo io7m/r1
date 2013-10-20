@@ -384,7 +384,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -490,7 +490,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -699,7 +699,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -807,7 +807,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
