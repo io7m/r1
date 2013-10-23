@@ -49,48 +49,48 @@ module SphericalLight is
   end;
 
   --
-  -- Given a spherical light [light], a surface normal [n],
-  -- and the point [p] on the surface to be lit, calculate all
-  -- relevant directions for simulating lighting.
+  -- Calculate all relevant directions for simulating lighting.
   --
   -- Note that calculations are in eye-space and therefore the
   -- observer is assumed to be at (0.0, 0.0, 0.0).
   --
 
   function directions (
-    light : t,
-    p     : vector_3f,
-    n     : vector_3f
+    light_position   : vector_3f,
+    surface_position : vector_3f,
+    surface_normal   : vector_3f
   ) : directions =
     let
       value position_diff =
-        V3.subtract (p, light.position);
+        V3.subtract (surface_position, light_position);
       value ots =
-        V3.normalize (p);
+        V3.normalize (surface_position);
     in
       record directions {
         ots        = ots,
-        normal     = n,
+        normal     = surface_normal,
         stl        = V3.normalize (V3.negate (position_diff)),
         distance   = V3.magnitude (position_diff),
-        reflection = V3.reflect (ots, n)
+        reflection = V3.reflect (ots, surface_normal)
       }
     end;
 
   --
-  -- Given a spherical light [light], at distance [distance]
-  -- from the point on the surface, calculate the amount of attenuation.
+  -- Given a light with range [light_range] and falloff exponent 
+  -- [light_falloff], at [distance] from the current point on the 
+  -- surface, calculate the amount of attenuation.
   --
 
   function attenuation (
-    light    : t,
-    distance : float
+    light_range   : float,
+    light_falloff : float,
+    distance      : float
   ) : float =
     let
       value nd          = F.subtract (0.0, distance);
-      value inv_radius  = F.divide (1.0, light.radius);
-      value linear      = F.add (F.multiply (nd, inv_radius), 1.0);
-      value exponential = F.clamp (F.power (linear, light.falloff), 0.0, 1.0);
+      value inv_range   = F.divide (1.0, light_range);
+      value linear      = F.add (F.multiply (nd, inv_range), 1.0);
+      value exponential = F.clamp (F.power (linear, light_falloff), 0.0, 1.0);
     in
       exponential
     end; 
@@ -129,8 +129,8 @@ module SphericalLight is
     p     : vector_3f
   ) : vector_3f =
     let
-      value d = directions (light, p, n);
-      value a = attenuation (light, d.distance);
+      value d = directions (light.position, p, n);
+      value a = attenuation (light.radius, light.falloff, d.distance);
       value c = diffuse_color (light, d, 0.0);
     in
       V3.multiply_scalar (c, a)
@@ -168,8 +168,8 @@ module SphericalLight is
     material : M.t
   ) : vector_3f =
     let
-      value d  = directions (light, p, n);
-      value a  = attenuation (light, d.distance);
+      value d  = directions (light.position, p, n);
+      value a  = attenuation (light.radius, light.falloff, d.distance);
       value dc = diffuse_color (light, d, 0.0);
       value sc = specular_color (light, d, material.specular);
     in
@@ -191,8 +191,8 @@ module SphericalLight is
     material : M.t
   ) : vector_3f =
     let
-      value d  = directions (light, p, n);
-      value a  = attenuation (light, d.distance);
+      value d  = directions (light.position, p, n);
+      value a  = attenuation (light.radius, light.falloff, d.distance);
       value dc = diffuse_color (light, d, material.emissive.emissive);
       value sc = specular_color (light, d, material.specular);
     in
@@ -214,8 +214,8 @@ module SphericalLight is
     material : M.t
   ) : vector_3f =
     let
-      value d = directions (light, p, n);
-      value a = attenuation (light, d.distance);
+      value d = directions (light.position, p, n);
+      value a = attenuation (light.radius, light.falloff, d.distance);
       value c = diffuse_color (light, d, material.emissive.emissive);
     in
       V3.multiply_scalar (c, a)

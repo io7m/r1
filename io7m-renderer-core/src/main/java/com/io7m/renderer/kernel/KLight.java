@@ -59,7 +59,7 @@ import com.io7m.renderer.RVectorReadable3F;
     private final @Nonnull Texture2DStaticUsable              texture;
     private final @Nonnull RVectorReadable3F<RSpaceWorld>     position;
     private final @Nonnull QuaternionI4F                      orientation;
-    private final float                                       distance;
+    private final float                                       range;
     private final float                                       falloff;
     private final @Nonnull RMatrixI4x4F<RTransformProjection> projection;
 
@@ -70,14 +70,14 @@ import com.io7m.renderer.RVectorReadable3F;
       final @Nonnull QuaternionI4F orientation,
       final @Nonnull RVectorReadable3F<RSpaceRGB> colour,
       final float intensity,
-      final float distance,
+      final float range,
       final float falloff,
       final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
     {
       super(Type.LIGHT_PROJECTIVE, id, colour, intensity);
       this.position = position;
       this.orientation = orientation;
-      this.distance = distance;
+      this.range = range;
       this.falloff = falloff;
       this.projection = projection;
       this.texture = texture;
@@ -93,9 +93,9 @@ import com.io7m.renderer.RVectorReadable3F;
       return this.texture;
     }
 
-    public float getDistance()
+    public float getRange()
     {
-      return this.distance;
+      return this.range;
     }
 
     public @Nonnull QuaternionI4F getOrientation()
