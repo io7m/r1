@@ -44,12 +44,14 @@ import com.io7m.renderer.RMatrixReadable4x4F;
 import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RSpaceTexture;
+import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RTransformModel;
 import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformTexture;
 import com.io7m.renderer.RTransformTextureProjection;
+import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.RTransformViewInverse;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI4F;
@@ -468,20 +470,11 @@ public final class KShadingProgramCommon
     throws JCGLException,
       ConstraintError
   {
-    final VectorM4F light_eye = new VectorM4F();
-    final VectorM4F light_world = new VectorM4F();
-    light_world.x = light.getDirection().getXF();
-    light_world.y = light.getDirection().getYF();
-    light_world.z = light.getDirection().getZF();
-    light_world.w = 0.0f;
-
-    final Context mc = matrices.getMatrixContext();
-    final RMatrixReadable4x4F<RTransformModelView> mmv =
-      matrices.getMatrixModelView();
-
-    MatrixM4x4F.multiplyVector4FWithContext(mc, mmv, light_world, light_eye);
-
-    e.execUniformPutVector3F(gc, "light_directional.direction", light_eye);
+    KShadingProgramCommon.putLightDirectionalDirection(
+      gc,
+      e,
+      matrices,
+      light.getDirection());
     e
       .execUniformPutVector3F(
         gc,
@@ -493,6 +486,28 @@ public final class KShadingProgramCommon
       light.getIntensity());
   }
 
+  static void putLightDirectionalDirection(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI e,
+    final @Nonnull KMatrices matrices,
+    final @Nonnull RVectorReadable3F<RSpaceWorld> direction)
+    throws ConstraintError,
+      JCGLException
+  {
+    final VectorM4F light_eye = new VectorM4F();
+    final VectorM4F light_world = new VectorM4F();
+    light_world.x = direction.getXF();
+    light_world.y = direction.getYF();
+    light_world.z = direction.getZF();
+    light_world.w = 0.0f;
+
+    final Context mc = matrices.getMatrixContext();
+    final RMatrixReadable4x4F<RTransformView> mv = matrices.getMatrixView();
+
+    MatrixM4x4F.multiplyVector4FWithContext(mc, mv, light_world, light_eye);
+    e.execUniformPutVector3F(gc, "light_directional.direction", light_eye);
+  }
+
   static void putLightProjective(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI exec,
@@ -501,20 +516,12 @@ public final class KShadingProgramCommon
     throws JCGLException,
       ConstraintError
   {
-    final VectorM4F light_eye = new VectorM4F();
-    final VectorM4F light_world = new VectorM4F();
-    light_world.x = light.getPosition().getXF();
-    light_world.y = light.getPosition().getYF();
-    light_world.z = light.getPosition().getZF();
-    light_world.w = 1.0f;
+    KShadingProgramCommon.putLightProjectivePosition(
+      gc,
+      exec,
+      matrices,
+      light.getPosition());
 
-    final Context mc = matrices.getMatrixContext();
-    final RMatrixReadable4x4F<RTransformModelView> mmv =
-      matrices.getMatrixModelView();
-
-    MatrixM4x4F.multiplyVector4FWithContext(mc, mmv, light_world, light_eye);
-
-    exec.execUniformPutVector3F(gc, "light_projective.position", light_eye);
     exec.execUniformPutVector3F(
       gc,
       "light_projective.color",
@@ -523,14 +530,33 @@ public final class KShadingProgramCommon
       gc,
       "light_projective.intensity",
       light.getIntensity());
-    exec.execUniformPutFloat(
-      gc,
-      "light_projective.distance",
-      light.getDistance());
+    exec.execUniformPutFloat(gc, "light_projective.range", light.getRange());
     exec.execUniformPutFloat(
       gc,
       "light_projective.falloff",
       light.getFalloff());
+  }
+
+  static void putLightProjectivePosition(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull KMatrices matrices,
+    final @Nonnull RVectorReadable3F<RSpaceWorld> position)
+    throws ConstraintError,
+      JCGLException
+  {
+    final VectorM4F light_eye = new VectorM4F();
+    final VectorM4F light_world = new VectorM4F();
+    light_world.x = position.getXF();
+    light_world.y = position.getYF();
+    light_world.z = position.getZF();
+    light_world.w = 1.0f;
+
+    final Context mc = matrices.getMatrixContext();
+    final RMatrixReadable4x4F<RTransformView> mv = matrices.getMatrixView();
+
+    MatrixM4x4F.multiplyVector4FWithContext(mc, mv, light_world, light_eye);
+    exec.execUniformPutVector3F(gc, "light_projective.position", light_eye);
   }
 
   static void putLightSpherical(
@@ -541,20 +567,12 @@ public final class KShadingProgramCommon
     throws JCGLException,
       ConstraintError
   {
-    final VectorM4F light_eye = new VectorM4F();
-    final VectorM4F light_world = new VectorM4F();
-    light_world.x = light.getPosition().getXF();
-    light_world.y = light.getPosition().getYF();
-    light_world.z = light.getPosition().getZF();
-    light_world.w = 1.0f;
+    KShadingProgramCommon.putLightSphericalPosition(
+      gc,
+      exec,
+      matrices,
+      light.getPosition());
 
-    final Context mc = matrices.getMatrixContext();
-    final RMatrixReadable4x4F<RTransformModelView> mmv =
-      matrices.getMatrixModelView();
-
-    MatrixM4x4F.multiplyVector4FWithContext(mc, mmv, light_world, light_eye);
-
-    exec.execUniformPutVector3F(gc, "light_spherical.position", light_eye);
     exec.execUniformPutVector3F(
       gc,
       "light_spherical.color",
@@ -568,6 +586,28 @@ public final class KShadingProgramCommon
       gc,
       "light_spherical.falloff",
       light.getFalloff());
+  }
+
+  static void putLightSphericalPosition(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull KMatrices matrices,
+    final @Nonnull RVectorReadable3F<RSpaceWorld> position)
+    throws ConstraintError,
+      JCGLException
+  {
+    final VectorM4F light_eye = new VectorM4F();
+    final VectorM4F light_world = new VectorM4F();
+    light_world.x = position.getXF();
+    light_world.y = position.getYF();
+    light_world.z = position.getZF();
+    light_world.w = 1.0f;
+
+    final Context mc = matrices.getMatrixContext();
+    final RMatrixReadable4x4F<RTransformView> mv = matrices.getMatrixView();
+
+    MatrixM4x4F.multiplyVector4FWithContext(mc, mv, light_world, light_eye);
+    exec.execUniformPutVector3F(gc, "light_spherical.position", light_eye);
   }
 
   static void putLightSphericalReuse(
