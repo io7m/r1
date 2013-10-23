@@ -33,17 +33,18 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RTransformTexture;
 
 public class SBInstanceDescriptionTest
 {
   private static class MaterialGenerator implements
     Generator<SBMaterialDescription>
   {
-    private final @Nonnull SBNonEmptyStringGenerator        string_gen;
-    private final @Nonnull IntegerGenerator                 int_gen;
-    private final @Nonnull SBVectorI4FGenerator<RSpaceRGBA> rgba_gen;
-    private final @Nonnull PathVirtualGenerator             path_gen;
-    private final @Nonnull KMatrix3x3FGenerator<KMatrixUV>  matrix_gen;
+    private final @Nonnull SBNonEmptyStringGenerator               string_gen;
+    private final @Nonnull IntegerGenerator                        int_gen;
+    private final @Nonnull SBVectorI4FGenerator<RSpaceRGBA>        rgba_gen;
+    private final @Nonnull PathVirtualGenerator                    path_gen;
+    private final @Nonnull RMatrix3x3FGenerator<RTransformTexture> matrix_gen;
 
     public MaterialGenerator()
     {
@@ -51,7 +52,7 @@ public class SBInstanceDescriptionTest
       this.int_gen = new IntegerGenerator();
       this.rgba_gen = new SBVectorI4FGenerator<RSpaceRGBA>();
       this.path_gen = new PathVirtualGenerator();
-      this.matrix_gen = new KMatrix3x3FGenerator<KMatrixUV>();
+      this.matrix_gen = new RMatrix3x3FGenerator<RTransformTexture>();
     }
 
     @Override public SBMaterialDescription next()
@@ -107,13 +108,13 @@ public class SBInstanceDescriptionTest
   private static class InstanceGenerator implements
     Generator<SBInstanceDescription>
   {
-    private final @Nonnull SBNonEmptyStringGenerator         string_gen;
-    private final @Nonnull IntegerGenerator                  int_gen;
-    private final @Nonnull SBVectorI3FGenerator<RSpaceWorld> pos_gen;
-    private final @Nonnull SBVectorI3FGenerator<SBDegrees>   ori_gen;
-    private final @Nonnull MaterialGenerator                 mat_gen;
-    private final @Nonnull PathVirtualGenerator              path_gen;
-    private final @Nonnull KMatrix3x3FGenerator<KMatrixUV>   matrix_gen;
+    private final @Nonnull SBNonEmptyStringGenerator               string_gen;
+    private final @Nonnull IntegerGenerator                        int_gen;
+    private final @Nonnull SBVectorI3FGenerator<RSpaceWorld>       pos_gen;
+    private final @Nonnull SBVectorI3FGenerator<SBDegrees>         ori_gen;
+    private final @Nonnull MaterialGenerator                       mat_gen;
+    private final @Nonnull PathVirtualGenerator                    path_gen;
+    private final @Nonnull RMatrix3x3FGenerator<RTransformTexture> matrix_gen;
 
     public InstanceGenerator()
     {
@@ -123,7 +124,7 @@ public class SBInstanceDescriptionTest
       this.ori_gen = new SBVectorI3FGenerator<SBDegrees>();
       this.mat_gen = new MaterialGenerator();
       this.path_gen = new PathVirtualGenerator();
-      this.matrix_gen = new KMatrix3x3FGenerator<KMatrixUV>();
+      this.matrix_gen = new RMatrix3x3FGenerator<RTransformTexture>();
     }
 
     @Override public SBInstanceDescription next()

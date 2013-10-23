@@ -20,7 +20,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.RMatrixI3x3F;
 import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RTransformTexture;
 import com.io7m.renderer.RVectorI3F;
 
 @Immutable final class SBInstance
@@ -77,7 +79,7 @@ import com.io7m.renderer.RVectorI3F;
     return builder.toString();
   }
 
-  public @Nonnull KMatrix3x3F<KMatrixUV> getUVMatrix()
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
   {
     return this.description.getUVMatrix();
   }

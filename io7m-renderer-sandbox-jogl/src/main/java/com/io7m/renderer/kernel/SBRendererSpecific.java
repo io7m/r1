@@ -41,22 +41,30 @@ import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
+import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.RMatrixI4x4F;
+import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RTransformProjection;
+import com.io7m.renderer.RTransformTextureProjection;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.RVectorI4F;
+import com.io7m.renderer.RVectorReadable3F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
+import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Environment;
 import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Normal;
@@ -105,7 +113,14 @@ public final class SBRendererSpecific implements KRenderer
     texture_units +=
       SBRendererSpecific.setParametersAlbedo(gc, i, exec, texture_units);
 
-    SBRendererSpecific.setParametersLight(gc, matrices, light, i, exec);
+    texture_units +=
+      SBRendererSpecific.setParametersLight(
+        gc,
+        matrices,
+        light,
+        i,
+        exec,
+        texture_units);
 
     if (KShadingProgramCommon.existsAttributeUV(exec)) {
       KShadingProgramCommon.bindAttributeUV(gc, exec, i
@@ -118,16 +133,19 @@ public final class SBRendererSpecific implements KRenderer
     }
   }
 
-  private static void setParametersLight(
+  private static int setParametersLight(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMatrices matrices,
     final @Nonnull KLight light,
     final @Nonnull KMeshInstance i,
-    final @Nonnull JCCEExecutionCallable exec)
+    final @Nonnull JCCEExecutionCallable exec,
+    final int texture_units)
     throws JCGLException,
       ConstraintError
   {
-    if (KShadingProgramCommon.existsLightDirection(exec)) {
+    int used_units = 0;
+
+    if (KShadingProgramCommon.existsLightDirectional(exec)) {
       switch (light.getType()) {
         case LIGHT_DIRECTIONAL:
         {
@@ -138,6 +156,7 @@ public final class SBRendererSpecific implements KRenderer
             (KDirectional) light);
           break;
         }
+        case LIGHT_PROJECTIVE:
         case LIGHT_SPHERE:
         {
           final RVectorI3F<RSpaceRGB> lc = new RVectorI3F<RSpaceRGB>(1, 1, 1);
@@ -153,8 +172,9 @@ public final class SBRendererSpecific implements KRenderer
       }
     }
 
-    if (KShadingProgramCommon.existsLightPosition(exec)) {
+    if (KShadingProgramCommon.existsLightSpherical(exec)) {
       switch (light.getType()) {
+        case LIGHT_PROJECTIVE:
         case LIGHT_DIRECTIONAL:
         {
           KShadingProgramCommon.putLightSpherical(
@@ -181,6 +201,66 @@ public final class SBRendererSpecific implements KRenderer
         }
       }
     }
+
+    if (KShadingProgramCommon.existsLightProjective(exec)) {
+      final TextureUnit[] units = gc.textureGetUnits();
+      final TextureUnit unit = units[texture_units];
+
+      ++used_units;
+
+      switch (light.getType()) {
+        case LIGHT_PROJECTIVE:
+        {
+          final KProjective l = (KProjective) light;
+
+          gc.texture2DStaticBind(unit, l.getTexture());
+
+          KShadingProgramCommon.putTextureProjection(exec, gc, unit);
+          KShadingProgramCommon.putLightProjective(
+            gc,
+            exec,
+            matrices,
+            (KProjective) light);
+          break;
+        }
+        case LIGHT_DIRECTIONAL:
+        case LIGHT_SPHERE:
+        {
+          gc.texture2DStaticUnbind(unit);
+
+          final Texture2DStaticUsable texture = null; // XXX: Ignored anyway
+          final RVectorReadable3F<RSpaceWorld> position =
+            new RVectorI3F<RSpaceWorld>(1.0f, 1.0f, -1.0f);
+          final QuaternionI4F orientation = new QuaternionI4F();
+          final RVectorReadable3F<RSpaceRGB> colour =
+            new RVectorI3F<RSpaceRGB>(1.0f, 1.0f, 1.0f);
+          final float intensity = 1.0f;
+          final float distance = 1.0f;
+          final float falloff = 1.0f;
+          final RMatrixI4x4F<RTransformProjection> projection =
+            new RMatrixI4x4F<RTransformProjection>();
+
+          KShadingProgramCommon.putTextureProjection(exec, gc, unit);
+          KShadingProgramCommon.putLightProjective(
+            gc,
+            exec,
+            matrices,
+            new KProjective(
+              Integer.valueOf(0),
+              texture,
+              position,
+              orientation,
+              colour,
+              intensity,
+              distance,
+              falloff,
+              projection));
+          break;
+        }
+      }
+    }
+
+    return used_units;
   }
 
   private static int setParametersAlpha(
@@ -589,6 +669,9 @@ public final class SBRendererSpecific implements KRenderer
         "depth",
         log);
     this.exec_depth = new JCCEExecutionCallable(this.program_depth);
+
+    this.fake_texture_projection =
+      new RMatrixM4x4F<RTransformTextureProjection>();
   }
 
   @Override public void close()
@@ -753,8 +836,6 @@ public final class SBRendererSpecific implements KRenderer
 
   /**
    * Render an opaque mesh to the color buffer.
-   * 
-   * @param kLight
    */
 
   private void renderOpaqueMesh(
@@ -777,7 +858,7 @@ public final class SBRendererSpecific implements KRenderer
       this.exec_program,
       gc,
       this.matrices.getMatrixModelView());
-
+    this.putTextureProjectionMatrixForLight(gc, light);
     if (KShadingProgramCommon.existsMatrixNormal(this.exec_program)) {
       KShadingProgramCommon.putMatrixNormal(
         this.exec_program,
@@ -832,6 +913,8 @@ public final class SBRendererSpecific implements KRenderer
     }
   }
 
+  private final @Nonnull RMatrixM4x4F<RTransformTextureProjection> fake_texture_projection;
+
   private void renderOpaqueMeshes(
     final @Nonnull KScene scene,
     final @Nonnull JCGLInterfaceCommon gc)
@@ -860,6 +943,37 @@ public final class SBRendererSpecific implements KRenderer
     }
   }
 
+  private void putTextureProjectionMatrixForLight(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KLight light)
+    throws JCGLException,
+      ConstraintError
+  {
+    if (KShadingProgramCommon
+      .existsMatrixTextureProjection(this.exec_program)) {
+      switch (light.getType()) {
+        case LIGHT_DIRECTIONAL:
+        case LIGHT_SPHERE:
+        {
+          KShadingProgramCommon.putMatrixTextureProjection(
+            gc,
+            this.exec_program,
+            this.fake_texture_projection);
+          break;
+        }
+        case LIGHT_PROJECTIVE:
+        {
+          this.matrices.matricesMakeFromLight((KProjective) light);
+          KShadingProgramCommon.putMatrixTextureProjection(
+            gc,
+            this.exec_program,
+            this.matrices.getTextureProjection());
+          break;
+        }
+      }
+    }
+  }
+
   private void renderTranslucentMesh(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KLight light,
@@ -876,6 +990,7 @@ public final class SBRendererSpecific implements KRenderer
 
     this.exec_program.execPrepare(gc);
     KShadingProgramCommon.putMatrixProjectionReuse(this.exec_program);
+    this.putTextureProjectionMatrixForLight(gc, light);
     KShadingProgramCommon.putMatrixModelView(
       this.exec_program,
       gc,

@@ -14,89 +14,51 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel;
+package com.io7m.renderer;
 
 import java.util.Arrays;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.MatrixReadable4x4F;
-import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.jtensors.MatrixM3x3F;
+import com.io7m.jtensors.MatrixReadable3x3F;
+import com.io7m.jtensors.VectorReadable3F;
 
-@Immutable final class KMatrix4x4F<T extends KMatrixKind>
+@Immutable public final class RMatrixI3x3F<T extends RTransform>
 {
   private final @Nonnull float[][] elements;
 
-  KMatrix4x4F(
-    final @Nonnull MatrixReadable4x4F m)
+  public RMatrixI3x3F(
+    final @Nonnull MatrixReadable3x3F m)
   {
-    this.elements = new float[4][4];
+    this.elements = new float[3][3];
 
-    for (int row = 0; row < 4; ++row) {
-      for (int col = 0; col < 4; ++col) {
+    for (int row = 0; row < 3; ++row) {
+      for (int col = 0; col < 3; ++col) {
         this.elements[row][col] = m.getRowColumnF(row, col);
       }
     }
   }
 
-  KMatrix4x4F(
-    final @Nonnull VectorReadable4F column_0,
-    final @Nonnull VectorReadable4F column_1,
-    final @Nonnull VectorReadable4F column_2,
-    final @Nonnull VectorReadable4F column_3)
+  public RMatrixI3x3F(
+    final @Nonnull VectorReadable3F column_0,
+    final @Nonnull VectorReadable3F column_1,
+    final @Nonnull VectorReadable3F column_2)
   {
-    this.elements = new float[4][4];
+    this.elements = new float[3][3];
 
     this.elements[0][0] = column_0.getXF();
     this.elements[1][0] = column_0.getYF();
     this.elements[2][0] = column_0.getZF();
-    this.elements[3][0] = column_0.getWF();
 
     this.elements[0][1] = column_1.getXF();
     this.elements[1][1] = column_1.getYF();
     this.elements[2][1] = column_1.getZF();
-    this.elements[3][1] = column_1.getWF();
 
     this.elements[0][2] = column_2.getXF();
     this.elements[1][2] = column_2.getYF();
     this.elements[2][2] = column_2.getZF();
-    this.elements[3][2] = column_2.getWF();
-
-    this.elements[0][3] = column_3.getXF();
-    this.elements[1][3] = column_3.getYF();
-    this.elements[2][3] = column_3.getZF();
-    this.elements[3][3] = column_3.getWF();
-  }
-
-  /**
-   * The identity matrix.
-   */
-
-  KMatrix4x4F()
-  {
-    this.elements = new float[4][4];
-
-    this.elements[0][0] = 1.0f;
-    this.elements[1][0] = 0.0f;
-    this.elements[2][0] = 0.0f;
-    this.elements[3][0] = 0.0f;
-
-    this.elements[0][1] = 0.0f;
-    this.elements[1][1] = 1.0f;
-    this.elements[2][1] = 0.0f;
-    this.elements[3][1] = 0.0f;
-
-    this.elements[0][2] = 0.0f;
-    this.elements[1][2] = 0.0f;
-    this.elements[2][2] = 1.0f;
-    this.elements[3][2] = 0.0f;
-
-    this.elements[0][3] = 0.0f;
-    this.elements[1][3] = 0.0f;
-    this.elements[2][3] = 0.0f;
-    this.elements[3][3] = 1.0f;
   }
 
   @Override public boolean equals(
@@ -111,7 +73,7 @@ import com.io7m.jtensors.VectorReadable4F;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KMatrix4x4F<?> other = (KMatrix4x4F<?>) obj;
+    final RMatrixI3x3F<?> other = (RMatrixI3x3F<?>) obj;
     if (!Arrays.deepEquals(this.elements, other.elements)) {
       return false;
     }
@@ -130,11 +92,11 @@ import com.io7m.jtensors.VectorReadable4F;
     return Arrays.hashCode(this.elements);
   }
 
-  void makeMatrixM4x4F(
-    final @Nonnull MatrixM4x4F m)
+  public void makeMatrixM3x3F(
+    final @Nonnull MatrixM3x3F m)
   {
-    for (int row = 0; row < 4; ++row) {
-      for (int col = 0; col < 4; ++col) {
+    for (int row = 0; row < 3; ++row) {
+      for (int col = 0; col < 3; ++col) {
         m.set(row, col, this.elements[row][col]);
       }
     }
@@ -143,14 +105,13 @@ import com.io7m.jtensors.VectorReadable4F;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    for (int row = 0; row < 4; ++row) {
+    for (int row = 0; row < 3; ++row) {
       final String text =
         String.format(
-          "[%.15f\t%.15f\t%.15f\t%.15f]\n",
+          "[%.15f\t%.15f\t%.15f]\n",
           Double.valueOf(this.elements[row][0]),
           Double.valueOf(this.elements[row][1]),
-          Double.valueOf(this.elements[row][2]),
-          Double.valueOf(this.elements[row][3]));
+          Double.valueOf(this.elements[row][2]));
       builder.append(text);
     }
     return builder.toString();

@@ -38,6 +38,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingWorker;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
@@ -52,30 +53,44 @@ import com.io7m.parasol.PGLSLMetaXML.Output;
 
 final class SBShadersPanel extends JPanel
 {
-  private static final long                 serialVersionUID;
+  private static final long                  serialVersionUID;
+  protected static final @Nonnull FileFilter META_XML_FILTER;
 
   static {
     serialVersionUID = -941448169051827275L;
+
+    META_XML_FILTER = new FileFilter() {
+      @Override public String getDescription()
+      {
+        return "All shaders (\"meta.xml\")";
+      }
+
+      @Override public boolean accept(
+        final File f)
+      {
+        return (f.isDirectory() || f.getName().equals("meta.xml"));
+      }
+    };
   }
 
-  private final @Nonnull JComboBox<String>  selector;
-  private final @Nonnull JButton            open;
-  private final @Nonnull Log                jlog;
+  private final @Nonnull JComboBox<String>   selector;
+  private final @Nonnull JButton             open;
+  private final @Nonnull Log                 jlog;
 
-  private @Nonnull Map<String, SBShader>    shaders;
+  private @Nonnull Map<String, SBShader>     shaders;
 
-  private final @Nonnull UniformsTableModel uniforms_model;
-  private final @Nonnull UniformsTable      uniforms_table;
-  private final @Nonnull JScrollPane        uniforms_scroller;
+  private final @Nonnull UniformsTableModel  uniforms_model;
+  private final @Nonnull UniformsTable       uniforms_table;
+  private final @Nonnull JScrollPane         uniforms_scroller;
 
-  private final @Nonnull InputsTableModel   inputs_model;
-  private final @Nonnull InputsTable        inputs_table;
-  private final @Nonnull JScrollPane        inputs_scroller;
+  private final @Nonnull InputsTableModel    inputs_model;
+  private final @Nonnull InputsTable         inputs_table;
+  private final @Nonnull JScrollPane         inputs_scroller;
 
-  private final @Nonnull OutputsTableModel  outputs_model;
-  private final @Nonnull OutputsTable       outputs_table;
-  private final @Nonnull JScrollPane        outputs_scroller;
-  private final @Nonnull JFrame             window;
+  private final @Nonnull OutputsTableModel   outputs_model;
+  private final @Nonnull OutputsTable        outputs_table;
+  private final @Nonnull JScrollPane         outputs_scroller;
+  private final @Nonnull JFrame              window;
 
   private static class UniformsTable extends JTable
   {
@@ -367,8 +382,10 @@ final class SBShadersPanel extends JPanel
       {
         final JFileChooser chooser = new JFileChooser();
         chooser.setMultiSelectionEnabled(false);
+        chooser.setFileFilter(SBShadersPanel.META_XML_FILTER);
 
         final int r = chooser.showOpenDialog(SBShadersPanel.this);
+
         switch (r) {
           case JFileChooser.APPROVE_OPTION:
           {

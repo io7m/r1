@@ -29,8 +29,8 @@ final class SBLightsWindow extends JFrame
     serialVersionUID = 4283712509235461406L;
   }
 
-  public SBLightsWindow(
-    final @Nonnull SBSceneControllerLights controller,
+  public <C extends SBSceneControllerTextures & SBSceneControllerLights> SBLightsWindow(
+    final @Nonnull C controller,
     final @Nonnull Log log)
   {
     super("Lights");

@@ -14,9 +14,9 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel;
+package com.io7m.renderer;
 
-public interface KMatrixView extends KMatrixKind
+public interface RTransformTexture extends RTransform
 {
   // No value-level representation.
 }

@@ -25,18 +25,23 @@ import com.io7m.jvvfs.PathVirtual;
 
 public final class SBTextureCube
 {
-  private final @Nonnull PathVirtual       path;
-  private final @Nonnull TextureCubeStatic texture;
-  private final @Nonnull BufferedImage     positive_z;
-  private final @Nonnull BufferedImage     negative_z;
-  private final @Nonnull BufferedImage     positive_y;
-  private final @Nonnull BufferedImage     negative_y;
-  private final @Nonnull BufferedImage     positive_x;
-  private final @Nonnull BufferedImage     negative_x;
+  private final @Nonnull SBTextureCubeDescription description;
+  private final @Nonnull TextureCubeStatic        texture;
+  private final @Nonnull BufferedImage            positive_z;
+  private final @Nonnull BufferedImage            negative_z;
+  private final @Nonnull BufferedImage            positive_y;
+  private final @Nonnull BufferedImage            negative_y;
+  private final @Nonnull BufferedImage            positive_x;
+  private final @Nonnull BufferedImage            negative_x;
+
+  public @Nonnull SBTextureCubeDescription getDescription()
+  {
+    return this.description;
+  }
 
   public @Nonnull PathVirtual getPath()
   {
-    return this.path;
+    return this.description.getPath();
   }
 
   public @Nonnull BufferedImage getPositiveZ()
@@ -70,7 +75,7 @@ public final class SBTextureCube
   }
 
   SBTextureCube(
-    final @Nonnull PathVirtual path,
+    final @Nonnull SBTextureCubeDescription description,
     final @Nonnull TextureCubeStatic texture,
     final @Nonnull BufferedImage positive_z,
     final @Nonnull BufferedImage negative_z,
@@ -79,7 +84,7 @@ public final class SBTextureCube
     final @Nonnull BufferedImage positive_x,
     final @Nonnull BufferedImage negative_x)
   {
-    this.path = path;
+    this.description = description;
     this.texture = texture;
     this.positive_z = positive_z;
     this.negative_z = negative_z;
@@ -102,10 +107,22 @@ public final class SBTextureCube
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBTextureCube ");
-    builder.append(this.path);
-    builder.append(" ");
+    builder.append("SBTextureCube [description=");
+    builder.append(this.description);
+    builder.append(", texture=");
     builder.append(this.texture);
+    builder.append(", positive_z=");
+    builder.append(this.positive_z);
+    builder.append(", negative_z=");
+    builder.append(this.negative_z);
+    builder.append(", positive_y=");
+    builder.append(this.positive_y);
+    builder.append(", negative_y=");
+    builder.append(this.negative_y);
+    builder.append(", positive_x=");
+    builder.append(this.positive_x);
+    builder.append(", negative_x=");
+    builder.append(this.negative_x);
     builder.append("]");
     return builder.toString();
   }

@@ -55,8 +55,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.RMatrixI3x3F;
 import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RTransformTexture;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.RVectorReadable3F;
@@ -65,13 +67,13 @@ import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 {
   private static class GeneralSettings implements
-    MaterialPanel<KMatrix3x3F<KMatrixUV>>
+    MaterialPanel<RMatrixI3x3F<RTransformTexture>>
   {
-    protected final @Nonnull SBMatrix3x3Fields<KMatrixUV> matrix;
+    protected final @Nonnull SBMatrix3x3Fields<RTransformTexture> matrix;
 
     GeneralSettings()
     {
-      this.matrix = new SBMatrix3x3Fields<KMatrixUV>();
+      this.matrix = new SBMatrix3x3Fields<RTransformTexture>();
     }
 
     @Override public void mpLayout(
@@ -95,7 +97,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.matrix.setMatrix(i.getUVMatrix());
     }
 
-    @Override public KMatrix3x3F<KMatrixUV> mpSave()
+    @Override public RMatrixI3x3F<RTransformTexture> mpSave()
       throws SBExceptionInputError,
         ConstraintError
     {
@@ -567,37 +569,37 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 
   private static class ObjectEditDialogPanel extends JPanel
   {
-    private static final long                             serialVersionUID;
+    private static final long                                     serialVersionUID;
 
     static {
       serialVersionUID = -3467271842953066384L;
     }
 
-    protected final @Nonnull AlbedoSettings               albedo_settings;
-    protected final @Nonnull AlphaSettings                alpha_settings;
-    protected final @Nonnull EmissiveSettings             emissive_settings;
-    protected final @Nonnull EnvironmentSettings          environment_settings;
-    protected final @Nonnull NormalSettings               normal_settings;
-    protected final @Nonnull SpecularSettings             specular_settings;
+    protected final @Nonnull AlbedoSettings                       albedo_settings;
+    protected final @Nonnull AlphaSettings                        alpha_settings;
+    protected final @Nonnull EmissiveSettings                     emissive_settings;
+    protected final @Nonnull EnvironmentSettings                  environment_settings;
+    protected final @Nonnull NormalSettings                       normal_settings;
+    protected final @Nonnull SpecularSettings                     specular_settings;
 
-    protected @Nonnull Map<PathVirtual, SBMesh>           meshes;
-    protected final @Nonnull JComboBox<PathVirtual>       mesh_selector;
-    protected final @Nonnull JButton                      mesh_load;
+    protected @Nonnull Map<PathVirtual, SBMesh>                   meshes;
+    protected final @Nonnull JComboBox<PathVirtual>               mesh_selector;
+    protected final @Nonnull JButton                              mesh_load;
 
-    protected final @Nonnull JTextField                   position_x;
-    protected final @Nonnull JTextField                   position_y;
-    protected final @Nonnull JTextField                   position_z;
-    protected final @Nonnull JTextField                   orientation_x;
-    protected final @Nonnull JTextField                   orientation_y;
-    protected final @Nonnull JTextField                   orientation_z;
-    protected final @Nonnull SBMatrix3x3Fields<KMatrixUV> matrix_uv;
+    protected final @Nonnull JTextField                           position_x;
+    protected final @Nonnull JTextField                           position_y;
+    protected final @Nonnull JTextField                           position_z;
+    protected final @Nonnull JTextField                           orientation_x;
+    protected final @Nonnull JTextField                           orientation_y;
+    protected final @Nonnull JTextField                           orientation_z;
+    protected final @Nonnull SBMatrix3x3Fields<RTransformTexture> matrix_uv;
 
-    protected final @Nonnull JLabel                       error_icon;
-    protected final @Nonnull JLabel                       error_text;
+    protected final @Nonnull JLabel                               error_icon;
+    protected final @Nonnull JLabel                               error_text;
 
-    private final @Nonnull ObjectsTableModel              objects_table_model;
-    private final @Nonnull GeneralSettings                general_settings;
-    protected final static @Nonnull FileFilter            MESH_FILE_FILTER;
+    private final @Nonnull ObjectsTableModel                      objects_table_model;
+    private final @Nonnull GeneralSettings                        general_settings;
+    protected final static @Nonnull FileFilter                    MESH_FILE_FILTER;
 
     static {
       MESH_FILE_FILTER = new FileFilter() {
@@ -646,7 +648,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.orientation_y = new JTextField("0.0");
       this.orientation_z = new JTextField("0.0");
 
-      this.matrix_uv = new SBMatrix3x3Fields<KMatrixUV>();
+      this.matrix_uv = new SBMatrix3x3Fields<RTransformTexture>();
 
       this.mesh_selector = new JComboBox<PathVirtual>();
       this.meshesRefresh(controller);
@@ -926,10 +928,11 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         this.specular_settings.mpSave();
       final SBMaterialEmissiveDescription emissive =
         this.emissive_settings.mpSave();
-      final KMatrix3x3F<KMatrixUV> material_uv_matrix =
+      final RMatrixI3x3F<RTransformTexture> material_uv_matrix =
         this.general_settings.mpSave();
 
-      final KMatrix3x3F<KMatrixUV> instance_uv_matrix = material_uv_matrix;
+      final RMatrixI3x3F<RTransformTexture> instance_uv_matrix =
+        material_uv_matrix;
 
       final SBMaterialDescription material =
         new SBMaterialDescription(
