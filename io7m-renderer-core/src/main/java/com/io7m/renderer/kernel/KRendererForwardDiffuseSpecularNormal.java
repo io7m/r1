@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.ArrayBuffer;
@@ -270,6 +271,10 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
             final KDirectional dlight = (KLight.KDirectional) light;
             this.renderLightPassMeshesDirectional(scene, gc, dlight);
             break;
+          }
+          case LIGHT_PROJECTIVE:
+          {
+            throw new UnimplementedCodeException();
           }
         }
       }
@@ -1041,7 +1046,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       e.execUniformPutVector3F(gc, "light.color", light.getColour());
       e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
       e.execUniformPutFloat(gc, "light.radius", light.getRadius());
-      e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+      e.execUniformPutFloat(gc, "light.falloff", light.getFalloff());
       e.execCancel();
     }
 
@@ -1053,7 +1058,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       e.execUniformPutVector3F(gc, "light.color", light.getColour());
       e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
       e.execUniformPutFloat(gc, "light.radius", light.getRadius());
-      e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+      e.execUniformPutFloat(gc, "light.falloff", light.getFalloff());
       e.execCancel();
     }
 
@@ -1065,7 +1070,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       e.execUniformPutVector3F(gc, "light.color", light.getColour());
       e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
       e.execUniformPutFloat(gc, "light.radius", light.getRadius());
-      e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+      e.execUniformPutFloat(gc, "light.falloff", light.getFalloff());
       e.execCancel();
     }
 
@@ -1077,7 +1082,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       e.execUniformPutVector3F(gc, "light.color", light.getColour());
       e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
       e.execUniformPutFloat(gc, "light.radius", light.getRadius());
-      e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+      e.execUniformPutFloat(gc, "light.falloff", light.getFalloff());
       e.execCancel();
     }
 

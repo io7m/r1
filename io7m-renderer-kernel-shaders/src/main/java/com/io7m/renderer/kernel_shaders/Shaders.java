@@ -171,13 +171,20 @@ public final class Shaders
           case LIGHT_DIRECTIONAL:
           case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
           {
-            b.append("  parameter light : DL.t;\n");
+            b.append("  parameter light_directional : DL.t;\n");
             break;
           }
           case LIGHT_SPHERICAL:
           case LIGHT_SPHERICAL_SHADOW_MAPPED:
           {
-            b.append("  parameter light : SL.t;\n");
+            b.append("  parameter light_spherical : SL.t;\n");
+            break;
+          }
+          case LIGHT_PROJECTIVE:
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED:
+          {
+            b.append("  parameter light_projective : PL.t;\n");
+            b.append("  parameter t_projection     : sampler_2d;\n");
             break;
           }
         }
@@ -227,6 +234,7 @@ public final class Shaders
     switch (label.getType()) {
       case Lit:
       {
+        Shaders.fragmentShaderAttributesLight(b, (LabelLit) label);
         Shaders.fragmentShaderAttributesNormal(b, (LabelLit) label);
         Shaders.fragmentShaderParametersNormal(b, (LabelLit) label);
         Shaders.fragmentShaderParametersEnvironment(b, (LabelLit) label);
@@ -254,6 +262,27 @@ public final class Shaders
     b.append("as\n");
     b.append("  out out_0 = rgba;\n");
     b.append("end;\n");
+  }
+
+  private static void fragmentShaderAttributesLight(
+    final @Nonnull StringBuilder b,
+    final @Nonnull LabelLit label)
+  {
+    switch (label.getLight()) {
+      case LIGHT_DIRECTIONAL:
+      case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
+      case LIGHT_SPHERICAL:
+      case LIGHT_SPHERICAL_SHADOW_MAPPED:
+      {
+        break;
+      }
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
+      case LIGHT_PROJECTIVE:
+      {
+        b.append("  in f_uv_projection : vector_4f;\n");
+        break;
+      }
+    }
   }
 
   private static void fragmentShaderValuesMaterialUnlit(
@@ -417,7 +446,7 @@ public final class Shaders
               case SPECULAR_NONE:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b.append("    DL.diffuse_only (light, n);\n");
+                b.append("    DL.diffuse_only (light_directional, n);\n");
                 break;
               }
               case SPECULAR_CONSTANT:
@@ -425,7 +454,7 @@ public final class Shaders
               {
                 b.append("  value light_term : vector_3f =\n");
                 b
-                  .append("    DL.diffuse_specular (light, n, f_position [x y z], m);\n");
+                  .append("    DL.diffuse_specular (light_directional, n, f_position [x y z], m);\n");
                 break;
               }
             }
@@ -438,7 +467,7 @@ public final class Shaders
               {
                 b.append("  value light_term : vector_3f =\n");
                 b
-                  .append("    SL.diffuse_only (light, n, f_position [x y z]);\n");
+                  .append("    SL.diffuse_only (light_spherical, n, f_position [x y z]);\n");
                 break;
               }
               case SPECULAR_CONSTANT:
@@ -446,7 +475,28 @@ public final class Shaders
               {
                 b.append("  value light_term : vector_3f =\n");
                 b
-                  .append("    SL.diffuse_specular (light, n, f_position [x y z], m);\n");
+                  .append("    SL.diffuse_specular (light_spherical, n, f_position [x y z], m);\n");
+                break;
+              }
+            }
+            break;
+          }
+          case LIGHT_PROJECTIVE:
+          {
+            switch (label.getSpecular()) {
+              case SPECULAR_NONE:
+              {
+                b.append("  value light_term : vector_3f =\n");
+                b
+                  .append("    PL.diffuse_only (light_projective, n, f_position [x y z], t_projection, f_uv_projection);\n");
+                break;
+              }
+              case SPECULAR_CONSTANT:
+              case SPECULAR_MAPPED:
+              {
+                b.append("  value light_term : vector_3f =\n");
+                b
+                  .append("    PL.diffuse_specular (light_projective, n, f_position [x y z], m, t_projection, f_uv_projection);\n");
                 break;
               }
             }
@@ -454,12 +504,14 @@ public final class Shaders
           }
           case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
           case LIGHT_SPHERICAL_SHADOW_MAPPED:
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED:
           {
             b.append("  -- XXX: SHADOW MAPPING UNIMPLEMENTED\n");
             b
               .append("  value light_term : vector_3f = new vector_3f (1.0, 0.0, 1.0);\n");
             break;
           }
+
         }
         break;
       }
@@ -473,7 +525,8 @@ public final class Shaders
               case SPECULAR_NONE:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b.append("    DL.diffuse_only_emissive (light, n, m);\n");
+                b
+                  .append("    DL.diffuse_only_emissive (light_directional, n, m);\n");
                 break;
               }
               case SPECULAR_CONSTANT:
@@ -481,7 +534,7 @@ public final class Shaders
               {
                 b.append("  value light_term : vector_3f =\n");
                 b
-                  .append("    DL.diffuse_specular_emissive (light, n, f_position [x y z], m);\n");
+                  .append("    DL.diffuse_specular_emissive (light_directional, n, f_position [x y z], m);\n");
                 break;
               }
             }
@@ -494,7 +547,7 @@ public final class Shaders
               {
                 b.append("  value light_term : vector_3f =\n");
                 b
-                  .append("    SL.diffuse_only_emissive (light, n, f_position [x y z], m);\n");
+                  .append("    SL.diffuse_only_emissive (light_spherical, n, f_position [x y z], m);\n");
                 break;
               }
               case SPECULAR_CONSTANT:
@@ -502,7 +555,7 @@ public final class Shaders
               {
                 b.append("  value light_term : vector_3f =\n");
                 b
-                  .append("    SL.diffuse_specular_emissive (light, n, f_position [x y z], m);\n");
+                  .append("    SL.diffuse_specular_emissive (light_spherical, n, f_position [x y z], m);\n");
                 break;
               }
             }
@@ -510,10 +563,32 @@ public final class Shaders
           }
           case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
           case LIGHT_SPHERICAL_SHADOW_MAPPED:
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED:
           {
             b.append("  -- XXX: SHADOW MAPPING UNIMPLEMENTED\n");
             b
               .append("  value light_term : vector_3f = new vector_3f (1.0, 0.0, 1.0);\n");
+            break;
+          }
+          case LIGHT_PROJECTIVE:
+          {
+            switch (label.getSpecular()) {
+              case SPECULAR_NONE:
+              {
+                b.append("  value light_term : vector_3f =\n");
+                b
+                  .append("    PL.diffuse_only_emissive (light_projective, n, f_position [x y z], m, t_projection, f_uv_projection);\n");
+                break;
+              }
+              case SPECULAR_CONSTANT:
+              case SPECULAR_MAPPED:
+              {
+                b.append("  value light_term : vector_3f =\n");
+                b
+                  .append("    PL.diffuse_specular_emissive (light_projective, n, f_position [x y z], m, t_projection, f_uv_projection);\n");
+                break;
+              }
+            }
             break;
           }
         }
@@ -660,6 +735,7 @@ public final class Shaders
     b.append("import com.io7m.renderer.Environment      as E;\n");
     b.append("import com.io7m.renderer.Materials        as M;\n");
     b.append("import com.io7m.renderer.Normals          as N;\n");
+    b.append("import com.io7m.renderer.ProjectiveLight  as PL;\n");
     b.append("import com.io7m.renderer.SphericalLight   as SL;\n");
     b.append("\n");
   }
@@ -677,14 +753,18 @@ public final class Shaders
     switch (label.getType()) {
       case Lit:
       {
+        Shaders.vertexShaderStandardParametersLight(b, (LabelLit) label);
+        Shaders.vertexShaderStandardAttributesLight(b, (LabelLit) label);
         Shaders.vertexShaderStandardAttributesNormal(b, (LabelLit) label);
         Shaders.vertexShaderStandardParametersNormal(b, (LabelLit) label);
         b.append("with\n");
         Shaders.vertexShaderStandardValuesPositions(b);
         Shaders.vertexShaderStandardValuesNormals(b, (LabelLit) label);
+        Shaders.vertexShaderStandardValuesLight(b, (LabelLit) label);
         Shaders.vertexShaderStandardValuesUV(b, label);
         b.append("as\n");
         Shaders.vertexShaderStandardWritesNormals(b, (LabelLit) label);
+        Shaders.vertexShaderStandardWritesLight(b, (LabelLit) label);
         break;
       }
       case Unlit:
@@ -700,6 +780,104 @@ public final class Shaders
     Shaders.vertexShaderStandardWrites(b);
     Shaders.vertexShaderStandardWritesUV(b, label);
     b.append("end;\n");
+  }
+
+  private static void vertexShaderStandardAttributesLight(
+    final @Nonnull StringBuilder b,
+    final @Nonnull LabelLit label)
+  {
+    switch (label.getLight()) {
+      case LIGHT_DIRECTIONAL:
+      case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
+      {
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
+      {
+        b.append("  out f_uv_projection : vector_4f;\n");
+        break;
+      }
+      case LIGHT_SPHERICAL:
+      case LIGHT_SPHERICAL_SHADOW_MAPPED:
+      {
+        break;
+      }
+    }
+  }
+
+  private static void vertexShaderStandardWritesLight(
+    final @Nonnull StringBuilder b,
+    final @Nonnull LabelLit label)
+  {
+    switch (label.getLight()) {
+      case LIGHT_DIRECTIONAL:
+      case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
+      {
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
+      {
+        b.append("  out f_uv_projection = uv_projection;\n");
+        break;
+      }
+      case LIGHT_SPHERICAL:
+      case LIGHT_SPHERICAL_SHADOW_MAPPED:
+      {
+        break;
+      }
+    }
+  }
+
+  private static void vertexShaderStandardValuesLight(
+    final @Nonnull StringBuilder b,
+    final @Nonnull LabelLit label)
+  {
+    switch (label.getLight()) {
+      case LIGHT_DIRECTIONAL:
+      case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
+      {
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
+      {
+        b.append("  value uv_projection : vector_4f =\n");
+        b
+          .append("    M4.multiply_vector (m_texture_projection, new vector_4f (v_position, 1.0));\n");
+        break;
+      }
+      case LIGHT_SPHERICAL:
+      case LIGHT_SPHERICAL_SHADOW_MAPPED:
+      {
+        break;
+      }
+    }
+  }
+
+  private static void vertexShaderStandardParametersLight(
+    final @Nonnull StringBuilder b,
+    final @Nonnull LabelLit label)
+  {
+    switch (label.getLight()) {
+      case LIGHT_DIRECTIONAL:
+      case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
+      {
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
+      {
+        b.append("  parameter m_texture_projection : matrix_4x4f;\n");
+        break;
+      }
+      case LIGHT_SPHERICAL:
+      case LIGHT_SPHERICAL_SHADOW_MAPPED:
+      {
+        break;
+      }
+    }
   }
 
   private static void vertexShaderStandardAttributesNormal(

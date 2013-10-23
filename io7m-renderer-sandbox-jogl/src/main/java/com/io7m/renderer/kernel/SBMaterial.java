@@ -19,6 +19,9 @@ package com.io7m.renderer.kernel;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+import com.io7m.renderer.RMatrixI3x3F;
+import com.io7m.renderer.RTransformTexture;
+
 public final class SBMaterial
 {
   private final @Nonnull SBMaterialDescription                     description;
@@ -177,7 +180,7 @@ public final class SBMaterial
     return builder.toString();
   }
 
-  public @Nonnull KMatrix3x3F<KMatrixUV> getUVMatrix()
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
   {
     return this.description.getUVMatrix();
   }

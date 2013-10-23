@@ -377,8 +377,10 @@ final class Labels
   static enum Light
   {
     LIGHT_DIRECTIONAL("LD"),
+    LIGHT_PROJECTIVE("LP"),
     LIGHT_SPHERICAL("LS"),
     LIGHT_DIRECTIONAL_SHADOW_MAPPED("LDSM"),
+    LIGHT_PROJECTIVE_SHADOW_MAPPED("LPSM"),
     LIGHT_SPHERICAL_SHADOW_MAPPED("LSSM");
 
     private final @Nonnull String code;

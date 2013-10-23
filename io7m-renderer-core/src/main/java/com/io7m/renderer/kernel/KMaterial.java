@@ -21,6 +21,8 @@ import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.RMatrixI3x3F;
+import com.io7m.renderer.RTransformTexture;
 
 /**
  * Object materials.
@@ -28,13 +30,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
 @Immutable public final class KMaterial
 {
-  private final @Nonnull KMaterialAlpha         alpha;
-  private final @Nonnull KMaterialAlbedo        albedo;
-  private final @Nonnull KMaterialEmissive      emissive;
-  private final @Nonnull KMaterialSpecular      specular;
-  private final @Nonnull KMaterialEnvironment   environment;
-  private final @Nonnull KMaterialNormal        normal;
-  private final @Nonnull KMatrix3x3F<KMatrixUV> uv_matrix;
+  private final @Nonnull KMaterialAlpha                  alpha;
+  private final @Nonnull KMaterialAlbedo                 albedo;
+  private final @Nonnull KMaterialEmissive               emissive;
+  private final @Nonnull KMaterialSpecular               specular;
+  private final @Nonnull KMaterialEnvironment            environment;
+  private final @Nonnull KMaterialNormal                 normal;
+  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
 
   KMaterial(
     final @Nonnull KMaterialAlpha alpha,
@@ -43,7 +45,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     final @Nonnull KMaterialEnvironment environment,
     final @Nonnull KMaterialNormal normal,
     final @Nonnull KMaterialSpecular specular,
-    final @Nonnull KMatrix3x3F<KMatrixUV> uv_matrix)
+    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix)
     throws ConstraintError
   {
     this.alpha = Constraints.constrainNotNull(alpha, "Alpha");
@@ -123,7 +125,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     return this.specular;
   }
 
-  public @Nonnull KMatrix3x3F<KMatrixUV> getUVMatrix()
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
   {
     return this.uv_matrix;
   }

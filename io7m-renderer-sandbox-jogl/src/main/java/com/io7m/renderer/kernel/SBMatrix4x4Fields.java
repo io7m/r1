@@ -20,9 +20,11 @@ import javax.annotation.Nonnull;
 import javax.swing.JTextField;
 
 import com.io7m.jtensors.VectorI4F;
+import com.io7m.renderer.RMatrixI4x4F;
+import com.io7m.renderer.RTransform;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
-public final class SBMatrix4x4Fields<T extends KMatrixKind>
+public final class SBMatrix4x4Fields<T extends RTransform>
 {
   private final @Nonnull JTextField fields[][];
 
@@ -43,7 +45,7 @@ public final class SBMatrix4x4Fields<T extends KMatrixKind>
     }
   }
 
-  public @Nonnull KMatrix4x4F<T> getMatrix4x4f()
+  public @Nonnull RMatrixI4x4F<T> getMatrix4x4f()
     throws SBExceptionInputError
   {
     final VectorI4F column_0 =
@@ -90,7 +92,7 @@ public final class SBMatrix4x4Fields<T extends KMatrixKind>
         SBTextFieldUtilities.getFieldFloatOrError(this
           .getRowColumnField(3, 3)));
 
-    return new KMatrix4x4F<T>(column_0, column_1, column_2, column_3);
+    return new RMatrixI4x4F<T>(column_0, column_1, column_2, column_3);
   }
 
   public @Nonnull JTextField getRowColumnField(
@@ -101,7 +103,7 @@ public final class SBMatrix4x4Fields<T extends KMatrixKind>
   }
 
   @SuppressWarnings("boxing") public void setMatrix(
-    final @Nonnull KMatrix4x4F<T> m)
+    final @Nonnull RMatrixI4x4F<T> m)
   {
     for (int c = 0; c < 4; ++c) {
       for (int r = 0; r < 4; ++r) {

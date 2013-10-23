@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.ArrayBuffer;
@@ -217,6 +218,10 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
             this.renderLightPassMeshesDirectional(scene, gc, dlight);
             break;
           }
+          case LIGHT_PROJECTIVE:
+          {
+            throw new UnimplementedCodeException();
+          }
         }
       }
     } finally {
@@ -339,7 +344,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     e.execUniformPutVector3F(gc, "light.color", light.getColour());
     e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
     e.execUniformPutFloat(gc, "light.radius", light.getRadius());
-    e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+    e.execUniformPutFloat(gc, "light.falloff", light.getFalloff());
     e.execCancel();
   }
 

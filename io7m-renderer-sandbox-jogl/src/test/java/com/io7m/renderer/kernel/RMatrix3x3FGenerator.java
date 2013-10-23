@@ -20,11 +20,13 @@ import net.java.quickcheck.Generator;
 
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.renderer.RMatrixI3x3F;
+import com.io7m.renderer.RTransform;
 
-final class KMatrix3x3FGenerator<T extends KMatrixKind> implements
-  Generator<KMatrix3x3F<T>>
+final class RMatrix3x3FGenerator<T extends RTransform> implements
+  Generator<RMatrixI3x3F<T>>
 {
-  @Override public KMatrix3x3F<T> next()
+  @Override public RMatrixI3x3F<T> next()
   {
     final VectorReadable3F column_0 =
       new VectorI3F(
@@ -41,6 +43,6 @@ final class KMatrix3x3FGenerator<T extends KMatrixKind> implements
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f);
-    return new KMatrix3x3F<T>(column_0, column_1, column_2);
+    return new RMatrixI3x3F<T>(column_0, column_1, column_2);
   }
 }

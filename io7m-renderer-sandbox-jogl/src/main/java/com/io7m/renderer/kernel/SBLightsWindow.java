@@ -16,7 +16,25 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KMatrixUV extends KMatrixKind
+import javax.annotation.Nonnull;
+import javax.swing.JFrame;
+
+import com.io7m.jlog.Log;
+
+final class SBLightsWindow extends JFrame
 {
-  // No value-level representation.
+  private static final long serialVersionUID;
+
+  static {
+    serialVersionUID = 4283712509235461406L;
+  }
+
+  public <C extends SBSceneControllerTextures & SBSceneControllerLights> SBLightsWindow(
+    final @Nonnull C controller,
+    final @Nonnull Log log)
+  {
+    super("Lights");
+    this.getContentPane().add(new SBLightsPanel(controller, log));
+    this.pack();
+  }
 }

@@ -23,21 +23,34 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.MatrixReadable4x4F;
+import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.QuaternionM4F;
+import com.io7m.jtensors.QuaternionReadable4F;
+import com.io7m.jtensors.VectorM3F;
+import com.io7m.renderer.RMatrixI3x3F;
 import com.io7m.renderer.RMatrixM3x3F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RMatrixReadable3x3F;
 import com.io7m.renderer.RMatrixReadable4x4F;
+import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RTransformModel;
 import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformTexture;
+import com.io7m.renderer.RTransformTextureProjection;
 import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.RTransformViewInverse;
+import com.io7m.renderer.RVectorReadable3F;
+import com.io7m.renderer.kernel.KLight.KProjective;
 
 public final class KMatrices
 {
-  private static void makeNormalMatrix(
+  /**
+   * Produce a normal matrix for the given modelview matrix.
+   */
+
+  static void makeNormalMatrix(
     final @Nonnull MatrixReadable4x4F m,
     final @Nonnull MatrixM3x3F mr)
   {
@@ -54,25 +67,56 @@ public final class KMatrices
     MatrixM3x3F.transposeInPlace(mr);
   }
 
-  private final @Nonnull MatrixM4x4F.Context                 matrix_context;
-  private final @Nonnull RMatrixM4x4F<RTransformModelView>   matrix_modelview;
-  private final @Nonnull RMatrixM4x4F<RTransformProjection>  matrix_projection;
-  private final @Nonnull RMatrixM4x4F<RTransformModel>       matrix_model;
-  private final @Nonnull RMatrixM4x4F<RTransformView>        matrix_view;
-  private final @Nonnull RMatrixM4x4F<RTransformViewInverse> matrix_view_inverse;
-  private final @Nonnull RMatrixM3x3F<RTransformNormal>      matrix_normal;
-  private final @Nonnull RMatrixM3x3F<RTransformTexture>     matrix_uv;
-  private final @Nonnull RMatrixM3x3F<RTransformTexture>     matrix_uv_temp;
+  /**
+   * Produce a view matrix assuming a viewer at <code>position</code> facing
+   * <code>orientation</code>.
+   */
 
-  private final @Nonnull KTransform.Context                  transform_context;
+  static void makeViewMatrix(
+    final @Nonnull KTransform.Context context,
+    final @Nonnull RVectorReadable3F<RSpaceWorld> position,
+    final @Nonnull QuaternionReadable4F orientation,
+    final @Nonnull RMatrixM4x4F<RTransformView> view)
+  {
+    MatrixM4x4F.setIdentity(view);
 
-  private boolean                                            matrix_model_done;
-  private boolean                                            matrix_modelview_done;
-  private boolean                                            matrix_projection_done;
-  private boolean                                            matrix_view_done;
-  private boolean                                            matrix_view_inverse_done;
-  private boolean                                            matrix_normal_done;
-  private boolean                                            matrix_uv_done;
+    final VectorM3F translate = new VectorM3F();
+    translate.x = -position.getXF();
+    translate.y = -position.getYF();
+    translate.z = -position.getZF();
+
+    MatrixM4x4F.translateByVector3FInPlace(view, translate);
+
+    final QuaternionI4F inverse_orient = QuaternionI4F.conjugate(orientation);
+    QuaternionM4F.makeRotationMatrix4x4(inverse_orient, context.t_matrix4x4);
+    MatrixM4x4F.multiplyInPlace(view, context.t_matrix4x4);
+  }
+
+  private final @Nonnull MatrixM4x4F.Context                       matrix_context;
+  private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_modelview;
+  private final @Nonnull RMatrixM4x4F<RTransformProjection>        matrix_projection;
+  private final @Nonnull RMatrixM4x4F<RTransformModel>             matrix_model;
+  private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_view;
+  private final @Nonnull RMatrixM4x4F<RTransformViewInverse>       matrix_view_inverse;
+  private final @Nonnull RMatrixM3x3F<RTransformNormal>            matrix_normal;
+  private final @Nonnull RMatrixM3x3F<RTransformTexture>           matrix_uv;
+  private final @Nonnull RMatrixM3x3F<RTransformTexture>           matrix_uv_temp;
+  private final @Nonnull RMatrixM4x4F<RTransformTextureProjection> matrix_texture_projection;
+  private final @Nonnull RMatrixM4x4F<RTransformProjection>        matrix_texture_projection_projection;
+  private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_texture_projection_view;
+  private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_texture_projection_modelview;
+  private final @Nonnull MatrixM4x4F                               matrix_texture_projection_bias;
+
+  private final @Nonnull KTransform.Context                        transform_context;
+
+  private boolean                                                  matrix_model_done;
+  private boolean                                                  matrix_modelview_done;
+  private boolean                                                  matrix_projection_done;
+  private boolean                                                  matrix_view_done;
+  private boolean                                                  matrix_view_inverse_done;
+  private boolean                                                  matrix_normal_done;
+  private boolean                                                  matrix_uv_done;
+  private boolean                                                  matrix_texture_projection_done;
 
   public KMatrices()
   {
@@ -85,6 +129,26 @@ public final class KMatrices
     this.matrix_context = new MatrixM4x4F.Context();
     this.matrix_uv = new RMatrixM3x3F<RTransformTexture>();
     this.matrix_uv_temp = new RMatrixM3x3F<RTransformTexture>();
+
+    this.matrix_texture_projection =
+      new RMatrixM4x4F<RTransformTextureProjection>();
+    this.matrix_texture_projection_projection =
+      new RMatrixM4x4F<RTransformProjection>();
+    this.matrix_texture_projection_view = new RMatrixM4x4F<RTransformView>();
+    this.matrix_texture_projection_modelview =
+      new RMatrixM4x4F<RTransformModelView>();
+
+    /**
+     * A matrix from normalized device coordinates to texture coordinates.
+     * Essentially, scaling and translating by 0.5.
+     */
+
+    this.matrix_texture_projection_bias = new MatrixM4x4F();
+    this.matrix_texture_projection_bias.set(0, 3, 0.5f); // Translate X by 0.5
+    this.matrix_texture_projection_bias.set(1, 3, 0.5f); // Translate Y by 0.5
+    this.matrix_texture_projection_bias.set(0, 0, 0.5f); // Scale X by 0.5
+    this.matrix_texture_projection_bias.set(1, 1, 0.5f); // Scale Y by 0.5
+
     this.transform_context = new KTransform.Context();
     this.matricesBegin();
   }
@@ -134,6 +198,17 @@ public final class KMatrices
     return this.matrix_projection;
   }
 
+  public @Nonnull
+    RMatrixM4x4F<RTransformTextureProjection>
+    getTextureProjection()
+      throws ConstraintError
+  {
+    Constraints.constrainArbitrary(
+      this.matrix_texture_projection_done,
+      "Texture projection matrix calculated");
+    return this.matrix_texture_projection;
+  }
+
   public @Nonnull RMatrixM3x3F<RTransformTexture> getMatrixUV()
     throws ConstraintError
   {
@@ -171,6 +246,7 @@ public final class KMatrices
     this.matrix_view_inverse_done = false;
     this.matrix_normal_done = false;
     this.matrix_uv_done = false;
+    this.matrix_texture_projection_done = false;
   }
 
   public void matricesMakeFromCamera(
@@ -225,11 +301,67 @@ public final class KMatrices
     this.matrix_normal_done = true;
   }
 
+  public void matricesMakeFromLight(
+    final @Nonnull KProjective light)
+    throws ConstraintError
+  {
+    Constraints.constrainArbitrary(
+      this.matrix_model_done,
+      "Model matrix calculated");
+
+    /**
+     * Produce a world -> eye transformation matrix for the given light.
+     */
+
+    KMatrices.makeViewMatrix(
+      this.transform_context,
+      light.getPosition(),
+      light.getOrientation(),
+      this.matrix_texture_projection_view);
+
+    /**
+     * Produce a model -> eye transformation matrix for the given light.
+     */
+
+    MatrixM4x4F.multiply(
+      this.matrix_texture_projection_view,
+      this.matrix_model,
+      this.matrix_texture_projection_modelview);
+
+    /**
+     * Produce the eye -> clip transformation matrix for the given light.
+     */
+
+    light.getProjection().makeMatrixM4x4F(
+      this.matrix_texture_projection_projection);
+
+    /**
+     * Produce the model -> clip transformation matrix for the given light.
+     */
+
+    MatrixM4x4F.multiply(
+      this.matrix_texture_projection_projection,
+      this.matrix_texture_projection_modelview,
+      this.matrix_texture_projection);
+
+    /**
+     * Convert the matrix to one that transforms to texture coordinates in the
+     * range [0, 1] as opposed to the clip coordinate space.
+     */
+
+    // MatrixM4x4F.multiplyInPlace(
+    // this.matrix_texture_projection,
+    // this.matrix_texture_projection_bias);
+
+    this.matrix_texture_projection_done = true;
+  }
+
   public void matricesMakeTextureFromInstance(
     final @Nonnull KMeshInstance instance)
   {
-    final KMatrix3x3F<KMatrixUV> km = instance.getMaterial().getUVMatrix();
-    final KMatrix3x3F<KMatrixUV> ki = instance.getUVMatrix();
+    final RMatrixI3x3F<RTransformTexture> km =
+      instance.getMaterial().getUVMatrix();
+    final RMatrixI3x3F<RTransformTexture> ki = instance.getUVMatrix();
 
     km.makeMatrixM3x3F(this.matrix_uv);
     ki.makeMatrixM3x3F(this.matrix_uv_temp);
