@@ -33,6 +33,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -43,6 +44,11 @@ import javax.swing.filechooser.FileFilter;
 import net.java.dev.designgridlayout.DesignGridLayout;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.TextureFilterMagnification;
+import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jcanephora.TextureWrapR;
+import com.io7m.jcanephora.TextureWrapS;
+import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.PathVirtual;
 
@@ -63,6 +69,90 @@ final class SBTexturesCubePanel extends JPanel
         return "Cube map definitions (*.rxc)";
       }
     };
+  }
+
+  private static final class TextureParameters extends JPanel
+  {
+    private static final long                                    serialVersionUID;
+
+    static {
+      serialVersionUID = 1094205333772042554L;
+    }
+
+    private final @Nonnull JComboBox<TextureWrapR>               wrap_r;
+    private final @Nonnull JComboBox<TextureWrapS>               wrap_s;
+    private final @Nonnull JComboBox<TextureWrapT>               wrap_t;
+    private final @Nonnull JComboBox<TextureFilterMinification>  filter_min;
+    private final @Nonnull JComboBox<TextureFilterMagnification> filter_mag;
+
+    TextureParameters()
+    {
+      this.wrap_r = new JComboBox<TextureWrapR>();
+      for (final TextureWrapR v : TextureWrapR.values()) {
+        this.wrap_r.addItem(v);
+      }
+      this.wrap_r.setSelectedItem(TextureWrapR.TEXTURE_WRAP_REPEAT);
+
+      this.wrap_s = new JComboBox<TextureWrapS>();
+      for (final TextureWrapS v : TextureWrapS.values()) {
+        this.wrap_s.addItem(v);
+      }
+      this.wrap_s.setSelectedItem(TextureWrapS.TEXTURE_WRAP_REPEAT);
+
+      this.wrap_t = new JComboBox<TextureWrapT>();
+      for (final TextureWrapT v : TextureWrapT.values()) {
+        this.wrap_t.addItem(v);
+      }
+      this.wrap_t.setSelectedItem(TextureWrapT.TEXTURE_WRAP_REPEAT);
+
+      this.filter_min = new JComboBox<TextureFilterMinification>();
+      for (final TextureFilterMinification v : TextureFilterMinification
+        .values()) {
+        this.filter_min.addItem(v);
+      }
+      this.filter_min
+        .setSelectedItem(TextureFilterMinification.TEXTURE_FILTER_LINEAR);
+
+      this.filter_mag = new JComboBox<TextureFilterMagnification>();
+      for (final TextureFilterMagnification v : TextureFilterMagnification
+        .values()) {
+        this.filter_mag.addItem(v);
+      }
+      this.filter_mag
+        .setSelectedItem(TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+
+      final DesignGridLayout d = new DesignGridLayout(this);
+      d.row().grid().add(new JLabel("Wrap R")).add(this.wrap_r);
+      d.row().grid().add(new JLabel("Wrap S")).add(this.wrap_s);
+      d.row().grid().add(new JLabel("Wrap T")).add(this.wrap_t);
+      d.row().grid().add(new JLabel("Minification")).add(this.filter_min);
+      d.row().grid().add(new JLabel("Magnification")).add(this.filter_mag);
+    }
+
+    TextureWrapR getWrapR()
+    {
+      return (TextureWrapR) this.wrap_r.getSelectedItem();
+    }
+
+    TextureWrapS getWrapS()
+    {
+      return (TextureWrapS) this.wrap_s.getSelectedItem();
+    }
+
+    TextureWrapT getWrapT()
+    {
+      return (TextureWrapT) this.wrap_t.getSelectedItem();
+    }
+
+    TextureFilterMinification getMinification()
+    {
+      return (TextureFilterMinification) this.filter_min.getSelectedItem();
+    }
+
+    TextureFilterMagnification getMagnification()
+    {
+      return (TextureFilterMagnification) this.filter_mag.getSelectedItem();
+    }
   }
 
   private static final class ImageDisplay extends JPanel
@@ -132,6 +222,11 @@ final class SBTexturesCubePanel extends JPanel
   protected final @Nonnull JComboBox<PathVirtual>    selector;
   protected @Nonnull Map<PathVirtual, SBTextureCube> images;
   protected @Nonnull ImageDisplay                    image_display;
+  private final @Nonnull JTextField                  t_filter_mag;
+  private final @Nonnull JTextField                  t_filter_min;
+  private final @Nonnull JTextField                  t_wrap_r;
+  private final @Nonnull JTextField                  t_wrap_s;
+  private final @Nonnull JTextField                  t_wrap_t;
 
   public SBTexturesCubePanel(
     final @Nonnull JFrame window,
@@ -152,6 +247,18 @@ final class SBTexturesCubePanel extends JPanel
     image_pane
       .setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
+    this.t_filter_mag = new JTextField();
+    this.t_filter_min = new JTextField();
+    this.t_wrap_r = new JTextField();
+    this.t_wrap_s = new JTextField();
+    this.t_wrap_t = new JTextField();
+
+    this.t_filter_mag.setEditable(false);
+    this.t_filter_min.setEditable(false);
+    this.t_wrap_r.setEditable(false);
+    this.t_wrap_s.setEditable(false);
+    this.t_wrap_t.setEditable(false);
+
     this.selector = new JComboBox<PathVirtual>();
     this.selector.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
@@ -164,6 +271,23 @@ final class SBTexturesCubePanel extends JPanel
           final SBTextureCube t = SBTexturesCubePanel.this.images.get(name);
           SBTexturesCubePanel.this.image_display.setImages(t);
           SBTexturesCubePanel.this.image_display.repaint();
+
+          final SBTextureCubeDescription d = t.getDescription();
+          SBTexturesCubePanel.this.t_filter_mag.setText(d
+            .getTextureMag()
+            .toString());
+          SBTexturesCubePanel.this.t_filter_min.setText(d
+            .getTextureMin()
+            .toString());
+          SBTexturesCubePanel.this.t_wrap_r.setText(d
+            .getWrapModeR()
+            .toString());
+          SBTexturesCubePanel.this.t_wrap_s.setText(d
+            .getWrapModeS()
+            .toString());
+          SBTexturesCubePanel.this.t_wrap_t.setText(d
+            .getWrapModeT()
+            .toString());
         }
       }
     });
@@ -175,15 +299,24 @@ final class SBTexturesCubePanel extends JPanel
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
+        final TextureParameters params = new TextureParameters();
         final JFileChooser chooser = new JFileChooser();
         chooser.setMultiSelectionEnabled(false);
         chooser.setFileFilter(SBTexturesCubePanel.CUBE_MAP_FILTER);
+        chooser.setAccessory(params);
 
         final int r = chooser.showOpenDialog(SBTexturesCubePanel.this);
         switch (r) {
           case JFileChooser.APPROVE_OPTION:
           {
             final File file = chooser.getSelectedFile();
+            final TextureWrapR wrap_r = params.getWrapR();
+            final TextureWrapS wrap_s = params.getWrapS();
+            final TextureWrapT wrap_t = params.getWrapT();
+            final TextureFilterMinification filter_min =
+              params.getMinification();
+            final TextureFilterMagnification filter_mag =
+              params.getMagnification();
 
             final SwingWorker<SBTextureCube, Void> worker =
               new SwingWorker<SBTextureCube, Void>() {
@@ -191,7 +324,13 @@ final class SBTexturesCubePanel extends JPanel
                   throws Exception
                 {
                   try {
-                    return controller.sceneTextureCubeLoad(file).get();
+                    return controller.sceneTextureCubeLoad(
+                      file,
+                      wrap_r,
+                      wrap_s,
+                      wrap_t,
+                      filter_min,
+                      filter_mag).get();
                   } catch (final ConstraintError x) {
                     throw new IOException(x);
                   }
@@ -272,17 +411,6 @@ final class SBTexturesCubePanel extends JPanel
     dg.row().grid().add(this.selector, 2).add(clear).add(open);
     dg.row().grid().add(image_pane);
     dg.row().grid().empty(2).add(cancel).add(select);
-  }
-
-  protected void imageRefresh(
-    final JComboBox<File> select)
-  {
-    final File file = (File) select.getSelectedItem();
-    if (file != null) {
-      final SBTextureCube t = SBTexturesCubePanel.this.images.get(file);
-      this.image_display.setImages(t);
-      this.image_display.repaint();
-    }
   }
 
   protected void selectorRefresh(
