@@ -143,7 +143,7 @@ abstract class SBLightDescription
       final Element ec = RXMLUtilities.getChild(e, "colour", uri);
       final Element ei = RXMLUtilities.getChild(e, "intensity", uri);
       final Element eid = RXMLUtilities.getChild(e, "id", uri);
-      final Element er = RXMLUtilities.getChild(e, "distance", uri);
+      final Element er = RXMLUtilities.getChild(e, "range", uri);
       final Element ef = RXMLUtilities.getChild(e, "falloff", uri);
       final Element efr = RXMLUtilities.getChild(e, "frustum", uri);
       final Element et = RXMLUtilities.getChild(e, "texture", uri);
@@ -177,7 +177,7 @@ abstract class SBLightDescription
 
     private final @Nonnull QuaternionI4F                      orientation;
     private final @Nonnull RVectorI3F<RSpaceWorld>            position;
-    private final float                                       distance;
+    private final float                                       range;
     private final float                                       falloff;
     private final @Nonnull SBFrustum                          frustum;
     private final @Nonnull PathVirtual                        texture;
@@ -211,7 +211,7 @@ abstract class SBLightDescription
 
       this.orientation = orientation;
       this.position = position;
-      this.distance = distance;
+      this.range = distance;
       this.falloff = falloff;
       this.frustum = frustum;
       this.texture = texture;
@@ -228,7 +228,7 @@ abstract class SBLightDescription
 
     public float getDistance()
     {
-      return this.distance;
+      return this.range;
     }
 
     public float getFalloff()
@@ -266,7 +266,7 @@ abstract class SBLightDescription
         this.orientation,
         this.colour,
         this.intensity,
-        this.distance,
+        this.range,
         this.falloff,
         this.projection);
     }
@@ -327,8 +327,8 @@ abstract class SBLightDescription
         "s",
         SBSceneDescription.SCENE_XML_URI);
 
-      final Element er = new Element("s:distance", uri);
-      er.appendChild(Float.toString(this.distance));
+      final Element er = new Element("s:range", uri);
+      er.appendChild(Float.toString(this.range));
       final Element ef = new Element("s:falloff", uri);
       ef.appendChild(Float.toString(this.falloff));
 
@@ -370,13 +370,13 @@ abstract class SBLightDescription
       final Element ec = RXMLUtilities.getChild(e, "colour", uri);
       final Element ei = RXMLUtilities.getChild(e, "intensity", uri);
       final Element eid = RXMLUtilities.getChild(e, "id", uri);
-      final Element er = RXMLUtilities.getChild(e, "distance", uri);
+      final Element er = RXMLUtilities.getChild(e, "range", uri);
       final Element ef = RXMLUtilities.getChild(e, "falloff", uri);
 
       final RVectorI3F<RSpaceWorld> position =
-        RXMLUtilities.getElementVector3f(ep, uri);
+        RXMLUtilities.getElementAttributesVector3f(ep, uri);
       final RVectorI3F<RSpaceRGB> colour =
-        RXMLUtilities.getElementRGB(ec, uri);
+        RXMLUtilities.getElementAttributesRGB(ec, uri);
       final int id = RXMLUtilities.getElementInteger(eid);
       final float intensity = RXMLUtilities.getElementFloat(ei);
       final float radius = RXMLUtilities.getElementFloat(er);
@@ -435,7 +435,7 @@ abstract class SBLightDescription
         this.actual.getPosition(),
         "s",
         SBSceneDescription.SCENE_XML_URI);
-      final Element er = new Element("s:distance", uri);
+      final Element er = new Element("s:range", uri);
       er.appendChild(Float.toString(this.actual.getRadius()));
       final Element ef = new Element("s:falloff", uri);
       ef.appendChild(Float.toString(this.actual.getFalloff()));

@@ -211,6 +211,7 @@ final class SBGLRenderer implements GLEventListener
   {
     STATE_INITIAL,
     STATE_RUNNING,
+    STATE_PAUSED,
     STATE_FAILED,
     STATE_FAILED_PERMANENTLY
   }
@@ -1073,21 +1074,31 @@ final class SBGLRenderer implements GLEventListener
       }
 
       this.loadNewRendererIfNecessary();
+      this.handleQueues();
+      this.handlePauseToggleRequest();
 
-      if (this.running.get() != RunningState.STATE_RUNNING) {
-        return;
+      switch (this.running.get()) {
+        case STATE_FAILED:
+        case STATE_FAILED_PERMANENTLY:
+        case STATE_INITIAL:
+          return;
+        case STATE_PAUSED:
+        {
+          if (this.input_state.wantStepOneFrame()) {
+            this.input_state.setWantStepOneFrame(false);
+            this.log.debug("stepping one frame");
+          } else {
+            return;
+          }
+          break;
+        }
+        case STATE_RUNNING:
+        {
+          break;
+        }
       }
 
       final JCGLInterfaceCommon gl = this.gi.getGLCommon();
-
-      SBGLRenderer.processQueue(this.mesh_delete_queue);
-      SBGLRenderer.processQueue(this.texture2d_delete_queue);
-      SBGLRenderer.processQueue(this.texture_cube_delete_queue);
-
-      SBGLRenderer.processQueue(this.texture2d_load_queue);
-      SBGLRenderer.processQueue(this.texture_cube_load_queue);
-      SBGLRenderer.processQueue(this.mesh_load_queue);
-      SBGLRenderer.processQueue(this.shader_load_queue);
 
       this.cameraHandle();
       this.renderScene();
@@ -1156,6 +1167,44 @@ final class SBGLRenderer implements GLEventListener
     }
 
     throw new UnreachableCodeException();
+  }
+
+  private void handlePauseToggleRequest()
+  {
+    if (this.input_state.wantPauseToggle()) {
+      this.input_state.setWantPauseToggle(false);
+      switch (this.running.get()) {
+        case STATE_FAILED:
+        case STATE_FAILED_PERMANENTLY:
+        case STATE_INITIAL:
+        {
+          break;
+        }
+        case STATE_RUNNING:
+        {
+          this.log.debug("paused");
+          this.running.set(RunningState.STATE_PAUSED);
+          break;
+        }
+        case STATE_PAUSED:
+        {
+          this.log.debug("unpaused");
+          this.running.set(RunningState.STATE_RUNNING);
+          break;
+        }
+      }
+    }
+  }
+
+  private void handleQueues()
+  {
+    SBGLRenderer.processQueue(this.mesh_delete_queue);
+    SBGLRenderer.processQueue(this.texture2d_delete_queue);
+    SBGLRenderer.processQueue(this.texture_cube_delete_queue);
+    SBGLRenderer.processQueue(this.texture2d_load_queue);
+    SBGLRenderer.processQueue(this.texture_cube_load_queue);
+    SBGLRenderer.processQueue(this.mesh_load_queue);
+    SBGLRenderer.processQueue(this.shader_load_queue);
   }
 
   @Override public void init(
@@ -1971,8 +2020,6 @@ final class SBGLRenderer implements GLEventListener
     final int width,
     final int height)
   {
-    assert this.running.get() == RunningState.STATE_RUNNING;
-
     try {
       final JCGLInterfaceCommon gl = this.gi.getGLCommon();
       this.reloadSizedResources(drawable, gl);

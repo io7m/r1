@@ -105,7 +105,6 @@ public final class KMatrices
   private final @Nonnull RMatrixM4x4F<RTransformProjection>        matrix_texture_projection_projection;
   private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_texture_projection_view;
   private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_texture_projection_modelview;
-  private final @Nonnull MatrixM4x4F                               matrix_texture_projection_bias;
 
   private final @Nonnull KTransform.Context                        transform_context;
 
@@ -137,17 +136,6 @@ public final class KMatrices
     this.matrix_texture_projection_view = new RMatrixM4x4F<RTransformView>();
     this.matrix_texture_projection_modelview =
       new RMatrixM4x4F<RTransformModelView>();
-
-    /**
-     * A matrix from normalized device coordinates to texture coordinates.
-     * Essentially, scaling and translating by 0.5.
-     */
-
-    this.matrix_texture_projection_bias = new MatrixM4x4F();
-    this.matrix_texture_projection_bias.set(0, 3, 0.5f); // Translate X by 0.5
-    this.matrix_texture_projection_bias.set(1, 3, 0.5f); // Translate Y by 0.5
-    this.matrix_texture_projection_bias.set(0, 0, 0.5f); // Scale X by 0.5
-    this.matrix_texture_projection_bias.set(1, 1, 0.5f); // Scale Y by 0.5
 
     this.transform_context = new KTransform.Context();
     this.matricesBegin();
@@ -343,15 +331,6 @@ public final class KMatrices
       this.matrix_texture_projection_projection,
       this.matrix_texture_projection_modelview,
       this.matrix_texture_projection);
-
-    /**
-     * Convert the matrix to one that transforms to texture coordinates in the
-     * range [0, 1] as opposed to the clip coordinate space.
-     */
-
-    // MatrixM4x4F.multiplyInPlace(
-    // this.matrix_texture_projection,
-    // this.matrix_texture_projection_bias);
 
     this.matrix_texture_projection_done = true;
   }

@@ -691,6 +691,12 @@ final class SBMainWindow extends JFrame
               this.input.setRotatingRight(false);
               break;
 
+            case 'p':
+              this.input.setWantPauseToggle(true);
+              break;
+            case 'o':
+              this.input.setWantStepOneFrame(true);
+              break;
             case 'n':
               this.input.setWantNextCamera(true);
               break;

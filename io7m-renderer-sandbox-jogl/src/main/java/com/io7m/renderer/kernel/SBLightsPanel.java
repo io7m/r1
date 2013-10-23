@@ -167,7 +167,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
       private final @Nonnull SBOrientationInput orientation;
 
-      protected final @Nonnull SBFloatHSlider   distance;
+      protected final @Nonnull SBFloatHSlider   range;
       protected final @Nonnull SBFloatHSlider   falloff;
       protected final @Nonnull JTextField       texture;
       private final @Nonnull JButton            texture_select;
@@ -184,7 +184,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         this.position_y = new JTextField("1.0");
         this.position_z = new JTextField("0.0");
         this.orientation = new SBOrientationInput();
-        this.distance = new SBFloatHSlider("Distance", 0.0f, 128.0f);
+        this.range = new SBFloatHSlider("Range", 0.0f, 128.0f);
         this.falloff = new SBFloatHSlider("Falloff", 0.0f, 64.0f);
         this.fov = new SBFloatHSlider("FOV", 0.0f, 360.0f);
         this.aspect = new SBFloatHSlider("Aspect ratio", 0.0f, 2.0f);
@@ -233,9 +233,9 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
         group
           .grid()
-          .add(this.distance.getLabel())
-          .add(this.distance.getSlider(), 4)
-          .add(this.distance.getField());
+          .add(this.range.getLabel())
+          .add(this.range.getSlider(), 4)
+          .add(this.range.getField());
 
         group
           .grid()
@@ -278,7 +278,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
         this.orientation.setOrientation(kl.getOrientation());
         this.texture.setText(kl.getTexture().getName());
-        this.distance.setCurrent(kl.getDistance());
+        this.range.setCurrent(kl.getRange());
         this.falloff.setCurrent(kl.getFalloff());
 
         final SBFrustum frustum = light.getDescription().getFrustum();
@@ -292,7 +292,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       public float getDistance()
         throws SBExceptionInputError
       {
-        return SBTextFieldUtilities.getFieldFloatOrError(this.distance
+        return SBTextFieldUtilities.getFieldFloatOrError(this.range
           .getField());
       }
 
@@ -320,7 +320,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       public @Nonnull SBFrustum getFrustum()
       {
         return new SBFrustum(
-          this.distance.getCurrent(),
+          this.range.getCurrent(),
           (float) Math.toRadians(this.fov.getCurrent()),
           this.aspect.getCurrent());
       }

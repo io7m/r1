@@ -28,121 +28,88 @@ module ProjectiveLight is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Sampler2D  as S2;
 
-  import com.io7m.renderer.Materials as M;
+  import com.io7m.renderer.Materials      as M;
+  import com.io7m.renderer.SphericalLight as SL;
 
   type t is record
     color     : vector_3f,
     position  : vector_3f,
     intensity : float,
-    distance  : float,
+    range     : float,
     falloff   : float
   end;
 
   --
-  -- The set of relevant direction vectors needed to calculate lighting
-  -- for a surface.
+  -- Sample a texel from the given texture [t], given clip-space 
+  -- coordinates [u].
   --
 
-  type directions is record
-    ots        : vector_3f, -- Direction from observer to surface ("V")
-    normal     : vector_3f, -- Surface normal ("N")
-    stl        : vector_3f, -- Direction from surface to light source ("L")
-    distance   : float,     -- Distance between light and surface
-    reflection : vector_3f  -- Reflection between observer and normal ("R")
-  end;
-
-  --
-  -- Given a projective light [light], a surface normal [n],
-  -- and the point [p] on the surface to be lit, calculate all
-  -- relevant directions for simulating lighting.
-  --
-  -- Note that calculations are in eye-space and therefore the
-  -- observer is assumed to be at (0.0, 0.0, 0.0).
-  --
-
-  function directions (
-    light : t,
-    p     : vector_3f,
-    n     : vector_3f
-  ) : directions =
+  function light_texel (
+    t : sampler_2d,
+    u : vector_4f
+  ) : vector_4f =
     let
-      value position_diff =
-        V3.subtract (p, light.position);
-      value ots =
-        V3.normalize (p);
+      -- Perform division-by-w to get coordinates into normalized-device space.
+      value u_divided =
+        new vector_2f (
+          F.divide (u [x], u [w]),
+          F.divide (u [y], u [w])
+        );
+      -- Scale and translate coordinates to get them into the range [0, 1] from [-1, 1].
+      value u_added =
+        V2.add_scalar (u_divided, 1.0);
+      value u_scaled =
+        V2.multiply_scalar (u_added, 0.5);
     in
-      record directions {
-        ots        = ots,
-        normal     = n,
-        stl        = V3.normalize (V3.negate (position_diff)),
-        distance   = V3.magnitude (position_diff),
-        reflection = V3.reflect (ots, n)
-      }
-    end;
-
-  --
-  -- Given a projective light [light], at distance [distance]
-  -- from the point on the surface, calculate the amount of attenuation.
-  --
-
-  function attenuation (
-    light    : t,
-    distance : float
-  ) : float =
-    let
-      value nd           = F.subtract (0.0, distance);
-      value inv_distance = F.divide (1.0, light.distance);
-      value linear       = F.add (F.multiply (nd, inv_distance), 1.0);
-      value exponential  = F.clamp (F.power (linear, light.falloff), 0.0, 1.0);
-    in
-      exponential
+      S2.texture (t, u_scaled)
     end;
 
   --
   -- Given a projective light [light], calculate the diffuse
-  -- color based on [d], with minimum emission level [e],
-  -- sampling from texture [t] using coordinates [u].
+  -- color based on the given light color [light_color], with
+  -- minimum emission level [e].
   --
 
   function diffuse_color (
-    light : t,
-    d     : directions,
-    t     : sampler_2d,
-    u     : vector_4f,
-    e     : float
+    light       : t,
+    d           : SL.directions,
+    light_color : vector_3f,
+    e           : float
   ) : vector_3f =
     let
       value factor =
         F.maximum (0.0, V3.dot (d.stl, d.normal));
       value factor_e =
         F.maximum (factor, e);
-
-      value u_divided =
-        new vector_2f (
-          F.divide (u [x], u [w]),
-          F.divide (u [y], u [w])
-        );
-      value u_added =
-        V2.add_scalar (u_divided, 1.0);
-      value u_scaled =
-        V2.multiply_scalar (u_added, 0.5);
-
-      value texel =
-        S2.texture (t, u_scaled) [x y z];
-
-      value light_color =
-        V3.multiply (light.color, texel);
       value color =
-        V3.multiply_scalar (V3.multiply_scalar (light_color, light.intensity), F.maximum(1.0, factor_e));
+        V3.multiply_scalar (V3.multiply_scalar (light_color, light.intensity), factor_e);
     in
       color
     end;
 
   --
-  -- Given a projective light [light], a surface normal [n],
-  -- and assuming the current point on the surface is at [p],
-  -- with minimum emission level [e], calculate the diffuse 
-  -- term for the surface.
+  -- Given a projective light [light], calculate the specular
+  -- color based on the given light color [light_color].
+  --
+
+  function specular_color (
+    light       : t,
+    d           : SL.directions,
+    light_color : vector_3f,
+    s           : M.specular
+  ) : vector_3f =
+    let
+      value factor =
+        F.power (F.maximum (0.0, V3.dot (d.reflection, d.stl)), s.exponent);
+      value color =
+        V3.multiply_scalar (V3.multiply_scalar (light_color, light.intensity), factor);
+    in
+      V3.multiply_scalar (color, s.intensity)
+    end;
+
+  --
+  -- Given a projective light [light], calculate the diffuse
+  -- color based on [d], sampling the current light texel from [t].
   --
 
   function diffuse_only (
@@ -153,12 +120,20 @@ module ProjectiveLight is
     u     : vector_4f
   ) : vector_3f =
     let
-      value d = directions (light, p, n);
-      value a = attenuation (light, d.distance);
-      value c = diffuse_color (light, d, t, u, 0.0);
+      value d  = SL.directions (light.position, p, n);
+      value a  = SL.attenuation (light.range, light.falloff, d.distance);
+      value tx = light_texel (t, u);
+      value lc = V3.multiply (light.color, tx [x y z]);
+      value c  = diffuse_color (light, d, lc, 0.0);
     in
       V3.multiply_scalar (c, a)
     end;
+
+  --
+  -- Given a projective light [light], calculate the diffuse
+  -- color based on [d], with the minimum emission level given in
+  -- [m], sampling the current light texel from [t].
+  --
 
   function diffuse_only_emissive (
     light : t,
@@ -168,7 +143,20 @@ module ProjectiveLight is
     t     : sampler_2d,
     u     : vector_4f
   ) : vector_3f =
-    new vector_3f (1.0, 0.0, 1.0);
+    let
+      value d  = SL.directions (light.position, p, n);
+      value a  = SL.attenuation (light.range, light.falloff, d.distance);
+      value tx = light_texel (t, u);
+      value lc = V3.multiply (light.color, tx [x y z]);
+      value c  = diffuse_color (light, d, lc, m.emissive.emissive);
+    in
+      V3.multiply_scalar (c, a)
+    end;
+
+  --
+  -- Given a projective light [light], calculate the diffuse and 
+  -- specular terms for the surface.
+  --
 
   function diffuse_specular (
     light : t,
@@ -178,7 +166,22 @@ module ProjectiveLight is
     t     : sampler_2d,
     u     : vector_4f
   ) : vector_3f =
-    new vector_3f (1.0, 0.0, 1.0);
+    let
+      value d  = SL.directions (light.position, p, n);
+      value a  = SL.attenuation (light.range, light.falloff, d.distance);
+      value tx = light_texel (t, u);
+      value lc = V3.multiply (light.color, tx [x y z]);
+      value dc = diffuse_color (light, d, lc, 0.0);
+      value sc = specular_color (light, d, lc, m.specular);
+    in
+      V3.multiply_scalar (V3.add (dc, sc), a)
+    end;
+
+  --
+  -- Given a projective light [light], calculate the diffuse and 
+  -- specular terms for the surface, with the minimum emission level
+  -- given in [m].
+  --
 
   function diffuse_specular_emissive (
     light : t,
@@ -188,6 +191,15 @@ module ProjectiveLight is
     t     : sampler_2d,
     u     : vector_4f
   ) : vector_3f =
-    new vector_3f (1.0, 0.0, 1.0);
+    let
+      value d  = SL.directions (light.position, p, n);
+      value a  = SL.attenuation (light.range, light.falloff, d.distance);
+      value tx = light_texel (t, u);
+      value lc = V3.multiply (light.color, tx [x y z]);
+      value dc = diffuse_color (light, d, lc, m.emissive.emissive);
+      value sc = specular_color (light, d, lc, m.specular);
+    in
+      V3.multiply_scalar (V3.add (dc, sc), a)
+    end;
 
 end;
