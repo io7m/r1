@@ -47,7 +47,6 @@ import org.pcollections.MapPSet;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
@@ -62,6 +61,7 @@ import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jlog.Log;
@@ -180,9 +180,16 @@ public final class SBSceneController implements
         scene = scene.texture2DAdd(t);
       }
 
-      for (final PathVirtual name : sd.getTexturesCube()) {
+      for (final SBTextureCubeDescription desc : sd.getTexturesCube()) {
         final SBTextureCube t =
-          this.internalTextureCubeLoadFromPath(fs, name);
+          this.internalTextureCubeLoadFromPath(
+            fs,
+            desc.getPath(),
+            desc.getWrapModeR(),
+            desc.getWrapModeS(),
+            desc.getWrapModeT(),
+            desc.getTextureMin(),
+            desc.getTextureMag());
         scene = scene.textureCubeAdd(t);
       }
 
@@ -407,7 +414,12 @@ public final class SBSceneController implements
 
   private @Nonnull SBTextureCube internalTextureCubeLoad(
     final @Nonnull SBSceneFilesystem fs,
-    final @Nonnull File file)
+    final @Nonnull File file,
+    final @Nonnull TextureWrapR wrap_r,
+    final @Nonnull TextureWrapS wrap_s,
+    final @Nonnull TextureWrapT wrap_t,
+    final @Nonnull TextureFilterMinification filter_min,
+    final @Nonnull TextureFilterMagnification filter_mag)
     throws FileNotFoundException,
       FilesystemError,
       IOException,
@@ -419,12 +431,24 @@ public final class SBSceneController implements
       RXMLException
   {
     final PathVirtual path = fs.filesystemCopyInTextureCube(file);
-    return this.internalTextureCubeLoadFromPath(fs, path);
+    return this.internalTextureCubeLoadFromPath(
+      fs,
+      path,
+      wrap_r,
+      wrap_s,
+      wrap_t,
+      filter_min,
+      filter_mag);
   }
 
   private @Nonnull SBTextureCube internalTextureCubeLoadFromPath(
     final @Nonnull SBSceneFilesystem fs,
-    final @Nonnull PathVirtual path)
+    final @Nonnull PathVirtual path,
+    final @Nonnull TextureWrapR wrap_r,
+    final @Nonnull TextureWrapS wrap_s,
+    final @Nonnull TextureWrapT wrap_t,
+    final @Nonnull TextureFilterMinification filter_min,
+    final @Nonnull TextureFilterMagnification filter_mag)
     throws FilesystemError,
       ConstraintError,
       IOException,
@@ -512,10 +536,28 @@ public final class SBSceneController implements
           fs.filesystemOpenFile(path_nx));
 
       final Future<TextureCubeStatic> future =
-        this.renderer.textureCubeLoad(path, spz, snz, spy, sny, spx, snx);
+        this.renderer.textureCubeLoad(
+          path,
+          spz,
+          snz,
+          spy,
+          sny,
+          spx,
+          snx,
+          wrap_r,
+          wrap_s,
+          wrap_t,
+          filter_min,
+          filter_mag);
 
       final TextureCubeStatic texture = future.get();
-      throw new UnimplementedCodeException();
+      return new SBTextureCube(new SBTextureCubeDescription(
+        path,
+        wrap_r,
+        wrap_s,
+        wrap_t,
+        filter_min,
+        filter_mag), texture, ipz, inz, ipy, iny, ipx, inx);
 
     } finally {
       if (spz != null) {
@@ -955,7 +997,12 @@ public final class SBSceneController implements
   }
 
   @Override public @Nonnull Future<SBTextureCube> sceneTextureCubeLoad(
-    final @Nonnull File file)
+    final @Nonnull File file,
+    final @Nonnull TextureWrapR wrap_r,
+    final @Nonnull TextureWrapS wrap_s,
+    final @Nonnull TextureWrapT wrap_t,
+    final @Nonnull TextureFilterMinification filter_min,
+    final @Nonnull TextureFilterMagnification filter_mag)
     throws ConstraintError
   {
     Constraints.constrainNotNull(file, "File");
@@ -974,7 +1021,12 @@ public final class SBSceneController implements
             final SBTextureCube sbc =
               SBSceneController.this.internalTextureCubeLoad(
                 saf.filesystem,
-                file);
+                file,
+                wrap_r,
+                wrap_s,
+                wrap_t,
+                filter_min,
+                filter_mag);
 
             SBSceneController.this.internalStateUpdateSceneOnly(saf.scene
               .textureCubeAdd(sbc));
@@ -1224,7 +1276,12 @@ interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration
       throws ConstraintError;
 
   public @Nonnull Future<SBTextureCube> sceneTextureCubeLoad(
-    final @Nonnull File file)
+    final @Nonnull File file,
+    final @Nonnull TextureWrapR wrap_r,
+    final @Nonnull TextureWrapS wrap_s,
+    final @Nonnull TextureWrapT wrap_t,
+    final @Nonnull TextureFilterMinification filter_min,
+    final @Nonnull TextureFilterMagnification filter_mag)
     throws ConstraintError;
 
   public @Nonnull Map<PathVirtual, SBTexture2D<?>> sceneTextures2DGet();

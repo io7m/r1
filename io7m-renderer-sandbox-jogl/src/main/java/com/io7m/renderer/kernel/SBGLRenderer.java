@@ -501,7 +501,12 @@ final class SBGLRenderer implements GLEventListener
       final @Nonnull CubeMapFaceInputStream<CMFKPositiveY> positive_y,
       final @Nonnull CubeMapFaceInputStream<CMFKNegativeY> negative_y,
       final @Nonnull CubeMapFaceInputStream<CMFKPositiveX> positive_x,
-      final @Nonnull CubeMapFaceInputStream<CMFKNegativeX> negative_x)
+      final @Nonnull CubeMapFaceInputStream<CMFKNegativeX> negative_x,
+      final @Nonnull TextureWrapR wrap_r,
+      final @Nonnull TextureWrapS wrap_s,
+      final @Nonnull TextureWrapT wrap_t,
+      final @Nonnull TextureFilterMinification filter_min,
+      final @Nonnull TextureFilterMagnification filter_mag)
     {
       super(new Callable<TextureCubeStatic>() {
         @SuppressWarnings("synthetic-access") @Override public @Nonnull
@@ -517,11 +522,11 @@ final class SBGLRenderer implements GLEventListener
               final TextureCubeStatic t =
                 SBGLRenderer.this.texture_loader.loadCubeRHStaticRGB888(
                   gl,
-                  TextureWrapR.TEXTURE_WRAP_CLAMP_TO_EDGE,
-                  TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-                  TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-                  TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-                  TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+                  wrap_r,
+                  wrap_s,
+                  wrap_t,
+                  filter_min,
+                  filter_mag,
                   positive_z,
                   negative_z,
                   positive_y,
@@ -2130,7 +2135,12 @@ final class SBGLRenderer implements GLEventListener
     final @Nonnull CubeMapFaceInputStream<CMFKPositiveY> positive_y,
     final @Nonnull CubeMapFaceInputStream<CMFKNegativeY> negative_y,
     final @Nonnull CubeMapFaceInputStream<CMFKPositiveX> positive_x,
-    final @Nonnull CubeMapFaceInputStream<CMFKNegativeX> negative_x)
+    final @Nonnull CubeMapFaceInputStream<CMFKNegativeX> negative_x,
+    final @Nonnull TextureWrapR wrap_r,
+    final @Nonnull TextureWrapS wrap_s,
+    final @Nonnull TextureWrapT wrap_t,
+    final @Nonnull TextureFilterMinification filter_min,
+    final @Nonnull TextureFilterMagnification filter_mag)
   {
     final TextureCubeLoadFuture f =
       new TextureCubeLoadFuture(
@@ -2140,7 +2150,12 @@ final class SBGLRenderer implements GLEventListener
         positive_y,
         negative_y,
         positive_x,
-        negative_x);
+        negative_x,
+        wrap_r,
+        wrap_s,
+        wrap_t,
+        filter_min,
+        filter_mag);
     this.texture_cube_load_queue.add(f);
     return f;
   }

@@ -362,7 +362,7 @@ import com.io7m.jvvfs.PathVirtual;
     }
 
     for (final SBTextureCube t : this.textures_cube.values()) {
-      desc = desc.textureCubeAdd(t.getPath());
+      desc = desc.textureCubeAdd(t.getDescription());
     }
 
     for (final SBLight l : this.lights.values()) {
