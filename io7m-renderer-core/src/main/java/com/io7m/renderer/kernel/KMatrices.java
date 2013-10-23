@@ -80,16 +80,15 @@ public final class KMatrices
   {
     MatrixM4x4F.setIdentity(view);
 
+    final QuaternionI4F inverse_orient = QuaternionI4F.conjugate(orientation);
+    QuaternionM4F.makeRotationMatrix4x4(inverse_orient, context.t_matrix4x4);
+    MatrixM4x4F.multiplyInPlace(view, context.t_matrix4x4);
+
     final VectorM3F translate = new VectorM3F();
     translate.x = -position.getXF();
     translate.y = -position.getYF();
     translate.z = -position.getZF();
-
     MatrixM4x4F.translateByVector3FInPlace(view, translate);
-
-    final QuaternionI4F inverse_orient = QuaternionI4F.conjugate(orientation);
-    QuaternionM4F.makeRotationMatrix4x4(inverse_orient, context.t_matrix4x4);
-    MatrixM4x4F.multiplyInPlace(view, context.t_matrix4x4);
   }
 
   private final @Nonnull MatrixM4x4F.Context                       matrix_context;
