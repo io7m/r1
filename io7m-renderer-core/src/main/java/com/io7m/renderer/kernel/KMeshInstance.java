@@ -20,6 +20,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.RMatrixI3x3F;
+import com.io7m.renderer.RTransformTexture;
 
 /**
  * <p>
@@ -42,17 +44,17 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
 @Immutable public final class KMeshInstance implements KTransformable
 {
-  private final @Nonnull Integer                    id;
-  private final @Nonnull KTransform                 transform;
-  private final @Nonnull KMesh                      mesh;
-  private final @Nonnull KMaterial                  material;
-  private final @Nonnull KMatrix3x3F<KMatrixUV>     uv_matrix;
-  private final @Nonnull KMeshInstanceMaterialLabel label;
+  private final @Nonnull Integer                         id;
+  private final @Nonnull KTransform                      transform;
+  private final @Nonnull KMesh                           mesh;
+  private final @Nonnull KMaterial                       material;
+  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
+  private final @Nonnull KMeshInstanceMaterialLabel      label;
 
   public KMeshInstance(
     final @Nonnull Integer id,
     final @Nonnull KTransform transform,
-    final @Nonnull KMatrix3x3F<KMatrixUV> uv_matrix,
+    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix,
     final @Nonnull KMesh mesh,
     final @Nonnull KMaterial material)
     throws ConstraintError
@@ -70,7 +72,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     return this.id;
   }
 
-  public @Nonnull KMatrix3x3F<KMatrixUV> getUVMatrix()
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
   {
     return this.uv_matrix;
   }

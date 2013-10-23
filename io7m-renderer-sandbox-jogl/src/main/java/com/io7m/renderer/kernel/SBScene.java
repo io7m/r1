@@ -39,7 +39,7 @@ import com.io7m.jvvfs.PathVirtual;
     final PMap<PathVirtual, SBTextureCube> textures_cube =
       HashTreePMap.empty();
     final PMap<PathVirtual, SBMesh> meshes = HashTreePMap.empty();
-    final PMap<Integer, KLight> lights = HashTreePMap.empty();
+    final PMap<Integer, SBLight> lights = HashTreePMap.empty();
     final PMap<Integer, SBInstance> instances = HashTreePMap.empty();
 
     return new SBScene(
@@ -62,7 +62,7 @@ import com.io7m.jvvfs.PathVirtual;
   private final @Nonnull PMap<PathVirtual, SBTexture2D<?>> textures2d;
   private final @Nonnull PMap<PathVirtual, SBTextureCube>  textures_cube;
   private final @Nonnull PMap<PathVirtual, SBMesh>         meshes;
-  private final @Nonnull PMap<Integer, KLight>             lights;
+  private final @Nonnull PMap<Integer, SBLight>            lights;
   private final @Nonnull Integer                           light_id_pool;
   private final @Nonnull PMap<Integer, SBInstance>         instances;
   private final @Nonnull Integer                           instance_id_pool;
@@ -71,7 +71,7 @@ import com.io7m.jvvfs.PathVirtual;
     final @Nonnull PMap<PathVirtual, SBTexture2D<?>> textures2d,
     final @Nonnull PMap<PathVirtual, SBTextureCube> textures_cube,
     final @Nonnull PMap<PathVirtual, SBMesh> meshes,
-    final @Nonnull PMap<Integer, KLight> lights,
+    final @Nonnull PMap<Integer, SBLight> lights,
     final @Nonnull Integer light_id_pool,
     final @Nonnull PMap<Integer, SBInstance> instances,
     final @Nonnull Integer instance_id_pool)
@@ -136,7 +136,7 @@ import com.io7m.jvvfs.PathVirtual;
   }
 
   public @Nonnull SBScene lightAdd(
-    final @Nonnull KLight light)
+    final @Nonnull SBLight light)
     throws ConstraintError
   {
     Constraints.constrainNotNull(light, "Light");
@@ -171,7 +171,7 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool), id);
   }
 
-  public @CheckForNull KLight lightGet(
+  public @CheckForNull SBLight lightGet(
     final @Nonnull Integer id)
     throws ConstraintError
   {
@@ -194,7 +194,7 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool);
   }
 
-  public @Nonnull Collection<KLight> lightsGet()
+  public @Nonnull Collection<SBLight> lightsGet()
   {
     return this.lights.values();
   }
@@ -358,15 +358,15 @@ import com.io7m.jvvfs.PathVirtual;
     }
 
     for (final SBTexture2D<?> t : this.textures2d.values()) {
-      desc = desc.texture2DAdd(t.getPath());
+      desc = desc.texture2DAdd(t.getDescription());
     }
 
     for (final SBTextureCube t : this.textures_cube.values()) {
       desc = desc.textureCubeAdd(t.getPath());
     }
 
-    for (final KLight l : this.lights.values()) {
-      desc = desc.lightAdd(l);
+    for (final SBLight l : this.lights.values()) {
+      desc = desc.lightAdd(l.getDescription());
     }
 
     for (final SBInstance i : this.instances.values()) {

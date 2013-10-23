@@ -22,67 +22,16 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import nu.xom.Element;
-import nu.xom.Elements;
-import nu.xom.ValidityException;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.RSpaceTexture;
-import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RMatrixI3x3F;
+import com.io7m.renderer.RTransformTexture;
 import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLException.RXMLExceptionValidityError;
 import com.io7m.renderer.xml.RXMLUtilities;
 
 @Immutable public final class SBMaterialDescription
 {
-  static @Nonnull KMatrix3x3F<KMatrixUV> matrix3x3Parse(
-    final @Nonnull Element e,
-    final @Nonnull URI uri)
-    throws RXMLException,
-      ConstraintError,
-      RXMLExceptionValidityError
-  {
-    final Elements eus = RXMLUtilities.getChildren(e, "column", uri);
-    if (eus.size() != 3) {
-      throw new RXMLException.RXMLExceptionValidityError(
-        new ValidityException("Expected exactly three uv-matrix columns"));
-    }
-
-    final Element ec0 = eus.get(0);
-    final RVectorI3F<RSpaceTexture> c0 =
-      RXMLUtilities.getElementAttributesMatrixColumn3(ec0, uri);
-    final Element ec1 = eus.get(1);
-    final RVectorI3F<RSpaceTexture> c1 =
-      RXMLUtilities.getElementAttributesMatrixColumn3(ec1, uri);
-    final Element ec2 = eus.get(2);
-    final RVectorI3F<RSpaceTexture> c2 =
-      RXMLUtilities.getElementAttributesMatrixColumn3(ec2, uri);
-    final KMatrix3x3F<KMatrixUV> uvm = new KMatrix3x3F<KMatrixUV>(c0, c1, c2);
-    return uvm;
-  }
-
-  static void matrix3x3Write(
-    final @Nonnull String uri,
-    final @Nonnull KMatrix3x3F<KMatrixUV> uvm,
-    final @Nonnull Element euv)
-  {
-    for (int c = 0; c < 3; ++c) {
-      final Element emc = new Element("s:column", uri);
-      final RVectorI3F<RSpaceTexture> col =
-        new RVectorI3F<RSpaceTexture>(
-          uvm.getRowColumnF(0, c),
-          uvm.getRowColumnF(1, c),
-          uvm.getRowColumnF(2, c));
-
-      RXMLUtilities.putElementAttributesMatrixColumn3(
-        emc,
-        col,
-        "s",
-        SBSceneDescription.SCENE_XML_URI);
-      euv.appendChild(emc);
-    }
-  }
-
   public static @Nonnull SBMaterialDescription fromXML(
     final @Nonnull Element e)
     throws RXMLException,
@@ -99,6 +48,8 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final Element en = RXMLUtilities.getChild(e, "normal", uri);
     final Element ee = RXMLUtilities.getChild(e, "environment", uri);
     final Element emu = RXMLUtilities.getChild(e, "uv-matrix", uri);
+    final RMatrixI3x3F<RTransformTexture> m =
+      RXMLUtilities.getElementMatrixI3x3F(emu, uri);
 
     return new SBMaterialDescription(
       SBMaterialAlphaDescription.fromXML(ea),
@@ -107,7 +58,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
       SBMaterialSpecularDescription.fromXML(es),
       SBMaterialEnvironmentDescription.fromXML(ee),
       SBMaterialNormalDescription.fromXML(en),
-      SBMaterialDescription.matrix3x3Parse(emu, uri));
+      m);
   }
 
   private final @Nonnull SBMaterialAlphaDescription       alpha;
@@ -116,7 +67,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
   private final @Nonnull SBMaterialEnvironmentDescription environment;
   private final @Nonnull SBMaterialNormalDescription      normal;
   private final @Nonnull SBMaterialSpecularDescription    specular;
-  private final @Nonnull KMatrix3x3F<KMatrixUV>           uv_matrix;
+  private final @Nonnull RMatrixI3x3F<RTransformTexture>  uv_matrix;
 
   SBMaterialDescription(
     final @Nonnull SBMaterialAlphaDescription alpha,
@@ -125,7 +76,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final @Nonnull SBMaterialSpecularDescription specular,
     final @Nonnull SBMaterialEnvironmentDescription environment,
     final @Nonnull SBMaterialNormalDescription normal,
-    final @Nonnull KMatrix3x3F<KMatrixUV> uv_matrix)
+    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix)
     throws ConstraintError
   {
     this.alpha = Constraints.constrainNotNull(alpha, "Alpha");
@@ -250,7 +201,11 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final Element e = new Element("s:material", uri);
 
     final Element euv = new Element("s:uv-matrix", uri);
-    SBMaterialDescription.matrix3x3Write(uri, this.uv_matrix, euv);
+    RXMLUtilities.putElementMatrixI3x3F(
+      euv,
+      "s",
+      this.uv_matrix,
+      SBSceneDescription.SCENE_XML_URI);
 
     e.appendChild(this.alpha.toXML());
     e.appendChild(this.albedo.toXML());
@@ -268,7 +223,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return this.alpha;
   }
 
-  public @Nonnull KMatrix3x3F<KMatrixUV> getUVMatrix()
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
   {
     return this.uv_matrix;
   }

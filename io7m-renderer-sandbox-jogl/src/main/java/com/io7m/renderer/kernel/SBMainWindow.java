@@ -690,6 +690,10 @@ final class SBMainWindow extends JFrame
             case 'e':
               this.input.setRotatingRight(false);
               break;
+
+            case 'n':
+              this.input.setWantNextCamera(true);
+              break;
           }
         }
 
