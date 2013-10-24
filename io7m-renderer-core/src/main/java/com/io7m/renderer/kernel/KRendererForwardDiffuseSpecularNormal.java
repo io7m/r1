@@ -260,10 +260,6 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
       for (final KLight light : scene.getLights()) {
         switch (light.getType()) {
-          case LIGHT_CONE:
-          {
-            throw new UnimplementedCodeException();
-          }
           case LIGHT_SPHERE:
           {
             final KSphere slight = (KLight.KSphere) light;
@@ -275,6 +271,10 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
             final KDirectional dlight = (KLight.KDirectional) light;
             this.renderLightPassMeshesDirectional(scene, gc, dlight);
             break;
+          }
+          case LIGHT_PROJECTIVE:
+          {
+            throw new UnimplementedCodeException();
           }
         }
       }
@@ -363,7 +363,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
     e.execCancel();
 
-    for (final KMeshInstance mesh : scene.getMeshes()) {
+    for (final KMeshInstance mesh : scene.getInstances()) {
       this.renderDepthPassMesh(gc, e, mesh);
     }
   }
@@ -455,7 +455,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -583,7 +583,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -720,7 +720,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -854,7 +854,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -1007,7 +1007,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       e.execCancel();
     }
 
-    for (final KMeshInstance mesh : scene.getMeshes()) {
+    for (final KMeshInstance mesh : scene.getInstances()) {
       this.renderLightPassMeshDirectional(gc, mesh);
     }
   }
@@ -1046,7 +1046,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       e.execUniformPutVector3F(gc, "light.color", light.getColour());
       e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
       e.execUniformPutFloat(gc, "light.radius", light.getRadius());
-      e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+      e.execUniformPutFloat(gc, "light.falloff", light.getFalloff());
       e.execCancel();
     }
 
@@ -1058,7 +1058,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       e.execUniformPutVector3F(gc, "light.color", light.getColour());
       e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
       e.execUniformPutFloat(gc, "light.radius", light.getRadius());
-      e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+      e.execUniformPutFloat(gc, "light.falloff", light.getFalloff());
       e.execCancel();
     }
 
@@ -1070,7 +1070,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       e.execUniformPutVector3F(gc, "light.color", light.getColour());
       e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
       e.execUniformPutFloat(gc, "light.radius", light.getRadius());
-      e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+      e.execUniformPutFloat(gc, "light.falloff", light.getFalloff());
       e.execCancel();
     }
 
@@ -1082,11 +1082,11 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
       e.execUniformPutVector3F(gc, "light.color", light.getColour());
       e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
       e.execUniformPutFloat(gc, "light.radius", light.getRadius());
-      e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+      e.execUniformPutFloat(gc, "light.falloff", light.getFalloff());
       e.execCancel();
     }
 
-    for (final KMeshInstance mesh : scene.getMeshes()) {
+    for (final KMeshInstance mesh : scene.getInstances()) {
       this.renderLightPassMeshSpherical(gc, mesh);
     }
   }
@@ -1180,7 +1180,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -1314,7 +1314,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -1457,7 +1457,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -1597,7 +1597,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -1716,5 +1716,21 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     final @Nonnull VectorReadable4F rgba)
   {
     VectorM4F.copy(rgba, this.background);
+  }
+
+  @Override public void close()
+    throws JCGLException,
+      ConstraintError
+  {
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+    gc.programDelete(this.program_cb_directional);
+    gc.programDelete(this.program_cb_directional_map);
+    gc.programDelete(this.program_cb_spherical);
+    gc.programDelete(this.program_cb_spherical_map);
+    gc.programDelete(this.program_pb_directional);
+    gc.programDelete(this.program_pb_directional_map);
+    gc.programDelete(this.program_pb_spherical);
+    gc.programDelete(this.program_pb_spherical_map);
+    gc.programDelete(this.program_depth);
   }
 }

@@ -4,15 +4,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer</groupId>
   <artifactId>io7m-renderer</artifactId>
-  <version>0.4.0</version>
+  <version>0.6.0</version>
   <packaging>pom</packaging>
   <name>io7m-renderer</name>
   <description>3D renderer</description>
   <url>http://mvn.io7m.com/renderer/</url>
 
   <modules>
-    <module>io7m-renderer-kernel-shaders</module>
     <module>io7m-renderer-core</module>
+    <module>io7m-renderer-kernel-shaders</module>
     <module>io7m-renderer-sandbox-jogl</module>
     <module>io7m-renderer-tests-jogl</module>
     <module>io7m-renderer-tests</module>

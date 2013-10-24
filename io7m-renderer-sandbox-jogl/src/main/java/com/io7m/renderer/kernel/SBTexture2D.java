@@ -24,20 +24,25 @@ import javax.annotation.concurrent.Immutable;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jvvfs.PathVirtual;
 
-@Immutable public final class SBTexture2D
+@Immutable public final class SBTexture2D<K extends SBTexture2DKind>
 {
-  private final @Nonnull PathVirtual     path;
-  private final @Nonnull Texture2DStatic texture;
-  private final @Nonnull BufferedImage   image;
+  private final @Nonnull SBTexture2DDescription description;
+  private final @Nonnull Texture2DStatic        texture;
+  private final @Nonnull BufferedImage          image;
 
   public SBTexture2D(
-    final @Nonnull PathVirtual path,
+    final @Nonnull SBTexture2DDescription description,
     final @Nonnull Texture2DStatic texture,
     final @Nonnull BufferedImage image)
   {
-    this.path = path;
+    this.description = description;
     this.texture = texture;
     this.image = image;
+  }
+
+  public @Nonnull SBTexture2DDescription getDescription()
+  {
+    return this.description;
   }
 
   public @Nonnull BufferedImage getImage()
@@ -47,7 +52,7 @@ import com.io7m.jvvfs.PathVirtual;
 
   public @Nonnull PathVirtual getPath()
   {
-    return this.path;
+    return this.description.getPath();
   }
 
   public @Nonnull Texture2DStatic getTexture()

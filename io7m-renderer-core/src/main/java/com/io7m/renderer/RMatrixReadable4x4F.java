@@ -21,5 +21,5 @@ import com.io7m.jtensors.MatrixReadable4x4F;
 public interface RMatrixReadable4x4F<T extends RTransform> extends
   MatrixReadable4x4F
 {
-
+  // No extra functions.
 }

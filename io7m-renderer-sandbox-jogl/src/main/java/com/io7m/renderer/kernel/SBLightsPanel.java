@@ -33,14 +33,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -50,15 +46,22 @@ import net.java.dev.designgridlayout.IRowCreator;
 import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Log;
+import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.RVectorM3F;
 import com.io7m.renderer.RVectorReadable3F;
+import com.io7m.renderer.kernel.KLight.KDirectional;
+import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
+import com.io7m.renderer.kernel.SBLight.SBLightDirectional;
+import com.io7m.renderer.kernel.SBLight.SBLightProjective;
+import com.io7m.renderer.kernel.SBLight.SBLightSpherical;
 
 final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 {
@@ -72,25 +75,39 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
     private final @Nonnull LightEditDialogPanel panel;
 
-    public LightEditDialog(
-      final @Nonnull SBSceneControllerLights controller,
-      final @Nonnull KLight light,
-      final @Nonnull LightsTableModel light_table_model)
-      throws IOException
+    public <C extends SBSceneControllerTextures & SBSceneControllerLights> LightEditDialog(
+      final @Nonnull C controller,
+      final @Nonnull SBLight light,
+      final @Nonnull LightsTableModel light_table_model,
+      final @Nonnull Log log)
+      throws IOException,
+        ConstraintError
     {
       this.panel =
-        new LightEditDialogPanel(this, controller, light, light_table_model);
+        new LightEditDialogPanel(
+          this,
+          controller,
+          light,
+          light_table_model,
+          log);
       this.setTitle("Edit light...");
       this.getContentPane().add(this.panel);
     }
 
-    public LightEditDialog(
-      final @Nonnull SBSceneControllerLights controller,
-      final @Nonnull LightsTableModel light_table_model)
-      throws IOException
+    public <C extends SBSceneControllerTextures & SBSceneControllerLights> LightEditDialog(
+      final @Nonnull C controller,
+      final @Nonnull LightsTableModel light_table_model,
+      final @Nonnull Log log)
+      throws IOException,
+        ConstraintError
     {
       this.panel =
-        new LightEditDialogPanel(this, controller, null, light_table_model);
+        new LightEditDialogPanel(
+          this,
+          controller,
+          null,
+          light_table_model,
+          log);
       this.setTitle("Create light...");
       this.getContentPane().add(this.panel);
     }
@@ -98,31 +115,6 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
   private static class LightEditDialogPanel extends JPanel
   {
-    private static class LightControlsCone
-    {
-      private final @Nonnull JTextField position_x;
-      private final @Nonnull JTextField position_y;
-      private final @Nonnull JTextField position_z;
-
-      public LightControlsCone()
-      {
-        this.position_x = new JTextField("0.0");
-        this.position_y = new JTextField("1.0");
-        this.position_z = new JTextField("0.0");
-      }
-
-      public void add(
-        final IRowCreator group)
-      {
-        group
-          .grid()
-          .add(new JLabel("Position"))
-          .add(this.position_x)
-          .add(this.position_y)
-          .add(this.position_z, 2);
-      }
-    }
-
     private static class LightControlsDirectional
     {
       private final @Nonnull JTextField direction_x;
@@ -144,7 +136,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           .add(new JLabel("Direction"))
           .add(this.direction_x)
           .add(this.direction_y)
-          .add(this.direction_z, 2);
+          .add(this.direction_z, 3);
       }
 
       @Nonnull RVectorM3F<RSpaceWorld> getDirection()
@@ -167,55 +159,191 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       }
     }
 
+    private static class LightControlsProjective
+    {
+      private final @Nonnull JTextField         position_x;
+      private final @Nonnull JTextField         position_y;
+      private final @Nonnull JTextField         position_z;
+
+      private final @Nonnull SBOrientationInput orientation;
+
+      protected final @Nonnull SBFloatHSlider   range;
+      protected final @Nonnull SBFloatHSlider   falloff;
+      protected final @Nonnull JTextField       texture;
+      private final @Nonnull JButton            texture_select;
+      private final @Nonnull SBFloatHSlider     fov;
+      private final @Nonnull SBFloatHSlider     aspect;
+
+      public LightControlsProjective(
+        final @Nonnull SBSceneControllerTextures texture_controller,
+        final @Nonnull JFrame owner,
+        final @Nonnull Log log)
+        throws ConstraintError
+      {
+        this.position_x = new JTextField("0.0");
+        this.position_y = new JTextField("1.0");
+        this.position_z = new JTextField("0.0");
+        this.orientation = new SBOrientationInput();
+        this.range = new SBFloatHSlider("Range", 0.0f, 128.0f);
+        this.falloff = new SBFloatHSlider("Falloff", 0.0f, 64.0f);
+        this.fov = new SBFloatHSlider("FOV", 0.0f, 360.0f);
+        this.aspect = new SBFloatHSlider("Aspect ratio", 0.0f, 2.0f);
+        this.texture = new JTextField();
+        this.texture.setEditable(false);
+        this.texture_select = new JButton("Select...");
+        this.texture_select.addActionListener(new ActionListener() {
+          @Override public void actionPerformed(
+            final ActionEvent e)
+          {
+            final SBTextures2DWindow twindow =
+              new SBTextures2DWindow(
+                texture_controller,
+                LightControlsProjective.this.texture,
+                log);
+            twindow.pack();
+            twindow.setVisible(true);
+          }
+        });
+      }
+
+      public void add(
+        final IRowCreator group)
+      {
+        group
+          .grid()
+          .add(new JLabel("Position"))
+          .add(this.position_x)
+          .add(this.position_y)
+          .add(this.position_z, 3);
+
+        group
+          .grid()
+          .add(this.orientation.getLabel())
+          .add(this.orientation.getOrientationX())
+          .add(this.orientation.getOrientationY())
+          .add(this.orientation.getOrientationZ())
+          .add(this.orientation.getOrientationW())
+          .add(this.orientation.getSelect());
+
+        group
+          .grid()
+          .add(new JLabel("Texture"))
+          .add(this.texture, 4)
+          .add(this.texture_select);
+
+        group
+          .grid()
+          .add(this.range.getLabel())
+          .add(this.range.getSlider(), 4)
+          .add(this.range.getField());
+
+        group
+          .grid()
+          .add(this.falloff.getLabel())
+          .add(this.falloff.getSlider(), 4)
+          .add(this.falloff.getField());
+
+        group
+          .grid()
+          .add(this.fov.getLabel())
+          .add(this.fov.getSlider(), 4)
+          .add(this.fov.getField());
+
+        group
+          .grid()
+          .add(this.aspect.getLabel())
+          .add(this.aspect.getSlider(), 4)
+          .add(this.aspect.getField());
+      }
+
+      public @Nonnull RVectorM3F<RSpaceWorld> getPosition()
+        throws SBExceptionInputError
+      {
+        final RVectorM3F<RSpaceWorld> v = new RVectorM3F<RSpaceWorld>();
+        v.x = SBTextFieldUtilities.getFieldFloatOrError(this.position_x);
+        v.y = SBTextFieldUtilities.getFieldFloatOrError(this.position_y);
+        v.z = SBTextFieldUtilities.getFieldFloatOrError(this.position_z);
+        return v;
+      }
+
+      public void setContents(
+        final SBLightProjective light)
+      {
+        final KProjective kl = light.getLight();
+
+        final RVectorReadable3F<RSpaceWorld> p = kl.getPosition();
+        this.position_x.setText(Float.toString(p.getXF()));
+        this.position_y.setText(Float.toString(p.getYF()));
+        this.position_z.setText(Float.toString(p.getZF()));
+
+        this.orientation.setOrientation(kl.getOrientation());
+        this.texture.setText(kl.getTexture().getName());
+        this.range.setCurrent(kl.getRange());
+        this.falloff.setCurrent(kl.getFalloff());
+
+        final SBFrustum frustum = light.getDescription().getFrustum();
+
+        final float fov_degrees =
+          (float) Math.toDegrees(frustum.getHorizontalFOV());
+        this.fov.setCurrent(fov_degrees);
+        this.aspect.setCurrent(frustum.getAspectRatio());
+      }
+
+      public float getDistance()
+        throws SBExceptionInputError
+      {
+        return SBTextFieldUtilities.getFieldFloatOrError(this.range
+          .getField());
+      }
+
+      public float getFalloff()
+        throws SBExceptionInputError
+      {
+        return SBTextFieldUtilities.getFieldFloatOrError(this.falloff
+          .getField());
+      }
+
+      public @Nonnull QuaternionI4F getOrientation()
+        throws SBExceptionInputError
+      {
+        return this.orientation.getOrientation();
+      }
+
+      public PathVirtual getTexture()
+        throws SBExceptionInputError,
+          ConstraintError
+      {
+        return PathVirtual.ofString(SBTextFieldUtilities
+          .getFieldNonEmptyStringOrError(this.texture));
+      }
+
+      public @Nonnull SBFrustum getFrustum()
+      {
+        return new SBFrustum(
+          this.range.getCurrent(),
+          (float) Math.toRadians(this.fov.getCurrent()),
+          this.aspect.getCurrent());
+      }
+    }
+
     private static class LightControlsSphere
     {
-      private final @Nonnull JTextField   position_x;
-      private final @Nonnull JTextField   position_y;
-      private final @Nonnull JTextField   position_z;
-      protected final @Nonnull JSlider    r_slider;
-      protected final @Nonnull JSlider    e_slider;
-      protected final @Nonnull JTextField r_value;
-      protected final @Nonnull JTextField e_value;
+      private final @Nonnull JTextField       position_x;
+      private final @Nonnull JTextField       position_y;
+      private final @Nonnull JTextField       position_z;
+
+      protected final @Nonnull SBFloatHSlider radius;
+      protected final @Nonnull SBFloatHSlider falloff;
 
       public LightControlsSphere()
+        throws ConstraintError
       {
         this.position_x = new JTextField("0.0");
         this.position_y = new JTextField("1.0");
         this.position_z = new JTextField("0.0");
 
-        this.r_value = new JTextField("1.0");
-        this.r_value.setEditable(true);
-        this.e_value = new JTextField("1.0");
-        this.e_value.setEditable(true);
-
-        this.r_slider = new JSlider(SwingConstants.HORIZONTAL);
-        this.r_slider.setValue(0);
-        this.e_slider = new JSlider(SwingConstants.HORIZONTAL);
-        this.e_slider.setValue(0);
-
-        this.r_slider.addChangeListener(new ChangeListener() {
-          @SuppressWarnings("boxing") @Override public void stateChanged(
-            final @Nonnull ChangeEvent ev)
-          {
-            final double x =
-              LightControlsSphere.this.r_slider.getValue() * 0.01;
-            final double r = (x * 24) + 1.0;
-            LightControlsSphere.this.r_value.setText(String.format("%f", r));
-          }
-        });
-
-        this.e_slider.addChangeListener(new ChangeListener() {
-          @SuppressWarnings("boxing") @Override public void stateChanged(
-            final @Nonnull ChangeEvent ev)
-          {
-            final double x =
-              LightControlsSphere.this.e_slider.getValue() * 0.01;
-            final double e = (x * 63) + 1.0;
-
-            LightControlsSphere.this.e_value.setText(String.format("%f", e));
-          }
-        });
-
+        this.radius = new SBFloatHSlider("Radius", 0.0f, 128.0f);
+        this.falloff = new SBFloatHSlider("Falloff", 0.0f, 64.0f);
       }
 
       public void add(
@@ -230,15 +358,15 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
         group
           .grid()
-          .add(new JLabel("Radius"))
-          .add(this.r_slider, 3)
-          .add(this.r_value);
+          .add(this.radius.getLabel())
+          .add(this.radius.getSlider(), 4)
+          .add(this.radius.getField());
 
         group
           .grid()
-          .add(new JLabel("Falloff"))
-          .add(this.e_slider, 3)
-          .add(this.e_value);
+          .add(this.falloff.getLabel())
+          .add(this.falloff.getSlider(), 4)
+          .add(this.falloff.getField());
       }
 
       public @Nonnull RVectorM3F<RSpaceWorld> getPosition()
@@ -258,20 +386,23 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         this.position_x.setText(Float.toString(p.getXF()));
         this.position_y.setText(Float.toString(p.getYF()));
         this.position_z.setText(Float.toString(p.getZF()));
-        this.r_value.setText(Float.toString(light.getRadius()));
-        this.e_value.setText(Float.toString(light.getExponent()));
+
+        this.radius.setCurrent(light.getRadius());
+        this.falloff.setCurrent(light.getFalloff());
       }
 
       public float getRadius()
         throws SBExceptionInputError
       {
-        return SBTextFieldUtilities.getFieldFloatOrError(this.r_value);
+        return SBTextFieldUtilities.getFieldFloatOrError(this.radius
+          .getField());
       }
 
       public float getExponent()
         throws SBExceptionInputError
       {
-        return SBTextFieldUtilities.getFieldFloatOrError(this.e_value);
+        return SBTextFieldUtilities.getFieldFloatOrError(this.falloff
+          .getField());
       }
     }
 
@@ -285,23 +416,24 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
     protected final @Nonnull JTextField             colour_g;
     protected final @Nonnull JTextField             colour_b;
     protected final @Nonnull JButton                colour_select;
-    protected final @Nonnull JTextField             intensity;
-    protected final @Nonnull JSlider                intensity_slider;
+    protected final @Nonnull SBFloatHSlider         intensity;
     protected final @Nonnull SBLightTypeSelector    type_select;
     private final @Nonnull LightControlsDirectional directional_controls;
     private final @Nonnull LightControlsSphere      sphere_controls;
-    private final @Nonnull LightControlsCone        cone_controls;
+    private final @Nonnull LightControlsProjective  projective_controls;
     private final @Nonnull JLabel                   error_text;
     private final @Nonnull JLabel                   error_icon;
     private final @Nonnull SBSceneControllerLights  controller;
     protected final @Nonnull LightsTableModel       light_table_model;
 
-    public LightEditDialogPanel(
+    public <C extends SBSceneControllerTextures & SBSceneControllerLights> LightEditDialogPanel(
       final @Nonnull LightEditDialog window,
-      final @Nonnull SBSceneControllerLights controller,
-      final @CheckForNull KLight light,
-      final @Nonnull LightsTableModel light_table_model)
-      throws IOException
+      final @Nonnull C controller,
+      final @CheckForNull SBLight light,
+      final @Nonnull LightsTableModel light_table_model,
+      final @Nonnull Log log)
+      throws IOException,
+        ConstraintError
     {
       this.controller = controller;
       this.light_table_model = light_table_model;
@@ -334,18 +466,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         }
       });
 
-      this.intensity = new JTextField("1.0");
-      this.intensity_slider = new JSlider(SwingConstants.HORIZONTAL);
-      this.intensity_slider.setValue(100);
-      this.intensity_slider.addChangeListener(new ChangeListener() {
-        @SuppressWarnings("boxing") @Override public void stateChanged(
-          final ChangeEvent e)
-        {
-          final double x =
-            LightEditDialogPanel.this.intensity_slider.getValue() * 0.01;
-          LightEditDialogPanel.this.intensity.setText(String.format("%f", x));
-        }
-      });
+      this.intensity = new SBFloatHSlider("Intensity", 0.0f, 2.0f);
 
       final DesignGridLayout dg = new DesignGridLayout(this);
 
@@ -362,30 +483,32 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         .add(this.colour_r)
         .add(this.colour_g)
         .add(this.colour_b)
-        .add(this.colour_select);
+        .add(this.colour_select, 2);
 
       dg
         .row()
         .grid()
-        .add(new JLabel("Intensity"))
-        .add(this.intensity_slider, 3)
-        .add(this.intensity);
-      dg.row().grid().add(new JLabel("Type")).add(this.type_select, 4);
+        .add(this.intensity.getLabel())
+        .add(this.intensity.getSlider(), 4)
+        .add(this.intensity.getField());
+
+      dg.row().grid().add(new JLabel("Type")).add(this.type_select, 5);
 
       this.directional_controls = new LightControlsDirectional();
       this.sphere_controls = new LightControlsSphere();
-      this.cone_controls = new LightControlsCone();
+      this.projective_controls =
+        new LightControlsProjective(controller, window, log);
 
       final RowGroup directional_group = new RowGroup();
       final RowGroup sphere_group = new RowGroup();
-      final RowGroup cone_group = new RowGroup();
+      final RowGroup projective_group = new RowGroup();
 
       this.directional_controls.add(dg.row().group(directional_group));
       this.sphere_controls.add(dg.row().group(sphere_group));
-      this.cone_controls.add(dg.row().group(cone_group));
+      this.projective_controls.add(dg.row().group(projective_group));
 
+      projective_group.hide();
       sphere_group.hide();
-      cone_group.hide();
       directional_group.forceShow();
 
       final JButton cancel = new JButton("Cancel");
@@ -442,17 +565,9 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
               .getSelectedItem();
 
           switch (selected) {
-            case LIGHT_CONE:
-            {
-              directional_group.hide();
-              sphere_group.hide();
-              cone_group.forceShow();
-              window.pack();
-              break;
-            }
             case LIGHT_DIRECTIONAL:
             {
-              cone_group.hide();
+              projective_group.hide();
               sphere_group.hide();
               directional_group.forceShow();
               window.pack();
@@ -460,9 +575,17 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
             }
             case LIGHT_SPHERE:
             {
+              projective_group.hide();
               directional_group.hide();
-              cone_group.hide();
               sphere_group.forceShow();
+              window.pack();
+              break;
+            }
+            case LIGHT_PROJECTIVE:
+            {
+              directional_group.hide();
+              sphere_group.hide();
+              projective_group.forceShow();
               window.pack();
               break;
             }
@@ -474,24 +597,34 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         final KLight.Type type = light.getType();
         this.type_select.setSelectedItem(type);
 
-        this.setColour(light.getColour());
-        this.setIntensity(light.getIntensity());
-
         switch (light.getType()) {
-          case LIGHT_CONE:
-          {
-            break;
-          }
           case LIGHT_DIRECTIONAL:
           {
-            final KLight.KDirectional d = (KLight.KDirectional) light;
-            this.directional_controls.setContents(d);
+            final SBLightDirectional d = (SBLightDirectional) light;
+            final KDirectional ld = d.getLight();
+            this.setColour(ld.getColour());
+            this.setIntensity(ld.getIntensity());
+
+            this.directional_controls.setContents(ld);
             break;
           }
           case LIGHT_SPHERE:
           {
-            final KSphere p = (KLight.KSphere) light;
+            final SBLightSpherical d = (SBLightSpherical) light;
+            final KSphere p = d.getLight();
+            this.setColour(p.getColour());
+            this.setIntensity(p.getIntensity());
+
             this.sphere_controls.setContents(p);
+            break;
+          }
+          case LIGHT_PROJECTIVE:
+          {
+            final SBLightProjective d = (SBLightProjective) light;
+            final KProjective p = d.getLight();
+            this.setColour(p.getColour());
+            this.setIntensity(p.getIntensity());
+            this.projective_controls.setContents(d);
             break;
           }
         }
@@ -511,32 +644,27 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
     private float getIntensity()
       throws SBExceptionInputError
     {
-      return SBTextFieldUtilities.getFieldFloatOrError(this.intensity);
+      return SBTextFieldUtilities.getFieldFloatOrError(this.intensity
+        .getField());
     }
 
-    protected @Nonnull KLight makeLight(
+    protected @Nonnull SBLightDescription makeLight(
       final @Nonnull Integer id,
       final @Nonnull KLight.Type type,
       final @Nonnull RVectorReadable3F<RSpaceRGB> colour)
-      throws SBExceptionInputError
+      throws SBExceptionInputError,
+        ConstraintError
     {
       switch (type) {
-        case LIGHT_CONE:
-        {
-          throw new UnimplementedCodeException();
-        }
         case LIGHT_DIRECTIONAL:
         {
           final RVectorM3F<RSpaceWorld> direction =
             this.directional_controls.getDirection();
 
-          final KLight l =
-            new KLight.KDirectional(
-              id,
-              direction,
-              colour,
-              this.getIntensity());
-          return l;
+          final KDirectional l =
+            new KDirectional(id, direction, colour, this.getIntensity());
+
+          return new SBLightDescription.SBLightDescriptionDirectional(l);
         }
         case LIGHT_SPHERE:
         {
@@ -545,15 +673,41 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           final float radius = this.sphere_controls.getRadius();
           final float exponent = this.sphere_controls.getExponent();
 
-          final KLight l =
-            new KLight.KSphere(
+          final KSphere l =
+            new KSphere(
               id,
               colour,
               this.getIntensity(),
               position,
               radius,
               exponent);
-          return l;
+
+          return new SBLightDescription.SBLightDescriptionSpherical(l);
+        }
+        case LIGHT_PROJECTIVE:
+        {
+          final QuaternionI4F orientation =
+            this.projective_controls.getOrientation();
+          final RVectorI3F<RSpaceWorld> position =
+            new RVectorI3F<RSpaceWorld>(
+              this.projective_controls.getPosition());
+
+          final float distance = this.projective_controls.getDistance();
+          final float falloff = this.projective_controls.getFalloff();
+          final SBFrustum frustum = this.projective_controls.getFrustum();
+          final PathVirtual texture = this.projective_controls.getTexture();
+          final float intensity_v = this.getIntensity();
+
+          return new SBLightDescription.SBLightDescriptionProjective(
+            orientation,
+            position,
+            distance,
+            falloff,
+            frustum,
+            texture,
+            new RVectorI3F<RSpaceRGB>(colour),
+            intensity_v,
+            id);
         }
       }
 
@@ -561,21 +715,20 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
     }
 
     protected void saveLight(
-      final @CheckForNull KLight initial)
+      final @CheckForNull SBLight light)
       throws SBExceptionInputError,
         ConstraintError
     {
       final Integer id =
-        (initial == null) ? this.controller.sceneLightFreshID() : initial
-          .getID();
+        (light == null) ? this.controller.sceneLightFreshID() : light.getID();
 
-      final KLight light =
+      final SBLightDescription ld =
         this.makeLight(
           id,
           (KLight.Type) this.type_select.getSelectedItem(),
           this.getColour());
 
-      this.controller.sceneLightAdd(light);
+      this.controller.sceneLightAddByDescription(ld);
       this.light_table_model.refreshLights();
       this.unsetError();
     }
@@ -599,7 +752,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
     private void setIntensity(
       final float value)
     {
-      this.intensity.setText(Float.toString(value));
+      this.intensity.setCurrent(value);
     }
 
     protected void unsetError()
@@ -671,7 +824,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       return this.column_names[column];
     }
 
-    protected @Nonnull KLight getLightAt(
+    protected @Nonnull SBLight getLightAt(
       final int row)
       throws ConstraintError
     {
@@ -698,9 +851,9 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
     void refreshLights()
     {
       this.data.clear();
-      final Collection<KLight> lights = this.controller.sceneLightsGetAll();
+      final Collection<SBLight> lights = this.controller.sceneLightsGetAll();
 
-      for (final KLight l : lights) {
+      for (final SBLight l : lights) {
         final ArrayList<String> row = new ArrayList<String>();
         row.add(l.getID().toString());
         row.add(l.getType().getName());
@@ -721,8 +874,8 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
   protected final @Nonnull LightsTable      lights;
   protected final @Nonnull JScrollPane      scroller;
 
-  public SBLightsPanel(
-    final @Nonnull SBSceneControllerLights controller,
+  public <C extends SBSceneControllerTextures & SBSceneControllerLights> SBLightsPanel(
+    final @Nonnull C controller,
     final @Nonnull Log log)
   {
     this.lights_model = new LightsTableModel(controller, log);
@@ -736,11 +889,16 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       {
         try {
           final LightEditDialog dialog =
-            new LightEditDialog(controller, SBLightsPanel.this.lights_model);
+            new LightEditDialog(
+              controller,
+              SBLightsPanel.this.lights_model,
+              log);
           dialog.pack();
           dialog.setVisible(true);
         } catch (final IOException x) {
           log.critical("Unable to open edit dialogue: " + x.getMessage());
+        } catch (final ConstraintError x) {
+          throw new UnreachableCodeException();
         }
       }
     });
@@ -755,7 +913,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         assert view_row != -1;
         final int model_row =
           SBLightsPanel.this.lights.convertRowIndexToModel(view_row);
-        KLight light;
+        SBLight light;
 
         try {
           light = SBLightsPanel.this.lights_model.getLightAt(model_row);
@@ -769,11 +927,14 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
             new LightEditDialog(
               controller,
               light,
-              SBLightsPanel.this.lights_model);
+              SBLightsPanel.this.lights_model,
+              log);
           dialog.pack();
           dialog.setVisible(true);
         } catch (final IOException x) {
           log.critical("Unable to open edit dialogue: " + x.getMessage());
+        } catch (final ConstraintError x) {
+          throw new UnreachableCodeException();
         }
       }
     });
@@ -789,7 +950,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           assert view_row != -1;
           final int model_row =
             SBLightsPanel.this.lights.convertRowIndexToModel(view_row);
-          KLight light;
+          SBLight light;
 
           light = SBLightsPanel.this.lights_model.getLightAt(model_row);
           assert light != null;

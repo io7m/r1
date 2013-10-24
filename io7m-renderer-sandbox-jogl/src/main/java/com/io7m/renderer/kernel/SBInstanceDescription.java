@@ -25,7 +25,9 @@ import nu.xom.Element;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.RMatrixI3x3F;
 import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RTransformTexture;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.RXMLUtilities;
@@ -46,6 +48,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final Element eo = RXMLUtilities.getChild(e, "orientation", uri);
     final Element em = RXMLUtilities.getChild(e, "mesh", uri);
     final Element emat = RXMLUtilities.getChild(e, "material", uri);
+    final Element eum = RXMLUtilities.getChild(e, "uv-matrix", uri);
 
     final int id = RXMLUtilities.getElementInteger(eid);
 
@@ -58,24 +61,30 @@ import com.io7m.renderer.xml.RXMLUtilities;
       PathVirtual.ofString(RXMLUtilities.getElementNonEmptyString(em));
     final SBMaterialDescription mat = SBMaterialDescription.fromXML(emat);
 
+    final RMatrixI3x3F<RTransformTexture> uvm =
+      RXMLUtilities.getElementMatrixI3x3F(eum, uri);
+
     return new SBInstanceDescription(
       Integer.valueOf(id),
       position,
       orientation,
+      uvm,
       mesh,
       mat);
   }
 
-  private final @Nonnull Integer                 id;
-  private final @Nonnull RVectorI3F<RSpaceWorld> position;
-  private final @Nonnull RVectorI3F<SBDegrees>   orientation;
-  private final @Nonnull PathVirtual             mesh;
-  private final @Nonnull SBMaterialDescription   material;
+  private final @Nonnull Integer                         id;
+  private final @Nonnull RVectorI3F<RSpaceWorld>         position;
+  private final @Nonnull RVectorI3F<SBDegrees>           orientation;
+  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
+  private final @Nonnull PathVirtual                     mesh;
+  private final @Nonnull SBMaterialDescription           material;
 
   public SBInstanceDescription(
     final @Nonnull Integer id,
     final @Nonnull RVectorI3F<RSpaceWorld> position,
     final @Nonnull RVectorI3F<SBDegrees> orientation,
+    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix,
     final @Nonnull PathVirtual mesh,
     final @Nonnull SBMaterialDescription material)
   {
@@ -84,6 +93,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     this.orientation = orientation;
     this.mesh = mesh;
     this.material = material;
+    this.uv_matrix = uv_matrix;
   }
 
   @Override public boolean equals(
@@ -233,11 +243,24 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
     final Element emat = this.material.toXML();
 
+    final Element eum = new Element("s:uv-matrix", uri);
+    RXMLUtilities.putElementMatrixI3x3F(
+      eum,
+      "s",
+      this.uv_matrix,
+      SBSceneDescription.SCENE_XML_URI);
+
     e.appendChild(eid);
     e.appendChild(eo);
     e.appendChild(ep);
     e.appendChild(em);
     e.appendChild(emat);
+    e.appendChild(eum);
     return e;
+  }
+
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
+  {
+    return this.uv_matrix;
   }
 }

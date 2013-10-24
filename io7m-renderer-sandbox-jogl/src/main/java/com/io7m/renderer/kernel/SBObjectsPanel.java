@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -36,16 +37,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSlider;
+import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import javax.swing.border.Border;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
@@ -57,8 +55,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.RMatrixI3x3F;
 import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RTransformTexture;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.RVectorReadable3F;
@@ -66,6 +66,469 @@ import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
 final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 {
+  private static class GeneralSettings implements
+    MaterialPanel<RMatrixI3x3F<RTransformTexture>>
+  {
+    protected final @Nonnull SBMatrix3x3Fields<RTransformTexture> matrix;
+
+    GeneralSettings()
+    {
+      this.matrix = new SBMatrix3x3Fields<RTransformTexture>();
+    }
+
+    @Override public void mpLayout(
+      final DesignGridLayout d)
+    {
+      d.row().grid().add(new JLabel("UV matrix"));
+
+      for (int r = 0; r < 3; ++r) {
+        d
+          .row()
+          .grid()
+          .add(this.matrix.getRowColumnField(r, 0))
+          .add(this.matrix.getRowColumnField(r, 1))
+          .add(this.matrix.getRowColumnField(r, 2));
+      }
+    }
+
+    @Override public void mpLoadFrom(
+      final SBInstanceDescription i)
+    {
+      this.matrix.setMatrix(i.getUVMatrix());
+    }
+
+    @Override public RMatrixI3x3F<RTransformTexture> mpSave()
+      throws SBExceptionInputError,
+        ConstraintError
+    {
+      return this.matrix.getMatrix3x3f();
+    }
+  }
+
+  private static class AlbedoSettings implements
+    MaterialPanel<SBMaterialAlbedoDescription>
+  {
+    protected final @Nonnull JTextField     r;
+    protected final @Nonnull JTextField     g;
+    protected final @Nonnull JTextField     b;
+    protected final @Nonnull JTextField     a;
+    protected final @Nonnull JButton        colour_select;
+    protected final @Nonnull JTextField     texture;
+    protected final @Nonnull JButton        texture_select;
+    protected final @Nonnull SBFloatHSlider texture_mix;
+
+    AlbedoSettings(
+      final @Nonnull SBSceneControllerTextures controller,
+      final @Nonnull JPanel owner,
+      final @Nonnull Log log)
+      throws ConstraintError
+    {
+      this.r = new JTextField("1.0");
+      this.g = new JTextField("1.0");
+      this.b = new JTextField("1.0");
+      this.a = new JTextField("1.0");
+      this.colour_select = new JButton("Select...");
+      this.colour_select.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          final Color c =
+            JColorChooser.showDialog(owner, "Select colour...", Color.WHITE);
+          if (c != null) {
+            final float[] rgb = c.getRGBColorComponents(null);
+            AlbedoSettings.this.r.setText(Float.toString(rgb[0]));
+            AlbedoSettings.this.g.setText(Float.toString(rgb[1]));
+            AlbedoSettings.this.b.setText(Float.toString(rgb[2]));
+          }
+        }
+      });
+
+      this.texture = new JTextField();
+      this.texture.setEditable(false);
+      this.texture_select = new JButton("Select...");
+      this.texture_select.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          final SBTextures2DWindow twindow =
+            new SBTextures2DWindow(
+              controller,
+              AlbedoSettings.this.texture,
+              log);
+          twindow.pack();
+          twindow.setVisible(true);
+        }
+      });
+
+      this.texture_mix = new SBFloatHSlider("Mix", 0.0f, 1.0f);
+    }
+
+    @Override public void mpLayout(
+      final @Nonnull DesignGridLayout dg)
+    {
+      dg
+        .row()
+        .grid()
+        .add(new JLabel("Colour"))
+        .add(this.r)
+        .add(this.g)
+        .add(this.b)
+        .add(this.a)
+        .add(this.colour_select);
+
+      dg
+        .row()
+        .grid()
+        .add(new JLabel("Texture"))
+        .add(this.texture, 4)
+        .add(this.texture_select);
+
+      dg
+        .row()
+        .grid()
+        .add(this.texture_mix.getLabel())
+        .add(this.texture_mix.getSlider(), 4)
+        .add(this.texture_mix.getField());
+    }
+
+    @Override public void mpLoadFrom(
+      final @Nonnull SBInstanceDescription i)
+    {
+      final SBMaterialAlbedoDescription mat_d = i.getMaterial().getAlbedo();
+
+      this.r.setText(Float.toString(mat_d.getColour().x));
+      this.g.setText(Float.toString(mat_d.getColour().y));
+      this.b.setText(Float.toString(mat_d.getColour().z));
+      this.a.setText(Float.toString(mat_d.getColour().w));
+
+      final PathVirtual t = mat_d.getTexture();
+      if (t != null) {
+        this.texture.setText(t.toString());
+      }
+
+      this.texture_mix.setCurrent(mat_d.getMix());
+    }
+
+    @Override public @Nonnull SBMaterialAlbedoDescription mpSave()
+      throws SBExceptionInputError,
+        ConstraintError
+    {
+      final RVectorI4F<RSpaceRGBA> albedo_colour =
+        new RVectorI4F<RSpaceRGBA>(
+          SBTextFieldUtilities.getFieldFloatOrError(this.r),
+          SBTextFieldUtilities.getFieldFloatOrError(this.g),
+          SBTextFieldUtilities.getFieldFloatOrError(this.b),
+          SBTextFieldUtilities.getFieldFloatOrError(this.a));
+
+      final String tt = this.texture.getText();
+
+      final PathVirtual albedo_texture_value =
+        (tt.equals("")) ? null : PathVirtual.ofString(tt);
+
+      final SBMaterialAlbedoDescription albedo =
+        new SBMaterialAlbedoDescription(
+          albedo_colour,
+          this.texture_mix.getCurrent(),
+          albedo_texture_value);
+
+      return albedo;
+    }
+  }
+
+  private static class AlphaSettings implements
+    MaterialPanel<SBMaterialAlphaDescription>
+  {
+    protected final @Nonnull JCheckBox      translucent;
+    protected final @Nonnull SBFloatHSlider opacity;
+
+    public AlphaSettings()
+      throws ConstraintError
+    {
+      this.opacity = new SBFloatHSlider("Opacity", 0.0f, 1.0f);
+      this.translucent = new JCheckBox();
+    }
+
+    @Override public void mpLayout(
+      final DesignGridLayout dg)
+    {
+      dg
+        .row()
+        .grid()
+        .add(this.opacity.getLabel())
+        .add(this.opacity.getSlider(), 3)
+        .add(this.opacity.getField());
+
+      dg.emptyRow();
+
+      dg.row().grid().add(new JLabel("Translucent")).add(this.translucent);
+    }
+
+    @Override public void mpLoadFrom(
+      final SBInstanceDescription i)
+    {
+      final SBMaterialAlphaDescription mat_a = i.getMaterial().getAlpha();
+      this.translucent.setSelected(mat_a.isTranslucent());
+      this.opacity.setCurrent(mat_a.getOpacity());
+    }
+
+    @Override public SBMaterialAlphaDescription mpSave()
+      throws SBExceptionInputError,
+        ConstraintError
+    {
+      return new SBMaterialAlphaDescription(
+        this.translucent.isSelected(),
+        this.opacity.getCurrent());
+    }
+
+  }
+
+  private static class EmissiveSettings implements
+    MaterialPanel<SBMaterialEmissiveDescription>
+  {
+    protected final @Nonnull JTextField     texture;
+    protected final @Nonnull JButton        texture_select;
+    protected final @Nonnull SBFloatHSlider level;
+
+    public EmissiveSettings(
+      final @Nonnull SBSceneControllerTextures controller,
+      final @Nonnull Log log)
+      throws ConstraintError
+    {
+      this.texture = new JTextField();
+      this.texture.setEditable(false);
+      this.texture_select = new JButton("Select...");
+      this.texture_select.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          final SBTextures2DWindow twindow =
+            new SBTextures2DWindow(
+              controller,
+              EmissiveSettings.this.texture,
+              log);
+          twindow.pack();
+          twindow.setVisible(true);
+        }
+      });
+
+      this.level = new SBFloatHSlider("Emission", 0.0f, 1.0f);
+    }
+
+    @Override public void mpLayout(
+      final DesignGridLayout dg)
+    {
+      dg
+        .row()
+        .grid()
+        .add(new JLabel("Texture"))
+        .add(this.texture, 3)
+        .add(this.texture_select);
+
+      dg
+        .row()
+        .grid()
+        .add(this.level.getLabel())
+        .add(this.level.getSlider(), 3)
+        .add(this.level.getField());
+    }
+
+    @Override public void mpLoadFrom(
+      final SBInstanceDescription i)
+    {
+      final SBMaterialEmissiveDescription mat_m =
+        i.getMaterial().getEmissive();
+      this.level.setCurrent(mat_m.getEmission());
+      final PathVirtual tt = mat_m.getTexture();
+      this.texture.setText(tt == null ? "" : tt.toString());
+    }
+
+    @Override public SBMaterialEmissiveDescription mpSave()
+      throws SBExceptionInputError,
+        ConstraintError
+    {
+      final String tt = this.texture.getText();
+      final PathVirtual path =
+        (tt.equals("")) ? null : PathVirtual.ofString(tt);
+
+      return new SBMaterialEmissiveDescription(this.level.getCurrent(), path);
+    }
+
+  }
+
+  private static class EnvironmentSettings implements
+    MaterialPanel<SBMaterialEnvironmentDescription>
+  {
+    protected final @Nonnull JTextField     texture;
+    protected final @Nonnull JButton        texture_select;
+    protected final @Nonnull SBFloatHSlider mix;
+    protected final @Nonnull SBFloatHSlider reflection_mix;
+    protected final @Nonnull SBFloatHSlider refraction_index;
+
+    public EnvironmentSettings(
+      final @Nonnull SBSceneControllerTextures controller,
+      final @Nonnull Log log)
+      throws ConstraintError
+    {
+      this.texture = new JTextField();
+      this.texture.setEditable(false);
+      this.texture_select = new JButton("Select...");
+      this.texture_select.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          final SBTexturesCubeWindow twindow =
+            new SBTexturesCubeWindow(
+              controller,
+              EnvironmentSettings.this.texture,
+              log);
+          twindow.pack();
+          twindow.setVisible(true);
+        }
+      });
+
+      this.mix = new SBFloatHSlider("Mix", 0.0f, 1.0f);
+      this.reflection_mix = new SBFloatHSlider("Reflection mix", 0.0f, 1.0f);
+      this.refraction_index =
+        new SBFloatHSlider("Refraction index", 0.0f, 10.0f);
+    }
+
+    @Override public void mpLayout(
+      final @Nonnull DesignGridLayout dg)
+    {
+      dg
+        .row()
+        .grid()
+        .add(new JLabel("Texture"))
+        .add(this.texture, 3)
+        .add(this.texture_select);
+
+      dg
+        .row()
+        .grid()
+        .add(this.mix.getLabel())
+        .add(this.mix.getSlider(), 3)
+        .add(this.mix.getField());
+
+      dg
+        .row()
+        .grid()
+        .add(this.reflection_mix.getLabel())
+        .add(this.reflection_mix.getSlider(), 3)
+        .add(this.reflection_mix.getField());
+
+      dg
+        .row()
+        .grid()
+        .add(this.refraction_index.getLabel())
+        .add(this.refraction_index.getSlider(), 3)
+        .add(this.refraction_index.getField());
+    }
+
+    @Override public void mpLoadFrom(
+      final @Nonnull SBInstanceDescription i)
+    {
+      final SBMaterialEnvironmentDescription mat_e =
+        i.getMaterial().getEnvironment();
+
+      final PathVirtual tt = mat_e.getTexture();
+      this.texture.setText(tt == null ? "" : tt.toString());
+      this.mix.setCurrent(mat_e.getMix());
+      this.reflection_mix.setCurrent(mat_e.getReflectionMix());
+      this.refraction_index.setCurrent(mat_e.getRefractionIndex());
+    }
+
+    @Override public @Nonnull SBMaterialEnvironmentDescription mpSave()
+      throws SBExceptionInputError,
+        ConstraintError
+    {
+      final String tt = this.texture.getText();
+      final PathVirtual environment_texture_value =
+        (tt.equals("")) ? null : PathVirtual.ofString(tt);
+
+      final SBMaterialEnvironmentDescription environment =
+        new SBMaterialEnvironmentDescription(
+          environment_texture_value,
+          this.mix.getCurrent(),
+          this.reflection_mix.getCurrent(),
+          this.refraction_index.getCurrent());
+
+      return environment;
+    }
+  }
+
+  interface MaterialPanel<T>
+  {
+    public void mpLayout(
+      final @Nonnull DesignGridLayout d);
+
+    public void mpLoadFrom(
+      final @Nonnull SBInstanceDescription i);
+
+    public @Nonnull T mpSave()
+      throws SBExceptionInputError,
+        ConstraintError;
+  }
+
+  private static class NormalSettings implements
+    MaterialPanel<SBMaterialNormalDescription>
+  {
+    protected final @Nonnull JTextField texture;
+    protected final @Nonnull JButton    texture_select;
+
+    public NormalSettings(
+      final @Nonnull SBSceneControllerTextures controller,
+      final @Nonnull Log log)
+    {
+      this.texture = new JTextField();
+      this.texture.setEditable(false);
+      this.texture_select = new JButton("Select...");
+      this.texture_select.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          final SBTextures2DWindow twindow =
+            new SBTextures2DWindow(
+              controller,
+              NormalSettings.this.texture,
+              log);
+          twindow.pack();
+          twindow.setVisible(true);
+        }
+      });
+    }
+
+    @Override public void mpLayout(
+      final @Nonnull DesignGridLayout dg)
+    {
+      dg
+        .row()
+        .grid()
+        .add(new JLabel("Texture"))
+        .add(this.texture, 3)
+        .add(this.texture_select);
+    }
+
+    @Override public void mpLoadFrom(
+      final @Nonnull SBInstanceDescription i)
+    {
+      final SBMaterialNormalDescription mat_n = i.getMaterial().getNormal();
+      final PathVirtual tt = mat_n.getTexture();
+      this.texture.setText(tt == null ? "" : tt.toString());
+    }
+
+    @Override public @Nonnull SBMaterialNormalDescription mpSave()
+      throws SBExceptionInputError,
+        ConstraintError
+    {
+      final String tt = this.texture.getText();
+      final PathVirtual texture_normal =
+        (tt.equals("")) ? null : PathVirtual.ofString(tt);
+
+      return new SBMaterialNormalDescription(texture_normal);
+    }
+
+  }
+
   private static class ObjectEditDialog extends JFrame
   {
     private static final long                    serialVersionUID;
@@ -80,7 +543,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       final @Nonnull C controller,
       final @Nonnull ObjectsTableModel data,
       final @Nonnull Log log)
-      throws IOException
+      throws IOException,
+        ConstraintError
     {
       this.panel =
         new ObjectEditDialogPanel(this, controller, null, data, log);
@@ -93,7 +557,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       final @Nonnull SBInstanceDescription initial_desc,
       final @Nonnull ObjectsTableModel data,
       final @Nonnull Log log)
-      throws IOException
+      throws IOException,
+        ConstraintError
     {
       this.panel =
         new ObjectEditDialogPanel(this, controller, initial_desc, data, log);
@@ -104,70 +569,37 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 
   private static class ObjectEditDialogPanel extends JPanel
   {
-    private static final long                       serialVersionUID;
+    private static final long                                     serialVersionUID;
 
     static {
       serialVersionUID = -3467271842953066384L;
     }
 
-    protected final @Nonnull JTextField             diffuse_r;
-    protected final @Nonnull JTextField             diffuse_g;
-    protected final @Nonnull JTextField             diffuse_b;
-    protected final @Nonnull JButton                diffuse_select;
+    protected final @Nonnull AlbedoSettings                       albedo_settings;
+    protected final @Nonnull AlphaSettings                        alpha_settings;
+    protected final @Nonnull EmissiveSettings                     emissive_settings;
+    protected final @Nonnull EnvironmentSettings                  environment_settings;
+    protected final @Nonnull NormalSettings                       normal_settings;
+    protected final @Nonnull SpecularSettings                     specular_settings;
 
-    protected final @Nonnull JTextField             diffuse_texture;
-    protected final @Nonnull JButton                diffuse_texture_select;
+    protected @Nonnull Map<PathVirtual, SBMesh>                   meshes;
+    protected final @Nonnull JComboBox<PathVirtual>               mesh_selector;
+    protected final @Nonnull JButton                              mesh_load;
 
-    protected final @Nonnull JSlider                diffuse_mix_slider;
-    protected final @Nonnull JTextField             diffuse_mix;
+    protected final @Nonnull JTextField                           position_x;
+    protected final @Nonnull JTextField                           position_y;
+    protected final @Nonnull JTextField                           position_z;
+    protected final @Nonnull JTextField                           orientation_x;
+    protected final @Nonnull JTextField                           orientation_y;
+    protected final @Nonnull JTextField                           orientation_z;
+    protected final @Nonnull SBMatrix3x3Fields<RTransformTexture> matrix_uv;
 
-    protected final @Nonnull JTextField             normal_texture;
-    protected final @Nonnull JButton                normal_texture_select;
-    protected final @Nonnull JTextField             specular_texture;
-    protected final @Nonnull JButton                specular_texture_select;
+    protected final @Nonnull JLabel                               error_icon;
+    protected final @Nonnull JLabel                               error_text;
 
-    protected final @Nonnull JTextField             environment_texture;
-    protected final @Nonnull JButton                environment_texture_select;
-
-    protected final @Nonnull JSlider                environment_mix_slider;
-    protected final @Nonnull JTextField             environment_mix;
-
-    protected @Nonnull Map<PathVirtual, SBMesh>     meshes;
-    protected final @Nonnull JComboBox<PathVirtual> mesh_selector;
-    protected final @Nonnull JButton                mesh_load;
-
-    protected final @Nonnull JSlider                specular_intensity_slider;
-    protected final @Nonnull JTextField             specular_intensity;
-
-    protected final @Nonnull JSlider                specular_exponent_slider;
-    protected final @Nonnull JTextField             specular_exponent;
-
-    protected final @Nonnull JTextField             position_x;
-    protected final @Nonnull JTextField             position_y;
-    protected final @Nonnull JTextField             position_z;
-
-    protected final @Nonnull JTextField             orientation_x;
-    protected final @Nonnull JTextField             orientation_y;
-    protected final @Nonnull JTextField             orientation_z;
-
-    protected final @Nonnull JLabel                 error_icon;
-    protected final @Nonnull JLabel                 error_text;
-
-    private final @Nonnull ObjectsTableModel        objects_table_model;
-    private final @Nonnull Border                   default_field_border;
-
-    protected void meshesRefresh(
-      final @Nonnull SBSceneControllerMeshes controller)
-    {
-      ObjectEditDialogPanel.this.meshes = controller.sceneMeshesGet();
-
-      this.mesh_selector.removeAllItems();
-      for (final PathVirtual name : this.meshes.keySet()) {
-        this.mesh_selector.addItem(name);
-      }
-    }
-
-    protected final static @Nonnull FileFilter MESH_FILE_FILTER;
+    private final @Nonnull ObjectsTableModel                      objects_table_model;
+    private final @Nonnull GeneralSettings                        general_settings;
+    protected final static @Nonnull FileFilter                    MESH_FILE_FILTER;
 
     static {
       MESH_FILE_FILTER = new FileFilter() {
@@ -190,18 +622,18 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       final @CheckForNull SBInstanceDescription initial_desc,
       final @Nonnull ObjectsTableModel objects_table_model,
       final @Nonnull Log log)
-      throws IOException
+      throws IOException,
+        ConstraintError
     {
       this.objects_table_model = objects_table_model;
 
-      final DesignGridLayout dg = new DesignGridLayout(this);
-
-      if (initial_desc != null) {
-        final JTextField id_field =
-          new JTextField(initial_desc.getID().toString());
-        id_field.setEditable(false);
-        dg.row().grid().add(new JLabel("ID")).add(id_field, 4);
-      }
+      this.albedo_settings = new AlbedoSettings(controller, this, log);
+      this.alpha_settings = new AlphaSettings();
+      this.environment_settings = new EnvironmentSettings(controller, log);
+      this.emissive_settings = new EmissiveSettings(controller, log);
+      this.normal_settings = new NormalSettings(controller, log);
+      this.specular_settings = new SpecularSettings(controller, log);
+      this.general_settings = new GeneralSettings();
 
       this.error_text = new JLabel("Some informative error text");
       this.error_icon = SBIcons.makeErrorIcon();
@@ -216,134 +648,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.orientation_y = new JTextField("0.0");
       this.orientation_z = new JTextField("0.0");
 
-      this.default_field_border = this.position_x.getBorder();
-
-      this.diffuse_r = new JTextField("1.0");
-      this.diffuse_g = new JTextField("1.0");
-      this.diffuse_b = new JTextField("1.0");
-      this.diffuse_select = new JButton("Select...");
-      this.diffuse_select.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
-        {
-          final Color c =
-            JColorChooser.showDialog(
-              ObjectEditDialogPanel.this,
-              "Select colour...",
-              Color.WHITE);
-          if (c != null) {
-            final float[] rgb = c.getRGBColorComponents(null);
-            ObjectEditDialogPanel.this.diffuse_r.setText(Float
-              .toString(rgb[0]));
-            ObjectEditDialogPanel.this.diffuse_g.setText(Float
-              .toString(rgb[1]));
-            ObjectEditDialogPanel.this.diffuse_b.setText(Float
-              .toString(rgb[2]));
-          }
-        }
-      });
-
-      this.diffuse_texture = new JTextField();
-      this.diffuse_texture.setEditable(false);
-      this.diffuse_texture_select = new JButton("Select...");
-      this.diffuse_texture_select.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
-        {
-          final SBTextures2DWindow twindow =
-            new SBTextures2DWindow(
-              controller,
-              ObjectEditDialogPanel.this.diffuse_texture,
-              log);
-          twindow.pack();
-          twindow.setVisible(true);
-        }
-      });
-
-      this.diffuse_mix = new JTextField("1.0");
-      this.diffuse_mix.setEditable(false);
-      this.diffuse_mix_slider = new JSlider(SwingConstants.HORIZONTAL);
-      this.diffuse_mix_slider.setMinimum(0);
-      this.diffuse_mix_slider.setMaximum(100);
-      this.diffuse_mix_slider.setValue(50);
-      this.diffuse_mix_slider.addChangeListener(new ChangeListener() {
-        @Override public void stateChanged(
-          final @Nonnull ChangeEvent ev)
-        {
-          final int current =
-            ObjectEditDialogPanel.this.diffuse_mix_slider.getValue();
-          final String ctext = Integer.toString(current);
-          ObjectEditDialogPanel.this.diffuse_mix.setText(ctext);
-        }
-      });
-
-      this.normal_texture = new JTextField();
-      this.normal_texture.setEditable(false);
-      this.normal_texture_select = new JButton("Select...");
-      this.normal_texture_select.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
-        {
-          final SBTextures2DWindow twindow =
-            new SBTextures2DWindow(
-              controller,
-              ObjectEditDialogPanel.this.normal_texture,
-              log);
-          twindow.pack();
-          twindow.setVisible(true);
-        }
-      });
-
-      this.specular_texture = new JTextField();
-      this.specular_texture.setEditable(false);
-      this.specular_texture_select = new JButton("Select...");
-      this.specular_texture_select.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
-        {
-          final SBTextures2DWindow twindow =
-            new SBTextures2DWindow(
-              controller,
-              ObjectEditDialogPanel.this.specular_texture,
-              log);
-          twindow.pack();
-          twindow.setVisible(true);
-        }
-      });
-
-      this.environment_texture = new JTextField();
-      this.environment_texture.setEditable(false);
-      this.environment_texture_select = new JButton("Select...");
-      this.environment_texture_select.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
-        {
-          final SBTexturesCubeWindow twindow =
-            new SBTexturesCubeWindow(
-              controller,
-              ObjectEditDialogPanel.this.environment_texture,
-              log);
-          twindow.pack();
-          twindow.setVisible(true);
-        }
-      });
-
-      this.environment_mix = new JTextField("1.0");
-      this.environment_mix.setEditable(false);
-      this.environment_mix_slider = new JSlider(SwingConstants.HORIZONTAL);
-      this.environment_mix_slider.setMinimum(0);
-      this.environment_mix_slider.setMaximum(100);
-      this.environment_mix_slider.setValue(50);
-      this.environment_mix_slider.addChangeListener(new ChangeListener() {
-        @Override public void stateChanged(
-          final @Nonnull ChangeEvent ev)
-        {
-          final int current =
-            ObjectEditDialogPanel.this.environment_mix_slider.getValue();
-          final String ctext = Integer.toString(current);
-          ObjectEditDialogPanel.this.environment_mix.setText(ctext);
-        }
-      });
+      this.matrix_uv = new SBMatrix3x3Fields<RTransformTexture>();
 
       this.mesh_selector = new JComboBox<PathVirtual>();
       this.meshesRefresh(controller);
@@ -405,40 +710,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         }
       });
 
-      this.specular_exponent = new JTextField("1.0");
-      this.specular_exponent.setEditable(false);
-      this.specular_exponent_slider = new JSlider(SwingConstants.HORIZONTAL);
-      this.specular_exponent_slider.setMinimum(1);
-      this.specular_exponent_slider.setMaximum(128);
-      this.specular_exponent_slider.setValue(1);
-      this.specular_exponent_slider.addChangeListener(new ChangeListener() {
-        @Override public void stateChanged(
-          final @Nonnull ChangeEvent ev)
-        {
-          final int current =
-            ObjectEditDialogPanel.this.specular_exponent_slider.getValue();
-          final String ctext = Integer.toString(current);
-          ObjectEditDialogPanel.this.specular_exponent.setText(ctext);
-        }
-      });
-
-      this.specular_intensity = new JTextField("1.0");
-      this.specular_intensity.setEditable(false);
-      this.specular_intensity_slider = new JSlider(SwingConstants.HORIZONTAL);
-      this.specular_intensity_slider.setMinimum(0);
-      this.specular_intensity_slider.setMaximum(100);
-      this.specular_intensity_slider.setValue(100);
-      this.specular_intensity_slider.addChangeListener(new ChangeListener() {
-        @Override public void stateChanged(
-          final @Nonnull ChangeEvent ev)
-        {
-          final int current =
-            ObjectEditDialogPanel.this.specular_intensity_slider.getValue();
-          final String ctext = Float.toString(current / 100.f);
-          ObjectEditDialogPanel.this.specular_intensity.setText(ctext);
-        }
-      });
-
       final JButton cancel = new JButton("Cancel");
       cancel.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
@@ -479,106 +750,101 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         }
       });
 
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Diffuse colour"))
-        .add(this.diffuse_r)
-        .add(this.diffuse_g)
-        .add(this.diffuse_b)
-        .add(this.diffuse_select);
+      final JTabbedPane tabs = new JTabbedPane();
 
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Diffuse texture"))
-        .add(this.diffuse_texture, 3)
-        .add(this.diffuse_texture_select);
+      {
+        final JPanel p = new JPanel();
+        final DesignGridLayout d = new DesignGridLayout(p);
+        this.general_settings.mpLayout(d);
+        tabs.add("General", p);
+      }
 
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Diffuse mix"))
-        .add(this.diffuse_mix_slider, 3)
-        .add(this.diffuse_mix);
+      {
+        final JPanel p = new JPanel();
+        final DesignGridLayout d = new DesignGridLayout(p);
+        this.albedo_settings.mpLayout(d);
+        tabs.add("Albedo", p);
+      }
 
-      dg.emptyRow();
+      {
+        final JPanel p = new JPanel();
+        final DesignGridLayout d = new DesignGridLayout(p);
+        this.alpha_settings.mpLayout(d);
+        tabs.add("Alpha", p);
+      }
 
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Normal map"))
-        .add(this.normal_texture, 3)
-        .add(this.normal_texture_select);
+      {
+        final JPanel p = new JPanel();
+        final DesignGridLayout d = new DesignGridLayout(p);
+        this.emissive_settings.mpLayout(d);
+        tabs.add("Emission", p);
+      }
 
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Specular map"))
-        .add(this.specular_texture, 3)
-        .add(this.specular_texture_select);
+      {
+        final JPanel p = new JPanel();
+        final DesignGridLayout d = new DesignGridLayout(p);
+        this.environment_settings.mpLayout(d);
+        tabs.add("Environment mapping", p);
+      }
 
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Specular intensity"))
-        .add(this.specular_intensity_slider, 3)
-        .add(this.specular_intensity);
+      {
+        final JPanel p = new JPanel();
+        final DesignGridLayout d = new DesignGridLayout(p);
+        this.normal_settings.mpLayout(d);
+        tabs.add("Normal mapping", p);
+      }
 
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Specular exponent"))
-        .add(this.specular_exponent_slider, 3)
-        .add(this.specular_exponent);
+      {
+        final JPanel p = new JPanel();
+        final DesignGridLayout d = new DesignGridLayout(p);
+        this.specular_settings.mpLayout(d);
+        tabs.add("Specularity", p);
+      }
 
-      dg.emptyRow();
+      {
+        final DesignGridLayout d = new DesignGridLayout(this);
 
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Environment map"))
-        .add(this.environment_texture, 3)
-        .add(this.environment_texture_select);
+        if (initial_desc != null) {
+          final JTextField id_field =
+            new JTextField(initial_desc.getID().toString());
+          id_field.setEditable(false);
+          d.row().grid().add(new JLabel("ID")).add(id_field, 3);
+        }
 
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Environment mix"))
-        .add(this.environment_mix_slider, 3)
-        .add(this.environment_mix);
+        d
+          .row()
+          .grid()
+          .add(new JLabel("Mesh"))
+          .add(this.mesh_selector, 3)
+          .add(this.mesh_load);
 
-      dg.emptyRow();
+        d.emptyRow();
 
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Mesh"))
-        .add(this.mesh_selector, 3)
-        .add(this.mesh_load);
+        d
+          .row()
+          .grid()
+          .add(new JLabel("Position"))
+          .add(this.position_x)
+          .add(this.position_y)
+          .add(this.position_z);
 
-      dg.emptyRow();
+        d
+          .row()
+          .grid()
+          .add(new JLabel("Orientation"))
+          .add(this.orientation_x)
+          .add(this.orientation_y)
+          .add(this.orientation_z);
 
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Position"))
-        .add(this.position_x)
-        .add(this.position_y)
-        .add(this.position_z, 2);
+        d.emptyRow();
+        d.row().left().add(new JSeparator()).fill();
+        d.emptyRow();
 
-      dg
-        .row()
-        .grid()
-        .add(new JLabel("Orientation"))
-        .add(this.orientation_x)
-        .add(this.orientation_y)
-        .add(this.orientation_z, 2);
-
-      dg.emptyRow();
-      dg.row().grid().add(apply).add(cancel).add(finish);
-      dg.emptyRow();
-      dg.row().left().add(this.error_icon).add(this.error_text);
+        d.row().grid().add(tabs);
+        d.row().grid().add(apply).add(cancel).add(finish);
+        d.emptyRow();
+        d.row().left().add(this.error_icon, this.error_text).fill();
+      }
 
       if (initial_desc != null) {
         this.loadObject(initial_desc);
@@ -610,42 +876,22 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.orientation_y.setText(Float.toString(ori.getYF()));
       this.orientation_z.setText(Float.toString(ori.getZF()));
 
-      final SBMaterialDescription mat = initial_desc.getMaterial();
-      final SBMaterialDiffuseDescription mat_d = mat.getDiffuse();
-      final SBMaterialNormalDescription mat_n = mat.getNormal();
-      final SBMaterialSpecularDescription mat_s = mat.getSpecular();
-      final SBMaterialEnvironmentDescription mat_e = mat.getEnvironment();
+      this.albedo_settings.mpLoadFrom(initial_desc);
+      this.alpha_settings.mpLoadFrom(initial_desc);
+      this.environment_settings.mpLoadFrom(initial_desc);
+      this.emissive_settings.mpLoadFrom(initial_desc);
+      this.normal_settings.mpLoadFrom(initial_desc);
+      this.specular_settings.mpLoadFrom(initial_desc);
+    }
 
-      this.diffuse_r.setText(Float.toString(mat_d.getColour().x));
-      this.diffuse_g.setText(Float.toString(mat_d.getColour().y));
-      this.diffuse_b.setText(Float.toString(mat_d.getColour().z));
+    protected void meshesRefresh(
+      final @Nonnull SBSceneControllerMeshes controller)
+    {
+      ObjectEditDialogPanel.this.meshes = controller.sceneMeshesGet();
 
-      this.diffuse_texture.setText(mat_d.getTexture() == null ? "" : mat_d
-        .getTexture()
-        .toString());
-
-      this.normal_texture.setText(mat_n.getTexture() == null ? "" : mat_n
-        .getTexture()
-        .toString());
-
-      this.specular_texture.setText(mat_s.getTexture() == null ? "" : mat_s
-        .getTexture()
-        .toString());
-
-      this.environment_texture.setText(mat_e.getTexture() == null
-        ? ""
-        : mat_e.getTexture().toString());
-
-      {
-        final float e = mat_s.getExponent();
-        this.specular_exponent.setText(Float.toString(e));
-        this.specular_exponent_slider.setValue((int) e);
-      }
-
-      {
-        final float e = mat_s.getIntensity();
-        this.specular_intensity.setText(Float.toString(e));
-        this.specular_intensity_slider.setValue((int) e * 100);
+      this.mesh_selector.removeAllItems();
+      for (final PathVirtual name : this.meshes.keySet()) {
+        this.mesh_selector.addItem(name);
       }
     }
 
@@ -671,68 +917,45 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           SBTextFieldUtilities.getFieldFloatOrError(this.orientation_y),
           SBTextFieldUtilities.getFieldFloatOrError(this.orientation_z));
 
-      final RVectorI4F<RSpaceRGBA> diffuse_colour =
-        new RVectorI4F<RSpaceRGBA>(
-          SBTextFieldUtilities.getFieldFloatOrError(this.diffuse_r),
-          SBTextFieldUtilities.getFieldFloatOrError(this.diffuse_g),
-          SBTextFieldUtilities.getFieldFloatOrError(this.diffuse_b),
-          1.0f);
-
-      final PathVirtual diffuse_texture_value =
-        (this.diffuse_texture.getText().equals("")) ? null : PathVirtual
-          .ofString(this.diffuse_texture.getText());
-      final float diffuse_mix_value =
-        this.diffuse_mix_slider.getValue() / 100.0f;
-
-      final PathVirtual texture_normal =
-        (this.normal_texture.getText().equals("")) ? null : PathVirtual
-          .ofString(this.normal_texture.getText());
-
-      final PathVirtual specular_texture_value =
-        (this.specular_texture.getText().equals("")) ? null : PathVirtual
-          .ofString(this.specular_texture.getText());
-      final float specular_exponent_value =
-        this.specular_exponent_slider.getValue();
-      final float specular_intensity_value =
-        this.specular_intensity_slider.getValue() / 100.0f;
-
-      final PathVirtual environment_texture_value =
-        (this.environment_texture.getText().equals("")) ? null : PathVirtual
-          .ofString(this.environment_texture.getText());
-      final float environment_mix_value =
-        this.environment_mix_slider.getValue() / 100.0f;
-
-      final SBMaterialDiffuseDescription diffuse =
-        new SBMaterialDiffuseDescription(
-          diffuse_colour,
-          diffuse_mix_value,
-          diffuse_texture_value);
-
-      final SBMaterialSpecularDescription specular =
-        new SBMaterialSpecularDescription(
-          specular_texture_value,
-          specular_intensity_value,
-          specular_exponent_value);
-
+      final SBMaterialAlphaDescription alpha = this.alpha_settings.mpSave();
+      final SBMaterialAlbedoDescription albedo =
+        this.albedo_settings.mpSave();
       final SBMaterialEnvironmentDescription environment =
-        new SBMaterialEnvironmentDescription(
-          environment_texture_value,
-          environment_mix_value);
-
+        this.environment_settings.mpSave();
       final SBMaterialNormalDescription normal =
-        new SBMaterialNormalDescription(texture_normal);
+        this.normal_settings.mpSave();
+      final SBMaterialSpecularDescription specular =
+        this.specular_settings.mpSave();
+      final SBMaterialEmissiveDescription emissive =
+        this.emissive_settings.mpSave();
+      final RMatrixI3x3F<RTransformTexture> material_uv_matrix =
+        this.general_settings.mpSave();
+
+      final RMatrixI3x3F<RTransformTexture> instance_uv_matrix =
+        material_uv_matrix;
 
       final SBMaterialDescription material =
-        new SBMaterialDescription(diffuse, specular, environment, normal);
+        new SBMaterialDescription(
+          alpha,
+          albedo,
+          emissive,
+          specular,
+          environment,
+          normal,
+          material_uv_matrix);
 
       final PathVirtual mesh_name =
         (PathVirtual) this.mesh_selector.getSelectedItem();
+      if (mesh_name == null) {
+        throw new SBExceptionInputError("Mesh is unset");
+      }
 
       final SBInstanceDescription d =
         new SBInstanceDescription(
           id,
           position,
           orientation,
+          instance_uv_matrix,
           mesh_name,
           material);
 
@@ -860,6 +1083,96 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     }
   }
 
+  private static class SpecularSettings implements
+    MaterialPanel<SBMaterialSpecularDescription>
+  {
+    protected final @Nonnull JTextField     texture;
+    protected final @Nonnull JButton        texture_select;
+    protected final @Nonnull SBFloatHSlider intensity;
+    protected final @Nonnull SBFloatHSlider exponent;
+
+    public SpecularSettings(
+      final @Nonnull SBSceneControllerTextures controller,
+      final @Nonnull Log log)
+      throws ConstraintError
+    {
+      this.texture = new JTextField();
+      this.texture.setEditable(false);
+      this.texture_select = new JButton("Select...");
+      this.texture_select.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          final SBTextures2DWindow twindow =
+            new SBTextures2DWindow(
+              controller,
+              SpecularSettings.this.texture,
+              log);
+          twindow.pack();
+          twindow.setVisible(true);
+        }
+      });
+
+      this.exponent = new SBFloatHSlider("Exponent", 1.0f, 128.0f);
+      this.intensity = new SBFloatHSlider("Intensity", 0.0f, 1.0f);
+    }
+
+    @Override public void mpLayout(
+      final DesignGridLayout dg)
+    {
+      dg
+        .row()
+        .grid()
+        .add(new JLabel("Texture"))
+        .add(this.texture, 3)
+        .add(this.texture_select);
+
+      dg
+        .row()
+        .grid()
+        .add(this.intensity.getLabel())
+        .add(this.intensity.getSlider(), 3)
+        .add(this.intensity.getField());
+
+      dg
+        .row()
+        .grid()
+        .add(this.exponent.getLabel())
+        .add(this.exponent.getSlider(), 3)
+        .add(this.exponent.getField());
+    }
+
+    @Override public void mpLoadFrom(
+      final SBInstanceDescription i)
+    {
+      final SBMaterialSpecularDescription mat_s =
+        i.getMaterial().getSpecular();
+
+      final PathVirtual tt = mat_s.getTexture();
+      this.texture.setText(tt == null ? "" : tt.toString());
+      this.exponent.setCurrent(mat_s.getExponent());
+      this.intensity.setCurrent(mat_s.getIntensity());
+    }
+
+    @Override public SBMaterialSpecularDescription mpSave()
+      throws SBExceptionInputError,
+        ConstraintError
+    {
+      final String tt = this.texture.getText();
+      final PathVirtual specular_texture_value =
+        (tt.equals("")) ? null : PathVirtual.ofString(tt);
+
+      final SBMaterialSpecularDescription specular =
+        new SBMaterialSpecularDescription(
+          specular_texture_value,
+          this.intensity.getCurrent(),
+          this.exponent.getCurrent());
+
+      return specular;
+    }
+
+  }
+
   private static final long                  serialVersionUID;
 
   static {
@@ -892,6 +1205,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           dialog.pack();
           dialog.setVisible(true);
         } catch (final IOException x) {
+          log.critical("Unable to open edit dialog: " + x.getMessage());
+        } catch (final ConstraintError x) {
           log.critical("Unable to open edit dialog: " + x.getMessage());
         }
       }

@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer.sandbox-jogl</groupId>
   <artifactId>io7m-renderer-sandbox-jogl</artifactId>
-  <version>0.4.0</version>
+  <version>0.6.0</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-sandbox-jogl</name>
   <description>JOGL renderer sandbox</description>
@@ -71,17 +71,17 @@
     <dependency>
       <groupId>com.io7m.jcanephora.jogl</groupId>
       <artifactId>io7m-jcanephora-jogl</artifactId>
-      <version>0.9.20</version>
+      <version>0.9.22</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.texload-imageio</groupId>
       <artifactId>io7m-jcanephora-texload-imageio</artifactId>
-      <version>0.9.20</version>
+      <version>0.9.22</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.framebuffer</groupId>
       <artifactId>io7m-jcanephora-framebuffer</artifactId>
-      <version>0.9.20</version>
+      <version>0.9.22</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.renderer.core</groupId>
@@ -92,6 +92,11 @@
       <groupId>com.io7m.renderer.xml</groupId>
       <artifactId>io7m-renderer-xml</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.parasol.xml</groupId>
+      <artifactId>io7m-parasol-xml</artifactId>
+      <version>0.1.15</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

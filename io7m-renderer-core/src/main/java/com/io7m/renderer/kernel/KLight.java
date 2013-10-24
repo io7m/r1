@@ -19,8 +19,12 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.RVectorReadable3F;
 
@@ -28,19 +32,8 @@ import com.io7m.renderer.RVectorReadable3F;
  * Lights.
  */
 
-public @Immutable abstract class KLight
+@Immutable public abstract class KLight
 {
-  @Immutable public static final class KCone extends KLight
-  {
-    @SuppressWarnings("synthetic-access") KCone(
-      final @Nonnull Integer id,
-      final @Nonnull RVectorReadable3F<RSpaceRGB> colour,
-      final float intensity)
-    {
-      super(Type.LIGHT_CONE, id, colour, intensity);
-    }
-  }
-
   @Immutable public static final class KDirectional extends KLight
   {
     private final @Nonnull RVectorReadable3F<RSpaceWorld> direction;
@@ -61,11 +54,71 @@ public @Immutable abstract class KLight
     }
   }
 
+  @Immutable public static final class KProjective extends KLight
+  {
+    private final @Nonnull Texture2DStaticUsable              texture;
+    private final @Nonnull RVectorReadable3F<RSpaceWorld>     position;
+    private final @Nonnull QuaternionI4F                      orientation;
+    private final float                                       range;
+    private final float                                       falloff;
+    private final @Nonnull RMatrixI4x4F<RTransformProjection> projection;
+
+    @SuppressWarnings("synthetic-access") KProjective(
+      final @Nonnull Integer id,
+      final @Nonnull Texture2DStaticUsable texture,
+      final @Nonnull RVectorReadable3F<RSpaceWorld> position,
+      final @Nonnull QuaternionI4F orientation,
+      final @Nonnull RVectorReadable3F<RSpaceRGB> colour,
+      final float intensity,
+      final float range,
+      final float falloff,
+      final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
+    {
+      super(Type.LIGHT_PROJECTIVE, id, colour, intensity);
+      this.position = position;
+      this.orientation = orientation;
+      this.range = range;
+      this.falloff = falloff;
+      this.projection = projection;
+      this.texture = texture;
+    }
+
+    public float getFalloff()
+    {
+      return this.falloff;
+    }
+
+    public @Nonnull Texture2DStaticUsable getTexture()
+    {
+      return this.texture;
+    }
+
+    public float getRange()
+    {
+      return this.range;
+    }
+
+    public @Nonnull QuaternionI4F getOrientation()
+    {
+      return this.orientation;
+    }
+
+    public @Nonnull RVectorReadable3F<RSpaceWorld> getPosition()
+    {
+      return this.position;
+    }
+
+    public @Nonnull RMatrixI4x4F<RTransformProjection> getProjection()
+    {
+      return this.projection;
+    }
+  }
+
   @Immutable public static final class KSphere extends KLight
   {
     private final @Nonnull RVectorReadable3F<RSpaceWorld>                        position;
     private final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius;
-    private final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float           exponent;
+    private final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float           falloff;
 
     @SuppressWarnings("synthetic-access") KSphere(
       final @Nonnull Integer id,
@@ -73,45 +126,53 @@ public @Immutable abstract class KLight
       final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity,
       final @Nonnull RVectorReadable3F<RSpaceWorld> position,
       final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius,
-      final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float exponent)
+      final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float falloff)
     {
       super(Type.LIGHT_SPHERE, id, colour, intensity);
       this.position = new RVectorI3F<RSpaceWorld>(position);
       this.radius = radius;
-      this.exponent = exponent;
+      this.falloff = falloff;
     }
 
-    public float getRadius()
+    public float getFalloff()
     {
-      return this.radius;
-    }
-
-    public float getExponent()
-    {
-      return this.exponent;
+      return this.falloff;
     }
 
     public @Nonnull RVectorReadable3F<RSpaceWorld> getPosition()
     {
       return this.position;
     }
+
+    public float getRadius()
+    {
+      return this.radius;
+    }
   }
 
   static enum Type
   {
-    LIGHT_SPHERE("Sphere"),
-    LIGHT_DIRECTIONAL("Directional"),
-    LIGHT_CONE("Cone");
+    LIGHT_SPHERE("Sphere", "LS"),
+    LIGHT_PROJECTIVE("Projective", "LP"),
+    LIGHT_DIRECTIONAL("Directional", "LD");
 
     private final @Nonnull String name;
+    private final @Nonnull String code;
 
     private Type(
-      final @Nonnull String name)
+      final @Nonnull String name,
+      final @Nonnull String code)
     {
       this.name = name;
+      this.code = code;
     }
 
-    @Nonnull String getName()
+    public @Nonnull String getCode()
+    {
+      return this.code;
+    }
+
+    public @Nonnull String getName()
     {
       return this.name;
     }
