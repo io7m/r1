@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer.xml</groupId>
   <artifactId>io7m-renderer-xml</artifactId>
-  <version>0.5.0</version>
+  <version>0.6.0</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-xml</name>
   <description>3D renderer (XML functions)</description>
