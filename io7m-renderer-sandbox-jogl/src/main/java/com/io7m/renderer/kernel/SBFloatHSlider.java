@@ -16,6 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.annotation.Nonnull;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
@@ -26,6 +29,7 @@ import javax.swing.event.ChangeListener;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
 public final class SBFloatHSlider
 {
@@ -47,7 +51,6 @@ public final class SBFloatHSlider
     this.minimum = minimum;
 
     this.field = new JTextField(Float.toString(minimum));
-    this.field.setEditable(false);
     this.slider = new JSlider(SwingConstants.HORIZONTAL);
     this.slider.setMinimum(0);
     this.slider.setMaximum(100);
@@ -63,6 +66,19 @@ public final class SBFloatHSlider
         SBFloatHSlider.this.current =
           SBFloatHSlider.convertFromSlider(slider_current, minimum, maximum);
         SBFloatHSlider.this.refreshText();
+      }
+    });
+
+    this.field.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final ActionEvent e)
+      {
+        try {
+          SBFloatHSlider.this.setCurrent(SBTextFieldUtilities
+            .getFieldFloatOrError(SBFloatHSlider.this.field));
+        } catch (final SBExceptionInputError x) {
+
+        }
       }
     });
   }
