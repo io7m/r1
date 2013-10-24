@@ -41,27 +41,33 @@ module ProjectiveLight is
 
   --
   -- Sample a texel from the given texture [t], given clip-space 
-  -- coordinates [u].
+  -- coordinates [u]. If [u [w]] is not greater than 0.0, then
+  -- the coordinate is behind the viewer (the light) and so no lighting
+  -- should be applied.
   --
 
   function light_texel (
     t : sampler_2d,
     u : vector_4f
   ) : vector_4f =
-    let
-      -- Perform division-by-w to get coordinates into normalized-device space.
-      value u_divided =
-        new vector_2f (
-          F.divide (u [x], u [w]),
-          F.divide (u [y], u [w])
-        );
-      -- Scale and translate coordinates to get them into the range [0, 1] from [-1, 1].
-      value u_added =
-        V2.add_scalar (u_divided, 1.0);
-      value u_scaled =
-        V2.multiply_scalar (u_added, 0.5);
-    in
-      S2.texture (t, u_scaled)
+    if F.greater (u [w], 0.0) then
+      let
+        -- Perform division-by-w to get coordinates into normalized-device space.
+        value u_divided =
+          new vector_2f (
+            F.divide (u [x], u [w]),
+            F.divide (u [y], u [w])
+          );
+        -- Scale and translate coordinates to get them into the range [0, 1] from [-1, 1].
+        value u_added =
+          V2.add_scalar (u_divided, 1.0);
+        value u_scaled =
+          V2.multiply_scalar (u_added, 0.5);
+      in
+        S2.texture (t, u_scaled)
+      end
+    else
+      new vector_4f (0.0, 0.0, 0.0, 1.0)
     end;
 
   --
