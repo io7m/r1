@@ -60,7 +60,6 @@ import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.RVectorM4F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KSphere;
-import com.io7m.renderer.kernel.programs.KSPDepth;
 
 final class KRendererForwardDiffuse implements KRenderer
 {
@@ -69,9 +68,10 @@ final class KRendererForwardDiffuse implements KRenderer
   private final @Nonnull VectorM4F             background;
   private final @Nonnull ProgramReference      program_directional;
   private final @Nonnull ProgramReference      program_spherical;
+  private final @Nonnull ProgramReference      program_depth;
   private final @Nonnull JCCEExecutionCallable exec_directional;
   private final @Nonnull JCCEExecutionCallable exec_spherical;
-  private final @Nonnull KSPDepth              program_depth;
+  private final @Nonnull JCCEExecutionCallable exec_depth;
   private final @Nonnull KMatrices             matrices;
 
   KRendererForwardDiffuse(
@@ -92,7 +92,16 @@ final class KRendererForwardDiffuse implements KRenderer
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrices = new KMatrices();
-    this.program_depth = KSPDepth.make(gl.getGLCommon(), fs, log);
+
+    this.program_depth =
+      KShaderUtilities.makeProgram(
+        gl.getGLCommon(),
+        version.getNumber(),
+        version.getAPI(),
+        fs,
+        "depth",
+        log);
+    this.exec_depth = new JCCEExecutionCallable(this.program_depth);
 
     this.program_directional =
       KShaderUtilities.makeProgram(
@@ -160,10 +169,6 @@ final class KRendererForwardDiffuse implements KRenderer
 
       for (final KLight light : scene.getLights()) {
         switch (light.getType()) {
-          case LIGHT_CONE:
-          {
-            throw new UnimplementedCodeException();
-          }
           case LIGHT_SPHERE:
           {
             final KSphere slight = (KLight.KSphere) light;
@@ -175,6 +180,10 @@ final class KRendererForwardDiffuse implements KRenderer
             final KDirectional dlight = (KLight.KDirectional) light;
             this.renderLightPassMeshesDirectional(scene, gc, dlight);
             break;
+          }
+          case LIGHT_PROJECTIVE:
+          {
+            throw new UnimplementedCodeException();
           }
         }
       }
@@ -190,16 +199,61 @@ final class KRendererForwardDiffuse implements KRenderer
 
   private void renderDepthPassMesh(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KSPDepth program,
+    final @Nonnull JCCEExecutionCallable e,
     final @Nonnull KMeshInstance instance)
-    throws ConstraintError
+    throws ConstraintError,
+      JCGLException
   {
     this.matrices.matricesMakeFromTransform(instance.getTransform());
 
+    /**
+     * Upload matrices.
+     */
+
+    e.execPrepare(gc);
+    KShadingProgramCommon.putMatrixProjectionReuse(e);
+    KShadingProgramCommon.putMatrixModelView(
+      e,
+      gc,
+      this.matrices.getMatrixModelView());
+    KShadingProgramCommon.putMatrixNormal(
+      e,
+      gc,
+      this.matrices.getMatrixNormal());
+
+    /**
+     * Associate array attributes with program attributes, and draw mesh.
+     */
+
     try {
-      program.ksRenderWithMeshInstance(gc, this.matrices, instance);
-    } catch (final Exception e) {
-      throw new UnreachableCodeException();
+      final KMesh mesh = instance.getMesh();
+      final ArrayBuffer array = mesh.getArrayBuffer();
+      final IndexBuffer indices = mesh.getIndexBuffer();
+
+      gc.arrayBufferBind(array);
+      KShadingProgramCommon.bindAttributePosition(gc, e, array);
+
+      e.execSetCallable(new Callable<Void>() {
+        @Override public Void call()
+          throws Exception
+        {
+          try {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+          } catch (final ConstraintError x) {
+            throw new UnreachableCodeException();
+          }
+          return null;
+        }
+      });
+
+      try {
+        e.execRun(gc);
+      } catch (final Exception x) {
+        throw new UnreachableCodeException();
+      }
+
+    } finally {
+      gc.arrayBufferUnbind();
     }
   }
 
@@ -214,10 +268,15 @@ final class KRendererForwardDiffuse implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    this.program_depth.ksPreparePass(gc, this.matrices.getMatrixProjection());
+    this.exec_depth.execPrepare(gc);
+    KShadingProgramCommon.putMatrixProjection(
+      this.exec_depth,
+      gc,
+      this.matrices.getMatrixProjection());
+    this.exec_depth.execCancel();
 
-    for (final KMeshInstance mesh : scene.getMeshes()) {
-      this.renderDepthPassMesh(gc, this.program_depth, mesh);
+    for (final KMeshInstance mesh : scene.getInstances()) {
+      this.renderDepthPassMesh(gc, this.exec_depth, mesh);
     }
   }
 
@@ -243,7 +302,7 @@ final class KRendererForwardDiffuse implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -358,7 +417,7 @@ final class KRendererForwardDiffuse implements KRenderer
     e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
     e.execCancel();
 
-    for (final KMeshInstance mesh : scene.getMeshes()) {
+    for (final KMeshInstance mesh : scene.getInstances()) {
       this.renderLightPassMeshDirectional(gc, e, mesh);
     }
   }
@@ -399,10 +458,10 @@ final class KRendererForwardDiffuse implements KRenderer
     e.execUniformPutVector3F(gc, "light.color", light.getColour());
     e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
     e.execUniformPutFloat(gc, "light.radius", light.getRadius());
-    e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+    e.execUniformPutFloat(gc, "light.falloff", light.getFalloff());
     e.execCancel();
 
-    for (final KMeshInstance mesh : scene.getMeshes()) {
+    for (final KMeshInstance mesh : scene.getInstances()) {
       this.renderLightPassMeshSpherical(gc, e, mesh);
     }
   }
@@ -429,7 +488,7 @@ final class KRendererForwardDiffuse implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -527,5 +586,15 @@ final class KRendererForwardDiffuse implements KRenderer
     final @Nonnull VectorReadable4F rgba)
   {
     VectorM4F.copy(rgba, this.background);
+  }
+
+  @Override public void close()
+    throws JCGLException,
+      ConstraintError
+  {
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+    gc.programDelete(this.program_directional);
+    gc.programDelete(this.program_spherical);
+    // XXX: Depth not deleted
   }
 }

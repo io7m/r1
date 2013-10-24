@@ -35,11 +35,11 @@ import com.io7m.jvvfs.PathVirtual;
 {
   public static @Nonnull SBScene empty()
   {
-    final PMap<PathVirtual, SBTexture2D> textures2d = HashTreePMap.empty();
+    final PMap<PathVirtual, SBTexture2D<?>> textures2d = HashTreePMap.empty();
     final PMap<PathVirtual, SBTextureCube> textures_cube =
       HashTreePMap.empty();
     final PMap<PathVirtual, SBMesh> meshes = HashTreePMap.empty();
-    final PMap<Integer, KLight> lights = HashTreePMap.empty();
+    final PMap<Integer, SBLight> lights = HashTreePMap.empty();
     final PMap<Integer, SBInstance> instances = HashTreePMap.empty();
 
     return new SBScene(
@@ -59,19 +59,19 @@ import com.io7m.jvvfs.PathVirtual;
     return Integer.valueOf(Math.max(x.intValue(), y.intValue()));
   }
 
-  private final @Nonnull PMap<PathVirtual, SBTexture2D>   textures2d;
-  private final @Nonnull PMap<PathVirtual, SBTextureCube> textures_cube;
-  private final @Nonnull PMap<PathVirtual, SBMesh>        meshes;
-  private final @Nonnull PMap<Integer, KLight>            lights;
-  private final @Nonnull Integer                          light_id_pool;
-  private final @Nonnull PMap<Integer, SBInstance>        instances;
-  private final @Nonnull Integer                          instance_id_pool;
+  private final @Nonnull PMap<PathVirtual, SBTexture2D<?>> textures2d;
+  private final @Nonnull PMap<PathVirtual, SBTextureCube>  textures_cube;
+  private final @Nonnull PMap<PathVirtual, SBMesh>         meshes;
+  private final @Nonnull PMap<Integer, SBLight>            lights;
+  private final @Nonnull Integer                           light_id_pool;
+  private final @Nonnull PMap<Integer, SBInstance>         instances;
+  private final @Nonnull Integer                           instance_id_pool;
 
   private SBScene(
-    final @Nonnull PMap<PathVirtual, SBTexture2D> textures2d,
+    final @Nonnull PMap<PathVirtual, SBTexture2D<?>> textures2d,
     final @Nonnull PMap<PathVirtual, SBTextureCube> textures_cube,
     final @Nonnull PMap<PathVirtual, SBMesh> meshes,
-    final @Nonnull PMap<Integer, KLight> lights,
+    final @Nonnull PMap<Integer, SBLight> lights,
     final @Nonnull Integer light_id_pool,
     final @Nonnull PMap<Integer, SBInstance> instances,
     final @Nonnull Integer instance_id_pool)
@@ -136,7 +136,7 @@ import com.io7m.jvvfs.PathVirtual;
   }
 
   public @Nonnull SBScene lightAdd(
-    final @Nonnull KLight light)
+    final @Nonnull SBLight light)
     throws ConstraintError
   {
     Constraints.constrainNotNull(light, "Light");
@@ -171,7 +171,7 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool), id);
   }
 
-  public @CheckForNull KLight lightGet(
+  public @CheckForNull SBLight lightGet(
     final @Nonnull Integer id)
     throws ConstraintError
   {
@@ -194,7 +194,7 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool);
   }
 
-  public @Nonnull Collection<KLight> lightsGet()
+  public @Nonnull Collection<SBLight> lightsGet()
   {
     return this.lights.values();
   }
@@ -245,7 +245,7 @@ import com.io7m.jvvfs.PathVirtual;
   }
 
   public @Nonnull SBScene texture2DAdd(
-    final @Nonnull SBTexture2D texture)
+    final @Nonnull SBTexture2D<?> texture)
     throws ConstraintError
   {
     Constraints.constrainNotNull(texture, "Texture");
@@ -260,15 +260,18 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool);
   }
 
-  public @CheckForNull SBTexture2D texture2DGet(
-    final @Nonnull PathVirtual texture)
-    throws ConstraintError
+  @SuppressWarnings("unchecked") public @CheckForNull
+    <T extends SBTexture2DKind>
+    SBTexture2D<T>
+    texture2DGet(
+      final @Nonnull PathVirtual texture)
+      throws ConstraintError
   {
     Constraints.constrainNotNull(texture, "Texture");
-    return this.textures2d.get(texture);
+    return (SBTexture2D<T>) this.textures2d.get(texture);
   }
 
-  public @Nonnull Map<PathVirtual, SBTexture2D> textures2DGet()
+  public @Nonnull Map<PathVirtual, SBTexture2D<?>> textures2DGet()
   {
     return this.textures2d;
   }
@@ -308,26 +311,40 @@ import com.io7m.jvvfs.PathVirtual;
     Constraints.constrainNotNull(d, "Instance");
     final SBMaterialDescription md = d.getMaterial();
 
-    final SBTexture2D diff =
-      (md.getDiffuse().getTexture() == null) ? null : this.texture2DGet(md
-        .getDiffuse()
-        .getTexture());
+    final SBTexture2D<SBTexture2DKindAlbedo> albe;
+    final SBTexture2D<SBTexture2DKindEmissive> emis;
+    final SBTexture2D<SBTexture2DKindNormal> norm;
+    final SBTexture2D<SBTexture2DKindSpecular> spec;
 
-    final SBTexture2D norm =
-      (md.getNormal().getTexture() == null) ? null : this.texture2DGet(md
-        .getNormal()
-        .getTexture());
+    if (md.getAlbedo().getTexture() == null) {
+      albe = null;
+    } else {
+      albe = this.texture2DGet(md.getAlbedo().getTexture());
+    }
 
-    final SBTexture2D spec =
-      (md.getSpecular().getTexture() == null) ? null : this.texture2DGet(md
-        .getSpecular()
-        .getTexture());
+    if (md.getEmissive().getTexture() == null) {
+      emis = null;
+    } else {
+      emis = this.texture2DGet(md.getEmissive().getTexture());
+    }
+
+    if (md.getNormal().getTexture() == null) {
+      norm = null;
+    } else {
+      norm = this.texture2DGet(md.getNormal().getTexture());
+    }
+
+    if (md.getSpecular().getTexture() == null) {
+      spec = null;
+    } else {
+      spec = this.texture2DGet(md.getSpecular().getTexture());
+    }
 
     final SBTextureCube env =
       (md.getEnvironment().getTexture() == null) ? null : this
         .textureCubeGet(md.getEnvironment().getTexture());
 
-    final SBMaterial m = new SBMaterial(md, diff, norm, spec, env);
+    final SBMaterial m = new SBMaterial(md, albe, emis, env, norm, spec);
     final SBInstance instance = new SBInstance(d, m);
     return this.instanceAdd(instance);
   }
@@ -340,16 +357,16 @@ import com.io7m.jvvfs.PathVirtual;
       desc = desc.meshAdd(m.getPath());
     }
 
-    for (final SBTexture2D t : this.textures2d.values()) {
-      desc = desc.texture2DAdd(t.getPath());
+    for (final SBTexture2D<?> t : this.textures2d.values()) {
+      desc = desc.texture2DAdd(t.getDescription());
     }
 
     for (final SBTextureCube t : this.textures_cube.values()) {
-      desc = desc.textureCubeAdd(t.getPath());
+      desc = desc.textureCubeAdd(t.getDescription());
     }
 
-    for (final KLight l : this.lights.values()) {
-      desc = desc.lightAdd(l);
+    for (final SBLight l : this.lights.values()) {
+      desc = desc.lightAdd(l.getDescription());
     }
 
     for (final SBInstance i : this.instances.values()) {

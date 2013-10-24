@@ -20,6 +20,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.RMatrixI3x3F;
+import com.io7m.renderer.RTransformTexture;
 
 /**
  * <p>
@@ -37,22 +39,22 @@ import com.io7m.jaux.Constraints.ConstraintError;
  * {@link KMeshAttributes#ATTRIBUTE_UV}.</li>
  * <li>If the mesh has per-vertex tangents, they must be of type
  * {@link KMeshAttributes#ATTRIBUTE_TANGENT4}.</li>
- * <li>If the mesh has both per-vertex tangents, they must be of type
- * {@link KMeshAttributes#ATTRIBUTE_TANGENT4}.</li>
  * <ul>
  */
 
 @Immutable public final class KMeshInstance implements KTransformable
 {
-  private final @Nonnull Integer                id;
-  private final @Nonnull KTransform             transform;
-  private final @Nonnull KMesh                  mesh;
-  private final @Nonnull KMaterial              material;
-  private final @Nonnull KRenderingCapabilities capabilities;
+  private final @Nonnull Integer                         id;
+  private final @Nonnull KTransform                      transform;
+  private final @Nonnull KMesh                           mesh;
+  private final @Nonnull KMaterial                       material;
+  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
+  private final @Nonnull KMeshInstanceMaterialLabel      label;
 
   public KMeshInstance(
     final @Nonnull Integer id,
     final @Nonnull KTransform transform,
+    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix,
     final @Nonnull KMesh mesh,
     final @Nonnull KMaterial material)
     throws ConstraintError
@@ -61,13 +63,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
     this.transform = transform;
     this.mesh = mesh;
     this.material = material;
-    this.capabilities =
-      KRenderingCapabilities.fromMeshAndMaterial(mesh, material);
-  }
-
-  public @Nonnull KRenderingCapabilities getCapabilities()
-  {
-    return this.capabilities;
+    this.uv_matrix = uv_matrix;
+    this.label = KMeshInstanceMaterialLabel.label(mesh, material);
   }
 
   public @Nonnull Integer getID()
@@ -75,9 +72,19 @@ import com.io7m.jaux.Constraints.ConstraintError;
     return this.id;
   }
 
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
+  {
+    return this.uv_matrix;
+  }
+
   public @Nonnull KMaterial getMaterial()
   {
     return this.material;
+  }
+
+  public @Nonnull KMeshInstanceMaterialLabel getMaterialLabel()
+  {
+    return this.label;
   }
 
   public @Nonnull KMesh getMesh()

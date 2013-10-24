@@ -70,7 +70,7 @@ import com.io7m.jcanephora.Texture2DStatic;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KMaterialDiffuse ");
+    builder.append("[KMaterialAlbedo ");
     builder.append(this.texture);
     builder.append("]");
     return builder.toString();

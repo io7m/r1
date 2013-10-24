@@ -14,12 +14,36 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer;
+package com.io7m.renderer.kernel;
 
-import com.io7m.jtensors.MatrixReadable4x4F;
+import java.awt.event.WindowEvent;
 
-public interface RMatrixReadable4x4F<T extends RTransform> extends
-  MatrixReadable4x4F
+import javax.annotation.Nonnull;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+
+final class SBWindowUtilities
 {
-  // No extra functions.
+  /**
+   * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given window.
+   */
+
+  static void closeWindow(
+    final @Nonnull JFrame frame)
+  {
+    final WindowEvent ev = new WindowEvent(frame, WindowEvent.WINDOW_CLOSING);
+    frame.dispatchEvent(ev);
+  }
+
+  /**
+   * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given dialog.
+   */
+
+  static void closeDialog(
+    final @Nonnull JDialog dialog)
+  {
+    final WindowEvent ev =
+      new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING);
+    dialog.dispatchEvent(ev);
+  }
 }

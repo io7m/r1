@@ -38,6 +38,8 @@ public final class SBMaterialEnvironmentDescription
     final URI uri = SBSceneDescription.SCENE_XML_URI;
     RXMLUtilities.checkIsElement(e, "environment", uri);
     final Element em = RXMLUtilities.getChild(e, "mix", uri);
+    final Element erm = RXMLUtilities.getChild(e, "reflection-mix", uri);
+    final Element eri = RXMLUtilities.getChild(e, "refraction-index", uri);
     final Element et = RXMLUtilities.getChild(e, "texture", uri);
 
     final PathVirtual texture =
@@ -45,18 +47,26 @@ public final class SBMaterialEnvironmentDescription
         .getValue());
 
     final float mix = RXMLUtilities.getElementFloat(em);
-    return new SBMaterialEnvironmentDescription(texture, mix);
+    final float rmix = RXMLUtilities.getElementFloat(erm);
+    final float rind = RXMLUtilities.getElementFloat(eri);
+    return new SBMaterialEnvironmentDescription(texture, mix, rmix, rind);
   }
 
   private final @CheckForNull PathVirtual texture;
   private final float                     mix;
+  private final float                     reflection_mix;
+  private final float                     refraction_index;
 
   SBMaterialEnvironmentDescription(
     final @CheckForNull PathVirtual texture,
-    final float mix)
+    final float mix,
+    final float reflection_mix,
+    final float refraction_index)
   {
     this.texture = texture;
     this.mix = mix;
+    this.reflection_mix = reflection_mix;
+    this.refraction_index = refraction_index;
   }
 
   @Override public boolean equals(
@@ -76,6 +86,14 @@ public final class SBMaterialEnvironmentDescription
     if (Float.floatToIntBits(this.mix) != Float.floatToIntBits(other.mix)) {
       return false;
     }
+    if (Float.floatToIntBits(this.reflection_mix) != Float
+      .floatToIntBits(other.reflection_mix)) {
+      return false;
+    }
+    if (Float.floatToIntBits(this.refraction_index) != Float
+      .floatToIntBits(other.refraction_index)) {
+      return false;
+    }
     if (this.texture == null) {
       if (other.texture != null) {
         return false;
@@ -86,11 +104,33 @@ public final class SBMaterialEnvironmentDescription
     return true;
   }
 
+  public float getMix()
+  {
+    return this.mix;
+  }
+
+  public float getReflectionMix()
+  {
+    return this.reflection_mix;
+  }
+
+  public float getRefractionIndex()
+  {
+    return this.refraction_index;
+  }
+
+  public @CheckForNull PathVirtual getTexture()
+  {
+    return this.texture;
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
     result = (prime * result) + Float.floatToIntBits(this.mix);
+    result = (prime * result) + Float.floatToIntBits(this.reflection_mix);
+    result = (prime * result) + Float.floatToIntBits(this.refraction_index);
     result =
       (prime * result)
         + ((this.texture == null) ? 0 : this.texture.hashCode());
@@ -104,6 +144,10 @@ public final class SBMaterialEnvironmentDescription
     builder.append(this.texture);
     builder.append(", mix=");
     builder.append(this.mix);
+    builder.append(", reflection_mix=");
+    builder.append(this.reflection_mix);
+    builder.append(", refraction_index=");
+    builder.append(this.refraction_index);
     builder.append("]");
     return builder.toString();
   }
@@ -120,19 +164,15 @@ public final class SBMaterialEnvironmentDescription
 
     final Element ei = new Element("s:mix", uri);
     ei.appendChild(String.format("%.6f", this.mix));
+    final Element erm = new Element("s:reflection-mix", uri);
+    erm.appendChild(String.format("%.6f", this.reflection_mix));
+    final Element eri = new Element("s:refraction-index", uri);
+    eri.appendChild(String.format("%.6f", this.refraction_index));
 
     e.appendChild(ei);
+    e.appendChild(erm);
+    e.appendChild(eri);
     e.appendChild(et);
     return e;
-  }
-
-  public @CheckForNull PathVirtual getTexture()
-  {
-    return this.texture;
-  }
-
-  public float getMix()
-  {
-    return this.mix;
   }
 }

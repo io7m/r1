@@ -19,29 +19,33 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.renderer.RMatrixI4x4F;
+import com.io7m.renderer.RTransformProjection;
+import com.io7m.renderer.RTransformView;
+
 /**
  * An orientable "camera" with a specific projection.
  */
 
 @Immutable final class KCamera
 {
-  private final @Nonnull KMatrix4x4F<KMatrixView>       view;
-  private final @Nonnull KMatrix4x4F<KMatrixProjection> projection;
+  private final @Nonnull RMatrixI4x4F<RTransformView>       view;
+  private final @Nonnull RMatrixI4x4F<RTransformProjection> projection;
 
   KCamera(
-    final @Nonnull KMatrix4x4F<KMatrixView> view,
-    final @Nonnull KMatrix4x4F<KMatrixProjection> projection)
+    final @Nonnull RMatrixI4x4F<RTransformView> view,
+    final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
   {
     this.view = view;
     this.projection = projection;
   }
 
-  public @Nonnull KMatrix4x4F<KMatrixProjection> getProjectionMatrix()
+  public @Nonnull RMatrixI4x4F<RTransformProjection> getProjectionMatrix()
   {
     return this.projection;
   }
 
-  public @Nonnull KMatrix4x4F<KMatrixView> getViewMatrix()
+  public @Nonnull RMatrixI4x4F<RTransformView> getViewMatrix()
   {
     return this.view;
   }

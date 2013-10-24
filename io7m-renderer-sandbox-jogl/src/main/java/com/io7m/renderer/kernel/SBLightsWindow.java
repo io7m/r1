@@ -14,12 +14,27 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer;
+package com.io7m.renderer.kernel;
 
-import com.io7m.jtensors.MatrixReadable4x4F;
+import javax.annotation.Nonnull;
+import javax.swing.JFrame;
 
-public interface RMatrixReadable4x4F<T extends RTransform> extends
-  MatrixReadable4x4F
+import com.io7m.jlog.Log;
+
+final class SBLightsWindow extends JFrame
 {
-  // No extra functions.
+  private static final long serialVersionUID;
+
+  static {
+    serialVersionUID = 4283712509235461406L;
+  }
+
+  public <C extends SBSceneControllerTextures & SBSceneControllerLights> SBLightsWindow(
+    final @Nonnull C controller,
+    final @Nonnull Log log)
+  {
+    super("Lights");
+    this.getContentPane().add(new SBLightsPanel(controller, log));
+    this.pack();
+  }
 }

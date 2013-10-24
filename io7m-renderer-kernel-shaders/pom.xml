@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer.kernel-shaders</groupId>
   <artifactId>io7m-renderer-kernel-shaders</artifactId>
-  <version>0.4.0</version>
+  <version>0.6.0</version>
   <packaging>jar</packaging>
-  <name>io7m-kernel-shaders</name>
-  <description>3D renderer (shaders for the kernel)</description>
+  <name>io7m-renderer-kernel-shaders</name>
+  <description>3D renderer (kernel shaders)</description>
   <url>http://mvn.io7m.com/renderer-kernel-shaders/</url>
 
   <licenses>
@@ -54,6 +57,31 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
+  <dependencies>
+    <dependency>
+      <groupId>com.io7m.parasol.compiler.frontend</groupId>
+      <artifactId>io7m-parasol-compiler-frontend</artifactId>
+      <version>[0.1.17, 0.2.0)</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.jaux</groupId>
+      <artifactId>io7m-jaux</artifactId>
+      <version>[2.3.0, 3.0.0)</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+      <version>4.11</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+  </dependencies>
+
   <reporting>
     <plugins>
       <plugin>
@@ -68,11 +96,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>3.3</version>
-      </plugin>
-      <plugin>
-        <groupId>org.sonatype.maven.plugin</groupId>
-        <artifactId>emma-maven-plugin</artifactId>
-        <version>1.2</version>
       </plugin>
     </plugins>
   </reporting>
@@ -95,10 +118,104 @@
         <artifactId>maven-install-plugin</artifactId>
         <version>2.4</version>
       </plugin>
+
+      <!-- Require JDK >= 1.6 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+
+      <!-- Create source jar -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Copy hand-written Parasol sources into output directory -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <version>2.6</version>
+        <executions>
+          <execution>
+            <id>copy-parasol-sources</id>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/parasol</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/parasol</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Generate and compile Parasol shader sources -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <id>make-parasol-sources</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>com.io7m.renderer.kernel_shaders.ForwardMakeAll</mainClass>
+              <arguments>
+                <argument>${project.build.directory}/parasol</argument>
+                <argument>${project.build.outputDirectory}/com/io7m/renderer</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Produce jar files -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <configuration>
+              <archive>
+                <manifestEntries>
+                  <Specification-Title>${project.name}</Specification-Title>
+                  <Specification-Version>${project.version}</Specification-Version>
+                  <Specification-Vendor>io7m.com</Specification-Vendor>
+                  <Implementation-Title>${project.name}</Implementation-Title>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                  <Implementation-Vendor>io7m.com</Implementation-Vendor>
+                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  <Built-By>io7m</Built-By>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
 
@@ -119,49 +236,6 @@
           <artifactId>lifecycle-mapping</artifactId>
           <version>1.0.0</version>
           <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.sonatype.maven.plugin</groupId>
-                    <artifactId>emma-maven-plugin</artifactId>
-                    <versionRange>[1.2,)</versionRange>
-                    <goals>
-                      <goal>instrument</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore></ignore>
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>xml-maven-plugin</artifactId>
-                    <versionRange>[1.0,)</versionRange>
-                    <goals>
-                      <goal>transform</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore></ignore>
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>com.io7m.saxon-plugin</groupId>
-                    <artifactId>io7m-saxon-plugin</artifactId>
-                    <versionRange>[1.0.0,)</versionRange>
-                    <goals>
-                      <goal>transform</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore></ignore>
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
           </configuration>
         </plugin>
       </plugins>

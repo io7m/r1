@@ -206,10 +206,6 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
       for (final KLight light : scene.getLights()) {
         switch (light.getType()) {
-          case LIGHT_CONE:
-          {
-            throw new UnimplementedCodeException();
-          }
           case LIGHT_SPHERE:
           {
             final KSphere slight = (KLight.KSphere) light;
@@ -221,6 +217,10 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
             final KDirectional dlight = (KLight.KDirectional) light;
             this.renderLightPassMeshesDirectional(scene, gc, dlight);
             break;
+          }
+          case LIGHT_PROJECTIVE:
+          {
+            throw new UnimplementedCodeException();
           }
         }
       }
@@ -309,7 +309,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     e.execUniformPutMatrix4x4F(gc, "m_projection", this.matrix_projection);
     e.execCancel();
 
-    for (final KMeshInstance mesh : scene.getMeshes()) {
+    for (final KMeshInstance mesh : scene.getInstances()) {
       this.renderDepthPassMesh(gc, e, mesh);
     }
   }
@@ -344,7 +344,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     e.execUniformPutVector3F(gc, "light.color", light.getColour());
     e.execUniformPutFloat(gc, "light.intensity", light.getIntensity());
     e.execUniformPutFloat(gc, "light.radius", light.getRadius());
-    e.execUniformPutFloat(gc, "light.falloff", light.getExponent());
+    e.execUniformPutFloat(gc, "light.falloff", light.getFalloff());
     e.execCancel();
   }
 
@@ -389,7 +389,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -495,7 +495,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -617,7 +617,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       this.renderInitCommonDirectionalUniforms(gc, light, light_cs, e);
     }
 
-    for (final KMeshInstance mesh : scene.getMeshes()) {
+    for (final KMeshInstance mesh : scene.getInstances()) {
       this.renderLightPassMeshDirectional(gc, mesh);
     }
   }
@@ -658,7 +658,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       this.renderInitCommonSphericalUniforms(gc, light, light_eye, e);
     }
 
-    for (final KMeshInstance mesh : scene.getMeshes()) {
+    for (final KMeshInstance mesh : scene.getInstances()) {
       this.renderLightPassMeshSpherical(gc, mesh);
     }
   }
@@ -704,7 +704,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -812,7 +812,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
-        material.getDiffuse().getTexture();
+        material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units[0],
@@ -918,5 +918,17 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
     final @Nonnull VectorReadable4F rgba)
   {
     VectorM4F.copy(rgba, this.background);
+  }
+
+  @Override public void close()
+    throws JCGLException,
+      ConstraintError
+  {
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+    gc.programDelete(this.program_directional);
+    gc.programDelete(this.program_directional_map);
+    gc.programDelete(this.program_spherical);
+    gc.programDelete(this.program_spherical_map);
+    gc.programDelete(this.program_depth);
   }
 }

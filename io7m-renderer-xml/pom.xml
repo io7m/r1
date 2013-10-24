@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer.xml</groupId>
   <artifactId>io7m-renderer-xml</artifactId>
-  <version>0.4.0</version>
+  <version>0.6.0</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-xml</name>
   <description>3D renderer (XML functions)</description>
@@ -81,7 +81,7 @@
     <dependency>
       <groupId>com.io7m.jcanephora.core</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
-      <version>0.9.20</version>
+      <version>0.9.22</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
