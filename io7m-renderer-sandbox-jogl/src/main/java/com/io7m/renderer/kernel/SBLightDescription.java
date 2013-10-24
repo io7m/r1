@@ -184,7 +184,6 @@ abstract class SBLightDescription
     private final @Nonnull RVectorI3F<RSpaceRGB>              colour;
     private final float                                       intensity;
     private final @Nonnull Integer                            id;
-
     private final @Nonnull RMatrixI4x4F<RTransformProjection> projection;
 
     @SuppressWarnings("synthetic-access") SBLightDescriptionProjective(
@@ -204,8 +203,8 @@ abstract class SBLightDescription
       final MatrixM4x4F m = new MatrixM4x4F();
       ProjectionMatrix.makePerspective(
         m,
-        1,
-        100,
+        1.0f,
+        frustum.getMaximumLength(),
         frustum.getAspectRatio(),
         frustum.getHorizontalFOV());
 
