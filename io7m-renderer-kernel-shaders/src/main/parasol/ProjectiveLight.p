@@ -50,7 +50,9 @@ module ProjectiveLight is
     t : sampler_2d,
     u : vector_4f
   ) : vector_4f =
-    if F.greater (u [w], 0.0) then
+    if F.lesser (u [w], 0.0) then
+      new vector_4f (0.0, 0.0, 0.0, 1.0)
+    else
       let
         -- Perform division-by-w to get coordinates into normalized-device space.
         value u_divided =
@@ -66,8 +68,6 @@ module ProjectiveLight is
       in
         S2.texture (t, u_scaled)
       end
-    else
-      new vector_4f (0.0, 0.0, 0.0, 1.0)
     end;
 
   --

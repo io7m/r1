@@ -55,7 +55,7 @@ public final class SBVisibleFrustum
 
     this.array =
       gl.arrayBufferAllocate(10, type, UsageHint.USAGE_STATIC_READ);
-    this.indices = gl.indexBufferAllocate(this.array, 18);
+    this.indices = gl.indexBufferAllocate(this.array, 34);
 
     final ArrayBufferWritableData array_map =
       new ArrayBufferWritableData(this.array);
@@ -66,54 +66,58 @@ public final class SBVisibleFrustum
       array_map.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION.getName());
     final CursorWritableIndex ic = index_map.getCursor();
 
-    final float h_fov = frustum.getHorizontalFOV();
-    final float aspect = frustum.getAspectRatio();
-    final float len = frustum.getMaximumLength();
-
-    final float near_plane_x = (float) Math.tan(h_fov);
-    final float near_plane_y = near_plane_x / aspect;
+    final float near_plane_x =
+      (float) (1.0 / Math.tan(frustum.getHorizontalFOV()));
+    final float near_plane_y = near_plane_x * frustum.getAspectRatio();
     final float near_plane_z = 0.0f;
 
-    /**
-     * Origin.
-     * 
-     * The projection plane is at 0.0f, so the actual origin of the frustum is
-     * one unit behind it.
-     */
+    // XXX: Placeholders
+    final float far_plane_x = near_plane_x;
+    final float far_plane_y = near_plane_y;
+    final float far_plane_z = near_plane_z;
 
-    pc.put3f(0, 0, 1.0f);
-
-    /**
-     * Line from origin to (-x, -y)
-     */
-
+    pc.put3f(0.0f, 0.0f, 1.0f);
     pc.put3f(-near_plane_x, -near_plane_y, -near_plane_z);
+    pc.put3f(-near_plane_x, +near_plane_y, -near_plane_z);
+    pc.put3f(+near_plane_x, +near_plane_y, -near_plane_z);
+    pc.put3f(+near_plane_x, -near_plane_y, -near_plane_z);
+    pc.put3f(-far_plane_x, -far_plane_y, -far_plane_z);
+    pc.put3f(-far_plane_x, +far_plane_y, -far_plane_z);
+    pc.put3f(+far_plane_x, +far_plane_y, -far_plane_z);
+    pc.put3f(+far_plane_x, -far_plane_y, -far_plane_z);
+    pc.put3f(0, 0, -far_plane_z);
+
+    /**
+     * Lines from origin to near plane
+     */
+
     ic.putIndex(0);
     ic.putIndex(1);
 
-    /**
-     * Line from origin to (-x, +y)
-     */
-
-    pc.put3f(-near_plane_x, +near_plane_y, -near_plane_z);
     ic.putIndex(0);
     ic.putIndex(2);
 
-    /**
-     * Line from origin to (+x, +y)
-     */
-
-    pc.put3f(+near_plane_x, +near_plane_y, -near_plane_z);
     ic.putIndex(0);
     ic.putIndex(3);
 
-    /**
-     * Line from origin to (+x, -y)
-     */
-
-    pc.put3f(+near_plane_x, -near_plane_y, -near_plane_z);
     ic.putIndex(0);
     ic.putIndex(4);
+
+    /**
+     * Lines from origin to far plane
+     */
+
+    ic.putIndex(0);
+    ic.putIndex(5);
+
+    ic.putIndex(0);
+    ic.putIndex(6);
+
+    ic.putIndex(0);
+    ic.putIndex(7);
+
+    ic.putIndex(0);
+    ic.putIndex(8);
 
     /**
      * Frame the near end.
@@ -132,12 +136,27 @@ public final class SBVisibleFrustum
     ic.putIndex(4);
 
     /**
+     * Frame the far end.
+     */
+
+    ic.putIndex(5);
+    ic.putIndex(6);
+
+    ic.putIndex(7);
+    ic.putIndex(8);
+
+    ic.putIndex(5);
+    ic.putIndex(8);
+
+    ic.putIndex(6);
+    ic.putIndex(7);
+
+    /**
      * A line from the origin to the end of the frustum
      */
 
-    pc.put3f(0, 0, -frustum.getMaximumLength());
     ic.putIndex(0);
-    ic.putIndex(5);
+    ic.putIndex(9);
 
     gl.arrayBufferUpdate(array_map);
     gl.indexBufferUpdate(index_map);
