@@ -52,9 +52,12 @@ import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileFilter;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Callbacks;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
+import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeKernel;
+import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeSpecific;
 import com.jogamp.opengl.util.FPSAnimator;
 
 final class SBMainWindow extends JFrame
@@ -83,11 +86,12 @@ final class SBMainWindow extends JFrame
   }
 
   private static @Nonnull
-    <C extends SBSceneControllerRendererControl & SBSceneControllerIO>
+    <C extends SBSceneControllerRendererControl & SBSceneControllerIO & SBSceneControllerShaders>
     JMenuBar
     makeMenuBar(
       final @Nonnull C controller,
       final @Nonnull SBMainWindow window,
+      final @Nonnull SBCameraWindow camera_window,
       final @Nonnull SBLightsWindow lights_window,
       final @Nonnull SBLogsWindow logs_window,
       final @Nonnull SBObjectsWindow objects_window,
@@ -96,8 +100,8 @@ final class SBMainWindow extends JFrame
     final JMenuBar bar = new JMenuBar();
     bar.add(SBMainWindow.makeMenuFile(controller, window, log));
     bar.add(SBMainWindow.makeMenuEdit(lights_window, objects_window));
-    bar.add(SBMainWindow.makeMenuRenderer(controller));
-    bar.add(SBMainWindow.makeMenuView(controller));
+    bar.add(SBMainWindow.makeMenuRenderer(window, log, controller));
+    bar.add(SBMainWindow.makeMenuView(camera_window, controller));
     bar.add(SBMainWindow.makeMenuDebug(logs_window));
     return bar;
   }
@@ -133,6 +137,12 @@ final class SBMainWindow extends JFrame
     menu.add(lights);
     menu.add(objects);
     return menu;
+  }
+
+  private static @Nonnull JCheckBoxMenuItem makeMenuEditShadersMenuItem(
+    final @Nonnull SBShadersWindow shaders_window)
+  {
+    return SBMainWindow.makeWindowCheckbox("Shaders...", shaders_window);
   }
 
   private static @Nonnull JCheckBoxMenuItem makeMenuEditLightsMenuItem(
@@ -334,32 +344,75 @@ final class SBMainWindow extends JFrame
     open_recent.setEnabled(recent_items.size() > 0);
   }
 
-  private static @Nonnull JMenu makeMenuRenderer(
-    final @Nonnull SBSceneControllerRendererControl controller)
+  private static @Nonnull
+    <C extends SBSceneControllerRendererControl & SBSceneControllerShaders>
+    JMenu
+    makeMenuRenderer(
+      final @Nonnull JFrame main_window,
+      final @Nonnull Log log,
+      final @Nonnull C controller)
   {
+    final ButtonGroup renderer_group = new ButtonGroup();
+
     final JMenu menu = new JMenu("Renderer");
-    final ButtonGroup group = new ButtonGroup();
+    final JMenu kr_menu = new JMenu("Kernel renderers");
 
-    for (final SBRendererType type : SBRendererType.values()) {
+    for (final SBKRendererType type : SBKRendererType.values()) {
       final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
-      b.setSelected(type == SBRendererType.RENDERER_FORWARD_UNLIT);
-
       b.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
         {
-          controller.rendererSetType(type);
+          try {
+            final SBRendererTypeKernel kt =
+              new SBRendererType.SBRendererTypeKernel(type);
+            controller.rendererSetType(kt);
+          } catch (final ConstraintError x) {
+            throw new UnreachableCodeException();
+          }
         }
       });
 
-      group.add(b);
-      menu.add(b);
+      renderer_group.add(b);
+      kr_menu.add(b);
     }
+
+    menu.add(kr_menu);
+
+    final JRadioButtonMenuItem b =
+      new JRadioButtonMenuItem("Specific shader...");
+    b.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final @Nonnull ActionEvent e)
+      {
+        final SBShadersDialog d =
+          new SBShadersDialog(main_window, log, controller);
+        d.setVisible(true);
+        d.addWindowListener(new WindowAdapter() {
+          @Override public void windowClosing(
+            final @Nonnull WindowEvent w)
+          {
+            try {
+              final SBShader s = d.getSelectedShader();
+              if (s != null) {
+                controller.rendererSetType(new SBRendererTypeSpecific(s));
+              }
+            } catch (final ConstraintError x) {
+              throw new UnreachableCodeException();
+            }
+          }
+        });
+      }
+    });
+
+    renderer_group.add(b);
+    menu.add(b);
 
     return menu;
   }
 
   private static @Nonnull JMenu makeMenuView(
+    final @Nonnull SBCameraWindow camera_window,
     final @Nonnull SBSceneControllerRendererControl controller)
   {
     final JMenu menu = new JMenu("View");
@@ -417,11 +470,16 @@ final class SBMainWindow extends JFrame
       }
     });
 
-    menu.add(bg_colour);
+    final JCheckBoxMenuItem camera =
+      SBMainWindow.makeWindowCheckbox("Camera...", camera_window);
+
     menu.add(axes);
     menu.add(grid);
     menu.add(lights);
     menu.add(lights_radii);
+    menu.add(new JSeparator());
+    menu.add(bg_colour);
+    menu.add(camera);
     return menu;
   }
 
@@ -511,6 +569,8 @@ final class SBMainWindow extends JFrame
     final SBLogsWindow logs_window = new SBLogsWindow();
     final SBObjectsWindow objects_window =
       new SBObjectsWindow(controller, log);
+
+    final SBCameraWindow camera_window = new SBCameraWindow(controller, log);
 
     log.setCallback(new Callbacks() {
       private final @Nonnull StringBuilder builder = new StringBuilder();
@@ -630,6 +690,16 @@ final class SBMainWindow extends JFrame
             case 'e':
               this.input.setRotatingRight(false);
               break;
+
+            case 'p':
+              this.input.setWantPauseToggle(true);
+              break;
+            case 'o':
+              this.input.setWantStepOneFrame(true);
+              break;
+            case 'n':
+              this.input.setWantNextCamera(true);
+              break;
           }
         }
 
@@ -645,6 +715,15 @@ final class SBMainWindow extends JFrame
 
       final Container pane = this.getContentPane();
       pane.add(canvas);
+
+      this.addWindowFocusListener(new WindowAdapter() {
+        @Override public void windowGainedFocus(
+          final WindowEvent e)
+        {
+          canvas.requestFocusInWindow();
+        }
+      });
+
     } catch (final GLException e) {
       SBErrorBox.showError(log, "Renderer disabled", e);
     }
@@ -652,6 +731,7 @@ final class SBMainWindow extends JFrame
     this.setJMenuBar(SBMainWindow.makeMenuBar(
       controller,
       this,
+      camera_window,
       lights_window,
       logs_window,
       objects_window,

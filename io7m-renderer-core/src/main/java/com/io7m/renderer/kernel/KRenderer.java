@@ -27,7 +27,7 @@ interface KRenderer
 {
   /**
    * <p>
-   * Render the scene <code>scene</code> to the framebuffer
+   * Render the batches <code>batches</code> to the framebuffer
    * <code>result</code>.
    * </p>
    * 
@@ -50,4 +50,12 @@ interface KRenderer
 
   void setBackgroundRGBA(
     final @Nonnull VectorReadable4F rgba);
+
+  /**
+   * Delete all resources associated with this renderer.
+   */
+
+  void close()
+    throws JCGLException,
+      ConstraintError;
 }

@@ -36,14 +36,11 @@ import org.pcollections.PMap;
 import org.pcollections.PSet;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.RSpaceRGB;
-import com.io7m.renderer.RSpaceWorld;
-import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.kernel.KLight.KDirectional;
-import com.io7m.renderer.kernel.KLight.KSphere;
+import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionDirectional;
+import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionProjective;
+import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionSpherical;
 import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.RXMLUtilities;
 
@@ -56,7 +53,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     try {
       SCENE_XML_URI =
         new URI("http://schemas.io7m.com/renderer/1.0.0/sandbox-scene");
-      SCENE_XML_VERSION = 7;
+      SCENE_XML_VERSION = 11;
     } catch (final URISyntaxException e) {
       throw new UnreachableCodeException();
     }
@@ -64,10 +61,10 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
   public static @Nonnull SBSceneDescription empty()
   {
-    final PSet<PathVirtual> textures_2d = HashTreePSet.empty();
-    final PSet<PathVirtual> textures_cube = HashTreePSet.empty();
+    final PSet<SBTexture2DDescription> textures_2d = HashTreePSet.empty();
+    final PSet<SBTextureCubeDescription> textures_cube = HashTreePSet.empty();
     final PSet<PathVirtual> meshes = HashTreePSet.empty();
-    final PMap<Integer, KLight> lights = HashTreePMap.empty();
+    final PMap<Integer, SBLightDescription> lights = HashTreePMap.empty();
     final PMap<Integer, SBInstanceDescription> instances =
       HashTreePMap.empty();
 
@@ -139,12 +136,13 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return HashTreePMap.from(m);
   }
 
-  private static @Nonnull PMap<Integer, KLight> fromXMLLights(
+  private static @Nonnull PMap<Integer, SBLightDescription> fromXMLLights(
     final @Nonnull Element e)
     throws RXMLException,
       ConstraintError
   {
-    final HashMap<Integer, KLight> m = new HashMap<Integer, KLight>();
+    final HashMap<Integer, SBLightDescription> m =
+      new HashMap<Integer, SBLightDescription>();
 
     final Element ec =
       RXMLUtilities.getChild(e, "lights", SBSceneDescription.SCENE_XML_URI);
@@ -153,7 +151,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
     for (int index = 0; index < ecc.size(); ++index) {
       final Element ei = ecc.get(index);
-      final KLight d = SBSceneDescription.loadLight(ei);
+      final SBLightDescription d = SBSceneDescription.loadLight(ei);
       m.put(d.getID(), d);
     }
 
@@ -183,12 +181,13 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return HashTreePSet.from(m);
   }
 
-  private static @Nonnull PSet<PathVirtual> fromXMLTextures2D(
+  private static @Nonnull PSet<SBTexture2DDescription> fromXMLTextures2D(
     final @Nonnull Element e)
     throws RXMLException,
       ConstraintError
   {
-    final HashSet<PathVirtual> m = new HashSet<PathVirtual>();
+    final HashSet<SBTexture2DDescription> m =
+      new HashSet<SBTexture2DDescription>();
 
     final Element ec =
       RXMLUtilities.getChild(
@@ -203,19 +202,19 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
     for (int index = 0; index < ecc.size(); ++index) {
       final Element me = ecc.get(index);
-      final String mep = RXMLUtilities.getElementNonEmptyString(me);
-      m.add(PathVirtual.ofString(mep));
+      m.add(SBTexture2DDescription.fromXML(me));
     }
 
     return HashTreePSet.from(m);
   }
 
-  private static @Nonnull PSet<PathVirtual> fromXMLTexturesCube(
+  private static @Nonnull PSet<SBTextureCubeDescription> fromXMLTexturesCube(
     final @Nonnull Element e)
     throws RXMLException,
       ConstraintError
   {
-    final HashSet<PathVirtual> m = new HashSet<PathVirtual>();
+    final HashSet<SBTextureCubeDescription> m =
+      new HashSet<SBTextureCubeDescription>();
 
     final Element ec =
       RXMLUtilities.getChild(
@@ -230,181 +229,42 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
     for (int index = 0; index < ecc.size(); ++index) {
       final Element me = ecc.get(index);
-      final String mep = RXMLUtilities.getElementNonEmptyString(me);
-      m.add(PathVirtual.ofString(mep));
+      m.add(SBTextureCubeDescription.fromXML(me));
     }
 
     return HashTreePSet.from(m);
   }
 
-  private static @Nonnull Element lightToXML(
-    final @Nonnull KLight light)
-  {
-    final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-
-    final Element eid = new Element("s:id", uri);
-    eid.appendChild(light.getID().toString());
-
-    final Element ei = new Element("s:intensity", uri);
-    ei.appendChild(Float.toString(light.getIntensity()));
-
-    final Element ec = new Element("s:colour", uri);
-    final Element ecr = new Element("s:r", uri);
-    ecr.appendChild(Float.toString(light.getColour().getXF()));
-    final Element ecg = new Element("s:g", uri);
-    ecg.appendChild(Float.toString(light.getColour().getYF()));
-    final Element ecb = new Element("s:b", uri);
-    ecb.appendChild(Float.toString(light.getColour().getZF()));
-    ec.appendChild(ecr);
-    ec.appendChild(ecg);
-    ec.appendChild(ecb);
-
-    switch (light.getType()) {
-      case LIGHT_CONE:
-      {
-        throw new UnimplementedCodeException();
-      }
-      case LIGHT_DIRECTIONAL:
-      {
-        final KDirectional d = (KLight.KDirectional) light;
-        final Element e = new Element("s:light-directional", uri);
-
-        final Element ed = new Element("s:direction", uri);
-        final Element edx = new Element("s:x", uri);
-        edx.appendChild(Float.toString(d.getDirection().getXF()));
-        final Element edy = new Element("s:y", uri);
-        edy.appendChild(Float.toString(d.getDirection().getYF()));
-        final Element edz = new Element("s:z", uri);
-        edz.appendChild(Float.toString(d.getDirection().getZF()));
-        ed.appendChild(edx);
-        ed.appendChild(edy);
-        ed.appendChild(edz);
-
-        e.appendChild(eid);
-        e.appendChild(ec);
-        e.appendChild(ei);
-        e.appendChild(ed);
-        return e;
-      }
-      case LIGHT_SPHERE:
-      {
-        final KSphere d = (KLight.KSphere) light;
-        final Element e = new Element("s:light-spherical", uri);
-
-        final Element ed = new Element("s:position", uri);
-        final Element edx = new Element("s:x", uri);
-        edx.appendChild(Float.toString(d.getPosition().getXF()));
-        final Element edy = new Element("s:y", uri);
-        edy.appendChild(Float.toString(d.getPosition().getYF()));
-        final Element edz = new Element("s:z", uri);
-        edz.appendChild(Float.toString(d.getPosition().getZF()));
-        ed.appendChild(edx);
-        ed.appendChild(edy);
-        ed.appendChild(edz);
-
-        final Element er = new Element("s:radius", uri);
-        er.appendChild(Float.toString(d.getRadius()));
-        final Element ef = new Element("s:falloff", uri);
-        ef.appendChild(Float.toString(d.getExponent()));
-
-        e.appendChild(eid);
-        e.appendChild(ec);
-        e.appendChild(ei);
-        e.appendChild(ed);
-        e.appendChild(er);
-        e.appendChild(ef);
-        return e;
-      }
-    }
-
-    throw new UnreachableCodeException();
-  }
-
-  private static @Nonnull KLight loadLight(
+  private static @Nonnull SBLightDescription loadLight(
     final @Nonnull Element e)
     throws RXMLException,
       ConstraintError
   {
     if (e.getLocalName().equals("light-directional")) {
-      return SBSceneDescription.loadLightDirectional(e);
+      return SBLightDescriptionDirectional.fromXML(e);
     }
     if (e.getLocalName().equals("light-spherical")) {
-      return SBSceneDescription.loadLightSpherical(e);
+      return SBLightDescriptionSpherical.fromXML(e);
+    }
+    if (e.getLocalName().equals("light-projective")) {
+      return SBLightDescriptionProjective.fromXML(e);
     }
 
-    throw new UnimplementedCodeException();
+    throw new UnreachableCodeException();
   }
 
-  private static @Nonnull KLight.KDirectional loadLightDirectional(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
-  {
-    final URI uri = SBSceneDescription.SCENE_XML_URI;
-    RXMLUtilities.checkIsElement(e, "light-directional", uri);
-
-    final Element ed = RXMLUtilities.getChild(e, "direction", uri);
-    final Element ec = RXMLUtilities.getChild(e, "colour", uri);
-    final Element ei = RXMLUtilities.getChild(e, "intensity", uri);
-    final Element eid = RXMLUtilities.getChild(e, "id", uri);
-
-    final RVectorI3F<RSpaceWorld> direction =
-      RXMLUtilities.getElementVector3f(ed, uri);
-    final RVectorI3F<RSpaceRGB> colour = RXMLUtilities.getElementRGB(ec, uri);
-    final int id = RXMLUtilities.getElementInteger(eid);
-    final float intensity = RXMLUtilities.getElementFloat(ei);
-
-    return new KLight.KDirectional(
-      Integer.valueOf(id),
-      direction,
-      colour,
-      intensity);
-  }
-
-  private static @Nonnull KSphere loadLightSpherical(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
-  {
-    final URI uri = SBSceneDescription.SCENE_XML_URI;
-    RXMLUtilities.checkIsElement(e, "light-spherical", uri);
-
-    final Element ep = RXMLUtilities.getChild(e, "position", uri);
-    final Element ec = RXMLUtilities.getChild(e, "colour", uri);
-    final Element ei = RXMLUtilities.getChild(e, "intensity", uri);
-    final Element eid = RXMLUtilities.getChild(e, "id", uri);
-    final Element er = RXMLUtilities.getChild(e, "radius", uri);
-    final Element ef = RXMLUtilities.getChild(e, "falloff", uri);
-
-    final RVectorI3F<RSpaceWorld> position =
-      RXMLUtilities.getElementVector3f(ep, uri);
-    final RVectorI3F<RSpaceRGB> colour = RXMLUtilities.getElementRGB(ec, uri);
-    final int id = RXMLUtilities.getElementInteger(eid);
-    final float intensity = RXMLUtilities.getElementFloat(ei);
-    final float radius = RXMLUtilities.getElementFloat(er);
-    final float falloff = RXMLUtilities.getElementFloat(ef);
-
-    return new KLight.KSphere(
-      Integer.valueOf(id),
-      colour,
-      intensity,
-      position,
-      radius,
-      falloff);
-  }
-
-  private final @Nonnull PSet<PathVirtual>                    textures_2d;
-  private final @Nonnull PSet<PathVirtual>                    textures_cube;
+  private final @Nonnull PSet<SBTexture2DDescription>         textures_2d;
+  private final @Nonnull PSet<SBTextureCubeDescription>       textures_cube;
   private final @Nonnull PSet<PathVirtual>                    meshes;
-  private final @Nonnull PMap<Integer, KLight>                lights;
+  private final @Nonnull PMap<Integer, SBLightDescription>    lights;
   private final @Nonnull PMap<Integer, SBInstanceDescription> instances;
 
-  public @Nonnull PSet<PathVirtual> getTextures2D()
+  public @Nonnull PSet<SBTexture2DDescription> getTextures2D()
   {
     return this.textures_2d;
   }
 
-  public @Nonnull PSet<PathVirtual> getTexturesCube()
+  public @Nonnull PSet<SBTextureCubeDescription> getTexturesCube()
   {
     return this.textures_cube;
   }
@@ -415,10 +275,10 @@ import com.io7m.renderer.xml.RXMLUtilities;
   }
 
   private SBSceneDescription(
-    final @Nonnull PSet<PathVirtual> textures_2d,
-    final @Nonnull PSet<PathVirtual> textures_cube,
+    final @Nonnull PSet<SBTexture2DDescription> textures_2d,
+    final @Nonnull PSet<SBTextureCubeDescription> textures_cube,
     final @Nonnull PSet<PathVirtual> models,
-    final @Nonnull PMap<Integer, KLight> lights,
+    final @Nonnull PMap<Integer, SBLightDescription> lights,
     final @Nonnull PMap<Integer, SBInstanceDescription> instances)
   {
     this.textures_2d = textures_2d;
@@ -464,7 +324,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return this.instances.values();
   }
 
-  public @Nonnull Collection<KLight> getLights()
+  public @Nonnull Collection<SBLightDescription> getLights()
   {
     return this.lights.values();
   }
@@ -492,7 +352,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
   }
 
   public @Nonnull SBSceneDescription lightAdd(
-    final @Nonnull KLight l)
+    final @Nonnull SBLightDescription l)
   {
     return new SBSceneDescription(
       this.textures_2d,
@@ -514,7 +374,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
   }
 
   public @Nonnull SBSceneDescription texture2DAdd(
-    final @Nonnull PathVirtual t)
+    final @Nonnull SBTexture2DDescription t)
   {
     return new SBSceneDescription(
       this.textures_2d.plus(t),
@@ -525,7 +385,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
   }
 
   public @Nonnull SBSceneDescription textureCubeAdd(
-    final @Nonnull PathVirtual t)
+    final @Nonnull SBTextureCubeDescription t)
   {
     return new SBSceneDescription(
       this.textures_2d,
@@ -543,17 +403,13 @@ import com.io7m.renderer.xml.RXMLUtilities;
       .toString(SBSceneDescription.SCENE_XML_VERSION)));
 
     final Element et2 = new Element("s:textures-2d", uri);
-    for (final PathVirtual t : this.textures_2d) {
-      final Element ete = new Element("s:texture-2d", uri);
-      ete.appendChild(t.toString());
-      et2.appendChild(ete);
+    for (final SBTexture2DDescription t : this.textures_2d) {
+      et2.appendChild(t.toXML());
     }
 
     final Element etc = new Element("s:textures-cube", uri);
-    for (final PathVirtual t : this.textures_cube) {
-      final Element ete = new Element("s:texture-cube", uri);
-      ete.appendChild(t.toString());
-      etc.appendChild(ete);
+    for (final SBTextureCubeDescription t : this.textures_cube) {
+      etc.appendChild(t.toXML());
     }
 
     final Element em = new Element("s:meshes", uri);
@@ -564,8 +420,8 @@ import com.io7m.renderer.xml.RXMLUtilities;
     }
 
     final Element el = new Element("s:lights", uri);
-    for (final KLight l : this.lights.values()) {
-      el.appendChild(SBSceneDescription.lightToXML(l));
+    for (final SBLightDescription l : this.lights.values()) {
+      el.appendChild(l.toXML());
     }
 
     final Element ei = new Element("s:instances", uri);

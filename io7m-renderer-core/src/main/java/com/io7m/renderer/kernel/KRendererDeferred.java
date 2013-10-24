@@ -25,7 +25,7 @@ import com.io7m.jtensors.VectorReadable4F;
 final class KRendererDeferred implements KRenderer
 {
   KRendererDeferred(
-    final @Nonnull JCGLImplementation gl)
+    @SuppressWarnings("unused") final @Nonnull JCGLImplementation gl)
   {
     // Nothing
   }
@@ -34,12 +34,17 @@ final class KRendererDeferred implements KRenderer
     final @Nonnull Framebuffer result,
     final @Nonnull KScene scene)
   {
-
+    // Not implemented.
   }
 
   @Override public void setBackgroundRGBA(
     final @Nonnull VectorReadable4F rgba)
   {
+    // Not implemented.
+  }
 
+  @Override public void close()
+  {
+    // Not implemented.
   }
 }

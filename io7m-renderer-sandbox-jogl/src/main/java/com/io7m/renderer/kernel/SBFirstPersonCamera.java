@@ -22,6 +22,8 @@ import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.renderer.RMatrixI4x4F;
+import com.io7m.renderer.RTransformView;
 
 final class SBFirstPersonCamera
 {
@@ -81,7 +83,7 @@ final class SBFirstPersonCamera
     return this.input_position;
   }
 
-  @Nonnull KMatrix4x4F<KMatrixView> makeViewMatrix()
+  @Nonnull RMatrixI4x4F<RTransformView> makeViewMatrix()
   {
     SBFirstPersonCamera.makePitchYawVector(
       this.input_pitch,
@@ -99,7 +101,7 @@ final class SBFirstPersonCamera
       SBFirstPersonCamera.UP,
       this.derived_matrix);
 
-    return new KMatrix4x4F<KMatrixView>(this.derived_matrix);
+    return new RMatrixI4x4F<RTransformView>(this.derived_matrix);
   }
 
   @Override public String toString()

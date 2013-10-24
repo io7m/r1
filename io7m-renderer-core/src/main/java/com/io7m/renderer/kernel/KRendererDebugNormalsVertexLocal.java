@@ -24,7 +24,6 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.Framebuffer;
 import com.io7m.jcanephora.IndexBuffer;
@@ -38,9 +37,7 @@ import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI2I;
-import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
@@ -49,17 +46,13 @@ import com.io7m.jvvfs.FilesystemError;
 
 final class KRendererDebugNormalsVertexLocal implements KRenderer
 {
-  private final @Nonnull MatrixM4x4F           matrix_modelview;
-  private final @Nonnull MatrixM4x4F           matrix_model;
-  private final @Nonnull MatrixM4x4F           matrix_view;
-  private final @Nonnull MatrixM4x4F           matrix_projection;
-  private final @Nonnull MatrixM4x4F.Context   matrix_context;
   private final @Nonnull KTransform.Context    transform_context;
+  private final @Nonnull KMatrices             matrices;
   private final @Nonnull JCGLImplementation    gl;
-  private final @Nonnull ProgramReference      program;
   private final @Nonnull Log                   log;
   private final @Nonnull VectorM4F             background;
   private final @Nonnull VectorM2I             viewport_size;
+  private final @Nonnull ProgramReference      program;
   private final @Nonnull JCCEExecutionCallable exec;
 
   KRendererDebugNormalsVertexLocal(
@@ -73,17 +66,13 @@ final class KRendererDebugNormalsVertexLocal implements KRenderer
       IOException,
       JCGLException
   {
-    this.log = new Log(log, "krenderer-debug-normals-vertex-eye");
+    this.log = new Log(log, "krenderer-debug-normals-vertex-local");
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrix_modelview = new MatrixM4x4F();
-    this.matrix_projection = new MatrixM4x4F();
-    this.matrix_model = new MatrixM4x4F();
-    this.matrix_view = new MatrixM4x4F();
-    this.matrix_context = new MatrixM4x4F.Context();
+    this.matrices = new KMatrices();
     this.transform_context = new KTransform.Context();
     this.viewport_size = new VectorM2I();
 
@@ -105,9 +94,8 @@ final class KRendererDebugNormalsVertexLocal implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-    final KCamera camera = scene.getCamera();
-    camera.getProjectionMatrix().makeMatrixM4x4F(this.matrix_projection);
-    camera.getViewMatrix().makeMatrixM4x4F(this.matrix_view);
+    this.matrices.matricesBegin();
+    this.matrices.matricesMakeFromCamera(scene.getCamera());
 
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
@@ -124,13 +112,13 @@ final class KRendererDebugNormalsVertexLocal implements KRenderer
       gc.blendingDisable();
 
       this.exec.execPrepare(gc);
-      this.exec.execUniformPutMatrix4x4F(
+      KShadingProgramCommon.putMatrixProjection(
+        this.exec,
         gc,
-        "m_projection",
-        this.matrix_projection);
+        this.matrices.getMatrixProjection());
       this.exec.execCancel();
 
-      for (final KMeshInstance mesh : scene.getMeshes()) {
+      for (final KMeshInstance mesh : scene.getInstances()) {
         this.renderMesh(gc, mesh);
       }
     } finally {
@@ -144,24 +132,18 @@ final class KRendererDebugNormalsVertexLocal implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    final KTransform transform = instance.getTransform();
-    transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
-
-    MatrixM4x4F.multiply(
-      this.matrix_view,
-      this.matrix_model,
-      this.matrix_modelview);
+    this.matrices.matricesMakeFromTransform(instance.getTransform());
 
     /**
      * Upload matrices.
      */
 
     this.exec.execPrepare(gc);
-    this.exec.execUniformUseExisting("m_projection");
-    this.exec.execUniformPutMatrix4x4F(
+    KShadingProgramCommon.putMatrixProjectionReuse(this.exec);
+    KShadingProgramCommon.putMatrixModelView(
+      this.exec,
       gc,
-      "m_modelview",
-      this.matrix_modelview);
+      this.matrices.getMatrixModelView());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -173,18 +155,8 @@ final class KRendererDebugNormalsVertexLocal implements KRenderer
       final IndexBuffer indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
-
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      this.exec.execAttributeBind(gc, "v_position", a_pos);
-
-      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
-        final ArrayBufferAttribute a_nor =
-          array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
-        this.exec.execAttributeBind(gc, "v_normal", a_nor);
-      } else {
-        this.exec.execAttributePutVector3F(gc, "v_normal", VectorI3F.ZERO);
-      }
+      KShadingProgramCommon.bindAttributePosition(gc, this.exec, array);
+      KShadingProgramCommon.bindAttributeNormal(gc, this.exec, array);
 
       this.exec.execSetCallable(new Callable<Void>() {
         @Override public Void call()
@@ -214,5 +186,13 @@ final class KRendererDebugNormalsVertexLocal implements KRenderer
     final @Nonnull VectorReadable4F rgba)
   {
     VectorM4F.copy(rgba, this.background);
+  }
+
+  @Override public void close()
+    throws JCGLException,
+      ConstraintError
+  {
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+    gc.programDelete(this.program);
   }
 }
