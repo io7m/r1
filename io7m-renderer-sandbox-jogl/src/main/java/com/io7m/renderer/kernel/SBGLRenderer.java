@@ -1015,12 +1015,12 @@ final class SBGLRenderer implements GLEventListener
         } else {
           final double aspect = width / height;
           MatrixM4x4F.setIdentity(this.matrix_projection);
-          ProjectionMatrix.makePerspective(
+          ProjectionMatrix.makePerspectiveProjection(
             this.matrix_projection,
             1,
             100,
             aspect,
-            Math.toRadians(30));
+            Math.toRadians(60));
         }
         break;
       }
@@ -1646,7 +1646,7 @@ final class SBGLRenderer implements GLEventListener
       new VectorI3F(0, 0, -1));
 
     MatrixM4x4F.setIdentity(this.matrix_projection);
-    ProjectionMatrix.makeOrthographic(
+    ProjectionMatrix.makeOrthographicProjection(
       this.matrix_projection,
       0,
       drawable.getWidth(),

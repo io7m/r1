@@ -167,6 +167,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
       private final @Nonnull SBOrientationInput orientation;
 
+      protected final @Nonnull SBFloatHSlider   near;
       protected final @Nonnull SBFloatHSlider   range;
       protected final @Nonnull SBFloatHSlider   falloff;
       protected final @Nonnull JTextField       texture;
@@ -184,9 +185,10 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         this.position_y = new JTextField("1.0");
         this.position_z = new JTextField("0.0");
         this.orientation = new SBOrientationInput();
+        this.near = new SBFloatHSlider("Near", 0.0f, 10.0f);
         this.range = new SBFloatHSlider("Range", 0.0f, 128.0f);
         this.falloff = new SBFloatHSlider("Falloff", 0.0f, 64.0f);
-        this.fov = new SBFloatHSlider("FOV", 0.0f, 360.0f);
+        this.fov = new SBFloatHSlider("FOV", 0.0f, 90.0f);
         this.aspect = new SBFloatHSlider("Aspect ratio", 0.0f, 2.0f);
         this.texture = new JTextField();
         this.texture.setEditable(false);
@@ -230,6 +232,12 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           .add(new JLabel("Texture"))
           .add(this.texture, 4)
           .add(this.texture_select);
+
+        group
+          .grid()
+          .add(this.near.getLabel())
+          .add(this.near.getSlider(), 4)
+          .add(this.near.getField());
 
         group
           .grid()
@@ -278,13 +286,13 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
         this.orientation.setOrientation(kl.getOrientation());
         this.texture.setText(kl.getTexture().getName());
-        this.range.setCurrent(kl.getRange());
         this.falloff.setCurrent(kl.getFalloff());
 
         final SBFrustum frustum = light.getDescription().getFrustum();
-
         final float fov_degrees =
           (float) Math.toDegrees(frustum.getHorizontalFOV());
+        this.range.setCurrent(frustum.getFarDistance());
+        this.near.setCurrent(frustum.getNearDistance());
         this.fov.setCurrent(fov_degrees);
         this.aspect.setCurrent(frustum.getAspectRatio());
       }
@@ -320,6 +328,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       public @Nonnull SBFrustum getFrustum()
       {
         return new SBFrustum(
+          this.near.getCurrent(),
           this.range.getCurrent(),
           (float) Math.toRadians(this.fov.getCurrent()),
           this.aspect.getCurrent());
