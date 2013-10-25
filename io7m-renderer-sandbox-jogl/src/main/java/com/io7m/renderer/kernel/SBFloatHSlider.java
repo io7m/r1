@@ -79,7 +79,7 @@ public final class SBFloatHSlider
           final float actual =
             SBTextFieldUtilities
               .getFieldFloatOrError(SBFloatHSlider.this.field);
-          SBFloatHSlider.this.setCurrentDirectly(actual);
+          SBFloatHSlider.this.setCurrent(actual);
         } catch (final SBExceptionInputError x) {
 
         }
@@ -143,16 +143,10 @@ public final class SBFloatHSlider
   public void setCurrent(
     final float e)
   {
-    this.setCurrentDirectly(e);
     this.slider.setValue(SBFloatHSlider.convertToSlider(
       e,
       this.minimum,
       this.maximum));
-  }
-
-  protected void setCurrentDirectly(
-    final float e)
-  {
     this.current = e;
     this.refreshText();
   }
