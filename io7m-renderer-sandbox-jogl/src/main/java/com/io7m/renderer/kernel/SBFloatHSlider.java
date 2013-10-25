@@ -70,12 +70,16 @@ public final class SBFloatHSlider
     });
 
     this.field.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final ActionEvent e)
+      @SuppressWarnings("synthetic-access") @Override public
+        void
+        actionPerformed(
+          final ActionEvent e)
       {
         try {
-          SBFloatHSlider.this.setCurrent(SBTextFieldUtilities
-            .getFieldFloatOrError(SBFloatHSlider.this.field));
+          final float actual =
+            SBTextFieldUtilities
+              .getFieldFloatOrError(SBFloatHSlider.this.field);
+          SBFloatHSlider.this.setCurrentDirectly(actual);
         } catch (final SBExceptionInputError x) {
 
         }
@@ -139,11 +143,17 @@ public final class SBFloatHSlider
   public void setCurrent(
     final float e)
   {
-    this.current = e;
-    this.refreshText();
+    this.setCurrentDirectly(e);
     this.slider.setValue(SBFloatHSlider.convertToSlider(
       e,
       this.minimum,
       this.maximum));
+  }
+
+  protected void setCurrentDirectly(
+    final float e)
+  {
+    this.current = e;
+    this.refreshText();
   }
 }
