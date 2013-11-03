@@ -40,14 +40,14 @@ import javax.annotation.concurrent.Immutable;
     this.batches = batches;
   }
 
+  public @Nonnull KBatches getBatches()
+  {
+    return this.batches;
+  }
+
   @Nonnull KCamera getCamera()
   {
     return this.camera;
-  }
-
-  public @Nonnull Collection<KLight> getLights()
-  {
-    return this.lights;
   }
 
   public @Nonnull Collection<KMeshInstance> getInstances()
@@ -55,8 +55,8 @@ import javax.annotation.concurrent.Immutable;
     return this.instances;
   }
 
-  public @Nonnull KBatches getBatches()
+  public @Nonnull Collection<KLight> getLights()
   {
-    return this.batches;
+    return this.lights;
   }
 }

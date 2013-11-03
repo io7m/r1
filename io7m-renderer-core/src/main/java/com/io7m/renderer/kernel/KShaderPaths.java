@@ -37,6 +37,17 @@ public final class KShaderPaths
     }
   }
 
+  public static @Nonnull PathVirtual getShaderPath(
+    final @Nonnull JCGLSLVersionNumber version,
+    final @Nonnull JCGLApi api,
+    final @Nonnull String name)
+    throws ConstraintError,
+      JCGLUnsupportedException
+  {
+    return KShaderPaths.BASE.appendName(name).appendName(
+      KShaderPaths.getShadingLanguageName(version, api));
+  }
+
   private static @Nonnull String getShadingLanguageName(
     final @Nonnull JCGLSLVersionNumber version,
     final @Nonnull JCGLApi api)
@@ -109,17 +120,6 @@ public final class KShaderPaths
     }
 
     throw new UnreachableCodeException();
-  }
-
-  public static @Nonnull PathVirtual getShaderPath(
-    final @Nonnull JCGLSLVersionNumber version,
-    final @Nonnull JCGLApi api,
-    final @Nonnull String name)
-    throws ConstraintError,
-      JCGLUnsupportedException
-  {
-    return KShaderPaths.BASE.appendName(name).appendName(
-      KShaderPaths.getShadingLanguageName(version, api));
   }
 
 }

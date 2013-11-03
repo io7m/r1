@@ -25,13 +25,14 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
+import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.FaceWindingOrder;
-import com.io7m.jcanephora.Framebuffer;
+import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
@@ -48,7 +49,9 @@ import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.jtensors.VectorI2F;
+import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
@@ -66,6 +69,7 @@ final class KRendererForwardDiffuse implements KRenderer
   private final @Nonnull JCGLImplementation    gl;
   private final @Nonnull Log                   log;
   private final @Nonnull VectorM4F             background;
+  private final @Nonnull VectorM2I             viewport_size;
   private final @Nonnull ProgramReference      program_directional;
   private final @Nonnull ProgramReference      program_spherical;
   private final @Nonnull ProgramReference      program_depth;
@@ -73,10 +77,12 @@ final class KRendererForwardDiffuse implements KRenderer
   private final @Nonnull JCCEExecutionCallable exec_spherical;
   private final @Nonnull JCCEExecutionCallable exec_depth;
   private final @Nonnull KMatrices             matrices;
+  private @Nonnull KFramebuffer                framebuffer;
 
   KRendererForwardDiffuse(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
+    final @Nonnull AreaInclusive size,
     final @Nonnull Log log)
     throws JCGLCompileException,
       ConstraintError,
@@ -92,6 +98,7 @@ final class KRendererForwardDiffuse implements KRenderer
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrices = new KMatrices();
+    this.viewport_size = new VectorM2I();
 
     this.program_depth =
       KShaderUtilities.makeProgram(
@@ -123,73 +130,8 @@ final class KRendererForwardDiffuse implements KRenderer
         "forward_d_spherical",
         log);
     this.exec_spherical = new JCCEExecutionCallable(this.program_spherical);
-  }
 
-  @Override public void render(
-    final @Nonnull Framebuffer result,
-    final @Nonnull KScene scene)
-    throws JCGLException,
-      ConstraintError
-  {
-    this.matrices.matricesBegin();
-    this.matrices.matricesMakeFromCamera(scene.getCamera());
-
-    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-
-    try {
-      gc.framebufferDrawBind(result.getFramebuffer());
-
-      gc.colorBufferClearV4f(this.background);
-
-      gc.cullingEnable(
-        FaceSelection.FACE_BACK,
-        FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-
-      /**
-       * Pass 0: render all meshes into the depth buffer, without touching the
-       * color buffer.
-       */
-
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-      gc.depthBufferWriteEnable();
-      gc.depthBufferClear(1.0f);
-      gc.colorBufferMask(false, false, false, false);
-      gc.blendingDisable();
-      this.renderDepthPassMeshes(scene, gc);
-
-      /**
-       * Pass 1 .. n: render all lit meshes, blending additively, into the
-       * framebuffer.
-       */
-
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
-      gc.depthBufferWriteDisable();
-      gc.colorBufferMask(true, true, true, true);
-      gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
-
-      for (final KLight light : scene.getLights()) {
-        switch (light.getType()) {
-          case LIGHT_SPHERE:
-          {
-            final KSphere slight = (KLight.KSphere) light;
-            this.renderLightPassMeshesSpherical(scene, gc, slight);
-            break;
-          }
-          case LIGHT_DIRECTIONAL:
-          {
-            final KDirectional dlight = (KLight.KDirectional) light;
-            this.renderLightPassMeshesDirectional(scene, gc, dlight);
-            break;
-          }
-          case LIGHT_PROJECTIVE:
-          {
-            throw new UnimplementedCodeException();
-          }
-        }
-      }
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
+    this.rendererFramebufferResize(size);
   }
 
   /**
@@ -278,6 +220,113 @@ final class KRendererForwardDiffuse implements KRenderer
     for (final KMeshInstance mesh : scene.getInstances()) {
       this.renderDepthPassMesh(gc, this.exec_depth, mesh);
     }
+  }
+
+  @Override public void rendererClose()
+    throws JCGLException,
+      ConstraintError
+  {
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+    gc.programDelete(this.program_directional);
+    gc.programDelete(this.program_spherical);
+    // XXX: Depth not deleted
+  }
+
+  @Override public void rendererEvaluate(
+    final @Nonnull KScene scene)
+    throws JCGLException,
+      ConstraintError
+  {
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+
+    this.matrices.matricesBegin();
+    this.matrices.matricesMakeFromCamera(scene.getCamera());
+
+    final FramebufferReferenceUsable output_buffer =
+      this.framebuffer.kframebufferGetOutputBuffer();
+    final AreaInclusive area = this.framebuffer.kframebufferGetArea();
+    this.viewport_size.x = (int) area.getRangeX().getInterval();
+    this.viewport_size.y = (int) area.getRangeY().getInterval();
+
+    try {
+      gc.framebufferDrawBind(output_buffer);
+      gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
+
+      gc.colorBufferClearV4f(this.background);
+
+      gc.cullingEnable(
+        FaceSelection.FACE_BACK,
+        FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+
+      /**
+       * Pass 0: render all meshes into the depth buffer, without touching the
+       * color buffer.
+       */
+
+      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+      gc.depthBufferWriteEnable();
+      gc.depthBufferClear(1.0f);
+      gc.colorBufferMask(false, false, false, false);
+      gc.blendingDisable();
+      this.renderDepthPassMeshes(scene, gc);
+
+      /**
+       * Pass 1 .. n: render all lit meshes, blending additively, into the
+       * framebuffer.
+       */
+
+      gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
+      gc.depthBufferWriteDisable();
+      gc.colorBufferMask(true, true, true, true);
+      gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+
+      for (final KLight light : scene.getLights()) {
+        switch (light.getType()) {
+          case LIGHT_SPHERE:
+          {
+            final KSphere slight = (KLight.KSphere) light;
+            this.renderLightPassMeshesSpherical(scene, gc, slight);
+            break;
+          }
+          case LIGHT_DIRECTIONAL:
+          {
+            final KDirectional dlight = (KLight.KDirectional) light;
+            this.renderLightPassMeshesDirectional(scene, gc, dlight);
+            break;
+          }
+          case LIGHT_PROJECTIVE:
+          {
+            throw new UnimplementedCodeException();
+          }
+        }
+      }
+    } finally {
+      gc.framebufferDrawUnbind();
+    }
+  }
+
+  @Override public @Nonnull KFramebufferUsable rendererFramebufferGet()
+  {
+    return this.framebuffer;
+  }
+
+  @Override public void rendererFramebufferResize(
+    final @Nonnull AreaInclusive size)
+    throws JCGLException,
+      ConstraintError,
+      JCGLUnsupportedException
+  {
+    if (this.framebuffer != null) {
+      this.framebuffer.kframebufferDelete(this.gl);
+    }
+
+    this.framebuffer = KFramebufferCommon.allocateBasicRGBA(this.gl, size);
+  }
+
+  @Override public void rendererSetBackgroundRGBA(
+    final @Nonnull VectorReadable4F rgba)
+  {
+    VectorM4F.copy(rgba, this.background);
   }
 
   /**
@@ -580,21 +629,5 @@ final class KRendererForwardDiffuse implements KRenderer
     } finally {
       gc.arrayBufferUnbind();
     }
-  }
-
-  @Override public void setBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-  {
-    VectorM4F.copy(rgba, this.background);
-  }
-
-  @Override public void close()
-    throws JCGLException,
-      ConstraintError
-  {
-    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-    gc.programDelete(this.program_directional);
-    gc.programDelete(this.program_spherical);
-    // XXX: Depth not deleted
   }
 }
