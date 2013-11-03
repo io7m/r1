@@ -29,21 +29,6 @@ import javax.annotation.concurrent.Immutable;
   private final @Nonnull KMeshInstanceMaterialLabel label;
   private final @Nonnull ArrayList<KMeshInstance>   instances;
 
-  public @Nonnull KLight getLight()
-  {
-    return this.light;
-  }
-
-  public @Nonnull KMeshInstanceMaterialLabel getLabel()
-  {
-    return this.label;
-  }
-
-  public @Nonnull List<KMeshInstance> getInstances()
-  {
-    return Collections.unmodifiableList(this.instances);
-  }
-
   KBatchLit(
     final @Nonnull KLight light,
     final @Nonnull KMeshInstanceMaterialLabel label,
@@ -74,6 +59,21 @@ import javax.annotation.concurrent.Immutable;
       return false;
     }
     return true;
+  }
+
+  public @Nonnull List<KMeshInstance> getInstances()
+  {
+    return Collections.unmodifiableList(this.instances);
+  }
+
+  public @Nonnull KMeshInstanceMaterialLabel getLabel()
+  {
+    return this.label;
+  }
+
+  public @Nonnull KLight getLight()
+  {
+    return this.light;
   }
 
   @Override public int hashCode()
