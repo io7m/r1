@@ -72,11 +72,6 @@ import com.io7m.renderer.RTransformTexture;
     return this.id;
   }
 
-  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
-  {
-    return this.uv_matrix;
-  }
-
   public @Nonnull KMaterial getMaterial()
   {
     return this.material;
@@ -95,5 +90,10 @@ import com.io7m.renderer.RTransformTexture;
   @Override public @Nonnull KTransform getTransform()
   {
     return this.transform;
+  }
+
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
+  {
+    return this.uv_matrix;
   }
 }
