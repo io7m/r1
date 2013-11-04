@@ -66,17 +66,16 @@ public final class SBVisibleFrustum
       array_map.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION.getName());
     final CursorWritableIndex ic = index_map.getCursor();
 
+    final float near_plane_z = frustum.getNearDistance();
     final float near_plane_x =
-      (float) (1.0 / Math.tan(frustum.getHorizontalFOV()));
+      (float) Math.tan(frustum.getHorizontalFOV() / 2.0f);
     final float near_plane_y = near_plane_x * frustum.getAspectRatio();
-    final float near_plane_z = 0.0f;
 
-    // XXX: Placeholders
-    final float far_plane_x = near_plane_x;
-    final float far_plane_y = near_plane_y;
-    final float far_plane_z = near_plane_z;
+    final float far_plane_z = 0.0f;
+    final float far_plane_x = 0.0f;
+    final float far_plane_y = 0.0f;
 
-    pc.put3f(0.0f, 0.0f, 1.0f);
+    pc.put3f(0.0f, 0.0f, 0.0f);
     pc.put3f(-near_plane_x, -near_plane_y, -near_plane_z);
     pc.put3f(-near_plane_x, +near_plane_y, -near_plane_z);
     pc.put3f(+near_plane_x, +near_plane_y, -near_plane_z);

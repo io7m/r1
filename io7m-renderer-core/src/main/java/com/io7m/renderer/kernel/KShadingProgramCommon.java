@@ -61,7 +61,7 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 
-public final class KShadingProgramCommon
+final class KShadingProgramCommon
 {
   static void bindAttributeNormal(
     final @Nonnull JCGLInterfaceCommon gc,

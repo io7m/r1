@@ -606,6 +606,7 @@ final class SBMainWindow extends JFrame
     try {
       final GLProfile profile = SBMainWindow.getGLProfile();
       final GLCapabilities caps = new GLCapabilities(profile);
+      log.debug("caps: " + caps);
       final GLCanvas canvas = new GLCanvas(caps);
       canvas.addGLEventListener(renderer);
       canvas.addKeyListener(new KeyListener() {
@@ -691,6 +692,9 @@ final class SBMainWindow extends JFrame
               this.input.setRotatingRight(false);
               break;
 
+            case 't':
+              this.input.setWantFramebufferSnapshot(true);
+              break;
             case 'p':
               this.input.setWantPauseToggle(true);
               break;

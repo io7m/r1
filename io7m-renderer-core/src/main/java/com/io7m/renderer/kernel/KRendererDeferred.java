@@ -18,8 +18,12 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jcanephora.Framebuffer;
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnimplementedCodeException;
+import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jtensors.VectorReadable4F;
 
 final class KRendererDeferred implements KRenderer
@@ -27,24 +31,39 @@ final class KRendererDeferred implements KRenderer
   KRendererDeferred(
     @SuppressWarnings("unused") final @Nonnull JCGLImplementation gl)
   {
-    // Nothing
+    throw new UnimplementedCodeException();
   }
 
-  @Override public void render(
-    final @Nonnull Framebuffer result,
-    final @Nonnull KScene scene)
+  @Override public void rendererClose()
   {
-    // Not implemented.
+    throw new UnimplementedCodeException();
   }
 
-  @Override public void setBackgroundRGBA(
+  @Override public void rendererEvaluate(
+    final @Nonnull KScene scene)
+    throws JCGLException,
+      ConstraintError
+  {
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public @Nonnull KFramebufferUsable rendererFramebufferGet()
+  {
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public void rendererFramebufferResize(
+    final @Nonnull AreaInclusive size)
+    throws JCGLException,
+      ConstraintError,
+      JCGLUnsupportedException
+  {
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public void rendererSetBackgroundRGBA(
     final @Nonnull VectorReadable4F rgba)
   {
-    // Not implemented.
-  }
-
-  @Override public void close()
-  {
-    // Not implemented.
+    throw new UnimplementedCodeException();
   }
 }
