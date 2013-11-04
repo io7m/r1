@@ -88,16 +88,6 @@ import com.io7m.renderer.RVectorReadable3F;
       return this.falloff;
     }
 
-    public @Nonnull Texture2DStaticUsable getTexture()
-    {
-      return this.texture;
-    }
-
-    public float getRange()
-    {
-      return this.range;
-    }
-
     public @Nonnull QuaternionI4F getOrientation()
     {
       return this.orientation;
@@ -111,6 +101,16 @@ import com.io7m.renderer.RVectorReadable3F;
     public @Nonnull RMatrixI4x4F<RTransformProjection> getProjection()
     {
       return this.projection;
+    }
+
+    public float getRange()
+    {
+      return this.range;
+    }
+
+    public @Nonnull Texture2DStaticUsable getTexture()
+    {
+      return this.texture;
     }
   }
 

@@ -37,24 +37,29 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final URI uri = SBSceneDescription.SCENE_XML_URI;
     RXMLUtilities.checkIsElement(e, "frustum", uri);
     final Element efov = RXMLUtilities.getChild(e, "fov", uri);
-    final Element elen = RXMLUtilities.getChild(e, "length", uri);
+    final Element end = RXMLUtilities.getChild(e, "near-distance", uri);
+    final Element efd = RXMLUtilities.getChild(e, "far-distance", uri);
     final Element easp = RXMLUtilities.getChild(e, "aspect", uri);
     return new SBFrustum(
-      RXMLUtilities.getElementFloat(elen),
+      RXMLUtilities.getElementFloat(end),
+      RXMLUtilities.getElementFloat(efd),
       RXMLUtilities.getElementFloat(efov),
       RXMLUtilities.getElementFloat(easp));
   }
 
-  private final float length;
+  private final float near_distance;
+  private final float far_distance;
   private final float horizontal_fov;
   private final float aspect;
 
   SBFrustum(
-    final float length,
+    final float near_distance,
+    final float far_distance,
     final float horizontal_fov,
     final float aspect)
   {
-    this.length = length;
+    this.near_distance = near_distance;
+    this.far_distance = far_distance;
     this.horizontal_fov = horizontal_fov;
     this.aspect = aspect;
   }
@@ -76,12 +81,16 @@ import com.io7m.renderer.xml.RXMLUtilities;
       .floatToIntBits(other.aspect)) {
       return false;
     }
+    if (Float.floatToIntBits(this.far_distance) != Float
+      .floatToIntBits(other.far_distance)) {
+      return false;
+    }
     if (Float.floatToIntBits(this.horizontal_fov) != Float
       .floatToIntBits(other.horizontal_fov)) {
       return false;
     }
-    if (Float.floatToIntBits(this.length) != Float
-      .floatToIntBits(other.length)) {
+    if (Float.floatToIntBits(this.near_distance) != Float
+      .floatToIntBits(other.near_distance)) {
       return false;
     }
     return true;
@@ -92,14 +101,19 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return this.aspect;
   }
 
+  public float getFarDistance()
+  {
+    return this.far_distance;
+  }
+
   public float getHorizontalFOV()
   {
     return this.horizontal_fov;
   }
 
-  public float getMaximumLength()
+  public float getNearDistance()
   {
-    return this.length;
+    return this.near_distance;
   }
 
   @Override public int hashCode()
@@ -107,21 +121,24 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + Float.floatToIntBits(this.aspect);
+    result = (prime * result) + Float.floatToIntBits(this.far_distance);
     result = (prime * result) + Float.floatToIntBits(this.horizontal_fov);
-    result = (prime * result) + Float.floatToIntBits(this.length);
+    result = (prime * result) + Float.floatToIntBits(this.near_distance);
     return result;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBFrustum [length");
-    builder.append(this.length);
-    builder.append("] [horizontal_fov ");
+    builder.append("SBFrustum [near_distance=");
+    builder.append(this.near_distance);
+    builder.append(", far_distance=");
+    builder.append(this.far_distance);
+    builder.append(", horizontal_fov=");
     builder.append(this.horizontal_fov);
-    builder.append("] [aspect ");
+    builder.append(", aspect=");
     builder.append(this.aspect);
-    builder.append("]]");
+    builder.append("]");
     return builder.toString();
   }
 
@@ -130,14 +147,17 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final URI uri = SBSceneDescription.SCENE_XML_URI;
     final Element e = new Element("s:frustum", uri.toString());
     final Element efov = new Element("s:fov", uri.toString());
-    final Element elen = new Element("s:length", uri.toString());
+    final Element efd = new Element("s:far-distance", uri.toString());
+    final Element end = new Element("s:near-distance", uri.toString());
     final Element easp = new Element("s:aspect", uri.toString());
     efov.appendChild(Float.toString(this.horizontal_fov));
     easp.appendChild(Float.toString(this.aspect));
-    elen.appendChild(Float.toString(this.length));
+    efd.appendChild(Float.toString(this.far_distance));
+    end.appendChild(Float.toString(this.near_distance));
     e.appendChild(efov);
     e.appendChild(easp);
-    e.appendChild(elen);
+    e.appendChild(efd);
+    e.appendChild(end);
     return e;
   }
 

@@ -71,17 +71,17 @@
     <dependency>
       <groupId>com.io7m.jcanephora.core</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
-      <version>0.9.22</version>
+      <version>0.10.3</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.checkedexec</groupId>
       <artifactId>io7m-jcanephora-checkedexec</artifactId>
-      <version>0.9.22</version>
+      <version>0.10.3</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.framebuffer</groupId>
       <artifactId>io7m-jcanephora-framebuffer</artifactId>
-      <version>0.9.22</version>
+      <version>0.10.3</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

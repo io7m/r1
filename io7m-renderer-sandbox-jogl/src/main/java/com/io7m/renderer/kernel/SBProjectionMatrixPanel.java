@@ -132,7 +132,12 @@ final class SBProjectionMatrixPanel extends JPanel
       final float as = SBTextFieldUtilities.getFieldFloatOrError(this.aspect);
       final float fd = SBTextFieldUtilities.getFieldFloatOrError(this.fov);
       final float fr = (float) Math.toRadians(fd);
-      ProjectionMatrix.makePerspective(this.matrix_temp, nz, fz, as, fr);
+      ProjectionMatrix.makePerspectiveProjection(
+        this.matrix_temp,
+        nz,
+        fz,
+        as,
+        fr);
       return new RMatrixI4x4F<RTransformProjection>(this.matrix_temp);
     }
 
@@ -216,7 +221,14 @@ final class SBProjectionMatrixPanel extends JPanel
       final float n = SBTextFieldUtilities.getFieldFloatOrError(this.near);
       final float f = SBTextFieldUtilities.getFieldFloatOrError(this.far);
 
-      ProjectionMatrix.makeOrthographic(this.matrix_temp, l, r, b, t, n, f);
+      ProjectionMatrix.makeOrthographicProjection(
+        this.matrix_temp,
+        l,
+        r,
+        b,
+        t,
+        n,
+        f);
       return new RMatrixI4x4F<RTransformProjection>(this.matrix_temp);
     }
 
@@ -289,32 +301,25 @@ final class SBProjectionMatrixPanel extends JPanel
       throws SBExceptionInputError,
         ConstraintError
     {
-      final float l = SBTextFieldUtilities.getFieldFloatOrError(this.left);
-      final float r = SBTextFieldUtilities.getFieldFloatOrError(this.right);
-      final float t = SBTextFieldUtilities.getFieldFloatOrError(this.top);
-      final float b = SBTextFieldUtilities.getFieldFloatOrError(this.bottom);
-      final float n = SBTextFieldUtilities.getFieldFloatOrError(this.near);
-      final float f = SBTextFieldUtilities.getFieldFloatOrError(this.far);
+      final double l = SBTextFieldUtilities.getFieldFloatOrError(this.left);
+      final double r = SBTextFieldUtilities.getFieldFloatOrError(this.right);
+      final double t = SBTextFieldUtilities.getFieldFloatOrError(this.top);
+      final double b = SBTextFieldUtilities.getFieldFloatOrError(this.bottom);
+      final double n = SBTextFieldUtilities.getFieldFloatOrError(this.near);
+      final double f = SBTextFieldUtilities.getFieldFloatOrError(this.far);
 
-      final float c0r0 = (2.0f * n) / (r - l);
-      final float c1r1 = (2.0f * n) / (t - b);
-      final float c2r0 = (r + l) / (r - l);
-      final float c2r1 = (t + b) / (t - b);
-      final float c2r2;
-      final float c3r2;
+      final double c0r0 = (2.0 * n) / (r - l);
+      final double c1r1 = (2.0 * n) / (t - b);
+      final double c2r0 = (r + l) / (r - l);
+      final double c2r1 = (t + b) / (t - b);
+      final double c2r2 = -((f + n) / (f - n));
+      final double c3r2 = -((2.0 * f * n) / (f - n));
 
-      if (f >= Float.POSITIVE_INFINITY) {
-        c2r2 = -1.0f;
-        c3r2 = -2.0f * n;
-      } else {
-        c2r2 = -(f - n) / (f - n);
-        c3r2 = -(2.0f * f * n) / (f - n);
-      }
-
-      final VectorI4F c0 = new VectorI4F(c0r0, 0.0f, 0.0f, 0.0f);
-      final VectorI4F c1 = new VectorI4F(0.0f, c1r1, 0.0f, 0.0f);
-      final VectorI4F c2 = new VectorI4F(c2r0, c2r1, c2r2, -1.0f);
-      final VectorI4F c3 = new VectorI4F(0.0f, 0.0f, c3r2, 0.0f);
+      final VectorI4F c0 = new VectorI4F((float) c0r0, 0.0f, 0.0f, 0.0f);
+      final VectorI4F c1 = new VectorI4F(0.0f, (float) c1r1, 0.0f, 0.0f);
+      final VectorI4F c2 =
+        new VectorI4F((float) c2r0, (float) c2r1, (float) c2r2, -1.0f);
+      final VectorI4F c3 = new VectorI4F(0.0f, 0.0f, (float) c3r2, 0.0f);
 
       return new RMatrixI4x4F<RTransformProjection>(c0, c1, c2, c3);
     }
