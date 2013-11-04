@@ -41,38 +41,6 @@ import com.io7m.jvvfs.PathVirtual;
 
 public final class KShaderUtilities
 {
-  public static @Nonnull ProgramReference makeProgramFromStreams(
-    final @Nonnull JCGLShadersCommon gl,
-    final @Nonnull String name,
-    final @Nonnull InputStream v_stream,
-    final @Nonnull InputStream f_stream)
-    throws IOException,
-      ConstraintError,
-      JCGLCompileException,
-      JCGLException
-  {
-    Constraints.constrainNotNull(gl, "GL");
-    Constraints.constrainNotNull(name, "Name");
-    Constraints.constrainNotNull(v_stream, "Vertex shader stream");
-    Constraints.constrainNotNull(f_stream, "Fragment shader stream");
-
-    VertexShader v = null;
-    FragmentShader f = null;
-
-    final List<String> v_lines = ShaderUtilities.readLines(v_stream);
-    v = gl.vertexShaderCompile(name, v_lines);
-    final List<String> f_lines = ShaderUtilities.readLines(f_stream);
-    f = gl.fragmentShaderCompile(name, f_lines);
-
-    assert v != null;
-    assert f != null;
-
-    final ProgramReference p = gl.programCreateCommon(name, v, f);
-    gl.vertexShaderDelete(v);
-    gl.fragmentShaderDelete(f);
-    return p;
-  }
-
   public static @Nonnull ProgramReference makeProgram(
     final @Nonnull JCGLShadersCommon gl,
     final @Nonnull JCGLSLVersionNumber version,
@@ -126,5 +94,37 @@ public final class KShaderUtilities
         f_stream.close();
       }
     }
+  }
+
+  public static @Nonnull ProgramReference makeProgramFromStreams(
+    final @Nonnull JCGLShadersCommon gl,
+    final @Nonnull String name,
+    final @Nonnull InputStream v_stream,
+    final @Nonnull InputStream f_stream)
+    throws IOException,
+      ConstraintError,
+      JCGLCompileException,
+      JCGLException
+  {
+    Constraints.constrainNotNull(gl, "GL");
+    Constraints.constrainNotNull(name, "Name");
+    Constraints.constrainNotNull(v_stream, "Vertex shader stream");
+    Constraints.constrainNotNull(f_stream, "Fragment shader stream");
+
+    VertexShader v = null;
+    FragmentShader f = null;
+
+    final List<String> v_lines = ShaderUtilities.readLines(v_stream);
+    v = gl.vertexShaderCompile(name, v_lines);
+    final List<String> f_lines = ShaderUtilities.readLines(f_stream);
+    f = gl.fragmentShaderCompile(name, f_lines);
+
+    assert v != null;
+    assert f != null;
+
+    final ProgramReference p = gl.programCreateCommon(name, v, f);
+    gl.vertexShaderDelete(v);
+    gl.fragmentShaderDelete(f);
+    return p;
   }
 }

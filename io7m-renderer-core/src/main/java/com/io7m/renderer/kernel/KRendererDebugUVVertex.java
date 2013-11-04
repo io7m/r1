@@ -23,9 +23,10 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
-import com.io7m.jcanephora.Framebuffer;
+import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
@@ -54,10 +55,12 @@ final class KRendererDebugUVVertex implements KRenderer
   private final @Nonnull VectorM4F             background;
   private final @Nonnull VectorM2I             viewport_size;
   private final @Nonnull JCCEExecutionCallable exec;
+  private @Nonnull KFramebuffer                framebuffer;
 
   KRendererDebugUVVertex(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
+    final @Nonnull AreaInclusive size,
     final @Nonnull Log log)
     throws JCGLCompileException,
       ConstraintError,
@@ -86,24 +89,35 @@ final class KRendererDebugUVVertex implements KRenderer
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);
+    this.rendererFramebufferResize(size);
   }
 
-  @Override public void render(
-    final @Nonnull Framebuffer result,
+  @Override public void rendererClose()
+    throws JCGLException,
+      ConstraintError
+  {
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+    gc.programDelete(this.program);
+  }
+
+  @Override public void rendererEvaluate(
     final @Nonnull KScene scene)
     throws JCGLException,
       ConstraintError
   {
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+
     this.matrices.matricesBegin();
     this.matrices.matricesMakeFromCamera(scene.getCamera());
 
-    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-
-    this.viewport_size.x = result.getWidth();
-    this.viewport_size.y = result.getHeight();
+    final FramebufferReferenceUsable output_buffer =
+      this.framebuffer.kframebufferGetOutputBuffer();
+    final AreaInclusive area = this.framebuffer.kframebufferGetArea();
+    this.viewport_size.x = (int) area.getRangeX().getInterval();
+    this.viewport_size.y = (int) area.getRangeY().getInterval();
 
     try {
-      gc.framebufferDrawBind(result.getFramebuffer());
+      gc.framebufferDrawBind(output_buffer);
       gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
 
       gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
@@ -124,6 +138,30 @@ final class KRendererDebugUVVertex implements KRenderer
     } finally {
       gc.framebufferDrawUnbind();
     }
+  }
+
+  @Override public @Nonnull KFramebufferUsable rendererFramebufferGet()
+  {
+    return this.framebuffer;
+  }
+
+  @Override public void rendererFramebufferResize(
+    final @Nonnull AreaInclusive size)
+    throws JCGLException,
+      ConstraintError,
+      JCGLUnsupportedException
+  {
+    if (this.framebuffer != null) {
+      this.framebuffer.kframebufferDelete(this.gl);
+    }
+
+    this.framebuffer = KFramebufferCommon.allocateBasicRGBA(this.gl, size);
+  }
+
+  @Override public void rendererSetBackgroundRGBA(
+    final @Nonnull VectorReadable4F rgba)
+  {
+    VectorM4F.copy(rgba, this.background);
   }
 
   private void renderMesh(
@@ -180,19 +218,5 @@ final class KRendererDebugUVVertex implements KRenderer
     } finally {
       gc.arrayBufferUnbind();
     }
-  }
-
-  @Override public void setBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-  {
-    VectorM4F.copy(rgba, this.background);
-  }
-
-  @Override public void close()
-    throws JCGLException,
-      ConstraintError
-  {
-    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-    gc.programDelete(this.program);
   }
 }

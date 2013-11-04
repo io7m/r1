@@ -201,10 +201,10 @@ abstract class SBLightDescription
       super(KLight.Type.LIGHT_PROJECTIVE);
 
       final MatrixM4x4F m = new MatrixM4x4F();
-      ProjectionMatrix.makePerspective(
+      ProjectionMatrix.makePerspectiveProjection(
         m,
-        1.0f,
-        frustum.getMaximumLength(),
+        frustum.getNearDistance(),
+        frustum.getFarDistance(),
         frustum.getAspectRatio(),
         frustum.getHorizontalFOV());
 

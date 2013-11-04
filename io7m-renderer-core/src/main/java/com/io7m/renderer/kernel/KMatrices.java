@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.NotThreadSafe;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -44,7 +45,7 @@ import com.io7m.renderer.RTransformViewInverse;
 import com.io7m.renderer.RVectorReadable3F;
 import com.io7m.renderer.kernel.KLight.KProjective;
 
-public final class KMatrices
+@NotThreadSafe final class KMatrices
 {
   /**
    * Produce a normal matrix for the given modelview matrix.
@@ -185,17 +186,6 @@ public final class KMatrices
     return this.matrix_projection;
   }
 
-  public @Nonnull
-    RMatrixM4x4F<RTransformTextureProjection>
-    getTextureProjection()
-      throws ConstraintError
-  {
-    Constraints.constrainArbitrary(
-      this.matrix_texture_projection_done,
-      "Texture projection matrix calculated");
-    return this.matrix_texture_projection;
-  }
-
   public @Nonnull RMatrixM3x3F<RTransformTexture> getMatrixUV()
     throws ConstraintError
   {
@@ -222,6 +212,17 @@ public final class KMatrices
       this.matrix_view_inverse_done,
       "Inverse view matrix calculated");
     return this.matrix_view_inverse;
+  }
+
+  public @Nonnull
+    RMatrixM4x4F<RTransformTextureProjection>
+    getTextureProjection()
+      throws ConstraintError
+  {
+    Constraints.constrainArbitrary(
+      this.matrix_texture_projection_done,
+      "Texture projection matrix calculated");
+    return this.matrix_texture_projection;
   }
 
   public void matricesBegin()
@@ -263,29 +264,6 @@ public final class KMatrices
     this.matrix_projection_done = true;
     this.matrix_view_done = true;
     this.matrix_view_inverse_done = true;
-  }
-
-  public void matricesMakeFromTransform(
-    final @Nonnull KTransform transform)
-    throws ConstraintError
-  {
-    Constraints.constrainNotNull(transform, "Transform");
-    Constraints.constrainArbitrary(
-      this.matrix_view_done,
-      "View matrix calculated");
-
-    transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
-
-    MatrixM4x4F.multiply(
-      this.matrix_view,
-      this.matrix_model,
-      this.matrix_modelview);
-
-    KMatrices.makeNormalMatrix(this.matrix_modelview, this.matrix_normal);
-
-    this.matrix_model_done = true;
-    this.matrix_modelview_done = true;
-    this.matrix_normal_done = true;
   }
 
   public void matricesMakeFromLight(
@@ -332,6 +310,29 @@ public final class KMatrices
       this.matrix_texture_projection);
 
     this.matrix_texture_projection_done = true;
+  }
+
+  public void matricesMakeFromTransform(
+    final @Nonnull KTransform transform)
+    throws ConstraintError
+  {
+    Constraints.constrainNotNull(transform, "Transform");
+    Constraints.constrainArbitrary(
+      this.matrix_view_done,
+      "View matrix calculated");
+
+    transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
+
+    MatrixM4x4F.multiply(
+      this.matrix_view,
+      this.matrix_model,
+      this.matrix_modelview);
+
+    KMatrices.makeNormalMatrix(this.matrix_modelview, this.matrix_normal);
+
+    this.matrix_model_done = true;
+    this.matrix_modelview_done = true;
+    this.matrix_normal_done = true;
   }
 
   public void matricesMakeTextureFromInstance(

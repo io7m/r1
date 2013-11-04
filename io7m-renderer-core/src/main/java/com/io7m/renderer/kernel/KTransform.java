@@ -132,6 +132,16 @@ import com.io7m.jtensors.VectorReadable3F;
     MatrixM4x4F.multiplyInPlace(m, context.t_matrix4x4);
   }
 
+  @Nonnull VectorReadable3F rotateVector3F(
+    final @Nonnull Context context,
+    final @Nonnull VectorI3F v)
+  {
+    final VectorM3F out = new VectorM3F();
+    QuaternionM4F
+      .makeRotationMatrix4x4(this.orientation, context.t_matrix4x4);
+    return MatrixM3x3F.multiplyVector3F(context.t_matrix3x3, v, out);
+  }
+
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
@@ -141,15 +151,5 @@ import com.io7m.jtensors.VectorReadable3F;
     builder.append(this.orientation);
     builder.append("]");
     return builder.toString();
-  }
-
-  @Nonnull VectorReadable3F rotateVector3F(
-    final @Nonnull Context context,
-    final @Nonnull VectorI3F v)
-  {
-    final VectorM3F out = new VectorM3F();
-    QuaternionM4F
-      .makeRotationMatrix4x4(this.orientation, context.t_matrix4x4);
-    return MatrixM3x3F.multiplyVector3F(context.t_matrix3x3, v, out);
   }
 }
