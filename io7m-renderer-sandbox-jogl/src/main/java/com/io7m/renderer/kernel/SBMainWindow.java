@@ -692,6 +692,9 @@ final class SBMainWindow extends JFrame
               this.input.setRotatingRight(false);
               break;
 
+            case 't':
+              this.input.setWantFramebufferSnapshot(true);
+              break;
             case 'p':
               this.input.setWantPauseToggle(true);
               break;
