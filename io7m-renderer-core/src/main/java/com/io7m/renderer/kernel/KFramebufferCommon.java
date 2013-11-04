@@ -218,7 +218,7 @@ import com.io7m.jcanephora.TextureWrapT;
       final int height = (int) size.getRangeY().getInterval();
 
       final Texture2DStatic color =
-        g.texture2DStaticAllocateRGBA16(
+        g.texture2DStaticAllocateRGBA8(
           "framebuffer",
           width,
           height,

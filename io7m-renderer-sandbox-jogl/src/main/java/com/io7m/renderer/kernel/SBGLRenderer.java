@@ -16,16 +16,23 @@
 
 package com.io7m.renderer.kernel;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
@@ -43,6 +50,7 @@ import nu.xom.Document;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
@@ -60,11 +68,13 @@ import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementationJOGL;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jcanephora.JCGLInterfaceGL3;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.ProjectionMatrix;
+import com.io7m.jcanephora.Texture2DReadableData;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureFilterMagnification;
@@ -1080,6 +1090,7 @@ final class SBGLRenderer implements GLEventListener
       this.loadNewRendererIfNecessary(SBGLRenderer.drawableArea(drawable));
       this.handleQueues();
       this.handlePauseToggleRequest();
+      this.handleSnapshotRequest();
 
       switch (this.running.get()) {
         case STATE_FAILED:
@@ -1114,6 +1125,71 @@ final class SBGLRenderer implements GLEventListener
     } catch (final Exception e) {
       this.failed(e);
     }
+  }
+
+  private void handleSnapshotRequest()
+    throws JCGLException,
+      ConstraintError,
+      FileNotFoundException,
+      IOException
+  {
+    if (this.input_state.wantFramebufferSnaphot()) {
+      this.input_state.setWantFramebufferSnapshot(false);
+
+      this.log.debug("Taking framebuffer snapshot");
+
+      final Option<JCGLInterfaceGL3> o = this.gi.getGL3();
+      switch (o.type) {
+        case OPTION_NONE:
+        {
+          break;
+        }
+        case OPTION_SOME:
+        {
+          final JCGLInterfaceGL3 g3 =
+            ((Option.Some<JCGLInterfaceGL3>) o).value;
+
+          if (this.renderer_kernel != null) {
+            final KFramebufferUsable f =
+              this.renderer_kernel.rendererFramebufferGet();
+            final Texture2DReadableData r =
+              g3.texture2DStaticGetImage(f.kframebufferGetOutputTexture());
+            this.writeRawFramebuffer(r);
+          } else if (this.renderer_specific != null) {
+            final KFramebufferUsable f =
+              this.renderer_specific.rendererFramebufferGet();
+            final Texture2DReadableData r =
+              g3.texture2DStaticGetImage(f.kframebufferGetOutputTexture());
+            this.writeRawFramebuffer(r);
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  private void writeRawFramebuffer(
+    final @Nonnull Texture2DReadableData r)
+    throws FileNotFoundException,
+      IOException
+  {
+    final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+    final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
+    final String name =
+      String.format("sandbox-fb-%s.raw", fmt.format(cal.getTime()));
+    final File out_file =
+      new File(System.getProperty("java.io.tmpdir"), name);
+
+    this.log.debug("Writing framebuffer snapshot to " + out_file);
+
+    final BufferedOutputStream s =
+      new BufferedOutputStream(new FileOutputStream(out_file));
+    final ByteBuffer data = r.getData();
+    for (int index = 0; index < data.capacity(); ++index) {
+      s.write(data.get(index));
+    }
+    s.flush();
+    s.close();
   }
 
   @Override public void dispose(
@@ -2058,7 +2134,7 @@ final class SBGLRenderer implements GLEventListener
     this.lights_show.set(enabled);
   }
 
-  public @Nonnull Future<SBShader> shaderLoad(
+  @Nonnull Future<SBShader> shaderLoad(
     final @Nonnull File directory,
     final @Nonnull PGLSLMetaXML meta)
   {
