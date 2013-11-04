@@ -87,12 +87,13 @@ module SphericalLight is
     distance      : float
   ) : float =
     let
-      value nd          = F.subtract (0.0, distance);
       value inv_range   = F.divide (1.0, light_range);
-      value linear      = F.add (F.multiply (nd, inv_range), 1.0);
-      value exponential = F.clamp (F.power (linear, light_falloff), 0.0, 1.0);
+      value linear      = F.multiply (distance, inv_range);
+      value falloff_inv = F.divide (1.0, light_falloff);
+      value exponential = F.power (linear, falloff_inv);
+      value clamped     = F.clamp (exponential, 0.0, 1.0);
     in
-      exponential
+      F.subtract (1.0, clamped)
     end; 
 
   --
