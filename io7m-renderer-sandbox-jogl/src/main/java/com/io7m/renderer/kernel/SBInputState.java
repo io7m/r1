@@ -35,6 +35,7 @@ final class SBInputState
   private final @Nonnull AtomicBoolean want_next_camera;
   private final @Nonnull AtomicBoolean want_pause_toggle;
   private final @Nonnull AtomicBoolean want_step_one;
+  private final @Nonnull AtomicBoolean want_framebuffer_snapshot;
 
   public SBInputState()
   {
@@ -51,6 +52,7 @@ final class SBInputState
     this.want_next_camera = new AtomicBoolean();
     this.want_pause_toggle = new AtomicBoolean();
     this.want_step_one = new AtomicBoolean();
+    this.want_framebuffer_snapshot = new AtomicBoolean();
   }
 
   boolean isMovingBackward()
@@ -163,6 +165,12 @@ final class SBInputState
     this.rotating_up.set(r);
   }
 
+  void setWantFramebufferSnapshot(
+    final boolean b)
+  {
+    this.want_framebuffer_snapshot.set(b);
+  }
+
   void setWantNextCamera(
     final boolean b)
   {
@@ -175,6 +183,17 @@ final class SBInputState
     this.want_pause_toggle.set(b);
   }
 
+  void setWantStepOneFrame(
+    final boolean b)
+  {
+    this.want_step_one.set(b);
+  }
+
+  boolean wantFramebufferSnaphot()
+  {
+    return this.want_framebuffer_snapshot.get();
+  }
+
   boolean wantNextCamera()
   {
     return this.want_next_camera.get();
@@ -183,12 +202,6 @@ final class SBInputState
   boolean wantPauseToggle()
   {
     return this.want_pause_toggle.get();
-  }
-
-  void setWantStepOneFrame(
-    final boolean b)
-  {
-    this.want_step_one.set(b);
   }
 
   boolean wantStepOneFrame()
