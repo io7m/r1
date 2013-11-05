@@ -21,6 +21,7 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
 
 public final class SBCameraWindow extends JFrame
@@ -37,6 +38,9 @@ public final class SBCameraWindow extends JFrame
       this.getContentPane().add(new SBCameraPanel(this, controller, log));
       this.pack();
     } catch (final IOException x) {
+      log.critical("Unable to open camera window: " + x.getMessage());
+      x.printStackTrace();
+    } catch (final ConstraintError x) {
       log.critical("Unable to open camera window: " + x.getMessage());
       x.printStackTrace();
     }

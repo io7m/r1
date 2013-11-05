@@ -19,6 +19,8 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.swing.JTextField;
 
+import net.java.dev.designgridlayout.IRowCreator;
+
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RTransform;
@@ -42,6 +44,18 @@ public final class SBMatrix4x4Fields<T extends RTransform>
         }
         this.fields[c][r] = f;
       }
+    }
+  }
+
+  public void groupLayout(
+    final @Nonnull IRowCreator group)
+  {
+    for (int r = 0; r < 4; ++r) {
+      final JTextField f0 = this.fields[r][0];
+      final JTextField f1 = this.fields[r][1];
+      final JTextField f2 = this.fields[r][2];
+      final JTextField f3 = this.fields[r][3];
+      group.grid().add(f0).add(f1).add(f2).add(f3);
     }
   }
 
