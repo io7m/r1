@@ -31,6 +31,7 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
+import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
@@ -46,14 +47,17 @@ public final class SBCameraPanel extends JPanel
   protected final @Nonnull JLabel                  error_icon;
   protected final @Nonnull JLabel                  error_text;
   protected final @Nonnull SBProjectionMatrixPanel panel;
+  protected final @Nonnull MatrixM4x4F             temporary;
 
   public SBCameraPanel(
     final @Nonnull JFrame owner,
     final @Nonnull SBSceneControllerRendererControl controller,
     final @Nonnull Log log)
-    throws IOException
+    throws IOException,
+      ConstraintError
   {
-    this.panel = new SBProjectionMatrixPanel(owner);
+    this.panel = new SBProjectionMatrixPanel(owner, true);
+    this.temporary = new MatrixM4x4F();
 
     this.error_text = new JLabel("Some informative error text");
     this.error_icon = SBIcons.makeErrorIcon();
@@ -116,8 +120,10 @@ public final class SBCameraPanel extends JPanel
     final @Nonnull SBSceneControllerRendererControl controller)
   {
     try {
-      final RMatrixI4x4F<RTransformProjection> m = this.panel.getMatrix();
-      controller.rendererSetCustomProjection(m);
+      final SBProjectionDescription m = this.panel.getDescription();
+      final RMatrixI4x4F<RTransformProjection> mat =
+        m.makeProjectionMatrix(this.temporary);
+      controller.rendererSetCustomProjection(mat);
       SBCameraPanel.this.unsetError();
     } catch (final SBExceptionInputError x) {
       SBCameraPanel.this.setError(x.getMessage());

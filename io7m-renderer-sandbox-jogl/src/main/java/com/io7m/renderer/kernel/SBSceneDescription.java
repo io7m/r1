@@ -53,7 +53,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     try {
       SCENE_XML_URI =
         new URI("http://schemas.io7m.com/renderer/1.0.0/sandbox-scene");
-      SCENE_XML_VERSION = 11;
+      SCENE_XML_VERSION = 12;
     } catch (final URISyntaxException e) {
       throw new UnreachableCodeException();
     }

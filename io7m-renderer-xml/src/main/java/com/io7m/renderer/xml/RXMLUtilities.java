@@ -189,38 +189,6 @@ public final class RXMLUtilities
     return e.getChildElements(name, uri.toString());
   }
 
-  public static @Nonnull RVectorI4F<RSpaceRGBA> getElementAttributesRGBA(
-    final @Nonnull Element e,
-    final @Nonnull URI uri)
-    throws RXMLException,
-      ConstraintError
-  {
-    final Attribute ax = RXMLUtilities.getAttribute(e, "r", uri);
-    final Attribute ay = RXMLUtilities.getAttribute(e, "g", uri);
-    final Attribute az = RXMLUtilities.getAttribute(e, "b", uri);
-    final Attribute aw = RXMLUtilities.getAttribute(e, "a", uri);
-    return new RVectorI4F<RSpaceRGBA>(
-      RXMLUtilities.getAttributeFloat(ax),
-      RXMLUtilities.getAttributeFloat(ay),
-      RXMLUtilities.getAttributeFloat(az),
-      RXMLUtilities.getAttributeFloat(aw));
-  }
-
-  public static @Nonnull RVectorI3F<RSpaceRGB> getElementAttributesRGB(
-    final @Nonnull Element e,
-    final @Nonnull URI uri)
-    throws RXMLException,
-      ConstraintError
-  {
-    final Attribute ax = RXMLUtilities.getAttribute(e, "r", uri);
-    final Attribute ay = RXMLUtilities.getAttribute(e, "g", uri);
-    final Attribute az = RXMLUtilities.getAttribute(e, "b", uri);
-    return new RVectorI3F<RSpaceRGB>(
-      RXMLUtilities.getAttributeFloat(ax),
-      RXMLUtilities.getAttributeFloat(ay),
-      RXMLUtilities.getAttributeFloat(az));
-  }
-
   public static @Nonnull
     <T extends RSpace>
     RVectorI3F<T>
@@ -257,6 +225,55 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(a1),
       RXMLUtilities.getAttributeFloat(a2),
       RXMLUtilities.getAttributeFloat(a3));
+  }
+
+  public static @Nonnull QuaternionI4F getElementAttributesQuaternion4f(
+    final @Nonnull Element e,
+    final @Nonnull URI uri)
+    throws RXMLException,
+      ConstraintError
+  {
+    final Attribute ax = RXMLUtilities.getAttribute(e, "x", uri);
+    final Attribute ay = RXMLUtilities.getAttribute(e, "y", uri);
+    final Attribute az = RXMLUtilities.getAttribute(e, "z", uri);
+    final Attribute aw = RXMLUtilities.getAttribute(e, "w", uri);
+    return new QuaternionI4F(
+      RXMLUtilities.getAttributeFloat(ax),
+      RXMLUtilities.getAttributeFloat(ay),
+      RXMLUtilities.getAttributeFloat(az),
+      RXMLUtilities.getAttributeFloat(aw));
+  }
+
+  public static @Nonnull RVectorI3F<RSpaceRGB> getElementAttributesRGB(
+    final @Nonnull Element e,
+    final @Nonnull URI uri)
+    throws RXMLException,
+      ConstraintError
+  {
+    final Attribute ax = RXMLUtilities.getAttribute(e, "r", uri);
+    final Attribute ay = RXMLUtilities.getAttribute(e, "g", uri);
+    final Attribute az = RXMLUtilities.getAttribute(e, "b", uri);
+    return new RVectorI3F<RSpaceRGB>(
+      RXMLUtilities.getAttributeFloat(ax),
+      RXMLUtilities.getAttributeFloat(ay),
+      RXMLUtilities.getAttributeFloat(az));
+  }
+
+  public static @Nonnull RVectorI4F<RSpaceRGBA> getElementAttributesRGBA(
+    final @Nonnull Element e,
+    final @Nonnull URI uri)
+    throws RXMLException,
+      ConstraintError
+  {
+    final Attribute ax = RXMLUtilities.getAttribute(e, "r", uri);
+    final Attribute ay = RXMLUtilities.getAttribute(e, "g", uri);
+    final Attribute az = RXMLUtilities.getAttribute(e, "b", uri);
+    final Attribute aw = RXMLUtilities.getAttribute(e, "a", uri);
+    return new RVectorI4F<RSpaceRGBA>(
+      RXMLUtilities.getAttributeFloat(ax),
+      RXMLUtilities.getAttributeFloat(ay),
+      RXMLUtilities.getAttributeFloat(az),
+      RXMLUtilities.getAttributeFloat(aw));
   }
 
   public static @Nonnull
@@ -350,6 +367,23 @@ public final class RXMLUtilities
     }
   }
 
+  public static double getElementDouble(
+    final @Nonnull Element e)
+    throws RXMLException,
+      ConstraintError
+  {
+    try {
+      return Double.parseDouble(e.getValue());
+    } catch (final NumberFormatException x) {
+      final StringBuilder message = new StringBuilder();
+      message.append("Expected a floating point value but got '");
+      message.append(e.getValue());
+      message.append("'");
+      throw new RXMLException.RXMLExceptionValidityError(
+        new ValidityException(message.toString()));
+    }
+  }
+
   public static int getElementInteger(
     final @Nonnull Element e)
     throws RXMLException,
@@ -365,6 +399,67 @@ public final class RXMLUtilities
       throw new RXMLException.RXMLExceptionValidityError(
         new ValidityException(message.toString()));
     }
+  }
+
+  public static @Nonnull
+    <T extends RTransform>
+    RMatrixI3x3F<T>
+    getElementMatrixI3x3F(
+      final @Nonnull Element e,
+      final @Nonnull URI uri)
+      throws ConstraintError,
+        RXMLException
+  {
+    final Elements eus = RXMLUtilities.getChildren(e, "column", uri);
+    if (eus.size() != 3) {
+      throw new RXMLException.RXMLExceptionValidityError(
+        new ValidityException("Expected exactly three matrix columns"));
+    }
+
+    final Element ec0 = eus.get(0);
+    final RVectorI3F<RSpace> c0 =
+      RXMLUtilities.getElementAttributesMatrixColumn3(ec0, uri);
+    final Element ec1 = eus.get(1);
+    final RVectorI3F<RSpace> c1 =
+      RXMLUtilities.getElementAttributesMatrixColumn3(ec1, uri);
+    final Element ec2 = eus.get(2);
+    final RVectorI3F<RSpace> c2 =
+      RXMLUtilities.getElementAttributesMatrixColumn3(ec2, uri);
+
+    final RMatrixI3x3F<T> m = new RMatrixI3x3F<T>(c0, c1, c2);
+    return m;
+  }
+
+  public static @Nonnull
+    <T extends RTransform>
+    RMatrixI4x4F<T>
+    getElementMatrixI4x4F(
+      final @Nonnull Element e,
+      final @Nonnull URI uri)
+      throws ConstraintError,
+        RXMLException
+  {
+    final Elements eus = RXMLUtilities.getChildren(e, "column", uri);
+    if (eus.size() != 4) {
+      throw new RXMLException.RXMLExceptionValidityError(
+        new ValidityException("Expected exactly four matrix columns"));
+    }
+
+    final Element ec0 = eus.get(0);
+    final RVectorI4F<RSpace> c0 =
+      RXMLUtilities.getElementAttributesMatrixColumn4(ec0, uri);
+    final Element ec1 = eus.get(1);
+    final RVectorI4F<RSpace> c1 =
+      RXMLUtilities.getElementAttributesMatrixColumn4(ec1, uri);
+    final Element ec2 = eus.get(2);
+    final RVectorI4F<RSpace> c2 =
+      RXMLUtilities.getElementAttributesMatrixColumn4(ec2, uri);
+    final Element ec3 = eus.get(3);
+    final RVectorI4F<RSpace> c3 =
+      RXMLUtilities.getElementAttributesMatrixColumn4(ec3, uri);
+
+    final RMatrixI4x4F<T> m = new RMatrixI4x4F<T>(c0, c1, c2, c3);
+    return m;
   }
 
   public static @Nonnull String getElementNonEmptyString(
@@ -452,97 +547,6 @@ public final class RXMLUtilities
     e.addAttribute(a);
   }
 
-  public static void putElementAttributesRGBA(
-    final @Nonnull Element e,
-    final @Nonnull RVectorReadable4F<RSpaceRGBA> rgba,
-    final @Nonnull String prefix,
-    final @Nonnull URI uri)
-  {
-    final Attribute ar =
-      new Attribute(prefix + ":r", uri.toString(), Float.toString(rgba
-        .getXF()));
-    final Attribute ag =
-      new Attribute(prefix + ":g", uri.toString(), Float.toString(rgba
-        .getYF()));
-    final Attribute ab =
-      new Attribute(prefix + ":b", uri.toString(), Float.toString(rgba
-        .getZF()));
-    final Attribute aa =
-      new Attribute(prefix + ":a", uri.toString(), Float.toString(rgba
-        .getWF()));
-
-    e.addAttribute(ar);
-    e.addAttribute(ag);
-    e.addAttribute(ab);
-    e.addAttribute(aa);
-  }
-
-  public static void putElementAttributesRGB(
-    final @Nonnull Element e,
-    final @Nonnull RVectorReadable3F<RSpaceRGB> rgb,
-    final @Nonnull String prefix,
-    final @Nonnull URI uri)
-  {
-    final Attribute ar =
-      new Attribute(
-        prefix + ":r",
-        uri.toString(),
-        Float.toString(rgb.getXF()));
-    final Attribute ag =
-      new Attribute(
-        prefix + ":g",
-        uri.toString(),
-        Float.toString(rgb.getYF()));
-    final Attribute ab =
-      new Attribute(
-        prefix + ":b",
-        uri.toString(),
-        Float.toString(rgb.getZF()));
-
-    e.addAttribute(ar);
-    e.addAttribute(ag);
-    e.addAttribute(ab);
-  }
-
-  public static <T extends RSpace> void putElementAttributesVector4f(
-    final @Nonnull Element e,
-    final @Nonnull RVectorReadable4F<T> v,
-    final @Nonnull String prefix,
-    final @Nonnull URI uri)
-  {
-    final Attribute ax =
-      new Attribute(prefix + ":x", uri.toString(), Float.toString(v.getXF()));
-    final Attribute ay =
-      new Attribute(prefix + ":y", uri.toString(), Float.toString(v.getYF()));
-    final Attribute az =
-      new Attribute(prefix + ":z", uri.toString(), Float.toString(v.getZF()));
-    final Attribute aw =
-      new Attribute(prefix + ":w", uri.toString(), Float.toString(v.getWF()));
-
-    e.addAttribute(ax);
-    e.addAttribute(ay);
-    e.addAttribute(az);
-    e.addAttribute(aw);
-  }
-
-  public static <T extends RSpace> void putElementAttributesVector3f(
-    final @Nonnull Element e,
-    final @Nonnull RVectorReadable3F<T> v,
-    final @Nonnull String prefix,
-    final @Nonnull URI uri)
-  {
-    final Attribute ax =
-      new Attribute(prefix + ":x", uri.toString(), Float.toString(v.getXF()));
-    final Attribute ay =
-      new Attribute(prefix + ":y", uri.toString(), Float.toString(v.getYF()));
-    final Attribute az =
-      new Attribute(prefix + ":z", uri.toString(), Float.toString(v.getZF()));
-
-    e.addAttribute(ax);
-    e.addAttribute(ay);
-    e.addAttribute(az);
-  }
-
   public static void putElementAttributesMatrixColumn3(
     final @Nonnull Element e,
     final @Nonnull VectorReadable3F column,
@@ -589,6 +593,58 @@ public final class RXMLUtilities
     e.addAttribute(a3);
   }
 
+  public static void putElementAttributesRGB(
+    final @Nonnull Element e,
+    final @Nonnull RVectorReadable3F<RSpaceRGB> rgb,
+    final @Nonnull String prefix,
+    final @Nonnull URI uri)
+  {
+    final Attribute ar =
+      new Attribute(
+        prefix + ":r",
+        uri.toString(),
+        Float.toString(rgb.getXF()));
+    final Attribute ag =
+      new Attribute(
+        prefix + ":g",
+        uri.toString(),
+        Float.toString(rgb.getYF()));
+    final Attribute ab =
+      new Attribute(
+        prefix + ":b",
+        uri.toString(),
+        Float.toString(rgb.getZF()));
+
+    e.addAttribute(ar);
+    e.addAttribute(ag);
+    e.addAttribute(ab);
+  }
+
+  public static void putElementAttributesRGBA(
+    final @Nonnull Element e,
+    final @Nonnull RVectorReadable4F<RSpaceRGBA> rgba,
+    final @Nonnull String prefix,
+    final @Nonnull URI uri)
+  {
+    final Attribute ar =
+      new Attribute(prefix + ":r", uri.toString(), Float.toString(rgba
+        .getXF()));
+    final Attribute ag =
+      new Attribute(prefix + ":g", uri.toString(), Float.toString(rgba
+        .getYF()));
+    final Attribute ab =
+      new Attribute(prefix + ":b", uri.toString(), Float.toString(rgba
+        .getZF()));
+    final Attribute aa =
+      new Attribute(prefix + ":a", uri.toString(), Float.toString(rgba
+        .getWF()));
+
+    e.addAttribute(ar);
+    e.addAttribute(ag);
+    e.addAttribute(ab);
+    e.addAttribute(aa);
+  }
+
   public static void putElementAttributeString(
     final @Nonnull Element e,
     final @Nonnull String prefix,
@@ -601,16 +657,58 @@ public final class RXMLUtilities
     e.addAttribute(a);
   }
 
-  public static void putElementString(
+  public static <T extends RSpace> void putElementAttributesVector3f(
+    final @Nonnull Element e,
+    final @Nonnull RVectorReadable3F<T> v,
+    final @Nonnull String prefix,
+    final @Nonnull URI uri)
+  {
+    final Attribute ax =
+      new Attribute(prefix + ":x", uri.toString(), Float.toString(v.getXF()));
+    final Attribute ay =
+      new Attribute(prefix + ":y", uri.toString(), Float.toString(v.getYF()));
+    final Attribute az =
+      new Attribute(prefix + ":z", uri.toString(), Float.toString(v.getZF()));
+
+    e.addAttribute(ax);
+    e.addAttribute(ay);
+    e.addAttribute(az);
+  }
+
+  public static <T extends RSpace> void putElementAttributesVector4f(
+    final @Nonnull Element e,
+    final @Nonnull RVectorReadable4F<T> v,
+    final @Nonnull String prefix,
+    final @Nonnull URI uri)
+  {
+    final Attribute ax =
+      new Attribute(prefix + ":x", uri.toString(), Float.toString(v.getXF()));
+    final Attribute ay =
+      new Attribute(prefix + ":y", uri.toString(), Float.toString(v.getYF()));
+    final Attribute az =
+      new Attribute(prefix + ":z", uri.toString(), Float.toString(v.getZF()));
+    final Attribute aw =
+      new Attribute(prefix + ":w", uri.toString(), Float.toString(v.getWF()));
+
+    e.addAttribute(ax);
+    e.addAttribute(ay);
+    e.addAttribute(az);
+    e.addAttribute(aw);
+  }
+
+  @SuppressWarnings("boxing") public static void putElementDouble(
     final @Nonnull Element e,
     final @Nonnull String prefix,
     final @Nonnull String name,
-    final @Nonnull String value,
+    final double value,
     final @Nonnull URI uri)
   {
-    final Element en = new Element(prefix + ":" + name, uri.toString());
-    en.appendChild(value);
-    e.appendChild(en);
+    RXMLUtilities.putElementString(
+      e,
+      prefix,
+      name,
+      String.format("%.15f", value),
+      uri);
   }
 
   public static <T extends RTransform> void putElementMatrixI3x3F(
@@ -652,81 +750,15 @@ public final class RXMLUtilities
     }
   }
 
-  public static @Nonnull QuaternionI4F getElementAttributesQuaternion4f(
+  public static void putElementString(
     final @Nonnull Element e,
+    final @Nonnull String prefix,
+    final @Nonnull String name,
+    final @Nonnull String value,
     final @Nonnull URI uri)
-    throws RXMLException,
-      ConstraintError
   {
-    final Attribute ax = RXMLUtilities.getAttribute(e, "x", uri);
-    final Attribute ay = RXMLUtilities.getAttribute(e, "y", uri);
-    final Attribute az = RXMLUtilities.getAttribute(e, "z", uri);
-    final Attribute aw = RXMLUtilities.getAttribute(e, "w", uri);
-    return new QuaternionI4F(
-      RXMLUtilities.getAttributeFloat(ax),
-      RXMLUtilities.getAttributeFloat(ay),
-      RXMLUtilities.getAttributeFloat(az),
-      RXMLUtilities.getAttributeFloat(aw));
-  }
-
-  public static @Nonnull
-    <T extends RTransform>
-    RMatrixI4x4F<T>
-    getElementMatrixI4x4F(
-      final @Nonnull Element e,
-      final @Nonnull URI uri)
-      throws ConstraintError,
-        RXMLException
-  {
-    final Elements eus = RXMLUtilities.getChildren(e, "column", uri);
-    if (eus.size() != 4) {
-      throw new RXMLException.RXMLExceptionValidityError(
-        new ValidityException("Expected exactly four matrix columns"));
-    }
-
-    final Element ec0 = eus.get(0);
-    final RVectorI4F<RSpace> c0 =
-      RXMLUtilities.getElementAttributesMatrixColumn4(ec0, uri);
-    final Element ec1 = eus.get(1);
-    final RVectorI4F<RSpace> c1 =
-      RXMLUtilities.getElementAttributesMatrixColumn4(ec1, uri);
-    final Element ec2 = eus.get(2);
-    final RVectorI4F<RSpace> c2 =
-      RXMLUtilities.getElementAttributesMatrixColumn4(ec2, uri);
-    final Element ec3 = eus.get(3);
-    final RVectorI4F<RSpace> c3 =
-      RXMLUtilities.getElementAttributesMatrixColumn4(ec3, uri);
-
-    final RMatrixI4x4F<T> m = new RMatrixI4x4F<T>(c0, c1, c2, c3);
-    return m;
-  }
-
-  public static @Nonnull
-    <T extends RTransform>
-    RMatrixI3x3F<T>
-    getElementMatrixI3x3F(
-      final @Nonnull Element e,
-      final @Nonnull URI uri)
-      throws ConstraintError,
-        RXMLException
-  {
-    final Elements eus = RXMLUtilities.getChildren(e, "column", uri);
-    if (eus.size() != 3) {
-      throw new RXMLException.RXMLExceptionValidityError(
-        new ValidityException("Expected exactly three matrix columns"));
-    }
-
-    final Element ec0 = eus.get(0);
-    final RVectorI3F<RSpace> c0 =
-      RXMLUtilities.getElementAttributesMatrixColumn3(ec0, uri);
-    final Element ec1 = eus.get(1);
-    final RVectorI3F<RSpace> c1 =
-      RXMLUtilities.getElementAttributesMatrixColumn3(ec1, uri);
-    final Element ec2 = eus.get(2);
-    final RVectorI3F<RSpace> c2 =
-      RXMLUtilities.getElementAttributesMatrixColumn3(ec2, uri);
-
-    final RMatrixI3x3F<T> m = new RMatrixI3x3F<T>(c0, c1, c2);
-    return m;
+    final Element en = new Element(prefix + ":" + name, uri.toString());
+    en.appendChild(value);
+    e.appendChild(en);
   }
 }

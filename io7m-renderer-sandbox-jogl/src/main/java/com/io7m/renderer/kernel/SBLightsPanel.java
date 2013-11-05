@@ -161,19 +161,14 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
     private static class LightControlsProjective
     {
-      private final @Nonnull JTextField         position_x;
-      private final @Nonnull JTextField         position_y;
-      private final @Nonnull JTextField         position_z;
-
-      private final @Nonnull SBOrientationInput orientation;
-
-      protected final @Nonnull SBFloatHSlider   near;
-      protected final @Nonnull SBFloatHSlider   range;
-      protected final @Nonnull SBFloatHSlider   falloff;
-      protected final @Nonnull JTextField       texture;
-      private final @Nonnull JButton            texture_select;
-      private final @Nonnull SBFloatHSlider     fov;
-      private final @Nonnull SBFloatHSlider     aspect;
+      private final @Nonnull JTextField                position_x;
+      private final @Nonnull JTextField                position_y;
+      private final @Nonnull JTextField                position_z;
+      private final @Nonnull SBOrientationInput        orientation;
+      protected final @Nonnull SBProjectionMatrixPanel projection;
+      protected final @Nonnull SBFloatHSlider          falloff;
+      protected final @Nonnull JTextField              texture;
+      private final @Nonnull JButton                   texture_select;
 
       public LightControlsProjective(
         final @Nonnull SBSceneControllerTextures texture_controller,
@@ -185,11 +180,8 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         this.position_y = new JTextField("1.0");
         this.position_z = new JTextField("0.0");
         this.orientation = new SBOrientationInput();
-        this.near = new SBFloatHSlider("Near", 0.0f, 10.0f);
-        this.range = new SBFloatHSlider("Range", 0.0f, 128.0f);
+        this.projection = new SBProjectionMatrixPanel(owner, false);
         this.falloff = new SBFloatHSlider("Falloff", 0.0f, 64.0f);
-        this.fov = new SBFloatHSlider("FOV", 0.0f, 90.0f);
-        this.aspect = new SBFloatHSlider("Aspect ratio", 0.0f, 2.0f);
         this.texture = new JTextField();
         this.texture.setEditable(false);
         this.texture_select = new JButton("Select...");
@@ -233,35 +225,13 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           .add(this.texture, 4)
           .add(this.texture_select);
 
-        group
-          .grid()
-          .add(this.near.getLabel())
-          .add(this.near.getSlider(), 4)
-          .add(this.near.getField());
-
-        group
-          .grid()
-          .add(this.range.getLabel())
-          .add(this.range.getSlider(), 4)
-          .add(this.range.getField());
+        group.grid().add(this.projection);
 
         group
           .grid()
           .add(this.falloff.getLabel())
           .add(this.falloff.getSlider(), 4)
           .add(this.falloff.getField());
-
-        group
-          .grid()
-          .add(this.fov.getLabel())
-          .add(this.fov.getSlider(), 4)
-          .add(this.fov.getField());
-
-        group
-          .grid()
-          .add(this.aspect.getLabel())
-          .add(this.aspect.getSlider(), 4)
-          .add(this.aspect.getField());
       }
 
       public @Nonnull RVectorM3F<RSpaceWorld> getPosition()
@@ -287,21 +257,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         this.orientation.setOrientation(kl.getOrientation());
         this.texture.setText(kl.getTexture().getName());
         this.falloff.setCurrent(kl.getFalloff());
-
-        final SBFrustum frustum = light.getDescription().getFrustum();
-        final float fov_degrees =
-          (float) Math.toDegrees(frustum.getHorizontalFOV());
-        this.range.setCurrent(frustum.getFarDistance());
-        this.near.setCurrent(frustum.getNearDistance());
-        this.fov.setCurrent(fov_degrees);
-        this.aspect.setCurrent(frustum.getAspectRatio());
-      }
-
-      public float getDistance()
-        throws SBExceptionInputError
-      {
-        return SBTextFieldUtilities.getFieldFloatOrError(this.range
-          .getField());
+        this.projection.setContents(light.getDescription());
       }
 
       public float getFalloff()
@@ -317,7 +273,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         return this.orientation.getOrientation();
       }
 
-      public PathVirtual getTexture()
+      public @Nonnull PathVirtual getTexture()
         throws SBExceptionInputError,
           ConstraintError
       {
@@ -325,13 +281,11 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           .getFieldNonEmptyStringOrError(this.texture));
       }
 
-      public @Nonnull SBFrustum getFrustum()
+      public @Nonnull SBProjectionDescription getProjection()
+        throws SBExceptionInputError,
+          ConstraintError
       {
-        return new SBFrustum(
-          this.near.getCurrent(),
-          this.range.getCurrent(),
-          (float) Math.toRadians(this.fov.getCurrent()),
-          this.aspect.getCurrent());
+        return this.projection.getDescription();
       }
     }
 
@@ -701,18 +655,17 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
             new RVectorI3F<RSpaceWorld>(
               this.projective_controls.getPosition());
 
-          final float distance = this.projective_controls.getDistance();
           final float falloff = this.projective_controls.getFalloff();
-          final SBFrustum frustum = this.projective_controls.getFrustum();
           final PathVirtual texture = this.projective_controls.getTexture();
           final float intensity_v = this.getIntensity();
+          final SBProjectionDescription projection =
+            this.projective_controls.getProjection();
 
           return new SBLightDescription.SBLightDescriptionProjective(
             orientation,
             position,
-            distance,
             falloff,
-            frustum,
+            projection,
             texture,
             new RVectorI3F<RSpaceRGB>(colour),
             intensity_v,

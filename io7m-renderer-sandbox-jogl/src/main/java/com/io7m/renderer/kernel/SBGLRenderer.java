@@ -55,6 +55,7 @@ import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
+import com.io7m.jcanephora.ArrayBufferUsable;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.CMFKNegativeX;
 import com.io7m.jcanephora.CMFKNegativeY;
@@ -64,6 +65,7 @@ import com.io7m.jcanephora.CMFKPositiveY;
 import com.io7m.jcanephora.CMFKPositiveZ;
 import com.io7m.jcanephora.CubeMapFaceInputStream;
 import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.jcanephora.IndexBufferUsable;
 import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementationJOGL;
@@ -664,7 +666,7 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull AtomicBoolean                                       lights_show;
   private final @Nonnull AtomicBoolean                                       lights_show_surface;
 
-  private final @Nonnull Map<SBFrustum, SBVisibleFrustum>                    frustum_cache;
+  private final @Nonnull Map<SBProjectionDescription, SBVisibleProjection>   projection_cache;
   private final @Nonnull QuaternionM4F.Context                               qm4f_context;
   private @Nonnull KTransform                                                camera_transform;
   private final @Nonnull KTransform.Context                                  camera_transform_context;
@@ -844,7 +846,8 @@ final class SBGLRenderer implements GLEventListener
     this.matrix_projection = new MatrixM4x4F();
     this.matrix_model_temporary = new MatrixM4x4F();
 
-    this.frustum_cache = new HashMap<SBFrustum, SBVisibleFrustum>();
+    this.projection_cache =
+      new HashMap<SBProjectionDescription, SBVisibleProjection>();
 
     this.camera_custom_projection =
       new AtomicReference<RMatrixI4x4F<RTransformProjection>>();
@@ -1956,19 +1959,19 @@ final class SBGLRenderer implements GLEventListener
                 "m_modelview",
                 this.matrix_modelview);
 
-              final SBFrustum frustum_description =
-                actual.getDescription().getFrustum();
+              final SBProjectionDescription description =
+                actual.getDescription().getProjection();
 
-              final SBVisibleFrustum f;
-              if (this.frustum_cache.containsKey(frustum_description)) {
-                f = this.frustum_cache.get(frustum_description);
+              final SBVisibleProjection vp;
+              if (this.projection_cache.containsKey(description)) {
+                vp = this.projection_cache.get(description);
               } else {
-                f = new SBVisibleFrustum(gl, frustum_description);
-                this.frustum_cache.put(frustum_description, f);
+                vp = SBVisibleProjection.make(gl, description);
+                this.projection_cache.put(description, vp);
               }
 
-              final IndexBuffer indices = f.getIndexBuffer();
-              final ArrayBuffer array = f.getArrayBuffer();
+              final IndexBufferUsable indices = vp.getIndexBuffer();
+              final ArrayBufferUsable array = vp.getArrayBuffer();
               final ArrayBufferAttribute b_pos =
                 array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION
                   .getName());
