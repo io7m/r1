@@ -25,7 +25,6 @@ import nu.xom.Element;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
@@ -145,7 +144,7 @@ abstract class SBLightDescription
       final Element eid = RXMLUtilities.getChild(e, "id", uri);
       final Element er = RXMLUtilities.getChild(e, "range", uri);
       final Element ef = RXMLUtilities.getChild(e, "falloff", uri);
-      final Element efr = RXMLUtilities.getChild(e, "frustum", uri);
+      final Element epd = RXMLUtilities.getChild(e, "projection", uri);
       final Element et = RXMLUtilities.getChild(e, "texture", uri);
 
       final RVectorI3F<RSpaceWorld> position =
@@ -157,18 +156,17 @@ abstract class SBLightDescription
         RXMLUtilities.getElementAttributesRGB(ec, uri);
       final int id = RXMLUtilities.getElementInteger(eid);
       final float intensity = RXMLUtilities.getElementFloat(ei);
-      final float distance = RXMLUtilities.getElementFloat(er);
       final float falloff = RXMLUtilities.getElementFloat(ef);
-      final SBFrustum frustum = SBFrustum.fromXML(efr);
+      final SBProjectionDescription projection =
+        SBProjectionDescription.fromXML(epd);
       final PathVirtual texture =
         PathVirtual.ofString(RXMLUtilities.getElementNonEmptyString(et));
 
       return new SBLightDescriptionProjective(
         orientation,
         position,
-        distance,
         falloff,
-        frustum,
+        projection,
         texture,
         colour,
         intensity,
@@ -177,21 +175,19 @@ abstract class SBLightDescription
 
     private final @Nonnull QuaternionI4F                      orientation;
     private final @Nonnull RVectorI3F<RSpaceWorld>            position;
-    private final float                                       range;
     private final float                                       falloff;
-    private final @Nonnull SBFrustum                          frustum;
     private final @Nonnull PathVirtual                        texture;
     private final @Nonnull RVectorI3F<RSpaceRGB>              colour;
     private final float                                       intensity;
     private final @Nonnull Integer                            id;
-    private final @Nonnull RMatrixI4x4F<RTransformProjection> projection;
+    private final @Nonnull SBProjectionDescription            projection;
+    private final @Nonnull RMatrixI4x4F<RTransformProjection> projection_matrix;
 
     @SuppressWarnings("synthetic-access") SBLightDescriptionProjective(
       final @Nonnull QuaternionI4F orientation,
       final @Nonnull RVectorI3F<RSpaceWorld> position,
-      final float distance,
       final float falloff,
-      final @Nonnull SBFrustum frustum,
+      final @Nonnull SBProjectionDescription projection,
       final @Nonnull PathVirtual texture,
       final @Nonnull RVectorI3F<RSpaceRGB> colour,
       final float intensity,
@@ -200,24 +196,17 @@ abstract class SBLightDescription
     {
       super(KLight.Type.LIGHT_PROJECTIVE);
 
-      final MatrixM4x4F m = new MatrixM4x4F();
-      ProjectionMatrix.makePerspectiveProjection(
-        m,
-        frustum.getNearDistance(),
-        frustum.getFarDistance(),
-        frustum.getAspectRatio(),
-        frustum.getHorizontalFOV());
-
       this.orientation = orientation;
       this.position = position;
-      this.range = distance;
       this.falloff = falloff;
-      this.frustum = frustum;
       this.texture = texture;
       this.colour = colour;
       this.intensity = intensity;
       this.id = id;
-      this.projection = new RMatrixI4x4F<RTransformProjection>(m);
+      this.projection = projection;
+
+      final MatrixM4x4F temporary = new MatrixM4x4F();
+      this.projection_matrix = projection.makeProjectionMatrix(temporary);
     }
 
     public RVectorI3F<RSpaceRGB> getColour()
@@ -225,19 +214,9 @@ abstract class SBLightDescription
       return this.colour;
     }
 
-    public float getDistance()
-    {
-      return this.range;
-    }
-
     public float getFalloff()
     {
       return this.falloff;
-    }
-
-    public SBFrustum getFrustum()
-    {
-      return this.frustum;
     }
 
     public Integer getId()
@@ -265,9 +244,9 @@ abstract class SBLightDescription
         this.orientation,
         this.colour,
         this.intensity,
-        this.range,
+        (float) this.projection.getFar(),
         this.falloff,
-        this.projection);
+        this.projection_matrix);
     }
 
     public QuaternionI4F getOrientation()
@@ -326,12 +305,10 @@ abstract class SBLightDescription
         "s",
         SBSceneDescription.SCENE_XML_URI);
 
-      final Element er = new Element("s:range", uri);
-      er.appendChild(Float.toString(this.range));
       final Element ef = new Element("s:falloff", uri);
       ef.appendChild(Float.toString(this.falloff));
 
-      final Element efr = this.frustum.toXML();
+      final Element epd = this.projection.toXML();
 
       final Element et = new Element("s:texture", uri);
       et.appendChild(this.texture.toString());
@@ -341,16 +318,20 @@ abstract class SBLightDescription
       e.appendChild(ei);
       e.appendChild(ep);
       e.appendChild(eo);
-      e.appendChild(efr);
-      e.appendChild(er);
+      e.appendChild(epd);
       e.appendChild(ef);
       e.appendChild(et);
       return e;
     }
 
-    public @Nonnull RMatrixI4x4F<RTransformProjection> getProjection()
+    public @Nonnull SBProjectionDescription getProjection()
     {
       return this.projection;
+    }
+
+    public @Nonnull RMatrixI4x4F<RTransformProjection> getProjectionMatrix()
+    {
+      return this.projection_matrix;
     }
   }
 

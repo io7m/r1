@@ -65,6 +65,7 @@ import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jlog.Log;
+import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI3F;
@@ -122,7 +123,6 @@ public final class SBSceneController implements
   private final @Nonnull LinkedList<SBSceneChangeListener>   listeners;
   private final @Nonnull AtomicReference<SceneAndFilesystem> state_current;
   private final @Nonnull ExecutorService                     exec_pool;
-
   private final @Nonnull Map<String, SBShader>               shaders;
 
   public SBSceneController(
@@ -215,6 +215,8 @@ public final class SBSceneController implements
             final SBTexture2D<SBTexture2DKind> t =
               scene.texture2DGet(dd.getTexture());
 
+            final MatrixM4x4F temporary = new MatrixM4x4F();
+
             final KProjective kp =
               new KProjective(
                 dd.getID(),
@@ -223,9 +225,9 @@ public final class SBSceneController implements
                 dd.getOrientation(),
                 dd.getColour(),
                 dd.getIntensity(),
-                dd.getDistance(),
+                (float) dd.getProjection().getFar(),
                 dd.getFalloff(),
-                dd.getProjection());
+                dd.getProjection().makeProjectionMatrix(temporary));
 
             scene = scene.lightAdd(new SBLightProjective(dd, kp));
             break;
@@ -1112,19 +1114,21 @@ public final class SBSceneController implements
           (SBTexture2D<SBTexture2DKindAlbedo>) this.sceneTextures2DGet().get(
             dd.getTexture());
 
-        final KProjective kl =
-          new KLight.KProjective(
+        final MatrixM4x4F temporary = new MatrixM4x4F();
+
+        final KProjective kp =
+          new KProjective(
             dd.getID(),
             t.getTexture(),
             dd.getPosition(),
             dd.getOrientation(),
             dd.getColour(),
             dd.getIntensity(),
-            dd.getDistance(),
+            (float) dd.getProjection().getFar(),
             dd.getFalloff(),
-            dd.getProjection());
+            dd.getProjection().makeProjectionMatrix(temporary));
 
-        final SBLightProjective l = new SBLight.SBLightProjective(dd, kl);
+        final SBLightProjective l = new SBLight.SBLightProjective(dd, kp);
 
         this.internalStateUpdateSceneOnly(this.state_current.get().scene
           .lightAdd(l));
