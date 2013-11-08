@@ -33,15 +33,6 @@ final class SBFirstPersonCamera
     UP = new VectorI3F(0, 1, 0);
   }
 
-  static void makeYawVector(
-    final double yaw,
-    final @Nonnull VectorM3F out)
-  {
-    out.x = (float) Math.sin(yaw);
-    out.y = 0.0f;
-    out.z = (float) -Math.cos(yaw);
-  }
-
   static void makePitchYawVector(
     final double pitch,
     final double yaw,
@@ -50,6 +41,15 @@ final class SBFirstPersonCamera
     out.x = (float) ((-Math.cos(pitch)) * -Math.sin(yaw));
     out.y = (float) Math.sin(pitch);
     out.z = (float) (Math.cos(pitch) * -Math.cos(yaw));
+  }
+
+  static void makeYawVector(
+    final double yaw,
+    final @Nonnull VectorM3F out)
+  {
+    out.x = (float) Math.sin(yaw);
+    out.y = 0.0f;
+    out.z = (float) -Math.cos(yaw);
   }
 
   private double                             input_yaw;
@@ -104,19 +104,6 @@ final class SBFirstPersonCamera
     return new RMatrixI4x4F<RTransformView>(this.derived_matrix);
   }
 
-  @Override public String toString()
-  {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("[SBFPSCamera [yaw ");
-    builder.append(this.input_yaw);
-    builder.append("] [pitch ");
-    builder.append(this.input_pitch);
-    builder.append("] [position ");
-    builder.append(this.input_position);
-    builder.append("]");
-    return builder.toString();
-  }
-
   void moveBackward(
     final double r)
   {
@@ -141,6 +128,12 @@ final class SBFirstPersonCamera
     VectorM3F.addInPlace(this.input_position, this.derived_forward);
   }
 
+  void moveRotateDown(
+    final double r)
+  {
+    this.input_pitch -= r;
+  }
+
   void moveRotateLeft(
     final double r)
   {
@@ -151,6 +144,12 @@ final class SBFirstPersonCamera
     final double r)
   {
     this.input_yaw += r;
+  }
+
+  void moveRotateUp(
+    final double r)
+  {
+    this.input_pitch += r;
   }
 
   void moveStrafeLeft(
@@ -188,15 +187,16 @@ final class SBFirstPersonCamera
     VectorM3F.copy(position, this.input_position);
   }
 
-  void moveRotateUp(
-    final double r)
+  @Override public String toString()
   {
-    this.input_pitch += r;
-  }
-
-  void moveRotateDown(
-    final double r)
-  {
-    this.input_pitch -= r;
+    final StringBuilder builder = new StringBuilder();
+    builder.append("[SBFPSCamera [yaw ");
+    builder.append(this.input_yaw);
+    builder.append("] [pitch ");
+    builder.append(this.input_pitch);
+    builder.append("] [position ");
+    builder.append(this.input_position);
+    builder.append("]");
+    return builder.toString();
   }
 }

@@ -25,17 +25,6 @@ import javax.swing.JFrame;
 final class SBWindowUtilities
 {
   /**
-   * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given window.
-   */
-
-  static void closeWindow(
-    final @Nonnull JFrame frame)
-  {
-    final WindowEvent ev = new WindowEvent(frame, WindowEvent.WINDOW_CLOSING);
-    frame.dispatchEvent(ev);
-  }
-
-  /**
    * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given dialog.
    */
 
@@ -45,5 +34,16 @@ final class SBWindowUtilities
     final WindowEvent ev =
       new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING);
     dialog.dispatchEvent(ev);
+  }
+
+  /**
+   * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given window.
+   */
+
+  static void closeWindow(
+    final @Nonnull JFrame frame)
+  {
+    final WindowEvent ev = new WindowEvent(frame, WindowEvent.WINDOW_CLOSING);
+    frame.dispatchEvent(ev);
   }
 }

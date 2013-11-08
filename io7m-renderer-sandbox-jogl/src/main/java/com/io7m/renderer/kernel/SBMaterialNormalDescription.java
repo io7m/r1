@@ -16,42 +16,13 @@
 
 package com.io7m.renderer.kernel;
 
-import java.net.URI;
-
 import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
-import nu.xom.Element;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLUtilities;
 
 public final class SBMaterialNormalDescription
 {
-  public static @Nonnull SBMaterialNormalDescription fromXML(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
-  {
-    final URI uri = SBSceneDescription.SCENE_XML_URI;
-    RXMLUtilities.checkIsElement(e, "normal", uri);
-    final Element et = RXMLUtilities.getChild(e, "texture", uri);
-
-    final PathVirtual texture =
-      (et.getValue().length() == 0) ? null : PathVirtual.ofString(et
-        .getValue());
-
-    return new SBMaterialNormalDescription(texture);
-  }
-
   private final @CheckForNull PathVirtual texture;
-
-  public @CheckForNull PathVirtual getTexture()
-  {
-    return this.texture;
-  }
 
   public SBMaterialNormalDescription(
     final @CheckForNull PathVirtual texture)
@@ -83,6 +54,11 @@ public final class SBMaterialNormalDescription
     return true;
   }
 
+  public @CheckForNull PathVirtual getTexture()
+  {
+    return this.texture;
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;
@@ -100,19 +76,5 @@ public final class SBMaterialNormalDescription
     builder.append(this.texture);
     builder.append("]");
     return builder.toString();
-  }
-
-  @Nonnull Element toXML()
-  {
-    final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-    final Element e = new Element("s:normal", uri);
-
-    final Element ed = new Element("s:texture", uri);
-    if (this.texture != null) {
-      ed.appendChild(this.texture.toString());
-    }
-
-    e.appendChild(ed);
-    return e;
   }
 }

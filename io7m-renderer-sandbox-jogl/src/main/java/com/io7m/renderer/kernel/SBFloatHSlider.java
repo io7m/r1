@@ -33,11 +33,30 @@ import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
 public final class SBFloatHSlider
 {
+  private static float convertFromSlider(
+    final int x,
+    final float min,
+    final float max)
+  {
+    final float factor = x / 100.0f;
+    return (factor * (max - min)) + min;
+  }
+
+  private static int convertToSlider(
+    final float f,
+    final float min,
+    final float max)
+  {
+    return (int) (((f - min) / (max - min)) * 100);
+  }
+
   private final float               minimum;
   private final float               maximum;
   private float                     current;
   private final @Nonnull JTextField field;
+
   private final @Nonnull JSlider    slider;
+
   private final @Nonnull JLabel     label;
 
   public SBFloatHSlider(
@@ -85,23 +104,6 @@ public final class SBFloatHSlider
         }
       }
     });
-  }
-
-  private static int convertToSlider(
-    final float f,
-    final float min,
-    final float max)
-  {
-    return (int) (((f - min) / (max - min)) * 100);
-  }
-
-  private static float convertFromSlider(
-    final int x,
-    final float min,
-    final float max)
-  {
-    final float factor = x / 100.0f;
-    return (factor * (max - min)) + min;
   }
 
   public float getCurrent()

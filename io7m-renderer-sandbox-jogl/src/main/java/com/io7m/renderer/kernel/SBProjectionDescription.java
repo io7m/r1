@@ -16,49 +16,21 @@
 
 package com.io7m.renderer.kernel;
 
-import java.net.URI;
-
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import nu.xom.Element;
-
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RTransformProjection;
-import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLUtilities;
 
 @Immutable public abstract class SBProjectionDescription
 {
   @Immutable public static final class SBProjectionFrustum extends
     SBProjectionDescription
   {
-    public static @Nonnull SBProjectionFrustum fromXML(
-      final @Nonnull Element e)
-      throws RXMLException,
-        ConstraintError
-    {
-      final URI uri = SBSceneDescription.SCENE_XML_URI;
-      RXMLUtilities.checkIsElement(e, "projection-frustum", uri);
-
-      return new SBProjectionFrustum(
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(e, "left", uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities
-          .getChild(e, "right", uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(
-          e,
-          "bottom",
-          uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(e, "top", uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(e, "near", uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(e, "far", uri)));
-    }
-
     private final double left;
     private final double right;
     private final double bottom;
@@ -90,6 +62,46 @@ import com.io7m.renderer.xml.RXMLUtilities;
       this.far = far;
     }
 
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final SBProjectionFrustum other = (SBProjectionFrustum) obj;
+      if (Double.doubleToLongBits(this.bottom) != Double
+        .doubleToLongBits(other.bottom)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.far) != Double
+        .doubleToLongBits(other.far)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.left) != Double
+        .doubleToLongBits(other.left)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.near) != Double
+        .doubleToLongBits(other.near)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.right) != Double
+        .doubleToLongBits(other.right)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.top) != Double
+        .doubleToLongBits(other.top)) {
+        return false;
+      }
+      return true;
+    }
+
     public double getBottom()
     {
       return this.bottom;
@@ -120,17 +132,24 @@ import com.io7m.renderer.xml.RXMLUtilities;
       return this.top;
     }
 
-    @Override public @Nonnull Element toXML()
+    @Override public int hashCode()
     {
-      final URI uri = SBSceneDescription.SCENE_XML_URI;
-      final Element e = new Element("s:projection-frustum", uri.toString());
-      RXMLUtilities.putElementDouble(e, "s", "left", this.left, uri);
-      RXMLUtilities.putElementDouble(e, "s", "right", this.right, uri);
-      RXMLUtilities.putElementDouble(e, "s", "top", this.top, uri);
-      RXMLUtilities.putElementDouble(e, "s", "bottom", this.bottom, uri);
-      RXMLUtilities.putElementDouble(e, "s", "near", this.near, uri);
-      RXMLUtilities.putElementDouble(e, "s", "far", this.far, uri);
-      return e;
+      final int prime = 31;
+      int result = 1;
+      long temp;
+      temp = Double.doubleToLongBits(this.bottom);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.far);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.left);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.near);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.right);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.top);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      return result;
     }
 
     @Override public RMatrixI4x4F<RTransformProjection> makeProjectionMatrix(
@@ -152,27 +171,6 @@ import com.io7m.renderer.xml.RXMLUtilities;
   @Immutable public static final class SBProjectionOrthographic extends
     SBProjectionDescription
   {
-    public static @Nonnull SBProjectionOrthographic fromXML(
-      final @Nonnull Element e)
-      throws RXMLException,
-        ConstraintError
-    {
-      final URI uri = SBSceneDescription.SCENE_XML_URI;
-      RXMLUtilities.checkIsElement(e, "projection-orthographic", uri);
-
-      return new SBProjectionOrthographic(
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(e, "left", uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities
-          .getChild(e, "right", uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(
-          e,
-          "bottom",
-          uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(e, "top", uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(e, "near", uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(e, "far", uri)));
-    }
-
     private final double left;
     private final double right;
     private final double bottom;
@@ -204,6 +202,46 @@ import com.io7m.renderer.xml.RXMLUtilities;
       this.far = far;
     }
 
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final SBProjectionOrthographic other = (SBProjectionOrthographic) obj;
+      if (Double.doubleToLongBits(this.bottom) != Double
+        .doubleToLongBits(other.bottom)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.far) != Double
+        .doubleToLongBits(other.far)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.left) != Double
+        .doubleToLongBits(other.left)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.near) != Double
+        .doubleToLongBits(other.near)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.right) != Double
+        .doubleToLongBits(other.right)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.top) != Double
+        .doubleToLongBits(other.top)) {
+        return false;
+      }
+      return true;
+    }
+
     public double getBottom()
     {
       return this.bottom;
@@ -234,18 +272,24 @@ import com.io7m.renderer.xml.RXMLUtilities;
       return this.top;
     }
 
-    @Override public @Nonnull Element toXML()
+    @Override public int hashCode()
     {
-      final URI uri = SBSceneDescription.SCENE_XML_URI;
-      final Element e =
-        new Element("s:projection-orthographic", uri.toString());
-      RXMLUtilities.putElementDouble(e, "s", "left", this.left, uri);
-      RXMLUtilities.putElementDouble(e, "s", "right", this.right, uri);
-      RXMLUtilities.putElementDouble(e, "s", "top", this.top, uri);
-      RXMLUtilities.putElementDouble(e, "s", "bottom", this.bottom, uri);
-      RXMLUtilities.putElementDouble(e, "s", "near", this.near, uri);
-      RXMLUtilities.putElementDouble(e, "s", "far", this.far, uri);
-      return e;
+      final int prime = 31;
+      int result = 1;
+      long temp;
+      temp = Double.doubleToLongBits(this.bottom);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.far);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.left);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.near);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.right);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.top);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      return result;
     }
 
     @Override public RMatrixI4x4F<RTransformProjection> makeProjectionMatrix(
@@ -267,27 +311,6 @@ import com.io7m.renderer.xml.RXMLUtilities;
   @Immutable public static final class SBProjectionPerspective extends
     SBProjectionDescription
   {
-    public static @Nonnull SBProjectionPerspective fromXML(
-      final @Nonnull Element e)
-      throws RXMLException,
-        ConstraintError
-    {
-      final URI uri = SBSceneDescription.SCENE_XML_URI;
-      RXMLUtilities.checkIsElement(e, "projection-perspective", uri);
-
-      return new SBProjectionPerspective(
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(e, "near", uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(e, "far", uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(
-          e,
-          "aspect",
-          uri)),
-        RXMLUtilities.getElementDouble(RXMLUtilities.getChild(
-          e,
-          "horizontal-fov",
-          uri)));
-    }
-
     private final double near;
     private final double far;
     private final double aspect;
@@ -313,6 +336,38 @@ import com.io7m.renderer.xml.RXMLUtilities;
       this.horizontal_fov = horizontal_fov;
     }
 
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final SBProjectionPerspective other = (SBProjectionPerspective) obj;
+      if (Double.doubleToLongBits(this.aspect) != Double
+        .doubleToLongBits(other.aspect)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.far) != Double
+        .doubleToLongBits(other.far)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.horizontal_fov) != Double
+        .doubleToLongBits(other.horizontal_fov)) {
+        return false;
+      }
+      if (Double.doubleToLongBits(this.near) != Double
+        .doubleToLongBits(other.near)) {
+        return false;
+      }
+      return true;
+    }
+
     public double getAspect()
     {
       return this.aspect;
@@ -333,21 +388,20 @@ import com.io7m.renderer.xml.RXMLUtilities;
       return this.near;
     }
 
-    @Override public @Nonnull Element toXML()
+    @Override public int hashCode()
     {
-      final URI uri = SBSceneDescription.SCENE_XML_URI;
-      final Element e =
-        new Element("s:projection-perspective", uri.toString());
-      RXMLUtilities.putElementDouble(e, "s", "near", this.near, uri);
-      RXMLUtilities.putElementDouble(e, "s", "far", this.far, uri);
-      RXMLUtilities.putElementDouble(e, "s", "aspect", this.aspect, uri);
-      RXMLUtilities.putElementDouble(
-        e,
-        "s",
-        "horizontal-fov",
-        this.horizontal_fov,
-        uri);
-      return e;
+      final int prime = 31;
+      int result = 1;
+      long temp;
+      temp = Double.doubleToLongBits(this.aspect);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.far);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.horizontal_fov);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(this.near);
+      result = (prime * result) + (int) (temp ^ (temp >>> 32));
+      return result;
     }
 
     @Override public RMatrixI4x4F<RTransformProjection> makeProjectionMatrix(
@@ -389,22 +443,6 @@ import com.io7m.renderer.xml.RXMLUtilities;
     }
   }
 
-  public static @Nonnull SBProjectionDescription fromXML(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
-  {
-    if (e.getLocalName().equals("projection-frustum")) {
-      return SBProjectionFrustum.fromXML(e);
-    } else if (e.getLocalName().equals("projection-perspective")) {
-      return SBProjectionPerspective.fromXML(e);
-    } else if (e.getLocalName().equals("projection-orthographic")) {
-      return SBProjectionOrthographic.fromXML(e);
-    }
-
-    throw new UnreachableCodeException();
-  }
-
   private final @Nonnull Type type;
 
   private SBProjectionDescription(
@@ -426,6 +464,4 @@ import com.io7m.renderer.xml.RXMLUtilities;
     makeProjectionMatrix(
       final @Nonnull MatrixM4x4F temporary)
       throws ConstraintError;
-
-  public abstract @Nonnull Element toXML();
 }

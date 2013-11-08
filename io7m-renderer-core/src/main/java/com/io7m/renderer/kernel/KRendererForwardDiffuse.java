@@ -77,7 +77,7 @@ final class KRendererForwardDiffuse implements KRenderer
   private final @Nonnull JCCEExecutionCallable exec_spherical;
   private final @Nonnull JCCEExecutionCallable exec_depth;
   private final @Nonnull KMatrices             matrices;
-  private @Nonnull KFramebuffer                framebuffer;
+  private @Nonnull KFramebufferBasic                framebuffer;
 
   KRendererForwardDiffuse(
     final @Nonnull JCGLImplementation gl,
@@ -305,7 +305,7 @@ final class KRendererForwardDiffuse implements KRenderer
     }
   }
 
-  @Override public @Nonnull KFramebufferUsable rendererFramebufferGet()
+  @Override public @Nonnull KFramebufferBasicUsable rendererFramebufferGet()
   {
     return this.framebuffer;
   }

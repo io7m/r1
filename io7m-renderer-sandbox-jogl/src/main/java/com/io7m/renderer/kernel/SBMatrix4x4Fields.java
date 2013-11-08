@@ -47,18 +47,6 @@ public final class SBMatrix4x4Fields<T extends RTransform>
     }
   }
 
-  public void groupLayout(
-    final @Nonnull IRowCreator group)
-  {
-    for (int r = 0; r < 4; ++r) {
-      final JTextField f0 = this.fields[r][0];
-      final JTextField f1 = this.fields[r][1];
-      final JTextField f2 = this.fields[r][2];
-      final JTextField f3 = this.fields[r][3];
-      group.grid().add(f0).add(f1).add(f2).add(f3);
-    }
-  }
-
   public @Nonnull RMatrixI4x4F<T> getMatrix4x4f()
     throws SBExceptionInputError
   {
@@ -114,6 +102,18 @@ public final class SBMatrix4x4Fields<T extends RTransform>
     final int column)
   {
     return this.fields[column][row];
+  }
+
+  public void groupLayout(
+    final @Nonnull IRowCreator group)
+  {
+    for (int r = 0; r < 4; ++r) {
+      final JTextField f0 = this.fields[r][0];
+      final JTextField f1 = this.fields[r][1];
+      final JTextField f2 = this.fields[r][2];
+      final JTextField f3 = this.fields[r][3];
+      group.grid().add(f0).add(f1).add(f2).add(f3);
+    }
   }
 
   @SuppressWarnings("boxing") public void setMatrix(

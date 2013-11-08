@@ -51,6 +51,37 @@ import com.io7m.jvvfs.PathVirtual;
 
 final class SBTextures2DPanel extends JPanel
 {
+  private static final class ImageDisplay extends JPanel
+  {
+    private static final long           serialVersionUID;
+
+    static {
+      serialVersionUID = -5281965547772476438L;
+    }
+
+    private @CheckForNull BufferedImage image;
+
+    ImageDisplay()
+    {
+
+    }
+
+    @Override protected void paintComponent(
+      final Graphics g)
+    {
+      super.paintComponent(g);
+      if (this.image != null) {
+        g.drawImage(this.image, 0, 0, null);
+      }
+    }
+
+    protected void setImage(
+      final @Nonnull BufferedImage image)
+    {
+      this.image = image;
+    }
+  }
+
   private static final class TextureParameters extends JPanel
   {
     private static final long                                    serialVersionUID;
@@ -101,6 +132,16 @@ final class SBTextures2DPanel extends JPanel
       d.row().grid().add(new JLabel("Magnification")).add(this.filter_mag);
     }
 
+    TextureFilterMagnification getMagnification()
+    {
+      return (TextureFilterMagnification) this.filter_mag.getSelectedItem();
+    }
+
+    TextureFilterMinification getMinification()
+    {
+      return (TextureFilterMinification) this.filter_min.getSelectedItem();
+    }
+
     TextureWrapS getWrapS()
     {
       return (TextureWrapS) this.wrap_s.getSelectedItem();
@@ -109,47 +150,6 @@ final class SBTextures2DPanel extends JPanel
     TextureWrapT getWrapT()
     {
       return (TextureWrapT) this.wrap_t.getSelectedItem();
-    }
-
-    TextureFilterMinification getMinification()
-    {
-      return (TextureFilterMinification) this.filter_min.getSelectedItem();
-    }
-
-    TextureFilterMagnification getMagnification()
-    {
-      return (TextureFilterMagnification) this.filter_mag.getSelectedItem();
-    }
-  }
-
-  private static final class ImageDisplay extends JPanel
-  {
-    private static final long           serialVersionUID;
-
-    static {
-      serialVersionUID = -5281965547772476438L;
-    }
-
-    private @CheckForNull BufferedImage image;
-
-    ImageDisplay()
-    {
-
-    }
-
-    @Override protected void paintComponent(
-      final Graphics g)
-    {
-      super.paintComponent(g);
-      if (this.image != null) {
-        g.drawImage(this.image, 0, 0, null);
-      }
-    }
-
-    protected void setImage(
-      final @Nonnull BufferedImage image)
-    {
-      this.image = image;
     }
   }
 

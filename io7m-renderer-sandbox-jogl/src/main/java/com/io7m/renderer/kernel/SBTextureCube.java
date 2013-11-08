@@ -34,46 +34,6 @@ public final class SBTextureCube
   private final @Nonnull BufferedImage            positive_x;
   private final @Nonnull BufferedImage            negative_x;
 
-  public @Nonnull SBTextureCubeDescription getDescription()
-  {
-    return this.description;
-  }
-
-  public @Nonnull PathVirtual getPath()
-  {
-    return this.description.getPath();
-  }
-
-  public @Nonnull BufferedImage getPositiveZ()
-  {
-    return this.positive_z;
-  }
-
-  public @Nonnull BufferedImage getNegativeZ()
-  {
-    return this.negative_z;
-  }
-
-  public @Nonnull BufferedImage getPositiveY()
-  {
-    return this.positive_y;
-  }
-
-  public @Nonnull BufferedImage getNegativeY()
-  {
-    return this.negative_y;
-  }
-
-  public @Nonnull BufferedImage getPositiveX()
-  {
-    return this.positive_x;
-  }
-
-  public @Nonnull BufferedImage getNegativeX()
-  {
-    return this.negative_x;
-  }
-
   SBTextureCube(
     final @Nonnull SBTextureCubeDescription description,
     final @Nonnull TextureCubeStatic texture,
@@ -94,9 +54,49 @@ public final class SBTextureCube
     this.negative_x = negative_x;
   }
 
+  public @Nonnull SBTextureCubeDescription getDescription()
+  {
+    return this.description;
+  }
+
   @Nonnull String getName()
   {
     return this.texture.getName();
+  }
+
+  public @Nonnull BufferedImage getNegativeX()
+  {
+    return this.negative_x;
+  }
+
+  public @Nonnull BufferedImage getNegativeY()
+  {
+    return this.negative_y;
+  }
+
+  public @Nonnull BufferedImage getNegativeZ()
+  {
+    return this.negative_z;
+  }
+
+  public @Nonnull PathVirtual getPath()
+  {
+    return this.description.getPath();
+  }
+
+  public @Nonnull BufferedImage getPositiveX()
+  {
+    return this.positive_x;
+  }
+
+  public @Nonnull BufferedImage getPositiveY()
+  {
+    return this.positive_y;
+  }
+
+  public @Nonnull BufferedImage getPositiveZ()
+  {
+    return this.positive_z;
   }
 
   public @Nonnull TextureCubeStatic getTexture()

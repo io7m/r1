@@ -28,7 +28,7 @@ module SphericalLight is
   import com.io7m.renderer.Materials as M;
 
   type t is record
-    color     : vector_3f,
+    colour    : vector_3f,
     position  : vector_3f,
     intensity : float,
     radius    : float,
@@ -98,10 +98,10 @@ module SphericalLight is
 
   --
   -- Given a spherical light [light], calculate the diffuse
-  -- color based on [d], with minimum emission level [e].
+  -- colour based on [d], with minimum emission level [e].
   --
 
-  function diffuse_color (
+  function diffuse_colour (
     light : t,
     d     : directions,
     e     : float
@@ -111,10 +111,10 @@ module SphericalLight is
         F.maximum (0.0, V3.dot (d.stl, d.normal));
       value factor_e =
         F.maximum (factor, e);
-      value color =
-        V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor_e);
+      value colour =
+        V3.multiply_scalar (V3.multiply_scalar (light.colour, light.intensity), factor_e);
     in
-      color
+      colour
     end;
 
   --
@@ -132,17 +132,17 @@ module SphericalLight is
     let
       value d = directions (light.position, p, n);
       value a = attenuation (light.radius, light.falloff, d.distance);
-      value c = diffuse_color (light, d, 0.0);
+      value c = diffuse_colour (light, d, 0.0);
     in
       V3.multiply_scalar (c, a)
     end;
 
   --
   -- Given a spherical light [light], calculate the specular
-  -- color based on [d].
+  -- colour based on [d].
   --
 
-  function specular_color (
+  function specular_colour (
     light : t,
     d     : directions,
     s     : M.specular
@@ -150,10 +150,10 @@ module SphericalLight is
     let
       value factor =
         F.power (F.maximum (0.0, V3.dot (d.reflection, d.stl)), s.exponent);
-      value color =
-        V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor);
+      value colour =
+        V3.multiply_scalar (V3.multiply_scalar (light.colour, light.intensity), factor);
     in
-      V3.multiply_scalar (color, s.intensity)
+      V3.multiply_scalar (colour, s.intensity)
     end;
 
   --
@@ -171,8 +171,8 @@ module SphericalLight is
     let
       value d  = directions (light.position, p, n);
       value a  = attenuation (light.radius, light.falloff, d.distance);
-      value dc = diffuse_color (light, d, 0.0);
-      value sc = specular_color (light, d, material.specular);
+      value dc = diffuse_colour (light, d, 0.0);
+      value sc = specular_colour (light, d, material.specular);
     in
       V3.multiply_scalar (V3.add (dc, sc), a)
     end;
@@ -194,8 +194,8 @@ module SphericalLight is
     let
       value d  = directions (light.position, p, n);
       value a  = attenuation (light.radius, light.falloff, d.distance);
-      value dc = diffuse_color (light, d, material.emissive.emissive);
-      value sc = specular_color (light, d, material.specular);
+      value dc = diffuse_colour (light, d, material.emissive.emissive);
+      value sc = specular_colour (light, d, material.specular);
     in
       V3.multiply_scalar (V3.add (dc, sc), a)
     end;
@@ -217,7 +217,7 @@ module SphericalLight is
     let
       value d = directions (light.position, p, n);
       value a = attenuation (light.radius, light.falloff, d.distance);
-      value c = diffuse_color (light, d, material.emissive.emissive);
+      value c = diffuse_colour (light, d, material.emissive.emissive);
     in
       V3.multiply_scalar (c, a)
     end;

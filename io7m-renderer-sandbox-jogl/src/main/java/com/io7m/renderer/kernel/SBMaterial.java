@@ -135,6 +135,11 @@ public final class SBMaterial
     return this.map_specular;
   }
 
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
+  {
+    return this.description.getUVMatrix();
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;
@@ -178,10 +183,5 @@ public final class SBMaterial
     builder.append(this.map_environment);
     builder.append("]");
     return builder.toString();
-  }
-
-  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
-  {
-    return this.description.getUVMatrix();
   }
 }
