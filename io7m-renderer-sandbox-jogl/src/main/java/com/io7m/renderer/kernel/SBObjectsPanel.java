@@ -66,45 +66,6 @@ import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
 final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 {
-  private static class GeneralSettings implements
-    MaterialPanel<RMatrixI3x3F<RTransformTexture>>
-  {
-    protected final @Nonnull SBMatrix3x3Fields<RTransformTexture> matrix;
-
-    GeneralSettings()
-    {
-      this.matrix = new SBMatrix3x3Fields<RTransformTexture>();
-    }
-
-    @Override public void mpLayout(
-      final DesignGridLayout d)
-    {
-      d.row().grid().add(new JLabel("UV matrix"));
-
-      for (int r = 0; r < 3; ++r) {
-        d
-          .row()
-          .grid()
-          .add(this.matrix.getRowColumnField(r, 0))
-          .add(this.matrix.getRowColumnField(r, 1))
-          .add(this.matrix.getRowColumnField(r, 2));
-      }
-    }
-
-    @Override public void mpLoadFrom(
-      final SBInstanceDescription i)
-    {
-      this.matrix.setMatrix(i.getUVMatrix());
-    }
-
-    @Override public RMatrixI3x3F<RTransformTexture> mpSave()
-      throws SBExceptionInputError,
-        ConstraintError
-    {
-      return this.matrix.getMatrix3x3f();
-    }
-  }
-
   private static class AlbedoSettings implements
     MaterialPanel<SBMaterialAlbedoDescription>
   {
@@ -453,6 +414,45 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           this.refraction_index.getCurrent());
 
       return environment;
+    }
+  }
+
+  private static class GeneralSettings implements
+    MaterialPanel<RMatrixI3x3F<RTransformTexture>>
+  {
+    protected final @Nonnull SBMatrix3x3Fields<RTransformTexture> matrix;
+
+    GeneralSettings()
+    {
+      this.matrix = new SBMatrix3x3Fields<RTransformTexture>();
+    }
+
+    @Override public void mpLayout(
+      final DesignGridLayout d)
+    {
+      d.row().grid().add(new JLabel("UV matrix"));
+
+      for (int r = 0; r < 3; ++r) {
+        d
+          .row()
+          .grid()
+          .add(this.matrix.getRowColumnField(r, 0))
+          .add(this.matrix.getRowColumnField(r, 1))
+          .add(this.matrix.getRowColumnField(r, 2));
+      }
+    }
+
+    @Override public void mpLoadFrom(
+      final SBInstanceDescription i)
+    {
+      this.matrix.setMatrix(i.getUVMatrix());
+    }
+
+    @Override public RMatrixI3x3F<RTransformTexture> mpSave()
+      throws SBExceptionInputError,
+        ConstraintError
+    {
+      return this.matrix.getMatrix3x3f();
     }
   }
 

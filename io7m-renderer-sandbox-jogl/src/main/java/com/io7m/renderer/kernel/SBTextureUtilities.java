@@ -33,6 +33,22 @@ import com.io7m.jlog.Log;
 
 public final class SBTextureUtilities
 {
+  static void textureDump(
+    final @Nonnull Texture2DReadableData r,
+    final @Nonnull File file)
+    throws FileNotFoundException,
+      IOException
+  {
+    final BufferedOutputStream s =
+      new BufferedOutputStream(new FileOutputStream(file));
+    final ByteBuffer data = r.getData();
+    for (int index = 0; index < data.capacity(); ++index) {
+      s.write(data.get(index));
+    }
+    s.flush();
+    s.close();
+  }
+
   static void textureDumpTimestampedTemporary(
     final @Nonnull Texture2DReadableData r,
     final @Nonnull String name,
@@ -48,21 +64,5 @@ public final class SBTextureUtilities
       new File(System.getProperty("java.io.tmpdir"), actual);
     log.debug("Writing texture to " + out_file);
     SBTextureUtilities.textureDump(r, out_file);
-  }
-
-  static void textureDump(
-    final @Nonnull Texture2DReadableData r,
-    final @Nonnull File file)
-    throws FileNotFoundException,
-      IOException
-  {
-    final BufferedOutputStream s =
-      new BufferedOutputStream(new FileOutputStream(file));
-    final ByteBuffer data = r.getData();
-    for (int index = 0; index < data.capacity(); ++index) {
-      s.write(data.get(index));
-    }
-    s.flush();
-    s.close();
   }
 }

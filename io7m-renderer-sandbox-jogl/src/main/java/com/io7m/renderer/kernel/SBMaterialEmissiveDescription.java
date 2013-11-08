@@ -20,20 +20,17 @@ import javax.annotation.CheckForNull;
 
 import com.io7m.jvvfs.PathVirtual;
 
-public final class SBMaterialSpecularDescription
+public final class SBMaterialEmissiveDescription
 {
+  private final float                     emission;
   private final @CheckForNull PathVirtual texture;
-  private final float                     intensity;
-  private final float                     exponent;
 
-  SBMaterialSpecularDescription(
-    final @CheckForNull PathVirtual texture,
-    final float intensity,
-    final float exponent)
+  public SBMaterialEmissiveDescription(
+    final float emission,
+    final @CheckForNull PathVirtual texture)
   {
+    this.emission = emission;
     this.texture = texture;
-    this.intensity = intensity;
-    this.exponent = exponent;
   }
 
   @Override public boolean equals(
@@ -48,14 +45,10 @@ public final class SBMaterialSpecularDescription
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final SBMaterialSpecularDescription other =
-      (SBMaterialSpecularDescription) obj;
-    if (Float.floatToIntBits(this.exponent) != Float
-      .floatToIntBits(other.exponent)) {
-      return false;
-    }
-    if (Float.floatToIntBits(this.intensity) != Float
-      .floatToIntBits(other.intensity)) {
+    final SBMaterialEmissiveDescription other =
+      (SBMaterialEmissiveDescription) obj;
+    if (Float.floatToIntBits(this.emission) != Float
+      .floatToIntBits(other.emission)) {
       return false;
     }
     if (this.texture == null) {
@@ -68,14 +61,9 @@ public final class SBMaterialSpecularDescription
     return true;
   }
 
-  public float getExponent()
+  public float getEmission()
   {
-    return this.exponent;
-  }
-
-  public float getIntensity()
-  {
-    return this.intensity;
+    return this.emission;
   }
 
   public @CheckForNull PathVirtual getTexture()
@@ -87,8 +75,7 @@ public final class SBMaterialSpecularDescription
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + Float.floatToIntBits(this.exponent);
-    result = (prime * result) + Float.floatToIntBits(this.intensity);
+    result = (prime * result) + Float.floatToIntBits(this.emission);
     result =
       (prime * result)
         + ((this.texture == null) ? 0 : this.texture.hashCode());
@@ -98,12 +85,10 @@ public final class SBMaterialSpecularDescription
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("SBMaterialSpecularDescription [texture=");
+    builder.append("SBMaterialEmissiveDescription [emission=");
+    builder.append(this.emission);
+    builder.append(", texture=");
     builder.append(this.texture);
-    builder.append(", intensity=");
-    builder.append(this.intensity);
-    builder.append(", exponent=");
-    builder.append(this.exponent);
     builder.append("]");
     return builder.toString();
   }

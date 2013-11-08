@@ -54,21 +54,63 @@ import com.io7m.jvvfs.PathVirtual;
 
 final class SBTexturesCubePanel extends JPanel
 {
-  static final @Nonnull FileFilter CUBE_MAP_FILTER;
+  private static final class ImageDisplay extends JPanel
+  {
+    private static final long           serialVersionUID;
 
-  static {
-    CUBE_MAP_FILTER = new FileFilter() {
-      @Override public boolean accept(
-        final File f)
-      {
-        return f.isDirectory() || f.toString().endsWith(".rxc");
-      }
+    static {
+      serialVersionUID = -5281965547772476438L;
+    }
 
-      @Override public String getDescription()
-      {
-        return "Cube map definitions (*.rxc)";
+    private @CheckForNull BufferedImage positive_z;
+
+    private @CheckForNull BufferedImage negative_z;
+    private @CheckForNull BufferedImage positive_y;
+    private @CheckForNull BufferedImage negative_y;
+    private @CheckForNull BufferedImage positive_x;
+    private @CheckForNull BufferedImage negative_x;
+
+    ImageDisplay()
+    {
+
+    }
+
+    @Override public Dimension getPreferredSize()
+    {
+      if (this.positive_z != null) {
+        final int size = this.positive_z.getWidth();
+        return new Dimension(size * 3, size * 2);
       }
-    };
+      return this.getSize();
+    }
+
+    @Override protected void paintComponent(
+      final Graphics g)
+    {
+      super.paintComponent(g);
+
+      if (this.positive_z != null) {
+        final int size = this.positive_z.getWidth();
+
+        g.drawImage(this.positive_y, size, 0, null);
+        g.drawImage(this.negative_x, 0, size, null);
+        g.drawImage(this.negative_z, size, size, null);
+        g.drawImage(this.positive_x, size + size, size, null);
+        g.drawImage(this.positive_z, size + size + size, size, null);
+        g.drawImage(this.negative_y, size, size + size, null);
+      }
+    }
+
+    public void setImages(
+      final @Nonnull SBTextureCube t)
+    {
+      this.positive_z = t.getPositiveZ();
+      this.positive_y = t.getPositiveY();
+      this.positive_x = t.getPositiveX();
+      this.negative_z = t.getNegativeZ();
+      this.negative_y = t.getNegativeY();
+      this.negative_x = t.getNegativeX();
+    }
   }
 
   private static final class TextureParameters extends JPanel
@@ -129,6 +171,16 @@ final class SBTexturesCubePanel extends JPanel
       d.row().grid().add(new JLabel("Magnification")).add(this.filter_mag);
     }
 
+    TextureFilterMagnification getMagnification()
+    {
+      return (TextureFilterMagnification) this.filter_mag.getSelectedItem();
+    }
+
+    TextureFilterMinification getMinification()
+    {
+      return (TextureFilterMinification) this.filter_min.getSelectedItem();
+    }
+
     TextureWrapR getWrapR()
     {
       return (TextureWrapR) this.wrap_r.getSelectedItem();
@@ -143,74 +195,23 @@ final class SBTexturesCubePanel extends JPanel
     {
       return (TextureWrapT) this.wrap_t.getSelectedItem();
     }
-
-    TextureFilterMinification getMinification()
-    {
-      return (TextureFilterMinification) this.filter_min.getSelectedItem();
-    }
-
-    TextureFilterMagnification getMagnification()
-    {
-      return (TextureFilterMagnification) this.filter_mag.getSelectedItem();
-    }
   }
 
-  private static final class ImageDisplay extends JPanel
-  {
-    private static final long serialVersionUID;
+  static final @Nonnull FileFilter                   CUBE_MAP_FILTER;
 
-    static {
-      serialVersionUID = -5281965547772476438L;
-    }
-
-    @Override public Dimension getPreferredSize()
-    {
-      if (this.positive_z != null) {
-        final int size = this.positive_z.getWidth();
-        return new Dimension(size * 3, size * 2);
+  static {
+    CUBE_MAP_FILTER = new FileFilter() {
+      @Override public boolean accept(
+        final File f)
+      {
+        return f.isDirectory() || f.toString().endsWith(".rxc");
       }
-      return this.getSize();
-    }
 
-    private @CheckForNull BufferedImage positive_z;
-    private @CheckForNull BufferedImage negative_z;
-    private @CheckForNull BufferedImage positive_y;
-    private @CheckForNull BufferedImage negative_y;
-    private @CheckForNull BufferedImage positive_x;
-    private @CheckForNull BufferedImage negative_x;
-
-    ImageDisplay()
-    {
-
-    }
-
-    @Override protected void paintComponent(
-      final Graphics g)
-    {
-      super.paintComponent(g);
-
-      if (this.positive_z != null) {
-        final int size = this.positive_z.getWidth();
-
-        g.drawImage(this.positive_y, size, 0, null);
-        g.drawImage(this.negative_x, 0, size, null);
-        g.drawImage(this.negative_z, size, size, null);
-        g.drawImage(this.positive_x, size + size, size, null);
-        g.drawImage(this.positive_z, size + size + size, size, null);
-        g.drawImage(this.negative_y, size, size + size, null);
+      @Override public String getDescription()
+      {
+        return "Cube map definitions (*.rxc)";
       }
-    }
-
-    public void setImages(
-      final @Nonnull SBTextureCube t)
-    {
-      this.positive_z = t.getPositiveZ();
-      this.positive_y = t.getPositiveY();
-      this.positive_x = t.getPositiveX();
-      this.negative_z = t.getNegativeZ();
-      this.negative_y = t.getNegativeY();
-      this.negative_x = t.getNegativeX();
-    }
+    };
   }
 
   private static final long                          serialVersionUID;

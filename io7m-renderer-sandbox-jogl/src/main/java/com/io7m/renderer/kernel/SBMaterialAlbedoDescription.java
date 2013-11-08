@@ -17,23 +17,29 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints;
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.RSpaceRGBA;
+import com.io7m.renderer.RVectorI4F;
 
-public final class SBMaterialSpecularDescription
+public final class SBMaterialAlbedoDescription
 {
-  private final @CheckForNull PathVirtual texture;
-  private final float                     intensity;
-  private final float                     exponent;
+  private final @Nonnull RVectorI4F<RSpaceRGBA> colour;
+  private final float                           mix;
+  private final @CheckForNull PathVirtual       texture;
 
-  SBMaterialSpecularDescription(
-    final @CheckForNull PathVirtual texture,
-    final float intensity,
-    final float exponent)
+  public SBMaterialAlbedoDescription(
+    final @Nonnull RVectorI4F<RSpaceRGBA> colour,
+    final float mix,
+    final @CheckForNull PathVirtual texture)
+    throws ConstraintError
   {
+    this.colour = Constraints.constrainNotNull(colour, "Colour");
+    this.mix = mix;
     this.texture = texture;
-    this.intensity = intensity;
-    this.exponent = exponent;
   }
 
   @Override public boolean equals(
@@ -48,14 +54,12 @@ public final class SBMaterialSpecularDescription
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final SBMaterialSpecularDescription other =
-      (SBMaterialSpecularDescription) obj;
-    if (Float.floatToIntBits(this.exponent) != Float
-      .floatToIntBits(other.exponent)) {
+    final SBMaterialAlbedoDescription other =
+      (SBMaterialAlbedoDescription) obj;
+    if (!this.colour.equals(other.colour)) {
       return false;
     }
-    if (Float.floatToIntBits(this.intensity) != Float
-      .floatToIntBits(other.intensity)) {
+    if (Float.floatToIntBits(this.mix) != Float.floatToIntBits(other.mix)) {
       return false;
     }
     if (this.texture == null) {
@@ -68,14 +72,14 @@ public final class SBMaterialSpecularDescription
     return true;
   }
 
-  public float getExponent()
+  public @Nonnull RVectorI4F<RSpaceRGBA> getColour()
   {
-    return this.exponent;
+    return this.colour;
   }
 
-  public float getIntensity()
+  public float getMix()
   {
-    return this.intensity;
+    return this.mix;
   }
 
   public @CheckForNull PathVirtual getTexture()
@@ -87,8 +91,8 @@ public final class SBMaterialSpecularDescription
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + Float.floatToIntBits(this.exponent);
-    result = (prime * result) + Float.floatToIntBits(this.intensity);
+    result = (prime * result) + this.colour.hashCode();
+    result = (prime * result) + Float.floatToIntBits(this.mix);
     result =
       (prime * result)
         + ((this.texture == null) ? 0 : this.texture.hashCode());
@@ -98,12 +102,12 @@ public final class SBMaterialSpecularDescription
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("SBMaterialSpecularDescription [texture=");
+    builder.append("SBMaterialAlbedoDescription [colour=");
+    builder.append(this.colour);
+    builder.append(", mix=");
+    builder.append(this.mix);
+    builder.append(", texture=");
     builder.append(this.texture);
-    builder.append(", intensity=");
-    builder.append(this.intensity);
-    builder.append(", exponent=");
-    builder.append(this.exponent);
     builder.append("]");
     return builder.toString();
   }

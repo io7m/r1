@@ -16,18 +16,18 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.CheckForNull;
 
-import com.io7m.jvvfs.PathVirtual;
-
-public final class SBMaterialNormalDescription
+public final class SBMaterialAlphaDescription
 {
-  private final @CheckForNull PathVirtual texture;
+  private final boolean translucent;
+  private final float   opacity;
 
-  public SBMaterialNormalDescription(
-    final @CheckForNull PathVirtual texture)
+  SBMaterialAlphaDescription(
+    final boolean translucent,
+    final float opacity)
   {
-    this.texture = texture;
+    this.translucent = translucent;
+    this.opacity = opacity;
   }
 
   @Override public boolean equals(
@@ -42,38 +42,43 @@ public final class SBMaterialNormalDescription
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final SBMaterialNormalDescription other =
-      (SBMaterialNormalDescription) obj;
-    if (this.texture == null) {
-      if (other.texture != null) {
-        return false;
-      }
-    } else if (!this.texture.equals(other.texture)) {
+    final SBMaterialAlphaDescription other = (SBMaterialAlphaDescription) obj;
+    if (Float.floatToIntBits(this.opacity) != Float
+      .floatToIntBits(other.opacity)) {
+      return false;
+    }
+    if (this.translucent != other.translucent) {
       return false;
     }
     return true;
   }
 
-  public @CheckForNull PathVirtual getTexture()
+  public float getOpacity()
   {
-    return this.texture;
+    return this.opacity;
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
-    result =
-      (prime * result)
-        + ((this.texture == null) ? 0 : this.texture.hashCode());
+    result = (prime * result) + Float.floatToIntBits(this.opacity);
+    result = (prime * result) + (this.translucent ? 1231 : 1237);
     return result;
+  }
+
+  public boolean isTranslucent()
+  {
+    return this.translucent;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("SBMaterialNormalDescription [texture=");
-    builder.append(this.texture);
+    builder.append("SBMaterialAlphaDescription [translucent=");
+    builder.append(this.translucent);
+    builder.append(", opacity=");
+    builder.append(this.opacity);
     builder.append("]");
     return builder.toString();
   }

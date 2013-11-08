@@ -16,12 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
-import java.net.URI;
-
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
-
-import nu.xom.Element;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -33,46 +29,16 @@ import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KLight.Type;
-import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLUtilities;
 
 abstract class SBLightDescription
 {
   @Immutable static final class SBLightDescriptionDirectional extends
     SBLightDescription
   {
-    static @Nonnull SBLightDescriptionDirectional fromXML(
-      final @Nonnull Element e)
-      throws RXMLException,
-        ConstraintError
-    {
-      final URI uri = SBSceneDescription.SCENE_XML_URI;
-      RXMLUtilities.checkIsElement(e, "light-directional", uri);
-
-      final Element ed = RXMLUtilities.getChild(e, "direction", uri);
-      final Element ec = RXMLUtilities.getChild(e, "colour", uri);
-      final Element ei = RXMLUtilities.getChild(e, "intensity", uri);
-      final Element eid = RXMLUtilities.getChild(e, "id", uri);
-
-      final RVectorI3F<RSpaceWorld> direction =
-        RXMLUtilities.getElementVector3f(ed, uri);
-      final RVectorI3F<RSpaceRGB> colour =
-        RXMLUtilities.getElementRGB(ec, uri);
-      final int id = RXMLUtilities.getElementInteger(eid);
-      final float intensity = RXMLUtilities.getElementFloat(ei);
-
-      return new SBLightDescriptionDirectional(new KLight.KDirectional(
-        Integer.valueOf(id),
-        direction,
-        colour,
-        intensity));
-    }
-
     private final @Nonnull KLight.KDirectional actual;
 
     @SuppressWarnings("synthetic-access") SBLightDescriptionDirectional(
@@ -81,6 +47,26 @@ abstract class SBLightDescription
     {
       super(KLight.Type.LIGHT_DIRECTIONAL);
       this.actual = actual;
+    }
+
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final SBLightDescriptionDirectional other =
+        (SBLightDescriptionDirectional) obj;
+      if (!this.actual.equals(other.actual)) {
+        return false;
+      }
+      return true;
     }
 
     @Override public Integer getID()
@@ -93,86 +79,29 @@ abstract class SBLightDescription
       return this.actual;
     }
 
-    @Override Element toXML()
+    @Override public int hashCode()
     {
-      final String uri = SBSceneDescription.SCENE_XML_URI.toString();
+      final int prime = 31;
+      int result = 1;
+      result =
+        (prime * result)
+          + ((this.actual == null) ? 0 : this.actual.hashCode());
+      return result;
+    }
 
-      final Element eid = new Element("s:id", uri);
-      eid.appendChild(this.actual.getID().toString());
-
-      final Element ei = new Element("s:intensity", uri);
-      ei.appendChild(Float.toString(this.actual.getIntensity()));
-
-      final Element ec = new Element("s:colour", uri);
-      RXMLUtilities.putElementAttributesRGB(
-        ec,
-        this.actual.getColour(),
-        "s",
-        SBSceneDescription.SCENE_XML_URI);
-
-      final Element e = new Element("s:light-directional", uri);
-      final Element ed = new Element("s:direction", uri);
-      RXMLUtilities.putElementAttributesVector3f(
-        ed,
-        this.actual.getDirection(),
-        "s",
-        SBSceneDescription.SCENE_XML_URI);
-
-      e.appendChild(eid);
-      e.appendChild(ec);
-      e.appendChild(ei);
-      e.appendChild(ed);
-      return e;
+    @Override public String toString()
+    {
+      final StringBuilder builder = new StringBuilder();
+      builder.append("[SBLightDescriptionDirectional ");
+      builder.append(this.actual);
+      builder.append("]");
+      return builder.toString();
     }
   }
 
   @Immutable static final class SBLightDescriptionProjective extends
     SBLightDescription
   {
-    static @Nonnull SBLightDescriptionProjective fromXML(
-      final @Nonnull Element e)
-      throws RXMLException,
-        ConstraintError
-    {
-      final URI uri = SBSceneDescription.SCENE_XML_URI;
-      RXMLUtilities.checkIsElement(e, "light-projective", uri);
-
-      final Element ep = RXMLUtilities.getChild(e, "position", uri);
-      final Element eo = RXMLUtilities.getChild(e, "orientation", uri);
-      final Element ec = RXMLUtilities.getChild(e, "colour", uri);
-      final Element ei = RXMLUtilities.getChild(e, "intensity", uri);
-      final Element eid = RXMLUtilities.getChild(e, "id", uri);
-      final Element er = RXMLUtilities.getChild(e, "range", uri);
-      final Element ef = RXMLUtilities.getChild(e, "falloff", uri);
-      final Element epd = RXMLUtilities.getChild(e, "projection", uri);
-      final Element et = RXMLUtilities.getChild(e, "texture", uri);
-
-      final RVectorI3F<RSpaceWorld> position =
-        RXMLUtilities.getElementAttributesVector3f(ep, uri);
-      final QuaternionI4F orientation =
-        RXMLUtilities.getElementAttributesQuaternion4f(eo, uri);
-
-      final RVectorI3F<RSpaceRGB> colour =
-        RXMLUtilities.getElementAttributesRGB(ec, uri);
-      final int id = RXMLUtilities.getElementInteger(eid);
-      final float intensity = RXMLUtilities.getElementFloat(ei);
-      final float falloff = RXMLUtilities.getElementFloat(ef);
-      final SBProjectionDescription projection =
-        SBProjectionDescription.fromXML(epd);
-      final PathVirtual texture =
-        PathVirtual.ofString(RXMLUtilities.getElementNonEmptyString(et));
-
-      return new SBLightDescriptionProjective(
-        orientation,
-        position,
-        falloff,
-        projection,
-        texture,
-        colour,
-        intensity,
-        id);
-    }
-
     private final @Nonnull QuaternionI4F                      orientation;
     private final @Nonnull RVectorI3F<RSpaceWorld>            position;
     private final float                                       falloff;
@@ -207,6 +136,60 @@ abstract class SBLightDescription
 
       final MatrixM4x4F temporary = new MatrixM4x4F();
       this.projection_matrix = projection.makeProjectionMatrix(temporary);
+    }
+
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final SBLightDescriptionProjective other =
+        (SBLightDescriptionProjective) obj;
+      if (this.colour == null) {
+        if (other.colour != null) {
+          return false;
+        }
+      } else if (!this.colour.equals(other.colour)) {
+        return false;
+      }
+      if (Float.floatToIntBits(this.falloff) != Float
+        .floatToIntBits(other.falloff)) {
+        return false;
+      }
+      if (this.id == null) {
+        if (other.id != null) {
+          return false;
+        }
+      } else if (!this.id.equals(other.id)) {
+        return false;
+      }
+      if (Float.floatToIntBits(this.intensity) != Float
+        .floatToIntBits(other.intensity)) {
+        return false;
+      }
+      if (!this.orientation.equals(other.orientation)) {
+        return false;
+      }
+      if (!this.position.equals(other.position)) {
+        return false;
+      }
+      if (!this.projection.equals(other.projection)) {
+        return false;
+      }
+      if (!this.projection_matrix.equals(other.projection_matrix)) {
+        return false;
+      }
+      if (!this.texture.equals(other.texture)) {
+        return false;
+      }
+      return true;
     }
 
     public RVectorI3F<RSpaceRGB> getColour()
@@ -259,71 +242,6 @@ abstract class SBLightDescription
       return this.position;
     }
 
-    @Nonnull PathVirtual getTexture()
-    {
-      return this.texture;
-    }
-
-    @Override Element toXML()
-    {
-      final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-
-      final Element eid = new Element("s:id", uri);
-      eid.appendChild(this.id.toString());
-
-      final Element ei = new Element("s:intensity", uri);
-      ei.appendChild(Float.toString(this.intensity));
-
-      final Element ec = new Element("s:colour", uri);
-      RXMLUtilities.putElementAttributesRGB(
-        ec,
-        this.colour,
-        "s",
-        SBSceneDescription.SCENE_XML_URI);
-
-      final Element e = new Element("s:light-projective", uri);
-
-      final Element ep = new Element("s:position", uri);
-      RXMLUtilities.putElementAttributesVector3f(
-        ep,
-        this.position,
-        "s",
-        SBSceneDescription.SCENE_XML_URI);
-
-      final QuaternionI4F doo = this.orientation;
-      final RVectorI4F<RSpaceWorld> ov =
-        new RVectorI4F<RSpaceWorld>(
-          doo.getXF(),
-          doo.getYF(),
-          doo.getZF(),
-          doo.getWF());
-
-      final Element eo = new Element("s:orientation", uri);
-      RXMLUtilities.putElementAttributesVector4f(
-        eo,
-        ov,
-        "s",
-        SBSceneDescription.SCENE_XML_URI);
-
-      final Element ef = new Element("s:falloff", uri);
-      ef.appendChild(Float.toString(this.falloff));
-
-      final Element epd = this.projection.toXML();
-
-      final Element et = new Element("s:texture", uri);
-      et.appendChild(this.texture.toString());
-
-      e.appendChild(eid);
-      e.appendChild(ec);
-      e.appendChild(ei);
-      e.appendChild(ep);
-      e.appendChild(eo);
-      e.appendChild(epd);
-      e.appendChild(ef);
-      e.appendChild(et);
-      return e;
-    }
-
     public @Nonnull SBProjectionDescription getProjection()
     {
       return this.projection;
@@ -333,44 +251,57 @@ abstract class SBLightDescription
     {
       return this.projection_matrix;
     }
+
+    @Nonnull PathVirtual getTexture()
+    {
+      return this.texture;
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + this.colour.hashCode();
+      result = (prime * result) + Float.floatToIntBits(this.falloff);
+      result = (prime * result) + this.id.hashCode();
+      result = (prime * result) + Float.floatToIntBits(this.intensity);
+      result = (prime * result) + this.orientation.hashCode();
+      result = (prime * result) + this.position.hashCode();
+      result = (prime * result) + this.projection.hashCode();
+      result = (prime * result) + this.projection_matrix.hashCode();
+      result = (prime * result) + this.texture.hashCode();
+      return result;
+    }
+
+    @Override public String toString()
+    {
+      final StringBuilder builder = new StringBuilder();
+      builder.append("[SBLightDescriptionProjective ");
+      builder.append(this.orientation);
+      builder.append(" position=");
+      builder.append(this.position);
+      builder.append(" falloff=");
+      builder.append(this.falloff);
+      builder.append(" texture=");
+      builder.append(this.texture);
+      builder.append(" colour=");
+      builder.append(this.colour);
+      builder.append(" intensity=");
+      builder.append(this.intensity);
+      builder.append(" id=");
+      builder.append(this.id);
+      builder.append(" projection=");
+      builder.append(this.projection);
+      builder.append(" projection_matrix=");
+      builder.append(this.projection_matrix);
+      builder.append("]");
+      return builder.toString();
+    }
   }
 
   @Immutable static final class SBLightDescriptionSpherical extends
     SBLightDescription
   {
-    static @Nonnull SBLightDescriptionSpherical fromXML(
-      final @Nonnull Element e)
-      throws RXMLException,
-        ConstraintError
-    {
-      final URI uri = SBSceneDescription.SCENE_XML_URI;
-      RXMLUtilities.checkIsElement(e, "light-spherical", uri);
-
-      final Element ep = RXMLUtilities.getChild(e, "position", uri);
-      final Element ec = RXMLUtilities.getChild(e, "colour", uri);
-      final Element ei = RXMLUtilities.getChild(e, "intensity", uri);
-      final Element eid = RXMLUtilities.getChild(e, "id", uri);
-      final Element er = RXMLUtilities.getChild(e, "range", uri);
-      final Element ef = RXMLUtilities.getChild(e, "falloff", uri);
-
-      final RVectorI3F<RSpaceWorld> position =
-        RXMLUtilities.getElementAttributesVector3f(ep, uri);
-      final RVectorI3F<RSpaceRGB> colour =
-        RXMLUtilities.getElementAttributesRGB(ec, uri);
-      final int id = RXMLUtilities.getElementInteger(eid);
-      final float intensity = RXMLUtilities.getElementFloat(ei);
-      final float radius = RXMLUtilities.getElementFloat(er);
-      final float falloff = RXMLUtilities.getElementFloat(ef);
-
-      return new SBLightDescriptionSpherical(new KLight.KSphere(
-        Integer.valueOf(id),
-        colour,
-        intensity,
-        position,
-        radius,
-        falloff));
-    }
-
     private final @Nonnull KLight.KSphere actual;
 
     @SuppressWarnings("synthetic-access") SBLightDescriptionSpherical(
@@ -379,6 +310,30 @@ abstract class SBLightDescription
     {
       super(KLight.Type.LIGHT_SPHERE);
       this.actual = actual;
+    }
+
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final SBLightDescriptionSpherical other =
+        (SBLightDescriptionSpherical) obj;
+      if (this.actual == null) {
+        if (other.actual != null) {
+          return false;
+        }
+      } else if (!this.actual.equals(other.actual)) {
+        return false;
+      }
+      return true;
     }
 
     @Override public Integer getID()
@@ -391,42 +346,23 @@ abstract class SBLightDescription
       return this.actual;
     }
 
-    @Override Element toXML()
+    @Override public int hashCode()
     {
-      final String uri = SBSceneDescription.SCENE_XML_URI.toString();
+      final int prime = 31;
+      int result = 1;
+      result =
+        (prime * result)
+          + ((this.actual == null) ? 0 : this.actual.hashCode());
+      return result;
+    }
 
-      final Element eid = new Element("s:id", uri);
-      eid.appendChild(this.actual.getID().toString());
-
-      final Element ei = new Element("s:intensity", uri);
-      ei.appendChild(Float.toString(this.actual.getIntensity()));
-
-      final Element ec = new Element("s:colour", uri);
-      RXMLUtilities.putElementAttributesRGB(
-        ec,
-        this.actual.getColour(),
-        "s",
-        SBSceneDescription.SCENE_XML_URI);
-
-      final Element e = new Element("s:light-spherical", uri);
-      final Element ed = new Element("s:position", uri);
-      RXMLUtilities.putElementAttributesVector3f(
-        ed,
-        this.actual.getPosition(),
-        "s",
-        SBSceneDescription.SCENE_XML_URI);
-      final Element er = new Element("s:range", uri);
-      er.appendChild(Float.toString(this.actual.getRadius()));
-      final Element ef = new Element("s:falloff", uri);
-      ef.appendChild(Float.toString(this.actual.getFalloff()));
-
-      e.appendChild(eid);
-      e.appendChild(ec);
-      e.appendChild(ei);
-      e.appendChild(ed);
-      e.appendChild(er);
-      e.appendChild(ef);
-      return e;
+    @Override public String toString()
+    {
+      final StringBuilder builder = new StringBuilder();
+      builder.append("[SBLightDescriptionSpherical ");
+      builder.append(this.actual);
+      builder.append("]");
+      return builder.toString();
     }
   }
 
@@ -445,6 +381,4 @@ abstract class SBLightDescription
   {
     return this.type;
   }
-
-  abstract @Nonnull Element toXML();
 }

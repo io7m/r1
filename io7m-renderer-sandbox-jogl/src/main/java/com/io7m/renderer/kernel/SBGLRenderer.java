@@ -602,6 +602,15 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
+  private static @Nonnull AreaInclusive drawableArea(
+    final @Nonnull GLAutoDrawable drawable)
+    throws ConstraintError
+  {
+    return new AreaInclusive(
+      new RangeInclusive(0, drawable.getWidth() - 1),
+      new RangeInclusive(0, drawable.getHeight() - 1));
+  }
+
   private static void initBuiltInSpheres(
     final @Nonnull Map<PathVirtual, KMesh> meshes,
     final @Nonnull FSCapabilityRead fs,
@@ -658,13 +667,13 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>             texture_cube_delete_queue;
   private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                      mesh_load_queue;
   private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>                    mesh_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>                    shader_load_queue;
 
+  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>                    shader_load_queue;
   private final @Nonnull HashMap<String, SBShader>                                  shaders;
   private final @Nonnull HashMap<PathVirtual, Texture2DStatic>                      textures_2d;
   private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>                    textures_cube;
-  private final @Nonnull HashMap<PathVirtual, KMesh>                                meshes;
 
+  private final @Nonnull HashMap<PathVirtual, KMesh>                                meshes;
   private @CheckForNull SBQuad                                                      screen_quad;
   private final @Nonnull FSCapabilityAll                                            filesystem;
   private final @Nonnull AtomicReference<RunningState>                              running;
@@ -678,8 +687,8 @@ final class SBGLRenderer implements GLEventListener
   private @CheckForNull KRenderer                                                   renderer_kernel;
   private @CheckForNull SBRendererSpecific                                          renderer_specific;
   private @Nonnull LRUCacheTrivial<String, ProgramReference, KShaderCacheException> shader_cache;
-  private @Nonnull LRUCacheConfig                                                   shader_cache_config;
 
+  private @Nonnull LRUCacheConfig                                                   shader_cache_config;
   private final @Nonnull AtomicReference<SBSceneControllerRenderer>                 controller;
   private final @Nonnull AtomicReference<VectorI3F>                                 background_colour;
   private @Nonnull SBVisibleAxes                                                    axes;
@@ -688,8 +697,8 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull AtomicBoolean                                              grid_show;
   private @Nonnull HashMap<PathVirtual, KMesh>                                      sphere_meshes;
   private final @Nonnull AtomicBoolean                                              lights_show;
-  private final @Nonnull AtomicBoolean                                              lights_show_surface;
 
+  private final @Nonnull AtomicBoolean                                              lights_show_surface;
   private final @Nonnull Map<SBProjectionDescription, SBVisibleProjection>          projection_cache;
   private final @Nonnull QuaternionM4F.Context                                      qm4f_context;
   private @Nonnull KTransform                                                       camera_transform;
@@ -701,8 +710,8 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>>        camera_custom_projection;
   private @Nonnull SceneObserver                                                    camera_current;
   private @CheckForNull KScene                                                      scene_current;
-  private @CheckForNull KScene                                                      scene_previous;
 
+  private @CheckForNull KScene                                                      scene_previous;
   private Collection<SBLight>                                                       scene_lights;
   private @CheckForNull ProgramReference                                            program_uv;
   private @CheckForNull ProgramReference                                            program_vcolour;
@@ -711,6 +720,7 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull JCCEExecutionCallable                                            exec_uv;
   private @Nonnull JCCEExecutionCallable                                            exec_ccolour;
   private @Nonnull AreaInclusive                                                    viewport;
+
   private static final @Nonnull VectorReadable4F                                    GRID_COLOUR;
 
   static {
@@ -738,83 +748,6 @@ final class SBGLRenderer implements GLEventListener
       return new SBMesh(path, new KMesh(ab, ib));
     } finally {
       stream.close();
-    }
-  }
-
-  private void renderSceneMakeLitBatches(
-    final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
-    final @Nonnull ArrayList<KBatchOpaqueLit> opaque_lit,
-    final @Nonnull ArrayList<KBatchTranslucent> translucent_lit)
-  {
-    for (final KLight l : p.first) {
-      switch (l.getType()) {
-        case LIGHT_PROJECTIVE:
-        case LIGHT_DIRECTIONAL:
-        case LIGHT_SPHERE:
-        {
-          final HashMap<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
-            new HashMap<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>>();
-
-          for (final KMeshInstance m : p.second) {
-            final KMeshInstanceMaterialLabel mlabel = m.getMaterialLabel();
-            if (instances_by_label.containsKey(mlabel)) {
-              final ArrayList<KMeshInstance> ins =
-                instances_by_label.get(mlabel);
-              ins.add(m);
-            } else {
-              final ArrayList<KMeshInstance> ins =
-                new ArrayList<KMeshInstance>();
-              ins.add(m);
-              instances_by_label.put(mlabel, ins);
-            }
-          }
-
-          for (final Entry<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
-            .entrySet()) {
-            final KMeshInstanceMaterialLabel label = e.getKey();
-            final ArrayList<KMeshInstance> instances = e.getValue();
-
-            if (label.getAlpha() != Alpha.ALPHA_TRANSLUCENT) {
-              opaque_lit.add(new KBatchOpaqueLit(l, label, instances));
-            }
-          }
-
-          break;
-        }
-      }
-    }
-
-    /**
-     * Sort translucent objects by Z (from the origin, not from the observer,
-     * for testing purposes). Associate all lights with each object.
-     */
-
-    final LinkedList<KMeshInstance> instances =
-      new LinkedList<KMeshInstance>(p.second);
-
-    Collections.sort(instances, new Comparator<KMeshInstance>() {
-      @Override public int compare(
-        final KMeshInstance o1,
-        final KMeshInstance o2)
-      {
-        final float o1z = o1.getTransform().getTranslation().getZF();
-        final float o2z = o2.getTransform().getTranslation().getZF();
-        return Float.compare(o1z, o2z);
-      }
-    });
-
-    final Iterator<KMeshInstance> iter = instances.iterator();
-    while (iter.hasNext()) {
-      final KMeshInstance i = iter.next();
-      final KMeshInstanceMaterialLabel label = i.getMaterialLabel();
-      if (label.getAlpha() == Alpha.ALPHA_OPAQUE) {
-        iter.remove();
-      } else {
-        translucent_lit.add(new KBatchTranslucent(
-          i,
-          label,
-          new ArrayList<KLight>(p.first)));
-      }
     }
   }
 
@@ -1130,15 +1063,6 @@ final class SBGLRenderer implements GLEventListener
     throw new UnreachableCodeException();
   }
 
-  private static @Nonnull AreaInclusive drawableArea(
-    final @Nonnull GLAutoDrawable drawable)
-    throws ConstraintError
-  {
-    return new AreaInclusive(
-      new RangeInclusive(0, drawable.getWidth() - 1),
-      new RangeInclusive(0, drawable.getHeight() - 1));
-  }
-
   @Override public void display(
     final @Nonnull GLAutoDrawable drawable)
   {
@@ -1184,53 +1108,6 @@ final class SBGLRenderer implements GLEventListener
       this.failed(e);
     } catch (final Exception e) {
       this.failed(e);
-    }
-  }
-
-  private void handleSnapshotRequest()
-    throws JCGLException,
-      ConstraintError,
-      FileNotFoundException,
-      IOException
-  {
-    if (this.input_state.wantFramebufferSnaphot()) {
-      this.input_state.setWantFramebufferSnapshot(false);
-
-      this.log.debug("Taking framebuffer snapshot");
-
-      final Option<JCGLInterfaceGL3> o = this.gi.getGL3();
-      switch (o.type) {
-        case OPTION_NONE:
-        {
-          break;
-        }
-        case OPTION_SOME:
-        {
-          final JCGLInterfaceGL3 g3 =
-            ((Option.Some<JCGLInterfaceGL3>) o).value;
-
-          if (this.renderer_kernel != null) {
-            final KFramebufferBasicUsable f =
-              this.renderer_kernel.rendererFramebufferGet();
-            final Texture2DReadableData r =
-              g3.texture2DStaticGetImage(f.kframebufferGetOutputTexture());
-            SBTextureUtilities.textureDumpTimestampedTemporary(
-              r,
-              "sandbox",
-              this.log);
-          } else if (this.renderer_specific != null) {
-            final KFramebufferBasicUsable f =
-              this.renderer_specific.rendererFramebufferGet();
-            final Texture2DReadableData r =
-              g3.texture2DStaticGetImage(f.kframebufferGetOutputTexture());
-            SBTextureUtilities.textureDumpTimestampedTemporary(
-              r,
-              "sandbox",
-              this.log);
-          }
-          break;
-        }
-      }
     }
   }
 
@@ -1301,6 +1178,53 @@ final class SBGLRenderer implements GLEventListener
     SBGLRenderer.processQueue(this.texture_cube_load_queue);
     SBGLRenderer.processQueue(this.mesh_load_queue);
     SBGLRenderer.processQueue(this.shader_load_queue);
+  }
+
+  private void handleSnapshotRequest()
+    throws JCGLException,
+      ConstraintError,
+      FileNotFoundException,
+      IOException
+  {
+    if (this.input_state.wantFramebufferSnaphot()) {
+      this.input_state.setWantFramebufferSnapshot(false);
+
+      this.log.debug("Taking framebuffer snapshot");
+
+      final Option<JCGLInterfaceGL3> o = this.gi.getGL3();
+      switch (o.type) {
+        case OPTION_NONE:
+        {
+          break;
+        }
+        case OPTION_SOME:
+        {
+          final JCGLInterfaceGL3 g3 =
+            ((Option.Some<JCGLInterfaceGL3>) o).value;
+
+          if (this.renderer_kernel != null) {
+            final KFramebufferBasicUsable f =
+              this.renderer_kernel.rendererFramebufferGet();
+            final Texture2DReadableData r =
+              g3.texture2DStaticGetImage(f.kframebufferGetOutputTexture());
+            SBTextureUtilities.textureDumpTimestampedTemporary(
+              r,
+              "sandbox",
+              this.log);
+          } else if (this.renderer_specific != null) {
+            final KFramebufferBasicUsable f =
+              this.renderer_specific.rendererFramebufferGet();
+            final Texture2DReadableData r =
+              g3.texture2DStaticGetImage(f.kframebufferGetOutputTexture());
+            SBTextureUtilities.textureDumpTimestampedTemporary(
+              r,
+              "sandbox",
+              this.log);
+          }
+          break;
+        }
+      }
+    }
   }
 
   @Override public void init(
@@ -2114,6 +2038,83 @@ final class SBGLRenderer implements GLEventListener
         final SBRendererSpecific rs = this.renderer_specific;
         rs.rendererSetBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f));
         rs.rendererEvaluate(scene);
+      }
+    }
+  }
+
+  private void renderSceneMakeLitBatches(
+    final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
+    final @Nonnull ArrayList<KBatchOpaqueLit> opaque_lit,
+    final @Nonnull ArrayList<KBatchTranslucent> translucent_lit)
+  {
+    for (final KLight l : p.first) {
+      switch (l.getType()) {
+        case LIGHT_PROJECTIVE:
+        case LIGHT_DIRECTIONAL:
+        case LIGHT_SPHERE:
+        {
+          final HashMap<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
+            new HashMap<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>>();
+
+          for (final KMeshInstance m : p.second) {
+            final KMeshInstanceMaterialLabel mlabel = m.getMaterialLabel();
+            if (instances_by_label.containsKey(mlabel)) {
+              final ArrayList<KMeshInstance> ins =
+                instances_by_label.get(mlabel);
+              ins.add(m);
+            } else {
+              final ArrayList<KMeshInstance> ins =
+                new ArrayList<KMeshInstance>();
+              ins.add(m);
+              instances_by_label.put(mlabel, ins);
+            }
+          }
+
+          for (final Entry<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
+            .entrySet()) {
+            final KMeshInstanceMaterialLabel label = e.getKey();
+            final ArrayList<KMeshInstance> instances = e.getValue();
+
+            if (label.getAlpha() != Alpha.ALPHA_TRANSLUCENT) {
+              opaque_lit.add(new KBatchOpaqueLit(l, label, instances));
+            }
+          }
+
+          break;
+        }
+      }
+    }
+
+    /**
+     * Sort translucent objects by Z (from the origin, not from the observer,
+     * for testing purposes). Associate all lights with each object.
+     */
+
+    final LinkedList<KMeshInstance> instances =
+      new LinkedList<KMeshInstance>(p.second);
+
+    Collections.sort(instances, new Comparator<KMeshInstance>() {
+      @Override public int compare(
+        final KMeshInstance o1,
+        final KMeshInstance o2)
+      {
+        final float o1z = o1.getTransform().getTranslation().getZF();
+        final float o2z = o2.getTransform().getTranslation().getZF();
+        return Float.compare(o1z, o2z);
+      }
+    });
+
+    final Iterator<KMeshInstance> iter = instances.iterator();
+    while (iter.hasNext()) {
+      final KMeshInstance i = iter.next();
+      final KMeshInstanceMaterialLabel label = i.getMaterialLabel();
+      if (label.getAlpha() == Alpha.ALPHA_OPAQUE) {
+        iter.remove();
+      } else {
+        translucent_lit.add(new KBatchTranslucent(
+          i,
+          label,
+          new ArrayList<KLight>(p.first)));
       }
     }
   }
