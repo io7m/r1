@@ -307,35 +307,71 @@ import com.io7m.jcanephora.ArrayBuffer;
     throw new UnreachableCodeException();
   }
 
+  private static boolean makeImpliesUV(
+    final @Nonnull Albedo albedo,
+    final @Nonnull Emissive emissive,
+    final @Nonnull Normal normal,
+    final @Nonnull Specular specular)
+  {
+    switch (albedo) {
+      case ALBEDO_COLOURED:
+        break;
+      case ALBEDO_TEXTURED:
+        return true;
+    }
+    switch (emissive) {
+      case EMISSIVE_MAPPED:
+        return true;
+      case EMISSIVE_CONSTANT:
+      case EMISSIVE_NONE:
+        break;
+    }
+    switch (normal) {
+      case NORMAL_MAPPED:
+        return true;
+      case NORMAL_NONE:
+      case NORMAL_VERTEX:
+        break;
+    }
+    switch (specular) {
+      case SPECULAR_CONSTANT:
+      case SPECULAR_NONE:
+        break;
+      case SPECULAR_MAPPED:
+        return true;
+    }
+    return false;
+  }
+
   private static @Nonnull String makeLabelCode(
     final @Nonnull Alpha a,
-    final @Nonnull Albedo d,
+    final @Nonnull Albedo b,
     final @Nonnull Emissive m,
     final @Nonnull Environment e,
     final @Nonnull Normal n,
     final @Nonnull Specular s)
   {
-    final StringBuilder b = new StringBuilder();
-    b.append(a.code);
-    b.append("_");
-    b.append(d.code);
+    final StringBuilder buffer = new StringBuilder();
+    buffer.append(a.code);
+    buffer.append("_");
+    buffer.append(b.code);
     if (m.code.isEmpty() == false) {
-      b.append("_");
-      b.append(m.code);
-    }
-    if (e.code.isEmpty() == false) {
-      b.append("_");
-      b.append(e.code);
+      buffer.append("_");
+      buffer.append(m.code);
     }
     if (n.code.isEmpty() == false) {
-      b.append("_");
-      b.append(n.code);
+      buffer.append("_");
+      buffer.append(n.code);
+    }
+    if (e.code.isEmpty() == false) {
+      buffer.append("_");
+      buffer.append(e.code);
     }
     if (s.code.isEmpty() == false) {
-      b.append("_");
-      b.append(s.code);
+      buffer.append("_");
+      buffer.append(s.code);
     }
-    return b.toString();
+    return buffer.toString();
   }
 
   private final @Nonnull Alpha       alpha;
@@ -345,6 +381,8 @@ import com.io7m.jcanephora.ArrayBuffer;
   private final @Nonnull Normal      normal;
   private final @Nonnull Specular    specular;
   private final @Nonnull String      code;
+
+  private final boolean              implies_uv;
 
   KMeshInstanceMaterialLabel(
     final @Nonnull Alpha alpha,
@@ -369,6 +407,13 @@ import com.io7m.jcanephora.ArrayBuffer;
         albedo,
         emissive,
         environment,
+        normal,
+        specular);
+
+    this.implies_uv =
+      KMeshInstanceMaterialLabel.makeImpliesUV(
+        albedo,
+        emissive,
         normal,
         specular);
   }
@@ -453,5 +498,10 @@ import com.io7m.jcanephora.ArrayBuffer;
     result = (prime * result) + this.normal.hashCode();
     result = (prime * result) + this.specular.hashCode();
     return result;
+  }
+
+  public boolean impliesUV()
+  {
+    return this.implies_uv;
   }
 }

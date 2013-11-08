@@ -138,22 +138,36 @@ public final class Shaders
       case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
       {
         b.append("  value env : vector_4f =\n");
-        b
-          .append("    E.reflection_refraction (t_environment, f_position [x y z], n, m_view_inv, m.environment);\n");
+        b.append("    E.reflection_refraction (\n");
+        b.append("      t_environment,\n");
+        b.append("      f_position [x y z],\n");
+        b.append("      n,\n");
+        b.append("      m_view_inv,\n");
+        b.append("      m.environment\n");
+        b.append("    );\n");
         break;
       }
       case ENVIRONMENT_REFLECTIVE:
       {
         b.append("  value env : vector_4f =\n");
-        b
-          .append("    E.reflection (t_environment, f_position [x y z], n, m_view_inv);\n");
+        b.append("    E.reflection (\n");
+        b.append("      t_environment,\n");
+        b.append("      f_position [x y z],\n");
+        b.append("      n,\n");
+        b.append("      m_view_inv\n");
+        b.append("    );\n");
         break;
       }
       case ENVIRONMENT_REFRACTIVE:
       {
         b.append("  value env : vector_4f =\n");
-        b
-          .append("    E.refraction (t_environment, f_position [x y z], n, m_view_inv, m.environment);\n");
+        b.append("    E.refraction (\n");
+        b.append("      t_environment,\n");
+        b.append("      f_position [x y z],\n");
+        b.append("      n,\n");
+        b.append("      m_view_inv,\n");
+        b.append("      m.environment\n");
+        b.append("    );\n");
         break;
       }
     }
@@ -208,7 +222,7 @@ public final class Shaders
     final @Nonnull Labels.Label label)
   {
     final StringBuilder b = new StringBuilder();
-    b.append("package com.io7m.renderer;\n");
+    b.append("package com.io7m.renderer.kernel;\n");
     Shaders.moduleStart(b, "Fwd_" + label.getCode());
     Shaders.moduleVertexShader(b, label);
     b.append("\n");
@@ -307,7 +321,9 @@ public final class Shaders
       {
         b
           .append("  value lit  = V3.multiply (surface [x y z], light_term);\n");
-        b.append("  value rgba = new vector_4f (lit, surface [w]);\n");
+        b.append("  -- Premultiply alpha\n");
+        b
+          .append("  value rgba = new vector_4f (V3.multiply_scalar (lit, surface [w]), surface [w]);\n");
         break;
       }
     }

@@ -16,51 +16,16 @@
 
 package com.io7m.renderer.kernel;
 
-import java.net.URI;
-
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
-
-import nu.xom.Element;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RMatrixI3x3F;
 import com.io7m.renderer.RTransformTexture;
-import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLUtilities;
 
 @Immutable public final class SBMaterialDescription
 {
-  public static @Nonnull SBMaterialDescription fromXML(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
-  {
-    final URI uri = SBSceneDescription.SCENE_XML_URI;
-
-    RXMLUtilities.checkIsElement(e, "material", uri);
-
-    final Element ed = RXMLUtilities.getChild(e, "albedo", uri);
-    final Element ea = RXMLUtilities.getChild(e, "alpha", uri);
-    final Element em = RXMLUtilities.getChild(e, "emissive", uri);
-    final Element es = RXMLUtilities.getChild(e, "specular", uri);
-    final Element en = RXMLUtilities.getChild(e, "normal", uri);
-    final Element ee = RXMLUtilities.getChild(e, "environment", uri);
-    final Element emu = RXMLUtilities.getChild(e, "uv-matrix", uri);
-    final RMatrixI3x3F<RTransformTexture> m =
-      RXMLUtilities.getElementMatrixI3x3F(emu, uri);
-
-    return new SBMaterialDescription(
-      SBMaterialAlphaDescription.fromXML(ea),
-      SBMaterialAlbedoDescription.fromXML(ed),
-      SBMaterialEmissiveDescription.fromXML(em),
-      SBMaterialSpecularDescription.fromXML(es),
-      SBMaterialEnvironmentDescription.fromXML(ee),
-      SBMaterialNormalDescription.fromXML(en),
-      m);
-  }
-
   private final @Nonnull SBMaterialAlphaDescription       alpha;
   private final @Nonnull SBMaterialAlbedoDescription      albedo;
   private final @Nonnull SBMaterialEmissiveDescription    emissive;
@@ -140,14 +105,19 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return true;
   }
 
-  public @Nonnull SBMaterialEmissiveDescription getEmissive()
-  {
-    return this.emissive;
-  }
-
   public @Nonnull SBMaterialAlbedoDescription getAlbedo()
   {
     return this.albedo;
+  }
+
+  public @Nonnull SBMaterialAlphaDescription getAlpha()
+  {
+    return this.alpha;
+  }
+
+  public @Nonnull SBMaterialEmissiveDescription getEmissive()
+  {
+    return this.emissive;
   }
 
   public @Nonnull SBMaterialEnvironmentDescription getEnvironment()
@@ -163,6 +133,11 @@ import com.io7m.renderer.xml.RXMLUtilities;
   public @Nonnull SBMaterialSpecularDescription getSpecular()
   {
     return this.specular;
+  }
+
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
+  {
+    return this.uv_matrix;
   }
 
   @Override public int hashCode()
@@ -193,38 +168,5 @@ import com.io7m.renderer.xml.RXMLUtilities;
     builder.append(this.normal);
     builder.append("]");
     return builder.toString();
-  }
-
-  @Nonnull Element toXML()
-  {
-    final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-    final Element e = new Element("s:material", uri);
-
-    final Element euv = new Element("s:uv-matrix", uri);
-    RXMLUtilities.putElementMatrixI3x3F(
-      euv,
-      "s",
-      this.uv_matrix,
-      SBSceneDescription.SCENE_XML_URI);
-
-    e.appendChild(this.alpha.toXML());
-    e.appendChild(this.albedo.toXML());
-    e.appendChild(this.emissive.toXML());
-    e.appendChild(this.normal.toXML());
-    e.appendChild(this.specular.toXML());
-    e.appendChild(this.environment.toXML());
-    e.appendChild(euv);
-
-    return e;
-  }
-
-  public @Nonnull SBMaterialAlphaDescription getAlpha()
-  {
-    return this.alpha;
-  }
-
-  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
-  {
-    return this.uv_matrix;
   }
 }

@@ -46,13 +46,13 @@ import com.io7m.jvvfs.PathVirtual;
     return this.path.compareTo(this.path);
   }
 
-  public @Nonnull PathVirtual getPath()
-  {
-    return this.path;
-  }
-
   public @Nonnull KMesh getMesh()
   {
     return this.mesh;
+  }
+
+  public @Nonnull PathVirtual getPath()
+  {
+    return this.path;
   }
 }

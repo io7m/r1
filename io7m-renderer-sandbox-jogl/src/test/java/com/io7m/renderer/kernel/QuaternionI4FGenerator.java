@@ -16,39 +16,22 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
 import net.java.quickcheck.Generator;
-import net.java.quickcheck.QuickCheck;
-import net.java.quickcheck.characteristic.AbstractCharacteristic;
 
-import org.junit.Assert;
-import org.junit.Test;
+import com.io7m.jtensors.QuaternionI4F;
 
-public class SBSceneDescriptionTest
+public final class QuaternionI4FGenerator implements Generator<QuaternionI4F>
 {
-  private static final class SceneGenerator implements
-    Generator<SBSceneDescription>
+  @Override public QuaternionI4F next()
   {
-    @Override public SBSceneDescription next()
-    {
-      return SBSceneDescription.empty();
-    }
-  }
-
-  @SuppressWarnings("static-method") @Test public
-    void
-    testSerializationRoundTrip()
-  {
-    QuickCheck.forAllVerbose(
-      new SceneGenerator(),
-      new AbstractCharacteristic<SBSceneDescription>() {
-        @Override protected void doSpecify(
-          final @Nonnull SBSceneDescription desc)
-          throws Throwable
-        {
-          Assert.assertEquals(desc, SBSceneDescription.fromXML(desc.toXML()));
-        }
-      });
+    final double x =
+      Float.MIN_VALUE + (Math.random() * (Float.MAX_VALUE - Float.MIN_VALUE));
+    final double y =
+      Float.MIN_VALUE + (Math.random() * (Float.MAX_VALUE - Float.MIN_VALUE));
+    final double z =
+      Float.MIN_VALUE + (Math.random() * (Float.MAX_VALUE - Float.MIN_VALUE));
+    final double w =
+      Float.MIN_VALUE + (Math.random() * (Float.MAX_VALUE - Float.MIN_VALUE));
+    return new QuaternionI4F((float) x, (float) y, (float) z, (float) w);
   }
 }

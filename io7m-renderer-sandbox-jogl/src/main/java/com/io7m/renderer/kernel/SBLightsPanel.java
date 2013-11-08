@@ -77,6 +77,24 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
     public <C extends SBSceneControllerTextures & SBSceneControllerLights> LightEditDialog(
       final @Nonnull C controller,
+      final @Nonnull LightsTableModel light_table_model,
+      final @Nonnull Log log)
+      throws IOException,
+        ConstraintError
+    {
+      this.panel =
+        new LightEditDialogPanel(
+          this,
+          controller,
+          null,
+          light_table_model,
+          log);
+      this.setTitle("Create light...");
+      this.getContentPane().add(this.panel);
+    }
+
+    public <C extends SBSceneControllerTextures & SBSceneControllerLights> LightEditDialog(
+      final @Nonnull C controller,
       final @Nonnull SBLight light,
       final @Nonnull LightsTableModel light_table_model,
       final @Nonnull Log log)
@@ -91,24 +109,6 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           light_table_model,
           log);
       this.setTitle("Edit light...");
-      this.getContentPane().add(this.panel);
-    }
-
-    public <C extends SBSceneControllerTextures & SBSceneControllerLights> LightEditDialog(
-      final @Nonnull C controller,
-      final @Nonnull LightsTableModel light_table_model,
-      final @Nonnull Log log)
-      throws IOException,
-        ConstraintError
-    {
-      this.panel =
-        new LightEditDialogPanel(
-          this,
-          controller,
-          null,
-          light_table_model,
-          log);
-      this.setTitle("Create light...");
       this.getContentPane().add(this.panel);
     }
   }
@@ -234,6 +234,19 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           .add(this.falloff.getField());
       }
 
+      public float getFalloff()
+        throws SBExceptionInputError
+      {
+        return SBTextFieldUtilities.getFieldFloatOrError(this.falloff
+          .getField());
+      }
+
+      public @Nonnull QuaternionI4F getOrientation()
+        throws SBExceptionInputError
+      {
+        return this.orientation.getOrientation();
+      }
+
       public @Nonnull RVectorM3F<RSpaceWorld> getPosition()
         throws SBExceptionInputError
       {
@@ -242,6 +255,21 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         v.y = SBTextFieldUtilities.getFieldFloatOrError(this.position_y);
         v.z = SBTextFieldUtilities.getFieldFloatOrError(this.position_z);
         return v;
+      }
+
+      public @Nonnull SBProjectionDescription getProjection()
+        throws SBExceptionInputError,
+          ConstraintError
+      {
+        return this.projection.getDescription();
+      }
+
+      public @Nonnull PathVirtual getTexture()
+        throws SBExceptionInputError,
+          ConstraintError
+      {
+        return PathVirtual.ofString(SBTextFieldUtilities
+          .getFieldNonEmptyStringOrError(this.texture));
       }
 
       public void setContents(
@@ -258,34 +286,6 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         this.texture.setText(kl.getTexture().getName());
         this.falloff.setCurrent(kl.getFalloff());
         this.projection.setContents(light.getDescription());
-      }
-
-      public float getFalloff()
-        throws SBExceptionInputError
-      {
-        return SBTextFieldUtilities.getFieldFloatOrError(this.falloff
-          .getField());
-      }
-
-      public @Nonnull QuaternionI4F getOrientation()
-        throws SBExceptionInputError
-      {
-        return this.orientation.getOrientation();
-      }
-
-      public @Nonnull PathVirtual getTexture()
-        throws SBExceptionInputError,
-          ConstraintError
-      {
-        return PathVirtual.ofString(SBTextFieldUtilities
-          .getFieldNonEmptyStringOrError(this.texture));
-      }
-
-      public @Nonnull SBProjectionDescription getProjection()
-        throws SBExceptionInputError,
-          ConstraintError
-      {
-        return this.projection.getDescription();
       }
     }
 
@@ -332,6 +332,13 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           .add(this.falloff.getField());
       }
 
+      public float getExponent()
+        throws SBExceptionInputError
+      {
+        return SBTextFieldUtilities.getFieldFloatOrError(this.falloff
+          .getField());
+      }
+
       public @Nonnull RVectorM3F<RSpaceWorld> getPosition()
         throws SBExceptionInputError
       {
@@ -340,6 +347,13 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         v.y = SBTextFieldUtilities.getFieldFloatOrError(this.position_y);
         v.z = SBTextFieldUtilities.getFieldFloatOrError(this.position_z);
         return v;
+      }
+
+      public float getRadius()
+        throws SBExceptionInputError
+      {
+        return SBTextFieldUtilities.getFieldFloatOrError(this.radius
+          .getField());
       }
 
       public void setContents(
@@ -352,20 +366,6 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
 
         this.radius.setCurrent(light.getRadius());
         this.falloff.setCurrent(light.getFalloff());
-      }
-
-      public float getRadius()
-        throws SBExceptionInputError
-      {
-        return SBTextFieldUtilities.getFieldFloatOrError(this.radius
-          .getField());
-      }
-
-      public float getExponent()
-        throws SBExceptionInputError
-      {
-        return SBTextFieldUtilities.getFieldFloatOrError(this.falloff
-          .getField());
       }
     }
 

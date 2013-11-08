@@ -105,6 +105,34 @@ final class SBZipUtilities
     }
   }
 
+  public static void main(
+    final String args[])
+    throws IOException
+  {
+    if (args.length != 2) {
+      System.err.println("usage: output.zip file");
+      System.exit(1);
+    }
+
+    final Properties props = new Properties();
+    props.setProperty("com.io7m.renderer.logs.sandbox", "true");
+    props.setProperty("com.io7m.renderer.sandbox.level", "LOG_DEBUG");
+    final Log log = new Log(props, "com.io7m.renderer", "sandbox");
+
+    final File file = new File(args[0]);
+    final File root = new File(args[1]);
+
+    final ZipOutputStream fo =
+      new ZipOutputStream(new FileOutputStream(file));
+    fo.setLevel(9);
+
+    SBZipUtilities.zipToStream(log, fo, root);
+
+    fo.finish();
+    fo.flush();
+    fo.close();
+  }
+
   /**
    * Unzip <code>file</code> to <code>output</code>.
    */
@@ -210,33 +238,5 @@ final class SBZipUtilities
           actual_new);
       }
     }
-  }
-
-  public static void main(
-    final String args[])
-    throws IOException
-  {
-    if (args.length != 2) {
-      System.err.println("usage: output.zip file");
-      System.exit(1);
-    }
-
-    final Properties props = new Properties();
-    props.setProperty("com.io7m.renderer.logs.sandbox", "true");
-    props.setProperty("com.io7m.renderer.sandbox.level", "LOG_DEBUG");
-    final Log log = new Log(props, "com.io7m.renderer", "sandbox");
-
-    final File file = new File(args[0]);
-    final File root = new File(args[1]);
-
-    final ZipOutputStream fo =
-      new ZipOutputStream(new FileOutputStream(file));
-    fo.setLevel(9);
-
-    SBZipUtilities.zipToStream(log, fo, root);
-
-    fo.finish();
-    fo.flush();
-    fo.close();
   }
 }

@@ -16,46 +16,17 @@
 
 package com.io7m.renderer.kernel;
 
-import java.net.URI;
-
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-
-import nu.xom.Element;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RVectorI4F;
-import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLUtilities;
 
 public final class SBMaterialAlbedoDescription
 {
-  public static @Nonnull SBMaterialAlbedoDescription fromXML(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
-  {
-    final URI uri = SBSceneDescription.SCENE_XML_URI;
-    RXMLUtilities.checkIsElement(e, "albedo", uri);
-    final Element ec = RXMLUtilities.getChild(e, "colour", uri);
-    final Element em = RXMLUtilities.getChild(e, "mix", uri);
-    final Element et = RXMLUtilities.getChild(e, "texture", uri);
-
-    final PathVirtual texture =
-      (et.getValue().length() == 0) ? null : PathVirtual.ofString(et
-        .getValue());
-
-    final RVectorI4F<RSpaceRGBA> colour =
-      RXMLUtilities.getElementAttributesRGBA(ec, uri);
-
-    final float mix = RXMLUtilities.getElementFloat(em);
-
-    return new SBMaterialAlbedoDescription(colour, mix, texture);
-  }
-
   private final @Nonnull RVectorI4F<RSpaceRGBA> colour;
   private final float                           mix;
   private final @CheckForNull PathVirtual       texture;
@@ -139,31 +110,5 @@ public final class SBMaterialAlbedoDescription
     builder.append(this.texture);
     builder.append("]");
     return builder.toString();
-  }
-
-  @SuppressWarnings("boxing") @Nonnull Element toXML()
-  {
-    final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-    final Element e = new Element("s:albedo", uri);
-
-    final Element ec = new Element("s:colour", uri);
-    RXMLUtilities.putElementAttributesRGBA(
-      ec,
-      this.colour,
-      "s",
-      SBSceneDescription.SCENE_XML_URI);
-
-    final Element ed = new Element("s:texture", uri);
-    if (this.texture != null) {
-      ed.appendChild(this.texture.toString());
-    }
-
-    final Element em = new Element("s:mix", uri);
-    em.appendChild(String.format("%.6f", this.mix));
-
-    e.appendChild(ec);
-    e.appendChild(ed);
-    e.appendChild(em);
-    return e;
   }
 }

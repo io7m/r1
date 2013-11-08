@@ -48,6 +48,11 @@ import com.io7m.renderer.RVectorI3F;
     return this.description.getID();
   }
 
+  public @Nonnull SBMaterial getMaterial()
+  {
+    return this.material;
+  }
+
   public @Nonnull PathVirtual getMesh()
   {
     return this.description.getMesh();
@@ -63,9 +68,9 @@ import com.io7m.renderer.RVectorI3F;
     return this.description.getPosition();
   }
 
-  public @Nonnull SBMaterial getMaterial()
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
   {
-    return this.material;
+    return this.description.getUVMatrix();
   }
 
   @Override public String toString()
@@ -77,10 +82,5 @@ import com.io7m.renderer.RVectorI3F;
     builder.append(this.material);
     builder.append("]");
     return builder.toString();
-  }
-
-  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
-  {
-    return this.description.getUVMatrix();
   }
 }

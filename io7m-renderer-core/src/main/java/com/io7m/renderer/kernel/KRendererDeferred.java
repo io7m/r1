@@ -47,7 +47,7 @@ final class KRendererDeferred implements KRenderer
     throw new UnimplementedCodeException();
   }
 
-  @Override public @Nonnull KFramebufferUsable rendererFramebufferGet()
+  @Override public @Nonnull KFramebufferBasicUsable rendererFramebufferGet()
   {
     throw new UnimplementedCodeException();
   }
