@@ -38,18 +38,6 @@ import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
 public final class SBOrientationInput
 {
-  private final @Nonnull JLabel     label;
-  private final @Nonnull JTextField orientation_x;
-  private final @Nonnull JTextField orientation_y;
-  private final @Nonnull JTextField orientation_z;
-  private final @Nonnull JTextField orientation_w;
-  private final @Nonnull JButton    select;
-
-  public @Nonnull JButton getSelect()
-  {
-    return this.select;
-  }
-
   static final class RotationDialog extends JFrame
   {
     private static final long             serialVersionUID;
@@ -125,11 +113,6 @@ public final class SBOrientationInput
       dg.row().right().add(this.cancel).add(this.ok);
     }
 
-    public boolean isSelected()
-    {
-      return this.selected;
-    }
-
     @Nonnull QuaternionI4F getQuaternion()
     {
       final QuaternionI4F q = new QuaternionI4F();
@@ -148,7 +131,20 @@ public final class SBOrientationInput
 
       return QuaternionI4F.multiply(qz, QuaternionI4F.multiply(qy, qx));
     }
+
+    public boolean isSelected()
+    {
+      return this.selected;
+    }
   }
+
+  private final @Nonnull JLabel     label;
+  private final @Nonnull JTextField orientation_x;
+  private final @Nonnull JTextField orientation_y;
+  private final @Nonnull JTextField orientation_z;
+  private final @Nonnull JTextField orientation_w;
+
+  private final @Nonnull JButton    select;
 
   SBOrientationInput()
   {
@@ -224,6 +220,11 @@ public final class SBOrientationInput
   public @Nonnull JTextField getOrientationZ()
   {
     return this.orientation_z;
+  }
+
+  public @Nonnull JButton getSelect()
+  {
+    return this.select;
   }
 
   void setOrientation(

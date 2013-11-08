@@ -761,4 +761,22 @@ public final class RXMLUtilities
     en.appendChild(value);
     e.appendChild(en);
   }
+
+  public static boolean hasChild(
+    final @Nonnull Element e,
+    final @Nonnull String name,
+    final @Nonnull URI uri)
+  {
+    final Elements es = e.getChildElements(name, uri.toString());
+    return es.size() == 1;
+  }
+
+  public static boolean hasChildren(
+    final @Nonnull Element e,
+    final @Nonnull String name,
+    final @Nonnull URI uri)
+  {
+    final Elements es = e.getChildElements(name, uri.toString());
+    return es.size() >= 1;
+  }
 }

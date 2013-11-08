@@ -298,38 +298,6 @@ final class SBProjectionMatrixPanel extends JPanel
   private final @Nonnull RowGroup                                                    pe_group;
   private final @Nonnull JFrame                                                      owner;
 
-  private void setCurrentType(
-    final @Nonnull SBProjectionDescription.Type item)
-  {
-    this.selector.setSelectedItem(item);
-
-    switch (item) {
-      case PROJECTION_FRUSTUM:
-      {
-        this.or_group.hide();
-        this.pe_group.hide();
-        this.fr_group.forceShow();
-        break;
-      }
-      case PROJECTION_ORTHOGRAPHIC:
-      {
-        this.pe_group.hide();
-        this.fr_group.hide();
-        this.or_group.forceShow();
-        break;
-      }
-      case PROJECTION_PERSPECTIVE:
-      {
-        this.fr_group.hide();
-        this.or_group.hide();
-        this.pe_group.forceShow();
-        break;
-      }
-    }
-
-    this.owner.pack();
-  }
-
   SBProjectionMatrixPanel(
     final @Nonnull JFrame owner,
     final boolean show_matrix)
@@ -450,5 +418,37 @@ final class SBProjectionMatrixPanel extends JPanel
         break;
       }
     }
+  }
+
+  private void setCurrentType(
+    final @Nonnull SBProjectionDescription.Type item)
+  {
+    this.selector.setSelectedItem(item);
+
+    switch (item) {
+      case PROJECTION_FRUSTUM:
+      {
+        this.or_group.hide();
+        this.pe_group.hide();
+        this.fr_group.forceShow();
+        break;
+      }
+      case PROJECTION_ORTHOGRAPHIC:
+      {
+        this.pe_group.hide();
+        this.fr_group.hide();
+        this.or_group.forceShow();
+        break;
+      }
+      case PROJECTION_PERSPECTIVE:
+      {
+        this.fr_group.hide();
+        this.or_group.hide();
+        this.pe_group.forceShow();
+        break;
+      }
+    }
+
+    this.owner.pack();
   }
 }

@@ -16,41 +16,12 @@
 
 package com.io7m.renderer.kernel;
 
-import java.net.URI;
-
 import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
-import nu.xom.Element;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLUtilities;
 
 public final class SBMaterialSpecularDescription
 {
-  public static @Nonnull SBMaterialSpecularDescription fromXML(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
-  {
-    final URI uri = SBSceneDescription.SCENE_XML_URI;
-    RXMLUtilities.checkIsElement(e, "specular", uri);
-    final Element ei = RXMLUtilities.getChild(e, "intensity", uri);
-    final Element ee = RXMLUtilities.getChild(e, "exponent", uri);
-    final Element et = RXMLUtilities.getChild(e, "texture", uri);
-
-    final PathVirtual texture =
-      (et.getValue().length() == 0) ? null : PathVirtual.ofString(et
-        .getValue());
-
-    final float intensity = RXMLUtilities.getElementFloat(ei);
-    final float exponent = RXMLUtilities.getElementFloat(ee);
-
-    return new SBMaterialSpecularDescription(texture, intensity, exponent);
-  }
-
   private final @CheckForNull PathVirtual texture;
   private final float                     intensity;
   private final float                     exponent;
@@ -135,26 +106,5 @@ public final class SBMaterialSpecularDescription
     builder.append(this.exponent);
     builder.append("]");
     return builder.toString();
-  }
-
-  @SuppressWarnings("boxing") @Nonnull Element toXML()
-  {
-    final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-    final Element e = new Element("s:specular", uri);
-
-    final Element et = new Element("s:texture", uri);
-    if (this.texture != null) {
-      et.appendChild(this.texture.toString());
-    }
-
-    final Element ei = new Element("s:intensity", uri);
-    ei.appendChild(String.format("%.6f", this.intensity));
-    final Element ee = new Element("s:exponent", uri);
-    ee.appendChild(String.format("%.6f", this.exponent));
-
-    e.appendChild(ei);
-    e.appendChild(ee);
-    e.appendChild(et);
-    return e;
   }
 }

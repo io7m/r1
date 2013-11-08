@@ -82,6 +82,7 @@ import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionDirectional
 import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionProjective;
 import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionSpherical;
 import com.io7m.renderer.xml.RXMLException;
+import com.thoughtworks.xstream.XStream;
 
 interface SBSceneChangeListener
 {
@@ -149,9 +150,6 @@ public final class SBSceneController implements
       FilesystemError,
       IOException,
       ConstraintError,
-      ValidityException,
-      ParsingException,
-      RXMLException,
       InterruptedException,
       ExecutionException
   {
@@ -161,10 +159,8 @@ public final class SBSceneController implements
       fs.filesystemOpenFile(PathVirtual.ofString("/scene.xml"));
 
     try {
-      final Builder b = new Builder();
-      final Document d = b.build(xms);
-      final SBSceneDescription sd =
-        SBSceneDescription.fromXML(d.getRootElement());
+      final XStream stream = new XStream();
+      final SBSceneDescription sd = (SBSceneDescription) stream.fromXML(xms);
 
       SBScene scene = SBScene.empty();
 
@@ -880,6 +876,62 @@ public final class SBSceneController implements
     return this.state_current.get().scene.instancesGet();
   }
 
+  @Override public void sceneLightAddByDescription(
+    final @Nonnull SBLightDescription d)
+    throws ConstraintError
+  {
+    switch (d.getType()) {
+      case LIGHT_DIRECTIONAL:
+      {
+        final SBLightDescriptionDirectional dd =
+          (SBLightDescriptionDirectional) d;
+        final SBLightDirectional l = new SBLight.SBLightDirectional(dd);
+        this.internalStateUpdateSceneOnly(this.state_current.get().scene
+          .lightAdd(l));
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      {
+        final SBLightDescriptionProjective dd =
+          (SBLightDescriptionProjective) d;
+
+        @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindAlbedo> t =
+          (SBTexture2D<SBTexture2DKindAlbedo>) this.sceneTextures2DGet().get(
+            dd.getTexture());
+
+        final MatrixM4x4F temporary = new MatrixM4x4F();
+
+        final KProjective kp =
+          new KProjective(
+            dd.getID(),
+            t.getTexture(),
+            dd.getPosition(),
+            dd.getOrientation(),
+            dd.getColour(),
+            dd.getIntensity(),
+            (float) dd.getProjection().getFar(),
+            dd.getFalloff(),
+            dd.getProjection().makeProjectionMatrix(temporary));
+
+        final SBLightProjective l = new SBLight.SBLightProjective(dd, kp);
+
+        this.internalStateUpdateSceneOnly(this.state_current.get().scene
+          .lightAdd(l));
+
+        break;
+      }
+      case LIGHT_SPHERE:
+      {
+        final SBLightDescriptionSpherical dd =
+          (SBLightDescriptionSpherical) d;
+
+        this.internalStateUpdateSceneOnly(this.state_current.get().scene
+          .lightAdd(new SBLight.SBLightSpherical(dd)));
+        break;
+      }
+    }
+  }
+
   @Override public boolean sceneLightExists(
     final @Nonnull Integer id)
     throws ConstraintError
@@ -1089,62 +1141,6 @@ public final class SBSceneController implements
   @Override public @Nonnull Map<String, SBShader> shadersGet()
   {
     return this.shaders;
-  }
-
-  @Override public void sceneLightAddByDescription(
-    final @Nonnull SBLightDescription d)
-    throws ConstraintError
-  {
-    switch (d.getType()) {
-      case LIGHT_DIRECTIONAL:
-      {
-        final SBLightDescriptionDirectional dd =
-          (SBLightDescriptionDirectional) d;
-        final SBLightDirectional l = new SBLight.SBLightDirectional(dd);
-        this.internalStateUpdateSceneOnly(this.state_current.get().scene
-          .lightAdd(l));
-        break;
-      }
-      case LIGHT_PROJECTIVE:
-      {
-        final SBLightDescriptionProjective dd =
-          (SBLightDescriptionProjective) d;
-
-        @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindAlbedo> t =
-          (SBTexture2D<SBTexture2DKindAlbedo>) this.sceneTextures2DGet().get(
-            dd.getTexture());
-
-        final MatrixM4x4F temporary = new MatrixM4x4F();
-
-        final KProjective kp =
-          new KProjective(
-            dd.getID(),
-            t.getTexture(),
-            dd.getPosition(),
-            dd.getOrientation(),
-            dd.getColour(),
-            dd.getIntensity(),
-            (float) dd.getProjection().getFar(),
-            dd.getFalloff(),
-            dd.getProjection().makeProjectionMatrix(temporary));
-
-        final SBLightProjective l = new SBLight.SBLightProjective(dd, kp);
-
-        this.internalStateUpdateSceneOnly(this.state_current.get().scene
-          .lightAdd(l));
-
-        break;
-      }
-      case LIGHT_SPHERE:
-      {
-        final SBLightDescriptionSpherical dd =
-          (SBLightDescriptionSpherical) d;
-
-        this.internalStateUpdateSceneOnly(this.state_current.get().scene
-          .lightAdd(new SBLight.SBLightSpherical(dd)));
-        break;
-      }
-    }
   }
 }
 
