@@ -64,9 +64,9 @@ import com.io7m.jcanephora.TextureWrapT;
 
 @Immutable final class KFramebufferCommon
 {
-  private static final class KFramebufferBasicRGBA implements KFramebuffer
+  private static final class KFramebufferBasicRGBA implements KFramebufferBasic
   {
-    static @Nonnull KFramebuffer allocateBasicRGBA(
+    static @Nonnull KFramebufferBasic allocateBasicRGBA(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull AreaInclusive size)
       throws ConstraintError,
@@ -141,7 +141,7 @@ import com.io7m.jcanephora.TextureWrapT;
 
     private static @Nonnull
       <R, G extends JCGLFramebuffersGL3 & JCGLTextures2DStaticGL2 & JCGLRenderbuffersGL2>
-      KFramebuffer
+      KFramebufferBasic
       allocateBasicRGBA_GL2(
         final @Nonnull G g,
         final @Nonnull AreaInclusive size)
@@ -203,7 +203,7 @@ import com.io7m.jcanephora.TextureWrapT;
 
     private static @Nonnull
       <R, G extends JCGLFramebuffersGL3 & JCGLTextures2DStaticGL3 & JCGLRenderbuffersGL3>
-      KFramebuffer
+      KFramebufferBasic
       allocateBasicRGBA_GL3(
         final @Nonnull G g,
         final @Nonnull AreaInclusive size)
@@ -265,7 +265,7 @@ import com.io7m.jcanephora.TextureWrapT;
 
     private static @Nonnull
       <R, G extends JCGLFramebuffersGL3 & JCGLTextures2DStaticGLES3 & JCGLRenderbuffersGLES3>
-      KFramebuffer
+      KFramebufferBasic
       allocateBasicRGBA_GLES3(
         final @Nonnull G g,
         final @Nonnull AreaInclusive size)
@@ -327,7 +327,7 @@ import com.io7m.jcanephora.TextureWrapT;
 
     private static @Nonnull
       <R, G extends JCGLFramebuffersGLES2 & JCGLTextures2DStaticGLES2 & JCGLRenderbuffersGLES2 & JCGLExtensionsGLES2>
-      KFramebuffer
+      KFramebufferBasic
       allocateBasicRGBA_GLES2(
         final @Nonnull G g,
         final @Nonnull AreaInclusive size)
@@ -448,7 +448,7 @@ import com.io7m.jcanephora.TextureWrapT;
     }
   }
 
-  public static @Nonnull KFramebuffer allocateBasicRGBA(
+  public static @Nonnull KFramebufferBasic allocateBasicRGBA(
     final @Nonnull JCGLImplementation gi,
     final @Nonnull AreaInclusive size)
     throws ConstraintError,

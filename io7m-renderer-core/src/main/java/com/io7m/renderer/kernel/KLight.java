@@ -52,6 +52,33 @@ import com.io7m.renderer.RVectorReadable3F;
     {
       return this.direction;
     }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + this.direction.hashCode();
+      return result;
+    }
+
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final KDirectional other = (KDirectional) obj;
+      if (!this.direction.equals(other.direction)) {
+        return false;
+      }
+      return true;
+    }
   }
 
   @Immutable public static final class KProjective extends KLight
@@ -112,6 +139,55 @@ import com.io7m.renderer.RVectorReadable3F;
     {
       return this.texture;
     }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + Float.floatToIntBits(this.falloff);
+      result = (prime * result) + this.orientation.hashCode();
+      result = (prime * result) + this.position.hashCode();
+      result = (prime * result) + this.projection.hashCode();
+      result = (prime * result) + Float.floatToIntBits(this.range);
+      result = (prime * result) + this.texture.hashCode();
+      return result;
+    }
+
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final KProjective other = (KProjective) obj;
+      if (Float.floatToIntBits(this.falloff) != Float
+        .floatToIntBits(other.falloff)) {
+        return false;
+      }
+      if (!this.orientation.equals(other.orientation)) {
+        return false;
+      }
+      if (!this.position.equals(other.position)) {
+        return false;
+      }
+      if (!this.projection.equals(other.projection)) {
+        return false;
+      }
+      if (Float.floatToIntBits(this.range) != Float
+        .floatToIntBits(other.range)) {
+        return false;
+      }
+      if (!this.texture.equals(other.texture)) {
+        return false;
+      }
+      return true;
+    }
   }
 
   @Immutable public static final class KSphere extends KLight
@@ -147,6 +223,43 @@ import com.io7m.renderer.RVectorReadable3F;
     public float getRadius()
     {
       return this.radius;
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + Float.floatToIntBits(this.falloff);
+      result = (prime * result) + this.position.hashCode();
+      result = (prime * result) + Float.floatToIntBits(this.radius);
+      return result;
+    }
+
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final KSphere other = (KSphere) obj;
+      if (Float.floatToIntBits(this.falloff) != Float
+        .floatToIntBits(other.falloff)) {
+        return false;
+      }
+      if (!this.position.equals(other.position)) {
+        return false;
+      }
+      if (Float.floatToIntBits(this.radius) != Float
+        .floatToIntBits(other.radius)) {
+        return false;
+      }
+      return true;
     }
   }
 

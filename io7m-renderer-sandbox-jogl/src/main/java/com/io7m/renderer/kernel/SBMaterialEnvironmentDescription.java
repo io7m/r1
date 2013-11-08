@@ -16,42 +16,12 @@
 
 package com.io7m.renderer.kernel;
 
-import java.net.URI;
-
 import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
-import nu.xom.Element;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLUtilities;
 
 public final class SBMaterialEnvironmentDescription
 {
-  public static @Nonnull SBMaterialEnvironmentDescription fromXML(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
-  {
-    final URI uri = SBSceneDescription.SCENE_XML_URI;
-    RXMLUtilities.checkIsElement(e, "environment", uri);
-    final Element em = RXMLUtilities.getChild(e, "mix", uri);
-    final Element erm = RXMLUtilities.getChild(e, "reflection-mix", uri);
-    final Element eri = RXMLUtilities.getChild(e, "refraction-index", uri);
-    final Element et = RXMLUtilities.getChild(e, "texture", uri);
-
-    final PathVirtual texture =
-      (et.getValue().length() == 0) ? null : PathVirtual.ofString(et
-        .getValue());
-
-    final float mix = RXMLUtilities.getElementFloat(em);
-    final float rmix = RXMLUtilities.getElementFloat(erm);
-    final float rind = RXMLUtilities.getElementFloat(eri);
-    return new SBMaterialEnvironmentDescription(texture, mix, rmix, rind);
-  }
-
   private final @CheckForNull PathVirtual texture;
   private final float                     mix;
   private final float                     reflection_mix;
@@ -150,29 +120,5 @@ public final class SBMaterialEnvironmentDescription
     builder.append(this.refraction_index);
     builder.append("]");
     return builder.toString();
-  }
-
-  @SuppressWarnings("boxing") @Nonnull Element toXML()
-  {
-    final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-    final Element e = new Element("s:environment", uri);
-
-    final Element et = new Element("s:texture", uri);
-    if (this.texture != null) {
-      et.appendChild(this.texture.toString());
-    }
-
-    final Element ei = new Element("s:mix", uri);
-    ei.appendChild(String.format("%.6f", this.mix));
-    final Element erm = new Element("s:reflection-mix", uri);
-    erm.appendChild(String.format("%.6f", this.reflection_mix));
-    final Element eri = new Element("s:refraction-index", uri);
-    eri.appendChild(String.format("%.6f", this.refraction_index));
-
-    e.appendChild(ei);
-    e.appendChild(erm);
-    e.appendChild(eri);
-    e.appendChild(et);
-    return e;
   }
 }

@@ -186,7 +186,7 @@
               <mainClass>com.io7m.renderer.kernel_shaders.ForwardMakeAll</mainClass>
               <arguments>
                 <argument>${project.build.directory}/parasol</argument>
-                <argument>${project.build.outputDirectory}/com/io7m/renderer</argument>
+                <argument>${project.build.outputDirectory}/com/io7m/renderer/kernel</argument>
               </arguments>
             </configuration>
           </execution>

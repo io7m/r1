@@ -65,12 +65,15 @@ public final class Sandbox
           window.setVisible(true);
         } catch (final FilesystemError e) {
           SBErrorBox.showError(log, "Filesystem error", e);
+          e.printStackTrace();
           System.exit(1);
         } catch (final ConstraintError e) {
           SBErrorBox.showError(log, "Internal constraint error", e);
+          e.printStackTrace();
           System.exit(1);
         } catch (final IOException e) {
           SBErrorBox.showError(log, "I/O error", e);
+          e.printStackTrace();
           System.exit(1);
         }
       }

@@ -16,12 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
-import java.net.URI;
-
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
-
-import nu.xom.Element;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -31,50 +27,9 @@ import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLUtilities;
 
 @Immutable public final class SBTextureCubeDescription
 {
-  public static @Nonnull SBTextureCubeDescription fromXML(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
-  {
-    final URI uri = SBSceneDescription.SCENE_XML_URI;
-
-    RXMLUtilities.checkIsElement(e, "texture-cube", uri);
-    final Element ep = RXMLUtilities.getChild(e, "path", uri);
-    final Element ewr = RXMLUtilities.getChild(e, "wrap-mode-r", uri);
-    final Element ews = RXMLUtilities.getChild(e, "wrap-mode-s", uri);
-    final Element ewt = RXMLUtilities.getChild(e, "wrap-mode-t", uri);
-    final Element emi = RXMLUtilities.getChild(e, "minification", uri);
-    final Element ema = RXMLUtilities.getChild(e, "magnification", uri);
-
-    final PathVirtual npath =
-      PathVirtual.ofString(RXMLUtilities.getElementNonEmptyString(ep));
-    final TextureWrapR nwrap_mode_r =
-      TextureWrapR.valueOf(RXMLUtilities.getElementNonEmptyString(ewr));
-    final TextureWrapS nwrap_mode_s =
-      TextureWrapS.valueOf(RXMLUtilities.getElementNonEmptyString(ews));
-    final TextureWrapT nwrap_mode_t =
-      TextureWrapT.valueOf(RXMLUtilities.getElementNonEmptyString(ewt));
-    final TextureFilterMinification ntexture_min =
-      TextureFilterMinification.valueOf(RXMLUtilities
-        .getElementNonEmptyString(emi));
-    final TextureFilterMagnification ntexture_mag =
-      TextureFilterMagnification.valueOf(RXMLUtilities
-        .getElementNonEmptyString(ema));
-
-    return new SBTextureCubeDescription(
-      npath,
-      nwrap_mode_r,
-      nwrap_mode_s,
-      nwrap_mode_t,
-      ntexture_min,
-      ntexture_mag);
-  }
-
   private final @Nonnull PathVirtual                path;
   private final @Nonnull TextureWrapR               wrap_mode_r;
   private final @Nonnull TextureWrapS               wrap_mode_s;
@@ -183,45 +138,5 @@ import com.io7m.renderer.xml.RXMLUtilities;
     result = (prime * result) + this.wrap_mode_s.hashCode();
     result = (prime * result) + this.wrap_mode_t.hashCode();
     return result;
-  }
-
-  public @Nonnull Element toXML()
-  {
-    final URI uri = SBSceneDescription.SCENE_XML_URI;
-
-    final Element e = new Element("s:texture-cube", uri.toString());
-    RXMLUtilities.putElementString(e, "s", "path", this.path.toString(), uri);
-    RXMLUtilities.putElementString(
-      e,
-      "s",
-      "wrap-mode-r",
-      this.wrap_mode_r.toString(),
-      uri);
-    RXMLUtilities.putElementString(
-      e,
-      "s",
-      "wrap-mode-s",
-      this.wrap_mode_s.toString(),
-      uri);
-    RXMLUtilities.putElementString(
-      e,
-      "s",
-      "wrap-mode-t",
-      this.wrap_mode_t.toString(),
-      uri);
-    RXMLUtilities.putElementString(
-      e,
-      "s",
-      "minification",
-      this.texture_min.toString(),
-      uri);
-    RXMLUtilities.putElementString(
-      e,
-      "s",
-      "magnification",
-      this.texture_mag.toString(),
-      uri);
-
-    return e;
   }
 }

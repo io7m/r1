@@ -28,7 +28,7 @@ module DirectionalLight is
   import com.io7m.renderer.Materials as M;
 
   type t is record
-    color     : vector_3f,
+    colour    : vector_3f,
     direction : vector_3f,
     intensity : float
   end;
@@ -72,10 +72,10 @@ module DirectionalLight is
 
   --
   -- Given a directional light [light], calculate the diffuse
-  -- color based on [d], with minimum emission [e].
+  -- colour based on [d], with minimum emission [e].
   --
 
-  function diffuse_color (
+  function diffuse_colour (
     light : t,
     d     : directions,
     e     : float
@@ -85,10 +85,10 @@ module DirectionalLight is
         F.maximum (0.0, V3.dot (d.stl, d.normal));
       value factor_e =
         F.maximum (factor, e);
-      value color =
-        V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor_e);
+      value colour =
+        V3.multiply_scalar (V3.multiply_scalar (light.colour, light.intensity), factor_e);
     in
-      color
+      colour
     end;
 
   --
@@ -102,17 +102,17 @@ module DirectionalLight is
   ) : vector_3f =
     let
       value d = directions (light, new vector_3f(0.0, 0.0, 0.0), n);
-      value c = diffuse_color (light, d, 0.0);
+      value c = diffuse_colour (light, d, 0.0);
     in
       c
     end;
 
   --
   -- Given a directional light [light], calculate the specular
-  -- color based on [d] and surface properties [material].
+  -- colour based on [d] and surface properties [material].
   --
 
-  function specular_color (
+  function specular_colour (
     light : t,
     d     : directions,
     s     : M.specular
@@ -120,10 +120,10 @@ module DirectionalLight is
     let
       value factor =
         F.power (F.maximum (0.0, V3.dot (d.reflection, d.stl)), s.exponent);
-      value color =
-        V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor);
+      value colour =
+        V3.multiply_scalar (V3.multiply_scalar (light.colour, light.intensity), factor);
     in
-      V3.multiply_scalar (color, s.intensity)
+      V3.multiply_scalar (colour, s.intensity)
     end;
 
   --
@@ -141,8 +141,8 @@ module DirectionalLight is
   ) : vector_3f =
     let
       value d  = directions (light, p, n);
-      value dc = diffuse_color (light, d, 0.0);
-      value sc = specular_color (light, d, material.specular);
+      value dc = diffuse_colour (light, d, 0.0);
+      value sc = specular_colour (light, d, material.specular);
     in
       V3.add (dc, sc)
     end;
@@ -164,8 +164,8 @@ module DirectionalLight is
   ) : vector_3f =
     let
       value d  = directions (light, p, n);
-      value dc = diffuse_color (light, d, material.emissive.emissive);
-      value sc = specular_color (light, d, material.specular);
+      value dc = diffuse_colour (light, d, material.emissive.emissive);
+      value sc = specular_colour (light, d, material.specular);
     in
       V3.add (dc, sc)
     end;
@@ -183,7 +183,7 @@ module DirectionalLight is
   ) : vector_3f =
     let
       value d = directions (light, new vector_3f(0.0, 0.0, 0.0), n);
-      value c = diffuse_color (light, d, material.emissive.emissive);
+      value c = diffuse_colour (light, d, material.emissive.emissive);
     in
       c
     end;
