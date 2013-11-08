@@ -16,10 +16,13 @@
 
 package com.io7m.renderer.kernel;
 
+import java.io.IOException;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jtensors.VectorReadable4F;
@@ -43,12 +46,22 @@ public interface KRenderer
    * @see #rendererFramebufferGet()
    * @throws ConstraintError
    *           Iff <code>result == null || scene == null</code>.
+   * @throws JCGLCompileException
+   *           Iff a shader cannot be compiled.
+   * @throws JCGLUnsupportedException
+   *           Iff a shader, framebuffer, or other resource cannot be created
+   *           or used on the current OpenGL implementation.
+   * @throws IOException
+   *           Iff an I/O exception occurs during rendering.
    */
 
   public void rendererEvaluate(
     final @Nonnull KScene scene)
     throws JCGLException,
-      ConstraintError;
+      ConstraintError,
+      JCGLCompileException,
+      JCGLUnsupportedException,
+      IOException;
 
   /**
    * Return a read-only view of the renderer's internal framebuffer. The
@@ -58,7 +71,7 @@ public interface KRenderer
    * @see #rendererFramebufferResize(AreaInclusive)
    */
 
-  public @Nonnull KFramebufferUsable rendererFramebufferGet();
+  public @Nonnull KFramebufferBasicUsable rendererFramebufferGet();
 
   /**
    * Resize the renderer's internal framebuffer to <code>size</code>.
@@ -89,5 +102,6 @@ public interface KRenderer
    */
 
   public void rendererSetBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba);
+    final @Nonnull VectorReadable4F rgba)
+    throws ConstraintError;
 }

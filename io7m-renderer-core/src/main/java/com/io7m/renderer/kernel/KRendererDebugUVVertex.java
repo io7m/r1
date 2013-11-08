@@ -55,7 +55,7 @@ final class KRendererDebugUVVertex implements KRenderer
   private final @Nonnull VectorM4F             background;
   private final @Nonnull VectorM2I             viewport_size;
   private final @Nonnull JCCEExecutionCallable exec;
-  private @Nonnull KFramebuffer                framebuffer;
+  private @Nonnull KFramebufferBasic                framebuffer;
 
   KRendererDebugUVVertex(
     final @Nonnull JCGLImplementation gl,
@@ -140,7 +140,7 @@ final class KRendererDebugUVVertex implements KRenderer
     }
   }
 
-  @Override public @Nonnull KFramebufferUsable rendererFramebufferGet()
+  @Override public @Nonnull KFramebufferBasicUsable rendererFramebufferGet()
   {
     return this.framebuffer;
   }

@@ -93,7 +93,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
   private final @Nonnull ProgramReference      program_cb_spherical_map;
   private final @Nonnull JCCEExecutionCallable exec_cb_spherical_map;
   private final @Nonnull VectorM2I             viewport_size;
-  private @Nonnull KFramebuffer                framebuffer;
+  private @Nonnull KFramebufferBasic                framebuffer;
 
   KRendererForwardDiffuseSpecularNormal(
     final @Nonnull JCGLImplementation gl,
@@ -396,7 +396,7 @@ final class KRendererForwardDiffuseSpecularNormal implements KRenderer
     }
   }
 
-  @Override public @Nonnull KFramebufferUsable rendererFramebufferGet()
+  @Override public @Nonnull KFramebufferBasicUsable rendererFramebufferGet()
   {
     return this.framebuffer;
   }
