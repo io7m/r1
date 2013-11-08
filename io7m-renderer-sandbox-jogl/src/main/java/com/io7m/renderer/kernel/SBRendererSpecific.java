@@ -640,7 +640,7 @@ public final class SBRendererSpecific implements KRenderer
   private final @Nonnull JCCEExecutionCallable                     exec_program;
   private final @Nonnull VectorM2I                                 viewport_size;
   private final @Nonnull RMatrixM4x4F<RTransformTextureProjection> fake_texture_projection;
-  private @Nonnull KFramebuffer                                    framebuffer;
+  private @Nonnull KFramebufferBasic                               framebuffer;
 
   public SBRendererSpecific(
     final @Nonnull JCGLImplementation gl,
@@ -795,13 +795,13 @@ public final class SBRendererSpecific implements KRenderer
 
     final KBatches batches = scene.getBatches();
 
-    for (final KBatchLit bl : batches.getBatchesOpaqueLit()) {
+    for (final KBatchOpaqueLit bl : batches.getBatchesOpaqueLit()) {
       for (final KMeshInstance i : bl.getInstances()) {
         this.renderDepthPassMesh(gc, this.exec_depth, i);
       }
     }
 
-    for (final KBatchUnlit bl : batches.getBatchesOpaqueUnlit()) {
+    for (final KBatchOpaqueUnlit bl : batches.getBatchesOpaqueUnlit()) {
       for (final KMeshInstance i : bl.getInstances()) {
         this.renderDepthPassMesh(gc, this.exec_depth, i);
       }
@@ -827,6 +827,7 @@ public final class SBRendererSpecific implements KRenderer
 
     final FramebufferReferenceUsable output_buffer =
       this.framebuffer.kframebufferGetOutputBuffer();
+
     final AreaInclusive area = this.framebuffer.kframebufferGetArea();
     this.viewport_size.x = (int) area.getRangeX().getInterval();
     this.viewport_size.y = (int) area.getRangeY().getInterval();
@@ -878,7 +879,7 @@ public final class SBRendererSpecific implements KRenderer
     }
   }
 
-  @Override public @Nonnull KFramebufferUsable rendererFramebufferGet()
+  @Override public @Nonnull KFramebufferBasicUsable rendererFramebufferGet()
   {
     return this.framebuffer;
   }
@@ -996,13 +997,13 @@ public final class SBRendererSpecific implements KRenderer
 
     final KBatches batches = scene.getBatches();
 
-    for (final KBatchLit bl : batches.getBatchesOpaqueLit()) {
+    for (final KBatchOpaqueLit bl : batches.getBatchesOpaqueLit()) {
       for (final KMeshInstance i : bl.getInstances()) {
         this.renderOpaqueMesh(gc, bl.getLight(), i);
       }
     }
 
-    for (final KBatchUnlit bl : batches.getBatchesOpaqueUnlit()) {
+    for (final KBatchOpaqueUnlit bl : batches.getBatchesOpaqueUnlit()) {
       for (final KMeshInstance i : bl.getInstances()) {
         this.renderOpaqueMesh(gc, null, i);
       }
@@ -1091,24 +1092,23 @@ public final class SBRendererSpecific implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-    this.exec_program.execPrepare(gc);
-    KShadingProgramCommon.putMatrixProjection(
-      this.exec_program,
-      gc,
-      this.matrices.getMatrixProjection());
-    this.exec_program.execCancel();
-
     final KBatches batches = scene.getBatches();
 
-    for (final KBatchLit bl : batches.getBatchesTranslucentLit()) {
-      for (final KMeshInstance i : bl.getInstances()) {
-        this.renderTranslucentMesh(gc, bl.getLight(), i);
-      }
-    }
+    for (final KBatchTranslucent bl : batches.getBatchesTranslucent()) {
+      final KMeshInstance i = bl.getInstance();
 
-    for (final KBatchUnlit bl : batches.getBatchesTranslucentUnlit()) {
-      for (final KMeshInstance i : bl.getInstances()) {
-        this.renderTranslucentMesh(gc, null, i);
+      boolean first_light = true;
+      for (final KLight light : bl.getLights()) {
+        if (first_light) {
+          gc.blendingEnable(
+            BlendFunction.BLEND_ONE,
+            BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
+        } else {
+          gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+        }
+
+        this.renderTranslucentMesh(gc, light, i);
+        first_light = false;
       }
     }
   }

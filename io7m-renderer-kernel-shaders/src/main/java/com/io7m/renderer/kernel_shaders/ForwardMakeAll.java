@@ -90,7 +90,7 @@ public final class ForwardMakeAll
     for (final Label l : labels) {
       final String code = l.getCode();
       writer.append("fwd_" + code);
-      writer.append(" : com.io7m.renderer.Fwd_" + code + ".p");
+      writer.append(" : com.io7m.renderer.kernel.Fwd_" + code + ".p");
       writer.append("\n");
     }
 

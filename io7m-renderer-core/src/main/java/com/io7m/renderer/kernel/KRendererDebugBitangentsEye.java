@@ -56,7 +56,7 @@ import com.io7m.jvvfs.FilesystemError;
   private final @Nonnull VectorM2I             viewport_size;
   private final @Nonnull ProgramReference      program;
   private final @Nonnull JCCEExecutionCallable exec;
-  private @Nonnull KFramebuffer                framebuffer;
+  private @Nonnull KFramebufferBasic                framebuffer;
 
   KRendererDebugBitangentsEye(
     final @Nonnull JCGLImplementation gl,
@@ -141,7 +141,7 @@ import com.io7m.jvvfs.FilesystemError;
     }
   }
 
-  @Override public @Nonnull KFramebufferUsable rendererFramebufferGet()
+  @Override public @Nonnull KFramebufferBasicUsable rendererFramebufferGet()
   {
     return this.framebuffer;
   }

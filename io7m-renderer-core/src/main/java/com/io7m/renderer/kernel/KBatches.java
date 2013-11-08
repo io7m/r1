@@ -28,46 +28,37 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
 @Immutable final class KBatches
 {
-  private final @Nonnull ArrayList<KBatchUnlit> batches_opaque_unlit;
-  private final @Nonnull ArrayList<KBatchLit>   batches_opaque_lit;
-  private final @Nonnull ArrayList<KBatchUnlit> batches_translucent_unlit;
-  private final @Nonnull ArrayList<KBatchLit>   batches_translucent_lit;
+  private final @Nonnull ArrayList<KBatchOpaqueUnlit> batches_opaque_unlit;
+  private final @Nonnull ArrayList<KBatchOpaqueLit>   batches_opaque_lit;
+  private final @Nonnull ArrayList<KBatchTranslucent> batches_translucent;
 
   KBatches(
-    final @Nonnull ArrayList<KBatchUnlit> opaque_unlit,
-    final @Nonnull ArrayList<KBatchLit> opaque_lit,
-    final @Nonnull ArrayList<KBatchUnlit> translucent_unlit,
-    final @Nonnull ArrayList<KBatchLit> translucent_lit)
+    final @Nonnull ArrayList<KBatchOpaqueUnlit> opaque_unlit,
+    final @Nonnull ArrayList<KBatchOpaqueLit> opaque_lit,
+    final @Nonnull ArrayList<KBatchTranslucent> translucent)
     throws ConstraintError
   {
     this.batches_opaque_unlit =
       Constraints.constrainNotNull(opaque_unlit, "Opaque unlit");
     this.batches_opaque_lit =
       Constraints.constrainNotNull(opaque_lit, "Opaque lit");
-    this.batches_translucent_unlit =
-      Constraints.constrainNotNull(translucent_unlit, "Translucent unlit");
-    this.batches_translucent_lit =
-      Constraints.constrainNotNull(translucent_lit, "Translucent lit");
+    this.batches_translucent =
+      Constraints.constrainNotNull(translucent, "Translucent");
   }
 
-  @Nonnull List<KBatchLit> getBatchesOpaqueLit()
+  @Nonnull List<KBatchOpaqueLit> getBatchesOpaqueLit()
   {
     return Collections.unmodifiableList(this.batches_opaque_lit);
   }
 
-  @Nonnull List<KBatchUnlit> getBatchesOpaqueUnlit()
+  @Nonnull List<KBatchOpaqueUnlit> getBatchesOpaqueUnlit()
   {
     return Collections.unmodifiableList(this.batches_opaque_unlit);
   }
 
-  @Nonnull List<KBatchLit> getBatchesTranslucentLit()
+  @Nonnull List<KBatchTranslucent> getBatchesTranslucent()
   {
-    return Collections.unmodifiableList(this.batches_translucent_lit);
-  }
-
-  @Nonnull List<KBatchUnlit> getBatchesTranslucentUnlit()
-  {
-    return Collections.unmodifiableList(this.batches_translucent_unlit);
+    return Collections.unmodifiableList(this.batches_translucent);
   }
 
   @Override public String toString()
@@ -78,9 +69,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     builder.append(" ");
     builder.append(this.batches_opaque_lit);
     builder.append(" ");
-    builder.append(this.batches_translucent_unlit);
-    builder.append(" ");
-    builder.append(this.batches_translucent_lit);
+    builder.append(this.batches_translucent);
     builder.append("]");
     return builder.toString();
   }
