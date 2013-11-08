@@ -22,13 +22,14 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import javax.annotation.Nonnull;
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+
+import net.java.dev.designgridlayout.DesignGridLayout;
 
 import com.io7m.jlog.Log;
 
@@ -51,17 +52,21 @@ public final class SBErrorBox
 
   private static void showErrorBox(
     final @Nonnull String title,
+    final @Nonnull String message,
     final @Nonnull JTextArea backtrace)
   {
     final JScrollPane pane = new JScrollPane(backtrace);
     pane.setPreferredSize(new Dimension(600, 320));
+    backtrace.setCaretPosition(0);
 
-    final JLabel label = new JLabel(title);
-    label.setBorder(BorderFactory.createEmptyBorder(0, 0, 16, 0));
+    final JPanel header = new JPanel();
+    final DesignGridLayout dg = new DesignGridLayout(header);
+    dg.row().grid().add(new JLabel(title));
+    dg.row().grid().add(new JLabel(message));
 
     final BorderLayout layout = new BorderLayout();
     final JPanel panel = new JPanel(layout);
-    panel.add(label, BorderLayout.NORTH);
+    panel.add(header, BorderLayout.NORTH);
     panel.add(pane, BorderLayout.SOUTH);
 
     JOptionPane.showMessageDialog(
@@ -87,7 +92,7 @@ public final class SBErrorBox
     text.setEditable(false);
     text.setText(writer.toString());
 
-    SBErrorBox.showErrorBox(title, text);
+    SBErrorBox.showErrorBox(title, e.getMessage(), text);
   }
 
   public static void showErrorWithoutException(
@@ -104,7 +109,7 @@ public final class SBErrorBox
         text.setEditable(false);
         text.setText(message);
 
-        SBErrorBox.showErrorBox(title, text);
+        SBErrorBox.showErrorBox(title, message, text);
       }
     });
   }

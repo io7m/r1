@@ -83,6 +83,7 @@ import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionProjective;
 import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionSpherical;
 import com.io7m.renderer.xml.RXMLException;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 
 interface SBSceneChangeListener
 {
@@ -160,7 +161,25 @@ public final class SBSceneController implements
 
     try {
       final XStream stream = new XStream();
-      final SBSceneDescription sd = (SBSceneDescription) stream.fromXML(xms);
+      final SBSceneDescription sd;
+
+      try {
+        sd = (SBSceneDescription) stream.fromXML(xms);
+      } catch (final CannotResolveClassException x) {
+        final StringBuilder m = new StringBuilder();
+        m
+          .append("Could not parse the given scene. It is likely of an unsupported version.");
+        throw new IOException(m.toString(), x);
+      }
+
+      if (sd.getSchemaVersion() != SBSceneDescription.SCENE_XML_VERSION) {
+        final StringBuilder m = new StringBuilder();
+        m.append("Supported scene version is ");
+        m.append(SBSceneDescription.SCENE_XML_VERSION);
+        m.append(" but the loaded scene is of version ");
+        m.append(sd.getSchemaVersion());
+        throw new IOException(m.toString());
+      }
 
       SBScene scene = SBScene.empty();
 

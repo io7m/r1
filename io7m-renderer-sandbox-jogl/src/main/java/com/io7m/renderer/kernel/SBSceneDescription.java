@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 
 import javax.annotation.Nonnull;
@@ -28,22 +26,14 @@ import org.pcollections.HashTreePSet;
 import org.pcollections.PMap;
 import org.pcollections.PSet;
 
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jvvfs.PathVirtual;
 
 @Immutable final class SBSceneDescription
 {
-  static final @Nonnull URI SCENE_XML_URI;
-  static final int          SCENE_XML_VERSION;
+  static final int SCENE_XML_VERSION;
 
   static {
-    try {
-      SCENE_XML_URI =
-        new URI("http://schemas.io7m.com/renderer/1.0.0/sandbox-scene");
-      SCENE_XML_VERSION = 12;
-    } catch (final URISyntaxException e) {
-      throw new UnreachableCodeException();
-    }
+    SCENE_XML_VERSION = 13;
   }
 
   public static @Nonnull SBSceneDescription empty()
@@ -56,6 +46,7 @@ import com.io7m.jvvfs.PathVirtual;
       HashTreePMap.empty();
 
     return new SBSceneDescription(
+      SBSceneDescription.SCENE_XML_VERSION,
       textures_2d,
       textures_cube,
       meshes,
@@ -68,14 +59,17 @@ import com.io7m.jvvfs.PathVirtual;
   private final @Nonnull PSet<PathVirtual>                    meshes;
   private final @Nonnull PMap<Integer, SBLightDescription>    lights;
   private final @Nonnull PMap<Integer, SBInstanceDescription> instances;
+  private final int                                           schema_version;
 
   private SBSceneDescription(
+    final int schema_version,
     final @Nonnull PSet<SBTexture2DDescription> textures_2d,
     final @Nonnull PSet<SBTextureCubeDescription> textures_cube,
     final @Nonnull PSet<PathVirtual> models,
     final @Nonnull PMap<Integer, SBLightDescription> lights,
     final @Nonnull PMap<Integer, SBInstanceDescription> instances)
   {
+    this.schema_version = schema_version;
     this.textures_2d = textures_2d;
     this.textures_cube = textures_cube;
     this.meshes = models;
@@ -129,6 +123,11 @@ import com.io7m.jvvfs.PathVirtual;
     return this.meshes;
   }
 
+  public int getSchemaVersion()
+  {
+    return this.schema_version;
+  }
+
   public @Nonnull PSet<SBTexture2DDescription> getTextures2D()
   {
     return this.textures_2d;
@@ -154,6 +153,7 @@ import com.io7m.jvvfs.PathVirtual;
     final @Nonnull SBInstanceDescription d)
   {
     return new SBSceneDescription(
+      this.schema_version,
       this.textures_2d,
       this.textures_cube,
       this.meshes,
@@ -165,6 +165,7 @@ import com.io7m.jvvfs.PathVirtual;
     final @Nonnull SBLightDescription l)
   {
     return new SBSceneDescription(
+      this.schema_version,
       this.textures_2d,
       this.textures_cube,
       this.meshes,
@@ -176,6 +177,7 @@ import com.io7m.jvvfs.PathVirtual;
     final @Nonnull PathVirtual d)
   {
     return new SBSceneDescription(
+      this.schema_version,
       this.textures_2d,
       this.textures_cube,
       this.meshes.plus(d),
@@ -187,6 +189,7 @@ import com.io7m.jvvfs.PathVirtual;
     final @Nonnull SBTexture2DDescription t)
   {
     return new SBSceneDescription(
+      this.schema_version,
       this.textures_2d.plus(t),
       this.textures_cube,
       this.meshes,
@@ -198,6 +201,7 @@ import com.io7m.jvvfs.PathVirtual;
     final @Nonnull SBTextureCubeDescription t)
   {
     return new SBSceneDescription(
+      this.schema_version,
       this.textures_2d,
       this.textures_cube.plus(t),
       this.meshes,
