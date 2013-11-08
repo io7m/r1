@@ -23,8 +23,8 @@ module Materials is
   --
 
   type diffuse is record
-    colour : vector_4f -- The base surface diffuse colour
-    mix    : float     -- The linear mix between the diffuse colour and texture, in the range [0, 1]
+    color : vector_4f -- The base surface diffuse color
+    mix   : float     -- The linear mix between the diffuse color and texture, in the range [0, 1]
   end;
 
   --

@@ -58,7 +58,7 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
   private final @Nonnull KMatrices             matrices;
   private final @Nonnull ProgramReference      program;
   private final @Nonnull JCCEExecutionCallable exec;
-  private @Nonnull KFramebuffer                framebuffer;
+  private @Nonnull KFramebufferBasic                framebuffer;
 
   KRendererDebugNormalsMapTangent(
     final @Nonnull JCGLImplementation gl,
@@ -143,7 +143,7 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
     }
   }
 
-  @Override public @Nonnull KFramebufferUsable rendererFramebufferGet()
+  @Override public @Nonnull KFramebufferBasicUsable rendererFramebufferGet()
   {
     return this.framebuffer;
   }

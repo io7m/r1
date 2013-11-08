@@ -17,11 +17,11 @@
 package com.io7m.renderer;
 
 --
--- Spherical lighting functions. All calculations are assumed to take
+-- Directional lighting functions. All calculations are assumed to take
 -- place in eye-space (where the observer is always at (0, 0, 0)).
 --
 
-module SphericalLight is
+module DirectionalLight is
 
   import com.io7m.parasol.Vector3f   as V3;
   import com.io7m.parasol.Float      as F;
@@ -29,10 +29,8 @@ module SphericalLight is
 
   type t is record
     colour    : vector_3f,
-    position  : vector_3f,
-    intensity : float,
-    radius    : float,
-    falloff   : float
+    direction : vector_3f,
+    intensity : float
   end;
 
   --
@@ -44,61 +42,37 @@ module SphericalLight is
     ots        : vector_3f, -- Direction from observer to surface ("V")
     normal     : vector_3f, -- Surface normal ("N")
     stl        : vector_3f, -- Direction from surface to light source ("L")
-    distance   : float,     -- Distance between light and surface
     reflection : vector_3f  -- Reflection between observer and normal ("R")
   end;
 
   --
-  -- Calculate all relevant directions for simulating lighting.
+  -- Given a directional light [light], a surface normal [n],
+  -- and an observer at [p], calculate all relevant directions
+  -- for simulating lighting.
   --
   -- Note that calculations are in eye-space and therefore the
   -- observer is assumed to be at (0.0, 0.0, 0.0).
   --
 
   function directions (
-    light_position   : vector_3f,
-    surface_position : vector_3f,
-    surface_normal   : vector_3f
+    light : t,
+    p     : vector_3f,
+    n     : vector_3f
   ) : directions =
     let
-      value position_diff =
-        V3.subtract (surface_position, light_position);
-      value ots =
-        V3.normalize (surface_position);
+      value ots = V3.normalize (p);
     in
       record directions {
         ots        = ots,
-        normal     = surface_normal,
-        stl        = V3.normalize (V3.negate (position_diff)),
-        distance   = V3.magnitude (position_diff),
-        reflection = V3.reflect (ots, surface_normal)
+        normal     = n,
+        stl        = V3.normalize (V3.negate (light.direction)),
+        reflection = V3.reflect (ots, n)
       }
     end;
 
   --
-  -- Given a light with range [light_range] and falloff exponent 
-  -- [light_falloff], at [distance] from the current point on the 
-  -- surface, calculate the amount of attenuation.
-  --
-
-  function attenuation (
-    light_range   : float,
-    light_falloff : float,
-    distance      : float
-  ) : float =
-    let
-      value inv_range   = F.divide (1.0, light_range);
-      value linear      = F.multiply (distance, inv_range);
-      value falloff_inv = F.divide (1.0, light_falloff);
-      value exponential = F.power (linear, falloff_inv);
-      value clamped     = F.clamp (exponential, 0.0, 1.0);
-    in
-      F.subtract (1.0, clamped)
-    end; 
-
-  --
-  -- Given a spherical light [light], calculate the diffuse
-  -- colour based on [d], with minimum emission level [e].
+  -- Given a directional light [light], calculate the diffuse
+  -- colour based on [d], with minimum emission [e].
   --
 
   function diffuse_colour (
@@ -118,28 +92,24 @@ module SphericalLight is
     end;
 
   --
-  -- Given a spherical light [light], a surface normal [n],
-  -- and assuming the current point on the surface is at [p],
-  -- with minimum emission level [e], calculate the diffuse 
-  -- term for the surface.
+  -- Given a directional light [light] and a surface normal [n],
+  -- calculate the diffuse term for the surface.
   --
 
   function diffuse_only (
     light : t,
-    n     : vector_3f,
-    p     : vector_3f
+    n     : vector_3f
   ) : vector_3f =
     let
-      value d = directions (light.position, p, n);
-      value a = attenuation (light.radius, light.falloff, d.distance);
+      value d = directions (light, new vector_3f(0.0, 0.0, 0.0), n);
       value c = diffuse_colour (light, d, 0.0);
     in
-      V3.multiply_scalar (c, a)
+      c
     end;
 
   --
-  -- Given a spherical light [light], calculate the specular
-  -- colour based on [d].
+  -- Given a directional light [light], calculate the specular
+  -- colour based on [d] and surface properties [material].
   --
 
   function specular_colour (
@@ -157,32 +127,33 @@ module SphericalLight is
     end;
 
   --
-  -- Given a spherical light [light], a surface normal [n],
-  -- surface properties [material], and assuming an observer at [p],
+  -- Given a directional light [light], a surface normal [n],
+  -- surface properties given by [material],
+  -- and the current point [p] on the surface to be lit,
   -- calculate the diffuse and specular terms for the surface.
   --
 
   function diffuse_specular (
-    light    : t,
-    n        : vector_3f,
-    p        : vector_3f,
-    material : M.t
+    light       : t,
+    n           : vector_3f,
+    p           : vector_3f,
+    material    : M.t
   ) : vector_3f =
     let
-      value d  = directions (light.position, p, n);
-      value a  = attenuation (light.radius, light.falloff, d.distance);
+      value d  = directions (light, p, n);
       value dc = diffuse_colour (light, d, 0.0);
       value sc = specular_colour (light, d, material.specular);
     in
-      V3.multiply_scalar (V3.add (dc, sc), a)
+      V3.add (dc, sc)
     end;
 
   --
-  -- Given a spherical light [light], a surface normal [n],
-  -- surface properties [material], and assuming an observer at [p],
+  -- Given a directional light [light], a surface normal [n],
+  -- surface properties given by [material],
+  -- and the current point [p] on the surface to be lit,
   -- calculate the diffuse and specular terms for the surface,
   -- including the emissive value as the minimum resulting
-  -- (diffuse) light intensity.
+  -- light intensity.
   --
 
   function diffuse_specular_emissive (
@@ -192,34 +163,29 @@ module SphericalLight is
     material : M.t
   ) : vector_3f =
     let
-      value d  = directions (light.position, p, n);
-      value a  = attenuation (light.radius, light.falloff, d.distance);
+      value d  = directions (light, p, n);
       value dc = diffuse_colour (light, d, material.emissive.emissive);
       value sc = specular_colour (light, d, material.specular);
     in
-      V3.multiply_scalar (V3.add (dc, sc), a)
+      V3.add (dc, sc)
     end;
 
   --
-  -- Given a spherical light [light], a surface normal [n],
-  -- and assuming the current point on the surface is at [p],
-  -- with minimum emission level [e], calculate the diffuse 
-  -- term for the surface, including the emissive value as the 
-  -- minimum resulting (diffuse) light intensity.
+  -- Given a directional light [light] and a surface normal [n],
+  -- calculate the diffuse term for the surface, including the
+  -- emissive value as the minimum resulting light intensity.
   --
 
   function diffuse_only_emissive (
     light    : t,
     n        : vector_3f,
-    p        : vector_3f,
     material : M.t
   ) : vector_3f =
     let
-      value d = directions (light.position, p, n);
-      value a = attenuation (light.radius, light.falloff, d.distance);
+      value d = directions (light, new vector_3f(0.0, 0.0, 0.0), n);
       value c = diffuse_colour (light, d, material.emissive.emissive);
     in
-      V3.multiply_scalar (c, a)
+      c
     end;
 
 end;
