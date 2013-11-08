@@ -28,9 +28,7 @@ import javax.annotation.Nonnull;
 
 import nu.xom.Builder;
 import nu.xom.Document;
-import nu.xom.Element;
 import nu.xom.ParsingException;
-import nu.xom.Serializer;
 import nu.xom.ValidityException;
 
 import com.io7m.jaux.Constraints;
@@ -44,6 +42,7 @@ import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.cubemap.CubeMap;
+import com.thoughtworks.xstream.XStream;
 
 public final class SBSceneFilesystem
 {
@@ -162,25 +161,8 @@ public final class SBSceneFilesystem
     return b.toString();
   }
 
-  private void sceneSaveSerializeXML(
-    final @Nonnull SBSceneDescription description)
-    throws IOException
-  {
-    final FileOutputStream out =
-      new FileOutputStream(new File(this.root, "scene.xml"));
-    final Element xml = description.toXML();
-    final Document doc = new Document(xml);
-    final Serializer s = new Serializer(out, "UTF-8");
-    s.setIndent(2);
-    s.setMaxLength(80);
-    s.write(doc);
-    s.flush();
-
-    out.flush();
-    out.close();
-  }
-
   private final @Nonnull Filesystem filesystem;
+
   private final @Nonnull Log        log;
   private final @Nonnull File       root;
 
@@ -396,5 +378,17 @@ public final class SBSceneFilesystem
   @Nonnull File root()
   {
     return this.root;
+  }
+
+  private void sceneSaveSerializeXML(
+    final @Nonnull SBSceneDescription description)
+    throws IOException
+  {
+    final FileOutputStream out =
+      new FileOutputStream(new File(this.root, "scene.xml"));
+
+    final XStream stream = new XStream();
+    stream.toXML(description, out);
+    out.close();
   }
 }

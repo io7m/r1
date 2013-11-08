@@ -33,6 +33,13 @@ import com.io7m.jvvfs.PathVirtual;
 
 @Immutable final class SBScene
 {
+  private static @Nonnull Integer currentMaxID(
+    final @Nonnull Integer x,
+    final @Nonnull Integer y)
+  {
+    return Integer.valueOf(Math.max(x.intValue(), y.intValue()));
+  }
+
   public static @Nonnull SBScene empty()
   {
     final PMap<PathVirtual, SBTexture2D<?>> textures2d = HashTreePMap.empty();
@@ -50,13 +57,6 @@ import com.io7m.jvvfs.PathVirtual;
       Integer.valueOf(0),
       instances,
       Integer.valueOf(0));
-  }
-
-  private static @Nonnull Integer currentMaxID(
-    final @Nonnull Integer x,
-    final @Nonnull Integer y)
-  {
-    return Integer.valueOf(Math.max(x.intValue(), y.intValue()));
   }
 
   private final @Nonnull PMap<PathVirtual, SBTexture2D<?>> textures2d;
@@ -99,6 +99,51 @@ import com.io7m.jvvfs.PathVirtual;
       this.light_id_pool,
       this.instances.plus(instance.getID(), instance),
       SBScene.currentMaxID(this.instance_id_pool, instance.getID()));
+  }
+
+  public @Nonnull SBScene instanceAddByDescription(
+    final @Nonnull SBInstanceDescription d)
+    throws ConstraintError
+  {
+    Constraints.constrainNotNull(d, "Instance");
+    final SBMaterialDescription md = d.getMaterial();
+
+    final SBTexture2D<SBTexture2DKindAlbedo> albe;
+    final SBTexture2D<SBTexture2DKindEmissive> emis;
+    final SBTexture2D<SBTexture2DKindNormal> norm;
+    final SBTexture2D<SBTexture2DKindSpecular> spec;
+
+    if (md.getAlbedo().getTexture() == null) {
+      albe = null;
+    } else {
+      albe = this.texture2DGet(md.getAlbedo().getTexture());
+    }
+
+    if (md.getEmissive().getTexture() == null) {
+      emis = null;
+    } else {
+      emis = this.texture2DGet(md.getEmissive().getTexture());
+    }
+
+    if (md.getNormal().getTexture() == null) {
+      norm = null;
+    } else {
+      norm = this.texture2DGet(md.getNormal().getTexture());
+    }
+
+    if (md.getSpecular().getTexture() == null) {
+      spec = null;
+    } else {
+      spec = this.texture2DGet(md.getSpecular().getTexture());
+    }
+
+    final SBTextureCube env =
+      (md.getEnvironment().getTexture() == null) ? null : this
+        .textureCubeGet(md.getEnvironment().getTexture());
+
+    final SBMaterial m = new SBMaterial(md, albe, emis, env, norm, spec);
+    final SBInstance instance = new SBInstance(d, m);
+    return this.instanceAdd(instance);
   }
 
   public boolean instanceExists(
@@ -199,6 +244,33 @@ import com.io7m.jvvfs.PathVirtual;
     return this.lights.values();
   }
 
+  public @Nonnull SBSceneDescription makeDescription()
+  {
+    SBSceneDescription desc = SBSceneDescription.empty();
+
+    for (final SBMesh m : this.meshes.values()) {
+      desc = desc.meshAdd(m.getPath());
+    }
+
+    for (final SBTexture2D<?> t : this.textures2d.values()) {
+      desc = desc.texture2DAdd(t.getDescription());
+    }
+
+    for (final SBTextureCube t : this.textures_cube.values()) {
+      desc = desc.textureCubeAdd(t.getDescription());
+    }
+
+    for (final SBLight l : this.lights.values()) {
+      desc = desc.lightAdd(l.getDescription());
+    }
+
+    for (final SBInstance i : this.instances.values()) {
+      desc = desc.instanceAdd(i.getDescription());
+    }
+
+    return desc;
+  }
+
   public @Nonnull SBScene meshAdd(
     final @Nonnull SBMesh mesh)
     throws ConstraintError
@@ -215,17 +287,17 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool);
   }
 
+  public @Nonnull Map<PathVirtual, SBMesh> meshesGet()
+  {
+    return this.meshes;
+  }
+
   public @CheckForNull SBMesh meshGet(
     final @Nonnull PathVirtual name)
     throws ConstraintError
   {
     Constraints.constrainNotNull(name, "Mesh");
     return this.meshes.get(name);
-  }
-
-  public @Nonnull Map<PathVirtual, SBMesh> meshesGet()
-  {
-    return this.meshes;
   }
 
   public @Nonnull SBScene removeInstance(
@@ -271,11 +343,6 @@ import com.io7m.jvvfs.PathVirtual;
     return (SBTexture2D<T>) this.textures2d.get(texture);
   }
 
-  public @Nonnull Map<PathVirtual, SBTexture2D<?>> textures2DGet()
-  {
-    return this.textures2d;
-  }
-
   public @Nonnull SBScene textureCubeAdd(
     final @Nonnull SBTextureCube texture)
     throws ConstraintError
@@ -299,80 +366,13 @@ import com.io7m.jvvfs.PathVirtual;
     return this.textures_cube.get(texture);
   }
 
+  public @Nonnull Map<PathVirtual, SBTexture2D<?>> textures2DGet()
+  {
+    return this.textures2d;
+  }
+
   public @Nonnull Map<PathVirtual, SBTextureCube> texturesCubeGet()
   {
     return this.textures_cube;
-  }
-
-  public @Nonnull SBScene instanceAddByDescription(
-    final @Nonnull SBInstanceDescription d)
-    throws ConstraintError
-  {
-    Constraints.constrainNotNull(d, "Instance");
-    final SBMaterialDescription md = d.getMaterial();
-
-    final SBTexture2D<SBTexture2DKindAlbedo> albe;
-    final SBTexture2D<SBTexture2DKindEmissive> emis;
-    final SBTexture2D<SBTexture2DKindNormal> norm;
-    final SBTexture2D<SBTexture2DKindSpecular> spec;
-
-    if (md.getAlbedo().getTexture() == null) {
-      albe = null;
-    } else {
-      albe = this.texture2DGet(md.getAlbedo().getTexture());
-    }
-
-    if (md.getEmissive().getTexture() == null) {
-      emis = null;
-    } else {
-      emis = this.texture2DGet(md.getEmissive().getTexture());
-    }
-
-    if (md.getNormal().getTexture() == null) {
-      norm = null;
-    } else {
-      norm = this.texture2DGet(md.getNormal().getTexture());
-    }
-
-    if (md.getSpecular().getTexture() == null) {
-      spec = null;
-    } else {
-      spec = this.texture2DGet(md.getSpecular().getTexture());
-    }
-
-    final SBTextureCube env =
-      (md.getEnvironment().getTexture() == null) ? null : this
-        .textureCubeGet(md.getEnvironment().getTexture());
-
-    final SBMaterial m = new SBMaterial(md, albe, emis, env, norm, spec);
-    final SBInstance instance = new SBInstance(d, m);
-    return this.instanceAdd(instance);
-  }
-
-  public @Nonnull SBSceneDescription makeDescription()
-  {
-    SBSceneDescription desc = SBSceneDescription.empty();
-
-    for (final SBMesh m : this.meshes.values()) {
-      desc = desc.meshAdd(m.getPath());
-    }
-
-    for (final SBTexture2D<?> t : this.textures2d.values()) {
-      desc = desc.texture2DAdd(t.getDescription());
-    }
-
-    for (final SBTextureCube t : this.textures_cube.values()) {
-      desc = desc.textureCubeAdd(t.getDescription());
-    }
-
-    for (final SBLight l : this.lights.values()) {
-      desc = desc.lightAdd(l.getDescription());
-    }
-
-    for (final SBInstance i : this.instances.values()) {
-      desc = desc.instanceAdd(i.getDescription());
-    }
-
-    return desc;
   }
 }

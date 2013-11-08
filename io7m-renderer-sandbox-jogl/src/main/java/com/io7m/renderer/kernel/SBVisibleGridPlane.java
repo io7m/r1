@@ -35,9 +35,6 @@ import com.io7m.jcanephora.UsageHint;
 public final class SBVisibleGridPlane
 {
 
-  private final @Nonnull ArrayBuffer array;
-  private final @Nonnull IndexBuffer indices;
-
   private static long elementsRequired(
     final int x,
     final int z)
@@ -54,6 +51,10 @@ public final class SBVisibleGridPlane
 
     return x_points + z_points;
   }
+
+  private final @Nonnull ArrayBuffer array;
+
+  private final @Nonnull IndexBuffer indices;
 
   SBVisibleGridPlane(
     final @Nonnull JCGLInterfaceCommon gl,

@@ -16,38 +16,12 @@
 
 package com.io7m.renderer.kernel;
 
-import java.net.URI;
-
 import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
-import nu.xom.Element;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLUtilities;
 
 public final class SBMaterialEmissiveDescription
 {
-  public static @Nonnull SBMaterialEmissiveDescription fromXML(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
-  {
-    final URI uri = SBSceneDescription.SCENE_XML_URI;
-    RXMLUtilities.checkIsElement(e, "emissive", uri);
-    final Element em = RXMLUtilities.getChild(e, "emission", uri);
-    final Element et = RXMLUtilities.getChild(e, "texture", uri);
-
-    final PathVirtual texture =
-      (et.getValue().length() == 0) ? null : PathVirtual.ofString(et
-        .getValue());
-
-    final float emission = RXMLUtilities.getElementFloat(em);
-    return new SBMaterialEmissiveDescription(emission, texture);
-  }
-
   private final float                     emission;
   private final @CheckForNull PathVirtual texture;
 
@@ -117,23 +91,5 @@ public final class SBMaterialEmissiveDescription
     builder.append(this.texture);
     builder.append("]");
     return builder.toString();
-  }
-
-  @SuppressWarnings("boxing") @Nonnull Element toXML()
-  {
-    final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-    final Element e = new Element("s:emissive", uri);
-
-    final Element ed = new Element("s:texture", uri);
-    if (this.texture != null) {
-      ed.appendChild(this.texture.toString());
-    }
-
-    final Element em = new Element("s:emission", uri);
-    em.appendChild(String.format("%.6f", this.emission));
-
-    e.appendChild(ed);
-    e.appendChild(em);
-    return e;
   }
 }

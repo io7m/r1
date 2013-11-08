@@ -53,133 +53,6 @@ import com.io7m.parasol.PGLSLMetaXML.Output;
 
 final class SBShadersPanel extends JPanel
 {
-  private static final long                  serialVersionUID;
-  protected static final @Nonnull FileFilter META_XML_FILTER;
-
-  static {
-    serialVersionUID = -941448169051827275L;
-
-    META_XML_FILTER = new FileFilter() {
-      @Override public String getDescription()
-      {
-        return "All shaders (\"meta.xml\")";
-      }
-
-      @Override public boolean accept(
-        final File f)
-      {
-        return (f.isDirectory() || f.getName().equals("meta.xml"));
-      }
-    };
-  }
-
-  private final @Nonnull JComboBox<String>   selector;
-  private final @Nonnull JButton             open;
-  private final @Nonnull Log                 jlog;
-
-  private @Nonnull Map<String, SBShader>     shaders;
-
-  private final @Nonnull UniformsTableModel  uniforms_model;
-  private final @Nonnull UniformsTable       uniforms_table;
-  private final @Nonnull JScrollPane         uniforms_scroller;
-
-  private final @Nonnull InputsTableModel    inputs_model;
-  private final @Nonnull InputsTable         inputs_table;
-  private final @Nonnull JScrollPane         inputs_scroller;
-
-  private final @Nonnull OutputsTableModel   outputs_model;
-  private final @Nonnull OutputsTable        outputs_table;
-  private final @Nonnull JScrollPane         outputs_scroller;
-  private final @Nonnull JFrame              window;
-
-  private static class UniformsTable extends JTable
-  {
-    private static final long                 serialVersionUID;
-
-    static {
-      serialVersionUID = -3198912965434164747L;
-    }
-
-    private final @Nonnull UniformsTableModel model;
-
-    public UniformsTable(
-      final UniformsTableModel model)
-    {
-      super(model);
-
-      this.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-      this.setAutoCreateRowSorter(true);
-      this.setAutoCreateColumnsFromModel(true);
-      this.getTableHeader().setReorderingAllowed(false);
-      this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-      this.setFillsViewportHeight(true);
-
-      this.model = model;
-    }
-  }
-
-  private static class UniformsTableModel extends AbstractTableModel
-  {
-    private static final long                           serialVersionUID;
-    private final @Nonnull String[]                     column_names;
-    private final @Nonnull ArrayList<ArrayList<String>> data;
-    private final @Nonnull Log                          log;
-
-    static {
-      serialVersionUID = 6499860137289000995L;
-    }
-
-    public UniformsTableModel(
-      final @Nonnull Log log)
-    {
-      this.log = new Log(log, "shader-uniform-table");
-      this.column_names = new String[] { "Name", "Location", "Type" };
-      this.data = new ArrayList<ArrayList<String>>();
-    }
-
-    @Override public int getColumnCount()
-    {
-      return this.column_names.length;
-    }
-
-    @Override public String getColumnName(
-      final int column)
-    {
-      return this.column_names[column];
-    }
-
-    @Override public int getRowCount()
-    {
-      return this.data.size();
-    }
-
-    @Override public Object getValueAt(
-      final int rowIndex,
-      final int columnIndex)
-    {
-      return this.data.get(rowIndex).get(columnIndex);
-    }
-
-    void showShader(
-      final @Nonnull SBShader shader)
-    {
-      this.data.clear();
-
-      final ProgramReference p = shader.getProgram();
-      for (final Entry<String, ProgramUniform> e : p.getUniforms().entrySet()) {
-        final String n = e.getKey();
-        final ProgramUniform u = e.getValue();
-        final ArrayList<String> row = new ArrayList<String>();
-        row.add(n);
-        row.add(Integer.toString(u.getLocation()));
-        row.add(u.getType().getName());
-        this.data.add(row);
-      }
-
-      this.fireTableDataChanged();
-    }
-  }
-
   private static class InputsTable extends JTable
   {
     private static final long               serialVersionUID;
@@ -357,6 +230,136 @@ final class SBShadersPanel extends JPanel
     }
   }
 
+  private static class UniformsTable extends JTable
+  {
+    private static final long                 serialVersionUID;
+
+    static {
+      serialVersionUID = -3198912965434164747L;
+    }
+
+    private final @Nonnull UniformsTableModel model;
+
+    public UniformsTable(
+      final UniformsTableModel model)
+    {
+      super(model);
+
+      this.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+      this.setAutoCreateRowSorter(true);
+      this.setAutoCreateColumnsFromModel(true);
+      this.getTableHeader().setReorderingAllowed(false);
+      this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+      this.setFillsViewportHeight(true);
+
+      this.model = model;
+    }
+  }
+
+  private static class UniformsTableModel extends AbstractTableModel
+  {
+    private static final long                           serialVersionUID;
+    private final @Nonnull String[]                     column_names;
+    private final @Nonnull ArrayList<ArrayList<String>> data;
+    private final @Nonnull Log                          log;
+
+    static {
+      serialVersionUID = 6499860137289000995L;
+    }
+
+    public UniformsTableModel(
+      final @Nonnull Log log)
+    {
+      this.log = new Log(log, "shader-uniform-table");
+      this.column_names = new String[] { "Name", "Location", "Type" };
+      this.data = new ArrayList<ArrayList<String>>();
+    }
+
+    @Override public int getColumnCount()
+    {
+      return this.column_names.length;
+    }
+
+    @Override public String getColumnName(
+      final int column)
+    {
+      return this.column_names[column];
+    }
+
+    @Override public int getRowCount()
+    {
+      return this.data.size();
+    }
+
+    @Override public Object getValueAt(
+      final int rowIndex,
+      final int columnIndex)
+    {
+      return this.data.get(rowIndex).get(columnIndex);
+    }
+
+    void showShader(
+      final @Nonnull SBShader shader)
+    {
+      this.data.clear();
+
+      final ProgramReference p = shader.getProgram();
+      for (final Entry<String, ProgramUniform> e : p.getUniforms().entrySet()) {
+        final String n = e.getKey();
+        final ProgramUniform u = e.getValue();
+        final ArrayList<String> row = new ArrayList<String>();
+        row.add(n);
+        row.add(Integer.toString(u.getLocation()));
+        row.add(u.getType().getName());
+        this.data.add(row);
+      }
+
+      this.fireTableDataChanged();
+    }
+  }
+
+  private static final long                  serialVersionUID;
+
+  protected static final @Nonnull FileFilter META_XML_FILTER;
+  static {
+    serialVersionUID = -941448169051827275L;
+
+    META_XML_FILTER = new FileFilter() {
+      @Override public boolean accept(
+        final File f)
+      {
+        return (f.isDirectory() || f.getName().equals("meta.xml"));
+      }
+
+      @Override public String getDescription()
+      {
+        return "All shaders (\"meta.xml\")";
+      }
+    };
+  }
+  private final @Nonnull JComboBox<String>   selector;
+
+  private final @Nonnull JButton             open;
+  private final @Nonnull Log                 jlog;
+  private @Nonnull Map<String, SBShader>     shaders;
+
+  private final @Nonnull UniformsTableModel  uniforms_model;
+  private final @Nonnull UniformsTable       uniforms_table;
+  private final @Nonnull JScrollPane         uniforms_scroller;
+  private final @Nonnull InputsTableModel    inputs_model;
+
+  private final @Nonnull InputsTable         inputs_table;
+
+  private final @Nonnull JScrollPane         inputs_scroller;
+
+  private final @Nonnull OutputsTableModel   outputs_model;
+
+  private final @Nonnull OutputsTable        outputs_table;
+
+  private final @Nonnull JScrollPane         outputs_scroller;
+
+  private final @Nonnull JFrame              window;
+
   public SBShadersPanel(
     final @Nonnull JFrame window,
     final @Nonnull SBSceneControllerShaders controller,
@@ -469,16 +472,6 @@ final class SBShadersPanel extends JPanel
     this.shadersUpdated();
   }
 
-  protected void selectorShowSelected()
-  {
-    final SBShader shader = this.getSelectedShader();
-    if (shader != null) {
-      this.uniforms_model.showShader(shader);
-      this.inputs_model.showShader(shader);
-      this.outputs_model.showShader(shader);
-    }
-  }
-
   public @CheckForNull SBShader getSelectedShader()
   {
     final String sname = (String) this.selector.getSelectedItem();
@@ -489,12 +482,6 @@ final class SBShadersPanel extends JPanel
     return null;
   }
 
-  protected void shadersUpdated()
-  {
-    this.selectorRefresh(this.selector);
-    this.selectorShowSelected();
-  }
-
   private void selectorRefresh(
     final @Nonnull JComboBox<String> box)
   {
@@ -503,6 +490,22 @@ final class SBShadersPanel extends JPanel
       box.addItem(e.getKey());
     }
     this.window.pack();
+  }
+
+  protected void selectorShowSelected()
+  {
+    final SBShader shader = this.getSelectedShader();
+    if (shader != null) {
+      this.uniforms_model.showShader(shader);
+      this.inputs_model.showShader(shader);
+      this.outputs_model.showShader(shader);
+    }
+  }
+
+  protected void shadersUpdated()
+  {
+    this.selectorRefresh(this.selector);
+    this.selectorShowSelected();
   }
 
   @Override public String toString()

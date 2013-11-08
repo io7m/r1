@@ -49,14 +49,14 @@ abstract class SBLight
       return this.description;
     }
 
-    @Override KDirectional getLight()
-    {
-      return this.light;
-    }
-
     @Override Integer getID()
     {
       return this.light.getID();
+    }
+
+    @Override KDirectional getLight()
+    {
+      return this.light;
     }
   }
 
@@ -80,14 +80,14 @@ abstract class SBLight
       return this.description;
     }
 
-    @Override KProjective getLight()
-    {
-      return this.light;
-    }
-
     @Override Integer getID()
     {
       return this.light.getID();
+    }
+
+    @Override KProjective getLight()
+    {
+      return this.light;
     }
   }
 
@@ -110,14 +110,14 @@ abstract class SBLight
       return this.description;
     }
 
-    @Override KSphere getLight()
-    {
-      return this.light;
-    }
-
     @Override Integer getID()
     {
       return this.light.getID();
+    }
+
+    @Override KSphere getLight()
+    {
+      return this.light;
     }
   }
 
@@ -132,12 +132,12 @@ abstract class SBLight
 
   abstract @Nonnull SBLightDescription getDescription();
 
+  abstract @Nonnull Integer getID();
+
   abstract @Nonnull KLight getLight();
 
   public KLight.Type getType()
   {
     return this.type;
   }
-
-  abstract @Nonnull Integer getID();
 }
