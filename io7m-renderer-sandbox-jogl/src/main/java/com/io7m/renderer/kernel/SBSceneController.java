@@ -703,7 +703,7 @@ public final class SBSceneController implements
       final Integer id = i.getID();
 
       final KTransform transform =
-        new KTransform(i.getPosition(), orientation);
+        new KTransform(i.getPosition(), i.getScale(), orientation);
 
       final SBMaterialAlphaDescription sd_alpha =
         mat.getDescription().getAlpha();

@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.RMatrixI3x3F;
 import com.io7m.renderer.RSpaceWorld;
@@ -82,5 +83,10 @@ import com.io7m.renderer.RVectorI3F;
     builder.append(this.material);
     builder.append("]");
     return builder.toString();
+  }
+
+  public @Nonnull VectorI3F getScale()
+  {
+    return this.description.getScale();
   }
 }
