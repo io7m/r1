@@ -54,6 +54,7 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Log;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.RMatrixI3x3F;
 import com.io7m.renderer.RSpaceRGBA;
@@ -589,9 +590,15 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     protected final @Nonnull JTextField                           position_x;
     protected final @Nonnull JTextField                           position_y;
     protected final @Nonnull JTextField                           position_z;
+
+    protected final @Nonnull JTextField                           scale_x;
+    protected final @Nonnull JTextField                           scale_y;
+    protected final @Nonnull JTextField                           scale_z;
+
     protected final @Nonnull JTextField                           orientation_x;
     protected final @Nonnull JTextField                           orientation_y;
     protected final @Nonnull JTextField                           orientation_z;
+
     protected final @Nonnull SBMatrix3x3Fields<RTransformTexture> matrix_uv;
 
     protected final @Nonnull JLabel                               error_icon;
@@ -643,6 +650,10 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.position_x = new JTextField("0.0");
       this.position_y = new JTextField("0.0");
       this.position_z = new JTextField("0.0");
+
+      this.scale_x = new JTextField("1.0");
+      this.scale_y = new JTextField("1.0");
+      this.scale_z = new JTextField("1.0");
 
       this.orientation_x = new JTextField("0.0");
       this.orientation_y = new JTextField("0.0");
@@ -831,6 +842,14 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         d
           .row()
           .grid()
+          .add(new JLabel("Scale"))
+          .add(this.scale_x)
+          .add(this.scale_y)
+          .add(this.scale_z);
+
+        d
+          .row()
+          .grid()
           .add(new JLabel("Orientation"))
           .add(this.orientation_x)
           .add(this.orientation_y)
@@ -855,6 +874,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       final @Nonnull SBInstanceDescription initial_desc)
     {
       final RVectorReadable3F<RSpaceWorld> pos = initial_desc.getPosition();
+      final VectorI3F scale = initial_desc.getScale();
       final RVectorReadable3F<SBDegrees> ori = initial_desc.getOrientation();
 
       {
@@ -871,6 +891,10 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.position_x.setText(Float.toString(pos.getXF()));
       this.position_y.setText(Float.toString(pos.getYF()));
       this.position_z.setText(Float.toString(pos.getZF()));
+
+      this.scale_x.setText(Float.toString(scale.getXF()));
+      this.scale_y.setText(Float.toString(scale.getYF()));
+      this.scale_z.setText(Float.toString(scale.getZF()));
 
       this.orientation_x.setText(Float.toString(ori.getXF()));
       this.orientation_y.setText(Float.toString(ori.getYF()));
@@ -910,6 +934,12 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           SBTextFieldUtilities.getFieldFloatOrError(this.position_x),
           SBTextFieldUtilities.getFieldFloatOrError(this.position_y),
           SBTextFieldUtilities.getFieldFloatOrError(this.position_z));
+
+      final VectorI3F scale =
+        new VectorI3F(
+          SBTextFieldUtilities.getFieldFloatOrError(this.scale_x),
+          SBTextFieldUtilities.getFieldFloatOrError(this.scale_y),
+          SBTextFieldUtilities.getFieldFloatOrError(this.scale_z));
 
       final RVectorI3F<SBDegrees> orientation =
         new RVectorI3F<SBDegrees>(
@@ -954,6 +984,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         new SBInstanceDescription(
           id,
           position,
+          scale,
           orientation,
           instance_uv_matrix,
           mesh_name,
