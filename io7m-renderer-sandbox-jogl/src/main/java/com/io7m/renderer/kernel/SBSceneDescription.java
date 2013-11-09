@@ -33,7 +33,7 @@ import com.io7m.jvvfs.PathVirtual;
   static final int SCENE_XML_VERSION;
 
   static {
-    SCENE_XML_VERSION = 13;
+    SCENE_XML_VERSION = 14;
   }
 
   public static @Nonnull SBSceneDescription empty()

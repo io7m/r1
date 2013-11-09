@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.RMatrixI3x3F;
 import com.io7m.renderer.RSpaceWorld;
@@ -29,6 +30,7 @@ import com.io7m.renderer.RVectorI3F;
 {
   private final @Nonnull Integer                         id;
   private final @Nonnull RVectorI3F<RSpaceWorld>         position;
+  private final @Nonnull VectorI3F                       scale;
   private final @Nonnull RVectorI3F<SBDegrees>           orientation;
   private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
   private final @Nonnull PathVirtual                     mesh;
@@ -37,6 +39,7 @@ import com.io7m.renderer.RVectorI3F;
   public SBInstanceDescription(
     final @Nonnull Integer id,
     final @Nonnull RVectorI3F<RSpaceWorld> position,
+    final @Nonnull VectorI3F scale,
     final @Nonnull RVectorI3F<SBDegrees> orientation,
     final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix,
     final @Nonnull PathVirtual mesh,
@@ -44,6 +47,7 @@ import com.io7m.renderer.RVectorI3F;
   {
     this.id = id;
     this.position = position;
+    this.scale = scale;
     this.orientation = orientation;
     this.mesh = mesh;
     this.material = material;
@@ -63,39 +67,25 @@ import com.io7m.renderer.RVectorI3F;
       return false;
     }
     final SBInstanceDescription other = (SBInstanceDescription) obj;
-    if (this.id == null) {
-      if (other.id != null) {
-        return false;
-      }
-    } else if (!this.id.equals(other.id)) {
+    if (!this.id.equals(other.id)) {
       return false;
     }
-    if (this.material == null) {
-      if (other.material != null) {
-        return false;
-      }
-    } else if (!this.material.equals(other.material)) {
+    if (!this.material.equals(other.material)) {
       return false;
     }
-    if (this.mesh == null) {
-      if (other.mesh != null) {
-        return false;
-      }
-    } else if (!this.mesh.equals(other.mesh)) {
+    if (!this.mesh.equals(other.mesh)) {
       return false;
     }
-    if (this.orientation == null) {
-      if (other.orientation != null) {
-        return false;
-      }
-    } else if (!this.orientation.equals(other.orientation)) {
+    if (!this.orientation.equals(other.orientation)) {
       return false;
     }
-    if (this.position == null) {
-      if (other.position != null) {
-        return false;
-      }
-    } else if (!this.position.equals(other.position)) {
+    if (!this.position.equals(other.position)) {
+      return false;
+    }
+    if (!this.scale.equals(other.scale)) {
+      return false;
+    }
+    if (!this.uv_matrix.equals(other.uv_matrix)) {
       return false;
     }
     return true;
@@ -126,6 +116,11 @@ import com.io7m.renderer.RVectorI3F;
     return this.position;
   }
 
+  public @Nonnull VectorI3F getScale()
+  {
+    return this.scale;
+  }
+
   public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
   {
     return this.uv_matrix;
@@ -135,18 +130,13 @@ import com.io7m.renderer.RVectorI3F;
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + ((this.id == null) ? 0 : this.id.hashCode());
-    result =
-      (prime * result)
-        + ((this.material == null) ? 0 : this.material.hashCode());
-    result =
-      (prime * result) + ((this.mesh == null) ? 0 : this.mesh.hashCode());
-    result =
-      (prime * result)
-        + ((this.orientation == null) ? 0 : this.orientation.hashCode());
-    result =
-      (prime * result)
-        + ((this.position == null) ? 0 : this.position.hashCode());
+    result = (prime * result) + this.id.hashCode();
+    result = (prime * result) + this.material.hashCode();
+    result = (prime * result) + this.mesh.hashCode();
+    result = (prime * result) + this.orientation.hashCode();
+    result = (prime * result) + this.position.hashCode();
+    result = (prime * result) + this.scale.hashCode();
+    result = (prime * result) + this.uv_matrix.hashCode();
     return result;
   }
 
@@ -157,6 +147,8 @@ import com.io7m.renderer.RVectorI3F;
     builder.append(this.id);
     builder.append(" ");
     builder.append(this.position);
+    builder.append(" ");
+    builder.append(this.scale);
     builder.append(" ");
     builder.append(this.orientation);
     builder.append(" ");
