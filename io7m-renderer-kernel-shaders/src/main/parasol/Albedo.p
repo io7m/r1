@@ -35,10 +35,9 @@ module Albedo is
     new vector_4f (d.colour [x y z], 1.0);
 
   function translucent (
-    d : M.albedo,
-    a : float
+    d : M.albedo
   ) : vector_4f =
-    new vector_4f (d.colour [x y z], F.minimum (a, d.colour[w]));
+    d.colour;
 
   function textured_opaque (
     t : sampler_2d,
@@ -56,15 +55,13 @@ module Albedo is
   function textured_translucent (
     t : sampler_2d,
     u : vector_2f,
-    d : M.albedo,
-    a : float
+    d : M.albedo
   ) : vector_4f =
     let
       value tc = S.texture (t, u);
       value m  = F.multiply (tc [w], d.mix);
-      value k  = V4.interpolate (d.colour, tc, m);
     in
-      new vector_4f (k [x y z], F.minimum (a, k [w]))
+      V4.interpolate (d.colour, tc, m)
     end;
 
 end;

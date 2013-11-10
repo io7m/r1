@@ -60,7 +60,171 @@ import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLUnsupporte
 
 public final class KRendererForward implements KRenderer
 {
-  private static void bindTextures(
+  private static void makeLitLabel(
+    final @Nonnull StringBuilder buffer,
+    final @Nonnull KLight light,
+    final @Nonnull KMeshInstanceMaterialLabel label)
+  {
+    buffer.setLength(0);
+    buffer.append("fwd_");
+    buffer.append(light.getType().getCode());
+    buffer.append("_");
+    buffer.append(label.getCode());
+  }
+
+  private static void makeUnlitLabel(
+    final @Nonnull StringBuilder buffer,
+    final @Nonnull KMeshInstanceMaterialLabel label)
+  {
+    buffer.setLength(0);
+    buffer.append("fwd_");
+    buffer.append(label.getCode());
+  }
+
+  private final @Nonnull Log                                                      log;
+  private final @Nonnull JCGLImplementation                                       g;
+  private final @Nonnull VectorM4F                                                background;
+  private final @Nonnull KMatrices                                                matrices;
+  private final @Nonnull VectorM2I                                                viewport_size;
+  private final @Nonnull StringBuilder                                            label_cache;
+  private final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache;
+  private @Nonnull KFramebufferBasic                                              framebuffer;
+
+  public KRendererForward(
+    final @Nonnull JCGLImplementation gl,
+    final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache,
+    final @Nonnull AreaInclusive size,
+    final @Nonnull Log log)
+    throws JCGLException,
+      JCGLUnsupportedException,
+      ConstraintError
+  {
+    this.log =
+      new Log(Constraints.constrainNotNull(log, "log"), "krenderer-forward");
+    this.g = Constraints.constrainNotNull(gl, "OpenGL implementation");
+    this.shader_cache =
+      Constraints.constrainNotNull(shader_cache, "Shader cache");
+    this.label_cache = new StringBuilder();
+    this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
+    this.matrices = new KMatrices();
+    this.viewport_size = new VectorM2I();
+    this.rendererFramebufferResize(size);
+  }
+
+  private void putLight(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KLight light,
+    final @Nonnull JCCEExecutionCallable e)
+    throws JCGLException,
+      ConstraintError
+  {
+    switch (light.getType()) {
+      case LIGHT_DIRECTIONAL:
+      {
+        KShadingProgramCommon.putLightDirectional(
+          gc,
+          e,
+          this.matrices,
+          (KDirectional) light);
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      {
+        final KProjective kp = (KProjective) light;
+        this.matrices.matricesMakeFromLight(kp);
+        KShadingProgramCommon.putLightProjective(gc, e, this.matrices, kp);
+        break;
+      }
+      case LIGHT_SPHERE:
+      {
+        KShadingProgramCommon.putLightSpherical(
+          gc,
+          e,
+          this.matrices,
+          (KSphere) light);
+        break;
+      }
+    }
+  }
+
+  @SuppressWarnings("static-method") private void putLightReuse(
+    final @Nonnull JCCEExecutionCallable e,
+    final @Nonnull KLight light)
+    throws JCGLException,
+      ConstraintError
+  {
+    switch (light.getType()) {
+      case LIGHT_DIRECTIONAL:
+      {
+        KShadingProgramCommon.putLightDirectionalReuse(e);
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      {
+        KShadingProgramCommon.putLightProjectiveReuse(e);
+        break;
+      }
+      case LIGHT_SPHERE:
+      {
+        KShadingProgramCommon.putLightSphericalReuse(e);
+        break;
+      }
+    }
+  }
+
+  private void putMeshInstanceMatrices(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable e,
+    final @Nonnull KMeshInstance i,
+    final @Nonnull KMeshInstanceMaterialLabel label)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMatrixProjectionReuse(e);
+    KShadingProgramCommon.putMatrixModelView(
+      e,
+      gc,
+      this.matrices.getMatrixModelView());
+    if (label.impliesUV()) {
+      this.matrices.matricesMakeTextureFromInstance(i);
+      KShadingProgramCommon.putMatrixUV(gc, e, this.matrices.getMatrixUV());
+    }
+
+    switch (label.getNormal()) {
+      case NORMAL_MAPPED:
+      case NORMAL_VERTEX:
+      {
+        KShadingProgramCommon.putMatrixNormal(
+          e,
+          gc,
+          this.matrices.getMatrixNormal());
+        break;
+      }
+      case NORMAL_NONE:
+      {
+        break;
+      }
+    }
+
+    switch (label.getEnvironment()) {
+      case ENVIRONMENT_NONE:
+      {
+        break;
+      }
+      case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+      case ENVIRONMENT_REFRACTIVE:
+      {
+        KShadingProgramCommon.putMatrixInverseView(
+          e,
+          gc,
+          this.matrices.getMatrixViewInverse());
+        break;
+      }
+    }
+  }
+
+  @SuppressWarnings("static-method") private void putTextures(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable e,
     final @Nonnull KMeshInstance i,
@@ -185,57 +349,6 @@ public final class KRendererForward implements KRenderer
         }
       }
     }
-  }
-
-  private static void makeLitLabel(
-    final @Nonnull StringBuilder buffer,
-    final @Nonnull KLight light,
-    final @Nonnull KMeshInstanceMaterialLabel label)
-  {
-    buffer.setLength(0);
-    buffer.append("fwd_");
-    buffer.append(light.getType().getCode());
-    buffer.append("_");
-    buffer.append(label.getCode());
-  }
-
-  private static void makeUnlitLabel(
-    final @Nonnull StringBuilder buffer,
-    final @Nonnull KMeshInstanceMaterialLabel label)
-  {
-    buffer.setLength(0);
-    buffer.append("fwd_");
-    buffer.append(label.getCode());
-  }
-
-  private final @Nonnull Log                                                      log;
-  private final @Nonnull JCGLImplementation                                       g;
-  private final @Nonnull VectorM4F                                                background;
-  private final @Nonnull KMatrices                                                matrices;
-  private final @Nonnull VectorM2I                                                viewport_size;
-  private final @Nonnull StringBuilder                                            label_cache;
-  private final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache;
-  private @Nonnull KFramebufferBasic                                              framebuffer;
-
-  public KRendererForward(
-    final @Nonnull JCGLImplementation gl,
-    final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache,
-    final @Nonnull AreaInclusive size,
-    final @Nonnull Log log)
-    throws JCGLException,
-      JCGLUnsupportedException,
-      ConstraintError
-  {
-    this.log =
-      new Log(Constraints.constrainNotNull(log, "log"), "krenderer-forward");
-    this.g = Constraints.constrainNotNull(gl, "OpenGL implementation");
-    this.shader_cache =
-      Constraints.constrainNotNull(shader_cache, "Shader cache");
-    this.label_cache = new StringBuilder();
-    this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = new KMatrices();
-    this.viewport_size = new VectorM2I();
-    this.rendererFramebufferResize(size);
   }
 
   private void renderDepthPassMeshes(
@@ -484,33 +597,7 @@ public final class KRendererForward implements KRenderer
         gc,
         this.matrices.getMatrixProjection());
 
-      switch (light.getType()) {
-        case LIGHT_DIRECTIONAL:
-        {
-          KShadingProgramCommon.putLightDirectional(
-            gc,
-            e,
-            this.matrices,
-            (KDirectional) light);
-          break;
-        }
-        case LIGHT_PROJECTIVE:
-        {
-          final KProjective kp = (KProjective) light;
-          this.matrices.matricesMakeFromLight(kp);
-          KShadingProgramCommon.putLightProjective(gc, e, this.matrices, kp);
-          break;
-        }
-        case LIGHT_SPHERE:
-        {
-          KShadingProgramCommon.putLightSpherical(
-            gc,
-            e,
-            this.matrices,
-            (KSphere) light);
-          break;
-        }
-      }
+      this.putLight(gc, light, e);
       e.execCancel();
 
       for (final KMeshInstance i : bl.getInstances()) {
@@ -551,83 +638,10 @@ public final class KRendererForward implements KRenderer
 
     this.matrices.matricesMakeFromTransform(i.getTransform());
 
-    /**
-     * Upload matrices.
-     */
-
     e.execPrepare(gc);
-    KShadingProgramCommon.putMatrixProjectionReuse(e);
-    KShadingProgramCommon.putMatrixModelView(
-      e,
-      gc,
-      this.matrices.getMatrixModelView());
-
-    KRendererForward.bindTextures(gc, e, i, light);
-
-    if (label.impliesUV()) {
-      this.matrices.matricesMakeTextureFromInstance(i);
-      KShadingProgramCommon.putMatrixUV(gc, e, this.matrices.getMatrixUV());
-    }
-
-    switch (label.getNormal()) {
-      case NORMAL_MAPPED:
-      case NORMAL_VERTEX:
-      {
-        KShadingProgramCommon.putMatrixNormal(
-          e,
-          gc,
-          this.matrices.getMatrixNormal());
-        break;
-      }
-      case NORMAL_NONE:
-      {
-        break;
-      }
-    }
-
-    switch (label.getEnvironment()) {
-      case ENVIRONMENT_NONE:
-      {
-        break;
-      }
-      case ENVIRONMENT_REFLECTIVE:
-      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
-      case ENVIRONMENT_REFRACTIVE:
-      {
-        KShadingProgramCommon.putMatrixInverseView(
-          e,
-          gc,
-          this.matrices.getMatrixViewInverse());
-        break;
-      }
-    }
-
-    /**
-     * Re-use light parameters.
-     */
-
-    switch (light.getType()) {
-      case LIGHT_DIRECTIONAL:
-      {
-        KShadingProgramCommon.putLightDirectionalReuse(e);
-        break;
-      }
-      case LIGHT_PROJECTIVE:
-      {
-        KShadingProgramCommon.putLightProjectiveReuse(e);
-        break;
-      }
-      case LIGHT_SPHERE:
-      {
-        KShadingProgramCommon.putLightSphericalReuse(e);
-        break;
-      }
-    }
-
-    /**
-     * Upload material parameters.
-     */
-
+    this.putMeshInstanceMatrices(gc, e, i, label);
+    this.putLightReuse(e, light);
+    this.putTextures(gc, e, i, light);
     KShadingProgramCommon.putMaterial(e, gc, material);
 
     /**
@@ -688,7 +702,7 @@ public final class KRendererForward implements KRenderer
     }
   }
 
-  private void renderOpaqueMeshUnlit(
+  @SuppressWarnings("static-method") private void renderOpaqueMeshUnlit(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable e,
     final @Nonnull KMeshInstance i)
@@ -724,34 +738,7 @@ public final class KRendererForward implements KRenderer
           gc,
           this.matrices.getMatrixProjection());
 
-        switch (light.getType()) {
-          case LIGHT_DIRECTIONAL:
-          {
-            KShadingProgramCommon.putLightDirectional(
-              gc,
-              e,
-              this.matrices,
-              (KDirectional) light);
-            break;
-          }
-          case LIGHT_PROJECTIVE:
-          {
-            final KProjective kp = (KProjective) light;
-            this.matrices.matricesMakeFromLight(kp);
-            KShadingProgramCommon
-              .putLightProjective(gc, e, this.matrices, kp);
-            break;
-          }
-          case LIGHT_SPHERE:
-          {
-            KShadingProgramCommon.putLightSpherical(
-              gc,
-              e,
-              this.matrices,
-              (KSphere) light);
-            break;
-          }
-        }
+        this.putLight(gc, light, e);
         e.execCancel();
 
         if (first_light) {
@@ -781,83 +768,10 @@ public final class KRendererForward implements KRenderer
 
     this.matrices.matricesMakeFromTransform(i.getTransform());
 
-    /**
-     * Upload matrices.
-     */
-
     e.execPrepare(gc);
-    KShadingProgramCommon.putMatrixProjectionReuse(e);
-    KShadingProgramCommon.putMatrixModelView(
-      e,
-      gc,
-      this.matrices.getMatrixModelView());
-
-    KRendererForward.bindTextures(gc, e, i, light);
-
-    if (label.impliesUV()) {
-      this.matrices.matricesMakeTextureFromInstance(i);
-      KShadingProgramCommon.putMatrixUV(gc, e, this.matrices.getMatrixUV());
-    }
-
-    switch (label.getNormal()) {
-      case NORMAL_MAPPED:
-      case NORMAL_VERTEX:
-      {
-        KShadingProgramCommon.putMatrixNormal(
-          e,
-          gc,
-          this.matrices.getMatrixNormal());
-        break;
-      }
-      case NORMAL_NONE:
-      {
-        break;
-      }
-    }
-
-    switch (label.getEnvironment()) {
-      case ENVIRONMENT_NONE:
-      {
-        break;
-      }
-      case ENVIRONMENT_REFLECTIVE:
-      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
-      case ENVIRONMENT_REFRACTIVE:
-      {
-        KShadingProgramCommon.putMatrixInverseView(
-          e,
-          gc,
-          this.matrices.getMatrixViewInverse());
-        break;
-      }
-    }
-
-    /**
-     * Re-use light parameters.
-     */
-
-    switch (light.getType()) {
-      case LIGHT_DIRECTIONAL:
-      {
-        KShadingProgramCommon.putLightDirectionalReuse(e);
-        break;
-      }
-      case LIGHT_PROJECTIVE:
-      {
-        KShadingProgramCommon.putLightProjectiveReuse(e);
-        break;
-      }
-      case LIGHT_SPHERE:
-      {
-        KShadingProgramCommon.putLightSphericalReuse(e);
-        break;
-      }
-    }
-
-    /**
-     * Upload material parameters.
-     */
-
+    this.putMeshInstanceMatrices(gc, e, i, label);
+    this.putLightReuse(e, light);
+    this.putTextures(gc, e, i, light);
     KShadingProgramCommon.putMaterial(e, gc, material);
 
     /**

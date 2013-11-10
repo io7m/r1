@@ -322,8 +322,10 @@ public final class Shaders
         b
           .append("  value lit  = V3.multiply (surface [x y z], light_term);\n");
         b.append("  -- Premultiply alpha\n");
-        b
-          .append("  value rgba = new vector_4f (V3.multiply_scalar (lit, surface [w]), surface [w]);\n");
+        b.append("  value rgba = new vector_4f (\n");
+        b.append("    V3.multiply_scalar (lit, surface [w]),\n");
+        b.append("    F.multiply (surface [w], m.alpha.opacity)\n");
+        b.append("  );\n");
         break;
       }
     }
@@ -372,9 +374,13 @@ public final class Shaders
           {
             b.append("  value surface : vector_4f =\n");
             b.append("    new vector_4f (\n");
-            b
-              .append("      V3.interpolate (albedo [x y z], env [x y z], m.environment.mix),\n");
-            b.append("      1.0);\n");
+            b.append("      V3.interpolate (\n");
+            b.append("        albedo [x y z],\n");
+            b.append("        env [x y z],\n");
+            b.append("        m.environment.mix\n");
+            b.append("      ),\n");
+            b.append("      1.0\n");
+            b.append("    );\n");
             break;
           }
         }
@@ -393,8 +399,11 @@ public final class Shaders
           case ENVIRONMENT_REFRACTIVE:
           {
             b.append("  value surface : vector_4f =\n");
-            b
-              .append("    V4.interpolate (albedo, env, m.environment.mix);\n");
+            b.append("    V4.interpolate (\n");
+            b.append("      albedo,\n");
+            b.append("      env,\n");
+            b.append("      m.environment.mix\n");
+            b.append("    );\n");
             break;
           }
         }
@@ -420,7 +429,7 @@ public final class Shaders
           case ALPHA_TRANSLUCENT:
           {
             b.append("  value albedo : vector_4f =\n");
-            b.append("    A.translucent (m.albedo, m.alpha.opacity);\n");
+            b.append("    A.translucent (m.albedo);\n");
             break;
           }
         }
@@ -438,8 +447,11 @@ public final class Shaders
           case ALPHA_TRANSLUCENT:
           {
             b.append("  value albedo : vector_4f =\n");
-            b
-              .append("    A.textured_translucent (t_albedo, f_uv, m.albedo, m.alpha.opacity);\n");
+            b.append("    A.textured_translucent (\n");
+            b.append("      t_albedo,\n");
+            b.append("      f_uv,\n");
+            b.append("      m.albedo\n");
+            b.append("    );\n");
             break;
           }
         }
@@ -1049,7 +1061,6 @@ public final class Shaders
       }
       case NORMALS_NONE:
       {
-
         break;
       }
       case NORMALS_VERTEX:
