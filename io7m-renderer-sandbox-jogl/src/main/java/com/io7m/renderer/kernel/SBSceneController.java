@@ -768,7 +768,8 @@ public final class SBSceneController implements
           sd_envi.getMix(),
           environment_map,
           sd_envi.getRefractionIndex(),
-          sd_envi.getReflectionMix());
+          sd_envi.getReflectionMix(),
+          sd_envi.getMixFromSpecularMap());
 
       final KMaterialNormal norm = new KMaterialNormal(normal_map);
 

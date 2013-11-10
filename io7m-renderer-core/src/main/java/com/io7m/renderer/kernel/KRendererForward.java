@@ -214,6 +214,9 @@ public final class KRendererForward implements KRenderer
       case ENVIRONMENT_REFLECTIVE:
       case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
       case ENVIRONMENT_REFRACTIVE:
+      case ENVIRONMENT_REFLECTIVE_MAPPED:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+      case ENVIRONMENT_REFRACTIVE_MAPPED:
       {
         KShadingProgramCommon.putMatrixInverseView(
           e,
@@ -272,22 +275,13 @@ public final class KRendererForward implements KRenderer
       }
     }
 
-    switch (label.getSpecular()) {
-      case SPECULAR_MAPPED:
-      {
-        KShadingProgramCommon.bindPutTextureSpecular(
-          gc,
-          e,
-          material,
-          units[current_unit]);
-        ++current_unit;
-        break;
-      }
-      case SPECULAR_CONSTANT:
-      case SPECULAR_NONE:
-      {
-        break;
-      }
+    if (label.impliesSpecularMap()) {
+      KShadingProgramCommon.bindPutTextureSpecular(
+        gc,
+        e,
+        material,
+        units[current_unit]);
+      ++current_unit;
     }
 
     switch (label.getEmissive()) {
@@ -316,6 +310,9 @@ public final class KRendererForward implements KRenderer
       case ENVIRONMENT_REFLECTIVE:
       case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
       case ENVIRONMENT_REFRACTIVE:
+      case ENVIRONMENT_REFLECTIVE_MAPPED:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+      case ENVIRONMENT_REFRACTIVE_MAPPED:
       {
         KShadingProgramCommon.bindPutTextureEnvironment(
           gc,

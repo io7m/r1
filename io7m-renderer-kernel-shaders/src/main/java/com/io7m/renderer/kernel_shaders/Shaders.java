@@ -52,15 +52,38 @@ public final class Shaders
     final @Nonnull StringBuilder b,
     final @Nonnull LabelLit label)
   {
+    boolean has_map = false;
+
     switch (label.getSpecular()) {
       case SPECULAR_CONSTANT:
       case SPECULAR_NONE:
         break;
       case SPECULAR_MAPPED:
       {
-        b.append("  parameter t_specular : sampler_2d;\n");
+        has_map = true;
         break;
       }
+    }
+
+    switch (label.getEnvironment()) {
+      case ENVIRONMENT_NONE:
+      case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+      case ENVIRONMENT_REFRACTIVE:
+      {
+        break;
+      }
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+      case ENVIRONMENT_REFLECTIVE_MAPPED:
+      case ENVIRONMENT_REFRACTIVE_MAPPED:
+      {
+        has_map = true;
+        break;
+      }
+    }
+
+    if (has_map) {
+      b.append("  parameter t_specular : sampler_2d;\n");
     }
   }
 
@@ -88,8 +111,11 @@ public final class Shaders
         break;
       }
       case ENVIRONMENT_REFLECTIVE:
-      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+      case ENVIRONMENT_REFLECTIVE_MAPPED:
       case ENVIRONMENT_REFRACTIVE:
+      case ENVIRONMENT_REFRACTIVE_MAPPED:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
       {
         b.append("  parameter t_environment : sampler_cube;\n");
         b.append("  parameter m_view_inv    : matrix_4x4f;\n");
@@ -135,6 +161,7 @@ public final class Shaders
       {
         break;
       }
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
       case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
       {
         b.append("  value env : vector_4f =\n");
@@ -147,6 +174,7 @@ public final class Shaders
         b.append("    );\n");
         break;
       }
+      case ENVIRONMENT_REFLECTIVE_MAPPED:
       case ENVIRONMENT_REFLECTIVE:
       {
         b.append("  value env : vector_4f =\n");
@@ -158,6 +186,7 @@ public final class Shaders
         b.append("    );\n");
         break;
       }
+      case ENVIRONMENT_REFRACTIVE_MAPPED:
       case ENVIRONMENT_REFRACTIVE:
       {
         b.append("  value env : vector_4f =\n");
@@ -383,6 +412,22 @@ public final class Shaders
             b.append("    );\n");
             break;
           }
+          case ENVIRONMENT_REFLECTIVE_MAPPED:
+          case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+          case ENVIRONMENT_REFRACTIVE_MAPPED:
+          {
+            b.append("  value surface : vector_4f =\n");
+            b.append("    new vector_4f (\n");
+            b.append("      V3.interpolate (\n");
+            b.append("        albedo [x y z],\n");
+            b.append("        env [x y z],\n");
+            b
+              .append("        F.multiply (spec_map_sample, m.environment.mix)\n");
+            b.append("      ),\n");
+            b.append("      1.0\n");
+            b.append("    );\n");
+            break;
+          }
         }
         break;
       }
@@ -403,6 +448,19 @@ public final class Shaders
             b.append("      albedo,\n");
             b.append("      env,\n");
             b.append("      m.environment.mix\n");
+            b.append("    );\n");
+            break;
+          }
+          case ENVIRONMENT_REFLECTIVE_MAPPED:
+          case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+          case ENVIRONMENT_REFRACTIVE_MAPPED:
+          {
+            b.append("  value surface : vector_4f =\n");
+            b.append("    V4.interpolate (\n");
+            b.append("      albedo,\n");
+            b.append("      env,\n");
+            b
+              .append("      F.multiply (spec_map_sample, m.environment.mix)\n");
             b.append("    );\n");
             break;
           }
@@ -629,6 +687,41 @@ public final class Shaders
     final @Nonnull StringBuilder b,
     final @Nonnull LabelLit label)
   {
+    boolean sample_specular = false;
+
+    switch (label.getSpecular()) {
+      case SPECULAR_CONSTANT:
+      case SPECULAR_NONE:
+        break;
+      case SPECULAR_MAPPED:
+      {
+        sample_specular = true;
+        break;
+      }
+    }
+
+    switch (label.getEnvironment()) {
+      case ENVIRONMENT_REFLECTIVE_MAPPED:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+      case ENVIRONMENT_REFRACTIVE_MAPPED:
+      {
+        sample_specular = true;
+        break;
+      }
+      case ENVIRONMENT_NONE:
+      case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+      case ENVIRONMENT_REFRACTIVE:
+      {
+        break;
+      }
+    }
+
+    if (sample_specular) {
+      b
+        .append("  value spec_map_sample = S.texture (t_specular, f_uv) [x];\n");
+    }
+
     switch (label.getEmissive()) {
       case EMISSIVE_CONSTANT:
       case EMISSIVE_NONE:
@@ -650,8 +743,7 @@ public final class Shaders
             b.append("      environment = material.environment,\n");
             b.append("      specular    = record M.specular {\n");
             b.append("        exponent  = material.specular.exponent,\n");
-            b
-              .append("        intensity = S.texture (t_specular, f_uv) [x]\n");
+            b.append("        intensity = spec_map_sample\n");
             b.append("      }\n");
             b.append("    };\n");
             break;
@@ -691,8 +783,7 @@ public final class Shaders
             b.append("      environment = material.environment,\n");
             b.append("      specular    = record M.specular {\n");
             b.append("        exponent  = material.specular.exponent,\n");
-            b
-              .append("        intensity = S.texture (t_specular, f_uv) [x]\n");
+            b.append("        intensity = spec_map_sample\n");
             b.append("      }\n");
             b.append("    };\n");
             break;

@@ -327,6 +327,9 @@ public final class SBRendererSpecific implements KRenderer
         case ENVIRONMENT_REFLECTIVE:
         case ENVIRONMENT_REFRACTIVE:
         case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+        case ENVIRONMENT_REFLECTIVE_MAPPED:
+        case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+        case ENVIRONMENT_REFRACTIVE_MAPPED:
         {
           if (environment.getTexture().isSome()) {
             final TextureCubeStatic t =

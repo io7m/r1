@@ -74,8 +74,11 @@ final class Labels
   {
     ENVIRONMENT_NONE(""),
     ENVIRONMENT_REFLECTIVE("EL"),
+    ENVIRONMENT_REFLECTIVE_MAPPED("ELM"),
     ENVIRONMENT_REFRACTIVE("ER"),
-    ENVIRONMENT_REFLECTIVE_REFRACTIVE("ELR");
+    ENVIRONMENT_REFRACTIVE_MAPPED("ERM"),
+    ENVIRONMENT_REFLECTIVE_REFRACTIVE("ELR"),
+    ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED("ELRM");
 
     private final @Nonnull String code;
 
@@ -241,7 +244,17 @@ final class Labels
                     case SPECULAR_CONSTANT:
                     case SPECULAR_NONE:
                     {
-                      return false;
+                      switch (this.environment) {
+                        case ENVIRONMENT_NONE:
+                        case ENVIRONMENT_REFLECTIVE:
+                        case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+                        case ENVIRONMENT_REFRACTIVE:
+                          return false;
+                        case ENVIRONMENT_REFLECTIVE_MAPPED:
+                        case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+                        case ENVIRONMENT_REFRACTIVE_MAPPED:
+                          return true;
+                      }
                     }
                   }
                 }
