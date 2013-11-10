@@ -89,7 +89,13 @@ import com.io7m.jcanephora.ArrayBuffer;
     ENVIRONMENT_NONE(""),
     ENVIRONMENT_REFLECTIVE("EL"),
     ENVIRONMENT_REFRACTIVE("ER"),
-    ENVIRONMENT_REFLECTIVE_REFRACTIVE("ELR");
+    ENVIRONMENT_REFLECTIVE_REFRACTIVE("ELR"),
+
+    ENVIRONMENT_REFLECTIVE_MAPPED("ELM"),
+    ENVIRONMENT_REFRACTIVE_MAPPED("ERM"),
+    ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED("ELRM"),
+
+    ;
 
     final @Nonnull String code;
 
@@ -236,11 +242,22 @@ import com.io7m.jcanephora.ArrayBuffer;
         if (e.getTexture().isSome()) {
           if (e.getMix() > 0.0) {
             if (e.getReflectionMix() == 0.0) {
+              if (e.getMixFromSpecularMap()) {
+                return Environment.ENVIRONMENT_REFRACTIVE_MAPPED;
+              }
               return Environment.ENVIRONMENT_REFRACTIVE;
             }
             if (e.getReflectionMix() == 1.0) {
+              if (e.getMixFromSpecularMap()) {
+                return Environment.ENVIRONMENT_REFLECTIVE_MAPPED;
+              }
               return Environment.ENVIRONMENT_REFLECTIVE;
             }
+
+            if (e.getMixFromSpecularMap()) {
+              return Environment.ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED;
+            }
+
             return Environment.ENVIRONMENT_REFLECTIVE_REFRACTIVE;
           }
         }
@@ -307,11 +324,43 @@ import com.io7m.jcanephora.ArrayBuffer;
     throw new UnreachableCodeException();
   }
 
+  private static boolean makeImpliesSpecularMap(
+    final @Nonnull Specular specular,
+    final @Nonnull Environment environment)
+  {
+    switch (specular) {
+      case SPECULAR_CONSTANT:
+      case SPECULAR_NONE:
+        break;
+      case SPECULAR_MAPPED:
+        return true;
+    }
+
+    switch (environment) {
+      case ENVIRONMENT_NONE:
+      case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+      case ENVIRONMENT_REFRACTIVE:
+      {
+        break;
+      }
+      case ENVIRONMENT_REFLECTIVE_MAPPED:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+      case ENVIRONMENT_REFRACTIVE_MAPPED:
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   private static boolean makeImpliesUV(
     final @Nonnull Albedo albedo,
     final @Nonnull Emissive emissive,
     final @Nonnull Normal normal,
-    final @Nonnull Specular specular)
+    final @Nonnull Specular specular,
+    final @Nonnull Environment environment)
   {
     switch (albedo) {
       case ALBEDO_COLOURED:
@@ -340,6 +389,18 @@ import com.io7m.jcanephora.ArrayBuffer;
       case SPECULAR_MAPPED:
         return true;
     }
+    switch (environment) {
+      case ENVIRONMENT_NONE:
+      case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+      case ENVIRONMENT_REFRACTIVE:
+        break;
+      case ENVIRONMENT_REFLECTIVE_MAPPED:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+      case ENVIRONMENT_REFRACTIVE_MAPPED:
+        return true;
+    }
+
     return false;
   }
 
@@ -381,8 +442,9 @@ import com.io7m.jcanephora.ArrayBuffer;
   private final @Nonnull Normal      normal;
   private final @Nonnull Specular    specular;
   private final @Nonnull String      code;
-
   private final boolean              implies_uv;
+
+  private final boolean              implies_specular_map;
 
   KMeshInstanceMaterialLabel(
     final @Nonnull Alpha alpha,
@@ -415,7 +477,12 @@ import com.io7m.jcanephora.ArrayBuffer;
         albedo,
         emissive,
         normal,
-        specular);
+        specular,
+        environment);
+
+    this.implies_specular_map =
+      KMeshInstanceMaterialLabel
+        .makeImpliesSpecularMap(specular, environment);
   }
 
   @Override public boolean equals(
@@ -498,6 +565,11 @@ import com.io7m.jcanephora.ArrayBuffer;
     result = (prime * result) + this.normal.hashCode();
     result = (prime * result) + this.specular.hashCode();
     return result;
+  }
+
+  public boolean impliesSpecularMap()
+  {
+    return this.implies_specular_map;
   }
 
   public boolean impliesUV()

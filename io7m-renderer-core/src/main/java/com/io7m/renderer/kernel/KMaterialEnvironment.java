@@ -30,18 +30,21 @@ import com.io7m.jcanephora.TextureCubeStatic;
   private final float                              refraction_index;
   private final float                              reflection_mix;
   private final @Nonnull Option<TextureCubeStatic> texture;
+  private final boolean                            mix_mapped;
 
   KMaterialEnvironment(
     final float mix,
     final @Nonnull Option<TextureCubeStatic> texture,
     final float refraction_index,
-    final float reflection_mix)
+    final float reflection_mix,
+    final boolean mix_mapped)
     throws ConstraintError
   {
     this.mix = mix;
     this.texture = Constraints.constrainNotNull(texture, "Texture");
     this.refraction_index = refraction_index;
     this.reflection_mix = reflection_mix;
+    this.mix_mapped = mix_mapped;
   }
 
   @Override public boolean equals(
@@ -60,6 +63,9 @@ import com.io7m.jcanephora.TextureCubeStatic;
     if (Float.floatToIntBits(this.mix) != Float.floatToIntBits(other.mix)) {
       return false;
     }
+    if (this.mix_mapped != other.mix_mapped) {
+      return false;
+    }
     if (Float.floatToIntBits(this.reflection_mix) != Float
       .floatToIntBits(other.reflection_mix)) {
       return false;
@@ -68,7 +74,11 @@ import com.io7m.jcanephora.TextureCubeStatic;
       .floatToIntBits(other.refraction_index)) {
       return false;
     }
-    if (!this.texture.equals(other.texture)) {
+    if (this.texture == null) {
+      if (other.texture != null) {
+        return false;
+      }
+    } else if (!this.texture.equals(other.texture)) {
       return false;
     }
     return true;
@@ -94,11 +104,17 @@ import com.io7m.jcanephora.TextureCubeStatic;
     return this.texture;
   }
 
+  public boolean getMixFromSpecularMap()
+  {
+    return this.mix_mapped;
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
     result = (prime * result) + Float.floatToIntBits(this.mix);
+    result = (prime * result) + (this.mix_mapped ? 1231 : 1237);
     result = (prime * result) + Float.floatToIntBits(this.reflection_mix);
     result = (prime * result) + Float.floatToIntBits(this.refraction_index);
     result = (prime * result) + this.texture.hashCode();
@@ -116,6 +132,8 @@ import com.io7m.jcanephora.TextureCubeStatic;
     builder.append(this.reflection_mix);
     builder.append(" ");
     builder.append(this.texture);
+    builder.append(" ");
+    builder.append(this.mix_mapped);
     builder.append("]");
     return builder.toString();
   }

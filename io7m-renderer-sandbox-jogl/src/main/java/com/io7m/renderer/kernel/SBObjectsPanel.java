@@ -325,6 +325,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     protected final @Nonnull SBFloatHSlider mix;
     protected final @Nonnull SBFloatHSlider reflection_mix;
     protected final @Nonnull SBFloatHSlider refraction_index;
+    protected final @Nonnull JCheckBox      spec_map;
 
     public EnvironmentSettings(
       final @Nonnull SBSceneControllerTextures controller,
@@ -352,6 +353,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.reflection_mix = new SBFloatHSlider("Reflection mix", 0.0f, 1.0f);
       this.refraction_index =
         new SBFloatHSlider("Refraction index", 0.0f, 10.0f);
+      this.spec_map = new JCheckBox();
     }
 
     @Override public void mpLayout(
@@ -384,6 +386,14 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         .add(this.refraction_index.getLabel())
         .add(this.refraction_index.getSlider(), 3)
         .add(this.refraction_index.getField());
+
+      dg.emptyRow();
+
+      dg
+        .row()
+        .grid()
+        .add(new JLabel("Mix from specular map"))
+        .add(this.spec_map, 4);
     }
 
     @Override public void mpLoadFrom(
@@ -397,6 +407,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.mix.setCurrent(mat_e.getMix());
       this.reflection_mix.setCurrent(mat_e.getReflectionMix());
       this.refraction_index.setCurrent(mat_e.getRefractionIndex());
+      this.spec_map.setSelected(mat_e.getMixFromSpecularMap());
     }
 
     @Override public @Nonnull SBMaterialEnvironmentDescription mpSave()
@@ -412,7 +423,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           environment_texture_value,
           this.mix.getCurrent(),
           this.reflection_mix.getCurrent(),
-          this.refraction_index.getCurrent());
+          this.refraction_index.getCurrent(),
+          this.spec_map.isSelected());
 
       return environment;
     }
