@@ -21,6 +21,7 @@ import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.functional.Option.None;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
@@ -220,7 +221,7 @@ abstract class SBLightDescription
     KProjective getLight(
       final @Nonnull SBTexture2D<SBTexture2DKindAlbedo> t)
     {
-      return new KLight.KProjective(
+      return KLight.KProjective.make(
         this.id,
         t.getTexture(),
         this.position,
@@ -229,7 +230,8 @@ abstract class SBLightDescription
         this.intensity,
         (float) this.projection.getFar(),
         this.falloff,
-        this.projection_matrix);
+        this.projection_matrix,
+        new None<KShadow>());
     }
 
     public QuaternionI4F getOrientation()

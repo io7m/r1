@@ -19,10 +19,10 @@ package com.io7m.renderer.kernel_shaders;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.renderer.kernel_shaders.Labels.Label;
-import com.io7m.renderer.kernel_shaders.Labels.LabelLit;
+import com.io7m.renderer.kernel_shaders.ForwardLabels.ForwardLabel;
+import com.io7m.renderer.kernel_shaders.ForwardLabels.ForwardLabelLit;
 
-public final class Shaders
+public final class ForwardShaders
 {
   private static void fragmentShaderStandardIO(
     final @Nonnull StringBuilder b)
@@ -33,9 +33,9 @@ public final class Shaders
 
   private static void fragmentShaderParametersAlbedo(
     final @Nonnull StringBuilder b,
-    final @Nonnull Label label)
+    final @Nonnull ForwardLabel forwardLabel)
   {
-    switch (label.getAlbedo()) {
+    switch (forwardLabel.getAlbedo()) {
       case ALBEDO_COLOURED:
       {
         break;
@@ -50,7 +50,7 @@ public final class Shaders
 
   private static void fragmentShaderParametersSpecular(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     boolean has_map = false;
 
@@ -89,9 +89,9 @@ public final class Shaders
 
   private static void fragmentShaderParametersEmissive(
     final @Nonnull StringBuilder b,
-    final @Nonnull Label label)
+    final @Nonnull ForwardLabel forwardLabel)
   {
-    switch (label.getEmissive()) {
+    switch (forwardLabel.getEmissive()) {
       case EMISSIVE_CONSTANT:
       case EMISSIVE_NONE:
         break;
@@ -103,7 +103,7 @@ public final class Shaders
 
   private static void fragmentShaderParametersEnvironment(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getEnvironment()) {
       case ENVIRONMENT_NONE:
@@ -126,7 +126,7 @@ public final class Shaders
 
   private static void fragmentShaderValuesNormal(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getNormals()) {
       case NORMALS_MAPPED:
@@ -154,7 +154,7 @@ public final class Shaders
 
   private static void fragmentShaderValuesEnvironment(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getEnvironment()) {
       case ENVIRONMENT_NONE:
@@ -204,13 +204,13 @@ public final class Shaders
 
   private static void fragmentShaderStandardParameters(
     final @Nonnull StringBuilder b,
-    final @Nonnull Label label)
+    final @Nonnull ForwardLabel forwardLabel)
   {
-    switch (label.getType()) {
+    switch (forwardLabel.getType()) {
       case Lit:
       {
         b.append("  parameter material : M.t;\n");
-        switch (((LabelLit) label).getLight()) {
+        switch (((ForwardLabelLit) forwardLabel).getLight()) {
           case LIGHT_DIRECTIONAL:
           case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
           {
@@ -248,55 +248,77 @@ public final class Shaders
   }
 
   public static @Nonnull String moduleForward(
-    final @Nonnull Labels.Label label)
+    final @Nonnull ForwardLabels.ForwardLabel forwardLabel)
   {
     final StringBuilder b = new StringBuilder();
     b.append("package com.io7m.renderer.kernel;\n");
-    Shaders.moduleStart(b, "Fwd_" + label.getCode());
-    Shaders.moduleVertexShader(b, label);
+    ForwardShaders.moduleStart(b, "Fwd_" + forwardLabel.getCode());
+    ForwardShaders.moduleVertexShader(b, forwardLabel);
     b.append("\n");
-    Shaders.moduleFragmentShader(b, label);
+    ForwardShaders.moduleFragmentShader(b, forwardLabel);
     b.append("\n");
-    Shaders.moduleProgram(b);
+    ForwardShaders.moduleProgram(b);
     b.append("\n");
-    Shaders.moduleEnd(b);
+    ForwardShaders.moduleEnd(b);
     return b.toString();
   }
 
   private static void moduleFragmentShader(
     final @Nonnull StringBuilder b,
-    final @Nonnull Label label)
+    final @Nonnull ForwardLabel forwardLabel)
   {
     b.append("shader fragment f is\n");
-    Shaders.fragmentShaderStandardIO(b);
-    Shaders.fragmentShaderStandardParameters(b, label);
-    Shaders.fragmentShaderAttributesUV(b, label);
-    Shaders.fragmentShaderParametersAlbedo(b, label);
-    Shaders.fragmentShaderParametersEmissive(b, label);
+    ForwardShaders.fragmentShaderStandardIO(b);
+    ForwardShaders.fragmentShaderStandardParameters(b, forwardLabel);
+    ForwardShaders.fragmentShaderAttributesUV(b, forwardLabel);
+    ForwardShaders.fragmentShaderParametersAlbedo(b, forwardLabel);
+    ForwardShaders.fragmentShaderParametersEmissive(b, forwardLabel);
 
-    switch (label.getType()) {
+    switch (forwardLabel.getType()) {
       case Lit:
       {
-        Shaders.fragmentShaderAttributesLight(b, (LabelLit) label);
-        Shaders.fragmentShaderAttributesNormal(b, (LabelLit) label);
-        Shaders.fragmentShaderParametersNormal(b, (LabelLit) label);
-        Shaders.fragmentShaderParametersEnvironment(b, (LabelLit) label);
-        Shaders.fragmentShaderParametersSpecular(b, (LabelLit) label);
+        ForwardShaders.fragmentShaderAttributesLight(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderAttributesNormal(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderParametersNormal(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderParametersEnvironment(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderParametersSpecular(
+          b,
+          (ForwardLabelLit) forwardLabel);
         b.append("with\n");
-        Shaders.fragmentShaderValuesNormal(b, (LabelLit) label);
-        Shaders.fragmentShaderValuesMaterialLit(b, (LabelLit) label);
-        Shaders.fragmentShaderValuesEnvironment(b, (LabelLit) label);
-        Shaders.fragmentShaderValuesLight(b, (LabelLit) label);
-        Shaders.fragmentShaderValuesAlbedo(b, label);
-        Shaders.fragmentShaderValuesSurface(b, (LabelLit) label);
-        Shaders.fragmentShaderValuesRGBA(b, (LabelLit) label);
+        ForwardShaders.fragmentShaderValuesNormal(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderValuesMaterialLit(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderValuesEnvironment(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderValuesLight(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderValuesAlbedo(b, forwardLabel);
+        ForwardShaders.fragmentShaderValuesSurface(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderValuesRGBA(
+          b,
+          (ForwardLabelLit) forwardLabel);
         break;
       }
       case Unlit:
       {
         b.append("with\n");
-        Shaders.fragmentShaderValuesMaterialUnlit(b);
-        Shaders.fragmentShaderValuesAlbedo(b, label);
+        ForwardShaders.fragmentShaderValuesMaterialUnlit(b);
+        ForwardShaders.fragmentShaderValuesAlbedo(b, forwardLabel);
         b.append("  value rgba = albedo;\n");
         break;
       }
@@ -309,7 +331,7 @@ public final class Shaders
 
   private static void fragmentShaderAttributesLight(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getLight()) {
       case LIGHT_DIRECTIONAL:
@@ -336,24 +358,24 @@ public final class Shaders
 
   private static void fragmentShaderValuesRGBA(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
+    b.append("  value lit = V3.multiply (surface [x y z], light_term);\n");
+
     switch (label.getAlpha()) {
       case ALPHA_OPAQUE:
       {
-        b
-          .append("  value lit  = V3.multiply (surface [x y z], light_term);\n");
         b.append("  value rgba = new vector_4f (lit, 1.0);\n");
         break;
       }
       case ALPHA_TRANSLUCENT:
       {
-        b
-          .append("  value lit  = V3.multiply (surface [x y z], light_term);\n");
+
         b.append("  -- Premultiply alpha\n");
+        b.append("  value a = F.multiply (surface [w], m.alpha.opacity);\n");
         b.append("  value rgba = new vector_4f (\n");
-        b.append("    V3.multiply_scalar (lit, surface [w]),\n");
-        b.append("    F.multiply (surface [w], m.alpha.opacity)\n");
+        b.append("    V3.multiply_scalar (lit, a),\n");
+        b.append("    a\n");
         b.append("  );\n");
         break;
       }
@@ -362,7 +384,7 @@ public final class Shaders
 
   private static void fragmentShaderAttributesNormal(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getNormals()) {
       case NORMALS_MAPPED:
@@ -386,7 +408,7 @@ public final class Shaders
 
   private static void fragmentShaderValuesSurface(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getAlpha()) {
       case ALPHA_OPAQUE:
@@ -472,12 +494,12 @@ public final class Shaders
 
   private static void fragmentShaderValuesAlbedo(
     final @Nonnull StringBuilder b,
-    final @Nonnull Label label)
+    final @Nonnull ForwardLabel forwardLabel)
   {
-    switch (label.getAlbedo()) {
+    switch (forwardLabel.getAlbedo()) {
       case ALBEDO_COLOURED:
       {
-        switch (label.getAlpha()) {
+        switch (forwardLabel.getAlpha()) {
           case ALPHA_OPAQUE:
           {
             b.append("  value albedo : vector_4f =\n");
@@ -495,7 +517,7 @@ public final class Shaders
       }
       case ALBEDO_TEXTURED:
       {
-        switch (label.getAlpha()) {
+        switch (forwardLabel.getAlpha()) {
           case ALPHA_OPAQUE:
           {
             b.append("  value albedo : vector_4f =\n");
@@ -520,7 +542,7 @@ public final class Shaders
 
   private static void fragmentShaderValuesLight(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getEmissive()) {
       case EMISSIVE_NONE:
@@ -685,7 +707,7 @@ public final class Shaders
 
   private static void fragmentShaderValuesMaterialLit(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     boolean sample_specular = false;
 
@@ -795,16 +817,16 @@ public final class Shaders
 
   private static void fragmentShaderAttributesUV(
     final @Nonnull StringBuilder b,
-    final @Nonnull Label label)
+    final @Nonnull ForwardLabel forwardLabel)
   {
-    if (label.impliesUV()) {
+    if (forwardLabel.impliesUV()) {
       b.append("  in f_uv : vector_2f;\n");
     }
   }
 
   private static void fragmentShaderParametersNormal(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getNormals()) {
       case NORMALS_MAPPED:
@@ -861,49 +883,65 @@ public final class Shaders
 
   private static void moduleVertexShader(
     final @Nonnull StringBuilder b,
-    final @Nonnull Label label)
+    final @Nonnull ForwardLabel forwardLabel)
   {
     b.append("shader vertex v is\n");
-    Shaders.vertexShaderStandardIO(b);
-    Shaders.vertexShaderStandardParametersMatrices(b);
-    Shaders.vertexShaderStandardAttributesUV(b, label);
-    Shaders.vertexShaderStandardParametersUV(b, label);
+    ForwardShaders.vertexShaderStandardIO(b);
+    ForwardShaders.vertexShaderStandardParametersMatrices(b);
+    ForwardShaders.vertexShaderStandardAttributesUV(b, forwardLabel);
+    ForwardShaders.vertexShaderStandardParametersUV(b, forwardLabel);
 
-    switch (label.getType()) {
+    switch (forwardLabel.getType()) {
       case Lit:
       {
-        Shaders.vertexShaderStandardParametersLight(b, (LabelLit) label);
-        Shaders.vertexShaderStandardAttributesLight(b, (LabelLit) label);
-        Shaders.vertexShaderStandardAttributesNormal(b, (LabelLit) label);
-        Shaders.vertexShaderStandardParametersNormal(b, (LabelLit) label);
+        ForwardShaders.vertexShaderStandardParametersLight(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.vertexShaderStandardAttributesLight(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.vertexShaderStandardAttributesNormal(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.vertexShaderStandardParametersNormal(
+          b,
+          (ForwardLabelLit) forwardLabel);
         b.append("with\n");
-        Shaders.vertexShaderStandardValuesPositions(b);
-        Shaders.vertexShaderStandardValuesNormals(b, (LabelLit) label);
-        Shaders.vertexShaderStandardValuesLight(b, (LabelLit) label);
-        Shaders.vertexShaderStandardValuesUV(b, label);
+        ForwardShaders.vertexShaderStandardValuesPositions(b);
+        ForwardShaders.vertexShaderStandardValuesNormals(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.vertexShaderStandardValuesLight(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.vertexShaderStandardValuesUV(b, forwardLabel);
         b.append("as\n");
-        Shaders.vertexShaderStandardWritesNormals(b, (LabelLit) label);
-        Shaders.vertexShaderStandardWritesLight(b, (LabelLit) label);
+        ForwardShaders.vertexShaderStandardWritesNormals(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.vertexShaderStandardWritesLight(
+          b,
+          (ForwardLabelLit) forwardLabel);
         break;
       }
       case Unlit:
       {
         b.append("with\n");
-        Shaders.vertexShaderStandardValuesPositions(b);
-        Shaders.vertexShaderStandardValuesUV(b, label);
+        ForwardShaders.vertexShaderStandardValuesPositions(b);
+        ForwardShaders.vertexShaderStandardValuesUV(b, forwardLabel);
         b.append("as\n");
         break;
       }
     }
 
-    Shaders.vertexShaderStandardWrites(b);
-    Shaders.vertexShaderStandardWritesUV(b, label);
+    ForwardShaders.vertexShaderStandardWrites(b);
+    ForwardShaders.vertexShaderStandardWritesUV(b, forwardLabel);
     b.append("end;\n");
   }
 
   private static void vertexShaderStandardAttributesLight(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getLight()) {
       case LIGHT_DIRECTIONAL:
@@ -927,7 +965,7 @@ public final class Shaders
 
   private static void vertexShaderStandardWritesLight(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getLight()) {
       case LIGHT_DIRECTIONAL:
@@ -951,7 +989,7 @@ public final class Shaders
 
   private static void vertexShaderStandardValuesLight(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getLight()) {
       case LIGHT_DIRECTIONAL:
@@ -977,7 +1015,7 @@ public final class Shaders
 
   private static void vertexShaderStandardParametersLight(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getLight()) {
       case LIGHT_DIRECTIONAL:
@@ -1001,7 +1039,7 @@ public final class Shaders
 
   private static void vertexShaderStandardAttributesNormal(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getNormals()) {
       case NORMALS_MAPPED:
@@ -1028,9 +1066,9 @@ public final class Shaders
 
   private static void vertexShaderStandardAttributesUV(
     final @Nonnull StringBuilder b,
-    final @Nonnull Label label)
+    final @Nonnull ForwardLabel forwardLabel)
   {
-    if (label.impliesUV()) {
+    if (forwardLabel.impliesUV()) {
       b.append("  in v_uv : vector_2f;\n");
       b.append("  out f_uv : vector_2f;\n");
     }
@@ -1052,7 +1090,7 @@ public final class Shaders
 
   private static void vertexShaderStandardParametersNormal(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getNormals()) {
       case NORMALS_MAPPED:
@@ -1073,16 +1111,16 @@ public final class Shaders
 
   private static void vertexShaderStandardParametersUV(
     final @Nonnull StringBuilder b,
-    final @Nonnull Label label)
+    final @Nonnull ForwardLabel forwardLabel)
   {
-    if (label.impliesUV()) {
+    if (forwardLabel.impliesUV()) {
       b.append("  parameter m_uv : matrix_3x3f;\n");
     }
   }
 
   private static void vertexShaderStandardValuesNormals(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getNormals()) {
       case NORMALS_MAPPED:
@@ -1108,9 +1146,9 @@ public final class Shaders
 
   private static void vertexShaderStandardValuesUV(
     final @Nonnull StringBuilder b,
-    final @Nonnull Label label)
+    final @Nonnull ForwardLabel forwardLabel)
   {
-    if (label.impliesUV()) {
+    if (forwardLabel.impliesUV()) {
       b
         .append("  value uv = M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];\n");
     }
@@ -1140,7 +1178,7 @@ public final class Shaders
 
   private static void vertexShaderStandardWritesNormals(
     final @Nonnull StringBuilder b,
-    final @Nonnull LabelLit label)
+    final @Nonnull ForwardLabelLit label)
   {
     switch (label.getNormals()) {
       case NORMALS_MAPPED:
@@ -1164,9 +1202,9 @@ public final class Shaders
 
   private static void vertexShaderStandardWritesUV(
     final @Nonnull StringBuilder b,
-    final @Nonnull Label label)
+    final @Nonnull ForwardLabel forwardLabel)
   {
-    if (label.impliesUV()) {
+    if (forwardLabel.impliesUV()) {
       b.append("  out f_uv = uv;\n");
     }
   }

@@ -625,7 +625,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
             this.directional_controls.getDirection();
 
           final KDirectional l =
-            new KDirectional(id, direction, colour, this.getIntensity());
+            KDirectional.make(id, direction, colour, this.getIntensity());
 
           return new SBLightDescription.SBLightDescriptionDirectional(l);
         }
@@ -637,7 +637,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           final float exponent = this.sphere_controls.getExponent();
 
           final KSphere l =
-            new KSphere(
+            KSphere.make(
               id,
               colour,
               this.getIntensity(),

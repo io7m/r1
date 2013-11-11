@@ -26,12 +26,12 @@ import javax.annotation.concurrent.Immutable;
 @Immutable final class KBatchLit
 {
   private final @Nonnull KLight                     light;
-  private final @Nonnull KMeshInstanceMaterialLabel label;
+  private final @Nonnull KMeshInstanceForwardMaterialLabel label;
   private final @Nonnull ArrayList<KMeshInstance>   instances;
 
   KBatchLit(
     final @Nonnull KLight light,
-    final @Nonnull KMeshInstanceMaterialLabel label,
+    final @Nonnull KMeshInstanceForwardMaterialLabel label,
     final @Nonnull ArrayList<KMeshInstance> instances)
   {
     this.light = light;
@@ -66,7 +66,7 @@ import javax.annotation.concurrent.Immutable;
     return Collections.unmodifiableList(this.instances);
   }
 
-  public @Nonnull KMeshInstanceMaterialLabel getLabel()
+  public @Nonnull KMeshInstanceForwardMaterialLabel getLabel()
   {
     return this.label;
   }

@@ -16,25 +16,19 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-import javax.swing.JFrame;
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLUnsupportedException;
+import com.io7m.renderer.JOGLTestContext;
+import com.io7m.renderer.TestContext;
 
-import com.io7m.jlog.Log;
-
-final class SBShadersWindow extends JFrame
+public final class KMutableMatricesTest extends KMutableMatricesContract
 {
-  private static final long serialVersionUID;
-
-  static {
-    serialVersionUID = -312314551231238L;
-  }
-
-  public <C extends SBSceneControllerShaders> SBShadersWindow(
-    final @Nonnull C controller,
-    final @Nonnull Log log)
+  @Override public TestContext newTestContext()
+    throws JCGLException,
+      JCGLUnsupportedException,
+      ConstraintError
   {
-    super("ForwardShaders");
-    this.getContentPane().add(new SBShadersPanel(this, controller, log));
-    this.pack();
+    return JOGLTestContext.makeContextWithDefault();
   }
 }

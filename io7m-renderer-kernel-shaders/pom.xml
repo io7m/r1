@@ -61,7 +61,7 @@
     <dependency>
       <groupId>com.io7m.parasol.compiler.frontend</groupId>
       <artifactId>io7m-parasol-compiler-frontend</artifactId>
-      <version>[0.1.18, 0.2.0)</version>
+      <version>[0.1.19, 0.2.0)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -152,13 +152,29 @@
         <version>2.6</version>
         <executions>
           <execution>
-            <id>copy-parasol-sources</id>
+            <id>copy-parasol-sources-shadow</id>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <phase>process-resources</phase>
             <configuration>
-              <outputDirectory>${project.build.directory}/parasol</outputDirectory>
+              <outputDirectory>${project.build.directory}/parasol/shadow</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/parasol</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-parasol-sources-forward</id>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/parasol/forward</outputDirectory>
               <resources>
                 <resource>
                   <directory>src/main/parasol</directory>
@@ -177,7 +193,7 @@
         <version>1.2.1</version>
         <executions>
           <execution>
-            <id>make-parasol-sources</id>
+            <id>make-parasol-forward-sources</id>
             <phase>prepare-package</phase>
             <goals>
               <goal>java</goal>
@@ -185,7 +201,21 @@
             <configuration>
               <mainClass>com.io7m.renderer.kernel_shaders.ForwardMakeAll</mainClass>
               <arguments>
-                <argument>${project.build.directory}/parasol</argument>
+                <argument>${project.build.directory}/parasol/forward</argument>
+                <argument>${project.build.outputDirectory}/com/io7m/renderer/kernel</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>make-parasol-shadow-sources</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>com.io7m.renderer.kernel_shaders.ShadowMakeAll</mainClass>
+              <arguments>
+                <argument>${project.build.directory}/parasol/shadow</argument>
                 <argument>${project.build.outputDirectory}/com/io7m/renderer/kernel</argument>
               </arguments>
             </configuration>

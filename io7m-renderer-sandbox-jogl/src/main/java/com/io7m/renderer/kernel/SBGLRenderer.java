@@ -110,8 +110,6 @@ import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
-import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Alpha;
-import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Normal;
 import com.io7m.renderer.kernel.SBLight.SBLightProjective;
 import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeKernel;
 import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeSpecific;
@@ -756,12 +754,13 @@ final class SBGLRenderer implements GLEventListener
     final @Nonnull ArrayList<KBatchOpaqueUnlit> opaque_unlit,
     final @Nonnull ArrayList<KBatchTranslucent> translucent_unlit)
   {
-    final HashMap<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
-      new HashMap<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>>();
+    final HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
+      new HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>>();
 
     for (final KMeshInstance i : p.second) {
-      final KMeshInstanceMaterialLabel mlabel = i.getMaterialLabel();
-      if (mlabel.getNormal() == Normal.NORMAL_NONE) {
+      final KMeshInstanceForwardMaterialLabel mlabel =
+        i.getForwardMaterialLabel();
+      if (mlabel.getNormal() == KMaterialNormalLabel.NORMAL_NONE) {
         if (instances_by_label.containsKey(mlabel)) {
           final ArrayList<KMeshInstance> ins = instances_by_label.get(mlabel);
           ins.add(i);
@@ -773,12 +772,12 @@ final class SBGLRenderer implements GLEventListener
       }
     }
 
-    for (final Entry<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
+    for (final Entry<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
       .entrySet()) {
-      final KMeshInstanceMaterialLabel label = e.getKey();
+      final KMeshInstanceForwardMaterialLabel label = e.getKey();
       final ArrayList<KMeshInstance> instances = e.getValue();
 
-      if (label.getAlpha() != Alpha.ALPHA_TRANSLUCENT) {
+      if (label.getAlpha() != KMaterialAlphaLabel.ALPHA_TRANSLUCENT) {
         opaque_unlit.add(new KBatchOpaqueUnlit(label, instances));
       }
     }
@@ -1998,7 +1997,7 @@ final class SBGLRenderer implements GLEventListener
       final RMatrixI4x4F<RTransformProjection> projection =
         new RMatrixI4x4F<RTransformProjection>(this.matrix_projection);
       final KCamera kcamera =
-        new KCamera(this.camera_view_matrix, projection);
+        KCamera.make(this.camera_view_matrix, projection);
       final Pair<Collection<SBLight>, Collection<KMeshInstance>> pgot =
         c.rendererGetScene();
 
@@ -2053,11 +2052,12 @@ final class SBGLRenderer implements GLEventListener
         case LIGHT_DIRECTIONAL:
         case LIGHT_SPHERE:
         {
-          final HashMap<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
-            new HashMap<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>>();
+          final HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
+            new HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>>();
 
           for (final KMeshInstance m : p.second) {
-            final KMeshInstanceMaterialLabel mlabel = m.getMaterialLabel();
+            final KMeshInstanceForwardMaterialLabel mlabel =
+              m.getForwardMaterialLabel();
             if (instances_by_label.containsKey(mlabel)) {
               final ArrayList<KMeshInstance> ins =
                 instances_by_label.get(mlabel);
@@ -2070,12 +2070,12 @@ final class SBGLRenderer implements GLEventListener
             }
           }
 
-          for (final Entry<KMeshInstanceMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
+          for (final Entry<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
             .entrySet()) {
-            final KMeshInstanceMaterialLabel label = e.getKey();
+            final KMeshInstanceForwardMaterialLabel label = e.getKey();
             final ArrayList<KMeshInstance> instances = e.getValue();
 
-            if (label.getAlpha() != Alpha.ALPHA_TRANSLUCENT) {
+            if (label.getAlpha() != KMaterialAlphaLabel.ALPHA_TRANSLUCENT) {
               opaque_lit.add(new KBatchOpaqueLit(l, label, instances));
             }
           }
@@ -2107,8 +2107,9 @@ final class SBGLRenderer implements GLEventListener
     final Iterator<KMeshInstance> iter = instances.iterator();
     while (iter.hasNext()) {
       final KMeshInstance i = iter.next();
-      final KMeshInstanceMaterialLabel label = i.getMaterialLabel();
-      if (label.getAlpha() == Alpha.ALPHA_OPAQUE) {
+      final KMeshInstanceForwardMaterialLabel label =
+        i.getForwardMaterialLabel();
+      if (label.getAlpha() == KMaterialAlphaLabel.ALPHA_OPAQUE) {
         iter.remove();
       } else {
         translucent_lit.add(new KBatchTranslucent(

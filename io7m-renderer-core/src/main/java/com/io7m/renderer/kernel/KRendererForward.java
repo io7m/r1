@@ -46,12 +46,16 @@ import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LUCache;
 import com.io7m.jlucache.LUCacheException;
+import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.renderer.RMatrixReadable4x4F;
+import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
+import com.io7m.renderer.kernel.KMutableMatrices.WithInstance;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheFilesystemException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheIOException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLCompileException;
@@ -63,7 +67,7 @@ public final class KRendererForward implements KRenderer
   private static void makeLitLabel(
     final @Nonnull StringBuilder buffer,
     final @Nonnull KLight light,
-    final @Nonnull KMeshInstanceMaterialLabel label)
+    final @Nonnull KMeshInstanceForwardMaterialLabel label)
   {
     buffer.setLength(0);
     buffer.append("fwd_");
@@ -74,7 +78,7 @@ public final class KRendererForward implements KRenderer
 
   private static void makeUnlitLabel(
     final @Nonnull StringBuilder buffer,
-    final @Nonnull KMeshInstanceMaterialLabel label)
+    final @Nonnull KMeshInstanceForwardMaterialLabel label)
   {
     buffer.setLength(0);
     buffer.append("fwd_");
@@ -84,7 +88,7 @@ public final class KRendererForward implements KRenderer
   private final @Nonnull Log                                                      log;
   private final @Nonnull JCGLImplementation                                       g;
   private final @Nonnull VectorM4F                                                background;
-  private final @Nonnull KMatrices                                                matrices;
+  private final @Nonnull KMutableMatrices                                         matrices;
   private final @Nonnull VectorM2I                                                viewport_size;
   private final @Nonnull StringBuilder                                            label_cache;
   private final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache;
@@ -106,14 +110,16 @@ public final class KRendererForward implements KRenderer
       Constraints.constrainNotNull(shader_cache, "Shader cache");
     this.label_cache = new StringBuilder();
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = new KMatrices();
+    this.matrices = KMutableMatrices.make();
     this.viewport_size = new VectorM2I();
     this.rendererFramebufferResize(size);
   }
 
-  private void putLight(
+  @SuppressWarnings("static-method") private void putLight(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KLight light,
+    final @Nonnull MatrixM4x4F.Context context,
+    final @Nonnull RMatrixReadable4x4F<RTransformView> view,
     final @Nonnull JCCEExecutionCallable e)
     throws JCGLException,
       ConstraintError
@@ -124,15 +130,19 @@ public final class KRendererForward implements KRenderer
         KShadingProgramCommon.putLightDirectional(
           gc,
           e,
-          this.matrices,
+          context,
+          view,
           (KDirectional) light);
         break;
       }
       case LIGHT_PROJECTIVE:
       {
-        final KProjective kp = (KProjective) light;
-        this.matrices.matricesMakeFromLight(kp);
-        KShadingProgramCommon.putLightProjective(gc, e, this.matrices, kp);
+        KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
+          gc,
+          e,
+          context,
+          view,
+          (KProjective) light);
         break;
       }
       case LIGHT_SPHERE:
@@ -140,7 +150,8 @@ public final class KRendererForward implements KRenderer
         KShadingProgramCommon.putLightSpherical(
           gc,
           e,
-          this.matrices,
+          context,
+          view,
           (KSphere) light);
         break;
       }
@@ -161,7 +172,8 @@ public final class KRendererForward implements KRenderer
       }
       case LIGHT_PROJECTIVE:
       {
-        KShadingProgramCommon.putLightProjectiveReuse(e);
+        KShadingProgramCommon
+          .putLightProjectiveWithoutTextureProjectionReuse(e);
         break;
       }
       case LIGHT_SPHERE:
@@ -172,32 +184,26 @@ public final class KRendererForward implements KRenderer
     }
   }
 
-  private void putMeshInstanceMatrices(
+  @SuppressWarnings("static-method") private void putMeshInstanceMatrices(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable e,
-    final @Nonnull KMeshInstance i,
-    final @Nonnull KMeshInstanceMaterialLabel label)
+    final @Nonnull KMeshInstanceForwardMaterialLabel label,
+    final @Nonnull KMutableMatrices.WithInstanceMatrices mwi)
     throws JCGLException,
       ConstraintError
   {
     KShadingProgramCommon.putMatrixProjectionReuse(e);
-    KShadingProgramCommon.putMatrixModelView(
-      e,
-      gc,
-      this.matrices.getMatrixModelView());
+    KShadingProgramCommon.putMatrixModelView(e, gc, mwi.getMatrixModelView());
+
     if (label.impliesUV()) {
-      this.matrices.matricesMakeTextureFromInstance(i);
-      KShadingProgramCommon.putMatrixUV(gc, e, this.matrices.getMatrixUV());
+      KShadingProgramCommon.putMatrixUV(gc, e, mwi.getMatrixUV());
     }
 
     switch (label.getNormal()) {
       case NORMAL_MAPPED:
       case NORMAL_VERTEX:
       {
-        KShadingProgramCommon.putMatrixNormal(
-          e,
-          gc,
-          this.matrices.getMatrixNormal());
+        KShadingProgramCommon.putMatrixNormal(e, gc, mwi.getMatrixNormal());
         break;
       }
       case NORMAL_NONE:
@@ -221,7 +227,7 @@ public final class KRendererForward implements KRenderer
         KShadingProgramCommon.putMatrixInverseView(
           e,
           gc,
-          this.matrices.getMatrixViewInverse());
+          mwi.getMatrixViewInverse());
         break;
       }
     }
@@ -236,7 +242,8 @@ public final class KRendererForward implements KRenderer
       ConstraintError
   {
     final KMaterial material = i.getMaterial();
-    final KMeshInstanceMaterialLabel label = i.getMaterialLabel();
+    final KMeshInstanceForwardMaterialLabel label =
+      i.getForwardMaterialLabel();
     final TextureUnit[] units = gc.textureGetUnits();
     int current_unit = 0;
 
@@ -350,7 +357,8 @@ public final class KRendererForward implements KRenderer
 
   private void renderDepthPassMeshes(
     final @Nonnull KScene scene,
-    final @Nonnull JCGLInterfaceCommon gc)
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMutableMatrices.WithCamera mwc)
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
@@ -363,43 +371,49 @@ public final class KRendererForward implements KRenderer
     KShadingProgramCommon.putMatrixProjection(
       e,
       gc,
-      this.matrices.getMatrixProjection());
+      mwc.getMatrixProjection());
     e.execCancel();
 
     final KBatches batches = scene.getBatches();
 
     for (final KBatchOpaqueLit bl : batches.getBatchesOpaqueLit()) {
       for (final KMeshInstance i : bl.getInstances()) {
-        this.renderDepthPassMeshOpaque(gc, e, i);
+        final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
+        try {
+          this.renderDepthPassMeshOpaque(gc, e, i, mwi);
+        } finally {
+          mwi.instanceFinish();
+        }
       }
     }
 
     for (final KBatchOpaqueUnlit bl : batches.getBatchesOpaqueUnlit()) {
       for (final KMeshInstance i : bl.getInstances()) {
-        this.renderDepthPassMeshOpaque(gc, e, i);
+        final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
+        try {
+          this.renderDepthPassMeshOpaque(gc, e, i, mwi);
+        } finally {
+          mwi.instanceFinish();
+        }
       }
     }
   }
 
-  private void renderDepthPassMeshOpaque(
+  @SuppressWarnings("static-method") private void renderDepthPassMeshOpaque(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable e,
-    final @Nonnull KMeshInstance i)
+    final @Nonnull KMeshInstance i,
+    final @Nonnull KMutableMatrices.WithInstanceMatrices mwi)
     throws ConstraintError,
       JCGLException
   {
-    this.matrices.matricesMakeFromTransform(i.getTransform());
-
     /**
      * Upload matrices.
      */
 
     e.execPrepare(gc);
     KShadingProgramCommon.putMatrixProjectionReuse(e);
-    KShadingProgramCommon.putMatrixModelView(
-      e,
-      gc,
-      this.matrices.getMatrixModelView());
+    KShadingProgramCommon.putMatrixModelView(e, gc, mwi.getMatrixModelView());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -453,92 +467,96 @@ public final class KRendererForward implements KRenderer
       IOException
   {
     final JCGLInterfaceCommon gc = this.g.getGLCommon();
-
-    this.matrices.matricesBegin();
-    this.matrices.matricesMakeFromCamera(scene.getCamera());
-
-    final FramebufferReferenceUsable output_buffer =
-      this.framebuffer.kframebufferGetOutputBuffer();
-
-    final AreaInclusive area = this.framebuffer.kframebufferGetArea();
-    this.viewport_size.x = (int) area.getRangeX().getInterval();
-    this.viewport_size.y = (int) area.getRangeY().getInterval();
+    final KMutableMatrices.WithCamera mwc =
+      this.matrices.withCamera(scene.getCamera());
 
     try {
-      gc.framebufferDrawBind(output_buffer);
-      gc.colorBufferClearV4f(this.background);
+      final FramebufferReferenceUsable output_buffer =
+        this.framebuffer.kframebufferGetOutputBuffer();
 
-      gc.cullingEnable(
-        FaceSelection.FACE_BACK,
-        FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+      final AreaInclusive area = this.framebuffer.kframebufferGetArea();
+      this.viewport_size.x = (int) area.getRangeX().getInterval();
+      this.viewport_size.y = (int) area.getRangeY().getInterval();
 
-      /**
-       * Render all opaque meshes into the depth buffer, without touching the
-       * color buffer.
-       */
+      try {
+        gc.framebufferDrawBind(output_buffer);
+        gc.colorBufferClearV4f(this.background);
 
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-      gc.depthBufferWriteEnable();
-      gc.depthBufferClear(1.0f);
-      gc.colorBufferMask(false, false, false, false);
-      gc.blendingDisable();
-      this.renderDepthPassMeshes(scene, gc);
+        gc.cullingEnable(
+          FaceSelection.FACE_BACK,
+          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
 
-      /**
-       * Render all opaque meshes, blending additively, into the framebuffer.
-       */
+        /**
+         * Render all opaque meshes into the depth buffer, without touching
+         * the color buffer.
+         */
 
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
-      gc.depthBufferWriteDisable();
-      gc.colorBufferMask(true, true, true, true);
-      gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
-      this.renderOpaqueMeshes(scene, gc);
+        gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+        gc.depthBufferWriteEnable();
+        gc.depthBufferClear(1.0f);
+        gc.colorBufferMask(false, false, false, false);
+        gc.blendingDisable();
+        this.renderDepthPassMeshes(scene, gc, mwc);
 
-      /**
-       * Render all translucent meshes into the framebuffer.
-       */
+        /**
+         * Render all opaque meshes, blending additively, into the
+         * framebuffer.
+         */
 
-      gc.cullingDisable();
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
-      gc.depthBufferWriteDisable();
-      gc.colorBufferMask(true, true, true, true);
-      this.renderTranslucentMeshes(scene, gc);
+        gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
+        gc.depthBufferWriteDisable();
+        gc.colorBufferMask(true, true, true, true);
+        gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+        this.renderOpaqueMeshes(scene, gc, mwc);
 
-    } catch (final KShaderCacheException e) {
-      switch (e.getCode()) {
-        case KSHADER_CACHE_FILESYSTEM_ERROR:
-        {
-          final KShaderCacheFilesystemException x =
-            (KShaderCacheFilesystemException) e;
-          throw new IOException(x);
+        /**
+         * Render all translucent meshes into the framebuffer.
+         */
+
+        gc.cullingDisable();
+        gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
+        gc.depthBufferWriteDisable();
+        gc.colorBufferMask(true, true, true, true);
+        this.renderTranslucentMeshes(scene, gc, mwc);
+
+      } catch (final KShaderCacheException e) {
+        switch (e.getCode()) {
+          case KSHADER_CACHE_FILESYSTEM_ERROR:
+          {
+            final KShaderCacheFilesystemException x =
+              (KShaderCacheFilesystemException) e;
+            throw new IOException(x);
+          }
+          case KSHADER_CACHE_IO_ERROR:
+          {
+            final KShaderCacheIOException x = (KShaderCacheIOException) e;
+            throw x.getCause();
+          }
+          case KSHADER_CACHE_JCGL_COMPILE_ERROR:
+          {
+            final KShaderCacheJCGLCompileException x =
+              (KShaderCacheJCGLCompileException) e;
+            throw x.getCause();
+          }
+          case KSHADER_CACHE_JCGL_ERROR:
+          {
+            final KShaderCacheJCGLException x = (KShaderCacheJCGLException) e;
+            throw x.getCause();
+          }
+          case KSHADER_CACHE_JCGL_UNSUPPORTED_ERROR:
+          {
+            final KShaderCacheJCGLUnsupportedException x =
+              (KShaderCacheJCGLUnsupportedException) e;
+            throw x.getCause();
+          }
         }
-        case KSHADER_CACHE_IO_ERROR:
-        {
-          final KShaderCacheIOException x = (KShaderCacheIOException) e;
-          throw x.getCause();
-        }
-        case KSHADER_CACHE_JCGL_COMPILE_ERROR:
-        {
-          final KShaderCacheJCGLCompileException x =
-            (KShaderCacheJCGLCompileException) e;
-          throw x.getCause();
-        }
-        case KSHADER_CACHE_JCGL_ERROR:
-        {
-          final KShaderCacheJCGLException x = (KShaderCacheJCGLException) e;
-          throw x.getCause();
-        }
-        case KSHADER_CACHE_JCGL_UNSUPPORTED_ERROR:
-        {
-          final KShaderCacheJCGLUnsupportedException x =
-            (KShaderCacheJCGLUnsupportedException) e;
-          throw x.getCause();
-        }
+      } catch (final LUCacheException e) {
+        throw new UnreachableCodeException(e);
+      } finally {
+        gc.framebufferDrawUnbind();
       }
-    } catch (final LUCacheException e) {
-      throw new UnreachableCodeException(e);
     } finally {
-      gc.framebufferDrawUnbind();
+      mwc.cameraFinish();
     }
   }
 
@@ -570,7 +588,8 @@ public final class KRendererForward implements KRenderer
 
   private void renderOpaqueMeshes(
     final @Nonnull KScene scene,
-    final @Nonnull JCGLInterfaceCommon gc)
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMutableMatrices.WithCamera mwc)
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
@@ -580,7 +599,7 @@ public final class KRendererForward implements KRenderer
 
     for (final KBatchOpaqueLit bl : batches.getBatchesOpaqueLit()) {
       final KLight light = bl.getLight();
-      final KMeshInstanceMaterialLabel label = bl.getLabel();
+      final KMeshInstanceForwardMaterialLabel label = bl.getLabel();
 
       KRendererForward.makeLitLabel(this.label_cache, light, label);
 
@@ -592,13 +611,18 @@ public final class KRendererForward implements KRenderer
       KShadingProgramCommon.putMatrixProjection(
         e,
         gc,
-        this.matrices.getMatrixProjection());
-
-      this.putLight(gc, light, e);
+        mwc.getMatrixProjection());
+      this
+        .putLight(gc, light, mwc.getMatrixContext(), mwc.getMatrixView(), e);
       e.execCancel();
 
       for (final KMeshInstance i : bl.getInstances()) {
-        this.renderOpaqueMeshLit(gc, e, light, i);
+        final WithInstance mwi = mwc.withInstance(i);
+        try {
+          this.renderOpaqueMeshLit(gc, e, light, i, mwi);
+        } finally {
+          mwi.instanceFinish();
+        }
       }
     }
 
@@ -613,11 +637,16 @@ public final class KRendererForward implements KRenderer
       KShadingProgramCommon.putMatrixProjection(
         e,
         gc,
-        this.matrices.getMatrixProjection());
+        mwc.getMatrixProjection());
       e.execCancel();
 
       for (final KMeshInstance i : bl.getInstances()) {
-        this.renderOpaqueMeshUnlit(gc, e, i);
+        final WithInstance mwi = mwc.withInstance(i);
+        try {
+          this.renderOpaqueMeshUnlit(gc, e, i, mwi);
+        } finally {
+          mwi.instanceFinish();
+        }
       }
     }
   }
@@ -626,20 +655,21 @@ public final class KRendererForward implements KRenderer
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable e,
     final @Nonnull KLight light,
-    final @Nonnull KMeshInstance i)
+    final @Nonnull KMeshInstance i,
+    final @Nonnull KMutableMatrices.WithInstance mwi)
     throws ConstraintError,
       JCGLException
   {
-    final KMeshInstanceMaterialLabel label = i.getMaterialLabel();
+    final KMeshInstanceForwardMaterialLabel label =
+      i.getForwardMaterialLabel();
     final KMaterial material = i.getMaterial();
 
-    this.matrices.matricesMakeFromTransform(i.getTransform());
-
     e.execPrepare(gc);
-    this.putMeshInstanceMatrices(gc, e, i, label);
+    this.putMeshInstanceMatrices(gc, e, label, mwi);
     this.putLightReuse(e, light);
     this.putTextures(gc, e, i, light);
     KShadingProgramCommon.putMaterial(e, gc, material);
+    this.putLightProjectiveMatrixIfNecessary(gc, e, light, mwi);
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -699,17 +729,54 @@ public final class KRendererForward implements KRenderer
     }
   }
 
+  private void putLightProjectiveMatrixIfNecessary(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable e,
+    final @Nonnull KLight light,
+    final @Nonnull KMutableMatrices.WithInstance mwi)
+    throws ConstraintError,
+      JCGLException
+  {
+    switch (light.getType()) {
+      case LIGHT_DIRECTIONAL:
+      {
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      {
+        final KMutableMatrices.WithProjectiveLight mwp =
+          mwi.withProjectiveLight((KProjective) light);
+
+        try {
+          KShadingProgramCommon.putMatrixTextureProjection(
+            gc,
+            e,
+            mwp.getTextureProjection());
+        } finally {
+          mwp.projectiveLightFinish();
+        }
+        break;
+      }
+      case LIGHT_SPHERE:
+      {
+        break;
+      }
+    }
+  }
+
   @SuppressWarnings("static-method") private void renderOpaqueMeshUnlit(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable e,
-    final @Nonnull KMeshInstance i)
+    final @Nonnull KMeshInstance i,
+    final @Nonnull KMutableMatrices.WithInstance mwi)
   {
     throw new UnimplementedCodeException();
   }
 
   private void renderTranslucentMeshes(
     final @Nonnull KScene scene,
-    final @Nonnull JCGLInterfaceCommon gc)
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMutableMatrices.WithCamera mwc)
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
@@ -718,36 +785,47 @@ public final class KRendererForward implements KRenderer
     final KBatches batches = scene.getBatches();
 
     for (final KBatchTranslucent bl : batches.getBatchesTranslucent()) {
-      final KMeshInstanceMaterialLabel label = bl.getLabel();
+      final KMeshInstanceForwardMaterialLabel label = bl.getLabel();
       final KMeshInstance i = bl.getInstance();
+      final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
 
-      boolean first_light = true;
-      for (final KLight light : bl.getLights()) {
-        KRendererForward.makeLitLabel(this.label_cache, light, label);
+      try {
+        boolean first_light = true;
+        for (final KLight light : bl.getLights()) {
+          KRendererForward.makeLitLabel(this.label_cache, light, label);
 
-        final JCCEExecutionCallable e =
-          new JCCEExecutionCallable(
-            this.shader_cache.luCacheGet(this.label_cache.toString()));
+          final JCCEExecutionCallable e =
+            new JCCEExecutionCallable(
+              this.shader_cache.luCacheGet(this.label_cache.toString()));
 
-        e.execPrepare(gc);
-        KShadingProgramCommon.putMatrixProjection(
-          e,
-          gc,
-          this.matrices.getMatrixProjection());
+          e.execPrepare(gc);
+          KShadingProgramCommon.putMatrixProjection(
+            e,
+            gc,
+            mwc.getMatrixProjection());
+          this.putLight(
+            gc,
+            light,
+            mwc.getMatrixContext(),
+            mwc.getMatrixView(),
+            e);
+          e.execCancel();
 
-        this.putLight(gc, light, e);
-        e.execCancel();
+          if (first_light) {
+            gc.blendingEnable(
+              BlendFunction.BLEND_ONE,
+              BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
+          } else {
+            gc.blendingEnable(
+              BlendFunction.BLEND_ONE,
+              BlendFunction.BLEND_ONE);
+          }
 
-        if (first_light) {
-          gc.blendingEnable(
-            BlendFunction.BLEND_ONE,
-            BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
-        } else {
-          gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+          this.renderTranslucentMeshLit(gc, e, light, i, mwi);
+          first_light = false;
         }
-
-        this.renderTranslucentMeshLit(gc, e, light, i);
-        first_light = false;
+      } finally {
+        mwi.instanceFinish();
       }
     }
   }
@@ -756,20 +834,21 @@ public final class KRendererForward implements KRenderer
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable e,
     final @Nonnull KLight light,
-    final @Nonnull KMeshInstance i)
+    final @Nonnull KMeshInstance i,
+    final @Nonnull KMutableMatrices.WithInstance mwi)
     throws ConstraintError,
       JCGLException
   {
-    final KMeshInstanceMaterialLabel label = i.getMaterialLabel();
+    final KMeshInstanceForwardMaterialLabel label =
+      i.getForwardMaterialLabel();
     final KMaterial material = i.getMaterial();
 
-    this.matrices.matricesMakeFromTransform(i.getTransform());
-
     e.execPrepare(gc);
-    this.putMeshInstanceMatrices(gc, e, i, label);
+    this.putMeshInstanceMatrices(gc, e, label, mwi);
     this.putLightReuse(e, light);
     this.putTextures(gc, e, i, light);
     KShadingProgramCommon.putMaterial(e, gc, material);
+    this.putLightProjectiveMatrixIfNecessary(gc, e, light, mwi);
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
