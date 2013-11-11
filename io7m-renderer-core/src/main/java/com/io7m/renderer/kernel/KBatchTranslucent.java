@@ -26,12 +26,12 @@ import javax.annotation.concurrent.Immutable;
 @Immutable final class KBatchTranslucent
 {
   private final @Nonnull KMeshInstance              instance;
-  private final @Nonnull KMeshInstanceMaterialLabel label;
+  private final @Nonnull KMeshInstanceForwardMaterialLabel label;
   private final @Nonnull ArrayList<KLight>          lights;
 
   KBatchTranslucent(
     final @Nonnull KMeshInstance instance,
-    final @Nonnull KMeshInstanceMaterialLabel label,
+    final @Nonnull KMeshInstanceForwardMaterialLabel label,
     final @Nonnull ArrayList<KLight> lights)
   {
     this.instance = instance;
@@ -66,7 +66,7 @@ import javax.annotation.concurrent.Immutable;
     return this.instance;
   }
 
-  public @Nonnull KMeshInstanceMaterialLabel getLabel()
+  public @Nonnull KMeshInstanceForwardMaterialLabel getLabel()
   {
     return this.label;
   }

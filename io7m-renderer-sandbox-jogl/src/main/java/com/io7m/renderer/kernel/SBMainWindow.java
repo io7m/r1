@@ -165,7 +165,7 @@ final class SBMainWindow extends JFrame
   private static @Nonnull JCheckBoxMenuItem makeMenuEditShadersMenuItem(
     final @Nonnull SBShadersWindow shaders_window)
   {
-    return SBMainWindow.makeWindowCheckbox("Shaders...", shaders_window);
+    return SBMainWindow.makeWindowCheckbox("ForwardShaders...", shaders_window);
   }
 
   private static @Nonnull JMenu makeMenuFile(

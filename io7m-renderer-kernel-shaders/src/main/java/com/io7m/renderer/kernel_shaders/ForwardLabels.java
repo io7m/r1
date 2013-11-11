@@ -25,7 +25,7 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 
-final class Labels
+final class ForwardLabels
 {
   static enum Albedo
   {
@@ -89,7 +89,7 @@ final class Labels
     }
   }
 
-  static abstract class Label
+  static abstract class ForwardLabel
   {
     static enum Type
     {
@@ -99,7 +99,7 @@ final class Labels
 
     private final @Nonnull Type type;
 
-    private Label(
+    private ForwardLabel(
       final @Nonnull Type type)
       throws ConstraintError
     {
@@ -122,7 +122,7 @@ final class Labels
     abstract public @Nonnull Alpha getAlpha();
   }
 
-  static final class LabelLit extends Label
+  static final class ForwardLabelLit extends ForwardLabel
   {
     final @Nonnull Alpha       alpha;
     final @Nonnull Albedo      albedo;
@@ -133,7 +133,7 @@ final class Labels
     final @Nonnull Specular    specular;
     private final String       code;
 
-    @SuppressWarnings("synthetic-access") public LabelLit(
+    @SuppressWarnings("synthetic-access") public ForwardLabelLit(
       final @Nonnull Alpha alpha,
       final @Nonnull Albedo albedo,
       final @Nonnull Emissive emissive,
@@ -273,14 +273,14 @@ final class Labels
     }
   }
 
-  static final class LabelUnlit extends Label
+  static final class ForwardLabelUnlit extends ForwardLabel
   {
     final @Nonnull Alpha    alpha;
     final @Nonnull Albedo   albedo;
     final @Nonnull Emissive emissive;
     private final String    code;
 
-    @SuppressWarnings("synthetic-access") public LabelUnlit(
+    @SuppressWarnings("synthetic-access") public ForwardLabelUnlit(
       final @Nonnull Alpha alpha,
       final @Nonnull Albedo albedo,
       final @Nonnull Emissive emissive)
@@ -351,10 +351,10 @@ final class Labels
     }
   }
 
-  static @Nonnull List<Label> allLabels()
+  static @Nonnull List<ForwardLabel> allLabels()
     throws ConstraintError
   {
-    final ArrayList<Label> results = new ArrayList<Label>();
+    final ArrayList<ForwardLabel> results = new ArrayList<ForwardLabel>();
 
     for (final Alpha a : Alpha.values()) {
       for (final Albedo b : Albedo.values()) {
@@ -363,7 +363,7 @@ final class Labels
             switch (n) {
               case NORMALS_NONE:
               {
-                results.add(new LabelUnlit(a, b, m));
+                results.add(new ForwardLabelUnlit(a, b, m));
                 break;
               }
               case NORMALS_MAPPED:
@@ -372,7 +372,7 @@ final class Labels
                 for (final Environment e : Environment.values()) {
                   for (final Light l : Light.values()) {
                     for (final Specular s : Specular.values()) {
-                      results.add(new LabelLit(a, b, m, e, l, n, s));
+                      results.add(new ForwardLabelLit(a, b, m, e, l, n, s));
                     }
                   }
                 }

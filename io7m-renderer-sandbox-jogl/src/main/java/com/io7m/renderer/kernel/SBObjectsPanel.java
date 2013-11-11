@@ -807,14 +807,14 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         final JPanel p = new JPanel();
         final DesignGridLayout d = new DesignGridLayout(p);
         this.environment_settings.mpLayout(d);
-        tabs.add("Environment mapping", p);
+        tabs.add("Environment", p);
       }
 
       {
         final JPanel p = new JPanel();
         final DesignGridLayout d = new DesignGridLayout(p);
         this.normal_settings.mpLayout(d);
-        tabs.add("Normal mapping", p);
+        tabs.add("Normal", p);
       }
 
       {

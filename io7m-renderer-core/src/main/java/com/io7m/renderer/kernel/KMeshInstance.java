@@ -44,12 +44,13 @@ import com.io7m.renderer.RTransformTexture;
 
 @Immutable public final class KMeshInstance implements KTransformable
 {
-  private final @Nonnull Integer                         id;
-  private final @Nonnull KTransform                      transform;
-  private final @Nonnull KMesh                           mesh;
-  private final @Nonnull KMaterial                       material;
-  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
-  private final @Nonnull KMeshInstanceMaterialLabel      label;
+  private final @Nonnull Integer                           id;
+  private final @Nonnull KTransform                        transform;
+  private final @Nonnull KMesh                             mesh;
+  private final @Nonnull KMaterial                         material;
+  private final @Nonnull RMatrixI3x3F<RTransformTexture>   uv_matrix;
+  private final @Nonnull KMeshInstanceForwardMaterialLabel forward_label;
+  private final @Nonnull KMeshInstanceShadowMaterialLabel  shadow_label;
 
   public KMeshInstance(
     final @Nonnull Integer id,
@@ -64,7 +65,15 @@ import com.io7m.renderer.RTransformTexture;
     this.mesh = mesh;
     this.material = material;
     this.uv_matrix = uv_matrix;
-    this.label = KMeshInstanceMaterialLabel.label(mesh, material);
+    this.forward_label =
+      KMeshInstanceForwardMaterialLabel.label(mesh, material);
+    this.shadow_label =
+      KMeshInstanceShadowMaterialLabel.label(mesh, material);
+  }
+
+  public @Nonnull KMeshInstanceForwardMaterialLabel getForwardMaterialLabel()
+  {
+    return this.forward_label;
   }
 
   public @Nonnull Integer getID()
@@ -75,11 +84,6 @@ import com.io7m.renderer.RTransformTexture;
   public @Nonnull KMaterial getMaterial()
   {
     return this.material;
-  }
-
-  public @Nonnull KMeshInstanceMaterialLabel getMaterialLabel()
-  {
-    return this.label;
   }
 
   public @Nonnull KMesh getMesh()

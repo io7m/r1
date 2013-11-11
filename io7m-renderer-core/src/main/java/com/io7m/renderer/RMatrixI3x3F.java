@@ -61,6 +61,21 @@ import com.io7m.jtensors.VectorReadable3F;
     this.elements[2][2] = column_2.getZF();
   }
 
+  public RMatrixI3x3F()
+  {
+    this.elements = new float[3][3];
+
+    for (int row = 0; row < 3; ++row) {
+      for (int col = 0; col < 3; ++col) {
+        if (row == col) {
+          this.elements[row][col] = 0.0f;
+        } else {
+          this.elements[row][col] = 0.0f;
+        }
+      }
+    }
+  }
+
   @Override public boolean equals(
     final Object obj)
   {

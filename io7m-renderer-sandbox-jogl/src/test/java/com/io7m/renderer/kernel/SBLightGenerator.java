@@ -67,7 +67,7 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
           final float intensity = (float) Math.random();
 
           return new SBLightDescription.SBLightDescriptionDirectional(
-            new KDirectional(this.id, direction, colour, intensity));
+            KDirectional.make(this.id, direction, colour, intensity));
         }
         case LIGHT_PROJECTIVE:
         {
@@ -99,7 +99,13 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
           final RVectorI3F<RSpaceWorld> position = this.world_gen.next();
 
           return new SBLightDescription.SBLightDescriptionSpherical(
-            new KSphere(this.id, colour, intensity, position, radius, falloff));
+            KSphere.make(
+              this.id,
+              colour,
+              intensity,
+              position,
+              radius,
+              falloff));
         }
       }
     } catch (final ConstraintError e) {

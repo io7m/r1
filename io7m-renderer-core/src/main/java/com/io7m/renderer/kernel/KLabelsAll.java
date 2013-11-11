@@ -20,12 +20,6 @@ import java.util.TreeSet;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.KLight.Type;
-import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Albedo;
-import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Alpha;
-import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Emissive;
-import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Environment;
-import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Normal;
-import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Specular;
 
 final class KLabelsAll
 {
@@ -36,9 +30,9 @@ final class KLabelsAll
     final TreeSet<String> shaders = new TreeSet<String>();
     final StringBuilder buf = new StringBuilder();
 
-    for (final Albedo b : KMeshInstanceMaterialLabel.Albedo.values()) {
-      for (final Alpha a : KMeshInstanceMaterialLabel.Alpha.values()) {
-        for (final Emissive m : KMeshInstanceMaterialLabel.Emissive.values()) {
+    for (final KMaterialAlbedoLabel b : KMaterialAlbedoLabel.values()) {
+      for (final KMaterialAlphaLabel a : KMaterialAlphaLabel.values()) {
+        for (final KMaterialEmissiveLabel m : KMaterialEmissiveLabel.values()) {
           buf.setLength(0);
           buf.append("U_");
           buf.append(a.code);
@@ -62,16 +56,16 @@ final class KLabelsAll
       }
     }
 
-    for (final Albedo b : KMeshInstanceMaterialLabel.Albedo.values()) {
-      for (final Alpha a : KMeshInstanceMaterialLabel.Alpha.values()) {
-        for (final Emissive m : KMeshInstanceMaterialLabel.Emissive.values()) {
-          for (final Environment e : KMeshInstanceMaterialLabel.Environment
+    for (final KMaterialAlbedoLabel b : KMaterialAlbedoLabel.values()) {
+      for (final KMaterialAlphaLabel a : KMaterialAlphaLabel.values()) {
+        for (final KMaterialEmissiveLabel m : KMaterialEmissiveLabel.values()) {
+          for (final KMaterialEnvironmentLabel e : KMaterialEnvironmentLabel
             .values()) {
-            for (final Normal n : KMeshInstanceMaterialLabel.Normal.values()) {
-              for (final Specular s : KMeshInstanceMaterialLabel.Specular
+            for (final KMaterialNormalLabel n : KMaterialNormalLabel.values()) {
+              for (final KMaterialSpecularLabel s : KMaterialSpecularLabel
                 .values()) {
-                final KMeshInstanceMaterialLabel label =
-                  new KMeshInstanceMaterialLabel(a, b, m, e, n, s);
+                final KMeshInstanceForwardMaterialLabel label =
+                  new KMeshInstanceForwardMaterialLabel(a, b, m, e, n, s);
 
                 for (final Type l : KLight.Type.values()) {
                   buf.setLength(0);

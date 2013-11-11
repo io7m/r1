@@ -105,7 +105,6 @@ import com.io7m.renderer.kernel.KLight.KProjective;
   private final @Nonnull RMatrixM4x4F<RTransformProjection>        matrix_texture_projection_projection;
   private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_texture_projection_view;
   private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_texture_projection_modelview;
-
   private final @Nonnull KTransform.Context                        transform_context;
 
   private boolean                                                  matrix_model_done;
@@ -171,7 +170,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
   {
     Constraints.constrainArbitrary(
       this.matrix_normal_done,
-      "Normal matrix calculated");
+      "KMaterialNormalLabel matrix calculated");
     return this.matrix_normal;
   }
 
@@ -227,14 +226,24 @@ import com.io7m.renderer.kernel.KLight.KProjective;
 
   public void matricesBegin()
   {
-    this.matrix_model_done = false;
-    this.matrix_modelview_done = false;
+    this.matricesBeginForCamera();
+    this.matricesBeginForInstance();
+  }
+
+  public void matricesBeginForCamera()
+  {
     this.matrix_projection_done = false;
     this.matrix_view_done = false;
     this.matrix_view_inverse_done = false;
+  }
+
+  public void matricesBeginForInstance()
+  {
+    this.matrix_model_done = false;
+    this.matrix_modelview_done = false;
     this.matrix_normal_done = false;
-    this.matrix_uv_done = false;
     this.matrix_texture_projection_done = false;
+    this.matrix_uv_done = false;
   }
 
   public void matricesMakeFromCamera(
@@ -320,6 +329,15 @@ import com.io7m.renderer.kernel.KLight.KProjective;
     Constraints.constrainArbitrary(
       this.matrix_view_done,
       "View matrix calculated");
+    Constraints.constrainArbitrary(
+      this.matrix_model_done == false,
+      "Model view not calculated");
+    Constraints.constrainArbitrary(
+      this.matrix_modelview_done == false,
+      "ModelView not calculated");
+    Constraints.constrainArbitrary(
+      this.matrix_normal_done == false,
+      "Normal not calculated");
 
     transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
 

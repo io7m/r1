@@ -17,24 +17,40 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
-import javax.swing.JFrame;
 
-import com.io7m.jlog.Log;
+import com.io7m.jaux.Constraints;
+import com.io7m.jaux.Constraints.ConstraintError;
 
-final class SBShadersWindow extends JFrame
+enum KMaterialAlphaLabel
 {
-  private static final long serialVersionUID;
+  ALPHA_OPAQUE("AO"),
+  ALPHA_TRANSLUCENT("AT");
 
-  static {
-    serialVersionUID = -312314551231238L;
+  final @Nonnull String code;
+
+  private KMaterialAlphaLabel(
+    final @Nonnull String code)
+  {
+    this.code = code;
   }
 
-  public <C extends SBSceneControllerShaders> SBShadersWindow(
-    final @Nonnull C controller,
-    final @Nonnull Log log)
+  public @Nonnull String getCode()
   {
-    super("ForwardShaders");
-    this.getContentPane().add(new SBShadersPanel(this, controller, log));
-    this.pack();
+    return this.code;
+  }
+
+  static @Nonnull KMaterialAlphaLabel fromMeshAndMaterial(
+    final @Nonnull KMesh mesh,
+    final @Nonnull KMaterial material)
+    throws ConstraintError
+  {
+    Constraints.constrainNotNull(mesh, "Mesh");
+    Constraints.constrainNotNull(material, "Material");
+
+    if (material.getAlpha().isTranslucent()) {
+      return KMaterialAlphaLabel.ALPHA_TRANSLUCENT;
+    }
+
+    return KMaterialAlphaLabel.ALPHA_OPAQUE;
   }
 }
