@@ -49,6 +49,7 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
+import com.io7m.jaux.functional.Option.None;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.CMFKNegativeX;
 import com.io7m.jcanephora.CMFKNegativeY;
@@ -233,7 +234,7 @@ public final class SBSceneController implements
             final MatrixM4x4F temporary = new MatrixM4x4F();
 
             final KProjective kp =
-              new KProjective(
+              KProjective.make(
                 dd.getID(),
                 t.getTexture(),
                 dd.getPosition(),
@@ -242,7 +243,8 @@ public final class SBSceneController implements
                 dd.getIntensity(),
                 (float) dd.getProjection().getFar(),
                 dd.getFalloff(),
-                dd.getProjection().makeProjectionMatrix(temporary));
+                dd.getProjection().makeProjectionMatrix(temporary),
+                new None<KShadow>());
 
             scene = scene.lightAdd(new SBLightProjective(dd, kp));
             break;
@@ -922,7 +924,7 @@ public final class SBSceneController implements
         final MatrixM4x4F temporary = new MatrixM4x4F();
 
         final KProjective kp =
-          new KProjective(
+          KProjective.make(
             dd.getID(),
             t.getTexture(),
             dd.getPosition(),
@@ -931,7 +933,8 @@ public final class SBSceneController implements
             dd.getIntensity(),
             (float) dd.getProjection().getFar(),
             dd.getFalloff(),
-            dd.getProjection().makeProjectionMatrix(temporary));
+            dd.getProjection().makeProjectionMatrix(temporary),
+            new None<KShadow>());
 
         final SBLightProjective l = new SBLight.SBLightProjective(dd, kp);
 

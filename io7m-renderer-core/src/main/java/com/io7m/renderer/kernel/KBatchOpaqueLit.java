@@ -23,13 +23,13 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-@Immutable final class KBatchLit
+@Immutable final class KBatchOpaqueLit
 {
   private final @Nonnull KLight                     light;
   private final @Nonnull KMeshInstanceForwardMaterialLabel label;
   private final @Nonnull ArrayList<KMeshInstance>   instances;
 
-  KBatchLit(
+  KBatchOpaqueLit(
     final @Nonnull KLight light,
     final @Nonnull KMeshInstanceForwardMaterialLabel label,
     final @Nonnull ArrayList<KMeshInstance> instances)
@@ -51,7 +51,7 @@ import javax.annotation.concurrent.Immutable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KBatchLit other = (KBatchLit) obj;
+    final KBatchOpaqueLit other = (KBatchOpaqueLit) obj;
     if (!this.label.equals(other.label)) {
       return false;
     }
@@ -88,7 +88,7 @@ import javax.annotation.concurrent.Immutable;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KBatchLit ");
+    builder.append("[KBatchOpaqueLit ");
     builder.append(this.light);
     builder.append(" ");
     builder.append(this.label);

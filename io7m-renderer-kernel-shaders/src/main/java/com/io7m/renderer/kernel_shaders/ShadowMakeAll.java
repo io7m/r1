@@ -27,9 +27,9 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.parasol.Compiler;
-import com.io7m.renderer.kernel_shaders.ForwardLabels.ForwardLabel;
+import com.io7m.renderer.kernel_shaders.ShadowLabels.ShadowLabel;
 
-public final class ForwardMakeAll
+public final class ShadowMakeAll
 {
   private static @Nonnull String[] getSourcesList(
     final @Nonnull File out_dir)
@@ -56,7 +56,7 @@ public final class ForwardMakeAll
 
     final File out_parasol_dir = new File(args[0]);
     final File out_glsl_dir = new File(args[1]);
-    final File out_batch = new File(out_parasol_dir, "batch-forward.txt");
+    final File out_batch = new File(out_parasol_dir, "batch-shadow.txt");
 
     if (out_parasol_dir.mkdirs() == false) {
       if (out_parasol_dir.isDirectory() == false) {
@@ -69,12 +69,12 @@ public final class ForwardMakeAll
       }
     }
 
-    final List<ForwardLabel> forwardLabels = ForwardLabels.allLabels();
-    ForwardMakeAll.makeSources(forwardLabels, out_parasol_dir);
-    ForwardMakeAll.makeBatch(forwardLabels, out_batch);
+    final List<ShadowLabel> shadowLabels = ShadowLabels.allLabels();
+    ShadowMakeAll.makeSources(shadowLabels, out_parasol_dir);
+    ShadowMakeAll.makeBatch(shadowLabels, out_batch);
 
-    final String[] sources = ForwardMakeAll.getSourcesList(out_parasol_dir);
-    ForwardMakeAll.makeCompileSources(
+    final String[] sources = ShadowMakeAll.getSourcesList(out_parasol_dir);
+    ShadowMakeAll.makeCompileSources(
       out_parasol_dir,
       sources,
       out_batch,
@@ -82,15 +82,15 @@ public final class ForwardMakeAll
   }
 
   public static void makeBatch(
-    final @Nonnull List<ForwardLabel> forwardLabels,
+    final @Nonnull List<ShadowLabel> shadowLabels,
     final @Nonnull File file)
     throws IOException
   {
     final FileWriter writer = new FileWriter(file);
-    for (final ForwardLabel l : forwardLabels) {
+    for (final ShadowLabel l : shadowLabels) {
       final String code = l.getCode();
-      writer.append("fwd_" + code);
-      writer.append(" : com.io7m.renderer.kernel.Fwd_" + code + ".p");
+      writer.append("shadow_" + code);
+      writer.append(" : com.io7m.renderer.kernel.Shadow_" + code + ".p");
       writer.append("\n");
     }
 
@@ -125,7 +125,7 @@ public final class ForwardMakeAll
   }
 
   public static void makeSources(
-    final @Nonnull List<ForwardLabel> forwardLabels,
+    final @Nonnull List<ShadowLabel> shadowLabels,
     final @Nonnull File dir)
     throws IOException
   {
@@ -133,15 +133,15 @@ public final class ForwardMakeAll
       throw new IOException(dir + " is not a directory");
     }
 
-    for (final ForwardLabel l : forwardLabels) {
+    for (final ShadowLabel l : shadowLabels) {
       final String code = l.getCode();
 
-      final File file = new File(dir, "Fwd_" + code + ".p");
+      final File file = new File(dir, "Shadow_" + code + ".p");
       System.err.println("info: writing: " + file);
 
       final FileWriter writer = new FileWriter(file);
       try {
-        writer.append(ForwardShaders.moduleForward(l));
+        writer.append(ShadowShaders.moduleShadow(l));
       } finally {
         writer.flush();
         writer.close();

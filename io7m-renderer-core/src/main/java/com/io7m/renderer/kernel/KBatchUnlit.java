@@ -23,18 +23,15 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-@Immutable final class KBatchLit
+@Immutable final class KBatchUnlit
 {
-  private final @Nonnull KLight                     light;
   private final @Nonnull KMeshInstanceForwardMaterialLabel label;
   private final @Nonnull ArrayList<KMeshInstance>   instances;
 
-  KBatchLit(
-    final @Nonnull KLight light,
+  KBatchUnlit(
     final @Nonnull KMeshInstanceForwardMaterialLabel label,
     final @Nonnull ArrayList<KMeshInstance> instances)
   {
-    this.light = light;
     this.label = label;
     this.instances = instances;
   }
@@ -51,11 +48,11 @@ import javax.annotation.concurrent.Immutable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KBatchLit other = (KBatchLit) obj;
-    if (!this.label.equals(other.label)) {
+    final KBatchUnlit other = (KBatchUnlit) obj;
+    if (!this.instances.equals(other.instances)) {
       return false;
     }
-    if (!this.light.equals(other.light)) {
+    if (!this.label.equals(other.label)) {
       return false;
     }
     return true;
@@ -71,26 +68,19 @@ import javax.annotation.concurrent.Immutable;
     return this.label;
   }
 
-  public @Nonnull KLight getLight()
-  {
-    return this.light;
-  }
-
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + this.instances.hashCode();
     result = (prime * result) + this.label.hashCode();
-    result = (prime * result) + this.light.hashCode();
     return result;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KBatchLit ");
-    builder.append(this.light);
-    builder.append(" ");
+    builder.append("[KBatchUnlit ");
     builder.append(this.label);
     builder.append(" ");
     builder.append(this.instances);

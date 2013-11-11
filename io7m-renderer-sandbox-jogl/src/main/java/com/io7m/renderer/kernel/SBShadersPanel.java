@@ -366,7 +366,7 @@ final class SBShadersPanel extends JPanel
     final @Nonnull Log log)
   {
     this.window = window;
-    this.jlog = new Log(log, "Shaders");
+    this.jlog = new Log(log, "ForwardShaders");
     this.shaders = controller.shadersGet();
 
     this.selector = new JComboBox<String>();

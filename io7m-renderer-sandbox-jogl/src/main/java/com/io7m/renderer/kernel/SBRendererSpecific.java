@@ -24,6 +24,7 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option.None;
 import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
@@ -68,17 +69,15 @@ import com.io7m.renderer.RVectorReadable3F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
-import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Environment;
-import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Normal;
-import com.io7m.renderer.kernel.KMeshInstanceMaterialLabel.Specular;
+import com.io7m.renderer.kernel.KMutableMatrices.WithInstance;
 
 public final class SBRendererSpecific implements KRenderer
 {
   private static void setParameters(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMatrices matrices,
     final @Nonnull KLight light,
     final @Nonnull KMeshInstance i,
+    final @Nonnull KMutableMatrices.WithInstance mwi,
     final @Nonnull ArrayBuffer array,
     final @Nonnull JCCEExecutionCallable exec)
     throws JCGLException,
@@ -86,13 +85,11 @@ public final class SBRendererSpecific implements KRenderer
   {
     int texture_units = 1;
 
-    texture_units +=
-      SBRendererSpecific.setParametersAlpha(gc, i, exec, texture_units);
+    SBRendererSpecific.setParametersAlpha(gc, i, exec);
 
     texture_units +=
       SBRendererSpecific.setParametersNormal(
         gc,
-        matrices,
         i,
         array,
         exec,
@@ -101,8 +98,8 @@ public final class SBRendererSpecific implements KRenderer
     texture_units +=
       SBRendererSpecific.setParametersEnvironment(
         gc,
-        matrices,
         i,
+        mwi,
         exec,
         texture_units);
 
@@ -118,9 +115,9 @@ public final class SBRendererSpecific implements KRenderer
     texture_units +=
       SBRendererSpecific.setParametersLight(
         gc,
-        matrices,
         light,
         i,
+        mwi,
         exec,
         texture_units);
 
@@ -131,7 +128,7 @@ public final class SBRendererSpecific implements KRenderer
     }
 
     if (KShadingProgramCommon.existsMatrixUV(exec)) {
-      KShadingProgramCommon.putMatrixUV(gc, exec, matrices.getMatrixUV());
+      KShadingProgramCommon.putMatrixUV(gc, exec, mwi.getMatrixUV());
     }
   }
 
@@ -161,7 +158,7 @@ public final class SBRendererSpecific implements KRenderer
       final TextureUnit[] units = gc.textureGetUnits();
       final TextureUnit unit = units[texture_units];
 
-      switch (i.getMaterialLabel().getAlbedo()) {
+      switch (i.getForwardMaterialLabel().getAlbedo()) {
         case ALBEDO_COLOURED:
         {
           gc.texture2DStaticUnbind(unit);
@@ -194,11 +191,10 @@ public final class SBRendererSpecific implements KRenderer
     return used_units;
   }
 
-  private static int setParametersAlpha(
+  private static void setParametersAlpha(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMeshInstance i,
-    final @Nonnull JCCEExecutionCallable exec,
-    final int texture_units)
+    final @Nonnull JCCEExecutionCallable exec)
     throws JCGLException,
       ConstraintError
   {
@@ -210,8 +206,6 @@ public final class SBRendererSpecific implements KRenderer
         gc,
         alpha.getOpacity());
     }
-
-    return 0;
   }
 
   private static int setParametersEmissive(
@@ -237,7 +231,7 @@ public final class SBRendererSpecific implements KRenderer
       final TextureUnit[] units = gc.textureGetUnits();
       final TextureUnit unit = units[texture_units];
 
-      switch (i.getMaterialLabel().getEmissive()) {
+      switch (i.getForwardMaterialLabel().getEmissive()) {
         case EMISSIVE_NONE:
         case EMISSIVE_CONSTANT:
         {
@@ -273,8 +267,8 @@ public final class SBRendererSpecific implements KRenderer
 
   private static int setParametersEnvironment(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMatrices matrices,
     final @Nonnull KMeshInstance i,
+    final @Nonnull KMutableMatrices.WithInstanceMatrices mwi,
     final @Nonnull JCCEExecutionCallable exec,
     final int texture_units)
     throws JCGLException,
@@ -283,7 +277,8 @@ public final class SBRendererSpecific implements KRenderer
     int used_units = 0;
 
     final KMaterialEnvironment environment = i.getMaterial().getEnvironment();
-    final Environment el = i.getMaterialLabel().getEnvironment();
+    final KMaterialEnvironmentLabel el =
+      i.getForwardMaterialLabel().getEnvironment();
 
     if (KShadingProgramCommon.existsMaterialEnvironmentMix(exec)) {
       KShadingProgramCommon.putMaterialEnvironmentMix(
@@ -310,7 +305,7 @@ public final class SBRendererSpecific implements KRenderer
       KShadingProgramCommon.putMatrixInverseView(
         exec,
         gc,
-        matrices.getMatrixViewInverse());
+        mwi.getMatrixViewInverse());
     }
 
     if (KShadingProgramCommon.existsTextureEnvironment(exec)) {
@@ -352,9 +347,9 @@ public final class SBRendererSpecific implements KRenderer
 
   private static int setParametersLight(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMatrices matrices,
     final @Nonnull KLight light,
     final @Nonnull KMeshInstance i,
+    final @Nonnull KMutableMatrices.WithInstance mwi,
     final @Nonnull JCCEExecutionCallable exec,
     final int texture_units)
     throws JCGLException,
@@ -369,7 +364,8 @@ public final class SBRendererSpecific implements KRenderer
           KShadingProgramCommon.putLightDirectional(
             gc,
             exec,
-            matrices,
+            mwi.getMatrixContext(),
+            mwi.getMatrixView(),
             (KDirectional) light);
           break;
         }
@@ -382,8 +378,9 @@ public final class SBRendererSpecific implements KRenderer
           KShadingProgramCommon.putLightDirectional(
             gc,
             exec,
-            matrices,
-            new KDirectional(Integer.valueOf(0), ld, lc, 1.0f));
+            mwi.getMatrixContext(),
+            mwi.getMatrixView(),
+            KDirectional.make(Integer.valueOf(0), ld, lc, 1.0f));
           break;
         }
       }
@@ -394,17 +391,18 @@ public final class SBRendererSpecific implements KRenderer
         case LIGHT_PROJECTIVE:
         case LIGHT_DIRECTIONAL:
         {
+          final KSphere sphere =
+            KSphere.make(Integer.valueOf(0), new RVectorI3F<RSpaceRGB>(
+              1,
+              1,
+              1), 1.0f, new RVectorI3F<RSpaceWorld>(0, 0, 0), 10f, 2);
+
           KShadingProgramCommon.putLightSpherical(
             gc,
             exec,
-            matrices,
-            new KSphere(
-              Integer.valueOf(0),
-              new RVectorI3F<RSpaceRGB>(1, 1, 1),
-              1.0f,
-              new RVectorI3F<RSpaceWorld>(0, 0, 0),
-              10f,
-              2));
+            mwi.getMatrixContext(),
+            mwi.getMatrixView(),
+            sphere);
           break;
         }
         case LIGHT_SPHERE:
@@ -412,7 +410,8 @@ public final class SBRendererSpecific implements KRenderer
           KShadingProgramCommon.putLightSpherical(
             gc,
             exec,
-            matrices,
+            mwi.getMatrixContext(),
+            mwi.getMatrixView(),
             (KSphere) light);
           break;
         }
@@ -433,10 +432,11 @@ public final class SBRendererSpecific implements KRenderer
           gc.texture2DStaticBind(unit, l.getTexture());
 
           KShadingProgramCommon.putTextureProjection(exec, gc, unit);
-          KShadingProgramCommon.putLightProjective(
+          KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
             gc,
             exec,
-            matrices,
+            mwi.getMatrixContext(),
+            mwi.getMatrixView(),
             (KProjective) light);
           break;
         }
@@ -458,11 +458,8 @@ public final class SBRendererSpecific implements KRenderer
             new RMatrixI4x4F<RTransformProjection>();
 
           KShadingProgramCommon.putTextureProjection(exec, gc, unit);
-          KShadingProgramCommon.putLightProjective(
-            gc,
-            exec,
-            matrices,
-            new KProjective(
+          final KProjective projective =
+            KProjective.make(
               Integer.valueOf(0),
               texture,
               position,
@@ -471,7 +468,15 @@ public final class SBRendererSpecific implements KRenderer
               intensity,
               distance,
               falloff,
-              projection));
+              projection,
+              new None<KShadow>());
+
+          KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
+            gc,
+            exec,
+            mwi.getMatrixContext(),
+            mwi.getMatrixView(),
+            projective);
           break;
         }
       }
@@ -482,7 +487,6 @@ public final class SBRendererSpecific implements KRenderer
 
   private static int setParametersNormal(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMatrices matrices,
     final @Nonnull KMeshInstance i,
     final @Nonnull ArrayBuffer array,
     final @Nonnull JCCEExecutionCallable exec,
@@ -493,7 +497,7 @@ public final class SBRendererSpecific implements KRenderer
     int used_units = 0;
 
     final KMaterialNormal normal = i.getMaterial().getNormal();
-    final Normal nl = i.getMaterialLabel().getNormal();
+    final KMaterialNormalLabel nl = i.getForwardMaterialLabel().getNormal();
 
     if (KShadingProgramCommon.existsAttributeNormal(exec)) {
       switch (nl) {
@@ -579,7 +583,8 @@ public final class SBRendererSpecific implements KRenderer
   {
     int used_units = 0;
 
-    final Specular sl = i.getMaterialLabel().getSpecular();
+    final KMaterialSpecularLabel sl =
+      i.getForwardMaterialLabel().getSpecular();
     final KMaterialSpecular specular = i.getMaterial().getSpecular();
 
     if (KShadingProgramCommon.existsMaterialSpecularIntensity(exec)) {
@@ -639,7 +644,7 @@ public final class SBRendererSpecific implements KRenderer
   private final @Nonnull VectorM4F                                 background;
   private final @Nonnull ProgramReference                          program_depth;
   private final @Nonnull JCCEExecutionCallable                     exec_depth;
-  private final @Nonnull KMatrices                                 matrices;
+  private final @Nonnull KMutableMatrices                          matrices;
   private final @Nonnull JCCEExecutionCallable                     exec_program;
   private final @Nonnull VectorM2I                                 viewport_size;
   private final @Nonnull RMatrixM4x4F<RTransformTextureProjection> fake_texture_projection;
@@ -667,7 +672,7 @@ public final class SBRendererSpecific implements KRenderer
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = new KMatrices();
+    this.matrices = KMutableMatrices.make();
     this.viewport_size = new VectorM2I();
 
     this.program_depth =
@@ -688,7 +693,8 @@ public final class SBRendererSpecific implements KRenderer
 
   private void putTextureProjectionMatrixForLight(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KLight light)
+    final @Nonnull KLight light,
+    final @Nonnull KMutableMatrices.WithInstance mwi)
     throws JCGLException,
       ConstraintError
   {
@@ -706,11 +712,16 @@ public final class SBRendererSpecific implements KRenderer
         }
         case LIGHT_PROJECTIVE:
         {
-          this.matrices.matricesMakeFromLight((KProjective) light);
-          KShadingProgramCommon.putMatrixTextureProjection(
-            gc,
-            this.exec_program,
-            this.matrices.getTextureProjection());
+          final KMutableMatrices.WithProjectiveLight mwp =
+            mwi.withProjectiveLight((KProjective) light);
+          try {
+            KShadingProgramCommon.putMatrixTextureProjection(
+              gc,
+              this.exec_program,
+              mwp.getTextureProjection());
+          } finally {
+            mwp.projectiveLightFinish();
+          }
           break;
         }
       }
@@ -724,12 +735,12 @@ public final class SBRendererSpecific implements KRenderer
 
   private void renderDepthPassMesh(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCCEExecutionCallable e,
-    final @Nonnull KMeshInstance instance)
+    final @Nonnull KMeshInstance i,
+    final @Nonnull KMutableMatrices.WithInstance mwi)
     throws ConstraintError,
       JCGLException
   {
-    this.matrices.matricesMakeFromTransform(instance.getTransform());
+    final JCCEExecutionCallable e = this.exec_depth;
 
     /**
      * Upload matrices.
@@ -737,17 +748,14 @@ public final class SBRendererSpecific implements KRenderer
 
     e.execPrepare(gc);
     KShadingProgramCommon.putMatrixProjectionReuse(e);
-    KShadingProgramCommon.putMatrixModelView(
-      e,
-      gc,
-      this.matrices.getMatrixModelView());
+    KShadingProgramCommon.putMatrixModelView(e, gc, mwi.getMatrixModelView());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
      */
 
     try {
-      final KMesh mesh = instance.getMesh();
+      final KMesh mesh = i.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
 
@@ -785,7 +793,8 @@ public final class SBRendererSpecific implements KRenderer
 
   private void renderDepthPassMeshes(
     final @Nonnull KScene scene,
-    final @Nonnull JCGLInterfaceCommon gc)
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMutableMatrices.WithCamera mwc)
     throws ConstraintError,
       JCGLException
   {
@@ -793,20 +802,30 @@ public final class SBRendererSpecific implements KRenderer
     KShadingProgramCommon.putMatrixProjection(
       this.exec_depth,
       gc,
-      this.matrices.getMatrixProjection());
+      mwc.getMatrixProjection());
     this.exec_depth.execCancel();
 
     final KBatches batches = scene.getBatches();
 
     for (final KBatchOpaqueLit bl : batches.getBatchesOpaqueLit()) {
       for (final KMeshInstance i : bl.getInstances()) {
-        this.renderDepthPassMesh(gc, this.exec_depth, i);
+        final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
+        try {
+          this.renderDepthPassMesh(gc, i, mwi);
+        } finally {
+          mwi.instanceFinish();
+        }
       }
     }
 
     for (final KBatchOpaqueUnlit bl : batches.getBatchesOpaqueUnlit()) {
       for (final KMeshInstance i : bl.getInstances()) {
-        this.renderDepthPassMesh(gc, this.exec_depth, i);
+        final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
+        try {
+          this.renderDepthPassMesh(gc, i, mwi);
+        } finally {
+          mwi.instanceFinish();
+        }
       }
     }
   }
@@ -825,60 +844,66 @@ public final class SBRendererSpecific implements KRenderer
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
-    this.matrices.matricesBegin();
-    this.matrices.matricesMakeFromCamera(scene.getCamera());
-
-    final FramebufferReferenceUsable output_buffer =
-      this.framebuffer.kframebufferGetOutputBuffer();
-
-    final AreaInclusive area = this.framebuffer.kframebufferGetArea();
-    this.viewport_size.x = (int) area.getRangeX().getInterval();
-    this.viewport_size.y = (int) area.getRangeY().getInterval();
+    final KMutableMatrices.WithCamera mwc =
+      this.matrices.withCamera(scene.getCamera());
 
     try {
-      gc.framebufferDrawBind(output_buffer);
-      gc.colorBufferClearV4f(this.background);
+      final FramebufferReferenceUsable output_buffer =
+        this.framebuffer.kframebufferGetOutputBuffer();
 
-      gc.cullingEnable(
-        FaceSelection.FACE_BACK,
-        FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+      final AreaInclusive area = this.framebuffer.kframebufferGetArea();
+      this.viewport_size.x = (int) area.getRangeX().getInterval();
+      this.viewport_size.y = (int) area.getRangeY().getInterval();
 
-      /**
-       * Render all opaque meshes into the depth buffer, without touching the
-       * color buffer.
-       */
+      try {
+        gc.framebufferDrawBind(output_buffer);
+        gc.colorBufferClearV4f(this.background);
 
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-      gc.depthBufferWriteEnable();
-      gc.depthBufferClear(1.0f);
-      gc.colorBufferMask(false, false, false, false);
-      gc.blendingDisable();
-      this.renderDepthPassMeshes(scene, gc);
+        gc.cullingEnable(
+          FaceSelection.FACE_BACK,
+          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
 
-      /**
-       * Render all opaque meshes, blending additively, into the framebuffer.
-       */
+        /**
+         * Render all opaque meshes into the depth buffer, without touching
+         * the color buffer.
+         */
 
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
-      gc.depthBufferWriteDisable();
-      gc.colorBufferMask(true, true, true, true);
-      gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
-      this.renderOpaqueMeshes(scene, gc);
+        gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+        gc.depthBufferWriteEnable();
+        gc.depthBufferClear(1.0f);
+        gc.colorBufferMask(false, false, false, false);
+        gc.blendingDisable();
+        this.renderDepthPassMeshes(scene, gc, mwc);
 
-      /**
-       * Render all translucent meshes into the framebuffer.
-       */
+        /**
+         * Render all opaque meshes, blending additively, into the
+         * framebuffer.
+         */
 
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
-      gc.depthBufferWriteDisable();
-      gc.colorBufferMask(true, true, true, true);
-      gc.blendingEnable(
-        BlendFunction.BLEND_SOURCE_ALPHA,
-        BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
-      this.renderTranslucentMeshes(scene, gc);
+        gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
+        gc.depthBufferWriteDisable();
+        gc.colorBufferMask(true, true, true, true);
+        gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+        this.renderOpaqueMeshes(scene, gc, mwc);
+
+        /**
+         * Render all translucent meshes into the framebuffer.
+         */
+
+        gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
+        gc.depthBufferWriteDisable();
+        gc.colorBufferMask(true, true, true, true);
+        gc.blendingEnable(
+          BlendFunction.BLEND_SOURCE_ALPHA,
+          BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
+        this.renderTranslucentMeshes(scene, gc, mwc);
+
+      } finally {
+        gc.framebufferDrawUnbind();
+      }
 
     } finally {
-      gc.framebufferDrawUnbind();
+      mwc.cameraFinish();
     }
   }
 
@@ -913,13 +938,11 @@ public final class SBRendererSpecific implements KRenderer
   private void renderOpaqueMesh(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KLight light,
-    final @Nonnull KMeshInstance i)
+    final @Nonnull KMeshInstance i,
+    final @Nonnull KMutableMatrices.WithInstance mwi)
     throws ConstraintError,
       JCGLException
   {
-    this.matrices.matricesMakeFromTransform(i.getTransform());
-    this.matrices.matricesMakeTextureFromInstance(i);
-
     /**
      * Upload matrices.
      */
@@ -929,13 +952,14 @@ public final class SBRendererSpecific implements KRenderer
     KShadingProgramCommon.putMatrixModelView(
       this.exec_program,
       gc,
-      this.matrices.getMatrixModelView());
-    this.putTextureProjectionMatrixForLight(gc, light);
+      mwi.getMatrixModelView());
+
+    this.putTextureProjectionMatrixForLight(gc, light, mwi);
     if (KShadingProgramCommon.existsMatrixNormal(this.exec_program)) {
       KShadingProgramCommon.putMatrixNormal(
         this.exec_program,
         gc,
-        this.matrices.getMatrixNormal());
+        mwi.getMatrixNormal());
     }
 
     /**
@@ -955,9 +979,9 @@ public final class SBRendererSpecific implements KRenderer
 
       SBRendererSpecific.setParameters(
         gc,
-        this.matrices,
         light,
         i,
+        mwi,
         array,
         this.exec_program);
 
@@ -987,7 +1011,8 @@ public final class SBRendererSpecific implements KRenderer
 
   private void renderOpaqueMeshes(
     final @Nonnull KScene scene,
-    final @Nonnull JCGLInterfaceCommon gc)
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMutableMatrices.WithCamera mwc)
     throws JCGLException,
       ConstraintError
   {
@@ -995,20 +1020,30 @@ public final class SBRendererSpecific implements KRenderer
     KShadingProgramCommon.putMatrixProjection(
       this.exec_program,
       gc,
-      this.matrices.getMatrixProjection());
+      mwc.getMatrixProjection());
     this.exec_program.execCancel();
 
     final KBatches batches = scene.getBatches();
 
     for (final KBatchOpaqueLit bl : batches.getBatchesOpaqueLit()) {
       for (final KMeshInstance i : bl.getInstances()) {
-        this.renderOpaqueMesh(gc, bl.getLight(), i);
+        final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
+        try {
+          this.renderOpaqueMesh(gc, bl.getLight(), i, mwi);
+        } finally {
+          mwi.instanceFinish();
+        }
       }
     }
 
     for (final KBatchOpaqueUnlit bl : batches.getBatchesOpaqueUnlit()) {
       for (final KMeshInstance i : bl.getInstances()) {
-        this.renderOpaqueMesh(gc, null, i);
+        final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
+        try {
+          this.renderOpaqueMesh(gc, null, i, mwi);
+        } finally {
+          mwi.instanceFinish();
+        }
       }
     }
   }
@@ -1016,30 +1051,29 @@ public final class SBRendererSpecific implements KRenderer
   private void renderTranslucentMesh(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KLight light,
-    final @Nonnull KMeshInstance i)
+    final @Nonnull KMeshInstance i,
+    final @Nonnull KMutableMatrices.WithInstance mwi)
     throws ConstraintError,
       JCGLException
   {
-    this.matrices.matricesMakeFromTransform(i.getTransform());
-    this.matrices.matricesMakeTextureFromInstance(i);
-
     /**
      * Upload matrices.
      */
 
     this.exec_program.execPrepare(gc);
     KShadingProgramCommon.putMatrixProjectionReuse(this.exec_program);
-    this.putTextureProjectionMatrixForLight(gc, light);
+    this.putTextureProjectionMatrixForLight(gc, light, mwi);
+
     KShadingProgramCommon.putMatrixModelView(
       this.exec_program,
       gc,
-      this.matrices.getMatrixModelView());
+      mwi.getMatrixModelView());
 
     if (KShadingProgramCommon.existsMatrixNormal(this.exec_program)) {
       KShadingProgramCommon.putMatrixNormal(
         this.exec_program,
         gc,
-        this.matrices.getMatrixNormal());
+        mwi.getMatrixNormal());
     }
 
     /**
@@ -1059,9 +1093,9 @@ public final class SBRendererSpecific implements KRenderer
 
       SBRendererSpecific.setParameters(
         gc,
-        this.matrices,
         light,
         i,
+        mwi,
         array,
         this.exec_program);
 
@@ -1091,7 +1125,8 @@ public final class SBRendererSpecific implements KRenderer
 
   private void renderTranslucentMeshes(
     final @Nonnull KScene scene,
-    final @Nonnull JCGLInterfaceCommon gc)
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMutableMatrices.WithCamera mwc)
     throws JCGLException,
       ConstraintError
   {
@@ -1100,18 +1135,25 @@ public final class SBRendererSpecific implements KRenderer
     for (final KBatchTranslucent bl : batches.getBatchesTranslucent()) {
       final KMeshInstance i = bl.getInstance();
 
-      boolean first_light = true;
-      for (final KLight light : bl.getLights()) {
-        if (first_light) {
-          gc.blendingEnable(
-            BlendFunction.BLEND_ONE,
-            BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
-        } else {
-          gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
-        }
+      final WithInstance mwi = mwc.withInstance(i);
+      try {
+        boolean first_light = true;
+        for (final KLight light : bl.getLights()) {
+          if (first_light) {
+            gc.blendingEnable(
+              BlendFunction.BLEND_ONE,
+              BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
+          } else {
+            gc.blendingEnable(
+              BlendFunction.BLEND_ONE,
+              BlendFunction.BLEND_ONE);
+          }
 
-        this.renderTranslucentMesh(gc, light, i);
-        first_light = false;
+          this.renderTranslucentMesh(gc, light, i, mwi);
+          first_light = false;
+        }
+      } finally {
+        mwi.instanceFinish();
       }
     }
   }

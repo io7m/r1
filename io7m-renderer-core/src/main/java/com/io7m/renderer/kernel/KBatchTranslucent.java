@@ -23,20 +23,20 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-@Immutable final class KBatchLit
+@Immutable final class KBatchTranslucent
 {
-  private final @Nonnull KLight                     light;
+  private final @Nonnull KMeshInstance              instance;
   private final @Nonnull KMeshInstanceForwardMaterialLabel label;
-  private final @Nonnull ArrayList<KMeshInstance>   instances;
+  private final @Nonnull ArrayList<KLight>          lights;
 
-  KBatchLit(
-    final @Nonnull KLight light,
+  KBatchTranslucent(
+    final @Nonnull KMeshInstance instance,
     final @Nonnull KMeshInstanceForwardMaterialLabel label,
-    final @Nonnull ArrayList<KMeshInstance> instances)
+    final @Nonnull ArrayList<KLight> lights)
   {
-    this.light = light;
+    this.instance = instance;
     this.label = label;
-    this.instances = instances;
+    this.lights = lights;
   }
 
   @Override public boolean equals(
@@ -51,19 +51,19 @@ import javax.annotation.concurrent.Immutable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KBatchLit other = (KBatchLit) obj;
-    if (!this.label.equals(other.label)) {
+    final KBatchTranslucent other = (KBatchTranslucent) obj;
+    if (!this.instance.equals(other.instance)) {
       return false;
     }
-    if (!this.light.equals(other.light)) {
+    if (!this.label.equals(other.label)) {
       return false;
     }
     return true;
   }
 
-  public @Nonnull List<KMeshInstance> getInstances()
+  public @Nonnull KMeshInstance getInstance()
   {
-    return Collections.unmodifiableList(this.instances);
+    return this.instance;
   }
 
   public @Nonnull KMeshInstanceForwardMaterialLabel getLabel()
@@ -71,30 +71,31 @@ import javax.annotation.concurrent.Immutable;
     return this.label;
   }
 
-  public @Nonnull KLight getLight()
+  public @Nonnull List<KLight> getLights()
   {
-    return this.light;
+    return Collections.unmodifiableList(this.lights);
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + this.instance.hashCode();
     result = (prime * result) + this.label.hashCode();
-    result = (prime * result) + this.light.hashCode();
     return result;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KBatchLit ");
-    builder.append(this.light);
+    builder.append("[KBatchTranslucent ");
+    builder.append(this.instance);
     builder.append(" ");
     builder.append(this.label);
     builder.append(" ");
-    builder.append(this.instances);
+    builder.append(this.lights);
     builder.append("]");
     return builder.toString();
   }
+
 }

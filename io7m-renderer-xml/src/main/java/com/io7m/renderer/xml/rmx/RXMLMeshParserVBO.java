@@ -317,7 +317,7 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
       if (this.cursor_normal != null) {
         Constraints.constrainArbitrary(
           this.cursor_normal.isValid() == false,
-          "Normal attributes completely assigned");
+          "KMaterialNormalLabel attributes completely assigned");
       }
       if (this.cursor_tangent3f != null) {
         Constraints.constrainArbitrary(

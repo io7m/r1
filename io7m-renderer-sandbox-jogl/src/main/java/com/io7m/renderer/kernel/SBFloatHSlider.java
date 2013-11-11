@@ -65,7 +65,7 @@ public final class SBFloatHSlider
     final float maximum)
     throws ConstraintError
   {
-    this.label = new JLabel(Constraints.constrainNotNull(label, "Label"));
+    this.label = new JLabel(Constraints.constrainNotNull(label, "ForwardLabel"));
     this.maximum = maximum;
     this.minimum = minimum;
 
