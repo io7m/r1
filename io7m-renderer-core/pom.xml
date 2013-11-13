@@ -62,6 +62,8 @@
       <groupId>com.io7m.renderer.kernel-shaders</groupId>
       <artifactId>io7m-renderer-kernel-shaders</artifactId>
       <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
     </dependency>
     <dependency>
       <groupId>com.io7m.jtensors</groupId>
@@ -185,12 +187,6 @@
                   <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
                   <Built-By>io7m</Built-By>
                 </manifestEntries>
-                <manifestSection>
-                  <name>com/io7m/renderer</name>
-                  <manifestEntries>
-                    <Sealed>true</Sealed>
-                  </manifestEntries>
-                </manifestSection>
               </archive>
             </configuration>
           </execution>
