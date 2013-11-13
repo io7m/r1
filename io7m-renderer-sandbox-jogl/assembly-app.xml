@@ -17,6 +17,12 @@
       <source>src/main/sh/sandbox-unix.sh</source>
       <destName>sandbox-unix.sh</destName>
     </file>
+    <file>
+      <outputDirectory>/</outputDirectory>
+      <fileMode>0755</fileMode>
+      <source>target/sandbox.exe</source>
+      <destName>sandbox.exe</destName>
+    </file>
   </files>
 
   <dependencySets>
