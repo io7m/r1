@@ -45,6 +45,7 @@ import javax.media.opengl.GLEventListener;
 
 import nu.xom.Document;
 
+import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
 import com.io7m.jaux.UnreachableCodeException;
@@ -113,7 +114,6 @@ import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.SBLight.SBLightProjective;
 import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeKernel;
 import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeSpecific;
-import com.io7m.renderer.kernel_shaders.KernelShaders;
 import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
 import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
@@ -785,11 +785,16 @@ final class SBGLRenderer implements GLEventListener
   }
 
   public SBGLRenderer(
+    final @Nonnull File shader_archive,
     final @Nonnull Log log)
     throws ConstraintError,
       FilesystemError
   {
+    Constraints.constrainNotNull(shader_archive, "Shader archive");
+    Constraints.constrainNotNull(log, "Log");
+
     this.log = new Log(log, "gl");
+    log.debug("Shader archive: " + shader_archive);
 
     this.controller = new AtomicReference<SBSceneControllerRenderer>();
     this.qm4f_context = new QuaternionM4F.Context();
@@ -822,9 +827,8 @@ final class SBGLRenderer implements GLEventListener
       SBGLRenderer.class,
       PathVirtual.ROOT);
     this.filesystem.mountClasspathArchive(KRenderer.class, PathVirtual.ROOT);
-    this.filesystem.mountClasspathArchive(
-      KernelShaders.class,
-      PathVirtual.ROOT);
+    this.filesystem
+      .mountArchiveFromAnywhere(shader_archive, PathVirtual.ROOT);
 
     this.background_colour =
       new AtomicReference<VectorI3F>(new VectorI3F(0.1f, 0.1f, 0.1f));

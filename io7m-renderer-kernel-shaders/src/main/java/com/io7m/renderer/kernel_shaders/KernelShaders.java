@@ -19,4 +19,10 @@ package com.io7m.renderer.kernel_shaders;
 public final class KernelShaders
 {
   // Empty main class, used to access shaders by resource.
+
+  public static void main(
+    final String args[])
+  {
+    System.out.println("KernelShaders");
+  }
 }
