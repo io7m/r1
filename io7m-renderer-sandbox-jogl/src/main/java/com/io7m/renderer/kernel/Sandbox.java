@@ -17,11 +17,21 @@
 package com.io7m.renderer.kernel;
 
 import java.awt.Dimension;
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Properties;
 
+import javax.annotation.Nonnull;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
@@ -29,9 +39,53 @@ import com.io7m.jvvfs.FilesystemError;
 
 public final class Sandbox
 {
+  private static final @Nonnull Options options;
+
+  static {
+    options = Sandbox.makeOptions();
+  }
+
+  private static @Nonnull Options makeOptions()
+  {
+    final Options o = new Options();
+
+    {
+      OptionBuilder.withLongOpt("shaders");
+      OptionBuilder.withDescription("Archive file containing shaders");
+      OptionBuilder.withArgName("shaders.zip");
+      OptionBuilder.hasArg();
+      OptionBuilder.isRequired();
+      o.addOption(OptionBuilder.create());
+    }
+
+    return o;
+  }
+
+  private static void showHelp()
+  {
+    final HelpFormatter formatter = new HelpFormatter();
+    final PrintWriter pw = new PrintWriter(System.err);
+    pw.println("sandbox: [options]");
+    pw.println();
+    pw.println("  Options include:");
+    formatter.printOptions(pw, 80, Sandbox.options, 2, 4);
+    pw.println();
+    pw.flush();
+  }
+
   public static void main(
     final String args[])
+    throws ParseException
   {
+    if (args.length == 0) {
+      Sandbox.showHelp();
+      System.exit(1);
+    }
+
+    final PosixParser parser = new PosixParser();
+    final CommandLine line = parser.parse(Sandbox.options, args);
+    final File shaders = new File(line.getOptionValue("shaders"));
+
     final Properties props = new Properties();
     props.setProperty("com.io7m.renderer.logs.sandbox", "true");
     props.setProperty("com.io7m.renderer.logs.sandbox.filesystem", "false");
@@ -51,7 +105,7 @@ public final class Sandbox
         try {
           new SBRepeatingReleasedEventsFixer().install();
 
-          final SBGLRenderer renderer = new SBGLRenderer(log);
+          final SBGLRenderer renderer = new SBGLRenderer(shaders, log);
           final SBSceneController controller =
             new SBSceneController(renderer, log);
           renderer.setController(controller);
@@ -79,4 +133,5 @@ public final class Sandbox
       }
     });
   }
+
 }

@@ -202,7 +202,7 @@
               <mainClass>com.io7m.renderer.kernel_shaders.ForwardMakeAll</mainClass>
               <arguments>
                 <argument>${project.build.directory}/parasol/forward</argument>
-                <argument>${project.build.outputDirectory}/com/io7m/renderer/kernel</argument>
+                <argument>${project.build.directory}/glsl/com/io7m/renderer/kernel</argument>
               </arguments>
             </configuration>
           </execution>
@@ -216,8 +216,28 @@
               <mainClass>com.io7m.renderer.kernel_shaders.ShadowMakeAll</mainClass>
               <arguments>
                 <argument>${project.build.directory}/parasol/shadow</argument>
-                <argument>${project.build.outputDirectory}/com/io7m/renderer/kernel</argument>
+                <argument>${project.build.directory}/glsl/com/io7m/renderer/kernel</argument>
               </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Produce shaders archive -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <id>make-assembly-shaders</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/shaders.xml</descriptor>
+              </descriptors>
             </configuration>
           </execution>
         </executions>
@@ -230,6 +250,8 @@
         <version>2.4</version>
         <executions>
           <execution>
+            <phase>package</phase>
+            <id>default-jar</id>
             <configuration>
               <archive>
                 <manifestEntries>
