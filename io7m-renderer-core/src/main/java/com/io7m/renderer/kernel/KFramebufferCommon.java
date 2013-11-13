@@ -64,7 +64,8 @@ import com.io7m.jcanephora.TextureWrapT;
 
 @Immutable final class KFramebufferCommon
 {
-  private static final class KFramebufferBasicRGBA implements KFramebufferBasic
+  private static final class KFramebufferBasicRGBA implements
+    KFramebufferBasic
   {
     static @Nonnull KFramebufferBasic allocateBasicRGBA(
       final @Nonnull JCGLImplementation gi,
@@ -174,9 +175,7 @@ import com.io7m.jcanephora.TextureWrapT;
 
       final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
         new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
-      for (int index = 0; index < buffers.length; ++index) {
-        mappings.put(buffers[index], points[index]);
-      }
+      mappings.put(buffers[0], points[0]);
 
       final FramebufferReference fb = g.framebufferAllocate();
       g.framebufferDrawBind(fb);
@@ -236,9 +235,7 @@ import com.io7m.jcanephora.TextureWrapT;
 
       final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
         new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
-      for (int index = 0; index < buffers.length; ++index) {
-        mappings.put(buffers[index], points[index]);
-      }
+      mappings.put(buffers[0], points[0]);
 
       final FramebufferReference fb = g.framebufferAllocate();
       g.framebufferDrawBind(fb);
@@ -298,9 +295,7 @@ import com.io7m.jcanephora.TextureWrapT;
 
       final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
         new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
-      for (int index = 0; index < buffers.length; ++index) {
-        mappings.put(buffers[index], points[index]);
-      }
+      mappings.put(buffers[0], points[0]);
 
       final FramebufferReference fb = g.framebufferAllocate();
       g.framebufferDrawBind(fb);
