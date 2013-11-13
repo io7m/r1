@@ -297,6 +297,36 @@
         </configuration>
       </plugin>
 
+      <!-- Produce windows binary -->
+      <plugin>
+        <groupId>com.akathist.maven.plugins.launch4j</groupId>
+        <artifactId>launch4j-maven-plugin</artifactId>
+        <version>1.5.2</version>
+        <executions>
+          <execution>
+            <id>l4j-mkcsr</id>
+            <phase>package</phase>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
+            <configuration>
+              <headerType>gui</headerType>
+              <outfile>target/sandbox.exe</outfile>
+              <jar>target/${project.name}-${project.version}.jar</jar>
+              <icon>src/main/resources/com/io7m/renderer/sandbox/icon.ico</icon>
+              <errTitle>mkcsr</errTitle>
+              <classPath>
+                <mainClass>com.io7m.renderer.kernel.Sandbox</mainClass>
+                <jarLocation>lib/</jarLocation>
+              </classPath>
+              <jre>
+                <minVersion>1.6.0</minVersion>
+              </jre>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- Produce application archive -->
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
