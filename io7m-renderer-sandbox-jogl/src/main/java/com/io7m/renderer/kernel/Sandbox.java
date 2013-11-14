@@ -17,87 +17,117 @@
 package com.io7m.renderer.kernel;
 
 import java.awt.Dimension;
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
 import javax.annotation.Nonnull;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.PropertyUtils;
+import com.io7m.jaux.PropertyUtils.ValueNotFound;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FilesystemError;
 
 public final class Sandbox
 {
-  private static final @Nonnull Options options;
-
-  static {
-    options = Sandbox.makeOptions();
-  }
-
-  private static @Nonnull Options makeOptions()
+  private static boolean hasConsole()
   {
-    final Options o = new Options();
-
-    {
-      OptionBuilder.withLongOpt("shaders");
-      OptionBuilder.withDescription("Archive file containing shaders");
-      OptionBuilder.withArgName("shaders.zip");
-      OptionBuilder.hasArg();
-      OptionBuilder.isRequired();
-      o.addOption(OptionBuilder.create());
+    final String gui =
+      System.getProperty("com.io7m.renderer.sandbox.no_console");
+    if (gui == null) {
+      return true;
     }
-
-    return o;
-  }
-
-  private static void showHelp()
-  {
-    final HelpFormatter formatter = new HelpFormatter();
-    final PrintWriter pw = new PrintWriter(System.err);
-    pw.println("sandbox: [options]");
-    pw.println();
-    pw.println("  Options include:");
-    formatter.printOptions(pw, 80, Sandbox.options, 2, 4);
-    pw.println();
-    pw.flush();
+    if (gui.equals("true")) {
+      return false;
+    }
+    return true;
   }
 
   public static void main(
     final String args[])
-    throws ParseException
   {
     if (args.length == 0) {
-      Sandbox.showHelp();
+      if (Sandbox.hasConsole()) {
+        System.err.println("usage: sandbox.conf");
+      } else {
+        Sandbox.showFatalErrorAndExitWithoutException(
+          Sandbox.makeEmptyLog(),
+          "No configuration file",
+          "No configuration file");
+      }
       System.exit(1);
     }
 
-    final PosixParser parser = new PosixParser();
-    final CommandLine line = parser.parse(Sandbox.options, args);
-    final File shaders = new File(line.getOptionValue("shaders"));
+    try {
+      Sandbox.run(PropertyUtils.loadFromFile(args[0]));
 
-    final Properties props = new Properties();
-    props.setProperty("com.io7m.renderer.logs.sandbox", "true");
-    props.setProperty("com.io7m.renderer.logs.sandbox.filesystem", "false");
-    props.setProperty(
-      "com.io7m.renderer.logs.sandbox.control.filesystem",
-      "false");
-    props.setProperty(
-      "com.io7m.renderer.logs.sandbox.gl.object-parser",
-      "false");
-    props.setProperty("com.io7m.renderer.sandbox.level", "LOG_DEBUG");
+    } catch (final FileNotFoundException e) {
+      if (Sandbox.hasConsole()) {
+        System.err.println("fatal: could not read configuration file: "
+          + e.getMessage());
+        e.printStackTrace();
+      } else {
+        Sandbox.showFatalErrorAndExit(
+          Sandbox.makeEmptyLog(),
+          "Missing config file",
+          e);
+      }
+      System.exit(1);
+    } catch (final IOException e) {
+      if (Sandbox.hasConsole()) {
+        System.err.println("fatal: i/o error: " + e.getMessage());
+        e.printStackTrace();
+      } else {
+        Sandbox.showFatalErrorAndExit(Sandbox.makeEmptyLog(), "I/O error", e);
+      }
+      System.exit(1);
+    } catch (final ConstraintError e) {
+      if (Sandbox.hasConsole()) {
+        System.err.println("fatal: constraint error: " + e.getMessage());
+        e.printStackTrace();
+      } else {
+        Sandbox.showFatalErrorAndExit(
+          Sandbox.makeEmptyLog(),
+          "Constraint error",
+          e);
+      }
+      System.exit(1);
+    } catch (final ValueNotFound e) {
+      if (Sandbox.hasConsole()) {
+        System.err.println("fatal: config error: " + e.getMessage());
+        e.printStackTrace();
+      } else {
+        Sandbox.showFatalErrorAndExit(
+          Sandbox.makeEmptyLog(),
+          "Configuration error",
+          e);
+      }
+      System.exit(1);
+    }
+  }
+
+  private static Log makeEmptyLog()
+  {
+    return new Log(new Properties(), "com.io7m.renderer", "sandbox");
+  }
+
+  public static void run(
+    final @Nonnull Properties props)
+    throws ConstraintError,
+      ValueNotFound
+  {
     final Log log = new Log(props, "com.io7m.renderer", "sandbox");
+    Sandbox.runWithConfig(SandboxConfig.fromProperties(props), log);
+  }
 
+  public static void runWithConfig(
+    final @Nonnull SandboxConfig config,
+    final @Nonnull Log log)
+  {
     SwingUtilities.invokeLater(new Runnable() {
       @Override public void run()
       {
@@ -105,7 +135,8 @@ public final class Sandbox
         try {
           new SBRepeatingReleasedEventsFixer().install();
 
-          final SBGLRenderer renderer = new SBGLRenderer(shaders, log);
+          final SBGLRenderer renderer =
+            new SBGLRenderer(config.getShaderArchiveFile(), log);
           final SBSceneController controller =
             new SBSceneController(renderer, log);
           renderer.setController(controller);
@@ -118,15 +149,15 @@ public final class Sandbox
           window.pack();
           window.setVisible(true);
         } catch (final FilesystemError e) {
-          SBErrorBox.showError(log, "Filesystem error", e);
+          SBErrorBox.showErrorLater(log, "Filesystem error", e);
           e.printStackTrace();
           System.exit(1);
         } catch (final ConstraintError e) {
-          SBErrorBox.showError(log, "Internal constraint error", e);
+          SBErrorBox.showErrorLater(log, "Internal constraint error", e);
           e.printStackTrace();
           System.exit(1);
         } catch (final IOException e) {
-          SBErrorBox.showError(log, "I/O error", e);
+          SBErrorBox.showErrorLater(log, "I/O error", e);
           e.printStackTrace();
           System.exit(1);
         }
@@ -134,4 +165,44 @@ public final class Sandbox
     });
   }
 
+  public static void showFatalErrorAndExit(
+    final @Nonnull Log log,
+    final @Nonnull String message,
+    final @Nonnull Throwable e)
+  {
+    try {
+      SwingUtilities.invokeAndWait(new Runnable() {
+        @Override public void run()
+        {
+          final int r = SBErrorBox.showError(log, message, e);
+          System.exit(1);
+        }
+      });
+    } catch (final InvocationTargetException x) {
+      x.printStackTrace();
+    } catch (final InterruptedException x) {
+      x.printStackTrace();
+    }
+  }
+
+  public static void showFatalErrorAndExitWithoutException(
+    final @Nonnull Log log,
+    final @Nonnull String title,
+    final @Nonnull String message)
+  {
+    try {
+      SwingUtilities.invokeAndWait(new Runnable() {
+        @Override public void run()
+        {
+          final int r =
+            SBErrorBox.showErrorWithoutException(log, title, message);
+          System.exit(1);
+        }
+      });
+    } catch (final InvocationTargetException x) {
+      x.printStackTrace();
+    } catch (final InterruptedException x) {
+      x.printStackTrace();
+    }
+  }
 }
