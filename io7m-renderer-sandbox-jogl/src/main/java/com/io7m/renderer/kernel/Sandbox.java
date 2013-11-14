@@ -19,10 +19,16 @@ package com.io7m.renderer.kernel;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import javax.annotation.Nonnull;
 import javax.swing.JDialog;
@@ -54,6 +60,24 @@ public final class Sandbox
   public static void main(
     final String args[])
   {
+    if (Sandbox.hasConsole() == false) {
+      try {
+        @SuppressWarnings("resource") final PrintStream out =
+          new PrintStream(new BufferedOutputStream(new FileOutputStream(
+            "sandbox.log",
+            true)));
+        System.setErr(out);
+        System.setOut(out);
+      } catch (final FileNotFoundException e) {
+        Sandbox.showFatalErrorAndExit(
+          Sandbox.makeEmptyLog(),
+          "Could not open log file",
+          e);
+      }
+    }
+
+    Sandbox.announceTime();
+
     if (args.length == 0) {
       Sandbox.showFatalErrorAndExitWithoutException(
         Sandbox.makeEmptyLog(),
@@ -89,6 +113,15 @@ public final class Sandbox
         "Error reading config file",
         e);
     }
+  }
+
+  private static void announceTime()
+  {
+    final Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+    final SimpleDateFormat d = new SimpleDateFormat("yyyy-MM-dd HH:MM:SS Z");
+    System.err.println();
+    System.err.println("== Started at " + d.format(c.getTime()));
+    System.err.println();
   }
 
   private static Log makeEmptyLog()
