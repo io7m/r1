@@ -718,6 +718,7 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull JCCEExecutionCallable                                            exec_uv;
   private @Nonnull JCCEExecutionCallable                                            exec_ccolour;
   private @Nonnull AreaInclusive                                                    viewport;
+  private final SandboxConfig                                                       config;
 
   private static final @Nonnull VectorReadable4F                                    GRID_COLOUR;
 
@@ -785,16 +786,16 @@ final class SBGLRenderer implements GLEventListener
   }
 
   public SBGLRenderer(
-    final @Nonnull File shader_archive,
+    final @Nonnull SandboxConfig config,
     final @Nonnull Log log)
     throws ConstraintError,
       FilesystemError
   {
-    Constraints.constrainNotNull(shader_archive, "Shader archive");
     Constraints.constrainNotNull(log, "Log");
+    this.config = Constraints.constrainNotNull(config, "Config");
 
     this.log = new Log(log, "gl");
-    log.debug("Shader archive: " + shader_archive);
+    log.debug("Shader archive: " + config.getShaderArchiveFile());
 
     this.controller = new AtomicReference<SBSceneControllerRenderer>();
     this.qm4f_context = new QuaternionM4F.Context();
@@ -827,8 +828,9 @@ final class SBGLRenderer implements GLEventListener
       SBGLRenderer.class,
       PathVirtual.ROOT);
     this.filesystem.mountClasspathArchive(KRenderer.class, PathVirtual.ROOT);
-    this.filesystem
-      .mountArchiveFromAnywhere(shader_archive, PathVirtual.ROOT);
+    this.filesystem.mountArchiveFromAnywhere(
+      config.getShaderArchiveFile(),
+      PathVirtual.ROOT);
 
     this.background_colour =
       new AtomicReference<VectorI3F>(new VectorI3F(0.1f, 0.1f, 0.1f));
@@ -1235,10 +1237,33 @@ final class SBGLRenderer implements GLEventListener
   {
     this.log.debug("initialized");
     try {
-      this.gi =
-        JCGLImplementationJOGL.newImplementationWithDebugging(
-          drawable.getContext(),
-          this.log);
+
+      if (this.config.isOpenglDebug()) {
+        if (this.config.isOpenglTrace()) {
+          this.gi =
+            JCGLImplementationJOGL.newImplementationWithDebuggingAndTracing(
+              drawable.getContext(),
+              this.log,
+              System.err);
+        } else {
+          this.gi =
+            JCGLImplementationJOGL.newImplementationWithDebugging(
+              drawable.getContext(),
+              this.log);
+        }
+      } else if (this.config.isOpenglTrace()) {
+        this.gi =
+          JCGLImplementationJOGL.newImplementationWithTracing(
+            drawable.getContext(),
+            this.log,
+            System.err);
+      } else {
+        this.gi =
+          JCGLImplementationJOGL.newImplementation(
+            drawable.getContext(),
+            this.log);
+      }
+
       final JCGLInterfaceCommon gl = this.gi.getGLCommon();
       final JCGLSLVersion version = gl.metaGetSLVersion();
 

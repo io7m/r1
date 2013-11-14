@@ -31,6 +31,7 @@ import javax.swing.WindowConstants;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.PropertyUtils;
+import com.io7m.jaux.PropertyUtils.ValueIncorrectType;
 import com.io7m.jaux.PropertyUtils.ValueNotFound;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FilesystemError;
@@ -82,6 +83,11 @@ public final class Sandbox
         Sandbox.makeEmptyLog(),
         "Error reading config file",
         e);
+    } catch (final ValueIncorrectType e) {
+      Sandbox.showFatalErrorAndExit(
+        Sandbox.makeEmptyLog(),
+        "Error reading config file",
+        e);
     }
   }
 
@@ -93,7 +99,8 @@ public final class Sandbox
   public static void run(
     final @Nonnull Properties props)
     throws ConstraintError,
-      ValueNotFound
+      ValueNotFound,
+      ValueIncorrectType
   {
     final Log log = new Log(props, "com.io7m.renderer", "sandbox");
     Sandbox.runWithConfig(SandboxConfig.fromProperties(props), log);
@@ -110,8 +117,7 @@ public final class Sandbox
         try {
           new SBRepeatingReleasedEventsFixer().install();
 
-          final SBGLRenderer renderer =
-            new SBGLRenderer(config.getShaderArchiveFile(), log);
+          final SBGLRenderer renderer = new SBGLRenderer(config, log);
           final SBSceneController controller =
             new SBSceneController(renderer, log);
           renderer.setController(controller);
