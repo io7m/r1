@@ -165,7 +165,9 @@ final class SBMainWindow extends JFrame
   private static @Nonnull JCheckBoxMenuItem makeMenuEditShadersMenuItem(
     final @Nonnull SBShadersWindow shaders_window)
   {
-    return SBMainWindow.makeWindowCheckbox("ForwardShaders...", shaders_window);
+    return SBMainWindow.makeWindowCheckbox(
+      "ForwardShaders...",
+      shaders_window);
   }
 
   private static @Nonnull JMenu makeMenuFile(
@@ -215,9 +217,12 @@ final class SBMainWindow extends JFrame
                       log,
                       open_recent);
                   } catch (final InterruptedException x) {
-                    SBErrorBox.showErrorLater(log, "Interrupted", x);
+                    SBErrorBox.showErrorWithTitleLater(log, "Interrupted", x);
                   } catch (final ExecutionException x) {
-                    SBErrorBox.showErrorLater(log, "I/O error", x.getCause());
+                    SBErrorBox.showErrorWithTitleLater(
+                      log,
+                      "I/O error",
+                      x.getCause());
                   }
                 }
               };
@@ -268,9 +273,12 @@ final class SBMainWindow extends JFrame
                   try {
                     this.get();
                   } catch (final InterruptedException x) {
-                    SBErrorBox.showErrorLater(log, "Interrupted", x);
+                    SBErrorBox.showErrorWithTitleLater(log, "Interrupted", x);
                   } catch (final ExecutionException x) {
-                    SBErrorBox.showErrorLater(log, "I/O error", x.getCause());
+                    SBErrorBox.showErrorWithTitleLater(
+                      log,
+                      "I/O error",
+                      x.getCause());
                   }
                 }
               };
@@ -478,9 +486,12 @@ final class SBMainWindow extends JFrame
                 try {
                   this.get();
                 } catch (final InterruptedException x) {
-                  SBErrorBox.showErrorLater(log, "Interrupted", x);
+                  SBErrorBox.showErrorWithTitleLater(log, "Interrupted", x);
                 } catch (final ExecutionException x) {
-                  SBErrorBox.showErrorLater(log, "I/O error", x.getCause());
+                  SBErrorBox.showErrorWithTitleLater(
+                    log,
+                    "I/O error",
+                    x.getCause());
                 }
               }
             };
@@ -740,7 +751,7 @@ final class SBMainWindow extends JFrame
       });
 
     } catch (final GLException e) {
-      SBErrorBox.showErrorLater(log, "Renderer disabled", e);
+      SBErrorBox.showErrorWithTitleLater(log, "Renderer disabled", e);
     }
 
     this.setJMenuBar(SBMainWindow.makeMenuBar(
