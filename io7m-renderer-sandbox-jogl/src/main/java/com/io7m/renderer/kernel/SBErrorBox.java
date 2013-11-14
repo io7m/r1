@@ -35,22 +35,16 @@ import com.io7m.jlog.Log;
 
 public final class SBErrorBox
 {
-  public static void showError(
+  public static int showError(
     final @Nonnull Log log,
     final @Nonnull String title,
     final @Nonnull Throwable e)
   {
     log.error(title + ": " + e.getMessage());
-
-    SwingUtilities.invokeLater(new Runnable() {
-      @SuppressWarnings("synthetic-access") @Override public void run()
-      {
-        SBErrorBox.showErrorWithException(title, e);
-      }
-    });
+    return SBErrorBox.showErrorWithException(title, e);
   }
 
-  private static void showErrorBox(
+  private static int showErrorBox(
     final @Nonnull String title,
     final @Nonnull String message,
     final @Nonnull JTextArea backtrace)
@@ -69,14 +63,34 @@ public final class SBErrorBox
     panel.add(header, BorderLayout.NORTH);
     panel.add(pane, BorderLayout.SOUTH);
 
-    JOptionPane.showMessageDialog(
+    final Object[] options = { "OK" };
+    return JOptionPane.showOptionDialog(
       null,
-      panel,
+      message,
       title,
-      JOptionPane.ERROR_MESSAGE);
+      JOptionPane.YES_NO_OPTION,
+      JOptionPane.ERROR_MESSAGE,
+      null,
+      options,
+      options[0]);
   }
 
-  private static void showErrorWithException(
+  public static void showErrorLater(
+    final @Nonnull Log log,
+    final @Nonnull String title,
+    final @Nonnull Throwable e)
+  {
+    log.error(title + ": " + e.getMessage());
+
+    SwingUtilities.invokeLater(new Runnable() {
+      @SuppressWarnings("synthetic-access") @Override public void run()
+      {
+        SBErrorBox.showErrorWithException(title, e);
+      }
+    });
+  }
+
+  private static int showErrorWithException(
     final @Nonnull String title,
     final @Nonnull Throwable e)
   {
@@ -92,10 +106,19 @@ public final class SBErrorBox
     text.setEditable(false);
     text.setText(writer.toString());
 
-    SBErrorBox.showErrorBox(title, e.getMessage(), text);
+    return SBErrorBox.showErrorBox(title, e.getMessage(), text);
   }
 
-  public static void showErrorWithoutException(
+  public static int showErrorWithoutException(
+    final @Nonnull Log log,
+    final @Nonnull String title,
+    final @Nonnull String message)
+  {
+    log.error(title + ": " + message);
+    return SBErrorBox.showErrorWithoutException(log, title, message);
+  }
+
+  public static void showErrorWithoutExceptionLater(
     final @Nonnull Log log,
     final @Nonnull String title,
     final @Nonnull String message)

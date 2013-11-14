@@ -23,6 +23,13 @@
       <source>target/sandbox.exe</source>
       <destName>sandbox.exe</destName>
     </file>
+    <file>
+      <outputDirectory>/</outputDirectory>
+      <fileMode>0644</fileMode>
+      <source>src/main/properties/sandbox.conf</source>
+      <destName>sandbox.conf</destName>
+      <filtered>true</filtered>
+    </file>
   </files>
 
   <dependencySets>

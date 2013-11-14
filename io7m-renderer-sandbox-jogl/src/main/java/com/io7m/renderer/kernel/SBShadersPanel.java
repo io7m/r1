@@ -417,12 +417,12 @@ final class SBShadersPanel extends JPanel
                     SBShadersPanel.this.shadersUpdated();
 
                   } catch (final InterruptedException x) {
-                    SBErrorBox.showError(
+                    SBErrorBox.showErrorLater(
                       SBShadersPanel.this.jlog,
                       "Error loading shader",
                       x);
                   } catch (final ExecutionException x) {
-                    SBErrorBox.showError(
+                    SBErrorBox.showErrorLater(
                       SBShadersPanel.this.jlog,
                       "Error loading shader",
                       x.getCause());

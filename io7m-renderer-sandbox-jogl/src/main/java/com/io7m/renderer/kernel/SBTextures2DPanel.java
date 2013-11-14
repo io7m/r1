@@ -280,12 +280,12 @@ final class SBTextures2DPanel extends JPanel
                       .selectorRefresh(SBTextures2DPanel.this.selector);
 
                   } catch (final InterruptedException x) {
-                    SBErrorBox.showError(
+                    SBErrorBox.showErrorLater(
                       SBTextures2DPanel.this.log_textures,
                       "Error loading image",
                       x);
                   } catch (final ExecutionException x) {
-                    SBErrorBox.showError(
+                    SBErrorBox.showErrorLater(
                       SBTextures2DPanel.this.log_textures,
                       "Error loading image",
                       x.getCause());

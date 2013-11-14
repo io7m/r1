@@ -215,9 +215,9 @@ final class SBMainWindow extends JFrame
                       log,
                       open_recent);
                   } catch (final InterruptedException x) {
-                    SBErrorBox.showError(log, "Interrupted", x);
+                    SBErrorBox.showErrorLater(log, "Interrupted", x);
                   } catch (final ExecutionException x) {
-                    SBErrorBox.showError(log, "I/O error", x.getCause());
+                    SBErrorBox.showErrorLater(log, "I/O error", x.getCause());
                   }
                 }
               };
@@ -268,9 +268,9 @@ final class SBMainWindow extends JFrame
                   try {
                     this.get();
                   } catch (final InterruptedException x) {
-                    SBErrorBox.showError(log, "Interrupted", x);
+                    SBErrorBox.showErrorLater(log, "Interrupted", x);
                   } catch (final ExecutionException x) {
-                    SBErrorBox.showError(log, "I/O error", x.getCause());
+                    SBErrorBox.showErrorLater(log, "I/O error", x.getCause());
                   }
                 }
               };
@@ -478,9 +478,9 @@ final class SBMainWindow extends JFrame
                 try {
                   this.get();
                 } catch (final InterruptedException x) {
-                  SBErrorBox.showError(log, "Interrupted", x);
+                  SBErrorBox.showErrorLater(log, "Interrupted", x);
                 } catch (final ExecutionException x) {
-                  SBErrorBox.showError(log, "I/O error", x.getCause());
+                  SBErrorBox.showErrorLater(log, "I/O error", x.getCause());
                 }
               }
             };
@@ -740,7 +740,7 @@ final class SBMainWindow extends JFrame
       });
 
     } catch (final GLException e) {
-      SBErrorBox.showError(log, "Renderer disabled", e);
+      SBErrorBox.showErrorLater(log, "Renderer disabled", e);
     }
 
     this.setJMenuBar(SBMainWindow.makeMenuBar(
