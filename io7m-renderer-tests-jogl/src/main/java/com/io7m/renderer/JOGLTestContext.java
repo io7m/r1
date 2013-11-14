@@ -238,7 +238,8 @@ public final class JOGLTestContext
 
     final GLContext ctx =
       JOGLTestContext.getContext(GLProfile.get(GLProfile.GLES2));
-    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
+    final JCGLImplementation gi =
+      JCGLImplementationJOGL.newImplementationWithDebugging(ctx, log);
 
     return new TestContext(fs, gi, log);
   }
@@ -254,7 +255,8 @@ public final class JOGLTestContext
 
     final GLContext ctx =
       JOGLTestContext.getContext(GLProfile.get(GLProfile.GLES3));
-    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
+    final JCGLImplementation gi =
+      JCGLImplementationJOGL.newImplementationWithDebugging(ctx, log);
 
     final VersionNumber version = ctx.getGLVersionNumber();
     if (version.getMajor() != 3) {
@@ -277,7 +279,8 @@ public final class JOGLTestContext
 
     final GLContext ctx =
       JOGLTestContext.getContext(GLProfile.get(GLProfile.GL2));
-    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
+    final JCGLImplementation gi =
+      JCGLImplementationJOGL.newImplementationWithDebugging(ctx, log);
 
     return new TestContext(fs, gi, log);
   }
@@ -293,7 +296,8 @@ public final class JOGLTestContext
 
     final GLContext ctx =
       JOGLTestContext.getContext(GLProfile.get(GLProfile.GL2));
-    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
+    final JCGLImplementation gi =
+      JCGLImplementationJOGL.newImplementationWithDebugging(ctx, log);
 
     final VersionNumber version = ctx.getGLVersionNumber();
     if (version.getMajor() != 3) {
@@ -314,7 +318,8 @@ public final class JOGLTestContext
 
     final GLContext ctx =
       JOGLTestContext.getContext(GLProfile.get(GLProfile.GL3));
-    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
+    final JCGLImplementation gi =
+      JCGLImplementationJOGL.newImplementationWithDebugging(ctx, log);
 
     final VersionNumber version = ctx.getGLVersionNumber();
     if (version.getMajor() != 3) {
@@ -341,7 +346,8 @@ public final class JOGLTestContext
     final FSCapabilityAll fs = JOGLTestContext.getFS(log);
 
     final GLContext ctx = JOGLTestContext.getContext(GLProfile.getDefault());
-    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
+    final JCGLImplementation gi =
+      JCGLImplementationJOGL.newImplementationWithDebugging(ctx, log);
     return new TestContext(fs, gi, log);
   }
 
