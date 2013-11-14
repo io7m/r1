@@ -24,17 +24,30 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.PropertyUtils;
+import com.io7m.jaux.PropertyUtils.ValueIncorrectType;
 import com.io7m.jaux.PropertyUtils.ValueNotFound;
 
 public final class SandboxConfig
 {
+  public static @Nonnull SandboxConfig fromProperties(
+    final @Nonnull Properties props)
+    throws ConstraintError,
+      ValueNotFound,
+      ValueIncorrectType
+  {
+    return new SandboxConfig(props);
+  }
+  private final boolean             opengl_debug;
+  private final boolean             opengl_trace;
   private final @Nonnull Properties props;
+
   private final @Nonnull File       shader_archive_file;
 
   public SandboxConfig(
     final @Nonnull Properties props)
     throws ConstraintError,
-      ValueNotFound
+      ValueNotFound,
+      ValueIncorrectType
   {
     this.props = Constraints.constrainNotNull(props, "Properties");
 
@@ -42,18 +55,31 @@ public final class SandboxConfig
       new File(PropertyUtils.getString(
         props,
         "com.io7m.renderer.sandbox.shader_archive"));
-  }
 
-  public static @Nonnull SandboxConfig fromProperties(
-    final @Nonnull Properties props)
-    throws ConstraintError,
-      ValueNotFound
-  {
-    return new SandboxConfig(props);
+    this.opengl_debug =
+      PropertyUtils.getOptionalBoolean(
+        props,
+        "com.io7m.renderer.sandbox.opengl.debug",
+        true);
+    this.opengl_trace =
+      PropertyUtils.getOptionalBoolean(
+        props,
+        "com.io7m.renderer.sandbox.opengl.trace",
+        false);
   }
 
   public @Nonnull File getShaderArchiveFile()
   {
     return this.shader_archive_file;
+  }
+
+  public boolean isOpenglDebug()
+  {
+    return this.opengl_debug;
+  }
+
+  public boolean isOpenglTrace()
+  {
+    return this.opengl_trace;
   }
 }
