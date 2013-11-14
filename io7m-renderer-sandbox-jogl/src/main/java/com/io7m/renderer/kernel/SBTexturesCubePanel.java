@@ -348,12 +348,12 @@ final class SBTexturesCubePanel extends JPanel
                       .selectorRefresh(SBTexturesCubePanel.this.selector);
 
                   } catch (final InterruptedException x) {
-                    SBErrorBox.showErrorLater(
+                    SBErrorBox.showErrorWithTitleLater(
                       SBTexturesCubePanel.this.log_textures,
                       "Error loading image",
                       x);
                   } catch (final ExecutionException x) {
-                    SBErrorBox.showErrorLater(
+                    SBErrorBox.showErrorWithTitleLater(
                       SBTexturesCubePanel.this.log_textures,
                       "Error loading image",
                       x.getCause());

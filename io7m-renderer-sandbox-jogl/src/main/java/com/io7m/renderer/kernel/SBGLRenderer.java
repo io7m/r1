@@ -1123,14 +1123,14 @@ final class SBGLRenderer implements GLEventListener
   private void failed(
     final @CheckForNull Throwable e)
   {
-    SBErrorBox.showErrorLater(this.log, "Renderer disabled", e);
+    SBErrorBox.showErrorWithTitleLater(this.log, "Renderer disabled", e);
     this.running.set(RunningState.STATE_FAILED);
   }
 
   private void failedPermanently(
     final @CheckForNull Throwable e)
   {
-    SBErrorBox.showErrorLater(this.log, "Renderer disabled", e);
+    SBErrorBox.showErrorWithTitleLater(this.log, "Renderer disabled", e);
     this.running.set(RunningState.STATE_FAILED_PERMANENTLY);
   }
 
