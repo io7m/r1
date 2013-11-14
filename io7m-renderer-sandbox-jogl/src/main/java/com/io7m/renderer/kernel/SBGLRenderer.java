@@ -1235,7 +1235,10 @@ final class SBGLRenderer implements GLEventListener
   {
     this.log.debug("initialized");
     try {
-      this.gi = new JCGLImplementationJOGL(drawable.getContext(), this.log);
+      this.gi =
+        JCGLImplementationJOGL.newImplementationWithDebugging(
+          drawable.getContext(),
+          this.log);
       final JCGLInterfaceCommon gl = this.gi.getGLCommon();
       final JCGLSLVersion version = gl.metaGetSLVersion();
 
