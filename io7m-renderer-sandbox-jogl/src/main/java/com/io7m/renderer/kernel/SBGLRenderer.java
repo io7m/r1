@@ -1596,6 +1596,8 @@ final class SBGLRenderer implements GLEventListener
     size.x = drawable.getWidth();
     size.y = drawable.getHeight();
 
+    assert gl.framebufferDrawAnyIsBound() == false;
+
     gl.viewportSet(VectorI2I.ZERO, size);
     gl.colorBufferClearV3f(this.background_colour.get());
     gl.depthBufferWriteEnable();
