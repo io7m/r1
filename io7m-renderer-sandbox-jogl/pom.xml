@@ -319,12 +319,16 @@
               <jar>lib/${project.name}-${project.version}.jar</jar>
               <icon>src/main/resources/com/io7m/renderer/sandbox/icon.ico</icon>
               <errTitle>sandbox</errTitle>
+              <cmdLine>sandbox.conf</cmdLine>
               <classPath>
                 <mainClass>com.io7m.renderer.kernel.Sandbox</mainClass>
                 <jarLocation>lib/</jarLocation>
               </classPath>
               <jre>
                 <minVersion>1.6.0</minVersion>
+                <opts>
+                  <opt>-Dcom.io7m.renderer.sandbox.no_console=true</opt>
+                </opts>
               </jre>
             </configuration>
           </execution>
@@ -335,18 +339,18 @@
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.4</version>
-        <configuration>
-          <descriptors>
-            <descriptor>assembly-app.xml</descriptor>
-          </descriptors>
-        </configuration>
         <executions>
           <execution>
-            <id>make-assembly</id>
+            <id>make-assembly-app</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/app.xml</descriptor>
+              </descriptors>
+            </configuration>
           </execution>
         </executions>
       </plugin>

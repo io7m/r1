@@ -711,9 +711,9 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
                       ObjectEditDialogPanel.this.meshesRefresh(controller);
 
                     } catch (final InterruptedException x) {
-                      SBErrorBox.showError(log, "Interrupted operation", x);
+                      SBErrorBox.showErrorLater(log, "Interrupted operation", x);
                     } catch (final ExecutionException x) {
-                      SBErrorBox.showError(
+                      SBErrorBox.showErrorLater(
                         log,
                         "Mesh loading error",
                         x.getCause());
