@@ -17,12 +17,15 @@
 package com.io7m.renderer.kernel;
 
 import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
 import javax.annotation.Nonnull;
+import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
@@ -51,62 +54,34 @@ public final class Sandbox
     final String args[])
   {
     if (args.length == 0) {
-      if (Sandbox.hasConsole()) {
-        System.err.println("usage: sandbox.conf");
-      } else {
-        Sandbox.showFatalErrorAndExitWithoutException(
-          Sandbox.makeEmptyLog(),
-          "No configuration file",
-          "No configuration file");
-      }
-      System.exit(1);
+      Sandbox.showFatalErrorAndExitWithoutException(
+        Sandbox.makeEmptyLog(),
+        "No configuration file",
+        "No configuration file specified on command line!");
     }
 
     try {
       Sandbox.run(PropertyUtils.loadFromFile(args[0]));
-
     } catch (final FileNotFoundException e) {
-      if (Sandbox.hasConsole()) {
-        System.err.println("fatal: could not read configuration file: "
-          + e.getMessage());
-        e.printStackTrace();
-      } else {
-        Sandbox.showFatalErrorAndExit(
-          Sandbox.makeEmptyLog(),
-          "Missing config file",
-          e);
-      }
-      System.exit(1);
+      Sandbox.showFatalErrorAndExit(
+        Sandbox.makeEmptyLog(),
+        "Could not find config file",
+        e);
     } catch (final IOException e) {
-      if (Sandbox.hasConsole()) {
-        System.err.println("fatal: i/o error: " + e.getMessage());
-        e.printStackTrace();
-      } else {
-        Sandbox.showFatalErrorAndExit(Sandbox.makeEmptyLog(), "I/O error", e);
-      }
-      System.exit(1);
+      Sandbox.showFatalErrorAndExit(
+        Sandbox.makeEmptyLog(),
+        "Error reading config file",
+        e);
     } catch (final ConstraintError e) {
-      if (Sandbox.hasConsole()) {
-        System.err.println("fatal: constraint error: " + e.getMessage());
-        e.printStackTrace();
-      } else {
-        Sandbox.showFatalErrorAndExit(
-          Sandbox.makeEmptyLog(),
-          "Constraint error",
-          e);
-      }
-      System.exit(1);
+      Sandbox.showFatalErrorAndExit(
+        Sandbox.makeEmptyLog(),
+        "Error reading config file",
+        e);
     } catch (final ValueNotFound e) {
-      if (Sandbox.hasConsole()) {
-        System.err.println("fatal: config error: " + e.getMessage());
-        e.printStackTrace();
-      } else {
-        Sandbox.showFatalErrorAndExit(
-          Sandbox.makeEmptyLog(),
-          "Configuration error",
-          e);
-      }
-      System.exit(1);
+      Sandbox.showFatalErrorAndExit(
+        Sandbox.makeEmptyLog(),
+        "Error reading config file",
+        e);
     }
   }
 
@@ -149,17 +124,18 @@ public final class Sandbox
           window.pack();
           window.setVisible(true);
         } catch (final FilesystemError e) {
-          SBErrorBox.showErrorLater(log, "Filesystem error", e);
+          SBErrorBox.showErrorWithTitleLater(log, "Filesystem error", e);
           e.printStackTrace();
-          System.exit(1);
         } catch (final ConstraintError e) {
-          SBErrorBox.showErrorLater(log, "Internal constraint error", e);
+          SBErrorBox.showErrorWithTitleLater(
+            log,
+            "Internal constraint error",
+            e);
           e.printStackTrace();
           System.exit(1);
         } catch (final IOException e) {
-          SBErrorBox.showErrorLater(log, "I/O error", e);
+          SBErrorBox.showErrorWithTitleLater(log, "I/O error", e);
           e.printStackTrace();
-          System.exit(1);
         }
       }
     });
@@ -167,15 +143,39 @@ public final class Sandbox
 
   public static void showFatalErrorAndExit(
     final @Nonnull Log log,
-    final @Nonnull String message,
+    final @Nonnull String title,
     final @Nonnull Throwable e)
   {
+    if (Sandbox.hasConsole()) {
+      System.err.println("fatal: "
+        + title
+        + ": "
+        + e.getClass().getCanonicalName()
+        + ": "
+        + e.getMessage());
+      e.printStackTrace();
+      System.exit(1);
+    }
+
     try {
       SwingUtilities.invokeAndWait(new Runnable() {
         @Override public void run()
         {
-          final int r = SBErrorBox.showError(log, message, e);
-          System.exit(1);
+          final StringBuilder m = new StringBuilder();
+          m.append(title);
+          m.append(" (");
+          m.append(e.getClass().getName());
+          m.append(")");
+
+          final JDialog r =
+            SBErrorBox.showErrorWithTitle(log, m.toString(), e);
+          r.addWindowListener(new WindowAdapter() {
+            @Override public void windowClosing(
+              final WindowEvent _)
+            {
+              System.exit(1);
+            }
+          });
         }
       });
     } catch (final InvocationTargetException x) {
@@ -190,13 +190,25 @@ public final class Sandbox
     final @Nonnull String title,
     final @Nonnull String message)
   {
+    if (Sandbox.hasConsole()) {
+      System.err.println("fatal: " + title + ": " + message);
+      System.exit(1);
+    }
+
     try {
       SwingUtilities.invokeAndWait(new Runnable() {
         @Override public void run()
         {
-          final int r =
+          final JDialog r =
             SBErrorBox.showErrorWithoutException(log, title, message);
-          System.exit(1);
+
+          r.addWindowListener(new WindowAdapter() {
+            @Override public void windowClosing(
+              final WindowEvent _)
+            {
+              System.exit(1);
+            }
+          });
         }
       });
     } catch (final InvocationTargetException x) {

@@ -16,14 +16,22 @@
 
 package com.io7m.renderer.kernel;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Properties;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -35,63 +43,90 @@ import com.io7m.jlog.Log;
 
 public final class SBErrorBox
 {
-  public static int showError(
-    final @Nonnull Log log,
-    final @Nonnull String title,
-    final @Nonnull Throwable e)
+  public static void main(
+    final String args[])
   {
-    log.error(title + ": " + e.getMessage());
-    return SBErrorBox.showErrorWithException(title, e);
-  }
-
-  private static int showErrorBox(
-    final @Nonnull String title,
-    final @Nonnull String message,
-    final @Nonnull JTextArea backtrace)
-  {
-    final JScrollPane pane = new JScrollPane(backtrace);
-    pane.setPreferredSize(new Dimension(600, 320));
-    backtrace.setCaretPosition(0);
-
-    final JPanel header = new JPanel();
-    final DesignGridLayout dg = new DesignGridLayout(header);
-    dg.row().grid().add(new JLabel(title));
-    dg.row().grid().add(new JLabel(message));
-
-    final BorderLayout layout = new BorderLayout();
-    final JPanel panel = new JPanel(layout);
-    panel.add(header, BorderLayout.NORTH);
-    panel.add(pane, BorderLayout.SOUTH);
-
-    final Object[] options = { "OK" };
-    return JOptionPane.showOptionDialog(
-      null,
-      message,
-      title,
-      JOptionPane.YES_NO_OPTION,
-      JOptionPane.ERROR_MESSAGE,
-      null,
-      options,
-      options[0]);
-  }
-
-  public static void showErrorLater(
-    final @Nonnull Log log,
-    final @Nonnull String title,
-    final @Nonnull Throwable e)
-  {
-    log.error(title + ": " + e.getMessage());
-
     SwingUtilities.invokeLater(new Runnable() {
-      @SuppressWarnings("synthetic-access") @Override public void run()
+      @Override public void run()
       {
-        SBErrorBox.showErrorWithException(title, e);
+        final Log log = new Log(new Properties(), "x", "y");
+
+        try {
+          Integer.parseInt("NOT CORRECT");
+        } catch (final NumberFormatException x) {
+          final JDialog d = SBErrorBox.showError(log, x);
+          d.addWindowListener(new WindowAdapter() {
+            @Override public void windowClosing(
+              final WindowEvent e)
+            {
+              System.exit(0);
+            }
+          });
+        }
       }
     });
   }
 
-  private static int showErrorWithException(
+  private static @Nonnull JDialog showActualErrorBox(
     final @Nonnull String title,
+    final @Nonnull String message,
+    final @CheckForNull JTextArea backtrace)
+  {
+    final JDialog d = new JDialog();
+    d.setTitle(title);
+    d.setMinimumSize(new Dimension(320, 0));
+
+    final JButton ok = new JButton("OK");
+    ok.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(
+        final ActionEvent _)
+      {
+        SBWindowUtilities.closeDialog(d);
+      }
+    });
+
+    final JLabel title_label = new JLabel("    " + title);
+    final JPanel error = new JPanel();
+    error.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+
+    try {
+      error.add(SBIcons.makeErrorIcon());
+    } catch (final IOException _) {
+      // Who cares?
+    }
+    error.add(title_label);
+
+    final JPanel main = new JPanel();
+    final DesignGridLayout dg = new DesignGridLayout(main);
+    dg.row().left().add(error);
+    dg.emptyRow();
+    dg.row().grid().add(new JLabel(message));
+
+    if (backtrace != null) {
+      final JScrollPane pane = new JScrollPane(backtrace);
+      pane.setPreferredSize(new Dimension(600, 320));
+      backtrace.setCaretPosition(0);
+
+      final JLabel backtrace_note =
+        new JLabel("The full error backtrace is as follows:");
+      dg.emptyRow();
+      dg.row().grid().add(backtrace_note);
+      dg.emptyRow();
+      dg.row().grid().add(pane);
+    }
+
+    dg.emptyRow();
+    dg.row().grid().add(ok);
+
+    d.setContentPane(main);
+    d.pack();
+    d.setVisible(true);
+    return d;
+  }
+
+  private static @Nonnull JDialog showActualErrorWithException(
+    final @Nonnull String title,
+    final @Nonnull String message,
     final @Nonnull Throwable e)
   {
     final StringWriter writer = new StringWriter();
@@ -106,16 +141,59 @@ public final class SBErrorBox
     text.setEditable(false);
     text.setText(writer.toString());
 
-    return SBErrorBox.showErrorBox(title, e.getMessage(), text);
+    return SBErrorBox.showActualErrorBox(title, message, text);
   }
 
-  public static int showErrorWithoutException(
+  public static @Nonnull JDialog showError(
+    final @Nonnull Log log,
+    final @Nonnull Throwable e)
+  {
+    final String title = e.getClass().getCanonicalName();
+    log.error(title + ": " + e.getMessage());
+    return SBErrorBox.showActualErrorWithException(title, e.getMessage(), e);
+  }
+
+  public static @Nonnull JDialog showErrorWithTitle(
+    final @Nonnull Log log,
+    final @Nonnull String title,
+    final @Nonnull Throwable e)
+  {
+    log.error(title + ": " + e.getMessage());
+    return SBErrorBox.showActualErrorWithException(title, e.getMessage(), e);
+  }
+
+  public static void showErrorLater(
+    final @Nonnull Log log,
+    final @Nonnull Throwable e)
+  {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override public void run()
+      {
+        SBErrorBox.showError(log, e);
+      }
+    });
+  }
+
+  public static void showErrorWithTitleLater(
+    final @Nonnull Log log,
+    final @Nonnull String title,
+    final @Nonnull Throwable e)
+  {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override public void run()
+      {
+        SBErrorBox.showErrorWithTitle(log, title, e);
+      }
+    });
+  }
+
+  public static @Nonnull JDialog showErrorWithoutException(
     final @Nonnull Log log,
     final @Nonnull String title,
     final @Nonnull String message)
   {
     log.error(title + ": " + message);
-    return SBErrorBox.showErrorWithoutException(log, title, message);
+    return SBErrorBox.showActualErrorBox(title, message, null);
   }
 
   public static void showErrorWithoutExceptionLater(
@@ -131,8 +209,7 @@ public final class SBErrorBox
         final JTextArea text = new JTextArea();
         text.setEditable(false);
         text.setText(message);
-
-        SBErrorBox.showErrorBox(title, message, text);
+        SBErrorBox.showActualErrorBox(title, message, text);
       }
     });
   }
