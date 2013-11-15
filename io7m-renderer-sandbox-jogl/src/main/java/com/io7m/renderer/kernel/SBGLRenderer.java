@@ -1237,6 +1237,7 @@ final class SBGLRenderer implements GLEventListener
   {
     this.log.debug("initialized");
     try {
+      drawable.getContext().setSwapInterval(1);
 
       if (this.config.isOpenglDebug()) {
         if (this.config.isOpenglTrace()) {
