@@ -71,17 +71,17 @@
     <dependency>
       <groupId>com.io7m.jcanephora.jogl</groupId>
       <artifactId>io7m-jcanephora-jogl</artifactId>
-      <version>0.13.2</version>
+      <version>0.13.3</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.texload-imageio</groupId>
       <artifactId>io7m-jcanephora-texload-imageio</artifactId>
-      <version>0.13.2</version>
+      <version>0.13.3</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.framebuffer</groupId>
       <artifactId>io7m-jcanephora-framebuffer</artifactId>
-      <version>0.13.2</version>
+      <version>0.13.3</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.renderer.core</groupId>
@@ -295,14 +295,14 @@
         </configuration>
       </plugin>
 
-      <!-- Produce windows binary -->
+      <!-- Produce windows binaries -->
       <plugin>
         <groupId>com.akathist.maven.plugins.launch4j</groupId>
         <artifactId>launch4j-maven-plugin</artifactId>
         <version>1.5.2</version>
         <executions>
           <execution>
-            <id>l4j-sandbox</id>
+            <id>l4j-sandbox-gui</id>
             <phase>package</phase>
             <goals>
               <goal>launch4j</goal>
@@ -310,6 +310,32 @@
             <configuration>
               <headerType>gui</headerType>
               <outfile>target/sandbox.exe</outfile>
+              <dontWrapJar>true</dontWrapJar>
+              <jar>lib/${project.name}-${project.version}.jar</jar>
+              <icon>src/main/resources/com/io7m/renderer/sandbox/icon.ico</icon>
+              <errTitle>sandbox</errTitle>
+              <cmdLine>sandbox.conf</cmdLine>
+              <classPath>
+                <mainClass>com.io7m.renderer.kernel.Sandbox</mainClass>
+                <jarLocation>lib/</jarLocation>
+              </classPath>
+              <jre>
+                <minVersion>1.6.0</minVersion>
+                <opts>
+                  <opt>-Dcom.io7m.renderer.sandbox.no_console=true</opt>
+                </opts>
+              </jre>
+            </configuration>
+          </execution>
+          <execution>
+            <id>l4j-sandbox-console</id>
+            <phase>package</phase>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
+            <configuration>
+              <headerType>console</headerType>
+              <outfile>target/sandbox-console.exe</outfile>
               <dontWrapJar>true</dontWrapJar>
               <jar>lib/${project.name}-${project.version}.jar</jar>
               <icon>src/main/resources/com/io7m/renderer/sandbox/icon.ico</icon>
