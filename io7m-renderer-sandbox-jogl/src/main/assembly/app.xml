@@ -25,6 +25,12 @@
     </file>
     <file>
       <outputDirectory>/</outputDirectory>
+      <fileMode>0755</fileMode>
+      <source>target/sandbox-console.exe</source>
+      <destName>sandbox-console.exe</destName>
+    </file>
+    <file>
+      <outputDirectory>/</outputDirectory>
       <fileMode>0644</fileMode>
       <source>src/main/properties/sandbox.conf</source>
       <destName>sandbox.conf</destName>
