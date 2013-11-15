@@ -58,7 +58,7 @@ import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeKernel;
 import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeSpecific;
-import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.util.Animator;
 
 final class SBMainWindow extends JFrame
 {
@@ -737,7 +737,7 @@ final class SBMainWindow extends JFrame
         }
       });
 
-      final FPSAnimator animator = new FPSAnimator(canvas, 60);
+      final Animator animator = new Animator(canvas);
       animator.start();
 
       final Container pane = this.getContentPane();
