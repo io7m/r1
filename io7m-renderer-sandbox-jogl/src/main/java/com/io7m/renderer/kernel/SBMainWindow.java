@@ -628,6 +628,7 @@ final class SBMainWindow extends JFrame
     try {
       final GLProfile profile = SBMainWindow.getGLProfile();
       final GLCapabilities caps = new GLCapabilities(profile);
+
       log.debug("caps: " + caps);
       final GLCanvas canvas = new GLCanvas(caps);
       canvas.addGLEventListener(renderer);
