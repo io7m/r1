@@ -35,6 +35,8 @@ import com.io7m.jcanephora.JCGLArrayBuffers;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLIndexBuffers;
 import com.io7m.jcanephora.UsageHint;
+import com.io7m.jlog.Level;
+import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.SBProjectionDescription.SBProjectionFrustum;
 import com.io7m.renderer.kernel.SBProjectionDescription.SBProjectionOrthographic;
 import com.io7m.renderer.kernel.SBProjectionDescription.SBProjectionPerspective;
@@ -48,11 +50,19 @@ public abstract class SBVisibleProjection
 
     @SuppressWarnings("synthetic-access") <G extends JCGLArrayBuffers & JCGLIndexBuffers> SBVisibleProjectionFrustum(
       final @Nonnull G g,
-      final @Nonnull SBProjectionFrustum p)
+      final @Nonnull SBProjectionFrustum p,
+      final @Nonnull Log log)
       throws ConstraintError,
         JCGLException
     {
       super(SBProjectionDescription.Type.PROJECTION_FRUSTUM);
+
+      if (log.enabled(Level.LOG_DEBUG)) {
+        final StringBuilder m = new StringBuilder();
+        m.append("Allocate visible frustum ");
+        m.append(p);
+        log.debug(m.toString());
+      }
 
       final ArrayBufferAttributeDescriptor[] ab =
         new ArrayBufferAttributeDescriptor[1];
@@ -202,11 +212,19 @@ public abstract class SBVisibleProjection
 
     @SuppressWarnings("synthetic-access") <G extends JCGLArrayBuffers & JCGLIndexBuffers> SBVisibleProjectionOrthographic(
       final @Nonnull G g,
-      final @Nonnull SBProjectionOrthographic p)
+      final @Nonnull SBProjectionOrthographic p,
+      final @Nonnull Log log)
       throws ConstraintError,
         JCGLException
     {
       super(SBProjectionDescription.Type.PROJECTION_ORTHOGRAPHIC);
+
+      if (log.enabled(Level.LOG_DEBUG)) {
+        final StringBuilder m = new StringBuilder();
+        m.append("Allocate visible orthographic ");
+        m.append(p);
+        log.debug(m.toString());
+      }
 
       final ArrayBufferAttributeDescriptor[] ab =
         new ArrayBufferAttributeDescriptor[1];
@@ -355,11 +373,19 @@ public abstract class SBVisibleProjection
 
     @SuppressWarnings("synthetic-access") <G extends JCGLArrayBuffers & JCGLIndexBuffers> SBVisibleProjectionPerspective(
       final @Nonnull G g,
-      final @Nonnull SBProjectionPerspective p)
+      final @Nonnull SBProjectionPerspective p,
+      final @Nonnull Log log)
       throws ConstraintError,
         JCGLException
     {
       super(SBProjectionDescription.Type.PROJECTION_PERSPECTIVE);
+
+      if (log.enabled(Level.LOG_DEBUG)) {
+        final StringBuilder m = new StringBuilder();
+        m.append("Allocate visible perspective ");
+        m.append(p);
+        log.debug(m.toString());
+      }
 
       final float near_z = (float) p.getNear();
       final float near_x =
@@ -504,26 +530,29 @@ public abstract class SBVisibleProjection
     SBVisibleProjection
     make(
       final @Nonnull G g,
-      final @Nonnull SBProjectionDescription p)
+      final @Nonnull SBProjectionDescription p,
+      final @Nonnull Log log)
       throws ConstraintError,
         JCGLException
   {
     switch (p.getType()) {
       case PROJECTION_FRUSTUM:
       {
-        return new SBVisibleProjectionFrustum(g, (SBProjectionFrustum) p);
+        return new SBVisibleProjectionFrustum(g, (SBProjectionFrustum) p, log);
       }
       case PROJECTION_ORTHOGRAPHIC:
       {
         return new SBVisibleProjectionOrthographic(
           g,
-          (SBProjectionOrthographic) p);
+          (SBProjectionOrthographic) p,
+          log);
       }
       case PROJECTION_PERSPECTIVE:
       {
         return new SBVisibleProjectionPerspective(
           g,
-          (SBProjectionPerspective) p);
+          (SBProjectionPerspective) p,
+          log);
       }
     }
 

@@ -340,7 +340,12 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
           "UV attributes completely assigned");
       }
 
-      this.gl.arrayBufferUpdate(this.array_data);
+      this.gl.arrayBufferBind(RXMLMeshParserVBO.this.array);
+      try {
+        this.gl.arrayBufferUpdate(this.array_data);
+      } finally {
+        this.gl.arrayBufferUnbind();
+      }
     }
 
     @Override public void eventMeshVerticesStarted(
