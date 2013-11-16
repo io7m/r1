@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import javax.annotation.CheckForNull;
@@ -244,7 +245,7 @@ public final class KRendererForward implements KRenderer
     final KMaterial material = i.getMaterial();
     final KMeshInstanceForwardMaterialLabel label =
       i.getForwardMaterialLabel();
-    final TextureUnit[] units = gc.textureGetUnits();
+    final List<TextureUnit> units = gc.textureGetUnits();
     int current_unit = 0;
 
     switch (label.getAlbedo()) {
@@ -258,7 +259,7 @@ public final class KRendererForward implements KRenderer
           gc,
           e,
           material,
-          units[current_unit]);
+          units.get(current_unit));
         ++current_unit;
         break;
       }
@@ -271,7 +272,7 @@ public final class KRendererForward implements KRenderer
           gc,
           e,
           material,
-          units[current_unit]);
+          units.get(current_unit));
         ++current_unit;
         break;
       }
@@ -287,7 +288,7 @@ public final class KRendererForward implements KRenderer
         gc,
         e,
         material,
-        units[current_unit]);
+        units.get(current_unit));
       ++current_unit;
     }
 
@@ -298,7 +299,7 @@ public final class KRendererForward implements KRenderer
           gc,
           e,
           material,
-          units[current_unit]);
+          units.get(current_unit));
         ++current_unit;
         break;
       }
@@ -325,7 +326,7 @@ public final class KRendererForward implements KRenderer
           gc,
           e,
           material,
-          units[current_unit]);
+          units.get(current_unit));
         ++current_unit;
         break;
       }
@@ -343,7 +344,7 @@ public final class KRendererForward implements KRenderer
             gc,
             e,
             (KProjective) light,
-            units[current_unit]);
+            units.get(current_unit));
           ++current_unit;
           break;
         }

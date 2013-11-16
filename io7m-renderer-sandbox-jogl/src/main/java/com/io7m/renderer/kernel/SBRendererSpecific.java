@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
@@ -155,8 +156,8 @@ public final class SBRendererSpecific implements KRenderer
     }
 
     if (KShadingProgramCommon.existsTextureAlbedo(exec)) {
-      final TextureUnit[] units = gc.textureGetUnits();
-      final TextureUnit unit = units[texture_units];
+      final List<TextureUnit> units = gc.textureGetUnits();
+      final TextureUnit unit = units.get(texture_units);
 
       switch (i.getForwardMaterialLabel().getAlbedo()) {
         case ALBEDO_COLOURED:
@@ -228,8 +229,8 @@ public final class SBRendererSpecific implements KRenderer
     }
 
     if (KShadingProgramCommon.existsTextureEmissive(exec)) {
-      final TextureUnit[] units = gc.textureGetUnits();
-      final TextureUnit unit = units[texture_units];
+      final List<TextureUnit> units = gc.textureGetUnits();
+      final TextureUnit unit = units.get(texture_units);
 
       switch (i.getForwardMaterialLabel().getEmissive()) {
         case EMISSIVE_NONE:
@@ -309,8 +310,8 @@ public final class SBRendererSpecific implements KRenderer
     }
 
     if (KShadingProgramCommon.existsTextureEnvironment(exec)) {
-      final TextureUnit[] units = gc.textureGetUnits();
-      final TextureUnit unit = units[texture_units];
+      final List<TextureUnit> units = gc.textureGetUnits();
+      final TextureUnit unit = units.get(texture_units);
 
       switch (el) {
         case ENVIRONMENT_NONE:
@@ -419,8 +420,8 @@ public final class SBRendererSpecific implements KRenderer
     }
 
     if (KShadingProgramCommon.existsLightProjective(exec)) {
-      final TextureUnit[] units = gc.textureGetUnits();
-      final TextureUnit unit = units[texture_units];
+      final List<TextureUnit> units = gc.textureGetUnits();
+      final TextureUnit unit = units.get(texture_units);
 
       ++used_units;
 
@@ -536,8 +537,8 @@ public final class SBRendererSpecific implements KRenderer
     }
 
     if (KShadingProgramCommon.existsTextureNormal(exec)) {
-      final TextureUnit[] units = gc.textureGetUnits();
-      final TextureUnit unit = units[texture_units];
+      final List<TextureUnit> units = gc.textureGetUnits();
+      final TextureUnit unit = units.get(texture_units);
 
       switch (nl) {
         case NORMAL_NONE:
@@ -601,8 +602,8 @@ public final class SBRendererSpecific implements KRenderer
     }
 
     if (KShadingProgramCommon.existsTextureSpecular(exec)) {
-      final TextureUnit[] units = gc.textureGetUnits();
-      final TextureUnit unit = units[texture_units];
+      final List<TextureUnit> units = gc.textureGetUnits();
+      final TextureUnit unit = units.get(texture_units);
 
       switch (sl) {
         case SPECULAR_NONE:

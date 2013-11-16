@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
@@ -84,7 +85,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
   private final @Nonnull JCCEExecutionCallable exec_spherical_map;
   private final @Nonnull JCCEExecutionCallable exec_depth;
   private final @Nonnull VectorM2I             viewport_size;
-  private @Nonnull KFramebufferBasic                framebuffer;
+  private @Nonnull KFramebufferBasic           framebuffer;
 
   KRendererForwardDiffuseSpecular(
     final @Nonnull JCGLImplementation gl,
@@ -433,17 +434,17 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
      */
 
     final KMaterial material = instance.getMaterial();
-    final TextureUnit[] texture_units = gc.textureGetUnits();
+    final List<TextureUnit> texture_units = gc.textureGetUnits();
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
         material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
-          texture_units[0],
+          texture_units.get(0),
           ((Option.Some<Texture2DStatic>) diffuse_0_opt).value);
       } else {
-        gc.texture2DStaticUnbind(texture_units[0]);
+        gc.texture2DStaticUnbind(texture_units.get(0));
       }
     }
 
@@ -459,7 +460,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       .getExponent());
     e.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
-    e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
+    e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units.get(0));
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -539,17 +540,17 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
      */
 
     final KMaterial material = instance.getMaterial();
-    final TextureUnit[] texture_units = gc.textureGetUnits();
+    final List<TextureUnit> texture_units = gc.textureGetUnits();
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
         material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
-          texture_units[0],
+          texture_units.get(0),
           ((Option.Some<Texture2DStatic>) diffuse_0_opt).value);
       } else {
-        gc.texture2DStaticUnbind(texture_units[0]);
+        gc.texture2DStaticUnbind(texture_units.get(0));
       }
     }
 
@@ -557,7 +558,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       final Option<Texture2DStatic> specular_opt =
         material.getSpecular().getTexture();
       gc.texture2DStaticBind(
-        texture_units[3],
+        texture_units.get(3),
         ((Option.Some<Texture2DStatic>) specular_opt).value);
     }
 
@@ -573,8 +574,8 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       .getExponent());
     e.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
-    e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
-    e.execUniformPutTextureUnit(gc, "t_specular", texture_units[3]);
+    e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units.get(0));
+    e.execUniformPutTextureUnit(gc, "t_specular", texture_units.get(3));
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -748,17 +749,17 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
      */
 
     final KMaterial material = instance.getMaterial();
-    final TextureUnit[] texture_units = gc.textureGetUnits();
+    final List<TextureUnit> texture_units = gc.textureGetUnits();
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
         material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
-          texture_units[0],
+          texture_units.get(0),
           ((Option.Some<Texture2DStatic>) diffuse_0_opt).value);
       } else {
-        gc.texture2DStaticUnbind(texture_units[0]);
+        gc.texture2DStaticUnbind(texture_units.get(0));
       }
     }
 
@@ -776,7 +777,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       .getExponent());
     e.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
-    e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
+    e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units.get(0));
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -856,17 +857,17 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
      */
 
     final KMaterial material = instance.getMaterial();
-    final TextureUnit[] texture_units = gc.textureGetUnits();
+    final List<TextureUnit> texture_units = gc.textureGetUnits();
 
     {
       final Option<Texture2DStatic> diffuse_0_opt =
         material.getAlbedo().getTexture();
       if (diffuse_0_opt.isSome()) {
         gc.texture2DStaticBind(
-          texture_units[0],
+          texture_units.get(0),
           ((Option.Some<Texture2DStatic>) diffuse_0_opt).value);
       } else {
-        gc.texture2DStaticUnbind(texture_units[0]);
+        gc.texture2DStaticUnbind(texture_units.get(0));
       }
     }
 
@@ -875,10 +876,10 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
         material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
-          texture_units[2],
+          texture_units.get(2),
           ((Option.Some<Texture2DStatic>) normal_opt).value);
       } else {
-        gc.texture2DStaticUnbind(texture_units[2]);
+        gc.texture2DStaticUnbind(texture_units.get(2));
       }
     }
 
@@ -886,7 +887,7 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       final Option<Texture2DStatic> specular_opt =
         material.getSpecular().getTexture();
       gc.texture2DStaticBind(
-        texture_units[3],
+        texture_units.get(3),
         ((Option.Some<Texture2DStatic>) specular_opt).value);
     }
 
@@ -904,8 +905,8 @@ final class KRendererForwardDiffuseSpecular implements KRenderer
       .getExponent());
     e.execUniformPutMatrix4x4F(gc, "m_modelview", this.matrix_modelview);
     e.execUniformPutMatrix3x3F(gc, "m_normal", this.matrix_normal);
-    e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units[0]);
-    e.execUniformPutTextureUnit(gc, "t_specular", texture_units[3]);
+    e.execUniformPutTextureUnit(gc, "t_diffuse_0", texture_units.get(0));
+    e.execUniformPutTextureUnit(gc, "t_specular", texture_units.get(3));
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
