@@ -31,6 +31,8 @@ import com.io7m.jcanephora.IndexBufferWritableData;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.UsageHint;
+import com.io7m.jlog.Level;
+import com.io7m.jlog.Log;
 
 public final class SBVisibleAxes
 {
@@ -41,10 +43,22 @@ public final class SBVisibleAxes
     final @Nonnull JCGLInterfaceCommon gl,
     final int x,
     final int y,
-    final int z)
+    final int z,
+    final @Nonnull Log log)
     throws ConstraintError,
       JCGLException
   {
+    if (log.enabled(Level.LOG_DEBUG)) {
+      final StringBuilder m = new StringBuilder();
+      m.append("Allocate axes ");
+      m.append(x);
+      m.append(" ");
+      m.append(y);
+      m.append(" ");
+      m.append(z);
+      log.debug(m.toString());
+    }
+
     final ArrayBufferAttributeDescriptor[] ab =
       new ArrayBufferAttributeDescriptor[2];
     ab[0] = KMeshAttributes.ATTRIBUTE_POSITION;
@@ -106,7 +120,12 @@ public final class SBVisibleAxes
     ic.putIndex(index);
     ++index;
 
-    gl.arrayBufferUpdate(array_map);
+    gl.arrayBufferBind(this.array);
+    try {
+      gl.arrayBufferUpdate(array_map);
+    } finally {
+      gl.arrayBufferUnbind();
+    }
     gl.indexBufferUpdate(index_map);
   }
 

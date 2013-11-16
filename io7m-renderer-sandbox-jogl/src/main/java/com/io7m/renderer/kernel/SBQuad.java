@@ -32,6 +32,8 @@ import com.io7m.jcanephora.JCGLArrayBuffers;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLIndexBuffers;
 import com.io7m.jcanephora.UsageHint;
+import com.io7m.jlog.Level;
+import com.io7m.jlog.Log;
 
 public final class SBQuad
 {
@@ -42,10 +44,22 @@ public final class SBQuad
     final @Nonnull G gl,
     final int width,
     final int height,
-    final int z)
+    final int z,
+    final @Nonnull Log log)
     throws ConstraintError,
       JCGLException
   {
+    if (log.enabled(Level.LOG_DEBUG)) {
+      final StringBuilder m = new StringBuilder();
+      m.append("Allocate quad ");
+      m.append(width);
+      m.append("x");
+      m.append(height);
+      m.append(" at ");
+      m.append(z);
+      log.debug(m.toString());
+    }
+
     final ArrayBufferAttributeDescriptor[] ab =
       new ArrayBufferAttributeDescriptor[3];
 
