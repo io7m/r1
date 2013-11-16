@@ -1277,8 +1277,8 @@ final class SBGLRenderer implements GLEventListener
           this.log), this.shader_cache_config);
 
       this.viewport = SBGLRenderer.drawableArea(drawable);
-      this.axes = new SBVisibleAxes(gl, 50, 50, 50);
-      this.grid = new SBVisibleGridPlane(gl, 50, 0, 50);
+      this.axes = new SBVisibleAxes(gl, 50, 50, 50, this.log);
+      this.grid = new SBVisibleGridPlane(gl, 50, 0, 50, this.log);
 
       this.sphere_meshes = new HashMap<PathVirtual, KMesh>();
       SBGLRenderer
@@ -1584,7 +1584,7 @@ final class SBGLRenderer implements GLEventListener
     }
 
     this.screen_quad =
-      new SBQuad(gl, drawable.getWidth(), drawable.getHeight(), -1);
+      new SBQuad(gl, drawable.getWidth(), drawable.getHeight(), -1, this.log);
   }
 
   private void renderResultsToScreen(
@@ -1979,7 +1979,7 @@ final class SBGLRenderer implements GLEventListener
               if (this.projection_cache.containsKey(description)) {
                 vp = this.projection_cache.get(description);
               } else {
-                vp = SBVisibleProjection.make(gl, description);
+                vp = SBVisibleProjection.make(gl, description, this.log);
                 this.projection_cache.put(description, vp);
               }
 
@@ -2163,6 +2163,8 @@ final class SBGLRenderer implements GLEventListener
     final int height)
   {
     try {
+      this.log.debug("Reshape " + width + "x" + height);
+
       this.viewport = SBGLRenderer.drawableArea(drawable);
       final JCGLInterfaceCommon gl = this.gi.getGLCommon();
       this.reloadSizedResources(drawable, gl);
