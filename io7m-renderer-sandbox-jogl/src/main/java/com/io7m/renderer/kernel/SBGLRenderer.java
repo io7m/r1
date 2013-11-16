@@ -28,6 +28,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
@@ -680,7 +681,7 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull MatrixM4x4F                                                matrix_model;
   private final @Nonnull MatrixM4x4F                                                matrix_model_temporary;
   private final @Nonnull MatrixM4x4F                                                matrix_view;
-  private @CheckForNull TextureUnit[]                                               texture_units;
+  private @CheckForNull List<TextureUnit>                                           texture_units;
   private final @Nonnull AtomicReference<SBRendererType>                            renderer_new;
   private @CheckForNull KRenderer                                                   renderer_kernel;
   private @CheckForNull SBRendererSpecific                                          renderer_specific;
@@ -1727,9 +1728,12 @@ final class SBGLRenderer implements GLEventListener
 
       final KFramebufferBasicUsable f = r.rendererFramebufferGet();
       gl.texture2DStaticBind(
-        this.texture_units[0],
+        this.texture_units.get(0),
         f.kframebufferGetOutputTexture());
-      e.execUniformPutTextureUnit(gl, "t_diffuse_0", this.texture_units[0]);
+      e.execUniformPutTextureUnit(
+        gl,
+        "t_diffuse_0",
+        this.texture_units.get(0));
 
       final IndexBuffer indices = this.screen_quad.getIndexBuffer();
       final ArrayBuffer array = this.screen_quad.getArrayBuffer();

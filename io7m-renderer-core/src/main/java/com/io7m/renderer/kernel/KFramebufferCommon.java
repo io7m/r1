@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -169,13 +170,14 @@ import com.io7m.jcanephora.TextureWrapT;
       final Renderbuffer<RenderableDepthStencil> depth =
         g.renderbufferAllocateDepth24Stencil8(width, height);
 
-      final FramebufferColorAttachmentPoint[] points =
+      final List<FramebufferColorAttachmentPoint> points =
         g.framebufferGetColorAttachmentPoints();
-      final FramebufferDrawBuffer[] buffers = g.framebufferGetDrawBuffers();
+      final List<FramebufferDrawBuffer> buffers =
+        g.framebufferGetDrawBuffers();
 
       final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
         new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
-      mappings.put(buffers[0], points[0]);
+      mappings.put(buffers.get(0), points.get(0));
 
       final FramebufferReference fb = g.framebufferAllocate();
       g.framebufferDrawBind(fb);
@@ -229,13 +231,14 @@ import com.io7m.jcanephora.TextureWrapT;
       final Renderbuffer<RenderableDepthStencil> depth =
         g.renderbufferAllocateDepth24Stencil8(width, height);
 
-      final FramebufferColorAttachmentPoint[] points =
+      final List<FramebufferColorAttachmentPoint> points =
         g.framebufferGetColorAttachmentPoints();
-      final FramebufferDrawBuffer[] buffers = g.framebufferGetDrawBuffers();
+      final List<FramebufferDrawBuffer> buffers =
+        g.framebufferGetDrawBuffers();
 
       final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
         new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
-      mappings.put(buffers[0], points[0]);
+      mappings.put(buffers.get(0), points.get(0));
 
       final FramebufferReference fb = g.framebufferAllocate();
       g.framebufferDrawBind(fb);
@@ -289,13 +292,14 @@ import com.io7m.jcanephora.TextureWrapT;
       final Renderbuffer<RenderableDepthStencil> depth =
         g.renderbufferAllocateDepth24Stencil8(width, height);
 
-      final FramebufferColorAttachmentPoint[] points =
+      final List<FramebufferColorAttachmentPoint> points =
         g.framebufferGetColorAttachmentPoints();
-      final FramebufferDrawBuffer[] buffers = g.framebufferGetDrawBuffers();
+      final List<FramebufferDrawBuffer> buffers =
+        g.framebufferGetDrawBuffers();
 
       final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
         new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
-      mappings.put(buffers[0], points[0]);
+      mappings.put(buffers.get(0), points.get(0));
 
       final FramebufferReference fb = g.framebufferAllocate();
       g.framebufferDrawBind(fb);
