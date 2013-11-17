@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -28,13 +29,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
 @Immutable final class KBatches
 {
-  private final @Nonnull ArrayList<KBatchOpaqueLit>   batches_opaque_lit;
-  private final @Nonnull ArrayList<KBatchOpaqueUnlit> batches_opaque_unlit;
-  private final @Nonnull ArrayList<KBatchTranslucent> batches_translucent;
+  private final @Nonnull Map<KLight, ArrayList<KBatchOpaqueLit>> batches_opaque_lit;
+  private final @Nonnull ArrayList<KBatchOpaqueUnlit>            batches_opaque_unlit;
+  private final @Nonnull ArrayList<KBatchTranslucent>            batches_translucent;
 
   KBatches(
+    final @Nonnull Map<KLight, ArrayList<KBatchOpaqueLit>> opaque_lit,
     final @Nonnull ArrayList<KBatchOpaqueUnlit> opaque_unlit,
-    final @Nonnull ArrayList<KBatchOpaqueLit> opaque_lit,
     final @Nonnull ArrayList<KBatchTranslucent> translucent)
     throws ConstraintError
   {
@@ -46,9 +47,9 @@ import com.io7m.jaux.Constraints.ConstraintError;
       Constraints.constrainNotNull(translucent, "Translucent");
   }
 
-  @Nonnull List<KBatchOpaqueLit> getBatchesOpaqueLit()
+  @Nonnull Map<KLight, ArrayList<KBatchOpaqueLit>> getBatchesOpaqueLit()
   {
-    return Collections.unmodifiableList(this.batches_opaque_lit);
+    return Collections.unmodifiableMap(this.batches_opaque_lit);
   }
 
   @Nonnull List<KBatchOpaqueUnlit> getBatchesOpaqueUnlit()

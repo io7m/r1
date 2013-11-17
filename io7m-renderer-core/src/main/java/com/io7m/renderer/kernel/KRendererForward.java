@@ -17,7 +17,10 @@
 package com.io7m.renderer.kernel;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import javax.annotation.CheckForNull;
@@ -418,13 +421,18 @@ public final class KRendererForward implements KRenderer
 
     final KBatches batches = scene.getBatches();
 
-    for (final KBatchOpaqueLit bl : batches.getBatchesOpaqueLit()) {
-      for (final KMeshInstance i : bl.getInstances()) {
-        final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
-        try {
-          this.renderDepthPassMeshOpaque(gc, e, i, mwi);
-        } finally {
-          mwi.instanceFinish();
+    final Map<KLight, ArrayList<KBatchOpaqueLit>> blit =
+      batches.getBatchesOpaqueLit();
+
+    for (final Entry<KLight, ArrayList<KBatchOpaqueLit>> es : blit.entrySet()) {
+      for (final KBatchOpaqueLit b : es.getValue()) {
+        for (final KMeshInstance i : b.getInstances()) {
+          final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
+          try {
+            this.renderDepthPassMeshOpaque(gc, e, i, mwi);
+          } finally {
+            mwi.instanceFinish();
+          }
         }
       }
     }
@@ -621,32 +629,43 @@ public final class KRendererForward implements KRenderer
       JCGLException
   {
     final KBatches batches = scene.getBatches();
+    final Map<KLight, ArrayList<KBatchOpaqueLit>> lit_by_light =
+      batches.getBatchesOpaqueLit();
 
-    for (final KBatchOpaqueLit bl : batches.getBatchesOpaqueLit()) {
-      final KLight light = bl.getLight();
-      final KMeshInstanceForwardMaterialLabel label = bl.getLabel();
+    for (final Entry<KLight, ArrayList<KBatchOpaqueLit>> es : lit_by_light
+      .entrySet()) {
+      final KLight light = es.getKey();
+      final ArrayList<KBatchOpaqueLit> lit = es.getValue();
 
-      KRendererForward.makeLitLabel(this.label_cache, light, label);
+      for (final KBatchOpaqueLit opaque : lit) {
+        final KMeshInstanceForwardMaterialLabel label = opaque.getLabel();
 
-      final JCCEExecutionCallable e =
-        new JCCEExecutionCallable(
-          this.shader_cache.luCacheGet(this.label_cache.toString()));
+        KRendererForward.makeLitLabel(this.label_cache, light, label);
 
-      e.execPrepare(gc);
-      KShadingProgramCommon.putMatrixProjection(
-        e,
-        gc,
-        mwc.getMatrixProjection());
-      this
-        .putLight(gc, light, mwc.getMatrixContext(), mwc.getMatrixView(), e);
-      e.execCancel();
+        final JCCEExecutionCallable e =
+          new JCCEExecutionCallable(
+            this.shader_cache.luCacheGet(this.label_cache.toString()));
 
-      for (final KMeshInstance i : bl.getInstances()) {
-        final WithInstance mwi = mwc.withInstance(i);
-        try {
-          this.renderOpaqueMeshLit(gc, e, light, i, mwi);
-        } finally {
-          mwi.instanceFinish();
+        e.execPrepare(gc);
+        KShadingProgramCommon.putMatrixProjection(
+          e,
+          gc,
+          mwc.getMatrixProjection());
+        this.putLight(
+          gc,
+          light,
+          mwc.getMatrixContext(),
+          mwc.getMatrixView(),
+          e);
+        e.execCancel();
+
+        for (final KMeshInstance i : opaque.getInstances()) {
+          final WithInstance mwi = mwc.withInstance(i);
+          try {
+            this.renderOpaqueMeshLit(gc, e, light, i, mwi);
+          } finally {
+            mwi.instanceFinish();
+          }
         }
       }
     }

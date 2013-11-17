@@ -17,7 +17,10 @@
 package com.io7m.renderer.kernel;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nonnull;
@@ -819,13 +822,21 @@ public final class SBRendererSpecific implements KRenderer
 
     final KBatches batches = scene.getBatches();
 
-    for (final KBatchOpaqueLit bl : batches.getBatchesOpaqueLit()) {
-      for (final KMeshInstance i : bl.getInstances()) {
-        final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
-        try {
-          this.renderDepthPassMesh(gc, i, mwi);
-        } finally {
-          mwi.instanceFinish();
+    final Map<KLight, ArrayList<KBatchOpaqueLit>> lit_by_light =
+      batches.getBatchesOpaqueLit();
+
+    for (final Entry<KLight, ArrayList<KBatchOpaqueLit>> es : lit_by_light
+      .entrySet()) {
+      final ArrayList<KBatchOpaqueLit> lit = es.getValue();
+
+      for (final KBatchOpaqueLit bl : lit) {
+        for (final KMeshInstance i : bl.getInstances()) {
+          final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
+          try {
+            this.renderDepthPassMesh(gc, i, mwi);
+          } finally {
+            mwi.instanceFinish();
+          }
         }
       }
     }
@@ -1020,13 +1031,22 @@ public final class SBRendererSpecific implements KRenderer
 
     final KBatches batches = scene.getBatches();
 
-    for (final KBatchOpaqueLit bl : batches.getBatchesOpaqueLit()) {
-      for (final KMeshInstance i : bl.getInstances()) {
-        final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
-        try {
-          this.renderOpaqueMesh(gc, bl.getLight(), i, mwi);
-        } finally {
-          mwi.instanceFinish();
+    final Map<KLight, ArrayList<KBatchOpaqueLit>> lit_by_light =
+      batches.getBatchesOpaqueLit();
+
+    for (final Entry<KLight, ArrayList<KBatchOpaqueLit>> es : lit_by_light
+      .entrySet()) {
+      final KLight light = es.getKey();
+      final ArrayList<KBatchOpaqueLit> lit = es.getValue();
+
+      for (final KBatchOpaqueLit bl : lit) {
+        for (final KMeshInstance i : bl.getInstances()) {
+          final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
+          try {
+            this.renderOpaqueMesh(gc, light, i, mwi);
+          } finally {
+            mwi.instanceFinish();
+          }
         }
       }
     }
