@@ -32,9 +32,8 @@ enum SBKRendererType
   KRENDERER_DEBUG_NORMALS_MAP_EYE("debug-normals-map-eye"),
   KRENDERER_DEBUG_NORMALS_MAP_TANGENT("debug-normals-map-tangent"),
   KRENDERER_FORWARD("forward"),
-  KRENDERER_FORWARD_DIFFUSE("forward-diffuse"),
-  KRENDERER_FORWARD_DIFFUSE_SPECULAR("forward-diffuse-specular"),
-  KRENDERER_FORWARD_DIFFUSE_SPECULAR_NORMAL("forward-diffuse-specular-normal");
+
+  ;
 
   private final @Nonnull String name;
 
