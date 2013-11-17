@@ -1972,8 +1972,8 @@ final class SBGLRenderer implements GLEventListener
 
       final ArrayList<KBatchOpaqueUnlit> opaque_unlit =
         new ArrayList<KBatchOpaqueUnlit>();
-      final ArrayList<KBatchOpaqueLit> opaque_lit =
-        new ArrayList<KBatchOpaqueLit>();
+      final Map<KLight, ArrayList<KBatchOpaqueLit>> opaque_lit =
+        new HashMap<KLight, ArrayList<KBatchOpaqueLit>>();
       final ArrayList<KBatchTranslucent> translucent =
         new ArrayList<KBatchTranslucent>();
 
@@ -1981,7 +1981,7 @@ final class SBGLRenderer implements GLEventListener
       this.renderSceneMakeLitBatches(p, opaque_lit, translucent);
 
       final KBatches batches =
-        new KBatches(opaque_unlit, opaque_lit, translucent);
+        new KBatches(opaque_lit, opaque_unlit, translucent);
 
       final KScene scene = new KScene(kcamera, p.first, p.second, batches);
       this.scene_previous = this.scene_current;
@@ -2001,7 +2001,7 @@ final class SBGLRenderer implements GLEventListener
 
   private void renderSceneMakeLitBatches(
     final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
-    final @Nonnull ArrayList<KBatchOpaqueLit> opaque_lit,
+    final @Nonnull Map<KLight, ArrayList<KBatchOpaqueLit>> opaque_lit,
     final @Nonnull ArrayList<KBatchTranslucent> translucent_lit)
   {
     for (final KLight l : p.first) {
@@ -2016,6 +2016,7 @@ final class SBGLRenderer implements GLEventListener
           for (final KMeshInstance m : p.second) {
             final KMeshInstanceForwardMaterialLabel mlabel =
               m.getForwardMaterialLabel();
+
             if (instances_by_label.containsKey(mlabel)) {
               final ArrayList<KMeshInstance> ins =
                 instances_by_label.get(mlabel);
@@ -2033,8 +2034,16 @@ final class SBGLRenderer implements GLEventListener
             final KMeshInstanceForwardMaterialLabel label = e.getKey();
             final ArrayList<KMeshInstance> instances = e.getValue();
 
+            final ArrayList<KBatchOpaqueLit> lits;
+            if (opaque_lit.containsKey(l)) {
+              lits = opaque_lit.get(l);
+            } else {
+              lits = new ArrayList<KBatchOpaqueLit>();
+              opaque_lit.put(l, lits);
+            }
+
             if (label.getAlpha() != KMaterialAlphaLabel.ALPHA_TRANSLUCENT) {
-              opaque_lit.add(new KBatchOpaqueLit(l, label, instances));
+              lits.add(new KBatchOpaqueLit(l, label, instances));
             }
           }
 
