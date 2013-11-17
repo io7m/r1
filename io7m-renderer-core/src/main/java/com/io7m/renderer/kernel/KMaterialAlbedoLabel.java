@@ -24,21 +24,8 @@ import com.io7m.jcanephora.ArrayBuffer;
 
 enum KMaterialAlbedoLabel
 {
-  ALBEDO_TEXTURED("BT"),
-  ALBEDO_COLOURED("BC");
-
-  final @Nonnull String code;
-
-  private KMaterialAlbedoLabel(
-    final @Nonnull String code)
-  {
-    this.code = code;
-  }
-
-  public @Nonnull String getCode()
-  {
-    return this.code;
-  }
+  ALBEDO_COLOURED("BC"),
+  ALBEDO_TEXTURED("BT");
 
   static @Nonnull KMaterialAlbedoLabel fromMeshAndMaterial(
     final @Nonnull KMesh mesh,
@@ -60,5 +47,18 @@ enum KMaterialAlbedoLabel
     }
 
     return KMaterialAlbedoLabel.ALBEDO_COLOURED;
+  }
+
+  final @Nonnull String code;
+
+  private KMaterialAlbedoLabel(
+    final @Nonnull String code)
+  {
+    this.code = code;
+  }
+
+  public @Nonnull String getCode()
+  {
+    return this.code;
   }
 }

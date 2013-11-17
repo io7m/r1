@@ -30,12 +30,12 @@ import com.io7m.renderer.RTransformTexture;
 
 @Immutable public final class KMaterial
 {
-  private final @Nonnull KMaterialAlpha                  alpha;
   private final @Nonnull KMaterialAlbedo                 albedo;
+  private final @Nonnull KMaterialAlpha                  alpha;
   private final @Nonnull KMaterialEmissive               emissive;
-  private final @Nonnull KMaterialSpecular               specular;
   private final @Nonnull KMaterialEnvironment            environment;
   private final @Nonnull KMaterialNormal                 normal;
+  private final @Nonnull KMaterialSpecular               specular;
   private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
 
   KMaterial(
@@ -49,12 +49,16 @@ import com.io7m.renderer.RTransformTexture;
     throws ConstraintError
   {
     this.alpha = Constraints.constrainNotNull(alpha, "KMaterialAlphaLabel");
-    this.albedo = Constraints.constrainNotNull(diffuse, "KMaterialAlbedoLabel");
-    this.emissive = Constraints.constrainNotNull(emissive, "KMaterialEmissiveLabel");
+    this.albedo =
+      Constraints.constrainNotNull(diffuse, "KMaterialAlbedoLabel");
+    this.emissive =
+      Constraints.constrainNotNull(emissive, "KMaterialEmissiveLabel");
     this.environment =
       Constraints.constrainNotNull(environment, "KMaterialEnvironmentLabel");
-    this.normal = Constraints.constrainNotNull(normal, "KMaterialNormalLabel");
-    this.specular = Constraints.constrainNotNull(specular, "KMaterialSpecularLabel");
+    this.normal =
+      Constraints.constrainNotNull(normal, "KMaterialNormalLabel");
+    this.specular =
+      Constraints.constrainNotNull(specular, "KMaterialSpecularLabel");
     this.uv_matrix = Constraints.constrainNotNull(uv_matrix, "UV matrix");
   }
 

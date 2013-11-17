@@ -20,8 +20,8 @@ import javax.annotation.concurrent.Immutable;
 
 @Immutable public final class KMaterialAlpha
 {
-  private final boolean translucent;
   private final float   opacity;
+  private final boolean translucent;
 
   KMaterialAlpha(
     final boolean translucent,

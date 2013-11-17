@@ -25,22 +25,9 @@ import com.io7m.jcanephora.ArrayBuffer;
 
 enum KMaterialSpecularLabel
 {
-  SPECULAR_NONE(""),
   SPECULAR_CONSTANT("SC"),
-  SPECULAR_MAPPED("SM");
-
-  final @Nonnull String code;
-
-  private KMaterialSpecularLabel(
-    final @Nonnull String code)
-  {
-    this.code = code;
-  }
-
-  public @Nonnull String getCode()
-  {
-    return this.code;
-  }
+  SPECULAR_MAPPED("SM"),
+  SPECULAR_NONE("");
 
   static @Nonnull KMaterialSpecularLabel fromMeshAndMaterial(
     final @Nonnull KMesh mesh,
@@ -73,5 +60,18 @@ enum KMaterialSpecularLabel
     }
 
     throw new UnreachableCodeException();
+  }
+
+  final @Nonnull String code;
+
+  private KMaterialSpecularLabel(
+    final @Nonnull String code)
+  {
+    this.code = code;
+  }
+
+  public @Nonnull String getCode()
+  {
+    return this.code;
   }
 }

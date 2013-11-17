@@ -21,7 +21,6 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLUnsupportedException;
@@ -45,51 +44,26 @@ public interface KRenderer
    * 
    * @see #rendererFramebufferGet()
    * @throws ConstraintError
-   *           Iff <code>result == null || scene == null</code>.
+   *           Iff
+   *           <code>result == null || scene == null || framebuffer == null</code>
+   *           .
    * @throws JCGLCompileException
    *           Iff a shader cannot be compiled.
    * @throws JCGLUnsupportedException
-   *           Iff a shader, framebuffer, or other resource cannot be created
-   *           or used on the current OpenGL implementation.
+   *           Iff a shader or other resource cannot be created or used on the
+   *           current OpenGL implementation.
    * @throws IOException
    *           Iff an I/O exception occurs during rendering.
    */
 
   public void rendererEvaluate(
+    final @Nonnull KFramebufferUsable framebuffer,
     final @Nonnull KScene scene)
     throws JCGLException,
       ConstraintError,
       JCGLCompileException,
       JCGLUnsupportedException,
       IOException;
-
-  /**
-   * Return a read-only view of the renderer's internal framebuffer. The
-   * returned reference is valid until the next call to
-   * {@link #rendererFramebufferResize(AreaInclusive)}.
-   * 
-   * @see #rendererFramebufferResize(AreaInclusive)
-   */
-
-  public @Nonnull KFramebufferBasicUsable rendererFramebufferGet();
-
-  /**
-   * Resize the renderer's internal framebuffer to <code>size</code>.
-   * 
-   * @throws JCGLException
-   *           Iff an internal OpenGL error occurs.
-   * @throws ConstraintError
-   *           Iff <code>size == null</code>.
-   * @throws JCGLUnsupportedException
-   *           Iff a framebuffer cannot be allocated on this particular OpenGL
-   *           implementation.
-   */
-
-  public void rendererFramebufferResize(
-    final @Nonnull AreaInclusive size)
-    throws JCGLException,
-      ConstraintError,
-      JCGLUnsupportedException;
 
   /**
    * <p>

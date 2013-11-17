@@ -25,9 +25,9 @@ import javax.annotation.concurrent.Immutable;
 
 @Immutable final class KBatchOpaqueLit
 {
-  private final @Nonnull KLight                     light;
+  private final @Nonnull ArrayList<KMeshInstance>          instances;
   private final @Nonnull KMeshInstanceForwardMaterialLabel label;
-  private final @Nonnull ArrayList<KMeshInstance>   instances;
+  private final @Nonnull KLight                            light;
 
   KBatchOpaqueLit(
     final @Nonnull KLight light,

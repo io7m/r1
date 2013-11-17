@@ -31,16 +31,26 @@ import com.io7m.renderer.RTransformView;
 
 @Immutable final class KCamera
 {
-  private final @Nonnull RMatrixI4x4F<RTransformView>       view;
+  public static @Nonnull KCamera make(
+    final @Nonnull RMatrixI4x4F<RTransformView> view,
+    final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
+    throws ConstraintError
+  {
+    return new KCamera(
+      Constraints.constrainNotNull(view, "View matrix"),
+      Constraints.constrainNotNull(projection, "Projection matrix"));
+  }
+
   private final @Nonnull RMatrixI4x4F<RTransformProjection> projection;
 
-  @Override public int hashCode()
+  private final @Nonnull RMatrixI4x4F<RTransformView>       view;
+
+  private KCamera(
+    final @Nonnull RMatrixI4x4F<RTransformView> view,
+    final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
   {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.projection.hashCode();
-    result = (prime * result) + this.view.hashCode();
-    return result;
+    this.view = view;
+    this.projection = projection;
   }
 
   @Override public boolean equals(
@@ -65,24 +75,6 @@ import com.io7m.renderer.RTransformView;
     return true;
   }
 
-  public static @Nonnull KCamera make(
-    final @Nonnull RMatrixI4x4F<RTransformView> view,
-    final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
-    throws ConstraintError
-  {
-    return new KCamera(
-      Constraints.constrainNotNull(view, "View matrix"),
-      Constraints.constrainNotNull(projection, "Projection matrix"));
-  }
-
-  private KCamera(
-    final @Nonnull RMatrixI4x4F<RTransformView> view,
-    final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
-  {
-    this.view = view;
-    this.projection = projection;
-  }
-
   public @Nonnull RMatrixI4x4F<RTransformProjection> getProjectionMatrix()
   {
     return this.projection;
@@ -91,6 +83,15 @@ import com.io7m.renderer.RTransformView;
   public @Nonnull RMatrixI4x4F<RTransformView> getViewMatrix()
   {
     return this.view;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.projection.hashCode();
+    result = (prime * result) + this.view.hashCode();
+    return result;
   }
 
   @Override public String toString()

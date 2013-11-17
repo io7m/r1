@@ -47,20 +47,32 @@ import com.io7m.jvvfs.FilesystemError;
 
 final class KRendererDebugNormalsVertexLocal implements KRenderer
 {
-  private final @Nonnull KTransform.Context    transform_context;
-  private final @Nonnull KMatrices             matrices;
+  public static KRendererDebugNormalsVertexLocal rendererNew(
+    final @Nonnull JCGLImplementation g,
+    final @Nonnull FSCapabilityRead fs,
+    final @Nonnull Log log)
+    throws JCGLCompileException,
+      JCGLUnsupportedException,
+      FilesystemError,
+      IOException,
+      JCGLException,
+      ConstraintError
+  {
+    return new KRendererDebugNormalsVertexLocal(g, fs, log);
+  }
+
+  private final @Nonnull VectorM4F             background;
+  private final @Nonnull JCCEExecutionCallable exec;
   private final @Nonnull JCGLImplementation    gl;
   private final @Nonnull Log                   log;
-  private final @Nonnull VectorM4F             background;
-  private final @Nonnull VectorM2I             viewport_size;
+  private final @Nonnull KMatrices             matrices;
   private final @Nonnull ProgramReference      program;
-  private final @Nonnull JCCEExecutionCallable exec;
-  private @Nonnull KFramebufferBasic                framebuffer;
+  private final @Nonnull KTransform.Context    transform_context;
+  private final @Nonnull VectorM2I             viewport_size;
 
-  KRendererDebugNormalsVertexLocal(
+  private KRendererDebugNormalsVertexLocal(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
-    final @Nonnull AreaInclusive size,
     final @Nonnull Log log)
     throws JCGLCompileException,
       ConstraintError,
@@ -89,7 +101,6 @@ final class KRendererDebugNormalsVertexLocal implements KRenderer
         log);
 
     this.exec = new JCCEExecutionCallable(this.program);
-    this.rendererFramebufferResize(size);
   }
 
   @Override public void rendererClose()
@@ -101,6 +112,7 @@ final class KRendererDebugNormalsVertexLocal implements KRenderer
   }
 
   @Override public void rendererEvaluate(
+    final @Nonnull KFramebufferUsable framebuffer,
     final @Nonnull KScene scene)
     throws JCGLException,
       ConstraintError
@@ -111,8 +123,8 @@ final class KRendererDebugNormalsVertexLocal implements KRenderer
     this.matrices.matricesMakeFromCamera(scene.getCamera());
 
     final FramebufferReferenceUsable output_buffer =
-      this.framebuffer.kframebufferGetOutputBuffer();
-    final AreaInclusive area = this.framebuffer.kframebufferGetArea();
+      framebuffer.kframebufferGetOutputBuffer();
+    final AreaInclusive area = framebuffer.kframebufferGetArea();
     this.viewport_size.x = (int) area.getRangeX().getInterval();
     this.viewport_size.y = (int) area.getRangeY().getInterval();
 
@@ -138,24 +150,6 @@ final class KRendererDebugNormalsVertexLocal implements KRenderer
     } finally {
       gc.framebufferDrawUnbind();
     }
-  }
-
-  @Override public @Nonnull KFramebufferBasicUsable rendererFramebufferGet()
-  {
-    return this.framebuffer;
-  }
-
-  @Override public void rendererFramebufferResize(
-    final @Nonnull AreaInclusive size)
-    throws JCGLException,
-      ConstraintError,
-      JCGLUnsupportedException
-  {
-    if (this.framebuffer != null) {
-      this.framebuffer.kframebufferDelete(this.gl);
-    }
-
-    this.framebuffer = KFramebufferCommon.allocateBasicRGBA(this.gl, size);
   }
 
   @Override public void rendererSetBackgroundRGBA(

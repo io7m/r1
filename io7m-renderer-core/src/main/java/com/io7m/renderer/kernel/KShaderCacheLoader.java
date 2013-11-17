@@ -43,8 +43,8 @@ import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLUnsupporte
 final class KShaderCacheLoader implements
   LUCacheLoader<String, ProgramReference, KShaderCacheException>
 {
-  private final @Nonnull JCGLImplementation gi;
   private final @Nonnull FSCapabilityRead   fs;
+  private final @Nonnull JCGLImplementation gi;
   private final @Nonnull Log                log;
 
   public KShaderCacheLoader(

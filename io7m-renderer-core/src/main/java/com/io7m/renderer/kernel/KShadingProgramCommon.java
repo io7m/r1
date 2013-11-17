@@ -166,18 +166,6 @@ final class KShadingProgramCommon
     KShadingProgramCommon.putTextureEnvironment(exec, gc, texture_unit);
   }
 
-  static void bindPutTextureProjection(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCCEExecutionAPI exec,
-    final @Nonnull KProjective light,
-    final @Nonnull TextureUnit texture_unit)
-    throws ConstraintError,
-      JCGLException
-  {
-    gc.texture2DStaticBind(texture_unit, light.getTexture());
-    KShadingProgramCommon.putTextureProjection(exec, gc, texture_unit);
-  }
-
   static void bindPutTextureNormal(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI exec,
@@ -194,6 +182,18 @@ final class KShadingProgramCommon
     final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
     gc.texture2DStaticBind(texture_unit, some.value);
     KShadingProgramCommon.putTextureNormal(exec, gc, texture_unit);
+  }
+
+  static void bindPutTextureProjection(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull KProjective light,
+    final @Nonnull TextureUnit texture_unit)
+    throws ConstraintError,
+      JCGLException
+  {
+    gc.texture2DStaticBind(texture_unit, light.getTexture());
+    KShadingProgramCommon.putTextureProjection(exec, gc, texture_unit);
   }
 
   static void bindPutTextureSpecular(
@@ -583,36 +583,6 @@ final class KShadingProgramCommon
     KShadingProgramCommon.putLightDirectionalIntensityReuse(e);
   }
 
-  static void putLightProjectiveWithoutTextureProjection(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCCEExecutionAPI exec,
-    final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4F<RTransformView> view,
-    final @Nonnull KProjective light)
-    throws JCGLException,
-      ConstraintError
-  {
-    KShadingProgramCommon.putLightProjectivePosition(
-      gc,
-      exec,
-      context,
-      view,
-      light.getPosition());
-    KShadingProgramCommon.putLightProjectiveColour(
-      gc,
-      exec,
-      light.getColour());
-    KShadingProgramCommon.putLightProjectiveIntensity(
-      gc,
-      exec,
-      light.getIntensity());
-    KShadingProgramCommon.putLightProjectiveFalloff(
-      gc,
-      exec,
-      light.getFalloff());
-    KShadingProgramCommon.putLightProjectiveRange(gc, exec, light.getRange());
-  }
-
   static void putLightProjectiveColour(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI e,
@@ -715,6 +685,36 @@ final class KShadingProgramCommon
       JCGLException
   {
     e.execUniformUseExisting("light_projective.range");
+  }
+
+  static void putLightProjectiveWithoutTextureProjection(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull MatrixM4x4F.Context context,
+    final @Nonnull RMatrixReadable4x4F<RTransformView> view,
+    final @Nonnull KProjective light)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putLightProjectivePosition(
+      gc,
+      exec,
+      context,
+      view,
+      light.getPosition());
+    KShadingProgramCommon.putLightProjectiveColour(
+      gc,
+      exec,
+      light.getColour());
+    KShadingProgramCommon.putLightProjectiveIntensity(
+      gc,
+      exec,
+      light.getIntensity());
+    KShadingProgramCommon.putLightProjectiveFalloff(
+      gc,
+      exec,
+      light.getFalloff());
+    KShadingProgramCommon.putLightProjectiveRange(gc, exec, light.getRange());
   }
 
   static void putLightProjectiveWithoutTextureProjectionReuse(

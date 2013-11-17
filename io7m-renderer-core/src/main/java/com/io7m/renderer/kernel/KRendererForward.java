@@ -86,23 +86,30 @@ public final class KRendererForward implements KRenderer
     buffer.append(label.getCode());
   }
 
-  private final @Nonnull Log                                                      log;
-  private final @Nonnull JCGLImplementation                                       g;
-  private final @Nonnull VectorM4F                                                background;
-  private final @Nonnull KMutableMatrices                                         matrices;
-  private final @Nonnull VectorM2I                                                viewport_size;
-  private final @Nonnull StringBuilder                                            label_cache;
-  private final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache;
-  private @Nonnull KFramebufferBasic                                              framebuffer;
+  public static
+    KRendererForward
+    rendererNew(
+      final @Nonnull JCGLImplementation g,
+      final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache,
+      final @Nonnull Log log)
+      throws ConstraintError
+  {
+    return new KRendererForward(g, shader_cache, log);
+  }
 
-  public KRendererForward(
+  private final @Nonnull VectorM4F                                                background;
+  private final @Nonnull JCGLImplementation                                       g;
+  private final @Nonnull StringBuilder                                            label_cache;
+  private final @Nonnull Log                                                      log;
+  private final @Nonnull KMutableMatrices                                         matrices;
+  private final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache;
+  private final @Nonnull VectorM2I                                                viewport_size;
+
+  private KRendererForward(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache,
-    final @Nonnull AreaInclusive size,
     final @Nonnull Log log)
-    throws JCGLException,
-      JCGLUnsupportedException,
-      ConstraintError
+    throws ConstraintError
   {
     this.log =
       new Log(Constraints.constrainNotNull(log, "log"), "krenderer-forward");
@@ -113,7 +120,6 @@ public final class KRendererForward implements KRenderer
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrices = KMutableMatrices.make();
     this.viewport_size = new VectorM2I();
-    this.rendererFramebufferResize(size);
   }
 
   @SuppressWarnings("static-method") private void putLight(
@@ -154,6 +160,41 @@ public final class KRendererForward implements KRenderer
           context,
           view,
           (KSphere) light);
+        break;
+      }
+    }
+  }
+
+  private void putLightProjectiveMatrixIfNecessary(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable e,
+    final @Nonnull KLight light,
+    final @Nonnull KMutableMatrices.WithInstance mwi)
+    throws ConstraintError,
+      JCGLException
+  {
+    switch (light.getType()) {
+      case LIGHT_DIRECTIONAL:
+      {
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      {
+        final KMutableMatrices.WithProjectiveLight mwp =
+          mwi.withProjectiveLight((KProjective) light);
+
+        try {
+          KShadingProgramCommon.putMatrixTextureProjection(
+            gc,
+            e,
+            mwp.getTextureProjection());
+        } finally {
+          mwp.projectiveLightFinish();
+        }
+        break;
+      }
+      case LIGHT_SPHERE:
+      {
         break;
       }
     }
@@ -456,10 +497,11 @@ public final class KRendererForward implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-    this.framebuffer.kframebufferDelete(this.g);
+
   }
 
   @Override public void rendererEvaluate(
+    final @Nonnull KFramebufferUsable framebuffer,
     final @Nonnull KScene scene)
     throws JCGLException,
       ConstraintError,
@@ -473,9 +515,9 @@ public final class KRendererForward implements KRenderer
 
     try {
       final FramebufferReferenceUsable output_buffer =
-        this.framebuffer.kframebufferGetOutputBuffer();
+        framebuffer.kframebufferGetOutputBuffer();
 
-      final AreaInclusive area = this.framebuffer.kframebufferGetArea();
+      final AreaInclusive area = framebuffer.kframebufferGetArea();
       this.viewport_size.x = (int) area.getRangeX().getInterval();
       this.viewport_size.y = (int) area.getRangeY().getInterval();
 
@@ -559,24 +601,6 @@ public final class KRendererForward implements KRenderer
     } finally {
       mwc.cameraFinish();
     }
-  }
-
-  @Override public @Nonnull KFramebufferBasicUsable rendererFramebufferGet()
-  {
-    return this.framebuffer;
-  }
-
-  @Override public void rendererFramebufferResize(
-    final @Nonnull AreaInclusive size)
-    throws JCGLException,
-      ConstraintError,
-      JCGLUnsupportedException
-  {
-    Constraints.constrainNotNull(size, "Size");
-    if (this.framebuffer != null) {
-      this.framebuffer.kframebufferDelete(this.g);
-    }
-    this.framebuffer = KFramebufferCommon.allocateBasicRGBA(this.g, size);
   }
 
   @Override public void rendererSetBackgroundRGBA(
@@ -727,41 +751,6 @@ public final class KRendererForward implements KRenderer
 
     } finally {
       gc.arrayBufferUnbind();
-    }
-  }
-
-  private void putLightProjectiveMatrixIfNecessary(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCCEExecutionCallable e,
-    final @Nonnull KLight light,
-    final @Nonnull KMutableMatrices.WithInstance mwi)
-    throws ConstraintError,
-      JCGLException
-  {
-    switch (light.getType()) {
-      case LIGHT_DIRECTIONAL:
-      {
-        break;
-      }
-      case LIGHT_PROJECTIVE:
-      {
-        final KMutableMatrices.WithProjectiveLight mwp =
-          mwi.withProjectiveLight((KProjective) light);
-
-        try {
-          KShadingProgramCommon.putMatrixTextureProjection(
-            gc,
-            e,
-            mwp.getTextureProjection());
-        } finally {
-          mwp.projectiveLightFinish();
-        }
-        break;
-      }
-      case LIGHT_SPHERE:
-      {
-        break;
-      }
     }
   }
 

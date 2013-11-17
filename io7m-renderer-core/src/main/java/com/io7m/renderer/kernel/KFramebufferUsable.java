@@ -24,13 +24,7 @@ import com.io7m.jcanephora.Texture2DStaticUsable;
 public interface KFramebufferUsable extends JCGLResourceUsable
 {
   /**
-   * Retrieve the size of the area to which rendering will occur.
-   */
-
-  public AreaInclusive kframebufferGetArea();
-
-  /**
-   * Retrieve the RGBA output buffer.
+   * Retrieve the RGBA output framebuffer.
    */
 
   public FramebufferReferenceUsable kframebufferGetOutputBuffer();
@@ -41,4 +35,9 @@ public interface KFramebufferUsable extends JCGLResourceUsable
 
   public Texture2DStaticUsable kframebufferGetOutputTexture();
 
+  /**
+   * Retrieve the size of the area to which rendering will occur.
+   */
+
+  public AreaInclusive kframebufferGetArea();
 }

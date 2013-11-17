@@ -44,13 +44,13 @@ import com.io7m.renderer.RTransformTexture;
 
 @Immutable public final class KMeshInstance implements KTransformable
 {
-  private final @Nonnull Integer                           id;
-  private final @Nonnull KTransform                        transform;
-  private final @Nonnull KMesh                             mesh;
-  private final @Nonnull KMaterial                         material;
-  private final @Nonnull RMatrixI3x3F<RTransformTexture>   uv_matrix;
   private final @Nonnull KMeshInstanceForwardMaterialLabel forward_label;
+  private final @Nonnull Integer                           id;
+  private final @Nonnull KMaterial                         material;
+  private final @Nonnull KMesh                             mesh;
   private final @Nonnull KMeshInstanceShadowMaterialLabel  shadow_label;
+  private final @Nonnull KTransform                        transform;
+  private final @Nonnull RMatrixI3x3F<RTransformTexture>   uv_matrix;
 
   public KMeshInstance(
     final @Nonnull Integer id,

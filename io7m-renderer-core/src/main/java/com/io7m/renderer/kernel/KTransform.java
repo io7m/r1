@@ -43,11 +43,11 @@ import com.io7m.jtensors.VectorReadable3F;
 
   @NotThreadSafe static final class Context
   {
-    final @Nonnull QuaternionM4F       t_rotation;
-    final @Nonnull MatrixM4x4F         t_matrix4x4;
-    final @Nonnull MatrixM4x4F.Context t_matrix4x4_context;
     final @Nonnull MatrixM3x3F         t_matrix3x3;
     final @Nonnull MatrixM3x3F.Context t_matrix3x3_context;
+    final @Nonnull MatrixM4x4F         t_matrix4x4;
+    final @Nonnull MatrixM4x4F.Context t_matrix4x4_context;
+    final @Nonnull QuaternionM4F       t_rotation;
 
     Context()
     {
@@ -59,9 +59,9 @@ import com.io7m.jtensors.VectorReadable3F;
     }
   }
 
-  private final @Nonnull VectorI3F     translation;
-  private final @Nonnull VectorI3F     scale;
   private final @Nonnull QuaternionI4F orientation;
+  private final @Nonnull VectorI3F     scale;
+  private final @Nonnull VectorI3F     translation;
 
   KTransform(
     final @Nonnull VectorReadable3F translation,

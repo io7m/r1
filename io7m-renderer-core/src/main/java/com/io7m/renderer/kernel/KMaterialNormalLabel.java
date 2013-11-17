@@ -24,22 +24,9 @@ import com.io7m.jcanephora.ArrayBuffer;
 
 enum KMaterialNormalLabel
 {
+  NORMAL_MAPPED("NM"),
   NORMAL_NONE(""),
-  NORMAL_VERTEX("NV"),
-  NORMAL_MAPPED("NM");
-
-  final @Nonnull String code;
-
-  private KMaterialNormalLabel(
-    final @Nonnull String code)
-  {
-    this.code = code;
-  }
-
-  public @Nonnull String getCode()
-  {
-    return this.code;
-  }
+  NORMAL_VERTEX("NV");
 
   static @Nonnull KMaterialNormalLabel fromMeshAndMaterial(
     final @Nonnull KMesh mesh,
@@ -63,5 +50,18 @@ enum KMaterialNormalLabel
     }
 
     return KMaterialNormalLabel.NORMAL_NONE;
+  }
+
+  final @Nonnull String code;
+
+  private KMaterialNormalLabel(
+    final @Nonnull String code)
+  {
+    this.code = code;
+  }
+
+  public @Nonnull String getCode()
+  {
+    return this.code;
   }
 }

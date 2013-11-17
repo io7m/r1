@@ -157,14 +157,14 @@ import com.io7m.jaux.Constraints.ConstraintError;
   }
 
   private final @Nonnull KMaterialAlphaLabel       alpha;
-  private final @Nonnull KMaterialAlbedoLabel      kMaterialAlbedoLabel;
+  private final @Nonnull String                    code;
   private final @Nonnull KMaterialEmissiveLabel    emissive;
   private final @Nonnull KMaterialEnvironmentLabel environment;
+  private final boolean                            implies_specular_map;
+  private final boolean                            implies_uv;
+  private final @Nonnull KMaterialAlbedoLabel      kMaterialAlbedoLabel;
   private final @Nonnull KMaterialNormalLabel      normal;
   private final @Nonnull KMaterialSpecularLabel    specular;
-  private final @Nonnull String                    code;
-  private final boolean                            implies_uv;
-  private final boolean                            implies_specular_map;
 
   KMeshInstanceForwardMaterialLabel(
     final @Nonnull KMaterialAlphaLabel alpha,
