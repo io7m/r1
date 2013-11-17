@@ -65,10 +65,9 @@ import com.io7m.jcanephora.TextureWrapT;
 
 @Immutable final class KFramebufferCommon
 {
-  private static final class KFramebufferBasicRGBA implements
-    KFramebufferBasic
+  private static final class KFramebufferBasicRGBA implements KFramebuffer
   {
-    static @Nonnull KFramebufferBasic allocateBasicRGBA(
+    static @Nonnull KFramebuffer allocateBasicRGBA(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull AreaInclusive size)
       throws ConstraintError,
@@ -143,7 +142,7 @@ import com.io7m.jcanephora.TextureWrapT;
 
     private static @Nonnull
       <R, G extends JCGLFramebuffersGL3 & JCGLTextures2DStaticGL2 & JCGLRenderbuffersGL2>
-      KFramebufferBasic
+      KFramebuffer
       allocateBasicRGBA_GL2(
         final @Nonnull G g,
         final @Nonnull AreaInclusive size)
@@ -181,22 +180,28 @@ import com.io7m.jcanephora.TextureWrapT;
 
       final FramebufferReference fb = g.framebufferAllocate();
       g.framebufferDrawBind(fb);
-      g.framebufferDrawAttachColorTexture2D(fb, color);
-      g.framebufferDrawAttachDepthStencilRenderbuffer(fb, depth);
-      g.framebufferDrawSetBuffers(fb, mappings);
 
-      final FramebufferStatus status = g.framebufferDrawValidate(fb);
-      switch (status) {
-        case FRAMEBUFFER_STATUS_COMPLETE:
-          break;
-        case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
-        case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
-        case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
-        case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
-        case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
-        case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
-          throw new JCGLUnsupportedException(
-            "Could not initialize framebuffer: " + status);
+      try {
+        g.framebufferDrawAttachColorTexture2D(fb, color);
+        g.framebufferDrawAttachDepthStencilRenderbuffer(fb, depth);
+        g.framebufferDrawSetBuffers(fb, mappings);
+
+        final FramebufferStatus status = g.framebufferDrawValidate(fb);
+        switch (status) {
+          case FRAMEBUFFER_STATUS_COMPLETE:
+            break;
+          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
+          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
+          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
+          case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
+          case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
+          case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
+            throw new JCGLUnsupportedException(
+              "Could not initialize framebuffer: " + status);
+        }
+
+      } finally {
+        g.framebufferDrawUnbind();
       }
 
       return new KFramebufferBasicRGBA(size, fb, color, depth);
@@ -204,7 +209,7 @@ import com.io7m.jcanephora.TextureWrapT;
 
     private static @Nonnull
       <R, G extends JCGLFramebuffersGL3 & JCGLTextures2DStaticGL3 & JCGLRenderbuffersGL3>
-      KFramebufferBasic
+      KFramebuffer
       allocateBasicRGBA_GL3(
         final @Nonnull G g,
         final @Nonnull AreaInclusive size)
@@ -242,30 +247,113 @@ import com.io7m.jcanephora.TextureWrapT;
 
       final FramebufferReference fb = g.framebufferAllocate();
       g.framebufferDrawBind(fb);
-      g.framebufferDrawAttachColorTexture2D(fb, color);
-      g.framebufferDrawAttachDepthStencilRenderbuffer(fb, depth);
-      g.framebufferDrawSetBuffers(fb, mappings);
 
-      final FramebufferStatus status = g.framebufferDrawValidate(fb);
-      switch (status) {
-        case FRAMEBUFFER_STATUS_COMPLETE:
-          break;
-        case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
-        case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
-        case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
-        case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
-        case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
-        case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
-          throw new JCGLUnsupportedException(
-            "Could not initialize framebuffer: " + status);
+      try {
+        g.framebufferDrawAttachColorTexture2D(fb, color);
+        g.framebufferDrawAttachDepthStencilRenderbuffer(fb, depth);
+        g.framebufferDrawSetBuffers(fb, mappings);
+
+        final FramebufferStatus status = g.framebufferDrawValidate(fb);
+        switch (status) {
+          case FRAMEBUFFER_STATUS_COMPLETE:
+            break;
+          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
+          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
+          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
+          case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
+          case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
+          case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
+            throw new JCGLUnsupportedException(
+              "Could not initialize framebuffer: " + status);
+        }
+
+      } finally {
+        g.framebufferDrawUnbind();
       }
 
       return new KFramebufferBasicRGBA(size, fb, color, depth);
     }
 
     private static @Nonnull
+      <R, G extends JCGLFramebuffersGLES2 & JCGLTextures2DStaticGLES2 & JCGLRenderbuffersGLES2 & JCGLExtensionsGLES2>
+      KFramebuffer
+      allocateBasicRGBA_GLES2(
+        final @Nonnull G g,
+        final @Nonnull AreaInclusive size)
+        throws JCGLException,
+          ConstraintError,
+          JCGLUnsupportedException
+    {
+      final int width = (int) size.getRangeX().getInterval();
+      final int height = (int) size.getRangeY().getInterval();
+
+      final Texture2DStatic color =
+        g.texture2DStaticAllocateRGBA4444(
+          "framebuffer",
+          width,
+          height,
+          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+          TextureFilterMinification.TEXTURE_FILTER_NEAREST,
+          TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
+
+      final FramebufferReference fb = g.framebufferAllocate();
+      g.framebufferDrawBind(fb);
+
+      Renderbuffer<?> saved_depth = null;
+      try {
+        g.framebufferDrawAttachColorTexture2D(fb, color);
+
+        final Option<JCGLExtensionPackedDepthStencil> eopt =
+          g.extensionPackedDepthStencil().extensionGetSupport();
+
+        switch (eopt.type) {
+          case OPTION_NONE:
+          {
+            final Renderbuffer<RenderableDepth> depth =
+              g.renderbufferAllocateDepth16(width, height);
+            g.framebufferDrawAttachDepthRenderbuffer(fb, depth);
+
+            saved_depth = depth;
+            break;
+          }
+          case OPTION_SOME:
+          {
+            final JCGLExtensionPackedDepthStencil ext =
+              ((Option.Some<JCGLExtensionPackedDepthStencil>) eopt).value;
+            final Renderbuffer<RenderableDepthStencil> depth =
+              ext.renderbufferAllocateDepth24Stencil8(width, height);
+            ext.framebufferDrawAttachDepthStencilRenderbuffer(fb, depth);
+
+            saved_depth = depth;
+            break;
+          }
+        }
+
+        final FramebufferStatus status = g.framebufferDrawValidate(fb);
+        switch (status) {
+          case FRAMEBUFFER_STATUS_COMPLETE:
+            break;
+          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
+          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
+          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
+          case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
+          case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
+          case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
+            throw new JCGLUnsupportedException(
+              "Could not initialize framebuffer: " + status);
+        }
+
+      } finally {
+        g.framebufferDrawUnbind();
+      }
+
+      return new KFramebufferBasicRGBA(size, fb, color, saved_depth);
+    }
+
+    private static @Nonnull
       <R, G extends JCGLFramebuffersGL3 & JCGLTextures2DStaticGLES3 & JCGLRenderbuffersGLES3>
-      KFramebufferBasic
+      KFramebuffer
       allocateBasicRGBA_GLES3(
         final @Nonnull G g,
         final @Nonnull AreaInclusive size)
@@ -303,103 +391,37 @@ import com.io7m.jcanephora.TextureWrapT;
 
       final FramebufferReference fb = g.framebufferAllocate();
       g.framebufferDrawBind(fb);
-      g.framebufferDrawAttachColorTexture2D(fb, color);
-      g.framebufferDrawAttachDepthStencilRenderbuffer(fb, depth);
-      g.framebufferDrawSetBuffers(fb, mappings);
 
-      final FramebufferStatus status = g.framebufferDrawValidate(fb);
-      switch (status) {
-        case FRAMEBUFFER_STATUS_COMPLETE:
-          break;
-        case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
-        case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
-        case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
-        case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
-        case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
-        case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
-          throw new JCGLUnsupportedException(
-            "Could not initialize framebuffer: " + status);
+      try {
+        g.framebufferDrawAttachColorTexture2D(fb, color);
+        g.framebufferDrawAttachDepthStencilRenderbuffer(fb, depth);
+        g.framebufferDrawSetBuffers(fb, mappings);
+
+        final FramebufferStatus status = g.framebufferDrawValidate(fb);
+        switch (status) {
+          case FRAMEBUFFER_STATUS_COMPLETE:
+            break;
+          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
+          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
+          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
+          case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
+          case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
+          case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
+            throw new JCGLUnsupportedException(
+              "Could not initialize framebuffer: " + status);
+        }
+
+      } finally {
+        g.framebufferDrawUnbind();
       }
-
       return new KFramebufferBasicRGBA(size, fb, color, depth);
     }
 
-    private static @Nonnull
-      <R, G extends JCGLFramebuffersGLES2 & JCGLTextures2DStaticGLES2 & JCGLRenderbuffersGLES2 & JCGLExtensionsGLES2>
-      KFramebufferBasic
-      allocateBasicRGBA_GLES2(
-        final @Nonnull G g,
-        final @Nonnull AreaInclusive size)
-        throws JCGLException,
-          ConstraintError,
-          JCGLUnsupportedException
-    {
-      final int width = (int) size.getRangeX().getInterval();
-      final int height = (int) size.getRangeY().getInterval();
-
-      final Texture2DStatic color =
-        g.texture2DStaticAllocateRGBA4444(
-          "framebuffer",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-          TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
-
-      final FramebufferReference fb = g.framebufferAllocate();
-      g.framebufferDrawBind(fb);
-      g.framebufferDrawAttachColorTexture2D(fb, color);
-
-      final Option<JCGLExtensionPackedDepthStencil> eopt =
-        g.extensionPackedDepthStencil().extensionGetSupport();
-
-      Renderbuffer<?> saved_depth = null;
-      switch (eopt.type) {
-        case OPTION_NONE:
-        {
-          final Renderbuffer<RenderableDepth> depth =
-            g.renderbufferAllocateDepth16(width, height);
-          g.framebufferDrawAttachDepthRenderbuffer(fb, depth);
-
-          saved_depth = depth;
-          break;
-        }
-        case OPTION_SOME:
-        {
-          final JCGLExtensionPackedDepthStencil ext =
-            ((Option.Some<JCGLExtensionPackedDepthStencil>) eopt).value;
-          final Renderbuffer<RenderableDepthStencil> depth =
-            ext.renderbufferAllocateDepth24Stencil8(width, height);
-          ext.framebufferDrawAttachDepthStencilRenderbuffer(fb, depth);
-
-          saved_depth = depth;
-          break;
-        }
-      }
-
-      final FramebufferStatus status = g.framebufferDrawValidate(fb);
-      switch (status) {
-        case FRAMEBUFFER_STATUS_COMPLETE:
-          break;
-        case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
-        case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
-        case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
-        case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
-        case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
-        case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
-          throw new JCGLUnsupportedException(
-            "Could not initialize framebuffer: " + status);
-      }
-
-      return new KFramebufferBasicRGBA(size, fb, color, saved_depth);
-    }
-
-    private final @Nonnull FramebufferReference framebuffer;
-    private final @Nonnull Texture2DStatic      color;
-    private final @Nonnull Renderbuffer<?>      depth_stencil;
     private final @Nonnull AreaInclusive        area;
+    private final @Nonnull Texture2DStatic      color;
     private boolean                             deleted;
+    private final @Nonnull Renderbuffer<?>      depth_stencil;
+    private final @Nonnull FramebufferReference framebuffer;
 
     private KFramebufferBasicRGBA(
       final @Nonnull AreaInclusive area,
@@ -447,7 +469,7 @@ import com.io7m.jcanephora.TextureWrapT;
     }
   }
 
-  public static @Nonnull KFramebufferBasic allocateBasicRGBA(
+  public static @Nonnull KFramebuffer allocateBasicRGBA(
     final @Nonnull JCGLImplementation gi,
     final @Nonnull AreaInclusive size)
     throws ConstraintError,

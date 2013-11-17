@@ -26,27 +26,14 @@ enum KMaterialEnvironmentLabel
 {
   ENVIRONMENT_NONE(""),
   ENVIRONMENT_REFLECTIVE("EL"),
-  ENVIRONMENT_REFRACTIVE("ER"),
+  ENVIRONMENT_REFLECTIVE_MAPPED("ELM"),
   ENVIRONMENT_REFLECTIVE_REFRACTIVE("ELR"),
 
-  ENVIRONMENT_REFLECTIVE_MAPPED("ELM"),
-  ENVIRONMENT_REFRACTIVE_MAPPED("ERM"),
   ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED("ELRM"),
+  ENVIRONMENT_REFRACTIVE("ER"),
+  ENVIRONMENT_REFRACTIVE_MAPPED("ERM"),
 
   ;
-
-  final @Nonnull String code;
-
-  private KMaterialEnvironmentLabel(
-    final @Nonnull String code)
-  {
-    this.code = code;
-  }
-
-  public @Nonnull String getCode()
-  {
-    return this.code;
-  }
 
   static @Nonnull KMaterialEnvironmentLabel fromMeshAndMaterial(
     final @Nonnull KMesh mesh,
@@ -93,5 +80,18 @@ enum KMaterialEnvironmentLabel
     }
 
     throw new UnreachableCodeException();
+  }
+
+  final @Nonnull String code;
+
+  private KMaterialEnvironmentLabel(
+    final @Nonnull String code)
+  {
+    this.code = code;
+  }
+
+  public @Nonnull String getCode()
+  {
+    return this.code;
   }
 }

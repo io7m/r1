@@ -25,9 +25,9 @@ import javax.annotation.concurrent.Immutable;
 
 @Immutable final class KBatchTranslucent
 {
-  private final @Nonnull KMeshInstance              instance;
+  private final @Nonnull KMeshInstance                     instance;
   private final @Nonnull KMeshInstanceForwardMaterialLabel label;
-  private final @Nonnull ArrayList<KLight>          lights;
+  private final @Nonnull ArrayList<KLight>                 lights;
 
   KBatchTranslucent(
     final @Nonnull KMeshInstance instance,

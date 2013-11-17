@@ -28,8 +28,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
 @Immutable final class KBatches
 {
-  private final @Nonnull ArrayList<KBatchOpaqueUnlit> batches_opaque_unlit;
   private final @Nonnull ArrayList<KBatchOpaqueLit>   batches_opaque_lit;
+  private final @Nonnull ArrayList<KBatchOpaqueUnlit> batches_opaque_unlit;
   private final @Nonnull ArrayList<KBatchTranslucent> batches_translucent;
 
   KBatches(

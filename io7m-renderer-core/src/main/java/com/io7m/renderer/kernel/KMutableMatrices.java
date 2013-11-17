@@ -174,8 +174,8 @@ import com.io7m.renderer.kernel.KLight.KProjective;
   @SuppressWarnings("synthetic-access") private final class WithInstanceActual implements
     WithInstance
   {
-    private final @Nonnull WithCameraActual parent;
     private final @Nonnull KMeshInstance    instance;
+    private final @Nonnull WithCameraActual parent;
 
     WithInstanceActual(
       final @Nonnull WithCameraActual parent,
@@ -534,27 +534,27 @@ import com.io7m.renderer.kernel.KLight.KProjective;
     return new KMutableMatrices();
   }
 
-  private final @Nonnull KTransform.Context                        transform_context;
-  private final @Nonnull MatrixM4x4F.Context                       matrix_context;
   private final @Nonnull AtomicBoolean                             camera_active;
   private final @Nonnull AtomicBoolean                             instance_active;
-  private final @Nonnull AtomicBoolean                             projective_light_active;
+  private final @Nonnull MatrixM4x4F.Context                       matrix_context;
+  private final @Nonnull RMatrixM4x4F<RTransformModel>             matrix_model;
+  private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_modelview;
 
   /*
    * Camera-specific matrices.
    */
 
+  private final @Nonnull RMatrixM3x3F<RTransformNormal>            matrix_normal;
   private final @Nonnull RMatrixM4x4F<RTransformProjection>        matrix_projection;
-  private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_view;
-  private final @Nonnull RMatrixM4x4F<RTransformViewInverse>       matrix_view_inverse;
+  private final @Nonnull RMatrixM4x4F<RTransformTextureProjection> matrix_texture_projection;
 
   /*
    * Camera-plus-instance-specific matrices.
    */
 
-  private final @Nonnull RMatrixM4x4F<RTransformModel>             matrix_model;
-  private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_modelview;
-  private final @Nonnull RMatrixM3x3F<RTransformNormal>            matrix_normal;
+  private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_texture_projection_modelview;
+  private final @Nonnull RMatrixM4x4F<RTransformProjection>        matrix_texture_projection_projection;
+  private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_texture_projection_view;
   private final @Nonnull RMatrixM3x3F<RTransformTexture>           matrix_uv;
   private final @Nonnull RMatrixM3x3F<RTransformTexture>           matrix_uv_temp;
 
@@ -562,10 +562,10 @@ import com.io7m.renderer.kernel.KLight.KProjective;
    * Camera-plus-instance-plus-light-specific matrices.
    */
 
-  private final @Nonnull RMatrixM4x4F<RTransformTextureProjection> matrix_texture_projection;
-  private final @Nonnull RMatrixM4x4F<RTransformProjection>        matrix_texture_projection_projection;
-  private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_texture_projection_view;
-  private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_texture_projection_modelview;
+  private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_view;
+  private final @Nonnull RMatrixM4x4F<RTransformViewInverse>       matrix_view_inverse;
+  private final @Nonnull AtomicBoolean                             projective_light_active;
+  private final @Nonnull KTransform.Context                        transform_context;
 
   private KMutableMatrices()
   {

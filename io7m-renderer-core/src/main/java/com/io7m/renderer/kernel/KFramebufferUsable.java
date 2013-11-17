@@ -16,41 +16,28 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
+import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.FramebufferReferenceUsable;
+import com.io7m.jcanephora.JCGLResourceUsable;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-
-enum KMaterialAlphaLabel
+public interface KFramebufferUsable extends JCGLResourceUsable
 {
-  ALPHA_OPAQUE("AO"),
-  ALPHA_TRANSLUCENT("AT");
+  /**
+   * Retrieve the RGBA output framebuffer.
+   */
 
-  static @Nonnull KMaterialAlphaLabel fromMeshAndMaterial(
-    final @Nonnull KMesh mesh,
-    final @Nonnull KMaterial material)
-    throws ConstraintError
-  {
-    Constraints.constrainNotNull(mesh, "Mesh");
-    Constraints.constrainNotNull(material, "Material");
+  public FramebufferReferenceUsable kframebufferGetOutputBuffer();
 
-    if (material.getAlpha().isTranslucent()) {
-      return KMaterialAlphaLabel.ALPHA_TRANSLUCENT;
-    }
+  /**
+   * Retrieve the texture that backs the main RGBA output buffer.
+   */
 
-    return KMaterialAlphaLabel.ALPHA_OPAQUE;
-  }
+  public Texture2DStaticUsable kframebufferGetOutputTexture();
 
-  final @Nonnull String code;
+  /**
+   * Retrieve the size of the area to which rendering will occur.
+   */
 
-  private KMaterialAlphaLabel(
-    final @Nonnull String code)
-  {
-    this.code = code;
-  }
-
-  public @Nonnull String getCode()
-  {
-    return this.code;
-  }
+  public AreaInclusive kframebufferGetArea();
 }

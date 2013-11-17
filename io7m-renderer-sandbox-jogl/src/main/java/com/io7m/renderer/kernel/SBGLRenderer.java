@@ -78,6 +78,7 @@ import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jcanephora.Texture2DReadableData;
 import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
@@ -683,11 +684,12 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull MatrixM4x4F                                                matrix_view;
   private @CheckForNull List<TextureUnit>                                           texture_units;
   private final @Nonnull AtomicReference<SBRendererType>                            renderer_new;
-  private @CheckForNull KRenderer                                                   renderer_kernel;
-  private @CheckForNull SBRendererSpecific                                          renderer_specific;
-  private @Nonnull LRUCacheTrivial<String, ProgramReference, KShaderCacheException> shader_cache;
+  private @CheckForNull KRenderer                                                   renderer;
+  private @CheckForNull KFramebuffer                                                framebuffer;
 
+  private @Nonnull LRUCacheTrivial<String, ProgramReference, KShaderCacheException> shader_cache;
   private @Nonnull LRUCacheConfig                                                   shader_cache_config;
+
   private final @Nonnull AtomicReference<SBSceneControllerRenderer>                 controller;
   private final @Nonnull AtomicReference<VectorI3F>                                 background_colour;
   private @Nonnull SBVisibleAxes                                                    axes;
@@ -863,8 +865,7 @@ final class SBGLRenderer implements GLEventListener
       new AtomicReference<RunningState>(RunningState.STATE_INITIAL);
 
     this.renderer_new = new AtomicReference<SBRendererType>();
-    this.renderer_kernel = null;
-    this.renderer_specific = null;
+    this.renderer = null;
   }
 
   private void cameraGetNext()
@@ -1077,7 +1078,7 @@ final class SBGLRenderer implements GLEventListener
         return;
       }
 
-      this.loadNewRendererIfNecessary(SBGLRenderer.drawableArea(drawable));
+      this.loadNewRendererIfNecessary();
       this.handleQueues();
       this.handlePauseToggleRequest();
       this.handleSnapshotRequest();
@@ -1207,26 +1208,14 @@ final class SBGLRenderer implements GLEventListener
         {
           final JCGLInterfaceGL3 g3 =
             ((Option.Some<JCGLInterfaceGL3>) o).value;
+          final Texture2DStaticUsable t =
+            this.framebuffer.kframebufferGetOutputTexture();
+          final Texture2DReadableData r = g3.texture2DStaticGetImage(t);
 
-          if (this.renderer_kernel != null) {
-            final KFramebufferBasicUsable f =
-              this.renderer_kernel.rendererFramebufferGet();
-            final Texture2DReadableData r =
-              g3.texture2DStaticGetImage(f.kframebufferGetOutputTexture());
-            SBTextureUtilities.textureDumpTimestampedTemporary(
-              r,
-              "sandbox",
-              this.log);
-          } else if (this.renderer_specific != null) {
-            final KFramebufferBasicUsable f =
-              this.renderer_specific.rendererFramebufferGet();
-            final Texture2DReadableData r =
-              g3.texture2DStaticGetImage(f.kframebufferGetOutputTexture());
-            SBTextureUtilities.textureDumpTimestampedTemporary(
-              r,
-              "sandbox",
-              this.log);
-          }
+          SBTextureUtilities.textureDumpTimestampedTemporary(
+            r,
+            "sandbox",
+            this.log);
           break;
         }
       }
@@ -1340,8 +1329,7 @@ final class SBGLRenderer implements GLEventListener
   }
 
   private @Nonnull KRenderer initKernelRenderer(
-    final @Nonnull SBKRendererType renderer,
-    final @Nonnull AreaInclusive size)
+    final @Nonnull SBKRendererType type)
     throws JCGLCompileException,
       JCGLUnsupportedException,
       FilesystemError,
@@ -1349,101 +1337,89 @@ final class SBGLRenderer implements GLEventListener
       JCGLException,
       ConstraintError
   {
-    switch (renderer) {
+    switch (type) {
       case KRENDERER_DEBUG_BITANGENTS_EYE:
       {
-        return new KRendererDebugBitangentsEye(
+        return KRendererDebugBitangentsEye.rendererNew(
           this.gi,
           this.filesystem,
-          size,
           this.log);
       }
       case KRENDERER_DEBUG_BITANGENTS_LOCAL:
       {
-        return new KRendererDebugBitangentsLocal(
+        return KRendererDebugBitangentsLocal.rendererNew(
           this.gi,
           this.filesystem,
-          size,
           this.log);
       }
       case KRENDERER_DEBUG_DEPTH:
       {
-        return new KRendererDebugDepth(
+        return KRendererDebugDepth.rendererNew(
           this.gi,
           this.filesystem,
-          size,
           this.log);
       }
       case KRENDERER_DEBUG_NORMALS_MAP_EYE:
       {
-        return new KRendererDebugNormalsMapEye(
+        return KRendererDebugNormalsMapEye.rendererNew(
           this.gi,
           this.filesystem,
-          size,
           this.log);
       }
       case KRENDERER_DEBUG_NORMALS_MAP_LOCAL:
       {
-        return new KRendererDebugNormalsMapLocal(
+        return KRendererDebugNormalsMapLocal.rendererNew(
           this.gi,
           this.filesystem,
-          size,
           this.log);
       }
       case KRENDERER_DEBUG_NORMALS_MAP_TANGENT:
       {
-        return new KRendererDebugNormalsMapTangent(
+        return KRendererDebugNormalsMapTangent.rendererNew(
           this.gi,
           this.filesystem,
-          size,
           this.log);
       }
       case KRENDERER_DEBUG_NORMALS_VERTEX_EYE:
       {
-        return new KRendererDebugNormalsVertexEye(
+        return KRendererDebugNormalsVertexEye.rendererNew(
           this.gi,
           this.filesystem,
-          size,
           this.log);
       }
       case KRENDERER_DEBUG_NORMALS_VERTEX_LOCAL:
       {
-        return new KRendererDebugNormalsVertexLocal(
+        return KRendererDebugNormalsVertexLocal.rendererNew(
           this.gi,
           this.filesystem,
-          size,
           this.log);
       }
       case KRENDERER_DEBUG_TANGENTS_VERTEX_EYE:
       {
-        return new KRendererDebugTangentsVertexEye(
+        return KRendererDebugTangentsVertexEye.rendererNew(
           this.gi,
           this.filesystem,
-          size,
           this.log);
       }
       case KRENDERER_DEBUG_TANGENTS_VERTEX_LOCAL:
       {
-        return new KRendererDebugTangentsVertexLocal(
+        return KRendererDebugTangentsVertexLocal.rendererNew(
           this.gi,
           this.filesystem,
-          size,
           this.log);
       }
       case KRENDERER_DEBUG_UV_VERTEX:
       {
-        return new KRendererDebugUVVertex(
+        return KRendererDebugUVVertex.rendererNew(
           this.gi,
           this.filesystem,
-          size,
           this.log);
       }
       case KRENDERER_FORWARD:
       {
-        return new KRendererForward(
+        return KRendererForward.rendererNew(
           this.gi,
           this.shader_cache,
-          size,
           this.log);
       }
     }
@@ -1451,8 +1427,7 @@ final class SBGLRenderer implements GLEventListener
     throw new UnreachableCodeException();
   }
 
-  private void loadNewRendererIfNecessary(
-    final @Nonnull AreaInclusive size)
+  private void loadNewRendererIfNecessary()
     throws JCGLCompileException,
       JCGLUnsupportedException,
       FilesystemError,
@@ -1462,58 +1437,33 @@ final class SBGLRenderer implements GLEventListener
   {
     final SBRendererType rn = this.renderer_new.getAndSet(null);
     if (rn != null) {
+      final KRenderer old = this.renderer;
+
       switch (rn.getType()) {
         case TYPE_KERNEL:
         {
           final SBRendererTypeKernel rnk = (SBRendererTypeKernel) rn;
-
-          final KRenderer kernel_old = this.renderer_kernel;
-          final SBRendererSpecific specific_old = this.renderer_specific;
-
-          final KRenderer kernel_new =
-            this.initKernelRenderer(rnk.getRenderer(), size);
-
-          this.renderer_kernel = kernel_new;
-          this.renderer_specific = null;
-
-          if (kernel_old != null) {
-            kernel_old.rendererClose();
-          }
-          if (specific_old != null) {
-            specific_old.rendererClose();
-          }
-
+          this.renderer = this.initKernelRenderer(rnk.getRenderer());
           this.running.set(RunningState.STATE_RUNNING);
           break;
         }
         case TYPE_SPECIFIC:
         {
           final SBRendererTypeSpecific rns = (SBRendererTypeSpecific) rn;
-          final KRenderer kernel_old = this.renderer_kernel;
-          final SBRendererSpecific specific_old = this.renderer_specific;
-
           final ProgramReference p = rns.getShader().getProgram();
-          final SBRendererSpecific specific_new =
-            new SBRendererSpecific(
+          this.renderer =
+            SBRendererSpecific.rendererNew(
               this.gi,
               this.filesystem,
               this.log,
-              size,
               p);
-
-          this.renderer_kernel = null;
-          this.renderer_specific = specific_new;
-
-          if (kernel_old != null) {
-            kernel_old.rendererClose();
-          }
-          if (specific_old != null) {
-            specific_old.rendererClose();
-          }
-
           this.running.set(RunningState.STATE_RUNNING);
           break;
         }
+      }
+
+      if (old != null) {
+        old.rendererClose();
       }
     }
   }
@@ -1549,10 +1499,11 @@ final class SBGLRenderer implements GLEventListener
       JCGLUnsupportedException
   {
     final AreaInclusive size = SBGLRenderer.drawableArea(drawable);
-    if (this.renderer_kernel != null) {
-      this.renderer_kernel.rendererFramebufferResize(size);
-    } else if (this.renderer_specific != null) {
-      this.renderer_specific.rendererFramebufferResize(size);
+
+    final KFramebuffer old = this.framebuffer;
+    this.framebuffer = KFramebufferCommon.allocateBasicRGBA(this.gi, size);
+    if (old != null) {
+      old.kframebufferDelete(this.gi);
     }
 
     if (this.screen_quad != null) {
@@ -1690,22 +1641,15 @@ final class SBGLRenderer implements GLEventListener
       1,
       100);
 
-    if ((this.renderer_kernel != null) || (this.renderer_specific != null)) {
-
-      final KRenderer r =
-        this.renderer_kernel != null
-          ? this.renderer_kernel
-          : this.renderer_specific;
-
+    if (this.renderer != null) {
       final JCCEExecutionCallable e = this.exec_uv;
       e.execPrepare(gl);
       e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
       e.execUniformPutMatrix4x4F(gl, "m_modelview", this.matrix_modelview);
 
-      final KFramebufferBasicUsable f = r.rendererFramebufferGet();
       gl.texture2DStaticBind(
         this.texture_units.get(0),
-        f.kframebufferGetOutputTexture());
+        this.framebuffer.kframebufferGetOutputTexture());
       e.execUniformPutTextureUnit(
         gl,
         "t_diffuse_0",
@@ -2044,14 +1988,13 @@ final class SBGLRenderer implements GLEventListener
       this.scene_current = scene;
       this.scene_lights = pgot.first;
 
-      if (this.renderer_kernel != null) {
-        final KRenderer kr = this.renderer_kernel;
-        kr.rendererSetBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f));
-        kr.rendererEvaluate(scene);
-      } else if (this.renderer_specific != null) {
-        final SBRendererSpecific rs = this.renderer_specific;
-        rs.rendererSetBackgroundRGBA(new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f));
-        rs.rendererEvaluate(scene);
+      if (this.renderer != null) {
+        this.renderer.rendererSetBackgroundRGBA(new VectorI4F(
+          0.0f,
+          0.0f,
+          0.0f,
+          0.0f));
+        this.renderer.rendererEvaluate(this.framebuffer, scene);
       }
     }
   }

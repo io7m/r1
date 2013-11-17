@@ -129,13 +129,13 @@ import com.io7m.renderer.RVectorReadable3F;
         shadow);
     }
 
-    private final @Nonnull Texture2DStaticUsable              texture;
-    private final @Nonnull RVectorReadable3F<RSpaceWorld>     position;
-    private final @Nonnull QuaternionI4F                      orientation;
-    private final float                                       range;
     private final float                                       falloff;
+    private final @Nonnull QuaternionI4F                      orientation;
+    private final @Nonnull RVectorReadable3F<RSpaceWorld>     position;
     private final @Nonnull RMatrixI4x4F<RTransformProjection> projection;
+    private final float                                       range;
     private final @Nonnull Option<KShadow>                    shadow;
+    private final @Nonnull Texture2DStaticUsable              texture;
 
     private @SuppressWarnings("synthetic-access") KProjective(
       final @Nonnull Integer id,
@@ -281,9 +281,9 @@ import com.io7m.renderer.RVectorReadable3F;
       return new KSphere(id, colour, intensity, position, radius, falloff);
     }
 
+    private final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float           falloff;
     private final @Nonnull RVectorReadable3F<RSpaceWorld>                        position;
     private final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius;
-    private final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float           falloff;
 
     private @SuppressWarnings("synthetic-access") KSphere(
       final @Nonnull Integer id,
@@ -369,12 +369,12 @@ import com.io7m.renderer.RVectorReadable3F;
 
   static enum Type
   {
-    LIGHT_SPHERE("Sphere", "LS"),
+    LIGHT_DIRECTIONAL("Directional", "LD"),
     LIGHT_PROJECTIVE("Projective", "LP"),
-    LIGHT_DIRECTIONAL("Directional", "LD");
+    LIGHT_SPHERE("Sphere", "LS");
 
-    private final @Nonnull String name;
     private final @Nonnull String code;
+    private final @Nonnull String name;
 
     private Type(
       final @Nonnull String name,
@@ -395,10 +395,10 @@ import com.io7m.renderer.RVectorReadable3F;
     }
   }
 
-  private final @Nonnull Integer                                    id;
-  private final @Nonnull Type                                       type;
   private final @Nonnull RVectorI3F<RSpaceRGB>                      colour;
+  private final @Nonnull Integer                                    id;
   private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
+  private final @Nonnull Type                                       type;
 
   private KLight(
     final @Nonnull Type type,

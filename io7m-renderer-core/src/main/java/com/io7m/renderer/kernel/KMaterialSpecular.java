@@ -26,9 +26,9 @@ import com.io7m.jcanephora.Texture2DStatic;
 
 @Immutable public final class KMaterialSpecular
 {
-  private final @Nonnull Option<Texture2DStatic> texture;
-  private final float                            intensity;
   private final float                            exponent;
+  private final float                            intensity;
+  private final @Nonnull Option<Texture2DStatic> texture;
 
   KMaterialSpecular(
     final float intensity,

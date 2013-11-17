@@ -649,13 +649,26 @@ public final class SBRendererSpecific implements KRenderer
   private final @Nonnull JCCEExecutionCallable                     exec_program;
   private final @Nonnull VectorM2I                                 viewport_size;
   private final @Nonnull RMatrixM4x4F<RTransformTextureProjection> fake_texture_projection;
-  private @Nonnull KFramebufferBasic                               framebuffer;
+
+  public static SBRendererSpecific rendererNew(
+    final @Nonnull JCGLImplementation g,
+    final @Nonnull FSCapabilityRead fs,
+    final @Nonnull Log log,
+    final @Nonnull ProgramReference program)
+    throws JCGLCompileException,
+      JCGLUnsupportedException,
+      FilesystemError,
+      IOException,
+      JCGLException,
+      ConstraintError
+  {
+    return new SBRendererSpecific(g, fs, log, program);
+  }
 
   public SBRendererSpecific(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log,
-    final @Nonnull AreaInclusive size,
     final @Nonnull ProgramReference program)
     throws ConstraintError,
       JCGLException,
@@ -688,8 +701,6 @@ public final class SBRendererSpecific implements KRenderer
 
     this.fake_texture_projection =
       new RMatrixM4x4F<RTransformTextureProjection>();
-
-    this.rendererFramebufferResize(size);
   }
 
   private void putTextureProjectionMatrixForLight(
@@ -839,6 +850,7 @@ public final class SBRendererSpecific implements KRenderer
   }
 
   @Override public void rendererEvaluate(
+    final @Nonnull KFramebufferUsable framebuffer,
     final @Nonnull KScene scene)
     throws JCGLException,
       ConstraintError
@@ -850,9 +862,9 @@ public final class SBRendererSpecific implements KRenderer
 
     try {
       final FramebufferReferenceUsable output_buffer =
-        this.framebuffer.kframebufferGetOutputBuffer();
+        framebuffer.kframebufferGetOutputBuffer();
 
-      final AreaInclusive area = this.framebuffer.kframebufferGetArea();
+      final AreaInclusive area = framebuffer.kframebufferGetArea();
       this.viewport_size.x = (int) area.getRangeX().getInterval();
       this.viewport_size.y = (int) area.getRangeY().getInterval();
 
@@ -906,24 +918,6 @@ public final class SBRendererSpecific implements KRenderer
     } finally {
       mwc.cameraFinish();
     }
-  }
-
-  @Override public @Nonnull KFramebufferBasicUsable rendererFramebufferGet()
-  {
-    return this.framebuffer;
-  }
-
-  @Override public void rendererFramebufferResize(
-    final @Nonnull AreaInclusive size)
-    throws JCGLException,
-      ConstraintError,
-      JCGLUnsupportedException
-  {
-    if (this.framebuffer != null) {
-      this.framebuffer.kframebufferDelete(this.gl);
-    }
-
-    this.framebuffer = KFramebufferCommon.allocateBasicRGBA(this.gl, size);
   }
 
   @Override public void rendererSetBackgroundRGBA(

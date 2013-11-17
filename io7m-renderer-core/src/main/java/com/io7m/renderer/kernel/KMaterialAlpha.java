@@ -16,24 +16,19 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-@Immutable final class KBatchOpaqueUnlit
+@Immutable public final class KMaterialAlpha
 {
-  private final @Nonnull ArrayList<KMeshInstance>          instances;
-  private final @Nonnull KMeshInstanceForwardMaterialLabel label;
+  private final float   opacity;
+  private final boolean translucent;
 
-  KBatchOpaqueUnlit(
-    final @Nonnull KMeshInstanceForwardMaterialLabel label,
-    final @Nonnull ArrayList<KMeshInstance> instances)
+  KMaterialAlpha(
+    final boolean translucent,
+    final float opacity)
   {
-    this.label = label;
-    this.instances = instances;
+    this.translucent = translucent;
+    this.opacity = opacity;
   }
 
   @Override public boolean equals(
@@ -48,42 +43,43 @@ import javax.annotation.concurrent.Immutable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KBatchOpaqueUnlit other = (KBatchOpaqueUnlit) obj;
-    if (!this.instances.equals(other.instances)) {
+    final KMaterialAlpha other = (KMaterialAlpha) obj;
+    if (Float.floatToIntBits(this.opacity) != Float
+      .floatToIntBits(other.opacity)) {
       return false;
     }
-    if (!this.label.equals(other.label)) {
+    if (this.translucent != other.translucent) {
       return false;
     }
     return true;
   }
 
-  public @Nonnull List<KMeshInstance> getInstances()
+  public float getOpacity()
   {
-    return Collections.unmodifiableList(this.instances);
-  }
-
-  public @Nonnull KMeshInstanceForwardMaterialLabel getLabel()
-  {
-    return this.label;
+    return this.opacity;
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.instances.hashCode();
-    result = (prime * result) + this.label.hashCode();
+    result = (prime * result) + Float.floatToIntBits(this.opacity);
+    result = (prime * result) + (this.translucent ? 1231 : 1237);
     return result;
+  }
+
+  public boolean isTranslucent()
+  {
+    return this.translucent;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KBatchOpaqueUnlit ");
-    builder.append(this.label);
+    builder.append("[KMaterialAlpha ");
+    builder.append(this.translucent);
     builder.append(" ");
-    builder.append(this.instances);
+    builder.append(this.opacity);
     builder.append("]");
     return builder.toString();
   }

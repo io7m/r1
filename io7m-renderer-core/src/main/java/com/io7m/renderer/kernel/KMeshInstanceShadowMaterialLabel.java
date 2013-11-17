@@ -58,8 +58,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
     return buffer.toString();
   }
 
-  private final @Nonnull KMaterialAlphaLabel  alpha;
   private final @Nonnull KMaterialAlbedoLabel albedo;
+  private final @Nonnull KMaterialAlphaLabel  alpha;
   private final @Nonnull String               code;
   private final boolean                       implies_uv;
 
