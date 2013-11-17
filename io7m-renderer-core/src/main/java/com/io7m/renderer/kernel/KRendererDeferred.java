@@ -20,10 +20,8 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnimplementedCodeException;
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jtensors.VectorReadable4F;
 
 final class KRendererDeferred implements KRenderer
@@ -40,23 +38,10 @@ final class KRendererDeferred implements KRenderer
   }
 
   @Override public void rendererEvaluate(
+    final @Nonnull KFramebufferUsable framebuffer,
     final @Nonnull KScene scene)
     throws JCGLException,
       ConstraintError
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public @Nonnull KFramebufferBasicUsable rendererFramebufferGet()
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public void rendererFramebufferResize(
-    final @Nonnull AreaInclusive size)
-    throws JCGLException,
-      ConstraintError,
-      JCGLUnsupportedException
   {
     throw new UnimplementedCodeException();
   }

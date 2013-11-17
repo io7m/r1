@@ -31,11 +31,11 @@ public abstract class KShaderCacheException extends Exception
 {
   public static enum Code
   {
+    KSHADER_CACHE_FILESYSTEM_ERROR,
+    KSHADER_CACHE_IO_ERROR,
+    KSHADER_CACHE_JCGL_COMPILE_ERROR,
     KSHADER_CACHE_JCGL_ERROR,
     KSHADER_CACHE_JCGL_UNSUPPORTED_ERROR,
-    KSHADER_CACHE_JCGL_COMPILE_ERROR,
-    KSHADER_CACHE_IO_ERROR,
-    KSHADER_CACHE_FILESYSTEM_ERROR,
   }
 
   public static final class KShaderCacheFilesystemException extends

@@ -93,28 +93,28 @@ import com.io7m.renderer.kernel.KLight.KProjective;
   }
 
   private final @Nonnull MatrixM4x4F.Context                       matrix_context;
-  private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_modelview;
-  private final @Nonnull RMatrixM4x4F<RTransformProjection>        matrix_projection;
   private final @Nonnull RMatrixM4x4F<RTransformModel>             matrix_model;
-  private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_view;
-  private final @Nonnull RMatrixM4x4F<RTransformViewInverse>       matrix_view_inverse;
+  private boolean                                                  matrix_model_done;
+  private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_modelview;
+  private boolean                                                  matrix_modelview_done;
   private final @Nonnull RMatrixM3x3F<RTransformNormal>            matrix_normal;
-  private final @Nonnull RMatrixM3x3F<RTransformTexture>           matrix_uv;
-  private final @Nonnull RMatrixM3x3F<RTransformTexture>           matrix_uv_temp;
+  private boolean                                                  matrix_normal_done;
+  private final @Nonnull RMatrixM4x4F<RTransformProjection>        matrix_projection;
+  private boolean                                                  matrix_projection_done;
   private final @Nonnull RMatrixM4x4F<RTransformTextureProjection> matrix_texture_projection;
+  private boolean                                                  matrix_texture_projection_done;
+  private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_texture_projection_modelview;
   private final @Nonnull RMatrixM4x4F<RTransformProjection>        matrix_texture_projection_projection;
   private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_texture_projection_view;
-  private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_texture_projection_modelview;
-  private final @Nonnull KTransform.Context                        transform_context;
 
-  private boolean                                                  matrix_model_done;
-  private boolean                                                  matrix_modelview_done;
-  private boolean                                                  matrix_projection_done;
-  private boolean                                                  matrix_view_done;
-  private boolean                                                  matrix_view_inverse_done;
-  private boolean                                                  matrix_normal_done;
+  private final @Nonnull RMatrixM3x3F<RTransformTexture>           matrix_uv;
   private boolean                                                  matrix_uv_done;
-  private boolean                                                  matrix_texture_projection_done;
+  private final @Nonnull RMatrixM3x3F<RTransformTexture>           matrix_uv_temp;
+  private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_view;
+  private boolean                                                  matrix_view_done;
+  private final @Nonnull RMatrixM4x4F<RTransformViewInverse>       matrix_view_inverse;
+  private boolean                                                  matrix_view_inverse_done;
+  private final @Nonnull KTransform.Context                        transform_context;
 
   public KMatrices()
   {

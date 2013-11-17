@@ -27,10 +27,10 @@ import com.io7m.jcanephora.TextureCubeStatic;
 @Immutable public final class KMaterialEnvironment
 {
   private final float                              mix;
-  private final float                              refraction_index;
-  private final float                              reflection_mix;
-  private final @Nonnull Option<TextureCubeStatic> texture;
   private final boolean                            mix_mapped;
+  private final float                              reflection_mix;
+  private final float                              refraction_index;
+  private final @Nonnull Option<TextureCubeStatic> texture;
 
   KMaterialEnvironment(
     final float mix,
@@ -89,6 +89,11 @@ import com.io7m.jcanephora.TextureCubeStatic;
     return this.mix;
   }
 
+  public boolean getMixFromSpecularMap()
+  {
+    return this.mix_mapped;
+  }
+
   public float getReflectionMix()
   {
     return this.reflection_mix;
@@ -102,11 +107,6 @@ import com.io7m.jcanephora.TextureCubeStatic;
   public @Nonnull Option<TextureCubeStatic> getTexture()
   {
     return this.texture;
-  }
-
-  public boolean getMixFromSpecularMap()
-  {
-    return this.mix_mapped;
   }
 
   @Override public int hashCode()

@@ -26,19 +26,6 @@ enum KMaterialAlphaLabel
   ALPHA_OPAQUE("AO"),
   ALPHA_TRANSLUCENT("AT");
 
-  final @Nonnull String code;
-
-  private KMaterialAlphaLabel(
-    final @Nonnull String code)
-  {
-    this.code = code;
-  }
-
-  public @Nonnull String getCode()
-  {
-    return this.code;
-  }
-
   static @Nonnull KMaterialAlphaLabel fromMeshAndMaterial(
     final @Nonnull KMesh mesh,
     final @Nonnull KMaterial material)
@@ -52,5 +39,18 @@ enum KMaterialAlphaLabel
     }
 
     return KMaterialAlphaLabel.ALPHA_OPAQUE;
+  }
+
+  final @Nonnull String code;
+
+  private KMaterialAlphaLabel(
+    final @Nonnull String code)
+  {
+    this.code = code;
+  }
+
+  public @Nonnull String getCode()
+  {
+    return this.code;
   }
 }

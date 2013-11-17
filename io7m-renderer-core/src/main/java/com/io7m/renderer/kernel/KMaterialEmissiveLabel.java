@@ -24,22 +24,9 @@ import com.io7m.jcanephora.ArrayBuffer;
 
 enum KMaterialEmissiveLabel
 {
-  EMISSIVE_NONE(""),
   EMISSIVE_CONSTANT("MC"),
-  EMISSIVE_MAPPED("MM");
-
-  final @Nonnull String code;
-
-  private KMaterialEmissiveLabel(
-    final @Nonnull String code)
-  {
-    this.code = code;
-  }
-
-  public @Nonnull String getCode()
-  {
-    return this.code;
-  }
+  EMISSIVE_MAPPED("MM"),
+  EMISSIVE_NONE("");
 
   static @Nonnull KMaterialEmissiveLabel fromMeshAndMaterial(
     final @Nonnull KMesh mesh,
@@ -61,5 +48,18 @@ enum KMaterialEmissiveLabel
     }
 
     return KMaterialEmissiveLabel.EMISSIVE_CONSTANT;
+  }
+
+  final @Nonnull String code;
+
+  private KMaterialEmissiveLabel(
+    final @Nonnull String code)
+  {
+    this.code = code;
+  }
+
+  public @Nonnull String getCode()
+  {
+    return this.code;
   }
 }

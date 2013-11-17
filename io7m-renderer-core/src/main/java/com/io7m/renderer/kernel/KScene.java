@@ -23,10 +23,10 @@ import javax.annotation.concurrent.Immutable;
 
 @Immutable final class KScene
 {
-  private final @Nonnull KCamera                   camera;
-  private final @Nonnull Collection<KLight>        lights;
-  private final @Nonnull Collection<KMeshInstance> instances;
   private final @Nonnull KBatches                  batches;
+  private final @Nonnull KCamera                   camera;
+  private final @Nonnull Collection<KMeshInstance> instances;
+  private final @Nonnull Collection<KLight>        lights;
 
   KScene(
     final @Nonnull KCamera camera,

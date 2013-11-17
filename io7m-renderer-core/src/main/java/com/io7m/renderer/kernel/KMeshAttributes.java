@@ -30,6 +30,14 @@ import com.io7m.jcanephora.JCGLScalarType;
 
 @Immutable public final class KMeshAttributes
 {
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_BITANGENT;
+
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_COLOUR;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_NORMAL;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_POSITION;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT3;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT4;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_UV;
   static {
     try {
       ATTRIBUTE_BITANGENT =
@@ -74,12 +82,4 @@ import com.io7m.jcanephora.JCGLScalarType;
       throw new UnreachableCodeException();
     }
   }
-
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_BITANGENT;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_COLOUR;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_NORMAL;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_POSITION;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT3;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT4;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_UV;
 }
