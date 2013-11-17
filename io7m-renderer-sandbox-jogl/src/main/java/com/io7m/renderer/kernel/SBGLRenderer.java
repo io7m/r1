@@ -1438,30 +1438,6 @@ final class SBGLRenderer implements GLEventListener
           size,
           this.log);
       }
-      case KRENDERER_FORWARD_DIFFUSE:
-      {
-        return new KRendererForwardDiffuse(
-          this.gi,
-          this.filesystem,
-          size,
-          this.log);
-      }
-      case KRENDERER_FORWARD_DIFFUSE_SPECULAR:
-      {
-        return new KRendererForwardDiffuseSpecular(
-          this.gi,
-          this.filesystem,
-          size,
-          this.log);
-      }
-      case KRENDERER_FORWARD_DIFFUSE_SPECULAR_NORMAL:
-      {
-        return new KRendererForwardDiffuseSpecularNormal(
-          this.gi,
-          this.filesystem,
-          size,
-          this.log);
-      }
       case KRENDERER_FORWARD:
       {
         return new KRendererForward(
