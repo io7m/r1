@@ -93,7 +93,6 @@ import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LRUCacheConfig;
 import com.io7m.jlucache.LRUCacheTrivial;
-import com.io7m.jlucache.LUCache;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI2I;
@@ -688,8 +687,6 @@ final class SBGLRenderer implements GLEventListener
   private @CheckForNull KRenderer                                                   renderer;
   private @CheckForNull KFramebuffer                                                framebuffer;
 
-  private @Nonnull LUCache<Integer, Texture2DStatic, KShadowCacheException>         shadow_cache;
-  private @Nonnull LRUCacheConfig                                                   shadow_cache_config;
   private @Nonnull LRUCacheTrivial<String, ProgramReference, KShaderCacheException> shader_cache;
   private @Nonnull LRUCacheConfig                                                   shader_cache_config;
 
@@ -1268,13 +1265,6 @@ final class SBGLRenderer implements GLEventListener
           this.filesystem,
           this.log), this.shader_cache_config);
 
-      this.shadow_cache_config =
-        LRUCacheConfig.empty().withMaximumCapacity(64 * 1024 * 1024);
-      this.shadow_cache =
-        LRUCacheTrivial.newCache(
-          new KShadowCacheLoader(this.gi, this.log),
-          this.shadow_cache_config);
-
       this.viewport = SBGLRenderer.drawableArea(drawable);
       this.axes = new SBVisibleAxes(gl, 50, 50, 50, this.log);
       this.grid = new SBVisibleGridPlane(gl, 50, 0, 50, this.log);
@@ -1429,7 +1419,6 @@ final class SBGLRenderer implements GLEventListener
         return KRendererForward.rendererNew(
           this.gi,
           this.shader_cache,
-          this.shadow_cache,
           this.log);
       }
     }
