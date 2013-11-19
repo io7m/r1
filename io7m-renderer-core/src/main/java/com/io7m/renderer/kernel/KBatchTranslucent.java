@@ -16,26 +16,33 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+/**
+ * A single translucent instance, lit by all of the given lights.
+ */
+
 @Immutable final class KBatchTranslucent
 {
-  private final @Nonnull KMeshInstance                     instance;
-  private final @Nonnull KMeshInstanceForwardMaterialLabel label;
-  private final @Nonnull ArrayList<KLight>                 lights;
-
-  KBatchTranslucent(
+  public static @Nonnull KBatchTranslucent newBatch(
     final @Nonnull KMeshInstance instance,
-    final @Nonnull KMeshInstanceForwardMaterialLabel label,
-    final @Nonnull ArrayList<KLight> lights)
+    final @Nonnull List<KLight> lights)
+  {
+    return new KBatchTranslucent(instance, lights);
+  }
+
+  private final @Nonnull KMeshInstance instance;
+  private final @Nonnull List<KLight>  lights;
+
+  private KBatchTranslucent(
+    final @Nonnull KMeshInstance instance,
+    final @Nonnull List<KLight> lights)
   {
     this.instance = instance;
-    this.label = label;
     this.lights = lights;
   }
 
@@ -55,7 +62,7 @@ import javax.annotation.concurrent.Immutable;
     if (!this.instance.equals(other.instance)) {
       return false;
     }
-    if (!this.label.equals(other.label)) {
+    if (!this.lights.equals(other.lights)) {
       return false;
     }
     return true;
@@ -64,11 +71,6 @@ import javax.annotation.concurrent.Immutable;
   public @Nonnull KMeshInstance getInstance()
   {
     return this.instance;
-  }
-
-  public @Nonnull KMeshInstanceForwardMaterialLabel getLabel()
-  {
-    return this.label;
   }
 
   public @Nonnull List<KLight> getLights()
@@ -81,7 +83,7 @@ import javax.annotation.concurrent.Immutable;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.instance.hashCode();
-    result = (prime * result) + this.label.hashCode();
+    result = (prime * result) + this.lights.hashCode();
     return result;
   }
 
@@ -90,8 +92,6 @@ import javax.annotation.concurrent.Immutable;
     final StringBuilder builder = new StringBuilder();
     builder.append("[KBatchTranslucent ");
     builder.append(this.instance);
-    builder.append(" ");
-    builder.append(this.label);
     builder.append(" ");
     builder.append(this.lights);
     builder.append("]");

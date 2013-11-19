@@ -16,22 +16,41 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-@Immutable final class KBatchUnlit
-{
-  private final @Nonnull ArrayList<KMeshInstance>          instances;
-  private final @Nonnull KMeshInstanceForwardMaterialLabel label;
+/**
+ * A single batch, with the given translucent instances having their shadows
+ * calculated according to the shadow material <code>label</code>, from the
+ * perspective of the given light <code>light</code>. The instances will be
+ * rendered in the exact order given, so should most likely be sorted by
+ * distance from the observer, with the furthest object appearing first in the
+ * list.
+ */
 
-  KBatchUnlit(
-    final @Nonnull KMeshInstanceForwardMaterialLabel label,
-    final @Nonnull ArrayList<KMeshInstance> instances)
+@Immutable final class KBatchTranslucentShadow
+{
+  public static @Nonnull KBatchTranslucentShadow newBatch(
+    final @Nonnull KLight light,
+    final @Nonnull KMeshInstanceShadowMaterialLabel label,
+    final @Nonnull List<KMeshInstance> instances)
   {
+    return new KBatchTranslucentShadow(light, label, instances);
+  }
+
+  private final @Nonnull List<KMeshInstance>              instances;
+  private final @Nonnull KMeshInstanceShadowMaterialLabel label;
+  private final @Nonnull KLight                           light;
+
+  private KBatchTranslucentShadow(
+    final @Nonnull KLight light,
+    final @Nonnull KMeshInstanceShadowMaterialLabel label,
+    final @Nonnull List<KMeshInstance> instances)
+  {
+    this.light = light;
     this.label = label;
     this.instances = instances;
   }
@@ -48,11 +67,14 @@ import javax.annotation.concurrent.Immutable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KBatchUnlit other = (KBatchUnlit) obj;
+    final KBatchTranslucentShadow other = (KBatchTranslucentShadow) obj;
     if (!this.instances.equals(other.instances)) {
       return false;
     }
     if (!this.label.equals(other.label)) {
+      return false;
+    }
+    if (!this.light.equals(other.light)) {
       return false;
     }
     return true;
@@ -63,9 +85,14 @@ import javax.annotation.concurrent.Immutable;
     return Collections.unmodifiableList(this.instances);
   }
 
-  public @Nonnull KMeshInstanceForwardMaterialLabel getLabel()
+  public @Nonnull KMeshInstanceShadowMaterialLabel getLabel()
   {
     return this.label;
+  }
+
+  public @Nonnull KLight getLight()
+  {
+    return this.light;
   }
 
   @Override public int hashCode()
@@ -74,13 +101,16 @@ import javax.annotation.concurrent.Immutable;
     int result = 1;
     result = (prime * result) + this.instances.hashCode();
     result = (prime * result) + this.label.hashCode();
+    result = (prime * result) + this.light.hashCode();
     return result;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KBatchUnlit ");
+    builder.append("[KBatchTranslucentShadow ");
+    builder.append(this.light);
+    builder.append(" ");
     builder.append(this.label);
     builder.append(" ");
     builder.append(this.instances);

@@ -69,7 +69,7 @@ final class KRendererDebugNormalsMapEye implements KRenderer
   private final @Nonnull JCCEExecutionCallable exec;
   private final @Nonnull JCGLImplementation    gl;
   private final @Nonnull Log                   log;
-  private final @Nonnull KMatrices             matrices;
+  private final @Nonnull KMutableMatrices      matrices;
   private final @Nonnull ProgramReference      program;
   private final @Nonnull KTransform.Context    transform_context;
   private final @Nonnull VectorM2I             viewport_size;
@@ -91,7 +91,7 @@ final class KRendererDebugNormalsMapEye implements KRenderer
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = new KMatrices();
+    this.matrices = KMutableMatrices.make();
     this.transform_context = new KTransform.Context();
     this.viewport_size = new VectorM2I();
 
@@ -117,42 +117,46 @@ final class KRendererDebugNormalsMapEye implements KRenderer
 
   @Override public void rendererEvaluate(
     final @Nonnull KFramebufferUsable framebuffer,
-    final @Nonnull KScene scene)
+    final @Nonnull KVisibleScene scene)
     throws JCGLException,
       ConstraintError
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
-    this.matrices.matricesBegin();
-    this.matrices.matricesMakeFromCamera(scene.getCamera());
-
-    final FramebufferReferenceUsable output_buffer =
-      framebuffer.kframebufferGetOutputBuffer();
-    final AreaInclusive area = framebuffer.kframebufferGetArea();
-    this.viewport_size.x = (int) area.getRangeX().getInterval();
-    this.viewport_size.y = (int) area.getRangeY().getInterval();
+    final KMutableMatrices.WithCamera mwc =
+      this.matrices.withCamera(scene.getCamera());
 
     try {
-      gc.framebufferDrawBind(output_buffer);
-      gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
+      final FramebufferReferenceUsable output_buffer =
+        framebuffer.kframebufferGetOutputBuffer();
+      final AreaInclusive area = framebuffer.kframebufferGetArea();
+      this.viewport_size.x = (int) area.getRangeX().getInterval();
+      this.viewport_size.y = (int) area.getRangeY().getInterval();
 
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-      gc.depthBufferClear(1.0f);
-      gc.colorBufferClearV4f(this.background);
-      gc.blendingDisable();
+      try {
+        gc.framebufferDrawBind(output_buffer);
+        gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
 
-      this.exec.execPrepare(gc);
-      KShadingProgramCommon.putMatrixProjection(
-        this.exec,
-        gc,
-        this.matrices.getMatrixProjection());
-      this.exec.execCancel();
+        gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+        gc.depthBufferClear(1.0f);
+        gc.colorBufferClearV4f(this.background);
+        gc.blendingDisable();
 
-      for (final KMeshInstance mesh : scene.getInstances()) {
-        this.renderMesh(gc, mesh);
+        this.exec.execPrepare(gc);
+        KShadingProgramCommon.putMatrixProjection(
+          this.exec,
+          gc,
+          mwc.getMatrixProjection());
+        this.exec.execCancel();
+
+        for (final KMeshInstance mesh : scene.getInstances()) {
+          this.renderMesh(gc, mwc, mesh);
+        }
+      } finally {
+        gc.framebufferDrawUnbind();
       }
     } finally {
-      gc.framebufferDrawUnbind();
+      mwc.cameraFinish();
     }
   }
 
@@ -164,84 +168,92 @@ final class KRendererDebugNormalsMapEye implements KRenderer
 
   private void renderMesh(
     final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMutableMatrices.WithCamera mwc,
     final @Nonnull KMeshInstance instance)
     throws ConstraintError,
       JCGLException
   {
-    this.matrices.matricesMakeFromTransform(instance.getTransform());
-
-    /**
-     * Upload matrices.
-     */
-
-    this.exec.execPrepare(gc);
-    KShadingProgramCommon.putMatrixProjectionReuse(this.exec);
-    KShadingProgramCommon.putMatrixModelView(
-      this.exec,
-      gc,
-      this.matrices.getMatrixModelView());
-    KShadingProgramCommon.putMatrixNormal(
-      this.exec,
-      gc,
-      this.matrices.getMatrixNormal());
-
-    /**
-     * Upload matrices, set textures.
-     */
-
-    final List<TextureUnit> texture_units = gc.textureGetUnits();
-    final KMaterial material = instance.getMaterial();
-
-    {
-      final Option<Texture2DStatic> normal_opt =
-        material.getNormal().getTexture();
-      if (normal_opt.isSome()) {
-        gc.texture2DStaticBind(
-          texture_units.get(0),
-          ((Option.Some<Texture2DStatic>) normal_opt).value);
-      } else {
-        gc.texture2DStaticUnbind(texture_units.get(0));
-      }
-    }
-
-    this.exec.execUniformPutTextureUnit(gc, "t_normal", texture_units.get(0));
-
-    /**
-     * Associate array attributes with program attributes, and draw mesh.
-     */
-
+    final KMutableMatrices.WithInstance mwi = mwc.withInstance(instance);
     try {
-      final KMesh mesh = instance.getMesh();
-      final ArrayBuffer array = mesh.getArrayBuffer();
-      final IndexBuffer indices = mesh.getIndexBuffer();
 
-      gc.arrayBufferBind(array);
-      KShadingProgramCommon.bindAttributePosition(gc, this.exec, array);
-      KShadingProgramCommon.bindAttributeNormal(gc, this.exec, array);
-      KShadingProgramCommon.bindAttributeTangent4(gc, this.exec, array);
-      KShadingProgramCommon.bindAttributeUV(gc, this.exec, array);
+      /**
+       * Upload matrices.
+       */
 
-      this.exec.execSetCallable(new Callable<Void>() {
-        @Override public Void call()
-          throws Exception
-        {
-          try {
-            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-          } catch (final ConstraintError e) {
-            throw new UnreachableCodeException();
-          }
-          return null;
+      this.exec.execPrepare(gc);
+      KShadingProgramCommon.putMatrixProjectionReuse(this.exec);
+      KShadingProgramCommon.putMatrixModelView(
+        this.exec,
+        gc,
+        mwi.getMatrixModelView());
+      KShadingProgramCommon.putMatrixNormal(
+        this.exec,
+        gc,
+        mwi.getMatrixNormal());
+
+      /**
+       * Upload matrices, set textures.
+       */
+
+      final List<TextureUnit> texture_units = gc.textureGetUnits();
+      final KMaterial material = instance.getMaterial();
+
+      {
+        final Option<Texture2DStatic> normal_opt =
+          material.getNormal().getTexture();
+        if (normal_opt.isSome()) {
+          gc.texture2DStaticBind(
+            texture_units.get(0),
+            ((Option.Some<Texture2DStatic>) normal_opt).value);
+        } else {
+          gc.texture2DStaticUnbind(texture_units.get(0));
         }
-      });
+      }
+
+      this.exec.execUniformPutTextureUnit(
+        gc,
+        "t_normal",
+        texture_units.get(0));
+
+      /**
+       * Associate array attributes with program attributes, and draw mesh.
+       */
 
       try {
-        this.exec.execRun(gc);
-      } catch (final Exception e) {
-        throw new UnreachableCodeException();
-      }
+        final KMesh mesh = instance.getMesh();
+        final ArrayBuffer array = mesh.getArrayBuffer();
+        final IndexBuffer indices = mesh.getIndexBuffer();
 
+        gc.arrayBufferBind(array);
+        KShadingProgramCommon.bindAttributePosition(gc, this.exec, array);
+        KShadingProgramCommon.bindAttributeNormal(gc, this.exec, array);
+        KShadingProgramCommon.bindAttributeTangent4(gc, this.exec, array);
+        KShadingProgramCommon.bindAttributeUV(gc, this.exec, array);
+
+        this.exec.execSetCallable(new Callable<Void>() {
+          @Override public Void call()
+            throws Exception
+          {
+            try {
+              gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+            } catch (final ConstraintError e) {
+              throw new UnreachableCodeException();
+            }
+            return null;
+          }
+        });
+
+        try {
+          this.exec.execRun(gc);
+        } catch (final Exception e) {
+          throw new UnreachableCodeException();
+        }
+
+      } finally {
+        gc.arrayBufferUnbind();
+      }
     } finally {
-      gc.arrayBufferUnbind();
+      mwi.instanceFinish();
     }
   }
 }
