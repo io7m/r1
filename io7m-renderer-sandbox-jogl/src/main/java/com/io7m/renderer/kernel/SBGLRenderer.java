@@ -93,6 +93,7 @@ import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LRUCacheConfig;
 import com.io7m.jlucache.LRUCacheTrivial;
+import com.io7m.jlucache.LUCache;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI2I;
@@ -687,6 +688,8 @@ final class SBGLRenderer implements GLEventListener
   private @CheckForNull KRenderer                                                   renderer;
   private @CheckForNull KFramebuffer                                                framebuffer;
 
+  private @Nonnull LUCache<Integer, Texture2DStatic, KShadowCacheException>         shadow_cache;
+  private @Nonnull LRUCacheConfig                                                   shadow_cache_config;
   private @Nonnull LRUCacheTrivial<String, ProgramReference, KShaderCacheException> shader_cache;
   private @Nonnull LRUCacheConfig                                                   shader_cache_config;
 
@@ -710,9 +713,9 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull RMatrixM4x4F<RTransformView>                               camera_view_matrix_temporary;
   private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>>        camera_custom_projection;
   private @Nonnull SceneObserver                                                    camera_current;
-  private @CheckForNull KScene                                                      scene_current;
+  private @CheckForNull KVisibleScene                                               scene_current;
 
-  private @CheckForNull KScene                                                      scene_previous;
+  private @CheckForNull KVisibleScene                                               scene_previous;
   private Collection<SBLight>                                                       scene_lights;
   private @CheckForNull ProgramReference                                            program_uv;
   private @CheckForNull ProgramReference                                            program_vcolour;
@@ -755,8 +758,7 @@ final class SBGLRenderer implements GLEventListener
 
   private static void renderSceneMakeUnlitBatches(
     final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
-    final @Nonnull ArrayList<KBatchOpaqueUnlit> opaque_unlit,
-    final @Nonnull ArrayList<KBatchTranslucent> translucent_unlit)
+    final @Nonnull List<KBatchOpaqueUnlit> opaque_unlit)
   {
     final HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
       new HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>>();
@@ -782,7 +784,7 @@ final class SBGLRenderer implements GLEventListener
       final ArrayList<KMeshInstance> instances = e.getValue();
 
       if (label.getAlpha() != KMaterialAlphaLabel.ALPHA_TRANSLUCENT) {
-        opaque_unlit.add(new KBatchOpaqueUnlit(label, instances));
+        opaque_unlit.add(KBatchOpaqueUnlit.newBatch(label, instances));
       }
     }
 
@@ -1266,6 +1268,13 @@ final class SBGLRenderer implements GLEventListener
           this.filesystem,
           this.log), this.shader_cache_config);
 
+      this.shadow_cache_config =
+        LRUCacheConfig.empty().withMaximumCapacity(64 * 1024 * 1024);
+      this.shadow_cache =
+        LRUCacheTrivial.newCache(
+          new KShadowCacheLoader(this.gi, this.log),
+          this.shadow_cache_config);
+
       this.viewport = SBGLRenderer.drawableArea(drawable);
       this.axes = new SBVisibleAxes(gl, 50, 50, 50, this.log);
       this.grid = new SBVisibleGridPlane(gl, 50, 0, 50, this.log);
@@ -1420,6 +1429,7 @@ final class SBGLRenderer implements GLEventListener
         return KRendererForward.rendererNew(
           this.gi,
           this.shader_cache,
+          this.shadow_cache,
           this.log);
       }
     }
@@ -1972,18 +1982,33 @@ final class SBGLRenderer implements GLEventListener
 
       final ArrayList<KBatchOpaqueUnlit> opaque_unlit =
         new ArrayList<KBatchOpaqueUnlit>();
-      final Map<KLight, ArrayList<KBatchOpaqueLit>> opaque_lit =
-        new HashMap<KLight, ArrayList<KBatchOpaqueLit>>();
+      final Map<KLight, List<KBatchOpaqueLit>> opaque_lit =
+        new HashMap<KLight, List<KBatchOpaqueLit>>();
       final ArrayList<KBatchTranslucent> translucent =
         new ArrayList<KBatchTranslucent>();
+      final Map<KLight, List<KBatchOpaqueShadow>> shadow_opaque =
+        new HashMap<KLight, List<KBatchOpaqueShadow>>();
+      final Map<KLight, List<KBatchTranslucentShadow>> shadow_translucent =
+        new HashMap<KLight, List<KBatchTranslucentShadow>>();
 
-      SBGLRenderer.renderSceneMakeUnlitBatches(p, opaque_unlit, translucent);
-      this.renderSceneMakeLitBatches(p, opaque_lit, translucent);
+      SBGLRenderer.renderSceneMakeUnlitBatches(p, opaque_unlit);
+      this.renderSceneMakeLitBatches(
+        p,
+        opaque_lit,
+        translucent,
+        shadow_opaque,
+        shadow_translucent);
 
       final KBatches batches =
-        new KBatches(opaque_lit, opaque_unlit, translucent);
+        KBatches.newBatches(
+          opaque_lit,
+          opaque_unlit,
+          translucent,
+          shadow_opaque,
+          shadow_translucent);
 
-      final KScene scene = new KScene(kcamera, p.first, p.second, batches);
+      final KVisibleScene scene =
+        new KVisibleScene(kcamera, p.first, p.second, batches);
       this.scene_previous = this.scene_current;
       this.scene_current = scene;
       this.scene_lights = pgot.first;
@@ -1999,10 +2024,14 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private void renderSceneMakeLitBatches(
-    final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
-    final @Nonnull Map<KLight, ArrayList<KBatchOpaqueLit>> opaque_lit,
-    final @Nonnull ArrayList<KBatchTranslucent> translucent_lit)
+  private
+    void
+    renderSceneMakeLitBatches(
+      final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
+      final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
+      final @Nonnull List<KBatchTranslucent> translucent_lit,
+      final @Nonnull Map<KLight, List<KBatchOpaqueShadow>> shadow_opaque,
+      final @Nonnull Map<KLight, List<KBatchTranslucentShadow>> shadow_translucent)
   {
     for (final KLight l : p.first) {
       switch (l.getType()) {
@@ -2034,7 +2063,7 @@ final class SBGLRenderer implements GLEventListener
             final KMeshInstanceForwardMaterialLabel label = e.getKey();
             final ArrayList<KMeshInstance> instances = e.getValue();
 
-            final ArrayList<KBatchOpaqueLit> lits;
+            final List<KBatchOpaqueLit> lits;
             if (opaque_lit.containsKey(l)) {
               lits = opaque_lit.get(l);
             } else {
@@ -2043,7 +2072,7 @@ final class SBGLRenderer implements GLEventListener
             }
 
             if (label.getAlpha() != KMaterialAlphaLabel.ALPHA_TRANSLUCENT) {
-              lits.add(new KBatchOpaqueLit(l, label, instances));
+              lits.add(KBatchOpaqueLit.newBatch(l, label, instances));
             }
           }
 
@@ -2079,9 +2108,8 @@ final class SBGLRenderer implements GLEventListener
       if (label.getAlpha() == KMaterialAlphaLabel.ALPHA_OPAQUE) {
         iter.remove();
       } else {
-        translucent_lit.add(new KBatchTranslucent(
+        translucent_lit.add(KBatchTranslucent.newBatch(
           i,
-          label,
           new ArrayList<KLight>(p.first)));
       }
     }

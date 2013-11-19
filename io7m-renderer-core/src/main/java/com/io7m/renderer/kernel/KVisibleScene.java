@@ -21,14 +21,14 @@ import java.util.Collection;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-@Immutable final class KScene
+@Immutable final class KVisibleScene
 {
   private final @Nonnull KBatches                  batches;
   private final @Nonnull KCamera                   camera;
   private final @Nonnull Collection<KMeshInstance> instances;
   private final @Nonnull Collection<KLight>        lights;
 
-  KScene(
+  KVisibleScene(
     final @Nonnull KCamera camera,
     final @Nonnull Collection<KLight> lights,
     final @Nonnull Collection<KMeshInstance> instances,

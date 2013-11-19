@@ -16,23 +16,36 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+/**
+ * A single batch, with the given instances being rendered with a
+ * non-translucent material <code>label</code> using the light
+ * <code>light</code>.
+ */
+
 @Immutable final class KBatchOpaqueLit
 {
-  private final @Nonnull ArrayList<KMeshInstance>          instances;
+  public static @Nonnull KBatchOpaqueLit newBatch(
+    final @Nonnull KLight light,
+    final @Nonnull KMeshInstanceForwardMaterialLabel label,
+    final @Nonnull List<KMeshInstance> instances)
+  {
+    return new KBatchOpaqueLit(light, label, instances);
+  }
+
+  private final @Nonnull List<KMeshInstance>               instances;
   private final @Nonnull KMeshInstanceForwardMaterialLabel label;
   private final @Nonnull KLight                            light;
 
-  KBatchOpaqueLit(
+  private KBatchOpaqueLit(
     final @Nonnull KLight light,
     final @Nonnull KMeshInstanceForwardMaterialLabel label,
-    final @Nonnull ArrayList<KMeshInstance> instances)
+    final @Nonnull List<KMeshInstance> instances)
   {
     this.light = light;
     this.label = label;
@@ -52,6 +65,9 @@ import javax.annotation.concurrent.Immutable;
       return false;
     }
     final KBatchOpaqueLit other = (KBatchOpaqueLit) obj;
+    if (!this.instances.equals(other.instances)) {
+      return false;
+    }
     if (!this.label.equals(other.label)) {
       return false;
     }
@@ -80,6 +96,7 @@ import javax.annotation.concurrent.Immutable;
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + this.instances.hashCode();
     result = (prime * result) + this.label.hashCode();
     result = (prime * result) + this.light.hashCode();
     return result;
