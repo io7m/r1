@@ -17,7 +17,6 @@
 package com.io7m.renderer.kernel;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -807,7 +806,7 @@ public final class SBRendererSpecific implements KRenderer
    */
 
   private void renderDepthPassMeshes(
-    final @Nonnull KScene scene,
+    final @Nonnull KVisibleScene scene,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMutableMatrices.WithCamera mwc)
     throws ConstraintError,
@@ -822,12 +821,12 @@ public final class SBRendererSpecific implements KRenderer
 
     final KBatches batches = scene.getBatches();
 
-    final Map<KLight, ArrayList<KBatchOpaqueLit>> lit_by_light =
+    final Map<KLight, List<KBatchOpaqueLit>> lit_by_light =
       batches.getBatchesOpaqueLit();
 
-    for (final Entry<KLight, ArrayList<KBatchOpaqueLit>> es : lit_by_light
+    for (final Entry<KLight, List<KBatchOpaqueLit>> es : lit_by_light
       .entrySet()) {
-      final ArrayList<KBatchOpaqueLit> lit = es.getValue();
+      final List<KBatchOpaqueLit> lit = es.getValue();
 
       for (final KBatchOpaqueLit bl : lit) {
         for (final KMeshInstance i : bl.getInstances()) {
@@ -862,7 +861,7 @@ public final class SBRendererSpecific implements KRenderer
 
   @Override public void rendererEvaluate(
     final @Nonnull KFramebufferUsable framebuffer,
-    final @Nonnull KScene scene)
+    final @Nonnull KVisibleScene scene)
     throws JCGLException,
       ConstraintError
   {
@@ -1016,7 +1015,7 @@ public final class SBRendererSpecific implements KRenderer
   }
 
   private void renderOpaqueMeshes(
-    final @Nonnull KScene scene,
+    final @Nonnull KVisibleScene scene,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMutableMatrices.WithCamera mwc)
     throws JCGLException,
@@ -1031,13 +1030,13 @@ public final class SBRendererSpecific implements KRenderer
 
     final KBatches batches = scene.getBatches();
 
-    final Map<KLight, ArrayList<KBatchOpaqueLit>> lit_by_light =
+    final Map<KLight, List<KBatchOpaqueLit>> lit_by_light =
       batches.getBatchesOpaqueLit();
 
-    for (final Entry<KLight, ArrayList<KBatchOpaqueLit>> es : lit_by_light
+    for (final Entry<KLight, List<KBatchOpaqueLit>> es : lit_by_light
       .entrySet()) {
       final KLight light = es.getKey();
-      final ArrayList<KBatchOpaqueLit> lit = es.getValue();
+      final List<KBatchOpaqueLit> lit = es.getValue();
 
       for (final KBatchOpaqueLit bl : lit) {
         for (final KMeshInstance i : bl.getInstances()) {
@@ -1139,7 +1138,7 @@ public final class SBRendererSpecific implements KRenderer
   }
 
   private void renderTranslucentMeshes(
-    final @Nonnull KScene scene,
+    final @Nonnull KVisibleScene scene,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMutableMatrices.WithCamera mwc)
     throws JCGLException,

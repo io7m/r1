@@ -17,7 +17,6 @@
 package com.io7m.renderer.kernel;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -401,7 +400,7 @@ public final class KRendererForward implements KRenderer
   }
 
   private void renderDepthPassMeshes(
-    final @Nonnull KScene scene,
+    final @Nonnull KVisibleScene scene,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMutableMatrices.WithCamera mwc)
     throws KShaderCacheException,
@@ -421,10 +420,10 @@ public final class KRendererForward implements KRenderer
 
     final KBatches batches = scene.getBatches();
 
-    final Map<KLight, ArrayList<KBatchOpaqueLit>> blit =
+    final Map<KLight, List<KBatchOpaqueLit>> blit =
       batches.getBatchesOpaqueLit();
 
-    for (final Entry<KLight, ArrayList<KBatchOpaqueLit>> es : blit.entrySet()) {
+    for (final Entry<KLight, List<KBatchOpaqueLit>> es : blit.entrySet()) {
       for (final KBatchOpaqueLit b : es.getValue()) {
         for (final KMeshInstance i : b.getInstances()) {
           final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
@@ -510,7 +509,7 @@ public final class KRendererForward implements KRenderer
 
   @Override public void rendererEvaluate(
     final @Nonnull KFramebufferUsable framebuffer,
-    final @Nonnull KScene scene)
+    final @Nonnull KVisibleScene scene)
     throws JCGLException,
       ConstraintError,
       JCGLCompileException,
@@ -620,7 +619,7 @@ public final class KRendererForward implements KRenderer
   }
 
   private void renderOpaqueMeshes(
-    final @Nonnull KScene scene,
+    final @Nonnull KVisibleScene scene,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMutableMatrices.WithCamera mwc)
     throws KShaderCacheException,
@@ -629,13 +628,13 @@ public final class KRendererForward implements KRenderer
       JCGLException
   {
     final KBatches batches = scene.getBatches();
-    final Map<KLight, ArrayList<KBatchOpaqueLit>> lit_by_light =
+    final Map<KLight, List<KBatchOpaqueLit>> lit_by_light =
       batches.getBatchesOpaqueLit();
 
-    for (final Entry<KLight, ArrayList<KBatchOpaqueLit>> es : lit_by_light
+    for (final Entry<KLight, List<KBatchOpaqueLit>> es : lit_by_light
       .entrySet()) {
       final KLight light = es.getKey();
-      final ArrayList<KBatchOpaqueLit> lit = es.getValue();
+      final List<KBatchOpaqueLit> lit = es.getValue();
 
       for (final KBatchOpaqueLit opaque : lit) {
         final KMeshInstanceForwardMaterialLabel label = opaque.getLabel();
@@ -783,7 +782,7 @@ public final class KRendererForward implements KRenderer
   }
 
   private void renderTranslucentMeshes(
-    final @Nonnull KScene scene,
+    final @Nonnull KVisibleScene scene,
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMutableMatrices.WithCamera mwc)
     throws KShaderCacheException,
@@ -794,8 +793,9 @@ public final class KRendererForward implements KRenderer
     final KBatches batches = scene.getBatches();
 
     for (final KBatchTranslucent bl : batches.getBatchesTranslucent()) {
-      final KMeshInstanceForwardMaterialLabel label = bl.getLabel();
       final KMeshInstance i = bl.getInstance();
+      final KMeshInstanceForwardMaterialLabel label =
+        i.getForwardMaterialLabel();
       final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
 
       try {

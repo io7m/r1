@@ -39,7 +39,7 @@ final class KRendererDeferred implements KRenderer
 
   @Override public void rendererEvaluate(
     final @Nonnull KFramebufferUsable framebuffer,
-    final @Nonnull KScene scene)
+    final @Nonnull KVisibleScene scene)
     throws JCGLException,
       ConstraintError
   {

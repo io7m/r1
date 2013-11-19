@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,14 +28,36 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
 @Immutable final class KBatches
 {
-  private final @Nonnull Map<KLight, ArrayList<KBatchOpaqueLit>> batches_opaque_lit;
-  private final @Nonnull ArrayList<KBatchOpaqueUnlit>            batches_opaque_unlit;
-  private final @Nonnull ArrayList<KBatchTranslucent>            batches_translucent;
+  public static @Nonnull
+    KBatches
+    newBatches(
+      final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
+      final @Nonnull List<KBatchOpaqueUnlit> opaque_unlit,
+      final @Nonnull List<KBatchTranslucent> translucent,
+      final @Nonnull Map<KLight, List<KBatchOpaqueShadow>> shadow_opaque,
+      final @Nonnull Map<KLight, List<KBatchTranslucentShadow>> shadow_translucent)
+      throws ConstraintError
+  {
+    return new KBatches(
+      opaque_lit,
+      opaque_unlit,
+      translucent,
+      shadow_opaque,
+      shadow_translucent);
+  }
 
-  KBatches(
-    final @Nonnull Map<KLight, ArrayList<KBatchOpaqueLit>> opaque_lit,
-    final @Nonnull ArrayList<KBatchOpaqueUnlit> opaque_unlit,
-    final @Nonnull ArrayList<KBatchTranslucent> translucent)
+  private final @Nonnull Map<KLight, List<KBatchOpaqueLit>>         batches_opaque_lit;
+  private final @Nonnull List<KBatchOpaqueUnlit>                    batches_opaque_unlit;
+  private final @Nonnull List<KBatchTranslucent>                    batches_translucent;
+  private final @Nonnull Map<KLight, List<KBatchOpaqueShadow>>      shadow_opaque;
+  private final @Nonnull Map<KLight, List<KBatchTranslucentShadow>> shadow_translucent;
+
+  private KBatches(
+    final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
+    final @Nonnull List<KBatchOpaqueUnlit> opaque_unlit,
+    final @Nonnull List<KBatchTranslucent> translucent,
+    final @Nonnull Map<KLight, List<KBatchOpaqueShadow>> shadow_opaque,
+    final @Nonnull Map<KLight, List<KBatchTranslucentShadow>> shadow_translucent)
     throws ConstraintError
   {
     this.batches_opaque_unlit =
@@ -45,21 +66,82 @@ import com.io7m.jaux.Constraints.ConstraintError;
       Constraints.constrainNotNull(opaque_lit, "Opaque lit");
     this.batches_translucent =
       Constraints.constrainNotNull(translucent, "Translucent");
+    this.shadow_opaque =
+      Constraints.constrainNotNull(shadow_opaque, "Opaque shadow");
+    this.shadow_translucent =
+      Constraints.constrainNotNull(shadow_translucent, "Translucent shadow");
   }
 
-  @Nonnull Map<KLight, ArrayList<KBatchOpaqueLit>> getBatchesOpaqueLit()
+  @Override public boolean equals(
+    final Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KBatches other = (KBatches) obj;
+    if (!this.batches_opaque_lit.equals(other.batches_opaque_lit)) {
+      return false;
+    }
+    if (!this.batches_opaque_unlit.equals(other.batches_opaque_unlit)) {
+      return false;
+    }
+    if (!this.batches_translucent.equals(other.batches_translucent)) {
+      return false;
+    }
+    if (!this.shadow_opaque.equals(other.shadow_opaque)) {
+      return false;
+    }
+    if (!this.shadow_translucent.equals(other.shadow_translucent)) {
+      return false;
+    }
+    return true;
+  }
+
+  public @Nonnull Map<KLight, List<KBatchOpaqueLit>> getBatchesOpaqueLit()
   {
     return Collections.unmodifiableMap(this.batches_opaque_lit);
   }
 
-  @Nonnull List<KBatchOpaqueUnlit> getBatchesOpaqueUnlit()
+  public @Nonnull List<KBatchOpaqueUnlit> getBatchesOpaqueUnlit()
   {
     return Collections.unmodifiableList(this.batches_opaque_unlit);
   }
 
-  @Nonnull List<KBatchTranslucent> getBatchesTranslucent()
+  public @Nonnull
+    Map<KLight, List<KBatchOpaqueShadow>>
+    getBatchesShadowOpaque()
+  {
+    return Collections.unmodifiableMap(this.shadow_opaque);
+  }
+
+  public @Nonnull
+    Map<KLight, List<KBatchTranslucentShadow>>
+    getBatchesShadowTranslucent()
+  {
+    return Collections.unmodifiableMap(this.shadow_translucent);
+  }
+
+  public @Nonnull List<KBatchTranslucent> getBatchesTranslucent()
   {
     return Collections.unmodifiableList(this.batches_translucent);
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.batches_opaque_lit.hashCode();
+    result = (prime * result) + this.batches_opaque_unlit.hashCode();
+    result = (prime * result) + this.batches_translucent.hashCode();
+    result = (prime * result) + this.shadow_opaque.hashCode();
+    result = (prime * result) + this.shadow_translucent.hashCode();
+    return result;
   }
 
   @Override public String toString()
