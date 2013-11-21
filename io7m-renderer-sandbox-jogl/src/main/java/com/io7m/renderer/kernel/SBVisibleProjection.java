@@ -177,8 +177,13 @@ public abstract class SBVisibleProjection
       ic.putIndex(0);
       ic.putIndex(9);
 
-      g.arrayBufferUpdate(array_map);
       g.indexBufferUpdate(index_map);
+      g.arrayBufferBind(this.array);
+      try {
+        g.arrayBufferUpdate(array_map);
+      } finally {
+        g.arrayBufferUnbind();
+      }
     }
 
     @Override public

@@ -16,21 +16,22 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.JCGLResourceUsable;
+import javax.swing.JComboBox;
 
-public interface KFramebufferUsable extends JCGLResourceUsable
+final class SBLightShadowTypeSelector extends JComboBox<KShadow.Type>
 {
-  /**
-   * Retrieve the actual framebuffer.
-   */
+  private static final long serialVersionUID;
 
-  public FramebufferReferenceUsable kframebufferGetFramebuffer();
+  static {
+    serialVersionUID = 319658390826132910L;
+  }
 
-  /**
-   * Retrieve the size of the area to which rendering will occur.
-   */
+  public SBLightShadowTypeSelector()
+  {
+    for (final KShadow.Type type : KShadow.Type.values()) {
+      this.addItem(type);
+    }
 
-  public AreaInclusive kframebufferGetArea();
+    this.setSelectedItem(KLight.Type.LIGHT_DIRECTIONAL);
+  }
 }

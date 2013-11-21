@@ -91,6 +91,11 @@ import com.io7m.renderer.RTransformTexture;
     return this.mesh;
   }
 
+  public @Nonnull KMeshInstanceShadowMaterialLabel getShadowMaterialLabel()
+  {
+    return this.shadow_label;
+  }
+
   @Override public @Nonnull KTransform getTransform()
   {
     return this.transform;

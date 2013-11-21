@@ -47,6 +47,7 @@ import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
@@ -169,6 +170,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
       protected final @Nonnull SBFloatHSlider          falloff;
       protected final @Nonnull JTextField              texture;
       private final @Nonnull JButton                   texture_select;
+      private final @Nonnull SBLightShadowControls     shadow_controls;
 
       public LightControlsProjective(
         final @Nonnull SBSceneControllerTextures texture_controller,
@@ -198,6 +200,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
             twindow.setVisible(true);
           }
         });
+        this.shadow_controls = SBLightShadowControls.newControls();
       }
 
       public void add(
@@ -224,6 +227,8 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           .add(new JLabel("Texture"))
           .add(this.texture, 4)
           .add(this.texture_select);
+
+        this.shadow_controls.addToLayout(group);
 
         group.grid().add(this.projection);
 
@@ -286,6 +291,12 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
         this.texture.setText(kl.getTexture().getName());
         this.falloff.setCurrent(kl.getFalloff());
         this.projection.setContents(light.getDescription());
+      }
+
+      public @Nonnull Option<SBLightShadowDescription> getShadow()
+        throws ConstraintError
+      {
+        return this.shadow_controls.getShadow();
       }
     }
 
@@ -660,6 +671,8 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
           final float intensity_v = this.getIntensity();
           final SBProjectionDescription projection =
             this.projective_controls.getProjection();
+          final Option<SBLightShadowDescription> shadow =
+            this.projective_controls.getShadow();
 
           return new SBLightDescription.SBLightDescriptionProjective(
             orientation,
@@ -669,6 +682,7 @@ final class SBLightsPanel extends JPanel implements SBSceneChangeListener
             texture,
             new RVectorI3F<RSpaceRGB>(colour),
             intensity_v,
+            shadow,
             id);
         }
       }
