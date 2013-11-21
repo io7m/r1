@@ -93,6 +93,10 @@ import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LRUCacheConfig;
 import com.io7m.jlucache.LRUCacheTrivial;
+import com.io7m.jlucache.PCache;
+import com.io7m.jlucache.PCacheConfig;
+import com.io7m.jlucache.PCacheConfig.Builder;
+import com.io7m.jlucache.PCacheTrivial;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI2I;
@@ -685,10 +689,12 @@ final class SBGLRenderer implements GLEventListener
   private @CheckForNull List<TextureUnit>                                           texture_units;
   private final @Nonnull AtomicReference<SBRendererType>                            renderer_new;
   private @CheckForNull KRenderer                                                   renderer;
-  private @CheckForNull KFramebuffer                                                framebuffer;
+  private @CheckForNull KFramebufferRGBA                                            framebuffer;
 
   private @Nonnull LRUCacheTrivial<String, ProgramReference, KShaderCacheException> shader_cache;
   private @Nonnull LRUCacheConfig                                                   shader_cache_config;
+  private @Nonnull PCache<KShadow, KFramebufferDepth, KShadowCacheException>        shadow_cache;
+  private @Nonnull PCacheConfig                                                     shadow_cache_config;
 
   private final @Nonnull AtomicReference<SBSceneControllerRenderer>                 controller;
   private final @Nonnull AtomicReference<VectorI3F>                                 background_colour;
@@ -1208,7 +1214,7 @@ final class SBGLRenderer implements GLEventListener
           final JCGLInterfaceGL3 g3 =
             ((Option.Some<JCGLInterfaceGL3>) o).value;
           final Texture2DStaticUsable t =
-            this.framebuffer.kframebufferGetOutputTexture();
+            this.framebuffer.kframebufferGetRGBAOutputTexture();
           final Texture2DReadableData r = g3.texture2DStaticGetImage(t);
 
           SBTextureUtilities.textureDumpTimestampedTemporary(
@@ -1260,10 +1266,20 @@ final class SBGLRenderer implements GLEventListener
       this.shader_cache_config =
         LRUCacheConfig.empty().withMaximumCapacity(1024);
       this.shader_cache =
-        LRUCacheTrivial.newCache(new KShaderCacheLoader(
-          this.gi,
-          this.filesystem,
-          this.log), this.shader_cache_config);
+        LRUCacheTrivial.newCache(
+          KShaderCacheLoader.newLoader(this.gi, this.filesystem, this.log),
+          this.shader_cache_config);
+
+      {
+        final Builder b = PCacheConfig.newBuilder();
+        b.setNoMaximumSize();
+        b.setMaximumAge(60);
+        this.shadow_cache_config = b.create();
+        this.shadow_cache =
+          PCacheTrivial.newCache(
+            KShadowCacheLoader.newLoader(this.gi, this.log),
+            this.shadow_cache_config);
+      }
 
       this.viewport = SBGLRenderer.drawableArea(drawable);
       this.axes = new SBVisibleAxes(gl, 50, 50, 50, this.log);
@@ -1419,6 +1435,7 @@ final class SBGLRenderer implements GLEventListener
         return KRendererForward.rendererNew(
           this.gi,
           this.shader_cache,
+          this.shadow_cache,
           this.log);
       }
     }
@@ -1500,7 +1517,7 @@ final class SBGLRenderer implements GLEventListener
     final AreaInclusive size = SBGLRenderer.drawableArea(drawable);
 
     final KFramebuffer old = this.framebuffer;
-    this.framebuffer = KFramebufferCommon.allocateBasicRGBA(this.gi, size);
+    this.framebuffer = KFramebufferCommon.newBasicRGBA(this.gi, size);
     if (old != null) {
       old.kframebufferDelete(this.gi);
     }
@@ -1648,7 +1665,7 @@ final class SBGLRenderer implements GLEventListener
 
       gl.texture2DStaticBind(
         this.texture_units.get(0),
-        this.framebuffer.kframebufferGetOutputTexture());
+        this.framebuffer.kframebufferGetRGBAOutputTexture());
       e.execUniformPutTextureUnit(
         gl,
         "t_diffuse_0",

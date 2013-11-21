@@ -27,8 +27,8 @@ import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
 final class SBTextFieldUtilities
 {
-  private static final Border DEFAULT_FIELD_BORDER;
   private static final Color  DEFAULT_FIELD_BACKGROUND;
+  private static final Border DEFAULT_FIELD_BORDER;
 
   static {
     final JTextField f = new JTextField();
@@ -62,6 +62,20 @@ final class SBTextFieldUtilities
       SBTextFieldUtilities.fieldSetErrorVisual(field);
       throw new SBException.SBExceptionInputError(
         "Field must be a real number");
+    }
+  }
+
+  public static int getFieldIntegerOrError(
+    final @Nonnull JTextField field)
+    throws SBExceptionInputError
+  {
+    try {
+      final int r = Integer.parseInt(field.getText());
+      SBTextFieldUtilities.fieldRestoreVisual(field);
+      return r;
+    } catch (final NumberFormatException e) {
+      SBTextFieldUtilities.fieldSetErrorVisual(field);
+      throw new SBException.SBExceptionInputError("Field must be an integer");
     }
   }
 

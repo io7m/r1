@@ -47,7 +47,18 @@ final class KShaderCacheLoader implements
   private final @Nonnull JCGLImplementation gi;
   private final @Nonnull Log                log;
 
-  public KShaderCacheLoader(
+  public static @Nonnull
+    LUCacheLoader<String, ProgramReference, KShaderCacheException>
+    newLoader(
+      final @Nonnull JCGLImplementation gi,
+      final @Nonnull FSCapabilityRead fs,
+      final @Nonnull Log log)
+      throws ConstraintError
+  {
+    return new KShaderCacheLoader(gi, fs, log);
+  }
+
+  private KShaderCacheLoader(
     final @Nonnull JCGLImplementation gi,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)

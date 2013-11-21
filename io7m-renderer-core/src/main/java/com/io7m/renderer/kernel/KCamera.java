@@ -42,7 +42,6 @@ import com.io7m.renderer.RTransformView;
   }
 
   private final @Nonnull RMatrixI4x4F<RTransformProjection> projection;
-
   private final @Nonnull RMatrixI4x4F<RTransformView>       view;
 
   private KCamera(

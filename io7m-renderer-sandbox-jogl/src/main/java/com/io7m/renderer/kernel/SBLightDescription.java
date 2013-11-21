@@ -21,6 +21,7 @@ import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Option.None;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
@@ -112,6 +113,7 @@ abstract class SBLightDescription
     private final @Nonnull Integer                            id;
     private final @Nonnull SBProjectionDescription            projection;
     private final @Nonnull RMatrixI4x4F<RTransformProjection> projection_matrix;
+    private final @Nonnull Option<SBLightShadowDescription>   shadow;
 
     @SuppressWarnings("synthetic-access") SBLightDescriptionProjective(
       final @Nonnull QuaternionI4F orientation,
@@ -121,6 +123,7 @@ abstract class SBLightDescription
       final @Nonnull PathVirtual texture,
       final @Nonnull RVectorI3F<RSpaceRGB> colour,
       final float intensity,
+      final @Nonnull Option<SBLightShadowDescription> shadow,
       final @Nonnull Integer id)
       throws ConstraintError
     {
@@ -134,6 +137,7 @@ abstract class SBLightDescription
       this.intensity = intensity;
       this.id = id;
       this.projection = projection;
+      this.shadow = shadow;
 
       final MatrixM4x4F temporary = new MatrixM4x4F();
       this.projection_matrix = projection.makeProjectionMatrix(temporary);
@@ -175,19 +179,46 @@ abstract class SBLightDescription
         .floatToIntBits(other.intensity)) {
         return false;
       }
-      if (!this.orientation.equals(other.orientation)) {
+      if (this.orientation == null) {
+        if (other.orientation != null) {
+          return false;
+        }
+      } else if (!this.orientation.equals(other.orientation)) {
         return false;
       }
-      if (!this.position.equals(other.position)) {
+      if (this.position == null) {
+        if (other.position != null) {
+          return false;
+        }
+      } else if (!this.position.equals(other.position)) {
         return false;
       }
-      if (!this.projection.equals(other.projection)) {
+      if (this.projection == null) {
+        if (other.projection != null) {
+          return false;
+        }
+      } else if (!this.projection.equals(other.projection)) {
         return false;
       }
-      if (!this.projection_matrix.equals(other.projection_matrix)) {
+      if (this.projection_matrix == null) {
+        if (other.projection_matrix != null) {
+          return false;
+        }
+      } else if (!this.projection_matrix.equals(other.projection_matrix)) {
         return false;
       }
-      if (!this.texture.equals(other.texture)) {
+      if (this.shadow == null) {
+        if (other.shadow != null) {
+          return false;
+        }
+      } else if (!this.shadow.equals(other.shadow)) {
+        return false;
+      }
+      if (this.texture == null) {
+        if (other.texture != null) {
+          return false;
+        }
+      } else if (!this.texture.equals(other.texture)) {
         return false;
       }
       return true;
@@ -263,39 +294,58 @@ abstract class SBLightDescription
     {
       final int prime = 31;
       int result = 1;
-      result = (prime * result) + this.colour.hashCode();
+      result =
+        (prime * result)
+          + ((this.colour == null) ? 0 : this.colour.hashCode());
       result = (prime * result) + Float.floatToIntBits(this.falloff);
-      result = (prime * result) + this.id.hashCode();
+      result =
+        (prime * result) + ((this.id == null) ? 0 : this.id.hashCode());
       result = (prime * result) + Float.floatToIntBits(this.intensity);
-      result = (prime * result) + this.orientation.hashCode();
-      result = (prime * result) + this.position.hashCode();
-      result = (prime * result) + this.projection.hashCode();
-      result = (prime * result) + this.projection_matrix.hashCode();
-      result = (prime * result) + this.texture.hashCode();
+      result =
+        (prime * result)
+          + ((this.orientation == null) ? 0 : this.orientation.hashCode());
+      result =
+        (prime * result)
+          + ((this.position == null) ? 0 : this.position.hashCode());
+      result =
+        (prime * result)
+          + ((this.projection == null) ? 0 : this.projection.hashCode());
+      result =
+        (prime * result)
+          + ((this.projection_matrix == null) ? 0 : this.projection_matrix
+            .hashCode());
+      result =
+        (prime * result)
+          + ((this.shadow == null) ? 0 : this.shadow.hashCode());
+      result =
+        (prime * result)
+          + ((this.texture == null) ? 0 : this.texture.hashCode());
       return result;
     }
 
     @Override public String toString()
     {
       final StringBuilder builder = new StringBuilder();
-      builder.append("[SBLightDescriptionProjective ");
+      builder.append("SBLightDescriptionProjective [orientation=");
       builder.append(this.orientation);
-      builder.append(" position=");
+      builder.append(", position=");
       builder.append(this.position);
-      builder.append(" falloff=");
+      builder.append(", falloff=");
       builder.append(this.falloff);
-      builder.append(" texture=");
+      builder.append(", texture=");
       builder.append(this.texture);
-      builder.append(" colour=");
+      builder.append(", colour=");
       builder.append(this.colour);
-      builder.append(" intensity=");
+      builder.append(", intensity=");
       builder.append(this.intensity);
-      builder.append(" id=");
+      builder.append(", id=");
       builder.append(this.id);
-      builder.append(" projection=");
+      builder.append(", projection=");
       builder.append(this.projection);
-      builder.append(" projection_matrix=");
+      builder.append(", projection_matrix=");
       builder.append(this.projection_matrix);
+      builder.append(", shadow=");
+      builder.append(this.shadow);
       builder.append("]");
       return builder.toString();
     }

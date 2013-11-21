@@ -57,7 +57,7 @@ public interface KRenderer
    */
 
   public void rendererEvaluate(
-    final @Nonnull KFramebufferUsable framebuffer,
+    final @Nonnull KFramebufferRGBAUsable framebuffer,
     final @Nonnull KVisibleScene scene)
     throws JCGLException,
       ConstraintError,

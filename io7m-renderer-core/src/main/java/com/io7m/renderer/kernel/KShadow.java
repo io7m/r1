@@ -26,26 +26,20 @@ import com.io7m.jaux.Constraints.ConstraintError;
 {
   @Immutable final static class KShadowMappedBasic extends KShadow
   {
-    public static @Nonnull KShadowMappedBasic make(
-      final int size)
-      throws ConstraintError
-    {
-      return new KShadowMappedBasic(size);
-    }
-
-    private final int size;
+    private final int size_exponent;
 
     @SuppressWarnings("synthetic-access") private KShadowMappedBasic(
-      final int size)
+      final @Nonnull Integer light_id,
+      final int size_exponent)
       throws ConstraintError
     {
-      super(Type.SHADOW_MAPPED_BASIC);
-      this.size =
+      super(Type.SHADOW_MAPPED_BASIC, light_id);
+      this.size_exponent =
         Constraints.constrainRange(
-          size,
-          2,
+          size_exponent,
+          1,
           Integer.MAX_VALUE,
-          "Shadow map size");
+          "Shadow size exponent");
     }
 
     @Override public boolean equals(
@@ -61,30 +55,30 @@ import com.io7m.jaux.Constraints.ConstraintError;
         return false;
       }
       final KShadowMappedBasic other = (KShadowMappedBasic) obj;
-      if (this.size != other.size) {
+      if (this.size_exponent != other.size_exponent) {
         return false;
       }
       return true;
     }
 
-    public int getSize()
+    public int getSizeExponent()
     {
-      return this.size;
+      return this.size_exponent;
     }
 
     @Override public int hashCode()
     {
       final int prime = 31;
       int result = 1;
-      result = (prime * result) + this.size;
+      result = (prime * result) + this.size_exponent;
       return result;
     }
 
     @Override public String toString()
     {
       final StringBuilder builder = new StringBuilder();
-      builder.append("[KShadowMappedBasic size=");
-      builder.append(this.size);
+      builder.append("[KShadowMappedBasic size_exponent=");
+      builder.append(this.size_exponent);
       builder.append("]");
       return builder.toString();
     }
@@ -92,16 +86,47 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
   static enum Type
   {
-    SHADOW_MAPPED_BASIC
+    SHADOW_MAPPED_BASIC("Mapped basic");
+
+    private final @Nonnull String name;
+
+    private Type(
+      final @Nonnull String name)
+    {
+      this.name = name;
+    }
+
+    @Override public @Nonnull String toString()
+    {
+      return this.name;
+    }
   }
 
-  private final @Nonnull Type type;
+  @SuppressWarnings("synthetic-access") public static @Nonnull
+    KShadowMappedBasic
+    newMappedBasic(
+      final @Nonnull Integer light_id,
+      final int size_exponent)
+      throws ConstraintError
+  {
+    return new KShadowMappedBasic(light_id, size_exponent);
+  }
+
+  private final @Nonnull Integer light_id;
+  private final @Nonnull Type    type;
 
   private KShadow(
-    final @Nonnull Type type)
+    final @Nonnull Type type,
+    final @Nonnull Integer light_id)
     throws ConstraintError
   {
+    this.light_id = Constraints.constrainNotNull(light_id, "Light ID");
     this.type = Constraints.constrainNotNull(type, "Type");
+  }
+
+  public @Nonnull Integer getLightID()
+  {
+    return this.light_id;
   }
 
   public @Nonnull Type getType()

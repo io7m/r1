@@ -223,6 +223,11 @@ import com.io7m.renderer.RVectorReadable3F;
       return this.range;
     }
 
+    public @Nonnull Option<KShadow> getShadow()
+    {
+      return this.shadow;
+    }
+
     public @Nonnull Texture2DStaticUsable getTexture()
     {
       return this.texture;
