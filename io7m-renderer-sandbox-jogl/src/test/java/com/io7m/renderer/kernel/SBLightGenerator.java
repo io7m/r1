@@ -23,6 +23,7 @@ import net.java.quickcheck.generator.support.IntegerGenerator;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.RSpaceRGB;
@@ -41,6 +42,7 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
   private final @Nonnull PathVirtualGenerator              path_gen;
   private final @Nonnull QuaternionI4FGenerator            quat_gen;
   private final @Nonnull SBProjectionGenerator             projection_gen;
+  private final @Nonnull SBLightShadowDescriptionGenerator shad_gen;
 
   public SBLightGenerator()
   {
@@ -50,6 +52,7 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
     this.path_gen = new PathVirtualGenerator();
     this.quat_gen = new QuaternionI4FGenerator();
     this.projection_gen = new SBProjectionGenerator();
+    this.shad_gen = new SBLightShadowDescriptionGenerator();
     this.id = Integer.valueOf(0);
   }
 
@@ -79,6 +82,8 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
             this.projection_gen.next();
           final QuaternionI4F orientation = this.quat_gen.next();
           final PathVirtual texture = this.path_gen.next();
+          final Option<SBLightShadowDescription> shadow =
+            Option.some(this.shad_gen.next());
 
           return new SBLightDescription.SBLightDescriptionProjective(
             orientation,
@@ -88,6 +93,7 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
             texture,
             colour,
             intensity,
+            shadow,
             this.id);
         }
         case LIGHT_SPHERE:

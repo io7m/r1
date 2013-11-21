@@ -147,7 +147,7 @@ public abstract class KMutableMatricesContract extends TestContract
 
   @SuppressWarnings("static-method") @Test public void testInitial()
   {
-    final KMutableMatrices mm = KMutableMatrices.make();
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
     Assert.assertNotNull(mm);
   }
 
@@ -159,7 +159,7 @@ public abstract class KMutableMatricesContract extends TestContract
     WithCamera mwc;
 
     try {
-      final KMutableMatrices mm = KMutableMatrices.make();
+      final KMutableMatrices mm = KMutableMatrices.newMatrices();
       final RMatrixI4x4F<RTransformView> view =
         new RMatrixI4x4F<RTransformView>();
       final RMatrixI4x4F<RTransformProjection> projection =
@@ -190,7 +190,7 @@ public abstract class KMutableMatricesContract extends TestContract
     WithCamera mwc;
 
     try {
-      final KMutableMatrices mm = KMutableMatrices.make();
+      final KMutableMatrices mm = KMutableMatrices.newMatrices();
       final RMatrixI4x4F<RTransformView> view =
         new RMatrixI4x4F<RTransformView>();
       final RMatrixI4x4F<RTransformProjection> projection =
@@ -238,7 +238,7 @@ public abstract class KMutableMatricesContract extends TestContract
   @SuppressWarnings("static-method") @Test public void testWithCameraOnce()
     throws ConstraintError
   {
-    final KMutableMatrices mm = KMutableMatrices.make();
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final RMatrixI4x4F<RTransformView> view =
       new RMatrixI4x4F<RTransformView>();
     final RMatrixI4x4F<RTransformProjection> projection =
@@ -261,7 +261,7 @@ public abstract class KMutableMatricesContract extends TestContract
     KCamera kc;
 
     try {
-      mm = KMutableMatrices.make();
+      mm = KMutableMatrices.newMatrices();
       final RMatrixI4x4F<RTransformView> view =
         new RMatrixI4x4F<RTransformView>();
       final RMatrixI4x4F<RTransformProjection> projection =
@@ -287,7 +287,7 @@ public abstract class KMutableMatricesContract extends TestContract
       final KMeshInstance kmi =
         KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
-      final KMutableMatrices mm = KMutableMatrices.make();
+      final KMutableMatrices mm = KMutableMatrices.newMatrices();
       final RMatrixI4x4F<RTransformView> view =
         new RMatrixI4x4F<RTransformView>();
       final RMatrixI4x4F<RTransformProjection> projection =
@@ -322,7 +322,7 @@ public abstract class KMutableMatricesContract extends TestContract
       final KMeshInstance kmi =
         KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
-      final KMutableMatrices mm = KMutableMatrices.make();
+      final KMutableMatrices mm = KMutableMatrices.newMatrices();
       final RMatrixI4x4F<RTransformView> view =
         new RMatrixI4x4F<RTransformView>();
       final RMatrixI4x4F<RTransformProjection> projection =
@@ -421,7 +421,7 @@ public abstract class KMutableMatricesContract extends TestContract
     final KMeshInstance kmi =
       KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
-    final KMutableMatrices mm = KMutableMatrices.make();
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final RMatrixI4x4F<RTransformView> view =
       new RMatrixI4x4F<RTransformView>();
     final RMatrixI4x4F<RTransformProjection> projection =
@@ -451,7 +451,7 @@ public abstract class KMutableMatricesContract extends TestContract
     final KMeshInstance kmi =
       KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
-    final KMutableMatrices mm = KMutableMatrices.make();
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final RMatrixI4x4F<RTransformView> view =
       new RMatrixI4x4F<RTransformView>();
     final RMatrixI4x4F<RTransformProjection> projection =
@@ -481,7 +481,7 @@ public abstract class KMutableMatricesContract extends TestContract
     WithCamera mwc;
 
     try {
-      final KMutableMatrices mm = KMutableMatrices.make();
+      final KMutableMatrices mm = KMutableMatrices.newMatrices();
       final RMatrixI4x4F<RTransformView> view =
         new RMatrixI4x4F<RTransformView>();
       final RMatrixI4x4F<RTransformProjection> projection =
@@ -514,7 +514,7 @@ public abstract class KMutableMatricesContract extends TestContract
         .getGLImplementation()
         .getGLCommon());
 
-    final KMutableMatrices mm = KMutableMatrices.make();
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final RMatrixI4x4F<RTransformView> view =
       new RMatrixI4x4F<RTransformView>();
     final RMatrixI4x4F<RTransformProjection> projection =
@@ -562,7 +562,7 @@ public abstract class KMutableMatricesContract extends TestContract
       final KMeshInstance kmi =
         KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
-      final KMutableMatrices mm = KMutableMatrices.make();
+      final KMutableMatrices mm = KMutableMatrices.newMatrices();
       final RMatrixI4x4F<RTransformView> view =
         new RMatrixI4x4F<RTransformView>();
       final RMatrixI4x4F<RTransformProjection> projection =
@@ -601,7 +601,7 @@ public abstract class KMutableMatricesContract extends TestContract
     final KMeshInstance kmi =
       KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
-    final KMutableMatrices mm = KMutableMatrices.make();
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final RMatrixI4x4F<RTransformView> view =
       new RMatrixI4x4F<RTransformView>();
     final RMatrixI4x4F<RTransformProjection> projection =
@@ -639,7 +639,7 @@ public abstract class KMutableMatricesContract extends TestContract
       final KMeshInstance kmi =
         KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
-      final KMutableMatrices mm = KMutableMatrices.make();
+      final KMutableMatrices mm = KMutableMatrices.newMatrices();
       final RMatrixI4x4F<RTransformView> view =
         new RMatrixI4x4F<RTransformView>();
       final RMatrixI4x4F<RTransformProjection> projection =

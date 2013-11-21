@@ -87,7 +87,7 @@ final class KRendererDebugBitangentsLocal implements KRenderer
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = KMutableMatrices.make();
+    this.matrices = KMutableMatrices.newMatrices();
     this.transform_context = new KTransform.Context();
     this.viewport_size = new VectorM2I();
 
@@ -112,7 +112,7 @@ final class KRendererDebugBitangentsLocal implements KRenderer
   }
 
   @Override public void rendererEvaluate(
-    final @Nonnull KFramebufferUsable framebuffer,
+    final @Nonnull KFramebufferRGBAUsable framebuffer,
     final @Nonnull KVisibleScene scene)
     throws JCGLException,
       ConstraintError
@@ -124,7 +124,7 @@ final class KRendererDebugBitangentsLocal implements KRenderer
 
     try {
       final FramebufferReferenceUsable output_buffer =
-        framebuffer.kframebufferGetOutputBuffer();
+        framebuffer.kframebufferGetFramebuffer();
       final AreaInclusive area = framebuffer.kframebufferGetArea();
       this.viewport_size.x = (int) area.getRangeX().getInterval();
       this.viewport_size.y = (int) area.getRangeY().getInterval();

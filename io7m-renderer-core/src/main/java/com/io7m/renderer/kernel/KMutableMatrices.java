@@ -27,6 +27,7 @@ import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.renderer.RMatrixI3x3F;
+import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RMatrixM3x3F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RMatrixReadable3x3F;
@@ -58,23 +59,24 @@ import com.io7m.renderer.kernel.KLight.KProjective;
     WithCamera
   {
     WithCameraActual(
-      final @Nonnull KCamera camera)
+      final @Nonnull RMatrixI4x4F<RTransformView> view,
+      final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
       throws ConstraintError
     {
       Constraints.constrainArbitrary(
         this.cameraIsActive() == false,
         "Camera is not currently active");
-      Constraints.constrainNotNull(camera, "Camera");
+
+      Constraints.constrainNotNull(view, "View matrix");
+      Constraints.constrainNotNull(view, "Projection matrix");
       KMutableMatrices.this.camera_active.set(true);
 
       /**
        * Calculate projection and view matrices.
        */
 
-      camera.getProjectionMatrix().makeMatrixM4x4F(
-        KMutableMatrices.this.matrix_projection);
-      camera.getViewMatrix().makeMatrixM4x4F(
-        KMutableMatrices.this.matrix_view);
+      projection.makeMatrixM4x4F(KMutableMatrices.this.matrix_projection);
+      view.makeMatrixM4x4F(KMutableMatrices.this.matrix_view);
 
       MatrixM4x4F.invertWithContext(
         KMutableMatrices.this.matrix_context,
@@ -529,7 +531,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
         throws ConstraintError;
   }
 
-  public static @Nonnull KMutableMatrices make()
+  public static @Nonnull KMutableMatrices newMatrices()
   {
     return new KMutableMatrices();
   }
@@ -600,6 +602,16 @@ import com.io7m.renderer.kernel.KLight.KProjective;
     final @Nonnull KCamera camera)
     throws ConstraintError
   {
-    return new WithCameraActual(camera);
+    return new WithCameraActual(
+      camera.getViewMatrix(),
+      camera.getProjectionMatrix());
+  }
+
+  public @Nonnull WithCamera withObserver(
+    final @Nonnull RMatrixI4x4F<RTransformView> view,
+    final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
+    throws ConstraintError
+  {
+    return new WithCameraActual(view, projection);
   }
 }

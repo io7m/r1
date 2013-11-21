@@ -688,7 +688,7 @@ public final class SBRendererSpecific implements KRenderer
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = KMutableMatrices.make();
+    this.matrices = KMutableMatrices.newMatrices();
     this.viewport_size = new VectorM2I();
 
     this.program_depth =
@@ -860,7 +860,7 @@ public final class SBRendererSpecific implements KRenderer
   }
 
   @Override public void rendererEvaluate(
-    final @Nonnull KFramebufferUsable framebuffer,
+    final @Nonnull KFramebufferRGBAUsable framebuffer,
     final @Nonnull KVisibleScene scene)
     throws JCGLException,
       ConstraintError
@@ -872,7 +872,7 @@ public final class SBRendererSpecific implements KRenderer
 
     try {
       final FramebufferReferenceUsable output_buffer =
-        framebuffer.kframebufferGetOutputBuffer();
+        framebuffer.kframebufferGetFramebuffer();
 
       final AreaInclusive area = framebuffer.kframebufferGetArea();
       this.viewport_size.x = (int) area.getRangeX().getInterval();
