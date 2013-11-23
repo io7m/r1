@@ -476,8 +476,7 @@ final class SBGLRenderer implements GLEventListener
                     gl3.texture2DStaticGetImage(t);
                   RDTextureUtilities.textureDumpTimestampedTemporary(
                     tr,
-                    ((Option.Some<String>) path.getBaseName()).value,
-                    SBGLRenderer.this.log);
+                    ((Option.Some<String>) path.getBaseName()).value);
                   break;
                 }
               }
