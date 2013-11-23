@@ -218,11 +218,11 @@ final class SBGLRenderer implements GLEventListener
 
   private static enum RunningState
   {
-    STATE_INITIAL,
-    STATE_RUNNING,
-    STATE_PAUSED,
     STATE_FAILED,
-    STATE_FAILED_PERMANENTLY
+    STATE_FAILED_PERMANENTLY,
+    STATE_INITIAL,
+    STATE_PAUSED,
+    STATE_RUNNING
   }
 
   private static abstract class SceneObserver
@@ -590,8 +590,10 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private static final @Nonnull PathVirtual SPHERE_32_16_MESH;
-  private static final @Nonnull PathVirtual SPHERE_16_8_MESH;
+  private static final @Nonnull VectorReadable4F GRID_COLOUR;
+  private static final @Nonnull PathVirtual      SPHERE_16_8_MESH;
+  private static final @Nonnull PathVirtual      SPHERE_32_16_MESH;
+
   static {
     try {
       SPHERE_32_16_MESH =
@@ -604,6 +606,10 @@ final class SBGLRenderer implements GLEventListener
     } catch (final ConstraintError e) {
       throw new UnreachableCodeException();
     }
+  }
+
+  static {
+    GRID_COLOUR = new VectorI4F(1.0f, 1.0f, 1.0f, 0.1f);
   }
 
   private static @Nonnull AreaInclusive drawableArea(
@@ -650,90 +656,6 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private static <A, B extends FutureTask<A>> void processQueue(
-    final @Nonnull Queue<B> q)
-  {
-    for (;;) {
-      final FutureTask<?> f = q.poll();
-      if (f == null) {
-        break;
-      }
-      f.run();
-    }
-  }
-
-  private final @Nonnull Log                                                        log;
-  private @CheckForNull JCGLImplementationJOGL                                      gi;
-  private final @Nonnull TextureLoader                                              texture_loader;
-  private final @Nonnull ConcurrentLinkedQueue<Texture2DLoadFuture>                 texture2d_load_queue;
-  private final @Nonnull ConcurrentLinkedQueue<Texture2DDeleteFuture>               texture2d_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>               texture_cube_load_queue;
-  private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>             texture_cube_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                      mesh_load_queue;
-  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>                    mesh_delete_queue;
-
-  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>                    shader_load_queue;
-  private final @Nonnull HashMap<String, SBShader>                                  shaders;
-  private final @Nonnull HashMap<PathVirtual, Texture2DStatic>                      textures_2d;
-  private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>                    textures_cube;
-
-  private final @Nonnull HashMap<PathVirtual, KMesh>                                meshes;
-  private @CheckForNull SBQuad                                                      screen_quad;
-  private final @Nonnull FSCapabilityAll                                            filesystem;
-  private final @Nonnull AtomicReference<RunningState>                              running;
-  private final @Nonnull MatrixM4x4F                                                matrix_projection;
-  private final @Nonnull MatrixM4x4F                                                matrix_modelview;
-  private final @Nonnull MatrixM4x4F                                                matrix_model;
-  private final @Nonnull MatrixM4x4F                                                matrix_model_temporary;
-  private final @Nonnull MatrixM4x4F                                                matrix_view;
-  private @CheckForNull List<TextureUnit>                                           texture_units;
-  private final @Nonnull AtomicReference<SBRendererType>                            renderer_new;
-  private @CheckForNull KRenderer                                                   renderer;
-  private @CheckForNull KFramebufferRGBA                                            framebuffer;
-
-  private @Nonnull LRUCacheTrivial<String, ProgramReference, KShaderCacheException> shader_cache;
-  private @Nonnull LRUCacheConfig                                                   shader_cache_config;
-  private @Nonnull PCache<KShadow, KFramebufferDepth, KShadowCacheException>        shadow_cache;
-  private @Nonnull PCacheConfig                                                     shadow_cache_config;
-
-  private final @Nonnull AtomicReference<SBSceneControllerRenderer>                 controller;
-  private final @Nonnull AtomicReference<VectorI3F>                                 background_colour;
-  private @Nonnull SBVisibleAxes                                                    axes;
-  private final @Nonnull AtomicBoolean                                              axes_show;
-  private @Nonnull SBVisibleGridPlane                                               grid;
-  private final @Nonnull AtomicBoolean                                              grid_show;
-  private @Nonnull HashMap<PathVirtual, KMesh>                                      sphere_meshes;
-  private final @Nonnull AtomicBoolean                                              lights_show;
-
-  private final @Nonnull AtomicBoolean                                              lights_show_surface;
-  private final @Nonnull Map<SBProjectionDescription, SBVisibleProjection>          projection_cache;
-  private final @Nonnull QuaternionM4F.Context                                      qm4f_context;
-  private @Nonnull KTransform                                                       camera_transform;
-  private final @Nonnull KTransform.Context                                         camera_transform_context;
-  private final @Nonnull SBInputState                                               input_state;
-  private final @Nonnull SBFirstPersonCamera                                        camera;
-  private @Nonnull RMatrixI4x4F<RTransformView>                                     camera_view_matrix;
-  private final @Nonnull RMatrixM4x4F<RTransformView>                               camera_view_matrix_temporary;
-  private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>>        camera_custom_projection;
-  private @Nonnull SceneObserver                                                    camera_current;
-  private @CheckForNull KVisibleScene                                               scene_current;
-  private @CheckForNull KVisibleScene                                               scene_previous;
-  private Collection<SBLight>                                                       scene_lights;
-  private @CheckForNull ProgramReference                                            program_uv;
-  private @CheckForNull ProgramReference                                            program_vcolour;
-  private @CheckForNull ProgramReference                                            program_ccolour;
-  private @Nonnull JCCEExecutionCallable                                            exec_vcolour;
-  private @Nonnull JCCEExecutionCallable                                            exec_uv;
-  private @Nonnull JCCEExecutionCallable                                            exec_ccolour;
-  private @Nonnull AreaInclusive                                                    viewport;
-  private final SandboxConfig                                                       config;
-
-  private static final @Nonnull VectorReadable4F                                    GRID_COLOUR;
-
-  static {
-    GRID_COLOUR = new VectorI4F(1.0f, 1.0f, 1.0f, 0.1f);
-  }
-
   private static @Nonnull SBMesh loadMesh(
     final @Nonnull PathVirtual path,
     final @Nonnull InputStream stream,
@@ -755,6 +677,163 @@ final class SBGLRenderer implements GLEventListener
       return new SBMesh(path, new KMesh(ab, ib));
     } finally {
       stream.close();
+    }
+  }
+
+  private static <A, B extends FutureTask<A>> void processQueue(
+    final @Nonnull Queue<B> q)
+  {
+    for (;;) {
+      final FutureTask<?> f = q.poll();
+      if (f == null) {
+        break;
+      }
+      f.run();
+    }
+  }
+
+  private static void renderSceneMakeLitBatches(
+    final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
+    final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
+    final @Nonnull List<KBatchTranslucent> translucent_lit,
+    final @Nonnull Map<KLight, KBatchOpaqueShadow> shadow_opaque,
+    final @Nonnull Map<KLight, KBatchTranslucentShadow> shadow_translucent)
+  {
+    /**
+     * Sort objects by Z (from the origin, not from the observer, for testing
+     * purposes). This will ensure that translucent objects are rendered from
+     * farthest to nearest.
+     */
+
+    final LinkedList<KMeshInstance> instances =
+      new LinkedList<KMeshInstance>(p.second);
+
+    Collections.sort(instances, new Comparator<KMeshInstance>() {
+      @Override public int compare(
+        final KMeshInstance o1,
+        final KMeshInstance o2)
+      {
+        final float o1z = o1.getTransform().getTranslation().getZF();
+        final float o2z = o2.getTransform().getTranslation().getZF();
+        return Float.compare(o1z, o2z);
+      }
+    });
+
+    for (final KLight l : p.first) {
+      switch (l.getType()) {
+        case LIGHT_PROJECTIVE:
+        {
+          final KProjective kp = (KProjective) l;
+          switch (kp.getShadow().type) {
+            case OPTION_NONE:
+            {
+              break;
+            }
+            case OPTION_SOME:
+            {
+              final ArrayList<KMeshInstance> light_opaques =
+                new ArrayList<KMeshInstance>();
+              final ArrayList<KMeshInstance> light_translucents =
+                new ArrayList<KMeshInstance>();
+
+              for (final KMeshInstance i : instances) {
+                switch (i.getShadowMaterialLabel()) {
+                  case SHADOW_OPAQUE:
+                  {
+                    light_opaques.add(i);
+                    break;
+                  }
+                  case SHADOW_TRANSLUCENT:
+                  case SHADOW_TRANSLUCENT_TEXTURED:
+                  {
+                    light_translucents.add(i);
+                    break;
+                  }
+                }
+              }
+
+              assert shadow_opaque.containsKey(kp) == false;
+              assert shadow_translucent.containsKey(kp) == false;
+
+              shadow_opaque.put(
+                kp,
+                KBatchOpaqueShadow.newBatch(kp, light_opaques));
+              shadow_translucent.put(
+                kp,
+                KBatchTranslucentShadow.newBatch(kp, light_translucents));
+              break;
+            }
+          }
+          break;
+        }
+        case LIGHT_DIRECTIONAL:
+        case LIGHT_SPHERE:
+        {
+          break;
+        }
+      }
+    }
+
+    for (final KLight l : p.first) {
+      switch (l.getType()) {
+        case LIGHT_PROJECTIVE:
+        case LIGHT_DIRECTIONAL:
+        case LIGHT_SPHERE:
+        {
+          final HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
+            new HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>>();
+
+          for (final KMeshInstance m : instances) {
+            final KMeshInstanceForwardMaterialLabel mlabel =
+              m.getForwardMaterialLabel();
+
+            if (instances_by_label.containsKey(mlabel)) {
+              final ArrayList<KMeshInstance> ins =
+                instances_by_label.get(mlabel);
+              ins.add(m);
+            } else {
+              final ArrayList<KMeshInstance> ins =
+                new ArrayList<KMeshInstance>();
+              ins.add(m);
+              instances_by_label.put(mlabel, ins);
+            }
+          }
+
+          for (final Entry<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
+            .entrySet()) {
+            final KMeshInstanceForwardMaterialLabel label = e.getKey();
+            final ArrayList<KMeshInstance> kinstances = e.getValue();
+
+            final List<KBatchOpaqueLit> lits;
+            if (opaque_lit.containsKey(l)) {
+              lits = opaque_lit.get(l);
+            } else {
+              lits = new ArrayList<KBatchOpaqueLit>();
+              opaque_lit.put(l, lits);
+            }
+
+            if (label.getAlpha() != KMaterialAlphaLabel.ALPHA_TRANSLUCENT) {
+              lits.add(KBatchOpaqueLit.newBatch(l, label, kinstances));
+            }
+          }
+
+          break;
+        }
+      }
+    }
+
+    final Iterator<KMeshInstance> iter = instances.iterator();
+    while (iter.hasNext()) {
+      final KMeshInstance i = iter.next();
+      final KMeshInstanceForwardMaterialLabel label =
+        i.getForwardMaterialLabel();
+      if (label.getAlpha() == KMaterialAlphaLabel.ALPHA_OPAQUE) {
+        iter.remove();
+      } else {
+        translucent_lit.add(KBatchTranslucent.newBatch(
+          i,
+          new ArrayList<KLight>(p.first)));
+      }
     }
   }
 
@@ -791,6 +870,79 @@ final class SBGLRenderer implements GLEventListener
     }
 
   }
+
+  private @Nonnull SBVisibleAxes                                                    axes;
+  private final @Nonnull AtomicBoolean                                              axes_show;
+  private final @Nonnull AtomicReference<VectorI3F>                                 background_colour;
+  private final @Nonnull SBFirstPersonCamera                                        camera;
+
+  private @Nonnull SceneObserver                                                    camera_current;
+  private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>>        camera_custom_projection;
+  private @Nonnull KTransform                                                       camera_transform;
+  private final @Nonnull KTransform.Context                                         camera_transform_context;
+
+  private @Nonnull RMatrixI4x4F<RTransformView>                                     camera_view_matrix;
+  private final @Nonnull RMatrixM4x4F<RTransformView>                               camera_view_matrix_temporary;
+  private final SandboxConfig                                                       config;
+  private final @Nonnull AtomicReference<SBSceneControllerRenderer>                 controller;
+  private @Nonnull JCCEExecutionCallable                                            exec_ccolour;
+  private @Nonnull JCCEExecutionCallable                                            exec_uv;
+  private @Nonnull JCCEExecutionCallable                                            exec_vcolour;
+  private final @Nonnull FSCapabilityAll                                            filesystem;
+  private boolean                                                                   first =
+                                                                                            true;
+  private @CheckForNull KFramebufferRGBA                                            framebuffer;
+  private @CheckForNull JCGLImplementationJOGL                                      gi;
+  private @Nonnull SBVisibleGridPlane                                               grid;
+  private final @Nonnull AtomicBoolean                                              grid_show;
+
+  private final @Nonnull SBInputState                                               input_state;
+  private final @Nonnull AtomicBoolean                                              lights_show;
+  private final @Nonnull AtomicBoolean                                              lights_show_surface;
+  private final @Nonnull Log                                                        log;
+
+  private final @Nonnull MatrixM4x4F                                                matrix_model;
+  private final @Nonnull MatrixM4x4F                                                matrix_model_temporary;
+  private final @Nonnull MatrixM4x4F                                                matrix_modelview;
+  private final @Nonnull MatrixM4x4F                                                matrix_projection;
+  private final @Nonnull MatrixM4x4F                                                matrix_view;
+  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>                    mesh_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                      mesh_load_queue;
+  private final @Nonnull HashMap<PathVirtual, KMesh>                                meshes;
+
+  private @CheckForNull ProgramReference                                            program_ccolour;
+  private @CheckForNull ProgramReference                                            program_uv;
+  private @CheckForNull ProgramReference                                            program_vcolour;
+  private final @Nonnull Map<SBProjectionDescription, SBVisibleProjection>          projection_cache;
+  private final @Nonnull QuaternionM4F.Context                                      qm4f_context;
+  private @CheckForNull KRenderer                                                   renderer;
+  private final @Nonnull AtomicReference<SBRendererType>                            renderer_new;
+  private final @Nonnull AtomicReference<RunningState>                              running;
+  private @CheckForNull KVisibleScene                                               scene_current;
+  private Collection<SBLight>                                                       scene_lights;
+  private @CheckForNull KVisibleScene                                               scene_previous;
+  private @CheckForNull SBQuad                                                      screen_quad;
+  private @Nonnull LRUCacheTrivial<String, ProgramReference, KShaderCacheException> shader_cache;
+  private @Nonnull LRUCacheConfig                                                   shader_cache_config;
+  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>                    shader_load_queue;
+  private final @Nonnull HashMap<String, SBShader>                                  shaders;
+  private @Nonnull PCache<KShadow, KFramebufferDepth, KShadowCacheException>        shadow_cache;
+  private @Nonnull PCacheConfig                                                     shadow_cache_config;
+  private @Nonnull HashMap<PathVirtual, KMesh>                                      sphere_meshes;
+  private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>             texture_cube_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>               texture_cube_load_queue;
+  private final @Nonnull TextureLoader                                              texture_loader;
+  private @CheckForNull List<TextureUnit>                                           texture_units;
+
+  private final @Nonnull ConcurrentLinkedQueue<Texture2DDeleteFuture>               texture2d_delete_queue;
+
+  private final @Nonnull ConcurrentLinkedQueue<Texture2DLoadFuture>                 texture2d_load_queue;
+
+  private final @Nonnull HashMap<PathVirtual, Texture2DStatic>                      textures_2d;
+
+  private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>                    textures_cube;
+
+  private @Nonnull AreaInclusive                                                    viewport;
 
   public SBGLRenderer(
     final @Nonnull SandboxConfig config,
@@ -1078,6 +1230,15 @@ final class SBGLRenderer implements GLEventListener
     final @Nonnull GLAutoDrawable drawable)
   {
     try {
+      final JCGLInterfaceCommon gl = this.gi.getGLCommon();
+
+      if (this.first) {
+        this.initializeResources(drawable);
+        this.gi.getGLCommon().colorBufferClear3f(0.0f, 0.0f, 0.0f);
+        this.first = false;
+        return;
+      }
+
       if (this.running.get() == RunningState.STATE_FAILED_PERMANENTLY) {
         return;
       }
@@ -1107,8 +1268,6 @@ final class SBGLRenderer implements GLEventListener
           break;
         }
       }
-
-      final JCGLInterfaceCommon gl = this.gi.getGLCommon();
 
       this.cameraHandle();
       this.renderScene();
@@ -1229,10 +1388,10 @@ final class SBGLRenderer implements GLEventListener
   @Override public void init(
     final @Nonnull GLAutoDrawable drawable)
   {
-    this.log.debug("initialized");
-    try {
-      drawable.getContext().setSwapInterval(1);
+    this.log.debug("Initializing OpenGL");
 
+    drawable.getContext().setSwapInterval(1);
+    try {
       if (this.config.isOpenglDebug()) {
         if (this.config.isOpenglTrace()) {
           this.gi =
@@ -1258,7 +1417,22 @@ final class SBGLRenderer implements GLEventListener
             drawable.getContext(),
             this.log);
       }
+    } catch (final JCGLException e) {
+      this.failedPermanently(e);
+    } catch (final JCGLUnsupportedException e) {
+      this.failedPermanently(e);
+    } catch (final ConstraintError e) {
+      this.failedPermanently(e);
+    }
+  }
 
+  private void initializeResources(
+    final GLAutoDrawable drawable)
+    throws Error
+  {
+    this.log.debug("Initializing resources");
+
+    try {
       final JCGLInterfaceCommon gl = this.gi.getGLCommon();
       final JCGLSLVersion version = gl.metaGetSLVersion();
 
@@ -2029,151 +2203,6 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private static void renderSceneMakeLitBatches(
-    final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
-    final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
-    final @Nonnull List<KBatchTranslucent> translucent_lit,
-    final @Nonnull Map<KLight, KBatchOpaqueShadow> shadow_opaque,
-    final @Nonnull Map<KLight, KBatchTranslucentShadow> shadow_translucent)
-  {
-    /**
-     * Sort objects by Z (from the origin, not from the observer, for testing
-     * purposes). This will ensure that translucent objects are rendered from
-     * farthest to nearest.
-     */
-
-    final LinkedList<KMeshInstance> instances =
-      new LinkedList<KMeshInstance>(p.second);
-
-    Collections.sort(instances, new Comparator<KMeshInstance>() {
-      @Override public int compare(
-        final KMeshInstance o1,
-        final KMeshInstance o2)
-      {
-        final float o1z = o1.getTransform().getTranslation().getZF();
-        final float o2z = o2.getTransform().getTranslation().getZF();
-        return Float.compare(o1z, o2z);
-      }
-    });
-
-    for (final KLight l : p.first) {
-      switch (l.getType()) {
-        case LIGHT_PROJECTIVE:
-        {
-          final KProjective kp = (KProjective) l;
-          switch (kp.getShadow().type) {
-            case OPTION_NONE:
-            {
-              break;
-            }
-            case OPTION_SOME:
-            {
-              final ArrayList<KMeshInstance> light_opaques =
-                new ArrayList<KMeshInstance>();
-              final ArrayList<KMeshInstance> light_translucents =
-                new ArrayList<KMeshInstance>();
-
-              for (final KMeshInstance i : instances) {
-                switch (i.getShadowMaterialLabel()) {
-                  case SHADOW_OPAQUE:
-                  {
-                    light_opaques.add(i);
-                    break;
-                  }
-                  case SHADOW_TRANSLUCENT:
-                  case SHADOW_TRANSLUCENT_TEXTURED:
-                  {
-                    light_translucents.add(i);
-                    break;
-                  }
-                }
-              }
-
-              assert shadow_opaque.containsKey(kp) == false;
-              assert shadow_translucent.containsKey(kp) == false;
-
-              shadow_opaque.put(
-                kp,
-                KBatchOpaqueShadow.newBatch(kp, light_opaques));
-              shadow_translucent.put(
-                kp,
-                KBatchTranslucentShadow.newBatch(kp, light_translucents));
-              break;
-            }
-          }
-          break;
-        }
-        case LIGHT_DIRECTIONAL:
-        case LIGHT_SPHERE:
-        {
-          break;
-        }
-      }
-    }
-
-    for (final KLight l : p.first) {
-      switch (l.getType()) {
-        case LIGHT_PROJECTIVE:
-        case LIGHT_DIRECTIONAL:
-        case LIGHT_SPHERE:
-        {
-          final HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
-            new HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>>();
-
-          for (final KMeshInstance m : instances) {
-            final KMeshInstanceForwardMaterialLabel mlabel =
-              m.getForwardMaterialLabel();
-
-            if (instances_by_label.containsKey(mlabel)) {
-              final ArrayList<KMeshInstance> ins =
-                instances_by_label.get(mlabel);
-              ins.add(m);
-            } else {
-              final ArrayList<KMeshInstance> ins =
-                new ArrayList<KMeshInstance>();
-              ins.add(m);
-              instances_by_label.put(mlabel, ins);
-            }
-          }
-
-          for (final Entry<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
-            .entrySet()) {
-            final KMeshInstanceForwardMaterialLabel label = e.getKey();
-            final ArrayList<KMeshInstance> kinstances = e.getValue();
-
-            final List<KBatchOpaqueLit> lits;
-            if (opaque_lit.containsKey(l)) {
-              lits = opaque_lit.get(l);
-            } else {
-              lits = new ArrayList<KBatchOpaqueLit>();
-              opaque_lit.put(l, lits);
-            }
-
-            if (label.getAlpha() != KMaterialAlphaLabel.ALPHA_TRANSLUCENT) {
-              lits.add(KBatchOpaqueLit.newBatch(l, label, kinstances));
-            }
-          }
-
-          break;
-        }
-      }
-    }
-
-    final Iterator<KMeshInstance> iter = instances.iterator();
-    while (iter.hasNext()) {
-      final KMeshInstance i = iter.next();
-      final KMeshInstanceForwardMaterialLabel label =
-        i.getForwardMaterialLabel();
-      if (label.getAlpha() == KMaterialAlphaLabel.ALPHA_OPAQUE) {
-        iter.remove();
-      } else {
-        translucent_lit.add(KBatchTranslucent.newBatch(
-          i,
-          new ArrayList<KLight>(p.first)));
-      }
-    }
-  }
-
   @Override public void reshape(
     final @Nonnull GLAutoDrawable drawable,
     final int x,
@@ -2183,7 +2212,6 @@ final class SBGLRenderer implements GLEventListener
   {
     try {
       this.log.debug("Reshape " + width + "x" + height);
-
       this.viewport = SBGLRenderer.drawableArea(drawable);
       final JCGLInterfaceCommon gl = this.gi.getGLCommon();
       this.reloadSizedResources(drawable, gl);
