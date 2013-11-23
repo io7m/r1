@@ -76,7 +76,6 @@ import com.io7m.renderer.kernel.KTransform.Context;
 
 public final class KRendererForward implements KRenderer
 {
-
   private static void handleShaderCacheException(
     final @Nonnull KShaderCacheException e)
     throws IOException,
@@ -178,6 +177,7 @@ public final class KRendererForward implements KRenderer
   {
     return new KRendererForward(g, shader_cache, shadow_cache, log);
   }
+
   private final @Nonnull VectorM4F                                                 background;
   private final @Nonnull JCGLImplementation                                        g;
   private final @Nonnull StringBuilder                                             label_cache;
@@ -187,7 +187,6 @@ public final class KRendererForward implements KRenderer
   private final @Nonnull LUCache<String, ProgramReference, KShaderCacheException>  shader_cache;
   private final @Nonnull PCache<KShadow, KFramebufferDepth, KShadowCacheException> shadow_cache;
   private final @Nonnull Context                                                   transform_context;
-
   private final @Nonnull VectorM2I                                                 viewport_size;
 
   private KRendererForward(
@@ -638,8 +637,6 @@ public final class KRendererForward implements KRenderer
 
         try {
           gc.framebufferDrawBind(output_buffer);
-          gc.colorBufferClearV4f(this.background);
-
           gc.cullingEnable(
             FaceSelection.FACE_BACK,
             FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
@@ -661,6 +658,8 @@ public final class KRendererForward implements KRenderer
            * framebuffer.
            */
 
+          gc.colorBufferMask(true, true, true, true);
+          gc.colorBufferClearV4f(this.background);
           gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
           gc.depthBufferWriteDisable();
           gc.colorBufferMask(true, true, true, true);
@@ -978,6 +977,22 @@ public final class KRendererForward implements KRenderer
       KShadowCacheException
   {
     final JCGLInterfaceCommon gc = this.g.getGLCommon();
+
+    /**
+     * Opaque objects will contribute to the depth buffer and are subject to
+     * being tested against the existing contents of the depth buffer, but
+     * will not contribute any colour information.
+     */
+
+    gc.cullingEnable(
+      FaceSelection.FACE_BACK,
+      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+    gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+    gc.depthBufferWriteEnable();
+    gc.depthBufferClear(1.0f);
+    gc.colorBufferMask(false, false, false, false);
+    gc.blendingDisable();
+
     final Map<KLight, KBatchOpaqueShadow> opaque_batches =
       scene.getBatches().getBatchesShadowOpaque();
     final Set<Entry<KLight, KBatchOpaqueShadow>> opaque_batches_entries =
@@ -1031,6 +1046,19 @@ public final class KRendererForward implements KRenderer
       JCGLException
   {
     final JCGLInterfaceCommon gc = this.g.getGLCommon();
+
+    /**
+     * Translucent objects will contribute to the depth buffer but are subject
+     * to being tested against the existing contents of the depth buffer, due
+     * to being drawn in a carefully defined order. Objects will not
+     * contribute any colour information.
+     */
+
+    gc.cullingDisable();
+    gc.depthBufferTestDisable();
+    gc.depthBufferWriteEnable();
+    gc.colorBufferMask(false, false, false, false);
+
     final Map<KLight, KBatchTranslucentShadow> translucent_batches =
       scene.getBatches().getBatchesShadowTranslucent();
     final Set<Entry<KLight, KBatchTranslucentShadow>> translucent_batches_entries =
