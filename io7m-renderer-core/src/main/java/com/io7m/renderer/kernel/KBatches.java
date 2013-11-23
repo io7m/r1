@@ -28,15 +28,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
 @Immutable final class KBatches
 {
-  public static @Nonnull
-    KBatches
-    newBatches(
-      final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
-      final @Nonnull List<KBatchOpaqueUnlit> opaque_unlit,
-      final @Nonnull List<KBatchTranslucent> translucent,
-      final @Nonnull Map<KLight, List<KBatchOpaqueShadow>> shadow_opaque,
-      final @Nonnull Map<KLight, List<KBatchTranslucentShadow>> shadow_translucent)
-      throws ConstraintError
+  public static @Nonnull KBatches newBatches(
+    final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
+    final @Nonnull List<KBatchOpaqueUnlit> opaque_unlit,
+    final @Nonnull List<KBatchTranslucent> translucent,
+    final @Nonnull Map<KLight, KBatchOpaqueShadow> shadow_opaque,
+    final @Nonnull Map<KLight, KBatchTranslucentShadow> shadow_translucent)
+    throws ConstraintError
   {
     return new KBatches(
       opaque_lit,
@@ -46,18 +44,18 @@ import com.io7m.jaux.Constraints.ConstraintError;
       shadow_translucent);
   }
 
-  private final @Nonnull Map<KLight, List<KBatchOpaqueLit>>         batches_opaque_lit;
-  private final @Nonnull List<KBatchOpaqueUnlit>                    batches_opaque_unlit;
-  private final @Nonnull List<KBatchTranslucent>                    batches_translucent;
-  private final @Nonnull Map<KLight, List<KBatchOpaqueShadow>>      shadow_opaque;
-  private final @Nonnull Map<KLight, List<KBatchTranslucentShadow>> shadow_translucent;
+  private final @Nonnull Map<KLight, List<KBatchOpaqueLit>>   batches_opaque_lit;
+  private final @Nonnull List<KBatchOpaqueUnlit>              batches_opaque_unlit;
+  private final @Nonnull List<KBatchTranslucent>              batches_translucent;
+  private final @Nonnull Map<KLight, KBatchOpaqueShadow>      shadow_opaque;
+  private final @Nonnull Map<KLight, KBatchTranslucentShadow> shadow_translucent;
 
   private KBatches(
     final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
     final @Nonnull List<KBatchOpaqueUnlit> opaque_unlit,
     final @Nonnull List<KBatchTranslucent> translucent,
-    final @Nonnull Map<KLight, List<KBatchOpaqueShadow>> shadow_opaque,
-    final @Nonnull Map<KLight, List<KBatchTranslucentShadow>> shadow_translucent)
+    final @Nonnull Map<KLight, KBatchOpaqueShadow> shadow_opaque,
+    final @Nonnull Map<KLight, KBatchTranslucentShadow> shadow_translucent)
     throws ConstraintError
   {
     this.batches_opaque_unlit =
@@ -113,15 +111,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
     return Collections.unmodifiableList(this.batches_opaque_unlit);
   }
 
-  public @Nonnull
-    Map<KLight, List<KBatchOpaqueShadow>>
-    getBatchesShadowOpaque()
+  public @Nonnull Map<KLight, KBatchOpaqueShadow> getBatchesShadowOpaque()
   {
     return Collections.unmodifiableMap(this.shadow_opaque);
   }
 
   public @Nonnull
-    Map<KLight, List<KBatchTranslucentShadow>>
+    Map<KLight, KBatchTranslucentShadow>
     getBatchesShadowTranslucent()
   {
     return Collections.unmodifiableMap(this.shadow_translucent);

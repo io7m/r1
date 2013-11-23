@@ -22,7 +22,6 @@ import javax.annotation.concurrent.Immutable;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
-import com.io7m.jaux.functional.Option.None;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
@@ -35,6 +34,7 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KLight.Type;
+import com.io7m.renderer.kernel.SBLightShadowDescription.SBLightShadowMappedBasicDescription;
 
 abstract class SBLightDescription
 {
@@ -239,11 +239,6 @@ abstract class SBLightDescription
       return this.falloff;
     }
 
-    public Integer getId()
-    {
-      return this.id;
-    }
-
     @Override public Integer getID()
     {
       return this.id;
@@ -256,7 +251,44 @@ abstract class SBLightDescription
 
     KProjective getLight(
       final @Nonnull SBTexture2D<SBTexture2DKindAlbedo> t)
+      throws ConstraintError
     {
+      Option<KShadow> kshadow = null;
+      switch (this.shadow.type) {
+        case OPTION_NONE:
+        {
+          kshadow = Option.none();
+          break;
+        }
+        case OPTION_SOME:
+        {
+          final SBLightShadowDescription s =
+            ((Option.Some<SBLightShadowDescription>) this.shadow).value;
+
+          switch (s.getType()) {
+            case SHADOW_MAPPED_BASIC:
+            {
+              final SBLightShadowMappedBasicDescription smb =
+                (SBLightShadowDescription.SBLightShadowMappedBasicDescription) s;
+              final KShadow ks =
+                KShadow.newMappedBasic(this.getID(), smb.getSize());
+              kshadow = Option.some(ks);
+              break;
+            }
+            case SHADOW_MAPPED_FILTERED:
+            {
+              final SBLightShadowMappedBasicDescription smb =
+                (SBLightShadowDescription.SBLightShadowMappedBasicDescription) s;
+              final KShadow ks =
+                KShadow.newMappedBasic(this.getID(), smb.getSize());
+              kshadow = Option.some(ks);
+              break;
+            }
+          }
+          break;
+        }
+      }
+
       return KLight.KProjective.make(
         this.id,
         t.getTexture(),
@@ -267,7 +299,7 @@ abstract class SBLightDescription
         (float) this.projection.getFar(),
         this.falloff,
         this.projection_matrix,
-        new None<KShadow>());
+        kshadow);
     }
 
     public QuaternionI4F getOrientation()

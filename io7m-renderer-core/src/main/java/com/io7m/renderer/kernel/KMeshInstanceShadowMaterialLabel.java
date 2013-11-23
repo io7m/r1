@@ -17,112 +17,74 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnimplementedCodeException;
+import com.io7m.jaux.UnreachableCodeException;
 
-@Immutable public final class KMeshInstanceShadowMaterialLabel
+public enum KMeshInstanceShadowMaterialLabel
 {
-  static @Nonnull KMeshInstanceShadowMaterialLabel label(
+  SHADOW_OPAQUE("SO"),
+  SHADOW_TRANSLUCENT("ST"),
+  SHADOW_TRANSLUCENT_TEXTURED("SX");
+
+  public static @Nonnull KMeshInstanceShadowMaterialLabel label(
     final @Nonnull KMesh mesh,
     final @Nonnull KMaterial material)
     throws ConstraintError
   {
-    return new KMeshInstanceShadowMaterialLabel(
-      KMaterialAlphaLabel.fromMeshAndMaterial(mesh, material),
-      KMaterialAlbedoLabel.fromMeshAndMaterial(mesh, material));
-  }
+    final KMaterialAlphaLabel alpha =
+      KMaterialAlphaLabel.fromMeshAndMaterial(mesh, material);
+    final KMaterialAlbedoLabel albedo =
+      KMaterialAlbedoLabel.fromMeshAndMaterial(mesh, material);
 
-  private static boolean makeImpliesUV(
-    final @Nonnull KMaterialAlbedoLabel albedo)
-  {
-    switch (albedo) {
-      case ALBEDO_COLOURED:
-        break;
-      case ALBEDO_TEXTURED:
-        return true;
+    switch (alpha) {
+      case ALPHA_OPAQUE:
+      {
+        return KMeshInstanceShadowMaterialLabel.SHADOW_OPAQUE;
+      }
+      case ALPHA_TRANSLUCENT:
+      {
+        switch (albedo) {
+          case ALBEDO_COLOURED:
+            return KMeshInstanceShadowMaterialLabel.SHADOW_TRANSLUCENT;
+          case ALBEDO_TEXTURED:
+            return KMeshInstanceShadowMaterialLabel.SHADOW_TRANSLUCENT_TEXTURED;
+        }
+      }
     }
 
-    return false;
+    throw new UnreachableCodeException();
   }
 
-  private static @Nonnull String makeLabelCode(
-    final @Nonnull KMaterialAlphaLabel a,
-    final @Nonnull KMaterialAlbedoLabel b)
-  {
-    final StringBuilder buffer = new StringBuilder();
-    buffer.append(a.code);
-    buffer.append("_");
-    buffer.append(b.code);
-    return buffer.toString();
-  }
+  private final String name;
 
-  private final @Nonnull KMaterialAlbedoLabel albedo;
-  private final @Nonnull KMaterialAlphaLabel  alpha;
-  private final @Nonnull String               code;
-  private final boolean                       implies_uv;
-
-  KMeshInstanceShadowMaterialLabel(
-    final @Nonnull KMaterialAlphaLabel alpha,
-    final @Nonnull KMaterialAlbedoLabel albedo)
-    throws ConstraintError
+  private KMeshInstanceShadowMaterialLabel(
+    final @Nonnull String name)
   {
-    this.alpha = Constraints.constrainNotNull(alpha, "Alpha");
-    this.albedo = Constraints.constrainNotNull(albedo, "Albedo");
-    this.code = KMeshInstanceShadowMaterialLabel.makeLabelCode(alpha, albedo);
-    this.implies_uv = KMeshInstanceShadowMaterialLabel.makeImpliesUV(albedo);
-  }
-
-  @Override public boolean equals(
-    final Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KMeshInstanceShadowMaterialLabel other =
-      (KMeshInstanceShadowMaterialLabel) obj;
-    if (this.alpha != other.alpha) {
-      return false;
-    }
-    if (this.albedo != other.albedo) {
-      return false;
-    }
-    return true;
-  }
-
-  public @Nonnull KMaterialAlbedoLabel getAlbedo()
-  {
-    return this.albedo;
-  }
-
-  public @Nonnull KMaterialAlphaLabel getAlpha()
-  {
-    return this.alpha;
+    this.name = name;
   }
 
   public @Nonnull String getCode()
   {
-    return this.code;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.alpha.hashCode();
-    result = (prime * result) + this.albedo.hashCode();
-    return result;
+    return this.name;
   }
 
   public boolean impliesUV()
   {
-    return this.implies_uv;
+    switch (this) {
+      case SHADOW_OPAQUE:
+      case SHADOW_TRANSLUCENT:
+        return false;
+      case SHADOW_TRANSLUCENT_TEXTURED:
+        return true;
+    }
+
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public @Nonnull String toString()
+  {
+    return this.name;
   }
 }

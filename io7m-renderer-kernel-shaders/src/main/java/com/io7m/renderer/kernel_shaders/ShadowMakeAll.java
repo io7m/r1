@@ -25,9 +25,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.parasol.Compiler;
-import com.io7m.renderer.kernel_shaders.ShadowLabels.ShadowLabel;
 
 public final class ShadowMakeAll
 {
@@ -46,8 +44,7 @@ public final class ShadowMakeAll
 
   public static void main(
     final String args[])
-    throws IOException,
-      ConstraintError
+    throws IOException
   {
     if (args.length != 2) {
       System.err.println("usage: out-parasol-directory out-glsl-directory");
@@ -69,7 +66,11 @@ public final class ShadowMakeAll
       }
     }
 
-    final List<ShadowLabel> shadowLabels = ShadowLabels.allLabels();
+    final List<ShadowLabel> shadowLabels = new ArrayList<ShadowLabel>();
+    for (final ShadowLabel l : ShadowLabel.values()) {
+      shadowLabels.add(l);
+    }
+
     ShadowMakeAll.makeSources(shadowLabels, out_parasol_dir);
     ShadowMakeAll.makeBatch(shadowLabels, out_batch);
 

@@ -80,20 +80,16 @@ import com.io7m.jcanephora.TextureWrapT;
       Constraints.constrainNotNull(size, "Framebuffer size");
 
       final JCGLInterfaceCommon g = gi.getGLCommon();
-      final FramebufferReference f = g.framebufferAllocate();
-      g.framebufferDrawBind(f);
-
       final int width = (int) size.getRangeX().getInterval();
       final int height = (int) size.getRangeY().getInterval();
 
       final Texture2DStatic texture =
         KFramebufferBasicDepth.newDepthTexture(gi, width, height);
-
       final FramebufferReference fb = g.framebufferAllocate();
       g.framebufferDrawBind(fb);
 
       try {
-        g.framebufferDrawAttachDepthTexture2D(f, texture);
+        g.framebufferDrawAttachDepthTexture2D(fb, texture);
 
         final FramebufferStatus status = g.framebufferDrawValidate(fb);
         switch (status) {
@@ -266,14 +262,11 @@ import com.io7m.jcanephora.TextureWrapT;
       Constraints.constrainNotNull(texture, "Texture");
 
       final JCGLInterfaceCommon g = gi.getGLCommon();
-      final FramebufferReference f = g.framebufferAllocate();
-      g.framebufferDrawBind(f);
-
       final FramebufferReference fb = g.framebufferAllocate();
       g.framebufferDrawBind(fb);
 
       try {
-        g.framebufferDrawAttachDepthTexture2D(f, texture);
+        g.framebufferDrawAttachDepthTexture2D(fb, texture);
 
         final FramebufferStatus status = g.framebufferDrawValidate(fb);
         switch (status) {
