@@ -23,14 +23,14 @@ import com.io7m.jcanephora.JCGLResourceUsable;
 public interface KFramebufferUsable extends JCGLResourceUsable
 {
   /**
-   * Retrieve the actual framebuffer.
-   */
-
-  public FramebufferReferenceUsable kframebufferGetFramebuffer();
-
-  /**
    * Retrieve the size of the area to which rendering will occur.
    */
 
   public AreaInclusive kframebufferGetArea();
+
+  /**
+   * Retrieve the actual framebuffer.
+   */
+
+  public FramebufferReferenceUsable kframebufferGetFramebuffer();
 }

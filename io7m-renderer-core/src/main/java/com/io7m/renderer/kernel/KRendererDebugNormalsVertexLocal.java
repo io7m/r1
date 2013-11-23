@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -109,6 +110,11 @@ final class KRendererDebugNormalsVertexLocal implements KRenderer
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
     gc.programDelete(this.program);
+  }
+
+  @Override public @CheckForNull KRendererDebugging rendererDebug()
+  {
+    return null;
   }
 
   @Override public void rendererEvaluate(

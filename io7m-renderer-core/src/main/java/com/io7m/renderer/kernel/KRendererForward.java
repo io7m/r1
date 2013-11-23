@@ -597,6 +597,11 @@ public final class KRendererForward implements KRenderer
 
   }
 
+  @Override public @CheckForNull KRendererDebugging rendererDebug()
+  {
+    return null;
+  }
+
   @Override public void rendererEvaluate(
     final @Nonnull KFramebufferRGBAUsable framebuffer,
     final @Nonnull KVisibleScene scene)

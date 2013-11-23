@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
@@ -76,6 +77,11 @@ import com.io7m.renderer.kernel.KMutableMatrices.WithInstance;
 
 public final class SBRendererSpecific implements KRenderer
 {
+  @Override public @CheckForNull KRendererDebugging rendererDebug()
+  {
+    return null;
+  }
+
   private static void setParameters(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KLight light,
