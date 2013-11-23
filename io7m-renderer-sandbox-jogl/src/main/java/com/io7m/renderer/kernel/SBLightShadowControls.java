@@ -79,6 +79,12 @@ public final class SBLightShadowControls implements IHideable
     {
       this.slider.setCurrent(desc.getSize());
     }
+
+    public void setDescription(
+      final SBLightShadowMappedBasicDescription smb)
+    {
+      this.slider.setCurrent(smb.getSize());
+    }
   }
 
   private static final class SBLightShadowMappedFilteredControls
@@ -116,7 +122,7 @@ public final class SBLightShadowControls implements IHideable
         .getCurrent());
     }
 
-    private void loadFrom(
+    void setDescription(
       final @Nonnull SBLightShadowMappedBasicDescription desc)
     {
       this.slider.setCurrent(desc.getSize());
@@ -280,12 +286,14 @@ public final class SBLightShadowControls implements IHideable
     throw new UnreachableCodeException();
   }
 
-  @SuppressWarnings("synthetic-access") public void loadFrom(
+  public void setDescription(
     final @Nonnull Option<SBLightShadowDescription> o)
   {
     switch (o.type) {
       case OPTION_NONE:
       {
+        this.shadow.setSelected(false);
+        this.controlsDisableSelector();
         break;
       }
       case OPTION_SOME:
@@ -293,17 +301,20 @@ public final class SBLightShadowControls implements IHideable
         final SBLightShadowDescription d =
           ((Option.Some<SBLightShadowDescription>) o).value;
 
+        this.shadow.setSelected(true);
+        this.controlsEnableSelector();
+
         switch (d.getType()) {
           case SHADOW_MAPPED_BASIC:
           {
             this.mapped_basic_controls
-              .loadFrom((SBLightShadowMappedBasicDescription) d);
+              .setDescription((SBLightShadowMappedBasicDescription) d);
             break;
           }
           case SHADOW_MAPPED_FILTERED:
           {
             this.mapped_filtered_controls
-              .loadFrom((SBLightShadowMappedBasicDescription) d);
+              .setDescription((SBLightShadowMappedBasicDescription) d);
             break;
           }
         }

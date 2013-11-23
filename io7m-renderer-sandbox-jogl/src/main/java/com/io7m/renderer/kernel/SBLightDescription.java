@@ -224,6 +224,11 @@ abstract class SBLightDescription
       return true;
     }
 
+    public Option<SBLightShadowDescription> getShadow()
+    {
+      return this.shadow;
+    }
+
     public RVectorI3F<RSpaceRGB> getColour()
     {
       return this.colour;
