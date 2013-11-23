@@ -84,9 +84,70 @@ import com.io7m.jaux.Constraints.ConstraintError;
     }
   }
 
+  @Immutable final static class KShadowMappedFiltered extends KShadow
+  {
+    private final int size_exponent;
+
+    @SuppressWarnings("synthetic-access") private KShadowMappedFiltered(
+      final @Nonnull Integer light_id,
+      final int size_exponent)
+      throws ConstraintError
+    {
+      super(Type.SHADOW_MAPPED_FILTERED, light_id);
+      this.size_exponent =
+        Constraints.constrainRange(
+          size_exponent,
+          1,
+          Integer.MAX_VALUE,
+          "Shadow size exponent");
+    }
+
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final KShadowMappedBasic other = (KShadowMappedBasic) obj;
+      if (this.size_exponent != other.size_exponent) {
+        return false;
+      }
+      return true;
+    }
+
+    public int getSizeExponent()
+    {
+      return this.size_exponent;
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + this.size_exponent;
+      return result;
+    }
+
+    @Override public String toString()
+    {
+      final StringBuilder builder = new StringBuilder();
+      builder.append("[KShadowMappedFiltered size_exponent=");
+      builder.append(this.size_exponent);
+      builder.append("]");
+      return builder.toString();
+    }
+  }
+
   static enum Type
   {
-    SHADOW_MAPPED_BASIC("Mapped basic");
+    SHADOW_MAPPED_BASIC("Mapped basic"),
+    SHADOW_MAPPED_FILTERED("Mapped filtered");
 
     private final @Nonnull String name;
 
@@ -110,6 +171,16 @@ import com.io7m.jaux.Constraints.ConstraintError;
       throws ConstraintError
   {
     return new KShadowMappedBasic(light_id, size_exponent);
+  }
+
+  @SuppressWarnings("synthetic-access") public static @Nonnull
+    KShadowMappedFiltered
+    newMappedFiltered(
+      final @Nonnull Integer light_id,
+      final int size_exponent)
+      throws ConstraintError
+  {
+    return new KShadowMappedFiltered(light_id, size_exponent);
   }
 
   private final @Nonnull Integer light_id;

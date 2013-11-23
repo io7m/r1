@@ -16,21 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.swing.JComboBox;
-
-final class SBLightTypeSelector extends JComboBox<KLight.Type>
+public interface KFramebufferRGBA extends
+  KFramebuffer,
+  KFramebufferRGBAUsable
 {
-  private static final long serialVersionUID;
-
-  static {
-    serialVersionUID = -8627152041068964041L;
-  }
-
-  public SBLightTypeSelector()
-  {
-    for (final KLight.Type type : KLight.Type.values()) {
-      this.addItem(type);
-    }
-    this.setSelectedItem(KLight.Type.LIGHT_DIRECTIONAL);
-  }
+  // No extras.
 }

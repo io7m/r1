@@ -16,21 +16,22 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.swing.JComboBox;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
-final class SBLightTypeSelector extends JComboBox<KLight.Type>
+import net.java.dev.designgridlayout.DesignGridLayout;
+import net.java.dev.designgridlayout.IHideable;
+
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
+
+public interface SBLightDescriptionControls extends IHideable
 {
-  private static final long serialVersionUID;
+  public @Nonnull SBLightDescription getDescription(
+    final @CheckForNull Integer id)
+    throws SBExceptionInputError,
+      ConstraintError;
 
-  static {
-    serialVersionUID = -8627152041068964041L;
-  }
-
-  public SBLightTypeSelector()
-  {
-    for (final KLight.Type type : KLight.Type.values()) {
-      this.addItem(type);
-    }
-    this.setSelectedItem(KLight.Type.LIGHT_DIRECTIONAL);
-  }
+  public void addToLayout(
+    final @Nonnull DesignGridLayout layout);
 }
