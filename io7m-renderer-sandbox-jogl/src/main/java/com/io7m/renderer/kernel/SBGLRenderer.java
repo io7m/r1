@@ -717,7 +717,6 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>>        camera_custom_projection;
   private @Nonnull SceneObserver                                                    camera_current;
   private @CheckForNull KVisibleScene                                               scene_current;
-
   private @CheckForNull KVisibleScene                                               scene_previous;
   private Collection<SBLight>                                                       scene_lights;
   private @CheckForNull ProgramReference                                            program_uv;
@@ -1992,13 +1991,13 @@ final class SBGLRenderer implements GLEventListener
         new HashMap<KLight, List<KBatchOpaqueLit>>();
       final ArrayList<KBatchTranslucent> translucent =
         new ArrayList<KBatchTranslucent>();
-      final Map<KLight, List<KBatchOpaqueShadow>> shadow_opaque =
-        new HashMap<KLight, List<KBatchOpaqueShadow>>();
-      final Map<KLight, List<KBatchTranslucentShadow>> shadow_translucent =
-        new HashMap<KLight, List<KBatchTranslucentShadow>>();
+      final Map<KLight, KBatchOpaqueShadow> shadow_opaque =
+        new HashMap<KLight, KBatchOpaqueShadow>();
+      final Map<KLight, KBatchTranslucentShadow> shadow_translucent =
+        new HashMap<KLight, KBatchTranslucentShadow>();
 
       SBGLRenderer.renderSceneMakeUnlitBatches(p, opaque_unlit);
-      this.renderSceneMakeLitBatches(
+      SBGLRenderer.renderSceneMakeLitBatches(
         p,
         opaque_lit,
         translucent,
@@ -2030,15 +2029,88 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private
-    void
-    renderSceneMakeLitBatches(
-      final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
-      final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
-      final @Nonnull List<KBatchTranslucent> translucent_lit,
-      final @Nonnull Map<KLight, List<KBatchOpaqueShadow>> shadow_opaque,
-      final @Nonnull Map<KLight, List<KBatchTranslucentShadow>> shadow_translucent)
+  private static void renderSceneMakeLitBatches(
+    final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
+    final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
+    final @Nonnull List<KBatchTranslucent> translucent_lit,
+    final @Nonnull Map<KLight, KBatchOpaqueShadow> shadow_opaque,
+    final @Nonnull Map<KLight, KBatchTranslucentShadow> shadow_translucent)
   {
+    /**
+     * Sort objects by Z (from the origin, not from the observer, for testing
+     * purposes). This will ensure that translucent objects are rendered from
+     * farthest to nearest.
+     */
+
+    final LinkedList<KMeshInstance> instances =
+      new LinkedList<KMeshInstance>(p.second);
+
+    Collections.sort(instances, new Comparator<KMeshInstance>() {
+      @Override public int compare(
+        final KMeshInstance o1,
+        final KMeshInstance o2)
+      {
+        final float o1z = o1.getTransform().getTranslation().getZF();
+        final float o2z = o2.getTransform().getTranslation().getZF();
+        return Float.compare(o1z, o2z);
+      }
+    });
+
+    for (final KLight l : p.first) {
+      switch (l.getType()) {
+        case LIGHT_PROJECTIVE:
+        {
+          final KProjective kp = (KProjective) l;
+          switch (kp.getShadow().type) {
+            case OPTION_NONE:
+            {
+              break;
+            }
+            case OPTION_SOME:
+            {
+              final ArrayList<KMeshInstance> light_opaques =
+                new ArrayList<KMeshInstance>();
+              final ArrayList<KMeshInstance> light_translucents =
+                new ArrayList<KMeshInstance>();
+
+              for (final KMeshInstance i : instances) {
+                switch (i.getShadowMaterialLabel()) {
+                  case SHADOW_OPAQUE:
+                  {
+                    light_opaques.add(i);
+                    break;
+                  }
+                  case SHADOW_TRANSLUCENT:
+                  case SHADOW_TRANSLUCENT_TEXTURED:
+                  {
+                    light_translucents.add(i);
+                    break;
+                  }
+                }
+              }
+
+              assert shadow_opaque.containsKey(kp) == false;
+              assert shadow_translucent.containsKey(kp) == false;
+
+              shadow_opaque.put(
+                kp,
+                KBatchOpaqueShadow.newBatch(kp, light_opaques));
+              shadow_translucent.put(
+                kp,
+                KBatchTranslucentShadow.newBatch(kp, light_translucents));
+              break;
+            }
+          }
+          break;
+        }
+        case LIGHT_DIRECTIONAL:
+        case LIGHT_SPHERE:
+        {
+          break;
+        }
+      }
+    }
+
     for (final KLight l : p.first) {
       switch (l.getType()) {
         case LIGHT_PROJECTIVE:
@@ -2048,7 +2120,7 @@ final class SBGLRenderer implements GLEventListener
           final HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
             new HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>>();
 
-          for (final KMeshInstance m : p.second) {
+          for (final KMeshInstance m : instances) {
             final KMeshInstanceForwardMaterialLabel mlabel =
               m.getForwardMaterialLabel();
 
@@ -2067,7 +2139,7 @@ final class SBGLRenderer implements GLEventListener
           for (final Entry<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
             .entrySet()) {
             final KMeshInstanceForwardMaterialLabel label = e.getKey();
-            final ArrayList<KMeshInstance> instances = e.getValue();
+            final ArrayList<KMeshInstance> kinstances = e.getValue();
 
             final List<KBatchOpaqueLit> lits;
             if (opaque_lit.containsKey(l)) {
@@ -2078,7 +2150,7 @@ final class SBGLRenderer implements GLEventListener
             }
 
             if (label.getAlpha() != KMaterialAlphaLabel.ALPHA_TRANSLUCENT) {
-              lits.add(KBatchOpaqueLit.newBatch(l, label, instances));
+              lits.add(KBatchOpaqueLit.newBatch(l, label, kinstances));
             }
           }
 
@@ -2086,25 +2158,6 @@ final class SBGLRenderer implements GLEventListener
         }
       }
     }
-
-    /**
-     * Sort translucent objects by Z (from the origin, not from the observer,
-     * for testing purposes). Associate all lights with each object.
-     */
-
-    final LinkedList<KMeshInstance> instances =
-      new LinkedList<KMeshInstance>(p.second);
-
-    Collections.sort(instances, new Comparator<KMeshInstance>() {
-      @Override public int compare(
-        final KMeshInstance o1,
-        final KMeshInstance o2)
-      {
-        final float o1z = o1.getTransform().getTranslation().getZF();
-        final float o2z = o2.getTransform().getTranslation().getZF();
-        return Float.compare(o1z, o2z);
-      }
-    });
 
     final Iterator<KMeshInstance> iter = instances.iterator();
     while (iter.hasNext()) {
