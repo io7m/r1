@@ -875,12 +875,10 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull AtomicBoolean                                              axes_show;
   private final @Nonnull AtomicReference<VectorI3F>                                 background_colour;
   private final @Nonnull SBFirstPersonCamera                                        camera;
-
   private @Nonnull SceneObserver                                                    camera_current;
   private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>>        camera_custom_projection;
   private @Nonnull KTransform                                                       camera_transform;
   private final @Nonnull KTransform.Context                                         camera_transform_context;
-
   private @Nonnull RMatrixI4x4F<RTransformView>                                     camera_view_matrix;
   private final @Nonnull RMatrixM4x4F<RTransformView>                               camera_view_matrix_temporary;
   private final SandboxConfig                                                       config;
@@ -889,18 +887,15 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull JCCEExecutionCallable                                            exec_uv;
   private @Nonnull JCCEExecutionCallable                                            exec_vcolour;
   private final @Nonnull FSCapabilityAll                                            filesystem;
-  private boolean                                                                   first =
-                                                                                            true;
+  private boolean                                                                   first;
   private @CheckForNull KFramebufferRGBA                                            framebuffer;
   private @CheckForNull JCGLImplementationJOGL                                      gi;
   private @Nonnull SBVisibleGridPlane                                               grid;
   private final @Nonnull AtomicBoolean                                              grid_show;
-
   private final @Nonnull SBInputState                                               input_state;
   private final @Nonnull AtomicBoolean                                              lights_show;
   private final @Nonnull AtomicBoolean                                              lights_show_surface;
   private final @Nonnull Log                                                        log;
-
   private final @Nonnull MatrixM4x4F                                                matrix_model;
   private final @Nonnull MatrixM4x4F                                                matrix_model_temporary;
   private final @Nonnull MatrixM4x4F                                                matrix_modelview;
@@ -909,7 +904,6 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>                    mesh_delete_queue;
   private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                      mesh_load_queue;
   private final @Nonnull HashMap<PathVirtual, KMesh>                                meshes;
-
   private @CheckForNull ProgramReference                                            program_ccolour;
   private @CheckForNull ProgramReference                                            program_uv;
   private @CheckForNull ProgramReference                                            program_vcolour;
@@ -933,15 +927,10 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>               texture_cube_load_queue;
   private final @Nonnull TextureLoader                                              texture_loader;
   private @CheckForNull List<TextureUnit>                                           texture_units;
-
   private final @Nonnull ConcurrentLinkedQueue<Texture2DDeleteFuture>               texture2d_delete_queue;
-
   private final @Nonnull ConcurrentLinkedQueue<Texture2DLoadFuture>                 texture2d_load_queue;
-
   private final @Nonnull HashMap<PathVirtual, Texture2DStatic>                      textures_2d;
-
   private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>                    textures_cube;
-
   private @Nonnull AreaInclusive                                                    viewport;
 
   public SBGLRenderer(
@@ -1022,6 +1011,8 @@ final class SBGLRenderer implements GLEventListener
 
     this.renderer_new = new AtomicReference<SBRendererType>();
     this.renderer = null;
+
+    this.first = true;
   }
 
   private void cameraGetNext()
