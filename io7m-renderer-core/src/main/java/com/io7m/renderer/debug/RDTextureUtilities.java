@@ -41,10 +41,13 @@ import com.io7m.jlog.Log;
 
 public final class RDTextureUtilities
 {
+  /**
+   * Dump the raw pixel data in <code>r</code> to the file <code>file</code>.
+   */
+
   public static void textureDump(
     final @Nonnull Texture2DReadableData r,
-    final @Nonnull File file,
-    final @Nonnull Log log)
+    final @Nonnull File file)
     throws FileNotFoundException,
       IOException
   {
@@ -57,6 +60,17 @@ public final class RDTextureUtilities
     s.flush();
     s.close();
   }
+
+  /**
+   * <p>
+   * Dump the raw pixel data of the texture <code>t</code> to the file
+   * <code>file</code>.
+   * </p>
+   * <p>
+   * The function does nothing if the current OpenGL implementation does not
+   * support texture image fetching.
+   * </p>
+   */
 
   public static void textureDump2DStatic(
     final @Nonnull JCGLImplementation gi,
@@ -93,7 +107,7 @@ public final class RDTextureUtilities
           final JCGLInterfaceGL3 g =
             ((Option.Some<JCGLInterfaceGL3>) og).value;
           final Texture2DReadableData r = g.texture2DStaticGetImage(t);
-          RDTextureUtilities.textureDump(r, file, log);
+          RDTextureUtilities.textureDump(r, file);
           return;
         }
       }
@@ -111,7 +125,7 @@ public final class RDTextureUtilities
           final JCGLInterfaceGL2 g =
             ((Option.Some<JCGLInterfaceGL2>) og).value;
           final Texture2DReadableData r = g.texture2DStaticGetImage(t);
-          RDTextureUtilities.textureDump(r, file, log);
+          RDTextureUtilities.textureDump(r, file);
           return;
         }
       }
@@ -120,10 +134,15 @@ public final class RDTextureUtilities
     log.debug("Cannot dump textures on this implementation");
   }
 
+  /**
+   * Dump the raw pixel data in <code>r</code> to a timestamped temporary file
+   * prefixed with <code>name</code>, in the current temporary directory
+   * (according to the <code>java.io.tmpdir</code> system property).
+   */
+
   public static void textureDumpTimestampedTemporary(
     final @Nonnull Texture2DReadableData r,
-    final @Nonnull String name,
-    final @Nonnull Log log)
+    final @Nonnull String name)
     throws FileNotFoundException,
       IOException
   {
@@ -133,8 +152,20 @@ public final class RDTextureUtilities
       String.format("%s-%s.raw", name, fmt.format(cal.getTime()));
     final File out_file =
       new File(System.getProperty("java.io.tmpdir"), actual);
-    RDTextureUtilities.textureDump(r, out_file, log);
+    RDTextureUtilities.textureDump(r, out_file);
   }
+
+  /**
+   * <p>
+   * Dump the raw pixel data of the texture <code>t</code> to a timestamped
+   * temporary file prefixed with <code>name</code>, in the current temporary
+   * directory (according to the <code>java.io.tmpdir</code> system property).
+   * </p>
+   * <p>
+   * The function does nothing if the current OpenGL implementation does not
+   * support texture image fetching.
+   * </p>
+   */
 
   public static void textureDumpTimestampedTemporary2DStatic(
     final @Nonnull JCGLImplementation gi,
