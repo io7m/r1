@@ -43,9 +43,9 @@ final class KShadowCacheLoader implements
   {
     return new KShadowCacheLoader(gi, log);
   }
+
   private final @Nonnull JCGLImplementation gi;
   private final @Nonnull Log                log;
-
   private final @Nonnull StringBuilder      message;
 
   private KShadowCacheLoader(
@@ -85,8 +85,8 @@ final class KShadowCacheLoader implements
           {
             final KShadowMappedBasic smb = (KShadowMappedBasic) s;
             final long size = 2 << (smb.getSizeExponent() - 1);
-            final RangeInclusive range_x = new RangeInclusive(0, size);
-            final RangeInclusive range_y = new RangeInclusive(0, size);
+            final RangeInclusive range_x = new RangeInclusive(0, size - 1);
+            final RangeInclusive range_y = new RangeInclusive(0, size - 1);
             final AreaInclusive area = new AreaInclusive(range_x, range_y);
             if (this.log.enabled(Level.LOG_DEBUG)) {
               this.message.setLength(0);

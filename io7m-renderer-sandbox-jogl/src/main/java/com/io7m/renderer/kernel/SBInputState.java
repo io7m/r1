@@ -36,6 +36,7 @@ final class SBInputState
   private final @Nonnull AtomicBoolean want_pause_toggle;
   private final @Nonnull AtomicBoolean want_step_one;
   private final @Nonnull AtomicBoolean want_framebuffer_snapshot;
+  private final @Nonnull AtomicBoolean want_dump_shadow_maps;
 
   public SBInputState()
   {
@@ -53,6 +54,7 @@ final class SBInputState
     this.want_pause_toggle = new AtomicBoolean();
     this.want_step_one = new AtomicBoolean();
     this.want_framebuffer_snapshot = new AtomicBoolean();
+    this.want_dump_shadow_maps = new AtomicBoolean();
   }
 
   boolean isMovingBackward()
@@ -191,21 +193,31 @@ final class SBInputState
 
   boolean wantFramebufferSnaphot()
   {
-    return this.want_framebuffer_snapshot.get();
+    return this.want_framebuffer_snapshot.getAndSet(false);
   }
 
   boolean wantNextCamera()
   {
-    return this.want_next_camera.get();
+    return this.want_next_camera.getAndSet(false);
   }
 
   boolean wantPauseToggle()
   {
-    return this.want_pause_toggle.get();
+    return this.want_pause_toggle.getAndSet(false);
   }
 
   boolean wantStepOneFrame()
   {
-    return this.want_step_one.get();
+    return this.want_step_one.getAndSet(false);
+  }
+
+  boolean wantShadowMapDump()
+  {
+    return this.want_dump_shadow_maps.getAndSet(false);
+  }
+
+  void setWantDumpShadowMaps()
+  {
+    this.want_dump_shadow_maps.set(true);
   }
 }
