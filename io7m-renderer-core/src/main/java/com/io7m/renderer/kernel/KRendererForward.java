@@ -1010,6 +1010,7 @@ public final class KRendererForward implements KRenderer
           final KShadow s = ((Option.Some<KShadow>) os).value;
 
           switch (s.getType()) {
+            case SHADOW_MAPPED_FILTERED:
             case SHADOW_MAPPED_BASIC:
             {
               final KFramebufferDepth fb = this.shadow_cache.pcCacheGet(s);
@@ -1063,6 +1064,7 @@ public final class KRendererForward implements KRenderer
 
           switch (s.getType()) {
             case SHADOW_MAPPED_BASIC:
+            case SHADOW_MAPPED_FILTERED:
             {
               final KFramebufferDepth fb = this.shadow_cache.pcCacheGet(s);
               gc.framebufferDrawBind(fb.kframebufferGetFramebuffer());

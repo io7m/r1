@@ -27,6 +27,8 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import net.java.dev.designgridlayout.IRowCreator;
+
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
@@ -150,5 +152,11 @@ public final class SBFloatHSlider
       this.maximum));
     this.current = e;
     this.refreshText();
+  }
+
+  public void addToLayout(
+    final @Nonnull IRowCreator row)
+  {
+    row.grid(this.label).add(this.slider, 3).add(this.field);
   }
 }

@@ -16,21 +16,13 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.swing.JComboBox;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 
-final class SBLightTypeSelector extends JComboBox<KLight.Type>
+public interface KFramebufferRGBAUsable extends KFramebufferUsable
 {
-  private static final long serialVersionUID;
+  /**
+   * Retrieve the texture that backs the main RGBA output buffer.
+   */
 
-  static {
-    serialVersionUID = -8627152041068964041L;
-  }
-
-  public SBLightTypeSelector()
-  {
-    for (final KLight.Type type : KLight.Type.values()) {
-      this.addItem(type);
-    }
-    this.setSelectedItem(KLight.Type.LIGHT_DIRECTIONAL);
-  }
+  public Texture2DStaticUsable kframebufferGetRGBAOutputTexture();
 }

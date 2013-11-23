@@ -28,6 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
+import net.java.dev.designgridlayout.IRowCreator;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
@@ -90,26 +91,9 @@ public final class SBOrientationInput
       });
 
       final DesignGridLayout dg = new DesignGridLayout(this.getContentPane());
-
-      dg
-        .row()
-        .grid()
-        .add(this.slider_x.getLabel())
-        .add(this.slider_x.getSlider())
-        .add(this.slider_x.getField());
-      dg
-        .row()
-        .grid()
-        .add(this.slider_y.getLabel())
-        .add(this.slider_y.getSlider())
-        .add(this.slider_y.getField());
-      dg
-        .row()
-        .grid()
-        .add(this.slider_z.getLabel())
-        .add(this.slider_z.getSlider())
-        .add(this.slider_z.getField());
-
+      this.slider_x.addToLayout(dg.row());
+      this.slider_y.addToLayout(dg.row());
+      this.slider_z.addToLayout(dg.row());
       dg.row().right().add(this.cancel).add(this.ok);
     }
 
@@ -143,16 +127,21 @@ public final class SBOrientationInput
   private final @Nonnull JTextField orientation_y;
   private final @Nonnull JTextField orientation_z;
   private final @Nonnull JTextField orientation_w;
-
   private final @Nonnull JButton    select;
 
-  SBOrientationInput()
+  public static @Nonnull SBOrientationInput newInput()
+  {
+    return new SBOrientationInput();
+  }
+
+  private SBOrientationInput()
   {
     this.label = new JLabel("Orientation");
     this.orientation_x = new JTextField("0.0");
     this.orientation_y = new JTextField("0.0");
     this.orientation_z = new JTextField("0.0");
     this.orientation_w = new JTextField("0.0");
+
     this.select = new JButton("Select...");
     this.select.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
@@ -234,5 +223,17 @@ public final class SBOrientationInput
     this.orientation_y.setText(Float.toString(q.getYF()));
     this.orientation_z.setText(Float.toString(q.getZF()));
     this.orientation_w.setText(Float.toString(q.getWF()));
+  }
+
+  public void addToLayout(
+    final @Nonnull IRowCreator row)
+  {
+    row
+      .grid(this.label)
+      .add(this.orientation_x)
+      .add(this.orientation_y)
+      .add(this.orientation_z)
+      .add(this.orientation_w)
+      .add(this.select);
   }
 }
