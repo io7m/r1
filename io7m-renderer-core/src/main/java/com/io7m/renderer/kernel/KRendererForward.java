@@ -188,6 +188,7 @@ public final class KRendererForward implements KRenderer
   private final @Nonnull PCache<KShadow, KFramebufferDepth, KShadowCacheException> shadow_cache;
   private final @Nonnull Context                                                   transform_context;
   private final @Nonnull VectorM2I                                                 viewport_size;
+  private final @Nonnull KRendererDebugging                                        debug;
 
   private KRendererForward(
     final @Nonnull JCGLImplementation gl,
@@ -210,6 +211,10 @@ public final class KRendererForward implements KRenderer
     this.viewport_size = new VectorM2I();
     this.transform_context = new KTransform.Context();
     this.m4_view = new RMatrixM4x4F<RTransformView>();
+
+    this.debug = new KRendererDebugging() {
+
+    };
   }
 
   @SuppressWarnings("static-method") private void putLight(
@@ -599,7 +604,7 @@ public final class KRendererForward implements KRenderer
 
   @Override public @CheckForNull KRendererDebugging rendererDebug()
   {
-    return null;
+    return this.debug;
   }
 
   @Override public void rendererEvaluate(
