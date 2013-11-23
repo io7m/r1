@@ -398,6 +398,11 @@ import com.io7m.renderer.RVectorReadable3F;
     {
       return this.name;
     }
+
+    @Override public String toString()
+    {
+      return this.name;
+    }
   }
 
   private final @Nonnull RVectorI3F<RSpaceRGB>                      colour;

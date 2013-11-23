@@ -92,15 +92,15 @@ final class SBProjectionMatrixPanel extends JPanel
     }
 
     void add(
-      final IRowCreator group)
+      final IRowCreator row)
     {
-      group.grid().add(new JLabel("Left")).add(this.left, 3);
-      group.grid().add(new JLabel("Right")).add(this.right, 3);
-      group.grid().add(new JLabel("Bottom")).add(this.bottom, 3);
-      group.grid().add(new JLabel("Top")).add(this.top, 3);
-      group.grid().add(new JLabel("Near")).add(this.near, 3);
-      group.grid().add(new JLabel("Far")).add(this.far, 3);
-      group.right().add(this.defaults);
+      row.grid().add(new JLabel("Left")).add(this.left, 3);
+      row.grid().add(new JLabel("Right")).add(this.right, 3);
+      row.grid().add(new JLabel("Bottom")).add(this.bottom, 3);
+      row.grid().add(new JLabel("Top")).add(this.top, 3);
+      row.grid().add(new JLabel("Near")).add(this.near, 3);
+      row.grid().add(new JLabel("Far")).add(this.far, 3);
+      row.right().add(this.defaults);
     }
 
     @Override public @Nonnull SBProjectionDescription getDescription()
@@ -172,15 +172,15 @@ final class SBProjectionMatrixPanel extends JPanel
     }
 
     void add(
-      final IRowCreator group)
+      final IRowCreator row)
     {
-      group.grid().add(new JLabel("Left")).add(this.left, 3);
-      group.grid().add(new JLabel("Right")).add(this.right, 3);
-      group.grid().add(new JLabel("Bottom")).add(this.bottom, 3);
-      group.grid().add(new JLabel("Top")).add(this.top, 3);
-      group.grid().add(new JLabel("Near")).add(this.near, 3);
-      group.grid().add(new JLabel("Far")).add(this.far, 3);
-      group.right().add(this.defaults);
+      row.grid().add(new JLabel("Left")).add(this.left, 3);
+      row.grid().add(new JLabel("Right")).add(this.right, 3);
+      row.grid().add(new JLabel("Bottom")).add(this.bottom, 3);
+      row.grid().add(new JLabel("Top")).add(this.top, 3);
+      row.grid().add(new JLabel("Near")).add(this.near, 3);
+      row.grid().add(new JLabel("Far")).add(this.far, 3);
+      row.right().add(this.defaults);
     }
 
     @Override public @Nonnull SBProjectionDescription getDescription()
@@ -247,13 +247,13 @@ final class SBProjectionMatrixPanel extends JPanel
     }
 
     void add(
-      final IRowCreator group)
+      final IRowCreator row)
     {
-      group.grid().add(new JLabel("Near Z")).add(this.near_z, 3);
-      group.grid().add(new JLabel("Far Z")).add(this.far_z, 3);
-      group.grid().add(new JLabel("Aspect ratio")).add(this.aspect, 3);
-      group.grid().add(new JLabel("FOV (degrees)")).add(this.fov, 3);
-      group.right().add(this.defaults);
+      row.grid().add(new JLabel("Near Z")).add(this.near_z, 3);
+      row.grid().add(new JLabel("Far Z")).add(this.far_z, 3);
+      row.grid().add(new JLabel("Aspect ratio")).add(this.aspect, 3);
+      row.grid().add(new JLabel("FOV (degrees)")).add(this.fov, 3);
+      row.right().add(this.defaults);
     }
 
     @Override public @Nonnull SBProjectionDescription getDescription()
