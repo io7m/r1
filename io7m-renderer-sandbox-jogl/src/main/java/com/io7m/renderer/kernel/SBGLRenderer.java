@@ -78,7 +78,6 @@ import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jcanephora.Texture2DReadableData;
 import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
@@ -115,6 +114,7 @@ import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
+import com.io7m.renderer.debug.RDTextureUtilities;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.SBLight.SBLightProjective;
@@ -474,7 +474,7 @@ final class SBGLRenderer implements GLEventListener
                       .getGL3()).value;
                   final Texture2DReadableData tr =
                     gl3.texture2DStaticGetImage(t);
-                  SBTextureUtilities.textureDumpTimestampedTemporary(
+                  RDTextureUtilities.textureDumpTimestampedTemporary(
                     tr,
                     ((Option.Some<String>) path.getBaseName()).value,
                     SBGLRenderer.this.log);
@@ -696,6 +696,7 @@ final class SBGLRenderer implements GLEventListener
     final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
     final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
     final @Nonnull List<KBatchTranslucent> translucent_lit,
+    final @Nonnull List<KLight> shadow_lights,
     final @Nonnull Map<KLight, KBatchOpaqueShadow> shadow_opaque,
     final @Nonnull Map<KLight, KBatchTranslucentShadow> shadow_translucent)
   {
@@ -731,6 +732,8 @@ final class SBGLRenderer implements GLEventListener
             }
             case OPTION_SOME:
             {
+              shadow_lights.add(kp);
+
               final ArrayList<KMeshInstance> light_opaques =
                 new ArrayList<KMeshInstance>();
               final ArrayList<KMeshInstance> light_translucents =
@@ -1238,6 +1241,7 @@ final class SBGLRenderer implements GLEventListener
       this.handleQueues();
       this.handlePauseToggleRequest();
       this.handleSnapshotRequest();
+      this.handleShadowMapDumpRequest();
 
       switch (this.running.get()) {
         case STATE_FAILED:
@@ -1306,7 +1310,6 @@ final class SBGLRenderer implements GLEventListener
   private void handlePauseToggleRequest()
   {
     if (this.input_state.wantPauseToggle()) {
-      this.input_state.setWantPauseToggle(false);
       switch (this.running.get()) {
         case STATE_FAILED:
         case STATE_FAILED_PERMANENTLY:
@@ -1341,6 +1344,19 @@ final class SBGLRenderer implements GLEventListener
     SBGLRenderer.processQueue(this.shader_load_queue);
   }
 
+  private void handleShadowMapDumpRequest()
+    throws ConstraintError
+  {
+    final KRenderer r = this.renderer;
+    if (r != null) {
+      if (this.input_state.wantShadowMapDump()) {
+        this.log.debug("Dumping shadow maps");
+        final KRendererDebugging d = r.rendererDebug();
+        d.debugRequestShadowMaps();
+      }
+    }
+  }
+
   private void handleSnapshotRequest()
     throws JCGLException,
       ConstraintError,
@@ -1348,31 +1364,12 @@ final class SBGLRenderer implements GLEventListener
       IOException
   {
     if (this.input_state.wantFramebufferSnaphot()) {
-      this.input_state.setWantFramebufferSnapshot(false);
-
       this.log.debug("Taking framebuffer snapshot");
-
-      final Option<JCGLInterfaceGL3> o = this.gi.getGL3();
-      switch (o.type) {
-        case OPTION_NONE:
-        {
-          break;
-        }
-        case OPTION_SOME:
-        {
-          final JCGLInterfaceGL3 g3 =
-            ((Option.Some<JCGLInterfaceGL3>) o).value;
-          final Texture2DStaticUsable t =
-            this.framebuffer.kframebufferGetRGBAOutputTexture();
-          final Texture2DReadableData r = g3.texture2DStaticGetImage(t);
-
-          SBTextureUtilities.textureDumpTimestampedTemporary(
-            r,
-            "sandbox",
-            this.log);
-          break;
-        }
-      }
+      RDTextureUtilities.textureDumpTimestampedTemporary2DStatic(
+        this.gi,
+        this.framebuffer.kframebufferGetRGBAOutputTexture(),
+        "framebuffer",
+        this.log);
     }
   }
 
@@ -2160,12 +2157,14 @@ final class SBGLRenderer implements GLEventListener
         new HashMap<KLight, KBatchOpaqueShadow>();
       final Map<KLight, KBatchTranslucentShadow> shadow_translucent =
         new HashMap<KLight, KBatchTranslucentShadow>();
+      final List<KLight> shadow_lights = new ArrayList<KLight>();
 
       SBGLRenderer.renderSceneMakeUnlitBatches(p, opaque_unlit);
       SBGLRenderer.renderSceneMakeLitBatches(
         p,
         opaque_lit,
         translucent,
+        shadow_lights,
         shadow_opaque,
         shadow_translucent);
 
@@ -2174,6 +2173,7 @@ final class SBGLRenderer implements GLEventListener
           opaque_lit,
           opaque_unlit,
           translucent,
+          shadow_lights,
           shadow_opaque,
           shadow_translucent);
 
