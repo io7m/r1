@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel;
 
 import java.io.IOException;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -35,6 +36,13 @@ public interface KRenderer
   public void rendererClose()
     throws JCGLException,
       ConstraintError;
+
+  /**
+   * Retrieve a reference to the debugging interface (optionally) supported by
+   * the renderer. Returns <code>null</code> if debugging is not supported.
+   */
+
+  public @CheckForNull KRendererDebugging rendererDebug();
 
   /**
    * <p>

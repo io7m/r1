@@ -14,23 +14,27 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel;
+package com.io7m.renderer;
 
-import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.JCGLResourceUsable;
+import javax.annotation.Nonnull;
 
-public interface KFramebufferUsable extends JCGLResourceUsable
+import com.io7m.jtensors.VectorI4F;
+
+public final class RVectorI4F<T extends RSpace> extends VectorI4F implements
+  RVectorReadable4F<T>
 {
-  /**
-   * Retrieve the size of the area to which rendering will occur.
-   */
+  public RVectorI4F(
+    final float x,
+    final float y,
+    final float z,
+    final float w)
+  {
+    super(x, y, z, w);
+  }
 
-  public AreaInclusive kframebufferGetArea();
-
-  /**
-   * Retrieve the actual framebuffer.
-   */
-
-  public FramebufferReferenceUsable kframebufferGetFramebuffer();
+  public RVectorI4F(
+    final @Nonnull RVectorReadable4F<T> v)
+  {
+    super(v);
+  }
 }

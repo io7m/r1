@@ -16,21 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.JCGLResourceUsable;
+/**
+ * Optional debugging interface supported by renderers.
+ */
 
-public interface KFramebufferUsable extends JCGLResourceUsable
+public interface KRendererDebugging
 {
-  /**
-   * Retrieve the size of the area to which rendering will occur.
-   */
 
-  public AreaInclusive kframebufferGetArea();
-
-  /**
-   * Retrieve the actual framebuffer.
-   */
-
-  public FramebufferReferenceUsable kframebufferGetFramebuffer();
 }

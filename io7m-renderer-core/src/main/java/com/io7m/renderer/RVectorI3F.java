@@ -14,23 +14,26 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel;
+package com.io7m.renderer;
 
-import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.JCGLResourceUsable;
+import javax.annotation.Nonnull;
 
-public interface KFramebufferUsable extends JCGLResourceUsable
+import com.io7m.jtensors.VectorI3F;
+
+public class RVectorI3F<T extends RSpace> extends VectorI3F implements
+  RVectorReadable3F<T>
 {
-  /**
-   * Retrieve the size of the area to which rendering will occur.
-   */
+  public RVectorI3F(
+    final float x,
+    final float y,
+    final float z)
+  {
+    super(x, y, z);
+  }
 
-  public AreaInclusive kframebufferGetArea();
-
-  /**
-   * Retrieve the actual framebuffer.
-   */
-
-  public FramebufferReferenceUsable kframebufferGetFramebuffer();
+  public RVectorI3F(
+    final @Nonnull RVectorReadable3F<T> v)
+  {
+    super(v);
+  }
 }

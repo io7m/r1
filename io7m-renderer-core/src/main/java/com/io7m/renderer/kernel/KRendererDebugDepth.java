@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -65,10 +66,10 @@ final class KRendererDebugDepth implements KRenderer
   private final @Nonnull JCCEExecutionCallable exec;
   private final @Nonnull JCGLImplementation    gl;
   private final @Nonnull Log                   log;
+  private final @Nonnull KMutableMatrices      matrices;
   private final @Nonnull ProgramReference      program;
   private final @Nonnull KTransform.Context    transform_context;
   private final @Nonnull VectorM2I             viewport_size;
-  private final @Nonnull KMutableMatrices      matrices;
 
   private KRendererDebugDepth(
     final @Nonnull JCGLImplementation gl,
@@ -109,6 +110,11 @@ final class KRendererDebugDepth implements KRenderer
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
     gc.programDelete(this.program);
+  }
+
+  @Override public @CheckForNull KRendererDebugging rendererDebug()
+  {
+    return null;
   }
 
   @Override public void rendererEvaluate(
