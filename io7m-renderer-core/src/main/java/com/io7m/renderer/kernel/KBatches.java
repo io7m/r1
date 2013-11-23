@@ -32,6 +32,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
     final @Nonnull List<KBatchOpaqueUnlit> opaque_unlit,
     final @Nonnull List<KBatchTranslucent> translucent,
+    final @Nonnull List<KLight> shadow_lights,
     final @Nonnull Map<KLight, KBatchOpaqueShadow> shadow_opaque,
     final @Nonnull Map<KLight, KBatchTranslucentShadow> shadow_translucent)
     throws ConstraintError
@@ -40,6 +41,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       opaque_lit,
       opaque_unlit,
       translucent,
+      shadow_lights,
       shadow_opaque,
       shadow_translucent);
   }
@@ -47,6 +49,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
   private final @Nonnull Map<KLight, List<KBatchOpaqueLit>>   batches_opaque_lit;
   private final @Nonnull List<KBatchOpaqueUnlit>              batches_opaque_unlit;
   private final @Nonnull List<KBatchTranslucent>              batches_translucent;
+  private final @Nonnull List<KLight>                         shadow_lights;
   private final @Nonnull Map<KLight, KBatchOpaqueShadow>      shadow_opaque;
   private final @Nonnull Map<KLight, KBatchTranslucentShadow> shadow_translucent;
 
@@ -54,6 +57,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
     final @Nonnull List<KBatchOpaqueUnlit> opaque_unlit,
     final @Nonnull List<KBatchTranslucent> translucent,
+    final @Nonnull List<KLight> shadow_lights,
     final @Nonnull Map<KLight, KBatchOpaqueShadow> shadow_opaque,
     final @Nonnull Map<KLight, KBatchTranslucentShadow> shadow_translucent)
     throws ConstraintError
@@ -64,6 +68,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
       Constraints.constrainNotNull(opaque_lit, "Opaque lit");
     this.batches_translucent =
       Constraints.constrainNotNull(translucent, "Translucent");
+    this.shadow_lights =
+      Constraints.constrainNotNull(shadow_lights, "Shadow lights");
     this.shadow_opaque =
       Constraints.constrainNotNull(shadow_opaque, "Opaque shadow");
     this.shadow_translucent =
@@ -90,6 +96,9 @@ import com.io7m.jaux.Constraints.ConstraintError;
       return false;
     }
     if (!this.batches_translucent.equals(other.batches_translucent)) {
+      return false;
+    }
+    if (!this.shadow_lights.equals(other.shadow_lights)) {
       return false;
     }
     if (!this.shadow_opaque.equals(other.shadow_opaque)) {
@@ -128,6 +137,11 @@ import com.io7m.jaux.Constraints.ConstraintError;
     return Collections.unmodifiableList(this.batches_translucent);
   }
 
+  public @Nonnull List<KLight> getShadowLights()
+  {
+    return this.shadow_lights;
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;
@@ -135,6 +149,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     result = (prime * result) + this.batches_opaque_lit.hashCode();
     result = (prime * result) + this.batches_opaque_unlit.hashCode();
     result = (prime * result) + this.batches_translucent.hashCode();
+    result = (prime * result) + this.shadow_lights.hashCode();
     result = (prime * result) + this.shadow_opaque.hashCode();
     result = (prime * result) + this.shadow_translucent.hashCode();
     return result;
@@ -143,14 +158,19 @@ import com.io7m.jaux.Constraints.ConstraintError;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KBatches ");
-    builder.append(this.batches_opaque_unlit);
-    builder.append(" ");
+    builder.append("[KBatches batches_opaque_lit=");
     builder.append(this.batches_opaque_lit);
-    builder.append(" ");
+    builder.append(" batches_opaque_unlit=");
+    builder.append(this.batches_opaque_unlit);
+    builder.append(" batches_translucent=");
     builder.append(this.batches_translucent);
+    builder.append(" shadow_lights=");
+    builder.append(this.shadow_lights);
+    builder.append(" shadow_opaque=");
+    builder.append(this.shadow_opaque);
+    builder.append(" shadow_translucent=");
+    builder.append(this.shadow_translucent);
     builder.append("]");
     return builder.toString();
   }
-
 }

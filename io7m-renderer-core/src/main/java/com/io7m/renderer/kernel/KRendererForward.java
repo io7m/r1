@@ -16,12 +16,15 @@
 
 package com.io7m.renderer.kernel;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -61,6 +64,7 @@ import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RMatrixReadable4x4F;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
+import com.io7m.renderer.debug.RDTextureUtilities;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
@@ -76,6 +80,86 @@ import com.io7m.renderer.kernel.KTransform.Context;
 
 public final class KRendererForward implements KRenderer
 {
+  private class Debugging implements KRendererDebugging
+  {
+    private final @Nonnull AtomicBoolean dump_shadow_maps;
+
+    public Debugging()
+    {
+      this.dump_shadow_maps = new AtomicBoolean(false);
+    }
+
+    @SuppressWarnings("synthetic-access") public
+      void
+      debugPerformDumpShadowMaps(
+        final @Nonnull Collection<KLight> lights)
+        throws ConstraintError,
+          KShadowCacheException,
+          LUCacheException,
+          FileNotFoundException,
+          JCGLException,
+          IOException
+    {
+      final PCache<KShadow, KFramebufferDepth, KShadowCacheException> sc =
+        KRendererForward.this.shadow_cache;
+      final boolean dump = this.dump_shadow_maps.getAndSet(false);
+      final StringBuilder name = new StringBuilder();
+
+      if (dump) {
+        KRendererForward.this.log.debug("Dumping shadow maps");
+
+        for (final KLight l : lights) {
+          switch (l.getType()) {
+            case LIGHT_DIRECTIONAL:
+            {
+              break;
+            }
+            case LIGHT_PROJECTIVE:
+            {
+              final KProjective kp = (KProjective) l;
+              final Option<KShadow> os = kp.getShadow();
+
+              switch (os.type) {
+                case OPTION_NONE:
+                {
+                  break;
+                }
+                case OPTION_SOME:
+                {
+                  final KShadow ks = ((Option.Some<KShadow>) os).value;
+                  assert sc.luCacheIsCached(ks);
+                  final KFramebufferDepth fb = sc.pcCacheGet(ks);
+
+                  name.setLength(0);
+                  name.append("shadow-");
+                  name.append(l.getID());
+
+                  RDTextureUtilities.textureDumpTimestampedTemporary2DStatic(
+                    KRendererForward.this.g,
+                    fb.kframebufferGetDepthTexture(),
+                    name.toString(),
+                    KRendererForward.this.log);
+                  break;
+                }
+              }
+              break;
+            }
+            case LIGHT_SPHERE:
+            {
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    @Override public void debugRequestShadowMaps()
+      throws ConstraintError
+    {
+      this.dump_shadow_maps.set(true);
+    }
+  }
+
   private static void handleShaderCacheException(
     final @Nonnull KShaderCacheException e)
     throws IOException,
@@ -177,8 +261,8 @@ public final class KRendererForward implements KRenderer
   {
     return new KRendererForward(g, shader_cache, shadow_cache, log);
   }
-
   private final @Nonnull VectorM4F                                                 background;
+  private @CheckForNull Debugging                                                  debug;
   private final @Nonnull JCGLImplementation                                        g;
   private final @Nonnull StringBuilder                                             label_cache;
   private final @Nonnull Log                                                       log;
@@ -187,8 +271,8 @@ public final class KRendererForward implements KRenderer
   private final @Nonnull LUCache<String, ProgramReference, KShaderCacheException>  shader_cache;
   private final @Nonnull PCache<KShadow, KFramebufferDepth, KShadowCacheException> shadow_cache;
   private final @Nonnull Context                                                   transform_context;
+
   private final @Nonnull VectorM2I                                                 viewport_size;
-  private final @Nonnull KRendererDebugging                                        debug;
 
   private KRendererForward(
     final @Nonnull JCGLImplementation gl,
@@ -211,10 +295,6 @@ public final class KRendererForward implements KRenderer
     this.viewport_size = new VectorM2I();
     this.transform_context = new KTransform.Context();
     this.m4_view = new RMatrixM4x4F<RTransformView>();
-
-    this.debug = new KRendererDebugging() {
-
-    };
   }
 
   @SuppressWarnings("static-method") private void putLight(
@@ -604,6 +684,7 @@ public final class KRendererForward implements KRenderer
 
   @Override public @CheckForNull KRendererDebugging rendererDebug()
   {
+    this.debug = new Debugging();
     return this.debug;
   }
 
@@ -624,6 +705,9 @@ public final class KRendererForward implements KRenderer
 
       try {
         this.renderShadowMaps(scene);
+        if (this.debug != null) {
+          this.debug.debugPerformDumpShadowMaps(scene.getLights());
+        }
       } catch (final KShaderCacheException e) {
         KRendererForward.handleShaderCacheException(e);
       } catch (final LUCacheException e) {
@@ -974,6 +1058,7 @@ public final class KRendererForward implements KRenderer
       JCGLException,
       KShadowCacheException
   {
+    this.renderShadowMapsPrecacheMaps(scene);
     this.renderShadowMapsOpaqueBatches(scene);
     this.renderShadowMapsTranslucentBatches(scene);
   }
@@ -999,7 +1084,6 @@ public final class KRendererForward implements KRenderer
       FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
     gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
     gc.depthBufferWriteEnable();
-    gc.depthBufferClear(1.0f);
     gc.colorBufferMask(false, false, false, false);
     gc.blendingDisable();
 
@@ -1044,6 +1128,54 @@ public final class KRendererForward implements KRenderer
         {
           break;
         }
+      }
+    }
+  }
+
+  private void renderShadowMapsPrecacheMaps(
+    final @Nonnull KVisibleScene scene)
+    throws KShadowCacheException,
+      ConstraintError,
+      LUCacheException,
+      JCGLException
+  {
+    final KBatches batches = scene.getBatches();
+    final JCGLInterfaceCommon gc = this.g.getGLCommon();
+
+    for (final KLight l : batches.getShadowLights()) {
+      switch (l.getType()) {
+        case LIGHT_DIRECTIONAL:
+        case LIGHT_SPHERE:
+          break;
+        case LIGHT_PROJECTIVE:
+          final KProjective kp = (KProjective) l;
+          final KShadow s = ((Option.Some<KShadow>) kp.getShadow()).value;
+          this.renderShadowMapsPrecacheShadow(gc, s);
+      }
+    }
+  }
+
+  private void renderShadowMapsPrecacheShadow(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KShadow s)
+    throws KShadowCacheException,
+      ConstraintError,
+      LUCacheException,
+      JCGLException
+  {
+    switch (s.getType()) {
+      case SHADOW_MAPPED_FILTERED:
+      case SHADOW_MAPPED_BASIC:
+      {
+        final KFramebufferDepth fb = this.shadow_cache.pcCacheGet(s);
+        gc.framebufferDrawBind(fb.kframebufferGetFramebuffer());
+        try {
+          gc.depthBufferWriteEnable();
+          gc.depthBufferClear(1.0f);
+        } finally {
+          gc.framebufferDrawUnbind();
+        }
+        break;
       }
     }
   }

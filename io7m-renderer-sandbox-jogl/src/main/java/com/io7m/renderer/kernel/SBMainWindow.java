@@ -727,6 +727,9 @@ final class SBMainWindow extends JFrame
             case 'n':
               this.input.setWantNextCamera(true);
               break;
+            case 'm':
+              this.input.setWantDumpShadowMaps();
+              break;
           }
         }
 

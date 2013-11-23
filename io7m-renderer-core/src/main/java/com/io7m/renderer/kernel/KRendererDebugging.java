@@ -16,11 +16,19 @@
 
 package com.io7m.renderer.kernel;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+
 /**
  * Optional debugging interface supported by renderers.
  */
 
 public interface KRendererDebugging
 {
+  /**
+   * Request that the renderer dump any generated shadow maps on the next
+   * evaluation.
+   */
 
+  public void debugRequestShadowMaps()
+    throws ConstraintError;
 }
