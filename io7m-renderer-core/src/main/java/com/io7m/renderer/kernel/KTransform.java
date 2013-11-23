@@ -134,13 +134,13 @@ import com.io7m.jtensors.VectorReadable3F;
     MatrixM4x4F.setIdentity(m);
     MatrixM4x4F.translateByVector3FInPlace(m, this.translation);
 
-    QuaternionM4F
-      .makeRotationMatrix4x4(this.orientation, context.t_matrix4x4);
-    MatrixM4x4F.multiplyInPlace(m, context.t_matrix4x4);
-
     MatrixM4x4F.set(m, 0, 0, m.get(0, 0) * this.scale.x);
     MatrixM4x4F.set(m, 1, 1, m.get(1, 1) * this.scale.y);
     MatrixM4x4F.set(m, 2, 2, m.get(2, 2) * this.scale.z);
+
+    QuaternionM4F
+      .makeRotationMatrix4x4(this.orientation, context.t_matrix4x4);
+    MatrixM4x4F.multiplyInPlace(m, context.t_matrix4x4);
   }
 
   @Nonnull VectorReadable3F rotateVector3F(
