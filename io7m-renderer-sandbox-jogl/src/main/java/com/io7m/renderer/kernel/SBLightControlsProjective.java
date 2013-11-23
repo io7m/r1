@@ -267,6 +267,8 @@ public final class SBLightControlsProjective implements
     this.orientation.setOrientation(description.getOrientation());
     this.falloff.setCurrent(description.getFalloff());
     this.texture.setText(description.getTexture().toString());
+    this.projection.setDescription(description.getProjection());
+    this.shadow.setDescription(description.getShadow());
   }
 
   @Override public SBLightDescription getDescription(
