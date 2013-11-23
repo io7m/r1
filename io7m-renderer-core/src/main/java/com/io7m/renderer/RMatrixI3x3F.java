@@ -29,6 +29,21 @@ import com.io7m.jtensors.VectorReadable3F;
 {
   private final @Nonnull float[][] elements;
 
+  public RMatrixI3x3F()
+  {
+    this.elements = new float[3][3];
+
+    for (int row = 0; row < 3; ++row) {
+      for (int col = 0; col < 3; ++col) {
+        if (row == col) {
+          this.elements[row][col] = 0.0f;
+        } else {
+          this.elements[row][col] = 0.0f;
+        }
+      }
+    }
+  }
+
   public RMatrixI3x3F(
     final @Nonnull MatrixReadable3x3F m)
   {
@@ -59,21 +74,6 @@ import com.io7m.jtensors.VectorReadable3F;
     this.elements[0][2] = column_2.getXF();
     this.elements[1][2] = column_2.getYF();
     this.elements[2][2] = column_2.getZF();
-  }
-
-  public RMatrixI3x3F()
-  {
-    this.elements = new float[3][3];
-
-    for (int row = 0; row < 3; ++row) {
-      for (int col = 0; col < 3; ++col) {
-        if (row == col) {
-          this.elements[row][col] = 0.0f;
-        } else {
-          this.elements[row][col] = 0.0f;
-        }
-      }
-    }
   }
 
   @Override public boolean equals(

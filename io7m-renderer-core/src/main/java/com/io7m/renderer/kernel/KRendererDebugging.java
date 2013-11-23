@@ -14,26 +14,13 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer;
+package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
+/**
+ * Optional debugging interface supported by renderers.
+ */
 
-import com.io7m.jtensors.VectorI3F;
-
-public class RVectorI3F<T extends RSpace> extends VectorI3F implements
-  RVectorReadable3F<T>
+public interface KRendererDebugging
 {
-  public RVectorI3F(
-    final float x,
-    final float y,
-    final float z)
-  {
-    super(x, y, z);
-  }
 
-  public RVectorI3F(
-    final @Nonnull RVectorReadable3F<T> v)
-  {
-    super(v);
-  }
 }

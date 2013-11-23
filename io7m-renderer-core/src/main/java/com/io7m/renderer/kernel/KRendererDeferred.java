@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -35,6 +36,11 @@ final class KRendererDeferred implements KRenderer
   @Override public void rendererClose()
   {
     throw new UnimplementedCodeException();
+  }
+
+  @Override public @CheckForNull KRendererDebugging rendererDebug()
+  {
+    return null;
   }
 
   @Override public void rendererEvaluate(

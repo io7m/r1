@@ -87,22 +87,6 @@ public abstract class KShadowCacheException extends Exception
     serialVersionUID = -217899695938417575L;
   }
 
-  private final @Nonnull Code code;
-
-  private KShadowCacheException(
-    final @Nonnull Throwable x,
-    final @Nonnull Code code)
-    throws ConstraintError
-  {
-    super(x);
-    this.code = Constraints.constrainNotNull(code, "Code");
-  }
-
-  public @Nonnull Code getCode()
-  {
-    return this.code;
-  }
-
   @SuppressWarnings("synthetic-access") public static @Nonnull
     KShadowCacheJCGLException
     errorJCGL(
@@ -119,5 +103,21 @@ public abstract class KShadowCacheException extends Exception
       throws ConstraintError
   {
     return new KShadowCacheJCGLUnsupportedException(e);
+  }
+
+  private final @Nonnull Code code;
+
+  private KShadowCacheException(
+    final @Nonnull Throwable x,
+    final @Nonnull Code code)
+    throws ConstraintError
+  {
+    super(x);
+    this.code = Constraints.constrainNotNull(code, "Code");
+  }
+
+  public @Nonnull Code getCode()
+  {
+    return this.code;
   }
 }

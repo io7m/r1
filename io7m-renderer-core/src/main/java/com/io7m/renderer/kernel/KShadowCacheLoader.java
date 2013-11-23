@@ -34,10 +34,6 @@ import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
 final class KShadowCacheLoader implements
   LUCacheLoader<KShadow, KFramebufferDepth, KShadowCacheException>
 {
-  private final @Nonnull JCGLImplementation gi;
-  private final @Nonnull Log                log;
-  private final @Nonnull StringBuilder      message;
-
   public static @Nonnull
     LUCacheLoader<KShadow, KFramebufferDepth, KShadowCacheException>
     newLoader(
@@ -47,6 +43,10 @@ final class KShadowCacheLoader implements
   {
     return new KShadowCacheLoader(gi, log);
   }
+  private final @Nonnull JCGLImplementation gi;
+  private final @Nonnull Log                log;
+
+  private final @Nonnull StringBuilder      message;
 
   private KShadowCacheLoader(
     final @Nonnull JCGLImplementation gi,
