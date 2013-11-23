@@ -26,6 +26,7 @@ import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLUnsupportedException;
+import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LUCacheLoader;
 import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
@@ -35,6 +36,7 @@ final class KShadowCacheLoader implements
 {
   private final @Nonnull JCGLImplementation gi;
   private final @Nonnull Log                log;
+  private final @Nonnull StringBuilder      message;
 
   public static @Nonnull
     LUCacheLoader<KShadow, KFramebufferDepth, KShadowCacheException>
@@ -54,6 +56,7 @@ final class KShadowCacheLoader implements
     this.log =
       new Log(Constraints.constrainNotNull(log, "Log"), "shadow-cache");
     this.gi = Constraints.constrainNotNull(gi, "OpenGL implementation");
+    this.message = new StringBuilder();
   }
 
   @Override public void luCacheClose(
@@ -85,6 +88,15 @@ final class KShadowCacheLoader implements
             final RangeInclusive range_x = new RangeInclusive(0, size);
             final RangeInclusive range_y = new RangeInclusive(0, size);
             final AreaInclusive area = new AreaInclusive(range_x, range_y);
+            if (this.log.enabled(Level.LOG_DEBUG)) {
+              this.message.setLength(0);
+              this.message.append("Allocating ");
+              this.message.append(size);
+              this.message.append("x");
+              this.message.append(size);
+              this.message.append(" shadow map");
+              this.log.debug(this.message.toString());
+            }
             return KFramebufferCommon.newDepthFramebuffer(this.gi, area);
           }
           case SHADOW_MAPPED_FILTERED:

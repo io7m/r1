@@ -18,8 +18,6 @@ package com.io7m.renderer.kernel_shaders;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.renderer.kernel_shaders.ShadowLabels.ShadowLabel;
-
 public final class ShadowShaders
 {
   private static void fragmentShaderAttributesUV(
@@ -35,12 +33,13 @@ public final class ShadowShaders
     final @Nonnull StringBuilder b,
     final @Nonnull ShadowLabel label)
   {
-    switch (label.getAlbedo()) {
-      case ALBEDO_COLOURED:
+    switch (label) {
+      case SHADOW_OPAQUE:
+      case SHADOW_TRANSLUCENT:
       {
         break;
       }
-      case ALBEDO_TEXTURED:
+      case SHADOW_TRANSLUCENT_TEXTURED:
       {
         b.append("  parameter t_albedo : sampler_2d;\n");
         break;
@@ -65,33 +64,28 @@ public final class ShadowShaders
     final @Nonnull StringBuilder b,
     final @Nonnull ShadowLabel label)
   {
-    switch (label.getAlpha()) {
-      case ALPHA_OPAQUE:
+    switch (label) {
+      case SHADOW_OPAQUE:
       {
         b.append("  value albedo : vector_4f =\n");
-        b.append("    A.opaque (m.albedo);\n");
+        b.append("    new vector_4f (1.0, 1.0, 1.0, 1.0);\n");
         break;
       }
-      case ALPHA_TRANSLUCENT:
+      case SHADOW_TRANSLUCENT:
       {
-        switch (label.getAlbedo()) {
-          case ALBEDO_COLOURED:
-          {
-            b.append("  value albedo : vector_4f =\n");
-            b.append("    A.translucent (m.albedo);\n");
-            break;
-          }
-          case ALBEDO_TEXTURED:
-          {
-            b.append("  value albedo : vector_4f =\n");
-            b.append("    A.textured_translucent (\n");
-            b.append("      t_albedo,\n");
-            b.append("      f_uv,\n");
-            b.append("      m.albedo\n");
-            b.append("    );\n");
-            break;
-          }
-        }
+        b.append("  value albedo : vector_4f =\n");
+        b.append("    A.translucent (m.albedo);\n");
+        break;
+      }
+      case SHADOW_TRANSLUCENT_TEXTURED:
+      {
+        b.append("  value albedo : vector_4f =\n");
+        b.append("    A.textured_translucent (\n");
+        b.append("      t_albedo,\n");
+        b.append("      f_uv,\n");
+        b.append("      m.albedo\n");
+        b.append("    );\n");
+        break;
       }
     }
   }
@@ -132,14 +126,12 @@ public final class ShadowShaders
     final @Nonnull StringBuilder b,
     final @Nonnull ShadowLabel label)
   {
-    switch (label.getAlpha()) {
-      case ALPHA_OPAQUE:
-      {
+    switch (label) {
+      case SHADOW_OPAQUE:
         b.append("  value rgba = albedo;\n");
         break;
-      }
-      case ALPHA_TRANSLUCENT:
-      {
+      case SHADOW_TRANSLUCENT:
+      case SHADOW_TRANSLUCENT_TEXTURED:
         b.append("  -- Premultiply alpha\n");
         b.append("  value a = F.multiply (albedo [w], m.alpha.opacity);\n");
         b.append("  value rgba = new vector_4f (\n");
@@ -147,7 +139,6 @@ public final class ShadowShaders
         b.append("    a\n");
         b.append("  );\n");
         break;
-      }
     }
   }
 
@@ -161,7 +152,7 @@ public final class ShadowShaders
   }
 
   public static @Nonnull String moduleShadow(
-    final @Nonnull ShadowLabels.ShadowLabel label)
+    final @Nonnull ShadowLabel label)
   {
     final StringBuilder b = new StringBuilder();
     b.append("package com.io7m.renderer.kernel;\n");

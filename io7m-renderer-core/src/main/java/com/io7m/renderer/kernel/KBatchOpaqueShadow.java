@@ -24,18 +24,17 @@ import javax.annotation.concurrent.Immutable;
 
 /**
  * A single batch, with the given non-translucent instances having their
- * shadows calculated according to the shadow material <code>label</code>,
- * from the perspective of the given light <code>light</code>.
+ * shadows calculated from the perspective of the given light
+ * <code>light</code>.
  */
 
 @Immutable final class KBatchOpaqueShadow
 {
   public static @Nonnull KBatchOpaqueShadow newBatch(
     final @Nonnull KLight light,
-    final @Nonnull KMeshInstanceShadowMaterialLabel label,
     final @Nonnull List<KMeshInstance> instances)
   {
-    return new KBatchOpaqueShadow(light, label, instances);
+    return new KBatchOpaqueShadow(light, instances);
   }
 
   private final @Nonnull List<KMeshInstance>              instances;
@@ -44,11 +43,10 @@ import javax.annotation.concurrent.Immutable;
 
   private KBatchOpaqueShadow(
     final @Nonnull KLight light,
-    final @Nonnull KMeshInstanceShadowMaterialLabel label,
     final @Nonnull List<KMeshInstance> instances)
   {
     this.light = light;
-    this.label = label;
+    this.label = KMeshInstanceShadowMaterialLabel.SHADOW_OPAQUE;
     this.instances = instances;
   }
 

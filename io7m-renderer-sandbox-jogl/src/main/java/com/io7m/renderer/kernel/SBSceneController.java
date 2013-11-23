@@ -49,7 +49,6 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
-import com.io7m.jaux.functional.Option.None;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.CMFKNegativeX;
 import com.io7m.jcanephora.CMFKNegativeY;
@@ -66,7 +65,6 @@ import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI3F;
@@ -227,26 +225,10 @@ public final class SBSceneController implements
           {
             final SBLightDescriptionProjective dd =
               (SBLightDescriptionProjective) light;
-
-            final SBTexture2D<SBTexture2DKind> t =
+            final SBTexture2D<SBTexture2DKindAlbedo> t =
               scene.texture2DGet(dd.getTexture());
 
-            final MatrixM4x4F temporary = new MatrixM4x4F();
-
-            final KProjective kp =
-              KProjective.make(
-                dd.getID(),
-                t.getTexture(),
-                dd.getPosition(),
-                dd.getOrientation(),
-                dd.getColour(),
-                dd.getIntensity(),
-                (float) dd.getProjection().getFar(),
-                dd.getFalloff(),
-                dd.getProjection().makeProjectionMatrix(temporary),
-                new None<KShadow>());
-
-            scene = scene.lightAdd(new SBLightProjective(dd, kp));
+            scene = scene.lightAdd(new SBLightProjective(dd, dd.getLight(t)));
             break;
           }
           case LIGHT_SPHERE:
@@ -921,21 +903,7 @@ public final class SBSceneController implements
           (SBTexture2D<SBTexture2DKindAlbedo>) this.sceneTextures2DGet().get(
             dd.getTexture());
 
-        final MatrixM4x4F temporary = new MatrixM4x4F();
-
-        final KProjective kp =
-          KProjective.make(
-            dd.getID(),
-            t.getTexture(),
-            dd.getPosition(),
-            dd.getOrientation(),
-            dd.getColour(),
-            dd.getIntensity(),
-            (float) dd.getProjection().getFar(),
-            dd.getFalloff(),
-            dd.getProjection().makeProjectionMatrix(temporary),
-            new None<KShadow>());
-
+        final KProjective kp = dd.getLight(t);
         final SBLightProjective l = new SBLight.SBLightProjective(dd, kp);
 
         this.internalStateUpdateSceneOnly(this.state_current.get().scene
