@@ -78,6 +78,7 @@ import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jcanephora.Texture2DReadableData;
 import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
@@ -114,9 +115,9 @@ import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
-import com.io7m.renderer.debug.RDTextureUtilities;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
+import com.io7m.renderer.kernel.KRendererDebugging.DebugShadowMapReceiver;
 import com.io7m.renderer.kernel.SBLight.SBLightProjective;
 import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeKernel;
 import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeSpecific;
@@ -474,7 +475,7 @@ final class SBGLRenderer implements GLEventListener
                       .getGL3()).value;
                   final Texture2DReadableData tr =
                     gl3.texture2DStaticGetImage(t);
-                  RDTextureUtilities.textureDumpTimestampedTemporary(
+                  SBTextureUtilities.textureDumpTimestampedTemporary(
                     tr,
                     ((Option.Some<String>) path.getBaseName()).value);
                   break;
@@ -1351,7 +1352,37 @@ final class SBGLRenderer implements GLEventListener
       if (this.input_state.wantShadowMapDump()) {
         this.log.debug("Dumping shadow maps");
         final KRendererDebugging d = r.rendererDebug();
-        d.debugRequestShadowMaps();
+        d.debugForEachShadowMap(new DebugShadowMapReceiver() {
+
+          private final StringBuilder name = new StringBuilder();
+
+          @SuppressWarnings("synthetic-access") @Override public
+            void
+            receive(
+              final @Nonnull KShadow shadow,
+              final @Nonnull Texture2DStaticUsable texture)
+          {
+            try {
+              this.name.setLength(0);
+              this.name.append("shadow-");
+              this.name.append(shadow.getLightID());
+
+              SBTextureUtilities.textureDumpTimestampedTemporary2DStatic(
+                SBGLRenderer.this.gi,
+                texture,
+                this.name.toString(),
+                SBGLRenderer.this.log);
+            } catch (final FileNotFoundException e) {
+              e.printStackTrace();
+            } catch (final IOException e) {
+              e.printStackTrace();
+            } catch (final JCGLException e) {
+              e.printStackTrace();
+            } catch (final ConstraintError e) {
+              e.printStackTrace();
+            }
+          }
+        });
       }
     }
   }
@@ -1364,7 +1395,7 @@ final class SBGLRenderer implements GLEventListener
   {
     if (this.input_state.wantFramebufferSnaphot()) {
       this.log.debug("Taking framebuffer snapshot");
-      RDTextureUtilities.textureDumpTimestampedTemporary2DStatic(
+      SBTextureUtilities.textureDumpTimestampedTemporary2DStatic(
         this.gi,
         this.framebuffer.kframebufferGetRGBAOutputTexture(),
         "framebuffer",
