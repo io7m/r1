@@ -1598,6 +1598,13 @@ final class SBGLRenderer implements GLEventListener
           this.shadow_cache,
           this.log);
       }
+      case KRENDERER_DEBUG_DEPTH_SHADOW:
+      {
+        return KRendererDebugDepthShadow.rendererNew(
+          this.gi,
+          this.shader_cache,
+          this.log);
+      }
     }
 
     throw new UnreachableCodeException();
