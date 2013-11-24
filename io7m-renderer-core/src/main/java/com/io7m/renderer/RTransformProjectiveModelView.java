@@ -16,7 +16,7 @@
 
 package com.io7m.renderer;
 
-public interface RTransformTextureProjection extends RTransform
+public interface RTransformProjectiveModelView extends RTransform
 {
   // No value-level representation.
 }

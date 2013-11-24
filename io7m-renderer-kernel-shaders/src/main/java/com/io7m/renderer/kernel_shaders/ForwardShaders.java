@@ -27,8 +27,9 @@ public final class ForwardShaders
   private static void fragmentShaderStandardIO(
     final @Nonnull StringBuilder b)
   {
-    b.append("  in f_position : vector_4f;\n");
-    b.append("  out out_0 : vector_4f as 0;\n");
+    b.append("  in f_position_eye : vector_4f;\n");
+    b.append("  out out_0         : vector_4f as 0;\n");
+    b.append("\n");
   }
 
   private static void fragmentShaderParametersAlbedo(
@@ -117,8 +118,10 @@ public final class ForwardShaders
       case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
       case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
       {
+        b.append("  -- Environment mapping parameters\n");
         b.append("  parameter t_environment : sampler_cube;\n");
         b.append("  parameter m_view_inv    : matrix_4x4f;\n");
+        b.append("\n");
         break;
       }
     }
@@ -134,7 +137,7 @@ public final class ForwardShaders
         b.append("  value n = N.bump (\n");
         b.append("    t_normal,\n");
         b.append("    m_normal,\n");
-        b.append("    V3.normalize (f_normal_os),\n");
+        b.append("    V3.normalize (f_normal_model),\n");
         b.append("    V3.normalize (f_tangent),\n");
         b.append("    V3.normalize (f_bitangent),\n");
         b.append("    f_uv\n");
@@ -147,7 +150,7 @@ public final class ForwardShaders
       }
       case NORMALS_VERTEX:
       {
-        b.append("  value n = V3.normalize (f_normal_es);\n");
+        b.append("  value n = V3.normalize (f_normal_eye);\n");
       }
     }
   }
@@ -167,7 +170,7 @@ public final class ForwardShaders
         b.append("  value env : vector_4f =\n");
         b.append("    E.reflection_refraction (\n");
         b.append("      t_environment,\n");
-        b.append("      f_position [x y z],\n");
+        b.append("      f_position_eye [x y z],\n");
         b.append("      n,\n");
         b.append("      m_view_inv,\n");
         b.append("      m.environment\n");
@@ -180,7 +183,7 @@ public final class ForwardShaders
         b.append("  value env : vector_4f =\n");
         b.append("    E.reflection (\n");
         b.append("      t_environment,\n");
-        b.append("      f_position [x y z],\n");
+        b.append("      f_position_eye [x y z],\n");
         b.append("      n,\n");
         b.append("      m_view_inv\n");
         b.append("    );\n");
@@ -192,7 +195,7 @@ public final class ForwardShaders
         b.append("  value env : vector_4f =\n");
         b.append("    E.refraction (\n");
         b.append("      t_environment,\n");
-        b.append("      f_position [x y z],\n");
+        b.append("      f_position_eye [x y z],\n");
         b.append("      n,\n");
         b.append("      m_view_inv,\n");
         b.append("      m.environment\n");
@@ -209,23 +212,36 @@ public final class ForwardShaders
     switch (forwardLabel.getType()) {
       case Lit:
       {
+        b.append("  -- Lit parameters\n");
         b.append("  parameter material : M.t;\n");
+        b.append("\n");
+
         switch (((ForwardLabelLit) forwardLabel).getLight()) {
           case LIGHT_DIRECTIONAL:
           {
+            b.append("  -- Directional light parameters\n");
             b.append("  parameter light_directional : DL.t;\n");
             break;
           }
           case LIGHT_SPHERICAL:
           {
+            b.append("  -- Spherical light parameters\n");
             b.append("  parameter light_spherical : SL.t;\n");
             break;
           }
           case LIGHT_PROJECTIVE:
-          case LIGHT_PROJECTIVE_SHADOW_MAPPED:
           {
+            b.append("  -- Projective light parameters\n");
             b.append("  parameter light_projective : PL.t;\n");
             b.append("  parameter t_projection     : sampler_2d;\n");
+            break;
+          }
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED:
+          {
+            b.append("  -- Projective light (shadow mapping) parameters\n");
+            b.append("  parameter light_projective : PL.t;\n");
+            b.append("  parameter t_projection     : sampler_2d;\n");
+            b.append("  parameter t_shadow         : sampler_2d;\n");
             break;
           }
         }
@@ -233,10 +249,13 @@ public final class ForwardShaders
       }
       case Unlit:
       {
+        b.append("  -- Unlit parameters\n");
         b.append("  parameter material : M.t;\n");
         break;
       }
     }
+
+    b.append("\n");
   }
 
   private static void moduleEnd(
@@ -338,9 +357,14 @@ public final class ForwardShaders
         break;
       }
       case LIGHT_PROJECTIVE_SHADOW_MAPPED:
+      {
+        b.append("  in f_position_light_eye  : vector_4f;\n");
+        b.append("  in f_position_light_clip : vector_4f;\n");
+        break;
+      }
       case LIGHT_PROJECTIVE:
       {
-        b.append("  in f_uv_projection : vector_4f;\n");
+        b.append("  in f_position_light_clip : vector_4f;\n");
         break;
       }
     }
@@ -385,9 +409,10 @@ public final class ForwardShaders
     switch (label.getNormals()) {
       case NORMALS_MAPPED:
       {
-        b.append("  in f_normal_os : vector_3f;\n");
-        b.append("  in f_tangent : vector_3f;\n");
-        b.append("  in f_bitangent : vector_3f;\n");
+        b.append("  -- Mapped normal attributes\n");
+        b.append("  in f_normal_model : vector_3f;\n");
+        b.append("  in f_tangent      : vector_3f;\n");
+        b.append("  in f_bitangent    : vector_3f;\n");
         break;
       }
       case NORMALS_NONE:
@@ -396,10 +421,13 @@ public final class ForwardShaders
       }
       case NORMALS_VERTEX:
       {
-        b.append("  in f_normal_es : vector_3f;\n");
+        b.append("  -- Vertex normal attributes\n");
+        b.append("  in f_normal_eye : vector_3f;\n");
         break;
       }
     }
+
+    b.append("\n");
   }
 
   private static void fragmentShaderValuesSurface(
@@ -557,8 +585,12 @@ public final class ForwardShaders
               case SPECULAR_MAPPED:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    DL.diffuse_specular (light_directional, n, f_position [x y z], m);\n");
+                b.append("    DL.diffuse_specular (\n");
+                b.append("      light_directional,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m\n");
+                b.append("    );\n");
                 break;
               }
             }
@@ -570,16 +602,23 @@ public final class ForwardShaders
               case SPECULAR_NONE:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    SL.diffuse_only (light_spherical, n, f_position [x y z]);\n");
+                b.append("    SL.diffuse_only (\n");
+                b.append("      light_spherical,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z]\n");
+                b.append("    );\n");
                 break;
               }
               case SPECULAR_CONSTANT:
               case SPECULAR_MAPPED:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    SL.diffuse_specular (light_spherical, n, f_position [x y z], m);\n");
+                b.append("    SL.diffuse_specular (\n");
+                b.append("      light_spherical,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m\n");
+                b.append("    );\n");
                 break;
               }
             }
@@ -591,16 +630,27 @@ public final class ForwardShaders
               case SPECULAR_NONE:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    PL.diffuse_only (light_projective, n, f_position [x y z], t_projection, f_uv_projection);\n");
+                b.append("    PL.diffuse_only (\n");
+                b.append("      light_projective,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      t_projection,\n");
+                b.append("      f_position_light_clip\n");
+                b.append("    );\n");
                 break;
               }
               case SPECULAR_CONSTANT:
               case SPECULAR_MAPPED:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    PL.diffuse_specular (light_projective, n, f_position [x y z], m, t_projection, f_uv_projection);\n");
+                b.append("    PL.diffuse_specular (\n");
+                b.append("      light_projective,\n");
+                b.append("      n,\n ");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m,\n");
+                b.append("      t_projection,\n");
+                b.append("      f_position_light_clip\n");
+                b.append("    );\n");
                 break;
               }
             }
@@ -608,12 +658,38 @@ public final class ForwardShaders
           }
           case LIGHT_PROJECTIVE_SHADOW_MAPPED:
           {
-            b.append("  -- XXX: SHADOW MAPPING UNIMPLEMENTED\n");
-            b
-              .append("  value light_term : vector_3f = new vector_3f (1.0, 0.0, 1.0);\n");
+            switch (label.getSpecular()) {
+              case SPECULAR_NONE:
+              {
+                b.append("  value light_term : vector_3f =\n");
+                b.append("    PL.diffuse_only_shadowed (\n");
+                b.append("      light_projective,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      t_projection,\n");
+                b.append("      f_position_light_clip,\n");
+                b.append("      t_shadow\n");
+                b.append("    );\n");
+                break;
+              }
+              case SPECULAR_CONSTANT:
+              case SPECULAR_MAPPED:
+              {
+                b.append("  value light_term : vector_3f =\n");
+                b.append("    PL.diffuse_specular_shadowed (\n");
+                b.append("      light_projective,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m,\n");
+                b.append("      t_projection,\n");
+                b.append("      f_position_light_clip,\n");
+                b.append("      t_shadow\n");
+                b.append("    );\n");
+                break;
+              }
+            }
             break;
           }
-
         }
         break;
       }
@@ -627,16 +703,23 @@ public final class ForwardShaders
               case SPECULAR_NONE:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    DL.diffuse_only_emissive (light_directional, n, m);\n");
+                b.append("    DL.diffuse_only_emissive (\n");
+                b.append("      light_directional,\n");
+                b.append("      n,\n");
+                b.append("      m\n");
+                b.append("    );\n");
                 break;
               }
               case SPECULAR_CONSTANT:
               case SPECULAR_MAPPED:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    DL.diffuse_specular_emissive (light_directional, n, f_position [x y z], m);\n");
+                b.append("    DL.diffuse_specular_emissive (\n");
+                b.append("      light_directional,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m\n");
+                b.append("    );\n");
                 break;
               }
             }
@@ -648,44 +731,94 @@ public final class ForwardShaders
               case SPECULAR_NONE:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    SL.diffuse_only_emissive (light_spherical, n, f_position [x y z], m);\n");
+                b.append("    SL.diffuse_only_emissive (\n");
+                b.append("      light_spherical,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m\n");
+                b.append("    );\n");
                 break;
               }
               case SPECULAR_CONSTANT:
               case SPECULAR_MAPPED:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    SL.diffuse_specular_emissive (light_spherical, n, f_position [x y z], m);\n");
+                b.append("    SL.diffuse_specular_emissive (\n");
+                b.append("      light_spherical,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m\n");
+                b.append("    );\n");
                 break;
               }
             }
             break;
           }
+
           case LIGHT_PROJECTIVE_SHADOW_MAPPED:
           {
-            b.append("  -- XXX: SHADOW MAPPING UNIMPLEMENTED\n");
-            b
-              .append("  value light_term : vector_3f = new vector_3f (1.0, 0.0, 1.0);\n");
+            switch (label.getSpecular()) {
+              case SPECULAR_NONE:
+              {
+                b.append("  value light_term : vector_3f =\n");
+                b.append("    PL.diffuse_only_emissive_shadowed (\n");
+                b.append("      light_projective,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m,\n");
+                b.append("      t_projection,\n");
+                b.append("      f_position_light_clip,\n");
+                b.append("      t_shadow\n");
+                b.append("    );\n");
+                break;
+              }
+              case SPECULAR_CONSTANT:
+              case SPECULAR_MAPPED:
+              {
+                b.append("  value light_term : vector_3f =\n");
+                b.append("    PL.diffuse_specular_emissive_shadowed (\n");
+                b.append("      light_projective,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m,\n");
+                b.append("      t_projection,\n");
+                b.append("      f_position_light_clip,\n");
+                b.append("      t_shadow\n");
+                b.append("    );\n");
+                break;
+              }
+            }
             break;
           }
+
           case LIGHT_PROJECTIVE:
           {
             switch (label.getSpecular()) {
               case SPECULAR_NONE:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    PL.diffuse_only_emissive (light_projective, n, f_position [x y z], m, t_projection, f_uv_projection);\n");
+                b.append("    PL.diffuse_only_emissive (\n");
+                b.append("      light_projective,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m,\n");
+                b.append("      t_projection,\n");
+                b.append("      f_position_light_clip\n");
+                b.append("    );\n");
                 break;
               }
               case SPECULAR_CONSTANT:
               case SPECULAR_MAPPED:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    PL.diffuse_specular_emissive (light_projective, n, f_position [x y z], m, t_projection, f_uv_projection);\n");
+                b.append("    PL.diffuse_specular_emissive (\n");
+                b.append("      light_projective,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m,\n");
+                b.append("      t_projection,\n");
+                b.append("      f_position_light_clip\n");
+                b.append("    );\n");
                 break;
               }
             }
@@ -823,8 +956,10 @@ public final class ForwardShaders
     switch (label.getNormals()) {
       case NORMALS_MAPPED:
       {
+        b.append("  -- Mapped normal parameters\n");
         b.append("  parameter m_normal : matrix_3x3f;\n");
         b.append("  parameter t_normal : sampler_2d;\n");
+        b.append("\n");
         break;
       }
       case NORMALS_NONE:
@@ -941,9 +1076,18 @@ public final class ForwardShaders
         break;
       }
       case LIGHT_PROJECTIVE:
+      {
+        b.append("  -- Projective light outputs\n");
+        b.append("  out f_position_light_clip : vector_4f;\n");
+        b.append("\n");
+        break;
+      }
       case LIGHT_PROJECTIVE_SHADOW_MAPPED:
       {
-        b.append("  out f_uv_projection : vector_4f;\n");
+        b.append("  -- Projective light (shadow mapped) outputs\n");
+        b.append("  out f_position_light_eye  : vector_4f;\n");
+        b.append("  out f_position_light_clip : vector_4f;\n");
+        b.append("\n");
         break;
       }
       case LIGHT_SPHERICAL:
@@ -963,9 +1107,14 @@ public final class ForwardShaders
         break;
       }
       case LIGHT_PROJECTIVE:
+      {
+        b.append("  out f_position_light_clip = position_light_clip;\n");
+        break;
+      }
       case LIGHT_PROJECTIVE_SHADOW_MAPPED:
       {
-        b.append("  out f_uv_projection = uv_projection;\n");
+        b.append("  out f_position_light_eye  = position_light_eye;\n");
+        b.append("  out f_position_light_clip = position_light_clip;\n");
         break;
       }
       case LIGHT_SPHERICAL:
@@ -987,9 +1136,16 @@ public final class ForwardShaders
       case LIGHT_PROJECTIVE:
       case LIGHT_PROJECTIVE_SHADOW_MAPPED:
       {
-        b.append("  value uv_projection : vector_4f =\n");
-        b
-          .append("    M4.multiply_vector (m_texture_projection, new vector_4f (v_position, 1.0));\n");
+        b.append("  value position_light_eye : vector_4f =\n");
+        b.append("    M4.multiply_vector (\n");
+        b.append("      m_projective_modelview,\n");
+        b.append("      new vector_4f (v_position, 1.0)\n");
+        b.append("    );\n");
+        b.append("  value position_light_clip : vector_4f =\n");
+        b.append("    M4.multiply_vector (\n");
+        b.append("      m_projective_projection,\n");
+        b.append("      position_light_eye\n");
+        b.append("    );\n");
         break;
       }
       case LIGHT_SPHERICAL:
@@ -1011,7 +1167,10 @@ public final class ForwardShaders
       case LIGHT_PROJECTIVE:
       case LIGHT_PROJECTIVE_SHADOW_MAPPED:
       {
-        b.append("  parameter m_texture_projection : matrix_4x4f;\n");
+        b.append("  -- Projective light parameters\n");
+        b.append("  parameter m_projective_modelview  : matrix_4x4f;\n");
+        b.append("  parameter m_projective_projection : matrix_4x4f;\n");
+        b.append("\n");
         break;
       }
       case LIGHT_SPHERICAL:
@@ -1028,11 +1187,12 @@ public final class ForwardShaders
     switch (label.getNormals()) {
       case NORMALS_MAPPED:
       {
-        b.append("  in v_normal : vector_3f;\n");
-        b.append("  in v_tangent4 : vector_4f;\n");
-        b.append("  out f_normal_os : vector_3f;\n");
-        b.append("  out f_tangent : vector_3f;\n");
-        b.append("  out f_bitangent : vector_3f;\n");
+        b.append("  -- Mapped normal attributes\n");
+        b.append("  in v_normal        : vector_3f;\n");
+        b.append("  in v_tangent4      : vector_4f;\n");
+        b.append("  out f_normal_model : vector_3f;\n");
+        b.append("  out f_tangent      : vector_3f;\n");
+        b.append("  out f_bitangent    : vector_3f;\n");
         break;
       }
       case NORMALS_NONE:
@@ -1041,11 +1201,14 @@ public final class ForwardShaders
       }
       case NORMALS_VERTEX:
       {
-        b.append("  in v_normal : vector_3f;\n");
-        b.append("  out f_normal_es : vector_3f;\n");
+        b.append("  -- Vertex normal attributes\n");
+        b.append("  in v_normal      : vector_3f;\n");
+        b.append("  out f_normal_eye : vector_3f;\n");
         break;
       }
     }
+
+    b.append("\n");
   }
 
   private static void vertexShaderStandardAttributesUV(
@@ -1053,7 +1216,7 @@ public final class ForwardShaders
     final @Nonnull ForwardLabel forwardLabel)
   {
     if (forwardLabel.impliesUV()) {
-      b.append("  in v_uv : vector_2f;\n");
+      b.append("  in v_uv  : vector_2f;\n");
       b.append("  out f_uv : vector_2f;\n");
     }
   }
@@ -1061,14 +1224,14 @@ public final class ForwardShaders
   private static void vertexShaderStandardIO(
     final @Nonnull StringBuilder b)
   {
-    b.append("  in v_position : vector_3f;\n");
-    b.append("  out f_position : vector_4f;\n");
+    b.append("  in v_position      : vector_3f;\n");
+    b.append("  out f_position_eye : vector_4f;\n");
   }
 
   private static void vertexShaderStandardParametersMatrices(
     final @Nonnull StringBuilder b)
   {
-    b.append("  parameter m_modelview : matrix_4x4f;\n");
+    b.append("  parameter m_modelview  : matrix_4x4f;\n");
     b.append("  parameter m_projection : matrix_4x4f;\n");
   }
 
@@ -1087,7 +1250,9 @@ public final class ForwardShaders
       }
       case NORMALS_VERTEX:
       {
+        b.append("  -- Vertex normal parameters\n");
         b.append("  parameter m_normal : matrix_3x3f;\n");
+        b.append("\n");
         break;
       }
     }
@@ -1121,7 +1286,7 @@ public final class ForwardShaders
       }
       case NORMALS_VERTEX:
       {
-        b.append("  value normal =\n");
+        b.append("  value normal_eye =\n");
         b.append("    M3.multiply_vector (m_normal, v_normal);\n");
         break;
       }
@@ -1141,14 +1306,14 @@ public final class ForwardShaders
   private static void vertexShaderStandardValuesPositions(
     final @Nonnull StringBuilder b)
   {
-    b.append("  value clip_position =\n");
-    b.append("    M4.multiply_vector (\n");
-    b.append("      M4.multiply (m_projection, m_modelview),\n");
-    b.append("      new vector_4f (v_position, 1.0)\n");
-    b.append("    );\n");
-    b.append("  value position =\n");
+    b.append("  value position_eye =\n");
     b.append("    M4.multiply_vector (\n");
     b.append("      m_modelview,\n");
+    b.append("      new vector_4f (v_position, 1.0)\n");
+    b.append("    );\n");
+    b.append("  value position_clip =\n");
+    b.append("    M4.multiply_vector (\n");
+    b.append("      M4.multiply (m_projection, m_modelview),\n");
     b.append("      new vector_4f (v_position, 1.0)\n");
     b.append("    );\n");
   }
@@ -1156,8 +1321,8 @@ public final class ForwardShaders
   private static void vertexShaderStandardWrites(
     final @Nonnull StringBuilder b)
   {
-    b.append("  out gl_Position = clip_position;\n");
-    b.append("  out f_position = position;\n");
+    b.append("  out gl_Position = position_clip;\n");
+    b.append("  out f_position_eye = position_eye;\n");
   }
 
   private static void vertexShaderStandardWritesNormals(
@@ -1167,7 +1332,7 @@ public final class ForwardShaders
     switch (label.getNormals()) {
       case NORMALS_MAPPED:
       {
-        b.append("  out f_normal_os = v_normal;\n");
+        b.append("  out f_normal_model = v_normal;\n");
         b.append("  out f_tangent = tangent;\n");
         b.append("  out f_bitangent = bitangent;\n");
         break;
@@ -1178,7 +1343,7 @@ public final class ForwardShaders
       }
       case NORMALS_VERTEX:
       {
-        b.append("  out f_normal_es = normal;\n");
+        b.append("  out f_normal_eye = normal_eye;\n");
         break;
       }
     }

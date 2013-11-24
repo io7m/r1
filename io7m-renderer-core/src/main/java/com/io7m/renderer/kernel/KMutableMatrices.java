@@ -36,8 +36,10 @@ import com.io7m.renderer.RTransformModel;
 import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
+import com.io7m.renderer.RTransformProjectiveModelView;
+import com.io7m.renderer.RTransformProjectiveProjection;
+import com.io7m.renderer.RTransformProjectiveView;
 import com.io7m.renderer.RTransformTexture;
-import com.io7m.renderer.RTransformTextureProjection;
 import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.RTransformViewInverse;
 import com.io7m.renderer.kernel.KLight.KProjective;
@@ -389,36 +391,27 @@ import com.io7m.renderer.kernel.KLight.KProjective;
        * Produce a world -> eye transformation matrix for the given light.
        */
 
-      KMatrices.makeViewMatrix(
+      KMatrices.makeViewMatrixProjective(
         KMutableMatrices.this.transform_context,
         projective.getPosition(),
         projective.getOrientation(),
-        KMutableMatrices.this.matrix_texture_projection_view);
+        KMutableMatrices.this.matrix_projective_view);
 
       /**
        * Produce a model -> eye transformation matrix for the given light.
        */
 
       MatrixM4x4F.multiply(
-        KMutableMatrices.this.matrix_texture_projection_view,
+        KMutableMatrices.this.matrix_projective_view,
         KMutableMatrices.this.matrix_model,
-        KMutableMatrices.this.matrix_texture_projection_modelview);
+        KMutableMatrices.this.matrix_projective_modelview);
 
       /**
        * Produce the eye -> clip transformation matrix for the given light.
        */
 
       projective.getProjection().makeMatrixM4x4F(
-        KMutableMatrices.this.matrix_texture_projection_projection);
-
-      /**
-       * Produce the model -> clip transformation matrix for the given light.
-       */
-
-      MatrixM4x4F.multiply(
-        KMutableMatrices.this.matrix_texture_projection_projection,
-        KMutableMatrices.this.matrix_texture_projection_modelview,
-        KMutableMatrices.this.matrix_texture_projection);
+        KMutableMatrices.this.matrix_projective_projection);
     }
 
     @Override public Context getMatrixContext()
@@ -499,17 +492,6 @@ import com.io7m.renderer.kernel.KLight.KProjective;
       return KMutableMatrices.this.matrix_view_inverse;
     }
 
-    @Override public
-      RMatrixM4x4F<RTransformTextureProjection>
-      getTextureProjection()
-        throws ConstraintError
-    {
-      Constraints.constrainArbitrary(
-        this.projectiveLightIsActive(),
-        "Projective light is currently active");
-      return KMutableMatrices.this.matrix_texture_projection;
-    }
-
     @Override public void projectiveLightFinish()
       throws ConstraintError
     {
@@ -521,13 +503,40 @@ import com.io7m.renderer.kernel.KLight.KProjective;
       return this.parent.instanceIsActive()
         && KMutableMatrices.this.projective_light_active.get();
     }
+
+    @Override public
+      RMatrixM4x4F<RTransformProjectiveModelView>
+      getMatrixProjectiveModelView()
+        throws ConstraintError
+    {
+      Constraints.constrainArbitrary(
+        this.projectiveLightIsActive(),
+        "Projective light is currently active");
+      return KMutableMatrices.this.matrix_projective_modelview;
+    }
+
+    @Override public
+      RMatrixM4x4F<RTransformProjectiveProjection>
+      getMatrixProjectiveProjection()
+        throws ConstraintError
+    {
+      Constraints.constrainArbitrary(
+        this.projectiveLightIsActive(),
+        "Projective light is currently active");
+      return KMutableMatrices.this.matrix_projective_projection;
+    }
   }
 
   interface WithProjectiveLightMatrices extends WithInstanceMatrices
   {
     public @Nonnull
-      RMatrixM4x4F<RTransformTextureProjection>
-      getTextureProjection()
+      RMatrixM4x4F<RTransformProjectiveModelView>
+      getMatrixProjectiveModelView()
+        throws ConstraintError;
+
+    public @Nonnull
+      RMatrixM4x4F<RTransformProjectiveProjection>
+      getMatrixProjectiveProjection()
         throws ConstraintError;
   }
 
@@ -536,38 +545,37 @@ import com.io7m.renderer.kernel.KLight.KProjective;
     return new KMutableMatrices();
   }
 
-  private final @Nonnull AtomicBoolean                             camera_active;
-  private final @Nonnull AtomicBoolean                             instance_active;
-  private final @Nonnull MatrixM4x4F.Context                       matrix_context;
-  private final @Nonnull RMatrixM4x4F<RTransformModel>             matrix_model;
-  private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_modelview;
+  private final @Nonnull AtomicBoolean                                camera_active;
+  private final @Nonnull AtomicBoolean                                instance_active;
+  private final @Nonnull MatrixM4x4F.Context                          matrix_context;
+  private final @Nonnull RMatrixM4x4F<RTransformModel>                matrix_model;
+  private final @Nonnull RMatrixM4x4F<RTransformModelView>            matrix_modelview;
 
   /*
    * Camera-specific matrices.
    */
 
-  private final @Nonnull RMatrixM3x3F<RTransformNormal>            matrix_normal;
-  private final @Nonnull RMatrixM4x4F<RTransformProjection>        matrix_projection;
-  private final @Nonnull RMatrixM4x4F<RTransformTextureProjection> matrix_texture_projection;
+  private final @Nonnull RMatrixM3x3F<RTransformNormal>               matrix_normal;
+  private final @Nonnull RMatrixM4x4F<RTransformProjection>           matrix_projection;
 
   /*
    * Camera-plus-instance-specific matrices.
    */
 
-  private final @Nonnull RMatrixM4x4F<RTransformModelView>         matrix_texture_projection_modelview;
-  private final @Nonnull RMatrixM4x4F<RTransformProjection>        matrix_texture_projection_projection;
-  private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_texture_projection_view;
-  private final @Nonnull RMatrixM3x3F<RTransformTexture>           matrix_uv;
-  private final @Nonnull RMatrixM3x3F<RTransformTexture>           matrix_uv_temp;
+  private final @Nonnull RMatrixM4x4F<RTransformProjectiveModelView>  matrix_projective_modelview;
+  private final @Nonnull RMatrixM4x4F<RTransformProjectiveProjection> matrix_projective_projection;
+  private final @Nonnull RMatrixM4x4F<RTransformProjectiveView>       matrix_projective_view;
+  private final @Nonnull RMatrixM3x3F<RTransformTexture>              matrix_uv;
+  private final @Nonnull RMatrixM3x3F<RTransformTexture>              matrix_uv_temp;
 
   /*
    * Camera-plus-instance-plus-light-specific matrices.
    */
 
-  private final @Nonnull RMatrixM4x4F<RTransformView>              matrix_view;
-  private final @Nonnull RMatrixM4x4F<RTransformViewInverse>       matrix_view_inverse;
-  private final @Nonnull AtomicBoolean                             projective_light_active;
-  private final @Nonnull KTransform.Context                        transform_context;
+  private final @Nonnull RMatrixM4x4F<RTransformView>                 matrix_view;
+  private final @Nonnull RMatrixM4x4F<RTransformViewInverse>          matrix_view_inverse;
+  private final @Nonnull AtomicBoolean                                projective_light_active;
+  private final @Nonnull KTransform.Context                           transform_context;
 
   private KMutableMatrices()
   {
@@ -585,13 +593,12 @@ import com.io7m.renderer.kernel.KLight.KProjective;
     this.matrix_uv = new RMatrixM3x3F<RTransformTexture>();
     this.matrix_uv_temp = new RMatrixM3x3F<RTransformTexture>();
 
-    this.matrix_texture_projection =
-      new RMatrixM4x4F<RTransformTextureProjection>();
-    this.matrix_texture_projection_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    this.matrix_texture_projection_view = new RMatrixM4x4F<RTransformView>();
-    this.matrix_texture_projection_modelview =
-      new RMatrixM4x4F<RTransformModelView>();
+    this.matrix_projective_modelview =
+      new RMatrixM4x4F<RTransformProjectiveModelView>();
+    this.matrix_projective_projection =
+      new RMatrixM4x4F<RTransformProjectiveProjection>();
+    this.matrix_projective_view =
+      new RMatrixM4x4F<RTransformProjectiveView>();
 
     this.camera_active = new AtomicBoolean();
     this.instance_active = new AtomicBoolean();

@@ -65,7 +65,8 @@ import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RTransformProjection;
-import com.io7m.renderer.RTransformTextureProjection;
+import com.io7m.renderer.RTransformProjectiveModelView;
+import com.io7m.renderer.RTransformProjectiveProjection;
 import com.io7m.renderer.RVectorI2F;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.RVectorI4F;
@@ -647,16 +648,17 @@ public final class SBRendererSpecific implements KRenderer
     return used_units;
   }
 
-  private final @Nonnull ProgramReference                          program;
-  private final @Nonnull JCGLImplementation                        gl;
-  private final @Nonnull Log                                       log;
-  private final @Nonnull VectorM4F                                 background;
-  private final @Nonnull ProgramReference                          program_depth;
-  private final @Nonnull JCCEExecutionCallable                     exec_depth;
-  private final @Nonnull KMutableMatrices                          matrices;
-  private final @Nonnull JCCEExecutionCallable                     exec_program;
-  private final @Nonnull VectorM2I                                 viewport_size;
-  private final @Nonnull RMatrixM4x4F<RTransformTextureProjection> fake_texture_projection;
+  private final @Nonnull ProgramReference                             program;
+  private final @Nonnull JCGLImplementation                           gl;
+  private final @Nonnull Log                                          log;
+  private final @Nonnull VectorM4F                                    background;
+  private final @Nonnull ProgramReference                             program_depth;
+  private final @Nonnull JCCEExecutionCallable                        exec_depth;
+  private final @Nonnull KMutableMatrices                             matrices;
+  private final @Nonnull JCCEExecutionCallable                        exec_program;
+  private final @Nonnull VectorM2I                                    viewport_size;
+  private final @Nonnull RMatrixM4x4F<RTransformProjectiveModelView>  fake_projective_modelview;
+  private final @Nonnull RMatrixM4x4F<RTransformProjectiveProjection> fake_projective_projection;
 
   public static SBRendererSpecific rendererNew(
     final @Nonnull JCGLImplementation g,
@@ -707,8 +709,10 @@ public final class SBRendererSpecific implements KRenderer
         log);
     this.exec_depth = new JCCEExecutionCallable(this.program_depth);
 
-    this.fake_texture_projection =
-      new RMatrixM4x4F<RTransformTextureProjection>();
+    this.fake_projective_modelview =
+      new RMatrixM4x4F<RTransformProjectiveModelView>();
+    this.fake_projective_projection =
+      new RMatrixM4x4F<RTransformProjectiveProjection>();
   }
 
   private void putTextureProjectionMatrixForLight(
@@ -724,10 +728,10 @@ public final class SBRendererSpecific implements KRenderer
         case LIGHT_DIRECTIONAL:
         case LIGHT_SPHERE:
         {
-          KShadingProgramCommon.putMatrixTextureProjection(
+          KShadingProgramCommon.putMatrixProjectiveProjection(
             gc,
             this.exec_program,
-            this.fake_texture_projection);
+            this.fake_projective_projection);
           break;
         }
         case LIGHT_PROJECTIVE:
@@ -735,10 +739,10 @@ public final class SBRendererSpecific implements KRenderer
           final KMutableMatrices.WithProjectiveLight mwp =
             mwi.withProjectiveLight((KProjective) light);
           try {
-            KShadingProgramCommon.putMatrixTextureProjection(
+            KShadingProgramCommon.putMatrixProjectiveProjection(
               gc,
               this.exec_program,
-              mwp.getTextureProjection());
+              mwp.getMatrixProjectiveProjection());
           } finally {
             mwp.projectiveLightFinish();
           }
