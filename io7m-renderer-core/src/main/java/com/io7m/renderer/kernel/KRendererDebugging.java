@@ -16,7 +16,10 @@
 
 package com.io7m.renderer.kernel;
 
+import javax.annotation.Nonnull;
+
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 
 /**
  * Optional debugging interface supported by renderers.
@@ -24,11 +27,19 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
 public interface KRendererDebugging
 {
+  public interface DebugShadowMapReceiver
+  {
+    public void receive(
+      final @Nonnull KShadow shadow,
+      final @Nonnull Texture2DStaticUsable texture);
+  }
+
   /**
-   * Request that the renderer dump any generated shadow maps on the next
-   * evaluation.
+   * Request that the renderer pass any generated shadow maps to
+   * <code>receiver</code> on the next evaluation.
    */
 
-  public void debugRequestShadowMaps()
+  public void debugForEachShadowMap(
+    final @Nonnull DebugShadowMapReceiver receiver)
     throws ConstraintError;
 }
