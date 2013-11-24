@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -65,7 +64,6 @@ import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RMatrixReadable4x4F;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
-import com.io7m.renderer.debug.RDTextureUtilities;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
@@ -83,11 +81,19 @@ public final class KRendererForward implements KRenderer
 {
   private class Debugging implements KRendererDebugging
   {
-    private final @Nonnull AtomicBoolean dump_shadow_maps;
+    private final @Nonnull AtomicReference<KRendererDebugging.DebugShadowMapReceiver> dump_shadow_maps;
 
     public Debugging()
     {
-      this.dump_shadow_maps = new AtomicBoolean(false);
+      this.dump_shadow_maps =
+        new AtomicReference<KRendererDebugging.DebugShadowMapReceiver>();
+    }
+
+    @Override public void debugForEachShadowMap(
+      final @Nonnull DebugShadowMapReceiver receiver)
+      throws ConstraintError
+    {
+      this.dump_shadow_maps.set(receiver);
     }
 
     @SuppressWarnings("synthetic-access") public
@@ -96,17 +102,14 @@ public final class KRendererForward implements KRenderer
         final @Nonnull Collection<KLight> lights)
         throws ConstraintError,
           KShadowCacheException,
-          LUCacheException,
-          FileNotFoundException,
-          JCGLException,
-          IOException
+          LUCacheException
     {
       final PCache<KShadow, KFramebufferDepth, KShadowCacheException> sc =
         KRendererForward.this.shadow_cache;
-      final boolean dump = this.dump_shadow_maps.getAndSet(false);
-      final StringBuilder name = new StringBuilder();
+      final DebugShadowMapReceiver dump =
+        this.dump_shadow_maps.getAndSet(null);
 
-      if (dump) {
+      if (dump != null) {
         KRendererForward.this.log.debug("Dumping shadow maps");
 
         for (final KLight l : lights) {
@@ -130,16 +133,7 @@ public final class KRendererForward implements KRenderer
                   final KShadow ks = ((Option.Some<KShadow>) os).value;
                   assert sc.luCacheIsCached(ks);
                   final KFramebufferDepth fb = sc.pcCacheGet(ks);
-
-                  name.setLength(0);
-                  name.append("shadow-");
-                  name.append(l.getID());
-
-                  RDTextureUtilities.textureDumpTimestampedTemporary2DStatic(
-                    KRendererForward.this.g,
-                    fb.kframebufferGetDepthTexture(),
-                    name.toString(),
-                    KRendererForward.this.log);
+                  dump.receive(ks, fb.kframebufferGetDepthTexture());
                   break;
                 }
               }
@@ -152,12 +146,6 @@ public final class KRendererForward implements KRenderer
           }
         }
       }
-    }
-
-    @Override public void debugRequestShadowMaps()
-      throws ConstraintError
-    {
-      this.dump_shadow_maps.set(true);
     }
   }
 
@@ -711,10 +699,10 @@ public final class KRendererForward implements KRenderer
         }
       } catch (final KShaderCacheException e) {
         KRendererForward.handleShaderCacheException(e);
-      } catch (final LUCacheException e) {
-        throw new UnreachableCodeException(e);
       } catch (final KShadowCacheException e) {
         KRendererForward.handleShadowCacheException(e);
+      } catch (final Throwable e) {
+        throw new UnreachableCodeException(e);
       }
 
       final JCGLInterfaceCommon gc = this.g.getGLCommon();

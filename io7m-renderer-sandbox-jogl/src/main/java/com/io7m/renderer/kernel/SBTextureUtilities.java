@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.debug;
+package com.io7m.renderer.kernel;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -39,7 +39,7 @@ import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 
-public final class RDTextureUtilities
+public final class SBTextureUtilities
 {
   /**
    * Dump the raw pixel data in <code>r</code> to the file <code>file</code>.
@@ -107,7 +107,7 @@ public final class RDTextureUtilities
           final JCGLInterfaceGL3 g =
             ((Option.Some<JCGLInterfaceGL3>) og).value;
           final Texture2DReadableData r = g.texture2DStaticGetImage(t);
-          RDTextureUtilities.textureDump(r, file);
+          SBTextureUtilities.textureDump(r, file);
           return;
         }
       }
@@ -125,7 +125,7 @@ public final class RDTextureUtilities
           final JCGLInterfaceGL2 g =
             ((Option.Some<JCGLInterfaceGL2>) og).value;
           final Texture2DReadableData r = g.texture2DStaticGetImage(t);
-          RDTextureUtilities.textureDump(r, file);
+          SBTextureUtilities.textureDump(r, file);
           return;
         }
       }
@@ -152,7 +152,7 @@ public final class RDTextureUtilities
       String.format("%s-%s.raw", name, fmt.format(cal.getTime()));
     final File out_file =
       new File(System.getProperty("java.io.tmpdir"), actual);
-    RDTextureUtilities.textureDump(r, out_file);
+    SBTextureUtilities.textureDump(r, out_file);
   }
 
   /**
@@ -183,6 +183,6 @@ public final class RDTextureUtilities
       String.format("%s-%s.raw", name, fmt.format(cal.getTime()));
     final File out_file =
       new File(System.getProperty("java.io.tmpdir"), actual);
-    RDTextureUtilities.textureDump2DStatic(gi, t, out_file, log);
+    SBTextureUtilities.textureDump2DStatic(gi, t, out_file, log);
   }
 }
