@@ -17,7 +17,6 @@
 package com.io7m.renderer.kernel;
 
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -52,7 +51,14 @@ public final class SBErrorBox
         final Log log = new Log(new Properties(), "x", "y");
 
         try {
-          Integer.parseInt("NOT CORRECT");
+          final StringBuilder m = new StringBuilder();
+          for (int index = 0; index < 32; ++index) {
+            m.append("This is too much text, and this is line "
+              + index
+              + "\n");
+          }
+
+          Integer.parseInt(m.toString());
         } catch (final NumberFormatException x) {
           final JDialog d = SBErrorBox.showError(log, x);
           d.addWindowListener(new WindowAdapter() {
@@ -85,22 +91,26 @@ public final class SBErrorBox
       }
     });
 
-    final JLabel title_label = new JLabel("    " + title);
-    final JPanel error = new JPanel();
-    error.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-
+    JLabel icon = null;
     try {
-      error.add(SBIcons.makeErrorIcon());
+      icon = SBIcons.makeErrorIcon();
     } catch (final IOException _) {
       // Who cares?
     }
-    error.add(title_label);
+
+    final int max_length = 120;
+    final String truncated;
+    if (message.length() > max_length) {
+      truncated = message.substring(0, max_length - 1) + "...";
+    } else {
+      truncated = message;
+    }
 
     final JPanel main = new JPanel();
     final DesignGridLayout dg = new DesignGridLayout(main);
-    dg.row().left().add(error);
+    dg.row().grid(icon).add(new JLabel(title));
     dg.emptyRow();
-    dg.row().grid().add(new JLabel(message));
+    dg.row().grid().add(new JLabel(truncated));
 
     if (backtrace != null) {
       final JScrollPane pane = new JScrollPane(backtrace);

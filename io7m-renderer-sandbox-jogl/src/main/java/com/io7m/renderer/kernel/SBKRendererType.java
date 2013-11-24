@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 enum SBKRendererType
 {
   KRENDERER_DEBUG_DEPTH("debug-depth"),
+  KRENDERER_DEBUG_DEPTH_SHADOW("debug-depth-shadow"),
   KRENDERER_DEBUG_UV_VERTEX("debug-uv-vertex"),
   KRENDERER_DEBUG_BITANGENTS_LOCAL("debug-bitangents-local"),
   KRENDERER_DEBUG_BITANGENTS_EYE("debug-bitangents-eye"),
