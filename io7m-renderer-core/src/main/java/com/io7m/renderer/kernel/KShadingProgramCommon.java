@@ -49,8 +49,9 @@ import com.io7m.renderer.RTransformModel;
 import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformNormal;
 import com.io7m.renderer.RTransformProjection;
+import com.io7m.renderer.RTransformProjectiveModelView;
+import com.io7m.renderer.RTransformProjectiveProjection;
 import com.io7m.renderer.RTransformTexture;
-import com.io7m.renderer.RTransformTextureProjection;
 import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.RTransformViewInverse;
 import com.io7m.renderer.RVectorI2F;
@@ -1118,22 +1119,40 @@ final class KShadingProgramCommon
     exec.execUniformUseExisting("m_projection");
   }
 
-  static void putMatrixTextureProjection(
+  static void putMatrixProjectiveProjection(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI exec,
-    final @Nonnull RMatrixReadable4x4F<RTransformTextureProjection> m)
+    final @Nonnull RMatrixReadable4x4F<RTransformProjectiveProjection> m)
     throws JCGLException,
       ConstraintError
   {
-    exec.execUniformPutMatrix4x4F(gc, "m_texture_projection", m);
+    exec.execUniformPutMatrix4x4F(gc, "m_projective_projection", m);
   }
 
-  static void putMatrixTextureProjectionReuse(
+  static void putMatrixProjectiveProjectionReuse(
     final @Nonnull JCCEExecutionAPI exec)
     throws JCGLException,
       ConstraintError
   {
-    exec.execUniformUseExisting("m_texture_projection");
+    exec.execUniformUseExisting("m_projective_projection");
+  }
+
+  static void putMatrixProjectiveModelView(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull RMatrixReadable4x4F<RTransformProjectiveModelView> m)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutMatrix4x4F(gc, "m_projective_modelview", m);
+  }
+
+  static void putMatrixProjectiveModelViewReuse(
+    final @Nonnull JCCEExecutionAPI exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformUseExisting("m_projective_modelview");
   }
 
   static void putMatrixUV(

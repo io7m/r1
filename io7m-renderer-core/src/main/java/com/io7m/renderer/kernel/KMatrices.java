@@ -29,6 +29,7 @@ import com.io7m.jtensors.QuaternionReadable4F;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RTransformProjectiveView;
 import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.RVectorReadable3F;
 
@@ -60,11 +61,11 @@ import com.io7m.renderer.RVectorReadable3F;
    * <code>orientation</code>.
    */
 
-  static void makeViewMatrix(
+  private static void makeViewMatrixActual(
     final @Nonnull KTransform.Context context,
     final @Nonnull RVectorReadable3F<RSpaceWorld> position,
     final @Nonnull QuaternionReadable4F orientation,
-    final @Nonnull RMatrixM4x4F<RTransformView> view)
+    final @Nonnull RMatrixM4x4F<?> view)
   {
     MatrixM4x4F.setIdentity(view);
 
@@ -77,6 +78,41 @@ import com.io7m.renderer.RVectorReadable3F;
     translate.y = -position.getYF();
     translate.z = -position.getZF();
     MatrixM4x4F.translateByVector3FInPlace(view, translate);
+  }
+
+  /**
+   * Produce a view matrix assuming a viewer at <code>position</code> facing
+   * <code>orientation</code>.
+   */
+
+  static void makeViewMatrix(
+    final @Nonnull KTransform.Context context,
+    final @Nonnull RVectorReadable3F<RSpaceWorld> position,
+    final @Nonnull QuaternionReadable4F orientation,
+    final @Nonnull RMatrixM4x4F<RTransformView> view)
+  {
+    KMatrices.makeViewMatrixActual(context, position, orientation, view);
+  }
+
+  /**
+   * <p>
+   * Produce a view matrix assuming a viewer at <code>position</code> facing
+   * <code>orientation</code>.
+   * </p>
+   * <p>
+   * Identical to
+   * {@link #makeViewMatrix(com.io7m.renderer.kernel.KTransform.Context, RVectorReadable3F, QuaternionReadable4F, RMatrixM4x4F)}
+   * but with a different phantom type parameter on the view matrix type.
+   * </p>
+   */
+
+  static void makeViewMatrixProjective(
+    final @Nonnull KTransform.Context context,
+    final @Nonnull RVectorReadable3F<RSpaceWorld> position,
+    final @Nonnull QuaternionReadable4F orientation,
+    final @Nonnull RMatrixM4x4F<RTransformProjectiveView> view)
+  {
+    KMatrices.makeViewMatrixActual(context, position, orientation, view);
   }
 
   private KMatrices()

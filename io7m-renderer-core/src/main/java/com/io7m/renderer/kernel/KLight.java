@@ -77,6 +77,11 @@ import com.io7m.renderer.RVectorReadable3F;
       return true;
     }
 
+    @Override public @Nonnull String getCode()
+    {
+      return "LD";
+    }
+
     public @Nonnull RVectorReadable3F<RSpaceWorld> getDirection()
     {
       return this.direction;
@@ -129,6 +134,7 @@ import com.io7m.renderer.RVectorReadable3F;
         shadow);
     }
 
+    private final @Nonnull String                             code;
     private final float                                       falloff;
     private final @Nonnull QuaternionI4F                      orientation;
     private final @Nonnull RVectorReadable3F<RSpaceWorld>     position;
@@ -157,6 +163,34 @@ import com.io7m.renderer.RVectorReadable3F;
       this.projection = projection;
       this.texture = texture;
       this.shadow = shadow;
+
+      String c = null;
+      switch (shadow.type) {
+        case OPTION_NONE:
+        {
+          c = "LP";
+          break;
+        }
+        case OPTION_SOME:
+        {
+          final KShadow ks = ((Option.Some<KShadow>) shadow).value;
+          switch (ks.getType()) {
+            case SHADOW_MAPPED_BASIC:
+            {
+              c = "LPSM";
+              break;
+            }
+            case SHADOW_MAPPED_FILTERED:
+            {
+              c = "LPSM";
+              break;
+            }
+          }
+        }
+      }
+
+      assert c != null;
+      this.code = c;
     }
 
     @Override public boolean equals(
@@ -196,6 +230,11 @@ import com.io7m.renderer.RVectorReadable3F;
         return false;
       }
       return true;
+    }
+
+    @Override public @Nonnull String getCode()
+    {
+      return this.code;
     }
 
     public float getFalloff()
@@ -331,6 +370,11 @@ import com.io7m.renderer.RVectorReadable3F;
       return true;
     }
 
+    @Override public String getCode()
+    {
+      return "LS";
+    }
+
     public float getFalloff()
     {
       return this.falloff;
@@ -374,24 +418,16 @@ import com.io7m.renderer.RVectorReadable3F;
 
   static enum Type
   {
-    LIGHT_DIRECTIONAL("Directional", "LD"),
-    LIGHT_PROJECTIVE("Projective", "LP"),
-    LIGHT_SPHERE("Sphere", "LS");
+    LIGHT_DIRECTIONAL("Directional"),
+    LIGHT_PROJECTIVE("Projective"),
+    LIGHT_SPHERE("Sphere");
 
-    private final @Nonnull String code;
     private final @Nonnull String name;
 
     private Type(
-      final @Nonnull String name,
-      final @Nonnull String code)
+      final @Nonnull String name)
     {
       this.name = name;
-      this.code = code;
-    }
-
-    public @Nonnull String getCode()
-    {
-      return this.code;
     }
 
     public @Nonnull String getName()
@@ -450,6 +486,8 @@ import com.io7m.renderer.RVectorReadable3F;
     }
     return true;
   }
+
+  public abstract @Nonnull String getCode();
 
   public @Nonnull RVectorI3F<RSpaceRGB> getColour()
   {

@@ -208,4 +208,77 @@ module ProjectiveLight is
       V3.multiply_scalar (V3.add (dc, sc), a)
     end;
 
+  --
+  -- Given a projective light [light], calculate the diffuse
+  -- colour based on [d], sampling the current light texel from [t_light].
+  --
+
+  function diffuse_only_shadowed (
+    light        : t,
+    n            : vector_3f,
+    p            : vector_3f,
+    t_light      : sampler_2d,
+    p_light_clip : vector_4f,
+    t_shadow     : sampler_2d
+  ) : vector_3f =
+    let
+      value d   = SL.directions (light.position, p, n);
+      value a   = SL.attenuation (light.range, light.falloff, d.distance);
+      value tx  = light_texel (t_light, p_light_clip);
+      value lc  = V3.multiply (light.colour, tx [x y z]);
+      value c   = diffuse_colour (light, d, lc, 0.0);
+    in
+      V3.multiply_scalar (c, a)
+    end;
+
+  --
+  -- Given a projective light [light], calculate the diffuse
+  -- colour based on [d], with the minimum emission level given in
+  -- [m], sampling the current light texel from [t_light].
+  --
+
+  function diffuse_only_emissive_shadowed (
+    light        : t,
+    n            : vector_3f,
+    p            : vector_3f,
+    m            : M.t,
+    t_light      : sampler_2d,
+    p_light_clip : vector_4f,
+    t_shadow     : sampler_2d
+  ) : vector_3f =
+    new vector_3f (1.0, 0.0, 1.0);
+
+  --
+  -- Given a projective light [light], calculate the diffuse and 
+  -- specular terms for the surface.
+  --
+
+  function diffuse_specular_shadowed (
+    light    : t,
+    n        : vector_3f,
+    p        : vector_3f,
+    m        : M.t,
+    t_light  : sampler_2d,
+    u        : vector_4f,
+    t_shadow : sampler_2d
+  ) : vector_3f =
+    new vector_3f (1.0, 0.0, 1.0);
+
+  --
+  -- Given a projective light [light], calculate the diffuse and 
+  -- specular terms for the surface, with the minimum emission level
+  -- given in [m].
+  --
+
+  function diffuse_specular_emissive_shadowed (
+    light    : t,
+    n        : vector_3f,
+    p        : vector_3f,
+    m        : M.t,
+    t_light  : sampler_2d,
+    u        : vector_4f,
+    t_shadow : sampler_2d
+  ) : vector_3f =
+    new vector_3f (1.0, 0.0, 1.0);
+
 end;

@@ -216,7 +216,7 @@ public final class KRendererForward implements KRenderer
   {
     buffer.setLength(0);
     buffer.append("fwd_");
-    buffer.append(light.getType().getCode());
+    buffer.append(light.getCode());
     buffer.append("_");
     buffer.append(label.getCode());
   }
@@ -331,7 +331,7 @@ public final class KRendererForward implements KRenderer
 
   @SuppressWarnings("static-method") private
     void
-    putLightProjectiveMatrixIfNecessary(
+    putLightProjectiveMatricesIfNecessary(
       final @Nonnull JCGLInterfaceCommon gc,
       final @Nonnull JCCEExecutionCallable e,
       final @Nonnull KLight light,
@@ -350,10 +350,14 @@ public final class KRendererForward implements KRenderer
           mwi.withProjectiveLight((KProjective) light);
 
         try {
-          KShadingProgramCommon.putMatrixTextureProjection(
+          KShadingProgramCommon.putMatrixProjectiveProjection(
             gc,
             e,
-            mwp.getTextureProjection());
+            mwp.getMatrixProjectiveProjection());
+          KShadingProgramCommon.putMatrixProjectiveModelView(
+            gc,
+            e,
+            mwp.getMatrixProjectiveModelView());
         } finally {
           mwp.projectiveLightFinish();
         }
@@ -877,7 +881,7 @@ public final class KRendererForward implements KRenderer
     this.putLightReuse(e, light);
     this.putTextures(gc, e, i, light);
     KShadingProgramCommon.putMaterial(e, gc, material);
-    this.putLightProjectiveMatrixIfNecessary(gc, e, light, mwi);
+    this.putLightProjectiveMatricesIfNecessary(gc, e, light, mwi);
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -1426,7 +1430,7 @@ public final class KRendererForward implements KRenderer
     this.putLightReuse(e, light);
     this.putTextures(gc, e, i, light);
     KShadingProgramCommon.putMaterial(e, gc, material);
-    this.putLightProjectiveMatrixIfNecessary(gc, e, light, mwi);
+    this.putLightProjectiveMatricesIfNecessary(gc, e, light, mwi);
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
