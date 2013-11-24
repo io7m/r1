@@ -212,13 +212,11 @@ public final class ForwardShaders
         b.append("  parameter material : M.t;\n");
         switch (((ForwardLabelLit) forwardLabel).getLight()) {
           case LIGHT_DIRECTIONAL:
-          case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
           {
             b.append("  parameter light_directional : DL.t;\n");
             break;
           }
           case LIGHT_SPHERICAL:
-          case LIGHT_SPHERICAL_SHADOW_MAPPED:
           {
             b.append("  parameter light_spherical : SL.t;\n");
             break;
@@ -335,9 +333,7 @@ public final class ForwardShaders
   {
     switch (label.getLight()) {
       case LIGHT_DIRECTIONAL:
-      case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
       case LIGHT_SPHERICAL:
-      case LIGHT_SPHERICAL_SHADOW_MAPPED:
       {
         break;
       }
@@ -610,8 +606,6 @@ public final class ForwardShaders
             }
             break;
           }
-          case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
-          case LIGHT_SPHERICAL_SHADOW_MAPPED:
           case LIGHT_PROJECTIVE_SHADOW_MAPPED:
           {
             b.append("  -- XXX: SHADOW MAPPING UNIMPLEMENTED\n");
@@ -669,8 +663,6 @@ public final class ForwardShaders
             }
             break;
           }
-          case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
-          case LIGHT_SPHERICAL_SHADOW_MAPPED:
           case LIGHT_PROJECTIVE_SHADOW_MAPPED:
           {
             b.append("  -- XXX: SHADOW MAPPING UNIMPLEMENTED\n");
@@ -945,7 +937,6 @@ public final class ForwardShaders
   {
     switch (label.getLight()) {
       case LIGHT_DIRECTIONAL:
-      case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
       {
         break;
       }
@@ -956,7 +947,6 @@ public final class ForwardShaders
         break;
       }
       case LIGHT_SPHERICAL:
-      case LIGHT_SPHERICAL_SHADOW_MAPPED:
       {
         break;
       }
@@ -969,7 +959,6 @@ public final class ForwardShaders
   {
     switch (label.getLight()) {
       case LIGHT_DIRECTIONAL:
-      case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
       {
         break;
       }
@@ -980,7 +969,6 @@ public final class ForwardShaders
         break;
       }
       case LIGHT_SPHERICAL:
-      case LIGHT_SPHERICAL_SHADOW_MAPPED:
       {
         break;
       }
@@ -993,7 +981,6 @@ public final class ForwardShaders
   {
     switch (label.getLight()) {
       case LIGHT_DIRECTIONAL:
-      case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
       {
         break;
       }
@@ -1006,7 +993,6 @@ public final class ForwardShaders
         break;
       }
       case LIGHT_SPHERICAL:
-      case LIGHT_SPHERICAL_SHADOW_MAPPED:
       {
         break;
       }
@@ -1019,7 +1005,6 @@ public final class ForwardShaders
   {
     switch (label.getLight()) {
       case LIGHT_DIRECTIONAL:
-      case LIGHT_DIRECTIONAL_SHADOW_MAPPED:
       {
         break;
       }
@@ -1030,7 +1015,6 @@ public final class ForwardShaders
         break;
       }
       case LIGHT_SPHERICAL:
-      case LIGHT_SPHERICAL_SHADOW_MAPPED:
       {
         break;
       }
