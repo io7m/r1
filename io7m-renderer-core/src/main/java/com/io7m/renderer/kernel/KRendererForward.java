@@ -56,6 +56,7 @@ import com.io7m.jlucache.LUCache;
 import com.io7m.jlucache.LUCacheException;
 import com.io7m.jlucache.PCache;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
@@ -261,6 +262,7 @@ public final class KRendererForward implements KRenderer
   {
     return new KRendererForward(g, shader_cache, shadow_cache, log);
   }
+
   private final @Nonnull VectorM4F                                                 background;
   private @CheckForNull Debugging                                                  debug;
   private final @Nonnull JCGLImplementation                                        g;
@@ -271,7 +273,6 @@ public final class KRendererForward implements KRenderer
   private final @Nonnull LUCache<String, ProgramReference, KShaderCacheException>  shader_cache;
   private final @Nonnull PCache<KShadow, KFramebufferDepth, KShadowCacheException> shadow_cache;
   private final @Nonnull Context                                                   transform_context;
-
   private final @Nonnull VectorM2I                                                 viewport_size;
 
   private KRendererForward(
@@ -731,15 +732,16 @@ public final class KRendererForward implements KRenderer
 
         try {
           gc.framebufferDrawBind(output_buffer);
-          gc.cullingEnable(
-            FaceSelection.FACE_BACK,
-            FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+          gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
 
           /**
            * Render all opaque meshes into the depth buffer, without touching
            * the color buffer.
            */
 
+          gc.cullingEnable(
+            FaceSelection.FACE_BACK,
+            FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
           gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
           gc.depthBufferWriteEnable();
           gc.depthBufferClear(1.0f);
@@ -974,23 +976,24 @@ public final class KRendererForward implements KRenderer
       this.m4_view);
     final RMatrixI4x4F<RTransformView> view =
       new RMatrixI4x4F<RTransformView>(this.m4_view);
+
     final KMutableMatrices.WithCamera mwc =
       this.matrices.withObserver(view, projection);
 
-    KRendererForward.makeShadowLabel(this.label_cache, b.getLabel());
-
-    final JCCEExecutionCallable e =
-      new JCCEExecutionCallable(this.shader_cache.luCacheGet(this.label_cache
-        .toString()));
-
-    e.execPrepare(gc);
-    KShadingProgramCommon.putMatrixProjection(
-      e,
-      gc,
-      mwc.getMatrixProjection());
-    e.execCancel();
-
     try {
+      KRendererForward.makeShadowLabel(this.label_cache, b.getLabel());
+
+      final JCCEExecutionCallable e =
+        new JCCEExecutionCallable(
+          this.shader_cache.luCacheGet(this.label_cache.toString()));
+
+      e.execPrepare(gc);
+      KShadingProgramCommon.putMatrixProjection(
+        e,
+        gc,
+        mwc.getMatrixProjection());
+      e.execCancel();
+
       for (final KMeshInstance i : b.getInstances()) {
         final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
         try {
@@ -1115,6 +1118,10 @@ public final class KRendererForward implements KRenderer
               final KFramebufferDepth fb = this.shadow_cache.pcCacheGet(s);
               gc.framebufferDrawBind(fb.kframebufferGetFramebuffer());
               try {
+                final AreaInclusive area = fb.kframebufferGetArea();
+                this.viewport_size.x = (int) area.getRangeX().getInterval();
+                this.viewport_size.y = (int) area.getRangeY().getInterval();
+                gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
                 this.renderShadowMapOpaqueBatch(gc, lp, b);
               } finally {
                 gc.framebufferDrawUnbind();
@@ -1185,7 +1192,8 @@ public final class KRendererForward implements KRenderer
     throws KShadowCacheException,
       ConstraintError,
       LUCacheException,
-      JCGLException
+      JCGLException,
+      KShaderCacheException
   {
     final JCGLInterfaceCommon gc = this.g.getGLCommon();
 
@@ -1197,7 +1205,7 @@ public final class KRendererForward implements KRenderer
      */
 
     gc.cullingDisable();
-    gc.depthBufferTestDisable();
+    gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
     gc.depthBufferWriteEnable();
     gc.colorBufferMask(false, false, false, false);
 
@@ -1229,7 +1237,11 @@ public final class KRendererForward implements KRenderer
               final KFramebufferDepth fb = this.shadow_cache.pcCacheGet(s);
               gc.framebufferDrawBind(fb.kframebufferGetFramebuffer());
               try {
-                this.renderShadowMapTranslucentBatch(gc, lp, s, b);
+                final AreaInclusive area = fb.kframebufferGetArea();
+                this.viewport_size.x = (int) area.getRangeX().getInterval();
+                this.viewport_size.y = (int) area.getRangeY().getInterval();
+                gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
+                this.renderShadowMapTranslucentBatch(gc, lp, b);
               } finally {
                 gc.framebufferDrawUnbind();
               }
@@ -1249,10 +1261,105 @@ public final class KRendererForward implements KRenderer
   private void renderShadowMapTranslucentBatch(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KProjective lp,
-    final @Nonnull KShadow s,
     final @Nonnull KBatchTranslucentShadow b)
+    throws ConstraintError,
+      KShaderCacheException,
+      JCGLException,
+      LUCacheException
   {
+    final RMatrixI4x4F<RTransformProjection> projection = lp.getProjection();
 
+    KMatrices.makeViewMatrix(
+      this.transform_context,
+      lp.getPosition(),
+      lp.getOrientation(),
+      this.m4_view);
+    final RMatrixI4x4F<RTransformView> view =
+      new RMatrixI4x4F<RTransformView>(this.m4_view);
+    final KMutableMatrices.WithCamera mwc =
+      this.matrices.withObserver(view, projection);
+
+    try {
+      for (final KMeshInstance i : b.getInstances()) {
+        final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
+        try {
+          this.renderShadowMapTranslucentMesh(gc, mwi, i);
+        } finally {
+          mwi.instanceFinish();
+        }
+      }
+    } finally {
+      mwc.cameraFinish();
+    }
+  }
+
+  private void renderShadowMapTranslucentMesh(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMutableMatrices.WithInstance mwi,
+    final @Nonnull KMeshInstance i)
+    throws KShaderCacheException,
+      ConstraintError,
+      LUCacheException,
+      JCGLException
+  {
+    final KMeshInstanceShadowMaterialLabel label = i.getShadowMaterialLabel();
+    KRendererForward.makeShadowLabel(this.label_cache, label);
+
+    final JCCEExecutionCallable e =
+      new JCCEExecutionCallable(this.shader_cache.luCacheGet(this.label_cache
+        .toString()));
+
+    final KMesh mesh = i.getMesh();
+    final ArrayBuffer array = mesh.getArrayBuffer();
+    final IndexBuffer indices = mesh.getIndexBuffer();
+
+    try {
+      gc.arrayBufferBind(array);
+
+      e.execPrepare(gc);
+      KShadingProgramCommon.putMatrixProjection(
+        e,
+        gc,
+        mwi.getMatrixProjection());
+      KShadingProgramCommon.bindAttributePosition(gc, e, array);
+      KShadingProgramCommon.putMatrixModelView(
+        e,
+        gc,
+        mwi.getMatrixModelView());
+      KShadingProgramCommon.putMaterial(e, gc, i.getMaterial());
+
+      if (label.impliesUV()) {
+        KShadingProgramCommon.bindAttributeUV(gc, e, array);
+        KShadingProgramCommon.putMatrixUV(gc, e, mwi.getMatrixUV());
+        final List<TextureUnit> units = gc.textureGetUnits();
+        KShadingProgramCommon.bindPutTextureAlbedo(
+          gc,
+          e,
+          i.getMaterial(),
+          units.get(0));
+      }
+
+      e.execSetCallable(new Callable<Void>() {
+        @Override public Void call()
+          throws Exception
+        {
+          try {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+          } catch (final ConstraintError x) {
+            throw new UnreachableCodeException();
+          }
+          return null;
+        }
+      });
+
+      try {
+        e.execRun(gc);
+      } catch (final Exception x) {
+        throw new UnreachableCodeException();
+      }
+    } finally {
+      gc.arrayBufferUnbind();
+    }
   }
 
   private void renderTranslucentMeshes(
