@@ -666,7 +666,8 @@ public abstract class KMutableMatricesContract extends TestContract
     Assert.assertNotNull(mwp.getMatrixModelView());
     Assert.assertNotNull(mwp.getMatrixNormal());
     Assert.assertNotNull(mwp.getMatrixUV());
-    Assert.assertNotNull(mwp.getTextureProjection());
+    Assert.assertNotNull(mwp.getMatrixProjectiveProjection());
+    Assert.assertNotNull(mwp.getMatrixProjectiveModelView());
   }
 
   private static @Nonnull KProjective makeKProjective(
