@@ -46,15 +46,11 @@ public interface KRenderer
 
   /**
    * <p>
-   * Render the batches <code>batches</code> to the renderer's internal
-   * framebuffer.
+   * Render the scene <code>scene</code> to the given framebuffer.
    * </p>
    * 
-   * @see #rendererFramebufferGet()
    * @throws ConstraintError
-   *           Iff
-   *           <code>result == null || scene == null || framebuffer == null</code>
-   *           .
+   *           Iff <code>scene == null || framebuffer == null</code> .
    * @throws JCGLCompileException
    *           Iff a shader cannot be compiled.
    * @throws JCGLUnsupportedException

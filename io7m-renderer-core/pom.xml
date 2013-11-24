@@ -64,6 +64,12 @@
       <version>${project.version}</version>
       <classifier>shaders</classifier>
       <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.parasol.compiler.frontend</groupId>
+          <artifactId>io7m-parasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.io7m.jtensors</groupId>
