@@ -48,7 +48,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       if (this == obj) {
         return true;
       }
-      if (obj == null) {
+      if (!super.equals(obj)) {
         return false;
       }
       if (this.getClass() != obj.getClass()) {
@@ -69,7 +69,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     @Override public int hashCode()
     {
       final int prime = 31;
-      int result = 1;
+      int result = super.hashCode();
       result = (prime * result) + this.size_exponent;
       return result;
     }
@@ -108,13 +108,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
       if (this == obj) {
         return true;
       }
-      if (obj == null) {
+      if (!super.equals(obj)) {
         return false;
       }
       if (this.getClass() != obj.getClass()) {
         return false;
       }
-      final KShadowMappedBasic other = (KShadowMappedBasic) obj;
+      final KShadowMappedFiltered other = (KShadowMappedFiltered) obj;
       if (this.size_exponent != other.size_exponent) {
         return false;
       }
@@ -129,7 +129,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     @Override public int hashCode()
     {
       final int prime = 31;
-      int result = 1;
+      int result = super.hashCode();
       result = (prime * result) + this.size_exponent;
       return result;
     }
@@ -195,6 +195,28 @@ import com.io7m.jaux.Constraints.ConstraintError;
     this.type = Constraints.constrainNotNull(type, "Type");
   }
 
+  @Override public boolean equals(
+    final Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KShadow other = (KShadow) obj;
+    if (!this.light_id.equals(other.light_id)) {
+      return false;
+    }
+    if (this.type != other.type) {
+      return false;
+    }
+    return true;
+  }
+
   public @Nonnull Integer getLightID()
   {
     return this.light_id;
@@ -203,5 +225,14 @@ import com.io7m.jaux.Constraints.ConstraintError;
   public @Nonnull Type getType()
   {
     return this.type;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.light_id.hashCode();
+    result = (prime * result) + this.type.hashCode();
+    return result;
   }
 }
