@@ -1114,7 +1114,7 @@ public final class KRendererForward implements KRenderer
      */
 
     gc.cullingEnable(
-      FaceSelection.FACE_BACK,
+      FaceSelection.FACE_FRONT,
       FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
     gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
     gc.depthBufferWriteEnable();
