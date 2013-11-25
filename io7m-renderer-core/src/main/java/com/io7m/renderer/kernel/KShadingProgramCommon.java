@@ -32,6 +32,7 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionAPI;
@@ -195,6 +196,18 @@ final class KShadingProgramCommon
   {
     gc.texture2DStaticBind(texture_unit, light.getTexture());
     KShadingProgramCommon.putTextureProjection(exec, gc, texture_unit);
+  }
+
+  static void bindPutTextureShadowMap(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull Texture2DStaticUsable texture,
+    final @Nonnull TextureUnit texture_unit)
+    throws ConstraintError,
+      JCGLException
+  {
+    gc.texture2DStaticBind(texture_unit, texture);
+    KShadingProgramCommon.putTextureShadowMap(exec, gc, texture_unit);
   }
 
   static void bindPutTextureSpecular(
@@ -1119,24 +1132,6 @@ final class KShadingProgramCommon
     exec.execUniformUseExisting("m_projection");
   }
 
-  static void putMatrixProjectiveProjection(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCCEExecutionAPI exec,
-    final @Nonnull RMatrixReadable4x4F<RTransformProjectiveProjection> m)
-    throws JCGLException,
-      ConstraintError
-  {
-    exec.execUniformPutMatrix4x4F(gc, "m_projective_projection", m);
-  }
-
-  static void putMatrixProjectiveProjectionReuse(
-    final @Nonnull JCCEExecutionAPI exec)
-    throws JCGLException,
-      ConstraintError
-  {
-    exec.execUniformUseExisting("m_projective_projection");
-  }
-
   static void putMatrixProjectiveModelView(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI exec,
@@ -1153,6 +1148,24 @@ final class KShadingProgramCommon
       ConstraintError
   {
     exec.execUniformUseExisting("m_projective_modelview");
+  }
+
+  static void putMatrixProjectiveProjection(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull RMatrixReadable4x4F<RTransformProjectiveProjection> m)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutMatrix4x4F(gc, "m_projective_projection", m);
+  }
+
+  static void putMatrixProjectiveProjectionReuse(
+    final @Nonnull JCCEExecutionAPI exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformUseExisting("m_projective_projection");
   }
 
   static void putMatrixUV(
@@ -1215,6 +1228,16 @@ final class KShadingProgramCommon
     exec.execUniformPutTextureUnit(gc, "t_projection", unit);
   }
 
+  static void putTextureShadowMap(
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull TextureUnit unit)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutTextureUnit(gc, "t_shadow", unit);
+  }
+
   static void putTextureSpecular(
     final @Nonnull JCCEExecutionAPI exec,
     final @Nonnull JCGLInterfaceCommon gc,
@@ -1250,4 +1273,5 @@ final class KShadingProgramCommon
       throw new UnreachableCodeException();
     }
   }
+
 }

@@ -451,7 +451,9 @@ public final class KRendererForward implements KRenderer
     final @Nonnull KMeshInstance i,
     final @CheckForNull KLight light)
     throws JCGLException,
-      ConstraintError
+      ConstraintError,
+      KShadowCacheException,
+      LUCacheException
   {
     final KMaterial material = i.getMaterial();
     final KMeshInstanceForwardMaterialLabel label =
@@ -551,12 +553,44 @@ public final class KRendererForward implements KRenderer
         }
         case LIGHT_PROJECTIVE:
         {
+          final KProjective kp = (KProjective) light;
+
           KShadingProgramCommon.bindPutTextureProjection(
             gc,
             e,
-            (KProjective) light,
+            kp,
             units.get(current_unit));
           ++current_unit;
+
+          switch (kp.getShadow().type) {
+            case OPTION_NONE:
+            {
+              break;
+            }
+            case OPTION_SOME:
+            {
+              final KShadow ks =
+                ((Option.Some<KShadow>) kp.getShadow()).value;
+
+              switch (ks.getType()) {
+                case SHADOW_MAPPED_BASIC:
+                case SHADOW_MAPPED_FILTERED:
+                {
+                  assert this.shadow_cache.luCacheIsCached(ks);
+                  final KFramebufferDepth fb =
+                    this.shadow_cache.pcCacheGet(ks);
+                  KShadingProgramCommon.bindPutTextureShadowMap(
+                    gc,
+                    e,
+                    fb.kframebufferGetDepthTexture(),
+                    units.get(current_unit));
+                  ++current_unit;
+                  break;
+                }
+              }
+              break;
+            }
+          }
           break;
         }
         case LIGHT_SPHERE:
@@ -768,6 +802,8 @@ public final class KRendererForward implements KRenderer
           KRendererForward.handleShaderCacheException(e);
         } catch (final LUCacheException e) {
           throw new UnreachableCodeException(e);
+        } catch (final KShadowCacheException e) {
+          KRendererForward.handleShadowCacheException(e);
         } finally {
           gc.framebufferDrawUnbind();
         }
@@ -794,7 +830,8 @@ public final class KRendererForward implements KRenderer
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
-      JCGLException
+      JCGLException,
+      KShadowCacheException
   {
     final KBatches batches = scene.getBatches();
     final Map<KLight, List<KBatchOpaqueLit>> lit_by_light =
@@ -870,7 +907,9 @@ public final class KRendererForward implements KRenderer
     final @Nonnull KMeshInstance i,
     final @Nonnull KMutableMatrices.WithInstance mwi)
     throws ConstraintError,
-      JCGLException
+      JCGLException,
+      KShadowCacheException,
+      LUCacheException
   {
     final KMeshInstanceForwardMaterialLabel label =
       i.getForwardMaterialLabel();
@@ -1361,7 +1400,8 @@ public final class KRendererForward implements KRenderer
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
-      JCGLException
+      JCGLException,
+      KShadowCacheException
   {
     final KBatches batches = scene.getBatches();
 
@@ -1419,7 +1459,9 @@ public final class KRendererForward implements KRenderer
     final @Nonnull KMeshInstance i,
     final @Nonnull KMutableMatrices.WithInstance mwi)
     throws ConstraintError,
-      JCGLException
+      JCGLException,
+      KShadowCacheException,
+      LUCacheException
   {
     final KMeshInstanceForwardMaterialLabel label =
       i.getForwardMaterialLabel();
