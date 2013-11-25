@@ -132,8 +132,8 @@ import com.io7m.jcanephora.TextureWrapT;
               height,
               TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
               TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-              TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
+              TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+              TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
           }
           case OPTION_NONE:
             break;
@@ -153,8 +153,8 @@ import com.io7m.jcanephora.TextureWrapT;
               height,
               TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
               TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-              TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
+              TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+              TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
           }
           case OPTION_NONE:
             break;
@@ -189,8 +189,8 @@ import com.io7m.jcanephora.TextureWrapT;
               height,
               TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
               TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-              TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
+              TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+              TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
           }
           case OPTION_NONE:
             break;
