@@ -180,11 +180,6 @@ import com.io7m.renderer.RVectorReadable3F;
               c = "LPSM";
               break;
             }
-            case SHADOW_MAPPED_FILTERED:
-            {
-              c = "LPSM";
-              break;
-            }
           }
         }
       }

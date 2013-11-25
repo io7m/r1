@@ -46,11 +46,6 @@ public final class SBLightShadowDescriptionGenerator implements
           return SBLightShadowDescription.newShadowMappedBasic(this.size_gen
             .nextInt());
         }
-        case SHADOW_MAPPED_FILTERED:
-        {
-          return SBLightShadowDescription.newShadowMappedBasic(this.size_gen
-            .nextInt());
-        }
       }
     } catch (final ConstraintError x) {
       throw new UnreachableCodeException(x);
