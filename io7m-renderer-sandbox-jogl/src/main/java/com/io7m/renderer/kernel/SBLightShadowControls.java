@@ -252,12 +252,6 @@ public final class SBLightShadowControls implements IHideable
         this.mapped_filtered_controls.getRowGroup().hide();
         break;
       }
-      case SHADOW_MAPPED_FILTERED:
-      {
-        this.mapped_basic_controls.getRowGroup().hide();
-        this.mapped_filtered_controls.getRowGroup().forceShow();
-        break;
-      }
     }
 
     this.parent.pack();
@@ -272,11 +266,6 @@ public final class SBLightShadowControls implements IHideable
         {
           return new Option.Some<SBLightShadowDescription>(
             this.mapped_basic_controls.getShadow());
-        }
-        case SHADOW_MAPPED_FILTERED:
-        {
-          return new Option.Some<SBLightShadowDescription>(
-            this.mapped_filtered_controls.getShadow());
         }
       }
     } else {
@@ -308,12 +297,6 @@ public final class SBLightShadowControls implements IHideable
           case SHADOW_MAPPED_BASIC:
           {
             this.mapped_basic_controls
-              .setDescription((SBLightShadowMappedBasicDescription) d);
-            break;
-          }
-          case SHADOW_MAPPED_FILTERED:
-          {
-            this.mapped_filtered_controls
               .setDescription((SBLightShadowMappedBasicDescription) d);
             break;
           }

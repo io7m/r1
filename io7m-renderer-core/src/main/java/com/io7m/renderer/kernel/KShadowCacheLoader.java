@@ -99,10 +99,6 @@ final class KShadowCacheLoader implements
             }
             return KFramebufferCommon.newDepthFramebuffer(this.gi, area);
           }
-          case SHADOW_MAPPED_FILTERED:
-          {
-            throw new UnreachableCodeException();
-          }
         }
 
         throw new UnreachableCodeException();

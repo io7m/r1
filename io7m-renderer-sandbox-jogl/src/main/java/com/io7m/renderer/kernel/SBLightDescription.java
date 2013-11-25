@@ -275,15 +275,6 @@ abstract class SBLightDescription
               kshadow = Option.some(ks);
               break;
             }
-            case SHADOW_MAPPED_FILTERED:
-            {
-              final SBLightShadowMappedBasicDescription smb =
-                (SBLightShadowDescription.SBLightShadowMappedBasicDescription) s;
-              final KShadow ks =
-                KShadow.newMappedBasic(this.getID(), smb.getSize());
-              kshadow = Option.some(ks);
-              break;
-            }
           }
           break;
         }
