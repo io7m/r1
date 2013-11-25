@@ -18,7 +18,8 @@ package com.io7m.renderer;
 
 --
 -- Projective lighting functions. All calculations are assumed to take
--- place in eye-space (where the observer is always at (0, 0, 0)).
+-- place in eye-space (where the observer is always at (0, 0, 0)) unless
+-- otherwise indicated.
 --
 
 module ProjectiveLight is
@@ -30,6 +31,7 @@ module ProjectiveLight is
 
   import com.io7m.renderer.Materials      as M;
   import com.io7m.renderer.SphericalLight as SL;
+  import com.io7m.renderer.Transform      as T;
 
   type t is record
     colour    : vector_3f,
@@ -53,20 +55,37 @@ module ProjectiveLight is
     if F.lesser (u [w], 0.0) then
       new vector_4f (0.0, 0.0, 0.0, 1.0)
     else
+      S2.texture (t, T.clip_to_texture (u) [x y])
+    end;
+
+  --
+  -- Given a shadow map [t_shadow], and clip-coordinates [p], return
+  -- the amount of light that could be reaching the current point (where
+  -- 0.0 is fully shadowed and 1.0 is fully lit).
+  --
+
+  value shadow_epsilon = 0.0005;
+
+  function shadow_factor (
+    t_shadow : sampler_2d,
+    p        : vector_4f
+  ) : float =
+    if F.lesser (p [w], 0.0) then
+      0.0
+    else
       let
-        -- Perform division-by-w to get coordinates into normalized-device space.
-        value u_divided =
-          new vector_2f (
-            F.divide (u [x], u [w]),
-            F.divide (u [y], u [w])
-          );
-        -- Scale and translate coordinates to get them into the range [0, 1] from [-1, 1].
-        value u_added =
-          V2.add_scalar (u_divided, 1.0);
-        value u_scaled =
-          V2.multiply_scalar (u_added, 0.5);
+        value current_tex =
+          T.clip_to_texture (p);
+        value map_depth =
+          S2.texture (t_shadow, current_tex [x y]) [x];
+        value map_depth_adjusted =
+          F.add (map_depth, shadow_epsilon);
       in
-        S2.texture (t, u_scaled)
+        if F.lesser (current_tex [z], map_depth_adjusted) then
+          1.0
+        else
+          0.2
+        end
       end
     end;
 
@@ -223,12 +242,14 @@ module ProjectiveLight is
   ) : vector_3f =
     let
       value d   = SL.directions (light.position, p, n);
+      value sf  = shadow_factor (t_shadow, p_light_clip);
       value a   = SL.attenuation (light.range, light.falloff, d.distance);
+      value sa  = F.multiply (sf, a);
       value tx  = light_texel (t_light, p_light_clip);
       value lc  = V3.multiply (light.colour, tx [x y z]);
       value c   = diffuse_colour (light, d, lc, 0.0);
     in
-      V3.multiply_scalar (c, a)
+      V3.multiply_scalar (c, sa)
     end;
 
   --
