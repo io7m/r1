@@ -445,7 +445,7 @@ public final class KRendererForward implements KRenderer
     }
   }
 
-  @SuppressWarnings("static-method") private void putTextures(
+  private void putTextures(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionCallable e,
     final @Nonnull KMeshInstance i,
