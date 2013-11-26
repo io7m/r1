@@ -90,6 +90,7 @@ import com.io7m.jcanephora.TextureWrapT;
 
       try {
         g.framebufferDrawAttachDepthTexture2D(fb, texture);
+        KFramebufferBasicDepth.noDrawBuffer(gi, fb);
 
         final FramebufferStatus status = g.framebufferDrawValidate(fb);
         switch (status) {
@@ -110,6 +111,82 @@ import com.io7m.jcanephora.TextureWrapT;
       }
 
       return new KFramebufferBasicDepth(size, fb, texture);
+    }
+
+    private static void noDrawBuffer(
+      final @Nonnull JCGLImplementation gi,
+      final @Nonnull FramebufferReference fb)
+      throws JCGLException,
+        ConstraintError
+    {
+      {
+        final Option<JCGLInterfaceGL3> o = gi.getGL3();
+        switch (o.type) {
+          case OPTION_SOME:
+          {
+            final JCGLInterfaceGL3 g =
+              ((Option.Some<JCGLInterfaceGL3>) o).value;
+            g
+              .framebufferDrawSetBuffers(
+                fb,
+                new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>());
+            break;
+          }
+          case OPTION_NONE:
+            break;
+        }
+      }
+
+      {
+        final Option<JCGLInterfaceGLES3> o = gi.getGLES3();
+        switch (o.type) {
+          case OPTION_SOME:
+          {
+            final JCGLInterfaceGLES3 g =
+              ((Option.Some<JCGLInterfaceGLES3>) o).value;
+            g
+              .framebufferDrawSetBuffers(
+                fb,
+                new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>());
+            break;
+          }
+          case OPTION_NONE:
+            break;
+        }
+      }
+
+      {
+        final Option<JCGLInterfaceGL2> o = gi.getGL2();
+        switch (o.type) {
+          case OPTION_SOME:
+          {
+            final JCGLInterfaceGL2 g =
+              ((Option.Some<JCGLInterfaceGL2>) o).value;
+            g
+              .framebufferDrawSetBuffers(
+                fb,
+                new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>());
+            break;
+          }
+          case OPTION_NONE:
+            break;
+        }
+      }
+
+      {
+        final Option<JCGLInterfaceGLES2> o = gi.getGLES2();
+        switch (o.type) {
+          case OPTION_SOME:
+          {
+            final JCGLInterfaceGLES2 g =
+              ((Option.Some<JCGLInterfaceGLES2>) o).value;
+
+            throw new UnimplementedCodeException();
+          }
+          case OPTION_NONE:
+            break;
+        }
+      }
     }
 
     private static @Nonnull Texture2DStatic newDepthTexture(
@@ -230,91 +307,6 @@ import com.io7m.jcanephora.TextureWrapT;
     @Override public AreaInclusive kframebufferGetArea()
     {
       return this.area;
-    }
-
-    @Override public Texture2DStaticUsable kframebufferGetDepthTexture()
-    {
-      return this.depth;
-    }
-
-    @Override public FramebufferReferenceUsable kframebufferGetFramebuffer()
-    {
-      return this.framebuffer;
-    }
-
-    @Override public boolean resourceIsDeleted()
-    {
-      return this.deleted;
-    }
-  }
-
-  private static final class KFramebufferBasicDepthWithTexture implements
-    KFramebufferDepth
-  {
-    static @Nonnull KFramebufferDepth newDepthWithTexture(
-      final @Nonnull JCGLImplementation gi,
-      final @Nonnull Texture2DStaticUsable texture)
-      throws ConstraintError,
-        JCGLUnsupportedException,
-        JCGLException
-    {
-      Constraints.constrainNotNull(gi, "GL implementation");
-      Constraints.constrainNotNull(texture, "Texture");
-
-      final JCGLInterfaceCommon g = gi.getGLCommon();
-      final FramebufferReference fb = g.framebufferAllocate();
-      g.framebufferDrawBind(fb);
-
-      try {
-        g.framebufferDrawAttachDepthTexture2D(fb, texture);
-
-        final FramebufferStatus status = g.framebufferDrawValidate(fb);
-        switch (status) {
-          case FRAMEBUFFER_STATUS_COMPLETE:
-            break;
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
-          case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
-          case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
-          case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
-            throw new JCGLUnsupportedException(
-              "Could not initialize framebuffer: " + status);
-        }
-
-      } finally {
-        g.framebufferDrawUnbind();
-      }
-
-      return new KFramebufferBasicDepthWithTexture(fb, texture);
-    }
-
-    private boolean                              deleted;
-    private final @Nonnull Texture2DStaticUsable depth;
-    private final @Nonnull FramebufferReference  framebuffer;
-
-    private KFramebufferBasicDepthWithTexture(
-      final @Nonnull FramebufferReference fb,
-      final @Nonnull Texture2DStaticUsable depth)
-    {
-      this.framebuffer = fb;
-      this.depth = depth;
-      this.deleted = false;
-    }
-
-    @Override public void kframebufferDelete(
-      final JCGLImplementation g)
-      throws JCGLException,
-        ConstraintError
-    {
-      final JCGLInterfaceCommon gc = g.getGLCommon();
-      gc.framebufferDelete(this.framebuffer);
-      this.deleted = true;
-    }
-
-    @Override public AreaInclusive kframebufferGetArea()
-    {
-      return this.depth.getArea();
     }
 
     @Override public Texture2DStaticUsable kframebufferGetDepthTexture()
@@ -757,15 +749,5 @@ import com.io7m.jcanephora.TextureWrapT;
       ConstraintError
   {
     return KFramebufferBasicDepth.newDepth(gi, size);
-  }
-
-  public static @Nonnull KFramebufferDepth newDepthFramebufferWithTexture(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull Texture2DStaticUsable texture)
-    throws JCGLUnsupportedException,
-      JCGLException,
-      ConstraintError
-  {
-    return KFramebufferBasicDepthWithTexture.newDepthWithTexture(gi, texture);
   }
 }
