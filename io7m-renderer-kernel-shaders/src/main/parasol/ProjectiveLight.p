@@ -42,6 +42,16 @@ module ProjectiveLight is
   end;
 
   --
+  -- Parameters for basic shadow mapping.
+  --
+
+  type basic is record
+    shadow_epsilon    : float,
+    shadow_factor_min : float,
+    shadow_factor_max : float
+  end;
+
+  --
   -- Sample a texel from the given texture [t], given clip-space 
   -- coordinates [u]. If [u [w]] is not greater than 0.0, then
   -- the coordinate is behind the viewer (the light) and so no lighting
@@ -67,6 +77,7 @@ module ProjectiveLight is
   value shadow_epsilon = 0.0005;
 
   function shadow_factor (
+    config   : basic,
     t_shadow : sampler_2d,
     p        : vector_4f
   ) : float =
@@ -79,12 +90,12 @@ module ProjectiveLight is
         value map_depth =
           S2.texture (t_shadow, current_tex [x y]) [x];
         value map_depth_adjusted =
-          F.add (map_depth, shadow_epsilon);
+          F.add (map_depth, config.shadow_epsilon);
       in
         if F.lesser (current_tex [z], map_depth_adjusted) then
-          1.0
+          config.shadow_factor_max
         else
-          0.2
+          config.shadow_factor_min
         end
       end
     end;
@@ -238,11 +249,12 @@ module ProjectiveLight is
     p            : vector_3f,
     t_light      : sampler_2d,
     p_light_clip : vector_4f,
-    t_shadow     : sampler_2d
+    t_shadow     : sampler_2d,
+    config       : basic
   ) : vector_3f =
     let
       value d   = SL.directions (light.position, p, n);
-      value sf  = shadow_factor (t_shadow, p_light_clip);
+      value sf  = shadow_factor (config, t_shadow, p_light_clip);
       value a   = SL.attenuation (light.range, light.falloff, d.distance);
       value sa  = F.multiply (sf, a);
       value tx  = light_texel (t_light, p_light_clip);

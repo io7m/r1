@@ -177,7 +177,7 @@ import com.io7m.renderer.RVectorReadable3F;
           switch (ks.getType()) {
             case SHADOW_MAPPED_BASIC:
             {
-              c = "LPSM";
+              c = "LPSMB";
               break;
             }
           }
