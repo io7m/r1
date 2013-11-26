@@ -42,13 +42,20 @@ public final class SBLightShadowControls implements IHideable
   private static final class SBLightShadowMappedBasicControls
   {
     private final @Nonnull RowGroup         row_group;
-    private final @Nonnull SBIntegerHSlider slider;
+    private final @Nonnull SBIntegerHSlider size;
+    private final @Nonnull SBFloatHSlider   epsilon;
+    private final @Nonnull SBFloatHSlider   factor_maximum;
+    private final @Nonnull SBFloatHSlider   factor_minimum;
 
     private SBLightShadowMappedBasicControls()
       throws ConstraintError
     {
-      this.slider = new SBIntegerHSlider("Size", 1, 10);
+      this.size = new SBIntegerHSlider("Size", 1, 10);
+      this.epsilon = new SBFloatHSlider("Epsilon", 0.0f, 0.001f);
+      this.factor_maximum = new SBFloatHSlider("Maximum", 0.0f, 1.0f);
+      this.factor_minimum = new SBFloatHSlider("Minimum", 0.0f, 1.0f);
       this.row_group = new RowGroup();
+      this.epsilon.setCurrent(0.0005f);
     }
 
     public void addToLayout(
@@ -57,9 +64,27 @@ public final class SBLightShadowControls implements IHideable
       layout
         .row()
         .group(this.row_group)
-        .grid(this.slider.getLabel())
-        .add(this.slider.getSlider(), 3)
-        .add(this.slider.getField());
+        .grid(this.size.getLabel())
+        .add(this.size.getSlider(), 3)
+        .add(this.size.getField());
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(this.epsilon.getLabel())
+        .add(this.epsilon.getSlider(), 3)
+        .add(this.epsilon.getField());
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(this.factor_maximum.getLabel())
+        .add(this.factor_maximum.getSlider(), 3)
+        .add(this.factor_maximum.getField());
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(this.factor_minimum.getLabel())
+        .add(this.factor_minimum.getSlider(), 3)
+        .add(this.factor_minimum.getField());
     }
 
     public @Nonnull RowGroup getRowGroup()
@@ -70,62 +95,20 @@ public final class SBLightShadowControls implements IHideable
     public @Nonnull SBLightShadowMappedBasicDescription getShadow()
       throws ConstraintError
     {
-      return SBLightShadowDescription.newShadowMappedBasic(this.slider
-        .getCurrent());
-    }
-
-    private void loadFrom(
-      final @Nonnull SBLightShadowMappedBasicDescription desc)
-    {
-      this.slider.setCurrent(desc.getSize());
+      return SBLightShadowDescription.newShadowMappedBasic(
+        this.size.getCurrent(),
+        this.epsilon.getCurrent(),
+        this.factor_maximum.getCurrent(),
+        this.factor_minimum.getCurrent());
     }
 
     public void setDescription(
       final SBLightShadowMappedBasicDescription smb)
     {
-      this.slider.setCurrent(smb.getSize());
-    }
-  }
-
-  private static final class SBLightShadowMappedFilteredControls
-  {
-    private final @Nonnull RowGroup         row_group;
-    private final @Nonnull SBIntegerHSlider slider;
-
-    private SBLightShadowMappedFilteredControls()
-      throws ConstraintError
-    {
-      this.slider = new SBIntegerHSlider("Size", 1, 10);
-      this.row_group = new RowGroup();
-    }
-
-    public void addToLayout(
-      final @Nonnull DesignGridLayout layout)
-    {
-      layout
-        .row()
-        .group(this.row_group)
-        .grid(this.slider.getLabel())
-        .add(this.slider.getSlider(), 3)
-        .add(this.slider.getField());
-    }
-
-    public @Nonnull RowGroup getRowGroup()
-    {
-      return this.row_group;
-    }
-
-    public @Nonnull SBLightShadowMappedBasicDescription getShadow()
-      throws ConstraintError
-    {
-      return SBLightShadowDescription.newShadowMappedBasic(this.slider
-        .getCurrent());
-    }
-
-    void setDescription(
-      final @Nonnull SBLightShadowMappedBasicDescription desc)
-    {
-      this.slider.setCurrent(desc.getSize());
+      this.size.setCurrent(smb.getSize());
+      this.epsilon.setCurrent(smb.getEpsilon());
+      this.factor_maximum.setCurrent(smb.getFactorMaximum());
+      this.factor_minimum.setCurrent(smb.getFactorMinimum());
     }
   }
 
@@ -158,12 +141,11 @@ public final class SBLightShadowControls implements IHideable
     return new SBLightShadowControls(parent);
   }
 
-  private final @Nonnull SBLightShadowMappedBasicControls    mapped_basic_controls;
-  private final @Nonnull SBLightShadowMappedFilteredControls mapped_filtered_controls;
-  private final @Nonnull JCheckBox                           shadow;
-  private final @Nonnull SBLightShadowTypeSelector           type_select;
-  private final @Nonnull JFrame                              parent;
-  private final @Nonnull RowGroup                            group;
+  private final @Nonnull SBLightShadowMappedBasicControls mapped_basic_controls;
+  private final @Nonnull JCheckBox                        shadow;
+  private final @Nonnull SBLightShadowTypeSelector        type_select;
+  private final @Nonnull JFrame                           parent;
+  private final @Nonnull RowGroup                         group;
 
   @SuppressWarnings("synthetic-access") private SBLightShadowControls(
     final @Nonnull JFrame parent)
@@ -173,7 +155,6 @@ public final class SBLightShadowControls implements IHideable
 
     this.group = new RowGroup();
     this.mapped_basic_controls = new SBLightShadowMappedBasicControls();
-    this.mapped_filtered_controls = new SBLightShadowMappedFilteredControls();
 
     this.shadow = new JCheckBox("Shadow");
     this.shadow.setSelected(false);
@@ -220,7 +201,6 @@ public final class SBLightShadowControls implements IHideable
 
     layout.emptyRow();
     this.mapped_basic_controls.addToLayout(layout);
-    this.mapped_filtered_controls.addToLayout(layout);
     this.controlsDisableSelector();
   }
 
@@ -228,7 +208,6 @@ public final class SBLightShadowControls implements IHideable
   {
     this.type_select.setEnabled(false);
     this.mapped_basic_controls.getRowGroup().hide();
-    this.mapped_filtered_controls.getRowGroup().hide();
     this.parent.pack();
   }
 
@@ -243,13 +222,11 @@ public final class SBLightShadowControls implements IHideable
     final @Nonnull Type type)
   {
     this.mapped_basic_controls.getRowGroup().forceShow();
-    this.mapped_filtered_controls.getRowGroup().forceShow();
 
     switch (type) {
       case SHADOW_MAPPED_BASIC:
       {
         this.mapped_basic_controls.getRowGroup().forceShow();
-        this.mapped_filtered_controls.getRowGroup().hide();
         break;
       }
     }

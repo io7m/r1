@@ -26,11 +26,17 @@ import com.io7m.jaux.Constraints.ConstraintError;
 {
   @Immutable final static class KShadowMappedBasic extends KShadow
   {
-    private final int size_exponent;
+    private final float epsilon;
+    private final float factor_max;
+    private final float factor_min;
+    private final int   size_exponent;
 
     @SuppressWarnings("synthetic-access") private KShadowMappedBasic(
       final @Nonnull Integer light_id,
-      final int size_exponent)
+      final int size_exponent,
+      final float epsilon,
+      final float factor_max,
+      final float factor_min)
       throws ConstraintError
     {
       super(Type.SHADOW_MAPPED_BASIC, light_id);
@@ -40,6 +46,9 @@ import com.io7m.jaux.Constraints.ConstraintError;
           1,
           Integer.MAX_VALUE,
           "Shadow size exponent");
+      this.epsilon = epsilon;
+      this.factor_max = factor_max;
+      this.factor_min = factor_min;
     }
 
     @Override public boolean equals(
@@ -55,10 +64,37 @@ import com.io7m.jaux.Constraints.ConstraintError;
         return false;
       }
       final KShadowMappedBasic other = (KShadowMappedBasic) obj;
+      if (Float.floatToIntBits(this.epsilon) != Float
+        .floatToIntBits(other.epsilon)) {
+        return false;
+      }
+      if (Float.floatToIntBits(this.factor_max) != Float
+        .floatToIntBits(other.factor_max)) {
+        return false;
+      }
+      if (Float.floatToIntBits(this.factor_min) != Float
+        .floatToIntBits(other.factor_min)) {
+        return false;
+      }
       if (this.size_exponent != other.size_exponent) {
         return false;
       }
       return true;
+    }
+
+    public float getEpsilon()
+    {
+      return this.epsilon;
+    }
+
+    public float getFactorMaximum()
+    {
+      return this.factor_max;
+    }
+
+    public float getFactorMinimum()
+    {
+      return this.factor_min;
     }
 
     public int getSizeExponent()
@@ -70,6 +106,9 @@ import com.io7m.jaux.Constraints.ConstraintError;
     {
       final int prime = 31;
       int result = super.hashCode();
+      result = (prime * result) + Float.floatToIntBits(this.epsilon);
+      result = (prime * result) + Float.floatToIntBits(this.factor_max);
+      result = (prime * result) + Float.floatToIntBits(this.factor_min);
       result = (prime * result) + this.size_exponent;
       return result;
     }
@@ -79,6 +118,12 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final StringBuilder builder = new StringBuilder();
       builder.append("[KShadowMappedBasic size_exponent=");
       builder.append(this.size_exponent);
+      builder.append(" epsilon=");
+      builder.append(this.epsilon);
+      builder.append(" factor_max=");
+      builder.append(this.factor_max);
+      builder.append(" factor_min=");
+      builder.append(this.factor_min);
       builder.append("]");
       return builder.toString();
     }
@@ -106,10 +151,18 @@ import com.io7m.jaux.Constraints.ConstraintError;
     KShadowMappedBasic
     newMappedBasic(
       final @Nonnull Integer light_id,
-      final int size_exponent)
+      final int size_exponent,
+      final @KSuggestedRangeF(upper = 0.001f, lower = 0.0001f) float epsilon,
+      final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float factor_max,
+      final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float factor_min)
       throws ConstraintError
   {
-    return new KShadowMappedBasic(light_id, size_exponent);
+    return new KShadowMappedBasic(
+      light_id,
+      size_exponent,
+      epsilon,
+      factor_max,
+      factor_min);
   }
 
   private final @Nonnull Integer light_id;

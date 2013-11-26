@@ -24,12 +24,65 @@ import com.io7m.renderer.kernel_shaders.ForwardLabels.ForwardLabelLit;
 
 public final class ForwardShaders
 {
-  private static void fragmentShaderStandardIO(
-    final @Nonnull StringBuilder b)
+  private static void fragmentShaderAttributesLight(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabelLit label)
   {
-    b.append("  in f_position_eye : vector_4f;\n");
-    b.append("  out out_0         : vector_4f as 0;\n");
+    switch (label.getLight()) {
+      case LIGHT_DIRECTIONAL:
+      case LIGHT_SPHERICAL:
+      {
+        break;
+      }
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
+      {
+        b.append("  in f_position_light_eye  : vector_4f;\n");
+        b.append("  in f_position_light_clip : vector_4f;\n");
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      {
+        b.append("  in f_position_light_clip : vector_4f;\n");
+        break;
+      }
+    }
+  }
+
+  private static void fragmentShaderAttributesNormal(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabelLit label)
+  {
+    switch (label.getNormals()) {
+      case NORMALS_MAPPED:
+      {
+        b.append("  -- Mapped normal attributes\n");
+        b.append("  in f_normal_model : vector_3f;\n");
+        b.append("  in f_tangent      : vector_3f;\n");
+        b.append("  in f_bitangent    : vector_3f;\n");
+        break;
+      }
+      case NORMALS_NONE:
+      {
+        throw new UnreachableCodeException();
+      }
+      case NORMALS_VERTEX:
+      {
+        b.append("  -- Vertex normal attributes\n");
+        b.append("  in f_normal_eye : vector_3f;\n");
+        break;
+      }
+    }
+
     b.append("\n");
+  }
+
+  private static void fragmentShaderAttributesUV(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabel forwardLabel)
+  {
+    if (forwardLabel.impliesUV()) {
+      b.append("  in f_uv : vector_2f;\n");
+    }
   }
 
   private static void fragmentShaderParametersAlbedo(
@@ -44,6 +97,69 @@ public final class ForwardShaders
       case ALBEDO_TEXTURED:
       {
         b.append("  parameter t_albedo : sampler_2d;\n");
+        break;
+      }
+    }
+  }
+
+  private static void fragmentShaderParametersEmissive(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabel forwardLabel)
+  {
+    switch (forwardLabel.getEmissive()) {
+      case EMISSIVE_CONSTANT:
+      case EMISSIVE_NONE:
+        break;
+      case EMISSIVE_MAPPED:
+        b.append("  parameter t_emissive : sampler_2d;\n");
+        break;
+    }
+  }
+
+  private static void fragmentShaderParametersEnvironment(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabelLit label)
+  {
+    switch (label.getEnvironment()) {
+      case ENVIRONMENT_NONE:
+      {
+        break;
+      }
+      case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_MAPPED:
+      case ENVIRONMENT_REFRACTIVE:
+      case ENVIRONMENT_REFRACTIVE_MAPPED:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+      case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+      {
+        b.append("  -- Environment mapping parameters\n");
+        b.append("  parameter t_environment : sampler_cube;\n");
+        b.append("  parameter m_view_inv    : matrix_4x4f;\n");
+        b.append("\n");
+        break;
+      }
+    }
+  }
+
+  private static void fragmentShaderParametersNormal(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabelLit label)
+  {
+    switch (label.getNormals()) {
+      case NORMALS_MAPPED:
+      {
+        b.append("  -- Mapped normal parameters\n");
+        b.append("  parameter m_normal : matrix_3x3f;\n");
+        b.append("  parameter t_normal : sampler_2d;\n");
+        b.append("\n");
+        break;
+      }
+      case NORMALS_NONE:
+      {
+        throw new UnreachableCodeException();
+      }
+      case NORMALS_VERTEX:
+      {
         break;
       }
     }
@@ -88,69 +204,112 @@ public final class ForwardShaders
     }
   }
 
-  private static void fragmentShaderParametersEmissive(
+  private static void fragmentShaderStandardIO(
+    final @Nonnull StringBuilder b)
+  {
+    b.append("  in f_position_eye : vector_4f;\n");
+    b.append("  out out_0         : vector_4f as 0;\n");
+    b.append("\n");
+  }
+
+  private static void fragmentShaderStandardParameters(
     final @Nonnull StringBuilder b,
     final @Nonnull ForwardLabel forwardLabel)
   {
-    switch (forwardLabel.getEmissive()) {
-      case EMISSIVE_CONSTANT:
-      case EMISSIVE_NONE:
-        break;
-      case EMISSIVE_MAPPED:
-        b.append("  parameter t_emissive : sampler_2d;\n");
-        break;
-    }
-  }
-
-  private static void fragmentShaderParametersEnvironment(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabelLit label)
-  {
-    switch (label.getEnvironment()) {
-      case ENVIRONMENT_NONE:
+    switch (forwardLabel.getType()) {
+      case Lit:
       {
-        break;
-      }
-      case ENVIRONMENT_REFLECTIVE:
-      case ENVIRONMENT_REFLECTIVE_MAPPED:
-      case ENVIRONMENT_REFRACTIVE:
-      case ENVIRONMENT_REFRACTIVE_MAPPED:
-      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
-      case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
-      {
-        b.append("  -- Environment mapping parameters\n");
-        b.append("  parameter t_environment : sampler_cube;\n");
-        b.append("  parameter m_view_inv    : matrix_4x4f;\n");
+        b.append("  -- Lit parameters\n");
+        b.append("  parameter material : M.t;\n");
         b.append("\n");
+
+        switch (((ForwardLabelLit) forwardLabel).getLight()) {
+          case LIGHT_DIRECTIONAL:
+          {
+            b.append("  -- Directional light parameters\n");
+            b.append("  parameter light_directional : DL.t;\n");
+            break;
+          }
+          case LIGHT_SPHERICAL:
+          {
+            b.append("  -- Spherical light parameters\n");
+            b.append("  parameter light_spherical : SL.t;\n");
+            break;
+          }
+          case LIGHT_PROJECTIVE:
+          {
+            b.append("  -- Projective light parameters\n");
+            b.append("  parameter light_projective : PL.t;\n");
+            b.append("  parameter t_projection     : sampler_2d;\n");
+            break;
+          }
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
+          {
+            b.append("  -- Projective light (shadow mapping) parameters\n");
+            b.append("  parameter light_projective : PL.t;\n");
+            b.append("  parameter t_projection     : sampler_2d;\n");
+            b.append("  parameter t_shadow         : sampler_2d;\n");
+            b.append("  parameter shadow_basic     : PL.basic;\n");
+            break;
+          }
+        }
+        break;
+      }
+      case Unlit:
+      {
+        b.append("  -- Unlit parameters\n");
+        b.append("  parameter material : M.t;\n");
         break;
       }
     }
+
+    b.append("\n");
   }
 
-  private static void fragmentShaderValuesNormal(
+  private static void fragmentShaderValuesAlbedo(
     final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabelLit label)
+    final @Nonnull ForwardLabel forwardLabel)
   {
-    switch (label.getNormals()) {
-      case NORMALS_MAPPED:
+    switch (forwardLabel.getAlbedo()) {
+      case ALBEDO_COLOURED:
       {
-        b.append("  value n = N.bump (\n");
-        b.append("    t_normal,\n");
-        b.append("    m_normal,\n");
-        b.append("    V3.normalize (f_normal_model),\n");
-        b.append("    V3.normalize (f_tangent),\n");
-        b.append("    V3.normalize (f_bitangent),\n");
-        b.append("    f_uv\n");
-        b.append("  );\n");
+        switch (forwardLabel.getAlpha()) {
+          case ALPHA_OPAQUE:
+          {
+            b.append("  value albedo : vector_4f =\n");
+            b.append("    A.opaque (m.albedo);\n");
+            break;
+          }
+          case ALPHA_TRANSLUCENT:
+          {
+            b.append("  value albedo : vector_4f =\n");
+            b.append("    A.translucent (m.albedo);\n");
+            break;
+          }
+        }
         break;
       }
-      case NORMALS_NONE:
+      case ALBEDO_TEXTURED:
       {
-        throw new UnreachableCodeException();
-      }
-      case NORMALS_VERTEX:
-      {
-        b.append("  value n = V3.normalize (f_normal_eye);\n");
+        switch (forwardLabel.getAlpha()) {
+          case ALPHA_OPAQUE:
+          {
+            b.append("  value albedo : vector_4f =\n");
+            b.append("    A.textured_opaque (t_albedo, f_uv, m.albedo);\n");
+            break;
+          }
+          case ALPHA_TRANSLUCENT:
+          {
+            b.append("  value albedo : vector_4f =\n");
+            b.append("    A.textured_translucent (\n");
+            b.append("      t_albedo,\n");
+            b.append("      f_uv,\n");
+            b.append("      m.albedo\n");
+            b.append("    );\n");
+            break;
+          }
+        }
+        break;
       }
     }
   }
@@ -200,365 +359,6 @@ public final class ForwardShaders
         b.append("      m_view_inv,\n");
         b.append("      m.environment\n");
         b.append("    );\n");
-        break;
-      }
-    }
-  }
-
-  private static void fragmentShaderStandardParameters(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabel forwardLabel)
-  {
-    switch (forwardLabel.getType()) {
-      case Lit:
-      {
-        b.append("  -- Lit parameters\n");
-        b.append("  parameter material : M.t;\n");
-        b.append("\n");
-
-        switch (((ForwardLabelLit) forwardLabel).getLight()) {
-          case LIGHT_DIRECTIONAL:
-          {
-            b.append("  -- Directional light parameters\n");
-            b.append("  parameter light_directional : DL.t;\n");
-            break;
-          }
-          case LIGHT_SPHERICAL:
-          {
-            b.append("  -- Spherical light parameters\n");
-            b.append("  parameter light_spherical : SL.t;\n");
-            break;
-          }
-          case LIGHT_PROJECTIVE:
-          {
-            b.append("  -- Projective light parameters\n");
-            b.append("  parameter light_projective : PL.t;\n");
-            b.append("  parameter t_projection     : sampler_2d;\n");
-            break;
-          }
-          case LIGHT_PROJECTIVE_SHADOW_MAPPED:
-          {
-            b.append("  -- Projective light (shadow mapping) parameters\n");
-            b.append("  parameter light_projective : PL.t;\n");
-            b.append("  parameter t_projection     : sampler_2d;\n");
-            b.append("  parameter t_shadow         : sampler_2d;\n");
-            break;
-          }
-        }
-        break;
-      }
-      case Unlit:
-      {
-        b.append("  -- Unlit parameters\n");
-        b.append("  parameter material : M.t;\n");
-        break;
-      }
-    }
-
-    b.append("\n");
-  }
-
-  private static void moduleEnd(
-    final @Nonnull StringBuilder b)
-  {
-    b.append("end;\n");
-  }
-
-  public static @Nonnull String moduleForward(
-    final @Nonnull ForwardLabels.ForwardLabel forwardLabel)
-  {
-    final StringBuilder b = new StringBuilder();
-    b.append("package com.io7m.renderer.kernel;\n");
-    ForwardShaders.moduleStart(b, "Fwd_" + forwardLabel.getCode());
-    ForwardShaders.moduleVertexShader(b, forwardLabel);
-    b.append("\n");
-    ForwardShaders.moduleFragmentShader(b, forwardLabel);
-    b.append("\n");
-    ForwardShaders.moduleProgram(b);
-    b.append("\n");
-    ForwardShaders.moduleEnd(b);
-    return b.toString();
-  }
-
-  private static void moduleFragmentShader(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabel forwardLabel)
-  {
-    b.append("shader fragment f is\n");
-    ForwardShaders.fragmentShaderStandardIO(b);
-    ForwardShaders.fragmentShaderStandardParameters(b, forwardLabel);
-    ForwardShaders.fragmentShaderAttributesUV(b, forwardLabel);
-    ForwardShaders.fragmentShaderParametersAlbedo(b, forwardLabel);
-    ForwardShaders.fragmentShaderParametersEmissive(b, forwardLabel);
-
-    switch (forwardLabel.getType()) {
-      case Lit:
-      {
-        ForwardShaders.fragmentShaderAttributesLight(
-          b,
-          (ForwardLabelLit) forwardLabel);
-        ForwardShaders.fragmentShaderAttributesNormal(
-          b,
-          (ForwardLabelLit) forwardLabel);
-        ForwardShaders.fragmentShaderParametersNormal(
-          b,
-          (ForwardLabelLit) forwardLabel);
-        ForwardShaders.fragmentShaderParametersEnvironment(
-          b,
-          (ForwardLabelLit) forwardLabel);
-        ForwardShaders.fragmentShaderParametersSpecular(
-          b,
-          (ForwardLabelLit) forwardLabel);
-        b.append("with\n");
-        ForwardShaders.fragmentShaderValuesNormal(
-          b,
-          (ForwardLabelLit) forwardLabel);
-        ForwardShaders.fragmentShaderValuesMaterialLit(
-          b,
-          (ForwardLabelLit) forwardLabel);
-        ForwardShaders.fragmentShaderValuesEnvironment(
-          b,
-          (ForwardLabelLit) forwardLabel);
-        ForwardShaders.fragmentShaderValuesLight(
-          b,
-          (ForwardLabelLit) forwardLabel);
-        ForwardShaders.fragmentShaderValuesAlbedo(b, forwardLabel);
-        ForwardShaders.fragmentShaderValuesSurface(
-          b,
-          (ForwardLabelLit) forwardLabel);
-        ForwardShaders.fragmentShaderValuesRGBA(
-          b,
-          (ForwardLabelLit) forwardLabel);
-        break;
-      }
-      case Unlit:
-      {
-        b.append("with\n");
-        ForwardShaders.fragmentShaderValuesMaterialUnlit(b);
-        ForwardShaders.fragmentShaderValuesAlbedo(b, forwardLabel);
-        b.append("  value rgba = albedo;\n");
-        break;
-      }
-    }
-
-    b.append("as\n");
-    b.append("  out out_0 = rgba;\n");
-    b.append("end;\n");
-  }
-
-  private static void fragmentShaderAttributesLight(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabelLit label)
-  {
-    switch (label.getLight()) {
-      case LIGHT_DIRECTIONAL:
-      case LIGHT_SPHERICAL:
-      {
-        break;
-      }
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
-      {
-        b.append("  in f_position_light_eye  : vector_4f;\n");
-        b.append("  in f_position_light_clip : vector_4f;\n");
-        break;
-      }
-      case LIGHT_PROJECTIVE:
-      {
-        b.append("  in f_position_light_clip : vector_4f;\n");
-        break;
-      }
-    }
-  }
-
-  private static void fragmentShaderValuesMaterialUnlit(
-    final @Nonnull StringBuilder b)
-  {
-    b.append("  value m = material;\n");
-  }
-
-  private static void fragmentShaderValuesRGBA(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabelLit label)
-  {
-    b.append("  value lit = V3.multiply (surface [x y z], light_term);\n");
-
-    switch (label.getAlpha()) {
-      case ALPHA_OPAQUE:
-      {
-        b.append("  value rgba = new vector_4f (lit, 1.0);\n");
-        break;
-      }
-      case ALPHA_TRANSLUCENT:
-      {
-
-        b.append("  -- Premultiply alpha\n");
-        b.append("  value a = F.multiply (surface [w], m.alpha.opacity);\n");
-        b.append("  value rgba = new vector_4f (\n");
-        b.append("    V3.multiply_scalar (lit, a),\n");
-        b.append("    a\n");
-        b.append("  );\n");
-        break;
-      }
-    }
-  }
-
-  private static void fragmentShaderAttributesNormal(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabelLit label)
-  {
-    switch (label.getNormals()) {
-      case NORMALS_MAPPED:
-      {
-        b.append("  -- Mapped normal attributes\n");
-        b.append("  in f_normal_model : vector_3f;\n");
-        b.append("  in f_tangent      : vector_3f;\n");
-        b.append("  in f_bitangent    : vector_3f;\n");
-        break;
-      }
-      case NORMALS_NONE:
-      {
-        throw new UnreachableCodeException();
-      }
-      case NORMALS_VERTEX:
-      {
-        b.append("  -- Vertex normal attributes\n");
-        b.append("  in f_normal_eye : vector_3f;\n");
-        break;
-      }
-    }
-
-    b.append("\n");
-  }
-
-  private static void fragmentShaderValuesSurface(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabelLit label)
-  {
-    switch (label.getAlpha()) {
-      case ALPHA_OPAQUE:
-      {
-        switch (label.getEnvironment()) {
-          case ENVIRONMENT_NONE:
-          {
-            b.append("  value surface : vector_4f = albedo;\n");
-            break;
-          }
-          case ENVIRONMENT_REFLECTIVE:
-          case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
-          case ENVIRONMENT_REFRACTIVE:
-          {
-            b.append("  value surface : vector_4f =\n");
-            b.append("    new vector_4f (\n");
-            b.append("      V3.interpolate (\n");
-            b.append("        albedo [x y z],\n");
-            b.append("        env [x y z],\n");
-            b.append("        m.environment.mix\n");
-            b.append("      ),\n");
-            b.append("      1.0\n");
-            b.append("    );\n");
-            break;
-          }
-          case ENVIRONMENT_REFLECTIVE_MAPPED:
-          case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
-          case ENVIRONMENT_REFRACTIVE_MAPPED:
-          {
-            b.append("  value surface : vector_4f =\n");
-            b.append("    new vector_4f (\n");
-            b.append("      V3.interpolate (\n");
-            b.append("        albedo [x y z],\n");
-            b.append("        env [x y z],\n");
-            b
-              .append("        F.multiply (spec_map_sample, m.environment.mix)\n");
-            b.append("      ),\n");
-            b.append("      1.0\n");
-            b.append("    );\n");
-            break;
-          }
-        }
-        break;
-      }
-      case ALPHA_TRANSLUCENT:
-      {
-        switch (label.getEnvironment()) {
-          case ENVIRONMENT_NONE:
-          {
-            b.append("  value surface : vector_4f = albedo;\n");
-            break;
-          }
-          case ENVIRONMENT_REFLECTIVE:
-          case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
-          case ENVIRONMENT_REFRACTIVE:
-          {
-            b.append("  value surface : vector_4f =\n");
-            b.append("    V4.interpolate (\n");
-            b.append("      albedo,\n");
-            b.append("      env,\n");
-            b.append("      m.environment.mix\n");
-            b.append("    );\n");
-            break;
-          }
-          case ENVIRONMENT_REFLECTIVE_MAPPED:
-          case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
-          case ENVIRONMENT_REFRACTIVE_MAPPED:
-          {
-            b.append("  value surface : vector_4f =\n");
-            b.append("    V4.interpolate (\n");
-            b.append("      albedo,\n");
-            b.append("      env,\n");
-            b
-              .append("      F.multiply (spec_map_sample, m.environment.mix)\n");
-            b.append("    );\n");
-            break;
-          }
-        }
-        break;
-      }
-    }
-  }
-
-  private static void fragmentShaderValuesAlbedo(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabel forwardLabel)
-  {
-    switch (forwardLabel.getAlbedo()) {
-      case ALBEDO_COLOURED:
-      {
-        switch (forwardLabel.getAlpha()) {
-          case ALPHA_OPAQUE:
-          {
-            b.append("  value albedo : vector_4f =\n");
-            b.append("    A.opaque (m.albedo);\n");
-            break;
-          }
-          case ALPHA_TRANSLUCENT:
-          {
-            b.append("  value albedo : vector_4f =\n");
-            b.append("    A.translucent (m.albedo);\n");
-            break;
-          }
-        }
-        break;
-      }
-      case ALBEDO_TEXTURED:
-      {
-        switch (forwardLabel.getAlpha()) {
-          case ALPHA_OPAQUE:
-          {
-            b.append("  value albedo : vector_4f =\n");
-            b.append("    A.textured_opaque (t_albedo, f_uv, m.albedo);\n");
-            break;
-          }
-          case ALPHA_TRANSLUCENT:
-          {
-            b.append("  value albedo : vector_4f =\n");
-            b.append("    A.textured_translucent (\n");
-            b.append("      t_albedo,\n");
-            b.append("      f_uv,\n");
-            b.append("      m.albedo\n");
-            b.append("    );\n");
-            break;
-          }
-        }
         break;
       }
     }
@@ -656,7 +456,7 @@ public final class ForwardShaders
             }
             break;
           }
-          case LIGHT_PROJECTIVE_SHADOW_MAPPED:
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
           {
             switch (label.getSpecular()) {
               case SPECULAR_NONE:
@@ -668,7 +468,8 @@ public final class ForwardShaders
                 b.append("      f_position_eye [x y z],\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow\n");
+                b.append("      t_shadow,\n");
+                b.append("      shadow_basic\n");
                 b.append("    );\n");
                 break;
               }
@@ -755,7 +556,7 @@ public final class ForwardShaders
             break;
           }
 
-          case LIGHT_PROJECTIVE_SHADOW_MAPPED:
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
           {
             switch (label.getSpecular()) {
               case SPECULAR_NONE:
@@ -940,26 +741,27 @@ public final class ForwardShaders
     }
   }
 
-  private static void fragmentShaderAttributesUV(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabel forwardLabel)
+  private static void fragmentShaderValuesMaterialUnlit(
+    final @Nonnull StringBuilder b)
   {
-    if (forwardLabel.impliesUV()) {
-      b.append("  in f_uv : vector_2f;\n");
-    }
+    b.append("  value m = material;\n");
   }
 
-  private static void fragmentShaderParametersNormal(
+  private static void fragmentShaderValuesNormal(
     final @Nonnull StringBuilder b,
     final @Nonnull ForwardLabelLit label)
   {
     switch (label.getNormals()) {
       case NORMALS_MAPPED:
       {
-        b.append("  -- Mapped normal parameters\n");
-        b.append("  parameter m_normal : matrix_3x3f;\n");
-        b.append("  parameter t_normal : sampler_2d;\n");
-        b.append("\n");
+        b.append("  value n = N.bump (\n");
+        b.append("    t_normal,\n");
+        b.append("    m_normal,\n");
+        b.append("    V3.normalize (f_normal_model),\n");
+        b.append("    V3.normalize (f_tangent),\n");
+        b.append("    V3.normalize (f_bitangent),\n");
+        b.append("    f_uv\n");
+        b.append("  );\n");
         break;
       }
       case NORMALS_NONE:
@@ -968,9 +770,209 @@ public final class ForwardShaders
       }
       case NORMALS_VERTEX:
       {
+        b.append("  value n = V3.normalize (f_normal_eye);\n");
+      }
+    }
+  }
+
+  private static void fragmentShaderValuesRGBA(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabelLit label)
+  {
+    b.append("  value lit = V3.multiply (surface [x y z], light_term);\n");
+
+    switch (label.getAlpha()) {
+      case ALPHA_OPAQUE:
+      {
+        b.append("  value rgba = new vector_4f (lit, 1.0);\n");
+        break;
+      }
+      case ALPHA_TRANSLUCENT:
+      {
+
+        b.append("  -- Premultiply alpha\n");
+        b.append("  value a = F.multiply (surface [w], m.alpha.opacity);\n");
+        b.append("  value rgba = new vector_4f (\n");
+        b.append("    V3.multiply_scalar (lit, a),\n");
+        b.append("    a\n");
+        b.append("  );\n");
         break;
       }
     }
+  }
+
+  private static void fragmentShaderValuesSurface(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabelLit label)
+  {
+    switch (label.getAlpha()) {
+      case ALPHA_OPAQUE:
+      {
+        switch (label.getEnvironment()) {
+          case ENVIRONMENT_NONE:
+          {
+            b.append("  value surface : vector_4f = albedo;\n");
+            break;
+          }
+          case ENVIRONMENT_REFLECTIVE:
+          case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+          case ENVIRONMENT_REFRACTIVE:
+          {
+            b.append("  value surface : vector_4f =\n");
+            b.append("    new vector_4f (\n");
+            b.append("      V3.interpolate (\n");
+            b.append("        albedo [x y z],\n");
+            b.append("        env [x y z],\n");
+            b.append("        m.environment.mix\n");
+            b.append("      ),\n");
+            b.append("      1.0\n");
+            b.append("    );\n");
+            break;
+          }
+          case ENVIRONMENT_REFLECTIVE_MAPPED:
+          case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+          case ENVIRONMENT_REFRACTIVE_MAPPED:
+          {
+            b.append("  value surface : vector_4f =\n");
+            b.append("    new vector_4f (\n");
+            b.append("      V3.interpolate (\n");
+            b.append("        albedo [x y z],\n");
+            b.append("        env [x y z],\n");
+            b
+              .append("        F.multiply (spec_map_sample, m.environment.mix)\n");
+            b.append("      ),\n");
+            b.append("      1.0\n");
+            b.append("    );\n");
+            break;
+          }
+        }
+        break;
+      }
+      case ALPHA_TRANSLUCENT:
+      {
+        switch (label.getEnvironment()) {
+          case ENVIRONMENT_NONE:
+          {
+            b.append("  value surface : vector_4f = albedo;\n");
+            break;
+          }
+          case ENVIRONMENT_REFLECTIVE:
+          case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+          case ENVIRONMENT_REFRACTIVE:
+          {
+            b.append("  value surface : vector_4f =\n");
+            b.append("    V4.interpolate (\n");
+            b.append("      albedo,\n");
+            b.append("      env,\n");
+            b.append("      m.environment.mix\n");
+            b.append("    );\n");
+            break;
+          }
+          case ENVIRONMENT_REFLECTIVE_MAPPED:
+          case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+          case ENVIRONMENT_REFRACTIVE_MAPPED:
+          {
+            b.append("  value surface : vector_4f =\n");
+            b.append("    V4.interpolate (\n");
+            b.append("      albedo,\n");
+            b.append("      env,\n");
+            b
+              .append("      F.multiply (spec_map_sample, m.environment.mix)\n");
+            b.append("    );\n");
+            break;
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  private static void moduleEnd(
+    final @Nonnull StringBuilder b)
+  {
+    b.append("end;\n");
+  }
+
+  public static @Nonnull String moduleForward(
+    final @Nonnull ForwardLabels.ForwardLabel forwardLabel)
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("package com.io7m.renderer.kernel;\n");
+    ForwardShaders.moduleStart(b, "Fwd_" + forwardLabel.getCode());
+    ForwardShaders.moduleVertexShader(b, forwardLabel);
+    b.append("\n");
+    ForwardShaders.moduleFragmentShader(b, forwardLabel);
+    b.append("\n");
+    ForwardShaders.moduleProgram(b);
+    b.append("\n");
+    ForwardShaders.moduleEnd(b);
+    return b.toString();
+  }
+
+  private static void moduleFragmentShader(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabel forwardLabel)
+  {
+    b.append("shader fragment f is\n");
+    ForwardShaders.fragmentShaderStandardIO(b);
+    ForwardShaders.fragmentShaderStandardParameters(b, forwardLabel);
+    ForwardShaders.fragmentShaderAttributesUV(b, forwardLabel);
+    ForwardShaders.fragmentShaderParametersAlbedo(b, forwardLabel);
+    ForwardShaders.fragmentShaderParametersEmissive(b, forwardLabel);
+
+    switch (forwardLabel.getType()) {
+      case Lit:
+      {
+        ForwardShaders.fragmentShaderAttributesLight(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderAttributesNormal(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderParametersNormal(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderParametersEnvironment(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderParametersSpecular(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        b.append("with\n");
+        ForwardShaders.fragmentShaderValuesNormal(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderValuesMaterialLit(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderValuesEnvironment(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderValuesLight(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderValuesAlbedo(b, forwardLabel);
+        ForwardShaders.fragmentShaderValuesSurface(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        ForwardShaders.fragmentShaderValuesRGBA(
+          b,
+          (ForwardLabelLit) forwardLabel);
+        break;
+      }
+      case Unlit:
+      {
+        b.append("with\n");
+        ForwardShaders.fragmentShaderValuesMaterialUnlit(b);
+        ForwardShaders.fragmentShaderValuesAlbedo(b, forwardLabel);
+        b.append("  value rgba = albedo;\n");
+        break;
+      }
+    }
+
+    b.append("as\n");
+    b.append("  out out_0 = rgba;\n");
+    b.append("end;\n");
   }
 
   private static void moduleProgram(
@@ -1082,94 +1084,11 @@ public final class ForwardShaders
         b.append("\n");
         break;
       }
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
       {
         b.append("  -- Projective light (shadow mapped) outputs\n");
         b.append("  out f_position_light_eye  : vector_4f;\n");
         b.append("  out f_position_light_clip : vector_4f;\n");
-        b.append("\n");
-        break;
-      }
-      case LIGHT_SPHERICAL:
-      {
-        break;
-      }
-    }
-  }
-
-  private static void vertexShaderStandardWritesLight(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabelLit label)
-  {
-    switch (label.getLight()) {
-      case LIGHT_DIRECTIONAL:
-      {
-        break;
-      }
-      case LIGHT_PROJECTIVE:
-      {
-        b.append("  out f_position_light_clip = position_light_clip;\n");
-        break;
-      }
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
-      {
-        b.append("  out f_position_light_eye  = position_light_eye;\n");
-        b.append("  out f_position_light_clip = position_light_clip;\n");
-        break;
-      }
-      case LIGHT_SPHERICAL:
-      {
-        break;
-      }
-    }
-  }
-
-  private static void vertexShaderStandardValuesLight(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabelLit label)
-  {
-    switch (label.getLight()) {
-      case LIGHT_DIRECTIONAL:
-      {
-        break;
-      }
-      case LIGHT_PROJECTIVE:
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
-      {
-        b.append("  value position_light_eye : vector_4f =\n");
-        b.append("    M4.multiply_vector (\n");
-        b.append("      m_projective_modelview,\n");
-        b.append("      new vector_4f (v_position, 1.0)\n");
-        b.append("    );\n");
-        b.append("  value position_light_clip : vector_4f =\n");
-        b.append("    M4.multiply_vector (\n");
-        b.append("      m_projective_projection,\n");
-        b.append("      position_light_eye\n");
-        b.append("    );\n");
-        break;
-      }
-      case LIGHT_SPHERICAL:
-      {
-        break;
-      }
-    }
-  }
-
-  private static void vertexShaderStandardParametersLight(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabelLit label)
-  {
-    switch (label.getLight()) {
-      case LIGHT_DIRECTIONAL:
-      {
-        break;
-      }
-      case LIGHT_PROJECTIVE:
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
-      {
-        b.append("  -- Projective light parameters\n");
-        b.append("  parameter m_projective_modelview  : matrix_4x4f;\n");
-        b.append("  parameter m_projective_projection : matrix_4x4f;\n");
         b.append("\n");
         break;
       }
@@ -1228,6 +1147,31 @@ public final class ForwardShaders
     b.append("  out f_position_eye : vector_4f;\n");
   }
 
+  private static void vertexShaderStandardParametersLight(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabelLit label)
+  {
+    switch (label.getLight()) {
+      case LIGHT_DIRECTIONAL:
+      {
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
+      {
+        b.append("  -- Projective light parameters\n");
+        b.append("  parameter m_projective_modelview  : matrix_4x4f;\n");
+        b.append("  parameter m_projective_projection : matrix_4x4f;\n");
+        b.append("\n");
+        break;
+      }
+      case LIGHT_SPHERICAL:
+      {
+        break;
+      }
+    }
+  }
+
   private static void vertexShaderStandardParametersMatrices(
     final @Nonnull StringBuilder b)
   {
@@ -1267,6 +1211,37 @@ public final class ForwardShaders
     }
   }
 
+  private static void vertexShaderStandardValuesLight(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabelLit label)
+  {
+    switch (label.getLight()) {
+      case LIGHT_DIRECTIONAL:
+      {
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
+      {
+        b.append("  value position_light_eye : vector_4f =\n");
+        b.append("    M4.multiply_vector (\n");
+        b.append("      m_projective_modelview,\n");
+        b.append("      new vector_4f (v_position, 1.0)\n");
+        b.append("    );\n");
+        b.append("  value position_light_clip : vector_4f =\n");
+        b.append("    M4.multiply_vector (\n");
+        b.append("      m_projective_projection,\n");
+        b.append("      position_light_eye\n");
+        b.append("    );\n");
+        break;
+      }
+      case LIGHT_SPHERICAL:
+      {
+        break;
+      }
+    }
+  }
+
   private static void vertexShaderStandardValuesNormals(
     final @Nonnull StringBuilder b,
     final @Nonnull ForwardLabelLit label)
@@ -1293,16 +1268,6 @@ public final class ForwardShaders
     }
   }
 
-  private static void vertexShaderStandardValuesUV(
-    final @Nonnull StringBuilder b,
-    final @Nonnull ForwardLabel forwardLabel)
-  {
-    if (forwardLabel.impliesUV()) {
-      b
-        .append("  value uv = M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];\n");
-    }
-  }
-
   private static void vertexShaderStandardValuesPositions(
     final @Nonnull StringBuilder b)
   {
@@ -1318,11 +1283,48 @@ public final class ForwardShaders
     b.append("    );\n");
   }
 
+  private static void vertexShaderStandardValuesUV(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabel forwardLabel)
+  {
+    if (forwardLabel.impliesUV()) {
+      b
+        .append("  value uv = M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];\n");
+    }
+  }
+
   private static void vertexShaderStandardWrites(
     final @Nonnull StringBuilder b)
   {
     b.append("  out gl_Position = position_clip;\n");
     b.append("  out f_position_eye = position_eye;\n");
+  }
+
+  private static void vertexShaderStandardWritesLight(
+    final @Nonnull StringBuilder b,
+    final @Nonnull ForwardLabelLit label)
+  {
+    switch (label.getLight()) {
+      case LIGHT_DIRECTIONAL:
+      {
+        break;
+      }
+      case LIGHT_PROJECTIVE:
+      {
+        b.append("  out f_position_light_clip = position_light_clip;\n");
+        break;
+      }
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
+      {
+        b.append("  out f_position_light_eye  = position_light_eye;\n");
+        b.append("  out f_position_light_clip = position_light_clip;\n");
+        break;
+      }
+      case LIGHT_SPHERICAL:
+      {
+        break;
+      }
+    }
   }
 
   private static void vertexShaderStandardWritesNormals(

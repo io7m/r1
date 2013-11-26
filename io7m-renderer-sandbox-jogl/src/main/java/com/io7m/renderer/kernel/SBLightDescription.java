@@ -271,7 +271,12 @@ abstract class SBLightDescription
               final SBLightShadowMappedBasicDescription smb =
                 (SBLightShadowDescription.SBLightShadowMappedBasicDescription) s;
               final KShadow ks =
-                KShadow.newMappedBasic(this.getID(), smb.getSize());
+                KShadow.newMappedBasic(
+                  this.getID(),
+                  smb.getSize(),
+                  smb.getEpsilon(),
+                  smb.getFactorMaximum(),
+                  smb.getFactorMinimum());
               kshadow = Option.some(ks);
               break;
             }

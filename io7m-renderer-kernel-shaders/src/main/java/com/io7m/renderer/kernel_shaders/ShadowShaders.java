@@ -51,7 +51,7 @@ public final class ShadowShaders
     final @Nonnull StringBuilder b)
   {
     b.append("  in f_position : vector_4f;\n");
-    b.append("  out out_0 : vector_4f as 0;\n");
+    b.append("  out out_0     : vector_4f as 0;\n");
   }
 
   private static void fragmentShaderStandardParameters(
@@ -212,7 +212,7 @@ public final class ShadowShaders
     final @Nonnull ShadowLabel label)
   {
     if (label.impliesUV()) {
-      b.append("  in v_uv : vector_2f;\n");
+      b.append("  in v_uv  : vector_2f;\n");
       b.append("  out f_uv : vector_2f;\n");
     }
   }
@@ -220,14 +220,14 @@ public final class ShadowShaders
   private static void vertexShaderStandardIO(
     final @Nonnull StringBuilder b)
   {
-    b.append("  in v_position : vector_3f;\n");
+    b.append("  in v_position  : vector_3f;\n");
     b.append("  out f_position : vector_4f;\n");
   }
 
   private static void vertexShaderStandardParametersMatrices(
     final @Nonnull StringBuilder b)
   {
-    b.append("  parameter m_modelview : matrix_4x4f;\n");
+    b.append("  parameter m_modelview  : matrix_4x4f;\n");
     b.append("  parameter m_projection : matrix_4x4f;\n");
   }
 
@@ -269,7 +269,7 @@ public final class ShadowShaders
     final @Nonnull StringBuilder b)
   {
     b.append("  out gl_Position = clip_position;\n");
-    b.append("  out f_position = position;\n");
+    b.append("  out f_position  = position;\n");
   }
 
   private static void vertexShaderStandardWritesUV(

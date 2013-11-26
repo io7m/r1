@@ -385,7 +385,9 @@ public final class KRendererForward implements KRenderer
       case LIGHT_PROJECTIVE:
       {
         KShadingProgramCommon
-          .putLightProjectiveWithoutTextureProjectionReuse(e);
+          .putLightProjectiveWithoutTextureProjectionReuse(
+            e,
+            (KProjective) light);
         break;
       }
       case LIGHT_SPHERE:

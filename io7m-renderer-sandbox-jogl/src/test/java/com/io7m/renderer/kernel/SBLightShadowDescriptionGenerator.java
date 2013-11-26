@@ -43,8 +43,11 @@ public final class SBLightShadowDescriptionGenerator implements
       switch (KShadow.Type.values()[this.index_gen.nextInt()]) {
         case SHADOW_MAPPED_BASIC:
         {
-          return SBLightShadowDescription.newShadowMappedBasic(this.size_gen
-            .nextInt());
+          return SBLightShadowDescription.newShadowMappedBasic(
+            this.size_gen.nextInt(),
+            (float) Math.random(),
+            (float) Math.random(),
+            (float) Math.random());
         }
       }
     } catch (final ConstraintError x) {
