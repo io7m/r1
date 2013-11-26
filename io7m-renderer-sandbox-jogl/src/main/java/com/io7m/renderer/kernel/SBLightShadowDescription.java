@@ -27,14 +27,23 @@ import com.io7m.jaux.Constraints.ConstraintError;
   @Immutable final static class SBLightShadowMappedBasicDescription extends
     SBLightShadowDescription
   {
-    private final int size;
+    private final int   size;
+    private final float epsilon;
+    private final float factor_max;
+    private final float factor_min;
 
     private SBLightShadowMappedBasicDescription(
-      final int size)
+      final int size,
+      final float epsilon,
+      final float factor_max,
+      final float factor_min)
       throws ConstraintError
     {
       super(KShadow.Type.SHADOW_MAPPED_BASIC);
       this.size = Constraints.constrainRange(size, 1, 10, "Shadow map size");
+      this.epsilon = epsilon;
+      this.factor_max = factor_max;
+      this.factor_min = factor_min;
     }
 
     @Override public boolean equals(
@@ -51,10 +60,37 @@ import com.io7m.jaux.Constraints.ConstraintError;
       }
       final SBLightShadowMappedBasicDescription other =
         (SBLightShadowMappedBasicDescription) obj;
+      if (Float.floatToIntBits(this.epsilon) != Float
+        .floatToIntBits(other.epsilon)) {
+        return false;
+      }
+      if (Float.floatToIntBits(this.factor_max) != Float
+        .floatToIntBits(other.factor_max)) {
+        return false;
+      }
+      if (Float.floatToIntBits(this.factor_min) != Float
+        .floatToIntBits(other.factor_min)) {
+        return false;
+      }
       if (this.size != other.size) {
         return false;
       }
       return true;
+    }
+
+    public float getEpsilon()
+    {
+      return this.epsilon;
+    }
+
+    public float getFactorMaximum()
+    {
+      return this.factor_max;
+    }
+
+    public float getFactorMinimum()
+    {
+      return this.factor_min;
     }
 
     public int getSize()
@@ -66,6 +102,9 @@ import com.io7m.jaux.Constraints.ConstraintError;
     {
       final int prime = 31;
       int result = super.hashCode();
+      result = (prime * result) + Float.floatToIntBits(this.epsilon);
+      result = (prime * result) + Float.floatToIntBits(this.factor_max);
+      result = (prime * result) + Float.floatToIntBits(this.factor_min);
       result = (prime * result) + this.size;
       return result;
     }
@@ -75,6 +114,12 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final StringBuilder builder = new StringBuilder();
       builder.append("[SBLightShadowMappedBasicDescription size=");
       builder.append(this.size);
+      builder.append(" epsilon=");
+      builder.append(this.epsilon);
+      builder.append(" factor_max=");
+      builder.append(this.factor_max);
+      builder.append(" factor_min=");
+      builder.append(this.factor_min);
       builder.append("]");
       return builder.toString();
     }
@@ -83,10 +128,17 @@ import com.io7m.jaux.Constraints.ConstraintError;
   public static @Nonnull
     SBLightShadowMappedBasicDescription
     newShadowMappedBasic(
-      final int size)
+      final int size,
+      final float epsilon,
+      final float factor_max,
+      final float factor_min)
       throws ConstraintError
   {
-    return new SBLightShadowMappedBasicDescription(size);
+    return new SBLightShadowMappedBasicDescription(
+      size,
+      epsilon,
+      factor_max,
+      factor_min);
   }
 
   private final @Nonnull KShadow.Type type;
