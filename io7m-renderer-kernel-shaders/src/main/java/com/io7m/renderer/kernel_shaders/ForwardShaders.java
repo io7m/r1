@@ -462,7 +462,7 @@ public final class ForwardShaders
               case SPECULAR_NONE:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b.append("    PL.diffuse_only_shadowed (\n");
+                b.append("    PL.diffuse_only_shadowed_basic (\n");
                 b.append("      light_projective,\n");
                 b.append("      n,\n");
                 b.append("      f_position_eye [x y z],\n");
@@ -477,14 +477,15 @@ public final class ForwardShaders
               case SPECULAR_MAPPED:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b.append("    PL.diffuse_specular_shadowed (\n");
+                b.append("    PL.diffuse_specular_shadowed_basic (\n");
                 b.append("      light_projective,\n");
                 b.append("      n,\n");
                 b.append("      f_position_eye [x y z],\n");
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow\n");
+                b.append("      t_shadow,\n");
+                b.append("      shadow_basic\n");
                 b.append("    );\n");
                 break;
               }
@@ -562,14 +563,15 @@ public final class ForwardShaders
               case SPECULAR_NONE:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b.append("    PL.diffuse_only_emissive_shadowed (\n");
+                b.append("    PL.diffuse_only_emissive_shadowed_basic (\n");
                 b.append("      light_projective,\n");
                 b.append("      n,\n");
                 b.append("      f_position_eye [x y z],\n");
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow\n");
+                b.append("      t_shadow,\n");
+                b.append("      shadow_basic\n");
                 b.append("    );\n");
                 break;
               }
@@ -577,14 +579,16 @@ public final class ForwardShaders
               case SPECULAR_MAPPED:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b.append("    PL.diffuse_specular_emissive_shadowed (\n");
+                b
+                  .append("    PL.diffuse_specular_emissive_shadowed_basic (\n");
                 b.append("      light_projective,\n");
                 b.append("      n,\n");
                 b.append("      f_position_eye [x y z],\n");
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow\n");
+                b.append("      t_shadow,\n");
+                b.append("      shadow_basic\n");
                 b.append("    );\n");
                 break;
               }
