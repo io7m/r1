@@ -58,6 +58,8 @@ public interface KRenderer
    *           current OpenGL implementation.
    * @throws IOException
    *           Iff an I/O exception occurs during rendering.
+   * @throws KXMLException
+   *           Iff an XML resource cannot be validated or parsed.
    */
 
   public void rendererEvaluate(
@@ -67,7 +69,8 @@ public interface KRenderer
       ConstraintError,
       JCGLCompileException,
       JCGLUnsupportedException,
-      IOException;
+      IOException,
+      KXMLException;
 
   /**
    * <p>

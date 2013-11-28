@@ -36,7 +36,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorI2I;
@@ -57,7 +56,8 @@ final class KRendererDebugBitangentsLocal implements KRenderer
       FilesystemError,
       IOException,
       JCGLException,
-      ConstraintError
+      ConstraintError,
+      KXMLException
   {
     return new KRendererDebugBitangentsLocal(g, fs, log);
   }
@@ -67,7 +67,7 @@ final class KRendererDebugBitangentsLocal implements KRenderer
   private final @Nonnull JCGLImplementation    gl;
   private final @Nonnull Log                   log;
   private final @Nonnull KMutableMatrices      matrices;
-  private final @Nonnull ProgramReference      program;
+  private final @Nonnull KProgram              program;
   private final @Nonnull KTransform.Context    transform_context;
   private final @Nonnull VectorM2I             viewport_size;
 
@@ -80,7 +80,8 @@ final class KRendererDebugBitangentsLocal implements KRenderer
       JCGLUnsupportedException,
       FilesystemError,
       IOException,
-      JCGLException
+      JCGLException,
+      KXMLException
   {
     this.log = new Log(log, "krenderer-debug-bitangents-local");
     this.gl = gl;
@@ -93,15 +94,15 @@ final class KRendererDebugBitangentsLocal implements KRenderer
     this.viewport_size = new VectorM2I();
 
     this.program =
-      KShaderUtilities.makeProgram(
+      KProgram.newProgramFromFilesystem(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "debug_bitangents_computed_local",
+        "debug_bitangents_vertex_local",
         log);
 
-    this.exec = new JCCEExecutionCallable(this.program);
+    this.exec = new JCCEExecutionCallable(this.program.getProgram());
   }
 
   @Override public void rendererClose()
@@ -109,7 +110,7 @@ final class KRendererDebugBitangentsLocal implements KRenderer
       ConstraintError
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-    gc.programDelete(this.program);
+    gc.programDelete(this.program.getProgram());
   }
 
   @Override public @CheckForNull KRendererDebugging rendererDebug()

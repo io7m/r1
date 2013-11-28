@@ -38,7 +38,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
@@ -61,7 +60,8 @@ final class KRendererDebugNormalsMapEye implements KRenderer
       FilesystemError,
       IOException,
       JCGLException,
-      ConstraintError
+      ConstraintError,
+      KXMLException
   {
     return new KRendererDebugNormalsMapEye(g, fs, log);
   }
@@ -71,7 +71,7 @@ final class KRendererDebugNormalsMapEye implements KRenderer
   private final @Nonnull JCGLImplementation    gl;
   private final @Nonnull Log                   log;
   private final @Nonnull KMutableMatrices      matrices;
-  private final @Nonnull ProgramReference      program;
+  private final @Nonnull KProgram              program;
   private final @Nonnull KTransform.Context    transform_context;
   private final @Nonnull VectorM2I             viewport_size;
 
@@ -84,7 +84,8 @@ final class KRendererDebugNormalsMapEye implements KRenderer
       JCGLUnsupportedException,
       FilesystemError,
       IOException,
-      JCGLException
+      JCGLException,
+      KXMLException
   {
     this.log = new Log(log, "krenderer-debug-normals-map-eye");
     this.gl = gl;
@@ -97,15 +98,15 @@ final class KRendererDebugNormalsMapEye implements KRenderer
     this.viewport_size = new VectorM2I();
 
     this.program =
-      KShaderUtilities.makeProgram(
+      KProgram.newProgramFromFilesystem(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "debug_normals_computed_bitangent_map_eye",
+        "debug_normals_map_eye",
         log);
 
-    this.exec = new JCCEExecutionCallable(this.program);
+    this.exec = new JCCEExecutionCallable(this.program.getProgram());
   }
 
   @Override public void rendererClose()
@@ -113,7 +114,7 @@ final class KRendererDebugNormalsMapEye implements KRenderer
       ConstraintError
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-    gc.programDelete(this.program);
+    gc.programDelete(this.program.getProgram());
   }
 
   @Override public @CheckForNull KRendererDebugging rendererDebug()

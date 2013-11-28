@@ -22,17 +22,16 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.ProgramReference;
-import com.io7m.parasol.PGLSLMetaXML;
+import com.io7m.parasol.xml.PGLSLMetaXML;
 
 public final class SBShader
 {
-  private final @Nonnull ProgramReference program;
-  private final @Nonnull File             file;
-  private final @Nonnull PGLSLMetaXML     meta;
+  private final @Nonnull KProgram     program;
+  private final @Nonnull File         file;
+  private final @Nonnull PGLSLMetaXML meta;
 
   SBShader(
-    final @Nonnull ProgramReference program,
+    final @Nonnull KProgram program,
     final @Nonnull File file,
     final @Nonnull PGLSLMetaXML meta)
     throws ConstraintError
@@ -82,7 +81,7 @@ public final class SBShader
     return this.meta.getName();
   }
 
-  public @Nonnull ProgramReference getProgram()
+  public @Nonnull KProgram getProgram()
   {
     return this.program;
   }

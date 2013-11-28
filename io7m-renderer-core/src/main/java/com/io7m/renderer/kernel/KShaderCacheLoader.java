@@ -29,7 +29,6 @@ import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
-import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LUCacheLoader;
 import com.io7m.jvvfs.FSCapabilityRead;
@@ -39,12 +38,13 @@ import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheIOException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLCompileException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLUnsupportedException;
+import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheXMLException;
 
 final class KShaderCacheLoader implements
-  LUCacheLoader<String, ProgramReference, KShaderCacheException>
+  LUCacheLoader<String, KProgram, KShaderCacheException>
 {
   public static @Nonnull
-    LUCacheLoader<String, ProgramReference, KShaderCacheException>
+    LUCacheLoader<String, KProgram, KShaderCacheException>
     newLoader(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull FSCapabilityRead fs,
@@ -53,9 +53,9 @@ final class KShaderCacheLoader implements
   {
     return new KShaderCacheLoader(gi, fs, log);
   }
+
   private final @Nonnull FSCapabilityRead   fs;
   private final @Nonnull JCGLImplementation gi;
-
   private final @Nonnull Log                log;
 
   private KShaderCacheLoader(
@@ -71,14 +71,14 @@ final class KShaderCacheLoader implements
   }
 
   @Override public void luCacheClose(
-    final @Nonnull ProgramReference v)
+    final @Nonnull KProgram v)
     throws KShaderCacheException
   {
     final JCGLInterfaceCommon gc = this.gi.getGLCommon();
 
     try {
       try {
-        gc.programDelete(v);
+        gc.programDelete(v.getProgram());
       } catch (final JCGLException e) {
         throw new KShaderCacheException.KShaderCacheJCGLException(e);
       }
@@ -87,7 +87,7 @@ final class KShaderCacheLoader implements
     }
   }
 
-  @Override public @Nonnull ProgramReference luCacheLoadFrom(
+  @Override public @Nonnull KProgram luCacheLoadFrom(
     final @Nonnull String name)
     throws KShaderCacheException
   {
@@ -95,7 +95,7 @@ final class KShaderCacheLoader implements
       try {
         final JCGLInterfaceCommon gc = this.gi.getGLCommon();
         final JCGLSLVersion version = gc.metaGetSLVersion();
-        return KShaderUtilities.makeProgram(
+        return KProgram.newProgramFromFilesystem(
           this.gi.getGLCommon(),
           version.getNumber(),
           version.getAPI(),
@@ -112,6 +112,8 @@ final class KShaderCacheLoader implements
         throw new KShaderCacheIOException(x);
       } catch (final JCGLException x) {
         throw new KShaderCacheJCGLException(x);
+      } catch (final KXMLException x) {
+        throw new KShaderCacheXMLException(x);
       }
     } catch (final ConstraintError x) {
       throw new UnreachableCodeException(x);
@@ -119,7 +121,7 @@ final class KShaderCacheLoader implements
   }
 
   @Override public long luCacheSizeOf(
-    final @Nonnull ProgramReference v)
+    final @Nonnull KProgram v)
   {
     return 1;
   }
