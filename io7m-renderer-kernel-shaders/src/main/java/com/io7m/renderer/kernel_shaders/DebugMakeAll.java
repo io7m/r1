@@ -20,9 +20,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import javax.annotation.Nonnull;
@@ -40,7 +41,7 @@ import com.io7m.parasol.Compiler;
 import com.io7m.parasol.xml.Batch;
 import com.io7m.parasol.xml.PGLSLCompactor;
 
-public final class ShadowMakeAll
+public final class DebugMakeAll
 {
   private static @Nonnull String[] getSourcesList(
     final @Nonnull File out_dir)
@@ -74,7 +75,7 @@ public final class ShadowMakeAll
     final File out_parasol_dir = new File(args[0]);
     final File out_glsl_dir = new File(args[1]);
     final File out_glsl_compact_dir = new File(args[2]);
-    final File out_batch = new File(out_parasol_dir, "batch-shadow.txt");
+    final File out_batch = new File(out_parasol_dir, "batch-debug.txt");
 
     if (out_parasol_dir.mkdirs() == false) {
       if (out_parasol_dir.isDirectory() == false) {
@@ -92,16 +93,11 @@ public final class ShadowMakeAll
       }
     }
 
-    final List<ShadowLabel> shadowLabels = new ArrayList<ShadowLabel>();
-    for (final ShadowLabel l : ShadowLabel.values()) {
-      shadowLabels.add(l);
-    }
+    DebugMakeAll.makeSources(out_parasol_dir);
+    DebugMakeAll.makeBatch(out_batch);
 
-    ShadowMakeAll.makeSources(shadowLabels, out_parasol_dir);
-    ShadowMakeAll.makeBatch(shadowLabels, out_batch);
-
-    final String[] sources = ShadowMakeAll.getSourcesList(out_parasol_dir);
-    ShadowMakeAll.makeCompileSources(
+    final String[] sources = DebugMakeAll.getSourcesList(out_parasol_dir);
+    DebugMakeAll.makeCompileSources(
       out_parasol_dir,
       sources,
       out_batch,
@@ -110,19 +106,29 @@ public final class ShadowMakeAll
   }
 
   public static void makeBatch(
-    final @Nonnull List<ShadowLabel> shadowLabels,
     final @Nonnull File file)
-    throws IOException
+    throws IOException,
+      ConstraintError
   {
-    final FileWriter writer = new FileWriter(file);
-    for (final ShadowLabel l : shadowLabels) {
-      final String code = l.getCode();
-      writer.append("shadow_" + code);
-      writer.append(" : com.io7m.renderer.kernel.Shadow_" + code + ".p");
-      writer.append("\n");
-    }
+    final PrintWriter writer = new PrintWriter(new FileWriter(file));
 
-    writer.close();
+    final InputStream stream =
+      DebugMakeAll.class
+        .getResourceAsStream("/com/io7m/renderer/kernel_shaders/debug-batch.txt");
+
+    try {
+      final Batch batch = Batch.fromStream(new File("/"), stream);
+      for (final Pair<String, String> t : batch.getTargets()) {
+        writer.append(t.first);
+        writer.append(" : ");
+        writer.append(t.second);
+        writer.println();
+      }
+      writer.flush();
+      writer.close();
+    } finally {
+      stream.close();
+    }
   }
 
   private static void makeCompileSources(
@@ -168,7 +174,7 @@ public final class ShadowMakeAll
         PGLSLCompactor.newCompactor(
           program_in,
           program_out,
-          ShadowMakeAll.getLog());
+          DebugMakeAll.getLog());
       }
     }
   }
@@ -181,27 +187,11 @@ public final class ShadowMakeAll
   }
 
   public static void makeSources(
-    final @Nonnull List<ShadowLabel> shadowLabels,
     final @Nonnull File dir)
     throws IOException
   {
     if (dir.isDirectory() == false) {
       throw new IOException(dir + " is not a directory");
-    }
-
-    for (final ShadowLabel l : shadowLabels) {
-      final String code = l.getCode();
-
-      final File file = new File(dir, "Shadow_" + code + ".p");
-      System.err.println("info: writing: " + file);
-
-      final FileWriter writer = new FileWriter(file);
-      try {
-        writer.append(ShadowShaders.moduleShadow(l));
-      } finally {
-        writer.flush();
-        writer.close();
-      }
     }
   }
 }

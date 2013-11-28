@@ -37,7 +37,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorI2I;
@@ -58,7 +57,8 @@ import com.io7m.jvvfs.FilesystemError;
       FilesystemError,
       IOException,
       JCGLException,
-      ConstraintError
+      ConstraintError,
+      KXMLException
   {
     return new KRendererDebugTangentsVertexEye(g, fs, log);
   }
@@ -68,7 +68,7 @@ import com.io7m.jvvfs.FilesystemError;
   private final @Nonnull JCGLImplementation    gl;
   private final @Nonnull Log                   log;
   private final @Nonnull KMutableMatrices      matrices;
-  private final @Nonnull ProgramReference      program;
+  private final @Nonnull KProgram              program;
   private final @Nonnull KTransform.Context    transform_context;
   private final @Nonnull VectorM2I             viewport_size;
 
@@ -81,7 +81,8 @@ import com.io7m.jvvfs.FilesystemError;
       JCGLUnsupportedException,
       FilesystemError,
       IOException,
-      JCGLException
+      JCGLException,
+      KXMLException
   {
     this.log = new Log(log, "krenderer-debug-tangents-vertex-eye");
     this.gl = gl;
@@ -94,15 +95,15 @@ import com.io7m.jvvfs.FilesystemError;
     this.viewport_size = new VectorM2I();
 
     this.program =
-      KShaderUtilities.makeProgram(
+      KProgram.newProgramFromFilesystem(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
-        "debug_tangents4_vertex_eye",
+        "debug_tangents_vertex_eye",
         log);
 
-    this.exec = new JCCEExecutionCallable(this.program);
+    this.exec = new JCCEExecutionCallable(this.program.getProgram());
   }
 
   @Override public void rendererClose()
@@ -110,7 +111,7 @@ import com.io7m.jvvfs.FilesystemError;
       ConstraintError
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-    gc.programDelete(this.program);
+    gc.programDelete(this.program.getProgram());
   }
 
   @Override public @CheckForNull KRendererDebugging rendererDebug()

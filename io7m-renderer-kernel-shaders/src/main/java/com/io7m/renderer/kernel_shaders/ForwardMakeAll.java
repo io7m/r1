@@ -20,13 +20,25 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.annotation.Nonnull;
+import javax.xml.parsers.ParserConfigurationException;
+
+import nu.xom.ParsingException;
+import nu.xom.ValidityException;
+
+import org.xml.sax.SAXException;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.functional.Pair;
+import com.io7m.jlog.Log;
 import com.io7m.parasol.Compiler;
+import com.io7m.parasol.xml.Batch;
+import com.io7m.parasol.xml.PGLSLCompactor;
 import com.io7m.renderer.kernel_shaders.ForwardLabels.ForwardLabel;
 
 public final class ForwardMakeAll
@@ -47,15 +59,22 @@ public final class ForwardMakeAll
   public static void main(
     final String args[])
     throws IOException,
-      ConstraintError
+      ConstraintError,
+      ValidityException,
+      NoSuchAlgorithmException,
+      ParsingException,
+      SAXException,
+      ParserConfigurationException
   {
-    if (args.length != 2) {
-      System.err.println("usage: out-parasol-directory out-glsl-directory");
+    if (args.length != 3) {
+      System.err
+        .println("usage: out-parasol-directory out-glsl-directory out-glsl-compacted-directory");
       System.exit(1);
     }
 
     final File out_parasol_dir = new File(args[0]);
     final File out_glsl_dir = new File(args[1]);
+    final File out_glsl_compact_dir = new File(args[2]);
     final File out_batch = new File(out_parasol_dir, "batch-forward.txt");
 
     if (out_parasol_dir.mkdirs() == false) {
@@ -68,6 +87,11 @@ public final class ForwardMakeAll
         throw new IOException("Could not create " + out_glsl_dir);
       }
     }
+    if (out_glsl_compact_dir.mkdirs() == false) {
+      if (out_glsl_compact_dir.isDirectory() == false) {
+        throw new IOException("Could not create " + out_glsl_compact_dir);
+      }
+    }
 
     final List<ForwardLabel> forwardLabels = ForwardLabels.allLabels();
     ForwardMakeAll.makeSources(forwardLabels, out_parasol_dir);
@@ -78,7 +102,8 @@ public final class ForwardMakeAll
       out_parasol_dir,
       sources,
       out_batch,
-      out_glsl_dir);
+      out_glsl_dir,
+      out_glsl_compact_dir);
   }
 
   public static void makeBatch(
@@ -87,6 +112,9 @@ public final class ForwardMakeAll
     throws IOException
   {
     final FileWriter writer = new FileWriter(file);
+
+    writer.append("depth : com.io7m.renderer.Depth.depth\n");
+
     for (final ForwardLabel l : forwardLabels) {
       final String code = l.getCode();
       writer.append("fwd_" + code);
@@ -101,7 +129,15 @@ public final class ForwardMakeAll
     final @Nonnull File source_dir,
     final @Nonnull String[] sources,
     final @Nonnull File batch,
-    final @Nonnull File out_dir)
+    final @Nonnull File out_dir,
+    final @Nonnull File out_compact_dir)
+    throws ValidityException,
+      NoSuchAlgorithmException,
+      ParsingException,
+      IOException,
+      SAXException,
+      ParserConfigurationException,
+      ConstraintError
   {
     final ArrayList<String> argslist = new ArrayList<String>();
 
@@ -122,6 +158,26 @@ public final class ForwardMakeAll
     final String[] args = new String[argslist.size()];
     argslist.toArray(args);
     Compiler.run(Compiler.getLog(false), args);
+
+    {
+      final Batch b = Batch.fromFile(out_dir, batch);
+      for (final Pair<String, String> k : b.getTargets()) {
+        final File program_in = new File(out_dir, k.first);
+        final File program_out = new File(out_compact_dir, k.first);
+        System.out.println("info: compact " + program_in);
+        PGLSLCompactor.newCompactor(
+          program_in,
+          program_out,
+          ForwardMakeAll.getLog());
+      }
+    }
+  }
+
+  private static @Nonnull Log getLog()
+  {
+    final Properties props = new Properties();
+    props.setProperty("com.io7m.parasol.logs.compactor", "false");
+    return new Log(props, "com.io7m.parasol", "compactor");
   }
 
   public static void makeSources(

@@ -36,6 +36,7 @@ public abstract class KShaderCacheException extends Exception
     KSHADER_CACHE_JCGL_COMPILE_ERROR,
     KSHADER_CACHE_JCGL_ERROR,
     KSHADER_CACHE_JCGL_UNSUPPORTED_ERROR,
+    KSHADER_CACHE_XML_ERROR,
   }
 
   public static final class KShaderCacheFilesystemException extends
@@ -158,6 +159,31 @@ public abstract class KShaderCacheException extends Exception
     }
 
     @Override public synchronized JCGLUnsupportedException getCause()
+    {
+      return this.x;
+    }
+  }
+
+  public static final class KShaderCacheXMLException extends
+    KShaderCacheException
+  {
+    private static final long            serialVersionUID;
+
+    static {
+      serialVersionUID = -7714877597916152434L;
+    }
+
+    private final @Nonnull KXMLException x;
+
+    @SuppressWarnings("synthetic-access") public KShaderCacheXMLException(
+      final @Nonnull KXMLException x)
+      throws ConstraintError
+    {
+      super(x, Code.KSHADER_CACHE_XML_ERROR);
+      this.x = x;
+    }
+
+    @Override public synchronized KXMLException getCause()
     {
       return this.x;
     }

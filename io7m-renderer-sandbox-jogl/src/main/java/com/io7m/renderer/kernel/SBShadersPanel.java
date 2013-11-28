@@ -48,8 +48,8 @@ import com.io7m.jcanephora.ProgramAttribute;
 import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.ProgramUniform;
 import com.io7m.jlog.Log;
-import com.io7m.parasol.PGLSLMetaXML;
-import com.io7m.parasol.PGLSLMetaXML.Output;
+import com.io7m.parasol.xml.FragmentOutput;
+import com.io7m.parasol.xml.PGLSLMetaXML;
 
 final class SBShadersPanel extends JPanel
 {
@@ -126,7 +126,8 @@ final class SBShadersPanel extends JPanel
     {
       this.data.clear();
 
-      final ProgramReference p = shader.getProgram();
+      final KProgram kp = shader.getProgram();
+      final ProgramReference p = kp.getProgram();
       for (final Entry<String, ProgramAttribute> e : p
         .getAttributes()
         .entrySet()) {
@@ -217,8 +218,10 @@ final class SBShadersPanel extends JPanel
       this.data.clear();
 
       final PGLSLMetaXML m = shader.getMeta();
-      for (final Entry<Integer, Output> e : m.getOutputs().entrySet()) {
-        final Output o = e.getValue();
+      for (final Entry<Integer, FragmentOutput> e : m
+        .getDeclaredFragmentOutputs()
+        .entrySet()) {
+        final FragmentOutput o = e.getValue();
         final ArrayList<String> row = new ArrayList<String>();
         row.add(o.getName());
         row.add(Integer.toString(o.getIndex()));
@@ -303,7 +306,8 @@ final class SBShadersPanel extends JPanel
     {
       this.data.clear();
 
-      final ProgramReference p = shader.getProgram();
+      final KProgram kp = shader.getProgram();
+      final ProgramReference p = kp.getProgram();
       for (final Entry<String, ProgramUniform> e : p.getUniforms().entrySet()) {
         final String n = e.getKey();
         final ProgramUniform u = e.getValue();

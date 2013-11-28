@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,14 +37,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
+import javax.xml.parsers.ParserConfigurationException;
 
-import nu.xom.Builder;
-import nu.xom.Document;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 import org.pcollections.HashTreePSet;
 import org.pcollections.MapPSet;
+import org.xml.sax.SAXException;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -70,7 +71,7 @@ import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.parasol.PGLSLMetaXML;
+import com.io7m.parasol.xml.PGLSLMetaXML;
 import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.kernel.KLight.KProjective;
@@ -297,17 +298,26 @@ public final class SBSceneController implements
   private @Nonnull SBShader internalShaderLoad(
     final @Nonnull File file)
     throws ConstraintError,
-      ParsingException,
       IOException,
       InterruptedException,
-      ExecutionException
+      ExecutionException,
+      KXMLException
   {
-    final Builder b = new Builder();
-    final Document d = b.build(file);
-    final PGLSLMetaXML meta = PGLSLMetaXML.fromDocument(d);
-    final Future<SBShader> f =
-      this.renderer.shaderLoad(file.getParentFile(), meta);
-    return f.get();
+    final FileInputStream stream = new FileInputStream(file);
+    try {
+      final PGLSLMetaXML meta = PGLSLMetaXML.fromStream(stream, this.log);
+      final Future<SBShader> f =
+        this.renderer.shaderLoad(file.getParentFile(), meta);
+      return f.get();
+    } catch (final SAXException x) {
+      throw KXMLException.saxException(x);
+    } catch (final ParserConfigurationException x) {
+      throw KXMLException.parserConfigurationException(x);
+    } catch (final ParsingException x) {
+      throw KXMLException.parsingException(x);
+    } finally {
+      stream.close();
+    }
   }
 
   private void internalStateChangedNotifyListeners()

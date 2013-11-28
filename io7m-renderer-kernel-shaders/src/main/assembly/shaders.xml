@@ -9,7 +9,7 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>${project.build.directory}/glsl</directory>
+      <directory>${project.build.directory}/glsl-compact</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>
   </fileSets>

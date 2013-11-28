@@ -61,7 +61,13 @@
     <dependency>
       <groupId>com.io7m.parasol.compiler.frontend</groupId>
       <artifactId>io7m-parasol-compiler-frontend</artifactId>
-      <version>[0.1.20, 0.2.0)</version>
+      <version>[0.5.0, 0.6.0)</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.parasol.xml</groupId>
+      <artifactId>io7m-parasol-xml</artifactId>
+      <version>[0.5.0, 0.6.0)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -183,6 +189,22 @@
               </resources>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-parasol-sources-debug</id>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/parasol/debug</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/parasol</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
@@ -192,6 +214,21 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.2.1</version>
         <executions>
+          <execution>
+            <id>make-parasol-debug-sources</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>com.io7m.renderer.kernel_shaders.DebugMakeAll</mainClass>
+              <arguments>
+                <argument>${project.build.directory}/parasol/debug</argument>
+                <argument>${project.build.directory}/glsl/com/io7m/renderer/kernel</argument>
+                <argument>${project.build.directory}/glsl-compact/com/io7m/renderer/kernel</argument>
+              </arguments>
+            </configuration>
+          </execution>
           <execution>
             <id>make-parasol-forward-sources</id>
             <phase>prepare-package</phase>
@@ -203,6 +240,7 @@
               <arguments>
                 <argument>${project.build.directory}/parasol/forward</argument>
                 <argument>${project.build.directory}/glsl/com/io7m/renderer/kernel</argument>
+                <argument>${project.build.directory}/glsl-compact/com/io7m/renderer/kernel</argument>
               </arguments>
             </configuration>
           </execution>
@@ -217,6 +255,7 @@
               <arguments>
                 <argument>${project.build.directory}/parasol/shadow</argument>
                 <argument>${project.build.directory}/glsl/com/io7m/renderer/kernel</argument>
+                <argument>${project.build.directory}/glsl-compact/com/io7m/renderer/kernel</argument>
               </arguments>
             </configuration>
           </execution>
