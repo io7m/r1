@@ -37,10 +37,10 @@ import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
+import com.io7m.jlucache.LRUCacheTrivial;
 import com.io7m.jlucache.LUCache;
 import com.io7m.jlucache.LUCacheException;
 import com.io7m.jtensors.VectorI2I;
@@ -52,6 +52,7 @@ import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheIOException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLCompileException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLUnsupportedException;
+import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheXMLException;
 
 final class KRendererDebugDepthShadow implements KRenderer
 {
@@ -60,7 +61,8 @@ final class KRendererDebugDepthShadow implements KRenderer
     throws IOException,
       JCGLCompileException,
       JCGLException,
-      JCGLUnsupportedException
+      JCGLUnsupportedException,
+      KXMLException
   {
     switch (e.getCode()) {
       case KSHADER_CACHE_FILESYSTEM_ERROR:
@@ -91,6 +93,11 @@ final class KRendererDebugDepthShadow implements KRenderer
           (KShaderCacheJCGLUnsupportedException) e;
         throw x.getCause();
       }
+      case KSHADER_CACHE_XML_ERROR:
+      {
+        final KShaderCacheXMLException x = (KShaderCacheXMLException) e;
+        throw x.getCause();
+      }
     }
   }
 
@@ -98,24 +105,24 @@ final class KRendererDebugDepthShadow implements KRenderer
     KRendererDebugDepthShadow
     rendererNew(
       final @Nonnull JCGLImplementation g,
-      final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache,
+      final @Nonnull LRUCacheTrivial<String, KProgram, KShaderCacheException> shader_cache,
       final @Nonnull Log log)
       throws ConstraintError
   {
     return new KRendererDebugDepthShadow(g, shader_cache, log);
   }
 
-  private final @Nonnull VectorM4F                                                background;
-  private final @Nonnull JCGLImplementation                                       gl;
-  private final @Nonnull Log                                                      log;
-  private final @Nonnull KMutableMatrices                                         matrices;
-  private final @Nonnull KTransform.Context                                       transform_context;
-  private final @Nonnull VectorM2I                                                viewport_size;
-  private final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache;
+  private final @Nonnull VectorM4F                                        background;
+  private final @Nonnull JCGLImplementation                               gl;
+  private final @Nonnull Log                                              log;
+  private final @Nonnull KMutableMatrices                                 matrices;
+  private final @Nonnull KTransform.Context                               transform_context;
+  private final @Nonnull VectorM2I                                        viewport_size;
+  private final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache;
 
   private KRendererDebugDepthShadow(
     final @Nonnull JCGLImplementation gl,
-    final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache,
+    final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
     final @Nonnull Log log)
     throws ConstraintError
   {
@@ -149,7 +156,8 @@ final class KRendererDebugDepthShadow implements KRenderer
       ConstraintError,
       IOException,
       JCGLCompileException,
-      JCGLUnsupportedException
+      JCGLUnsupportedException,
+      KXMLException
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
@@ -209,9 +217,10 @@ final class KRendererDebugDepthShadow implements KRenderer
       final KMeshInstanceShadowMaterialLabel label =
         instance.getShadowMaterialLabel();
 
+      final KProgram p =
+        this.shader_cache.luCacheGet("shadow_" + label.getCode());
       final JCCEExecutionCallable e =
-        new JCCEExecutionCallable(this.shader_cache.luCacheGet("shadow_"
-          + label.getCode()));
+        new JCCEExecutionCallable(p.getProgram());
 
       /**
        * Upload matrices.

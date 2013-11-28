@@ -45,7 +45,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureCubeStatic;
@@ -648,11 +647,11 @@ public final class SBRendererSpecific implements KRenderer
     return used_units;
   }
 
-  private final @Nonnull ProgramReference                             program;
+  private final @Nonnull KProgram                                     program;
   private final @Nonnull JCGLImplementation                           gl;
   private final @Nonnull Log                                          log;
   private final @Nonnull VectorM4F                                    background;
-  private final @Nonnull ProgramReference                             program_depth;
+  private final @Nonnull KProgram                                     program_depth;
   private final @Nonnull JCCEExecutionCallable                        exec_depth;
   private final @Nonnull KMutableMatrices                             matrices;
   private final @Nonnull JCCEExecutionCallable                        exec_program;
@@ -664,31 +663,33 @@ public final class SBRendererSpecific implements KRenderer
     final @Nonnull JCGLImplementation g,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log,
-    final @Nonnull ProgramReference program)
+    final @Nonnull KProgram p)
     throws JCGLCompileException,
       JCGLUnsupportedException,
       FilesystemError,
       IOException,
       JCGLException,
-      ConstraintError
+      ConstraintError,
+      KXMLException
   {
-    return new SBRendererSpecific(g, fs, log, program);
+    return new SBRendererSpecific(g, fs, log, p);
   }
 
   public SBRendererSpecific(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log,
-    final @Nonnull ProgramReference program)
+    final @Nonnull KProgram p)
     throws ConstraintError,
       JCGLException,
       JCGLCompileException,
       JCGLUnsupportedException,
       FilesystemError,
-      IOException
+      IOException,
+      KXMLException
   {
-    this.program = Constraints.constrainNotNull(program, "Program");
-    this.exec_program = new JCCEExecutionCallable(program);
+    this.program = Constraints.constrainNotNull(p, "Program");
+    this.exec_program = new JCCEExecutionCallable(p.getProgram());
 
     this.log = new Log(log, "sb-renderer-specific");
     this.gl = gl;
@@ -700,14 +701,15 @@ public final class SBRendererSpecific implements KRenderer
     this.viewport_size = new VectorM2I();
 
     this.program_depth =
-      KShaderUtilities.makeProgram(
+      KProgram.newProgramFromFilesystem(
         gl.getGLCommon(),
         version.getNumber(),
         version.getAPI(),
         fs,
         "depth",
         log);
-    this.exec_depth = new JCCEExecutionCallable(this.program_depth);
+    this.exec_depth =
+      new JCCEExecutionCallable(this.program_depth.getProgram());
 
     this.fake_projective_modelview =
       new RMatrixM4x4F<RTransformProjectiveModelView>();

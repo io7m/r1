@@ -72,6 +72,11 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>com.io7m.parasol.xml</groupId>
+      <artifactId>io7m-parasol-xml</artifactId>
+      <version>[0.5.0, 0.6.0)</version>
+    </dependency>
+    <dependency>
       <groupId>com.io7m.jtensors</groupId>
       <artifactId>io7m-jtensors</artifactId>
       <version>[5.0.0, 6.0.0)</version>

@@ -47,10 +47,10 @@ import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
+import com.io7m.jlucache.LRUCacheTrivial;
 import com.io7m.jlucache.LUCache;
 import com.io7m.jlucache.LUCacheException;
 import com.io7m.jlucache.PCache;
@@ -73,6 +73,7 @@ import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheIOException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLCompileException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLUnsupportedException;
+import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheXMLException;
 import com.io7m.renderer.kernel.KShadowCacheException.KShadowCacheJCGLException;
 import com.io7m.renderer.kernel.KShadowCacheException.KShadowCacheJCGLUnsupportedException;
 import com.io7m.renderer.kernel.KTransform.Context;
@@ -154,7 +155,8 @@ public final class KRendererForward implements KRenderer
     throws IOException,
       JCGLCompileException,
       JCGLException,
-      JCGLUnsupportedException
+      JCGLUnsupportedException,
+      KXMLException
   {
     switch (e.getCode()) {
       case KSHADER_CACHE_FILESYSTEM_ERROR:
@@ -183,6 +185,11 @@ public final class KRendererForward implements KRenderer
       {
         final KShaderCacheJCGLUnsupportedException x =
           (KShaderCacheJCGLUnsupportedException) e;
+        throw x.getCause();
+      }
+      case KSHADER_CACHE_XML_ERROR:
+      {
+        final KShaderCacheXMLException x = (KShaderCacheXMLException) e;
         throw x.getCause();
       }
     }
@@ -243,7 +250,7 @@ public final class KRendererForward implements KRenderer
     KRendererForward
     rendererNew(
       final @Nonnull JCGLImplementation g,
-      final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache,
+      final @Nonnull LRUCacheTrivial<String, KProgram, KShaderCacheException> shader_cache,
       final @Nonnull PCache<KShadow, KFramebufferDepth, KShadowCacheException> shadow_cache,
       final @Nonnull Log log)
       throws ConstraintError
@@ -258,14 +265,14 @@ public final class KRendererForward implements KRenderer
   private final @Nonnull Log                                                       log;
   private final @Nonnull RMatrixM4x4F<RTransformView>                              m4_view;
   private final @Nonnull KMutableMatrices                                          matrices;
-  private final @Nonnull LUCache<String, ProgramReference, KShaderCacheException>  shader_cache;
+  private final @Nonnull LUCache<String, KProgram, KShaderCacheException>          shader_cache;
   private final @Nonnull PCache<KShadow, KFramebufferDepth, KShadowCacheException> shadow_cache;
   private final @Nonnull Context                                                   transform_context;
   private final @Nonnull VectorM2I                                                 viewport_size;
 
   private KRendererForward(
     final @Nonnull JCGLImplementation gl,
-    final @Nonnull LUCache<String, ProgramReference, KShaderCacheException> shader_cache,
+    final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
     final @Nonnull PCache<KShadow, KFramebufferDepth, KShadowCacheException> shadow_cache,
     final @Nonnull Log log)
     throws ConstraintError
@@ -611,8 +618,8 @@ public final class KRendererForward implements KRenderer
       LUCacheException,
       JCGLException
   {
-    final JCCEExecutionCallable e =
-      new JCCEExecutionCallable(this.shader_cache.luCacheGet("depth"));
+    final KProgram p = this.shader_cache.luCacheGet("depth");
+    final JCCEExecutionCallable e = new JCCEExecutionCallable(p.getProgram());
 
     e.execPrepare(gc);
     KShadingProgramCommon.putMatrixProjection(
@@ -723,7 +730,8 @@ public final class KRendererForward implements KRenderer
       ConstraintError,
       JCGLCompileException,
       JCGLUnsupportedException,
-      IOException
+      IOException,
+      KXMLException
   {
     Constraints.constrainNotNull(framebuffer, "Framebuffer");
     Constraints.constrainNotNull(scene, "Scene");
@@ -848,9 +856,10 @@ public final class KRendererForward implements KRenderer
 
         KRendererForward.makeLitLabel(this.label_cache, light, label);
 
+        final KProgram p =
+          this.shader_cache.luCacheGet(this.label_cache.toString());
         final JCCEExecutionCallable e =
-          new JCCEExecutionCallable(
-            this.shader_cache.luCacheGet(this.label_cache.toString()));
+          new JCCEExecutionCallable(p.getProgram());
 
         e.execPrepare(gc);
         KShadingProgramCommon.putMatrixProjection(
@@ -879,9 +888,10 @@ public final class KRendererForward implements KRenderer
     for (final KBatchOpaqueUnlit bl : batches.getBatchesOpaqueUnlit()) {
       KRendererForward.makeUnlitLabel(this.label_cache, bl.getLabel());
 
+      final KProgram p =
+        this.shader_cache.luCacheGet(this.label_cache.toString());
       final JCCEExecutionCallable e =
-        new JCCEExecutionCallable(
-          this.shader_cache.luCacheGet(this.label_cache.toString()));
+        new JCCEExecutionCallable(p.getProgram());
 
       e.execPrepare(gc);
       KShadingProgramCommon.putMatrixProjection(
@@ -1015,9 +1025,10 @@ public final class KRendererForward implements KRenderer
     try {
       KRendererForward.makeShadowLabel(this.label_cache, b.getLabel());
 
+      final KProgram p =
+        this.shader_cache.luCacheGet(this.label_cache.toString());
       final JCCEExecutionCallable e =
-        new JCCEExecutionCallable(
-          this.shader_cache.luCacheGet(this.label_cache.toString()));
+        new JCCEExecutionCallable(p.getProgram());
 
       e.execPrepare(gc);
       KShadingProgramCommon.putMatrixProjection(
@@ -1334,9 +1345,9 @@ public final class KRendererForward implements KRenderer
     final KMeshInstanceShadowMaterialLabel label = i.getShadowMaterialLabel();
     KRendererForward.makeShadowLabel(this.label_cache, label);
 
-    final JCCEExecutionCallable e =
-      new JCCEExecutionCallable(this.shader_cache.luCacheGet(this.label_cache
-        .toString()));
+    final KProgram p =
+      this.shader_cache.luCacheGet(this.label_cache.toString());
+    final JCCEExecutionCallable e = new JCCEExecutionCallable(p.getProgram());
 
     final KMesh mesh = i.getMesh();
     final ArrayBuffer array = mesh.getArrayBuffer();
@@ -1414,9 +1425,10 @@ public final class KRendererForward implements KRenderer
         for (final KLight light : bl.getLights()) {
           KRendererForward.makeLitLabel(this.label_cache, light, label);
 
+          final KProgram p =
+            this.shader_cache.luCacheGet(this.label_cache.toString());
           final JCCEExecutionCallable e =
-            new JCCEExecutionCallable(
-              this.shader_cache.luCacheGet(this.label_cache.toString()));
+            new JCCEExecutionCallable(p.getProgram());
 
           e.execPrepare(gc);
           KShadingProgramCommon.putMatrixProjection(

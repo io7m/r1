@@ -72,6 +72,29 @@ module Normals is
     end;
 
   --
+  -- Given a texture consisting of normal vectors [t_normal], object-space
+  -- normal [n], object-space tangent [t], object-space bitangent [b],
+  -- and texture coordinates [uv], [unpack] and [transform] a
+  -- vector from the texture, resulting in an object-space peturbed normal.
+  --
+
+  function bump_local (
+    t_normal : sampler_2d,
+    n        : vector_3f,
+    t        : vector_3f,
+    b        : vector_3f,
+    uv       : vector_2f
+  ) : vector_3f =
+    let
+      value m  = unpack (t_normal, uv);
+      value nn = V3.normalize (n);
+      value nt = V3.normalize (t);
+      value nb = V3.normalize (b);
+    in
+      transform (m, nt, nb, nn)
+    end;
+
+  --
   -- Given a texture consisting of normal vectors [t_normal],
   -- an object-to-eye-space matrix [m_normal], object-space
   -- normal [n], object-space tangent [t], object-space bitangent [b],
@@ -87,14 +110,9 @@ module Normals is
     b        : vector_3f,
     uv       : vector_2f
   ) : vector_3f =
-    let
-      value m  = unpack (t_normal, uv);
-      value nn = V3.normalize (n);
-      value nt = V3.normalize (t);
-      value nb = V3.normalize (b);
-      value r  = transform (m, nt, nb, nn);
-    in
-      M3.multiply_vector (m_normal, r)
-    end;
+    M3.multiply_vector (
+      m_normal,
+      bump_local (t_normal, n, t, b, uv)
+    );
 
 end;
