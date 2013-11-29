@@ -619,7 +619,7 @@ public final class KRendererForward implements KRenderer
       JCGLException
   {
     final KProgram p = this.shader_cache.luCacheGet("depth");
-    final JCCEExecutionCallable e = new JCCEExecutionCallable(p.getProgram());
+    final JCCEExecutionCallable e = p.getExecutable();
 
     e.execPrepare(gc);
     KShadingProgramCommon.putMatrixProjection(
@@ -858,8 +858,7 @@ public final class KRendererForward implements KRenderer
 
         final KProgram p =
           this.shader_cache.luCacheGet(this.label_cache.toString());
-        final JCCEExecutionCallable e =
-          new JCCEExecutionCallable(p.getProgram());
+        final JCCEExecutionCallable e = p.getExecutable();
 
         e.execPrepare(gc);
         KShadingProgramCommon.putMatrixProjection(
@@ -890,8 +889,7 @@ public final class KRendererForward implements KRenderer
 
       final KProgram p =
         this.shader_cache.luCacheGet(this.label_cache.toString());
-      final JCCEExecutionCallable e =
-        new JCCEExecutionCallable(p.getProgram());
+      final JCCEExecutionCallable e = p.getExecutable();
 
       e.execPrepare(gc);
       KShadingProgramCommon.putMatrixProjection(
@@ -1027,8 +1025,7 @@ public final class KRendererForward implements KRenderer
 
       final KProgram p =
         this.shader_cache.luCacheGet(this.label_cache.toString());
-      final JCCEExecutionCallable e =
-        new JCCEExecutionCallable(p.getProgram());
+      final JCCEExecutionCallable e = p.getExecutable();
 
       e.execPrepare(gc);
       KShadingProgramCommon.putMatrixProjection(
@@ -1347,7 +1344,7 @@ public final class KRendererForward implements KRenderer
 
     final KProgram p =
       this.shader_cache.luCacheGet(this.label_cache.toString());
-    final JCCEExecutionCallable e = new JCCEExecutionCallable(p.getProgram());
+    final JCCEExecutionCallable e = p.getExecutable();
 
     final KMesh mesh = i.getMesh();
     final ArrayBuffer array = mesh.getArrayBuffer();
@@ -1427,8 +1424,7 @@ public final class KRendererForward implements KRenderer
 
           final KProgram p =
             this.shader_cache.luCacheGet(this.label_cache.toString());
-          final JCCEExecutionCallable e =
-            new JCCEExecutionCallable(p.getProgram());
+          final JCCEExecutionCallable e = p.getExecutable();
 
           e.execPrepare(gc);
           KShadingProgramCommon.putMatrixProjection(

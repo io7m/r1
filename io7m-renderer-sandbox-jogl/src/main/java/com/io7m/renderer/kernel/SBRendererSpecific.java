@@ -125,7 +125,6 @@ public final class SBRendererSpecific implements KRenderer
       SBRendererSpecific.setParametersLight(
         gc,
         light,
-        i,
         mwi,
         exec,
         texture_units);
@@ -357,7 +356,6 @@ public final class SBRendererSpecific implements KRenderer
   private static int setParametersLight(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KLight light,
-    final @Nonnull KMeshInstance i,
     final @Nonnull KMutableMatrices.WithInstance mwi,
     final @Nonnull JCCEExecutionCallable exec,
     final int texture_units)
@@ -652,9 +650,7 @@ public final class SBRendererSpecific implements KRenderer
   private final @Nonnull Log                                          log;
   private final @Nonnull VectorM4F                                    background;
   private final @Nonnull KProgram                                     program_depth;
-  private final @Nonnull JCCEExecutionCallable                        exec_depth;
   private final @Nonnull KMutableMatrices                             matrices;
-  private final @Nonnull JCCEExecutionCallable                        exec_program;
   private final @Nonnull VectorM2I                                    viewport_size;
   private final @Nonnull RMatrixM4x4F<RTransformProjectiveModelView>  fake_projective_modelview;
   private final @Nonnull RMatrixM4x4F<RTransformProjectiveProjection> fake_projective_projection;
@@ -689,7 +685,6 @@ public final class SBRendererSpecific implements KRenderer
       KXMLException
   {
     this.program = Constraints.constrainNotNull(p, "Program");
-    this.exec_program = new JCCEExecutionCallable(p.getProgram());
 
     this.log = new Log(log, "sb-renderer-specific");
     this.gl = gl;
@@ -708,8 +703,6 @@ public final class SBRendererSpecific implements KRenderer
         fs,
         "depth",
         log);
-    this.exec_depth =
-      new JCCEExecutionCallable(this.program_depth.getProgram());
 
     this.fake_projective_modelview =
       new RMatrixM4x4F<RTransformProjectiveModelView>();
@@ -719,20 +712,20 @@ public final class SBRendererSpecific implements KRenderer
 
   private void putTextureProjectionMatrixForLight(
     final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable e,
     final @Nonnull KLight light,
     final @Nonnull KMutableMatrices.WithInstance mwi)
     throws JCGLException,
       ConstraintError
   {
-    if (KShadingProgramCommon
-      .existsMatrixTextureProjection(this.exec_program)) {
+    if (KShadingProgramCommon.existsMatrixTextureProjection(e)) {
       switch (light.getType()) {
         case LIGHT_DIRECTIONAL:
         case LIGHT_SPHERE:
         {
           KShadingProgramCommon.putMatrixProjectiveProjection(
             gc,
-            this.exec_program,
+            e,
             this.fake_projective_projection);
           break;
         }
@@ -743,7 +736,7 @@ public final class SBRendererSpecific implements KRenderer
           try {
             KShadingProgramCommon.putMatrixProjectiveProjection(
               gc,
-              this.exec_program,
+              e,
               mwp.getMatrixProjectiveProjection());
           } finally {
             mwp.projectiveLightFinish();
@@ -757,17 +750,18 @@ public final class SBRendererSpecific implements KRenderer
   /**
    * Render the given mesh into the depth buffer, without touching the color
    * buffer.
+   * 
+   * @param e
    */
 
-  private void renderDepthPassMesh(
+  @SuppressWarnings("static-method") private void renderDepthPassMesh(
     final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable e,
     final @Nonnull KMeshInstance i,
     final @Nonnull KMutableMatrices.WithInstance mwi)
     throws ConstraintError,
       JCGLException
   {
-    final JCCEExecutionCallable e = this.exec_depth;
-
     /**
      * Upload matrices.
      */
@@ -795,7 +789,7 @@ public final class SBRendererSpecific implements KRenderer
           try {
             gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
           } catch (final ConstraintError x) {
-            throw new UnreachableCodeException();
+            throw new UnreachableCodeException(x);
           }
           return null;
         }
@@ -804,7 +798,7 @@ public final class SBRendererSpecific implements KRenderer
       try {
         e.execRun(gc);
       } catch (final Exception x) {
-        throw new UnreachableCodeException();
+        throw new UnreachableCodeException(x);
       }
 
     } finally {
@@ -824,12 +818,14 @@ public final class SBRendererSpecific implements KRenderer
     throws ConstraintError,
       JCGLException
   {
-    this.exec_depth.execPrepare(gc);
+    final JCCEExecutionCallable e = this.program_depth.getExecutable();
+
+    e.execPrepare(gc);
     KShadingProgramCommon.putMatrixProjection(
-      this.exec_depth,
+      e,
       gc,
       mwc.getMatrixProjection());
-    this.exec_depth.execCancel();
+    e.execCancel();
 
     final KBatches batches = scene.getBatches();
 
@@ -844,7 +840,7 @@ public final class SBRendererSpecific implements KRenderer
         for (final KMeshInstance i : bl.getInstances()) {
           final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
           try {
-            this.renderDepthPassMesh(gc, i, mwi);
+            this.renderDepthPassMesh(gc, e, i, mwi);
           } finally {
             mwi.instanceFinish();
           }
@@ -856,7 +852,7 @@ public final class SBRendererSpecific implements KRenderer
       for (final KMeshInstance i : bl.getInstances()) {
         final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
         try {
-          this.renderDepthPassMesh(gc, i, mwi);
+          this.renderDepthPassMesh(gc, e, i, mwi);
         } finally {
           mwi.instanceFinish();
         }
@@ -950,10 +946,13 @@ public final class SBRendererSpecific implements KRenderer
 
   /**
    * Render an opaque mesh to the color buffer.
+   * 
+   * @param e
    */
 
   private void renderOpaqueMesh(
     final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable e,
     final @Nonnull KLight light,
     final @Nonnull KMeshInstance i,
     final @Nonnull KMutableMatrices.WithInstance mwi)
@@ -964,19 +963,13 @@ public final class SBRendererSpecific implements KRenderer
      * Upload matrices.
      */
 
-    this.exec_program.execPrepare(gc);
-    KShadingProgramCommon.putMatrixProjectionReuse(this.exec_program);
-    KShadingProgramCommon.putMatrixModelView(
-      this.exec_program,
-      gc,
-      mwi.getMatrixModelView());
+    e.execPrepare(gc);
+    KShadingProgramCommon.putMatrixProjectionReuse(e);
+    KShadingProgramCommon.putMatrixModelView(e, gc, mwi.getMatrixModelView());
 
-    this.putTextureProjectionMatrixForLight(gc, light, mwi);
-    if (KShadingProgramCommon.existsMatrixNormal(this.exec_program)) {
-      KShadingProgramCommon.putMatrixNormal(
-        this.exec_program,
-        gc,
-        mwi.getMatrixNormal());
+    this.putTextureProjectionMatrixForLight(gc, e, light, mwi);
+    if (KShadingProgramCommon.existsMatrixNormal(e)) {
+      KShadingProgramCommon.putMatrixNormal(e, gc, mwi.getMatrixNormal());
     }
 
     /**
@@ -989,36 +982,27 @@ public final class SBRendererSpecific implements KRenderer
       final IndexBuffer indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
-      KShadingProgramCommon.bindAttributePosition(
-        gc,
-        this.exec_program,
-        array);
+      KShadingProgramCommon.bindAttributePosition(gc, e, array);
 
-      SBRendererSpecific.setParameters(
-        gc,
-        light,
-        i,
-        mwi,
-        array,
-        this.exec_program);
+      SBRendererSpecific.setParameters(gc, light, i, mwi, array, e);
 
-      this.exec_program.execSetCallable(new Callable<Void>() {
+      e.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception
         {
           try {
             gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
           } catch (final ConstraintError x) {
-            throw new UnreachableCodeException();
+            throw new UnreachableCodeException(x);
           }
           return null;
         }
       });
 
       try {
-        this.exec_program.execRun(gc);
+        e.execRun(gc);
       } catch (final Exception x) {
-        throw new UnreachableCodeException();
+        throw new UnreachableCodeException(x);
       }
 
     } finally {
@@ -1033,12 +1017,14 @@ public final class SBRendererSpecific implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-    this.exec_program.execPrepare(gc);
+    final JCCEExecutionCallable e = this.program.getExecutable();
+
+    e.execPrepare(gc);
     KShadingProgramCommon.putMatrixProjection(
-      this.exec_program,
+      e,
       gc,
       mwc.getMatrixProjection());
-    this.exec_program.execCancel();
+    e.execCancel();
 
     final KBatches batches = scene.getBatches();
 
@@ -1054,7 +1040,7 @@ public final class SBRendererSpecific implements KRenderer
         for (final KMeshInstance i : bl.getInstances()) {
           final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
           try {
-            this.renderOpaqueMesh(gc, light, i, mwi);
+            this.renderOpaqueMesh(gc, e, light, i, mwi);
           } finally {
             mwi.instanceFinish();
           }
@@ -1066,7 +1052,7 @@ public final class SBRendererSpecific implements KRenderer
       for (final KMeshInstance i : bl.getInstances()) {
         final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
         try {
-          this.renderOpaqueMesh(gc, null, i, mwi);
+          this.renderOpaqueMesh(gc, e, null, i, mwi);
         } finally {
           mwi.instanceFinish();
         }
@@ -1086,20 +1072,14 @@ public final class SBRendererSpecific implements KRenderer
      * Upload matrices.
      */
 
-    this.exec_program.execPrepare(gc);
-    KShadingProgramCommon.putMatrixProjectionReuse(this.exec_program);
-    this.putTextureProjectionMatrixForLight(gc, light, mwi);
+    final JCCEExecutionCallable e = this.program.getExecutable();
 
-    KShadingProgramCommon.putMatrixModelView(
-      this.exec_program,
-      gc,
-      mwi.getMatrixModelView());
-
-    if (KShadingProgramCommon.existsMatrixNormal(this.exec_program)) {
-      KShadingProgramCommon.putMatrixNormal(
-        this.exec_program,
-        gc,
-        mwi.getMatrixNormal());
+    e.execPrepare(gc);
+    KShadingProgramCommon.putMatrixProjectionReuse(e);
+    this.putTextureProjectionMatrixForLight(gc, e, light, mwi);
+    KShadingProgramCommon.putMatrixModelView(e, gc, mwi.getMatrixModelView());
+    if (KShadingProgramCommon.existsMatrixNormal(e)) {
+      KShadingProgramCommon.putMatrixNormal(e, gc, mwi.getMatrixNormal());
     }
 
     /**
@@ -1112,36 +1092,26 @@ public final class SBRendererSpecific implements KRenderer
       final IndexBuffer indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
-      KShadingProgramCommon.bindAttributePosition(
-        gc,
-        this.exec_program,
-        array);
+      KShadingProgramCommon.bindAttributePosition(gc, e, array);
+      SBRendererSpecific.setParameters(gc, light, i, mwi, array, e);
 
-      SBRendererSpecific.setParameters(
-        gc,
-        light,
-        i,
-        mwi,
-        array,
-        this.exec_program);
-
-      this.exec_program.execSetCallable(new Callable<Void>() {
+      e.execSetCallable(new Callable<Void>() {
         @Override public Void call()
           throws Exception
         {
           try {
             gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
           } catch (final ConstraintError x) {
-            throw new UnreachableCodeException();
+            throw new UnreachableCodeException(x);
           }
           return null;
         }
       });
 
       try {
-        this.exec_program.execRun(gc);
+        e.execRun(gc);
       } catch (final Exception x) {
-        throw new UnreachableCodeException();
+        throw new UnreachableCodeException(x);
       }
 
     } finally {

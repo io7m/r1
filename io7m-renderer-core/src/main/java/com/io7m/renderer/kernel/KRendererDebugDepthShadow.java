@@ -219,8 +219,7 @@ final class KRendererDebugDepthShadow implements KRenderer
 
       final KProgram p =
         this.shader_cache.luCacheGet("shadow_" + label.getCode());
-      final JCCEExecutionCallable e =
-        new JCCEExecutionCallable(p.getProgram());
+      final JCCEExecutionCallable e = p.getExecutable();
 
       /**
        * Upload matrices.

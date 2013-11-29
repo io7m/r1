@@ -66,14 +66,13 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
     return new KRendererDebugNormalsMapTangent(g, fs, log);
   }
 
-  private final @Nonnull VectorM4F             background;
-  private final @Nonnull JCCEExecutionCallable exec;
-  private final @Nonnull JCGLImplementation    gl;
-  private final @Nonnull Log                   log;
-  private final @Nonnull KMutableMatrices      matrices;
-  private final @Nonnull KProgram              program;
-  private final @Nonnull KTransform.Context    transform_context;
-  private final @Nonnull VectorM2I             viewport_size;
+  private final @Nonnull VectorM4F          background;
+  private final @Nonnull JCGLImplementation gl;
+  private final @Nonnull Log                log;
+  private final @Nonnull KMutableMatrices   matrices;
+  private final @Nonnull KProgram           program;
+  private final @Nonnull KTransform.Context transform_context;
+  private final @Nonnull VectorM2I          viewport_size;
 
   private KRendererDebugNormalsMapTangent(
     final @Nonnull JCGLImplementation gl,
@@ -105,8 +104,6 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
         fs,
         "debug_normals_map_tangent",
         log);
-
-    this.exec = new JCCEExecutionCallable(this.program.getProgram());
   }
 
   @Override public void rendererClose()
@@ -149,15 +146,16 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
         gc.colorBufferClearV4f(this.background);
         gc.blendingDisable();
 
-        this.exec.execPrepare(gc);
+        final JCCEExecutionCallable e = this.program.getExecutable();
+        e.execPrepare(gc);
         KShadingProgramCommon.putMatrixProjection(
-          this.exec,
+          e,
           gc,
           mwc.getMatrixProjection());
-        this.exec.execCancel();
+        e.execCancel();
 
         for (final KMeshInstance mesh : scene.getInstances()) {
-          this.renderMesh(gc, mwc, mesh);
+          this.renderMesh(gc, e, mwc, mesh);
         }
       } finally {
         gc.framebufferDrawUnbind();
@@ -173,8 +171,9 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
     VectorM4F.copy(rgba, this.background);
   }
 
-  private void renderMesh(
+  @SuppressWarnings("static-method") private void renderMesh(
     final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable e,
     final @Nonnull KMutableMatrices.WithCamera mwc,
     final @Nonnull KMeshInstance instance)
     throws ConstraintError,
@@ -187,10 +186,10 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
        * Upload matrices.
        */
 
-      this.exec.execPrepare(gc);
-      KShadingProgramCommon.putMatrixProjectionReuse(this.exec);
+      e.execPrepare(gc);
+      KShadingProgramCommon.putMatrixProjectionReuse(e);
       KShadingProgramCommon.putMatrixModelView(
-        this.exec,
+        e,
         gc,
         mwi.getMatrixModelView());
 
@@ -213,10 +212,7 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
         }
       }
 
-      this.exec.execUniformPutTextureUnit(
-        gc,
-        "t_normal",
-        texture_units.get(0));
+      e.execUniformPutTextureUnit(gc, "t_normal", texture_units.get(0));
 
       /**
        * Associate array attributes with program attributes, and draw mesh.
@@ -228,26 +224,26 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
         final IndexBuffer indices = mesh.getIndexBuffer();
 
         gc.arrayBufferBind(array);
-        KShadingProgramCommon.bindAttributePosition(gc, this.exec, array);
-        KShadingProgramCommon.bindAttributeUV(gc, this.exec, array);
+        KShadingProgramCommon.bindAttributePosition(gc, e, array);
+        KShadingProgramCommon.bindAttributeUV(gc, e, array);
 
-        this.exec.execSetCallable(new Callable<Void>() {
+        e.execSetCallable(new Callable<Void>() {
           @Override public Void call()
             throws Exception
           {
             try {
               gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-            } catch (final ConstraintError e) {
-              throw new UnreachableCodeException();
+            } catch (final ConstraintError x) {
+              throw new UnreachableCodeException(x);
             }
             return null;
           }
         });
 
         try {
-          this.exec.execRun(gc);
-        } catch (final Exception e) {
-          throw new UnreachableCodeException();
+          e.execRun(gc);
+        } catch (final Exception x) {
+          throw new UnreachableCodeException(x);
         }
 
       } finally {
