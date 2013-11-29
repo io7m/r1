@@ -62,14 +62,13 @@ final class KRendererDebugTangentsVertexLocal implements KRenderer
     return new KRendererDebugTangentsVertexLocal(g, fs, log);
   }
 
-  private final @Nonnull VectorM4F             background;
-  private final @Nonnull JCCEExecutionCallable exec;
-  private final @Nonnull JCGLImplementation    gl;
-  private final @Nonnull Log                   log;
-  private final @Nonnull KMutableMatrices      matrices;
-  private final @Nonnull KProgram              program;
-  private final @Nonnull KTransform.Context    transform_context;
-  private final @Nonnull VectorM2I             viewport_size;
+  private final @Nonnull VectorM4F          background;
+  private final @Nonnull JCGLImplementation gl;
+  private final @Nonnull Log                log;
+  private final @Nonnull KMutableMatrices   matrices;
+  private final @Nonnull KProgram           program;
+  private final @Nonnull KTransform.Context transform_context;
+  private final @Nonnull VectorM2I          viewport_size;
 
   private KRendererDebugTangentsVertexLocal(
     final @Nonnull JCGLImplementation gl,
@@ -101,8 +100,6 @@ final class KRendererDebugTangentsVertexLocal implements KRenderer
         fs,
         "debug_tangents_vertex_local",
         log);
-
-    this.exec = new JCCEExecutionCallable(this.program.getProgram());
   }
 
   @Override public void rendererClose()
@@ -145,15 +142,16 @@ final class KRendererDebugTangentsVertexLocal implements KRenderer
         gc.colorBufferClearV4f(this.background);
         gc.blendingDisable();
 
-        this.exec.execPrepare(gc);
+        final JCCEExecutionCallable e = this.program.getExecutable();
+        e.execPrepare(gc);
         KShadingProgramCommon.putMatrixProjection(
-          this.exec,
+          e,
           gc,
           mwc.getMatrixProjection());
-        this.exec.execCancel();
+        e.execCancel();
 
         for (final KMeshInstance mesh : scene.getInstances()) {
-          this.renderMesh(gc, mwc, mesh);
+          this.renderMesh(gc, e, mwc, mesh);
         }
       } finally {
         gc.framebufferDrawUnbind();
@@ -169,8 +167,9 @@ final class KRendererDebugTangentsVertexLocal implements KRenderer
     VectorM4F.copy(rgba, this.background);
   }
 
-  private void renderMesh(
+  @SuppressWarnings("static-method") private void renderMesh(
     final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable e,
     final @Nonnull KMutableMatrices.WithCamera mwc,
     final @Nonnull KMeshInstance instance)
     throws ConstraintError,
@@ -183,10 +182,10 @@ final class KRendererDebugTangentsVertexLocal implements KRenderer
        * Upload matrices.
        */
 
-      this.exec.execPrepare(gc);
-      KShadingProgramCommon.putMatrixProjectionReuse(this.exec);
+      e.execPrepare(gc);
+      KShadingProgramCommon.putMatrixProjectionReuse(e);
       KShadingProgramCommon.putMatrixModelView(
-        this.exec,
+        e,
         gc,
         mwi.getMatrixModelView());
 
@@ -200,26 +199,26 @@ final class KRendererDebugTangentsVertexLocal implements KRenderer
         final IndexBuffer indices = mesh.getIndexBuffer();
 
         gc.arrayBufferBind(array);
-        KShadingProgramCommon.bindAttributePosition(gc, this.exec, array);
-        KShadingProgramCommon.bindAttributeTangent4(gc, this.exec, array);
+        KShadingProgramCommon.bindAttributePosition(gc, e, array);
+        KShadingProgramCommon.bindAttributeTangent4(gc, e, array);
 
-        this.exec.execSetCallable(new Callable<Void>() {
+        e.execSetCallable(new Callable<Void>() {
           @Override public Void call()
             throws Exception
           {
             try {
               gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-            } catch (final ConstraintError e) {
-              throw new UnreachableCodeException();
+            } catch (final ConstraintError x) {
+              throw new UnreachableCodeException(x);
             }
             return null;
           }
         });
 
         try {
-          this.exec.execRun(gc);
-        } catch (final Exception e) {
-          throw new UnreachableCodeException();
+          e.execRun(gc);
+        } catch (final Exception x) {
+          throw new UnreachableCodeException(x);
         }
 
       } finally {
