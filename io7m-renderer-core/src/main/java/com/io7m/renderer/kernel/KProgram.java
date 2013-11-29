@@ -282,7 +282,8 @@ import com.io7m.parasol.xml.VertexParameter;
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Version v,
     final @Nonnull String name,
-    final @Nonnull PGLSLMetaXML m)
+    final @Nonnull PGLSLMetaXML m,
+    final @Nonnull Log log)
     throws ConstraintError,
       FilesystemError,
       IOException,
@@ -304,7 +305,7 @@ import com.io7m.parasol.xml.VertexParameter;
       try {
         final ProgramReference p =
           KProgram.newProgramFromStreams(gl, name, v_stream, f_stream, v);
-        return new KProgram(m, p);
+        return new KProgram(m, p, log);
       } finally {
         f_stream.close();
       }
@@ -317,7 +318,8 @@ import com.io7m.parasol.xml.VertexParameter;
     final @Nonnull JCGLShadersCommon gl,
     final @Nonnull File directory,
     final @Nonnull Version v,
-    final @Nonnull PGLSLMetaXML m)
+    final @Nonnull PGLSLMetaXML m,
+    final @Nonnull Log log)
     throws ConstraintError,
       IOException,
       JCGLCompileException,
@@ -342,7 +344,7 @@ import com.io7m.parasol.xml.VertexParameter;
             v_stream,
             f_stream,
             v);
-        return new KProgram(m, p);
+        return new KProgram(m, p, log);
       } finally {
         f_stream.close();
       }
@@ -357,7 +359,8 @@ import com.io7m.parasol.xml.VertexParameter;
     final @Nonnull JCGLSLVersionNumber version,
     final @Nonnull JCGLApi api,
     final @Nonnull String name,
-    final @Nonnull PGLSLMetaXML m)
+    final @Nonnull PGLSLMetaXML m,
+    final @Nonnull Log log)
     throws JCGLUnsupportedException,
       ConstraintError,
       FilesystemError,
@@ -375,7 +378,7 @@ import com.io7m.parasol.xml.VertexParameter;
       try {
         final ProgramReference p =
           KProgram.newProgramFromStreams(gl, name, v_stream, f_stream, null);
-        return new KProgram(m, p);
+        return new KProgram(m, p, log);
       } finally {
         f_stream.close();
       }
@@ -389,7 +392,8 @@ import com.io7m.parasol.xml.VertexParameter;
     final @Nonnull File directory,
     final @Nonnull JCGLSLVersionNumber version,
     final @Nonnull JCGLApi api,
-    final @Nonnull PGLSLMetaXML m)
+    final @Nonnull PGLSLMetaXML m,
+    final @Nonnull Log log)
     throws JCGLUnsupportedException,
       IOException,
       JCGLCompileException,
@@ -415,7 +419,7 @@ import com.io7m.parasol.xml.VertexParameter;
             v_stream,
             f_stream,
             null);
-        return new KProgram(m, p);
+        return new KProgram(m, p, log);
       } finally {
         f_stream.close();
       }
@@ -453,14 +457,15 @@ import com.io7m.parasol.xml.VertexParameter;
       KProgram.checkSupport(v, m);
 
       if (m.isCompacted()) {
-        return KProgram.loadCompactedFromDirectory(gl, directory, v, m);
+        return KProgram.loadCompactedFromDirectory(gl, directory, v, m, logp);
       }
       return KProgram.loadUncompactedFromDirectory(
         gl,
         directory,
         version,
         api,
-        m);
+        m,
+        logp);
     } catch (final ValidityException x) {
       throw KXMLException.validityException(x);
     } catch (final ParsingException x) {
@@ -491,21 +496,23 @@ import com.io7m.parasol.xml.VertexParameter;
     Constraints.constrainNotNull(directory, "Filesystem");
     Constraints.constrainNotNull(log, "Log");
 
-    KProgram.getLog(version, api, meta.getName(), log);
+    final Log logp = KProgram.getLog(version, api, meta.getName(), log);
 
     final Version v =
       Version.newVersion(KProgram.getVersion(version), KProgram.getAPI(api));
     KProgram.checkSupport(v, meta);
 
     if (meta.isCompacted()) {
-      return KProgram.loadCompactedFromDirectory(gl, directory, v, meta);
+      return KProgram
+        .loadCompactedFromDirectory(gl, directory, v, meta, logp);
     }
     return KProgram.loadUncompactedFromDirectory(
       gl,
       directory,
       version,
       api,
-      meta);
+      meta,
+      logp);
   }
 
   public static @Nonnull KProgram newProgramFromFilesystem(
@@ -541,9 +548,9 @@ import com.io7m.parasol.xml.VertexParameter;
       KProgram.checkSupport(v, m);
 
       if (m.isCompacted()) {
-        return KProgram.loadCompacted(gl, fs, v, name, m);
+        return KProgram.loadCompacted(gl, fs, v, name, m, logp);
       }
-      return KProgram.loadUncompacted(gl, fs, version, api, name, m);
+      return KProgram.loadUncompacted(gl, fs, version, api, name, m, logp);
 
     } catch (final ValidityException x) {
       throw KXMLException.validityException(x);
@@ -641,7 +648,8 @@ import com.io7m.parasol.xml.VertexParameter;
 
   private KProgram(
     final @Nonnull PGLSLMetaXML meta,
-    final @Nonnull ProgramReference program)
+    final @Nonnull ProgramReference program,
+    final @Nonnull Log log)
     throws ConstraintError
   {
     this.meta = Constraints.constrainNotNull(meta, "Meta");
@@ -649,16 +657,43 @@ import com.io7m.parasol.xml.VertexParameter;
     this.declared_uniforms = new HashMap<String, JCGLType>();
     this.declared_attributes = new HashMap<String, JCGLType>();
 
+    final StringBuilder message = new StringBuilder();
+
     for (final VertexParameter p : meta.getDeclaredVertexParameters()) {
-      this.declared_uniforms.put(p.getName(), JCGLType.fromName(p.getType()));
+      final JCGLType t = JCGLType.fromName(p.getType());
+      this.declared_uniforms.put(p.getName(), t);
+      if (log.enabled(Level.LOG_DEBUG)) {
+        message.setLength(0);
+        message.append("declared uniform ");
+        message.append(p.getName());
+        message.append(" ");
+        message.append(t);
+        log.debug(message.toString());
+      }
     }
     for (final FragmentParameter p : meta.getDeclaredFragmentParameters()) {
-      this.declared_uniforms.put(p.getName(), JCGLType.fromName(p.getType()));
+      final JCGLType t = JCGLType.fromName(p.getType());
+      this.declared_uniforms.put(p.getName(), t);
+      if (log.enabled(Level.LOG_DEBUG)) {
+        message.setLength(0);
+        message.append("declared uniform ");
+        message.append(p.getName());
+        message.append(" ");
+        message.append(t);
+        log.debug(message.toString());
+      }
     }
     for (final VertexInput p : meta.getDeclaredVertexInputs()) {
-      this.declared_attributes.put(
-        p.getName(),
-        JCGLType.fromName(p.getType()));
+      final JCGLType t = JCGLType.fromName(p.getType());
+      this.declared_attributes.put(p.getName(), t);
+      if (log.enabled(Level.LOG_DEBUG)) {
+        message.setLength(0);
+        message.append("declared attribute ");
+        message.append(p.getName());
+        message.append(" ");
+        message.append(t);
+        log.debug(message.toString());
+      }
     }
 
     this.exec =
