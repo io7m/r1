@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -43,10 +44,12 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersionNumber;
 import com.io7m.jcanephora.JCGLShadersCommon;
+import com.io7m.jcanephora.JCGLType;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.ShaderUtilities;
 import com.io7m.jcanephora.VertexShader;
+import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FSCapabilityRead;
@@ -54,8 +57,11 @@ import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.parasol.xml.API;
 import com.io7m.parasol.xml.CompactedShaders;
+import com.io7m.parasol.xml.FragmentParameter;
 import com.io7m.parasol.xml.PGLSLMetaXML;
 import com.io7m.parasol.xml.Version;
+import com.io7m.parasol.xml.VertexInput;
+import com.io7m.parasol.xml.VertexParameter;
 
 @Immutable public final class KProgram
 {
@@ -105,6 +111,26 @@ import com.io7m.parasol.xml.Version;
     }
 
     throw new UnreachableCodeException();
+  }
+
+  private static Log getLog(
+    final JCGLSLVersionNumber version,
+    final JCGLApi api,
+    final String name,
+    final Log log)
+  {
+    final Log logp = new Log(log, "kprogram");
+    if (logp.enabled(Level.LOG_DEBUG)) {
+      final StringBuilder message = new StringBuilder();
+      message.append("Loading ");
+      message.append(name);
+      message.append(" for ");
+      message.append(version);
+      message.append(" ");
+      message.append(api);
+      logp.debug(message.toString());
+    }
+    return logp;
   }
 
   private static @Nonnull PGLSLMetaXML getMeta(
@@ -530,26 +556,6 @@ import com.io7m.parasol.xml.Version;
     }
   }
 
-  private static Log getLog(
-    final JCGLSLVersionNumber version,
-    final JCGLApi api,
-    final String name,
-    final Log log)
-  {
-    final Log logp = new Log(log, "kprogram");
-    if (logp.enabled(Level.LOG_DEBUG)) {
-      final StringBuilder message = new StringBuilder();
-      message.append("Loading ");
-      message.append(name);
-      message.append(" for ");
-      message.append(version);
-      message.append(" ");
-      message.append(api);
-      logp.debug(message.toString());
-    }
-    return logp;
-  }
-
   public static @Nonnull ProgramReference newProgramFromStreams(
     final @Nonnull JCGLShadersCommon gl,
     final @Nonnull String name,
@@ -590,17 +596,6 @@ import com.io7m.parasol.xml.Version;
     return p;
   }
 
-  private static void prependVersion(
-    final @Nonnull List<String> lines,
-    final @Nonnull Version prepend)
-  {
-    final StringBuilder directive = new StringBuilder();
-    directive.append("#version ");
-    directive.append(prepend.getVersion());
-    directive.append("\n");
-    lines.add(0, directive.toString());
-  }
-
   private static void notSupported(
     final @Nonnull Version v,
     final @Nonnull PGLSLMetaXML m)
@@ -627,8 +622,22 @@ import com.io7m.parasol.xml.Version;
     throw new JCGLUnsupportedException(message.toString());
   }
 
-  private final @Nonnull PGLSLMetaXML     meta;
-  private final @Nonnull ProgramReference program;
+  private static void prependVersion(
+    final @Nonnull List<String> lines,
+    final @Nonnull Version prepend)
+  {
+    final StringBuilder directive = new StringBuilder();
+    directive.append("#version ");
+    directive.append(prepend.getVersion());
+    directive.append("\n");
+    lines.add(0, directive.toString());
+  }
+
+  private final @Nonnull HashMap<String, JCGLType> declared_attributes;
+  private final @Nonnull HashMap<String, JCGLType> declared_uniforms;
+  private final @Nonnull JCCEExecutionCallable     exec;
+  private final @Nonnull PGLSLMetaXML              meta;
+  private final @Nonnull ProgramReference          program;
 
   private KProgram(
     final @Nonnull PGLSLMetaXML meta,
@@ -637,6 +646,31 @@ import com.io7m.parasol.xml.Version;
   {
     this.meta = Constraints.constrainNotNull(meta, "Meta");
     this.program = Constraints.constrainNotNull(program, "Program");
+    this.declared_uniforms = new HashMap<String, JCGLType>();
+    this.declared_attributes = new HashMap<String, JCGLType>();
+
+    for (final VertexParameter p : meta.getDeclaredVertexParameters()) {
+      this.declared_uniforms.put(p.getName(), JCGLType.fromName(p.getType()));
+    }
+    for (final FragmentParameter p : meta.getDeclaredFragmentParameters()) {
+      this.declared_uniforms.put(p.getName(), JCGLType.fromName(p.getType()));
+    }
+    for (final VertexInput p : meta.getDeclaredVertexInputs()) {
+      this.declared_attributes.put(
+        p.getName(),
+        JCGLType.fromName(p.getType()));
+    }
+
+    this.exec =
+      JCCEExecutionCallable.newProgramWithDeclarations(
+        program,
+        this.declared_uniforms,
+        this.declared_attributes);
+  }
+
+  public @Nonnull JCCEExecutionCallable getExecutable()
+  {
+    return this.exec;
   }
 
   public @Nonnull PGLSLMetaXML getMeta()

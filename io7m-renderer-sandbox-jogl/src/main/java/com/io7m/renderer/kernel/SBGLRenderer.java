@@ -293,7 +293,7 @@ final class SBGLRenderer implements GLEventListener
       final @Nonnull PGLSLMetaXML meta)
     {
       super(new Callable<SBShader>() {
-        @SuppressWarnings({ "synthetic-access", "boxing" }) @Override public @Nonnull
+        @SuppressWarnings({ "synthetic-access" }) @Override public @Nonnull
           SBShader
           call()
             throws Exception
@@ -825,9 +825,6 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull RMatrixM4x4F<RTransformView>                        camera_view_matrix_temporary;
   private final SandboxConfig                                                config;
   private final @Nonnull AtomicReference<SBSceneControllerRenderer>          controller;
-  private @Nonnull JCCEExecutionCallable                                     exec_ccolour;
-  private @Nonnull JCCEExecutionCallable                                     exec_uv;
-  private @Nonnull JCCEExecutionCallable                                     exec_vcolour;
   private final @Nonnull FSCapabilityAll                                     filesystem;
   private boolean                                                            first;
   private @CheckForNull KFramebufferRGBA                                     framebuffer;
@@ -1430,9 +1427,6 @@ final class SBGLRenderer implements GLEventListener
           "debug_vcolour",
           this.log);
 
-      this.exec_vcolour =
-        new JCCEExecutionCallable(this.program_vcolour.getProgram());
-
       this.program_ccolour =
         KProgram.newProgramFromFilesystem(
           gl,
@@ -1442,9 +1436,6 @@ final class SBGLRenderer implements GLEventListener
           "debug_ccolour",
           this.log);
 
-      this.exec_ccolour =
-        new JCCEExecutionCallable(this.program_ccolour.getProgram());
-
       this.program_uv =
         KProgram.newProgramFromFilesystem(
           gl,
@@ -1453,8 +1444,6 @@ final class SBGLRenderer implements GLEventListener
           this.filesystem,
           "debug_flat_uv",
           this.log);
-
-      this.exec_uv = new JCCEExecutionCallable(this.program_uv.getProgram());
 
       this.reloadSizedResources(drawable, gl);
       this.running.set(RunningState.STATE_RUNNING);
@@ -1713,7 +1702,7 @@ final class SBGLRenderer implements GLEventListener
         this.matrix_model,
         this.matrix_modelview);
 
-      final JCCEExecutionCallable e = this.exec_ccolour;
+      final JCCEExecutionCallable e = this.program_ccolour.getExecutable();
       e.execPrepare(gl);
       e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
       e.execUniformPutMatrix4x4F(gl, "m_modelview", this.matrix_modelview);
@@ -1751,7 +1740,7 @@ final class SBGLRenderer implements GLEventListener
         this.matrix_model,
         this.matrix_modelview);
 
-      final JCCEExecutionCallable e = this.exec_vcolour;
+      final JCCEExecutionCallable e = this.program_vcolour.getExecutable();
       e.execPrepare(gl);
       e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
       e.execUniformPutMatrix4x4F(gl, "m_modelview", this.matrix_modelview);
@@ -1801,7 +1790,7 @@ final class SBGLRenderer implements GLEventListener
       100);
 
     if (this.renderer != null) {
-      final JCCEExecutionCallable e = this.exec_uv;
+      final JCCEExecutionCallable e = this.program_uv.getExecutable();
       e.execPrepare(gl);
       e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
       e.execUniformPutMatrix4x4F(gl, "m_modelview", this.matrix_modelview);
@@ -1896,7 +1885,8 @@ final class SBGLRenderer implements GLEventListener
               this.matrix_model,
               this.matrix_modelview);
 
-            final JCCEExecutionCallable e = this.exec_ccolour;
+            final JCCEExecutionCallable e =
+              this.program_ccolour.getExecutable();
             e.execPrepare(gl);
             e.execUniformPutMatrix4x4F(
               gl,
@@ -1992,7 +1982,8 @@ final class SBGLRenderer implements GLEventListener
                 this.matrix_model,
                 this.matrix_modelview);
 
-              final JCCEExecutionCallable e = this.exec_ccolour;
+              final JCCEExecutionCallable e =
+                this.program_ccolour.getExecutable();
               e.execPrepare(gl);
               e.execUniformPutMatrix4x4F(
                 gl,
@@ -2025,7 +2016,8 @@ final class SBGLRenderer implements GLEventListener
              */
 
             if (this.lights_show_surface.get()) {
-              final JCCEExecutionCallable e = this.exec_ccolour;
+              final JCCEExecutionCallable e =
+                this.program_ccolour.getExecutable();
 
               MatrixM4x4F.setIdentity(this.matrix_model);
               MatrixM4x4F.translateByVector3FInPlace(
