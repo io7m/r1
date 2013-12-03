@@ -18,27 +18,27 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-
 /**
- * Optional debugging interface supported by renderers.
+ * A hint regarding the number of bits of precision available in the buffers
+ * used for shadow mapping.
  */
 
-public interface KRendererDebugging
+public enum KShadowPrecision
 {
-  public interface DebugShadowMapReceiver
+  SHADOW_PRECISION_16("16"),
+  SHADOW_PRECISION_24("24"),
+  SHADOW_PRECISION_32("32");
+
+  private final @Nonnull String name;
+
+  private KShadowPrecision(
+    final @Nonnull String name)
   {
-    public void receive(
-      final @Nonnull KShadow shadow,
-      final @Nonnull KFramebufferShadow fb);
+    this.name = name;
   }
 
-  /**
-   * Request that the renderer pass any generated shadow maps to
-   * <code>receiver</code> on the next evaluation.
-   */
-
-  public void debugForEachShadowMap(
-    final @Nonnull DebugShadowMapReceiver receiver)
-    throws ConstraintError;
+  @Override public @Nonnull String toString()
+  {
+    return this.name;
+  }
 }

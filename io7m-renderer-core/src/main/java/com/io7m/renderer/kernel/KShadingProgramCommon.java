@@ -64,6 +64,7 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedVariance;
 
 final class KShadingProgramCommon
 {
@@ -209,6 +210,18 @@ final class KShadingProgramCommon
   {
     gc.texture2DStaticBind(texture_unit, texture);
     KShadingProgramCommon.putTextureShadowMap(exec, gc, texture_unit);
+  }
+
+  static void bindPutTextureShadowVarianceMap(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionCallable exec,
+    final @Nonnull Texture2DStaticUsable texture,
+    final @Nonnull TextureUnit unit)
+    throws JCGLException,
+      ConstraintError
+  {
+    gc.texture2DStaticBind(unit, texture);
+    KShadingProgramCommon.putTextureShadowVarianceMap(exec, gc, unit);
   }
 
   static void bindPutTextureSpecular(
@@ -746,6 +759,13 @@ final class KShadingProgramCommon
             KShadingProgramCommon.putShadowBasic(gc, exec, ksmb);
             break;
           }
+          case SHADOW_MAPPED_VARIANCE:
+          {
+            final KShadowMappedVariance ksmv =
+              (KShadow.KShadowMappedVariance) ks;
+            KShadingProgramCommon.putShadowVariance(gc, exec, ksmv);
+            break;
+          }
         }
         break;
       }
@@ -776,6 +796,11 @@ final class KShadingProgramCommon
           case SHADOW_MAPPED_BASIC:
           {
             KShadingProgramCommon.putShadowBasicReuse(exec);
+            break;
+          }
+          case SHADOW_MAPPED_VARIANCE:
+          {
+            KShadingProgramCommon.putShadowVarianceReuse(exec);
             break;
           }
         }
@@ -1226,8 +1251,10 @@ final class KShadingProgramCommon
     throws JCGLException,
       ConstraintError
   {
-    KShadingProgramCommon
-      .putShadowBasicEpsilon(gc, exec, shadow.getEpsilon());
+    KShadingProgramCommon.putShadowBasicDepthBias(
+      gc,
+      exec,
+      shadow.getDepthBias());
     KShadingProgramCommon.putShadowBasicFactorMaximum(
       gc,
       exec,
@@ -1238,22 +1265,23 @@ final class KShadingProgramCommon
       shadow.getFactorMinimum());
   }
 
-  static void putShadowBasicEpsilon(
+  static void putShadowBasicDepthBias(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCCEExecutionAPI exec,
-    final float epsilon)
+    final float depth_bias)
     throws JCGLException,
       ConstraintError
   {
-    exec.execUniformPutFloat(gc, "shadow_basic.shadow_epsilon", epsilon);
+    exec
+      .execUniformPutFloat(gc, "shadow_basic.shadow_depth_bias", depth_bias);
   }
 
-  static void putShadowBasicEpsilonReuse(
+  static void putShadowBasicDepthBiasReuse(
     final @Nonnull JCCEExecutionAPI exec)
     throws JCGLException,
       ConstraintError
   {
-    exec.execUniformUseExisting("shadow_basic.shadow_epsilon");
+    exec.execUniformUseExisting("shadow_basic.shadow_depth_bias");
   }
 
   static void putShadowBasicFactorMaximum(
@@ -1297,9 +1325,71 @@ final class KShadingProgramCommon
     throws JCGLException,
       ConstraintError
   {
-    KShadingProgramCommon.putShadowBasicEpsilonReuse(exec);
+    KShadingProgramCommon.putShadowBasicDepthBiasReuse(exec);
     KShadingProgramCommon.putShadowBasicFactorMaximumReuse(exec);
     KShadingProgramCommon.putShadowBasicFactorMinimumReuse(exec);
+  }
+
+  static void putShadowVariance(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull KShadow.KShadowMappedVariance shadow)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putShadowVarianceFactorMaximum(
+      gc,
+      exec,
+      shadow.getFactorMaximum());
+    KShadingProgramCommon.putShadowVarianceFactorMinimum(
+      gc,
+      exec,
+      shadow.getFactorMinimum());
+  }
+
+  static void putShadowVarianceFactorMaximum(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final float max)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutFloat(gc, "shadow_variance.shadow_factor_max", max);
+  }
+
+  static void putShadowVarianceFactorMaximumReuse(
+    final @Nonnull JCCEExecutionAPI exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformUseExisting("shadow_variance.shadow_factor_max");
+  }
+
+  static void putShadowVarianceFactorMinimum(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCCEExecutionAPI exec,
+    final float min)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutFloat(gc, "shadow_variance.shadow_factor_min", min);
+  }
+
+  static void putShadowVarianceFactorMinimumReuse(
+    final @Nonnull JCCEExecutionAPI exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformUseExisting("shadow_variance.shadow_factor_min");
+  }
+
+  static void putShadowVarianceReuse(
+    final @Nonnull JCCEExecutionAPI exec)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putShadowVarianceFactorMaximumReuse(exec);
+    KShadingProgramCommon.putShadowVarianceFactorMinimumReuse(exec);
   }
 
   static void putTextureAlbedo(
@@ -1360,6 +1450,16 @@ final class KShadingProgramCommon
       ConstraintError
   {
     exec.execUniformPutTextureUnit(gc, "t_shadow", unit);
+  }
+
+  static void putTextureShadowVarianceMap(
+    final @Nonnull JCCEExecutionAPI exec,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull TextureUnit unit)
+    throws JCGLException,
+      ConstraintError
+  {
+    exec.execUniformPutTextureUnit(gc, "t_shadow_variance", unit);
   }
 
   static void putTextureSpecular(

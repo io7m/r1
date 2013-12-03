@@ -16,6 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -59,11 +62,11 @@ public final class SBVisibleAxes
       log.debug(m.toString());
     }
 
-    final ArrayBufferAttributeDescriptor[] ab =
-      new ArrayBufferAttributeDescriptor[2];
-    ab[0] = KMeshAttributes.ATTRIBUTE_POSITION;
-    ab[1] = KMeshAttributes.ATTRIBUTE_COLOUR;
-    final ArrayBufferTypeDescriptor type = new ArrayBufferTypeDescriptor(ab);
+    final List<ArrayBufferAttributeDescriptor> abs =
+      new ArrayList<ArrayBufferAttributeDescriptor>();
+    abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
+    abs.add(KMeshAttributes.ATTRIBUTE_COLOUR);
+    final ArrayBufferTypeDescriptor type = new ArrayBufferTypeDescriptor(abs);
 
     this.array = gl.arrayBufferAllocate(6, type, UsageHint.USAGE_STATIC_READ);
     this.indices = gl.indexBufferAllocate(this.array, 6);

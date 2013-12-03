@@ -27,14 +27,18 @@ import com.io7m.jaux.UnreachableCodeException;
 public final class SBLightShadowDescriptionGenerator implements
   Generator<SBLightShadowDescription>
 {
-  private final @Nonnull IntegerGenerator index_gen;
-  private final @Nonnull IntegerGenerator size_gen;
+  private final @Nonnull IntegerGenerator          index_gen;
+  private final @Nonnull IntegerGenerator          size_gen;
+  private final @Nonnull KShadowPrecisionGenerator prec_gen;
+  private final @Nonnull KShadowFilterGenerator    filter_gen;
 
   public SBLightShadowDescriptionGenerator()
   {
     this.index_gen =
       new IntegerGenerator(0, KShadow.Type.values().length - 1);
     this.size_gen = new IntegerGenerator(1, 10);
+    this.prec_gen = new KShadowPrecisionGenerator();
+    this.filter_gen = new KShadowFilterGenerator();
   }
 
   @Override public SBLightShadowDescription next()
@@ -47,7 +51,18 @@ public final class SBLightShadowDescriptionGenerator implements
             this.size_gen.nextInt(),
             (float) Math.random(),
             (float) Math.random(),
-            (float) Math.random());
+            (float) Math.random(),
+            this.prec_gen.next(),
+            this.filter_gen.next());
+        }
+        case SHADOW_MAPPED_VARIANCE:
+        {
+          return SBLightShadowDescription.newShadowMappedVariance(
+            this.size_gen.nextInt(),
+            (float) Math.random(),
+            (float) Math.random(),
+            this.prec_gen.next(),
+            this.filter_gen.next());
         }
       }
     } catch (final ConstraintError x) {

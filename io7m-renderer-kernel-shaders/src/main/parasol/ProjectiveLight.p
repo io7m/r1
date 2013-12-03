@@ -46,7 +46,7 @@ module ProjectiveLight is
   --
 
   type basic is record
-    shadow_epsilon    : float,
+    shadow_depth_bias : float,
     shadow_factor_min : float,
     shadow_factor_max : float
   end;
@@ -88,7 +88,7 @@ module ProjectiveLight is
         value map_depth =
           S2.texture (t_shadow, current_tex [x y]) [x];
         value map_depth_adjusted =
-          F.add (map_depth, config.shadow_epsilon);
+          F.add (map_depth, config.shadow_depth_bias);
       in
         if F.lesser (current_tex [z], map_depth_adjusted) then
           config.shadow_factor_max
