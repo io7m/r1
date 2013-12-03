@@ -48,6 +48,7 @@ import nu.xom.Document;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
@@ -76,7 +77,6 @@ import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jcanephora.Texture2DReadableData;
 import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
@@ -813,64 +813,64 @@ final class SBGLRenderer implements GLEventListener
 
   }
 
-  private @Nonnull SBVisibleAxes                                             axes;
-  private final @Nonnull AtomicBoolean                                       axes_show;
-  private final @Nonnull AtomicReference<VectorI3F>                          background_colour;
-  private final @Nonnull SBFirstPersonCamera                                 camera;
-  private @Nonnull SceneObserver                                             camera_current;
-  private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>> camera_custom_projection;
-  private @Nonnull KTransform                                                camera_transform;
-  private final @Nonnull KTransform.Context                                  camera_transform_context;
-  private @Nonnull RMatrixI4x4F<RTransformView>                              camera_view_matrix;
-  private final @Nonnull RMatrixM4x4F<RTransformView>                        camera_view_matrix_temporary;
-  private final SandboxConfig                                                config;
-  private final @Nonnull AtomicReference<SBSceneControllerRenderer>          controller;
-  private final @Nonnull FSCapabilityAll                                     filesystem;
-  private boolean                                                            first;
-  private @CheckForNull KFramebufferRGBA                                     framebuffer;
-  private @CheckForNull JCGLImplementationJOGL                               gi;
-  private @Nonnull SBVisibleGridPlane                                        grid;
-  private final @Nonnull AtomicBoolean                                       grid_show;
-  private final @Nonnull SBInputState                                        input_state;
-  private final @Nonnull AtomicBoolean                                       lights_show;
-  private final @Nonnull AtomicBoolean                                       lights_show_surface;
-  private final @Nonnull Log                                                 log;
-  private final @Nonnull MatrixM4x4F                                         matrix_model;
-  private final @Nonnull MatrixM4x4F                                         matrix_model_temporary;
-  private final @Nonnull MatrixM4x4F                                         matrix_modelview;
-  private final @Nonnull MatrixM4x4F                                         matrix_projection;
-  private final @Nonnull MatrixM4x4F                                         matrix_view;
-  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>             mesh_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>               mesh_load_queue;
-  private final @Nonnull HashMap<PathVirtual, KMesh>                         meshes;
-  private @CheckForNull KProgram                                             program_ccolour;
-  private @CheckForNull KProgram                                             program_uv;
-  private @CheckForNull KProgram                                             program_vcolour;
-  private final @Nonnull Map<SBProjectionDescription, SBVisibleProjection>   projection_cache;
-  private final @Nonnull QuaternionM4F.Context                               qm4f_context;
-  private @CheckForNull KRenderer                                            renderer;
-  private final @Nonnull AtomicReference<SBRendererType>                     renderer_new;
-  private final @Nonnull AtomicReference<RunningState>                       running;
-  private @CheckForNull KVisibleScene                                        scene_current;
-  private Collection<SBLight>                                                scene_lights;
-  private @CheckForNull KVisibleScene                                        scene_previous;
-  private @CheckForNull SBQuad                                               screen_quad;
-  private @Nonnull LRUCacheTrivial<String, KProgram, KShaderCacheException>  shader_cache;
-  private @Nonnull LRUCacheConfig                                            shader_cache_config;
-  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>             shader_load_queue;
-  private final @Nonnull HashMap<String, SBShader>                           shaders;
-  private @Nonnull PCache<KShadow, KFramebufferDepth, KShadowCacheException> shadow_cache;
-  private @Nonnull PCacheConfig                                              shadow_cache_config;
-  private @Nonnull HashMap<PathVirtual, KMesh>                               sphere_meshes;
-  private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>      texture_cube_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>        texture_cube_load_queue;
-  private final @Nonnull TextureLoader                                       texture_loader;
-  private @CheckForNull List<TextureUnit>                                    texture_units;
-  private final @Nonnull ConcurrentLinkedQueue<Texture2DDeleteFuture>        texture2d_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<Texture2DLoadFuture>          texture2d_load_queue;
-  private final @Nonnull HashMap<PathVirtual, Texture2DStatic>               textures_2d;
-  private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>             textures_cube;
-  private @Nonnull AreaInclusive                                             viewport;
+  private @Nonnull SBVisibleAxes                                              axes;
+  private final @Nonnull AtomicBoolean                                        axes_show;
+  private final @Nonnull AtomicReference<VectorI3F>                           background_colour;
+  private final @Nonnull SBFirstPersonCamera                                  camera;
+  private @Nonnull SceneObserver                                              camera_current;
+  private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>>  camera_custom_projection;
+  private @Nonnull KTransform                                                 camera_transform;
+  private final @Nonnull KTransform.Context                                   camera_transform_context;
+  private @Nonnull RMatrixI4x4F<RTransformView>                               camera_view_matrix;
+  private final @Nonnull RMatrixM4x4F<RTransformView>                         camera_view_matrix_temporary;
+  private final SandboxConfig                                                 config;
+  private final @Nonnull AtomicReference<SBSceneControllerRenderer>           controller;
+  private final @Nonnull FSCapabilityAll                                      filesystem;
+  private boolean                                                             first;
+  private @CheckForNull KFramebufferRGBA                                      framebuffer;
+  private @CheckForNull JCGLImplementationJOGL                                gi;
+  private @Nonnull SBVisibleGridPlane                                         grid;
+  private final @Nonnull AtomicBoolean                                        grid_show;
+  private final @Nonnull SBInputState                                         input_state;
+  private final @Nonnull AtomicBoolean                                        lights_show;
+  private final @Nonnull AtomicBoolean                                        lights_show_surface;
+  private final @Nonnull Log                                                  log;
+  private final @Nonnull MatrixM4x4F                                          matrix_model;
+  private final @Nonnull MatrixM4x4F                                          matrix_model_temporary;
+  private final @Nonnull MatrixM4x4F                                          matrix_modelview;
+  private final @Nonnull MatrixM4x4F                                          matrix_projection;
+  private final @Nonnull MatrixM4x4F                                          matrix_view;
+  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>              mesh_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                mesh_load_queue;
+  private final @Nonnull HashMap<PathVirtual, KMesh>                          meshes;
+  private @CheckForNull KProgram                                              program_ccolour;
+  private @CheckForNull KProgram                                              program_uv;
+  private @CheckForNull KProgram                                              program_vcolour;
+  private final @Nonnull Map<SBProjectionDescription, SBVisibleProjection>    projection_cache;
+  private final @Nonnull QuaternionM4F.Context                                qm4f_context;
+  private @CheckForNull KRenderer                                             renderer;
+  private final @Nonnull AtomicReference<SBRendererType>                      renderer_new;
+  private final @Nonnull AtomicReference<RunningState>                        running;
+  private @CheckForNull KVisibleScene                                         scene_current;
+  private Collection<SBLight>                                                 scene_lights;
+  private @CheckForNull KVisibleScene                                         scene_previous;
+  private @CheckForNull SBQuad                                                screen_quad;
+  private @Nonnull LRUCacheTrivial<String, KProgram, KShaderCacheException>   shader_cache;
+  private @Nonnull LRUCacheConfig                                             shader_cache_config;
+  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>              shader_load_queue;
+  private final @Nonnull HashMap<String, SBShader>                            shaders;
+  private @Nonnull PCache<KShadow, KFramebufferShadow, KShadowCacheException> shadow_cache;
+  private @Nonnull PCacheConfig                                               shadow_cache_config;
+  private @Nonnull HashMap<PathVirtual, KMesh>                                sphere_meshes;
+  private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>       texture_cube_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>         texture_cube_load_queue;
+  private final @Nonnull TextureLoader                                        texture_loader;
+  private @CheckForNull List<TextureUnit>                                     texture_units;
+  private final @Nonnull ConcurrentLinkedQueue<Texture2DDeleteFuture>         texture2d_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<Texture2DLoadFuture>           texture2d_load_queue;
+  private final @Nonnull HashMap<PathVirtual, Texture2DStatic>                textures_2d;
+  private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>              textures_cube;
+  private @Nonnull AreaInclusive                                              viewport;
 
   public SBGLRenderer(
     final @Nonnull SandboxConfig config,
@@ -1292,31 +1292,14 @@ final class SBGLRenderer implements GLEventListener
 
           private final StringBuilder name = new StringBuilder();
 
-          @SuppressWarnings("synthetic-access") @Override public
-            void
-            receive(
-              final @Nonnull KShadow shadow,
-              final @Nonnull Texture2DStaticUsable texture)
+          @Override public void receive(
+            final @Nonnull KShadow shadow,
+            final @Nonnull KFramebufferShadow fb)
           {
-            try {
-              this.name.setLength(0);
-              this.name.append("shadow-");
-              this.name.append(shadow.getLightID());
-
-              SBTextureUtilities.textureDumpTimestampedTemporary2DStatic(
-                SBGLRenderer.this.gi,
-                texture,
-                this.name.toString(),
-                SBGLRenderer.this.log);
-            } catch (final FileNotFoundException e) {
-              e.printStackTrace();
-            } catch (final IOException e) {
-              e.printStackTrace();
-            } catch (final JCGLException e) {
-              e.printStackTrace();
-            } catch (final ConstraintError e) {
-              e.printStackTrace();
-            }
+            this.name.setLength(0);
+            this.name.append("shadow-");
+            this.name.append(shadow.getLightID());
+            throw new UnimplementedCodeException();
           }
         });
       }

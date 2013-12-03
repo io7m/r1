@@ -16,6 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import org.junit.Assert;
@@ -74,14 +77,13 @@ public abstract class KMutableMatricesContract extends TestContract
     throws ConstraintError,
       JCGLException
   {
-    final ArrayBufferAttributeDescriptor[] attributes =
-      new ArrayBufferAttributeDescriptor[3];
-    attributes[0] = KMeshAttributes.ATTRIBUTE_POSITION;
-    attributes[1] = KMeshAttributes.ATTRIBUTE_NORMAL;
-    attributes[2] = KMeshAttributes.ATTRIBUTE_UV;
+    final List<ArrayBufferAttributeDescriptor> abs =
+      new ArrayList<ArrayBufferAttributeDescriptor>();
+    abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
+    abs.add(KMeshAttributes.ATTRIBUTE_NORMAL);
+    abs.add(KMeshAttributes.ATTRIBUTE_UV);
+    final ArrayBufferTypeDescriptor type = new ArrayBufferTypeDescriptor(abs);
 
-    final ArrayBufferTypeDescriptor type =
-      new ArrayBufferTypeDescriptor(attributes);
     return a.arrayBufferAllocate(3, type, UsageHint.USAGE_STATIC_DRAW);
   }
 

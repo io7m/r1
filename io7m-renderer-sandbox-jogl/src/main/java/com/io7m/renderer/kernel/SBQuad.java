@@ -16,6 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -60,15 +63,14 @@ public final class SBQuad
       log.debug(m.toString());
     }
 
-    final ArrayBufferAttributeDescriptor[] ab =
-      new ArrayBufferAttributeDescriptor[3];
-
-    ab[0] = KMeshAttributes.ATTRIBUTE_POSITION;
-    ab[1] = KMeshAttributes.ATTRIBUTE_NORMAL;
-    ab[2] = KMeshAttributes.ATTRIBUTE_UV;
-
+    final List<ArrayBufferAttributeDescriptor> abs =
+      new ArrayList<ArrayBufferAttributeDescriptor>();
+    abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
+    abs.add(KMeshAttributes.ATTRIBUTE_NORMAL);
+    abs.add(KMeshAttributes.ATTRIBUTE_UV);
     final ArrayBufferTypeDescriptor array_type =
-      new ArrayBufferTypeDescriptor(ab);
+      new ArrayBufferTypeDescriptor(abs);
+
     this.array =
       gl.arrayBufferAllocate(4, array_type, UsageHint.USAGE_STATIC_DRAW);
 

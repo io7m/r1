@@ -35,6 +35,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KLight.Type;
 import com.io7m.renderer.kernel.SBLightShadowDescription.SBLightShadowMappedBasicDescription;
+import com.io7m.renderer.kernel.SBLightShadowDescription.SBLightShadowMappedVarianceDescription;
 
 abstract class SBLightDescription
 {
@@ -274,9 +275,26 @@ abstract class SBLightDescription
                 KShadow.newMappedBasic(
                   this.getID(),
                   smb.getSize(),
-                  smb.getEpsilon(),
+                  smb.getDepthBias(),
                   smb.getFactorMaximum(),
-                  smb.getFactorMinimum());
+                  smb.getFactorMinimum(),
+                  smb.getPrecision(),
+                  smb.getFilter());
+              kshadow = Option.some(ks);
+              break;
+            }
+            case SHADOW_MAPPED_VARIANCE:
+            {
+              final SBLightShadowMappedVarianceDescription smb =
+                (SBLightShadowDescription.SBLightShadowMappedVarianceDescription) s;
+              final KShadow ks =
+                KShadow.newMappedVariance(
+                  this.getID(),
+                  smb.getSize(),
+                  smb.getFactorMaximum(),
+                  smb.getFactorMinimum(),
+                  smb.getPrecision(),
+                  smb.getFilter());
               kshadow = Option.some(ks);
               break;
             }

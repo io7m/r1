@@ -16,9 +16,17 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KFramebufferDepth extends
-  KFramebuffer,
-  KFramebufferDepthUsable
+import javax.swing.JComboBox;
+
+public final class SBShadowFilterSelector extends JComboBox<KShadowFilter>
 {
-  // No extras.
+  private static final long serialVersionUID = -1174463966109424043L;
+
+  public SBShadowFilterSelector()
+  {
+    for (final KShadowFilter type : KShadowFilter.values()) {
+      this.addItem(type);
+    }
+    this.setSelectedItem(KShadowFilter.SHADOW_FILTER_LINEAR);
+  }
 }

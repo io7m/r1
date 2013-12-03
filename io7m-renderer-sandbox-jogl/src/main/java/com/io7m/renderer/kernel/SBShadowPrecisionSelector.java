@@ -16,29 +16,18 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
+import javax.swing.JComboBox;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-
-/**
- * Optional debugging interface supported by renderers.
- */
-
-public interface KRendererDebugging
+public final class SBShadowPrecisionSelector extends
+  JComboBox<KShadowPrecision>
 {
-  public interface DebugShadowMapReceiver
+  private static final long serialVersionUID = -1174463966109424043L;
+
+  public SBShadowPrecisionSelector()
   {
-    public void receive(
-      final @Nonnull KShadow shadow,
-      final @Nonnull KFramebufferShadow fb);
+    for (final KShadowPrecision type : KShadowPrecision.values()) {
+      this.addItem(type);
+    }
+    this.setSelectedItem(KShadowPrecision.SHADOW_PRECISION_16);
   }
-
-  /**
-   * Request that the renderer pass any generated shadow maps to
-   * <code>receiver</code> on the next evaluation.
-   */
-
-  public void debugForEachShadowMap(
-    final @Nonnull DebugShadowMapReceiver receiver)
-    throws ConstraintError;
 }

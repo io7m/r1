@@ -208,11 +208,7 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
         a.add(KMeshAttributes.ATTRIBUTE_UV);
       }
 
-      final ArrayBufferAttributeDescriptor[] ab =
-        new ArrayBufferAttributeDescriptor[a.size()];
-      a.toArray(ab);
-
-      this.type = new ArrayBufferTypeDescriptor(ab);
+      this.type = new ArrayBufferTypeDescriptor(a);
       this.mtype = mt;
     }
 

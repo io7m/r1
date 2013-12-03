@@ -16,6 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
@@ -64,11 +67,11 @@ public abstract class SBVisibleProjection
         log.debug(m.toString());
       }
 
-      final ArrayBufferAttributeDescriptor[] ab =
-        new ArrayBufferAttributeDescriptor[1];
-      ab[0] = KMeshAttributes.ATTRIBUTE_POSITION;
+      final List<ArrayBufferAttributeDescriptor> abs =
+        new ArrayList<ArrayBufferAttributeDescriptor>();
+      abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
       final ArrayBufferTypeDescriptor type =
-        new ArrayBufferTypeDescriptor(ab);
+        new ArrayBufferTypeDescriptor(abs);
 
       this.array =
         g.arrayBufferAllocate(10, type, UsageHint.USAGE_STATIC_READ);
@@ -231,11 +234,11 @@ public abstract class SBVisibleProjection
         log.debug(m.toString());
       }
 
-      final ArrayBufferAttributeDescriptor[] ab =
-        new ArrayBufferAttributeDescriptor[1];
-      ab[0] = KMeshAttributes.ATTRIBUTE_POSITION;
+      final List<ArrayBufferAttributeDescriptor> abs =
+        new ArrayList<ArrayBufferAttributeDescriptor>();
+      abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
       final ArrayBufferTypeDescriptor type =
-        new ArrayBufferTypeDescriptor(ab);
+        new ArrayBufferTypeDescriptor(abs);
 
       this.array =
         g.arrayBufferAllocate(10, type, UsageHint.USAGE_STATIC_READ);
@@ -407,11 +410,11 @@ public abstract class SBVisibleProjection
         (float) (far_z * Math.tan(p.getHorizontalFOV() / 2.0f));
       final float far_y = (float) (far_x / p.getAspect());
 
-      final ArrayBufferAttributeDescriptor[] ab =
-        new ArrayBufferAttributeDescriptor[1];
-      ab[0] = KMeshAttributes.ATTRIBUTE_POSITION;
+      final List<ArrayBufferAttributeDescriptor> abs =
+        new ArrayList<ArrayBufferAttributeDescriptor>();
+      abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
       final ArrayBufferTypeDescriptor type =
-        new ArrayBufferTypeDescriptor(ab);
+        new ArrayBufferTypeDescriptor(abs);
 
       this.array =
         g.arrayBufferAllocate(10, type, UsageHint.USAGE_STATIC_READ);
