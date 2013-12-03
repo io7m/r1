@@ -27,23 +27,29 @@ import com.io7m.jaux.Constraints.ConstraintError;
   @Immutable final static class SBLightShadowMappedBasicDescription extends
     SBLightShadowDescription
   {
-    private final int   size;
-    private final float epsilon;
-    private final float factor_max;
-    private final float factor_min;
+    private final float                     depth_bias;
+    private final float                     factor_max;
+    private final float                     factor_min;
+    private final @Nonnull KShadowFilter    filter;
+    private final @Nonnull KShadowPrecision precision;
+    private final int                       size;
 
     private SBLightShadowMappedBasicDescription(
       final int size,
-      final float epsilon,
+      final float depth_bias,
       final float factor_max,
-      final float factor_min)
+      final float factor_min,
+      final @Nonnull KShadowPrecision precision,
+      final @Nonnull KShadowFilter filter)
       throws ConstraintError
     {
       super(KShadow.Type.SHADOW_MAPPED_BASIC);
       this.size = Constraints.constrainRange(size, 1, 10, "Shadow map size");
-      this.epsilon = epsilon;
+      this.depth_bias = depth_bias;
       this.factor_max = factor_max;
       this.factor_min = factor_min;
+      this.precision = Constraints.constrainNotNull(precision, "Precision");
+      this.filter = Constraints.constrainNotNull(filter, "Filter");
     }
 
     @Override public boolean equals(
@@ -60,8 +66,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
       }
       final SBLightShadowMappedBasicDescription other =
         (SBLightShadowMappedBasicDescription) obj;
-      if (Float.floatToIntBits(this.epsilon) != Float
-        .floatToIntBits(other.epsilon)) {
+      if (Float.floatToIntBits(this.depth_bias) != Float
+        .floatToIntBits(other.depth_bias)) {
         return false;
       }
       if (Float.floatToIntBits(this.factor_max) != Float
@@ -72,15 +78,21 @@ import com.io7m.jaux.Constraints.ConstraintError;
         .floatToIntBits(other.factor_min)) {
         return false;
       }
+      if (this.filter != other.filter) {
+        return false;
+      }
+      if (this.precision != other.precision) {
+        return false;
+      }
       if (this.size != other.size) {
         return false;
       }
       return true;
     }
 
-    public float getEpsilon()
+    public float getDepthBias()
     {
-      return this.epsilon;
+      return this.depth_bias;
     }
 
     public float getFactorMaximum()
@@ -93,6 +105,16 @@ import com.io7m.jaux.Constraints.ConstraintError;
       return this.factor_min;
     }
 
+    public @Nonnull KShadowFilter getFilter()
+    {
+      return this.filter;
+    }
+
+    public @Nonnull KShadowPrecision getPrecision()
+    {
+      return this.precision;
+    }
+
     public int getSize()
     {
       return this.size;
@@ -102,9 +124,11 @@ import com.io7m.jaux.Constraints.ConstraintError;
     {
       final int prime = 31;
       int result = super.hashCode();
-      result = (prime * result) + Float.floatToIntBits(this.epsilon);
+      result = (prime * result) + Float.floatToIntBits(this.depth_bias);
       result = (prime * result) + Float.floatToIntBits(this.factor_max);
       result = (prime * result) + Float.floatToIntBits(this.factor_min);
+      result = (prime * result) + this.filter.hashCode();
+      result = (prime * result) + this.precision.hashCode();
       result = (prime * result) + this.size;
       return result;
     }
@@ -112,14 +136,132 @@ import com.io7m.jaux.Constraints.ConstraintError;
     @Override public String toString()
     {
       final StringBuilder builder = new StringBuilder();
-      builder.append("[SBLightShadowMappedBasicDescription size=");
-      builder.append(this.size);
-      builder.append(" epsilon=");
-      builder.append(this.epsilon);
-      builder.append(" factor_max=");
+      builder.append("SBLightShadowMappedBasicDescription [depth_bias=");
+      builder.append(this.depth_bias);
+      builder.append(", factor_max=");
       builder.append(this.factor_max);
-      builder.append(" factor_min=");
+      builder.append(", factor_min=");
       builder.append(this.factor_min);
+      builder.append(", precision=");
+      builder.append(this.precision);
+      builder.append(", filter=");
+      builder.append(this.filter);
+      builder.append(", size=");
+      builder.append(this.size);
+      builder.append("]");
+      return builder.toString();
+    }
+  }
+
+  @Immutable final static class SBLightShadowMappedVarianceDescription extends
+    SBLightShadowDescription
+  {
+    private final float                     factor_max;
+    private final float                     factor_min;
+    private final @Nonnull KShadowFilter    filter;
+    private final @Nonnull KShadowPrecision precision;
+    private final int                       size;
+
+    private SBLightShadowMappedVarianceDescription(
+      final float factor_max,
+      final float factor_min,
+      final @Nonnull KShadowPrecision precision,
+      final @Nonnull KShadowFilter filter,
+      final int size)
+      throws ConstraintError
+    {
+      super(KShadow.Type.SHADOW_MAPPED_VARIANCE);
+      this.size = Constraints.constrainRange(size, 1, 10, "Shadow map size");
+      this.factor_max = factor_max;
+      this.factor_min = factor_min;
+      this.precision = Constraints.constrainNotNull(precision, "Precision");
+      this.filter = Constraints.constrainNotNull(filter, "Filter");
+    }
+
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (!super.equals(obj)) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final SBLightShadowMappedVarianceDescription other =
+        (SBLightShadowMappedVarianceDescription) obj;
+      if (Float.floatToIntBits(this.factor_max) != Float
+        .floatToIntBits(other.factor_max)) {
+        return false;
+      }
+      if (Float.floatToIntBits(this.factor_min) != Float
+        .floatToIntBits(other.factor_min)) {
+        return false;
+      }
+      if (this.filter != other.filter) {
+        return false;
+      }
+      if (this.precision != other.precision) {
+        return false;
+      }
+      if (this.size != other.size) {
+        return false;
+      }
+      return true;
+    }
+
+    public float getFactorMaximum()
+    {
+      return this.factor_max;
+    }
+
+    public float getFactorMinimum()
+    {
+      return this.factor_min;
+    }
+
+    public @Nonnull KShadowFilter getFilter()
+    {
+      return this.filter;
+    }
+
+    public @Nonnull KShadowPrecision getPrecision()
+    {
+      return this.precision;
+    }
+
+    public int getSize()
+    {
+      return this.size;
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = super.hashCode();
+      result = (prime * result) + Float.floatToIntBits(this.factor_max);
+      result = (prime * result) + Float.floatToIntBits(this.factor_min);
+      result = (prime * result) + this.filter.hashCode();
+      result = (prime * result) + this.precision.hashCode();
+      result = (prime * result) + this.size;
+      return result;
+    }
+
+    @Override public String toString()
+    {
+      final StringBuilder builder = new StringBuilder();
+      builder.append("SBLightShadowMappedVarianceDescription [factor_max=");
+      builder.append(this.factor_max);
+      builder.append(", factor_min=");
+      builder.append(this.factor_min);
+      builder.append(", precision=");
+      builder.append(this.precision);
+      builder.append(", filter=");
+      builder.append(this.filter);
+      builder.append(", size=");
+      builder.append(this.size);
       builder.append("]");
       return builder.toString();
     }
@@ -131,14 +273,36 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final int size,
       final float epsilon,
       final float factor_max,
-      final float factor_min)
+      final float factor_min,
+      final @Nonnull KShadowPrecision precision,
+      final @Nonnull KShadowFilter filter)
       throws ConstraintError
   {
     return new SBLightShadowMappedBasicDescription(
       size,
       epsilon,
       factor_max,
-      factor_min);
+      factor_min,
+      precision,
+      filter);
+  }
+
+  public static @Nonnull
+    SBLightShadowMappedVarianceDescription
+    newShadowMappedVariance(
+      final int size,
+      final float factor_max,
+      final float factor_min,
+      final @Nonnull KShadowPrecision precision,
+      final @Nonnull KShadowFilter filter)
+      throws ConstraintError
+  {
+    return new SBLightShadowMappedVarianceDescription(
+      factor_max,
+      factor_min,
+      precision,
+      filter,
+      size);
   }
 
   private final @Nonnull KShadow.Type type;
@@ -185,7 +349,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBLightShadowDescription type=");
+    builder.append("SBLightShadowDescription [type=");
     builder.append(this.type);
     builder.append("]");
     return builder.toString();

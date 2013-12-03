@@ -30,12 +30,13 @@ import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LUCacheLoader;
 import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedVariance;
 
 final class KShadowCacheLoader implements
-  LUCacheLoader<KShadow, KFramebufferDepth, KShadowCacheException>
+  LUCacheLoader<KShadow, KFramebufferShadow, KShadowCacheException>
 {
   public static @Nonnull
-    LUCacheLoader<KShadow, KFramebufferDepth, KShadowCacheException>
+    LUCacheLoader<KShadow, KFramebufferShadow, KShadowCacheException>
     newLoader(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull Log log)
@@ -60,7 +61,7 @@ final class KShadowCacheLoader implements
   }
 
   @Override public void luCacheClose(
-    final @Nonnull KFramebufferDepth v)
+    final @Nonnull KFramebufferShadow v)
     throws KShadowCacheException
   {
     try {
@@ -74,7 +75,7 @@ final class KShadowCacheLoader implements
     }
   }
 
-  @Override public KFramebufferDepth luCacheLoadFrom(
+  @Override public KFramebufferShadow luCacheLoadFrom(
     final @Nonnull KShadow s)
     throws KShadowCacheException
   {
@@ -97,7 +98,33 @@ final class KShadowCacheLoader implements
               this.message.append(" shadow map");
               this.log.debug(this.message.toString());
             }
-            return KFramebufferCommon.newDepthFramebuffer(this.gi, area);
+            return KFramebufferShadow.newBasic(
+              this.gi,
+              area,
+              smb.getShadowFilter(),
+              smb.getShadowPrecision());
+          }
+          case SHADOW_MAPPED_VARIANCE:
+          {
+            final KShadowMappedVariance smv = (KShadowMappedVariance) s;
+            final long size = 2 << (smv.getSizeExponent() - 1);
+            final RangeInclusive range_x = new RangeInclusive(0, size - 1);
+            final RangeInclusive range_y = new RangeInclusive(0, size - 1);
+            final AreaInclusive area = new AreaInclusive(range_x, range_y);
+            if (this.log.enabled(Level.LOG_DEBUG)) {
+              this.message.setLength(0);
+              this.message.append("Allocating ");
+              this.message.append(size);
+              this.message.append("x");
+              this.message.append(size);
+              this.message.append(" shadow map");
+              this.log.debug(this.message.toString());
+            }
+            return KFramebufferShadow.newVariance(
+              this.gi,
+              area,
+              smv.getShadowFilter(),
+              smv.getShadowPrecision());
           }
         }
 
@@ -113,13 +140,8 @@ final class KShadowCacheLoader implements
   }
 
   @Override public long luCacheSizeOf(
-    final @Nonnull KFramebufferDepth f)
+    final @Nonnull KFramebufferShadow f)
   {
-    final AreaInclusive area = f.kframebufferGetArea();
-    final long width = area.getRangeX().getInterval();
-    final long height = area.getRangeY().getInterval();
-    final int bpp =
-      f.kframebufferGetDepthTexture().getType().getBytesPerPixel();
-    return height * width * bpp;
+    return f.getSizeBytes();
   }
 }

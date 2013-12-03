@@ -180,6 +180,11 @@ import com.io7m.renderer.RVectorReadable3F;
               c = "LPSMB";
               break;
             }
+            case SHADOW_MAPPED_VARIANCE:
+            {
+              c = "LPSMV";
+              break;
+            }
           }
         }
       }

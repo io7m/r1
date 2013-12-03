@@ -18,27 +18,22 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jaux.Constraints.ConstraintError;
+import net.java.quickcheck.Generator;
+import net.java.quickcheck.generator.support.IntegerGenerator;
 
-/**
- * Optional debugging interface supported by renderers.
- */
-
-public interface KRendererDebugging
+public final class KShadowPrecisionGenerator implements
+  Generator<KShadowPrecision>
 {
-  public interface DebugShadowMapReceiver
+  private final @Nonnull IntegerGenerator index_gen;
+
+  public KShadowPrecisionGenerator()
   {
-    public void receive(
-      final @Nonnull KShadow shadow,
-      final @Nonnull KFramebufferShadow fb);
+    this.index_gen =
+      new IntegerGenerator(0, KShadowPrecision.values().length - 1);
   }
 
-  /**
-   * Request that the renderer pass any generated shadow maps to
-   * <code>receiver</code> on the next evaluation.
-   */
-
-  public void debugForEachShadowMap(
-    final @Nonnull DebugShadowMapReceiver receiver)
-    throws ConstraintError;
+  @Override public KShadowPrecision next()
+  {
+    return KShadowPrecision.values()[this.index_gen.nextInt()];
+  }
 }

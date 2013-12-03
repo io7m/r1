@@ -36,26 +36,31 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.renderer.kernel.KShadow.Type;
 import com.io7m.renderer.kernel.SBLightShadowDescription.SBLightShadowMappedBasicDescription;
+import com.io7m.renderer.kernel.SBLightShadowDescription.SBLightShadowMappedVarianceDescription;
 
 public final class SBLightShadowControls implements IHideable
 {
   private static final class SBLightShadowMappedBasicControls
   {
-    private final @Nonnull RowGroup         row_group;
-    private final @Nonnull SBIntegerHSlider size;
-    private final @Nonnull SBFloatHSlider   epsilon;
-    private final @Nonnull SBFloatHSlider   factor_maximum;
-    private final @Nonnull SBFloatHSlider   factor_minimum;
+    private final @Nonnull RowGroup                  row_group;
+    private final @Nonnull SBIntegerHSlider          size;
+    private final @Nonnull SBFloatHSlider            depth_bias;
+    private final @Nonnull SBFloatHSlider            factor_maximum;
+    private final @Nonnull SBFloatHSlider            factor_minimum;
+    private final @Nonnull SBShadowPrecisionSelector precision;
+    private final @Nonnull SBShadowFilterSelector    filter;
 
     private SBLightShadowMappedBasicControls()
       throws ConstraintError
     {
       this.size = new SBIntegerHSlider("Size", 1, 10);
-      this.epsilon = new SBFloatHSlider("Epsilon", 0.0f, 0.001f);
+      this.depth_bias = new SBFloatHSlider("Depth bias", 0.0f, 0.001f);
       this.factor_maximum = new SBFloatHSlider("Maximum", 0.0f, 1.0f);
       this.factor_minimum = new SBFloatHSlider("Minimum", 0.0f, 1.0f);
+      this.precision = new SBShadowPrecisionSelector();
+      this.filter = new SBShadowFilterSelector();
       this.row_group = new RowGroup();
-      this.epsilon.setCurrent(0.0005f);
+      this.depth_bias.setCurrent(0.0005f);
     }
 
     public void addToLayout(
@@ -70,9 +75,9 @@ public final class SBLightShadowControls implements IHideable
       layout
         .row()
         .group(this.row_group)
-        .grid(this.epsilon.getLabel())
-        .add(this.epsilon.getSlider(), 3)
-        .add(this.epsilon.getField());
+        .grid(this.depth_bias.getLabel())
+        .add(this.depth_bias.getSlider(), 3)
+        .add(this.depth_bias.getField());
       layout
         .row()
         .group(this.row_group)
@@ -85,6 +90,16 @@ public final class SBLightShadowControls implements IHideable
         .grid(this.factor_minimum.getLabel())
         .add(this.factor_minimum.getSlider(), 3)
         .add(this.factor_minimum.getField());
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(new JLabel("Precision"))
+        .add(this.precision, 4);
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(new JLabel("Filter"))
+        .add(this.filter, 4);
     }
 
     public @Nonnull RowGroup getRowGroup()
@@ -97,18 +112,102 @@ public final class SBLightShadowControls implements IHideable
     {
       return SBLightShadowDescription.newShadowMappedBasic(
         this.size.getCurrent(),
-        this.epsilon.getCurrent(),
+        this.depth_bias.getCurrent(),
         this.factor_maximum.getCurrent(),
-        this.factor_minimum.getCurrent());
+        this.factor_minimum.getCurrent(),
+        (KShadowPrecision) this.precision.getSelectedItem(),
+        (KShadowFilter) this.filter.getSelectedItem());
     }
 
     public void setDescription(
       final SBLightShadowMappedBasicDescription smb)
     {
       this.size.setCurrent(smb.getSize());
-      this.epsilon.setCurrent(smb.getEpsilon());
+      this.depth_bias.setCurrent(smb.getDepthBias());
       this.factor_maximum.setCurrent(smb.getFactorMaximum());
       this.factor_minimum.setCurrent(smb.getFactorMinimum());
+      this.precision.setSelectedItem(smb.getPrecision());
+      this.filter.setSelectedItem(smb.getFilter());
+    }
+  }
+
+  private static final class SBLightShadowMappedVarianceControls
+  {
+    private final @Nonnull RowGroup                  row_group;
+    private final @Nonnull SBIntegerHSlider          size;
+    private final @Nonnull SBFloatHSlider            factor_maximum;
+    private final @Nonnull SBFloatHSlider            factor_minimum;
+    private final @Nonnull SBShadowPrecisionSelector precision;
+    private final @Nonnull SBShadowFilterSelector    filter;
+
+    private SBLightShadowMappedVarianceControls()
+      throws ConstraintError
+    {
+      this.size = new SBIntegerHSlider("Size", 1, 10);
+      this.factor_maximum = new SBFloatHSlider("Maximum", 0.0f, 1.0f);
+      this.factor_minimum = new SBFloatHSlider("Minimum", 0.0f, 1.0f);
+      this.precision = new SBShadowPrecisionSelector();
+      this.filter = new SBShadowFilterSelector();
+      this.row_group = new RowGroup();
+    }
+
+    public void addToLayout(
+      final @Nonnull DesignGridLayout layout)
+    {
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(this.size.getLabel())
+        .add(this.size.getSlider(), 3)
+        .add(this.size.getField());
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(this.factor_maximum.getLabel())
+        .add(this.factor_maximum.getSlider(), 3)
+        .add(this.factor_maximum.getField());
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(this.factor_minimum.getLabel())
+        .add(this.factor_minimum.getSlider(), 3)
+        .add(this.factor_minimum.getField());
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(new JLabel("Precision"))
+        .add(this.precision, 4);
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(new JLabel("Filter"))
+        .add(this.filter, 4);
+    }
+
+    public @Nonnull RowGroup getRowGroup()
+    {
+      return this.row_group;
+    }
+
+    public @Nonnull SBLightShadowMappedVarianceDescription getShadow()
+      throws ConstraintError
+    {
+      return SBLightShadowDescription.newShadowMappedVariance(
+        this.size.getCurrent(),
+        this.factor_maximum.getCurrent(),
+        this.factor_minimum.getCurrent(),
+        (KShadowPrecision) this.precision.getSelectedItem(),
+        (KShadowFilter) this.filter.getSelectedItem());
+    }
+
+    public void setDescription(
+      final SBLightShadowMappedVarianceDescription smb)
+    {
+      this.size.setCurrent(smb.getSize());
+      this.factor_maximum.setCurrent(smb.getFactorMaximum());
+      this.factor_minimum.setCurrent(smb.getFactorMinimum());
+      this.precision.setSelectedItem(smb.getPrecision());
+      this.filter.setSelectedItem(smb.getFilter());
     }
   }
 
@@ -141,11 +240,12 @@ public final class SBLightShadowControls implements IHideable
     return new SBLightShadowControls(parent);
   }
 
-  private final @Nonnull SBLightShadowMappedBasicControls mapped_basic_controls;
-  private final @Nonnull JCheckBox                        shadow;
-  private final @Nonnull SBLightShadowTypeSelector        type_select;
-  private final @Nonnull JFrame                           parent;
-  private final @Nonnull RowGroup                         group;
+  private final @Nonnull SBLightShadowMappedBasicControls    mapped_basic_controls;
+  private final @Nonnull SBLightShadowMappedVarianceControls mapped_variance_controls;
+  private final @Nonnull JCheckBox                           shadow;
+  private final @Nonnull SBLightShadowTypeSelector           type_select;
+  private final @Nonnull JFrame                              parent;
+  private final @Nonnull RowGroup                            group;
 
   @SuppressWarnings("synthetic-access") private SBLightShadowControls(
     final @Nonnull JFrame parent)
@@ -155,6 +255,7 @@ public final class SBLightShadowControls implements IHideable
 
     this.group = new RowGroup();
     this.mapped_basic_controls = new SBLightShadowMappedBasicControls();
+    this.mapped_variance_controls = new SBLightShadowMappedVarianceControls();
 
     this.shadow = new JCheckBox("Shadow");
     this.shadow.setSelected(false);
@@ -201,6 +302,7 @@ public final class SBLightShadowControls implements IHideable
 
     layout.emptyRow();
     this.mapped_basic_controls.addToLayout(layout);
+    this.mapped_variance_controls.addToLayout(layout);
     this.controlsDisableSelector();
   }
 
@@ -208,6 +310,7 @@ public final class SBLightShadowControls implements IHideable
   {
     this.type_select.setEnabled(false);
     this.mapped_basic_controls.getRowGroup().hide();
+    this.mapped_variance_controls.getRowGroup().hide();
     this.parent.pack();
   }
 
@@ -222,11 +325,19 @@ public final class SBLightShadowControls implements IHideable
     final @Nonnull Type type)
   {
     this.mapped_basic_controls.getRowGroup().forceShow();
+    this.mapped_variance_controls.getRowGroup().forceShow();
 
     switch (type) {
       case SHADOW_MAPPED_BASIC:
       {
         this.mapped_basic_controls.getRowGroup().forceShow();
+        this.mapped_variance_controls.getRowGroup().hide();
+        break;
+      }
+      case SHADOW_MAPPED_VARIANCE:
+      {
+        this.mapped_variance_controls.getRowGroup().forceShow();
+        this.mapped_basic_controls.getRowGroup().hide();
         break;
       }
     }
@@ -243,6 +354,11 @@ public final class SBLightShadowControls implements IHideable
         {
           return new Option.Some<SBLightShadowDescription>(
             this.mapped_basic_controls.getShadow());
+        }
+        case SHADOW_MAPPED_VARIANCE:
+        {
+          return new Option.Some<SBLightShadowDescription>(
+            this.mapped_variance_controls.getShadow());
         }
       }
     } else {
@@ -275,6 +391,12 @@ public final class SBLightShadowControls implements IHideable
           {
             this.mapped_basic_controls
               .setDescription((SBLightShadowMappedBasicDescription) d);
+            break;
+          }
+          case SHADOW_MAPPED_VARIANCE:
+          {
+            this.mapped_variance_controls
+              .setDescription((SBLightShadowMappedVarianceDescription) d);
             break;
           }
         }

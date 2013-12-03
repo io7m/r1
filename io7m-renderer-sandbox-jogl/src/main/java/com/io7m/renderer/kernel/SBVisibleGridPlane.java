@@ -16,6 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -77,12 +80,11 @@ public final class SBVisibleGridPlane
       log.debug(m.toString());
     }
 
-    final ArrayBufferAttributeDescriptor[] attributes =
-      new ArrayBufferAttributeDescriptor[2];
-    attributes[0] = KMeshAttributes.ATTRIBUTE_POSITION;
-    attributes[1] = KMeshAttributes.ATTRIBUTE_COLOUR;
-    final ArrayBufferTypeDescriptor type =
-      new ArrayBufferTypeDescriptor(attributes);
+    final List<ArrayBufferAttributeDescriptor> abs =
+      new ArrayList<ArrayBufferAttributeDescriptor>();
+    abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
+    abs.add(KMeshAttributes.ATTRIBUTE_COLOUR);
+    final ArrayBufferTypeDescriptor type = new ArrayBufferTypeDescriptor(abs);
 
     final long elements = SBVisibleGridPlane.elementsRequired(x, z);
     this.array =

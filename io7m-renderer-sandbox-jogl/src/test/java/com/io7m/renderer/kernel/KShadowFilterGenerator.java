@@ -16,13 +16,23 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.jcanephora.Texture2DStaticUsable;
+import javax.annotation.Nonnull;
 
-public interface KFramebufferDepthUsable extends KFramebufferUsable
+import net.java.quickcheck.Generator;
+import net.java.quickcheck.generator.support.IntegerGenerator;
+
+public final class KShadowFilterGenerator implements Generator<KShadowFilter>
 {
-  /**
-   * Retrieve the texture that backs the depth buffer.
-   */
+  private final @Nonnull IntegerGenerator index_gen;
 
-  public Texture2DStaticUsable kframebufferGetDepthTexture();
+  public KShadowFilterGenerator()
+  {
+    this.index_gen =
+      new IntegerGenerator(0, KShadowFilter.values().length - 1);
+  }
+
+  @Override public KShadowFilter next()
+  {
+    return KShadowFilter.values()[this.index_gen.nextInt()];
+  }
 }
