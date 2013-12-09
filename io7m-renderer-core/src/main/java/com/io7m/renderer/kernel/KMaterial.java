@@ -48,17 +48,13 @@ import com.io7m.renderer.RTransformTexture;
     final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix)
     throws ConstraintError
   {
-    this.alpha = Constraints.constrainNotNull(alpha, "KMaterialAlphaLabel");
-    this.albedo =
-      Constraints.constrainNotNull(diffuse, "KMaterialAlbedoLabel");
-    this.emissive =
-      Constraints.constrainNotNull(emissive, "KMaterialEmissiveLabel");
+    this.alpha = Constraints.constrainNotNull(alpha, "Alpha");
+    this.albedo = Constraints.constrainNotNull(diffuse, "Albedo");
+    this.emissive = Constraints.constrainNotNull(emissive, "Emissive");
     this.environment =
-      Constraints.constrainNotNull(environment, "KMaterialEnvironmentLabel");
-    this.normal =
-      Constraints.constrainNotNull(normal, "KMaterialNormalLabel");
-    this.specular =
-      Constraints.constrainNotNull(specular, "KMaterialSpecularLabel");
+      Constraints.constrainNotNull(environment, "Environment");
+    this.normal = Constraints.constrainNotNull(normal, "Normal");
+    this.specular = Constraints.constrainNotNull(specular, "Specular");
     this.uv_matrix = Constraints.constrainNotNull(uv_matrix, "UV matrix");
   }
 

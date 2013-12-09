@@ -29,6 +29,7 @@ module ProjectiveLight is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Sampler2D  as S2;
 
+  import com.io7m.renderer.Depth          as D;
   import com.io7m.renderer.Materials      as M;
   import com.io7m.renderer.SphericalLight as SL;
   import com.io7m.renderer.Transform      as T;
@@ -87,6 +88,39 @@ module ProjectiveLight is
           T.clip_to_texture (p);
         value map_depth =
           S2.texture (t_shadow, current_tex [x y]) [x];
+        value map_depth_adjusted =
+          F.add (map_depth, config.shadow_depth_bias);
+      in
+        if F.lesser (current_tex [z], map_depth_adjusted) then
+          config.shadow_factor_max
+        else
+          config.shadow_factor_min
+        end
+      end
+    end;
+
+  --
+  -- Given a shadow map [t_shadow], and clip-coordinates [p], return
+  -- the amount of light that could be reaching the current point (where
+  -- 0.0 is fully shadowed and 1.0 is fully lit), assuming that the
+  -- texture is a packed RGBA4444 texture.
+  --
+
+  function shadow_factor_packed4444 (
+    config   : basic,
+    t_shadow : sampler_2d,
+    p        : vector_4f
+  ) : float =
+    if F.lesser (p [w], 0.0) then
+      0.0
+    else
+      let
+        value current_tex =
+          T.clip_to_texture (p);
+        value rgba =
+          S2.texture (t_shadow, current_tex [x y]);
+        value map_depth =
+          D.unpack4444 (rgba);
         value map_depth_adjusted =
           F.add (map_depth, config.shadow_depth_bias);
       in
@@ -264,6 +298,32 @@ module ProjectiveLight is
 
   --
   -- Given a projective light [light], calculate the diffuse
+  -- colour based on [d], sampling the current light texel from [t_light].
+  --
+
+  function diffuse_only_shadowed_basic_packed4444 (
+    light        : t,
+    n            : vector_3f,
+    p            : vector_3f,
+    t_light      : sampler_2d,
+    p_light_clip : vector_4f,
+    t_shadow     : sampler_2d,
+    config       : basic
+  ) : vector_3f =
+    let
+      value d   = SL.directions (light.position, p, n);
+      value sf  = shadow_factor_packed4444 (config, t_shadow, p_light_clip);
+      value a   = SL.attenuation (light.range, light.falloff, d.distance);
+      value sa  = F.multiply (sf, a);
+      value tx  = light_texel (t_light, p_light_clip);
+      value lc  = V3.multiply (light.colour, tx [x y z]);
+      value c   = diffuse_colour (light, d, lc, 0.0);
+    in
+      V3.multiply_scalar (c, sa)
+    end;
+
+  --
+  -- Given a projective light [light], calculate the diffuse
   -- colour based on [d], with the minimum emission level given in
   -- [m], sampling the current light texel from [t_light].
   --
@@ -281,6 +341,35 @@ module ProjectiveLight is
     let
       value d  = SL.directions (light.position, p, n);
       value sf = shadow_factor (config, t_shadow, p_light_clip);
+      value a  = SL.attenuation (light.range, light.falloff, d.distance);
+      value sa = F.multiply (sf, a);
+      value tx = light_texel (t_light, p_light_clip);
+      value lc = V3.multiply (light.colour, tx [x y z]);
+      value dc = diffuse_colour (light, d, lc, 0.0);
+      value sc = specular_colour (light, d, lc, m.specular);
+    in
+      V3.multiply_scalar (V3.add (dc, sc), sa)
+    end;
+
+  --
+  -- Given a projective light [light], calculate the diffuse
+  -- colour based on [d], with the minimum emission level given in
+  -- [m], sampling the current light texel from [t_light].
+  --
+
+  function diffuse_only_emissive_shadowed_basic_packed4444 (
+    light        : t,
+    n            : vector_3f,
+    p            : vector_3f,
+    m            : M.t,
+    t_light      : sampler_2d,
+    p_light_clip : vector_4f,
+    t_shadow     : sampler_2d,
+    config       : basic
+  ) : vector_3f =
+    let
+      value d  = SL.directions (light.position, p, n);
+      value sf = shadow_factor_packed4444 (config, t_shadow, p_light_clip);
       value a  = SL.attenuation (light.range, light.falloff, d.distance);
       value sa = F.multiply (sf, a);
       value tx = light_texel (t_light, p_light_clip);
@@ -321,6 +410,34 @@ module ProjectiveLight is
 
   --
   -- Given a projective light [light], calculate the diffuse and 
+  -- specular terms for the surface.
+  --
+
+  function diffuse_specular_shadowed_basic_packed4444 (
+    light        : t,
+    n            : vector_3f,
+    p            : vector_3f,
+    m            : M.t,
+    t_light      : sampler_2d,
+    p_light_clip : vector_4f,
+    t_shadow     : sampler_2d,
+    config       : basic
+  ) : vector_3f =
+    let
+      value d  = SL.directions (light.position, p, n);
+      value sf = shadow_factor_packed4444 (config, t_shadow, p_light_clip);
+      value a  = SL.attenuation (light.range, light.falloff, d.distance);
+      value sa = F.multiply (sf, a);
+      value tx = light_texel (t_light, p_light_clip);
+      value lc = V3.multiply (light.colour, tx [x y z]);
+      value dc = diffuse_colour (light, d, lc, 0.0);
+      value sc = specular_colour (light, d, lc, m.specular);
+    in
+      V3.multiply_scalar (V3.add (dc, sc), sa)
+    end;
+
+  --
+  -- Given a projective light [light], calculate the diffuse and 
   -- specular terms for the surface, with the minimum emission level
   -- given in [m].
   --
@@ -338,6 +455,35 @@ module ProjectiveLight is
     let
       value d  = SL.directions (light.position, p, n);
       value sf = shadow_factor (config, t_shadow, p_light_clip);
+      value a  = SL.attenuation (light.range, light.falloff, d.distance);
+      value sa = F.multiply (sf, a);
+      value tx = light_texel (t_light, p_light_clip);
+      value lc = V3.multiply (light.colour, tx [x y z]);
+      value dc = diffuse_colour (light, d, lc, m.emissive.emissive);
+      value sc = specular_colour (light, d, lc, m.specular);
+    in
+      V3.multiply_scalar (V3.add (dc, sc), sa)
+    end;
+
+  --
+  -- Given a projective light [light], calculate the diffuse and 
+  -- specular terms for the surface, with the minimum emission level
+  -- given in [m].
+  --
+
+  function diffuse_specular_emissive_shadowed_basic_packed4444 (
+    light        : t,
+    n            : vector_3f,
+    p            : vector_3f,
+    m            : M.t,
+    t_light      : sampler_2d,
+    p_light_clip : vector_4f,
+    t_shadow     : sampler_2d,
+    config       : basic
+  ) : vector_3f =
+    let
+      value d  = SL.directions (light.position, p, n);
+      value sf = shadow_factor_packed4444 (config, t_shadow, p_light_clip);
       value a  = SL.attenuation (light.range, light.falloff, d.distance);
       value sa = F.multiply (sf, a);
       value tx = light_texel (t_light, p_light_clip);

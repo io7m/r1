@@ -22,29 +22,8 @@ import javax.annotation.concurrent.Immutable;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 
-@Immutable public final class KMeshInstanceForwardMaterialLabel
+@Immutable final class KMaterialForwardLabel
 {
-  static @Nonnull KMeshInstanceForwardMaterialLabel label(
-    final @Nonnull KMesh mesh,
-    final @Nonnull KMaterial material)
-    throws ConstraintError
-  {
-    final KMaterialNormalLabel normal_label =
-      KMaterialNormalLabel.fromMeshAndMaterial(mesh, material);
-
-    return new KMeshInstanceForwardMaterialLabel(
-      KMaterialAlphaLabel.fromMeshAndMaterial(mesh, material),
-      KMaterialAlbedoLabel.fromMeshAndMaterial(mesh, material),
-      KMaterialEmissiveLabel.fromMeshAndMaterial(mesh, material),
-      KMaterialEnvironmentLabel.fromMeshAndMaterial(
-        mesh,
-        material,
-        normal_label),
-      normal_label,
-      KMaterialSpecularLabel
-        .fromMeshAndMaterial(mesh, material, normal_label));
-  }
-
   private static boolean makeImpliesSpecularMap(
     final @Nonnull KMaterialSpecularLabel specular,
     final @Nonnull KMaterialEnvironmentLabel environment)
@@ -77,13 +56,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
   }
 
   private static boolean makeImpliesUV(
-    final @Nonnull KMaterialAlbedoLabel kMaterialAlbedoLabel,
+    final @Nonnull KMaterialAlbedoLabel albedo,
     final @Nonnull KMaterialEmissiveLabel emissive,
     final @Nonnull KMaterialNormalLabel normal,
     final @Nonnull KMaterialSpecularLabel specular,
     final @Nonnull KMaterialEnvironmentLabel environment)
   {
-    switch (kMaterialAlbedoLabel) {
+    switch (albedo) {
       case ALBEDO_COLOURED:
         break;
       case ALBEDO_TEXTURED:
@@ -162,54 +141,46 @@ import com.io7m.jaux.Constraints.ConstraintError;
   private final @Nonnull KMaterialEnvironmentLabel environment;
   private final boolean                            implies_specular_map;
   private final boolean                            implies_uv;
-  private final @Nonnull KMaterialAlbedoLabel      kMaterialAlbedoLabel;
+  private final @Nonnull KMaterialAlbedoLabel      albedo;
   private final @Nonnull KMaterialNormalLabel      normal;
   private final @Nonnull KMaterialSpecularLabel    specular;
 
-  KMeshInstanceForwardMaterialLabel(
+  KMaterialForwardLabel(
     final @Nonnull KMaterialAlphaLabel alpha,
-    final @Nonnull KMaterialAlbedoLabel kMaterialAlbedoLabel,
+    final @Nonnull KMaterialAlbedoLabel albedo,
     final @Nonnull KMaterialEmissiveLabel emissive,
     final @Nonnull KMaterialEnvironmentLabel environment,
     final @Nonnull KMaterialNormalLabel normal,
     final @Nonnull KMaterialSpecularLabel specular)
     throws ConstraintError
   {
-    this.alpha = Constraints.constrainNotNull(alpha, "KMaterialAlphaLabel");
-    this.kMaterialAlbedoLabel =
-      Constraints.constrainNotNull(
-        kMaterialAlbedoLabel,
-        "KMaterialAlbedoLabel");
-    this.emissive =
-      Constraints.constrainNotNull(emissive, "KMaterialEmissiveLabel");
+    this.alpha = Constraints.constrainNotNull(alpha, "Alpha");
+    this.albedo = Constraints.constrainNotNull(albedo, "Albedo");
+    this.emissive = Constraints.constrainNotNull(emissive, "Emissive");
     this.environment =
-      Constraints.constrainNotNull(environment, "KMaterialEnvironmentLabel");
-    this.normal =
-      Constraints.constrainNotNull(normal, "KMaterialNormalLabel");
-    this.specular =
-      Constraints.constrainNotNull(specular, "KMaterialSpecularLabel");
+      Constraints.constrainNotNull(environment, "Environment");
+    this.normal = Constraints.constrainNotNull(normal, "Normal");
+    this.specular = Constraints.constrainNotNull(specular, "Specular");
 
     this.code =
-      KMeshInstanceForwardMaterialLabel.makeLabelCode(
+      KMaterialForwardLabel.makeLabelCode(
         alpha,
-        kMaterialAlbedoLabel,
+        albedo,
         emissive,
         environment,
         normal,
         specular);
 
     this.implies_uv =
-      KMeshInstanceForwardMaterialLabel.makeImpliesUV(
-        kMaterialAlbedoLabel,
+      KMaterialForwardLabel.makeImpliesUV(
+        albedo,
         emissive,
         normal,
         specular,
         environment);
 
     this.implies_specular_map =
-      KMeshInstanceForwardMaterialLabel.makeImpliesSpecularMap(
-        specular,
-        environment);
+      KMaterialForwardLabel.makeImpliesSpecularMap(specular, environment);
   }
 
   @Override public boolean equals(
@@ -224,12 +195,11 @@ import com.io7m.jaux.Constraints.ConstraintError;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KMeshInstanceForwardMaterialLabel other =
-      (KMeshInstanceForwardMaterialLabel) obj;
+    final KMaterialForwardLabel other = (KMaterialForwardLabel) obj;
     if (this.alpha != other.alpha) {
       return false;
     }
-    if (this.kMaterialAlbedoLabel != other.kMaterialAlbedoLabel) {
+    if (this.albedo != other.albedo) {
       return false;
     }
     if (this.emissive != other.emissive) {
@@ -249,7 +219,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
   public @Nonnull KMaterialAlbedoLabel getAlbedo()
   {
-    return this.kMaterialAlbedoLabel;
+    return this.albedo;
   }
 
   public @Nonnull KMaterialAlphaLabel getAlpha()
@@ -287,7 +257,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.alpha.hashCode();
-    result = (prime * result) + this.kMaterialAlbedoLabel.hashCode();
+    result = (prime * result) + this.albedo.hashCode();
     result = (prime * result) + this.emissive.hashCode();
     result = (prime * result) + this.environment.hashCode();
     result = (prime * result) + this.normal.hashCode();

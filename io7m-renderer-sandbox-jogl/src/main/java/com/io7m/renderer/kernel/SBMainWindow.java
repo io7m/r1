@@ -62,13 +62,13 @@ import com.jogamp.opengl.util.Animator;
 
 final class SBMainWindow extends JFrame
 {
+  protected final static @Nonnull FileFilter SCENE_FILTER;
+
   private static final long                  serialVersionUID;
 
   static {
     serialVersionUID = -4478810823021843490L;
   }
-
-  protected final static @Nonnull FileFilter SCENE_FILTER;
 
   static {
     SCENE_FILTER = new FileFilter() {
@@ -85,18 +85,25 @@ final class SBMainWindow extends JFrame
     };
   }
 
-  private static @Nonnull GLProfile getGLProfile()
+  private static @Nonnull GLProfile getGLProfile(
+    final @Nonnull SandboxConfig config)
   {
-    if (GLProfile.isAvailable(GLProfile.GLES2)) {
-      return GLProfile.get(GLProfile.GLES2);
+    switch (config.getOpenGLProfile()) {
+      case OPENGL_PROFILE_DEFAULT:
+        return GLProfile.getDefault();
+      case OPENGL_PROFILE_GL2:
+        return GLProfile.get(GLProfile.GL2);
+      case OPENGL_PROFILE_GL3:
+        return GLProfile.get(GLProfile.GL3);
+      case OPENGL_PROFILE_GL4:
+        return GLProfile.get(GLProfile.GL4);
+      case OPENGL_PROFILE_GLES2:
+        return GLProfile.get(GLProfile.GLES2);
+      case OPENGL_PROFILE_GLES3:
+        return GLProfile.get(GLProfile.GLES3);
     }
-    if (GLProfile.isAvailable(GLProfile.GL3)) {
-      return GLProfile.get(GLProfile.GL3);
-    }
-    if (GLProfile.isAvailable(GLProfile.GL3bc)) {
-      return GLProfile.get(GLProfile.GL3bc);
-    }
-    return GLProfile.get(GLProfile.GL2ES2);
+
+    throw new UnreachableCodeException();
   }
 
   private static @Nonnull
@@ -584,6 +591,7 @@ final class SBMainWindow extends JFrame
   protected final @Nonnull SBGLRenderer renderer;
 
   public SBMainWindow(
+    final @Nonnull SandboxConfig config,
     final @Nonnull SBSceneController controller,
     final @Nonnull SBGLRenderer renderer,
     final @Nonnull Log log)
@@ -594,7 +602,6 @@ final class SBMainWindow extends JFrame
     final SBLogsWindow logs_window = new SBLogsWindow();
     final SBObjectsWindow objects_window =
       new SBObjectsWindow(controller, log);
-
     final SBCameraWindow camera_window = new SBCameraWindow(controller, log);
 
     log.setCallback(new Callbacks() {
@@ -629,7 +636,7 @@ final class SBMainWindow extends JFrame
     });
 
     try {
-      final GLProfile profile = SBMainWindow.getGLProfile();
+      final GLProfile profile = SBMainWindow.getGLProfile(config);
       final GLCapabilities caps = new GLCapabilities(profile);
 
       log.debug("caps: " + caps);

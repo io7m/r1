@@ -17,63 +17,55 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.RMatrixI3x3F;
-import com.io7m.renderer.RTransformTexture;
 
 /**
  * <p>
- * An instance of a polygon mesh on the GPU.
+ * An instance of a polygon mesh on the GPU with an associated material.
  * </p>
- * <p>
- * The polygon mesh is expected to have the following type(s):
- * </p>
- * <ul>
- * <li>The array buffer must have an attribute of type
- * {@link KMeshAttributes#ATTRIBUTE_POSITION}.</li>
- * <li>If the mesh has per-vertex normals, they must be of type
- * {@link KMeshAttributes#ATTRIBUTE_NORMAL}.</li>
- * <li>If the mesh has texture coordinates, they must be of type
- * {@link KMeshAttributes#ATTRIBUTE_UV}.</li>
- * <li>If the mesh has per-vertex tangents, they must be of type
- * {@link KMeshAttributes#ATTRIBUTE_TANGENT4}.</li>
- * <ul>
+ * 
+ * @see KMaterial
+ * @see KMesh
  */
 
-@Immutable public final class KMeshInstance implements KTransformable
+public class KMeshInstance
 {
-  private final @Nonnull KMeshInstanceForwardMaterialLabel forward_label;
-  private final @Nonnull Integer                           id;
-  private final @Nonnull KMaterial                         material;
-  private final @Nonnull KMesh                             mesh;
-  private final @Nonnull KMeshInstanceShadowMaterialLabel  shadow_label;
-  private final @Nonnull KTransform                        transform;
-  private final @Nonnull RMatrixI3x3F<RTransformTexture>   uv_matrix;
+  public final @Nonnull Integer   id;
+  public final @Nonnull KMaterial material;
+  public final @Nonnull KMesh     mesh;
 
-  public KMeshInstance(
+  KMeshInstance(
     final @Nonnull Integer id,
-    final @Nonnull KTransform transform,
-    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix,
-    final @Nonnull KMesh mesh,
-    final @Nonnull KMaterial material)
-    throws ConstraintError
+    final @Nonnull KMaterial material,
+    final @Nonnull KMesh mesh)
   {
     this.id = id;
-    this.transform = transform;
-    this.mesh = mesh;
     this.material = material;
-    this.uv_matrix = uv_matrix;
-    this.forward_label =
-      KMeshInstanceForwardMaterialLabel.label(mesh, material);
-    this.shadow_label =
-      KMeshInstanceShadowMaterialLabel.label(mesh, material);
+    this.mesh = mesh;
   }
 
-  public @Nonnull KMeshInstanceForwardMaterialLabel getForwardMaterialLabel()
+  @Override public boolean equals(
+    final Object obj)
   {
-    return this.forward_label;
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KMeshInstance other = (KMeshInstance) obj;
+    if (!this.id.equals(other.id)) {
+      return false;
+    }
+    if (!this.material.equals(other.material)) {
+      return false;
+    }
+    if (!this.mesh.equals(other.mesh)) {
+      return false;
+    }
+    return true;
   }
 
   public @Nonnull Integer getID()
@@ -91,18 +83,27 @@ import com.io7m.renderer.RTransformTexture;
     return this.mesh;
   }
 
-  public @Nonnull KMeshInstanceShadowMaterialLabel getShadowMaterialLabel()
+  @Override public int hashCode()
   {
-    return this.shadow_label;
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.id.hashCode();
+    result = (prime * result) + this.material.hashCode();
+    result = (prime * result) + this.mesh.hashCode();
+    return result;
   }
 
-  @Override public @Nonnull KTransform getTransform()
+  @Override public String toString()
   {
-    return this.transform;
+    final StringBuilder builder = new StringBuilder();
+    builder.append("[KMeshInstance id=");
+    builder.append(this.id);
+    builder.append(" material=");
+    builder.append(this.material);
+    builder.append(" mesh=");
+    builder.append(this.mesh);
+    builder.append("]");
+    return builder.toString();
   }
 
-  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
-  {
-    return this.uv_matrix;
-  }
 }

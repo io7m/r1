@@ -29,16 +29,16 @@ enum KMaterialSpecularLabel
   SPECULAR_MAPPED("SM"),
   SPECULAR_NONE("");
 
-  static @Nonnull KMaterialSpecularLabel fromMeshAndMaterial(
-    final @Nonnull KMesh mesh,
-    final @Nonnull KMaterial material,
+  static @Nonnull KMaterialSpecularLabel fromInstance(
+    final @Nonnull KMeshInstance instance,
     final @Nonnull KMaterialNormalLabel normal)
     throws ConstraintError
   {
-    Constraints.constrainNotNull(mesh, "Mesh");
-    Constraints.constrainNotNull(material, "Material");
+    Constraints.constrainNotNull(instance, "Instance");
     Constraints.constrainNotNull(normal, "Normal");
 
+    final KMesh mesh = instance.getMesh();
+    final KMaterial material = instance.getMaterial();
     final ArrayBuffer a = mesh.getArrayBuffer();
 
     switch (normal) {

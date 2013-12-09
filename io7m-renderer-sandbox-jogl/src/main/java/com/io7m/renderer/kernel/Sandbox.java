@@ -156,7 +156,7 @@ public final class Sandbox
           renderer.setController(controller);
 
           final SBMainWindow window =
-            new SBMainWindow(controller, renderer, log);
+            new SBMainWindow(config, controller, renderer, log);
           window.setTitle("Sandbox");
           window.setPreferredSize(new Dimension(800, 600));
           window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
