@@ -38,6 +38,8 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.FragmentShader;
+import com.io7m.jcanephora.JCBExecutionAPI;
+import com.io7m.jcanephora.JCBExecutor;
 import com.io7m.jcanephora.JCGLApi;
 import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
@@ -49,7 +51,6 @@ import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.ShaderUtilities;
 import com.io7m.jcanephora.VertexShader;
-import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FSCapabilityRead;
@@ -305,7 +306,7 @@ import com.io7m.parasol.xml.VertexParameter;
       try {
         final ProgramReference p =
           KProgram.newProgramFromStreams(gl, name, v_stream, f_stream, v);
-        return new KProgram(m, p, log);
+        return new KProgram(gl, m, p, log);
       } finally {
         f_stream.close();
       }
@@ -344,7 +345,7 @@ import com.io7m.parasol.xml.VertexParameter;
             v_stream,
             f_stream,
             v);
-        return new KProgram(m, p, log);
+        return new KProgram(gl, m, p, log);
       } finally {
         f_stream.close();
       }
@@ -378,7 +379,7 @@ import com.io7m.parasol.xml.VertexParameter;
       try {
         final ProgramReference p =
           KProgram.newProgramFromStreams(gl, name, v_stream, f_stream, null);
-        return new KProgram(m, p, log);
+        return new KProgram(gl, m, p, log);
       } finally {
         f_stream.close();
       }
@@ -419,7 +420,7 @@ import com.io7m.parasol.xml.VertexParameter;
             v_stream,
             f_stream,
             null);
-        return new KProgram(m, p, log);
+        return new KProgram(gl, m, p, log);
       } finally {
         f_stream.close();
       }
@@ -642,11 +643,12 @@ import com.io7m.parasol.xml.VertexParameter;
 
   private final @Nonnull HashMap<String, JCGLType> declared_attributes;
   private final @Nonnull HashMap<String, JCGLType> declared_uniforms;
-  private final @Nonnull JCCEExecutionCallable     exec;
+  private final @Nonnull JCBExecutionAPI           exec;
   private final @Nonnull PGLSLMetaXML              meta;
   private final @Nonnull ProgramReference          program;
 
   private KProgram(
+    final @Nonnull JCGLShadersCommon gl,
     final @Nonnull PGLSLMetaXML meta,
     final @Nonnull ProgramReference program,
     final @Nonnull Log log)
@@ -657,53 +659,29 @@ import com.io7m.parasol.xml.VertexParameter;
     this.declared_uniforms = new HashMap<String, JCGLType>();
     this.declared_attributes = new HashMap<String, JCGLType>();
 
-    final StringBuilder message = new StringBuilder();
-
     for (final VertexParameter p : meta.getDeclaredVertexParameters()) {
       final JCGLType t = JCGLType.fromName(p.getType());
       this.declared_uniforms.put(p.getName(), t);
-      if (log.enabled(Level.LOG_DEBUG)) {
-        message.setLength(0);
-        message.append("declared uniform ");
-        message.append(p.getName());
-        message.append(" ");
-        message.append(t);
-        log.debug(message.toString());
-      }
     }
     for (final FragmentParameter p : meta.getDeclaredFragmentParameters()) {
       final JCGLType t = JCGLType.fromName(p.getType());
       this.declared_uniforms.put(p.getName(), t);
-      if (log.enabled(Level.LOG_DEBUG)) {
-        message.setLength(0);
-        message.append("declared uniform ");
-        message.append(p.getName());
-        message.append(" ");
-        message.append(t);
-        log.debug(message.toString());
-      }
     }
     for (final VertexInput p : meta.getDeclaredVertexInputs()) {
       final JCGLType t = JCGLType.fromName(p.getType());
       this.declared_attributes.put(p.getName(), t);
-      if (log.enabled(Level.LOG_DEBUG)) {
-        message.setLength(0);
-        message.append("declared attribute ");
-        message.append(p.getName());
-        message.append(" ");
-        message.append(t);
-        log.debug(message.toString());
-      }
     }
 
     this.exec =
-      JCCEExecutionCallable.newProgramWithDeclarations(
+      JCBExecutor.newExecutorWithDeclarations(
+        gl,
         program,
         this.declared_uniforms,
-        this.declared_attributes);
+        this.declared_attributes,
+        log);
   }
 
-  public @Nonnull JCCEExecutionCallable getExecutable()
+  public @Nonnull JCBExecutionAPI getExecutable()
   {
     return this.exec;
   }

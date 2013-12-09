@@ -20,16 +20,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -54,7 +51,6 @@ import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.ArrayBufferUsable;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.CMFKNegativeX;
@@ -66,6 +62,11 @@ import com.io7m.jcanephora.CMFKPositiveZ;
 import com.io7m.jcanephora.CubeMapFaceInputStream;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.IndexBufferUsable;
+import com.io7m.jcanephora.JCBExecutionAPI;
+import com.io7m.jcanephora.JCBExecutionException;
+import com.io7m.jcanephora.JCBExecutorProcedure;
+import com.io7m.jcanephora.JCBProgram;
+import com.io7m.jcanephora.JCBProgramProcedure;
 import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementationJOGL;
@@ -87,7 +88,6 @@ import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.UsageHint;
-import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LRUCacheConfig;
 import com.io7m.jlucache.LRUCacheTrivial;
@@ -111,6 +111,8 @@ import com.io7m.jvvfs.PathVirtual;
 import com.io7m.parasol.xml.PGLSLMetaXML;
 import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RMatrixM4x4F;
+import com.io7m.renderer.RTransformModel;
+import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.kernel.KLight.KProjective;
@@ -631,188 +633,6 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private static void renderSceneMakeLitBatches(
-    final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
-    final @Nonnull Map<KLight, List<KBatchOpaqueLit>> opaque_lit,
-    final @Nonnull List<KBatchTranslucent> translucent_lit,
-    final @Nonnull List<KLight> shadow_lights,
-    final @Nonnull Map<KLight, KBatchOpaqueShadow> shadow_opaque,
-    final @Nonnull Map<KLight, KBatchTranslucentShadow> shadow_translucent)
-  {
-    /**
-     * Sort objects by Z (from the origin, not from the observer, for testing
-     * purposes). This will ensure that translucent objects are rendered from
-     * farthest to nearest.
-     */
-
-    final LinkedList<KMeshInstance> instances =
-      new LinkedList<KMeshInstance>(p.second);
-
-    Collections.sort(instances, new Comparator<KMeshInstance>() {
-      @Override public int compare(
-        final KMeshInstance o1,
-        final KMeshInstance o2)
-      {
-        final float o1z = o1.getTransform().getTranslation().getZF();
-        final float o2z = o2.getTransform().getTranslation().getZF();
-        return Float.compare(o1z, o2z);
-      }
-    });
-
-    for (final KLight l : p.first) {
-      switch (l.getType()) {
-        case LIGHT_PROJECTIVE:
-        {
-          final KProjective kp = (KProjective) l;
-          switch (kp.getShadow().type) {
-            case OPTION_NONE:
-            {
-              break;
-            }
-            case OPTION_SOME:
-            {
-              shadow_lights.add(kp);
-
-              final ArrayList<KMeshInstance> light_opaques =
-                new ArrayList<KMeshInstance>();
-              final ArrayList<KMeshInstance> light_translucents =
-                new ArrayList<KMeshInstance>();
-
-              for (final KMeshInstance i : instances) {
-                switch (i.getShadowMaterialLabel()) {
-                  case SHADOW_OPAQUE:
-                  {
-                    light_opaques.add(i);
-                    break;
-                  }
-                  case SHADOW_TRANSLUCENT:
-                  case SHADOW_TRANSLUCENT_TEXTURED:
-                  {
-                    light_translucents.add(i);
-                    break;
-                  }
-                }
-              }
-
-              assert shadow_opaque.containsKey(kp) == false;
-              assert shadow_translucent.containsKey(kp) == false;
-
-              shadow_opaque.put(
-                kp,
-                KBatchOpaqueShadow.newBatch(kp, light_opaques));
-              shadow_translucent.put(
-                kp,
-                KBatchTranslucentShadow.newBatch(kp, light_translucents));
-              break;
-            }
-          }
-          break;
-        }
-        case LIGHT_DIRECTIONAL:
-        case LIGHT_SPHERE:
-        {
-          break;
-        }
-      }
-    }
-
-    for (final KLight l : p.first) {
-      switch (l.getType()) {
-        case LIGHT_PROJECTIVE:
-        case LIGHT_DIRECTIONAL:
-        case LIGHT_SPHERE:
-        {
-          final HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
-            new HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>>();
-
-          for (final KMeshInstance m : instances) {
-            final KMeshInstanceForwardMaterialLabel mlabel =
-              m.getForwardMaterialLabel();
-
-            if (instances_by_label.containsKey(mlabel)) {
-              final ArrayList<KMeshInstance> ins =
-                instances_by_label.get(mlabel);
-              ins.add(m);
-            } else {
-              final ArrayList<KMeshInstance> ins =
-                new ArrayList<KMeshInstance>();
-              ins.add(m);
-              instances_by_label.put(mlabel, ins);
-            }
-          }
-
-          for (final Entry<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
-            .entrySet()) {
-            final KMeshInstanceForwardMaterialLabel label = e.getKey();
-            final ArrayList<KMeshInstance> kinstances = e.getValue();
-
-            final List<KBatchOpaqueLit> lits;
-            if (opaque_lit.containsKey(l)) {
-              lits = opaque_lit.get(l);
-            } else {
-              lits = new ArrayList<KBatchOpaqueLit>();
-              opaque_lit.put(l, lits);
-            }
-
-            if (label.getAlpha() != KMaterialAlphaLabel.ALPHA_TRANSLUCENT) {
-              lits.add(KBatchOpaqueLit.newBatch(l, label, kinstances));
-            }
-          }
-
-          break;
-        }
-      }
-    }
-
-    final Iterator<KMeshInstance> iter = instances.iterator();
-    while (iter.hasNext()) {
-      final KMeshInstance i = iter.next();
-      final KMeshInstanceForwardMaterialLabel label =
-        i.getForwardMaterialLabel();
-      if (label.getAlpha() == KMaterialAlphaLabel.ALPHA_OPAQUE) {
-        iter.remove();
-      } else {
-        translucent_lit.add(KBatchTranslucent.newBatch(
-          i,
-          new ArrayList<KLight>(p.first)));
-      }
-    }
-  }
-
-  private static void renderSceneMakeUnlitBatches(
-    final @Nonnull Pair<Collection<KLight>, Collection<KMeshInstance>> p,
-    final @Nonnull List<KBatchOpaqueUnlit> opaque_unlit)
-  {
-    final HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> instances_by_label =
-      new HashMap<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>>();
-
-    for (final KMeshInstance i : p.second) {
-      final KMeshInstanceForwardMaterialLabel mlabel =
-        i.getForwardMaterialLabel();
-      if (mlabel.getNormal() == KMaterialNormalLabel.NORMAL_NONE) {
-        if (instances_by_label.containsKey(mlabel)) {
-          final ArrayList<KMeshInstance> ins = instances_by_label.get(mlabel);
-          ins.add(i);
-        } else {
-          final ArrayList<KMeshInstance> ins = new ArrayList<KMeshInstance>();
-          ins.add(i);
-          instances_by_label.put(mlabel, ins);
-        }
-      }
-    }
-
-    for (final Entry<KMeshInstanceForwardMaterialLabel, ArrayList<KMeshInstance>> e : instances_by_label
-      .entrySet()) {
-      final KMeshInstanceForwardMaterialLabel label = e.getKey();
-      final ArrayList<KMeshInstance> instances = e.getValue();
-
-      if (label.getAlpha() != KMaterialAlphaLabel.ALPHA_TRANSLUCENT) {
-        opaque_unlit.add(KBatchOpaqueUnlit.newBatch(label, instances));
-      }
-    }
-
-  }
-
   private @Nonnull SBVisibleAxes                                              axes;
   private final @Nonnull AtomicBoolean                                        axes_show;
   private final @Nonnull AtomicReference<VectorI3F>                           background_colour;
@@ -832,14 +652,15 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull SBVisibleGridPlane                                         grid;
   private final @Nonnull AtomicBoolean                                        grid_show;
   private final @Nonnull SBInputState                                         input_state;
+  private @Nonnull KLabelDecider                                              label_cache;
   private final @Nonnull AtomicBoolean                                        lights_show;
   private final @Nonnull AtomicBoolean                                        lights_show_surface;
   private final @Nonnull Log                                                  log;
-  private final @Nonnull MatrixM4x4F                                          matrix_model;
-  private final @Nonnull MatrixM4x4F                                          matrix_model_temporary;
-  private final @Nonnull MatrixM4x4F                                          matrix_modelview;
-  private final @Nonnull MatrixM4x4F                                          matrix_projection;
-  private final @Nonnull MatrixM4x4F                                          matrix_view;
+  private final @Nonnull RMatrixM4x4F<RTransformModel>                        matrix_model;
+  private final @Nonnull RMatrixM4x4F<RTransformModel>                        matrix_model_temporary;
+  private final @Nonnull RMatrixM4x4F<RTransformModelView>                    matrix_modelview;
+  private final @Nonnull RMatrixM4x4F<RTransformProjection>                   matrix_projection;
+  private final @Nonnull RMatrixM4x4F<RTransformView>                         matrix_view;
   private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>              mesh_delete_queue;
   private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                mesh_load_queue;
   private final @Nonnull HashMap<PathVirtual, KMesh>                          meshes;
@@ -850,10 +671,9 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull QuaternionM4F.Context                                qm4f_context;
   private @CheckForNull KRenderer                                             renderer;
   private final @Nonnull AtomicReference<SBRendererType>                      renderer_new;
+  private final @Nonnull SBSoftRestrictions                                   restrictions;
   private final @Nonnull AtomicReference<RunningState>                        running;
-  private @CheckForNull KVisibleScene                                         scene_current;
   private Collection<SBLight>                                                 scene_lights;
-  private @CheckForNull KVisibleScene                                         scene_previous;
   private @CheckForNull SBQuad                                                screen_quad;
   private @Nonnull LRUCacheTrivial<String, KProgram, KShaderCacheException>   shader_cache;
   private @Nonnull LRUCacheConfig                                             shader_cache_config;
@@ -880,6 +700,7 @@ final class SBGLRenderer implements GLEventListener
   {
     Constraints.constrainNotNull(log, "Log");
     this.config = Constraints.constrainNotNull(config, "Config");
+    this.restrictions = SBSoftRestrictions.newRestrictions(config);
 
     this.log = new Log(log, "gl");
     log.debug("Shader archive: " + config.getShaderArchiveFile());
@@ -922,11 +743,11 @@ final class SBGLRenderer implements GLEventListener
     this.background_colour =
       new AtomicReference<VectorI3F>(new VectorI3F(0.1f, 0.1f, 0.1f));
 
-    this.matrix_model = new MatrixM4x4F();
-    this.matrix_view = new MatrixM4x4F();
-    this.matrix_modelview = new MatrixM4x4F();
-    this.matrix_projection = new MatrixM4x4F();
-    this.matrix_model_temporary = new MatrixM4x4F();
+    this.matrix_model = new RMatrixM4x4F<RTransformModel>();
+    this.matrix_view = new RMatrixM4x4F<RTransformView>();
+    this.matrix_modelview = new RMatrixM4x4F<RTransformModelView>();
+    this.matrix_projection = new RMatrixM4x4F<RTransformProjection>();
+    this.matrix_model_temporary = new RMatrixM4x4F<RTransformModel>();
 
     this.projection_cache =
       new HashMap<SBProjectionDescription, SBVisibleProjection>();
@@ -1329,30 +1150,36 @@ final class SBGLRenderer implements GLEventListener
 
     drawable.getContext().setSwapInterval(1);
     try {
-      if (this.config.isOpenglDebug()) {
-        if (this.config.isOpenglTrace()) {
+      if (this.config.isOpenGLDebug()) {
+        if (this.config.isOpenGLTrace()) {
           this.gi =
-            JCGLImplementationJOGL.newImplementationWithDebuggingAndTracing(
-              drawable.getContext(),
-              this.log,
-              System.err);
+            JCGLImplementationJOGL
+              .newImplementationWithDebuggingAndTracingAndRestrictions(
+                drawable.getContext(),
+                this.log,
+                System.err,
+                this.restrictions);
         } else {
           this.gi =
-            JCGLImplementationJOGL.newImplementationWithDebugging(
-              drawable.getContext(),
-              this.log);
+            JCGLImplementationJOGL
+              .newImplementationWithDebuggingAndRestrictions(
+                drawable.getContext(),
+                this.log,
+                this.restrictions);
         }
-      } else if (this.config.isOpenglTrace()) {
+      } else if (this.config.isOpenGLTrace()) {
         this.gi =
-          JCGLImplementationJOGL.newImplementationWithTracing(
+          JCGLImplementationJOGL.newImplementationWithTracingAndRestrictions(
             drawable.getContext(),
             this.log,
-            System.err);
+            System.err,
+            this.restrictions);
       } else {
         this.gi =
-          JCGLImplementationJOGL.newImplementation(
+          JCGLImplementationJOGL.newImplementationWithRestrictions(
             drawable.getContext(),
-            this.log);
+            this.log,
+            this.restrictions);
       }
     } catch (final JCGLException e) {
       this.failedPermanently(e);
@@ -1379,6 +1206,10 @@ final class SBGLRenderer implements GLEventListener
         LRUCacheTrivial.newCache(
           KShaderCacheLoader.newLoader(this.gi, this.filesystem, this.log),
           this.shader_cache_config);
+
+      final KGraphicsCapabilities capabilities =
+        KGraphicsCapabilities.getCapabilities(this.gi);
+      this.label_cache = KLabelDecider.newDecider(capabilities, 8192);
 
       {
         final Builder b = PCacheConfig.newBuilder();
@@ -1543,12 +1374,14 @@ final class SBGLRenderer implements GLEventListener
           this.gi,
           this.shader_cache,
           this.shadow_cache,
+          this.label_cache,
           this.log);
       }
       case KRENDERER_DEBUG_DEPTH_SHADOW:
       {
         return KRendererDebugDepthShadow.rendererNew(
           this.gi,
+          this.label_cache,
           this.shader_cache,
           this.log);
       }
@@ -1586,6 +1419,7 @@ final class SBGLRenderer implements GLEventListener
             SBRendererSpecific.rendererNew(
               this.gi,
               this.filesystem,
+              this.label_cache,
               this.log,
               p);
           this.running.set(RunningState.STATE_RUNNING);
@@ -1685,32 +1519,44 @@ final class SBGLRenderer implements GLEventListener
         this.matrix_model,
         this.matrix_modelview);
 
-      final JCCEExecutionCallable e = this.program_ccolour.getExecutable();
-      e.execPrepare(gl);
-      e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
-      e.execUniformPutMatrix4x4F(gl, "m_modelview", this.matrix_modelview);
-      e.execUniformPutVector4F(gl, "f_ccolour", SBGLRenderer.GRID_COLOUR);
-
-      final IndexBuffer indices = this.grid.getIndexBuffer();
-      final ArrayBuffer array = this.grid.getArrayBuffer();
-      final ArrayBufferAttribute b_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      gl.arrayBufferBind(array);
-      e.execAttributeBind(gl, "v_position", b_pos);
-
-      e.execSetCallable(new Callable<Void>() {
-        @Override public Void call()
-          throws Exception
+      final JCBExecutionAPI e = this.program_ccolour.getExecutable();
+      e.execRun(new JCBExecutorProcedure() {
+        @SuppressWarnings("synthetic-access") @Override public void call(
+          final @Nonnull JCBProgram program)
+          throws ConstraintError,
+            JCGLException,
+            JCBExecutionException
         {
+          final IndexBuffer indices = SBGLRenderer.this.grid.getIndexBuffer();
+          final ArrayBuffer array = SBGLRenderer.this.grid.getArrayBuffer();
+
+          gl.arrayBufferBind(array);
           try {
-            gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
-          } catch (final ConstraintError x) {
-            throw new UnreachableCodeException();
+            KShadingProgramCommon.putMatrixProjection(
+              program,
+              SBGLRenderer.this.matrix_projection);
+            KShadingProgramCommon.putMatrixModelView(
+              program,
+              SBGLRenderer.this.matrix_modelview);
+            program.programUniformPutVector4f(
+              "f_ccolour",
+              SBGLRenderer.GRID_COLOUR);
+            KShadingProgramCommon.bindAttributePosition(program, array);
+
+            program.programExecute(new JCBProgramProcedure() {
+              @Override public void call()
+                throws ConstraintError,
+                  JCGLException,
+                  Throwable
+              {
+                gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
+              }
+            });
+          } finally {
+            gl.arrayBufferUnbind();
           }
-          return null;
         }
       });
-      e.execRun(gl);
     }
 
     /**
@@ -1723,33 +1569,43 @@ final class SBGLRenderer implements GLEventListener
         this.matrix_model,
         this.matrix_modelview);
 
-      final JCCEExecutionCallable e = this.program_vcolour.getExecutable();
-      e.execPrepare(gl);
-      e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
-      e.execUniformPutMatrix4x4F(gl, "m_modelview", this.matrix_modelview);
-
-      final IndexBuffer indices = this.axes.getIndexBuffer();
-      final ArrayBuffer array = this.axes.getArrayBuffer();
-      final ArrayBufferAttribute b_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final ArrayBufferAttribute b_col =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_COLOUR.getName());
-      gl.arrayBufferBind(array);
-      e.execAttributeBind(gl, "v_position", b_pos);
-      e.execAttributeBind(gl, "v_colour", b_col);
-      e.execSetCallable(new Callable<Void>() {
-        @Override public Void call()
-          throws Exception
+      final JCBExecutionAPI e = this.program_vcolour.getExecutable();
+      e.execRun(new JCBExecutorProcedure() {
+        @SuppressWarnings("synthetic-access") @Override public void call(
+          final @Nonnull JCBProgram program)
+          throws ConstraintError,
+            JCGLException,
+            JCBExecutionException
         {
+          final IndexBuffer indices = SBGLRenderer.this.axes.getIndexBuffer();
+          final ArrayBuffer array = SBGLRenderer.this.axes.getArrayBuffer();
+
+          gl.arrayBufferBind(array);
           try {
-            gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
-          } catch (final ConstraintError x) {
-            throw new UnreachableCodeException();
+            KShadingProgramCommon.putMatrixProjection(
+              program,
+              SBGLRenderer.this.matrix_projection);
+            KShadingProgramCommon.putMatrixModelView(
+              program,
+              SBGLRenderer.this.matrix_modelview);
+
+            KShadingProgramCommon.bindAttributePosition(program, array);
+            KShadingProgramCommon.bindAttributeColour(program, array);
+
+            program.programExecute(new JCBProgramProcedure() {
+              @Override public void call()
+                throws ConstraintError,
+                  JCGLException,
+                  Throwable
+              {
+                gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
+              }
+            });
+          } finally {
+            gl.arrayBufferUnbind();
           }
-          return null;
         }
       });
-      e.execRun(gl);
     }
 
     /**
@@ -1773,38 +1629,55 @@ final class SBGLRenderer implements GLEventListener
       100);
 
     if (this.renderer != null) {
-      final JCCEExecutionCallable e = this.program_uv.getExecutable();
-      e.execPrepare(gl);
-      e.execUniformPutMatrix4x4F(gl, "m_projection", this.matrix_projection);
-      e.execUniformPutMatrix4x4F(gl, "m_modelview", this.matrix_modelview);
 
-      gl.texture2DStaticBind(
-        this.texture_units.get(0),
-        this.framebuffer.kframebufferGetRGBAOutputTexture());
-      e.execUniformPutTextureUnit(gl, "t_albedo", this.texture_units.get(0));
-
-      final IndexBuffer indices = this.screen_quad.getIndexBuffer();
-      final ArrayBuffer array = this.screen_quad.getArrayBuffer();
-      final ArrayBufferAttribute b_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final ArrayBufferAttribute b_uv =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-      gl.arrayBufferBind(array);
-      e.execAttributeBind(gl, "v_position", b_pos);
-      e.execAttributeBind(gl, "v_uv", b_uv);
-      e.execSetCallable(new Callable<Void>() {
-        @Override public Void call()
-          throws Exception
+      final JCBExecutionAPI e = this.program_uv.getExecutable();
+      e.execRun(new JCBExecutorProcedure() {
+        @SuppressWarnings("synthetic-access") @Override public void call(
+          final @Nonnull JCBProgram program)
+          throws ConstraintError,
+            JCGLException,
+            JCBExecutionException
         {
+          final IndexBuffer indices =
+            SBGLRenderer.this.screen_quad.getIndexBuffer();
+          final ArrayBuffer array =
+            SBGLRenderer.this.screen_quad.getArrayBuffer();
+
+          gl.arrayBufferBind(array);
           try {
-            gl.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-          } catch (final ConstraintError x) {
-            throw new UnreachableCodeException();
+            KShadingProgramCommon.putMatrixProjection(
+              program,
+              SBGLRenderer.this.matrix_projection);
+            KShadingProgramCommon.putMatrixModelView(
+              program,
+              SBGLRenderer.this.matrix_modelview);
+
+            KShadingProgramCommon.bindAttributePosition(program, array);
+            KShadingProgramCommon.bindAttributeUV(program, array);
+
+            gl.texture2DStaticBind(
+              SBGLRenderer.this.texture_units.get(0),
+              SBGLRenderer.this.framebuffer
+                .kframebufferGetRGBAOutputTexture());
+            KShadingProgramCommon.putTextureAlbedo(
+              program,
+              SBGLRenderer.this.texture_units.get(0));
+
+            program.programExecute(new JCBProgramProcedure() {
+              @Override public void call()
+                throws ConstraintError,
+                  JCGLException,
+                  Throwable
+              {
+                gl.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+              }
+            });
+          } finally {
+            gl.arrayBufferUnbind();
           }
-          return null;
+
         }
       });
-      e.execRun(gl);
     }
 
     /**
@@ -1844,13 +1717,6 @@ final class SBGLRenderer implements GLEventListener
                 lp.getColour().z,
                 1.0f);
 
-            final IndexBuffer indices = mesh.getIndexBuffer();
-            final ArrayBuffer array = mesh.getArrayBuffer();
-            final ArrayBufferAttribute b_pos =
-              array
-                .getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-            gl.arrayBufferBind(array);
-
             /**
              * Render center.
              */
@@ -1868,33 +1734,46 @@ final class SBGLRenderer implements GLEventListener
               this.matrix_model,
               this.matrix_modelview);
 
-            final JCCEExecutionCallable e =
-              this.program_ccolour.getExecutable();
-            e.execPrepare(gl);
-            e.execUniformPutMatrix4x4F(
-              gl,
-              "m_projection",
-              this.matrix_projection);
-            e.execUniformPutMatrix4x4F(
-              gl,
-              "m_modelview",
-              this.matrix_modelview);
-
-            e.execAttributeBind(gl, "v_position", b_pos);
-            e.execUniformPutVector4F(gl, "f_ccolour", colour);
-            e.execSetCallable(new Callable<Void>() {
-              @Override public Void call()
-                throws Exception
+            final JCBExecutionAPI e = this.program_ccolour.getExecutable();
+            e.execRun(new JCBExecutorProcedure() {
+              @SuppressWarnings("synthetic-access") @Override public
+                void
+                call(
+                  final @Nonnull JCBProgram program)
+                  throws ConstraintError,
+                    JCGLException,
+                    JCBExecutionException
               {
+                final IndexBuffer indices = mesh.getIndexBuffer();
+                final ArrayBuffer array = mesh.getArrayBuffer();
+
+                KShadingProgramCommon.putMatrixProjection(
+                  program,
+                  SBGLRenderer.this.matrix_projection);
+                KShadingProgramCommon.putMatrixModelView(
+                  program,
+                  SBGLRenderer.this.matrix_modelview);
+                program.programUniformPutVector4f("f_ccolour", colour);
+
+                gl.arrayBufferBind(array);
                 try {
-                  gl.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                } catch (final ConstraintError x) {
-                  throw new UnreachableCodeException();
+                  KShadingProgramCommon.bindAttributePosition(program, array);
+
+                  program.programExecute(new JCBProgramProcedure() {
+                    @Override public void call()
+                      throws ConstraintError,
+                        JCGLException,
+                        Throwable
+                    {
+                      gl
+                        .drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+                    }
+                  });
+                } finally {
+                  gl.arrayBufferUnbind();
                 }
-                return null;
               }
             });
-            e.execRun(gl);
 
             /**
              * Render surface.
@@ -1910,17 +1789,50 @@ final class SBGLRenderer implements GLEventListener
                 this.matrix_model,
                 this.matrix_modelview);
 
-              colour.w = 0.1f;
+              e.execRun(new JCBExecutorProcedure() {
+                @SuppressWarnings("synthetic-access") @Override public
+                  void
+                  call(
+                    final @Nonnull JCBProgram program)
+                    throws ConstraintError,
+                      JCGLException,
+                      JCBExecutionException
+                {
+                  final IndexBuffer indices = mesh.getIndexBuffer();
+                  final ArrayBuffer array = mesh.getArrayBuffer();
 
-              e.execPrepare(gl);
-              e.execUniformUseExisting("m_projection");
-              e.execUniformPutMatrix4x4F(
-                gl,
-                "m_modelview",
-                this.matrix_modelview);
-              e.execAttributeBind(gl, "v_position", b_pos);
-              e.execUniformPutVector4F(gl, "f_ccolour", colour);
-              e.execRun(gl);
+                  KShadingProgramCommon.putMatrixProjection(
+                    program,
+                    SBGLRenderer.this.matrix_projection);
+                  KShadingProgramCommon.putMatrixModelView(
+                    program,
+                    SBGLRenderer.this.matrix_modelview);
+
+                  colour.w = colour.w * 0.1f;
+                  program.programUniformPutVector4f("f_ccolour", colour);
+
+                  gl.arrayBufferBind(array);
+                  try {
+                    KShadingProgramCommon.bindAttributePosition(
+                      program,
+                      array);
+
+                    program.programExecute(new JCBProgramProcedure() {
+                      @Override public void call()
+                        throws ConstraintError,
+                          JCGLException,
+                          Throwable
+                      {
+                        gl.drawElements(
+                          Primitives.PRIMITIVE_TRIANGLES,
+                          indices);
+                      }
+                    });
+                  } finally {
+                    gl.arrayBufferUnbind();
+                  }
+                }
+              });
             }
             break;
           }
@@ -1941,13 +1853,6 @@ final class SBGLRenderer implements GLEventListener
                 1.0f);
 
             {
-              final IndexBuffer indices = mesh.getIndexBuffer();
-              final ArrayBuffer array = mesh.getArrayBuffer();
-              final ArrayBufferAttribute b_pos =
-                array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION
-                  .getName());
-              gl.arrayBufferBind(array);
-
               /**
                * Render center.
                */
@@ -1965,33 +1870,49 @@ final class SBGLRenderer implements GLEventListener
                 this.matrix_model,
                 this.matrix_modelview);
 
-              final JCCEExecutionCallable e =
-                this.program_ccolour.getExecutable();
-              e.execPrepare(gl);
-              e.execUniformPutMatrix4x4F(
-                gl,
-                "m_projection",
-                this.matrix_projection);
-              e.execUniformPutMatrix4x4F(
-                gl,
-                "m_modelview",
-                this.matrix_modelview);
-
-              e.execAttributeBind(gl, "v_position", b_pos);
-              e.execUniformPutVector4F(gl, "f_ccolour", colour);
-              e.execSetCallable(new Callable<Void>() {
-                @Override public Void call()
-                  throws Exception
+              final JCBExecutionAPI e = this.program_ccolour.getExecutable();
+              e.execRun(new JCBExecutorProcedure() {
+                @SuppressWarnings("synthetic-access") @Override public
+                  void
+                  call(
+                    final @Nonnull JCBProgram program)
+                    throws ConstraintError,
+                      JCGLException,
+                      JCBExecutionException
                 {
+                  final IndexBuffer indices = mesh.getIndexBuffer();
+                  final ArrayBuffer array = mesh.getArrayBuffer();
+
+                  KShadingProgramCommon.putMatrixProjection(
+                    program,
+                    SBGLRenderer.this.matrix_projection);
+                  KShadingProgramCommon.putMatrixModelView(
+                    program,
+                    SBGLRenderer.this.matrix_modelview);
+                  program.programUniformPutVector4f("f_ccolour", colour);
+
+                  gl.arrayBufferBind(array);
                   try {
-                    gl.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                  } catch (final ConstraintError x) {
-                    throw new UnreachableCodeException();
+                    KShadingProgramCommon.bindAttributePosition(
+                      program,
+                      array);
+
+                    program.programExecute(new JCBProgramProcedure() {
+                      @Override public void call()
+                        throws ConstraintError,
+                          JCGLException,
+                          Throwable
+                      {
+                        gl.drawElements(
+                          Primitives.PRIMITIVE_TRIANGLES,
+                          indices);
+                      }
+                    });
+                  } finally {
+                    gl.arrayBufferUnbind();
                   }
-                  return null;
                 }
               });
-              e.execRun(gl);
             }
 
             /**
@@ -1999,9 +1920,6 @@ final class SBGLRenderer implements GLEventListener
              */
 
             if (this.lights_show_surface.get()) {
-              final JCCEExecutionCallable e =
-                this.program_ccolour.getExecutable();
-
               MatrixM4x4F.setIdentity(this.matrix_model);
               MatrixM4x4F.translateByVector3FInPlace(
                 this.matrix_model,
@@ -2020,13 +1938,6 @@ final class SBGLRenderer implements GLEventListener
                 this.matrix_model,
                 this.matrix_modelview);
 
-              e.execPrepare(gl);
-              e.execUniformUseExisting("m_projection");
-              e.execUniformPutMatrix4x4F(
-                gl,
-                "m_modelview",
-                this.matrix_modelview);
-
               final SBProjectionDescription description =
                 actual.getDescription().getProjection();
 
@@ -2038,28 +1949,48 @@ final class SBGLRenderer implements GLEventListener
                 this.projection_cache.put(description, vp);
               }
 
-              final IndexBufferUsable indices = vp.getIndexBuffer();
-              final ArrayBufferUsable array = vp.getArrayBuffer();
-              final ArrayBufferAttribute b_pos =
-                array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION
-                  .getName());
-              gl.arrayBufferBind(array);
+              final JCBExecutionAPI e = this.program_ccolour.getExecutable();
 
-              e.execAttributeBind(gl, "v_position", b_pos);
-              e.execUniformPutVector4F(gl, "f_ccolour", colour);
-              e.execSetCallable(new Callable<Void>() {
-                @Override public Void call()
-                  throws Exception
+              e.execRun(new JCBExecutorProcedure() {
+                @SuppressWarnings("synthetic-access") @Override public
+                  void
+                  call(
+                    final @Nonnull JCBProgram program)
+                    throws ConstraintError,
+                      JCGLException,
+                      JCBExecutionException
                 {
+                  final IndexBufferUsable indices = vp.getIndexBuffer();
+                  final ArrayBufferUsable array = vp.getArrayBuffer();
+
+                  KShadingProgramCommon.putMatrixProjection(
+                    program,
+                    SBGLRenderer.this.matrix_projection);
+                  KShadingProgramCommon.putMatrixModelView(
+                    program,
+                    SBGLRenderer.this.matrix_modelview);
+                  program.programUniformPutVector4f("f_ccolour", colour);
+
+                  gl.arrayBufferBind(array);
                   try {
-                    gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
-                  } catch (final ConstraintError x) {
-                    throw new UnreachableCodeException();
+                    KShadingProgramCommon.bindAttributePosition(
+                      program,
+                      array);
+
+                    program.programExecute(new JCBProgramProcedure() {
+                      @Override public void call()
+                        throws ConstraintError,
+                          JCGLException,
+                          Throwable
+                      {
+                        gl.drawElements(Primitives.PRIMITIVE_LINES, indices);
+                      }
+                    });
+                  } finally {
+                    gl.arrayBufferUnbind();
                   }
-                  return null;
                 }
               });
-              e.execRun(gl);
             }
 
             break;
@@ -2087,56 +2018,76 @@ final class SBGLRenderer implements GLEventListener
 
       final RMatrixI4x4F<RTransformProjection> projection =
         new RMatrixI4x4F<RTransformProjection>(this.matrix_projection);
+
       final KCamera kcamera =
         KCamera.make(this.camera_view_matrix, projection);
-      final Pair<Collection<SBLight>, Collection<KMeshInstance>> pgot =
+
+      final Pair<Collection<SBLight>, Collection<KMeshInstanceTransformed>> scene_things =
         c.rendererGetScene();
 
-      final ArrayList<KLight> klights = new ArrayList<KLight>();
-      for (final SBLight l : pgot.first) {
-        klights.add(l.getLight());
+      this.scene_lights = scene_things.first;
+
+      /**
+       * Sort objects by Z (from the origin, not from the observer, for
+       * testing purposes). This will ensure that translucent objects are
+       * rendered from farthest to nearest.
+       */
+
+      final LinkedList<KMeshInstanceTransformed> instances =
+        new LinkedList<KMeshInstanceTransformed>(scene_things.second);
+
+      Collections.sort(instances, new Comparator<KMeshInstanceTransformed>() {
+        @Override public int compare(
+          final KMeshInstanceTransformed o1,
+          final KMeshInstanceTransformed o2)
+        {
+          final float o1z = o1.getTransform().getTranslation().getZF();
+          final float o2z = o2.getTransform().getTranslation().getZF();
+          return Float.compare(o1z, o2z);
+        }
+      });
+
+      final KSceneBuilder builder =
+        KScene.newBuilder(this.label_cache, kcamera);
+
+      /**
+       * For each light, add instances.
+       * 
+       * XXX: Assume that all instances will cast shadows (this is something
+       * that would be configured on a per-instance basis outside of the
+       * kernel).
+       * 
+       * XXX: In reality, translucent objects must be specified in draw-order
+       * for each light and for the observer (the orders for each will be
+       * different). For testing purposes only, use the same order for all.
+       */
+
+      for (final SBLight light : scene_things.first) {
+        final KLight klight = light.getLight();
+
+        for (final KMeshInstanceTransformed instance : scene_things.second) {
+          final KMaterialAlphaLabel alpha =
+            this.label_cache.getAlphaLabel(instance.getInstance());
+
+          switch (alpha) {
+            case ALPHA_OPAQUE:
+            {
+              builder.sceneAddOpaqueLitVisibleWithShadow(klight, instance);
+              break;
+            }
+            case ALPHA_TRANSLUCENT:
+            {
+              builder.sceneAddTranslucentLitVisibleWithoutShadow(
+                klight,
+                instance);
+              builder.sceneAddTranslucentInvisibleShadowCaster(
+                klight,
+                instance);
+              break;
+            }
+          }
+        }
       }
-
-      final Pair<Collection<KLight>, Collection<KMeshInstance>> p =
-        new Pair<Collection<KLight>, Collection<KMeshInstance>>(
-          klights,
-          pgot.second);
-
-      final ArrayList<KBatchOpaqueUnlit> opaque_unlit =
-        new ArrayList<KBatchOpaqueUnlit>();
-      final Map<KLight, List<KBatchOpaqueLit>> opaque_lit =
-        new HashMap<KLight, List<KBatchOpaqueLit>>();
-      final ArrayList<KBatchTranslucent> translucent =
-        new ArrayList<KBatchTranslucent>();
-      final Map<KLight, KBatchOpaqueShadow> shadow_opaque =
-        new HashMap<KLight, KBatchOpaqueShadow>();
-      final Map<KLight, KBatchTranslucentShadow> shadow_translucent =
-        new HashMap<KLight, KBatchTranslucentShadow>();
-      final List<KLight> shadow_lights = new ArrayList<KLight>();
-
-      SBGLRenderer.renderSceneMakeUnlitBatches(p, opaque_unlit);
-      SBGLRenderer.renderSceneMakeLitBatches(
-        p,
-        opaque_lit,
-        translucent,
-        shadow_lights,
-        shadow_opaque,
-        shadow_translucent);
-
-      final KBatches batches =
-        KBatches.newBatches(
-          opaque_lit,
-          opaque_unlit,
-          translucent,
-          shadow_lights,
-          shadow_opaque,
-          shadow_translucent);
-
-      final KVisibleScene scene =
-        new KVisibleScene(kcamera, p.first, p.second, batches);
-      this.scene_previous = this.scene_current;
-      this.scene_current = scene;
-      this.scene_lights = pgot.first;
 
       if (this.renderer != null) {
         this.renderer.rendererSetBackgroundRGBA(new VectorI4F(
@@ -2144,7 +2095,9 @@ final class SBGLRenderer implements GLEventListener
           0.0f,
           0.0f,
           0.0f));
-        this.renderer.rendererEvaluate(this.framebuffer, scene);
+        this.renderer.rendererEvaluate(
+          this.framebuffer,
+          builder.sceneCreate());
       }
     }
   }

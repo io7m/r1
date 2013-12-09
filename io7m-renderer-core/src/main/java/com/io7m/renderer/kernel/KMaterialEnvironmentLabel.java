@@ -35,15 +35,15 @@ enum KMaterialEnvironmentLabel
 
   ;
 
-  static @Nonnull KMaterialEnvironmentLabel fromMeshAndMaterial(
-    final @Nonnull KMesh mesh,
-    final @Nonnull KMaterial material,
+  static @Nonnull KMaterialEnvironmentLabel fromInstance(
+    final @Nonnull KMeshInstance instance,
     final @Nonnull KMaterialNormalLabel normal)
     throws ConstraintError
   {
-    Constraints.constrainNotNull(mesh, "Mesh");
-    Constraints.constrainNotNull(material, "Material");
+    Constraints.constrainNotNull(instance, "Instance");
     Constraints.constrainNotNull(normal, "Normal");
+
+    final KMaterial material = instance.getMaterial();
 
     switch (normal) {
       case NORMAL_NONE:

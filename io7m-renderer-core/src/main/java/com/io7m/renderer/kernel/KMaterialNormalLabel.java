@@ -28,14 +28,14 @@ enum KMaterialNormalLabel
   NORMAL_NONE(""),
   NORMAL_VERTEX("NV");
 
-  static @Nonnull KMaterialNormalLabel fromMeshAndMaterial(
-    final @Nonnull KMesh mesh,
-    final @Nonnull KMaterial material)
+  static @Nonnull KMaterialNormalLabel fromInstance(
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError
   {
-    Constraints.constrainNotNull(mesh, "Mesh");
-    Constraints.constrainNotNull(material, "Material");
+    Constraints.constrainNotNull(instance, "Instance");
 
+    final KMesh mesh = instance.getMesh();
+    final KMaterial material = instance.getMaterial();
     final ArrayBuffer a = mesh.getArrayBuffer();
 
     if (a.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {

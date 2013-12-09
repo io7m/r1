@@ -17,7 +17,10 @@
 package com.io7m.renderer.kernel;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -37,11 +40,25 @@ public final class SandboxConfig
   {
     return new SandboxConfig(props);
   }
-  private final boolean             opengl_debug;
-  private final boolean             opengl_trace;
-  private final @Nonnull Properties props;
 
-  private final @Nonnull File       shader_archive_file;
+  private static Set<String> split(
+    final @Nonnull String text)
+  {
+    final HashSet<String> names = new HashSet<String>();
+    final String[] segments = text.split("\\s+");
+    for (final String name : segments) {
+      names.add(name.trim());
+    }
+    return names;
+  }
+
+  private final @Nonnull Set<String>     hide_extensions;
+  private final boolean                  opengl_debug;
+  private final boolean                  opengl_trace;
+  private final @Nonnull SBOpenGLProfile profile;
+  private final @Nonnull Properties      props;
+  private final long                     restrict_units;
+  private final @Nonnull File            shader_archive_file;
 
   public SandboxConfig(
     final @Nonnull Properties props)
@@ -55,7 +72,6 @@ public final class SandboxConfig
       new File(PropertyUtils.getString(
         props,
         "com.io7m.renderer.sandbox.shader_archive"));
-
     this.opengl_debug =
       PropertyUtils.getOptionalBoolean(
         props,
@@ -66,6 +82,35 @@ public final class SandboxConfig
         props,
         "com.io7m.renderer.sandbox.opengl.trace",
         false);
+    this.hide_extensions =
+      SandboxConfig.split(PropertyUtils.getOptionalString(
+        props,
+        "com.io7m.renderer.sandbox.opengl.hide_extensions",
+        ""));
+    this.restrict_units =
+      PropertyUtils.getOptionalInteger(
+        props,
+        "com.io7m.renderer.sandbox.opengl.texture_units",
+        -1);
+    this.profile =
+      SBOpenGLProfile.fromString(PropertyUtils.getString(
+        props,
+        "com.io7m.renderer.sandbox.opengl.profile"));
+  }
+
+  public @Nonnull Set<String> getOpenGLHideExtensions()
+  {
+    return Collections.unmodifiableSet(this.hide_extensions);
+  }
+
+  public @Nonnull SBOpenGLProfile getOpenGLProfile()
+  {
+    return this.profile;
+  }
+
+  public long getOpenGLRestrictTextureUnits()
+  {
+    return this.restrict_units;
   }
 
   public @Nonnull File getShaderArchiveFile()
@@ -73,12 +118,12 @@ public final class SandboxConfig
     return this.shader_archive_file;
   }
 
-  public boolean isOpenglDebug()
+  public boolean isOpenGLDebug()
   {
     return this.opengl_debug;
   }
 
-  public boolean isOpenglTrace()
+  public boolean isOpenGLTrace()
   {
     return this.opengl_trace;
   }

@@ -16,34 +16,30 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.Collections;
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jaux.Constraints;
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.functional.Option;
+import com.io7m.jcanephora.Texture2DStatic;
+
 /**
- * A single translucent instance, lit by all of the given lights.
+ * Material properties related to surface emission.
  */
 
-@Immutable final class KBatchTranslucent
+@Immutable public final class KMaterialEmissive
 {
-  public static @Nonnull KBatchTranslucent newBatch(
-    final @Nonnull KMeshInstance instance,
-    final @Nonnull List<KLight> lights)
-  {
-    return new KBatchTranslucent(instance, lights);
-  }
+  private final float                            emission;
+  private final @Nonnull Option<Texture2DStatic> texture;
 
-  private final @Nonnull KMeshInstance instance;
-  private final @Nonnull List<KLight>  lights;
-
-  private KBatchTranslucent(
-    final @Nonnull KMeshInstance instance,
-    final @Nonnull List<KLight> lights)
+  KMaterialEmissive(
+    final float emission,
+    final @Nonnull Option<Texture2DStatic> texture)
+    throws ConstraintError
   {
-    this.instance = instance;
-    this.lights = lights;
+    this.emission = emission;
+    this.texture = Constraints.constrainNotNull(texture, "Texture");
   }
 
   @Override public boolean equals(
@@ -58,44 +54,44 @@ import javax.annotation.concurrent.Immutable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KBatchTranslucent other = (KBatchTranslucent) obj;
-    if (!this.instance.equals(other.instance)) {
+    final KMaterialEmissive other = (KMaterialEmissive) obj;
+    if (Float.floatToIntBits(this.emission) != Float
+      .floatToIntBits(other.emission)) {
       return false;
     }
-    if (!this.lights.equals(other.lights)) {
+    if (!this.texture.equals(other.texture)) {
       return false;
     }
     return true;
   }
 
-  public @Nonnull KMeshInstance getInstance()
+  public float getEmission()
   {
-    return this.instance;
+    return this.emission;
   }
 
-  public @Nonnull List<KLight> getLights()
+  public @Nonnull Option<Texture2DStatic> getTexture()
   {
-    return Collections.unmodifiableList(this.lights);
+    return this.texture;
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.instance.hashCode();
-    result = (prime * result) + this.lights.hashCode();
+    result = (prime * result) + Float.floatToIntBits(this.emission);
+    result = (prime * result) + this.texture.hashCode();
     return result;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KBatchTranslucent ");
-    builder.append(this.instance);
+    builder.append("[KMaterialEmissive ");
+    builder.append(this.emission);
     builder.append(" ");
-    builder.append(this.lights);
+    builder.append(this.texture);
     builder.append("]");
     return builder.toString();
   }
-
 }

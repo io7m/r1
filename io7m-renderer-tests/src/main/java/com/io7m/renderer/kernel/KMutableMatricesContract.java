@@ -95,7 +95,7 @@ public abstract class KMutableMatricesContract extends TestContract
     return i.indexBufferAllocateType(JCGLUnsignedType.TYPE_UNSIGNED_BYTE, 3);
   }
 
-  private static @Nonnull KMeshInstance makeMeshInstance(
+  private static @Nonnull KMeshInstanceTransformed makeMeshInstance(
     final JCGLImplementation g)
   {
     try {
@@ -134,12 +134,15 @@ public abstract class KMutableMatricesContract extends TestContract
           normal,
           specular,
           uv_matrix);
+
       final KMeshInstance kmi =
-        new KMeshInstance(Integer.valueOf(23), new KTransform(
+        new KMeshInstance(Integer.valueOf(23), material, mesh);
+      final KMeshInstanceTransformed kmit =
+        new KMeshInstanceTransformed(kmi, new KTransform(
           translation,
           scale,
-          orientation), uv_matrix, mesh, material);
-      return kmi;
+          orientation), uv_matrix);
+      return kmit;
     } catch (final ConstraintError e) {
       throw new AssertionError(e);
     } catch (final JCGLException e) {
@@ -286,7 +289,7 @@ public abstract class KMutableMatricesContract extends TestContract
 
     try {
       final TestContext tc = this.newTestContext();
-      final KMeshInstance kmi =
+      final KMeshInstanceTransformed kmi =
         KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
       final KMutableMatrices mm = KMutableMatrices.newMatrices();
@@ -321,7 +324,7 @@ public abstract class KMutableMatricesContract extends TestContract
 
     try {
       final TestContext tc = this.newTestContext();
-      final KMeshInstance kmi =
+      final KMeshInstanceTransformed kmi =
         KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
       final KMutableMatrices mm = KMutableMatrices.newMatrices();
@@ -420,7 +423,7 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException
   {
     final TestContext tc = this.newTestContext();
-    final KMeshInstance kmi =
+    final KMeshInstanceTransformed kmi =
       KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
@@ -450,7 +453,7 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException
   {
     final TestContext tc = this.newTestContext();
-    final KMeshInstance kmi =
+    final KMeshInstanceTransformed kmi =
       KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
@@ -478,7 +481,7 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException
   {
     final TestContext tc = this.newTestContext();
-    final KMeshInstance kmi =
+    final KMeshInstanceTransformed kmi =
       KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
     WithCamera mwc;
 
@@ -509,7 +512,7 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException
   {
     final TestContext tc = this.newTestContext();
-    final KMeshInstance kmi =
+    final KMeshInstanceTransformed kmi =
       KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
     final KProjective projective =
       KMutableMatricesContract.makeKProjective(tc
@@ -561,7 +564,7 @@ public abstract class KMutableMatricesContract extends TestContract
         .getGLCommon());
 
     try {
-      final KMeshInstance kmi =
+      final KMeshInstanceTransformed kmi =
         KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
       final KMutableMatrices mm = KMutableMatrices.newMatrices();
@@ -600,7 +603,7 @@ public abstract class KMutableMatricesContract extends TestContract
         .getGLImplementation()
         .getGLCommon());
 
-    final KMeshInstance kmi =
+    final KMeshInstanceTransformed kmi =
       KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
@@ -638,7 +641,7 @@ public abstract class KMutableMatricesContract extends TestContract
         .getGLCommon());
 
     try {
-      final KMeshInstance kmi =
+      final KMeshInstanceTransformed kmi =
         KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
 
       final KMutableMatrices mm = KMutableMatrices.newMatrices();

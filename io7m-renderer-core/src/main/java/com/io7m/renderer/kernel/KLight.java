@@ -77,14 +77,14 @@ import com.io7m.renderer.RVectorReadable3F;
       return true;
     }
 
-    @Override public @Nonnull String getCode()
-    {
-      return "LD";
-    }
-
     public @Nonnull RVectorReadable3F<RSpaceWorld> getDirection()
     {
       return this.direction;
+    }
+
+    @Override public Option<KShadow> getShadow()
+    {
+      return Option.none();
     }
 
     @Override public int hashCode()
@@ -93,6 +93,11 @@ import com.io7m.renderer.RVectorReadable3F;
       int result = super.hashCode();
       result = (prime * result) + this.direction.hashCode();
       return result;
+    }
+
+    @Override public boolean hasShadow()
+    {
+      return false;
     }
 
     @Override public String toString()
@@ -134,7 +139,6 @@ import com.io7m.renderer.RVectorReadable3F;
         shadow);
     }
 
-    private final @Nonnull String                             code;
     private final float                                       falloff;
     private final @Nonnull QuaternionI4F                      orientation;
     private final @Nonnull RVectorReadable3F<RSpaceWorld>     position;
@@ -163,34 +167,6 @@ import com.io7m.renderer.RVectorReadable3F;
       this.projection = projection;
       this.texture = texture;
       this.shadow = shadow;
-
-      String c = null;
-      switch (shadow.type) {
-        case OPTION_NONE:
-        {
-          c = "LP";
-          break;
-        }
-        case OPTION_SOME:
-        {
-          final KShadow ks = ((Option.Some<KShadow>) shadow).value;
-          switch (ks.getType()) {
-            case SHADOW_MAPPED_BASIC:
-            {
-              c = "LPSMB";
-              break;
-            }
-            case SHADOW_MAPPED_VARIANCE:
-            {
-              c = "LPSMV";
-              break;
-            }
-          }
-        }
-      }
-
-      assert c != null;
-      this.code = c;
     }
 
     @Override public boolean equals(
@@ -232,11 +208,6 @@ import com.io7m.renderer.RVectorReadable3F;
       return true;
     }
 
-    @Override public @Nonnull String getCode()
-    {
-      return this.code;
-    }
-
     public float getFalloff()
     {
       return this.falloff;
@@ -262,7 +233,7 @@ import com.io7m.renderer.RVectorReadable3F;
       return this.range;
     }
 
-    public @Nonnull Option<KShadow> getShadow()
+    @Override public @Nonnull Option<KShadow> getShadow()
     {
       return this.shadow;
     }
@@ -284,6 +255,11 @@ import com.io7m.renderer.RVectorReadable3F;
       result = (prime * result) + this.shadow.hashCode();
       result = (prime * result) + this.texture.hashCode();
       return result;
+    }
+
+    @Override public boolean hasShadow()
+    {
+      return this.shadow.isSome();
     }
 
     @Override public String toString()
@@ -370,11 +346,6 @@ import com.io7m.renderer.RVectorReadable3F;
       return true;
     }
 
-    @Override public String getCode()
-    {
-      return "LS";
-    }
-
     public float getFalloff()
     {
       return this.falloff;
@@ -390,6 +361,11 @@ import com.io7m.renderer.RVectorReadable3F;
       return this.radius;
     }
 
+    @Override public Option<KShadow> getShadow()
+    {
+      return Option.none();
+    }
+
     @Override public int hashCode()
     {
       final int prime = 31;
@@ -398,6 +374,11 @@ import com.io7m.renderer.RVectorReadable3F;
       result = (prime * result) + this.position.hashCode();
       result = (prime * result) + Float.floatToIntBits(this.radius);
       return result;
+    }
+
+    @Override public boolean hasShadow()
+    {
+      return false;
     }
 
     @Override public String toString()
@@ -487,8 +468,6 @@ import com.io7m.renderer.RVectorReadable3F;
     return true;
   }
 
-  public abstract @Nonnull String getCode();
-
   public @Nonnull RVectorI3F<RSpaceRGB> getColour()
   {
     return this.colour;
@@ -503,6 +482,8 @@ import com.io7m.renderer.RVectorReadable3F;
   {
     return this.intensity;
   }
+
+  abstract public @Nonnull Option<KShadow> getShadow();
 
   public @Nonnull Type getType()
   {
@@ -519,6 +500,8 @@ import com.io7m.renderer.RVectorReadable3F;
     result = (prime * result) + this.type.hashCode();
     return result;
   }
+
+  abstract public boolean hasShadow();
 
   @Override public String toString()
   {

@@ -24,6 +24,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.Texture2DStatic;
 
+/**
+ * Material properties related to surface normals.
+ */
+
 @Immutable public final class KMaterialNormal
 {
   private final @Nonnull Option<Texture2DStatic> texture;
