@@ -53,7 +53,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
     public boolean cameraIsActive();
 
     public @Nonnull WithInstance withInstance(
-      final @Nonnull KMeshInstance instance)
+      final @Nonnull KMeshInstanceTransformed instance)
       throws ConstraintError;
   }
 
@@ -137,7 +137,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
     }
 
     @Override public WithInstance withInstance(
-      final @Nonnull KMeshInstance instance)
+      final @Nonnull KMeshInstanceTransformed instance)
       throws ConstraintError
     {
       Constraints.constrainArbitrary(
@@ -178,16 +178,16 @@ import com.io7m.renderer.kernel.KLight.KProjective;
   @SuppressWarnings("synthetic-access") private final class WithInstanceActual implements
     WithInstance
   {
-    private final @Nonnull KMeshInstance    instance;
-    private final @Nonnull WithCameraActual parent;
+    private final @Nonnull KMeshInstanceTransformed instance;
+    private final @Nonnull WithCameraActual         parent;
 
     WithInstanceActual(
       final @Nonnull WithCameraActual parent,
-      final @Nonnull KMeshInstance instance)
+      final @Nonnull KMeshInstanceTransformed transformed)
       throws ConstraintError
     {
       this.parent = Constraints.constrainNotNull(parent, "Parent");
-      this.instance = Constraints.constrainNotNull(instance, "Instance");
+      this.instance = Constraints.constrainNotNull(transformed, "Instance");
 
       Constraints.constrainArbitrary(
         parent.cameraIsActive(),
@@ -202,7 +202,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
        * Calculate model and modelview transforms.
        */
 
-      final KTransform transform = instance.getTransform();
+      final KTransform transform = transformed.getTransform();
       transform.makeMatrix4x4F(
         KMutableMatrices.this.transform_context,
         KMutableMatrices.this.matrix_model);
@@ -221,8 +221,8 @@ import com.io7m.renderer.kernel.KLight.KProjective;
        */
 
       final RMatrixI3x3F<RTransformTexture> km =
-        instance.getMaterial().getUVMatrix();
-      final RMatrixI3x3F<RTransformTexture> ki = instance.getUVMatrix();
+        transformed.getInstance().getMaterial().getUVMatrix();
+      final RMatrixI3x3F<RTransformTexture> ki = transformed.getUVMatrix();
 
       km.makeMatrixM3x3F(KMutableMatrices.this.matrix_uv);
       ki.makeMatrixM3x3F(KMutableMatrices.this.matrix_uv_temp);

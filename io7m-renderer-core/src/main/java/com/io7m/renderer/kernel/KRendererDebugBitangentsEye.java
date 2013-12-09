@@ -17,7 +17,6 @@
 package com.io7m.renderer.kernel;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -30,6 +29,11 @@ import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.jcanephora.JCBExecutionAPI;
+import com.io7m.jcanephora.JCBExecutionException;
+import com.io7m.jcanephora.JCBExecutorProcedure;
+import com.io7m.jcanephora.JCBProgram;
+import com.io7m.jcanephora.JCBProgramProcedure;
 import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
@@ -37,7 +41,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
@@ -118,7 +121,7 @@ import com.io7m.jvvfs.FilesystemError;
 
   @Override public void rendererEvaluate(
     final @Nonnull KFramebufferRGBAUsable framebuffer,
-    final @Nonnull KVisibleScene scene)
+    final @Nonnull KScene scene)
     throws JCGLException,
       ConstraintError
   {
@@ -128,7 +131,6 @@ import com.io7m.jvvfs.FilesystemError;
       this.matrices.withCamera(scene.getCamera());
 
     try {
-
       final FramebufferReferenceUsable output_buffer =
         framebuffer.kframebufferGetFramebuffer();
       final AreaInclusive area = framebuffer.kframebufferGetArea();
@@ -144,17 +146,26 @@ import com.io7m.jvvfs.FilesystemError;
         gc.colorBufferClearV4f(this.background);
         gc.blendingDisable();
 
-        final JCCEExecutionCallable e = this.program.getExecutable();
-        e.execPrepare(gc);
-        KShadingProgramCommon.putMatrixProjection(
-          e,
-          gc,
-          mwc.getMatrixProjection());
-        e.execCancel();
+        final JCBExecutionAPI e = this.program.getExecutable();
+        e.execRun(new JCBExecutorProcedure() {
+          @SuppressWarnings("synthetic-access") @Override public void call(
+            final @Nonnull JCBProgram p)
+            throws ConstraintError,
+              JCGLException,
+              Exception
+          {
+            KShadingProgramCommon.putMatrixProjection(
+              p,
+              mwc.getMatrixProjection());
 
-        for (final KMeshInstance mesh : scene.getInstances()) {
-          this.renderMesh(gc, e, mwc, mesh);
-        }
+            for (final KMeshInstanceTransformed mesh : scene
+              .getVisibleInstances()) {
+              KRendererDebugBitangentsEye.this.renderMesh(gc, p, mwc, mesh);
+            }
+          }
+        });
+      } catch (final JCBExecutionException x) {
+        throw new UnreachableCodeException(x);
       } finally {
         gc.framebufferDrawUnbind();
       }
@@ -171,11 +182,12 @@ import com.io7m.jvvfs.FilesystemError;
 
   @SuppressWarnings("static-method") private void renderMesh(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCCEExecutionCallable e,
+    final @Nonnull JCBProgram p,
     final @Nonnull KMutableMatrices.WithCamera mwc,
-    final @Nonnull KMeshInstance instance)
+    final @Nonnull KMeshInstanceTransformed instance)
     throws ConstraintError,
-      JCGLException
+      JCGLException,
+      JCBExecutionException
   {
     final KMutableMatrices.WithInstance mwi = mwc.withInstance(instance);
 
@@ -184,47 +196,33 @@ import com.io7m.jvvfs.FilesystemError;
        * Upload matrices.
        */
 
-      e.execPrepare(gc);
-      KShadingProgramCommon.putMatrixProjectionReuse(e);
-      KShadingProgramCommon.putMatrixModelView(
-        e,
-        gc,
-        mwi.getMatrixModelView());
-      KShadingProgramCommon.putMatrixNormal(e, gc, mwi.getMatrixNormal());
+      KShadingProgramCommon.putMatrixProjectionReuse(p);
+      KShadingProgramCommon.putMatrixModelView(p, mwi.getMatrixModelView());
+      KShadingProgramCommon.putMatrixNormal(p, mwi.getMatrixNormal());
 
       /**
        * Associate array attributes with program attributes, and draw mesh.
        */
 
       try {
-        final KMesh mesh = instance.getMesh();
+        final KMesh mesh = instance.getInstance().getMesh();
         final ArrayBuffer array = mesh.getArrayBuffer();
         final IndexBuffer indices = mesh.getIndexBuffer();
 
         gc.arrayBufferBind(array);
-        KShadingProgramCommon.bindAttributePosition(gc, e, array);
-        KShadingProgramCommon.bindAttributeNormal(gc, e, array);
-        KShadingProgramCommon.bindAttributeTangent4(gc, e, array);
+        KShadingProgramCommon.bindAttributePosition(p, array);
+        KShadingProgramCommon.bindAttributeNormal(p, array);
+        KShadingProgramCommon.bindAttributeTangent4(p, array);
 
-        e.execSetCallable(new Callable<Void>() {
-          @Override public Void call()
-            throws Exception
+        p.programExecute(new JCBProgramProcedure() {
+          @Override public void call()
+            throws ConstraintError,
+              JCGLException,
+              Exception
           {
-            try {
-              gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-            } catch (final ConstraintError x) {
-              throw new UnreachableCodeException(x);
-            }
-            return null;
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
           }
         });
-
-        try {
-          e.execRun(gc);
-        } catch (final Exception x) {
-          throw new UnreachableCodeException(x);
-        }
-
       } finally {
         gc.arrayBufferUnbind();
       }

@@ -26,6 +26,10 @@ import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RVectorI4F;
 
+/**
+ * Material properties related to surface albedo.
+ */
+
 @Immutable public final class KMaterialAlbedo
 {
   private final @Nonnull RVectorI4F<RSpaceRGBA>  colour;

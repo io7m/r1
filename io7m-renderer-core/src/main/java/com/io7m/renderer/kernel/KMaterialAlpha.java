@@ -18,6 +18,10 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.concurrent.Immutable;
 
+/**
+ * Material properties related to translucency.
+ */
+
 @Immutable public final class KMaterialAlpha
 {
   private final float   opacity;

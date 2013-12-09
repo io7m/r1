@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -31,6 +30,11 @@ import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.jcanephora.JCBExecutionAPI;
+import com.io7m.jcanephora.JCBExecutionException;
+import com.io7m.jcanephora.JCBExecutorProcedure;
+import com.io7m.jcanephora.JCBProgram;
+import com.io7m.jcanephora.JCBProgramProcedure;
 import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
@@ -38,7 +42,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
-import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LRUCacheTrivial;
 import com.io7m.jlucache.LUCache;
@@ -105,11 +108,12 @@ final class KRendererDebugDepthShadow implements KRenderer
     KRendererDebugDepthShadow
     rendererNew(
       final @Nonnull JCGLImplementation g,
+      final @Nonnull KLabelDecider label_decider,
       final @Nonnull LRUCacheTrivial<String, KProgram, KShaderCacheException> shader_cache,
       final @Nonnull Log log)
       throws ConstraintError
   {
-    return new KRendererDebugDepthShadow(g, shader_cache, log);
+    return new KRendererDebugDepthShadow(g, label_decider, shader_cache, log);
   }
 
   private final @Nonnull VectorM4F                                        background;
@@ -119,9 +123,11 @@ final class KRendererDebugDepthShadow implements KRenderer
   private final @Nonnull KTransform.Context                               transform_context;
   private final @Nonnull VectorM2I                                        viewport_size;
   private final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache;
+  private final @Nonnull KLabelDecider                            label_decider;
 
   private KRendererDebugDepthShadow(
     final @Nonnull JCGLImplementation gl,
+    final @Nonnull KLabelDecider label_decider,
     final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
     final @Nonnull Log log)
     throws ConstraintError
@@ -131,6 +137,8 @@ final class KRendererDebugDepthShadow implements KRenderer
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrices = KMutableMatrices.newMatrices();
+    this.label_decider =
+      Constraints.constrainNotNull(label_decider, "Label decider");
     this.transform_context = new KTransform.Context();
     this.viewport_size = new VectorM2I();
     this.shader_cache =
@@ -151,7 +159,7 @@ final class KRendererDebugDepthShadow implements KRenderer
 
   @Override public void rendererEvaluate(
     final @Nonnull KFramebufferRGBAUsable framebuffer,
-    final @Nonnull KVisibleScene scene)
+    final @Nonnull KScene scene)
     throws JCGLException,
       ConstraintError,
       IOException,
@@ -181,12 +189,15 @@ final class KRendererDebugDepthShadow implements KRenderer
         gc.colorBufferClearV4f(this.background);
         gc.blendingDisable();
 
-        for (final KMeshInstance mesh : scene.getInstances()) {
+        for (final KMeshInstanceTransformed mesh : scene
+          .getVisibleInstances()) {
           this.renderMesh(gc, mwc, mesh);
         }
       } catch (final KShaderCacheException x) {
         KRendererDebugDepthShadow.handleShaderCacheException(x);
       } catch (final LUCacheException x) {
+        throw new UnreachableCodeException(x);
+      } catch (final JCBExecutionException x) {
         throw new UnreachableCodeException(x);
       } finally {
         gc.framebufferDrawUnbind();
@@ -205,104 +216,139 @@ final class KRendererDebugDepthShadow implements KRenderer
   private void renderMesh(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMutableMatrices.WithCamera mwc,
-    final @Nonnull KMeshInstance instance)
+    final @Nonnull KMeshInstanceTransformed transformed)
     throws ConstraintError,
       JCGLException,
       KShaderCacheException,
-      LUCacheException
+      LUCacheException,
+      JCBExecutionException
   {
-    final KMutableMatrices.WithInstance mwi = mwc.withInstance(instance);
+    final KMutableMatrices.WithInstance mwi = mwc.withInstance(transformed);
 
     try {
-      final KMeshInstanceShadowMaterialLabel label =
-        instance.getShadowMaterialLabel();
+      final KShadow shadow =
+        KShadow.newMappedBasic(
+          Integer.valueOf(0),
+          10,
+          0.005f,
+          0.2f,
+          1.0f,
+          KShadowPrecision.SHADOW_PRECISION_16,
+          KShadowFilter.SHADOW_FILTER_LINEAR);
 
+      final KMeshInstance instance = transformed.getInstance();
+      final KMaterialShadowLabel label =
+        this.label_decider.getShadowLabel(instance, shadow);
       final KProgram p =
         this.shader_cache.luCacheGet("shadow_" + label.getCode());
-      final JCCEExecutionCallable e = p.getExecutable();
+      final JCBExecutionAPI e = p.getExecutable();
 
-      /**
-       * Upload matrices.
-       */
+      e.execRun(new JCBExecutorProcedure() {
+        @Override public void call(
+          final @Nonnull JCBProgram program)
+          throws ConstraintError,
+            JCGLException,
+            JCBExecutionException,
+            Exception
+        {
+          /**
+           * Upload matrices.
+           */
 
-      e.execPrepare(gc);
-      KShadingProgramCommon.putMatrixProjection(
-        e,
-        gc,
-        mwi.getMatrixProjection());
-      KShadingProgramCommon.putMatrixModelView(
-        e,
-        gc,
-        mwi.getMatrixModelView());
+          KShadingProgramCommon.putMatrixProjection(
+            program,
+            mwi.getMatrixProjection());
+          KShadingProgramCommon.putMatrixModelView(
+            program,
+            mwi.getMatrixModelView());
 
-      /**
-       * Associate array attributes with program attributes, and draw mesh.
-       */
+          /**
+           * Associate array attributes with program attributes, and draw
+           * mesh.
+           */
 
-      final KMesh mesh = instance.getMesh();
-      final ArrayBuffer array = mesh.getArrayBuffer();
-      final IndexBuffer indices = mesh.getIndexBuffer();
+          final KMesh mesh = instance.getMesh();
+          final ArrayBuffer array = mesh.getArrayBuffer();
+          final IndexBuffer indices = mesh.getIndexBuffer();
 
-      gc.arrayBufferBind(array);
+          gc.arrayBufferBind(array);
 
-      try {
-        KShadingProgramCommon.bindAttributePosition(gc, e, array);
+          try {
+            KShadingProgramCommon.bindAttributePosition(program, array);
 
-        switch (label) {
-          case SHADOW_OPAQUE:
-          {
-            break;
-          }
-          case SHADOW_TRANSLUCENT:
-          case SHADOW_TRANSLUCENT_TEXTURED:
-          {
-            KShadingProgramCommon.putMaterial(e, gc, instance.getMaterial());
-            break;
-          }
-        }
-
-        switch (label) {
-          case SHADOW_OPAQUE:
-          case SHADOW_TRANSLUCENT:
-          {
-            break;
-          }
-          case SHADOW_TRANSLUCENT_TEXTURED:
-          {
-            final List<TextureUnit> units = gc.textureGetUnits();
-            KShadingProgramCommon.bindPutTextureAlbedo(
-              gc,
-              e,
-              instance.getMaterial(),
-              units.get(0));
-            KShadingProgramCommon.putMatrixUV(gc, e, mwi.getMatrixUV());
-            KShadingProgramCommon.bindAttributeUV(gc, e, array);
-            break;
-          }
-        }
-
-        e.execSetCallable(new Callable<Void>() {
-          @Override public Void call()
-            throws Exception
-          {
-            try {
-              gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-            } catch (final ConstraintError x) {
-              throw new UnreachableCodeException(x);
+            switch (label) {
+              case SHADOW_BASIC_OPAQUE:
+              case SHADOW_BASIC_OPAQUE_PACKED4444:
+              {
+                break;
+              }
+              case SHADOW_BASIC_TRANSLUCENT:
+              case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
+              case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
+              case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
+              {
+                KShadingProgramCommon.putMaterial(
+                  program,
+                  instance.getMaterial());
+                break;
+              }
+              case SHADOW_VARIANCE_OPAQUE:
+              case SHADOW_VARIANCE_TRANSLUCENT:
+              case SHADOW_VARIANCE_TRANSLUCENT_TEXTURED:
+              {
+                throw new UnreachableCodeException();
+              }
             }
-            return null;
+
+            switch (label) {
+              case SHADOW_BASIC_OPAQUE:
+              case SHADOW_BASIC_OPAQUE_PACKED4444:
+              case SHADOW_BASIC_TRANSLUCENT:
+              case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
+              {
+                break;
+              }
+              case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
+              case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
+              {
+                final List<TextureUnit> units = gc.textureGetUnits();
+                KShadingProgramCommon.bindPutTextureAlbedo(
+                  program,
+                  gc,
+                  instance.getMaterial(),
+                  units.get(0));
+                KShadingProgramCommon.putMatrixUV(program, mwi.getMatrixUV());
+                KShadingProgramCommon.bindAttributeUV(program, array);
+                break;
+              }
+              case SHADOW_VARIANCE_OPAQUE:
+              case SHADOW_VARIANCE_TRANSLUCENT:
+              case SHADOW_VARIANCE_TRANSLUCENT_TEXTURED:
+              {
+                throw new UnreachableCodeException();
+              }
+            }
+
+            program.programExecute(new JCBProgramProcedure() {
+              @Override public void call()
+                throws ConstraintError,
+                  JCGLException,
+                  Exception
+              {
+                try {
+                  gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+                } catch (final ConstraintError x) {
+                  throw new UnreachableCodeException(x);
+                }
+              }
+            });
+
+          } finally {
+            gc.arrayBufferUnbind();
           }
-        });
-
-        try {
-          e.execRun(gc);
-        } catch (final Exception x) {
-          throw new UnreachableCodeException(x);
         }
+      });
 
-      } finally {
-        gc.arrayBufferUnbind();
-      }
     } finally {
       mwi.instanceFinish();
     }

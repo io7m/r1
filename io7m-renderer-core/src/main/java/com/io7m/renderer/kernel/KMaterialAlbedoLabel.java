@@ -27,14 +27,14 @@ enum KMaterialAlbedoLabel
   ALBEDO_COLOURED("BC"),
   ALBEDO_TEXTURED("BT");
 
-  static @Nonnull KMaterialAlbedoLabel fromMeshAndMaterial(
-    final @Nonnull KMesh mesh,
-    final @Nonnull KMaterial material)
+  static @Nonnull KMaterialAlbedoLabel fromInstance(
+    final @Nonnull KMeshInstance instance)
     throws ConstraintError
   {
-    Constraints.constrainNotNull(mesh, "Mesh");
-    Constraints.constrainNotNull(material, "Material");
+    Constraints.constrainNotNull(instance, "Instance");
 
+    final KMesh mesh = instance.getMesh();
+    final KMaterial material = instance.getMaterial();
     final ArrayBuffer a = mesh.getArrayBuffer();
 
     if (a.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {

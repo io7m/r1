@@ -24,6 +24,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.TextureCubeStatic;
 
+/**
+ * Material properties related to surface environment mapping.
+ */
+
 @Immutable public final class KMaterialEnvironment
 {
   private final float                              mix;

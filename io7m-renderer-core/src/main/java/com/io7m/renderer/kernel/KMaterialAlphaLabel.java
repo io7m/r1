@@ -26,12 +26,10 @@ enum KMaterialAlphaLabel
   ALPHA_OPAQUE("AO"),
   ALPHA_TRANSLUCENT("AT");
 
-  static @Nonnull KMaterialAlphaLabel fromMeshAndMaterial(
-    final @Nonnull KMesh mesh,
+  static @Nonnull KMaterialAlphaLabel fromMaterial(
     final @Nonnull KMaterial material)
     throws ConstraintError
   {
-    Constraints.constrainNotNull(mesh, "Mesh");
     Constraints.constrainNotNull(material, "Material");
 
     if (material.getAlpha().isTranslucent()) {

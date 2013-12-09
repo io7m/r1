@@ -89,17 +89,22 @@
     <dependency>
       <groupId>com.io7m.jcanephora.core</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
-      <version>0.18.0</version>
+      <version>0.22.0</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.checkedexec</groupId>
       <artifactId>io7m-jcanephora-checkedexec</artifactId>
-      <version>0.18.0</version>
+      <version>0.22.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.jcanephora.batchexec</groupId>
+      <artifactId>io7m-jcanephora-batchexec</artifactId>
+      <version>0.22.0</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.framebuffer</groupId>
       <artifactId>io7m-jcanephora-framebuffer</artifactId>
-      <version>0.18.0</version>
+      <version>0.22.0</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jlucache</groupId>
@@ -116,6 +121,11 @@
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
       <version>2.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.pcollections</groupId>
+      <artifactId>pcollections</artifactId>
+      <version>2.1.2</version>
     </dependency>
   </dependencies>
 

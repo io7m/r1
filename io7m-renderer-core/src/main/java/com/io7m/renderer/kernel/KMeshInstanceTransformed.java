@@ -16,34 +16,27 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.Collections;
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-/**
- * A single translucent instance, lit by all of the given lights.
- */
+import com.io7m.renderer.RMatrixI3x3F;
+import com.io7m.renderer.RTransformTexture;
 
-@Immutable final class KBatchTranslucent
+@Immutable public final class KMeshInstanceTransformed implements
+  KTransformable
 {
-  public static @Nonnull KBatchTranslucent newBatch(
-    final @Nonnull KMeshInstance instance,
-    final @Nonnull List<KLight> lights)
-  {
-    return new KBatchTranslucent(instance, lights);
-  }
+  private final @Nonnull KMeshInstance                   instance;
+  private final @Nonnull KTransform                      transform;
+  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
 
-  private final @Nonnull KMeshInstance instance;
-  private final @Nonnull List<KLight>  lights;
-
-  private KBatchTranslucent(
+  KMeshInstanceTransformed(
     final @Nonnull KMeshInstance instance,
-    final @Nonnull List<KLight> lights)
+    final @Nonnull KTransform transform,
+    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix)
   {
     this.instance = instance;
-    this.lights = lights;
+    this.transform = transform;
+    this.uv_matrix = uv_matrix;
   }
 
   @Override public boolean equals(
@@ -58,11 +51,14 @@ import javax.annotation.concurrent.Immutable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KBatchTranslucent other = (KBatchTranslucent) obj;
+    final KMeshInstanceTransformed other = (KMeshInstanceTransformed) obj;
     if (!this.instance.equals(other.instance)) {
       return false;
     }
-    if (!this.lights.equals(other.lights)) {
+    if (!this.transform.equals(other.transform)) {
+      return false;
+    }
+    if (!this.uv_matrix.equals(other.uv_matrix)) {
       return false;
     }
     return true;
@@ -73,9 +69,14 @@ import javax.annotation.concurrent.Immutable;
     return this.instance;
   }
 
-  public @Nonnull List<KLight> getLights()
+  @Override public @Nonnull KTransform getTransform()
   {
-    return Collections.unmodifiableList(this.lights);
+    return this.transform;
+  }
+
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
+  {
+    return this.uv_matrix;
   }
 
   @Override public int hashCode()
@@ -83,19 +84,8 @@ import javax.annotation.concurrent.Immutable;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.instance.hashCode();
-    result = (prime * result) + this.lights.hashCode();
+    result = (prime * result) + this.transform.hashCode();
+    result = (prime * result) + this.uv_matrix.hashCode();
     return result;
   }
-
-  @Override public String toString()
-  {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("[KBatchTranslucent ");
-    builder.append(this.instance);
-    builder.append(" ");
-    builder.append(this.lights);
-    builder.append("]");
-    return builder.toString();
-  }
-
 }

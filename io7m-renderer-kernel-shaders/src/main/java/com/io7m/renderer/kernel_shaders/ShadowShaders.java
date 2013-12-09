@@ -34,12 +34,15 @@ public final class ShadowShaders
     final @Nonnull ShadowLabel label)
   {
     switch (label) {
-      case SHADOW_OPAQUE:
-      case SHADOW_TRANSLUCENT:
+      case SHADOW_BASIC_OPAQUE:
+      case SHADOW_BASIC_TRANSLUCENT:
+      case SHADOW_BASIC_OPAQUE_PACKED4444:
+      case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
       {
         break;
       }
-      case SHADOW_TRANSLUCENT_TEXTURED:
+      case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
+      case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
       {
         b.append("  parameter t_albedo : sampler_2d;\n");
         break;
@@ -65,19 +68,22 @@ public final class ShadowShaders
     final @Nonnull ShadowLabel label)
   {
     switch (label) {
-      case SHADOW_OPAQUE:
+      case SHADOW_BASIC_OPAQUE_PACKED4444:
+      case SHADOW_BASIC_OPAQUE:
       {
         b.append("  value albedo : vector_4f =\n");
         b.append("    new vector_4f (1.0, 1.0, 1.0, 1.0);\n");
         break;
       }
-      case SHADOW_TRANSLUCENT:
+      case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
+      case SHADOW_BASIC_TRANSLUCENT:
       {
         b.append("  value albedo : vector_4f =\n");
         b.append("    A.translucent (m.albedo);\n");
         break;
       }
-      case SHADOW_TRANSLUCENT_TEXTURED:
+      case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
+      case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
       {
         b.append("  value albedo : vector_4f =\n");
         b.append("    A.textured_translucent (\n");
@@ -116,7 +122,23 @@ public final class ShadowShaders
     ShadowShaders.fragmentShaderValuesMaterial(b);
     ShadowShaders.fragmentShaderValuesAlbedo(b, label);
     ShadowShaders.fragmentShaderValuesRGBA(b, label);
-    b.append("  discard (F.lesser (rgba [w], 0.5));\n");
+
+    switch (label) {
+      case SHADOW_BASIC_OPAQUE:
+      case SHADOW_BASIC_OPAQUE_PACKED4444:
+      {
+        break;
+      }
+      case SHADOW_BASIC_TRANSLUCENT:
+      case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
+      case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
+      case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
+      {
+        b.append("  discard (F.lesser (alpha, 0.5));\n");
+        break;
+      }
+    }
+
     b.append("as\n");
     b.append("  out out_0 = rgba;\n");
     b.append("end;\n");
@@ -127,18 +149,36 @@ public final class ShadowShaders
     final @Nonnull ShadowLabel label)
   {
     switch (label) {
-      case SHADOW_OPAQUE:
+      case SHADOW_BASIC_OPAQUE:
+      {
         b.append("  value rgba = albedo;\n");
         break;
-      case SHADOW_TRANSLUCENT:
-      case SHADOW_TRANSLUCENT_TEXTURED:
-        b.append("  -- Premultiply alpha\n");
-        b.append("  value a = F.multiply (albedo [w], m.alpha.opacity);\n");
-        b.append("  value rgba = new vector_4f (\n");
-        b.append("    V3.multiply_scalar (albedo [x y z], a),\n");
-        b.append("    a\n");
-        b.append("  );\n");
+      }
+      case SHADOW_BASIC_OPAQUE_PACKED4444:
+      {
+        b.append("  -- Pack depth into colour buffer\n");
+        b.append("  value rgba = D.pack4444 (gl_FragCoord [z]);\n");
         break;
+      }
+      case SHADOW_BASIC_TRANSLUCENT:
+      case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
+      {
+        b.append("  -- Premultiply alpha\n");
+        b
+          .append("  value alpha = F.multiply (albedo [w], m.alpha.opacity);\n");
+        b.append("  value rgba  = new vector_4f (0.0, 0.0, 0.0, alpha);\n");
+        break;
+      }
+      case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
+      case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
+      {
+        b.append("  -- Premultiply alpha\n");
+        b
+          .append("  value alpha = F.multiply (albedo [w], m.alpha.opacity);\n");
+        b.append("  -- Pack depth into colour buffer\n");
+        b.append("  value rgba   = D.pack4444 (gl_FragCoord [z]);\n");
+        break;
+      }
     }
   }
 
@@ -183,6 +223,7 @@ public final class ShadowShaders
     b.append("import com.io7m.parasol.Float             as F;\n");
     b.append("\n");
     b.append("import com.io7m.renderer.Albedo           as A;\n");
+    b.append("import com.io7m.renderer.Depth            as D;\n");
     b.append("import com.io7m.renderer.Materials        as M;\n");
     b.append("\n");
   }

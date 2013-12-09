@@ -350,8 +350,8 @@ public abstract class KFramebufferShadow implements KFramebuffer
           g.renderbufferAllocateDepth16(width, height);
 
         final Texture2DStatic t =
-          g.texture2DStaticAllocateRGB565(
-            "color-565",
+          g.texture2DStaticAllocateRGBA4444(
+            "color-4444",
             width,
             height,
             TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,

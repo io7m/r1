@@ -661,7 +661,7 @@ public final class SBSceneController implements
   }
 
   @Override public @Nonnull
-    Pair<Collection<SBLight>, Collection<KMeshInstance>>
+    Pair<Collection<SBLight>, Collection<KMeshInstanceTransformed>>
     rendererGetScene()
       throws ConstraintError
   {
@@ -669,7 +669,7 @@ public final class SBSceneController implements
     final SBScene scene = saf.scene;
 
     final Collection<SBLight> lights = scene.lightsGet();
-    MapPSet<KMeshInstance> meshes = HashTreePSet.empty();
+    MapPSet<KMeshInstanceTransformed> meshes = HashTreePSet.empty();
 
     for (final SBInstance i : scene.instancesGet()) {
       final PathVirtual mesh_path = i.getMesh();
@@ -771,13 +771,15 @@ public final class SBSceneController implements
         new KMaterial(alpha, diff, emiss, envi, norm, spec, mat.getUVMatrix());
 
       final KMesh km = mesh.getMesh();
-      final KMeshInstance mi =
-        new KMeshInstance(id, transform, i.getUVMatrix(), km, material);
+      final KMeshInstance kmi = new KMeshInstance(id, material, km);
+
+      final KMeshInstanceTransformed mi =
+        new KMeshInstanceTransformed(kmi, transform, i.getUVMatrix());
 
       meshes = meshes.plus(mi);
     }
 
-    return new Pair<Collection<SBLight>, Collection<KMeshInstance>>(
+    return new Pair<Collection<SBLight>, Collection<KMeshInstanceTransformed>>(
       lights,
       meshes);
   }
@@ -1219,7 +1221,7 @@ interface SBSceneControllerMeshes extends SBSceneChangeListenerRegistration
 interface SBSceneControllerRenderer
 {
   public @Nonnull
-    Pair<Collection<SBLight>, Collection<KMeshInstance>>
+    Pair<Collection<SBLight>, Collection<KMeshInstanceTransformed>>
     rendererGetScene()
       throws ConstraintError;
 }
