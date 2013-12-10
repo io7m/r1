@@ -57,9 +57,9 @@ final class ForwardLabels
 
   static enum Emissive
   {
-    EMISSIVE_NONE(""),
     EMISSIVE_CONSTANT("MC"),
-    EMISSIVE_MAPPED("MM");
+    EMISSIVE_MAPPED("MM"),
+    EMISSIVE_NONE("");
 
     private final @Nonnull String code;
 
@@ -75,10 +75,10 @@ final class ForwardLabels
     ENVIRONMENT_NONE(""),
     ENVIRONMENT_REFLECTIVE("EL"),
     ENVIRONMENT_REFLECTIVE_MAPPED("ELM"),
-    ENVIRONMENT_REFRACTIVE("ER"),
-    ENVIRONMENT_REFRACTIVE_MAPPED("ERM"),
     ENVIRONMENT_REFLECTIVE_REFRACTIVE("ELR"),
-    ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED("ELRM");
+    ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED("ELRM"),
+    ENVIRONMENT_REFRACTIVE("ER"),
+    ENVIRONMENT_REFRACTIVE_MAPPED("ERM");
 
     private final @Nonnull String code;
 
@@ -93,102 +93,90 @@ final class ForwardLabels
   {
     static enum Type
     {
-      Lit,
-      Unlit
+      TYPE_LIT,
+      TYPE_UNLIT
     }
 
     private final @Nonnull Type type;
 
-    private ForwardLabel(
-      final @Nonnull Type type)
-      throws ConstraintError
-    {
-      this.type = Constraints.constrainNotNull(type, "Type");
-    }
+    final @Nonnull Albedo       albedo;
+    final @Nonnull Alpha        alpha;
+    final @Nonnull Emissive     emissive;
+    final @Nonnull Environment  environment;
+    final @Nonnull Normals      normals;
+    final @Nonnull Specular     specular;
 
-    abstract boolean impliesUV();
-
-    abstract @Nonnull String getCode();
-
-    public final @Nonnull Type getType()
+    Type getType()
     {
       return this.type;
     }
 
-    abstract public @Nonnull Albedo getAlbedo();
-
-    abstract public @Nonnull Emissive getEmissive();
-
-    abstract public @Nonnull Alpha getAlpha();
-  }
-
-  static final class ForwardLabelLit extends ForwardLabel
-  {
-    final @Nonnull Alpha       alpha;
-    final @Nonnull Albedo      albedo;
-    final @Nonnull Emissive    emissive;
-    final @Nonnull Environment environment;
-    final @Nonnull Light       light;
-    final @Nonnull Normals     normals;
-    final @Nonnull Specular    specular;
-    private final String       code;
-
-    @SuppressWarnings("synthetic-access") public ForwardLabelLit(
+    public ForwardLabel(
+      final @Nonnull Type type,
       final @Nonnull Alpha alpha,
       final @Nonnull Albedo albedo,
       final @Nonnull Emissive emissive,
       final @Nonnull Environment environment,
-      final @Nonnull Light light,
       final @Nonnull Normals normals,
       final @Nonnull Specular specular)
       throws ConstraintError
     {
-      super(Type.Lit);
+      this.type = Constraints.constrainNotNull(type, "Type");
       this.alpha = alpha;
       this.albedo = albedo;
       this.emissive = emissive;
       this.environment = environment;
-      this.light = light;
       this.normals = normals;
       this.specular = specular;
-
-      final StringBuilder b = new StringBuilder();
-      b.append(light.code);
-      b.append("_");
-      b.append(alpha.code);
-      b.append("_");
-      b.append(albedo.code);
-      if (emissive.code.isEmpty() == false) {
-        b.append("_");
-        b.append(emissive.code);
-      }
-      if (normals.code.isEmpty() == false) {
-        b.append("_");
-        b.append(normals.code);
-      }
-      if (environment.code.isEmpty() == false) {
-        b.append("_");
-        b.append(environment.code);
-      }
-      if (specular.code.isEmpty() == false) {
-        b.append("_");
-        b.append(specular.code);
-      }
-
-      this.code = b.toString();
     }
 
-    @Override public Alpha getAlpha()
+    @Override public boolean equals(
+      final Object obj)
     {
-      return this.alpha;
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final ForwardLabelLit other = (ForwardLabelLit) obj;
+      if (this.albedo != other.albedo) {
+        return false;
+      }
+      if (this.alpha != other.alpha) {
+        return false;
+      }
+      if (this.emissive != other.emissive) {
+        return false;
+      }
+      if (this.environment != other.environment) {
+        return false;
+      }
+      if (this.normals != other.normals) {
+        return false;
+      }
+      if (this.specular != other.specular) {
+        return false;
+      }
+      return true;
     }
 
-    @Override public Albedo getAlbedo()
+    public Albedo getAlbedo()
     {
       return this.albedo;
     }
 
-    @Override public Emissive getEmissive()
+    public Alpha getAlpha()
+    {
+      return this.alpha;
+    }
+
+    abstract public @Nonnull String getCode();
+
+    public Emissive getEmissive()
     {
       return this.emissive;
     }
@@ -196,11 +184,6 @@ final class ForwardLabels
     public Environment getEnvironment()
     {
       return this.environment;
-    }
-
-    public Light getLight()
-    {
-      return this.light;
     }
 
     public Normals getNormals()
@@ -213,7 +196,20 @@ final class ForwardLabels
       return this.specular;
     }
 
-    @Override boolean impliesUV()
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + this.albedo.hashCode();
+      result = (prime * result) + this.alpha.hashCode();
+      result = (prime * result) + this.emissive.hashCode();
+      result = (prime * result) + this.environment.hashCode();
+      result = (prime * result) + this.normals.hashCode();
+      result = (prime * result) + this.specular.hashCode();
+      return result;
+    }
+
+    boolean impliesUV()
     {
       switch (this.albedo) {
         case ALBEDO_TEXTURED:
@@ -266,134 +262,132 @@ final class ForwardLabels
 
       throw new UnreachableCodeException();
     }
-
-    @Override @Nonnull String getCode()
-    {
-      return this.code;
-    }
   }
 
-  static final class ForwardLabelUnlit extends ForwardLabel
+  static final class ForwardLabelLit extends ForwardLabel
   {
-    final @Nonnull Alpha    alpha;
-    final @Nonnull Albedo   albedo;
-    final @Nonnull Emissive emissive;
-    private final String    code;
+    private final @Nonnull String code;
+    private final @Nonnull Light  light;
 
-    @SuppressWarnings("synthetic-access") public ForwardLabelUnlit(
+    Light getLight()
+    {
+      return this.light;
+    }
+
+    @SuppressWarnings("synthetic-access") public ForwardLabelLit(
+      final @Nonnull Light light,
       final @Nonnull Alpha alpha,
       final @Nonnull Albedo albedo,
-      final @Nonnull Emissive emissive)
+      final @Nonnull Emissive emissive,
+      final @Nonnull Environment environment,
+      final @Nonnull Normals normals,
+      final @Nonnull Specular specular)
       throws ConstraintError
     {
-      super(Type.Unlit);
-      this.alpha = alpha;
-      this.albedo = albedo;
-      this.emissive = emissive;
+      super(
+        Type.TYPE_LIT,
+        alpha,
+        albedo,
+        emissive,
+        environment,
+        normals,
+        specular);
+
+      this.light = light;
 
       final StringBuilder b = new StringBuilder();
-      b.append("U_");
-      b.append(alpha.code);
+      b.append(light.code);
       b.append("_");
-      b.append(albedo.code);
-      if (emissive.code.isEmpty() == false) {
+      b.append(this.alpha.code);
+      b.append("_");
+      b.append(this.albedo.code);
+      if (this.emissive.code.isEmpty() == false) {
         b.append("_");
-        b.append(emissive.code);
+        b.append(this.emissive.code);
+      }
+      if (this.normals.code.isEmpty() == false) {
+        b.append("_");
+        b.append(this.normals.code);
+      }
+      if (this.environment.code.isEmpty() == false) {
+        b.append("_");
+        b.append(this.environment.code);
+      }
+      if (this.specular.code.isEmpty() == false) {
+        b.append("_");
+        b.append(this.specular.code);
       }
 
       this.code = b.toString();
     }
 
-    @Override boolean impliesUV()
-    {
-      switch (this.albedo) {
-        case ALBEDO_TEXTURED:
-        {
-          return true;
-        }
-        case ALBEDO_COLOURED:
-        {
-          switch (this.emissive) {
-            case EMISSIVE_CONSTANT:
-            case EMISSIVE_NONE:
-            {
-              return false;
-            }
-            case EMISSIVE_MAPPED:
-            {
-              return true;
-            }
-          }
-        }
-      }
-
-      throw new UnreachableCodeException();
-    }
-
-    @Override @Nonnull String getCode()
+    @Override public String getCode()
     {
       return this.code;
     }
 
-    @Override public Albedo getAlbedo()
-    {
-      return this.albedo;
-    }
-
-    @Override public Emissive getEmissive()
-    {
-      return this.emissive;
-    }
-
-    @Override public Alpha getAlpha()
-    {
-      return this.alpha;
-    }
   }
 
-  static @Nonnull List<ForwardLabel> allLabels()
-    throws ConstraintError
+  static final class ForwardLabelUnlit extends ForwardLabel
   {
-    final ArrayList<ForwardLabel> results = new ArrayList<ForwardLabel>();
+    private final String code;
 
-    for (final Alpha a : Alpha.values()) {
-      for (final Albedo b : Albedo.values()) {
-        for (final Emissive m : Emissive.values()) {
-          for (final Normals n : Normals.values()) {
-            switch (n) {
-              case NORMALS_NONE:
-              {
-                results.add(new ForwardLabelUnlit(a, b, m));
-                break;
-              }
-              case NORMALS_MAPPED:
-              case NORMALS_VERTEX:
-              {
-                for (final Environment e : Environment.values()) {
-                  for (final Light l : Light.values()) {
-                    for (final Specular s : Specular.values()) {
-                      results.add(new ForwardLabelLit(a, b, m, e, l, n, s));
-                    }
-                  }
-                }
-                break;
-              }
-            }
-          }
-        }
+    @SuppressWarnings("synthetic-access") public ForwardLabelUnlit(
+      final @Nonnull Alpha alpha,
+      final @Nonnull Albedo albedo,
+      final @Nonnull Emissive emissive,
+      final @Nonnull Environment environment,
+      final @Nonnull Normals normals,
+      final @Nonnull Specular specular)
+      throws ConstraintError
+    {
+      super(
+        Type.TYPE_UNLIT,
+        alpha,
+        albedo,
+        emissive,
+        environment,
+        normals,
+        specular);
+
+      final StringBuilder b = new StringBuilder();
+      b.append("U_");
+      b.append(this.alpha.code);
+      b.append("_");
+      b.append(this.albedo.code);
+      if (this.emissive.code.isEmpty() == false) {
+        b.append("_");
+        b.append(this.emissive.code);
       }
+      if (this.normals.code.isEmpty() == false) {
+        b.append("_");
+        b.append(this.normals.code);
+      }
+      if (this.environment.code.isEmpty() == false) {
+        b.append("_");
+        b.append(this.environment.code);
+      }
+      if (this.specular.code.isEmpty() == false) {
+        b.append("_");
+        b.append(this.specular.code);
+      }
+
+      this.code = b.toString();
     }
 
-    return results;
+    @Override public String getCode()
+    {
+      return this.code;
+    }
   }
 
   static enum Light
   {
     LIGHT_DIRECTIONAL("LD"),
     LIGHT_PROJECTIVE("LP"),
-    LIGHT_SPHERICAL("LS"),
     LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC("LPSMB"),
-    LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444("LPSMBP4")
+    LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444("LPSMBP4"),
+    LIGHT_SPHERICAL("LS")
 
     ;
 
@@ -408,9 +402,9 @@ final class ForwardLabels
 
   static enum Normals
   {
+    NORMALS_MAPPED("NM"),
     NORMALS_NONE(""),
-    NORMALS_VERTEX("NV"),
-    NORMALS_MAPPED("NM");
+    NORMALS_VERTEX("NV");
 
     private final @Nonnull String code;
 
@@ -423,9 +417,9 @@ final class ForwardLabels
 
   static enum Specular
   {
-    SPECULAR_NONE(""),
     SPECULAR_CONSTANT("SC"),
-    SPECULAR_MAPPED("SM");
+    SPECULAR_MAPPED("SM"),
+    SPECULAR_NONE("");
 
     private final @Nonnull String code;
 
@@ -434,5 +428,72 @@ final class ForwardLabels
     {
       this.code = code;
     }
+  }
+
+  static @Nonnull List<ForwardLabel> allLabels()
+    throws ConstraintError
+  {
+    final List<ForwardLabel> results = new ArrayList<ForwardLabel>();
+
+    for (final Alpha a : Alpha.values()) {
+      for (final Albedo b : Albedo.values()) {
+        for (final Emissive m : Emissive.values()) {
+          for (final Normals n : Normals.values()) {
+            switch (n) {
+              case NORMALS_NONE:
+              {
+                results.add(new ForwardLabelUnlit(
+                  a,
+                  b,
+                  m,
+                  Environment.ENVIRONMENT_NONE,
+                  n,
+                  Specular.SPECULAR_NONE));
+                break;
+              }
+              case NORMALS_MAPPED:
+              case NORMALS_VERTEX:
+              {
+                for (final Environment e : Environment.values()) {
+                  for (final Specular s : Specular.values()) {
+                    switch (s) {
+                      case SPECULAR_MAPPED:
+                      {
+                        break;
+                      }
+                      case SPECULAR_CONSTANT:
+                      case SPECULAR_NONE:
+                      {
+                        switch (e) {
+                          case ENVIRONMENT_NONE:
+                          case ENVIRONMENT_REFLECTIVE:
+                          case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
+                          case ENVIRONMENT_REFRACTIVE:
+                            break;
+                          case ENVIRONMENT_REFLECTIVE_MAPPED:
+                          case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
+                          case ENVIRONMENT_REFRACTIVE_MAPPED:
+                            // "Mapped" environment requires specular map
+                            continue;
+                        }
+                        break;
+                      }
+                    }
+
+                    results.add(new ForwardLabelUnlit(a, b, m, e, n, s));
+                    for (final Light l : Light.values()) {
+                      results.add(new ForwardLabelLit(l, a, b, m, e, n, s));
+                    }
+                  }
+                }
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return results;
   }
 }

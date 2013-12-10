@@ -2030,7 +2030,7 @@ final class SBGLRenderer implements GLEventListener
       final KCamera kcamera =
         KCamera.make(this.camera_view_matrix, projection);
 
-      final Pair<Collection<SBLight>, Collection<KMeshInstanceTransformed>> scene_things =
+      final Pair<Collection<SBLight>, Collection<Pair<KMeshInstanceTransformed, SBInstance>>> scene_things =
         c.rendererGetScene();
 
       this.scene_lights = scene_things.first;
@@ -2041,19 +2041,24 @@ final class SBGLRenderer implements GLEventListener
        * rendered from farthest to nearest.
        */
 
-      final LinkedList<KMeshInstanceTransformed> instances =
-        new LinkedList<KMeshInstanceTransformed>(scene_things.second);
+      final LinkedList<Pair<KMeshInstanceTransformed, SBInstance>> instances =
+        new LinkedList<Pair<KMeshInstanceTransformed, SBInstance>>(
+          scene_things.second);
 
-      Collections.sort(instances, new Comparator<KMeshInstanceTransformed>() {
-        @Override public int compare(
-          final KMeshInstanceTransformed o1,
-          final KMeshInstanceTransformed o2)
-        {
-          final float o1z = o1.getTransform().getTranslation().getZF();
-          final float o2z = o2.getTransform().getTranslation().getZF();
-          return Float.compare(o1z, o2z);
-        }
-      });
+      Collections.sort(
+        instances,
+        new Comparator<Pair<KMeshInstanceTransformed, SBInstance>>() {
+          @Override public int compare(
+            final Pair<KMeshInstanceTransformed, SBInstance> o1,
+            final Pair<KMeshInstanceTransformed, SBInstance> o2)
+          {
+            final float o1z =
+              o1.first.getTransform().getTranslation().getZF();
+            final float o2z =
+              o2.first.getTransform().getTranslation().getZF();
+            return Float.compare(o1z, o2z);
+          }
+        });
 
       final KSceneBuilder builder =
         KScene.newBuilder(this.label_cache, kcamera);
@@ -2073,25 +2078,42 @@ final class SBGLRenderer implements GLEventListener
       for (final SBLight light : scene_things.first) {
         final KLight klight = light.getLight();
 
-        for (final KMeshInstanceTransformed instance : scene_things.second) {
+        for (final Pair<KMeshInstanceTransformed, SBInstance> pair : scene_things.second) {
+          final KMeshInstanceTransformed instance = pair.first;
+
           final KMaterialAlphaLabel alpha =
             this.label_cache.getAlphaLabel(instance.getInstance());
 
-          switch (alpha) {
-            case ALPHA_OPAQUE:
-            {
-              builder.sceneAddOpaqueLitVisibleWithShadow(klight, instance);
-              break;
+          if (pair.second.getDescription().isLit()) {
+            switch (alpha) {
+              case ALPHA_OPAQUE:
+              {
+                builder.sceneAddOpaqueLitVisibleWithShadow(klight, instance);
+                break;
+              }
+              case ALPHA_TRANSLUCENT:
+              {
+                builder.sceneAddTranslucentLitVisibleWithoutShadow(
+                  klight,
+                  instance);
+                builder.sceneAddTranslucentInvisibleShadowCaster(
+                  klight,
+                  instance);
+                break;
+              }
             }
-            case ALPHA_TRANSLUCENT:
-            {
-              builder.sceneAddTranslucentLitVisibleWithoutShadow(
-                klight,
-                instance);
-              builder.sceneAddTranslucentInvisibleShadowCaster(
-                klight,
-                instance);
-              break;
+          } else {
+            switch (alpha) {
+              case ALPHA_OPAQUE:
+              {
+                builder.sceneAddOpaqueUnlit(instance);
+                break;
+              }
+              case ALPHA_TRANSLUCENT:
+              {
+                builder.sceneAddTranslucentUnlit(instance);
+                break;
+              }
             }
           }
         }
