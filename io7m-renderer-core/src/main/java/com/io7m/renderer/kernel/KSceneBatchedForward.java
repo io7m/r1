@@ -29,6 +29,7 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.renderer.kernel.KScene.KSceneOpaques;
+import com.io7m.renderer.kernel.KScene.KSceneShadows;
 import com.io7m.renderer.kernel.KScene.KSceneTranslucents;
 
 @Immutable final class KSceneBatchedForward
@@ -237,10 +238,10 @@ import com.io7m.renderer.kernel.KScene.KSceneTranslucents;
   @SuppressWarnings("synthetic-access") private static @Nonnull
     Map<KLight, BatchTranslucentShadow>
     makeTranslucentShadowCasters(
-      final @Nonnull KSceneTranslucents translucents)
+      final @Nonnull KSceneShadows shadows)
   {
     final Map<KLight, List<KMeshInstanceTransformed>> casters =
-      translucents.getShadowCastersByLight();
+      shadows.getTranslucentShadowCasters();
 
     final HashMap<KLight, BatchTranslucentShadow> batches =
       new HashMap<KLight, BatchTranslucentShadow>();
@@ -264,6 +265,7 @@ import com.io7m.renderer.kernel.KScene.KSceneTranslucents;
 
     final KSceneOpaques opaques = scene.getOpaques();
     final KSceneTranslucents translucents = scene.getTranslucents();
+    final KSceneShadows shadows = scene.getShadows();
 
     final Map<KLight, Map<KMaterialForwardLabel, List<KMeshInstanceTransformed>>> batches_opaque_lit =
       KSceneBatchedForward.makeOpaqueBatches(
@@ -273,7 +275,7 @@ import com.io7m.renderer.kernel.KScene.KSceneTranslucents;
     final Map<KLight, BatchOpaqueShadow> shadow_opaque =
       KSceneBatchedForward.makeOpaqueShadowCasters(
         shadow_labels,
-        opaques.getShadowCasters());
+        shadows.getOpaqueShadowCasters());
 
     final List<BatchTranslucentLit> batches_translucent =
       KSceneBatchedForward.makeTranslucentBatches(
@@ -281,12 +283,12 @@ import com.io7m.renderer.kernel.KScene.KSceneTranslucents;
         translucents);
 
     final Map<KLight, BatchTranslucentShadow> shadow_translucent =
-      KSceneBatchedForward.makeTranslucentShadowCasters(translucents);
+      KSceneBatchedForward.makeTranslucentShadowCasters(shadows);
 
     return new KSceneBatchedForward(
       batches_opaque_lit,
       batches_translucent,
-      scene.getShadowLights(),
+      shadows.getShadowLights(),
       shadow_opaque,
       shadow_translucent);
   }
