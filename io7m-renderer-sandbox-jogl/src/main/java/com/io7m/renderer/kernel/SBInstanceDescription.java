@@ -35,6 +35,7 @@ import com.io7m.renderer.RVectorI3F;
   private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
   private final @Nonnull PathVirtual                     mesh;
   private final @Nonnull SBMaterialDescription           material;
+  private final boolean                                  lit;
 
   public SBInstanceDescription(
     final @Nonnull Integer id,
@@ -43,7 +44,8 @@ import com.io7m.renderer.RVectorI3F;
     final @Nonnull RVectorI3F<SBDegrees> orientation,
     final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix,
     final @Nonnull PathVirtual mesh,
-    final @Nonnull SBMaterialDescription material)
+    final @Nonnull SBMaterialDescription material,
+    final boolean lit)
   {
     this.id = id;
     this.position = position;
@@ -52,6 +54,7 @@ import com.io7m.renderer.RVectorI3F;
     this.mesh = mesh;
     this.material = material;
     this.uv_matrix = uv_matrix;
+    this.lit = lit;
   }
 
   @Override public boolean equals(
@@ -68,6 +71,9 @@ import com.io7m.renderer.RVectorI3F;
     }
     final SBInstanceDescription other = (SBInstanceDescription) obj;
     if (!this.id.equals(other.id)) {
+      return false;
+    }
+    if (this.lit != other.lit) {
       return false;
     }
     if (!this.material.equals(other.material)) {
@@ -94,6 +100,11 @@ import com.io7m.renderer.RVectorI3F;
   public @Nonnull Integer getID()
   {
     return this.id;
+  }
+
+  boolean isLit()
+  {
+    return this.lit;
   }
 
   public @Nonnull SBMaterialDescription getMaterial()
@@ -131,6 +142,7 @@ import com.io7m.renderer.RVectorI3F;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.id.hashCode();
+    result = (prime * result) + (this.lit ? 1231 : 1237);
     result = (prime * result) + this.material.hashCode();
     result = (prime * result) + this.mesh.hashCode();
     result = (prime * result) + this.orientation.hashCode();
@@ -143,18 +155,22 @@ import com.io7m.renderer.RVectorI3F;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBInstanceDescription ");
+    builder.append("[SBInstanceDescription [id=");
     builder.append(this.id);
-    builder.append(" ");
+    builder.append(", position=");
     builder.append(this.position);
-    builder.append(" ");
+    builder.append(", scale=");
     builder.append(this.scale);
-    builder.append(" ");
+    builder.append(", orientation=");
     builder.append(this.orientation);
-    builder.append(" ");
+    builder.append(", uv_matrix=");
+    builder.append(this.uv_matrix);
+    builder.append(", mesh=");
     builder.append(this.mesh);
-    builder.append(" ");
+    builder.append(", material=");
     builder.append(this.material);
+    builder.append(", lit=");
+    builder.append(this.lit);
     builder.append("]");
     return builder.toString();
   }

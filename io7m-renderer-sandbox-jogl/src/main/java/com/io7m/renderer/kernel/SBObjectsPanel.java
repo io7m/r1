@@ -618,6 +618,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 
     private final @Nonnull ObjectsTableModel                      objects_table_model;
     private final @Nonnull GeneralSettings                        general_settings;
+    private final @Nonnull JCheckBox                              affected_by_light;
+
     protected final static @Nonnull FileFilter                    MESH_FILE_FILTER;
 
     static {
@@ -670,6 +672,9 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.orientation_x = new JTextField("0.0");
       this.orientation_y = new JTextField("0.0");
       this.orientation_z = new JTextField("0.0");
+
+      this.affected_by_light = new JCheckBox();
+      this.affected_by_light.setSelected(true);
 
       this.matrix_uv = new SBMatrix3x3Fields<RTransformTexture>();
 
@@ -834,13 +839,12 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           final JTextField id_field =
             new JTextField(initial_desc.getID().toString());
           id_field.setEditable(false);
-          d.row().grid().add(new JLabel("ID")).add(id_field, 3);
+          d.row().grid(new JLabel("ID")).add(id_field, 3);
         }
 
         d
           .row()
-          .grid()
-          .add(new JLabel("Mesh"))
+          .grid(new JLabel("Mesh"))
           .add(this.mesh_selector, 3)
           .add(this.mesh_load);
 
@@ -848,27 +852,26 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
 
         d
           .row()
-          .grid()
-          .add(new JLabel("Position"))
+          .grid(new JLabel("Position"))
           .add(this.position_x)
           .add(this.position_y)
           .add(this.position_z);
 
         d
           .row()
-          .grid()
-          .add(new JLabel("Scale"))
+          .grid(new JLabel("Scale"))
           .add(this.scale_x)
           .add(this.scale_y)
           .add(this.scale_z);
 
         d
           .row()
-          .grid()
-          .add(new JLabel("Orientation"))
+          .grid(new JLabel("Orientation"))
           .add(this.orientation_x)
           .add(this.orientation_y)
           .add(this.orientation_z);
+
+        d.row().grid(new JLabel("Lit")).add(this.affected_by_light);
 
         d.emptyRow();
         d.row().left().add(new JSeparator()).fill();
@@ -921,6 +924,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.emissive_settings.mpLoadFrom(initial_desc);
       this.normal_settings.mpLoadFrom(initial_desc);
       this.specular_settings.mpLoadFrom(initial_desc);
+      this.affected_by_light.setSelected(initial_desc.isLit());
     }
 
     protected void meshesRefresh(
@@ -1003,7 +1007,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
           orientation,
           instance_uv_matrix,
           mesh_name,
-          material);
+          material,
+          this.affected_by_light.isSelected());
 
       controller.sceneInstanceAddByDescription(d);
 
