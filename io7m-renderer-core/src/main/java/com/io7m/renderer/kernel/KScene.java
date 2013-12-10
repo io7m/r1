@@ -273,23 +273,71 @@ import com.io7m.jaux.Constraints.ConstraintError;
       sceneCreate()
     {
       final KSceneOpaques o =
-        new KSceneOpaques(
-          this.lit_opaque,
-          this.shadow_casters_opaque,
-          this.visible_opaque);
+        new KSceneOpaques(this.lit_opaque, this.visible_opaque);
 
       final KSceneTranslucents t =
-        new KSceneTranslucents(
-          this.shadow_casters_translucent,
-          this.translucent_ordered,
-          this.lit_translucent);
+        new KSceneTranslucents(this.translucent_ordered, this.lit_translucent);
 
-      return new KScene(
-        this.camera,
-        this.shadow_lights,
-        o,
-        t,
-        this.visible_instances);
+      final KSceneShadows s =
+        new KSceneShadows(
+          this.shadow_lights,
+          this.shadow_casters_opaque,
+          this.shadow_casters_translucent);
+
+      return new KScene(this.camera, o, t, s, this.visible_instances);
+    }
+  }
+
+  /**
+   * Information about the shadow casters in the current scene.
+   */
+
+  @Immutable public static class KSceneShadows
+  {
+    private final @Nonnull Set<KLight>                                 shadow_lights;
+    private final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_opaque;
+    private final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_translucent;
+
+    private KSceneShadows(
+      final @Nonnull Set<KLight> shadow_lights,
+      final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_opaque,
+      final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_translucent)
+    {
+      this.shadow_lights = shadow_lights;
+      this.shadow_casters_opaque = shadow_casters_opaque;
+      this.shadow_casters_translucent = shadow_casters_translucent;
+    }
+
+    /**
+     * Retrieve the set of all shadow-producing lights in the scene.
+     */
+
+    public @Nonnull Set<KLight> getShadowLights()
+    {
+      return this.shadow_lights;
+    }
+
+    /**
+     * Retrieve the set of opaque shadow casters for each light in the scene.
+     */
+
+    public @Nonnull
+      Map<KLight, List<KMeshInstanceTransformed>>
+      getOpaqueShadowCasters()
+    {
+      return this.shadow_casters_opaque;
+    }
+
+    /**
+     * Retrieve the set of translucent shadow casters for each light in the
+     * scene.
+     */
+
+    public @Nonnull
+      Map<KLight, List<KMeshInstanceTransformed>>
+      getTranslucentShadowCasters()
+    {
+      return this.shadow_casters_translucent;
     }
   }
 
@@ -300,16 +348,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
   @Immutable public static class KSceneOpaques
   {
     private final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> lit;
-    private final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters;
     private final @Nonnull Set<KMeshInstanceTransformed>               all;
 
     private KSceneOpaques(
       final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> lit_opaque,
-      final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_opaque,
       final @Nonnull Set<KMeshInstanceTransformed> visible_opaque)
     {
       this.lit = lit_opaque;
-      this.shadow_casters = shadow_casters_opaque;
       this.all = visible_opaque;
     }
 
@@ -333,17 +378,6 @@ import com.io7m.jaux.Constraints.ConstraintError;
     {
       return this.lit;
     }
-
-    /**
-     * Retrieve the set of opaque shadow casters for each light in the scene.
-     */
-
-    public @Nonnull
-      Map<KLight, List<KMeshInstanceTransformed>>
-      getShadowCasters()
-    {
-      return this.shadow_casters;
-    }
   }
 
   /**
@@ -352,16 +386,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
   @Immutable public static class KSceneTranslucents
   {
-    private final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_translucent_casters;
     private final @Nonnull Map<KMeshInstanceTransformed, List<KLight>> translucent_lights;
     private final @Nonnull List<KMeshInstanceTransformed>              translucent_ordered;
 
     private KSceneTranslucents(
-      final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_translucent_casters,
       final @Nonnull List<KMeshInstanceTransformed> translucent_ordered,
       final @Nonnull Map<KMeshInstanceTransformed, List<KLight>> translucent_lights)
     {
-      this.shadow_translucent_casters = shadow_translucent_casters;
       this.translucent_ordered = translucent_ordered;
       this.translucent_lights = translucent_lights;
     }
@@ -386,19 +417,6 @@ import com.io7m.jaux.Constraints.ConstraintError;
       getLightsByInstance()
     {
       return this.translucent_lights;
-    }
-
-    /**
-     * Retrieve the set of translucent shadow casters for each light in the
-     * scene. The shadow casters for each light are in insertion order (with
-     * the oldest instance appearing first).
-     */
-
-    public @Nonnull
-      Map<KLight, List<KMeshInstanceTransformed>>
-      getShadowCastersByLight()
-    {
-      return this.shadow_translucent_casters;
     }
   }
 
@@ -425,21 +443,21 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
   private final @Nonnull KCamera                       camera;
   private final @Nonnull KSceneOpaques                 opaques;
-  private final @Nonnull Set<KLight>                   shadow_lights;
   private final @Nonnull KSceneTranslucents            translucents;
+  private final @Nonnull KSceneShadows                 shadows;
   private final @Nonnull Set<KMeshInstanceTransformed> visible;
 
   private KScene(
     final @Nonnull KCamera camera,
-    final @Nonnull Set<KLight> shadow_lights,
     final @Nonnull KSceneOpaques opaques,
     final @Nonnull KSceneTranslucents translucents,
+    final @Nonnull KSceneShadows shadows,
     final @Nonnull Set<KMeshInstanceTransformed> visible)
   {
     this.camera = camera;
     this.opaques = opaques;
     this.translucents = translucents;
-    this.shadow_lights = shadow_lights;
+    this.shadows = shadows;
     this.visible = visible;
   }
 
@@ -458,12 +476,12 @@ import com.io7m.jaux.Constraints.ConstraintError;
   }
 
   /**
-   * Retrieve the set of shadow casting lights in the current scene.
+   * Retrieve the set of shadow casters in the current scene.
    */
 
-  public @Nonnull Set<KLight> getShadowLights()
+  public @Nonnull KSceneShadows getShadows()
   {
-    return this.shadow_lights;
+    return this.shadows;
   }
 
   /**
