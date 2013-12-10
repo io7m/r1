@@ -73,9 +73,9 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KMutableMatrices.WithInstance;
-import com.io7m.renderer.kernel.KSceneBatchedForward.BatchOpaqueShadow;
 import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucentLit;
-import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucentShadow;
+import com.io7m.renderer.kernel.KSceneBatchedShadow.BatchOpaqueShadow;
+import com.io7m.renderer.kernel.KSceneBatchedShadow.BatchTranslucentShadow;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheFilesystemException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheIOException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLCompileException;
@@ -763,9 +763,10 @@ public final class KRendererForward implements KRenderer
       this.shadow_cache.pcPeriodStart();
 
       try {
-        this.renderShadowMaps(batched);
+        final KSceneBatchedShadow shadows = batched.getBatchedShadow();
+        this.renderShadowMaps(shadows);
         if (this.debug != null) {
-          this.debug.debugPerformDumpShadowMaps(batched.getShadowLights());
+          this.debug.debugPerformDumpShadowMaps(shadows.getShadowLights());
         }
       } catch (final KShaderCacheException e) {
         KRendererForward.handleShaderCacheException(e);
@@ -1157,7 +1158,7 @@ public final class KRendererForward implements KRenderer
   }
 
   private void renderShadowMaps(
-    final @Nonnull KSceneBatchedForward batched)
+    final @Nonnull KSceneBatchedShadow batched)
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
@@ -1171,7 +1172,7 @@ public final class KRendererForward implements KRenderer
   }
 
   private void renderShadowMapsOpaqueBatches(
-    final @Nonnull KSceneBatchedForward batched)
+    final @Nonnull KSceneBatchedShadow batched)
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
@@ -1241,7 +1242,7 @@ public final class KRendererForward implements KRenderer
   }
 
   private void renderShadowMapsPrecacheMaps(
-    final @Nonnull KSceneBatchedForward batched)
+    final @Nonnull KSceneBatchedShadow batched)
     throws KShadowCacheException,
       ConstraintError,
       LUCacheException,
@@ -1290,7 +1291,7 @@ public final class KRendererForward implements KRenderer
   }
 
   private void renderShadowMapsTranslucentBatches(
-    final KSceneBatchedForward batched)
+    final KSceneBatchedShadow batched)
     throws KShadowCacheException,
       ConstraintError,
       LUCacheException,
