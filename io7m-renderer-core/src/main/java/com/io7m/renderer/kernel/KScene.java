@@ -88,33 +88,48 @@ import com.io7m.jaux.Constraints.ConstraintError;
   private static class Builder<L extends KMaterialAlphaLabelCache> implements
     KSceneBuilder
   {
-    private @Nonnull final MapPSet<KLight>                            all_lights;
     private final @Nonnull KCamera                                    camera;
     private final @Nonnull L                                          labels;
+    private @Nonnull MapPSet<KLight>                                  lights_all;
+    private @Nonnull MapPSet<KMeshInstanceTransformed>                lit;
     private @Nonnull HashPMap<KLight, List<KMeshInstanceTransformed>> lit_opaque;
     private @Nonnull HashPMap<KMeshInstanceTransformed, List<KLight>> lit_translucent;
     private @Nonnull HashPMap<KLight, List<KMeshInstanceTransformed>> shadow_casters_opaque;
     private @Nonnull HashPMap<KLight, List<KMeshInstanceTransformed>> shadow_casters_translucent;
     private @Nonnull MapPSet<KLight>                                  shadow_lights;
-    private @Nonnull PVector<KMeshInstanceTransformed>                translucent_ordered;
-    private @Nonnull MapPSet<KMeshInstanceTransformed>                visible_opaque;
+    private @Nonnull MapPSet<KMeshInstanceTransformed>                unlit;
+    private @Nonnull MapPSet<KMeshInstanceTransformed>                unlit_opaque;
     private @Nonnull MapPSet<KMeshInstanceTransformed>                visible_instances;
+    private @Nonnull MapPSet<KMeshInstanceTransformed>                visible_opaque;
+    private @Nonnull PVector<KMeshInstanceTransformed>                visible_translucent;
 
     Builder(
       final @Nonnull KCamera camera,
       final @Nonnull L labels)
     {
       this.camera = camera;
+      this.lit = HashTreePSet.empty();
       this.lit_opaque = HashTreePMap.empty();
       this.lit_translucent = HashTreePMap.empty();
       this.shadow_lights = HashTreePSet.empty();
       this.shadow_casters_opaque = HashTreePMap.empty();
       this.shadow_casters_translucent = HashTreePMap.empty();
-      this.translucent_ordered = TreePVector.empty();
+      this.visible_translucent = TreePVector.empty();
       this.visible_opaque = HashTreePSet.empty();
       this.labels = labels;
       this.visible_instances = HashTreePSet.empty();
-      this.all_lights = HashTreePSet.empty();
+      this.lights_all = HashTreePSet.empty();
+      this.unlit = HashTreePSet.empty();
+      this.unlit_opaque = HashTreePSet.empty();
+    }
+
+    private void addLight(
+      final @Nonnull KLight light)
+    {
+      if (light.hasShadow()) {
+        this.shadow_lights = this.shadow_lights.plus(light);
+      }
+      this.lights_all = this.lights_all.plus(light);
     }
 
     private void addOpaqueInstance(
@@ -129,7 +144,9 @@ import com.io7m.jaux.Constraints.ConstraintError;
         instances = TreePVector.empty();
       }
       this.lit_opaque = this.lit_opaque.plus(light, instances.plus(instance));
+      this.lit = this.lit.plus(instance);
       this.visible_opaque = this.visible_opaque.plus(instance);
+      this.visible_instances = this.visible_instances.plus(instance);
     }
 
     private void addOpaqueShadowCaster(
@@ -148,6 +165,25 @@ import com.io7m.jaux.Constraints.ConstraintError;
         this.shadow_casters_opaque.plus(light, instances.plus(instance));
     }
 
+    private void addTranslucentInstance(
+      final KLight light,
+      final KMeshInstanceTransformed instance)
+    {
+      this.visible_translucent = this.visible_translucent.plus(instance);
+
+      final PVector<KLight> lights;
+      if (this.lit_translucent.containsKey(instance)) {
+        lights = (PVector<KLight>) this.lit_translucent.get(instance);
+      } else {
+        lights = TreePVector.empty();
+      }
+      this.lit_translucent =
+        this.lit_translucent.plus(instance, lights.plus(light));
+
+      this.lit = this.lit.plus(instance);
+      this.visible_instances = this.visible_instances.plus(instance);
+    }
+
     private void addTranslucentShadowCaster(
       final @Nonnull KLight light,
       final @Nonnull KMeshInstanceTransformed instance)
@@ -164,12 +200,28 @@ import com.io7m.jaux.Constraints.ConstraintError;
         this.shadow_casters_translucent.plus(light, instances.plus(instance));
     }
 
-    private void checkOpaque(
-      final @Nonnull KLight light,
+    private void checkNotLit(
       final @Nonnull KMeshInstanceTransformed transformed)
       throws ConstraintError
     {
-      Constraints.constrainNotNull(light, "Light");
+      Constraints.constrainArbitrary(
+        this.lit.contains(transformed) == false,
+        "Instance not already lit");
+    }
+
+    private void checkNotUnlit(
+      final @Nonnull KMeshInstanceTransformed transformed)
+      throws ConstraintError
+    {
+      Constraints.constrainArbitrary(
+        this.unlit.contains(transformed) == false,
+        "Instance not already unlit");
+    }
+
+    private void checkOpaque(
+      final KMeshInstanceTransformed transformed)
+      throws ConstraintError
+    {
       Constraints.constrainNotNull(transformed, "Instance");
 
       final KMaterialAlphaLabel alpha =
@@ -180,12 +232,20 @@ import com.io7m.jaux.Constraints.ConstraintError;
         "Instance material is opaque");
     }
 
-    private void checkTranslucent(
+    private void checkOpaqueLit(
       final @Nonnull KLight light,
       final @Nonnull KMeshInstanceTransformed transformed)
       throws ConstraintError
     {
       Constraints.constrainNotNull(light, "Light");
+      this.checkOpaque(transformed);
+      this.checkNotUnlit(transformed);
+    }
+
+    private void checkTranslucent(
+      final @Nonnull KMeshInstanceTransformed transformed)
+      throws ConstraintError
+    {
       Constraints.constrainNotNull(transformed, "Instance");
 
       final KMaterialAlphaLabel alpha =
@@ -196,15 +256,24 @@ import com.io7m.jaux.Constraints.ConstraintError;
         "Instance material is opaque");
     }
 
+    private void checkTranslucentLit(
+      final @Nonnull KLight light,
+      final @Nonnull KMeshInstanceTransformed transformed)
+      throws ConstraintError
+    {
+      Constraints.constrainNotNull(light, "Light");
+      this.checkTranslucent(transformed);
+      this.checkNotUnlit(transformed);
+    }
+
     @Override public void sceneAddOpaqueInvisibleWithShadow(
       final @Nonnull KLight light,
       final @Nonnull KMeshInstanceTransformed instance)
       throws ConstraintError
     {
-      this.checkOpaque(light, instance);
-
+      this.checkOpaqueLit(light, instance);
+      this.addLight(light);
       if (light.hasShadow()) {
-        this.shadow_lights = this.shadow_lights.plus(light);
         this.addOpaqueShadowCaster(light, instance);
       }
     }
@@ -214,9 +283,9 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final @Nonnull KMeshInstanceTransformed instance)
       throws ConstraintError
     {
-      this.checkOpaque(light, instance);
+      this.checkOpaqueLit(light, instance);
       this.addOpaqueInstance(light, instance);
-      this.visible_instances = this.visible_instances.plus(instance);
+      this.addLight(light);
     }
 
     @Override public void sceneAddOpaqueLitVisibleWithShadow(
@@ -224,13 +293,24 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final @Nonnull KMeshInstanceTransformed instance)
       throws ConstraintError
     {
-      this.checkOpaque(light, instance);
+      this.checkOpaqueLit(light, instance);
       this.addOpaqueInstance(light, instance);
-
+      this.addLight(light);
       if (light.hasShadow()) {
-        this.shadow_lights = this.shadow_lights.plus(light);
         this.addOpaqueShadowCaster(light, instance);
       }
+    }
+
+    @Override public void sceneAddOpaqueUnlit(
+      final @Nonnull KMeshInstanceTransformed instance)
+      throws ConstraintError
+    {
+      this.checkOpaque(instance);
+      this.checkNotLit(instance);
+
+      this.unlit = this.unlit.plus(instance);
+      this.unlit_opaque = this.unlit_opaque.plus(instance);
+      this.visible_opaque = this.visible_opaque.plus(instance);
       this.visible_instances = this.visible_instances.plus(instance);
     }
 
@@ -239,10 +319,9 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final @Nonnull KMeshInstanceTransformed instance)
       throws ConstraintError
     {
-      this.checkTranslucent(light, instance);
-
+      this.checkTranslucentLit(light, instance);
+      this.addLight(light);
       if (light.hasShadow()) {
-        this.shadow_lights = this.shadow_lights.plus(light);
         this.addTranslucentShadowCaster(light, instance);
       }
     }
@@ -252,19 +331,18 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final @Nonnull KMeshInstanceTransformed instance)
       throws ConstraintError
     {
-      this.checkTranslucent(light, instance);
+      this.checkTranslucentLit(light, instance);
+      this.addTranslucentInstance(light, instance);
+    }
 
-      this.translucent_ordered = this.translucent_ordered.plus(instance);
-
-      final PVector<KLight> lights;
-      if (this.lit_translucent.containsKey(instance)) {
-        lights = (PVector<KLight>) this.lit_translucent.get(instance);
-      } else {
-        lights = TreePVector.empty();
-      }
-      this.lit_translucent =
-        this.lit_translucent.plus(instance, lights.plus(light));
-
+    @Override public void sceneAddTranslucentUnlit(
+      final @Nonnull KMeshInstanceTransformed instance)
+      throws ConstraintError
+    {
+      this.checkTranslucent(instance);
+      this.checkNotLit(instance);
+      this.unlit = this.unlit.plus(instance);
+      this.visible_translucent = this.visible_translucent.plus(instance);
       this.visible_instances = this.visible_instances.plus(instance);
     }
 
@@ -273,10 +351,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
       sceneCreate()
     {
       final KSceneOpaques o =
-        new KSceneOpaques(this.lit_opaque, this.visible_opaque);
+        new KSceneOpaques(
+          this.lit_opaque,
+          this.unlit_opaque,
+          this.visible_opaque);
 
       final KSceneTranslucents t =
-        new KSceneTranslucents(this.translucent_ordered, this.lit_translucent);
+        new KSceneTranslucents(this.visible_translucent, this.lit_translucent);
 
       final KSceneShadows s =
         new KSceneShadows(
@@ -289,73 +370,23 @@ import com.io7m.jaux.Constraints.ConstraintError;
   }
 
   /**
-   * Information about the shadow casters in the current scene.
-   */
-
-  @Immutable public static class KSceneShadows
-  {
-    private final @Nonnull Set<KLight>                                 shadow_lights;
-    private final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_opaque;
-    private final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_translucent;
-
-    private KSceneShadows(
-      final @Nonnull Set<KLight> shadow_lights,
-      final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_opaque,
-      final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_translucent)
-    {
-      this.shadow_lights = shadow_lights;
-      this.shadow_casters_opaque = shadow_casters_opaque;
-      this.shadow_casters_translucent = shadow_casters_translucent;
-    }
-
-    /**
-     * Retrieve the set of all shadow-producing lights in the scene.
-     */
-
-    public @Nonnull Set<KLight> getShadowLights()
-    {
-      return this.shadow_lights;
-    }
-
-    /**
-     * Retrieve the set of opaque shadow casters for each light in the scene.
-     */
-
-    public @Nonnull
-      Map<KLight, List<KMeshInstanceTransformed>>
-      getOpaqueShadowCasters()
-    {
-      return this.shadow_casters_opaque;
-    }
-
-    /**
-     * Retrieve the set of translucent shadow casters for each light in the
-     * scene.
-     */
-
-    public @Nonnull
-      Map<KLight, List<KMeshInstanceTransformed>>
-      getTranslucentShadowCasters()
-    {
-      return this.shadow_casters_translucent;
-    }
-  }
-
-  /**
    * Information about the opaque instances in the current scene.
    */
 
   @Immutable public static class KSceneOpaques
   {
-    private final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> lit;
     private final @Nonnull Set<KMeshInstanceTransformed>               all;
+    private final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> lit;
+    private final @Nonnull Set<KMeshInstanceTransformed>               unlit;
 
     private KSceneOpaques(
-      final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> lit_opaque,
-      final @Nonnull Set<KMeshInstanceTransformed> visible_opaque)
+      final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> lit,
+      final @Nonnull Set<KMeshInstanceTransformed> unlit,
+      final @Nonnull Set<KMeshInstanceTransformed> visible)
     {
-      this.lit = lit_opaque;
-      this.all = visible_opaque;
+      this.lit = lit;
+      this.unlit = unlit;
+      this.all = visible;
     }
 
     /**
@@ -374,9 +405,71 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
     public @Nonnull
       Map<KLight, List<KMeshInstanceTransformed>>
-      getInstances()
+      getLitInstances()
     {
       return this.lit;
+    }
+
+    /**
+     * Retrieve the set of unlit opaque instances in the scene.
+     */
+
+    public @Nonnull Set<KMeshInstanceTransformed> getUnlitInstances()
+    {
+      return this.unlit;
+    }
+  }
+
+  /**
+   * Information about the shadow casters in the current scene.
+   */
+
+  @Immutable public static class KSceneShadows
+  {
+    private final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_opaque;
+    private final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_translucent;
+    private final @Nonnull Set<KLight>                                 shadow_lights;
+
+    private KSceneShadows(
+      final @Nonnull Set<KLight> shadow_lights,
+      final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_opaque,
+      final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> shadow_casters_translucent)
+    {
+      this.shadow_lights = shadow_lights;
+      this.shadow_casters_opaque = shadow_casters_opaque;
+      this.shadow_casters_translucent = shadow_casters_translucent;
+    }
+
+    /**
+     * Retrieve the set of opaque shadow casters for each light in the scene.
+     */
+
+    public @Nonnull
+      Map<KLight, List<KMeshInstanceTransformed>>
+      getOpaqueShadowCasters()
+    {
+      return this.shadow_casters_opaque;
+    }
+
+    /**
+     * Retrieve the set of all shadow-producing lights in the scene.
+     */
+
+    public @Nonnull Set<KLight> getShadowLights()
+    {
+      return this.shadow_lights;
+    }
+
+    /**
+     * Retrieve the set of translucent shadow casters for each light in the
+     * scene.
+     */
+
+    public @Nonnull
+      Map<KLight, List<KMeshInstanceTransformed>>
+      getTranslucentShadowCasters()
+    {
+      return this.shadow_casters_translucent;
     }
   }
 
@@ -398,9 +491,11 @@ import com.io7m.jaux.Constraints.ConstraintError;
     }
 
     /**
+     * <p>
      * Retrieve the set of translucent instances in the scene that will appear
      * in the final rendered image. The instances are returned in insertion
      * order (with the oldest instance appearing first).
+     * </p>
      */
 
     public @Nonnull List<KMeshInstanceTransformed> getInstancesOrdered()
@@ -409,7 +504,12 @@ import com.io7m.jaux.Constraints.ConstraintError;
     }
 
     /**
+     * <p>
      * Retrieve the set of lights that affect each instance.
+     * </p>
+     * <p>
+     * An unlit instance will not have an entry in the map.
+     * </p>
      */
 
     public @Nonnull
@@ -443,8 +543,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
   private final @Nonnull KCamera                       camera;
   private final @Nonnull KSceneOpaques                 opaques;
-  private final @Nonnull KSceneTranslucents            translucents;
   private final @Nonnull KSceneShadows                 shadows;
+  private final @Nonnull KSceneTranslucents            translucents;
   private final @Nonnull Set<KMeshInstanceTransformed> visible;
 
   private KScene(

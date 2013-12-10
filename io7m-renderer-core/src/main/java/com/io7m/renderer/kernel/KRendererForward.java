@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -28,7 +29,6 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.AreaInclusive;
@@ -51,7 +51,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
-import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LRUCacheTrivial;
 import com.io7m.jlucache.LUCache;
@@ -70,6 +69,7 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KMutableMatrices.WithInstance;
+import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucent;
 import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucentLit;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheFilesystemException;
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheIOException;
@@ -148,6 +148,24 @@ public final class KRendererForward implements KRenderer
           }
         }
       }
+    }
+  }
+
+  private static void handleJCBException(
+    final @Nonnull JCBExecutionException e)
+    throws JCGLException,
+      JCGLUnsupportedException
+  {
+    Throwable x = e;
+    for (;;) {
+      if (x == null) {
+        throw new UnreachableCodeException();
+      }
+      if (x instanceof KShadowCacheException) {
+        KRendererForward
+          .handleShadowCacheException((KShadowCacheException) x);
+      }
+      x = x.getCause();
     }
   }
 
@@ -231,79 +249,13 @@ public final class KRendererForward implements KRenderer
     buffer.append(label.getCode());
   }
 
-  private static void makeShadowLabel(
-    final @Nonnull StringBuilder cache,
-    final @Nonnull KMaterialShadowLabel label)
-  {
-    cache.setLength(0);
-    cache.append("shadow_");
-    cache.append(label.getCode());
-  }
-
   private static void makeUnlitLabel(
     final @Nonnull StringBuilder buffer,
     final @Nonnull KMaterialForwardLabel label)
   {
     buffer.setLength(0);
-    buffer.append("fwd_");
+    buffer.append("fwd_U_");
     buffer.append(label.getCode());
-  }
-
-  public static
-    KRendererForward
-    rendererNew(
-      final @Nonnull JCGLImplementation g,
-      final @Nonnull LRUCacheTrivial<String, KProgram, KShaderCacheException> shader_cache,
-      final @Nonnull KShadowMapRenderer shadow_map_renderer,
-      final @Nonnull KLabelDecider decider,
-      final @Nonnull Log log)
-      throws ConstraintError
-  {
-    return new KRendererForward(
-      g,
-      shader_cache,
-      shadow_map_renderer,
-      decider,
-      log);
-  }
-
-  private final @Nonnull VectorM4F                                        background;
-  private @CheckForNull Debugging                                         debug;
-  private final @Nonnull JCGLImplementation                               g;
-  private final @Nonnull StringBuilder                                    label_cache;
-  private final @Nonnull Log                                              log;
-  private final @Nonnull RMatrixM4x4F<RTransformView>                     m4_view;
-  private final @Nonnull KMutableMatrices                                 matrices;
-  private final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache;
-  private final @Nonnull Context                                          transform_context;
-  private final @Nonnull VectorM2I                                        viewport_size;
-  private final @Nonnull KLabelDecider                                    decider;
-  private final @Nonnull KShadowMapRenderer                               shadow_map_renderer;
-
-  private KRendererForward(
-    final @Nonnull JCGLImplementation gl,
-    final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
-    final @Nonnull KShadowMapRenderer shadow_map_renderer,
-    final @Nonnull KLabelDecider decider,
-    final @Nonnull Log log)
-    throws ConstraintError
-  {
-    this.log =
-      new Log(Constraints.constrainNotNull(log, "log"), "krenderer-forward");
-    this.g = Constraints.constrainNotNull(gl, "OpenGL implementation");
-    this.shader_cache =
-      Constraints.constrainNotNull(shader_cache, "Shader cache");
-    this.shadow_map_renderer =
-      Constraints
-        .constrainNotNull(shadow_map_renderer, "Shadow map renderer");
-    this.decider = Constraints.constrainNotNull(decider, "Label decider");
-
-    this.label_cache = new StringBuilder();
-    this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = KMutableMatrices.newMatrices();
-    this.viewport_size = new VectorM2I();
-    this.transform_context = new KTransform.Context();
-    this.m4_view = new RMatrixM4x4F<RTransformView>();
   }
 
   private static void putLight(
@@ -343,6 +295,65 @@ public final class KRendererForward implements KRenderer
         break;
       }
     }
+  }
+
+  public static
+    KRendererForward
+    rendererNew(
+      final @Nonnull JCGLImplementation g,
+      final @Nonnull LRUCacheTrivial<String, KProgram, KShaderCacheException> shader_cache,
+      final @Nonnull KShadowMapRenderer shadow_map_renderer,
+      final @Nonnull KLabelDecider decider,
+      final @Nonnull Log log)
+      throws ConstraintError
+  {
+    return new KRendererForward(
+      g,
+      shader_cache,
+      shadow_map_renderer,
+      decider,
+      log);
+  }
+
+  private final @Nonnull VectorM4F                                        background;
+  private @CheckForNull Debugging                                         debug;
+  private final @Nonnull KLabelDecider                                    decider;
+  private final @Nonnull JCGLImplementation                               g;
+  private final @Nonnull StringBuilder                                    label_cache;
+  private final @Nonnull Log                                              log;
+  private final @Nonnull RMatrixM4x4F<RTransformView>                     m4_view;
+  private final @Nonnull KMutableMatrices                                 matrices;
+  private final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache;
+  private final @Nonnull KShadowMapRenderer                               shadow_map_renderer;
+
+  private final @Nonnull Context                                          transform_context;
+
+  private final @Nonnull VectorM2I                                        viewport_size;
+
+  private KRendererForward(
+    final @Nonnull JCGLImplementation gl,
+    final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
+    final @Nonnull KShadowMapRenderer shadow_map_renderer,
+    final @Nonnull KLabelDecider decider,
+    final @Nonnull Log log)
+    throws ConstraintError
+  {
+    this.log =
+      new Log(Constraints.constrainNotNull(log, "log"), "krenderer-forward");
+    this.g = Constraints.constrainNotNull(gl, "OpenGL implementation");
+    this.shader_cache =
+      Constraints.constrainNotNull(shader_cache, "Shader cache");
+    this.shadow_map_renderer =
+      Constraints
+        .constrainNotNull(shadow_map_renderer, "Shadow map renderer");
+    this.decider = Constraints.constrainNotNull(decider, "Label decider");
+
+    this.label_cache = new StringBuilder();
+    this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
+    this.matrices = KMutableMatrices.newMatrices();
+    this.viewport_size = new VectorM2I();
+    this.transform_context = new KTransform.Context();
+    this.m4_view = new RMatrixM4x4F<RTransformView>();
   }
 
   @SuppressWarnings("static-method") private
@@ -489,6 +500,24 @@ public final class KRendererForward implements KRenderer
       }
     }
 
+    switch (label.getEmissive()) {
+      case EMISSIVE_MAPPED:
+      {
+        KShadingProgramCommon.bindPutTextureEmissive(
+          program,
+          gc,
+          material,
+          units.get(current_unit));
+        ++current_unit;
+        break;
+      }
+      case EMISSIVE_CONSTANT:
+      case EMISSIVE_NONE:
+      {
+        break;
+      }
+    }
+
     switch (label.getNormal()) {
       case NORMAL_MAPPED:
       {
@@ -514,24 +543,6 @@ public final class KRendererForward implements KRenderer
         material,
         units.get(current_unit));
       ++current_unit;
-    }
-
-    switch (label.getEmissive()) {
-      case EMISSIVE_MAPPED:
-      {
-        KShadingProgramCommon.bindPutTextureEmissive(
-          program,
-          gc,
-          material,
-          units.get(current_unit));
-        ++current_unit;
-        break;
-      }
-      case EMISSIVE_CONSTANT:
-      case EMISSIVE_NONE:
-      {
-        break;
-      }
     }
 
     switch (label.getEnvironment()) {
@@ -638,6 +649,7 @@ public final class KRendererForward implements KRenderer
   {
     final KProgram p = this.shader_cache.luCacheGet("depth");
     final JCBExecutionAPI e = p.getExecutable();
+    final Set<KMeshInstanceTransformed> depth_batch = batched.getBatchDepth();
 
     e.execRun(new JCBExecutorProcedure() {
       @SuppressWarnings("synthetic-access") @Override public void call(
@@ -651,31 +663,17 @@ public final class KRendererForward implements KRenderer
           program,
           mwc.getMatrixProjection());
 
-        {
-          final Map<KLight, Map<KMaterialForwardLabel, List<KMeshInstanceTransformed>>> batches =
-            batched.getBatchesOpaqueLit();
-
-          for (final KLight light : batches.keySet()) {
-            final Map<KMaterialForwardLabel, List<KMeshInstanceTransformed>> by_label =
-              batches.get(light);
-            for (final KMaterialForwardLabel label : by_label.keySet()) {
-              final List<KMeshInstanceTransformed> batch =
-                by_label.get(label);
-              for (int index = 0; index < batch.size(); ++index) {
-                final KMeshInstanceTransformed instance = batch.get(index);
-                final KMutableMatrices.WithInstance mwi =
-                  mwc.withInstance(instance);
-                try {
-                  KRendererForward.this.renderDepthPassMeshOpaque(
-                    gc,
-                    program,
-                    instance,
-                    mwi);
-                } finally {
-                  mwi.instanceFinish();
-                }
-              }
-            }
+        for (final KMeshInstanceTransformed instance : depth_batch) {
+          final KMutableMatrices.WithInstance mwi =
+            mwc.withInstance(instance);
+          try {
+            KRendererForward.this.renderDepthPassMeshOpaque(
+              gc,
+              program,
+              instance,
+              mwi);
+          } finally {
+            mwi.instanceFinish();
           }
         }
       }
@@ -753,7 +751,6 @@ public final class KRendererForward implements KRenderer
 
     final KSceneBatchedForward batched =
       KSceneBatchedForward.newBatchedScene(this.decider, this.decider, scene);
-    final KSceneBatchedShadow shadows = batched.getBatchedShadow();
 
     try {
       this.shadow_map_renderer.shadowRendererStart();
@@ -836,24 +833,6 @@ public final class KRendererForward implements KRenderer
     }
   }
 
-  private static void handleJCBException(
-    final @Nonnull JCBExecutionException e)
-    throws JCGLException,
-      JCGLUnsupportedException
-  {
-    Throwable x = e;
-    for (;;) {
-      if (x == null) {
-        throw new UnreachableCodeException();
-      }
-      if (x instanceof KShadowCacheException) {
-        KRendererForward
-          .handleShadowCacheException((KShadowCacheException) x);
-      }
-      x = x.getCause();
-    }
-  }
-
   @Override public void rendererSetBackgroundRGBA(
     final @Nonnull VectorReadable4F rgba)
     throws ConstraintError
@@ -868,6 +847,20 @@ public final class KRendererForward implements KRenderer
     final @Nonnull KMutableMatrices.WithCamera mwc)
     throws KShaderCacheException,
       ConstraintError,
+      LUCacheException,
+      JCGLException,
+      JCBExecutionException
+  {
+    this.renderOpaqueMeshesLit(batched, gc, mwc);
+    this.renderOpaqueMeshesUnlit(batched, gc, mwc);
+  }
+
+  private void renderOpaqueMeshesLit(
+    final @Nonnull KSceneBatchedForward batched,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMutableMatrices.WithCamera mwc)
+    throws ConstraintError,
+      KShaderCacheException,
       LUCacheException,
       JCGLException,
       JCBExecutionException
@@ -930,6 +923,59 @@ public final class KRendererForward implements KRenderer
           }
         });
       }
+    }
+  }
+
+  private void renderOpaqueMeshesUnlit(
+    final @Nonnull KSceneBatchedForward batched,
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMutableMatrices.WithCamera mwc)
+    throws KShaderCacheException,
+      ConstraintError,
+      LUCacheException,
+      JCGLException,
+      JCBExecutionException
+  {
+    final Map<KMaterialForwardLabel, List<KMeshInstanceTransformed>> batches =
+      batched.getBatchesOpaqueUnlit();
+
+    for (final KMaterialForwardLabel label : batches.keySet()) {
+      final List<KMeshInstanceTransformed> batch = batches.get(label);
+
+      KRendererForward.makeUnlitLabel(this.label_cache, label);
+
+      final KProgram p =
+        this.shader_cache.luCacheGet(this.label_cache.toString());
+      final JCBExecutionAPI e = p.getExecutable();
+
+      e.execRun(new JCBExecutorProcedure() {
+        @SuppressWarnings("synthetic-access") @Override public void call(
+          final @Nonnull JCBProgram program)
+          throws ConstraintError,
+            JCGLException,
+            JCBExecutionException,
+            Throwable
+        {
+          KShadingProgramCommon.putMatrixProjection(
+            program,
+            mwc.getMatrixProjection());
+
+          for (int index = 0; index < batch.size(); ++index) {
+            final KMeshInstanceTransformed instance = batch.get(index);
+            final WithInstance mwi = mwc.withInstance(instance);
+            try {
+              KRendererForward.this.renderOpaqueMeshUnlit(
+                gc,
+                program,
+                label,
+                instance,
+                mwi);
+            } finally {
+              mwi.instanceFinish();
+            }
+          }
+        }
+      });
     }
   }
 
@@ -1002,13 +1048,70 @@ public final class KRendererForward implements KRenderer
     }
   }
 
-  @SuppressWarnings("static-method") private void renderOpaqueMeshUnlit(
+  private void renderOpaqueMeshUnlit(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCCEExecutionCallable e,
-    final @Nonnull KMeshInstanceTransformed i,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KMaterialForwardLabel label,
+    final @Nonnull KMeshInstanceTransformed instance,
     final @Nonnull KMutableMatrices.WithInstance mwi)
+    throws JCGLException,
+      ConstraintError,
+      JCBExecutionException,
+      KShadowCacheException
   {
-    throw new UnimplementedCodeException();
+    final KMeshInstance actual = instance.getInstance();
+    final KMaterial material = actual.getMaterial();
+
+    this.putMeshInstanceMatrices(program, label, mwi);
+    this.putTextures(gc, program, instance, label, null);
+    KShadingProgramCommon.putMaterial(program, material);
+
+    /**
+     * Associate array attributes with program attributes, and draw mesh.
+     */
+
+    try {
+      final KMesh mesh = actual.getMesh();
+      final ArrayBuffer array = mesh.getArrayBuffer();
+      final IndexBuffer indices = mesh.getIndexBuffer();
+
+      gc.arrayBufferBind(array);
+      KShadingProgramCommon.bindAttributePosition(program, array);
+
+      switch (label.getNormal()) {
+        case NORMAL_MAPPED:
+        {
+          KShadingProgramCommon.bindAttributeTangent4(program, array);
+          KShadingProgramCommon.bindAttributeNormal(program, array);
+          break;
+        }
+        case NORMAL_VERTEX:
+        {
+          KShadingProgramCommon.bindAttributeNormal(program, array);
+          break;
+        }
+        case NORMAL_NONE:
+        {
+          break;
+        }
+      }
+
+      if (label.impliesUV()) {
+        KShadingProgramCommon.bindAttributeUV(program, array);
+      }
+
+      program.programExecute(new JCBProgramProcedure() {
+        @Override public void call()
+          throws ConstraintError,
+            JCGLException
+        {
+          gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+        }
+      });
+
+    } finally {
+      gc.arrayBufferUnbind();
+    }
   }
 
   private void renderTranslucentMeshes(
@@ -1021,24 +1124,79 @@ public final class KRendererForward implements KRenderer
       JCGLException,
       JCBExecutionException
   {
-    final List<BatchTranslucentLit> batches = scene.getBatchesTranslucent();
+    final List<BatchTranslucent> batches = scene.getBatchesTranslucent();
+
     for (int index = 0; index < batches.size(); ++index) {
-      final BatchTranslucentLit batch = batches.get(index);
+      final BatchTranslucent batch = batches.get(index);
       final KMeshInstanceTransformed instance = batch.getInstance();
       final KMaterialForwardLabel label = batch.getLabel();
-      final List<KLight> lights = batch.getLights();
 
       final KMutableMatrices.WithInstance mwi = mwc.withInstance(instance);
       try {
-        final AtomicBoolean first_light = new AtomicBoolean(true);
-        for (int light_index = 0; light_index < lights.size(); ++light_index) {
-          final KLight light = lights.get(light_index);
 
-          KRendererForward.makeLitLabel(
-            this.label_cache,
-            this.decider,
-            light,
-            label);
+        if (batch instanceof BatchTranslucentLit) {
+          final List<KLight> lights =
+            ((BatchTranslucentLit) batch).getLights();
+
+          final AtomicBoolean first_light = new AtomicBoolean(true);
+          for (int light_index = 0; light_index < lights.size(); ++light_index) {
+            final KLight light = lights.get(light_index);
+
+            KRendererForward.makeLitLabel(
+              this.label_cache,
+              this.decider,
+              light,
+              label);
+
+            final KProgram p =
+              this.shader_cache.luCacheGet(this.label_cache.toString());
+
+            final JCBExecutionAPI e = p.getExecutable();
+            e.execRun(new JCBExecutorProcedure() {
+              @SuppressWarnings("synthetic-access") @Override public
+                void
+                call(
+                  final @Nonnull JCBProgram program)
+                  throws ConstraintError,
+                    JCGLException,
+                    JCBExecutionException,
+                    KShadowCacheException,
+                    LUCacheException
+              {
+                KShadingProgramCommon.putMatrixProjection(
+                  program,
+                  mwc.getMatrixProjection());
+                KRendererForward.putLight(
+                  light,
+                  mwc.getMatrixContext(),
+                  mwc.getMatrixView(),
+                  program);
+
+                if (first_light.get()) {
+                  gc.blendingEnable(
+                    BlendFunction.BLEND_ONE,
+                    BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
+                } else {
+                  gc.blendingEnable(
+                    BlendFunction.BLEND_ONE,
+                    BlendFunction.BLEND_ONE);
+                }
+
+                KRendererForward.this.renderTranslucentMeshLit(
+                  gc,
+                  program,
+                  light,
+                  instance,
+                  label,
+                  mwi);
+              }
+            });
+
+            first_light.set(false);
+          }
+        } else {
+
+          KRendererForward.makeUnlitLabel(this.label_cache, label);
 
           final KProgram p =
             this.shader_cache.luCacheGet(this.label_cache.toString());
@@ -1056,34 +1214,21 @@ public final class KRendererForward implements KRenderer
               KShadingProgramCommon.putMatrixProjection(
                 program,
                 mwc.getMatrixProjection());
-              KRendererForward.putLight(
-                light,
-                mwc.getMatrixContext(),
-                mwc.getMatrixView(),
-                program);
 
-              if (first_light.get()) {
-                gc.blendingEnable(
-                  BlendFunction.BLEND_ONE,
-                  BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
-              } else {
-                gc.blendingEnable(
-                  BlendFunction.BLEND_ONE,
-                  BlendFunction.BLEND_ONE);
-              }
+              gc.blendingEnable(
+                BlendFunction.BLEND_ONE,
+                BlendFunction.BLEND_ONE);
 
-              KRendererForward.this.renderTranslucentMeshLit(
+              KRendererForward.this.renderTranslucentMeshUnlit(
                 gc,
                 program,
-                light,
                 instance,
                 label,
                 mwi);
             }
           });
-
-          first_light.set(false);
         }
+
       } finally {
         mwi.instanceFinish();
       }
@@ -1140,6 +1285,55 @@ public final class KRendererForward implements KRenderer
           break;
         }
       }
+
+      if (label.impliesUV()) {
+        KShadingProgramCommon.bindAttributeUV(program, array);
+      }
+
+      program.programExecute(new JCBProgramProcedure() {
+        @Override public void call()
+          throws ConstraintError,
+            JCGLException,
+            Throwable
+        {
+          gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+        }
+      });
+
+    } finally {
+      gc.arrayBufferUnbind();
+    }
+  }
+
+  private void renderTranslucentMeshUnlit(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KMeshInstanceTransformed instance,
+    final @Nonnull KMaterialForwardLabel label,
+    final @Nonnull KMutableMatrices.WithInstance mwi)
+    throws JCGLException,
+      ConstraintError,
+      KShadowCacheException,
+      JCBExecutionException
+  {
+    final KMeshInstance actual = instance.getInstance();
+    final KMaterial material = actual.getMaterial();
+
+    this.putMeshInstanceMatrices(program, label, mwi);
+    this.putTextures(gc, program, instance, label, null);
+    KShadingProgramCommon.putMaterial(program, material);
+
+    /**
+     * Associate array attributes with program attributes, and draw mesh.
+     */
+
+    try {
+      final KMesh mesh = actual.getMesh();
+      final ArrayBuffer array = mesh.getArrayBuffer();
+      final IndexBuffer indices = mesh.getIndexBuffer();
+
+      gc.arrayBufferBind(array);
+      KShadingProgramCommon.bindAttributePosition(program, array);
 
       if (label.impliesUV()) {
         KShadingProgramCommon.bindAttributeUV(program, array);

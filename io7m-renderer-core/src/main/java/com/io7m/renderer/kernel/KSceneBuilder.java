@@ -118,6 +118,29 @@ public interface KSceneBuilder
 
   /**
    * <p>
+   * Add an instance <code>instance</code> which is expected to have an opaque
+   * material and is unaffected by lighting.
+   * </p>
+   * <p>
+   * Due to depth buffering, opaque objects may be rendered in any order and
+   * therefore the order that they are added to the scene has no effect on the
+   * rendered image.
+   * </p>
+   * 
+   * @throws ConstraintError
+   *           If any of the following hold:
+   *           <ul>
+   *           <li><code>instance == null</code></li>
+   *           <li>The material used for <code>instance</code> is translucent</li>
+   *           </ul>
+   */
+
+  public void sceneAddOpaqueUnlit(
+    final @Nonnull KMeshInstanceTransformed instance)
+    throws ConstraintError;
+
+  /**
+   * <p>
    * Add an instance <code>instance</code>, which is expected to have a
    * translucent material, that will cast shadows with respect to
    * <code>light</code> and will not appear in the final rendered image.
@@ -176,6 +199,28 @@ public interface KSceneBuilder
 
   public void sceneAddTranslucentLitVisibleWithoutShadow(
     final @Nonnull KLight light,
+    final @Nonnull KMeshInstanceTransformed instance)
+    throws ConstraintError;
+
+  /**
+   * <p>
+   * Add an instance <code>instance</code> which is expected to have a
+   * translucent material and is unaffected by lighting.
+   * </p>
+   * 
+   * @throws ConstraintError
+   *           If any of the following hold:
+   *           <ul>
+   *           <li><code>light == null || instance == null</code></li>
+   *           <li>The material used for <code>instance</code> is not
+   *           translucent</li>
+   *           </ul>
+   * 
+   * @see #sceneAddTranslucentLitVisibleWithoutShadow(KLight,
+   *      KMeshInstanceTransformed)
+   */
+
+  public void sceneAddTranslucentUnlit(
     final @Nonnull KMeshInstanceTransformed instance)
     throws ConstraintError;
 
