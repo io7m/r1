@@ -22,8 +22,12 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 
-public interface KShadowMapRenderer
+interface KShadowMapRenderer
 {
+  /**
+   * Evaluate all required shadows in <code>batched</code>.
+   */
+
   public void shadowRendererEvaluate(
     final @Nonnull KSceneBatchedShadow batched)
     throws ConstraintError,
@@ -32,13 +36,27 @@ public interface KShadowMapRenderer
       KShaderCacheException,
       JCGLUnsupportedException;
 
+  /**
+   * Complete shadow rendering, invalidating all cached shadows.
+   */
+
   public void shadowRendererFinish()
     throws ConstraintError;
+
+  /**
+   * Retrieve a reference to a rendered shadow map. The map is valid until the
+   * next call to {{@link #shadowRendererFinish()} or
+   * {@link #shadowRendererEvaluate(KSceneBatchedShadow)}.
+   */
 
   public @Nonnull KFramebufferShadow shadowRendererGetRenderedMap(
     final @Nonnull KShadow shadow)
     throws ConstraintError,
       KShadowCacheException;
+
+  /**
+   * Begin shadow map rendering.
+   */
 
   public void shadowRendererStart()
     throws ConstraintError;
