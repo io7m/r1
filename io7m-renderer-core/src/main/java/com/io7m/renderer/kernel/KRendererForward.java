@@ -308,7 +308,6 @@ public final class KRendererForward implements KRenderer
   }
 
   private static void putLight(
-    final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KLight light,
     final @Nonnull MatrixM4x4F.Context context,
     final @Nonnull RMatrixReadable4x4F<RTransformView> view,
@@ -916,7 +915,6 @@ public final class KRendererForward implements KRenderer
               mwc.getMatrixProjection());
 
             KRendererForward.putLight(
-              gc,
               light,
               mwc.getMatrixContext(),
               mwc.getMatrixView(),
@@ -1521,7 +1519,6 @@ public final class KRendererForward implements KRenderer
                 program,
                 mwc.getMatrixProjection());
               KRendererForward.putLight(
-                gc,
                 light,
                 mwc.getMatrixContext(),
                 mwc.getMatrixView(),
