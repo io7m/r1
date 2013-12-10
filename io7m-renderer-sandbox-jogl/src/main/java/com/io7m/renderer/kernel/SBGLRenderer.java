@@ -681,6 +681,7 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull HashMap<String, SBShader>                            shaders;
   private @Nonnull PCache<KShadow, KFramebufferShadow, KShadowCacheException> shadow_cache;
   private @Nonnull PCacheConfig                                               shadow_cache_config;
+  private @Nonnull KShadowMapRendererActual                                   shadow_map_renderer;
   private @Nonnull HashMap<PathVirtual, KMesh>                                sphere_meshes;
   private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>       texture_cube_delete_queue;
   private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>         texture_cube_load_queue;
@@ -1222,6 +1223,13 @@ final class SBGLRenderer implements GLEventListener
             this.shadow_cache_config);
       }
 
+      this.shadow_map_renderer =
+        KShadowMapRendererActual.newRenderer(
+          this.gi,
+          this.label_cache,
+          this.shader_cache,
+          this.shadow_cache);
+
       this.viewport = SBGLRenderer.drawableArea(drawable);
       this.axes = new SBVisibleAxes(gl, 50, 50, 50, this.log);
       this.grid = new SBVisibleGridPlane(gl, 50, 0, 50, this.log);
@@ -1373,7 +1381,7 @@ final class SBGLRenderer implements GLEventListener
         return KRendererForward.rendererNew(
           this.gi,
           this.shader_cache,
-          this.shadow_cache,
+          this.shadow_map_renderer,
           this.label_cache,
           this.log);
       }
