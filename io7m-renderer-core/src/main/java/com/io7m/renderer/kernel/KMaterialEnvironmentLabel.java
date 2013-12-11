@@ -44,6 +44,8 @@ enum KMaterialEnvironmentLabel
     Constraints.constrainNotNull(normal, "Normal");
 
     final KMaterial material = instance.getMaterial();
+    final boolean has_specular_map =
+      material.getSpecular().getTexture().isSome();
 
     switch (normal) {
       case NORMAL_NONE:
@@ -55,19 +57,20 @@ enum KMaterialEnvironmentLabel
         if (e.getTexture().isSome()) {
           if (e.getMix() > 0.0) {
             if (e.getReflectionMix() == 0.0) {
-              if (e.getMixFromSpecularMap()) {
+
+              if (e.getMixFromSpecularMap() && has_specular_map) {
                 return KMaterialEnvironmentLabel.ENVIRONMENT_REFRACTIVE_MAPPED;
               }
               return KMaterialEnvironmentLabel.ENVIRONMENT_REFRACTIVE;
             }
             if (e.getReflectionMix() == 1.0) {
-              if (e.getMixFromSpecularMap()) {
+              if (e.getMixFromSpecularMap() && has_specular_map) {
                 return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE_MAPPED;
               }
               return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE;
             }
 
-            if (e.getMixFromSpecularMap()) {
+            if (e.getMixFromSpecularMap() && has_specular_map) {
               return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED;
             }
 
