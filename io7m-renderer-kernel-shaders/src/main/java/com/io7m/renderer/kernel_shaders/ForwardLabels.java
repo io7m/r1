@@ -456,30 +456,6 @@ final class ForwardLabels
               {
                 for (final Environment e : Environment.values()) {
                   for (final Specular s : Specular.values()) {
-                    switch (s) {
-                      case SPECULAR_MAPPED:
-                      {
-                        break;
-                      }
-                      case SPECULAR_CONSTANT:
-                      case SPECULAR_NONE:
-                      {
-                        switch (e) {
-                          case ENVIRONMENT_NONE:
-                          case ENVIRONMENT_REFLECTIVE:
-                          case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
-                          case ENVIRONMENT_REFRACTIVE:
-                            break;
-                          case ENVIRONMENT_REFLECTIVE_MAPPED:
-                          case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
-                          case ENVIRONMENT_REFRACTIVE_MAPPED:
-                            // "Mapped" environment requires specular map
-                            continue;
-                        }
-                        break;
-                      }
-                    }
-
                     results.add(new ForwardLabelUnlit(a, b, m, e, n, s));
                     for (final Light l : Light.values()) {
                       results.add(new ForwardLabelLit(l, a, b, m, e, n, s));
