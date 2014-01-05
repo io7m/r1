@@ -1241,8 +1241,9 @@ public final class ForwardShaders
   private static void vertexShaderStandardIO(
     final @Nonnull StringBuilder b)
   {
-    b.append("  in v_position      : vector_3f;\n");
-    b.append("  out f_position_eye : vector_4f;\n");
+    b.append("  in v_position              : vector_3f;\n");
+    b.append("  out f_position_eye         : vector_4f;\n");
+    b.append("  out vertex f_position_clip : vector_4f;\n");
   }
 
   private static void vertexShaderStandardParametersLight(
@@ -1396,8 +1397,8 @@ public final class ForwardShaders
   private static void vertexShaderStandardWrites(
     final @Nonnull StringBuilder b)
   {
-    b.append("  out gl_Position = position_clip;\n");
-    b.append("  out f_position_eye = position_eye;\n");
+    b.append("  out f_position_clip = position_clip;\n");
+    b.append("  out f_position_eye  = position_eye;\n");
   }
 
   private static void vertexShaderStandardWritesLight(

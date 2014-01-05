@@ -157,7 +157,7 @@ public final class ShadowShaders
       case SHADOW_BASIC_OPAQUE_PACKED4444:
       {
         b.append("  -- Pack depth into colour buffer\n");
-        b.append("  value rgba = D.pack4444 (gl_FragCoord [z]);\n");
+        b.append("  value rgba = D.pack4444 (Fragment.coordinate [z]);\n");
         break;
       }
       case SHADOW_BASIC_TRANSLUCENT:
@@ -176,7 +176,7 @@ public final class ShadowShaders
         b
           .append("  value alpha = F.multiply (albedo [w], m.alpha.opacity);\n");
         b.append("  -- Pack depth into colour buffer\n");
-        b.append("  value rgba   = D.pack4444 (gl_FragCoord [z]);\n");
+        b.append("  value rgba   = D.pack4444 (Fragment.coordinate [z]);\n");
         break;
       }
     }
@@ -221,6 +221,7 @@ public final class ShadowShaders
     b.append("import com.io7m.parasol.Vector4f          as V4;\n");
     b.append("import com.io7m.parasol.Sampler2D         as S;\n");
     b.append("import com.io7m.parasol.Float             as F;\n");
+    b.append("import com.io7m.parasol.Fragment;\n");
     b.append("\n");
     b.append("import com.io7m.renderer.Albedo           as A;\n");
     b.append("import com.io7m.renderer.Depth            as D;\n");
@@ -261,8 +262,9 @@ public final class ShadowShaders
   private static void vertexShaderStandardIO(
     final @Nonnull StringBuilder b)
   {
-    b.append("  in v_position  : vector_3f;\n");
-    b.append("  out f_position : vector_4f;\n");
+    b.append("  in v_position              : vector_3f;\n");
+    b.append("  out f_position             : vector_4f;\n");
+    b.append("  out vertex f_position_clip : vector_4f;\n");
   }
 
   private static void vertexShaderStandardParametersMatrices(
@@ -309,8 +311,8 @@ public final class ShadowShaders
   private static void vertexShaderStandardWrites(
     final @Nonnull StringBuilder b)
   {
-    b.append("  out gl_Position = clip_position;\n");
-    b.append("  out f_position  = position;\n");
+    b.append("  out f_position_clip = clip_position;\n");
+    b.append("  out f_position      = position;\n");
   }
 
   private static void vertexShaderStandardWritesUV(

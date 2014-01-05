@@ -31,14 +31,16 @@ import javax.xml.parsers.ParserConfigurationException;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
+import org.apache.commons.cli.ParseException;
 import org.xml.sax.SAXException;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jlog.Log;
-import com.io7m.parasol.Compiler;
-import com.io7m.parasol.xml.Batch;
-import com.io7m.parasol.xml.PGLSLCompactor;
+import com.io7m.jparasol.CompilerError;
+import com.io7m.jparasol.frontend.Frontend;
+import com.io7m.jparasol.xml.Batch;
+import com.io7m.jparasol.xml.PGLSLCompactor;
 import com.io7m.renderer.kernel_shaders.ForwardLabels.ForwardLabel;
 
 public final class ForwardMakeAll
@@ -64,7 +66,9 @@ public final class ForwardMakeAll
       NoSuchAlgorithmException,
       ParsingException,
       SAXException,
-      ParserConfigurationException
+      ParserConfigurationException,
+      ParseException,
+      CompilerError
   {
     if (args.length != 3) {
       System.err
@@ -137,15 +141,16 @@ public final class ForwardMakeAll
       IOException,
       SAXException,
       ParserConfigurationException,
-      ConstraintError
+      ConstraintError,
+      ParseException,
+      CompilerError
   {
     final ArrayList<String> argslist = new ArrayList<String>();
 
-    argslist.add("--Yno-comments");
     argslist.add("--require-es");
     argslist.add("[100,300]");
     argslist.add("--require-full");
-    argslist.add("[110,430]");
+    argslist.add("[110,440]");
     argslist.add("--compile-batch");
     argslist.add(out_dir.toString());
     argslist.add(batch.toString());
@@ -157,7 +162,7 @@ public final class ForwardMakeAll
 
     final String[] args = new String[argslist.size()];
     argslist.toArray(args);
-    Compiler.run(Compiler.getLog(false), args);
+    Frontend.run(Frontend.getLog(false), args);
 
     {
       final Batch b = Batch.fromFile(out_dir, batch);
