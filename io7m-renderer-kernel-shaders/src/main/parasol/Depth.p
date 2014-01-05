@@ -62,9 +62,10 @@ module Depth is
   --
 
   shader vertex depth_v is
-    in v_position          : vector_3f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    out vertex f_position_clip : vector_4f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -72,7 +73,7 @@ module Depth is
         new vector_4f (v_position, 1.0)
       );
   as
-    out gl_Position = clip_position;
+    out f_position_clip = clip_position;
   end;
 
   shader fragment depth_f is

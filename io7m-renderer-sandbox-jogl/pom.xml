@@ -61,27 +61,27 @@
     <dependency>
       <groupId>com.io7m.jvvfs.core</groupId>
       <artifactId>io7m-jvvfs-core</artifactId>
-      <version>[3.1.0, 4.0.0)</version>
+      <version>[3.1.1, 4.0.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jtensors</groupId>
       <artifactId>io7m-jtensors</artifactId>
-      <version>[5.0.0, 6.0.0)</version>
+      <version>[5.3.1, 6.0.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.jogl</groupId>
       <artifactId>io7m-jcanephora-jogl</artifactId>
-      <version>0.22.1</version>
+      <version>0.23.2</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.texload-imageio</groupId>
       <artifactId>io7m-jcanephora-texload-imageio</artifactId>
-      <version>0.22.1</version>
+      <version>0.23.2</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.framebuffer</groupId>
       <artifactId>io7m-jcanephora-framebuffer</artifactId>
-      <version>0.22.1</version>
+      <version>0.23.2</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.renderer.core</groupId>
@@ -94,9 +94,9 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.parasol.xml</groupId>
-      <artifactId>io7m-parasol-xml</artifactId>
-      <version>0.1.19</version>
+      <groupId>com.io7m.jparasol.xml</groupId>
+      <artifactId>io7m-jparasol-xml</artifactId>
+      <version>[0.3.6, 0.4.0)</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -107,7 +107,7 @@
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
-      <version>2.0.1</version>
+      <version>2.0.2</version>
     </dependency>
     <dependency>
       <groupId>org.jogamp.gluegen</groupId>

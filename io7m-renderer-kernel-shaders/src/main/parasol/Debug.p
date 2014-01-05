@@ -24,6 +24,7 @@ module Debug is
   import com.io7m.parasol.Vector4f          as V4;
   import com.io7m.parasol.Sampler2D         as S;
   import com.io7m.parasol.Float             as F;
+  import com.io7m.parasol.Fragment;
 
   import com.io7m.renderer.Normals as N;
 
@@ -32,9 +33,10 @@ module Debug is
   --
 
   shader vertex debug_ccolour_v is
-    in v_position          : vector_3f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
+    out vertex f_position_clip : vector_4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -42,7 +44,7 @@ module Debug is
         new vector_4f (v_position, 1.0)
       );
   as
-    out gl_Position = clip_position;
+    out f_position_clip = clip_position;
   end;
 
   shader fragment debug_ccolour_f is
@@ -62,9 +64,10 @@ module Debug is
   --
 
   shader vertex debug_depth_v is
-    in v_position          : vector_3f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
+    out vertex f_position_clip : vector_4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -72,13 +75,13 @@ module Debug is
         new vector_4f (v_position, 1.0)
       );
   as
-    out gl_Position = clip_position;
+    out f_position_clip = clip_position;
   end;
 
   shader fragment debug_depth_f is
     out out_0 : vector_4f as 0;
   with
-    value rgba = new vector_4f (gl_FragCoord [z z z], 1.0);
+    value rgba = new vector_4f (Fragment.coordinate [z z z], 1.0);
   as
     out out_0 = rgba;
   end;
@@ -93,11 +96,12 @@ module Debug is
   --
 
   shader vertex debug_uv_v is
-    in v_position          : vector_3f;
-    in v_uv                : vector_2f;
-    out f_uv               : vector_2f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    in v_uv                    : vector_2f;
+    out f_uv                   : vector_2f;
+    out vertex f_position_clip : vector_4f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -105,8 +109,8 @@ module Debug is
         new vector_4f (v_position, 1.0)
       );
   as
-    out gl_Position = clip_position;
-    out f_uv        = v_uv;
+    out f_position_clip = clip_position;
+    out f_uv            = v_uv;
   end;
 
   shader fragment debug_uv_f is
@@ -128,11 +132,12 @@ module Debug is
   --
 
   shader vertex debug_vcolour_v is
-    in v_position          : vector_3f;
-    in v_colour            : vector_4f;
-    out f_colour           : vector_4f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    in v_colour                : vector_4f;
+    out f_colour               : vector_4f;
+    out vertex f_position_clip : vector_4f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -140,8 +145,8 @@ module Debug is
         new vector_4f (v_position, 1.0)
       );
   as
-    out gl_Position = clip_position;
-    out f_colour    = v_colour;
+    out f_position_clip = clip_position;
+    out f_colour        = v_colour;
   end;
 
   shader fragment debug_vcolour_f is
@@ -161,11 +166,12 @@ module Debug is
   --
 
   shader vertex debug_flat_uv_v is
-    in v_position          : vector_3f;
-    in v_uv                : vector_2f;
-    out f_uv               : vector_2f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    in v_uv                    : vector_2f;
+    out f_uv                   : vector_2f;
+    out vertex f_position_clip : vector_4f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -173,7 +179,7 @@ module Debug is
         new vector_4f (v_position, 1.0)
       );
   as
-    out gl_Position = clip_position;
+    out f_position_clip = clip_position;
     out f_uv        = v_uv;
   end;
 
@@ -197,11 +203,12 @@ module Debug is
   --
 
   shader vertex debug_normals_vertex_local_v is
-    in v_position          : vector_3f;
-    in v_normal            : vector_3f;
-    out f_normal           : vector_3f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    in v_normal                : vector_3f;
+    out f_normal               : vector_3f;
+    out vertex f_position_clip : vector_4f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -209,8 +216,8 @@ module Debug is
         new vector_4f (v_position, 1.0)
       );
   as
-    out gl_Position = clip_position;
-    out f_normal    = v_normal;
+    out f_position_clip = clip_position;
+    out f_normal        = v_normal;
   end;
 
   shader fragment debug_normals_vertex_local_f is
@@ -232,12 +239,13 @@ module Debug is
   --
 
   shader vertex debug_normals_vertex_eye_v is
-    in v_position          : vector_3f;
-    in v_normal            : vector_3f;
-    out f_normal           : vector_3f;
-    parameter m_normal     : matrix_3x3f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    in v_normal                : vector_3f;
+    out f_normal               : vector_3f;
+    out vertex f_position_clip : vector_4f;
+    parameter m_normal         : matrix_3x3f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -247,8 +255,8 @@ module Debug is
     value normal =
       M3.multiply_vector (m_normal, v_normal);
   as
-    out gl_Position = clip_position;
-    out f_normal    = normal;
+    out f_position_clip = clip_position;
+    out f_normal        = normal;
   end;
 
   shader fragment debug_normals_vertex_eye_f is
@@ -270,12 +278,13 @@ module Debug is
   --
 
   shader vertex debug_bitangents_vertex_local_v is
-    in v_position          : vector_3f;
-    in v_normal            : vector_3f;
-    in v_tangent4          : vector_4f;
-    out f_bitangent        : vector_3f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    in v_normal                : vector_3f;
+    in v_tangent4              : vector_4f;
+    out f_bitangent            : vector_3f;
+    out vertex f_position_clip : vector_4f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -285,8 +294,8 @@ module Debug is
     value bitangent =
       N.bitangent (v_normal, v_tangent4);
   as
-    out gl_Position = clip_position;
-    out f_bitangent = bitangent;
+    out f_position_clip = clip_position;
+    out f_bitangent     = bitangent;
   end;
 
   shader fragment debug_bitangents_vertex_local_f is
@@ -308,11 +317,12 @@ module Debug is
   --
 
   shader vertex debug_tangents_vertex_local_v is
-    in v_position          : vector_3f;
-    in v_tangent4          : vector_4f;
-    out f_tangent          : vector_3f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    in v_tangent4              : vector_4f;
+    out f_tangent              : vector_3f;
+    out vertex f_position_clip : vector_4f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -322,8 +332,8 @@ module Debug is
     value tangent =
       v_tangent4 [x y z];
   as
-    out gl_Position = clip_position;
-    out f_tangent   = tangent;
+    out f_position_clip = clip_position;
+    out f_tangent       = tangent;
   end;
 
   shader fragment debug_tangents_vertex_local_f is
@@ -345,13 +355,14 @@ module Debug is
   --
 
   shader vertex debug_bitangents_vertex_eye_v is
-    in v_position          : vector_3f;
-    in v_normal            : vector_3f;
-    in v_tangent4          : vector_4f;
-    out f_bitangent        : vector_3f;
-    parameter m_normal     : matrix_3x3f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    in v_normal                : vector_3f;
+    in v_tangent4              : vector_4f;
+    out f_bitangent            : vector_3f;
+    out vertex f_position_clip : vector_4f;
+    parameter m_normal         : matrix_3x3f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -361,8 +372,8 @@ module Debug is
     value bitangent =
       M3.multiply_vector (m_normal, N.bitangent (v_normal, v_tangent4));
   as
-    out gl_Position = clip_position;
-    out f_bitangent = bitangent;
+    out f_position_clip = clip_position;
+    out f_bitangent     = bitangent;
   end;
 
   shader fragment debug_bitangents_vertex_eye_f is
@@ -384,12 +395,13 @@ module Debug is
   --
 
   shader vertex debug_tangents_vertex_eye_v is
-    in v_position          : vector_3f;
-    in v_tangent4          : vector_4f;
-    out f_tangent          : vector_3f;
-    parameter m_normal     : matrix_3x3f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    in v_tangent4              : vector_4f;
+    out f_tangent              : vector_3f;
+    out vertex f_position_clip : vector_4f;
+    parameter m_normal         : matrix_3x3f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -399,8 +411,8 @@ module Debug is
     value tangent =
       M3.multiply_vector (m_normal, v_tangent4 [x y z]);
   as
-    out gl_Position = clip_position;
-    out f_tangent   = tangent;
+    out f_position_clip = clip_position;
+    out f_tangent       = tangent;
   end;
 
   shader fragment debug_tangents_vertex_eye_f is
@@ -422,16 +434,17 @@ module Debug is
   --
 
   shader vertex debug_normals_map_local_v is
-    in v_position          : vector_3f;
-    in v_normal            : vector_3f;
-    in v_tangent4          : vector_4f;
-    in v_uv                : vector_2f;
-    out f_normal           : vector_3f;
-    out f_tangent          : vector_3f;
-    out f_bitangent        : vector_3f;
-    out f_uv               : vector_2f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    in v_normal                : vector_3f;
+    in v_tangent4              : vector_4f;
+    in v_uv                    : vector_2f;
+    out vertex f_position_clip : vector_4f;
+    out f_normal               : vector_3f;
+    out f_tangent              : vector_3f;
+    out f_bitangent            : vector_3f;
+    out f_uv                   : vector_2f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -443,11 +456,11 @@ module Debug is
     value bitangent =
       N.bitangent (v_normal, v_tangent4);
   as
-    out gl_Position = clip_position;
-    out f_normal    = v_normal;
-    out f_tangent   = tangent;
-    out f_bitangent = bitangent;
-    out f_uv        = v_uv;
+    out f_position_clip = clip_position;
+    out f_normal        = v_normal;
+    out f_tangent       = tangent;
+    out f_bitangent     = bitangent;
+    out f_uv            = v_uv;
   end;
 
   shader fragment debug_normals_map_local_f is
@@ -481,16 +494,17 @@ module Debug is
   --
 
   shader vertex debug_normals_map_eye_v is
-    in v_position          : vector_3f;
-    in v_normal            : vector_3f;
-    in v_tangent4          : vector_4f;
-    in v_uv                : vector_2f;
-    out f_normal           : vector_3f;
-    out f_tangent          : vector_3f;
-    out f_bitangent        : vector_3f;
-    out f_uv               : vector_2f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    in v_normal                : vector_3f;
+    in v_tangent4              : vector_4f;
+    in v_uv                    : vector_2f;
+    out vertex f_position_clip : vector_4f;
+    out f_normal               : vector_3f;
+    out f_tangent              : vector_3f;
+    out f_bitangent            : vector_3f;
+    out f_uv                   : vector_2f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -502,11 +516,11 @@ module Debug is
     value bitangent =
       N.bitangent (v_normal, v_tangent4);
   as
-    out gl_Position = clip_position;
-    out f_normal    = v_normal;
-    out f_tangent   = tangent;
-    out f_bitangent = bitangent;
-    out f_uv        = v_uv;
+    out f_position_clip = clip_position;
+    out f_normal        = v_normal;
+    out f_tangent       = tangent;
+    out f_bitangent     = bitangent;
+    out f_uv            = v_uv;
   end;
 
   shader fragment debug_normals_map_eye_f is
@@ -542,11 +556,12 @@ module Debug is
   --
 
   shader vertex debug_normals_map_tangent_v is
-    in v_position          : vector_3f;
-    in v_uv                : vector_2f;
-    out f_uv               : vector_2f;
-    parameter m_modelview  : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
+    in v_position              : vector_3f;
+    in v_uv                    : vector_2f;
+    out f_uv                   : vector_2f;
+    out vertex f_position_clip : vector_4f;
+    parameter m_modelview      : matrix_4x4f;
+    parameter m_projection     : matrix_4x4f;
   with
     value clip_position =
       M4.multiply_vector (
@@ -554,8 +569,8 @@ module Debug is
         new vector_4f (v_position, 1.0)
       );
   as
-    out gl_Position = clip_position;
-    out f_uv        = v_uv;
+    out f_position_clip = clip_position;
+    out f_uv            = v_uv;
   end;
 
   shader fragment debug_normals_map_tangent_f is

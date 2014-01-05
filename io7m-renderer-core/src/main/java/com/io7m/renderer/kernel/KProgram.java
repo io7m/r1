@@ -53,16 +53,16 @@ import com.io7m.jcanephora.ShaderUtilities;
 import com.io7m.jcanephora.VertexShader;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
+import com.io7m.jparasol.xml.API;
+import com.io7m.jparasol.xml.CompactedShaders;
+import com.io7m.jparasol.xml.FragmentParameter;
+import com.io7m.jparasol.xml.PGLSLMetaXML;
+import com.io7m.jparasol.xml.Version;
+import com.io7m.jparasol.xml.VertexInput;
+import com.io7m.jparasol.xml.VertexParameter;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.parasol.xml.API;
-import com.io7m.parasol.xml.CompactedShaders;
-import com.io7m.parasol.xml.FragmentParameter;
-import com.io7m.parasol.xml.PGLSLMetaXML;
-import com.io7m.parasol.xml.Version;
-import com.io7m.parasol.xml.VertexInput;
-import com.io7m.parasol.xml.VertexParameter;
 
 @Immutable public final class KProgram
 {

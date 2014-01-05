@@ -22,7 +22,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.parasol.xml.PGLSLMetaXML;
+import com.io7m.jparasol.xml.PGLSLMetaXML;
 
 public final class SBShader
 {
