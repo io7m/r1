@@ -48,8 +48,8 @@ import com.io7m.jcanephora.ProgramAttribute;
 import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.ProgramUniform;
 import com.io7m.jlog.Log;
-import com.io7m.parasol.xml.FragmentOutput;
-import com.io7m.parasol.xml.PGLSLMetaXML;
+import com.io7m.jparasol.xml.FragmentOutput;
+import com.io7m.jparasol.xml.PGLSLMetaXML;
 
 final class SBShadersPanel extends JPanel
 {

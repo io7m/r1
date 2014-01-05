@@ -23,8 +23,8 @@ module Materials is
   --
 
   type albedo is record
-    colour : vector_4f -- The base surface colour
-    mix    : float     -- The linear mix between the colour and texture, in the range [0, 1]
+    colour : vector_4f, -- The base surface colour
+    mix    : float      -- The linear mix between the colour and texture, in the range [0, 1]
   end;
 
   --

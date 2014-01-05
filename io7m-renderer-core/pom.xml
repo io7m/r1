@@ -66,50 +66,50 @@
       <type>zip</type>
       <exclusions>
         <exclusion>
-          <groupId>com.io7m.parasol.compiler.frontend</groupId>
-          <artifactId>io7m-parasol-compiler-frontend</artifactId>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.io7m.parasol.xml</groupId>
-      <artifactId>io7m-parasol-xml</artifactId>
-      <version>[0.5.0, 0.6.0)</version>
+      <groupId>com.io7m.jparasol.xml</groupId>
+      <artifactId>io7m-jparasol-xml</artifactId>
+      <version>[0.3.6, 0.4.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jtensors</groupId>
       <artifactId>io7m-jtensors</artifactId>
-      <version>[5.0.0, 6.0.0)</version>
+      <version>[5.3.1, 6.0.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jvvfs.core</groupId>
       <artifactId>io7m-jvvfs-core</artifactId>
-      <version>[3.0.0, 4.0.0)</version>
+      <version>[3.1.1, 4.0.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.core</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
-      <version>0.22.1</version>
+      <version>0.23.2</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.checkedexec</groupId>
       <artifactId>io7m-jcanephora-checkedexec</artifactId>
-      <version>0.22.1</version>
+      <version>0.23.2</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.batchexec</groupId>
       <artifactId>io7m-jcanephora-batchexec</artifactId>
-      <version>0.22.1</version>
+      <version>0.23.2</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.framebuffer</groupId>
       <artifactId>io7m-jcanephora-framebuffer</artifactId>
-      <version>0.22.1</version>
+      <version>0.23.2</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jlucache</groupId>
       <artifactId>io7m-jlucache</artifactId>
-      <version>0.2.0</version>
+      <version>0.2.1</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -120,7 +120,7 @@
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
-      <version>2.0.1</version>
+      <version>2.0.2</version>
     </dependency>
     <dependency>
       <groupId>org.pcollections</groupId>
