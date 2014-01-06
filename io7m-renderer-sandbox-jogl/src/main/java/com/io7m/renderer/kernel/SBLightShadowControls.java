@@ -334,7 +334,7 @@ public final class SBLightShadowControls implements IHideable
         this.mapped_variance_controls.getRowGroup().hide();
         break;
       }
-      case SHADOW_MAPPED_VARIANCE:
+      case SHADOW_MAPPED_SOFT:
       {
         this.mapped_variance_controls.getRowGroup().forceShow();
         this.mapped_basic_controls.getRowGroup().hide();
@@ -355,7 +355,7 @@ public final class SBLightShadowControls implements IHideable
           return new Option.Some<SBLightShadowDescription>(
             this.mapped_basic_controls.getShadow());
         }
-        case SHADOW_MAPPED_VARIANCE:
+        case SHADOW_MAPPED_SOFT:
         {
           return new Option.Some<SBLightShadowDescription>(
             this.mapped_variance_controls.getShadow());
@@ -393,7 +393,7 @@ public final class SBLightShadowControls implements IHideable
               .setDescription((SBLightShadowMappedBasicDescription) d);
             break;
           }
-          case SHADOW_MAPPED_VARIANCE:
+          case SHADOW_MAPPED_SOFT:
           {
             this.mapped_variance_controls
               .setDescription((SBLightShadowMappedVarianceDescription) d);

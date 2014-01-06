@@ -69,7 +69,7 @@ public enum KLightLabel
               return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC;
             }
             return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444;
-          case SHADOW_MAPPED_VARIANCE:
+          case SHADOW_MAPPED_SOFT:
             return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_VARIANCE;
         }
         throw new UnreachableCodeException();

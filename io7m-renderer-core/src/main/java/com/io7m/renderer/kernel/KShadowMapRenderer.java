@@ -49,7 +49,7 @@ interface KShadowMapRenderer
    * {@link #shadowRendererEvaluate(KSceneBatchedShadow)}.
    */
 
-  public @Nonnull KFramebufferShadow shadowRendererGetRenderedMap(
+  public @Nonnull KShadowMap shadowRendererGetRenderedMap(
     final @Nonnull KShadow shadow)
     throws ConstraintError,
       KShadowCacheException;

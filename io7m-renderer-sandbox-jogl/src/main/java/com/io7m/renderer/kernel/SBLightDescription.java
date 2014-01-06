@@ -283,7 +283,7 @@ abstract class SBLightDescription
               kshadow = Option.some(ks);
               break;
             }
-            case SHADOW_MAPPED_VARIANCE:
+            case SHADOW_MAPPED_SOFT:
             {
               final SBLightShadowMappedVarianceDescription smb =
                 (SBLightShadowDescription.SBLightShadowMappedVarianceDescription) s;

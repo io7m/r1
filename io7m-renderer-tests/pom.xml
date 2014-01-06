@@ -81,7 +81,7 @@
     <dependency>
       <groupId>com.io7m.jcanephora.core</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
-      <version>0.23.2</version>
+      <version>0.23.4</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

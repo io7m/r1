@@ -55,7 +55,7 @@ public final class SBLightShadowDescriptionGenerator implements
             this.prec_gen.next(),
             this.filter_gen.next());
         }
-        case SHADOW_MAPPED_VARIANCE:
+        case SHADOW_MAPPED_SOFT:
         {
           return SBLightShadowDescription.newShadowMappedVariance(
             this.size_gen.nextInt(),
