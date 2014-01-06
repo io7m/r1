@@ -164,8 +164,8 @@ import com.io7m.jcanephora.TextureWrapT;
           height,
           TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
           TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-          TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
+          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+          TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
 
       final Renderbuffer<RenderableDepthStencil> depth =
         g.renderbufferAllocateDepth24Stencil8(width, height);
@@ -231,8 +231,8 @@ import com.io7m.jcanephora.TextureWrapT;
           height,
           TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
           TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-          TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
+          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+          TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
 
       final Renderbuffer<RenderableDepthStencil> depth =
         g.renderbufferAllocateDepth24Stencil8(width, height);
@@ -295,8 +295,8 @@ import com.io7m.jcanephora.TextureWrapT;
           height,
           TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
           TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-          TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
+          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+          TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
 
       final FramebufferReference fb = g.framebufferAllocate();
       g.framebufferDrawBind(fb);
@@ -375,8 +375,8 @@ import com.io7m.jcanephora.TextureWrapT;
           height,
           TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
           TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-          TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
+          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+          TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
 
       final Renderbuffer<RenderableDepthStencil> depth =
         g.renderbufferAllocateDepth24Stencil8(width, height);
