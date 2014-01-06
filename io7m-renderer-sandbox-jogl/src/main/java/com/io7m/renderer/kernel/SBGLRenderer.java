@@ -1393,6 +1393,13 @@ final class SBGLRenderer implements GLEventListener
           this.shader_cache,
           this.log);
       }
+      case KRENDERER_BLUR_DEMO:
+      {
+        return KRendererBlurDemo.rendererNew(
+          this.gi,
+          this.filesystem,
+          this.log);
+      }
     }
 
     throw new UnreachableCodeException();
