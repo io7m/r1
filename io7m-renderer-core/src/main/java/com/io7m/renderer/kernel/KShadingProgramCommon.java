@@ -60,7 +60,7 @@ import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
-import com.io7m.renderer.kernel.KShadow.KShadowMappedVariance;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedSoft;
 
 final class KShadingProgramCommon
 {
@@ -695,10 +695,10 @@ final class KShadingProgramCommon
             KShadingProgramCommon.putShadowBasic(program, ksmb);
             break;
           }
-          case SHADOW_MAPPED_VARIANCE:
+          case SHADOW_MAPPED_SOFT:
           {
-            final KShadowMappedVariance ksmv =
-              (KShadow.KShadowMappedVariance) ks;
+            final KShadowMappedSoft ksmv =
+              (KShadow.KShadowMappedSoft) ks;
             KShadingProgramCommon.putShadowVariance(program, ksmv);
             break;
           }
@@ -734,7 +734,7 @@ final class KShadingProgramCommon
             KShadingProgramCommon.putShadowBasicReuse(program);
             break;
           }
-          case SHADOW_MAPPED_VARIANCE:
+          case SHADOW_MAPPED_SOFT:
           {
             KShadingProgramCommon.putShadowVarianceReuse(program);
             break;
@@ -1223,7 +1223,7 @@ final class KShadingProgramCommon
 
   static void putShadowVariance(
     final @Nonnull JCBProgram program,
-    final @Nonnull KShadow.KShadowMappedVariance shadow)
+    final @Nonnull KShadow.KShadowMappedSoft shadow)
     throws JCGLException,
       ConstraintError
   {

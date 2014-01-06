@@ -135,13 +135,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
     }
   }
 
-  @Immutable final static class KShadowMappedVariance extends KShadow
+  @Immutable final static class KShadowMappedSoft extends KShadow
   {
     private final float factor_max;
     private final float factor_min;
     private final int   size_exponent;
 
-    @SuppressWarnings("synthetic-access") private KShadowMappedVariance(
+    @SuppressWarnings("synthetic-access") private KShadowMappedSoft(
       final @Nonnull Integer light_id,
       final int size_exponent,
       final float factor_max,
@@ -177,7 +177,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       if (this.getClass() != obj.getClass()) {
         return false;
       }
-      final KShadowMappedVariance other = (KShadowMappedVariance) obj;
+      final KShadowMappedSoft other = (KShadowMappedSoft) obj;
       if (Float.floatToIntBits(this.factor_max) != Float
         .floatToIntBits(other.factor_max)) {
         return false;
@@ -220,7 +220,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     @Override public String toString()
     {
       final StringBuilder builder = new StringBuilder();
-      builder.append("[KShadowMappedBasic size_exponent=");
+      builder.append("[KShadowMappedSoft size_exponent=");
       builder.append(this.size_exponent);
       builder.append(" factor_max=");
       builder.append(this.factor_max);
@@ -234,7 +234,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
   static enum Type
   {
     SHADOW_MAPPED_BASIC("Mapped basic"),
-    SHADOW_MAPPED_VARIANCE("Mapped variance");
+    SHADOW_MAPPED_SOFT("Mapped soft");
 
     private final @Nonnull String name;
 
@@ -273,7 +273,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
   }
 
   @SuppressWarnings("synthetic-access") public static @Nonnull
-    KShadowMappedVariance
+    KShadowMappedSoft
     newMappedVariance(
       final @Nonnull Integer light_id,
       final int size_exponent,
@@ -283,7 +283,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final @Nonnull KShadowFilter shadow_filter)
       throws ConstraintError
   {
-    return new KShadowMappedVariance(
+    return new KShadowMappedSoft(
       light_id,
       size_exponent,
       factor_max,

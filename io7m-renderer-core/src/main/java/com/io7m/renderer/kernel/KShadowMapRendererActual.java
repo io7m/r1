@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.AreaInclusive;
@@ -30,6 +31,7 @@ import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.FaceWindingOrder;
+import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.JCBExecutionAPI;
 import com.io7m.jcanephora.JCBExecutionException;
@@ -54,6 +56,7 @@ import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KSceneBatchedShadow.BatchOpaqueShadow;
 import com.io7m.renderer.kernel.KSceneBatchedShadow.BatchTranslucentShadow;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KTransform.Context;
 
 final class KShadowMapRendererActual implements KShadowMapRenderer
@@ -104,7 +107,7 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
       final @Nonnull JCGLImplementation gl,
       final @Nonnull KMaterialShadowLabelCache label_decider,
       final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
-      final @Nonnull PCache<KShadow, KFramebufferShadow, KShadowCacheException> shadow_cache)
+      final @Nonnull PCache<KShadow, KShadowMap, KShadowCacheException> shadow_cache)
       throws ConstraintError
   {
     return new KShadowMapRendererActual(
@@ -139,22 +142,22 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
     }
   }
 
-  private final @Nonnull JCGLImplementation                                         g;
-  private final @Nonnull StringBuilder                                              label_cache;
-  private final @Nonnull KMaterialShadowLabelCache                                  label_decider;
-  private final @Nonnull RMatrixM4x4F<RTransformView>                               m4_view;
-  private final @Nonnull KMutableMatrices                                           matrices;
-  private final @Nonnull LUCache<String, KProgram, KShaderCacheException>           shader_cache;
-  private final @Nonnull PCache<KShadow, KFramebufferShadow, KShadowCacheException> shadow_cache;
-  private @Nonnull State                                                            state;
-  private final @Nonnull Context                                                    transform_context;
-  private final @Nonnull VectorM2I                                                  viewport_size;
+  private final @Nonnull JCGLImplementation                                 g;
+  private final @Nonnull StringBuilder                                      label_cache;
+  private final @Nonnull KMaterialShadowLabelCache                          label_decider;
+  private final @Nonnull RMatrixM4x4F<RTransformView>                       m4_view;
+  private final @Nonnull KMutableMatrices                                   matrices;
+  private final @Nonnull LUCache<String, KProgram, KShaderCacheException>   shader_cache;
+  private final @Nonnull PCache<KShadow, KShadowMap, KShadowCacheException> shadow_cache;
+  private @Nonnull State                                                    state;
+  private final @Nonnull Context                                            transform_context;
+  private final @Nonnull VectorM2I                                          viewport_size;
 
   private KShadowMapRendererActual(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull KMaterialShadowLabelCache label_decider,
     final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
-    final @Nonnull PCache<KShadow, KFramebufferShadow, KShadowCacheException> shadow_cache)
+    final @Nonnull PCache<KShadow, KShadowMap, KShadowCacheException> shadow_cache)
     throws ConstraintError
   {
     this.state = State.SHADOW_RENDERER_INITIAL;
@@ -338,13 +341,21 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
           final KShadow s = ((Option.Some<KShadow>) os).value;
 
           switch (s.getType()) {
-            case SHADOW_MAPPED_VARIANCE:
+            case SHADOW_MAPPED_SOFT:
+            {
+              // TODO:
+              throw new UnimplementedCodeException();
+            }
             case SHADOW_MAPPED_BASIC:
             {
-              final KFramebufferShadow fb = this.shadow_cache.pcCacheGet(s);
-              gc.framebufferDrawBind(fb.kframebufferGetFramebuffer());
+              final KShadowMapBasic smb =
+                (KShadowMapBasic) this.shadow_cache.pcCacheGet(s);
+              final FramebufferReferenceUsable fb =
+                smb.mapGetDepthFramebuffer();
+
+              gc.framebufferDrawBind(fb);
               try {
-                final AreaInclusive area = fb.kframebufferGetArea();
+                final AreaInclusive area = smb.mapGetDepthFramebufferArea();
                 this.viewport_size.x = (int) area.getRangeX().getInterval();
                 this.viewport_size.y = (int) area.getRangeY().getInterval();
                 gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
@@ -396,11 +407,15 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
       JCGLException
   {
     switch (s.getType()) {
-      case SHADOW_MAPPED_VARIANCE:
+      case SHADOW_MAPPED_SOFT:
+      {
+        // TODO
+        throw new UnimplementedCodeException();
+      }
       case SHADOW_MAPPED_BASIC:
       {
-        final KFramebufferShadow fb = this.shadow_cache.pcCacheGet(s);
-        gc.framebufferDrawBind(fb.kframebufferGetFramebuffer());
+        final KShadowMap fb = this.shadow_cache.pcCacheGet(s);
+        gc.framebufferDrawBind(fb.mapGetDepthFramebuffer());
         try {
           gc.colorBufferMask(true, true, true, true);
           gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -465,13 +480,18 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
           final KShadow s = ((Option.Some<KShadow>) os).value;
 
           switch (s.getType()) {
-            case SHADOW_MAPPED_VARIANCE:
+            case SHADOW_MAPPED_SOFT:
+            {
+              // TODO:
+              throw new UnimplementedCodeException();
+            }
             case SHADOW_MAPPED_BASIC:
             {
-              final KFramebufferShadow fb = this.shadow_cache.pcCacheGet(s);
-              gc.framebufferDrawBind(fb.kframebufferGetFramebuffer());
+              final KShadowMapBasic map =
+                (KShadowMapBasic) this.shadow_cache.pcCacheGet(s);
+              gc.framebufferDrawBind(map.mapGetDepthFramebuffer());
               try {
-                final AreaInclusive area = fb.kframebufferGetArea();
+                final AreaInclusive area = map.mapGetDepthFramebufferArea();
                 this.viewport_size.x = (int) area.getRangeX().getInterval();
                 this.viewport_size.y = (int) area.getRangeY().getInterval();
                 gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
@@ -643,7 +663,7 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
     this.shadow_cache.pcPeriodEnd();
   }
 
-  @Override public @Nonnull KFramebufferShadow shadowRendererGetRenderedMap(
+  @Override public @Nonnull KShadowMap shadowRendererGetRenderedMap(
     final @Nonnull KShadow shadow)
     throws ConstraintError,
       KShadowCacheException

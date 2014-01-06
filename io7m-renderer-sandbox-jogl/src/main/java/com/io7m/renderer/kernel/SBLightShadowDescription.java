@@ -170,7 +170,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final int size)
       throws ConstraintError
     {
-      super(KShadow.Type.SHADOW_MAPPED_VARIANCE);
+      super(KShadow.Type.SHADOW_MAPPED_SOFT);
       this.size = Constraints.constrainRange(size, 1, 10, "Shadow map size");
       this.factor_max = factor_max;
       this.factor_min = factor_min;

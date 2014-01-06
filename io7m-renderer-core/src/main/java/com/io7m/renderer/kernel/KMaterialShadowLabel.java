@@ -53,7 +53,7 @@ enum KMaterialShadowLabel
       {
         return KMaterialShadowLabel.fromShadowBasic(capabilities, caster);
       }
-      case SHADOW_MAPPED_VARIANCE:
+      case SHADOW_MAPPED_SOFT:
       {
         return KMaterialShadowLabel.fromShadowVariance(caster);
       }

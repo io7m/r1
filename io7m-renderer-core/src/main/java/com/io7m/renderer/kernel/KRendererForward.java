@@ -29,6 +29,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.AreaInclusive;
@@ -63,8 +64,6 @@ import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RMatrixReadable4x4F;
 import com.io7m.renderer.RTransformView;
-import com.io7m.renderer.kernel.KFramebufferShadow.KFramebufferShadowBasic;
-import com.io7m.renderer.kernel.KFramebufferShadow.KFramebufferShadowVariance;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
@@ -79,6 +78,7 @@ import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLUnsupporte
 import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheXMLException;
 import com.io7m.renderer.kernel.KShadowCacheException.KShadowCacheJCGLException;
 import com.io7m.renderer.kernel.KShadowCacheException.KShadowCacheJCGLUnsupportedException;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KTransform.Context;
 
 public final class KRendererForward implements KRenderer
@@ -132,7 +132,7 @@ public final class KRendererForward implements KRenderer
                 case OPTION_SOME:
                 {
                   final KShadow ks = ((Option.Some<KShadow>) os).value;
-                  final KFramebufferShadow fb =
+                  final KShadowMap fb =
                     KRendererForward.this.shadow_map_renderer
                       .shadowRendererGetRenderedMap(ks);
                   dump.receive(ks, fb);
@@ -597,31 +597,22 @@ public final class KRendererForward implements KRenderer
               switch (ks.getType()) {
                 case SHADOW_MAPPED_BASIC:
                 {
-                  final KFramebufferShadowBasic fb =
-                    (KFramebufferShadowBasic) this.shadow_map_renderer
+                  final KShadowMapBasic fb =
+                    (KShadowMapBasic) this.shadow_map_renderer
                       .shadowRendererGetRenderedMap(ks);
 
                   KShadingProgramCommon.bindPutTextureShadowMap(
                     program,
                     gc,
-                    fb.getDepthTexture(),
+                    fb.mapGetDepthTexture(),
                     units.get(current_unit));
                   ++current_unit;
                   break;
                 }
-                case SHADOW_MAPPED_VARIANCE:
+                case SHADOW_MAPPED_SOFT:
                 {
-                  final KFramebufferShadowVariance fb =
-                    (KFramebufferShadowVariance) this.shadow_map_renderer
-                      .shadowRendererGetRenderedMap(ks);
-
-                  KShadingProgramCommon.bindPutTextureShadowVarianceMap(
-                    program,
-                    gc,
-                    fb.getVarianceTexture(),
-                    units.get(current_unit));
-                  ++current_unit;
-                  break;
+                  // TODO
+                  throw new UnimplementedCodeException();
                 }
               }
               break;
