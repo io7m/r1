@@ -84,8 +84,10 @@ public final class KRendererBlurDemo implements KRenderer
   private final @Nonnull KUnitQuad          quad;
   private final @Nonnull KTransform.Context transform_context;
   private final @Nonnull VectorM2I          viewport_size;
-  private final int                         passes;
-  private final int                         image_size;
+
+  private final float                       blur_size;
+  private final int                         blur_passes;
+  private final int                         blur_image_size;
 
   private KRendererBlurDemo(
     final @Nonnull JCGLImplementation gl,
@@ -145,23 +147,24 @@ public final class KRendererBlurDemo implements KRenderer
         "postprocessing_gaussian_blur_vertical",
         log);
 
-    this.passes = 3;
-    this.image_size = 512;
+    this.blur_passes = 1;
+    this.blur_image_size = 512;
+    this.blur_size = 1.0f;
 
     {
       final RangeInclusive range_x =
-        new RangeInclusive(0, this.image_size - 1);
+        new RangeInclusive(0, this.blur_image_size - 1);
       final RangeInclusive range_y =
-        new RangeInclusive(0, this.image_size - 1);
+        new RangeInclusive(0, this.blur_image_size - 1);
       final AreaInclusive size = new AreaInclusive(range_x, range_y);
       this.blur_0 = KFramebufferCommon.newBasicRGBA(gl, size);
     }
 
     {
       final RangeInclusive range_x =
-        new RangeInclusive(0, this.image_size - 1);
+        new RangeInclusive(0, this.blur_image_size - 1);
       final RangeInclusive range_y =
-        new RangeInclusive(0, this.image_size - 1);
+        new RangeInclusive(0, this.blur_image_size - 1);
       final AreaInclusive size = new AreaInclusive(range_x, range_y);
       this.blur_1 = KFramebufferCommon.newBasicRGBA(gl, size);
     }
@@ -193,7 +196,7 @@ public final class KRendererBlurDemo implements KRenderer
   {
     this.renderEvaluateScene(scene, this.blur_0);
 
-    for (int pass = 0; pass < this.passes; ++pass) {
+    for (int pass = 0; pass < this.blur_passes; ++pass) {
       this.renderEvaluateBlurH(this.blur_0, this.blur_1);
       this.renderEvaluateBlurV(this.blur_1, this.blur_0);
     }
@@ -304,7 +307,8 @@ public final class KRendererBlurDemo implements KRenderer
 
             final long width =
               input.kframebufferGetArea().getRangeX().getInterval();
-            p.programUniformPutFloat("image_width", width);
+            p.programUniformPutFloat("image_width", width
+              / KRendererBlurDemo.this.blur_size);
 
             final TextureUnit unit = units.get(0);
             gc.texture2DStaticBind(
@@ -379,9 +383,10 @@ public final class KRendererBlurDemo implements KRenderer
             KShadingProgramCommon.bindAttributePosition(p, array);
             KShadingProgramCommon.bindAttributeUV(p, array);
 
-            final long width =
-              input.kframebufferGetArea().getRangeX().getInterval();
-            p.programUniformPutFloat("image_height", width);
+            final long height =
+              input.kframebufferGetArea().getRangeY().getInterval();
+            p.programUniformPutFloat("image_height", height
+              / KRendererBlurDemo.this.blur_size);
 
             final TextureUnit unit = units.get(0);
             gc.texture2DStaticBind(
