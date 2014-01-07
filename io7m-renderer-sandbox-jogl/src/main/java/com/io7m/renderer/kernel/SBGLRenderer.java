@@ -705,7 +705,13 @@ final class SBGLRenderer implements GLEventListener
     this.restrictions = SBSoftRestrictions.newRestrictions(config);
 
     this.log = new Log(log, "gl");
-    log.debug("Shader archive: " + config.getShaderArchiveFile());
+    log.debug("Shader debug archive: " + config.getShaderArchiveDebugFile());
+    log
+      .debug("Shader shadow archive: " + config.getShaderArchiveShadowFile());
+    log.debug("Shader forward archive: "
+      + config.getShaderArchiveForwardFile());
+    log.debug("Shader postprocessing archive: "
+      + config.getShaderArchivePostprocessingFile());
 
     this.controller = new AtomicReference<SBSceneControllerRenderer>();
     this.qm4f_context = new QuaternionM4F.Context();
@@ -739,7 +745,16 @@ final class SBGLRenderer implements GLEventListener
       PathVirtual.ROOT);
     this.filesystem.mountClasspathArchive(KRenderer.class, PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
-      config.getShaderArchiveFile(),
+      config.getShaderArchiveDebugFile(),
+      PathVirtual.ROOT);
+    this.filesystem.mountArchiveFromAnywhere(
+      config.getShaderArchiveForwardFile(),
+      PathVirtual.ROOT);
+    this.filesystem.mountArchiveFromAnywhere(
+      config.getShaderArchiveShadowFile(),
+      PathVirtual.ROOT);
+    this.filesystem.mountArchiveFromAnywhere(
+      config.getShaderArchivePostprocessingFile(),
       PathVirtual.ROOT);
 
     this.background_colour =

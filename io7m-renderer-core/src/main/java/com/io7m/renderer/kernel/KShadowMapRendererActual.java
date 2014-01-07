@@ -414,7 +414,9 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
       }
       case SHADOW_MAPPED_BASIC:
       {
-        final KShadowMap fb = this.shadow_cache.pcCacheGet(s);
+        final KShadowMapBasic fb =
+          (KShadowMapBasic) this.shadow_cache.pcCacheGet(s);
+
         gc.framebufferDrawBind(fb.mapGetDepthFramebuffer());
         try {
           gc.colorBufferMask(true, true, true, true);
