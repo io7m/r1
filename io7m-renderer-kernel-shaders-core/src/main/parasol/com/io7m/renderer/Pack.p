@@ -16,18 +16,18 @@
 
 package com.io7m.renderer;
 
-module Depth is
+module Pack is
 
   import com.io7m.parasol.Matrix4x4f as M4;
   import com.io7m.parasol.Float      as F;
 
   --
-  -- Pack a depth value in the range [0, 1] to four four-bit cells.
+  -- Pack a value in the range [0, 1] to four four-bit cells.
   --
 
-  function pack4444 (depth : float) : vector_4f =
+  function pack4444 (x : float) : vector_4f =
     let 
-      value d  = F.multiply (depth, 65536.0);
+      value d  = F.multiply (x, 65536.0);
 
       value k0 = F.floor (F.divide (d, 4096.0));
       value k1 = F.floor (F.divide (F.modulo (d, 4096.0), 256.0));
@@ -43,50 +43,18 @@ module Depth is
     end;
 
   --
-  -- Unpack a depth value from four four-bit cells.
+  -- Unpack a value in the range [0, 1] from four four-bit cells.
   --
 
-  function unpack4444 (depth : vector_4f) : float =
+  function unpack4444 (p : vector_4f) : float =
     let 
-      value k0 = F.multiply (depth [x], 61440.0);
-      value k1 = F.multiply (depth [y], 3840.0);
-      value k2 = F.multiply (depth [z], 240.0);
-      value k3 = F.multiply (depth [w], 15.0);
+      value k0 = F.multiply (p [x], 61440.0);
+      value k1 = F.multiply (p [y], 3840.0);
+      value k2 = F.multiply (p [z], 240.0);
+      value k3 = F.multiply (p [w], 15.0);
       value s  = F.add (F.add (F.add (k0, k1), k2), k3);
     in 
       F.divide (s, 65536.0)
     end;
-
-  --
-  -- Depth-only program.
-  --
-
-  shader vertex depth_v is
-    in v_position              : vector_3f;
-    out vertex f_position_clip : vector_4f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-  as
-    out f_position_clip = clip_position;
-  end;
-
-  shader fragment depth_f is
-    out out_0 : vector_4f as 0;
-  with
-    value rgba = new vector_4f (1.0, 1.0, 1.0, 1.0);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program depth is
-    vertex   depth_v;
-    fragment depth_f;
-  end;
 
 end;

@@ -1,0 +1,4 @@
+depth_O    : com.io7m.renderer.Depth.depth_O
+depth_OP4  : com.io7m.renderer.Depth.depth_OP4
+depth_OA   : com.io7m.renderer.Depth.depth_OA
+depth_OAP4 : com.io7m.renderer.Depth.depth_OAP4

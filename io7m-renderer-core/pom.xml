@@ -72,6 +72,19 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>com.io7m.renderer.kernel-shaders.depth</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-depth</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>com.io7m.renderer.kernel-shaders.forward</groupId>
       <artifactId>io7m-renderer-kernel-shaders-forward</artifactId>
       <version>${project.version}</version>

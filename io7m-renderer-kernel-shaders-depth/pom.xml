@@ -5,13 +5,13 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.io7m.renderer.kernel-shaders.postprocessing</groupId>
-  <artifactId>io7m-renderer-kernel-shaders-postprocessing</artifactId>
+  <groupId>com.io7m.renderer.kernel-shaders.depth</groupId>
+  <artifactId>io7m-renderer-kernel-shaders-depth</artifactId>
   <version>0.6.0</version>
   <packaging>jar</packaging>
-  <name>io7m-renderer-kernel-shaders-postprocessing</name>
-  <description>3D renderer (Postprocessing shaders)</description>
-  <url>http://mvn.io7m.com/renderer-kernel-shaders-postprocessing/</url>
+  <name>io7m-renderer-kernel-shaders-depth</name>
+  <description>3D renderer (depth-only shaders)</description>
+  <url>http://mvn.io7m.com/renderer-kernel-shaders-depth/</url>
 
   <licenses>
     <license>
@@ -44,7 +44,7 @@
     <site>
       <id>io7m</id>
       <name>io7m.com</name>
-      <url>http://mvn.io7m.com/renderer-kernel-shaders-postprocessing/</url>
+      <url>http://mvn.io7m.com/renderer-kernel-shaders-depth/</url>
     </site>
   </distributionManagement>
 
@@ -179,7 +179,7 @@
               <outputDirectory>${project.build.directory}/parasol/</outputDirectory>
               <resources>
                 <resource>
-                  <directory>src/main/resources/</directory>
+                  <directory>src/main/parasol/com/io7m/renderer</directory>
                   <filtering>false</filtering>
                 </resource>
               </resources>
@@ -195,15 +195,15 @@
         <version>1.2.1</version>
         <executions>
           <execution>
-            <id>make-parasol-postprocessing-sources</id>
+            <id>make-parasol-depth-sources</id>
             <phase>prepare-package</phase>
             <goals>
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>com.io7m.renderer.kernel_shaders.PostprocessingMakeAll</mainClass>
+              <mainClass>com.io7m.renderer.kernel_shaders.DepthMakeAll</mainClass>
               <arguments>
-                <argument>${project.build.directory}/parasol/batch-postprocessing.txt</argument>
+                <argument>${project.build.directory}/parasol/batch-depth.txt</argument>
                 <argument>${project.build.directory}/parasol/</argument>
                 <argument>${project.build.directory}/glsl/com/io7m/renderer/kernel</argument>
                 <argument>${project.build.directory}/glsl-compact/com/io7m/renderer/kernel</argument>

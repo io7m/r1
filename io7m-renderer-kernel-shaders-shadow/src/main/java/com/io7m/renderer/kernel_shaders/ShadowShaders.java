@@ -157,7 +157,7 @@ public final class ShadowShaders
       case SHADOW_BASIC_OPAQUE_PACKED4444:
       {
         b.append("  -- Pack depth into colour buffer\n");
-        b.append("  value rgba = D.pack4444 (Fragment.coordinate [z]);\n");
+        b.append("  value rgba = P.pack4444 (Fragment.coordinate [z]);\n");
         break;
       }
       case SHADOW_BASIC_TRANSLUCENT:
@@ -176,7 +176,7 @@ public final class ShadowShaders
         b
           .append("  value alpha = F.multiply (albedo [w], m.alpha.opacity);\n");
         b.append("  -- Pack depth into colour buffer\n");
-        b.append("  value rgba   = D.pack4444 (Fragment.coordinate [z]);\n");
+        b.append("  value rgba   = P.pack4444 (Fragment.coordinate [z]);\n");
         break;
       }
     }
@@ -215,17 +215,17 @@ public final class ShadowShaders
     b.append(name);
     b.append(" is\n");
     b.append("\n");
-    b.append("import com.io7m.parasol.Matrix3x3f        as M3;\n");
-    b.append("import com.io7m.parasol.Matrix4x4f        as M4;\n");
-    b.append("import com.io7m.parasol.Vector3f          as V3;\n");
-    b.append("import com.io7m.parasol.Vector4f          as V4;\n");
-    b.append("import com.io7m.parasol.Sampler2D         as S;\n");
-    b.append("import com.io7m.parasol.Float             as F;\n");
+    b.append("import com.io7m.parasol.Matrix3x3f as M3;\n");
+    b.append("import com.io7m.parasol.Matrix4x4f as M4;\n");
+    b.append("import com.io7m.parasol.Vector3f   as V3;\n");
+    b.append("import com.io7m.parasol.Vector4f   as V4;\n");
+    b.append("import com.io7m.parasol.Sampler2D  as S;\n");
+    b.append("import com.io7m.parasol.Float      as F;\n");
     b.append("import com.io7m.parasol.Fragment;\n");
     b.append("\n");
-    b.append("import com.io7m.renderer.Albedo           as A;\n");
-    b.append("import com.io7m.renderer.Depth            as D;\n");
-    b.append("import com.io7m.renderer.Materials        as M;\n");
+    b.append("import com.io7m.renderer.Albedo    as A;\n");
+    b.append("import com.io7m.renderer.Pack      as P;\n");
+    b.append("import com.io7m.renderer.Materials as M;\n");
     b.append("\n");
   }
 

@@ -17,6 +17,7 @@
     <module>io7m-renderer-core</module>
     <module>io7m-renderer-kernel-shaders-core</module>
     <module>io7m-renderer-kernel-shaders-debug</module>
+    <module>io7m-renderer-kernel-shaders-depth</module>
     <module>io7m-renderer-kernel-shaders-forward</module>
     <module>io7m-renderer-kernel-shaders-postprocessing</module>
     <module>io7m-renderer-kernel-shaders-shadow</module>

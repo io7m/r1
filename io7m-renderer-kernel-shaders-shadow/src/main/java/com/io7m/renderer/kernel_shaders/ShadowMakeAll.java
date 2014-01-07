@@ -120,12 +120,12 @@ public final class ShadowMakeAll
     throws IOException
   {
     final FileWriter writer = new FileWriter(file);
-    for (final ShadowLabel l : shadowLabels) {
-      final String code = l.getCode();
-      writer.append("shadow_" + code);
-      writer.append(" : com.io7m.renderer.kernel.Shadow_" + code + ".p");
-      writer.append("\n");
-    }
+    // for (final ShadowLabel l : shadowLabels) {
+    // final String code = l.getCode();
+    // writer.append("shadow_" + code);
+    // writer.append(" : com.io7m.renderer.kernel.Shadow_" + code + ".p");
+    // writer.append("\n");
+    // }
 
     writer.close();
   }
@@ -149,9 +149,9 @@ public final class ShadowMakeAll
     final ArrayList<String> argslist = new ArrayList<String>();
 
     argslist.add("--require-es");
-    argslist.add("[100,300]");
+    argslist.add("[,]");
     argslist.add("--require-full");
-    argslist.add("[110,440]");
+    argslist.add("[,]");
     argslist.add("--compile-batch");
     argslist.add(out_dir.toString());
     argslist.add(batch.toString());
