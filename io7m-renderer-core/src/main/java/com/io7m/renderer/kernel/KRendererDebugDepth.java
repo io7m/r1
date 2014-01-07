@@ -215,6 +215,11 @@ final class KRendererDebugDepth implements KRenderer
         {
           break;
         }
+        case DEPTH_UNIFORM:
+        {
+          KShadingProgramCommon.putMaterial(p, material);
+          break;
+        }
         case DEPTH_MAPPED:
         {
           KShadingProgramCommon.putMaterial(p, material);
@@ -242,6 +247,7 @@ final class KRendererDebugDepth implements KRenderer
 
         switch (label) {
           case DEPTH_CONSTANT:
+          case DEPTH_UNIFORM:
           {
             break;
           }

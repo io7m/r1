@@ -27,6 +27,7 @@ import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.ArrayBufferUsable;
 import com.io7m.jcanephora.JCBProgram;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.JCGLTextures2DStaticCommon;
 import com.io7m.jcanephora.JCGLTexturesCubeStaticCommon;
 import com.io7m.jcanephora.Texture2DStatic;
@@ -697,8 +698,7 @@ final class KShadingProgramCommon
           }
           case SHADOW_MAPPED_SOFT:
           {
-            final KShadowMappedSoft ksmv =
-              (KShadow.KShadowMappedSoft) ks;
+            final KShadowMappedSoft ksmv = (KShadow.KShadowMappedSoft) ks;
             KShadingProgramCommon.putShadowVariance(program, ksmv);
             break;
           }
@@ -935,6 +935,20 @@ final class KShadingProgramCommon
   {
     KShadingProgramCommon
       .putMaterialAlphaOpacity(program, alpha.getOpacity());
+    KShadingProgramCommon.putMaterialAlphaDepthThreshold(
+      program,
+      alpha.getDepthThreshold());
+  }
+
+  private static void putMaterialAlphaDepthThreshold(
+    final @Nonnull JCBProgram program,
+    final float threshold)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    program.programUniformPutFloat(
+      "material.alpha.depth_threshold",
+      threshold);
   }
 
   static void putMaterialAlphaOpacity(

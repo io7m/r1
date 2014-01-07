@@ -2,3 +2,5 @@ depth_C       : com.io7m.renderer.Depth.depth_C
 depth_CP4     : com.io7m.renderer.Depth.depth_CP4
 depth_M       : com.io7m.renderer.Depth.depth_M
 depth_MP4     : com.io7m.renderer.Depth.depth_MP4
+depth_U       : com.io7m.renderer.Depth.depth_U
+depth_UP4     : com.io7m.renderer.Depth.depth_UP4

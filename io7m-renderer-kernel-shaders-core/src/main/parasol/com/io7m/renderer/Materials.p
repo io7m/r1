@@ -32,7 +32,13 @@ module Materials is
   --
 
   type alpha is record
-    opacity : float  -- The upper bound on object opacity, in the range [0, 1]
+    -- The upper bound on object opacity, in the range [0, 1]
+    opacity : float,  
+    
+    -- Threshold for depth writes, in the range [0, 1]
+    -- Alpha opacity greater or equal to depth_threshold will 
+    -- cause writes to the depth buffer.
+    depth_threshold : float
   end;
 
   --

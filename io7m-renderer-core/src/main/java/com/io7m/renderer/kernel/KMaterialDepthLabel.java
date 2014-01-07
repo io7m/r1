@@ -23,7 +23,8 @@ import com.io7m.jaux.UnreachableCodeException;
 enum KMaterialDepthLabel
 {
   DEPTH_CONSTANT("C"),
-  DEPTH_MAPPED("M")
+  DEPTH_MAPPED("M"),
+  DEPTH_UNIFORM("U")
 
   ;
 
@@ -42,7 +43,7 @@ enum KMaterialDepthLabel
       {
         switch (albedo) {
           case ALBEDO_COLOURED:
-            return DEPTH_CONSTANT;
+            return DEPTH_UNIFORM;
           case ALBEDO_TEXTURED:
             return DEPTH_MAPPED;
         }
@@ -53,7 +54,7 @@ enum KMaterialDepthLabel
       {
         switch (albedo) {
           case ALBEDO_COLOURED:
-            return DEPTH_CONSTANT;
+            return DEPTH_UNIFORM;
           case ALBEDO_TEXTURED:
             return DEPTH_MAPPED;
         }
