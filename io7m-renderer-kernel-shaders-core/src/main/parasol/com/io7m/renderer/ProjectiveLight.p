@@ -29,7 +29,7 @@ module ProjectiveLight is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Sampler2D  as S2;
 
-  import com.io7m.renderer.Depth          as D;
+  import com.io7m.renderer.Pack           as P;
   import com.io7m.renderer.Materials      as M;
   import com.io7m.renderer.SphericalLight as SL;
   import com.io7m.renderer.Transform      as T;
@@ -120,7 +120,7 @@ module ProjectiveLight is
         value rgba =
           S2.texture (t_shadow, current_tex [x y]);
         value map_depth =
-          D.unpack4444 (rgba);
+          P.unpack4444 (rgba);
         value map_depth_adjusted =
           F.add (map_depth, config.shadow_depth_bias);
       in

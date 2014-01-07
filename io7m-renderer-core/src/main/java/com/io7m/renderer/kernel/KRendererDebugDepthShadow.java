@@ -123,7 +123,7 @@ final class KRendererDebugDepthShadow implements KRenderer
   private final @Nonnull KTransform.Context                               transform_context;
   private final @Nonnull VectorM2I                                        viewport_size;
   private final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache;
-  private final @Nonnull KLabelDecider                            label_decider;
+  private final @Nonnull KLabelDecider                                    label_decider;
 
   private KRendererDebugDepthShadow(
     final @Nonnull JCGLImplementation gl,
@@ -240,7 +240,7 @@ final class KRendererDebugDepthShadow implements KRenderer
       final KMaterialShadowLabel label =
         this.label_decider.getShadowLabel(instance, shadow);
       final KProgram p =
-        this.shader_cache.luCacheGet("shadow_" + label.getCode());
+        this.shader_cache.luCacheGet("depth_" + label.getCode());
       final JCBExecutionAPI e = p.getExecutable();
 
       e.execRun(new JCBExecutorProcedure() {
@@ -292,12 +292,6 @@ final class KRendererDebugDepthShadow implements KRenderer
                   instance.getMaterial());
                 break;
               }
-              case SHADOW_VARIANCE_OPAQUE:
-              case SHADOW_VARIANCE_TRANSLUCENT:
-              case SHADOW_VARIANCE_TRANSLUCENT_TEXTURED:
-              {
-                throw new UnreachableCodeException();
-              }
             }
 
             switch (label) {
@@ -320,12 +314,6 @@ final class KRendererDebugDepthShadow implements KRenderer
                 KShadingProgramCommon.putMatrixUV(program, mwi.getMatrixUV());
                 KShadingProgramCommon.bindAttributeUV(program, array);
                 break;
-              }
-              case SHADOW_VARIANCE_OPAQUE:
-              case SHADOW_VARIANCE_TRANSLUCENT:
-              case SHADOW_VARIANCE_TRANSLUCENT_TEXTURED:
-              {
-                throw new UnreachableCodeException();
               }
             }
 

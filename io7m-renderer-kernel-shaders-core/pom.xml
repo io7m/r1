@@ -10,7 +10,7 @@
   <version>0.6.0</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-kernel-shaders-core</name>
-  <description>3D renderer (core kernel shaders)</description>
+  <description>3D renderer (Kernel shader core sources)</description>
   <url>http://mvn.io7m.com/renderer-kernel-shaders-core/</url>
 
   <licenses>

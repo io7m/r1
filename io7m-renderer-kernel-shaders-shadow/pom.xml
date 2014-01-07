@@ -10,7 +10,7 @@
   <version>0.6.0</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-kernel-shaders-shadow</name>
-  <description>3D renderer (shadow kernel shaders)</description>
+  <description>3D renderer (Shadow mapping shaders)</description>
   <url>http://mvn.io7m.com/renderer-kernel-shaders-shadow/</url>
 
   <licenses>
@@ -188,7 +188,7 @@
         </executions>
       </plugin>
 
-      <!-- Compile Parasol shader sources -->
+      <!-- Compile Parasol shader sources --> 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>

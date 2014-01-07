@@ -59,6 +59,7 @@ public final class SandboxConfig
   private final @Nonnull Properties      props;
   private final long                     restrict_units;
   private final @Nonnull File            shader_archive_debug_file;
+  private final @Nonnull File            shader_archive_depth_file;
   private final @Nonnull File            shader_archive_forward_file;
   private final @Nonnull File            shader_archive_postprocessing_file;
   private final @Nonnull File            shader_archive_shadow_file;
@@ -75,6 +76,10 @@ public final class SandboxConfig
       new File(PropertyUtils.getString(
         props,
         "com.io7m.renderer.sandbox.shaders.debug"));
+    this.shader_archive_depth_file =
+      new File(PropertyUtils.getString(
+        props,
+        "com.io7m.renderer.sandbox.shaders.depth"));
     this.shader_archive_shadow_file =
       new File(PropertyUtils.getString(
         props,
@@ -132,6 +137,11 @@ public final class SandboxConfig
   public @Nonnull File getShaderArchiveDebugFile()
   {
     return this.shader_archive_debug_file;
+  }
+
+  public @Nonnull File getShaderArchiveDepthFile()
+  {
+    return this.shader_archive_depth_file;
   }
 
   public @Nonnull File getShaderArchiveForwardFile()

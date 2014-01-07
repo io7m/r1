@@ -10,7 +10,7 @@
   <version>0.6.0</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-kernel-shaders-forward</name>
-  <description>3D renderer (forward kernel shaders)</description>
+  <description>3D renderer (Forward rendering shaders)</description>
   <url>http://mvn.io7m.com/renderer-kernel-shaders-forward/</url>
 
   <licenses>
