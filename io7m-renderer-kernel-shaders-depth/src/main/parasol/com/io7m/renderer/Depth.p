@@ -53,11 +53,11 @@ module Depth is
   end;
 
   --
-  -- Rendering of the depth values of opaque objects into the depth buffer.
+  -- Rendering of the depth values of constant-depth objects into the depth buffer.
   -- The colour value is expected to be ignored with glColorMask.
   --
 
-  shader fragment depth_O_f is
+  shader fragment depth_C_f is
     in f_position : vector_4f;
     out out_0     : vector_4f as 0;
   with
@@ -67,18 +67,18 @@ module Depth is
     out out_0 = rgba;
   end;
 
-  shader program depth_O is
+  shader program depth_C is
     vertex   depth_simple_v;
-    fragment depth_O_f;
+    fragment depth_C_f;
   end;
 
   --
-  -- Rendering of the depth values of opaque objects into the colour buffer,
+  -- Rendering of the depth values of constant-depth objects into the colour buffer,
   -- packed into four 4-bit cells. This is for use on platforms that do not
   -- have depth textures.
   --
 
-  shader fragment depth_OP4_f is
+  shader fragment depth_CP4_f is
     in f_position : vector_4f;
     out out_0     : vector_4f as 0;
   with
@@ -87,13 +87,13 @@ module Depth is
     out out_0 = rgba;
   end;
 
-  shader program depth_OP4 is
+  shader program depth_CP4 is
     vertex   depth_simple_v;
-    fragment depth_OP4_f;
+    fragment depth_CP4_f;
   end;
 
   --
-  -- Rendering of the depth values of partially opaque objects into the
+  -- Rendering of the depth values of mapped-depth objects into the
   -- depth buffer.
   --
   -- The colour value is expected to be ignored with glColorMask.
@@ -127,7 +127,7 @@ module Depth is
     out f_uv            = uv;
   end;
   
-  shader fragment depth_OA_f is
+  shader fragment depth_M_f is
     in f_uv            : vector_2f;
     in f_position      : vector_4f;
     out out_0          : vector_4f as 0;
@@ -149,18 +149,18 @@ module Depth is
     out out_0 = rgba;
   end;
 
-  shader program depth_OA is
+  shader program depth_M is
     vertex   depth_textured_v;
-    fragment depth_OA_f;
+    fragment depth_M_f;
   end;
 
   --
-  -- Rendering of the depth values of textured partially opaque objects 
+  -- Rendering of the depth values of mapped-depth objects 
   -- into the colour buffer, packed into four 4-bit cells. This is for use on 
   -- platforms that do not have depth textures.
   --
 
-  shader fragment depth_OAP4_f is
+  shader fragment depth_MP4_f is
     in f_uv            : vector_2f;
     in f_position      : vector_4f;
     out out_0          : vector_4f as 0;
@@ -181,9 +181,9 @@ module Depth is
     out out_0 = rgba;
   end;
 
-  shader program depth_OAP4 is
+  shader program depth_MP4 is
     vertex   depth_textured_v;
-    fragment depth_OAP4_f;
+    fragment depth_MP4_f;
   end;
 
 end;
