@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 <code@io7m.com> http://io7m.com
+ * Copyright © 2013 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,22 +14,27 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel_shaders;
+package com.io7m.renderer.kernel;
 
-import java.io.File;
+import javax.swing.JComboBox;
 
-public final class ShadowMakeAll
+import com.io7m.renderer.kernel.KMaterialAlpha.OpacityType;
+
+final class SBOpacityTypeSelector extends
+  JComboBox<KMaterialAlpha.OpacityType>
 {
-  public static void main(
-    final String args[])
-  {
-    /**
-     * XXX: Currently unused, but the program must at least create the output
-     * directory in order to avoid having the Maven assembly plugin complain
-     * about creating an artifact with no files.
-     */
+  private static final long serialVersionUID;
 
-    assert args.length == 3;
-    new File(args[2]).mkdirs();
+  static {
+    serialVersionUID = 319658390826132910L;
+  }
+
+  public SBOpacityTypeSelector()
+  {
+    for (final OpacityType type : KMaterialAlpha.OpacityType.values()) {
+      this.addItem(type);
+    }
+
+    this.setSelectedItem(OpacityType.ALPHA_OPAQUE);
   }
 }
