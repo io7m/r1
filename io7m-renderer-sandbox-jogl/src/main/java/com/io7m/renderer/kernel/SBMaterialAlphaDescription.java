@@ -16,17 +16,20 @@
 
 package com.io7m.renderer.kernel;
 
+import javax.annotation.Nonnull;
+
+import com.io7m.renderer.kernel.KMaterialAlpha.OpacityType;
 
 public final class SBMaterialAlphaDescription
 {
-  private final boolean translucent;
-  private final float   opacity;
+  private final float                opacity;
+  private final @Nonnull OpacityType type;
 
   SBMaterialAlphaDescription(
-    final boolean translucent,
+    final @Nonnull OpacityType type,
     final float opacity)
   {
-    this.translucent = translucent;
+    this.type = type;
     this.opacity = opacity;
   }
 
@@ -47,7 +50,7 @@ public final class SBMaterialAlphaDescription
       .floatToIntBits(other.opacity)) {
       return false;
     }
-    if (this.translucent != other.translucent) {
+    if (this.type != other.type) {
       return false;
     }
     return true;
@@ -58,26 +61,31 @@ public final class SBMaterialAlphaDescription
     return this.opacity;
   }
 
+  public @Nonnull OpacityType getOpacityType()
+  {
+    return this.type;
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
     result = (prime * result) + Float.floatToIntBits(this.opacity);
-    result = (prime * result) + (this.translucent ? 1231 : 1237);
+    result = (prime * result) + this.type.hashCode();
     return result;
   }
 
   public boolean isTranslucent()
   {
-    return this.translucent;
+    return this.type == OpacityType.ALPHA_TRANSLUCENT;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("SBMaterialAlphaDescription [translucent=");
-    builder.append(this.translucent);
-    builder.append(", opacity=");
+    builder.append("[SBMaterialAlphaDescription ");
+    builder.append(this.type);
+    builder.append(" ");
     builder.append(this.opacity);
     builder.append("]");
     return builder.toString();

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -636,54 +635,88 @@ public final class KRendererForward implements KRenderer
       JCGLException,
       JCBExecutionException
   {
-    final KProgram p = this.shader_cache.luCacheGet("depth_O");
-    final JCBExecutionAPI e = p.getExecutable();
-    final Set<KMeshInstanceTransformed> depth_batch = batched.getBatchDepth();
+    final Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> depth_batch =
+      batched.getBatchesDepth();
 
-    e.execRun(new JCBExecutorProcedure() {
-      @SuppressWarnings("synthetic-access") @Override public void call(
-        final @Nonnull JCBProgram program)
-        throws ConstraintError,
-          JCGLException,
-          JCBExecutionException,
-          Exception
-      {
-        KShadingProgramCommon.putMatrixProjection(
-          program,
-          mwc.getMatrixProjection());
+    for (final KMaterialDepthLabel label : depth_batch.keySet()) {
+      final List<KMeshInstanceTransformed> batch = depth_batch.get(label);
 
-        for (final KMeshInstanceTransformed instance : depth_batch) {
-          final KMutableMatrices.WithInstance mwi =
-            mwc.withInstance(instance);
-          try {
-            KRendererForward.this.renderDepthPassMeshOpaque(
-              gc,
-              program,
-              instance,
-              mwi);
-          } finally {
-            mwi.instanceFinish();
+      this.label_cache.setLength(0);
+      this.label_cache.append("depth_");
+      this.label_cache.append(label.getCode());
+
+      final KProgram p =
+        this.shader_cache.luCacheGet(this.label_cache.toString());
+      final JCBExecutionAPI e = p.getExecutable();
+
+      e.execRun(new JCBExecutorProcedure() {
+        @SuppressWarnings("synthetic-access") @Override public void call(
+          final @Nonnull JCBProgram program)
+          throws ConstraintError,
+            JCGLException,
+            JCBExecutionException,
+            Exception
+        {
+          KShadingProgramCommon.putMatrixProjection(
+            program,
+            mwc.getMatrixProjection());
+
+          for (final KMeshInstanceTransformed instance : batch) {
+            final KMutableMatrices.WithInstance mwi =
+              mwc.withInstance(instance);
+            try {
+              KRendererForward.this.renderDepthPassMeshOpaque(
+                gc,
+                program,
+                instance,
+                label,
+                mwi);
+            } finally {
+              mwi.instanceFinish();
+            }
           }
         }
-      }
-    });
+      });
+    }
   }
 
   @SuppressWarnings("static-method") private void renderDepthPassMeshOpaque(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCBProgram p,
     final @Nonnull KMeshInstanceTransformed i,
+    final @Nonnull KMaterialDepthLabel label,
     final @Nonnull KMutableMatrices.WithInstanceMatrices mwi)
     throws ConstraintError,
       JCGLException,
       JCBExecutionException
   {
+    final KMaterial material = i.getInstance().getMaterial();
+    final List<TextureUnit> units = gc.textureGetUnits();
+
     /**
      * Upload matrices.
      */
 
     KShadingProgramCommon.putMatrixProjectionReuse(p);
     KShadingProgramCommon.putMatrixModelView(p, mwi.getMatrixModelView());
+
+    switch (label) {
+      case DEPTH_OPAQUE:
+      {
+        break;
+      }
+      case DEPTH_OPAQUE_ALBEDO_ALPHA_TO_DEPTH:
+      {
+        KShadingProgramCommon.putMaterial(p, material);
+        KShadingProgramCommon.putMatrixUV(p, mwi.getMatrixUV());
+        KShadingProgramCommon.bindPutTextureAlbedo(
+          p,
+          gc,
+          material,
+          units.get(0));
+        break;
+      }
+    }
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -697,6 +730,18 @@ public final class KRendererForward implements KRenderer
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePosition(p, array);
+
+      switch (label) {
+        case DEPTH_OPAQUE:
+        {
+          break;
+        }
+        case DEPTH_OPAQUE_ALBEDO_ALPHA_TO_DEPTH:
+        {
+          KShadingProgramCommon.bindAttributeUV(p, array);
+          break;
+        }
+      }
 
       p.programExecute(new JCBProgramProcedure() {
         @Override public void call()
@@ -739,7 +784,11 @@ public final class KRendererForward implements KRenderer
     Constraints.constrainNotNull(scene, "Scene");
 
     final KSceneBatchedForward batched =
-      KSceneBatchedForward.newBatchedScene(this.decider, this.decider, scene);
+      KSceneBatchedForward.newBatchedScene(
+        this.decider,
+        this.decider,
+        this.decider,
+        scene);
 
     try {
       this.shadow_map_renderer.shadowRendererStart();

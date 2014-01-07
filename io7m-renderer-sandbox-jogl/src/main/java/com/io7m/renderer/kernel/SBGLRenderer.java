@@ -1331,6 +1331,8 @@ final class SBGLRenderer implements GLEventListener
         return KRendererDebugDepth.rendererNew(
           this.gi,
           this.filesystem,
+          this.label_cache,
+          this.shader_cache,
           this.log);
       }
       case KRENDERER_DEBUG_NORMALS_MAP_EYE:

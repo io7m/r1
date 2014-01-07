@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -24,14 +25,50 @@ import javax.annotation.concurrent.Immutable;
 
 @Immutable public final class KMaterialAlpha
 {
-  private final float   opacity;
-  private final boolean translucent;
+  public static enum OpacityType
+  {
+    /**
+     * A completely opaque object. Will be rendered opaque and will cast a
+     * shadow of the same shape as the object to which the material is
+     * applied.
+     */
+
+    ALPHA_OPAQUE,
+
+    /**
+     * A (possibly) partially opaque object; The object will be rendered
+     * opaque but the surface alpha value (taken from the albedo texture) will
+     * determine whether or not the object's depth value at that point will be
+     * placed into the depth buffer, so the object may have sections that are
+     * completely transparent, and will cast shadows of a shape determined by
+     * the alpha value.
+     * 
+     * A typical use case would be for vegetation/foliage: The leaves on a
+     * tree are opaque, but the gaps between them are not.
+     */
+
+    ALPHA_OPAQUE_ALBEDO_ALPHA_TO_DEPTH,
+
+    /**
+     * A translucent object. The object will be rendered translucent according
+     * to the other material properties and the maximum
+     * {@link KMaterialAlpha#opacity} value. The object will not contribute to
+     * the depth buffer.
+     */
+
+    ALPHA_TRANSLUCENT
+
+    ;
+  }
+
+  private final float       opacity;
+  private final OpacityType type;
 
   KMaterialAlpha(
-    final boolean translucent,
+    final @Nonnull OpacityType type,
     final float opacity)
   {
-    this.translucent = translucent;
+    this.type = type;
     this.opacity = opacity;
   }
 
@@ -52,7 +89,7 @@ import javax.annotation.concurrent.Immutable;
       .floatToIntBits(other.opacity)) {
       return false;
     }
-    if (this.translucent != other.translucent) {
+    if (this.type != other.type) {
       return false;
     }
     return true;
@@ -63,27 +100,32 @@ import javax.annotation.concurrent.Immutable;
     return this.opacity;
   }
 
+  public @Nonnull OpacityType getOpacityType()
+  {
+    return this.type;
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
     result = (prime * result) + Float.floatToIntBits(this.opacity);
-    result = (prime * result) + (this.translucent ? 1231 : 1237);
+    result = (prime * result) + this.type.hashCode();
     return result;
   }
 
   public boolean isTranslucent()
   {
-    return this.translucent;
+    return this.type == OpacityType.ALPHA_TRANSLUCENT;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
     builder.append("[KMaterialAlpha ");
-    builder.append(this.translucent);
-    builder.append(" ");
     builder.append(this.opacity);
+    builder.append(" ");
+    builder.append(this.type);
     builder.append("]");
     return builder.toString();
   }
