@@ -716,6 +716,11 @@ public final class KRendererForward implements KRenderer
           units.get(0));
         break;
       }
+      case DEPTH_UNIFORM:
+      {
+        KShadingProgramCommon.putMaterial(p, material);
+        break;
+      }
     }
 
     /**
@@ -732,6 +737,7 @@ public final class KRendererForward implements KRenderer
       KShadingProgramCommon.bindAttributePosition(p, array);
 
       switch (label) {
+        case DEPTH_UNIFORM:
         case DEPTH_CONSTANT:
         {
           break;

@@ -297,6 +297,14 @@ final class KRendererDebugDepthShadow implements KRenderer
                 KShadingProgramCommon.bindAttributeUV(program, array);
                 break;
               }
+              case SHADOW_BASIC_DEPTH_UNIFORM:
+              case SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444:
+              {
+                KShadingProgramCommon.putMaterial(
+                  program,
+                  instance.getMaterial());
+                break;
+              }
             }
 
             program.programExecute(new JCBProgramProcedure() {

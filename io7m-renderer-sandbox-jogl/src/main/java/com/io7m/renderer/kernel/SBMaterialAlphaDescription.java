@@ -22,15 +22,18 @@ import com.io7m.renderer.kernel.KMaterialAlpha.OpacityType;
 
 public final class SBMaterialAlphaDescription
 {
+  private final float                depth_threshold;
   private final float                opacity;
   private final @Nonnull OpacityType type;
 
   SBMaterialAlphaDescription(
     final @Nonnull OpacityType type,
-    final float opacity)
+    final float opacity,
+    final float depth_threshold)
   {
     this.type = type;
     this.opacity = opacity;
+    this.depth_threshold = depth_threshold;
   }
 
   @Override public boolean equals(
@@ -46,6 +49,10 @@ public final class SBMaterialAlphaDescription
       return false;
     }
     final SBMaterialAlphaDescription other = (SBMaterialAlphaDescription) obj;
+    if (Float.floatToIntBits(this.depth_threshold) != Float
+      .floatToIntBits(other.depth_threshold)) {
+      return false;
+    }
     if (Float.floatToIntBits(this.opacity) != Float
       .floatToIntBits(other.opacity)) {
       return false;
@@ -54,6 +61,11 @@ public final class SBMaterialAlphaDescription
       return false;
     }
     return true;
+  }
+
+  public float getDepthThreshold()
+  {
+    return this.depth_threshold;
   }
 
   public float getOpacity()
@@ -70,6 +82,7 @@ public final class SBMaterialAlphaDescription
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + Float.floatToIntBits(this.depth_threshold);
     result = (prime * result) + Float.floatToIntBits(this.opacity);
     result = (prime * result) + this.type.hashCode();
     return result;
@@ -83,10 +96,12 @@ public final class SBMaterialAlphaDescription
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBMaterialAlphaDescription ");
-    builder.append(this.type);
-    builder.append(" ");
+    builder.append("[SBMaterialAlphaDescription opacity=");
     builder.append(this.opacity);
+    builder.append(" depth_threshold=");
+    builder.append(this.depth_threshold);
+    builder.append(" type=");
+    builder.append(this.type);
     builder.append("]");
     return builder.toString();
   }

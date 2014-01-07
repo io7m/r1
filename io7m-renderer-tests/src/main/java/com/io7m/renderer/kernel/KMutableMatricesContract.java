@@ -111,7 +111,7 @@ public abstract class KMutableMatricesContract extends TestContract
         KMutableMatricesContract.makeIndexBuffer(g.getGLCommon());
       final KMesh mesh = new KMesh(array, indices);
       final KMaterialAlpha alpha =
-        new KMaterialAlpha(OpacityType.ALPHA_OPAQUE, 1.0f);
+        new KMaterialAlpha(OpacityType.ALPHA_OPAQUE, 1.0f, 0.0f);
       final RVectorI4F<RSpaceRGBA> colour =
         new RVectorI4F<RSpaceRGBA>(0.0f, 0.0f, 0.0f, 0.0f);
       final Option<Texture2DStatic> no_texture =

@@ -123,12 +123,14 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
       JCGLException
   {
     switch (label) {
+      case SHADOW_BASIC_DEPTH_UNIFORM:
       case SHADOW_BASIC_DEPTH_CONSTANT:
       case SHADOW_BASIC_DEPTH_MAPPED:
       {
         gc.colorBufferMask(false, false, false, false);
         break;
       }
+      case SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444:
       case SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444:
       case SHADOW_BASIC_DEPTH_MAPPED_PACKED4444:
       {
@@ -292,6 +294,12 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
         case SHADOW_BASIC_DEPTH_CONSTANT:
         case SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444:
         {
+          break;
+        }
+        case SHADOW_BASIC_DEPTH_UNIFORM:
+        case SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444:
+        {
+          KShadingProgramCommon.putMaterial(program, material);
           break;
         }
         case SHADOW_BASIC_DEPTH_MAPPED:
