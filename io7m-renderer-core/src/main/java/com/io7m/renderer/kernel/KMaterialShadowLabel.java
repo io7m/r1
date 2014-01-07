@@ -26,9 +26,11 @@ import com.io7m.jaux.UnreachableCodeException;
 enum KMaterialShadowLabel
 {
   SHADOW_BASIC_DEPTH_CONSTANT("C"),
+  SHADOW_BASIC_DEPTH_UNIFORM("U"),
   SHADOW_BASIC_DEPTH_MAPPED("M"),
 
   SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444("CP4"),
+  SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444("UP4"),
   SHADOW_BASIC_DEPTH_MAPPED_PACKED4444("MP4"),
 
   ;
@@ -66,6 +68,8 @@ enum KMaterialShadowLabel
           return SHADOW_BASIC_DEPTH_CONSTANT;
         case DEPTH_MAPPED:
           return SHADOW_BASIC_DEPTH_MAPPED;
+        case DEPTH_UNIFORM:
+          return SHADOW_BASIC_DEPTH_UNIFORM;
       }
     } else {
       switch (caster) {
@@ -73,6 +77,8 @@ enum KMaterialShadowLabel
           return SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444;
         case DEPTH_MAPPED:
           return SHADOW_BASIC_DEPTH_MAPPED_PACKED4444;
+        case DEPTH_UNIFORM:
+          return SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444;
       }
     }
 
@@ -97,6 +103,8 @@ enum KMaterialShadowLabel
     switch (this) {
       case SHADOW_BASIC_DEPTH_CONSTANT:
       case SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444:
+      case SHADOW_BASIC_DEPTH_UNIFORM:
+      case SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444:
         return false;
       case SHADOW_BASIC_DEPTH_MAPPED:
       case SHADOW_BASIC_DEPTH_MAPPED_PACKED4444:

@@ -91,15 +91,18 @@ import javax.annotation.concurrent.Immutable;
     ;
   }
 
-  private final float       opacity;
-  private final OpacityType type;
+  private final float                depth_threshold;
+  private final float                opacity;
+  private final @Nonnull OpacityType type;
 
   KMaterialAlpha(
     final @Nonnull OpacityType type,
-    final float opacity)
+    final float opacity,
+    final float depth_threshold)
   {
     this.type = type;
     this.opacity = opacity;
+    this.depth_threshold = depth_threshold;
   }
 
   @Override public boolean equals(
@@ -115,6 +118,10 @@ import javax.annotation.concurrent.Immutable;
       return false;
     }
     final KMaterialAlpha other = (KMaterialAlpha) obj;
+    if (Float.floatToIntBits(this.depth_threshold) != Float
+      .floatToIntBits(other.depth_threshold)) {
+      return false;
+    }
     if (Float.floatToIntBits(this.opacity) != Float
       .floatToIntBits(other.opacity)) {
       return false;
@@ -123,6 +130,11 @@ import javax.annotation.concurrent.Immutable;
       return false;
     }
     return true;
+  }
+
+  public float getDepthThreshold()
+  {
+    return this.depth_threshold;
   }
 
   public float getOpacity()
@@ -139,6 +151,7 @@ import javax.annotation.concurrent.Immutable;
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + Float.floatToIntBits(this.depth_threshold);
     result = (prime * result) + Float.floatToIntBits(this.opacity);
     result = (prime * result) + this.type.hashCode();
     return result;
@@ -153,8 +166,10 @@ import javax.annotation.concurrent.Immutable;
   {
     final StringBuilder builder = new StringBuilder();
     builder.append("[KMaterialAlpha ");
+    builder.append(this.depth_threshold);
+    builder.append(" opacity=");
     builder.append(this.opacity);
-    builder.append(" ");
+    builder.append(" type=");
     builder.append(this.type);
     builder.append("]");
     return builder.toString();

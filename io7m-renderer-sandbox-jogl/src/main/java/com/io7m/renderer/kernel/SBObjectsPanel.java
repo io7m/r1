@@ -203,12 +203,16 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
   {
     protected final @Nonnull SBOpacityTypeSelector type;
     protected final @Nonnull SBFloatHSlider        opacity;
+    protected final @Nonnull SBFloatHSlider        depth_threshold;
 
     public AlphaSettings()
       throws ConstraintError
     {
       this.opacity = new SBFloatHSlider("Opacity", 0.0f, 1.0f);
       this.opacity.setCurrent(1.0f);
+      this.depth_threshold =
+        new SBFloatHSlider("Depth threshold", 0.0f, 1.0f);
+      this.opacity.setCurrent(0.5f);
       this.type = new SBOpacityTypeSelector();
     }
 
@@ -221,6 +225,11 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         .grid(this.opacity.getLabel())
         .add(this.opacity.getSlider(), 2)
         .add(this.opacity.getField());
+      dg
+        .row()
+        .grid(this.depth_threshold.getLabel())
+        .add(this.depth_threshold.getSlider(), 2)
+        .add(this.depth_threshold.getField());
     }
 
     @Override public void mpLoadFrom(
@@ -229,6 +238,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       final SBMaterialAlphaDescription mat_a = i.getMaterial().getAlpha();
       this.type.setSelectedItem(mat_a.getOpacityType());
       this.opacity.setCurrent(mat_a.getOpacity());
+      this.depth_threshold.setCurrent(mat_a.getDepthThreshold());
     }
 
     @Override public SBMaterialAlphaDescription mpSave()
@@ -237,7 +247,8 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     {
       return new SBMaterialAlphaDescription(
         (OpacityType) this.type.getSelectedItem(),
-        this.opacity.getCurrent());
+        this.opacity.getCurrent(),
+        this.depth_threshold.getCurrent());
     }
 
   }

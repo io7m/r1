@@ -93,6 +93,53 @@ module Depth is
   end;
 
   --
+  -- Rendering of the depth values of uniform-depth objects into the depth buffer.
+  -- The colour value is expected to be ignored with glColorMask.
+  --
+
+  shader fragment depth_U_f is
+    in f_position      : vector_4f;
+    parameter material : M.t;
+    out out_0          : vector_4f as 0;
+  with
+    value albedo : vector_4f = A.translucent (material.albedo);
+    value alpha = F.multiply (albedo [w], material.alpha.opacity);
+    discard (F.lesser (alpha, material.alpha.depth_threshold));
+    value rgba = new vector_4f (0.0, Fragment.coordinate [z], 1.0, 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program depth_U is
+    vertex   depth_simple_v;
+    fragment depth_U_f;
+  end;
+
+  --
+  -- Rendering of the depth values of uniform-depth objects into the colour buffer,
+  -- packed into four 4-bit cells. This is for use on platforms that do not
+  -- have depth textures.
+  --
+
+  shader fragment depth_UP4_f is
+    in f_position      : vector_4f;
+    parameter material : M.t;
+    out out_0          : vector_4f as 0;
+  with
+    value albedo : vector_4f = A.translucent (material.albedo);
+    value alpha = F.multiply (albedo [w], material.alpha.opacity);
+    discard (F.lesser (alpha, material.alpha.depth_threshold));
+    value rgba = P.pack4444 (Fragment.coordinate [z]);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program depth_UP4 is
+    vertex   depth_simple_v;
+    fragment depth_UP4_f;
+  end;
+
+  --
   -- Rendering of the depth values of mapped-depth objects into the
   -- depth buffer.
   --
