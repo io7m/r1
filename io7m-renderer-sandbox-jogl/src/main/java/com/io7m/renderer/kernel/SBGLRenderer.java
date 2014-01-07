@@ -712,6 +712,7 @@ final class SBGLRenderer implements GLEventListener
       + config.getShaderArchiveForwardFile());
     log.debug("Shader postprocessing archive: "
       + config.getShaderArchivePostprocessingFile());
+    log.debug("Shader depth archive: " + config.getShaderArchiveDepthFile());
 
     this.controller = new AtomicReference<SBSceneControllerRenderer>();
     this.qm4f_context = new QuaternionM4F.Context();
@@ -746,6 +747,9 @@ final class SBGLRenderer implements GLEventListener
     this.filesystem.mountClasspathArchive(KRenderer.class, PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
       config.getShaderArchiveDebugFile(),
+      PathVirtual.ROOT);
+    this.filesystem.mountArchiveFromAnywhere(
+      config.getShaderArchiveDepthFile(),
       PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
       config.getShaderArchiveForwardFile(),

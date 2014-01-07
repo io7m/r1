@@ -325,9 +325,7 @@ public final class KRendererForward implements KRenderer
   private final @Nonnull KMutableMatrices                                 matrices;
   private final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache;
   private final @Nonnull KShadowMapRenderer                               shadow_map_renderer;
-
   private final @Nonnull Context                                          transform_context;
-
   private final @Nonnull VectorM2I                                        viewport_size;
 
   private KRendererForward(
@@ -638,7 +636,7 @@ public final class KRendererForward implements KRenderer
       JCGLException,
       JCBExecutionException
   {
-    final KProgram p = this.shader_cache.luCacheGet("depth");
+    final KProgram p = this.shader_cache.luCacheGet("depth_O");
     final JCBExecutionAPI e = p.getExecutable();
     final Set<KMeshInstanceTransformed> depth_batch = batched.getBatchDepth();
 

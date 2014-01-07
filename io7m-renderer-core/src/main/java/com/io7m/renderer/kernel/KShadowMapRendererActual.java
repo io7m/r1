@@ -97,7 +97,7 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
     final @Nonnull KMaterialShadowLabel label)
   {
     cache.setLength(0);
-    cache.append("shadow_");
+    cache.append("depth_");
     cache.append(label.getCode());
   }
 
@@ -133,11 +133,6 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
       case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
       case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
         gc.colorBufferMask(true, true, true, true);
-        break;
-      case SHADOW_VARIANCE_OPAQUE:
-      case SHADOW_VARIANCE_TRANSLUCENT:
-      case SHADOW_VARIANCE_TRANSLUCENT_TEXTURED:
-        gc.colorBufferMask(true, true, false, false);
         break;
     }
   }

@@ -40,7 +40,7 @@ import com.io7m.jparasol.frontend.Frontend;
 import com.io7m.jparasol.xml.Batch;
 import com.io7m.jparasol.xml.PGLSLCompactor;
 
-public final class PostprocessingMakeAll
+public final class DepthMakeAll
 {
   private static @Nonnull String[] getSourcesList(
     final @Nonnull File out_dir)
@@ -95,9 +95,8 @@ public final class PostprocessingMakeAll
       }
     }
 
-    final String[] sources =
-      PostprocessingMakeAll.getSourcesList(out_parasol_dir);
-    PostprocessingMakeAll.makeCompileSources(
+    final String[] sources = DepthMakeAll.getSourcesList(out_parasol_dir);
+    DepthMakeAll.makeCompileSources(
       out_parasol_dir,
       sources,
       out_batch,
@@ -149,7 +148,7 @@ public final class PostprocessingMakeAll
         PGLSLCompactor.newCompactor(
           program_in,
           program_out,
-          PostprocessingMakeAll.getLog());
+          DepthMakeAll.getLog());
       }
     }
   }

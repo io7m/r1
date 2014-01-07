@@ -25,17 +25,13 @@ import com.io7m.jaux.UnreachableCodeException;
 
 enum KMaterialShadowLabel
 {
-  SHADOW_BASIC_OPAQUE("BO"),
+  SHADOW_BASIC_OPAQUE("O"),
   SHADOW_BASIC_TRANSLUCENT("BT"),
   SHADOW_BASIC_TRANSLUCENT_TEXTURED("BX"),
 
-  SHADOW_BASIC_OPAQUE_PACKED4444("BOP4"),
+  SHADOW_BASIC_OPAQUE_PACKED4444("OP4"),
   SHADOW_BASIC_TRANSLUCENT_PACKED4444("BTP4"),
   SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444("BXP4"),
-
-  SHADOW_VARIANCE_OPAQUE("VO"),
-  SHADOW_VARIANCE_TRANSLUCENT("VT"),
-  SHADOW_VARIANCE_TRANSLUCENT_TEXTURED("VX"),
 
   ;
 
@@ -55,26 +51,11 @@ enum KMaterialShadowLabel
       }
       case SHADOW_MAPPED_SOFT:
       {
-        return KMaterialShadowLabel.fromShadowVariance(caster);
+        throw new UnimplementedCodeException();
       }
     }
 
     throw new UnreachableCodeException();
-  }
-
-  private static @Nonnull KMaterialShadowLabel fromShadowVariance(
-    final @Nonnull KMaterialShadowCastLabel caster)
-  {
-    switch (caster) {
-      case SHADOW_CAST_OPAQUE:
-        return SHADOW_VARIANCE_OPAQUE;
-      case SHADOW_CAST_TRANSLUCENT:
-        return SHADOW_VARIANCE_TRANSLUCENT;
-      case SHADOW_CAST_TRANSLUCENT_TEXTURED:
-        return SHADOW_VARIANCE_TRANSLUCENT_TEXTURED;
-    }
-
-    throw new UnimplementedCodeException();
   }
 
   private static @Nonnull KMaterialShadowLabel fromShadowBasic(
@@ -124,12 +105,9 @@ enum KMaterialShadowLabel
       case SHADOW_BASIC_OPAQUE:
       case SHADOW_BASIC_TRANSLUCENT:
       case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
-      case SHADOW_VARIANCE_OPAQUE:
-      case SHADOW_VARIANCE_TRANSLUCENT:
         return false;
       case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
       case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
-      case SHADOW_VARIANCE_TRANSLUCENT_TEXTURED:
         return true;
     }
 

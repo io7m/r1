@@ -118,8 +118,6 @@ public final class ForwardMakeAll
   {
     final FileWriter writer = new FileWriter(file);
 
-    writer.append("depth : com.io7m.renderer.Depth.depth\n");
-
     for (final ForwardLabel l : forwardLabels) {
       final String code = l.getCode();
       writer.append("fwd_" + code);
@@ -149,9 +147,9 @@ public final class ForwardMakeAll
     final ArrayList<String> argslist = new ArrayList<String>();
 
     argslist.add("--require-es");
-    argslist.add("[100,300]");
+    argslist.add("[,]");
     argslist.add("--require-full");
-    argslist.add("[110,440]");
+    argslist.add("[,]");
     argslist.add("--compile-batch");
     argslist.add(out_dir.toString());
     argslist.add(batch.toString());
