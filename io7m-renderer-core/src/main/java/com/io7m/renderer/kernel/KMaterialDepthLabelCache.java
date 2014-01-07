@@ -14,22 +14,15 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel_shaders;
+package com.io7m.renderer.kernel;
 
-import java.io.File;
+import javax.annotation.Nonnull;
 
-public final class ShadowMakeAll
+import com.io7m.jaux.Constraints.ConstraintError;
+
+interface KMaterialDepthLabelCache
 {
-  public static void main(
-    final String args[])
-  {
-    /**
-     * XXX: Currently unused, but the program must at least create the output
-     * directory in order to avoid having the Maven assembly plugin complain
-     * about creating an artifact with no files.
-     */
-
-    assert args.length == 3;
-    new File(args[2]).mkdirs();
-  }
+  public @Nonnull KMaterialDepthLabel getDepthLabel(
+    final @Nonnull KMeshInstance instance)
+    throws ConstraintError;
 }

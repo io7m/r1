@@ -28,32 +28,62 @@ import javax.annotation.concurrent.Immutable;
   public static enum OpacityType
   {
     /**
-     * A completely opaque object. Will be rendered opaque and will cast a
-     * shadow of the same shape as the object to which the material is
-     * applied.
+     * <p>
+     * A completely opaque material.
+     * </p>
+     * <p>
+     * An object with this material applied will:
+     * </p>
+     * <ul>
+     * <li>When rendered in the scene: Appear to be completely opaque at every
+     * point on the mesh.</li>
+     * <li>When rendered as a shadow caster: Appear to cast a shadow the exact
+     * same shape as the mesh.</li>
+     * <ul>
      */
 
     ALPHA_OPAQUE,
 
     /**
-     * A (possibly) partially opaque object; The object will be rendered
-     * opaque but the surface alpha value (taken from the albedo texture) will
-     * determine whether or not the object's depth value at that point will be
-     * placed into the depth buffer, so the object may have sections that are
-     * completely transparent, and will cast shadows of a shape determined by
-     * the alpha value.
-     * 
-     * A typical use case would be for vegetation/foliage: The leaves on a
-     * tree are opaque, but the gaps between them are not.
+     * <p>
+     * A partially opaque material.
+     * </p>
+     * <p>
+     * An object with this material applied will:
+     * </p>
+     * <ul>
+     * <li>When rendered in the scene: Appear to be completely opaque at
+     * positions on the mesh where the value in the surface albedo alpha
+     * channel is greater than or equal to the given
+     * {@link KMaterialAlpha#threshold}, and completely transparent elsewhere.
+     * </li>
+     * <li>When rendered as a shadow caster: Cast a shadow from points on the
+     * mesh where the value in the surface albedo alpha channel is greater
+     * than or equal to the given {@link KMaterialAlpha#threshold}, and cast
+     * no shadow elsewhere.</li>
+     * </ul>
      */
 
     ALPHA_OPAQUE_ALBEDO_ALPHA_TO_DEPTH,
 
     /**
-     * A translucent object. The object will be rendered translucent according
-     * to the other material properties and the maximum
-     * {@link KMaterialAlpha#opacity} value. The object will not contribute to
-     * the depth buffer.
+     * <p>
+     * A translucent object.
+     * </p>
+     * <p>
+     * An object with this material applied will:
+     * </p>
+     * <ul>
+     * <li>
+     * When rendered in the scene: Appear to be translucent with the opacity
+     * of the object at any given point being equal to the value in the
+     * surface albedo alpha channel (which will be less than or equal to the
+     * {@link KMaterialAlpha#opacity}).</li>
+     * <li>When rendered as a shadow caster: Cast a shadow from points on the
+     * mesh where the value in the surface albedo alpha channel is greater
+     * than or equal to the given {@link KMaterialAlpha#threshold}, and cast
+     * no shadow elsewhere.</li>
+     * </ul>
      */
 
     ALPHA_TRANSLUCENT

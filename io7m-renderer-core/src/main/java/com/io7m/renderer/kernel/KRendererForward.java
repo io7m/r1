@@ -701,11 +701,11 @@ public final class KRendererForward implements KRenderer
     KShadingProgramCommon.putMatrixModelView(p, mwi.getMatrixModelView());
 
     switch (label) {
-      case DEPTH_OPAQUE:
+      case DEPTH_CONSTANT:
       {
         break;
       }
-      case DEPTH_OPAQUE_ALBEDO_ALPHA_TO_DEPTH:
+      case DEPTH_MAPPED:
       {
         KShadingProgramCommon.putMaterial(p, material);
         KShadingProgramCommon.putMatrixUV(p, mwi.getMatrixUV());
@@ -732,11 +732,11 @@ public final class KRendererForward implements KRenderer
       KShadingProgramCommon.bindAttributePosition(p, array);
 
       switch (label) {
-        case DEPTH_OPAQUE:
+        case DEPTH_CONSTANT:
         {
           break;
         }
-        case DEPTH_OPAQUE_ALBEDO_ALPHA_TO_DEPTH:
+        case DEPTH_MAPPED:
         {
           KShadingProgramCommon.bindAttributeUV(p, array);
           break;
@@ -794,6 +794,13 @@ public final class KRendererForward implements KRenderer
       this.shadow_map_renderer.shadowRendererStart();
       this.shadow_map_renderer.shadowRendererEvaluate(batched
         .getBatchedShadow());
+
+      if (this.debug != null) {
+        this.debug.debugPerformDumpShadowMaps(batched
+          .getBatchedShadow()
+          .getShadowCasters()
+          .keySet());
+      }
 
       final JCGLInterfaceCommon gc = this.g.getGLCommon();
 

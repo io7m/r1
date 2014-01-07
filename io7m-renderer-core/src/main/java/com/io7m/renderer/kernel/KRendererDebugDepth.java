@@ -211,11 +211,11 @@ final class KRendererDebugDepth implements KRenderer
       KShadingProgramCommon.putMatrixModelView(p, mwi.getMatrixModelView());
 
       switch (label) {
-        case DEPTH_OPAQUE:
+        case DEPTH_CONSTANT:
         {
           break;
         }
-        case DEPTH_OPAQUE_ALBEDO_ALPHA_TO_DEPTH:
+        case DEPTH_MAPPED:
         {
           KShadingProgramCommon.putMaterial(p, material);
           KShadingProgramCommon.putMatrixUV(p, mwi.getMatrixUV());
@@ -241,11 +241,11 @@ final class KRendererDebugDepth implements KRenderer
         KShadingProgramCommon.bindAttributePosition(p, array);
 
         switch (label) {
-          case DEPTH_OPAQUE:
+          case DEPTH_CONSTANT:
           {
             break;
           }
-          case DEPTH_OPAQUE_ALBEDO_ALPHA_TO_DEPTH:
+          case DEPTH_MAPPED:
           {
             KShadingProgramCommon.bindAttributeUV(p, array);
             break;

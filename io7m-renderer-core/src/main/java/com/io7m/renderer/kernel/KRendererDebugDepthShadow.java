@@ -277,34 +277,16 @@ final class KRendererDebugDepthShadow implements KRenderer
             KShadingProgramCommon.bindAttributePosition(program, array);
 
             switch (label) {
-              case SHADOW_BASIC_OPAQUE:
-              case SHADOW_BASIC_OPAQUE_PACKED4444:
-              {
+              case SHADOW_BASIC_DEPTH_CONSTANT:
+              case SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444:
                 break;
-              }
-              case SHADOW_BASIC_TRANSLUCENT:
-              case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
-              case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
-              case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
+              case SHADOW_BASIC_DEPTH_MAPPED:
+              case SHADOW_BASIC_DEPTH_MAPPED_PACKED4444:
               {
                 KShadingProgramCommon.putMaterial(
                   program,
                   instance.getMaterial());
-                break;
-              }
-            }
 
-            switch (label) {
-              case SHADOW_BASIC_OPAQUE:
-              case SHADOW_BASIC_OPAQUE_PACKED4444:
-              case SHADOW_BASIC_TRANSLUCENT:
-              case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
-              {
-                break;
-              }
-              case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
-              case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
-              {
                 final List<TextureUnit> units = gc.textureGetUnits();
                 KShadingProgramCommon.bindPutTextureAlbedo(
                   program,

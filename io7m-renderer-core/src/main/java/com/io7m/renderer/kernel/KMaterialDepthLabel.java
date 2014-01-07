@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,46 +18,61 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jaux.UnimplementedCodeException;
+import com.io7m.jaux.UnreachableCodeException;
 
-enum KMaterialShadowCastLabel
+enum KMaterialDepthLabel
 {
-  SHADOW_CAST_OPAQUE("O"),
-  SHADOW_CAST_TRANSLUCENT("T"),
-  SHADOW_CAST_TRANSLUCENT_TEXTURED("X")
+  DEPTH_CONSTANT("C"),
+  DEPTH_MAPPED("M")
 
   ;
 
-  private final String code;
+  public static @Nonnull KMaterialDepthLabel fromMaterial(
+    final @Nonnull KMaterialAlbedoLabel albedo,
+    final @Nonnull KMaterial material)
+  {
+    final KMaterialAlpha a = material.getAlpha();
 
-  private KMaterialShadowCastLabel(
+    switch (a.getOpacityType()) {
+      case ALPHA_OPAQUE:
+      {
+        return DEPTH_CONSTANT;
+      }
+      case ALPHA_OPAQUE_ALBEDO_ALPHA_TO_DEPTH:
+      {
+        switch (albedo) {
+          case ALBEDO_COLOURED:
+            return DEPTH_CONSTANT;
+          case ALBEDO_TEXTURED:
+            return DEPTH_MAPPED;
+        }
+
+        throw new UnreachableCodeException();
+      }
+      case ALPHA_TRANSLUCENT:
+      {
+        switch (albedo) {
+          case ALBEDO_COLOURED:
+            return DEPTH_CONSTANT;
+          case ALBEDO_TEXTURED:
+            return DEPTH_MAPPED;
+        }
+      }
+    }
+
+    throw new UnreachableCodeException();
+  }
+
+  private final @Nonnull String code;
+
+  private KMaterialDepthLabel(
     final @Nonnull String code)
   {
     this.code = code;
   }
 
-  @Override public @Nonnull String toString()
+  public @Nonnull String getCode()
   {
     return this.code;
   }
-
-  public static @Nonnull KMaterialShadowCastLabel fromLabels(
-    final @Nonnull KMaterialAlbedoLabel albedo,
-    final @Nonnull KMaterialAlphaLabel alpha)
-  {
-    switch (alpha) {
-      case ALPHA_OPAQUE:
-        return SHADOW_CAST_OPAQUE;
-      case ALPHA_TRANSLUCENT:
-        switch (albedo) {
-          case ALBEDO_COLOURED:
-            return SHADOW_CAST_TRANSLUCENT;
-          case ALBEDO_TEXTURED:
-            return SHADOW_CAST_TRANSLUCENT_TEXTURED;
-        }
-    }
-
-    throw new UnimplementedCodeException();
-  }
-
 }

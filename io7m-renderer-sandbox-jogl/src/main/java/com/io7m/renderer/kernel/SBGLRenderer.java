@@ -45,7 +45,6 @@ import nu.xom.Document;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
@@ -1137,10 +1136,25 @@ final class SBGLRenderer implements GLEventListener
             final @Nonnull KShadow shadow,
             final @Nonnull KShadowMap map)
           {
-            this.name.setLength(0);
-            this.name.append("shadow-");
-            this.name.append(shadow.getLightID());
-            throw new UnimplementedCodeException();
+            try {
+              this.name.setLength(0);
+              this.name.append("shadow-");
+              this.name.append(shadow.getLightID());
+
+              SBTextureUtilities.textureDumpTimestampedTemporary2DStatic(
+                SBGLRenderer.this.gi,
+                map.mapGetDepthTexture(),
+                this.name.toString(),
+                SBGLRenderer.this.log);
+            } catch (final FileNotFoundException e) {
+              e.printStackTrace();
+            } catch (final IOException e) {
+              e.printStackTrace();
+            } catch (final JCGLException e) {
+              e.printStackTrace();
+            } catch (final ConstraintError e) {
+              e.printStackTrace();
+            }
           }
         });
       }
@@ -2115,10 +2129,7 @@ final class SBGLRenderer implements GLEventListener
               }
               case ALPHA_TRANSLUCENT:
               {
-                builder.sceneAddTranslucentLitVisibleWithoutShadow(
-                  klight,
-                  instance);
-                builder.sceneAddTranslucentInvisibleShadowCaster(
+                builder.sceneAddTranslucentLitVisibleWithShadow(
                   klight,
                   instance);
                 break;
