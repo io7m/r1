@@ -66,6 +66,7 @@ import com.io7m.renderer.RVectorReadable3F;
 import com.io7m.renderer.TestContext;
 import com.io7m.renderer.TestContract;
 import com.io7m.renderer.kernel.KLight.KProjective;
+import com.io7m.renderer.kernel.KMaterialAlpha.OpacityType;
 import com.io7m.renderer.kernel.KMutableMatrices.WithCamera;
 import com.io7m.renderer.kernel.KMutableMatrices.WithInstance;
 import com.io7m.renderer.kernel.KMutableMatrices.WithProjectiveLight;
@@ -109,7 +110,8 @@ public abstract class KMutableMatricesContract extends TestContract
       final IndexBuffer indices =
         KMutableMatricesContract.makeIndexBuffer(g.getGLCommon());
       final KMesh mesh = new KMesh(array, indices);
-      final KMaterialAlpha alpha = new KMaterialAlpha(true, 1.0f);
+      final KMaterialAlpha alpha =
+        new KMaterialAlpha(OpacityType.ALPHA_OPAQUE, 1.0f);
       final RVectorI4F<RSpaceRGBA> colour =
         new RVectorI4F<RSpaceRGBA>(0.0f, 0.0f, 0.0f, 0.0f);
       final Option<Texture2DStatic> no_texture =

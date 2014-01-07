@@ -61,7 +61,8 @@ module Depth is
     in f_position : vector_4f;
     out out_0     : vector_4f as 0;
   with
-    value rgba = new vector_4f (1.0, 1.0, 1.0, 1.0);
+    value rgba =
+      new vector_4f (0.0, Fragment.coordinate [z], 1.0, 1.0);
   as
     out out_0 = rgba;
   end;
@@ -142,11 +143,12 @@ module Depth is
 
     value alpha = F.multiply (albedo [w], material.alpha.opacity);
     discard (F.lesser (alpha, 0.5));
-    value rgba  = new vector_4f (0.0, 0.0, 0.0, alpha);
+    value rgba =
+      new vector_4f (0.0, Fragment.coordinate [z], 1.0, 1.0);
   as
     out out_0 = rgba;
   end;
-  
+
   shader program depth_OA is
     vertex   depth_textured_v;
     fragment depth_OA_f;
