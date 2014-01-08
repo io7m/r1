@@ -46,32 +46,32 @@ import com.io7m.renderer.kernel.KLight.KProjective;
 
 @NotThreadSafe final class KMutableMatrices
 {
-  interface WithCamera extends WithCameraMatrices
+  interface WithObserver extends WithObserverMatrices
   {
-    public void cameraFinish();
+    public void observerFinish();
 
-    public boolean cameraIsActive();
+    public boolean observerIsActive();
 
     public @Nonnull WithInstance withInstance(
       final @Nonnull KMeshInstanceTransformed instance)
       throws ConstraintError;
   }
 
-  @SuppressWarnings("synthetic-access") private final class WithCameraActual implements
-    WithCamera
+  @SuppressWarnings("synthetic-access") private final class WithObserverActual implements
+    WithObserver
   {
-    WithCameraActual(
+    WithObserverActual(
       final @Nonnull RMatrixI4x4F<RTransformView> view,
       final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
       throws ConstraintError
     {
       Constraints.constrainArbitrary(
-        this.cameraIsActive() == false,
-        "Camera is not currently active");
+        this.observerIsActive() == false,
+        "Observer is not currently active");
 
       Constraints.constrainNotNull(view, "View matrix");
       Constraints.constrainNotNull(view, "Projection matrix");
-      KMutableMatrices.this.camera_active.set(true);
+      KMutableMatrices.this.observer_active.set(true);
 
       /**
        * Calculate projection and view matrices.
@@ -86,21 +86,21 @@ import com.io7m.renderer.kernel.KLight.KProjective;
         KMutableMatrices.this.matrix_view_inverse);
     }
 
-    @Override public void cameraFinish()
+    @Override public void observerFinish()
     {
-      KMutableMatrices.this.camera_active.set(false);
+      KMutableMatrices.this.observer_active.set(false);
     }
 
-    @Override public boolean cameraIsActive()
+    @Override public boolean observerIsActive()
     {
-      return KMutableMatrices.this.camera_active.get();
+      return KMutableMatrices.this.observer_active.get();
     }
 
     @Override public Context getMatrixContext()
       throws ConstraintError
     {
       Constraints.constrainArbitrary(
-        this.cameraIsActive(),
+        this.observerIsActive(),
         "Camera is currently active");
       return KMutableMatrices.this.matrix_context;
     }
@@ -111,7 +111,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
         throws ConstraintError
     {
       Constraints.constrainArbitrary(
-        this.cameraIsActive(),
+        this.observerIsActive(),
         "Camera is currently active");
       return KMutableMatrices.this.matrix_projection;
     }
@@ -120,7 +120,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
       throws ConstraintError
     {
       Constraints.constrainArbitrary(
-        this.cameraIsActive(),
+        this.observerIsActive(),
         "Camera is currently active");
       return KMutableMatrices.this.matrix_view;
     }
@@ -131,7 +131,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
         throws ConstraintError
     {
       Constraints.constrainArbitrary(
-        this.cameraIsActive(),
+        this.observerIsActive(),
         "Camera is currently active");
       return KMutableMatrices.this.matrix_view_inverse;
     }
@@ -141,13 +141,13 @@ import com.io7m.renderer.kernel.KLight.KProjective;
       throws ConstraintError
     {
       Constraints.constrainArbitrary(
-        this.cameraIsActive(),
+        this.observerIsActive(),
         "Camera is currently active");
       return new WithInstanceActual(this, instance);
     }
   }
 
-  interface WithCameraMatrices
+  interface WithObserverMatrices
   {
     public @Nonnull MatrixM4x4F.Context getMatrixContext()
       throws ConstraintError;
@@ -179,10 +179,10 @@ import com.io7m.renderer.kernel.KLight.KProjective;
     WithInstance
   {
     private final @Nonnull KMeshInstanceTransformed instance;
-    private final @Nonnull WithCameraActual         parent;
+    private final @Nonnull WithObserverActual       parent;
 
     WithInstanceActual(
-      final @Nonnull WithCameraActual parent,
+      final @Nonnull WithObserverActual parent,
       final @Nonnull KMeshInstanceTransformed transformed)
       throws ConstraintError
     {
@@ -190,7 +190,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
       this.instance = Constraints.constrainNotNull(transformed, "Instance");
 
       Constraints.constrainArbitrary(
-        parent.cameraIsActive(),
+        parent.observerIsActive(),
         "Camera is active");
       Constraints.constrainArbitrary(
         this.instanceIsActive() == false,
@@ -319,7 +319,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
 
     @Override public boolean instanceIsActive()
     {
-      return this.parent.cameraIsActive()
+      return this.parent.observerIsActive()
         && KMutableMatrices.this.instance_active.get();
     }
 
@@ -335,7 +335,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
     }
   }
 
-  interface WithInstanceMatrices extends WithCameraMatrices
+  interface WithInstanceMatrices extends WithObserverMatrices
   {
     public @Nonnull RMatrixReadable4x4F<RTransformModel> getMatrixModel()
       throws ConstraintError;
@@ -545,7 +545,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
     return new KMutableMatrices();
   }
 
-  private final @Nonnull AtomicBoolean                                camera_active;
+  private final @Nonnull AtomicBoolean                                observer_active;
   private final @Nonnull AtomicBoolean                                instance_active;
   private final @Nonnull MatrixM4x4F.Context                          matrix_context;
   private final @Nonnull RMatrixM4x4F<RTransformModel>                matrix_model;
@@ -600,25 +600,16 @@ import com.io7m.renderer.kernel.KLight.KProjective;
     this.matrix_projective_view =
       new RMatrixM4x4F<RTransformProjectiveView>();
 
-    this.camera_active = new AtomicBoolean();
+    this.observer_active = new AtomicBoolean();
     this.instance_active = new AtomicBoolean();
     this.projective_light_active = new AtomicBoolean();
   }
 
-  public @Nonnull WithCamera withCamera(
-    final @Nonnull KCamera camera)
-    throws ConstraintError
-  {
-    return new WithCameraActual(
-      camera.getViewMatrix(),
-      camera.getProjectionMatrix());
-  }
-
-  public @Nonnull WithCamera withObserver(
+  public @Nonnull WithObserver withObserver(
     final @Nonnull RMatrixI4x4F<RTransformView> view,
     final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
     throws ConstraintError
   {
-    return new WithCameraActual(view, projection);
+    return new WithObserverActual(view, projection);
   }
 }

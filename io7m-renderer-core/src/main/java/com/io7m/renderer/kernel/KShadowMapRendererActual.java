@@ -198,7 +198,7 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
     final RMatrixI4x4F<RTransformView> view =
       new RMatrixI4x4F<RTransformView>(this.m4_view);
 
-    final KMutableMatrices.WithCamera mwc =
+    final KMutableMatrices.WithObserver mwc =
       this.matrices.withObserver(view, projection);
 
     try {
@@ -242,7 +242,7 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
       });
 
     } finally {
-      mwc.cameraFinish();
+      mwc.observerFinish();
     }
   }
 

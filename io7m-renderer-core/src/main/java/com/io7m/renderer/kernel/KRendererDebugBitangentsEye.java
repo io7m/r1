@@ -133,8 +133,11 @@ import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererDebug;
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
-    final KMutableMatrices.WithCamera mwc =
-      this.matrices.withCamera(scene.getCamera());
+    final KCamera camera = scene.getCamera();
+    final KMutableMatrices.WithObserver mwc =
+      this.matrices.withObserver(
+        camera.getViewMatrix(),
+        camera.getProjectionMatrix());
 
     try {
       final FramebufferReferenceUsable output_buffer =
@@ -176,7 +179,7 @@ import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererDebug;
         gc.framebufferDrawUnbind();
       }
     } finally {
-      mwc.cameraFinish();
+      mwc.observerFinish();
     }
   }
 
@@ -189,7 +192,7 @@ import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererDebug;
   @SuppressWarnings("static-method") private void renderMesh(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCBProgram p,
-    final @Nonnull KMutableMatrices.WithCamera mwc,
+    final @Nonnull KMutableMatrices.WithObserver mwc,
     final @Nonnull KMeshInstanceTransformed instance)
     throws ConstraintError,
       JCGLException,
