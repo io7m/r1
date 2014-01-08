@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.IOException;
+import java.util.List;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -40,50 +40,49 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
+import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
+import com.io7m.jlucache.LUCache;
+import com.io7m.jlucache.LUCacheException;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
-import com.io7m.jvvfs.FilesystemError;
 
 final class KRendererDebugDepth implements KRenderer
 {
-  public static KRendererDebugDepth rendererNew(
-    final @Nonnull JCGLImplementation g,
-    final @Nonnull FSCapabilityRead fs,
-    final @Nonnull Log log)
-    throws JCGLCompileException,
-      JCGLUnsupportedException,
-      FilesystemError,
-      IOException,
-      JCGLException,
-      ConstraintError,
-      KXMLException
+  public static
+    KRendererDebugDepth
+    rendererNew(
+      final @Nonnull JCGLImplementation g,
+      final @Nonnull FSCapabilityRead fs,
+      final @Nonnull KMaterialDepthLabelCache depth_labels,
+      final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
+      final @Nonnull Log log)
+      throws JCGLCompileException,
+        JCGLUnsupportedException,
+        JCGLException
   {
-    return new KRendererDebugDepth(g, fs, log);
+    return new KRendererDebugDepth(g, fs, depth_labels, shader_cache, log);
   }
 
-  private final @Nonnull VectorM4F          background;
-  private final @Nonnull JCGLImplementation gl;
-  private final @Nonnull Log                log;
-  private final @Nonnull KMutableMatrices   matrices;
-  private final @Nonnull KProgram           program;
-  private final @Nonnull KTransform.Context transform_context;
-  private final @Nonnull VectorM2I          viewport_size;
+  private final @Nonnull VectorM4F                                        background;
+  private final @Nonnull JCGLImplementation                               gl;
+  private final @Nonnull Log                                              log;
+  private final @Nonnull KMutableMatrices                                 matrices;
+  private final @Nonnull KTransform.Context                               transform_context;
+  private final @Nonnull VectorM2I                                        viewport_size;
+  private final @Nonnull KMaterialDepthLabelCache                         depth_labels;
+  private final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache;
 
   private KRendererDebugDepth(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
+    final @Nonnull KMaterialDepthLabelCache depth_labels,
+    final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
     final @Nonnull Log log)
-    throws JCGLCompileException,
-      ConstraintError,
-      JCGLUnsupportedException,
-      JCGLException,
-      FilesystemError,
-      IOException,
-      KXMLException
+    throws JCGLException
   {
     this.log = new Log(log, "krenderer-debug-depth");
     this.gl = gl;
@@ -94,23 +93,15 @@ final class KRendererDebugDepth implements KRenderer
     this.matrices = KMutableMatrices.newMatrices();
     this.transform_context = new KTransform.Context();
     this.viewport_size = new VectorM2I();
-
-    this.program =
-      KProgram.newProgramFromFilesystem(
-        gl.getGLCommon(),
-        version.getNumber(),
-        version.getAPI(),
-        fs,
-        "debug_depth",
-        log);
+    this.depth_labels = depth_labels;
+    this.shader_cache = shader_cache;
   }
 
   @Override public void rendererClose()
     throws JCGLException,
       ConstraintError
   {
-    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-    gc.programDelete(this.program.getProgram());
+    // Nothing
   }
 
   @Override public @CheckForNull KRendererDebugging rendererDebug()
@@ -146,25 +137,42 @@ final class KRendererDebugDepth implements KRenderer
         gc.colorBufferClearV4f(this.background);
         gc.blendingDisable();
 
-        final JCBExecutionAPI e = this.program.getExecutable();
-        e.execRun(new JCBExecutorProcedure() {
-          @SuppressWarnings("synthetic-access") @Override public void call(
-            final @Nonnull JCBProgram p)
-            throws ConstraintError,
-              JCGLException,
-              Exception
-          {
-            KShadingProgramCommon.putMatrixProjection(
-              p,
-              mwc.getMatrixProjection());
-
-            for (final KMeshInstanceTransformed mesh : scene
-              .getVisibleInstances()) {
-              KRendererDebugDepth.this.renderMesh(gc, p, mwc, mesh);
-            }
+        for (final KMeshInstanceTransformed instance : scene
+          .getVisibleInstances()) {
+          final KMeshInstance ii = instance.getInstance();
+          final KMaterial m = ii.getMaterial();
+          if (m.getAlpha().isTranslucent()) {
+            continue;
           }
-        });
+
+          final KMaterialDepthLabel label =
+            this.depth_labels.getDepthLabel(ii);
+
+          final KProgram kp =
+            this.shader_cache.luCacheGet("depth_" + label.getCode());
+
+          final JCBExecutionAPI e = kp.getExecutable();
+          e.execRun(new JCBExecutorProcedure() {
+            @SuppressWarnings("synthetic-access") @Override public void call(
+              final @Nonnull JCBProgram p)
+              throws ConstraintError,
+                JCGLException,
+                Exception
+            {
+              KShadingProgramCommon.putMatrixProjection(
+                p,
+                mwc.getMatrixProjection());
+              KRendererDebugDepth.this
+                .renderMesh(gc, p, mwc, instance, label);
+            }
+          });
+        }
+
       } catch (final JCBExecutionException x) {
+        throw new UnreachableCodeException(x);
+      } catch (final KShaderCacheException x) {
+        throw new UnreachableCodeException(x);
+      } catch (final LUCacheException x) {
         throw new UnreachableCodeException(x);
       } finally {
         gc.framebufferDrawUnbind();
@@ -184,12 +192,15 @@ final class KRendererDebugDepth implements KRenderer
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCBProgram p,
     final @Nonnull KMutableMatrices.WithCamera mwc,
-    final @Nonnull KMeshInstanceTransformed instance)
+    final @Nonnull KMeshInstanceTransformed instance,
+    final @Nonnull KMaterialDepthLabel label)
     throws ConstraintError,
       JCGLException,
       JCBExecutionException
   {
     final KMutableMatrices.WithInstance mwi = mwc.withInstance(instance);
+    final KMaterial material = instance.getInstance().getMaterial();
+    final List<TextureUnit> units = gc.textureGetUnits();
 
     try {
       /**
@@ -198,6 +209,29 @@ final class KRendererDebugDepth implements KRenderer
 
       KShadingProgramCommon.putMatrixProjectionReuse(p);
       KShadingProgramCommon.putMatrixModelView(p, mwi.getMatrixModelView());
+
+      switch (label) {
+        case DEPTH_CONSTANT:
+        {
+          break;
+        }
+        case DEPTH_UNIFORM:
+        {
+          KShadingProgramCommon.putMaterial(p, material);
+          break;
+        }
+        case DEPTH_MAPPED:
+        {
+          KShadingProgramCommon.putMaterial(p, material);
+          KShadingProgramCommon.putMatrixUV(p, mwi.getMatrixUV());
+          KShadingProgramCommon.bindPutTextureAlbedo(
+            p,
+            gc,
+            material,
+            units.get(0));
+          break;
+        }
+      }
 
       /**
        * Associate array attributes with program attributes, and draw mesh.
@@ -210,6 +244,19 @@ final class KRendererDebugDepth implements KRenderer
 
         gc.arrayBufferBind(array);
         KShadingProgramCommon.bindAttributePosition(p, array);
+
+        switch (label) {
+          case DEPTH_CONSTANT:
+          case DEPTH_UNIFORM:
+          {
+            break;
+          }
+          case DEPTH_MAPPED:
+          {
+            KShadingProgramCommon.bindAttributeUV(p, array);
+            break;
+          }
+        }
 
         p.programExecute(new JCBProgramProcedure() {
           @Override public void call()

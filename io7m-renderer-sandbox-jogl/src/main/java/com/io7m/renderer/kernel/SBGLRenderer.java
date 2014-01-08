@@ -45,7 +45,6 @@ import nu.xom.Document;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
@@ -705,7 +704,14 @@ final class SBGLRenderer implements GLEventListener
     this.restrictions = SBSoftRestrictions.newRestrictions(config);
 
     this.log = new Log(log, "gl");
-    log.debug("Shader archive: " + config.getShaderArchiveFile());
+    log.debug("Shader debug archive: " + config.getShaderArchiveDebugFile());
+    log
+      .debug("Shader shadow archive: " + config.getShaderArchiveShadowFile());
+    log.debug("Shader forward archive: "
+      + config.getShaderArchiveForwardFile());
+    log.debug("Shader postprocessing archive: "
+      + config.getShaderArchivePostprocessingFile());
+    log.debug("Shader depth archive: " + config.getShaderArchiveDepthFile());
 
     this.controller = new AtomicReference<SBSceneControllerRenderer>();
     this.qm4f_context = new QuaternionM4F.Context();
@@ -739,7 +745,19 @@ final class SBGLRenderer implements GLEventListener
       PathVirtual.ROOT);
     this.filesystem.mountClasspathArchive(KRenderer.class, PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
-      config.getShaderArchiveFile(),
+      config.getShaderArchiveDebugFile(),
+      PathVirtual.ROOT);
+    this.filesystem.mountArchiveFromAnywhere(
+      config.getShaderArchiveDepthFile(),
+      PathVirtual.ROOT);
+    this.filesystem.mountArchiveFromAnywhere(
+      config.getShaderArchiveForwardFile(),
+      PathVirtual.ROOT);
+    this.filesystem.mountArchiveFromAnywhere(
+      config.getShaderArchiveShadowFile(),
+      PathVirtual.ROOT);
+    this.filesystem.mountArchiveFromAnywhere(
+      config.getShaderArchivePostprocessingFile(),
       PathVirtual.ROOT);
 
     this.background_colour =
@@ -1118,10 +1136,25 @@ final class SBGLRenderer implements GLEventListener
             final @Nonnull KShadow shadow,
             final @Nonnull KShadowMap map)
           {
-            this.name.setLength(0);
-            this.name.append("shadow-");
-            this.name.append(shadow.getLightID());
-            throw new UnimplementedCodeException();
+            try {
+              this.name.setLength(0);
+              this.name.append("shadow-");
+              this.name.append(shadow.getLightID());
+
+              SBTextureUtilities.textureDumpTimestampedTemporary2DStatic(
+                SBGLRenderer.this.gi,
+                map.mapGetDepthTexture(),
+                this.name.toString(),
+                SBGLRenderer.this.log);
+            } catch (final FileNotFoundException e) {
+              e.printStackTrace();
+            } catch (final IOException e) {
+              e.printStackTrace();
+            } catch (final JCGLException e) {
+              e.printStackTrace();
+            } catch (final ConstraintError e) {
+              e.printStackTrace();
+            }
           }
         });
       }
@@ -1312,6 +1345,8 @@ final class SBGLRenderer implements GLEventListener
         return KRendererDebugDepth.rendererNew(
           this.gi,
           this.filesystem,
+          this.label_cache,
+          this.shader_cache,
           this.log);
       }
       case KRENDERER_DEBUG_NORMALS_MAP_EYE:
@@ -2094,10 +2129,7 @@ final class SBGLRenderer implements GLEventListener
               }
               case ALPHA_TRANSLUCENT:
               {
-                builder.sceneAddTranslucentLitVisibleWithoutShadow(
-                  klight,
-                  instance);
-                builder.sceneAddTranslucentInvisibleShadowCaster(
+                builder.sceneAddTranslucentLitVisibleWithShadow(
                   klight,
                   instance);
                 break;

@@ -59,8 +59,60 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.io7m.renderer.kernel-shaders</groupId>
-      <artifactId>io7m-renderer-kernel-shaders</artifactId>
+      <groupId>com.io7m.renderer.kernel-shaders.debug</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-debug</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.renderer.kernel-shaders.depth</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-depth</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.renderer.kernel-shaders.forward</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-forward</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.renderer.kernel-shaders.shadow</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-shadow</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.renderer.kernel-shaders.postprocessing</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-postprocessing</artifactId>
       <version>${project.version}</version>
       <classifier>shaders</classifier>
       <type>zip</type>
@@ -74,7 +126,7 @@
     <dependency>
       <groupId>com.io7m.jparasol.xml</groupId>
       <artifactId>io7m-jparasol-xml</artifactId>
-      <version>[0.3.8, 0.4.0)</version>
+      <version>[0.3.9, 0.4.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jtensors</groupId>

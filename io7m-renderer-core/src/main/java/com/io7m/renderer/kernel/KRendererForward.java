@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -70,14 +69,6 @@ import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KMutableMatrices.WithInstance;
 import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucent;
 import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucentLit;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheFilesystemException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheIOException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLCompileException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLUnsupportedException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheXMLException;
-import com.io7m.renderer.kernel.KShadowCacheException.KShadowCacheJCGLException;
-import com.io7m.renderer.kernel.KShadowCacheException.KShadowCacheJCGLUnsupportedException;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KTransform.Context;
 
@@ -147,90 +138,6 @@ public final class KRendererForward implements KRenderer
             }
           }
         }
-      }
-    }
-  }
-
-  private static void handleJCBException(
-    final @Nonnull JCBExecutionException e)
-    throws JCGLException,
-      JCGLUnsupportedException
-  {
-    Throwable x = e;
-    for (;;) {
-      if (x == null) {
-        throw new UnreachableCodeException();
-      }
-      if (x instanceof KShadowCacheException) {
-        KRendererForward
-          .handleShadowCacheException((KShadowCacheException) x);
-      }
-      x = x.getCause();
-    }
-  }
-
-  private static void handleShaderCacheException(
-    final @Nonnull KShaderCacheException e)
-    throws IOException,
-      JCGLCompileException,
-      JCGLException,
-      JCGLUnsupportedException,
-      KXMLException
-  {
-    switch (e.getCode()) {
-      case KSHADER_CACHE_FILESYSTEM_ERROR:
-      {
-        final KShaderCacheFilesystemException x =
-          (KShaderCacheFilesystemException) e;
-        throw new IOException(x);
-      }
-      case KSHADER_CACHE_IO_ERROR:
-      {
-        final KShaderCacheIOException x = (KShaderCacheIOException) e;
-        throw x.getCause();
-      }
-      case KSHADER_CACHE_JCGL_COMPILE_ERROR:
-      {
-        final KShaderCacheJCGLCompileException x =
-          (KShaderCacheJCGLCompileException) e;
-        throw x.getCause();
-      }
-      case KSHADER_CACHE_JCGL_ERROR:
-      {
-        final KShaderCacheJCGLException x = (KShaderCacheJCGLException) e;
-        throw x.getCause();
-      }
-      case KSHADER_CACHE_JCGL_UNSUPPORTED_ERROR:
-      {
-        final KShaderCacheJCGLUnsupportedException x =
-          (KShaderCacheJCGLUnsupportedException) e;
-        throw x.getCause();
-      }
-      case KSHADER_CACHE_XML_ERROR:
-      {
-        final KShaderCacheXMLException x = (KShaderCacheXMLException) e;
-        throw x.getCause();
-      }
-    }
-  }
-
-  private static void handleShadowCacheException(
-    final @Nonnull KShadowCacheException e)
-    throws JCGLException,
-      JCGLUnsupportedException
-  {
-    switch (e.getCode()) {
-      case KSHADER_CACHE_JCGL_ERROR:
-      {
-        final KShadowCacheJCGLException x =
-          (KShadowCacheException.KShadowCacheJCGLException) e;
-        throw x.getCause();
-      }
-      case KSHADER_CACHE_JCGL_UNSUPPORTED_ERROR:
-      {
-        final KShadowCacheJCGLUnsupportedException x =
-          (KShadowCacheException.KShadowCacheJCGLUnsupportedException) e;
-        throw x.getCause();
       }
     }
   }
@@ -325,9 +232,7 @@ public final class KRendererForward implements KRenderer
   private final @Nonnull KMutableMatrices                                 matrices;
   private final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache;
   private final @Nonnull KShadowMapRenderer                               shadow_map_renderer;
-
   private final @Nonnull Context                                          transform_context;
-
   private final @Nonnull VectorM2I                                        viewport_size;
 
   private KRendererForward(
@@ -638,54 +543,93 @@ public final class KRendererForward implements KRenderer
       JCGLException,
       JCBExecutionException
   {
-    final KProgram p = this.shader_cache.luCacheGet("depth");
-    final JCBExecutionAPI e = p.getExecutable();
-    final Set<KMeshInstanceTransformed> depth_batch = batched.getBatchDepth();
+    final Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> depth_batch =
+      batched.getBatchesDepth();
 
-    e.execRun(new JCBExecutorProcedure() {
-      @SuppressWarnings("synthetic-access") @Override public void call(
-        final @Nonnull JCBProgram program)
-        throws ConstraintError,
-          JCGLException,
-          JCBExecutionException,
-          Exception
-      {
-        KShadingProgramCommon.putMatrixProjection(
-          program,
-          mwc.getMatrixProjection());
+    for (final KMaterialDepthLabel label : depth_batch.keySet()) {
+      final List<KMeshInstanceTransformed> batch = depth_batch.get(label);
 
-        for (final KMeshInstanceTransformed instance : depth_batch) {
-          final KMutableMatrices.WithInstance mwi =
-            mwc.withInstance(instance);
-          try {
-            KRendererForward.this.renderDepthPassMeshOpaque(
-              gc,
-              program,
-              instance,
-              mwi);
-          } finally {
-            mwi.instanceFinish();
+      this.label_cache.setLength(0);
+      this.label_cache.append("depth_");
+      this.label_cache.append(label.getCode());
+
+      final KProgram p =
+        this.shader_cache.luCacheGet(this.label_cache.toString());
+      final JCBExecutionAPI e = p.getExecutable();
+
+      e.execRun(new JCBExecutorProcedure() {
+        @SuppressWarnings("synthetic-access") @Override public void call(
+          final @Nonnull JCBProgram program)
+          throws ConstraintError,
+            JCGLException,
+            JCBExecutionException,
+            Exception
+        {
+          KShadingProgramCommon.putMatrixProjection(
+            program,
+            mwc.getMatrixProjection());
+
+          for (final KMeshInstanceTransformed instance : batch) {
+            final KMutableMatrices.WithInstance mwi =
+              mwc.withInstance(instance);
+            try {
+              KRendererForward.this.renderDepthPassMeshOpaque(
+                gc,
+                program,
+                instance,
+                label,
+                mwi);
+            } finally {
+              mwi.instanceFinish();
+            }
           }
         }
-      }
-    });
+      });
+    }
   }
 
   @SuppressWarnings("static-method") private void renderDepthPassMeshOpaque(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCBProgram p,
     final @Nonnull KMeshInstanceTransformed i,
+    final @Nonnull KMaterialDepthLabel label,
     final @Nonnull KMutableMatrices.WithInstanceMatrices mwi)
     throws ConstraintError,
       JCGLException,
       JCBExecutionException
   {
+    final KMaterial material = i.getInstance().getMaterial();
+    final List<TextureUnit> units = gc.textureGetUnits();
+
     /**
      * Upload matrices.
      */
 
     KShadingProgramCommon.putMatrixProjectionReuse(p);
     KShadingProgramCommon.putMatrixModelView(p, mwi.getMatrixModelView());
+
+    switch (label) {
+      case DEPTH_CONSTANT:
+      {
+        break;
+      }
+      case DEPTH_MAPPED:
+      {
+        KShadingProgramCommon.putMaterial(p, material);
+        KShadingProgramCommon.putMatrixUV(p, mwi.getMatrixUV());
+        KShadingProgramCommon.bindPutTextureAlbedo(
+          p,
+          gc,
+          material,
+          units.get(0));
+        break;
+      }
+      case DEPTH_UNIFORM:
+      {
+        KShadingProgramCommon.putMaterial(p, material);
+        break;
+      }
+    }
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -699,6 +643,19 @@ public final class KRendererForward implements KRenderer
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePosition(p, array);
+
+      switch (label) {
+        case DEPTH_UNIFORM:
+        case DEPTH_CONSTANT:
+        {
+          break;
+        }
+        case DEPTH_MAPPED:
+        {
+          KShadingProgramCommon.bindAttributeUV(p, array);
+          break;
+        }
+      }
 
       p.programExecute(new JCBProgramProcedure() {
         @Override public void call()
@@ -741,12 +698,23 @@ public final class KRendererForward implements KRenderer
     Constraints.constrainNotNull(scene, "Scene");
 
     final KSceneBatchedForward batched =
-      KSceneBatchedForward.newBatchedScene(this.decider, this.decider, scene);
+      KSceneBatchedForward.newBatchedScene(
+        this.decider,
+        this.decider,
+        this.decider,
+        scene);
 
     try {
       this.shadow_map_renderer.shadowRendererStart();
       this.shadow_map_renderer.shadowRendererEvaluate(batched
         .getBatchedShadow());
+
+      if (this.debug != null) {
+        this.debug.debugPerformDumpShadowMaps(batched
+          .getBatchedShadow()
+          .getShadowCasters()
+          .keySet());
+      }
 
       final JCGLInterfaceCommon gc = this.g.getGLCommon();
 
@@ -804,11 +772,11 @@ public final class KRendererForward implements KRenderer
           this.renderTranslucentMeshes(batched, gc, mwc);
 
         } catch (final KShaderCacheException e) {
-          KRendererForward.handleShaderCacheException(e);
+          KRendererCommon.handleShaderCacheException(e);
         } catch (final LUCacheException e) {
           throw new UnreachableCodeException(e);
         } catch (final JCBExecutionException e) {
-          KRendererForward.handleJCBException(e);
+          KRendererCommon.handleJCBException(e);
         } finally {
           gc.framebufferDrawUnbind();
         }
@@ -816,9 +784,9 @@ public final class KRendererForward implements KRenderer
         mwc.cameraFinish();
       }
     } catch (final KShadowCacheException x) {
-      KRendererForward.handleShadowCacheException(x);
+      KRendererCommon.handleShadowCacheException(x);
     } catch (final KShaderCacheException x) {
-      KRendererForward.handleShaderCacheException(x);
+      KRendererCommon.handleShaderCacheException(x);
     } finally {
       this.shadow_map_renderer.shadowRendererFinish();
     }

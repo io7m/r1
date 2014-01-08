@@ -123,7 +123,7 @@ final class KRendererDebugDepthShadow implements KRenderer
   private final @Nonnull KTransform.Context                               transform_context;
   private final @Nonnull VectorM2I                                        viewport_size;
   private final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache;
-  private final @Nonnull KLabelDecider                            label_decider;
+  private final @Nonnull KLabelDecider                                    label_decider;
 
   private KRendererDebugDepthShadow(
     final @Nonnull JCGLImplementation gl,
@@ -240,7 +240,7 @@ final class KRendererDebugDepthShadow implements KRenderer
       final KMaterialShadowLabel label =
         this.label_decider.getShadowLabel(instance, shadow);
       final KProgram p =
-        this.shader_cache.luCacheGet("shadow_" + label.getCode());
+        this.shader_cache.luCacheGet("depth_" + label.getCode());
       final JCBExecutionAPI e = p.getExecutable();
 
       e.execRun(new JCBExecutorProcedure() {
@@ -277,40 +277,16 @@ final class KRendererDebugDepthShadow implements KRenderer
             KShadingProgramCommon.bindAttributePosition(program, array);
 
             switch (label) {
-              case SHADOW_BASIC_OPAQUE:
-              case SHADOW_BASIC_OPAQUE_PACKED4444:
-              {
+              case SHADOW_BASIC_DEPTH_CONSTANT:
+              case SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444:
                 break;
-              }
-              case SHADOW_BASIC_TRANSLUCENT:
-              case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
-              case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
-              case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
+              case SHADOW_BASIC_DEPTH_MAPPED:
+              case SHADOW_BASIC_DEPTH_MAPPED_PACKED4444:
               {
                 KShadingProgramCommon.putMaterial(
                   program,
                   instance.getMaterial());
-                break;
-              }
-              case SHADOW_VARIANCE_OPAQUE:
-              case SHADOW_VARIANCE_TRANSLUCENT:
-              case SHADOW_VARIANCE_TRANSLUCENT_TEXTURED:
-              {
-                throw new UnreachableCodeException();
-              }
-            }
 
-            switch (label) {
-              case SHADOW_BASIC_OPAQUE:
-              case SHADOW_BASIC_OPAQUE_PACKED4444:
-              case SHADOW_BASIC_TRANSLUCENT:
-              case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
-              {
-                break;
-              }
-              case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
-              case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
-              {
                 final List<TextureUnit> units = gc.textureGetUnits();
                 KShadingProgramCommon.bindPutTextureAlbedo(
                   program,
@@ -321,11 +297,13 @@ final class KRendererDebugDepthShadow implements KRenderer
                 KShadingProgramCommon.bindAttributeUV(program, array);
                 break;
               }
-              case SHADOW_VARIANCE_OPAQUE:
-              case SHADOW_VARIANCE_TRANSLUCENT:
-              case SHADOW_VARIANCE_TRANSLUCENT_TEXTURED:
+              case SHADOW_BASIC_DEPTH_UNIFORM:
+              case SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444:
               {
-                throw new UnreachableCodeException();
+                KShadingProgramCommon.putMaterial(
+                  program,
+                  instance.getMaterial());
+                break;
               }
             }
 

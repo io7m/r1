@@ -741,7 +741,10 @@ public final class SBSceneController implements
             .getTexture());
 
       final KMaterialAlpha alpha =
-        new KMaterialAlpha(sd_alpha.isTranslucent(), sd_alpha.getOpacity());
+        new KMaterialAlpha(
+          sd_alpha.getOpacityType(),
+          sd_alpha.getOpacity(),
+          sd_alpha.getDepthThreshold());
 
       final KMaterialAlbedo diff =
         new KMaterialAlbedo(
