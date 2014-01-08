@@ -63,6 +63,7 @@ import com.io7m.renderer.RTransformTexture;
 import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.RVectorI4F;
 import com.io7m.renderer.RVectorReadable3F;
+import com.io7m.renderer.kernel.KMaterialAlpha.OpacityType;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
 final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
@@ -200,37 +201,44 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
   private static class AlphaSettings implements
     MaterialPanel<SBMaterialAlphaDescription>
   {
-    protected final @Nonnull JCheckBox      translucent;
-    protected final @Nonnull SBFloatHSlider opacity;
+    protected final @Nonnull SBOpacityTypeSelector type;
+    protected final @Nonnull SBFloatHSlider        opacity;
+    protected final @Nonnull SBFloatHSlider        depth_threshold;
 
     public AlphaSettings()
       throws ConstraintError
     {
       this.opacity = new SBFloatHSlider("Opacity", 0.0f, 1.0f);
-      this.translucent = new JCheckBox();
+      this.opacity.setCurrent(1.0f);
+      this.depth_threshold =
+        new SBFloatHSlider("Depth threshold", 0.0f, 1.0f);
+      this.opacity.setCurrent(0.5f);
+      this.type = new SBOpacityTypeSelector();
     }
 
     @Override public void mpLayout(
       final DesignGridLayout dg)
     {
+      dg.row().grid(new JLabel("Type")).add(this.type);
       dg
         .row()
-        .grid()
-        .add(this.opacity.getLabel())
-        .add(this.opacity.getSlider(), 3)
+        .grid(this.opacity.getLabel())
+        .add(this.opacity.getSlider(), 2)
         .add(this.opacity.getField());
-
-      dg.emptyRow();
-
-      dg.row().grid().add(new JLabel("Translucent")).add(this.translucent);
+      dg
+        .row()
+        .grid(this.depth_threshold.getLabel())
+        .add(this.depth_threshold.getSlider(), 2)
+        .add(this.depth_threshold.getField());
     }
 
     @Override public void mpLoadFrom(
       final SBInstanceDescription i)
     {
       final SBMaterialAlphaDescription mat_a = i.getMaterial().getAlpha();
-      this.translucent.setSelected(mat_a.isTranslucent());
+      this.type.setSelectedItem(mat_a.getOpacityType());
       this.opacity.setCurrent(mat_a.getOpacity());
+      this.depth_threshold.setCurrent(mat_a.getDepthThreshold());
     }
 
     @Override public SBMaterialAlphaDescription mpSave()
@@ -238,8 +246,9 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         ConstraintError
     {
       return new SBMaterialAlphaDescription(
-        this.translucent.isSelected(),
-        this.opacity.getCurrent());
+        (OpacityType) this.type.getSelectedItem(),
+        this.opacity.getCurrent(),
+        this.depth_threshold.getCurrent());
     }
 
   }

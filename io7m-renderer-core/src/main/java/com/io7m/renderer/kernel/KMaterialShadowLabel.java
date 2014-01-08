@@ -25,23 +25,19 @@ import com.io7m.jaux.UnreachableCodeException;
 
 enum KMaterialShadowLabel
 {
-  SHADOW_BASIC_OPAQUE("BO"),
-  SHADOW_BASIC_TRANSLUCENT("BT"),
-  SHADOW_BASIC_TRANSLUCENT_TEXTURED("BX"),
+  SHADOW_BASIC_DEPTH_CONSTANT("C"),
+  SHADOW_BASIC_DEPTH_UNIFORM("U"),
+  SHADOW_BASIC_DEPTH_MAPPED("M"),
 
-  SHADOW_BASIC_OPAQUE_PACKED4444("BOP4"),
-  SHADOW_BASIC_TRANSLUCENT_PACKED4444("BTP4"),
-  SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444("BXP4"),
-
-  SHADOW_VARIANCE_OPAQUE("VO"),
-  SHADOW_VARIANCE_TRANSLUCENT("VT"),
-  SHADOW_VARIANCE_TRANSLUCENT_TEXTURED("VX"),
+  SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444("CP4"),
+  SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444("UP4"),
+  SHADOW_BASIC_DEPTH_MAPPED_PACKED4444("MP4"),
 
   ;
 
   public static @Nonnull KMaterialShadowLabel fromShadow(
     final @Nonnull KGraphicsCapabilities capabilities,
-    final @Nonnull KMaterialShadowCastLabel caster,
+    final @Nonnull KMaterialDepthLabel caster,
     final @Nonnull KShadow shadow)
     throws ConstraintError
   {
@@ -55,49 +51,34 @@ enum KMaterialShadowLabel
       }
       case SHADOW_MAPPED_SOFT:
       {
-        return KMaterialShadowLabel.fromShadowVariance(caster);
+        throw new UnimplementedCodeException();
       }
     }
 
     throw new UnreachableCodeException();
   }
 
-  private static @Nonnull KMaterialShadowLabel fromShadowVariance(
-    final @Nonnull KMaterialShadowCastLabel caster)
-  {
-    switch (caster) {
-      case SHADOW_CAST_OPAQUE:
-        return SHADOW_VARIANCE_OPAQUE;
-      case SHADOW_CAST_TRANSLUCENT:
-        return SHADOW_VARIANCE_TRANSLUCENT;
-      case SHADOW_CAST_TRANSLUCENT_TEXTURED:
-        return SHADOW_VARIANCE_TRANSLUCENT_TEXTURED;
-    }
-
-    throw new UnimplementedCodeException();
-  }
-
   private static @Nonnull KMaterialShadowLabel fromShadowBasic(
     final @Nonnull KGraphicsCapabilities capabilities,
-    final @Nonnull KMaterialShadowCastLabel caster)
+    final @Nonnull KMaterialDepthLabel caster)
   {
     if (capabilities.getSupportsDepthTextures()) {
       switch (caster) {
-        case SHADOW_CAST_OPAQUE:
-          return SHADOW_BASIC_OPAQUE;
-        case SHADOW_CAST_TRANSLUCENT:
-          return SHADOW_BASIC_TRANSLUCENT;
-        case SHADOW_CAST_TRANSLUCENT_TEXTURED:
-          return SHADOW_BASIC_TRANSLUCENT_TEXTURED;
+        case DEPTH_CONSTANT:
+          return SHADOW_BASIC_DEPTH_CONSTANT;
+        case DEPTH_MAPPED:
+          return SHADOW_BASIC_DEPTH_MAPPED;
+        case DEPTH_UNIFORM:
+          return SHADOW_BASIC_DEPTH_UNIFORM;
       }
     } else {
       switch (caster) {
-        case SHADOW_CAST_OPAQUE:
-          return SHADOW_BASIC_OPAQUE_PACKED4444;
-        case SHADOW_CAST_TRANSLUCENT:
-          return SHADOW_BASIC_TRANSLUCENT_PACKED4444;
-        case SHADOW_CAST_TRANSLUCENT_TEXTURED:
-          return SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444;
+        case DEPTH_CONSTANT:
+          return SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444;
+        case DEPTH_MAPPED:
+          return SHADOW_BASIC_DEPTH_MAPPED_PACKED4444;
+        case DEPTH_UNIFORM:
+          return SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444;
       }
     }
 
@@ -120,16 +101,13 @@ enum KMaterialShadowLabel
   public boolean impliesUV()
   {
     switch (this) {
-      case SHADOW_BASIC_OPAQUE_PACKED4444:
-      case SHADOW_BASIC_OPAQUE:
-      case SHADOW_BASIC_TRANSLUCENT:
-      case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
-      case SHADOW_VARIANCE_OPAQUE:
-      case SHADOW_VARIANCE_TRANSLUCENT:
+      case SHADOW_BASIC_DEPTH_CONSTANT:
+      case SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444:
+      case SHADOW_BASIC_DEPTH_UNIFORM:
+      case SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444:
         return false;
-      case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
-      case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
-      case SHADOW_VARIANCE_TRANSLUCENT_TEXTURED:
+      case SHADOW_BASIC_DEPTH_MAPPED:
+      case SHADOW_BASIC_DEPTH_MAPPED_PACKED4444:
         return true;
     }
 

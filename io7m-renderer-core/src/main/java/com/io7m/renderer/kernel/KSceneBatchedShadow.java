@@ -16,177 +16,71 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Option;
-import com.io7m.renderer.kernel.KScene.KSceneShadows;
+import com.io7m.jaux.functional.Option.Some;
 
 public final class KSceneBatchedShadow
 {
-  @Immutable static final class BatchOpaqueShadow
-  {
-    private final @Nonnull List<KMeshInstanceTransformed> instances;
-    private final @Nonnull KMaterialShadowLabel           label;
-    private final @Nonnull KLight                         light;
-
-    private BatchOpaqueShadow(
-      final @Nonnull KLight light,
-      final @Nonnull KMaterialShadowLabel label,
-      final @Nonnull List<KMeshInstanceTransformed> instances)
-    {
-      this.light = light;
-      this.label = label;
-      this.instances = instances;
-    }
-
-    @Nonnull List<KMeshInstanceTransformed> getInstances()
-    {
-      return this.instances;
-    }
-
-    @Nonnull KMaterialShadowLabel getLabel()
-    {
-      return this.label;
-    }
-
-    @Nonnull KLight getLight()
-    {
-      return this.light;
-    }
-  }
-
-  @Immutable static final class BatchTranslucentShadow
-  {
-    private final @Nonnull List<KMeshInstanceTransformed> instances;
-    private final @Nonnull KLight                         light;
-
-    private BatchTranslucentShadow(
-      final @Nonnull KLight light,
-      final @Nonnull List<KMeshInstanceTransformed> instances)
-    {
-      this.light = light;
-      this.instances = instances;
-    }
-
-    @Nonnull List<KMeshInstanceTransformed> getInstances()
-    {
-      return this.instances;
-    }
-
-    @Nonnull KLight getLight()
-    {
-      return this.light;
-    }
-  }
-
-  /**
-   * Calculate labels for all shadow casters and batch.
-   */
-
-  @SuppressWarnings("synthetic-access") private static @Nonnull
-    Map<KLight, BatchOpaqueShadow>
-    makeOpaqueShadowCasters(
-      final @Nonnull KMaterialShadowLabelCache labels,
-      final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> casters)
-      throws ConstraintError
-  {
-    final HashMap<KLight, BatchOpaqueShadow> m =
-      new HashMap<KLight, BatchOpaqueShadow>();
-
-    for (final KLight light : casters.keySet()) {
-      final List<KMeshInstanceTransformed> instances = casters.get(light);
-
-      /**
-       * Labels will be identical for all opaque casters for a given light.
-       */
-
-      assert instances.size() >= 1;
-      final KMeshInstanceTransformed instance = instances.get(0);
-
-      final Option<KShadow> shadow_opt = light.getShadow();
-      assert shadow_opt.isSome();
-      final KShadow shadow = ((Option.Some<KShadow>) shadow_opt).value;
-
-      final KMaterialShadowLabel label =
-        labels.getShadowLabel(instance.getInstance(), shadow);
-      m.put(light, new BatchOpaqueShadow(light, label, instances));
-    }
-
-    return m;
-  }
-
-  @SuppressWarnings("synthetic-access") private static @Nonnull
-    Map<KLight, BatchTranslucentShadow>
-    makeTranslucentShadowCasters(
-      final @Nonnull KSceneShadows shadows)
-  {
-    final Map<KLight, List<KMeshInstanceTransformed>> casters =
-      shadows.getTranslucentShadowCasters();
-
-    final HashMap<KLight, BatchTranslucentShadow> batches =
-      new HashMap<KLight, BatchTranslucentShadow>();
-
-    for (final KLight light : casters.keySet()) {
-      final List<KMeshInstanceTransformed> instances = casters.get(light);
-      batches.put(light, new BatchTranslucentShadow(light, instances));
-    }
-
-    return batches;
-  }
-
   public static @Nonnull KSceneBatchedShadow newBatchedScene(
     final @Nonnull KScene.KSceneShadows shadows,
     final @Nonnull KMaterialShadowLabelCache shadow_labels)
     throws ConstraintError
   {
-    final Map<KLight, BatchOpaqueShadow> shadow_opaque =
-      KSceneBatchedShadow.makeOpaqueShadowCasters(
-        shadow_labels,
-        shadows.getOpaqueShadowCasters());
+    final Map<KLight, List<KMeshInstanceTransformed>> casters =
+      shadows.getShadowCasters();
+    final Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>> batched_casters =
+      new HashMap<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>>();
 
-    final Map<KLight, BatchTranslucentShadow> shadow_translucent =
-      KSceneBatchedShadow.makeTranslucentShadowCasters(shadows);
+    for (final KLight light : casters.keySet()) {
+      assert light.hasShadow();
 
-    return new KSceneBatchedShadow(
-      shadows.getShadowLights(),
-      shadow_opaque,
-      shadow_translucent);
+      final List<KMeshInstanceTransformed> instances = casters.get(light);
+      final HashMap<KMaterialShadowLabel, List<KMeshInstanceTransformed>> by_label =
+        new HashMap<KMaterialShadowLabel, List<KMeshInstanceTransformed>>();
+
+      for (final KMeshInstanceTransformed i : instances) {
+        final Some<KShadow> shadow = (Some<KShadow>) light.getShadow();
+
+        final KMaterialShadowLabel label =
+          shadow_labels.getShadowLabel(i.getInstance(), shadow.value);
+
+        List<KMeshInstanceTransformed> label_casters = null;
+        if (by_label.containsKey(label)) {
+          label_casters = by_label.get(label);
+        } else {
+          label_casters = new ArrayList<KMeshInstanceTransformed>();
+        }
+
+        label_casters.add(i);
+        by_label.put(label, label_casters);
+      }
+
+      assert batched_casters.containsKey(light) == false;
+      batched_casters.put(light, by_label);
+    }
+
+    return new KSceneBatchedShadow(batched_casters);
   }
 
-  private final @Nonnull Map<KLight, BatchOpaqueShadow>      shadow_opaque;
-  private final @Nonnull Map<KLight, BatchTranslucentShadow> shadow_translucent;
-  private final @Nonnull Set<KLight>                         shadow_lights;
+  private final @Nonnull Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>> shadow_casters;
 
   private KSceneBatchedShadow(
-    final @Nonnull Set<KLight> shadow_lights,
-    final @Nonnull Map<KLight, BatchOpaqueShadow> shadow_opaque,
-    final @Nonnull Map<KLight, BatchTranslucentShadow> shadow_translucent)
+    final @Nonnull Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>> shadow_casters)
   {
-    this.shadow_opaque = shadow_opaque;
-    this.shadow_translucent = shadow_translucent;
-    this.shadow_lights = shadow_lights;
+    this.shadow_casters = shadow_casters;
   }
 
-  @Nonnull Map<KLight, BatchOpaqueShadow> getShadowCastersOpaque()
+  public @Nonnull
+    Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>>
+    getShadowCasters()
   {
-    return this.shadow_opaque;
+    return this.shadow_casters;
   }
-
-  @Nonnull Map<KLight, BatchTranslucentShadow> getShadowCastersTranslucent()
-  {
-    return this.shadow_translucent;
-  }
-
-  @Nonnull Set<KLight> getShadowLights()
-  {
-    return this.shadow_lights;
-  }
-
 }
