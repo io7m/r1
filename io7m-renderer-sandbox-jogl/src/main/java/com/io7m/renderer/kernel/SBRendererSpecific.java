@@ -836,7 +836,11 @@ public final class SBRendererSpecific implements KRenderer
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
     final KSceneBatchedForward batched =
-      KSceneBatchedForward.newBatchedScene(this.decider, this.decider, scene);
+      KSceneBatchedForward.newBatchedScene(
+        this.decider,
+        this.decider,
+        this.decider,
+        scene);
 
     final KMutableMatrices.WithCamera mwc =
       this.matrices.withCamera(scene.getCamera());

@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -54,8 +55,6 @@ import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.kernel.KLight.KProjective;
-import com.io7m.renderer.kernel.KSceneBatchedShadow.BatchOpaqueShadow;
-import com.io7m.renderer.kernel.KSceneBatchedShadow.BatchTranslucentShadow;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KTransform.Context;
 
@@ -97,7 +96,7 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
     final @Nonnull KMaterialShadowLabel label)
   {
     cache.setLength(0);
-    cache.append("shadow_");
+    cache.append("depth_");
     cache.append(label.getCode());
   }
 
@@ -124,21 +123,20 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
       JCGLException
   {
     switch (label) {
-      case SHADOW_BASIC_OPAQUE:
-      case SHADOW_BASIC_TRANSLUCENT:
-      case SHADOW_BASIC_TRANSLUCENT_TEXTURED:
+      case SHADOW_BASIC_DEPTH_UNIFORM:
+      case SHADOW_BASIC_DEPTH_CONSTANT:
+      case SHADOW_BASIC_DEPTH_MAPPED:
+      {
         gc.colorBufferMask(false, false, false, false);
         break;
-      case SHADOW_BASIC_OPAQUE_PACKED4444:
-      case SHADOW_BASIC_TRANSLUCENT_PACKED4444:
-      case SHADOW_BASIC_TRANSLUCENT_TEXTURED_PACKED4444:
+      }
+      case SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444:
+      case SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444:
+      case SHADOW_BASIC_DEPTH_MAPPED_PACKED4444:
+      {
         gc.colorBufferMask(true, true, true, true);
         break;
-      case SHADOW_VARIANCE_OPAQUE:
-      case SHADOW_VARIANCE_TRANSLUCENT:
-      case SHADOW_VARIANCE_TRANSLUCENT_TEXTURED:
-        gc.colorBufferMask(true, true, false, false);
-        break;
+      }
     }
   }
 
@@ -177,23 +175,26 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
     this.m4_view = new RMatrixM4x4F<RTransformView>();
   }
 
-  private void renderShadowMapOpaqueBatch(
+  private void renderShadowMapBatch(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KProjective lp,
-    final @Nonnull BatchOpaqueShadow batch)
-    throws KShaderCacheException,
-      ConstraintError,
-      LUCacheException,
+    final @Nonnull KMaterialShadowLabel label,
+    final @Nonnull KProjective light,
+    final @Nonnull List<KMeshInstanceTransformed> batch)
+    throws ConstraintError,
       JCGLException,
+      KShaderCacheException,
+      LUCacheException,
       JCBExecutionException
   {
-    final RMatrixI4x4F<RTransformProjection> projection = lp.getProjection();
+    final RMatrixI4x4F<RTransformProjection> projection =
+      light.getProjection();
 
     KMatrices.makeViewMatrix(
       this.transform_context,
-      lp.getPosition(),
-      lp.getOrientation(),
+      light.getPosition(),
+      light.getOrientation(),
       this.m4_view);
+
     final RMatrixI4x4F<RTransformView> view =
       new RMatrixI4x4F<RTransformView>(this.m4_view);
 
@@ -201,12 +202,10 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
       this.matrices.withObserver(view, projection);
 
     try {
-      KShadowMapRendererActual.makeShadowLabel(
-        this.label_cache,
-        batch.getLabel());
+      KShadowMapRendererActual.makeShadowLabel(this.label_cache, label);
       KShadowMapRendererActual.renderShadowMapsConfigureDepthColorMasks(
         gc,
-        batch.getLabel());
+        label);
 
       final KProgram p =
         this.shader_cache.luCacheGet(this.label_cache.toString());
@@ -224,19 +223,17 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
             program,
             mwc.getMatrixProjection());
 
-          final List<KMeshInstanceTransformed> instances =
-            batch.getInstances();
-
-          for (int index = 0; index < instances.size(); ++index) {
-            final KMeshInstanceTransformed instance = instances.get(index);
+          for (int index = 0; index < batch.size(); ++index) {
+            final KMeshInstanceTransformed instance = batch.get(index);
             final KMutableMatrices.WithInstance mwi =
               mwc.withInstance(instance);
             try {
-              KShadowMapRendererActual.this.renderShadowMapOpaqueMesh(
+              KShadowMapRendererActual.this.renderShadowMapMesh(
                 gc,
                 program,
                 mwi,
-                instance);
+                instance,
+                label);
             } finally {
               mwi.instanceFinish();
             }
@@ -249,16 +246,37 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
     }
   }
 
-  @SuppressWarnings("static-method") private void renderShadowMapOpaqueMesh(
+  private
+    void
+    renderShadowMapBatches(
+      final @Nonnull JCGLInterfaceCommon gc,
+      final @Nonnull KProjective projective,
+      final @Nonnull Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>> by_label)
+      throws JCGLException,
+        KShaderCacheException,
+        JCBExecutionException,
+        ConstraintError,
+        LUCacheException
+  {
+    for (final KMaterialShadowLabel label : by_label.keySet()) {
+      final List<KMeshInstanceTransformed> batch = by_label.get(label);
+      this.renderShadowMapBatch(gc, label, projective, batch);
+    }
+  }
+
+  @SuppressWarnings("static-method") private void renderShadowMapMesh(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCBProgram program,
     final @Nonnull KMutableMatrices.WithInstance mwi,
-    final @Nonnull KMeshInstanceTransformed i)
+    final @Nonnull KMeshInstanceTransformed i,
+    final @Nonnull KMaterialShadowLabel label)
     throws ConstraintError,
       JCGLException,
       JCBExecutionException
   {
+    final List<TextureUnit> units = gc.textureGetUnits();
     final KMeshInstance actual = i.getInstance();
+    final KMaterial material = actual.getMaterial();
     final KMesh mesh = actual.getMesh();
     final ArrayBuffer array = mesh.getArrayBuffer();
     final IndexBuffer indices = mesh.getIndexBuffer();
@@ -271,6 +289,33 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
       KShadingProgramCommon.putMatrixModelView(
         program,
         mwi.getMatrixModelView());
+
+      switch (label) {
+        case SHADOW_BASIC_DEPTH_CONSTANT:
+        case SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444:
+        {
+          break;
+        }
+        case SHADOW_BASIC_DEPTH_UNIFORM:
+        case SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444:
+        {
+          KShadingProgramCommon.putMaterial(program, material);
+          break;
+        }
+        case SHADOW_BASIC_DEPTH_MAPPED:
+        case SHADOW_BASIC_DEPTH_MAPPED_PACKED4444:
+        {
+          KShadingProgramCommon.putMaterial(program, material);
+          KShadingProgramCommon.putMatrixUV(program, mwi.getMatrixUV());
+          KShadingProgramCommon.bindAttributeUV(program, array);
+          KShadingProgramCommon.bindPutTextureAlbedo(
+            program,
+            gc,
+            material,
+            units.get(0));
+          break;
+        }
+      }
 
       program.programExecute(new JCBProgramProcedure() {
         @Override public void call()
@@ -286,14 +331,14 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
     }
   }
 
-  private void renderShadowMapsOpaqueBatches(
+  private void renderShadowMaps(
     final @Nonnull KSceneBatchedShadow batched)
-    throws KShaderCacheException,
+    throws JCGLException,
       ConstraintError,
+      KShaderCacheException,
+      JCBExecutionException,
       LUCacheException,
-      JCGLException,
-      KShadowCacheException,
-      JCBExecutionException
+      KShadowCacheException
   {
     final JCGLInterfaceCommon gc = this.g.getGLCommon();
 
@@ -322,25 +367,30 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
 
     gc.blendingDisable();
 
-    final Map<KLight, BatchOpaqueShadow> opaque_batches =
-      batched.getShadowCastersOpaque();
+    /**
+     * For each light, render all batches into the shadow map associated with
+     * the light.
+     */
 
-    for (final KLight light : opaque_batches.keySet()) {
-      final BatchOpaqueShadow batch = opaque_batches.get(light);
+    final Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>> by_light =
+      batched.getShadowCasters();
+
+    for (final KLight light : by_light.keySet()) {
+      assert light.hasShadow();
 
       switch (light.getType()) {
         case LIGHT_DIRECTIONAL:
+        case LIGHT_SPHERE:
         {
           break;
         }
         case LIGHT_PROJECTIVE:
         {
-          final KProjective projective = (KProjective) light;
-          final Option<KShadow> os = projective.getShadow();
-          assert os.isSome();
-          final KShadow s = ((Option.Some<KShadow>) os).value;
+          final KProjective projective = (KLight.KProjective) light;
+          final KShadow shadow =
+            ((Option.Some<KShadow>) projective.getShadow()).value;
 
-          switch (s.getType()) {
+          switch (shadow.getType()) {
             case SHADOW_MAPPED_SOFT:
             {
               // TODO:
@@ -349,7 +399,7 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
             case SHADOW_MAPPED_BASIC:
             {
               final KShadowMapBasic smb =
-                (KShadowMapBasic) this.shadow_cache.pcCacheGet(s);
+                (KShadowMapBasic) this.shadow_cache.pcCacheGet(shadow);
               final FramebufferReferenceUsable fb =
                 smb.mapGetDepthFramebuffer();
 
@@ -359,274 +409,22 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
                 this.viewport_size.x = (int) area.getRangeX().getInterval();
                 this.viewport_size.y = (int) area.getRangeY().getInterval();
                 gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
-                this.renderShadowMapOpaqueBatch(gc, projective, batch);
+
+                final Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>> by_label =
+                  by_light.get(projective);
+
+                this.renderShadowMapBatches(gc, projective, by_label);
               } finally {
                 gc.framebufferDrawUnbind();
               }
               break;
             }
           }
-          break;
-        }
-        case LIGHT_SPHERE:
-        {
+
           break;
         }
       }
     }
-  }
-
-  private void renderShadowMapsPrecacheMaps(
-    final @Nonnull KSceneBatchedShadow batched)
-    throws KShadowCacheException,
-      ConstraintError,
-      LUCacheException,
-      JCGLException
-  {
-    final JCGLInterfaceCommon gc = this.g.getGLCommon();
-
-    for (final KLight l : batched.getShadowLights()) {
-      switch (l.getType()) {
-        case LIGHT_DIRECTIONAL:
-        case LIGHT_SPHERE:
-          break;
-        case LIGHT_PROJECTIVE:
-          final KProjective kp = (KProjective) l;
-          final KShadow s = ((Option.Some<KShadow>) kp.getShadow()).value;
-          this.renderShadowMapsPrecacheShadow(gc, s);
-      }
-    }
-  }
-
-  private void renderShadowMapsPrecacheShadow(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KShadow s)
-    throws KShadowCacheException,
-      ConstraintError,
-      LUCacheException,
-      JCGLException
-  {
-    switch (s.getType()) {
-      case SHADOW_MAPPED_SOFT:
-      {
-        // TODO
-        throw new UnimplementedCodeException();
-      }
-      case SHADOW_MAPPED_BASIC:
-      {
-        final KShadowMap fb = this.shadow_cache.pcCacheGet(s);
-        gc.framebufferDrawBind(fb.mapGetDepthFramebuffer());
-        try {
-          gc.colorBufferMask(true, true, true, true);
-          gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
-          gc.depthBufferWriteEnable();
-          gc.depthBufferClear(1.0f);
-        } finally {
-          gc.framebufferDrawUnbind();
-        }
-        break;
-      }
-    }
-  }
-
-  private void renderShadowMapsTranslucentBatches(
-    final KSceneBatchedShadow batched)
-    throws KShadowCacheException,
-      ConstraintError,
-      LUCacheException,
-      JCGLException,
-      KShaderCacheException,
-      JCBExecutionException
-  {
-    final JCGLInterfaceCommon gc = this.g.getGLCommon();
-
-    /**
-     * Translucent objects will contribute to the depth buffer but are not
-     * subject to being tested against the existing contents of the depth
-     * buffer, due to being drawn in a carefully defined order.
-     * 
-     * On platforms supporting depth textures (which is most of them), the
-     * depth buffer is the only thing produced by the renderer.
-     */
-
-    gc.cullingDisable();
-    gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
-    gc.depthBufferWriteEnable();
-
-    /**
-     * On platforms that don't support depth textures, the depth values are
-     * packed into a colour texture (including the alpha channel), so it's
-     * critical that blending is disabled.
-     */
-
-    gc.blendingDisable();
-
-    final Map<KLight, BatchTranslucentShadow> translucent_batches =
-      batched.getShadowCastersTranslucent();
-
-    for (final KLight light : translucent_batches.keySet()) {
-      final BatchTranslucentShadow batch = translucent_batches.get(light);
-
-      switch (light.getType()) {
-        case LIGHT_DIRECTIONAL:
-        {
-          break;
-        }
-        case LIGHT_PROJECTIVE:
-        {
-          final KProjective projective = (KProjective) light;
-          final Option<KShadow> os = projective.getShadow();
-          assert os.isSome();
-          final KShadow s = ((Option.Some<KShadow>) os).value;
-
-          switch (s.getType()) {
-            case SHADOW_MAPPED_SOFT:
-            {
-              // TODO:
-              throw new UnimplementedCodeException();
-            }
-            case SHADOW_MAPPED_BASIC:
-            {
-              final KShadowMapBasic map =
-                (KShadowMapBasic) this.shadow_cache.pcCacheGet(s);
-              gc.framebufferDrawBind(map.mapGetDepthFramebuffer());
-              try {
-                final AreaInclusive area = map.mapGetDepthFramebufferArea();
-                this.viewport_size.x = (int) area.getRangeX().getInterval();
-                this.viewport_size.y = (int) area.getRangeY().getInterval();
-                gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
-                this.renderShadowMapTranslucentBatch(gc, projective, batch);
-              } finally {
-                gc.framebufferDrawUnbind();
-              }
-              break;
-            }
-          }
-          break;
-        }
-        case LIGHT_SPHERE:
-        {
-          break;
-        }
-      }
-    }
-  }
-
-  private void renderShadowMapTranslucentBatch(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KProjective projective,
-    final @Nonnull BatchTranslucentShadow batch)
-    throws ConstraintError,
-      KShaderCacheException,
-      JCGLException,
-      LUCacheException,
-      JCBExecutionException
-  {
-    final RMatrixI4x4F<RTransformProjection> projection =
-      projective.getProjection();
-
-    KMatrices.makeViewMatrix(
-      this.transform_context,
-      projective.getPosition(),
-      projective.getOrientation(),
-      this.m4_view);
-    final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(this.m4_view);
-    final KMutableMatrices.WithCamera mwc =
-      this.matrices.withObserver(view, projection);
-
-    final KShadow shadow =
-      ((Option.Some<KShadow>) projective.getShadow()).value;
-
-    try {
-      final List<KMeshInstanceTransformed> instances = batch.getInstances();
-      for (int index = 0; index < instances.size(); ++index) {
-        final KMeshInstanceTransformed instance = instances.get(index);
-        final KMutableMatrices.WithInstance mwi = mwc.withInstance(instance);
-        try {
-          this.renderShadowMapTranslucentMesh(gc, shadow, mwi, instance);
-        } finally {
-          mwi.instanceFinish();
-        }
-      }
-    } finally {
-      mwc.cameraFinish();
-    }
-  }
-
-  private void renderShadowMapTranslucentMesh(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KShadow shadow,
-    final @Nonnull KMutableMatrices.WithInstance mwi,
-    final @Nonnull KMeshInstanceTransformed i)
-    throws KShaderCacheException,
-      ConstraintError,
-      LUCacheException,
-      JCGLException,
-      JCBExecutionException
-  {
-    final KMeshInstance actual = i.getInstance();
-
-    final KMaterialShadowLabel label =
-      this.label_decider.getShadowLabel(actual, shadow);
-
-    KShadowMapRendererActual.makeShadowLabel(this.label_cache, label);
-    KShadowMapRendererActual.renderShadowMapsConfigureDepthColorMasks(
-      gc,
-      label);
-
-    final KProgram p =
-      this.shader_cache.luCacheGet(this.label_cache.toString());
-    final JCBExecutionAPI e = p.getExecutable();
-
-    e.execRun(new JCBExecutorProcedure() {
-      @Override public void call(
-        final @Nonnull JCBProgram program)
-        throws ConstraintError,
-          JCGLException,
-          JCBExecutionException
-      {
-        final KMesh mesh = actual.getMesh();
-        final ArrayBuffer array = mesh.getArrayBuffer();
-        final IndexBuffer indices = mesh.getIndexBuffer();
-
-        try {
-          gc.arrayBufferBind(array);
-
-          KShadingProgramCommon.putMatrixProjection(
-            program,
-            mwi.getMatrixProjection());
-          KShadingProgramCommon.bindAttributePosition(program, array);
-          KShadingProgramCommon.putMatrixModelView(
-            program,
-            mwi.getMatrixModelView());
-          KShadingProgramCommon.putMaterial(program, actual.getMaterial());
-
-          if (label.impliesUV()) {
-            KShadingProgramCommon.bindAttributeUV(program, array);
-            KShadingProgramCommon.putMatrixUV(program, mwi.getMatrixUV());
-            final List<TextureUnit> units = gc.textureGetUnits();
-            KShadingProgramCommon.bindPutTextureAlbedo(
-              program,
-              gc,
-              actual.getMaterial(),
-              units.get(0));
-          }
-
-          program.programExecute(new JCBProgramProcedure() {
-            @Override public void call()
-              throws ConstraintError,
-                JCGLException
-            {
-              gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-            }
-          });
-
-        } finally {
-          gc.arrayBufferUnbind();
-        }
-      }
-    });
   }
 
   @Override public void shadowRendererEvaluate(
@@ -645,15 +443,70 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
 
     this.state = State.SHADOW_RENDERER_STARTED;
     try {
-      this.renderShadowMapsPrecacheMaps(batched);
-      this.renderShadowMapsOpaqueBatches(batched);
-      this.renderShadowMapsTranslucentBatches(batched);
+      this.renderShadowMapsInitialize(batched.getShadowCasters().keySet());
+      this.renderShadowMaps(batched);
     } catch (final LUCacheException x) {
       throw new UnreachableCodeException(x);
     } catch (final JCBExecutionException x) {
       KShadowMapRendererActual.handleJCBException(x);
     }
     this.state = State.SHADOW_RENDERER_EVALUATED;
+  }
+
+  private void renderShadowMapsInitialize(
+    final @Nonnull Set<KLight> lights)
+    throws JCGLException,
+      ConstraintError,
+      KShadowCacheException,
+      LUCacheException
+  {
+    final JCGLInterfaceCommon gc = this.g.getGLCommon();
+
+    for (final KLight light : lights) {
+      assert light.hasShadow();
+
+      switch (light.getType()) {
+        case LIGHT_DIRECTIONAL:
+        case LIGHT_SPHERE:
+        {
+          break;
+        }
+        case LIGHT_PROJECTIVE:
+        {
+          final KProjective projective = (KLight.KProjective) light;
+          final KShadow shadow =
+            ((Option.Some<KShadow>) projective.getShadow()).value;
+
+          switch (shadow.getType()) {
+            case SHADOW_MAPPED_SOFT:
+            {
+              // TODO:
+              throw new UnimplementedCodeException();
+            }
+            case SHADOW_MAPPED_BASIC:
+            {
+              final KShadowMapBasic smb =
+                (KShadowMapBasic) this.shadow_cache.pcCacheGet(shadow);
+              final FramebufferReferenceUsable fb =
+                smb.mapGetDepthFramebuffer();
+
+              gc.framebufferDrawBind(fb);
+              try {
+                gc.colorBufferMask(true, true, true, true);
+                gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+                gc.depthBufferWriteEnable();
+                gc.depthBufferClear(1.0f);
+              } finally {
+                gc.framebufferDrawUnbind();
+              }
+              break;
+            }
+          }
+
+          break;
+        }
+      }
+    }
   }
 
   @Override public void shadowRendererFinish()

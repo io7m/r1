@@ -58,7 +58,11 @@ public final class SandboxConfig
   private final @Nonnull SBOpenGLProfile profile;
   private final @Nonnull Properties      props;
   private final long                     restrict_units;
-  private final @Nonnull File            shader_archive_file;
+  private final @Nonnull File            shader_archive_debug_file;
+  private final @Nonnull File            shader_archive_depth_file;
+  private final @Nonnull File            shader_archive_forward_file;
+  private final @Nonnull File            shader_archive_postprocessing_file;
+  private final @Nonnull File            shader_archive_shadow_file;
 
   public SandboxConfig(
     final @Nonnull Properties props)
@@ -68,10 +72,27 @@ public final class SandboxConfig
   {
     this.props = Constraints.constrainNotNull(props, "Properties");
 
-    this.shader_archive_file =
+    this.shader_archive_debug_file =
       new File(PropertyUtils.getString(
         props,
-        "com.io7m.renderer.sandbox.shader_archive"));
+        "com.io7m.renderer.sandbox.shaders.debug"));
+    this.shader_archive_depth_file =
+      new File(PropertyUtils.getString(
+        props,
+        "com.io7m.renderer.sandbox.shaders.depth"));
+    this.shader_archive_shadow_file =
+      new File(PropertyUtils.getString(
+        props,
+        "com.io7m.renderer.sandbox.shaders.shadow"));
+    this.shader_archive_forward_file =
+      new File(PropertyUtils.getString(
+        props,
+        "com.io7m.renderer.sandbox.shaders.forward"));
+    this.shader_archive_postprocessing_file =
+      new File(PropertyUtils.getString(
+        props,
+        "com.io7m.renderer.sandbox.shaders.postprocessing"));
+
     this.opengl_debug =
       PropertyUtils.getOptionalBoolean(
         props,
@@ -113,9 +134,29 @@ public final class SandboxConfig
     return this.restrict_units;
   }
 
-  public @Nonnull File getShaderArchiveFile()
+  public @Nonnull File getShaderArchiveDebugFile()
   {
-    return this.shader_archive_file;
+    return this.shader_archive_debug_file;
+  }
+
+  public @Nonnull File getShaderArchiveDepthFile()
+  {
+    return this.shader_archive_depth_file;
+  }
+
+  public @Nonnull File getShaderArchiveForwardFile()
+  {
+    return this.shader_archive_forward_file;
+  }
+
+  public @Nonnull File getShaderArchivePostprocessingFile()
+  {
+    return this.shader_archive_postprocessing_file;
+  }
+
+  public @Nonnull File getShaderArchiveShadowFile()
+  {
+    return this.shader_archive_shadow_file;
   }
 
   public boolean isOpenGLDebug()
