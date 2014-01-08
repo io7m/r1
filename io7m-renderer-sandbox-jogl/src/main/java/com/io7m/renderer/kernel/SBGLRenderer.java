@@ -45,9 +45,11 @@ import nu.xom.Document;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
+import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferUsable;
@@ -68,6 +70,7 @@ import com.io7m.jcanephora.JCBProgram;
 import com.io7m.jcanephora.JCBProgramProcedure;
 import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLImplementationJOGL;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLInterfaceGL3;
@@ -647,7 +650,7 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull AtomicReference<SBSceneControllerRenderer>          controller;
   private final @Nonnull FSCapabilityAll                                     filesystem;
   private boolean                                                            first;
-  private @CheckForNull KFramebufferRGBA                                     framebuffer;
+  private @CheckForNull KFramebufferForwardType                              framebuffer;
   private @CheckForNull JCGLImplementationJOGL                               gi;
   private @Nonnull SBVisibleGridPlane                                        grid;
   private final @Nonnull AtomicBoolean                                       grid_show;
@@ -743,7 +746,9 @@ final class SBGLRenderer implements GLEventListener
     this.filesystem.mountClasspathArchive(
       SBGLRenderer.class,
       PathVirtual.ROOT);
-    this.filesystem.mountClasspathArchive(KRenderer.class, PathVirtual.ROOT);
+    this.filesystem.mountClasspathArchive(
+      KRendererAPIOld.class,
+      PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
       config.getShaderArchiveDebugFile(),
       PathVirtual.ROOT);
@@ -1171,7 +1176,7 @@ final class SBGLRenderer implements GLEventListener
       this.log.debug("Taking framebuffer snapshot");
       SBTextureUtilities.textureDumpTimestampedTemporary2DStatic(
         this.gi,
-        this.framebuffer.kframebufferGetRGBAOutputTexture(),
+        this.framebuffer.kFramebufferGetRGBATexture(),
         "framebuffer",
         this.log);
     }
@@ -1298,7 +1303,7 @@ final class SBGLRenderer implements GLEventListener
           "debug_flat_uv",
           this.log);
 
-      this.reloadSizedResources(drawable, gl);
+      this.reloadSizedResources(drawable, this.gi);
       this.running.set(RunningState.STATE_RUNNING);
     } catch (final JCGLException e) {
       this.failedPermanently(e);
@@ -1344,7 +1349,6 @@ final class SBGLRenderer implements GLEventListener
       {
         return KRendererDebugDepth.rendererNew(
           this.gi,
-          this.filesystem,
           this.label_cache,
           this.shader_cache,
           this.log);
@@ -1407,19 +1411,11 @@ final class SBGLRenderer implements GLEventListener
       }
       case KRENDERER_FORWARD:
       {
-        return KRendererForward.rendererNew(
+        return KRendererForwardActual.rendererNew(
           this.gi,
           this.shader_cache,
           this.shadow_map_renderer,
           this.label_cache,
-          this.log);
-      }
-      case KRENDERER_DEBUG_DEPTH_SHADOW:
-      {
-        return KRendererDebugDepthShadow.rendererNew(
-          this.gi,
-          this.label_cache,
-          this.shader_cache,
           this.log);
       }
       case KRENDERER_BLUR_DEMO:
@@ -1502,26 +1498,32 @@ final class SBGLRenderer implements GLEventListener
 
   private void reloadSizedResources(
     final @Nonnull GLAutoDrawable drawable,
-    final @Nonnull JCGLInterfaceCommon gl)
+    final @Nonnull JCGLImplementation g)
     throws ConstraintError,
       JCGLException,
       JCGLUnsupportedException
   {
     final AreaInclusive size = SBGLRenderer.drawableArea(drawable);
+    final JCGLInterfaceCommon gc = g.getGLCommon();
 
-    final KFramebuffer old = this.framebuffer;
-    this.framebuffer = KFramebufferCommon.newBasicRGBA(this.gi, size);
+    final KFramebufferForwardType old = this.framebuffer;
+    this.framebuffer =
+      KFramebufferForward.newFramebuffer(
+        g,
+        size,
+        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+        TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
     if (old != null) {
-      old.kframebufferDelete(this.gi);
+      old.kFramebufferDelete(g);
     }
 
     if (this.screen_quad != null) {
-      gl.arrayBufferDelete(this.screen_quad.getArrayBuffer());
-      gl.indexBufferDelete(this.screen_quad.getIndexBuffer());
+      gc.arrayBufferDelete(this.screen_quad.getArrayBuffer());
+      gc.indexBufferDelete(this.screen_quad.getIndexBuffer());
     }
 
     this.screen_quad =
-      new SBQuad(gl, drawable.getWidth(), drawable.getHeight(), -1, this.log);
+      new SBQuad(gc, drawable.getWidth(), drawable.getHeight(), -1, this.log);
   }
 
   private void renderResultsToScreen(
@@ -1701,8 +1703,7 @@ final class SBGLRenderer implements GLEventListener
 
             gl.texture2DStaticBind(
               SBGLRenderer.this.texture_units.get(0),
-              SBGLRenderer.this.framebuffer
-                .kframebufferGetRGBAOutputTexture());
+              SBGLRenderer.this.framebuffer.kFramebufferGetRGBATexture());
             KShadingProgramCommon.putTextureAlbedo(
               program,
               SBGLRenderer.this.texture_units.get(0));
@@ -2158,9 +2159,43 @@ final class SBGLRenderer implements GLEventListener
           0.0f,
           0.0f,
           0.0f));
-        this.renderer.rendererEvaluate(
-          this.framebuffer,
-          builder.sceneCreate());
+
+        final KFramebufferForwardType fb = SBGLRenderer.this.framebuffer;
+        this.renderer
+          .rendererVisitableAccept(new KRendererVisitor<Unit, JCGLException>() {
+            @Override public Unit rendererVisitDebug(
+              final KRendererDebug r)
+              throws JCGLException,
+                ConstraintError,
+                IOException,
+                KXMLException
+            {
+              r.rendererDebugEvaluate(fb, builder.sceneCreate());
+              return Unit.unit();
+            }
+
+            @Override public Unit rendererVisitDeferred(
+              final KRendererDeferred r)
+              throws JCGLException,
+                ConstraintError,
+                IOException,
+                KXMLException
+            {
+              // TODO: No deferred renderers yet
+              throw new UnimplementedCodeException();
+            }
+
+            @Override public Unit rendererVisitForward(
+              final KRendererForward r)
+              throws JCGLException,
+                ConstraintError,
+                IOException,
+                KXMLException
+            {
+              r.rendererForwardEvaluate(fb, builder.sceneCreate());
+              return Unit.unit();
+            }
+          });
       }
     }
   }
@@ -2175,8 +2210,7 @@ final class SBGLRenderer implements GLEventListener
     try {
       this.log.debug("Reshape " + width + "x" + height);
       this.viewport = SBGLRenderer.drawableArea(drawable);
-      final JCGLInterfaceCommon gl = this.gi.getGLCommon();
-      this.reloadSizedResources(drawable, gl);
+      this.reloadSizedResources(drawable, this.gi);
     } catch (final JCGLException e) {
       this.failedPermanently(e);
     } catch (final ConstraintError e) {

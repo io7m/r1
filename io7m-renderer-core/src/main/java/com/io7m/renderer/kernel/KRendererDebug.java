@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,14 +16,16 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.JCGLResourceUsable;
+import javax.annotation.Nonnull;
 
-public interface KFramebufferUsable extends JCGLResourceUsable
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.JCGLException;
+
+public interface KRendererDebug extends KRenderer
 {
-  /**
-   * Retrieve the size of the area to which rendering will occur.
-   */
-
-  public AreaInclusive kFramebufferGetArea();
+  public void rendererDebugEvaluate(
+    final @Nonnull KFramebufferRGBAUsable framebuffer,
+    final @Nonnull KScene scene)
+    throws JCGLException,
+      ConstraintError;
 }

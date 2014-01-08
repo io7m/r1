@@ -33,12 +33,9 @@ import com.io7m.jcanephora.JCBExecutionException;
 import com.io7m.jcanephora.JCBExecutorProcedure;
 import com.io7m.jcanephora.JCBProgram;
 import com.io7m.jcanephora.JCBProgramProcedure;
-import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLSLVersion;
-import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
@@ -48,23 +45,21 @@ import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
-import com.io7m.jvvfs.FSCapabilityRead;
+import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererDebug;
 
-final class KRendererDebugDepth implements KRenderer
+final class KRendererDebugDepth extends KAbstractRendererDebug
 {
+  private static final @Nonnull String NAME = "debug-depth";
+
   public static
     KRendererDebugDepth
     rendererNew(
       final @Nonnull JCGLImplementation g,
-      final @Nonnull FSCapabilityRead fs,
       final @Nonnull KMaterialDepthLabelCache depth_labels,
       final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
       final @Nonnull Log log)
-      throws JCGLCompileException,
-        JCGLUnsupportedException,
-        JCGLException
   {
-    return new KRendererDebugDepth(g, fs, depth_labels, shader_cache, log);
+    return new KRendererDebugDepth(g, depth_labels, shader_cache, log);
   }
 
   private final @Nonnull VectorM4F                                        background;
@@ -78,16 +73,13 @@ final class KRendererDebugDepth implements KRenderer
 
   private KRendererDebugDepth(
     final @Nonnull JCGLImplementation gl,
-    final @Nonnull FSCapabilityRead fs,
     final @Nonnull KMaterialDepthLabelCache depth_labels,
     final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
     final @Nonnull Log log)
-    throws JCGLException
   {
-    this.log = new Log(log, "krenderer-debug-depth");
+    super(KRendererDebugDepth.NAME);
+    this.log = new Log(log, KRendererDebugDepth.NAME);
     this.gl = gl;
-
-    final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrices = KMutableMatrices.newMatrices();
@@ -109,7 +101,7 @@ final class KRendererDebugDepth implements KRenderer
     return null;
   }
 
-  @Override public void rendererEvaluate(
+  @Override public void rendererDebugEvaluate(
     final @Nonnull KFramebufferRGBAUsable framebuffer,
     final @Nonnull KScene scene)
     throws JCGLException,
@@ -122,9 +114,9 @@ final class KRendererDebugDepth implements KRenderer
 
     try {
       final FramebufferReferenceUsable output_buffer =
-        framebuffer.kframebufferGetFramebuffer();
+        framebuffer.kFramebufferGetColorFramebuffer();
 
-      final AreaInclusive area = framebuffer.kframebufferGetArea();
+      final AreaInclusive area = framebuffer.kFramebufferGetArea();
       this.viewport_size.x = (int) area.getRangeX().getInterval();
       this.viewport_size.y = (int) area.getRangeY().getInterval();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -47,9 +47,12 @@ import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererDebug;
 
-final class KRendererDebugTangentsVertexLocal implements KRenderer
+final class KRendererDebugTangentsVertexLocal extends KAbstractRendererDebug
 {
+  private static final @Nonnull String NAME = "debug-tangents-vertex-local";
+
   public static KRendererDebugTangentsVertexLocal rendererNew(
     final @Nonnull JCGLImplementation g,
     final @Nonnull FSCapabilityRead fs,
@@ -85,7 +88,9 @@ final class KRendererDebugTangentsVertexLocal implements KRenderer
       JCGLException,
       KXMLException
   {
-    this.log = new Log(log, "krenderer-debug-tangents-vertex-local");
+    super(KRendererDebugTangentsVertexLocal.NAME);
+
+    this.log = new Log(log, KRendererDebugTangentsVertexLocal.NAME);
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
@@ -118,7 +123,7 @@ final class KRendererDebugTangentsVertexLocal implements KRenderer
     return null;
   }
 
-  @Override public void rendererEvaluate(
+  @Override public void rendererDebugEvaluate(
     final @Nonnull KFramebufferRGBAUsable framebuffer,
     final @Nonnull KScene scene)
     throws JCGLException,
@@ -131,8 +136,8 @@ final class KRendererDebugTangentsVertexLocal implements KRenderer
 
     try {
       final FramebufferReferenceUsable output_buffer =
-        framebuffer.kframebufferGetFramebuffer();
-      final AreaInclusive area = framebuffer.kframebufferGetArea();
+        framebuffer.kFramebufferGetColorFramebuffer();
+      final AreaInclusive area = framebuffer.kFramebufferGetArea();
       this.viewport_size.x = (int) area.getRangeX().getInterval();
       this.viewport_size.y = (int) area.getRangeY().getInterval();
 

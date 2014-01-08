@@ -16,45 +16,41 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.CheckForNull;
+import java.io.IOException;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.jcanephora.JCGLUnsupportedException;
 
-public interface KRenderer extends KRendererVisitable
+public interface KRendererVisitor<A, E extends Throwable>
 {
-  /**
-   * Delete all resources associated with this renderer.
-   */
-
-  public void rendererClose()
+  public A rendererVisitDebug(
+    final @Nonnull KRendererDebug r)
     throws JCGLException,
-      ConstraintError;
+      ConstraintError,
+      JCGLCompileException,
+      JCGLUnsupportedException,
+      IOException,
+      KXMLException;
 
-  /**
-   * Retrieve a reference to the debugging interface (optionally) supported by
-   * the renderer. Returns <code>null</code> if debugging is not supported.
-   */
+  public A rendererVisitDeferred(
+    final @Nonnull KRendererDeferred r)
+    throws JCGLException,
+      ConstraintError,
+      JCGLCompileException,
+      JCGLUnsupportedException,
+      IOException,
+      KXMLException;
 
-  public @CheckForNull KRendererDebugging rendererDebug();
-
-  /**
-   * Retrieve the name of the renderer.
-   */
-
-  public @Nonnull String rendererGetName();
-
-  /**
-   * Set the colour to which the renderer will clear the colour buffer prior
-   * to rendering.
-   * 
-   * @throws ConstraintError
-   *           Iff <code>rgba == null</code>.
-   */
-
-  public void rendererSetBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-    throws ConstraintError;
+  public A rendererVisitForward(
+    final @Nonnull KRendererForward r)
+    throws JCGLException,
+      ConstraintError,
+      JCGLCompileException,
+      JCGLUnsupportedException,
+      IOException,
+      KXMLException;
 }
