@@ -16,36 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.Texture2DStaticUsable;
-
-public interface KFramebufferForwardUsable extends KFramebufferRGBAUsable
+public interface KFramebufferForwardUsable extends
+  KFramebufferRGBAUsable,
+  KFramebufferDepthUsable
 {
-  /**
-   * <p>
-   * Retrieve a reference to the framebuffer to which the initial depth-pass
-   * will be rendered.
-   * </p>
-   * <p>
-   * This framebuffer, if different to that returned by
-   * {@link #kfGetColorFramebuffer()}, shares the same depth attachment, so
-   * rendering to one will affect the depth buffer of the other.
-   * </p>
-   */
-
-  public @Nonnull
-    FramebufferReferenceUsable
-    kFramebufferGetDepthPassFramebuffer();
-
-  /**
-   * Retrieve the current depth values of the scene as a texture. If the
-   * current OpenGL version does not support depth textures, the texture will
-   * be in a packed colour format that must be decoded to retrieve the
-   * original depths.
-   */
-
-  public @Nonnull Texture2DStaticUsable kFramebufferGetDepthTexture();
-
+  // No extras
 }
