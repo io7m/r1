@@ -16,10 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KFramebufferForwardType extends
-  KFramebufferRGBA,
-  KFramebufferDepth,
-  KFramebufferForwardUsable
+public interface KFramebufferDepth extends
+  KFramebuffer,
+  KFramebufferDepthUsable
 {
-  // No extras.
+  // No extras
 }
