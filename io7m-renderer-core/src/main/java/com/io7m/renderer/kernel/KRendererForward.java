@@ -69,14 +69,6 @@ import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KMutableMatrices.WithInstance;
 import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucent;
 import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucentLit;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheFilesystemException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheIOException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLCompileException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLUnsupportedException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheXMLException;
-import com.io7m.renderer.kernel.KShadowCacheException.KShadowCacheJCGLException;
-import com.io7m.renderer.kernel.KShadowCacheException.KShadowCacheJCGLUnsupportedException;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KTransform.Context;
 
@@ -146,90 +138,6 @@ public final class KRendererForward implements KRenderer
             }
           }
         }
-      }
-    }
-  }
-
-  private static void handleJCBException(
-    final @Nonnull JCBExecutionException e)
-    throws JCGLException,
-      JCGLUnsupportedException
-  {
-    Throwable x = e;
-    for (;;) {
-      if (x == null) {
-        throw new UnreachableCodeException();
-      }
-      if (x instanceof KShadowCacheException) {
-        KRendererForward
-          .handleShadowCacheException((KShadowCacheException) x);
-      }
-      x = x.getCause();
-    }
-  }
-
-  private static void handleShaderCacheException(
-    final @Nonnull KShaderCacheException e)
-    throws IOException,
-      JCGLCompileException,
-      JCGLException,
-      JCGLUnsupportedException,
-      KXMLException
-  {
-    switch (e.getCode()) {
-      case KSHADER_CACHE_FILESYSTEM_ERROR:
-      {
-        final KShaderCacheFilesystemException x =
-          (KShaderCacheFilesystemException) e;
-        throw new IOException(x);
-      }
-      case KSHADER_CACHE_IO_ERROR:
-      {
-        final KShaderCacheIOException x = (KShaderCacheIOException) e;
-        throw x.getCause();
-      }
-      case KSHADER_CACHE_JCGL_COMPILE_ERROR:
-      {
-        final KShaderCacheJCGLCompileException x =
-          (KShaderCacheJCGLCompileException) e;
-        throw x.getCause();
-      }
-      case KSHADER_CACHE_JCGL_ERROR:
-      {
-        final KShaderCacheJCGLException x = (KShaderCacheJCGLException) e;
-        throw x.getCause();
-      }
-      case KSHADER_CACHE_JCGL_UNSUPPORTED_ERROR:
-      {
-        final KShaderCacheJCGLUnsupportedException x =
-          (KShaderCacheJCGLUnsupportedException) e;
-        throw x.getCause();
-      }
-      case KSHADER_CACHE_XML_ERROR:
-      {
-        final KShaderCacheXMLException x = (KShaderCacheXMLException) e;
-        throw x.getCause();
-      }
-    }
-  }
-
-  private static void handleShadowCacheException(
-    final @Nonnull KShadowCacheException e)
-    throws JCGLException,
-      JCGLUnsupportedException
-  {
-    switch (e.getCode()) {
-      case KSHADER_CACHE_JCGL_ERROR:
-      {
-        final KShadowCacheJCGLException x =
-          (KShadowCacheException.KShadowCacheJCGLException) e;
-        throw x.getCause();
-      }
-      case KSHADER_CACHE_JCGL_UNSUPPORTED_ERROR:
-      {
-        final KShadowCacheJCGLUnsupportedException x =
-          (KShadowCacheException.KShadowCacheJCGLUnsupportedException) e;
-        throw x.getCause();
       }
     }
   }
@@ -864,11 +772,11 @@ public final class KRendererForward implements KRenderer
           this.renderTranslucentMeshes(batched, gc, mwc);
 
         } catch (final KShaderCacheException e) {
-          KRendererForward.handleShaderCacheException(e);
+          KRendererCommon.handleShaderCacheException(e);
         } catch (final LUCacheException e) {
           throw new UnreachableCodeException(e);
         } catch (final JCBExecutionException e) {
-          KRendererForward.handleJCBException(e);
+          KRendererCommon.handleJCBException(e);
         } finally {
           gc.framebufferDrawUnbind();
         }
@@ -876,9 +784,9 @@ public final class KRendererForward implements KRenderer
         mwc.cameraFinish();
       }
     } catch (final KShadowCacheException x) {
-      KRendererForward.handleShadowCacheException(x);
+      KRendererCommon.handleShadowCacheException(x);
     } catch (final KShaderCacheException x) {
-      KRendererForward.handleShaderCacheException(x);
+      KRendererCommon.handleShaderCacheException(x);
     } finally {
       this.shadow_map_renderer.shadowRendererFinish();
     }
