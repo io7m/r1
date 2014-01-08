@@ -787,7 +787,7 @@ public final class SBRendererSpecific implements KRendererForward
   private void renderDepthPassMeshes(
     final @Nonnull KScene scene,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithCamera mwc)
+    final @Nonnull KMutableMatrices.WithObserver mwc)
     throws ConstraintError,
       JCGLException,
       JCBExecutionException
@@ -842,8 +842,11 @@ public final class SBRendererSpecific implements KRendererForward
         this.decider,
         scene);
 
-    final KMutableMatrices.WithCamera mwc =
-      this.matrices.withCamera(scene.getCamera());
+    final KCamera camera = scene.getCamera();
+    final KMutableMatrices.WithObserver mwc =
+      this.matrices.withObserver(
+        camera.getViewMatrix(),
+        camera.getProjectionMatrix());
 
     try {
       final FramebufferReferenceUsable output_buffer =
@@ -903,7 +906,7 @@ public final class SBRendererSpecific implements KRendererForward
       }
 
     } finally {
-      mwc.cameraFinish();
+      mwc.observerFinish();
     }
   }
 
@@ -979,7 +982,7 @@ public final class SBRendererSpecific implements KRendererForward
   private void renderOpaqueMeshes(
     final @Nonnull KSceneBatchedForward batched,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithCamera mwc)
+    final @Nonnull KMutableMatrices.WithObserver mwc)
     throws JCGLException,
       ConstraintError,
       JCBExecutionException
@@ -1093,7 +1096,7 @@ public final class SBRendererSpecific implements KRendererForward
   private void renderTranslucentMeshes(
     final @Nonnull KSceneBatchedForward batched,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithCamera mwc)
+    final @Nonnull KMutableMatrices.WithObserver mwc)
     throws JCGLException,
       ConstraintError,
       JCBExecutionException
