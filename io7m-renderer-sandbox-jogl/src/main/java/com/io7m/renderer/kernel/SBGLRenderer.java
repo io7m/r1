@@ -746,9 +746,7 @@ final class SBGLRenderer implements GLEventListener
     this.filesystem.mountClasspathArchive(
       SBGLRenderer.class,
       PathVirtual.ROOT);
-    this.filesystem.mountClasspathArchive(
-      KRendererAPIOld.class,
-      PathVirtual.ROOT);
+    this.filesystem.mountClasspathArchive(KRenderer.class, PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
       config.getShaderArchiveDebugFile(),
       PathVirtual.ROOT);

@@ -543,7 +543,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   private void renderDepthPassMeshes(
     final @Nonnull KSceneBatchedForward batched,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithCamera mwc)
+    final @Nonnull KMutableMatrices.WithObserver mwc)
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
@@ -725,8 +725,11 @@ public final class KRendererForwardActual extends KAbstractRendererForward
 
       final JCGLInterfaceCommon gc = this.g.getGLCommon();
 
-      final KMutableMatrices.WithCamera mwc =
-        this.matrices.withCamera(scene.getCamera());
+      final KCamera camera = scene.getCamera();
+      final KMutableMatrices.WithObserver mwc =
+        this.matrices.withObserver(
+          camera.getViewMatrix(),
+          camera.getProjectionMatrix());
 
       try {
         final FramebufferReferenceUsable output_buffer =
@@ -788,7 +791,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
           gc.framebufferDrawUnbind();
         }
       } finally {
-        mwc.cameraFinish();
+        mwc.observerFinish();
       }
     } catch (final KShadowCacheException x) {
       KRendererCommon.handleShadowCacheException(x);
@@ -810,7 +813,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   private void renderOpaqueMeshes(
     final @Nonnull KSceneBatchedForward batched,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithCamera mwc)
+    final @Nonnull KMutableMatrices.WithObserver mwc)
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
@@ -824,7 +827,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   private void renderOpaqueMeshesLit(
     final @Nonnull KSceneBatchedForward batched,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithCamera mwc)
+    final @Nonnull KMutableMatrices.WithObserver mwc)
     throws ConstraintError,
       KShaderCacheException,
       LUCacheException,
@@ -895,7 +898,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   private void renderOpaqueMeshesUnlit(
     final @Nonnull KSceneBatchedForward batched,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithCamera mwc)
+    final @Nonnull KMutableMatrices.WithObserver mwc)
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
@@ -1083,7 +1086,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   private void renderTranslucentMeshes(
     final @Nonnull KSceneBatchedForward scene,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithCamera mwc)
+    final @Nonnull KMutableMatrices.WithObserver mwc)
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,

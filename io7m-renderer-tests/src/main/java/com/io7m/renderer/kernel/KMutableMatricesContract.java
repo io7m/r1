@@ -67,8 +67,8 @@ import com.io7m.renderer.TestContext;
 import com.io7m.renderer.TestContract;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KMaterialAlpha.OpacityType;
-import com.io7m.renderer.kernel.KMutableMatrices.WithCamera;
 import com.io7m.renderer.kernel.KMutableMatrices.WithInstance;
+import com.io7m.renderer.kernel.KMutableMatrices.WithObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.WithProjectiveLight;
 
 public abstract class KMutableMatricesContract extends TestContract
@@ -163,7 +163,7 @@ public abstract class KMutableMatricesContract extends TestContract
     testWithCameraMatrices()
       throws ConstraintError
   {
-    WithCamera mwc;
+    WithObserver mwc;
 
     try {
       final KMutableMatrices mm = KMutableMatrices.newMatrices();
@@ -172,9 +172,9 @@ public abstract class KMutableMatricesContract extends TestContract
       final RMatrixI4x4F<RTransformProjection> projection =
         new RMatrixI4x4F<RTransformProjection>();
       final KCamera kc = KCamera.make(view, projection);
-      mwc = mm.withCamera(kc);
+      mwc = mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
       Assert.assertNotNull(mwc);
-      Assert.assertTrue(mwc.cameraIsActive());
+      Assert.assertTrue(mwc.observerIsActive());
     } catch (final Throwable x) {
       throw new AssertionError(x);
     }
@@ -194,7 +194,7 @@ public abstract class KMutableMatricesContract extends TestContract
     void
     testWithCameraMatricesInactive()
   {
-    WithCamera mwc;
+    WithObserver mwc;
 
     try {
       final KMutableMatrices mm = KMutableMatrices.newMatrices();
@@ -203,10 +203,10 @@ public abstract class KMutableMatricesContract extends TestContract
       final RMatrixI4x4F<RTransformProjection> projection =
         new RMatrixI4x4F<RTransformProjection>();
       final KCamera kc = KCamera.make(view, projection);
-      mwc = mm.withCamera(kc);
+      mwc = mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
       Assert.assertNotNull(mwc);
-      Assert.assertTrue(mwc.cameraIsActive());
-      mwc.cameraFinish();
+      Assert.assertTrue(mwc.observerIsActive());
+      mwc.observerFinish();
     } catch (final Throwable x) {
       throw new AssertionError(x);
     }
@@ -251,11 +251,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixI4x4F<RTransformProjection> projection =
       new RMatrixI4x4F<RTransformProjection>();
     final KCamera kc = KCamera.make(view, projection);
-    final WithCamera mwc = mm.withCamera(kc);
+    final WithObserver mwc =
+      mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
     Assert.assertNotNull(mwc);
-    Assert.assertTrue(mwc.cameraIsActive());
-    mwc.cameraFinish();
-    Assert.assertFalse(mwc.cameraIsActive());
+    Assert.assertTrue(mwc.observerIsActive());
+    mwc.observerFinish();
+    Assert.assertFalse(mwc.observerIsActive());
   }
 
   @SuppressWarnings("static-method") @Test(expected = ConstraintError.class) public
@@ -264,7 +265,7 @@ public abstract class KMutableMatricesContract extends TestContract
       throws ConstraintError
   {
     KMutableMatrices mm;
-    WithCamera mwc;
+    WithObserver mwc;
     KCamera kc;
 
     try {
@@ -274,14 +275,14 @@ public abstract class KMutableMatricesContract extends TestContract
       final RMatrixI4x4F<RTransformProjection> projection =
         new RMatrixI4x4F<RTransformProjection>();
       kc = KCamera.make(view, projection);
-      mwc = mm.withCamera(kc);
+      mwc = mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
       Assert.assertNotNull(mwc);
-      Assert.assertTrue(mwc.cameraIsActive());
+      Assert.assertTrue(mwc.observerIsActive());
     } catch (final Throwable x) {
       throw new AssertionError(x);
     }
 
-    mm.withCamera(kc);
+    mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
   }
 
   @Test public void testWithInstanceMatrices()
@@ -300,9 +301,10 @@ public abstract class KMutableMatricesContract extends TestContract
       final RMatrixI4x4F<RTransformProjection> projection =
         new RMatrixI4x4F<RTransformProjection>();
       final KCamera kc = KCamera.make(view, projection);
-      final WithCamera mwc = mm.withCamera(kc);
+      final WithObserver mwc =
+        mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
       Assert.assertNotNull(mwc);
-      Assert.assertTrue(mwc.cameraIsActive());
+      Assert.assertTrue(mwc.observerIsActive());
 
       mwi = mwc.withInstance(kmi);
       Assert.assertNotNull(mwi);
@@ -335,9 +337,10 @@ public abstract class KMutableMatricesContract extends TestContract
       final RMatrixI4x4F<RTransformProjection> projection =
         new RMatrixI4x4F<RTransformProjection>();
       final KCamera kc = KCamera.make(view, projection);
-      final WithCamera mwc = mm.withCamera(kc);
+      final WithObserver mwc =
+        mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
       Assert.assertNotNull(mwc);
-      Assert.assertTrue(mwc.cameraIsActive());
+      Assert.assertTrue(mwc.observerIsActive());
 
       mwi = mwc.withInstance(kmi);
       Assert.assertNotNull(mwi);
@@ -434,9 +437,10 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixI4x4F<RTransformProjection> projection =
       new RMatrixI4x4F<RTransformProjection>();
     final KCamera kc = KCamera.make(view, projection);
-    final WithCamera mwc = mm.withCamera(kc);
+    final WithObserver mwc =
+      mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
     Assert.assertNotNull(mwc);
-    Assert.assertTrue(mwc.cameraIsActive());
+    Assert.assertTrue(mwc.observerIsActive());
 
     final WithInstance mwi = mwc.withInstance(kmi);
     Assert.assertNotNull(mwi);
@@ -444,9 +448,9 @@ public abstract class KMutableMatricesContract extends TestContract
     mwi.instanceFinish();
     Assert.assertFalse(mwi.instanceIsActive());
 
-    Assert.assertTrue(mwc.cameraIsActive());
-    mwc.cameraFinish();
-    Assert.assertFalse(mwc.cameraIsActive());
+    Assert.assertTrue(mwc.observerIsActive());
+    mwc.observerFinish();
+    Assert.assertFalse(mwc.observerIsActive());
   }
 
   @Test public void testWithInstanceOnceCameraFinished()
@@ -464,17 +468,18 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixI4x4F<RTransformProjection> projection =
       new RMatrixI4x4F<RTransformProjection>();
     final KCamera kc = KCamera.make(view, projection);
-    final WithCamera mwc = mm.withCamera(kc);
+    final WithObserver mwc =
+      mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
     Assert.assertNotNull(mwc);
-    Assert.assertTrue(mwc.cameraIsActive());
+    Assert.assertTrue(mwc.observerIsActive());
 
     final WithInstance mwi = mwc.withInstance(kmi);
     Assert.assertNotNull(mwi);
     Assert.assertTrue(mwi.instanceIsActive());
-    mwc.cameraFinish();
+    mwc.observerFinish();
 
     Assert.assertFalse(mwi.instanceIsActive());
-    Assert.assertFalse(mwc.cameraIsActive());
+    Assert.assertFalse(mwc.observerIsActive());
   }
 
   @Test(expected = ConstraintError.class) public void testWithInstanceTwice()
@@ -485,7 +490,7 @@ public abstract class KMutableMatricesContract extends TestContract
     final TestContext tc = this.newTestContext();
     final KMeshInstanceTransformed kmi =
       KMutableMatricesContract.makeMeshInstance(tc.getGLImplementation());
-    WithCamera mwc;
+    WithObserver mwc;
 
     try {
       final KMutableMatrices mm = KMutableMatrices.newMatrices();
@@ -494,9 +499,9 @@ public abstract class KMutableMatricesContract extends TestContract
       final RMatrixI4x4F<RTransformProjection> projection =
         new RMatrixI4x4F<RTransformProjection>();
       final KCamera kc = KCamera.make(view, projection);
-      mwc = mm.withCamera(kc);
+      mwc = mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
       Assert.assertNotNull(mwc);
-      Assert.assertTrue(mwc.cameraIsActive());
+      Assert.assertTrue(mwc.observerIsActive());
 
       final WithInstance mwi = mwc.withInstance(kmi);
       Assert.assertNotNull(mwi);
@@ -527,9 +532,10 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixI4x4F<RTransformProjection> projection =
       new RMatrixI4x4F<RTransformProjection>();
     final KCamera kc = KCamera.make(view, projection);
-    final WithCamera mwc = mm.withCamera(kc);
+    final WithObserver mwc =
+      mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
     Assert.assertNotNull(mwc);
-    Assert.assertTrue(mwc.cameraIsActive());
+    Assert.assertTrue(mwc.observerIsActive());
 
     final WithInstance mwi = mwc.withInstance(kmi);
     Assert.assertNotNull(mwi);
@@ -545,9 +551,9 @@ public abstract class KMutableMatricesContract extends TestContract
     mwi.instanceFinish();
     Assert.assertFalse(mwi.instanceIsActive());
 
-    Assert.assertTrue(mwc.cameraIsActive());
-    mwc.cameraFinish();
-    Assert.assertFalse(mwc.cameraIsActive());
+    Assert.assertTrue(mwc.observerIsActive());
+    mwc.observerFinish();
+    Assert.assertFalse(mwc.observerIsActive());
   }
 
   @Test(expected = ConstraintError.class) public
@@ -575,9 +581,10 @@ public abstract class KMutableMatricesContract extends TestContract
       final RMatrixI4x4F<RTransformProjection> projection =
         new RMatrixI4x4F<RTransformProjection>();
       final KCamera kc = KCamera.make(view, projection);
-      final WithCamera mwc = mm.withCamera(kc);
+      final WithObserver mwc =
+        mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
       Assert.assertNotNull(mwc);
-      Assert.assertTrue(mwc.cameraIsActive());
+      Assert.assertTrue(mwc.observerIsActive());
 
       mwi = mwc.withInstance(kmi);
       Assert.assertNotNull(mwi);
@@ -614,9 +621,10 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixI4x4F<RTransformProjection> projection =
       new RMatrixI4x4F<RTransformProjection>();
     final KCamera kc = KCamera.make(view, projection);
-    final WithCamera mwc = mm.withCamera(kc);
+    final WithObserver mwc =
+      mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
     Assert.assertNotNull(mwc);
-    Assert.assertTrue(mwc.cameraIsActive());
+    Assert.assertTrue(mwc.observerIsActive());
 
     final WithInstance mwi = mwc.withInstance(kmi);
     Assert.assertNotNull(mwi);
@@ -652,9 +660,10 @@ public abstract class KMutableMatricesContract extends TestContract
       final RMatrixI4x4F<RTransformProjection> projection =
         new RMatrixI4x4F<RTransformProjection>();
       final KCamera kc = KCamera.make(view, projection);
-      final WithCamera mwc = mm.withCamera(kc);
+      final WithObserver mwc =
+        mm.withObserver(kc.getViewMatrix(), kc.getProjectionMatrix());
       Assert.assertNotNull(mwc);
-      Assert.assertTrue(mwc.cameraIsActive());
+      Assert.assertTrue(mwc.observerIsActive());
 
       final WithInstance mwi = mwc.withInstance(kmi);
       Assert.assertNotNull(mwi);
