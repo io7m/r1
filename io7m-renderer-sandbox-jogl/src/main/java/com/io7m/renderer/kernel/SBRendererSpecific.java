@@ -81,7 +81,7 @@ import com.io7m.renderer.kernel.KScene.KSceneOpaques;
 import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucent;
 import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucentLit;
 
-public final class SBRendererSpecific implements KRenderer
+public final class SBRendererSpecific implements KRendererForward
 {
   @Override public @CheckForNull KRendererDebugging rendererDebug()
   {
@@ -827,8 +827,8 @@ public final class SBRendererSpecific implements KRenderer
     // TODO Auto-generated method stub
   }
 
-  @Override public void rendererEvaluate(
-    final @Nonnull KFramebufferRGBAUsable framebuffer,
+  @Override public void rendererForwardEvaluate(
+    final @Nonnull KFramebufferForwardUsable framebuffer,
     final @Nonnull KScene scene)
     throws JCGLException,
       ConstraintError
@@ -847,9 +847,9 @@ public final class SBRendererSpecific implements KRenderer
 
     try {
       final FramebufferReferenceUsable output_buffer =
-        framebuffer.kframebufferGetFramebuffer();
+        framebuffer.kFramebufferGetColorFramebuffer();
 
-      final AreaInclusive area = framebuffer.kframebufferGetArea();
+      final AreaInclusive area = framebuffer.kFramebufferGetArea();
       this.viewport_size.x = (int) area.getRangeX().getInterval();
       this.viewport_size.y = (int) area.getRangeY().getInterval();
 
@@ -1203,5 +1203,26 @@ public final class SBRendererSpecific implements KRenderer
         }
       }
     });
+  }
+
+  @Override public String rendererGetName()
+  {
+    return "specific";
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KRendererVisitor<A, E>>
+    A
+    rendererVisitableAccept(
+      final @Nonnull V v)
+      throws E,
+        JCGLException,
+        ConstraintError,
+        JCGLCompileException,
+        JCGLUnsupportedException,
+        IOException,
+        KXMLException
+  {
+    return v.rendererVisitForward(this);
   }
 }

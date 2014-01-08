@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,14 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.JCGLResourceUsable;
-
-public interface KFramebufferUsable extends JCGLResourceUsable
+public interface KFramebufferForwardType extends
+  KFramebufferRGBA,
+  KFramebufferForwardUsable
 {
-  /**
-   * Retrieve the size of the area to which rendering will occur.
-   */
-
-  public AreaInclusive kFramebufferGetArea();
+  // No extras.
 }

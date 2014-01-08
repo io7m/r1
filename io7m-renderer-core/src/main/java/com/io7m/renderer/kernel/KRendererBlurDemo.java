@@ -45,6 +45,8 @@ import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.TextureFilterMagnification;
+import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorI2I;
@@ -53,9 +55,12 @@ import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererForward;
 
-public final class KRendererBlurDemo implements KRenderer
+final class KRendererBlurDemo extends KAbstractRendererForward
 {
+  private static final @Nonnull String NAME = "blur-demo";
+
   public static KRendererBlurDemo rendererNew(
     final @Nonnull JCGLImplementation g,
     final @Nonnull FSCapabilityRead fs,
@@ -71,23 +76,22 @@ public final class KRendererBlurDemo implements KRenderer
     return new KRendererBlurDemo(g, fs, log);
   }
 
-  private final @Nonnull VectorM4F          background;
-  private final @Nonnull KFramebufferRGBA   blur_0;
-  private final @Nonnull KFramebufferRGBA   blur_1;
-  private final @Nonnull JCGLImplementation gl;
-  private final @Nonnull Log                log;
-  private final @Nonnull KMutableMatrices   matrices;
-  private final @Nonnull KProgram           program_blur_h;
-  private final @Nonnull KProgram           program_blur_v;
-  private final @Nonnull KProgram           program_id;
-  private final @Nonnull KProgram           program_normals;
-  private final @Nonnull KUnitQuad          quad;
-  private final @Nonnull KTransform.Context transform_context;
-  private final @Nonnull VectorM2I          viewport_size;
-
-  private final float                       blur_size;
-  private final int                         blur_passes;
-  private final int                         blur_image_size;
+  private final @Nonnull VectorM4F               background;
+  private final @Nonnull KFramebufferForwardType blur_0;
+  private final @Nonnull KFramebufferForwardType blur_1;
+  private final @Nonnull JCGLImplementation      gl;
+  private final @Nonnull Log                     log;
+  private final @Nonnull KMutableMatrices        matrices;
+  private final @Nonnull KProgram                program_blur_h;
+  private final @Nonnull KProgram                program_blur_v;
+  private final @Nonnull KProgram                program_id;
+  private final @Nonnull KProgram                program_normals;
+  private final @Nonnull KUnitQuad               quad;
+  private final @Nonnull KTransform.Context      transform_context;
+  private final @Nonnull VectorM2I               viewport_size;
+  private final float                            blur_size;
+  private final int                              blur_passes;
+  private final int                              blur_image_size;
 
   private KRendererBlurDemo(
     final @Nonnull JCGLImplementation gl,
@@ -101,7 +105,9 @@ public final class KRendererBlurDemo implements KRenderer
       IOException,
       KXMLException
   {
-    this.log = new Log(log, "krenderer-blur-demo");
+    super(KRendererBlurDemo.NAME);
+
+    this.log = new Log(log, KRendererBlurDemo.NAME);
     this.gl = gl;
 
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
@@ -157,7 +163,12 @@ public final class KRendererBlurDemo implements KRenderer
       final RangeInclusive range_y =
         new RangeInclusive(0, this.blur_image_size - 1);
       final AreaInclusive size = new AreaInclusive(range_x, range_y);
-      this.blur_0 = KFramebufferCommon.newBasicRGBA(gl, size);
+      this.blur_0 =
+        KFramebufferForward.newFramebuffer(
+          gl,
+          size,
+          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+          TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
     }
 
     {
@@ -166,7 +177,12 @@ public final class KRendererBlurDemo implements KRenderer
       final RangeInclusive range_y =
         new RangeInclusive(0, this.blur_image_size - 1);
       final AreaInclusive size = new AreaInclusive(range_x, range_y);
-      this.blur_1 = KFramebufferCommon.newBasicRGBA(gl, size);
+      this.blur_1 =
+        KFramebufferForward.newFramebuffer(
+          gl,
+          size,
+          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+          TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
     }
 
     this.quad = KUnitQuad.newQuad(gl.getGLCommon(), log);
@@ -176,7 +192,8 @@ public final class KRendererBlurDemo implements KRenderer
     throws JCGLException,
       ConstraintError
   {
-
+    this.blur_0.kFramebufferDelete(this.gl);
+    this.blur_1.kFramebufferDelete(this.gl);
   }
 
   @Override public @CheckForNull KRendererDebugging rendererDebug()
@@ -184,8 +201,8 @@ public final class KRendererBlurDemo implements KRenderer
     return null;
   }
 
-  @Override public void rendererEvaluate(
-    final @Nonnull KFramebufferRGBAUsable framebuffer,
+  @Override public void rendererForwardEvaluate(
+    final @Nonnull KFramebufferForwardUsable framebuffer,
     final @Nonnull KScene scene)
     throws JCGLException,
       ConstraintError,
@@ -213,7 +230,7 @@ public final class KRendererBlurDemo implements KRenderer
 
   private void renderEvaluateScene(
     final @Nonnull KScene scene,
-    final @Nonnull KFramebufferRGBA output)
+    final @Nonnull KFramebufferForwardUsable output)
     throws ConstraintError,
       JCGLException
   {
@@ -223,12 +240,12 @@ public final class KRendererBlurDemo implements KRenderer
       this.matrices.withCamera(scene.getCamera());
 
     try {
-      final AreaInclusive area = output.kframebufferGetArea();
+      final AreaInclusive area = output.kFramebufferGetArea();
       this.viewport_size.x = (int) area.getRangeX().getInterval();
       this.viewport_size.y = (int) area.getRangeY().getInterval();
 
       try {
-        gc.framebufferDrawBind(output.kframebufferGetFramebuffer());
+        gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
         gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
 
         gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
@@ -265,21 +282,21 @@ public final class KRendererBlurDemo implements KRenderer
   }
 
   private void renderEvaluateBlurH(
-    final @Nonnull KFramebufferRGBA input,
-    final @Nonnull KFramebufferRGBA output)
+    final @Nonnull KFramebufferForwardUsable input,
+    final @Nonnull KFramebufferForwardUsable output)
     throws JCGLException,
       ConstraintError
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
-    final AreaInclusive area = output.kframebufferGetArea();
+    final AreaInclusive area = output.kFramebufferGetArea();
     this.viewport_size.x = (int) area.getRangeX().getInterval();
     this.viewport_size.y = (int) area.getRangeY().getInterval();
 
     final List<TextureUnit> units = gc.textureGetUnits();
 
     try {
-      gc.framebufferDrawBind(output.kframebufferGetFramebuffer());
+      gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
       gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
 
       gc.depthBufferWriteDisable();
@@ -306,14 +323,12 @@ public final class KRendererBlurDemo implements KRenderer
             KShadingProgramCommon.bindAttributeUV(p, array);
 
             final long width =
-              input.kframebufferGetArea().getRangeX().getInterval();
+              input.kFramebufferGetArea().getRangeX().getInterval();
             p.programUniformPutFloat("image_width", width
               / KRendererBlurDemo.this.blur_size);
 
             final TextureUnit unit = units.get(0);
-            gc.texture2DStaticBind(
-              unit,
-              input.kframebufferGetRGBAOutputTexture());
+            gc.texture2DStaticBind(unit, input.kFramebufferGetRGBATexture());
             p.programUniformPutTextureUnit("t_image", unit);
 
             p.programExecute(new JCBProgramProcedure() {
@@ -343,21 +358,21 @@ public final class KRendererBlurDemo implements KRenderer
   }
 
   private void renderEvaluateBlurV(
-    final @Nonnull KFramebufferRGBA input,
-    final @Nonnull KFramebufferRGBA output)
+    final @Nonnull KFramebufferForwardUsable input,
+    final @Nonnull KFramebufferForwardUsable output)
     throws JCGLException,
       ConstraintError
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
-    final AreaInclusive area = output.kframebufferGetArea();
+    final AreaInclusive area = output.kFramebufferGetArea();
     this.viewport_size.x = (int) area.getRangeX().getInterval();
     this.viewport_size.y = (int) area.getRangeY().getInterval();
 
     final List<TextureUnit> units = gc.textureGetUnits();
 
     try {
-      gc.framebufferDrawBind(output.kframebufferGetFramebuffer());
+      gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
       gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
 
       gc.depthBufferWriteDisable();
@@ -384,14 +399,12 @@ public final class KRendererBlurDemo implements KRenderer
             KShadingProgramCommon.bindAttributeUV(p, array);
 
             final long height =
-              input.kframebufferGetArea().getRangeY().getInterval();
+              input.kFramebufferGetArea().getRangeY().getInterval();
             p.programUniformPutFloat("image_height", height
               / KRendererBlurDemo.this.blur_size);
 
             final TextureUnit unit = units.get(0);
-            gc.texture2DStaticBind(
-              unit,
-              input.kframebufferGetRGBAOutputTexture());
+            gc.texture2DStaticBind(unit, input.kFramebufferGetRGBATexture());
             p.programUniformPutTextureUnit("t_image", unit);
 
             p.programExecute(new JCBProgramProcedure() {
@@ -421,21 +434,21 @@ public final class KRendererBlurDemo implements KRenderer
   }
 
   private void renderEvaluateCopy(
-    final @Nonnull KFramebufferRGBAUsable input,
-    final @Nonnull KFramebufferRGBAUsable output)
+    final @Nonnull KFramebufferForwardUsable input,
+    final @Nonnull KFramebufferForwardUsable output)
     throws JCGLException,
       ConstraintError
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
-    final AreaInclusive area = output.kframebufferGetArea();
+    final AreaInclusive area = output.kFramebufferGetArea();
     this.viewport_size.x = (int) area.getRangeX().getInterval();
     this.viewport_size.y = (int) area.getRangeY().getInterval();
 
     final List<TextureUnit> units = gc.textureGetUnits();
 
     try {
-      gc.framebufferDrawBind(output.kframebufferGetFramebuffer());
+      gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
       gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
 
       gc.depthBufferWriteDisable();
@@ -462,9 +475,7 @@ public final class KRendererBlurDemo implements KRenderer
             KShadingProgramCommon.bindAttributeUV(p, array);
 
             final TextureUnit unit = units.get(0);
-            gc.texture2DStaticBind(
-              unit,
-              input.kframebufferGetRGBAOutputTexture());
+            gc.texture2DStaticBind(unit, input.kFramebufferGetRGBATexture());
             p.programUniformPutTextureUnit("t_image", unit);
 
             p.programExecute(new JCBProgramProcedure() {
