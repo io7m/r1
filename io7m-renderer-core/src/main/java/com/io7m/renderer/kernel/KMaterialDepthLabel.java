@@ -65,15 +65,22 @@ enum KMaterialDepthLabel
   }
 
   private final @Nonnull String code;
+  private final @Nonnull String name;
 
   private KMaterialDepthLabel(
     final @Nonnull String code)
   {
     this.code = code;
+    this.name = "depth_" + code;
   }
 
   public @Nonnull String getCode()
   {
     return this.code;
+  }
+
+  public @Nonnull String getName()
+  {
+    return this.name;
   }
 }
