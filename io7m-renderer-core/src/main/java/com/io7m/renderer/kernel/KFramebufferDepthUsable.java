@@ -19,7 +19,7 @@ package com.io7m.renderer.kernel;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 
-public interface KFramebufferDepthUsable
+public interface KFramebufferDepthUsable extends KFramebufferUsable
 {
   /**
    * <p>

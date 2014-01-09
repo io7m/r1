@@ -493,7 +493,7 @@ final class KShadowMapRendererActual implements KShadowMapRenderer
               gc.framebufferDrawBind(fb);
               try {
                 gc.colorBufferMask(true, true, true, true);
-                gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+                gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
                 gc.depthBufferWriteEnable();
                 gc.depthBufferClear(1.0f);
               } finally {

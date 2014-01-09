@@ -646,6 +646,7 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull KTransform.Context                                  camera_transform_context;
   private @Nonnull RMatrixI4x4F<RTransformView>                              camera_view_matrix;
   private final @Nonnull RMatrixM4x4F<RTransformView>                        camera_view_matrix_temporary;
+  private @Nonnull KGraphicsCapabilities                                     capabilities;
   private final SandboxConfig                                                config;
   private final @Nonnull AtomicReference<SBSceneControllerRenderer>          controller;
   private final @Nonnull FSCapabilityAll                                     filesystem;
@@ -1242,9 +1243,9 @@ final class SBGLRenderer implements GLEventListener
           KShaderCacheLoader.newLoader(this.gi, this.filesystem, this.log),
           this.shader_cache_config);
 
-      final KGraphicsCapabilities capabilities =
-        KGraphicsCapabilities.getCapabilities(this.gi);
-      this.label_cache = KLabelDecider.newDecider(capabilities, 8192);
+      this.capabilities = KGraphicsCapabilities.getCapabilities(this.gi);
+
+      this.label_cache = KLabelDecider.newDecider(this.capabilities, 8192);
 
       {
         final Builder b = PCacheConfig.newBuilder();
@@ -1414,6 +1415,7 @@ final class SBGLRenderer implements GLEventListener
           this.shader_cache,
           this.shadow_map_renderer,
           this.label_cache,
+          this.capabilities,
           this.log);
       }
       case KRENDERER_BLUR_DEMO:

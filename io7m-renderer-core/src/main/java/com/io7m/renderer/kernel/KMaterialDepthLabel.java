@@ -22,13 +22,18 @@ import com.io7m.jaux.UnreachableCodeException;
 
 enum KMaterialDepthLabel
 {
-  DEPTH_CONSTANT("C"),
-  DEPTH_MAPPED("M"),
-  DEPTH_UNIFORM("U")
+  DEPTH_CONSTANT("C", false),
+  DEPTH_MAPPED("M", false),
+  DEPTH_UNIFORM("U", false),
+
+  DEPTH_CONSTANT_PACKED4444("CP4", true),
+  DEPTH_MAPPED_PACKED4444("MP4", true),
+  DEPTH_UNIFORM_PACKED4444("UP4", true)
 
   ;
 
   public static @Nonnull KMaterialDepthLabel fromMaterial(
+    final @Nonnull KGraphicsCapabilities caps,
     final @Nonnull KMaterialAlbedoLabel albedo,
     final @Nonnull KMaterial material)
   {
@@ -37,26 +42,48 @@ enum KMaterialDepthLabel
     switch (a.getOpacityType()) {
       case ALPHA_OPAQUE:
       {
-        return DEPTH_CONSTANT;
+        if (caps.getSupportsDepthTextures()) {
+          return DEPTH_CONSTANT;
+        }
+
+        return DEPTH_CONSTANT_PACKED4444;
       }
       case ALPHA_OPAQUE_ALBEDO_ALPHA_TO_DEPTH:
       {
-        switch (albedo) {
-          case ALBEDO_COLOURED:
-            return DEPTH_UNIFORM;
-          case ALBEDO_TEXTURED:
-            return DEPTH_MAPPED;
+        if (caps.getSupportsDepthTextures()) {
+          switch (albedo) {
+            case ALBEDO_COLOURED:
+              return DEPTH_UNIFORM;
+            case ALBEDO_TEXTURED:
+              return DEPTH_MAPPED;
+          }
+        } else {
+          switch (albedo) {
+            case ALBEDO_COLOURED:
+              return DEPTH_UNIFORM_PACKED4444;
+            case ALBEDO_TEXTURED:
+              return DEPTH_MAPPED_PACKED4444;
+          }
         }
 
         throw new UnreachableCodeException();
       }
       case ALPHA_TRANSLUCENT:
       {
-        switch (albedo) {
-          case ALBEDO_COLOURED:
-            return DEPTH_UNIFORM;
-          case ALBEDO_TEXTURED:
-            return DEPTH_MAPPED;
+        if (caps.getSupportsDepthTextures()) {
+          switch (albedo) {
+            case ALBEDO_COLOURED:
+              return DEPTH_UNIFORM;
+            case ALBEDO_TEXTURED:
+              return DEPTH_MAPPED;
+          }
+        } else {
+          switch (albedo) {
+            case ALBEDO_COLOURED:
+              return DEPTH_UNIFORM_PACKED4444;
+            case ALBEDO_TEXTURED:
+              return DEPTH_MAPPED_PACKED4444;
+          }
         }
       }
     }
@@ -66,12 +93,20 @@ enum KMaterialDepthLabel
 
   private final @Nonnull String code;
   private final @Nonnull String name;
+  private final boolean         packed;
 
   private KMaterialDepthLabel(
-    final @Nonnull String code)
+    final @Nonnull String code,
+    final boolean packed)
   {
     this.code = code;
     this.name = "depth_" + code;
+    this.packed = packed;
+  }
+
+  public boolean isPacked()
+  {
+    return this.packed;
   }
 
   public @Nonnull String getCode()
