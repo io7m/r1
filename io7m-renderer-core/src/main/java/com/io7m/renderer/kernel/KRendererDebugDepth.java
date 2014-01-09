@@ -206,15 +206,18 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
       KShadingProgramCommon.putMatrixModelView(p, mwi.getMatrixModelView());
 
       switch (label) {
+        case DEPTH_CONSTANT_PACKED4444:
         case DEPTH_CONSTANT:
         {
           break;
         }
+        case DEPTH_UNIFORM_PACKED4444:
         case DEPTH_UNIFORM:
         {
           KShadingProgramCommon.putMaterial(p, material);
           break;
         }
+        case DEPTH_MAPPED_PACKED4444:
         case DEPTH_MAPPED:
         {
           KShadingProgramCommon.putMaterial(p, material);
@@ -241,11 +244,14 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
         KShadingProgramCommon.bindAttributePosition(p, array);
 
         switch (label) {
+          case DEPTH_CONSTANT_PACKED4444:
           case DEPTH_CONSTANT:
           case DEPTH_UNIFORM:
+          case DEPTH_UNIFORM_PACKED4444:
           {
             break;
           }
+          case DEPTH_MAPPED_PACKED4444:
           case DEPTH_MAPPED:
           {
             KShadingProgramCommon.bindAttributeUV(p, array);

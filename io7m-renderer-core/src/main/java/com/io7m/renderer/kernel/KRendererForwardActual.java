@@ -75,8 +75,6 @@ import com.io7m.renderer.kernel.KTransform.Context;
 
 public final class KRendererForwardActual extends KAbstractRendererForward
 {
-  private static final @Nonnull String NAME = "forward";
-
   private class Debugging implements KRendererDebugging
   {
     private final @Nonnull AtomicReference<KRendererDebugging.DebugShadowMapReceiver> dump_shadow_maps;
@@ -144,6 +142,8 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       }
     }
   }
+
+  private static final @Nonnull String NAME = "forward";
 
   private static void makeLitLabel(
     final @Nonnull StringBuilder buffer,
@@ -214,6 +214,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       final @Nonnull LRUCacheTrivial<String, KProgram, KShaderCacheException> shader_cache,
       final @Nonnull KShadowMapRenderer shadow_map_renderer,
       final @Nonnull KLabelDecider decider,
+      final @Nonnull KGraphicsCapabilities caps,
       final @Nonnull Log log)
       throws ConstraintError
   {
@@ -222,12 +223,14 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       shader_cache,
       shadow_map_renderer,
       decider,
+      caps,
       log);
   }
 
   private final @Nonnull VectorM4F                                        background;
   private @CheckForNull Debugging                                         debug;
   private final @Nonnull KLabelDecider                                    decider;
+  private final @Nonnull KDepthRenderer                                   depth_renderer;
   private final @Nonnull JCGLImplementation                               g;
   private final @Nonnull StringBuilder                                    label_cache;
   private final @Nonnull Log                                              log;
@@ -243,6 +246,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
     final @Nonnull KShadowMapRenderer shadow_map_renderer,
     final @Nonnull KLabelDecider decider,
+    final @Nonnull KGraphicsCapabilities caps,
     final @Nonnull Log log)
     throws ConstraintError
   {
@@ -259,6 +263,9 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       Constraints
         .constrainNotNull(shadow_map_renderer, "Shadow map renderer");
     this.decider = Constraints.constrainNotNull(decider, "Label decider");
+
+    this.depth_renderer =
+      KDepthRenderer.newDepthRenderer(gl, shader_cache, caps, log);
 
     this.label_cache = new StringBuilder();
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
@@ -540,144 +547,6 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     }
   }
 
-  private void renderDepthPassMeshes(
-    final @Nonnull KSceneBatchedForward batched,
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithObserver mwc)
-    throws KShaderCacheException,
-      ConstraintError,
-      LUCacheException,
-      JCGLException,
-      JCBExecutionException
-  {
-    final Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> depth_batch =
-      batched.getBatchesDepth();
-
-    for (final KMaterialDepthLabel label : depth_batch.keySet()) {
-      final List<KMeshInstanceTransformed> batch = depth_batch.get(label);
-
-      this.label_cache.setLength(0);
-      this.label_cache.append("depth_");
-      this.label_cache.append(label.getCode());
-
-      final KProgram p =
-        this.shader_cache.luCacheGet(this.label_cache.toString());
-      final JCBExecutionAPI e = p.getExecutable();
-
-      e.execRun(new JCBExecutorProcedure() {
-        @SuppressWarnings("synthetic-access") @Override public void call(
-          final @Nonnull JCBProgram program)
-          throws ConstraintError,
-            JCGLException,
-            JCBExecutionException,
-            Exception
-        {
-          KShadingProgramCommon.putMatrixProjection(
-            program,
-            mwc.getMatrixProjection());
-
-          for (final KMeshInstanceTransformed instance : batch) {
-            final KMutableMatrices.WithInstance mwi =
-              mwc.withInstance(instance);
-            try {
-              KRendererForwardActual.this.renderDepthPassMeshOpaque(
-                gc,
-                program,
-                instance,
-                label,
-                mwi);
-            } finally {
-              mwi.instanceFinish();
-            }
-          }
-        }
-      });
-    }
-  }
-
-  @SuppressWarnings("static-method") private void renderDepthPassMeshOpaque(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCBProgram p,
-    final @Nonnull KMeshInstanceTransformed i,
-    final @Nonnull KMaterialDepthLabel label,
-    final @Nonnull KMutableMatrices.WithInstanceMatrices mwi)
-    throws ConstraintError,
-      JCGLException,
-      JCBExecutionException
-  {
-    final KMaterial material = i.getInstance().getMaterial();
-    final List<TextureUnit> units = gc.textureGetUnits();
-
-    /**
-     * Upload matrices.
-     */
-
-    KShadingProgramCommon.putMatrixProjectionReuse(p);
-    KShadingProgramCommon.putMatrixModelView(p, mwi.getMatrixModelView());
-
-    switch (label) {
-      case DEPTH_CONSTANT:
-      {
-        break;
-      }
-      case DEPTH_MAPPED:
-      {
-        KShadingProgramCommon.putMaterial(p, material);
-        KShadingProgramCommon.putMatrixUV(p, mwi.getMatrixUV());
-        KShadingProgramCommon.bindPutTextureAlbedo(
-          p,
-          gc,
-          material,
-          units.get(0));
-        break;
-      }
-      case DEPTH_UNIFORM:
-      {
-        KShadingProgramCommon.putMaterial(p, material);
-        break;
-      }
-    }
-
-    /**
-     * Associate array attributes with program attributes, and draw mesh.
-     */
-
-    try {
-      final KMeshInstance actual = i.getInstance();
-      final KMesh mesh = actual.getMesh();
-      final ArrayBuffer array = mesh.getArrayBuffer();
-      final IndexBuffer indices = mesh.getIndexBuffer();
-
-      gc.arrayBufferBind(array);
-      KShadingProgramCommon.bindAttributePosition(p, array);
-
-      switch (label) {
-        case DEPTH_UNIFORM:
-        case DEPTH_CONSTANT:
-        {
-          break;
-        }
-        case DEPTH_MAPPED:
-        {
-          KShadingProgramCommon.bindAttributeUV(p, array);
-          break;
-        }
-      }
-
-      p.programExecute(new JCBProgramProcedure() {
-        @Override public void call()
-          throws ConstraintError,
-            JCGLException
-        {
-          gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-        }
-      });
-
-    } finally {
-      gc.arrayBufferUnbind();
-    }
-  }
-
   @Override public void rendererClose()
     throws JCGLException,
       ConstraintError
@@ -732,37 +601,36 @@ public final class KRendererForwardActual extends KAbstractRendererForward
           camera.getProjectionMatrix());
 
       try {
-        final FramebufferReferenceUsable output_buffer =
-          framebuffer.kFramebufferGetColorFramebuffer();
 
-        final AreaInclusive area = framebuffer.kFramebufferGetArea();
-        this.viewport_size.x = (int) area.getRangeX().getInterval();
-        this.viewport_size.y = (int) area.getRangeY().getInterval();
+        /**
+         * Populate the depth buffer.
+         */
+
+        this.depth_renderer.depthRendererEvaluate(
+          camera.getViewMatrix(),
+          camera.getProjectionMatrix(),
+          batched.getBatchesDepth(),
+          framebuffer);
 
         try {
+          final FramebufferReferenceUsable output_buffer =
+            framebuffer.kFramebufferGetColorFramebuffer();
+
+          final AreaInclusive area = framebuffer.kFramebufferGetArea();
+          this.viewport_size.x = (int) area.getRangeX().getInterval();
+          this.viewport_size.y = (int) area.getRangeY().getInterval();
+
           gc.framebufferDrawBind(output_buffer);
           gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
-
-          /**
-           * Render all opaque meshes into the depth buffer, without touching
-           * the color buffer.
-           */
-
-          gc.cullingEnable(
-            FaceSelection.FACE_BACK,
-            FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-          gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-          gc.depthBufferWriteEnable();
-          gc.depthBufferClear(1.0f);
-          gc.colorBufferMask(false, false, false, false);
-          gc.blendingDisable();
-          this.renderDepthPassMeshes(batched, gc, mwc);
 
           /**
            * Render all opaque meshes, blending additively, into the
            * framebuffer.
            */
 
+          gc.cullingEnable(
+            FaceSelection.FACE_BACK,
+            FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
           gc.colorBufferMask(true, true, true, true);
           gc.colorBufferClearV4f(this.background);
           gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
