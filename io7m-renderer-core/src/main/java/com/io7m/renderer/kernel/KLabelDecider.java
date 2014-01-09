@@ -189,6 +189,7 @@ final class KLabelDecider implements
                 final KMaterialAlbedoLabel albedo =
                   KLabelDecider.this.albedo_cache.luCacheGet(instance);
                 return KMaterialDepthLabel.fromMaterial(
+                  capabilities,
                   albedo,
                   instance.getMaterial());
               } catch (final LUCacheException e) {
@@ -201,8 +202,7 @@ final class KLabelDecider implements
             {
               return 1;
             }
-          },
-          this.cache_config);
+          }, this.cache_config);
 
     this.emissive_cache =
       LRUCacheTrivial
@@ -393,10 +393,7 @@ final class KLabelDecider implements
                 final KMaterialDepthLabel caster =
                   KLabelDecider.this.depth_cache.luCacheGet(key.instance);
 
-                return KMaterialShadowLabel.fromShadow(
-                  KLabelDecider.this.capabilities,
-                  caster,
-                  key.shadow);
+                return KMaterialShadowLabel.fromShadow(caster, key.shadow);
               } catch (final LUCacheException x) {
                 throw new UnreachableCodeException(x);
               }

@@ -36,7 +36,6 @@ enum KMaterialShadowLabel
   ;
 
   public static @Nonnull KMaterialShadowLabel fromShadow(
-    final @Nonnull KGraphicsCapabilities capabilities,
     final @Nonnull KMaterialDepthLabel caster,
     final @Nonnull KShadow shadow)
     throws ConstraintError
@@ -47,7 +46,7 @@ enum KMaterialShadowLabel
     switch (shadow.getType()) {
       case SHADOW_MAPPED_BASIC:
       {
-        return KMaterialShadowLabel.fromShadowBasic(capabilities, caster);
+        return KMaterialShadowLabel.fromShadowBasic(caster);
       }
       case SHADOW_MAPPED_SOFT:
       {
@@ -59,27 +58,21 @@ enum KMaterialShadowLabel
   }
 
   private static @Nonnull KMaterialShadowLabel fromShadowBasic(
-    final @Nonnull KGraphicsCapabilities capabilities,
     final @Nonnull KMaterialDepthLabel caster)
   {
-    if (capabilities.getSupportsDepthTextures()) {
-      switch (caster) {
-        case DEPTH_CONSTANT:
-          return SHADOW_BASIC_DEPTH_CONSTANT;
-        case DEPTH_MAPPED:
-          return SHADOW_BASIC_DEPTH_MAPPED;
-        case DEPTH_UNIFORM:
-          return SHADOW_BASIC_DEPTH_UNIFORM;
-      }
-    } else {
-      switch (caster) {
-        case DEPTH_CONSTANT:
-          return SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444;
-        case DEPTH_MAPPED:
-          return SHADOW_BASIC_DEPTH_MAPPED_PACKED4444;
-        case DEPTH_UNIFORM:
-          return SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444;
-      }
+    switch (caster) {
+      case DEPTH_CONSTANT:
+        return SHADOW_BASIC_DEPTH_CONSTANT;
+      case DEPTH_CONSTANT_PACKED4444:
+        return SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444;
+      case DEPTH_MAPPED:
+        return SHADOW_BASIC_DEPTH_MAPPED;
+      case DEPTH_MAPPED_PACKED4444:
+        return SHADOW_BASIC_DEPTH_MAPPED_PACKED4444;
+      case DEPTH_UNIFORM:
+        return SHADOW_BASIC_DEPTH_UNIFORM;
+      case DEPTH_UNIFORM_PACKED4444:
+        return SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444;
     }
 
     throw new UnreachableCodeException();

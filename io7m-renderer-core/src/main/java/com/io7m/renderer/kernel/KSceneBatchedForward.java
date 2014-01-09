@@ -106,7 +106,7 @@ import com.io7m.renderer.kernel.KScene.KSceneTranslucents;
     makeOpaqueLitBatches(
       final @Nonnull KMaterialForwardLabelCache labels,
       final @Nonnull KMaterialDepthLabelCache depth_labels,
-      final @Nonnull Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batch_depth,
+      final @Nonnull KSceneBatchedDepth.Builder depth_builder,
       final @Nonnull Map<KLight, List<KMeshInstanceTransformed>> instances_by_light)
       throws ConstraintError
   {
@@ -142,17 +142,7 @@ import com.io7m.renderer.kernel.KScene.KSceneTranslucents;
         by_material.put(label, batch);
         batches_opaque_lit.put(light, by_material);
 
-        final KMaterialDepthLabel depth_label =
-          depth_labels.getDepthLabel(instance_i);
-        List<KMeshInstanceTransformed> depth_batch;
-        if (batch_depth.containsKey(depth_label)) {
-          depth_batch = batch_depth.get(depth_label);
-        } else {
-          depth_batch = new ArrayList<KMeshInstanceTransformed>();
-        }
-
-        depth_batch.add(instance);
-        batch_depth.put(depth_label, depth_batch);
+        depth_builder.sceneAddInstance(instance);
       }
     }
 
@@ -163,8 +153,7 @@ import com.io7m.renderer.kernel.KScene.KSceneTranslucents;
     Map<KMaterialForwardLabel, List<KMeshInstanceTransformed>>
     makeOpaqueUnlitBatches(
       final @Nonnull KMaterialForwardLabelCache forward_labels,
-      final @Nonnull KMaterialDepthLabelCache depth_labels,
-      final @Nonnull Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batch_depth,
+      final @Nonnull KSceneBatchedDepth.Builder depth_builder,
       final @Nonnull Set<KMeshInstanceTransformed> instances)
       throws ConstraintError
   {
@@ -185,16 +174,7 @@ import com.io7m.renderer.kernel.KScene.KSceneTranslucents;
       forward_batch.add(instance);
       forward_map.put(forward_label, forward_batch);
 
-      final KMaterialDepthLabel depth_label = depth_labels.getDepthLabel(i);
-      List<KMeshInstanceTransformed> depth_batch;
-      if (batch_depth.containsKey(depth_label)) {
-        depth_batch = batch_depth.get(depth_label);
-      } else {
-        depth_batch = new ArrayList<KMeshInstanceTransformed>();
-      }
-
-      depth_batch.add(instance);
-      batch_depth.put(depth_label, depth_batch);
+      depth_builder.sceneAddInstance(instance);
     }
 
     return forward_map;
@@ -244,21 +224,20 @@ import com.io7m.renderer.kernel.KScene.KSceneTranslucents;
     final KSceneOpaques opaques = scene.getOpaques();
     final KSceneTranslucents translucents = scene.getTranslucents();
 
-    final Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batch_depth =
-      new HashMap<KMaterialDepthLabel, List<KMeshInstanceTransformed>>();
+    final KSceneBatchedDepth.Builder depth_builder =
+      KSceneBatchedDepth.newBuilder(depth_labels);
 
     final Map<KLight, Map<KMaterialForwardLabel, List<KMeshInstanceTransformed>>> batches_opaque_lit =
       KSceneBatchedForward.makeOpaqueLitBatches(
         forward_labels,
         depth_labels,
-        batch_depth,
+        depth_builder,
         opaques.getLitInstances());
 
     final Map<KMaterialForwardLabel, List<KMeshInstanceTransformed>> batches_opaque_unlit =
       KSceneBatchedForward.makeOpaqueUnlitBatches(
         forward_labels,
-        depth_labels,
-        batch_depth,
+        depth_builder,
         opaques.getUnlitInstances());
 
     final List<BatchTranslucent> batches_translucent =
@@ -272,7 +251,7 @@ import com.io7m.renderer.kernel.KScene.KSceneTranslucents;
     return new KSceneBatchedForward(
       batches_opaque_unlit,
       batches_opaque_lit,
-      batch_depth,
+      depth_builder.sceneCreate(),
       batches_translucent,
       batched_shadow);
   }
