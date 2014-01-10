@@ -16,45 +16,18 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.IOException;
-
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLUnsupportedException;
-import com.io7m.renderer.RException;
+import com.io7m.jlucache.PCache;
 
-public interface KRendererVisitor<A, E extends Throwable>
+public interface KShadowMapsWith<A, E extends Throwable>
 {
-  public A rendererVisitDebug(
-    final @Nonnull KRendererDebug r)
-    throws JCGLException,
-      ConstraintError,
-      JCGLCompileException,
-      JCGLUnsupportedException,
-      IOException,
-      KXMLException,
-      RException;
-
-  public A rendererVisitDeferred(
-    final @Nonnull KRendererDeferred r)
-    throws JCGLException,
-      ConstraintError,
-      JCGLCompileException,
-      JCGLUnsupportedException,
-      IOException,
-      KXMLException,
-      RException;
-
-  public A rendererVisitForward(
-    final @Nonnull KRendererForward r)
-    throws JCGLException,
-      ConstraintError,
-      JCGLCompileException,
-      JCGLUnsupportedException,
-      IOException,
-      KXMLException,
-      RException;
+  public A withMaps(
+    final @Nonnull PCache<KShadow, KShadowMap, KShadowCacheException> cache)
+    throws ConstraintError,
+      JCGLException,
+      KShadowCacheException,
+      E;
 }

@@ -34,13 +34,7 @@ public final class ForwardShaders
       {
         break;
       }
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
-      {
-        b.append("  in f_position_light_eye  : vector_4f;\n");
-        b.append("  in f_position_light_clip : vector_4f;\n");
-        break;
-      }
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
       case LIGHT_PROJECTIVE:
       {
         b.append("  in f_position_light_clip : vector_4f;\n");
@@ -244,14 +238,12 @@ public final class ForwardShaders
             b.append("  parameter t_projection     : sampler_2d;\n");
             break;
           }
-          case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
-          case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED:
           {
             b.append("  -- Projective light (shadow mapping) parameters\n");
             b.append("  parameter light_projective : PL.t;\n");
             b.append("  parameter t_projection     : sampler_2d;\n");
             b.append("  parameter t_shadow         : sampler_2d;\n");
-            b.append("  parameter shadow_basic     : PL.basic;\n");
             break;
           }
         }
@@ -458,20 +450,19 @@ public final class ForwardShaders
             }
             break;
           }
-          case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED:
           {
             switch (label.getSpecular()) {
               case SPECULAR_NONE:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b.append("    PL.diffuse_only_shadowed_basic (\n");
+                b.append("    PL.diffuse_only_shadowed (\n");
                 b.append("      light_projective,\n");
                 b.append("      n,\n");
                 b.append("      f_position_eye [x y z],\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
-                b.append("      shadow_basic\n");
+                b.append("      t_shadow\n");
                 b.append("    );\n");
                 break;
               }
@@ -479,52 +470,14 @@ public final class ForwardShaders
               case SPECULAR_MAPPED:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b.append("    PL.diffuse_specular_shadowed_basic (\n");
+                b.append("    PL.diffuse_specular_shadowed (\n");
                 b.append("      light_projective,\n");
                 b.append("      n,\n");
                 b.append("      f_position_eye [x y z],\n");
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
-                b.append("      shadow_basic\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-          case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
-          {
-            switch (label.getSpecular()) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b.append("    PL.diffuse_only_shadowed_basic_packed4444 (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
-                b.append("      shadow_basic\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    PL.diffuse_specular_shadowed_basic_packed4444 (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      m,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
-                b.append("      shadow_basic\n");
+                b.append("      t_shadow\n");
                 b.append("    );\n");
                 break;
               }
@@ -596,21 +549,20 @@ public final class ForwardShaders
             break;
           }
 
-          case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED:
           {
             switch (label.getSpecular()) {
               case SPECULAR_NONE:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b.append("    PL.diffuse_only_emissive_shadowed_basic (\n");
+                b.append("    PL.diffuse_only_emissive_shadowed (\n");
                 b.append("      light_projective,\n");
                 b.append("      n,\n");
                 b.append("      f_position_eye [x y z],\n");
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
-                b.append("      shadow_basic\n");
+                b.append("      t_shadow\n");
                 b.append("    );\n");
                 break;
               }
@@ -618,56 +570,14 @@ public final class ForwardShaders
               case SPECULAR_MAPPED:
               {
                 b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    PL.diffuse_specular_emissive_shadowed_basic (\n");
+                b.append("    PL.diffuse_specular_emissive_shadowed (\n");
                 b.append("      light_projective,\n");
                 b.append("      n,\n");
                 b.append("      f_position_eye [x y z],\n");
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
-                b.append("      shadow_basic\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-
-          case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
-          {
-            switch (label.getSpecular()) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    PL.diffuse_only_emissive_shadowed_basic_packed4444 (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      m,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
-                b.append("      shadow_basic\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    PL.diffuse_specular_emissive_shadowed_basic_packed4444 (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      m,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
-                b.append("      shadow_basic\n");
+                b.append("      t_shadow\n");
                 b.append("    );\n");
                 break;
               }
@@ -1181,11 +1091,9 @@ public final class ForwardShaders
         b.append("\n");
         break;
       }
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
       {
         b.append("  -- Projective light (shadow mapped) outputs\n");
-        b.append("  out f_position_light_eye  : vector_4f;\n");
         b.append("  out f_position_light_clip : vector_4f;\n");
         b.append("\n");
         break;
@@ -1256,8 +1164,7 @@ public final class ForwardShaders
         break;
       }
       case LIGHT_PROJECTIVE:
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
       {
         b.append("  -- Projective light parameters\n");
         b.append("  parameter m_projective_modelview  : matrix_4x4f;\n");
@@ -1321,8 +1228,7 @@ public final class ForwardShaders
         break;
       }
       case LIGHT_PROJECTIVE:
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
       {
         b.append("  value position_light_eye : vector_4f =\n");
         b.append("    M4.multiply_vector (\n");
@@ -1410,15 +1316,9 @@ public final class ForwardShaders
       {
         break;
       }
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED:
       case LIGHT_PROJECTIVE:
       {
-        b.append("  out f_position_light_clip = position_light_clip;\n");
-        break;
-      }
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
-      case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
-      {
-        b.append("  out f_position_light_eye  = position_light_eye;\n");
         b.append("  out f_position_light_clip = position_light_clip;\n");
         break;
       }

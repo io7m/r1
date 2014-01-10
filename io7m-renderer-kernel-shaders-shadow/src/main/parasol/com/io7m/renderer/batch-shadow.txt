@@ -1,0 +1,6 @@
+shadow_BC   : com.io7m.renderer.Shadow.shadow_BC
+shadow_BCP4 : com.io7m.renderer.Shadow.shadow_BCP4
+shadow_BU   : com.io7m.renderer.Shadow.shadow_BU
+shadow_BUP4 : com.io7m.renderer.Shadow.shadow_BUP4
+shadow_BM   : com.io7m.renderer.Shadow.shadow_BM
+shadow_BMP4 : com.io7m.renderer.Shadow.shadow_BMP4

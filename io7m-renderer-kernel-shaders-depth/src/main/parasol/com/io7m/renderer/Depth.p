@@ -189,7 +189,7 @@ module Depth is
       );
 
     value alpha = F.multiply (albedo [w], material.alpha.opacity);
-    discard (F.lesser (alpha, 0.5));
+    discard (F.lesser (alpha, material.alpha.depth_threshold));
     value rgba =
       new vector_4f (0.0, Fragment.coordinate [z], 1.0, 1.0);
   as
@@ -222,7 +222,7 @@ module Depth is
       );
 
     value alpha = F.multiply (albedo [w], material.alpha.opacity);
-    discard (F.lesser (alpha, 0.5));
+    discard (F.lesser (alpha, material.alpha.depth_threshold));
     value rgba = P.pack4444 (Fragment.coordinate [z]);
   as
     out out_0 = rgba;
