@@ -25,13 +25,13 @@ import com.io7m.jaux.UnreachableCodeException;
 
 enum KMaterialShadowLabel
 {
-  SHADOW_BASIC_DEPTH_CONSTANT("C"),
-  SHADOW_BASIC_DEPTH_UNIFORM("U"),
-  SHADOW_BASIC_DEPTH_MAPPED("M"),
+  SHADOW_BASIC_DEPTH_CONSTANT("shadow_BC"),
+  SHADOW_BASIC_DEPTH_UNIFORM("shadow_BU"),
+  SHADOW_BASIC_DEPTH_MAPPED("shadow_BM"),
 
-  SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444("CP4"),
-  SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444("UP4"),
-  SHADOW_BASIC_DEPTH_MAPPED_PACKED4444("MP4"),
+  SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444("shadow_BCP4"),
+  SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444("shadow_BUP4"),
+  SHADOW_BASIC_DEPTH_MAPPED_PACKED4444("shadow_BMP4"),
 
   ;
 
@@ -86,11 +86,6 @@ enum KMaterialShadowLabel
     this.name = name;
   }
 
-  public @Nonnull String getCode()
-  {
-    return this.name;
-  }
-
   public boolean impliesUV()
   {
     switch (this) {
@@ -108,6 +103,11 @@ enum KMaterialShadowLabel
   }
 
   @Override public @Nonnull String toString()
+  {
+    return this.name;
+  }
+
+  public @Nonnull String getName()
   {
     return this.name;
   }

@@ -24,6 +24,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLUnsupportedException;
+import com.io7m.renderer.RException;
 
 public interface KRendererVisitor<A, E extends Throwable>
 {
@@ -34,7 +35,8 @@ public interface KRendererVisitor<A, E extends Throwable>
       JCGLCompileException,
       JCGLUnsupportedException,
       IOException,
-      KXMLException;
+      KXMLException,
+      RException;
 
   public A rendererVisitDeferred(
     final @Nonnull KRendererDeferred r)
@@ -43,7 +45,8 @@ public interface KRendererVisitor<A, E extends Throwable>
       JCGLCompileException,
       JCGLUnsupportedException,
       IOException,
-      KXMLException;
+      KXMLException,
+      RException;
 
   public A rendererVisitForward(
     final @Nonnull KRendererForward r)
@@ -52,5 +55,6 @@ public interface KRendererVisitor<A, E extends Throwable>
       JCGLCompileException,
       JCGLUnsupportedException,
       IOException,
-      KXMLException;
+      KXMLException,
+      RException;
 }

@@ -30,7 +30,6 @@ import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LUCacheLoader;
 import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
-import com.io7m.renderer.kernel.KShadow.KShadowMappedSoft;
 
 final class KShadowCacheLoader implements
   LUCacheLoader<KShadow, KShadowMap, KShadowCacheException>
@@ -66,7 +65,7 @@ final class KShadowCacheLoader implements
   {
     try {
       try {
-        v.mapDelete(this.gi);
+        v.kFramebufferDelete(this.gi);
       } catch (final JCGLException e) {
         throw KShadowCacheException.errorJCGL(e);
       }
@@ -82,6 +81,7 @@ final class KShadowCacheLoader implements
     try {
       try {
         switch (s.getType()) {
+          case SHADOW_MAPPED_SOFT:
           case SHADOW_MAPPED_BASIC:
           {
             final KShadowMappedBasic smb = (KShadowMappedBasic) s;
@@ -98,33 +98,12 @@ final class KShadowCacheLoader implements
               this.message.append(" shadow map");
               this.log.debug(this.message.toString());
             }
-            return KShadowMap.newBasic(
+            final KShadowFilter filter = smb.getShadowFilter();
+            return KShadowMap.newShadowMap(
               this.gi,
               area,
-              smb.getShadowFilter(),
-              smb.getShadowPrecision());
-          }
-          case SHADOW_MAPPED_SOFT:
-          {
-            final KShadowMappedSoft smv = (KShadowMappedSoft) s;
-            final long size = 2 << (smv.getSizeExponent() - 1);
-            final RangeInclusive range_x = new RangeInclusive(0, size - 1);
-            final RangeInclusive range_y = new RangeInclusive(0, size - 1);
-            final AreaInclusive area = new AreaInclusive(range_x, range_y);
-            if (this.log.enabled(Level.LOG_DEBUG)) {
-              this.message.setLength(0);
-              this.message.append("Allocating ");
-              this.message.append(size);
-              this.message.append("x");
-              this.message.append(size);
-              this.message.append(" shadow map");
-              this.log.debug(this.message.toString());
-            }
-            return KShadowMap.newSoft(
-              this.gi,
-              area,
-              smv.getShadowFilter(),
-              smv.getShadowPrecision());
+              filter.getMinification(),
+              filter.getMagnification());
           }
         }
 
@@ -142,6 +121,6 @@ final class KShadowCacheLoader implements
   @Override public long luCacheSizeOf(
     final @Nonnull KShadowMap f)
   {
-    return f.mapGetSizeBytes();
+    return f.kFramebufferGetShadowSizeBytes();
   }
 }
