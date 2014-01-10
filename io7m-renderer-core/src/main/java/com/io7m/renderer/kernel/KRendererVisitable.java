@@ -16,14 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.IOException;
-
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLCompileException;
-import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.renderer.RException;
 
 public interface KRendererVisitable
@@ -34,11 +29,6 @@ public interface KRendererVisitable
     rendererVisitableAccept(
       final @Nonnull V v)
       throws E,
-        JCGLException,
         ConstraintError,
-        JCGLCompileException,
-        JCGLUnsupportedException,
-        IOException,
-        KXMLException,
         RException;
 }

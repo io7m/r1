@@ -16,13 +16,29 @@
 
 package com.io7m.renderer;
 
+import java.io.IOException;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.kernel.KXMLException;
 
 public interface RExceptionVisitor<T, E extends Throwable>
 {
   public T visitJCGLException(
     final @Nonnull JCGLException e)
+    throws E;
+
+  public T visitIOException(
+    final @Nonnull IOException e)
+    throws E;
+
+  public T visitXMLException(
+    final @Nonnull KXMLException e)
+    throws E;
+
+  public T visitFilesystemException(
+    final @Nonnull FilesystemError e)
     throws E;
 }

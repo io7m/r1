@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,16 +47,14 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
 {
   private static final @Nonnull String NAME = "debug-shadow-map";
 
-  public static
-    KRendererDebugShadowMap
-    rendererNew(
-      final @Nonnull JCGLImplementation g,
-      final @Nonnull KLabelDecider decider,
-      final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
-      final @Nonnull KGraphicsCapabilities caps,
-      final @Nonnull Log log,
-      final @Nonnull PCache<KShadow, KShadowMap, KShadowCacheException> shadow_cache)
-      throws ConstraintError
+  public static KRendererDebugShadowMap rendererNew(
+    final @Nonnull JCGLImplementation g,
+    final @Nonnull KLabelDecider decider,
+    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
+    final @Nonnull KGraphicsCapabilities caps,
+    final @Nonnull Log log,
+    final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache)
+    throws ConstraintError
   {
     return new KRendererDebugShadowMap(
       g,
@@ -69,33 +66,34 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
       shadow_cache);
   }
 
-  private final @Nonnull VectorM4F           background;
-  private final @Nonnull JCGLImplementation  gl;
-  private final @Nonnull Log                 log;
-  private final @Nonnull KMutableMatricesOld matrices;
-  private final @Nonnull KTransform.Context  transform_context;
-  private final @Nonnull VectorM2I           viewport_size;
-  private final @Nonnull KDepthRenderer      depth_renderer;
-  private final @Nonnull KLabelDecider       decider;
-  private final @Nonnull KShadowMapRenderer  shadow_renderer;
-  private @CheckForNull Debugging            debug;
+  private final @Nonnull VectorM4F          background;
+  private final @Nonnull JCGLImplementation gl;
+  private final @Nonnull Log                log;
+  private final @Nonnull KMutableMatrices   matrices;
+  private final @Nonnull KTransform.Context transform_context;
+  private final @Nonnull VectorM2I          viewport_size;
+  private final @Nonnull KDepthRenderer     depth_renderer;
+  private final @Nonnull KLabelDecider      decider;
+  private final @Nonnull KShadowMapRenderer shadow_renderer;
+  private @CheckForNull Debugging           debug;
 
   private KRendererDebugShadowMap(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull KLabelDecider decider,
-    final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
+    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull KGraphicsCapabilities caps,
     final @Nonnull Log log,
     final @Nonnull KMaterialShadowLabelCache label_decider,
-    final @Nonnull PCache<KShadow, KShadowMap, KShadowCacheException> shadow_cache)
+    final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache)
     throws ConstraintError
   {
     super(KRendererDebugShadowMap.NAME);
+
     this.log = new Log(log, KRendererDebugShadowMap.NAME);
     this.gl = gl;
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = KMutableMatricesOld.newMatrices();
+    this.matrices = KMutableMatrices.newMatrices();
     this.transform_context = new KTransform.Context();
     this.viewport_size = new VectorM2I();
 
@@ -106,7 +104,9 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
         gl,
         label_decider,
         shader_cache,
-        shadow_cache);
+        shadow_cache,
+        caps,
+        log);
     this.decider = decider;
   }
 
@@ -132,10 +132,7 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
   @Override public void rendererForwardEvaluate(
     final @Nonnull KFramebufferForwardUsable framebuffer,
     final @Nonnull KScene scene)
-    throws JCGLException,
-      ConstraintError,
-      IOException,
-      KXMLException,
+    throws ConstraintError,
       RException
   {
     final KCamera camera = scene.getCamera();
@@ -147,30 +144,15 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
         this.decider,
         scene);
 
-    /**
-     * Populate the depth buffer.
-     */
-
-    this.depth_renderer.depthRendererEvaluate(
-      camera.getViewMatrix(),
-      camera.getProjectionMatrix(),
-      batched.getBatchesDepth(),
-      framebuffer);
-
     try {
       this.shadow_renderer.shadowMapRendererEvaluate(
-        framebuffer.kFramebufferGetDepthTexture(),
         scene.getCamera(),
         batched.getBatchedShadow(),
         new KShadowMapsWith<Unit, JCGLException>() {
-          @Override public
-            Unit
-            withMaps(
-              final @Nonnull PCache<KShadow, KShadowMap, KShadowCacheException> cache)
-              throws ConstraintError,
-                JCGLException,
-                KShadowCacheException,
-                JCGLException
+          @Override public Unit withMaps(
+            final @Nonnull PCache<KShadow, KShadowMap, RException> cache)
+            throws ConstraintError,
+              RException
           {
             try {
               if (KRendererDebugShadowMap.this.debug != null) {
@@ -180,25 +162,19 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
                     .getShadowCasters()
                     .keySet());
               }
-
-              KRendererDebugShadowMap.this.renderScene(
-                framebuffer,
-                batched,
-                camera.getViewMatrix(),
-                camera.getProjectionMatrix());
               return Unit.unit();
             } catch (final LUCacheException e) {
               throw new UnreachableCodeException(e);
             }
           }
         });
-    } catch (final KShadowCacheException e) {
-      KRendererCommon.handleShadowCacheException(e);
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
     }
   }
 
   protected void debugDumpShadowMaps(
-    final @Nonnull PCache<KShadow, KShadowMap, KShadowCacheException> cache,
+    final @Nonnull PCache<KShadow, KShadowMap, RException> cache,
     final @Nonnull Set<KLight> lights)
   {
 
@@ -233,10 +209,10 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
     @SuppressWarnings("synthetic-access") public
       void
       debugPerformDumpShadowMaps(
-        final @Nonnull PCache<KShadow, KShadowMap, KShadowCacheException> cache,
+        final @Nonnull PCache<KShadow, KShadowMap, RException> cache,
         final @Nonnull Collection<KLight> lights)
         throws ConstraintError,
-          KShadowCacheException,
+          RException,
           LUCacheException
     {
       final DebugShadowMapReceiver dump =

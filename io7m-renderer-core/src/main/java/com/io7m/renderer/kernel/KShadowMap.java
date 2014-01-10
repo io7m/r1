@@ -17,12 +17,12 @@
 package com.io7m.renderer.kernel;
 
 import java.util.HashMap;
-import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.functional.Option;
+import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
 import com.io7m.jcanephora.FramebufferDrawBuffer;
@@ -30,6 +30,7 @@ import com.io7m.jcanephora.FramebufferReference;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.FramebufferStatus;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLExtensionESDepthTexture;
 import com.io7m.jcanephora.JCGLFramebuffersGL3;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLImplementationVisitor;
@@ -38,315 +39,596 @@ import com.io7m.jcanephora.JCGLInterfaceGL2;
 import com.io7m.jcanephora.JCGLInterfaceGL3;
 import com.io7m.jcanephora.JCGLInterfaceGLES2;
 import com.io7m.jcanephora.JCGLInterfaceGLES3;
-import com.io7m.jcanephora.JCGLRenderbuffersGL3ES3;
+import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.JCGLTextures2DStaticGL3ES3;
+import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.RenderableDepth;
 import com.io7m.jcanephora.Renderbuffer;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.jcanephora.TextureFilterMagnification;
-import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.renderer.RException;
 
 public abstract class KShadowMap implements KShadowMapType
 {
-  private static final class KShadowMapGL2 extends KShadowMap
+  public static abstract class KShadowMapBasic extends KShadowMap implements
+    KFramebufferDepthUsable
   {
-    public static KShadowMapGL2 newFramebuffer(
-      final @Nonnull JCGLInterfaceGL2 gl,
-      final @Nonnull AreaInclusive area,
-      final @Nonnull TextureFilterMinification min,
-      final @Nonnull TextureFilterMagnification mag)
-      throws JCGLException,
-        ConstraintError
+    private static final class KShadowMapBasicGL2 extends KShadowMapBasic
     {
-      final int width = (int) area.getRangeX().getInterval();
-      final int height = (int) area.getRangeY().getInterval();
+      public static
+        KShadowMapBasic
+        newShadowMapBasic(
+          final @Nonnull JCGLInterfaceGL2 gl,
+          final int width,
+          final int height,
+          final @Nonnull KShadowFilter filter,
+          @SuppressWarnings("unused") final @Nonnull KShadowPrecision precision)
+          throws JCGLException,
+            ConstraintError
+      {
+        final Texture2DStatic depth =
+          gl.texture2DStaticAllocateDepth24Stencil8(
+            "depth-24s8",
+            width,
+            height,
+            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            filter.getMinification(),
+            filter.getMagnification());
 
-      final Texture2DStatic c =
-        gl.texture2DStaticAllocateRGBA8(
-          "shadow-light-rgba8",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          min,
-          mag);
+        final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> empty =
+          new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
 
-      final Renderbuffer<RenderableDepth> r =
-        gl.renderbufferAllocateDepth24(width, height);
+        final FramebufferReference fb = gl.framebufferAllocate();
+        gl.framebufferDrawBind(fb);
 
-      final List<FramebufferColorAttachmentPoint> points =
-        gl.framebufferGetColorAttachmentPoints();
-      final List<FramebufferDrawBuffer> buffers =
-        gl.framebufferGetDrawBuffers();
+        try {
+          gl.framebufferDrawAttachDepthTexture2D(fb, depth);
+          gl.framebufferDrawSetBuffers(fb, empty);
 
-      final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
-        new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
-      mappings.put(buffers.get(0), points.get(0));
+          final FramebufferStatus status = gl.framebufferDrawValidate(fb);
+          switch (status) {
+            case FRAMEBUFFER_STATUS_COMPLETE:
+              break;
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
+            case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
+            case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
+            case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
+              throw new JCGLUnsupportedException(
+                "Could not initialize framebuffer: " + status);
+          }
 
-      final FramebufferReference fb = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb);
-      try {
-        gl.framebufferDrawAttachColorTexture2D(fb, c);
-        gl.framebufferDrawAttachDepthRenderbuffer(fb, r);
-        gl.framebufferDrawSetBuffers(fb, mappings);
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb);
-        KFramebufferForward.checkFramebufferStatus(status);
-      } finally {
-        gl.framebufferDrawUnbind();
+        } finally {
+          gl.framebufferDrawUnbind();
+        }
+
+        return new KShadowMapBasicGL2(depth, fb);
       }
 
-      return new KShadowMapGL2(c, r, fb);
-    }
+      private final @Nonnull Texture2DStatic      depth;
+      private final @Nonnull FramebufferReference framebuffer;
+      private final int                           size;
 
-    private KShadowMapGL2(
-      final @Nonnull Texture2DStatic c,
-      final @Nonnull Renderbuffer<RenderableDepth> r,
-      final @Nonnull FramebufferReference fb)
-    {
-      super(c, fb, r);
-    }
-  }
+      private KShadowMapBasicGL2(
+        final @Nonnull Texture2DStatic depth,
+        final @Nonnull FramebufferReference framebuffer)
+      {
+        this.depth = depth;
+        this.framebuffer = framebuffer;
+        this.size =
+          this.depth.getHeight()
+            * (this.depth.getWidth() * this.depth
+              .getType()
+              .getBytesPerPixel());
+      }
 
-  private static long makeSize(
-    final @Nonnull Texture2DStatic c,
-    final @Nonnull Renderbuffer<RenderableDepth> r,
-    final @Nonnull FramebufferReference fb)
-  {
-    final long cw = c.getWidth();
-    final long ch = c.getHeight();
-    final long cb = c.getType().getBytesPerPixel();
-    final long cs = cw * ch * cb;
-
-    final long rw = r.getWidth();
-    final long rh = r.getHeight();
-    final long rb = r.getType().getBytesPerPixel();
-    final long rs = rw * rh * rb;
-
-    return cs + rs;
-  }
-
-  private static final class KShadowMapGL3ES3 extends KShadowMap
-  {
-    public static final @Nonnull
-      <G extends JCGLTextures2DStaticGL3ES3 & JCGLFramebuffersGL3 & JCGLRenderbuffersGL3ES3>
-      KShadowMapGL3ES3
-      newFramebuffer(
-        final @Nonnull G gl,
-        final @Nonnull AreaInclusive area,
-        final @Nonnull TextureFilterMinification min,
-        final @Nonnull TextureFilterMagnification mag)
-        throws JCGLException,
+      @Override public void kShadowMapDelete(
+        final JCGLImplementation g)
+        throws RException,
           ConstraintError
-    {
-      final int width = (int) area.getRangeX().getInterval();
-      final int height = (int) area.getRangeY().getInterval();
-
-      final Texture2DStatic c =
-        gl.texture2DStaticAllocateR8(
-          "shadow-light-r8",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          min,
-          mag);
-
-      final Renderbuffer<RenderableDepth> r =
-        gl.renderbufferAllocateDepth24(width, height);
-
-      final List<FramebufferColorAttachmentPoint> points =
-        gl.framebufferGetColorAttachmentPoints();
-      final List<FramebufferDrawBuffer> buffers =
-        gl.framebufferGetDrawBuffers();
-
-      final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
-        new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
-      mappings.put(buffers.get(0), points.get(0));
-
-      final FramebufferReference fb = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb);
-      try {
-        gl.framebufferDrawAttachColorTexture2D(fb, c);
-        gl.framebufferDrawAttachDepthRenderbuffer(fb, r);
-        gl.framebufferDrawSetBuffers(fb, mappings);
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb);
-        KFramebufferForward.checkFramebufferStatus(status);
-      } finally {
-        gl.framebufferDrawUnbind();
+      {
+        try {
+          final JCGLInterfaceCommon gc = g.getGLCommon();
+          gc.framebufferDelete(this.framebuffer);
+          gc.texture2DStaticDelete(this.depth);
+        } catch (final JCGLRuntimeException e) {
+          throw RException.fromJCGLException(e);
+        } finally {
+          super.setDeleted(true);
+        }
       }
 
-      return new KShadowMapGL3ES3(c, r, fb);
+      @Override public long kShadowMapGetSizeBytes()
+      {
+        return this.size;
+      }
+
+      @Override public
+        FramebufferReferenceUsable
+        kFramebufferGetDepthPassFramebuffer()
+      {
+        return this.framebuffer;
+      }
+
+      @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
+      {
+        return this.depth;
+      }
+
+      @Override public AreaInclusive kFramebufferGetArea()
+      {
+        return this.depth.getArea();
+      }
     }
 
-    private KShadowMapGL3ES3(
-      final @Nonnull Texture2DStatic c,
-      final @Nonnull Renderbuffer<RenderableDepth> r,
-      final @Nonnull FramebufferReference fb)
+    private static final class KShadowMapBasicGL3ES3 extends KShadowMapBasic
     {
-      super(c, fb, r);
-    }
-  }
+      public static
+        <G extends JCGLTextures2DStaticGL3ES3 & JCGLFramebuffersGL3>
+        KShadowMapBasic
+        newShadowMapBasic(
+          final @Nonnull G gl,
+          final int width,
+          final int height,
+          final @Nonnull KShadowFilter filter,
+          final @Nonnull KShadowPrecision precision)
+          throws JCGLException,
+            ConstraintError
+      {
+        Texture2DStatic depth = null;
+        switch (precision) {
+          case SHADOW_PRECISION_16:
+          {
+            depth =
+              gl.texture2DStaticAllocateDepth16(
+                "depth-16",
+                width,
+                height,
+                TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                filter.getMinification(),
+                filter.getMagnification());
+            break;
+          }
+          case SHADOW_PRECISION_24:
+          {
+            depth =
+              gl.texture2DStaticAllocateDepth24(
+                "depth-24",
+                width,
+                height,
+                TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                filter.getMinification(),
+                filter.getMagnification());
+            break;
+          }
+          case SHADOW_PRECISION_32:
+          {
+            depth =
+              gl.texture2DStaticAllocateDepth32f(
+                "depth-32f",
+                width,
+                height,
+                TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                filter.getMinification(),
+                filter.getMagnification());
+            break;
+          }
+        }
 
-  private static final class KShadowMapGLES2 extends KShadowMap
-  {
-    public static final @Nonnull KShadowMapGLES2 newFramebuffer(
-      final @Nonnull JCGLInterfaceGLES2 gl,
-      final @Nonnull AreaInclusive area,
-      final @Nonnull TextureFilterMinification min,
-      final @Nonnull TextureFilterMagnification mag)
-      throws JCGLException,
+        assert depth != null;
+
+        final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> empty =
+          new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
+
+        final FramebufferReference fb = gl.framebufferAllocate();
+        gl.framebufferDrawBind(fb);
+
+        try {
+          gl.framebufferDrawAttachDepthTexture2D(fb, depth);
+          gl.framebufferDrawSetBuffers(fb, empty);
+
+          final FramebufferStatus status = gl.framebufferDrawValidate(fb);
+          switch (status) {
+            case FRAMEBUFFER_STATUS_COMPLETE:
+              break;
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
+            case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
+            case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
+            case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
+              throw new JCGLUnsupportedException(
+                "Could not initialize framebuffer: " + status);
+          }
+
+        } finally {
+          gl.framebufferDrawUnbind();
+        }
+
+        return new KShadowMapBasicGL3ES3(depth, fb);
+      }
+
+      private final @Nonnull Texture2DStatic      depth;
+      private final @Nonnull FramebufferReference framebuffer;
+      private final int                           size;
+
+      private KShadowMapBasicGL3ES3(
+        final @Nonnull Texture2DStatic depth,
+        final @Nonnull FramebufferReference framebuffer)
+      {
+        this.depth = depth;
+        this.framebuffer = framebuffer;
+        this.size =
+          this.depth.getHeight()
+            * (this.depth.getWidth() * this.depth
+              .getType()
+              .getBytesPerPixel());
+      }
+
+      @Override public
+        FramebufferReferenceUsable
+        kFramebufferGetDepthPassFramebuffer()
+      {
+        return this.framebuffer;
+      }
+
+      @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
+      {
+        return this.depth;
+      }
+
+      @Override public AreaInclusive kFramebufferGetArea()
+      {
+        return this.depth.getArea();
+      }
+
+      @Override public void kShadowMapDelete(
+        final JCGLImplementation g)
+        throws RException,
+          ConstraintError
+      {
+        try {
+          final JCGLInterfaceCommon gc = g.getGLCommon();
+          gc.framebufferDelete(this.framebuffer);
+          gc.texture2DStaticDelete(this.depth);
+        } catch (final JCGLRuntimeException e) {
+          throw RException.fromJCGLException(e);
+        } finally {
+          super.setDeleted(true);
+        }
+      }
+
+      @Override public long kShadowMapGetSizeBytes()
+      {
+        return this.size;
+      }
+    }
+
+    private static final class KShadowMapBasicGLES2WithDepthTexture extends
+      KShadowMapBasic
+    {
+      public static
+        KShadowMapBasic
+        newShadowMapBasic(
+          final @Nonnull JCGLInterfaceGLES2 gl,
+          final int width,
+          final int height,
+          final @Nonnull KShadowFilter filter,
+          @SuppressWarnings("unused") final @Nonnull KShadowPrecision precision,
+          final @Nonnull JCGLExtensionESDepthTexture ext)
+          throws JCGLException,
+            ConstraintError
+      {
+        final Texture2DStatic t =
+          ext.texture2DStaticAllocateDepth16(
+            "depth-16",
+            width,
+            height,
+            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            filter.getMinification(),
+            filter.getMagnification());
+
+        final FramebufferReference fb = gl.framebufferAllocate();
+        gl.framebufferDrawBind(fb);
+
+        try {
+          gl.framebufferDrawAttachDepthTexture2D(fb, t);
+
+          final FramebufferStatus status = gl.framebufferDrawValidate(fb);
+          switch (status) {
+            case FRAMEBUFFER_STATUS_COMPLETE:
+              break;
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
+            case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
+            case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
+            case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
+              throw new JCGLUnsupportedException(
+                "Could not initialize framebuffer: " + status);
+          }
+
+        } finally {
+          gl.framebufferDrawUnbind();
+        }
+
+        return new KShadowMapBasicGLES2WithDepthTexture(t, fb);
+      }
+
+      private final @Nonnull Texture2DStatic      depth;
+      private final @Nonnull FramebufferReference framebuffer;
+      private final int                           size;
+
+      private KShadowMapBasicGLES2WithDepthTexture(
+        final @Nonnull Texture2DStatic depth,
+        final @Nonnull FramebufferReference framebuffer)
+      {
+        this.depth = depth;
+        this.framebuffer = framebuffer;
+        this.size =
+          this.depth.getHeight()
+            * (this.depth.getWidth() * this.depth
+              .getType()
+              .getBytesPerPixel());
+      }
+
+      @Override public
+        FramebufferReferenceUsable
+        kFramebufferGetDepthPassFramebuffer()
+      {
+        return this.framebuffer;
+      }
+
+      @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
+      {
+        return this.depth;
+      }
+
+      @Override public AreaInclusive kFramebufferGetArea()
+      {
+        return this.depth.getArea();
+      }
+
+      @Override public void kShadowMapDelete(
+        final JCGLImplementation g)
+        throws RException,
+          ConstraintError
+      {
+        try {
+          final JCGLInterfaceCommon gc = g.getGLCommon();
+          gc.framebufferDelete(this.framebuffer);
+          gc.texture2DStaticDelete(this.depth);
+        } catch (final JCGLRuntimeException e) {
+          throw RException.fromJCGLException(e);
+        } finally {
+          super.setDeleted(true);
+        }
+      }
+
+      @Override public long kShadowMapGetSizeBytes()
+      {
+        return this.size;
+      }
+    }
+
+    private static final class KShadowMapBasicGLES2WithoutDepthTexture extends
+      KShadowMapBasic
+    {
+      public static
+        KShadowMapBasic
+        newShadowMapBasic(
+          final @Nonnull JCGLInterfaceGLES2 gl,
+          final int width,
+          final int height,
+          final @Nonnull KShadowFilter filter,
+          @SuppressWarnings("unused") final @Nonnull KShadowPrecision precision)
+          throws JCGLException,
+            ConstraintError
+      {
+        final Renderbuffer<RenderableDepth> rb =
+          gl.renderbufferAllocateDepth16(width, height);
+        final Texture2DStatic t =
+          gl.texture2DStaticAllocateRGBA4444(
+            "color-4444",
+            width,
+            height,
+            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            filter.getMinification(),
+            filter.getMagnification());
+
+        final FramebufferReference fb = gl.framebufferAllocate();
+        gl.framebufferDrawBind(fb);
+
+        try {
+          gl.framebufferDrawAttachColorTexture2D(fb, t);
+          gl.framebufferDrawAttachDepthRenderbuffer(fb, rb);
+
+          final FramebufferStatus status = gl.framebufferDrawValidate(fb);
+          switch (status) {
+            case FRAMEBUFFER_STATUS_COMPLETE:
+              break;
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
+            case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
+            case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
+            case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
+              throw new JCGLUnsupportedException(
+                "Could not initialize framebuffer: " + status);
+          }
+
+        } finally {
+          gl.framebufferDrawUnbind();
+        }
+
+        return new KShadowMapBasicGLES2WithoutDepthTexture(rb, t, fb);
+      }
+
+      private final @Nonnull Texture2DStatic               depth;
+      private final @Nonnull FramebufferReference          framebuffer;
+      private final @Nonnull Renderbuffer<RenderableDepth> renderbuffer;
+      private final int                                    size;
+
+      private KShadowMapBasicGLES2WithoutDepthTexture(
+        final @Nonnull Renderbuffer<RenderableDepth> rb,
+        final @Nonnull Texture2DStatic depth,
+        final @Nonnull FramebufferReference framebuffer)
+      {
+        this.depth = depth;
+        this.renderbuffer = rb;
+        this.framebuffer = framebuffer;
+
+        final int w = this.depth.getWidth();
+        final int h = this.depth.getHeight();
+
+        final int rb_size = h * (w * rb.getType().getBytesPerPixel());
+        final int tc_size = h * (w * depth.getType().getBytesPerPixel());
+        this.size = rb_size + tc_size;
+      }
+
+      @Override public
+        FramebufferReferenceUsable
+        kFramebufferGetDepthPassFramebuffer()
+      {
+        return this.framebuffer;
+      }
+
+      @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
+      {
+        return this.depth;
+      }
+
+      @Override public AreaInclusive kFramebufferGetArea()
+      {
+        return this.depth.getArea();
+      }
+
+      @Override public void kShadowMapDelete(
+        final JCGLImplementation g)
+        throws RException,
+          ConstraintError
+      {
+        try {
+          final JCGLInterfaceCommon gc = g.getGLCommon();
+          gc.framebufferDelete(this.framebuffer);
+          gc.renderbufferDelete(this.renderbuffer);
+          gc.texture2DStaticDelete(this.depth);
+        } catch (final JCGLRuntimeException e) {
+          throw RException.fromJCGLException(e);
+        } finally {
+          super.setDeleted(true);
+        }
+      }
+
+      @Override public long kShadowMapGetSizeBytes()
+      {
+        return this.size;
+      }
+    }
+
+    public static @Nonnull KShadowMapBasic newShadowMapBasic(
+      final @Nonnull JCGLImplementation g,
+      final int width,
+      final int height,
+      final @Nonnull KShadowFilter filter,
+      final @Nonnull KShadowPrecision precision)
+      throws RException,
         ConstraintError
     {
-      final int width = (int) area.getRangeX().getInterval();
-      final int height = (int) area.getRangeY().getInterval();
-
-      final Texture2DStatic c =
-        gl.texture2DStaticAllocateRGB565(
-          "shadow-light-rgb565",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          min,
-          mag);
-
-      final Renderbuffer<RenderableDepth> r =
-        gl.renderbufferAllocateDepth16(width, height);
-
-      final FramebufferReference fb = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb);
       try {
-        gl.framebufferDrawAttachColorTexture2D(fb, c);
-        gl.framebufferDrawAttachDepthRenderbuffer(fb, r);
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb);
-        KFramebufferForward.checkFramebufferStatus(status);
-      } finally {
-        gl.framebufferDrawUnbind();
+        return g
+          .implementationAccept(new JCGLImplementationVisitor<KShadowMapBasic, JCGLException>() {
+            @Override public KShadowMapBasic implementationIsGL2(
+              final JCGLInterfaceGL2 gl)
+              throws JCGLException,
+                ConstraintError
+            {
+              return KShadowMapBasicGL2.newShadowMapBasic(
+                gl,
+                width,
+                height,
+                filter,
+                precision);
+            }
+
+            @Override public KShadowMapBasic implementationIsGL3(
+              final JCGLInterfaceGL3 gl)
+              throws JCGLException,
+                ConstraintError
+            {
+              return KShadowMapBasicGL3ES3.newShadowMapBasic(
+                gl,
+                width,
+                height,
+                filter,
+                precision);
+            }
+
+            @Override public KShadowMapBasic implementationIsGLES2(
+              final JCGLInterfaceGLES2 gl)
+              throws JCGLException,
+                ConstraintError
+            {
+              final Option<JCGLExtensionESDepthTexture> ext =
+                gl.extensionDepthTexture();
+              if (ext.isSome()) {
+                return KShadowMapBasicGLES2WithDepthTexture
+                  .newShadowMapBasic(
+                    gl,
+                    width,
+                    height,
+                    filter,
+                    precision,
+                    ((Some<JCGLExtensionESDepthTexture>) ext).value);
+              }
+              return KShadowMapBasicGLES2WithoutDepthTexture
+                .newShadowMapBasic(gl, width, height, filter, precision);
+            }
+
+            @Override public KShadowMapBasic implementationIsGLES3(
+              final JCGLInterfaceGLES3 gl)
+              throws JCGLException,
+                ConstraintError
+            {
+              return KShadowMapBasicGL3ES3.newShadowMapBasic(
+                gl,
+                width,
+                height,
+                filter,
+                precision);
+            }
+          });
+      } catch (final JCGLException e) {
+        throw RException.fromJCGLException(e);
       }
-
-      return new KShadowMapGLES2(c, r, fb);
     }
 
-    private KShadowMapGLES2(
-      final @Nonnull Texture2DStatic c,
-      final @Nonnull Renderbuffer<RenderableDepth> r,
-      final @Nonnull FramebufferReference fb)
+    @Override public final
+      <A, E extends Throwable, V extends KShadowMapVisitor<A, E>>
+      A
+      kShadowMapAccept(
+        final @Nonnull V v)
+        throws E,
+          RException
     {
-      super(c, fb, r);
+      return v.kShadowMapVisitBasic(this);
     }
   }
 
-  public static @Nonnull KShadowMap newShadowMap(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull AreaInclusive area,
-    final @Nonnull TextureFilterMinification min,
-    final @Nonnull TextureFilterMagnification mag)
-    throws ConstraintError,
-      JCGLException
+  private boolean deleted;
+
+  protected KShadowMap()
   {
-    Constraints.constrainNotNull(gi, "GL implementation");
-    Constraints.constrainNotNull(area, "Framebuffer area");
-    Constraints.constrainNotNull(min, "Minification filter");
-    Constraints.constrainNotNull(mag, "Magnification filter");
-
-    return gi
-      .implementationAccept(new JCGLImplementationVisitor<KShadowMap, JCGLException>() {
-        @Override public KShadowMap implementationIsGL2(
-          final @Nonnull JCGLInterfaceGL2 gl)
-          throws JCGLException,
-            ConstraintError,
-            JCGLException
-        {
-          return KShadowMapGL2.newFramebuffer(gl, area, min, mag);
-        }
-
-        @Override public KShadowMap implementationIsGL3(
-          final @Nonnull JCGLInterfaceGL3 gl)
-          throws JCGLException,
-            ConstraintError,
-            JCGLException
-        {
-          return KShadowMapGL3ES3.newFramebuffer(gl, area, min, mag);
-        }
-
-        @Override public KShadowMap implementationIsGLES2(
-          final @Nonnull JCGLInterfaceGLES2 gl)
-          throws JCGLException,
-            ConstraintError,
-            JCGLException
-        {
-          return KShadowMapGLES2.newFramebuffer(gl, area, min, mag);
-        }
-
-        @Override public KShadowMap implementationIsGLES3(
-          final @Nonnull JCGLInterfaceGLES3 gl)
-          throws JCGLException,
-            ConstraintError,
-            JCGLException
-        {
-          return KShadowMapGL3ES3.newFramebuffer(gl, area, min, mag);
-        }
-      });
-  }
-
-  private final @Nonnull Texture2DStatic               colour;
-  private boolean                                      deleted;
-  private final @Nonnull FramebufferReference          framebuffer;
-  private final @Nonnull Renderbuffer<RenderableDepth> renderbuffer;
-  private final long                                   size;
-
-  protected KShadowMap(
-    final @Nonnull Texture2DStatic colour,
-    final @Nonnull FramebufferReference framebuffer,
-    final @Nonnull Renderbuffer<RenderableDepth> renderbuffer)
-  {
-    this.colour = colour;
-    this.framebuffer = framebuffer;
-    this.renderbuffer = renderbuffer;
     this.deleted = false;
-    this.size = KShadowMap.makeSize(colour, renderbuffer, framebuffer);
-  }
-
-  @Override public void kFramebufferDelete(
-    final @Nonnull JCGLImplementation g)
-    throws JCGLException,
-      ConstraintError
-  {
-    try {
-      final JCGLInterfaceCommon gc = g.getGLCommon();
-      gc.framebufferDelete(this.framebuffer);
-      gc.texture2DStaticDelete(this.colour);
-      gc.renderbufferDelete(this.renderbuffer);
-    } finally {
-      this.setDeleted(true);
-    }
-  }
-
-  @Override public final @Nonnull AreaInclusive kFramebufferGetArea()
-  {
-    return this.colour.getArea();
-  }
-
-  @Override public final @Nonnull
-    FramebufferReferenceUsable
-    kFramebufferGetShadowFramebuffer()
-  {
-    return this.framebuffer;
-  }
-
-  @Override public long kFramebufferGetShadowSizeBytes()
-  {
-    return this.size;
-  }
-
-  @Override public final @Nonnull
-    Texture2DStaticUsable
-    kFramebufferGetShadowTexture()
-  {
-    return this.colour;
   }
 
   @Override public final boolean resourceIsDeleted()
@@ -354,7 +636,7 @@ public abstract class KShadowMap implements KShadowMapType
     return this.deleted;
   }
 
-  private void setDeleted(
+  protected final void setDeleted(
     final boolean deleted)
   {
     this.deleted = deleted;

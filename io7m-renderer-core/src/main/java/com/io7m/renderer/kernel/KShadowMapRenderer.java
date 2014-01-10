@@ -16,27 +16,18 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.IOException;
-
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.RException;
 
 public interface KShadowMapRenderer
 {
   public <A, E extends Throwable> A shadowMapRendererEvaluate(
     final @Nonnull KCamera camera,
-    final @Nonnull AreaInclusive screen_size,
     final @Nonnull KSceneBatchedShadow batches,
     final @Nonnull KShadowMapsWith<A, E> with)
     throws ConstraintError,
-      JCGLException,
-      KShadowCacheException,
       E,
-      IOException,
-      KXMLException,
       RException;
 }

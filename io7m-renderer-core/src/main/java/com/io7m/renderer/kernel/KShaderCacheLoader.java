@@ -16,35 +16,25 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.IOException;
-
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
-import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LUCacheLoader;
 import com.io7m.jvvfs.FSCapabilityRead;
-import com.io7m.jvvfs.FilesystemError;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheFilesystemException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheIOException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLCompileException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheJCGLUnsupportedException;
-import com.io7m.renderer.kernel.KShaderCacheException.KShaderCacheXMLException;
+import com.io7m.renderer.RException;
 
 final class KShaderCacheLoader implements
-  LUCacheLoader<String, KProgram, KShaderCacheException>
+  LUCacheLoader<String, KProgram, RException>
 {
   public static @Nonnull
-    LUCacheLoader<String, KProgram, KShaderCacheException>
+    LUCacheLoader<String, KProgram, RException>
     newLoader(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull FSCapabilityRead fs,
@@ -72,7 +62,7 @@ final class KShaderCacheLoader implements
 
   @Override public void luCacheClose(
     final @Nonnull KProgram v)
-    throws KShaderCacheException
+    throws RException
   {
     final JCGLInterfaceCommon gc = this.gi.getGLCommon();
 
@@ -80,7 +70,7 @@ final class KShaderCacheLoader implements
       try {
         gc.programDelete(v.getProgram());
       } catch (final JCGLException e) {
-        throw new KShaderCacheException.KShaderCacheJCGLException(e);
+        throw RException.fromJCGLException(e);
       }
     } catch (final ConstraintError x) {
       throw new UnreachableCodeException(x);
@@ -89,7 +79,7 @@ final class KShaderCacheLoader implements
 
   @Override public @Nonnull KProgram luCacheLoadFrom(
     final @Nonnull String name)
-    throws KShaderCacheException
+    throws RException
   {
     try {
       try {
@@ -102,18 +92,8 @@ final class KShaderCacheLoader implements
           this.fs,
           name,
           this.log);
-      } catch (final JCGLCompileException x) {
-        throw new KShaderCacheJCGLCompileException(x);
-      } catch (final JCGLUnsupportedException x) {
-        throw new KShaderCacheJCGLUnsupportedException(x);
-      } catch (final FilesystemError x) {
-        throw new KShaderCacheFilesystemException(x);
-      } catch (final IOException x) {
-        throw new KShaderCacheIOException(x);
       } catch (final JCGLException x) {
-        throw new KShaderCacheJCGLException(x);
-      } catch (final KXMLException x) {
-        throw new KShaderCacheXMLException(x);
+        throw RException.fromJCGLException(x);
       }
     } catch (final ConstraintError x) {
       throw new UnreachableCodeException(x);
