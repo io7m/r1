@@ -14,20 +14,15 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel;
+package com.io7m.renderer;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.renderer.RException;
 
-public interface KRendererDebug extends KRenderer
+public interface RExceptionVisitor<T, E extends Throwable>
 {
-  public void rendererDebugEvaluate(
-    final @Nonnull KFramebufferRGBAUsable framebuffer,
-    final @Nonnull KScene scene)
-    throws JCGLException,
-      ConstraintError,
-      RException;
+  public T visitJCGLException(
+    final @Nonnull JCGLException e)
+    throws E;
 }

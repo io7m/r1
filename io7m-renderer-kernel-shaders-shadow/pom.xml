@@ -179,7 +179,7 @@
               <outputDirectory>${project.build.directory}/parasol/</outputDirectory>
               <resources>
                 <resource>
-                  <directory>src/main/resources/</directory>
+                  <directory>src/main/parasol/com/io7m/renderer</directory>
                   <filtering>false</filtering>
                 </resource>
               </resources>
@@ -203,6 +203,7 @@
             <configuration>
               <mainClass>com.io7m.renderer.kernel_shaders.ShadowMakeAll</mainClass>
               <arguments>
+                <argument>${project.build.directory}/parasol/batch-shadow.txt</argument>
                 <argument>${project.build.directory}/parasol/</argument>
                 <argument>${project.build.directory}/glsl/com/io7m/renderer/kernel</argument>
                 <argument>${project.build.directory}/glsl-compact/com/io7m/renderer/kernel</argument>

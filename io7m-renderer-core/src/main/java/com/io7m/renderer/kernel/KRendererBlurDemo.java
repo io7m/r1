@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -26,6 +27,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
+import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferUsable;
@@ -41,6 +43,7 @@ import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
@@ -55,7 +58,12 @@ import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererForward;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 
 final class KRendererBlurDemo extends KAbstractRendererForward
 {
@@ -209,7 +217,8 @@ final class KRendererBlurDemo extends KAbstractRendererForward
       JCGLCompileException,
       JCGLUnsupportedException,
       IOException,
-      KXMLException
+      KXMLException,
+      RException
   {
     this.renderEvaluateScene(scene, this.blur_0);
 
@@ -232,56 +241,27 @@ final class KRendererBlurDemo extends KAbstractRendererForward
     final @Nonnull KScene scene,
     final @Nonnull KFramebufferForwardUsable output)
     throws ConstraintError,
-      JCGLException
+      JCGLException,
+      RException
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-
     final KCamera camera = scene.getCamera();
-    final KMutableMatrices.WithObserver mwc =
-      this.matrices.withObserver(
-        camera.getViewMatrix(),
-        camera.getProjectionMatrix());
 
-    try {
-      final AreaInclusive area = output.kFramebufferGetArea();
-      this.viewport_size.x = (int) area.getRangeX().getInterval();
-      this.viewport_size.y = (int) area.getRangeY().getInterval();
+    this.matrices.withObserver(
+      camera.getViewMatrix(),
+      camera.getProjectionMatrix(),
+      new MatricesObserverFunction<Unit, JCGLException>() {
+        @SuppressWarnings("synthetic-access") @Override public Unit run(
+          final MatricesObserver mo)
+          throws JCGLException,
+            ConstraintError,
+            RException
+        {
+          KRendererBlurDemo.this.renderScene(scene, output, gc, mo);
+          return Unit.unit();
+        }
+      });
 
-      try {
-        gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
-        gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
-
-        gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-        gc.depthBufferClear(1.0f);
-        gc.colorBufferClearV4f(this.background);
-        gc.blendingDisable();
-
-        final JCBExecutionAPI e = this.program_normals.getExecutable();
-        e.execRun(new JCBExecutorProcedure() {
-          @SuppressWarnings("synthetic-access") @Override public void call(
-            final @Nonnull JCBProgram p)
-            throws ConstraintError,
-              JCGLException,
-              Exception
-          {
-            KShadingProgramCommon.putMatrixProjection(
-              p,
-              mwc.getMatrixProjection());
-
-            for (final KMeshInstanceTransformed mesh : scene
-              .getVisibleInstances()) {
-              KRendererBlurDemo.this.renderMesh(gc, p, mwc, mesh);
-            }
-          }
-        });
-      } catch (final JCBExecutionException x) {
-        throw new UnreachableCodeException(x);
-      } finally {
-        gc.framebufferDrawUnbind();
-      }
-    } finally {
-      mwc.observerFinish();
-    }
   }
 
   private void renderEvaluateBlurH(
@@ -309,7 +289,7 @@ final class KRendererBlurDemo extends KAbstractRendererForward
 
       final JCBExecutionAPI e = this.program_blur_h.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
-        @Override public void call(
+        @SuppressWarnings("synthetic-access") @Override public void call(
           final @Nonnull JCBProgram p)
           throws ConstraintError,
             JCGLException,
@@ -385,7 +365,7 @@ final class KRendererBlurDemo extends KAbstractRendererForward
 
       final JCBExecutionAPI e = this.program_blur_v.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
-        @Override public void call(
+        @SuppressWarnings("synthetic-access") @Override public void call(
           final @Nonnull JCBProgram p)
           throws ConstraintError,
             JCGLException,
@@ -429,8 +409,6 @@ final class KRendererBlurDemo extends KAbstractRendererForward
           }
         }
       });
-    } catch (final JCBExecutionException x) {
-      throw new UnreachableCodeException(x);
     } finally {
       gc.framebufferDrawUnbind();
     }
@@ -461,7 +439,7 @@ final class KRendererBlurDemo extends KAbstractRendererForward
 
       final JCBExecutionAPI e = this.program_id.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
-        @Override public void call(
+        @SuppressWarnings("synthetic-access") @Override public void call(
           final @Nonnull JCBProgram p)
           throws ConstraintError,
             JCGLException,
@@ -500,8 +478,6 @@ final class KRendererBlurDemo extends KAbstractRendererForward
           }
         }
       });
-    } catch (final JCBExecutionException x) {
-      throw new UnreachableCodeException(x);
     } finally {
       gc.framebufferDrawUnbind();
     }
@@ -510,78 +486,136 @@ final class KRendererBlurDemo extends KAbstractRendererForward
   @SuppressWarnings("static-method") private void renderMesh(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCBProgram p,
-    final @Nonnull KMutableMatrices.WithObserver mwc,
+    final @Nonnull MatricesInstance mi,
     final @Nonnull KMeshInstanceTransformed transformed)
     throws ConstraintError,
       JCGLException,
       JCBExecutionException
   {
-    final KMutableMatrices.WithInstance mwi = mwc.withInstance(transformed);
+    /**
+     * Upload matrices.
+     */
+
+    KShadingProgramCommon.putMatrixProjectionReuse(p);
+    KShadingProgramCommon.putMatrixModelView(p, mi.getMatrixModelView());
+
+    /**
+     * Upload matrices, set textures.
+     */
+
+    final List<TextureUnit> texture_units = gc.textureGetUnits();
+    final KMeshInstance instance = transformed.getInstance();
+    final KMaterial material = instance.getMaterial();
+
+    {
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
+      if (normal_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units.get(0),
+          ((Option.Some<Texture2DStatic>) normal_opt).value);
+      } else {
+        gc.texture2DStaticUnbind(texture_units.get(0));
+      }
+    }
+
+    KShadingProgramCommon.putTextureNormal(p, texture_units.get(0));
+
+    /**
+     * Associate array attributes with program attributes, and draw mesh.
+     */
+
     try {
+      final KMesh mesh = instance.getMesh();
+      final ArrayBuffer array = mesh.getArrayBuffer();
+      final IndexBuffer indices = mesh.getIndexBuffer();
 
-      /**
-       * Upload matrices.
-       */
+      gc.arrayBufferBind(array);
+      KShadingProgramCommon.bindAttributePosition(p, array);
+      KShadingProgramCommon.bindAttributeNormal(p, array);
+      KShadingProgramCommon.bindAttributeTangent4(p, array);
+      KShadingProgramCommon.bindAttributeUV(p, array);
 
-      KShadingProgramCommon.putMatrixProjectionReuse(p);
-      KShadingProgramCommon.putMatrixModelView(p, mwi.getMatrixModelView());
-
-      /**
-       * Upload matrices, set textures.
-       */
-
-      final List<TextureUnit> texture_units = gc.textureGetUnits();
-      final KMeshInstance instance = transformed.getInstance();
-      final KMaterial material = instance.getMaterial();
-
-      {
-        final Option<Texture2DStatic> normal_opt =
-          material.getNormal().getTexture();
-        if (normal_opt.isSome()) {
-          gc.texture2DStaticBind(
-            texture_units.get(0),
-            ((Option.Some<Texture2DStatic>) normal_opt).value);
-        } else {
-          gc.texture2DStaticUnbind(texture_units.get(0));
-        }
-      }
-
-      KShadingProgramCommon.putTextureNormal(p, texture_units.get(0));
-
-      /**
-       * Associate array attributes with program attributes, and draw mesh.
-       */
-
-      try {
-        final KMesh mesh = instance.getMesh();
-        final ArrayBuffer array = mesh.getArrayBuffer();
-        final IndexBuffer indices = mesh.getIndexBuffer();
-
-        gc.arrayBufferBind(array);
-        KShadingProgramCommon.bindAttributePosition(p, array);
-        KShadingProgramCommon.bindAttributeNormal(p, array);
-        KShadingProgramCommon.bindAttributeTangent4(p, array);
-        KShadingProgramCommon.bindAttributeUV(p, array);
-
-        p.programExecute(new JCBProgramProcedure() {
-          @Override public void call()
-            throws ConstraintError,
-              JCGLException,
-              Exception
-          {
-            try {
-              gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-            } catch (final ConstraintError x) {
-              throw new UnreachableCodeException(x);
-            }
+      p.programExecute(new JCBProgramProcedure() {
+        @Override public void call()
+          throws ConstraintError,
+            JCGLException,
+            Exception
+        {
+          try {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+          } catch (final ConstraintError x) {
+            throw new UnreachableCodeException(x);
           }
-        });
+        }
+      });
 
-      } finally {
-        gc.arrayBufferUnbind();
-      }
     } finally {
-      mwi.instanceFinish();
+      gc.arrayBufferUnbind();
+    }
+  }
+
+  void renderScene(
+    final KScene scene,
+    final KFramebufferForwardUsable output,
+    final JCGLInterfaceCommon gc,
+    final MatricesObserver mo)
+    throws JCGLRuntimeException,
+      ConstraintError,
+      JCBExecutionException
+  {
+    final AreaInclusive area = output.kFramebufferGetArea();
+    KRendererBlurDemo.this.viewport_size.x =
+      (int) area.getRangeX().getInterval();
+    KRendererBlurDemo.this.viewport_size.y =
+      (int) area.getRangeY().getInterval();
+
+    try {
+      gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
+      gc.viewportSet(VectorI2I.ZERO, KRendererBlurDemo.this.viewport_size);
+
+      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+      gc.depthBufferClear(1.0f);
+      gc.colorBufferClearV4f(KRendererBlurDemo.this.background);
+      gc.blendingDisable();
+
+      final JCBExecutionAPI e =
+        KRendererBlurDemo.this.program_normals.getExecutable();
+      e.execRun(new JCBExecutorProcedure() {
+        @Override public void call(
+          final @Nonnull JCBProgram p)
+          throws ConstraintError,
+            JCGLException,
+            RException
+        {
+          KShadingProgramCommon.putMatrixProjection(
+            p,
+            mo.getMatrixProjection());
+
+          final Set<KMeshInstanceTransformed> instances =
+            scene.getVisibleInstances();
+
+          for (final KMeshInstanceTransformed i : instances) {
+            mo.withInstance(
+              i,
+              new MatricesInstanceFunction<Unit, JCGLException>() {
+                @SuppressWarnings("synthetic-access") @Override public
+                  Unit
+                  run(
+                    final @Nonnull MatricesInstance mi)
+                    throws JCGLException,
+                      ConstraintError,
+                      RException
+                {
+                  KRendererBlurDemo.this.renderMesh(gc, p, mi, i);
+                  return Unit.unit();
+                }
+              });
+          }
+        }
+      });
+    } finally {
+      gc.framebufferDrawUnbind();
     }
   }
 }

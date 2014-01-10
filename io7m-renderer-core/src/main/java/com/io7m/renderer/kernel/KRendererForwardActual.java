@@ -17,11 +17,9 @@
 package com.io7m.renderer.kernel;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -67,82 +65,14 @@ import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererForward;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
-import com.io7m.renderer.kernel.KMutableMatrices.WithInstance;
+import com.io7m.renderer.kernel.KMutableMatricesOld.WithInstance;
 import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucent;
 import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucentLit;
-import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
+import com.io7m.renderer.kernel.KShadowMapOld.KShadowMapBasic;
 import com.io7m.renderer.kernel.KTransform.Context;
 
 public final class KRendererForwardActual extends KAbstractRendererForward
 {
-  private class Debugging implements KRendererDebugging
-  {
-    private final @Nonnull AtomicReference<KRendererDebugging.DebugShadowMapReceiver> dump_shadow_maps;
-
-    public Debugging()
-    {
-      this.dump_shadow_maps =
-        new AtomicReference<KRendererDebugging.DebugShadowMapReceiver>();
-    }
-
-    @Override public void debugForEachShadowMap(
-      final @Nonnull DebugShadowMapReceiver receiver)
-      throws ConstraintError
-    {
-      this.dump_shadow_maps.set(receiver);
-    }
-
-    @SuppressWarnings("synthetic-access") public
-      void
-      debugPerformDumpShadowMaps(
-        final @Nonnull Collection<KLight> lights)
-        throws ConstraintError,
-          KShadowCacheException
-    {
-      final DebugShadowMapReceiver dump =
-        this.dump_shadow_maps.getAndSet(null);
-
-      if (dump != null) {
-        KRendererForwardActual.this.log.debug("Dumping shadow maps");
-
-        for (final KLight l : lights) {
-          switch (l.getType()) {
-            case LIGHT_DIRECTIONAL:
-            {
-              break;
-            }
-            case LIGHT_PROJECTIVE:
-            {
-              final KProjective kp = (KProjective) l;
-              final Option<KShadow> os = kp.getShadow();
-
-              switch (os.type) {
-                case OPTION_NONE:
-                {
-                  break;
-                }
-                case OPTION_SOME:
-                {
-                  final KShadow ks = ((Option.Some<KShadow>) os).value;
-                  final KShadowMap fb =
-                    KRendererForwardActual.this.shadow_map_renderer
-                      .shadowRendererGetRenderedMap(ks);
-                  dump.receive(ks, fb);
-                  break;
-                }
-              }
-              break;
-            }
-            case LIGHT_SPHERE:
-            {
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
-
   private static final @Nonnull String NAME = "forward";
 
   private static void makeLitLabel(
@@ -212,7 +142,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     rendererNew(
       final @Nonnull JCGLImplementation g,
       final @Nonnull LRUCacheTrivial<String, KProgram, KShaderCacheException> shader_cache,
-      final @Nonnull KShadowMapRenderer shadow_map_renderer,
+      final @Nonnull KShadowMapRendererOld shadow_map_renderer,
       final @Nonnull KLabelDecider decider,
       final @Nonnull KGraphicsCapabilities caps,
       final @Nonnull Log log)
@@ -228,23 +158,22 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   }
 
   private final @Nonnull VectorM4F                                        background;
-  private @CheckForNull Debugging                                         debug;
   private final @Nonnull KLabelDecider                                    decider;
   private final @Nonnull KDepthRenderer                                   depth_renderer;
   private final @Nonnull JCGLImplementation                               g;
   private final @Nonnull StringBuilder                                    label_cache;
   private final @Nonnull Log                                              log;
   private final @Nonnull RMatrixM4x4F<RTransformView>                     m4_view;
-  private final @Nonnull KMutableMatrices                                 matrices;
+  private final @Nonnull KMutableMatricesOld                              matrices;
   private final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache;
-  private final @Nonnull KShadowMapRenderer                               shadow_map_renderer;
+  private final @Nonnull KShadowMapRendererOld                            shadow_map_renderer;
   private final @Nonnull Context                                          transform_context;
   private final @Nonnull VectorM2I                                        viewport_size;
 
   private KRendererForwardActual(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
-    final @Nonnull KShadowMapRenderer shadow_map_renderer,
+    final @Nonnull KShadowMapRendererOld shadow_map_renderer,
     final @Nonnull KLabelDecider decider,
     final @Nonnull KGraphicsCapabilities caps,
     final @Nonnull Log log)
@@ -269,7 +198,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
 
     this.label_cache = new StringBuilder();
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = KMutableMatrices.newMatrices();
+    this.matrices = KMutableMatricesOld.newMatrices();
     this.viewport_size = new VectorM2I();
     this.transform_context = new KTransform.Context();
     this.m4_view = new RMatrixM4x4F<RTransformView>();
@@ -280,7 +209,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     putLightProjectiveMatricesIfNecessary(
       final @Nonnull JCBProgram program,
       final @Nonnull KLight light,
-      final @Nonnull KMutableMatrices.WithInstance mwi)
+      final @Nonnull KMutableMatricesOld.WithInstance mwi)
       throws ConstraintError,
         JCGLException
   {
@@ -291,7 +220,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       }
       case LIGHT_PROJECTIVE:
       {
-        final KMutableMatrices.WithProjectiveLight mwp =
+        final KMutableMatricesOld.WithProjectiveLight mwp =
           mwi.withProjectiveLight((KProjective) light);
 
         try {
@@ -344,7 +273,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   @SuppressWarnings("static-method") private void putMeshInstanceMatrices(
     final @Nonnull JCBProgram p,
     final @Nonnull KMaterialForwardLabel label,
-    final @Nonnull KMutableMatrices.WithInstanceMatrices mwi)
+    final @Nonnull KMutableMatricesOld.WithInstanceMatrices mwi)
     throws JCGLException,
       ConstraintError
   {
@@ -556,8 +485,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
 
   @Override public @CheckForNull KRendererDebugging rendererDebug()
   {
-    this.debug = new Debugging();
-    return this.debug;
+    return null;
   }
 
   @Override public void rendererForwardEvaluate(
@@ -585,17 +513,10 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       this.shadow_map_renderer.shadowRendererEvaluate(batched
         .getBatchedShadow());
 
-      if (this.debug != null) {
-        this.debug.debugPerformDumpShadowMaps(batched
-          .getBatchedShadow()
-          .getShadowCasters()
-          .keySet());
-      }
-
       final JCGLInterfaceCommon gc = this.g.getGLCommon();
 
       final KCamera camera = scene.getCamera();
-      final KMutableMatrices.WithObserver mwc =
+      final KMutableMatricesOld.WithObserver mwc =
         this.matrices.withObserver(
           camera.getViewMatrix(),
           camera.getProjectionMatrix());
@@ -681,7 +602,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   private void renderOpaqueMeshes(
     final @Nonnull KSceneBatchedForward batched,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithObserver mwc)
+    final @Nonnull KMutableMatricesOld.WithObserver mwc)
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
@@ -695,7 +616,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   private void renderOpaqueMeshesLit(
     final @Nonnull KSceneBatchedForward batched,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithObserver mwc)
+    final @Nonnull KMutableMatricesOld.WithObserver mwc)
     throws ConstraintError,
       KShaderCacheException,
       LUCacheException,
@@ -766,7 +687,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   private void renderOpaqueMeshesUnlit(
     final @Nonnull KSceneBatchedForward batched,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithObserver mwc)
+    final @Nonnull KMutableMatricesOld.WithObserver mwc)
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
@@ -822,7 +743,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     final @Nonnull KLight light,
     final @Nonnull KMaterialForwardLabel label,
     final @Nonnull KMeshInstanceTransformed i,
-    final @Nonnull KMutableMatrices.WithInstance mwi)
+    final @Nonnull KMutableMatricesOld.WithInstance mwi)
     throws ConstraintError,
       JCGLException,
       KShadowCacheException,
@@ -890,7 +811,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     final @Nonnull JCBProgram program,
     final @Nonnull KMaterialForwardLabel label,
     final @Nonnull KMeshInstanceTransformed instance,
-    final @Nonnull KMutableMatrices.WithInstance mwi)
+    final @Nonnull KMutableMatricesOld.WithInstance mwi)
     throws JCGLException,
       ConstraintError,
       JCBExecutionException,
@@ -954,7 +875,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   private void renderTranslucentMeshes(
     final @Nonnull KSceneBatchedForward scene,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithObserver mwc)
+    final @Nonnull KMutableMatricesOld.WithObserver mwc)
     throws KShaderCacheException,
       ConstraintError,
       LUCacheException,
@@ -968,7 +889,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       final KMeshInstanceTransformed instance = batch.getInstance();
       final KMaterialForwardLabel label = batch.getLabel();
 
-      final KMutableMatrices.WithInstance mwi = mwc.withInstance(instance);
+      final KMutableMatricesOld.WithInstance mwi = mwc.withInstance(instance);
       try {
 
         if (batch instanceof BatchTranslucentLit) {
@@ -1078,7 +999,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     final @Nonnull KLight light,
     final @Nonnull KMeshInstanceTransformed i,
     final @Nonnull KMaterialForwardLabel label,
-    final @Nonnull KMutableMatrices.WithInstance mwi)
+    final @Nonnull KMutableMatricesOld.WithInstance mwi)
     throws ConstraintError,
       JCGLException,
       KShadowCacheException,
@@ -1147,7 +1068,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     final @Nonnull JCBProgram program,
     final @Nonnull KMeshInstanceTransformed instance,
     final @Nonnull KMaterialForwardLabel label,
-    final @Nonnull KMutableMatrices.WithInstance mwi)
+    final @Nonnull KMutableMatricesOld.WithInstance mwi)
     throws JCGLException,
       ConstraintError,
       KShadowCacheException,

@@ -60,6 +60,7 @@ import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.RException;
 import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RSpaceObject;
@@ -76,7 +77,7 @@ import com.io7m.renderer.RVectorReadable3F;
 import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
-import com.io7m.renderer.kernel.KMutableMatrices.WithInstance;
+import com.io7m.renderer.kernel.KMutableMatricesOld.WithInstance;
 import com.io7m.renderer.kernel.KScene.KSceneOpaques;
 import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucent;
 import com.io7m.renderer.kernel.KSceneBatchedForward.BatchTranslucentLit;
@@ -93,7 +94,7 @@ public final class SBRendererSpecific implements KRendererForward
     final @Nonnull KLabelDecider decider,
     final @CheckForNull KLight light,
     final @Nonnull KMeshInstanceTransformed i,
-    final @Nonnull KMutableMatrices.WithInstance mwi,
+    final @Nonnull KMutableMatricesOld.WithInstance mwi,
     final @Nonnull ArrayBuffer array,
     final @Nonnull JCBProgram p)
     throws JCGLException,
@@ -285,7 +286,7 @@ public final class SBRendererSpecific implements KRendererForward
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KLabelDecider decider,
     final @Nonnull KMeshInstanceTransformed i,
-    final @Nonnull KMutableMatrices.WithInstanceMatrices mwi,
+    final @Nonnull KMutableMatricesOld.WithInstanceMatrices mwi,
     final @Nonnull JCBProgram p,
     final int texture_units)
     throws JCGLException,
@@ -362,7 +363,7 @@ public final class SBRendererSpecific implements KRendererForward
   private static int setParametersLight(
     final @Nonnull JCGLInterfaceCommon gc,
     final @CheckForNull KLight light,
-    final @Nonnull KMutableMatrices.WithInstance mwi,
+    final @Nonnull KMutableMatricesOld.WithInstance mwi,
     final @Nonnull JCBProgram p,
     final int texture_units)
     throws JCGLException,
@@ -627,7 +628,7 @@ public final class SBRendererSpecific implements KRendererForward
   private final @Nonnull Log                                          log;
   private final @Nonnull VectorM4F                                    background;
   private final @Nonnull KProgram                                     program_depth;
-  private final @Nonnull KMutableMatrices                             matrices;
+  private final @Nonnull KMutableMatricesOld                          matrices;
   private final @Nonnull VectorM2I                                    viewport_size;
   private final @Nonnull RMatrixM4x4F<RTransformProjectiveModelView>  fake_projective_modelview;
   private final @Nonnull RMatrixM4x4F<RTransformProjectiveProjection> fake_projective_projection;
@@ -672,7 +673,7 @@ public final class SBRendererSpecific implements KRendererForward
     final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = KMutableMatrices.newMatrices();
+    this.matrices = KMutableMatricesOld.newMatrices();
     this.viewport_size = new VectorM2I();
 
     this.program_depth =
@@ -693,7 +694,7 @@ public final class SBRendererSpecific implements KRendererForward
   private void putTextureProjectionMatrixForLight(
     final @Nonnull JCBProgram p,
     final @CheckForNull KLight light,
-    final @Nonnull KMutableMatrices.WithInstance mwi)
+    final @Nonnull KMutableMatricesOld.WithInstance mwi)
     throws JCGLException,
       ConstraintError
   {
@@ -716,7 +717,7 @@ public final class SBRendererSpecific implements KRendererForward
         }
         case LIGHT_PROJECTIVE:
         {
-          final KMutableMatrices.WithProjectiveLight mwp =
+          final KMutableMatricesOld.WithProjectiveLight mwp =
             mwi.withProjectiveLight((KProjective) light);
           try {
             KShadingProgramCommon.putMatrixProjectiveProjection(
@@ -740,7 +741,7 @@ public final class SBRendererSpecific implements KRendererForward
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCBProgram p,
     final @Nonnull KMeshInstanceTransformed i,
-    final @Nonnull KMutableMatrices.WithInstance mwi)
+    final @Nonnull KMutableMatricesOld.WithInstance mwi)
     throws ConstraintError,
       JCGLException,
       JCBExecutionException
@@ -787,7 +788,7 @@ public final class SBRendererSpecific implements KRendererForward
   private void renderDepthPassMeshes(
     final @Nonnull KScene scene,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithObserver mwc)
+    final @Nonnull KMutableMatricesOld.WithObserver mwc)
     throws ConstraintError,
       JCGLException,
       JCBExecutionException
@@ -808,7 +809,7 @@ public final class SBRendererSpecific implements KRendererForward
         final Set<KMeshInstanceTransformed> all_opaque = opaques.getAll();
 
         for (final KMeshInstanceTransformed instance : all_opaque) {
-          final KMutableMatrices.WithInstance mwi =
+          final KMutableMatricesOld.WithInstance mwi =
             mwc.withInstance(instance);
           try {
             SBRendererSpecific.this.renderDepthPassMesh(gc, p, instance, mwi);
@@ -843,7 +844,7 @@ public final class SBRendererSpecific implements KRendererForward
         scene);
 
     final KCamera camera = scene.getCamera();
-    final KMutableMatrices.WithObserver mwc =
+    final KMutableMatricesOld.WithObserver mwc =
       this.matrices.withObserver(
         camera.getViewMatrix(),
         camera.getProjectionMatrix());
@@ -927,7 +928,7 @@ public final class SBRendererSpecific implements KRendererForward
     final @Nonnull JCBProgram p,
     final @Nonnull KLight light,
     final @Nonnull KMeshInstanceTransformed i,
-    final @Nonnull KMutableMatrices.WithInstance mwi)
+    final @Nonnull KMutableMatricesOld.WithInstance mwi)
     throws ConstraintError,
       JCGLException,
       JCBExecutionException
@@ -982,7 +983,7 @@ public final class SBRendererSpecific implements KRendererForward
   private void renderOpaqueMeshes(
     final @Nonnull KSceneBatchedForward batched,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithObserver mwc)
+    final @Nonnull KMutableMatricesOld.WithObserver mwc)
     throws JCGLException,
       ConstraintError,
       JCBExecutionException
@@ -1010,7 +1011,8 @@ public final class SBRendererSpecific implements KRendererForward
               by_material.get(label);
 
             for (final KMeshInstanceTransformed i : instances) {
-              final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
+              final KMutableMatricesOld.WithInstance mwi =
+                mwc.withInstance(i);
               try {
                 SBRendererSpecific.this
                   .renderOpaqueMesh(gc, p, light, i, mwi);
@@ -1028,7 +1030,7 @@ public final class SBRendererSpecific implements KRendererForward
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KLight light,
     final @Nonnull KMeshInstanceTransformed i,
-    final @Nonnull KMutableMatrices.WithInstance mwi)
+    final @Nonnull KMutableMatricesOld.WithInstance mwi)
     throws ConstraintError,
       JCGLException,
       JCBExecutionException
@@ -1096,7 +1098,7 @@ public final class SBRendererSpecific implements KRendererForward
   private void renderTranslucentMeshes(
     final @Nonnull KSceneBatchedForward batched,
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithObserver mwc)
+    final @Nonnull KMutableMatricesOld.WithObserver mwc)
     throws JCGLException,
       ConstraintError,
       JCBExecutionException
@@ -1143,7 +1145,7 @@ public final class SBRendererSpecific implements KRendererForward
   private void renderTranslucentMeshUnlit(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KMeshInstanceTransformed i,
-    final @Nonnull KMutableMatrices.WithInstance mwi)
+    final @Nonnull KMutableMatricesOld.WithInstance mwi)
     throws JCGLException,
       JCBExecutionException,
       ConstraintError
@@ -1221,10 +1223,9 @@ public final class SBRendererSpecific implements KRendererForward
       throws E,
         JCGLException,
         ConstraintError,
-        JCGLCompileException,
-        JCGLUnsupportedException,
         IOException,
-        KXMLException
+        KXMLException,
+        RException
   {
     return v.rendererVisitForward(this);
   }

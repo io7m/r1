@@ -16,18 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLException;
-import com.io7m.renderer.RException;
-
-public interface KRendererDebug extends KRenderer
+public interface KShadowMapType extends KFramebuffer, KShadowMapUsable
 {
-  public void rendererDebugEvaluate(
-    final @Nonnull KFramebufferRGBAUsable framebuffer,
-    final @Nonnull KScene scene)
-    throws JCGLException,
-      ConstraintError,
-      RException;
+
 }

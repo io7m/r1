@@ -30,7 +30,7 @@ public interface KRendererDebugging
   {
     public void receive(
       final @Nonnull KShadow shadow,
-      final @Nonnull KShadowMap fb);
+      final @Nonnull KShadowMap map);
   }
 
   /**

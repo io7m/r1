@@ -36,6 +36,7 @@ import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorM4F;
+import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RMatrixReadable3x3F;
 import com.io7m.renderer.RMatrixReadable4x4F;
 import com.io7m.renderer.RSpaceObject;
@@ -214,6 +215,18 @@ final class KShadingProgramCommon
   {
     gt.texture2DStaticBind(texture_unit, texture);
     KShadingProgramCommon.putTextureShadowMap(program, texture_unit);
+  }
+
+  static void bindPutTextureShadowSceneDepth(
+    final @Nonnull JCBProgram program,
+    final @Nonnull JCGLTextures2DStaticCommon gt,
+    final @Nonnull Texture2DStaticUsable texture,
+    final @Nonnull TextureUnit unit)
+    throws JCGLException,
+      ConstraintError
+  {
+    gt.texture2DStaticBind(unit, texture);
+    KShadingProgramCommon.putTextureShadowSceneDepth(program, unit);
   }
 
   static void bindPutTextureShadowVarianceMap(
@@ -1144,6 +1157,58 @@ final class KShadingProgramCommon
     program.programUniformUseExisting("m_projective_projection");
   }
 
+  static void putMatrixShadowMapLightModelView(
+    final @Nonnull JCBProgram program,
+    final @Nonnull RMatrixReadable4x4F<RTransformProjectiveModelView> m)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMatrixProjectiveModelView(program, m);
+  }
+
+  static void putMatrixShadowMapLightProjection(
+    final @Nonnull JCBProgram program,
+    final @Nonnull RMatrixM4x4F<RTransformProjectiveProjection> m)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMatrixProjectiveProjection(program, m);
+  }
+
+  static void putMatrixShadowMapLightProjectionReuse(
+    final @Nonnull JCBProgram program)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMatrixProjectiveProjectionReuse(program);
+  }
+
+  static void putMatrixShadowMapSceneModelView(
+    final @Nonnull JCBProgram program,
+    final @Nonnull RMatrixReadable4x4F<RTransformModelView> m)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMatrixModelView(program, m);
+  }
+
+  static void putMatrixShadowMapSceneProjection(
+    final @Nonnull JCBProgram program,
+    final @Nonnull RMatrixReadable4x4F<RTransformProjection> m)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMatrixProjection(program, m);
+  }
+
+  static void putMatrixShadowMapSceneProjectionReuse(
+    final @Nonnull JCBProgram program)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMatrixProjectionReuse(program);
+  }
+
   static void putMatrixUV(
     final @Nonnull JCBProgram program,
     final @Nonnull RMatrixReadable3x3F<RTransformTexture> m)
@@ -1176,9 +1241,7 @@ final class KShadingProgramCommon
     throws JCGLException,
       ConstraintError
   {
-    program.programUniformPutFloat(
-      "shadow_basic.shadow_depth_bias",
-      depth_bias);
+    program.programUniformPutFloat("shadow_basic.depth_bias", depth_bias);
   }
 
   static void putShadowBasicDepthBiasReuse(
@@ -1186,7 +1249,7 @@ final class KShadingProgramCommon
     throws JCGLException,
       ConstraintError
   {
-    program.programUniformUseExisting("shadow_basic.shadow_depth_bias");
+    program.programUniformUseExisting("shadow_basic.depth_bias");
   }
 
   static void putShadowBasicFactorMaximum(
@@ -1196,7 +1259,7 @@ final class KShadingProgramCommon
     throws JCGLException,
       ConstraintError
   {
-    program.programUniformPutFloat("shadow_basic.shadow_factor_max", max);
+    program.programUniformPutFloat("shadow_basic.factor_max", max);
   }
 
   static void putShadowBasicFactorMaximumReuse(
@@ -1204,7 +1267,7 @@ final class KShadingProgramCommon
     throws JCGLException,
       ConstraintError
   {
-    program.programUniformUseExisting("shadow_basic.shadow_factor_max");
+    program.programUniformUseExisting("shadow_basic.factor_max");
   }
 
   static void putShadowBasicFactorMinimum(
@@ -1214,7 +1277,7 @@ final class KShadingProgramCommon
     throws JCGLException,
       ConstraintError
   {
-    program.programUniformPutFloat("shadow_basic.shadow_factor_min", min);
+    program.programUniformPutFloat("shadow_basic.factor_min", min);
   }
 
   static void putShadowBasicFactorMinimumReuse(
@@ -1222,7 +1285,7 @@ final class KShadingProgramCommon
     throws JCGLException,
       ConstraintError
   {
-    program.programUniformUseExisting("shadow_basic.shadow_factor_min");
+    program.programUniformUseExisting("shadow_basic.factor_min");
   }
 
   static void putShadowBasicReuse(
@@ -1344,6 +1407,15 @@ final class KShadingProgramCommon
       ConstraintError
   {
     program.programUniformPutTextureUnit("t_shadow", unit);
+  }
+
+  private static void putTextureShadowSceneDepth(
+    final @Nonnull JCBProgram program,
+    final @Nonnull TextureUnit unit)
+    throws JCGLException,
+      ConstraintError
+  {
+    program.programUniformPutTextureUnit("t_scene_depth", unit);
   }
 
   static void putTextureShadowVarianceMap(

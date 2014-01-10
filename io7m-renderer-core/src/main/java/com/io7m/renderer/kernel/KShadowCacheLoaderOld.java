@@ -30,25 +30,26 @@ import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LUCacheLoader;
 import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedSoft;
 
-final class KShadowCacheLoader implements
-  LUCacheLoader<KShadow, KShadowMap, KShadowCacheException>
+final class KShadowCacheLoaderOld implements
+  LUCacheLoader<KShadow, KShadowMapOld, KShadowCacheException>
 {
   public static @Nonnull
-    LUCacheLoader<KShadow, KShadowMap, KShadowCacheException>
+    LUCacheLoader<KShadow, KShadowMapOld, KShadowCacheException>
     newLoader(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull Log log)
       throws ConstraintError
   {
-    return new KShadowCacheLoader(gi, log);
+    return new KShadowCacheLoaderOld(gi, log);
   }
 
   private final @Nonnull JCGLImplementation gi;
   private final @Nonnull Log                log;
   private final @Nonnull StringBuilder      message;
 
-  private KShadowCacheLoader(
+  private KShadowCacheLoaderOld(
     final @Nonnull JCGLImplementation gi,
     final @Nonnull Log log)
     throws ConstraintError
@@ -60,12 +61,12 @@ final class KShadowCacheLoader implements
   }
 
   @Override public void luCacheClose(
-    final @Nonnull KShadowMap v)
+    final @Nonnull KShadowMapOld v)
     throws KShadowCacheException
   {
     try {
       try {
-        v.kFramebufferDelete(this.gi);
+        v.mapDelete(this.gi);
       } catch (final JCGLException e) {
         throw KShadowCacheException.errorJCGL(e);
       }
@@ -74,14 +75,13 @@ final class KShadowCacheLoader implements
     }
   }
 
-  @Override public KShadowMap luCacheLoadFrom(
+  @Override public KShadowMapOld luCacheLoadFrom(
     final @Nonnull KShadow s)
     throws KShadowCacheException
   {
     try {
       try {
         switch (s.getType()) {
-          case SHADOW_MAPPED_SOFT:
           case SHADOW_MAPPED_BASIC:
           {
             final KShadowMappedBasic smb = (KShadowMappedBasic) s;
@@ -98,12 +98,33 @@ final class KShadowCacheLoader implements
               this.message.append(" shadow map");
               this.log.debug(this.message.toString());
             }
-            final KShadowFilter filter = smb.getShadowFilter();
-            return KShadowMap.newShadowMap(
+            return KShadowMapOld.newBasic(
               this.gi,
               area,
-              filter.getMinification(),
-              filter.getMagnification());
+              smb.getShadowFilter(),
+              smb.getShadowPrecision());
+          }
+          case SHADOW_MAPPED_SOFT:
+          {
+            final KShadowMappedSoft smv = (KShadowMappedSoft) s;
+            final long size = 2 << (smv.getSizeExponent() - 1);
+            final RangeInclusive range_x = new RangeInclusive(0, size - 1);
+            final RangeInclusive range_y = new RangeInclusive(0, size - 1);
+            final AreaInclusive area = new AreaInclusive(range_x, range_y);
+            if (this.log.enabled(Level.LOG_DEBUG)) {
+              this.message.setLength(0);
+              this.message.append("Allocating ");
+              this.message.append(size);
+              this.message.append("x");
+              this.message.append(size);
+              this.message.append(" shadow map");
+              this.log.debug(this.message.toString());
+            }
+            return KShadowMapOld.newSoft(
+              this.gi,
+              area,
+              smv.getShadowFilter(),
+              smv.getShadowPrecision());
           }
         }
 
@@ -119,8 +140,8 @@ final class KShadowCacheLoader implements
   }
 
   @Override public long luCacheSizeOf(
-    final @Nonnull KShadowMap f)
+    final @Nonnull KShadowMapOld f)
   {
-    return f.kFramebufferGetShadowSizeBytes();
+    return f.mapGetSizeBytes();
   }
 }

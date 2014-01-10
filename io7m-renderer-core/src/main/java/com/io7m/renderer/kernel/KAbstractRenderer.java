@@ -22,9 +22,8 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLUnsupportedException;
+import com.io7m.renderer.RException;
 
 public abstract class KAbstractRenderer implements KRenderer
 {
@@ -45,10 +44,9 @@ public abstract class KAbstractRenderer implements KRenderer
         throws E,
           JCGLException,
           ConstraintError,
-          JCGLCompileException,
-          JCGLUnsupportedException,
           IOException,
-          KXMLException
+          KXMLException,
+          RException
     {
       Constraints.constrainNotNull(v, "Visitor");
       return v.rendererVisitDebug(this);
@@ -72,10 +70,9 @@ public abstract class KAbstractRenderer implements KRenderer
         throws E,
           JCGLException,
           ConstraintError,
-          JCGLCompileException,
-          JCGLUnsupportedException,
           IOException,
-          KXMLException
+          KXMLException,
+          RException
     {
       Constraints.constrainNotNull(v, "Visitor");
       return v.rendererVisitDeferred(this);
@@ -99,10 +96,9 @@ public abstract class KAbstractRenderer implements KRenderer
         throws E,
           JCGLException,
           ConstraintError,
-          JCGLCompileException,
-          JCGLUnsupportedException,
           IOException,
-          KXMLException
+          KXMLException,
+          RException
     {
       Constraints.constrainNotNull(v, "Visitor");
       return v.rendererVisitForward(this);

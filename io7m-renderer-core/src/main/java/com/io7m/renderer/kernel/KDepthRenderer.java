@@ -68,7 +68,7 @@ final class KDepthRenderer
 
   private static void renderDepthPassBatch(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithObserver mwc,
+    final @Nonnull KMutableMatricesOld.WithObserver mwc,
     final @Nonnull JCBProgram jp,
     final @Nonnull KMaterialDepthLabel label,
     final @Nonnull List<KMeshInstanceTransformed> batch)
@@ -77,7 +77,7 @@ final class KDepthRenderer
       JCBExecutionException
   {
     for (final KMeshInstanceTransformed i : batch) {
-      final KMutableMatrices.WithInstance mwi = mwc.withInstance(i);
+      final KMutableMatricesOld.WithInstance mwi = mwc.withInstance(i);
       try {
         KDepthRenderer.renderDepthPassInstance(gc, mwi, jp, label, i);
       } finally {
@@ -88,7 +88,7 @@ final class KDepthRenderer
 
   private static void renderDepthPassInstance(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMutableMatrices.WithInstance mwi,
+    final @Nonnull KMutableMatricesOld.WithInstance mwi,
     final @Nonnull JCBProgram jp,
     final @Nonnull KMaterialDepthLabel label,
     final @Nonnull KMeshInstanceTransformed i)
@@ -178,7 +178,7 @@ final class KDepthRenderer
   private final @Nonnull KGraphicsCapabilities                            caps;
   private final @Nonnull JCGLImplementation                               g;
   private final @Nonnull Log                                              log;
-  private final @Nonnull KMutableMatrices                                 matrices;
+  private final @Nonnull KMutableMatricesOld                                 matrices;
   private final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache;
   private final @Nonnull VectorM2I                                        viewport_size;
 
@@ -195,7 +195,7 @@ final class KDepthRenderer
     this.shader_cache =
       Constraints.constrainNotNull(shader_cache, "Shader cache");
     this.caps = Constraints.constrainNotNull(caps, "Capabilities");
-    this.matrices = KMutableMatrices.newMatrices();
+    this.matrices = KMutableMatricesOld.newMatrices();
     this.viewport_size = new VectorM2I();
   }
 
@@ -223,7 +223,7 @@ final class KDepthRenderer
       this.viewport_size.y = (int) area.getRangeY().getInterval();
       gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
 
-      final KMutableMatrices.WithObserver mwc =
+      final KMutableMatricesOld.WithObserver mwc =
         this.matrices.withObserver(view, projection);
 
       try {
@@ -283,7 +283,7 @@ final class KDepthRenderer
     renderDepthPassBatches(
       final @Nonnull Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batches,
       final @Nonnull JCGLInterfaceCommon gc,
-      final @Nonnull KMutableMatrices.WithObserver mwc)
+      final @Nonnull KMutableMatricesOld.WithObserver mwc)
       throws KShaderCacheException,
         ConstraintError,
         LUCacheException,

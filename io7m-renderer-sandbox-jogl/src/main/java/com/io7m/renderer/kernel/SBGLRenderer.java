@@ -112,6 +112,7 @@ import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.RException;
 import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RTransformModel;
@@ -683,9 +684,10 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull LRUCacheConfig                                            shader_cache_config;
   private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>             shader_load_queue;
   private final @Nonnull HashMap<String, SBShader>                           shaders;
+  private @Nonnull PCache<KShadow, KShadowMapOld, KShadowCacheException>     shadow_cache_old;
   private @Nonnull PCache<KShadow, KShadowMap, KShadowCacheException>        shadow_cache;
   private @Nonnull PCacheConfig                                              shadow_cache_config;
-  private @Nonnull KShadowMapRendererActual                                  shadow_map_renderer;
+  private @Nonnull KShadowMapRendererActualOld                               shadow_map_renderer;
   private @Nonnull HashMap<PathVirtual, KMesh>                               sphere_meshes;
   private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>      texture_cube_delete_queue;
   private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>        texture_cube_load_queue;
@@ -1054,6 +1056,8 @@ final class SBGLRenderer implements GLEventListener
       this.failed(e);
     } catch (final Exception e) {
       this.failed(e);
+    } catch (final RException e) {
+      this.failed(e);
     }
   }
 
@@ -1133,6 +1137,8 @@ final class SBGLRenderer implements GLEventListener
       if (this.input_state.wantShadowMapDump()) {
         this.log.debug("Dumping shadow maps");
         final KRendererDebugging d = r.rendererDebug();
+        assert d != null;
+
         d.debugForEachShadowMap(new DebugShadowMapReceiver() {
           private final StringBuilder name = new StringBuilder();
 
@@ -1147,7 +1153,7 @@ final class SBGLRenderer implements GLEventListener
 
               SBTextureUtilities.textureDumpTimestampedTemporary2DStatic(
                 SBGLRenderer.this.gi,
-                map.mapGetDepthTexture(),
+                map.kFramebufferGetShadowTexture(),
                 this.name.toString(),
                 SBGLRenderer.this.log);
             } catch (final FileNotFoundException e) {
@@ -1252,6 +1258,10 @@ final class SBGLRenderer implements GLEventListener
         b.setNoMaximumSize();
         b.setMaximumAge(60);
         this.shadow_cache_config = b.create();
+        this.shadow_cache_old =
+          PCacheTrivial.newCache(
+            KShadowCacheLoaderOld.newLoader(this.gi, this.log),
+            this.shadow_cache_config);
         this.shadow_cache =
           PCacheTrivial.newCache(
             KShadowCacheLoader.newLoader(this.gi, this.log),
@@ -1259,11 +1269,11 @@ final class SBGLRenderer implements GLEventListener
       }
 
       this.shadow_map_renderer =
-        KShadowMapRendererActual.newRenderer(
+        KShadowMapRendererActualOld.newRenderer(
           this.gi,
           this.label_cache,
           this.shader_cache,
-          this.shadow_cache);
+          this.shadow_cache_old);
 
       this.viewport = SBGLRenderer.drawableArea(drawable);
       this.axes = new SBVisibleAxes(gl, 50, 50, 50, this.log);
@@ -1424,6 +1434,16 @@ final class SBGLRenderer implements GLEventListener
           this.gi,
           this.filesystem,
           this.log);
+      }
+      case KRENDERER_DEBUG_SHADOW_MAP:
+      {
+        return KRendererDebugShadowMap.rendererNew(
+          this.gi,
+          this.label_cache,
+          this.shader_cache,
+          this.capabilities,
+          this.log,
+          this.shadow_cache);
       }
     }
 
@@ -2051,7 +2071,8 @@ final class SBGLRenderer implements GLEventListener
       JCGLCompileException,
       JCGLUnsupportedException,
       IOException,
-      KXMLException
+      KXMLException,
+      RException
   {
     final SBSceneControllerRenderer c = this.controller.get();
 
@@ -2162,13 +2183,14 @@ final class SBGLRenderer implements GLEventListener
 
         final KFramebufferForwardType fb = SBGLRenderer.this.framebuffer;
         this.renderer
-          .rendererVisitableAccept(new KRendererVisitor<Unit, JCGLException>() {
+          .rendererVisitableAccept(new KRendererVisitor<Unit, RException>() {
             @Override public Unit rendererVisitDebug(
               final KRendererDebug r)
               throws JCGLException,
                 ConstraintError,
                 IOException,
-                KXMLException
+                KXMLException,
+                RException
             {
               r.rendererDebugEvaluate(fb, builder.sceneCreate());
               return Unit.unit();
@@ -2190,7 +2212,8 @@ final class SBGLRenderer implements GLEventListener
               throws JCGLException,
                 ConstraintError,
                 IOException,
-                KXMLException
+                KXMLException,
+                RException
             {
               r.rendererForwardEvaluate(fb, builder.sceneCreate());
               return Unit.unit();
