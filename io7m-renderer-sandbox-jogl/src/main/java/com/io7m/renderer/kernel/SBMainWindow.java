@@ -56,8 +56,6 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Callbacks;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeKernel;
-import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeSpecific;
 import com.jogamp.opengl.util.Animator;
 
 final class SBMainWindow extends JFrame
@@ -335,9 +333,7 @@ final class SBMainWindow extends JFrame
       final @Nonnull C controller)
   {
     final ButtonGroup renderer_group = new ButtonGroup();
-
     final JMenu menu = new JMenu("Renderer");
-    final JMenu kr_menu = new JMenu("Kernel renderers");
 
     for (final SBKRendererType type : SBKRendererType.values()) {
       final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
@@ -345,50 +341,13 @@ final class SBMainWindow extends JFrame
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
         {
-          try {
-            final SBRendererTypeKernel kt =
-              new SBRendererType.SBRendererTypeKernel(type);
-            controller.rendererSetType(kt);
-          } catch (final ConstraintError x) {
-            throw new UnreachableCodeException();
-          }
+          controller.rendererSetType(type);
         }
       });
 
       renderer_group.add(b);
-      kr_menu.add(b);
+      menu.add(b);
     }
-
-    menu.add(kr_menu);
-
-    final JRadioButtonMenuItem b =
-      new JRadioButtonMenuItem("Specific shader...");
-    b.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
-      {
-        final SBShadersDialog d =
-          new SBShadersDialog(main_window, log, controller);
-        d.setVisible(true);
-        d.addWindowListener(new WindowAdapter() {
-          @Override public void windowClosing(
-            final @Nonnull WindowEvent w)
-          {
-            try {
-              final SBShader s = d.getSelectedShader();
-              if (s != null) {
-                controller.rendererSetType(new SBRendererTypeSpecific(s));
-              }
-            } catch (final ConstraintError x) {
-              throw new UnreachableCodeException();
-            }
-          }
-        });
-      }
-    });
-
-    renderer_group.add(b);
-    menu.add(b);
 
     return menu;
   }

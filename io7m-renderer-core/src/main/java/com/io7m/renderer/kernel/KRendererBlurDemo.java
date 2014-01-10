@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -39,13 +38,11 @@ import com.io7m.jcanephora.JCBExecutionException;
 import com.io7m.jcanephora.JCBExecutorProcedure;
 import com.io7m.jcanephora.JCBProgram;
 import com.io7m.jcanephora.JCBProgramProcedure;
-import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.JCGLSLVersion;
-import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureFilterMagnification;
@@ -57,7 +54,6 @@ import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
-import com.io7m.jvvfs.FilesystemError;
 import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererForward;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
@@ -73,13 +69,8 @@ final class KRendererBlurDemo extends KAbstractRendererForward
     final @Nonnull JCGLImplementation g,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
-    throws JCGLCompileException,
-      JCGLUnsupportedException,
-      FilesystemError,
-      IOException,
-      JCGLException,
-      ConstraintError,
-      KXMLException
+    throws ConstraintError,
+      RException
   {
     return new KRendererBlurDemo(g, fs, log);
   }
@@ -105,95 +96,95 @@ final class KRendererBlurDemo extends KAbstractRendererForward
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
-    throws JCGLCompileException,
-      ConstraintError,
-      JCGLUnsupportedException,
-      JCGLException,
-      FilesystemError,
-      IOException,
-      KXMLException
+    throws ConstraintError,
+      RException
   {
     super(KRendererBlurDemo.NAME);
 
-    this.log = new Log(log, KRendererBlurDemo.NAME);
-    this.gl = gl;
+    try {
+      this.log = new Log(log, KRendererBlurDemo.NAME);
+      this.gl = gl;
 
-    final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
+      final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
 
-    this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = KMutableMatrices.newMatrices();
-    this.transform_context = new KTransform.Context();
-    this.viewport_size = new VectorM2I();
+      this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
+      this.matrices = KMutableMatrices.newMatrices();
+      this.transform_context = new KTransform.Context();
+      this.viewport_size = new VectorM2I();
 
-    this.program_normals =
-      KProgram.newProgramFromFilesystem(
-        gl.getGLCommon(),
-        version.getNumber(),
-        version.getAPI(),
-        fs,
-        "debug_normals_map_local",
-        log);
+      this.program_normals =
+        KProgram.newProgramFromFilesystem(
+          gl.getGLCommon(),
+          version.getNumber(),
+          version.getAPI(),
+          fs,
+          "debug_normals_map_local",
+          log);
 
-    this.program_id =
-      KProgram.newProgramFromFilesystem(
-        gl.getGLCommon(),
-        version.getNumber(),
-        version.getAPI(),
-        fs,
-        "postprocessing_identity",
-        log);
+      this.program_id =
+        KProgram.newProgramFromFilesystem(
+          gl.getGLCommon(),
+          version.getNumber(),
+          version.getAPI(),
+          fs,
+          "postprocessing_identity",
+          log);
 
-    this.program_blur_h =
-      KProgram.newProgramFromFilesystem(
-        gl.getGLCommon(),
-        version.getNumber(),
-        version.getAPI(),
-        fs,
-        "postprocessing_gaussian_blur_horizontal",
-        log);
+      this.program_blur_h =
+        KProgram.newProgramFromFilesystem(
+          gl.getGLCommon(),
+          version.getNumber(),
+          version.getAPI(),
+          fs,
+          "postprocessing_gaussian_blur_horizontal",
+          log);
 
-    this.program_blur_v =
-      KProgram.newProgramFromFilesystem(
-        gl.getGLCommon(),
-        version.getNumber(),
-        version.getAPI(),
-        fs,
-        "postprocessing_gaussian_blur_vertical",
-        log);
+      this.program_blur_v =
+        KProgram.newProgramFromFilesystem(
+          gl.getGLCommon(),
+          version.getNumber(),
+          version.getAPI(),
+          fs,
+          "postprocessing_gaussian_blur_vertical",
+          log);
 
-    this.blur_passes = 1;
-    this.blur_image_size = 512;
-    this.blur_size = 1.0f;
+      this.blur_passes = 1;
+      this.blur_image_size = 512;
+      this.blur_size = 1.0f;
 
-    {
-      final RangeInclusive range_x =
-        new RangeInclusive(0, this.blur_image_size - 1);
-      final RangeInclusive range_y =
-        new RangeInclusive(0, this.blur_image_size - 1);
-      final AreaInclusive size = new AreaInclusive(range_x, range_y);
-      this.blur_0 =
-        KFramebufferForward.newFramebuffer(
-          gl,
-          size,
-          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-          TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+      {
+        final RangeInclusive range_x =
+          new RangeInclusive(0, this.blur_image_size - 1);
+        final RangeInclusive range_y =
+          new RangeInclusive(0, this.blur_image_size - 1);
+        final AreaInclusive size = new AreaInclusive(range_x, range_y);
+        this.blur_0 =
+          KFramebufferForward.newFramebuffer(
+            gl,
+            size,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+      }
+
+      {
+        final RangeInclusive range_x =
+          new RangeInclusive(0, this.blur_image_size - 1);
+        final RangeInclusive range_y =
+          new RangeInclusive(0, this.blur_image_size - 1);
+        final AreaInclusive size = new AreaInclusive(range_x, range_y);
+        this.blur_1 =
+          KFramebufferForward.newFramebuffer(
+            gl,
+            size,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+      }
+
+      this.quad = KUnitQuad.newQuad(gl.getGLCommon(), log);
+
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
     }
-
-    {
-      final RangeInclusive range_x =
-        new RangeInclusive(0, this.blur_image_size - 1);
-      final RangeInclusive range_y =
-        new RangeInclusive(0, this.blur_image_size - 1);
-      final AreaInclusive size = new AreaInclusive(range_x, range_y);
-      this.blur_1 =
-        KFramebufferForward.newFramebuffer(
-          gl,
-          size,
-          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-          TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
-    }
-
-    this.quad = KUnitQuad.newQuad(gl.getGLCommon(), log);
   }
 
   @Override public void rendererClose()
@@ -212,22 +203,21 @@ final class KRendererBlurDemo extends KAbstractRendererForward
   @Override public void rendererForwardEvaluate(
     final @Nonnull KFramebufferForwardUsable framebuffer,
     final @Nonnull KScene scene)
-    throws JCGLException,
-      ConstraintError,
-      JCGLCompileException,
-      JCGLUnsupportedException,
-      IOException,
-      KXMLException,
+    throws ConstraintError,
       RException
   {
-    this.renderEvaluateScene(scene, this.blur_0);
+    try {
+      this.renderEvaluateScene(scene, this.blur_0);
 
-    for (int pass = 0; pass < this.blur_passes; ++pass) {
-      this.renderEvaluateBlurH(this.blur_0, this.blur_1);
-      this.renderEvaluateBlurV(this.blur_1, this.blur_0);
+      for (int pass = 0; pass < this.blur_passes; ++pass) {
+        this.renderEvaluateBlurH(this.blur_0, this.blur_1);
+        this.renderEvaluateBlurV(this.blur_1, this.blur_0);
+      }
+
+      this.renderEvaluateCopy(this.blur_0, framebuffer);
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
     }
-
-    this.renderEvaluateCopy(this.blur_0, framebuffer);
   }
 
   @Override public void rendererSetBackgroundRGBA(
@@ -251,7 +241,7 @@ final class KRendererBlurDemo extends KAbstractRendererForward
       camera.getViewMatrix(),
       camera.getProjectionMatrix(),
       new MatricesObserverFunction<Unit, JCGLException>() {
-        @SuppressWarnings("synthetic-access") @Override public Unit run(
+        @Override public Unit run(
           final MatricesObserver mo)
           throws JCGLException,
             ConstraintError,
@@ -261,7 +251,6 @@ final class KRendererBlurDemo extends KAbstractRendererForward
           return Unit.unit();
         }
       });
-
   }
 
   private void renderEvaluateBlurH(

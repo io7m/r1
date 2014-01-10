@@ -16,12 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.IOException;
-
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.RException;
 
 public interface KRendererForward extends KRenderer
@@ -29,9 +26,6 @@ public interface KRendererForward extends KRenderer
   public void rendererForwardEvaluate(
     final @Nonnull KFramebufferForwardUsable framebuffer,
     final @Nonnull KScene scene)
-    throws JCGLException,
-      ConstraintError,
-      IOException,
-      KXMLException,
+    throws ConstraintError,
       RException;
 }

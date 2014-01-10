@@ -24,66 +24,51 @@ import nu.xom.ValidityException;
 
 import org.xml.sax.SAXException;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-
 public abstract class KXMLException extends Exception
 {
-  public static final class KXMLParserConfigurationException extends
+  public static final class RXMLParserConfigurationException extends
     KXMLException
   {
     private static final long serialVersionUID = -5385921436341180278L;
 
-    @SuppressWarnings("synthetic-access") private KXMLParserConfigurationException(
+    @SuppressWarnings("synthetic-access") private RXMLParserConfigurationException(
       final @Nonnull ParserConfigurationException x)
-      throws ConstraintError
     {
-      super(Type.KXML_PARSER_CONFIGURATION_EXCEPTION, x);
+      super(x);
     }
   }
 
-  public static final class KXMLParsingException extends KXMLException
+  public static final class RXMLParsingException extends KXMLException
   {
     private static final long serialVersionUID = 3538612428621468503L;
 
-    @SuppressWarnings("synthetic-access") private KXMLParsingException(
+    @SuppressWarnings("synthetic-access") private RXMLParsingException(
       final @Nonnull ParsingException x)
-      throws ConstraintError
     {
-      super(Type.KXML_PARSING_EXCEPTION, x);
+      super(x);
     }
   }
 
-  public static final class KXMLSaxException extends KXMLException
+  public static final class RXMLSaxException extends KXMLException
   {
     private static final long serialVersionUID = -94265091031652878L;
 
-    @SuppressWarnings("synthetic-access") private KXMLSaxException(
+    @SuppressWarnings("synthetic-access") private RXMLSaxException(
       final @Nonnull SAXException x)
-      throws ConstraintError
     {
-      super(Type.KXML_SAX_EXCEPTION, x);
+      super(x);
     }
   }
 
-  public static final class KXMLValidityException extends KXMLException
+  public static final class RXMLValidityException extends KXMLException
   {
     private static final long serialVersionUID = -7586780514130613772L;
 
-    @SuppressWarnings("synthetic-access") private KXMLValidityException(
+    @SuppressWarnings("synthetic-access") private RXMLValidityException(
       final @Nonnull ValidityException x)
-      throws ConstraintError
     {
-      super(Type.KXML_VALIDITY_EXCEPTION, x);
+      super(x);
     }
-  }
-
-  public static enum Type
-  {
-    KXML_PARSER_CONFIGURATION_EXCEPTION,
-    KXML_PARSING_EXCEPTION,
-    KXML_SAX_EXCEPTION,
-    KXML_VALIDITY_EXCEPTION
   }
 
   private static final long serialVersionUID = -4760622215644296545L;
@@ -92,51 +77,37 @@ public abstract class KXMLException extends Exception
     KXMLException
     parserConfigurationException(
       final @Nonnull ParserConfigurationException x)
-      throws ConstraintError
   {
-    return new KXMLParserConfigurationException(x);
+    return new RXMLParserConfigurationException(x);
   }
 
   @SuppressWarnings("synthetic-access") public static @Nonnull
     KXMLException
     parsingException(
       final @Nonnull ParsingException x)
-      throws ConstraintError
   {
-    return new KXMLParsingException(x);
+    return new RXMLParsingException(x);
   }
 
   @SuppressWarnings("synthetic-access") public static @Nonnull
     KXMLException
     saxException(
       final @Nonnull SAXException x)
-      throws ConstraintError
   {
-    return new KXMLSaxException(x);
+    return new RXMLSaxException(x);
   }
 
   @SuppressWarnings("synthetic-access") public static @Nonnull
     KXMLException
     validityException(
       final @Nonnull ValidityException x)
-      throws ConstraintError
   {
-    return new KXMLValidityException(x);
+    return new RXMLValidityException(x);
   }
-
-  private final @Nonnull Type type;
 
   private KXMLException(
-    final @Nonnull Type type,
     final @Nonnull Exception x)
-    throws ConstraintError
   {
     super(x);
-    this.type = Constraints.constrainNotNull(type, "Type");
-  }
-
-  public final @Nonnull Type getType()
-  {
-    return this.type;
   }
 }

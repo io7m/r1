@@ -57,33 +57,32 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
 {
   private static final @Nonnull String NAME = "debug-depth";
 
-  public static
-    KRendererDebugDepth
-    rendererNew(
-      final @Nonnull JCGLImplementation g,
-      final @Nonnull KMaterialDepthLabelCache depth_labels,
-      final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
-      final @Nonnull Log log)
+  public static KRendererDebugDepth rendererNew(
+    final @Nonnull JCGLImplementation g,
+    final @Nonnull KMaterialDepthLabelCache depth_labels,
+    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
+    final @Nonnull Log log)
   {
     return new KRendererDebugDepth(g, depth_labels, shader_cache, log);
   }
 
-  private final @Nonnull VectorM4F                                        background;
-  private final @Nonnull KMaterialDepthLabelCache                         depth_labels;
-  private final @Nonnull JCGLImplementation                               gl;
-  private final @Nonnull Log                                              log;
-  private final @Nonnull KMutableMatrices                                 matrices;
-  private final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache;
-  private final @Nonnull KTransform.Context                               transform_context;
-  private final @Nonnull VectorM2I                                        viewport_size;
+  private final @Nonnull VectorM4F                             background;
+  private final @Nonnull KMaterialDepthLabelCache              depth_labels;
+  private final @Nonnull JCGLImplementation                    gl;
+  private final @Nonnull Log                                   log;
+  private final @Nonnull KMutableMatrices                      matrices;
+  private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
+  private final @Nonnull KTransform.Context                    transform_context;
+  private final @Nonnull VectorM2I                             viewport_size;
 
   private KRendererDebugDepth(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull KMaterialDepthLabelCache depth_labels,
-    final @Nonnull LUCache<String, KProgram, KShaderCacheException> shader_cache,
+    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull Log log)
   {
     super(KRendererDebugDepth.NAME);
+
     this.log = new Log(log, KRendererDebugDepth.NAME);
     this.gl = gl;
 
@@ -112,27 +111,30 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
   @Override public void rendererDebugEvaluate(
     final @Nonnull KFramebufferRGBAUsable framebuffer,
     final @Nonnull KScene scene)
-    throws JCGLException,
-      ConstraintError,
+    throws ConstraintError,
       RException
   {
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
     final KCamera camera = scene.getCamera();
 
-    this.matrices.withObserver(
-      camera.getViewMatrix(),
-      camera.getProjectionMatrix(),
-      new MatricesObserverFunction<Unit, JCGLException>() {
-        @Override public Unit run(
-          final MatricesObserver mo)
-          throws JCGLException,
-            ConstraintError,
-            RException
-        {
-          KRendererDebugDepth.this.renderScene(framebuffer, scene, gc, mo);
-          return Unit.unit();
-        }
-      });
+    try {
+      this.matrices.withObserver(
+        camera.getViewMatrix(),
+        camera.getProjectionMatrix(),
+        new MatricesObserverFunction<Unit, JCGLException>() {
+          @SuppressWarnings("synthetic-access") @Override public Unit run(
+            final MatricesObserver mo)
+            throws JCGLException,
+              ConstraintError,
+              RException
+          {
+            KRendererDebugDepth.this.renderScene(framebuffer, scene, gc, mo);
+            return Unit.unit();
+          }
+        });
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
+    }
   }
 
   @Override public void rendererSetBackgroundRGBA(
@@ -239,7 +241,8 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
     final @Nonnull KMeshInstanceTransformed instance,
     final @Nonnull MatricesInstance mi)
     throws ConstraintError,
-      JCGLException
+      JCGLException,
+      RException
   {
     try {
       final KMeshInstance ii = instance.getInstance();
@@ -271,14 +274,8 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
         }
       });
 
-    } catch (final KShaderCacheException x) {
-      // XXX: TODO
-      throw new UnreachableCodeException(x);
     } catch (final LUCacheException x) {
-      // XXX: TODO
       throw new UnreachableCodeException(x);
-    } finally {
-
     }
   }
 
