@@ -81,7 +81,6 @@ import com.io7m.renderer.kernel.SBLight.SBLightSpherical;
 import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionDirectional;
 import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionProjective;
 import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionSpherical;
-import com.io7m.renderer.xml.RXMLException;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 
@@ -439,7 +438,7 @@ public final class SBSceneController implements
       ExecutionException,
       ValidityException,
       ParsingException,
-      RXMLException
+      com.io7m.renderer.xml.RXMLException
   {
     final PathVirtual path = fs.filesystemCopyInTextureCube(file);
     return this.internalTextureCubeLoadFromPath(
@@ -804,7 +803,7 @@ public final class SBSceneController implements
   }
 
   @Override public void rendererSetType(
-    final @Nonnull SBRendererType type)
+    final @Nonnull SBKRendererType type)
   {
     this.renderer.setRenderer(type);
   }
@@ -1244,7 +1243,7 @@ interface SBSceneControllerRendererControl
     final @Nonnull RMatrixI4x4F<RTransformProjection> p);
 
   public void rendererSetType(
-    final @Nonnull SBRendererType type);
+    final @Nonnull SBKRendererType type);
 
   public void rendererShowAxes(
     final boolean enabled);

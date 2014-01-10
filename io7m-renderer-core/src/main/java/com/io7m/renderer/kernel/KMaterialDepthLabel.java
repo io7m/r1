@@ -23,11 +23,11 @@ import com.io7m.jaux.UnreachableCodeException;
 enum KMaterialDepthLabel
 {
   DEPTH_CONSTANT("C", false),
-  DEPTH_MAPPED("M", false),
-  DEPTH_UNIFORM("U", false),
-
   DEPTH_CONSTANT_PACKED4444("CP4", true),
+  DEPTH_MAPPED("M", false),
+
   DEPTH_MAPPED_PACKED4444("MP4", true),
+  DEPTH_UNIFORM("U", false),
   DEPTH_UNIFORM_PACKED4444("UP4", true)
 
   ;
@@ -91,6 +91,27 @@ enum KMaterialDepthLabel
     throw new UnreachableCodeException();
   }
 
+  public static @Nonnull KMaterialDepthLabel fromShadowLabel(
+    final @Nonnull KMaterialShadowLabel label)
+  {
+    switch (label) {
+      case SHADOW_BASIC_DEPTH_CONSTANT:
+        return DEPTH_CONSTANT;
+      case SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444:
+        return DEPTH_CONSTANT_PACKED4444;
+      case SHADOW_BASIC_DEPTH_MAPPED:
+        return DEPTH_MAPPED;
+      case SHADOW_BASIC_DEPTH_MAPPED_PACKED4444:
+        return DEPTH_MAPPED_PACKED4444;
+      case SHADOW_BASIC_DEPTH_UNIFORM:
+        return DEPTH_UNIFORM;
+      case SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444:
+        return DEPTH_UNIFORM_PACKED4444;
+    }
+
+    throw new UnreachableCodeException();
+  }
+
   private final @Nonnull String code;
   private final @Nonnull String name;
   private final boolean         packed;
@@ -104,11 +125,6 @@ enum KMaterialDepthLabel
     this.packed = packed;
   }
 
-  public boolean isPacked()
-  {
-    return this.packed;
-  }
-
   public @Nonnull String getCode()
   {
     return this.code;
@@ -117,5 +133,10 @@ enum KMaterialDepthLabel
   public @Nonnull String getName()
   {
     return this.name;
+  }
+
+  public boolean isPacked()
+  {
+    return this.packed;
   }
 }

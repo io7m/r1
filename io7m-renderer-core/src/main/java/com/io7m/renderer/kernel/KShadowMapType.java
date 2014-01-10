@@ -16,7 +16,18 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KShadowMapType extends KFramebuffer, KShadowMapUsable
-{
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.JCGLResourceUsable;
+import com.io7m.renderer.RException;
 
+public interface KShadowMapType extends
+  KShadowMapUsable,
+  JCGLResourceUsable,
+  KShadowMapVisitable
+{
+  public void kShadowMapDelete(
+    JCGLImplementation g)
+    throws RException,
+      ConstraintError;
 }

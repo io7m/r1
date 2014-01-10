@@ -18,26 +18,13 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RException;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 
-public interface KRendererVisitor<A, E extends Throwable>
+public interface KShadowMapVisitor<A, E extends Throwable>
 {
-  public A rendererVisitDebug(
-    final @Nonnull KRendererDebug r)
+  public A kShadowMapVisitBasic(
+    final @Nonnull KShadowMapBasic sm)
     throws E,
-      ConstraintError,
-      RException;
-
-  public A rendererVisitDeferred(
-    final @Nonnull KRendererDeferred r)
-    throws E,
-      ConstraintError,
-      RException;
-
-  public A rendererVisitForward(
-    final @Nonnull KRendererForward r)
-    throws E,
-      ConstraintError,
       RException;
 }

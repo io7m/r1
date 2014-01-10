@@ -16,19 +16,72 @@
 
 package com.io7m.renderer;
 
+import java.io.IOException;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.kernel.KXMLException;
 
 public abstract class RException extends Throwable implements
   RExceptionVisitable
 {
+  public static final class RFilesystemException extends RException
+  {
+    private static final long              serialVersionUID;
+
+    static {
+      serialVersionUID = -6738063184220278663L;
+    }
+
+    private final @Nonnull FilesystemError x;
+
+    private RFilesystemException(
+      final @Nonnull FilesystemError e)
+    {
+      super(e);
+      this.x = e;
+    }
+
+    @Override public <T, E extends Throwable> T exceptionAccept(
+      final @Nonnull RExceptionVisitor<T, E> v)
+      throws E
+    {
+      return v.visitFilesystemException(this.x);
+    }
+  }
+
+  public static final class RIOException extends RException
+  {
+    private static final long          serialVersionUID;
+    static {
+      serialVersionUID = 3534241141400066374L;
+    }
+
+    private final @Nonnull IOException x;
+
+    private RIOException(
+      final @Nonnull IOException e)
+    {
+      super(e);
+      this.x = e;
+    }
+
+    @Override public <T, E extends Throwable> T exceptionAccept(
+      final @Nonnull RExceptionVisitor<T, E> v)
+      throws E
+    {
+      return v.visitIOException(this.x);
+    }
+  }
+
   public static final class RJCGLException extends RException
   {
     private static final long            serialVersionUID;
 
     static {
-      serialVersionUID = -8291388414238573895L;
+      serialVersionUID = -6738063184220278663L;
     }
 
     private final @Nonnull JCGLException x;
@@ -48,10 +101,51 @@ public abstract class RException extends Throwable implements
     }
   }
 
+  public static final class RKXMLException extends RException
+  {
+    private static final long            serialVersionUID;
+
+    static {
+      serialVersionUID = 2784663722958676921L;
+    }
+
+    private final @Nonnull KXMLException x;
+
+    private RKXMLException(
+      final @Nonnull KXMLException e)
+    {
+      super(e);
+      this.x = e;
+    }
+
+    @Override public <T, E extends Throwable> T exceptionAccept(
+      final @Nonnull RExceptionVisitor<T, E> v)
+      throws E
+    {
+      return v.visitXMLException(this.x);
+    }
+  }
+
   private static final long serialVersionUID;
 
   static {
     serialVersionUID = 883316517600668005L;
+  }
+
+  @SuppressWarnings("synthetic-access") public static
+    RException
+    fromFilesystemException(
+      final @Nonnull FilesystemError e)
+  {
+    return new RFilesystemException(e);
+  }
+
+  @SuppressWarnings("synthetic-access") public static
+    RException
+    fromIOException(
+      final @Nonnull IOException x)
+  {
+    return new RIOException(x);
   }
 
   @SuppressWarnings("synthetic-access") public static @Nonnull
@@ -60,6 +154,14 @@ public abstract class RException extends Throwable implements
       final @Nonnull JCGLException e)
   {
     return new RJCGLException(e);
+  }
+
+  @SuppressWarnings("synthetic-access") public static
+    RException
+    fromRKXMLException(
+      final @Nonnull KXMLException x)
+  {
+    return new RKXMLException(x);
   }
 
   protected RException(

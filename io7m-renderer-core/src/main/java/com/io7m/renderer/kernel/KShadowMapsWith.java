@@ -21,13 +21,14 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jlucache.PCache;
+import com.io7m.renderer.RException;
 
 public interface KShadowMapsWith<A, E extends Throwable>
 {
   public A withMaps(
-    final @Nonnull PCache<KShadow, KShadowMap, KShadowCacheException> cache)
+    final @Nonnull PCache<KShadow, KShadowMap, RException> cache)
     throws ConstraintError,
       JCGLException,
-      KShadowCacheException,
+      RException,
       E;
 }

@@ -16,37 +16,12 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.Texture2DStaticUsable;
-
-public interface KShadowMapUsable extends KFramebufferUsable
+public interface KShadowMapUsable
 {
   /**
-   * <p>
-   * Retrieve a reference to the framebuffer to which the shadow will be
-   * rendered.
-   * </p>
-   */
-
-  public @Nonnull
-    FramebufferReferenceUsable
-    kFramebufferGetShadowFramebuffer();
-
-  /**
    * Retrieve the number of bytes consumed by all resources that make up the
-   * framebuffer.
+   * shadow map.
    */
 
-  public long kFramebufferGetShadowSizeBytes();
-
-  /**
-   * Retrieve the texture that backs the scene framebuffer. Typically, shadow
-   * information is stored in the <tt>red</tt> channel of the texture (and on
-   * many platforms, the texture may consist of a single <tt>red</tt>
-   * channel).
-   */
-
-  public @Nonnull Texture2DStaticUsable kFramebufferGetShadowTexture();
+  public long kShadowMapGetSizeBytes();
 }

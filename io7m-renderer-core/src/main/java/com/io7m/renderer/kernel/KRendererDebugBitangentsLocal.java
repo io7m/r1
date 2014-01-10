@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.IOException;
 import java.util.Set;
 
 import javax.annotation.CheckForNull;
@@ -35,12 +34,10 @@ import com.io7m.jcanephora.JCBExecutionException;
 import com.io7m.jcanephora.JCBExecutorProcedure;
 import com.io7m.jcanephora.JCBProgram;
 import com.io7m.jcanephora.JCBProgramProcedure;
-import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
-import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorI2I;
@@ -48,7 +45,6 @@ import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
-import com.io7m.jvvfs.FilesystemError;
 import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererDebug;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
@@ -64,13 +60,8 @@ final class KRendererDebugBitangentsLocal extends KAbstractRendererDebug
     final @Nonnull JCGLImplementation g,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
-    throws JCGLCompileException,
-      JCGLUnsupportedException,
-      FilesystemError,
-      IOException,
-      JCGLException,
-      ConstraintError,
-      KXMLException
+    throws RException,
+      ConstraintError
   {
     return new KRendererDebugBitangentsLocal(g, fs, log);
   }
@@ -87,34 +78,33 @@ final class KRendererDebugBitangentsLocal extends KAbstractRendererDebug
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
-    throws JCGLCompileException,
-      ConstraintError,
-      JCGLUnsupportedException,
-      FilesystemError,
-      IOException,
-      JCGLException,
-      KXMLException
+    throws RException,
+      ConstraintError
   {
     super(KRendererDebugBitangentsLocal.NAME);
 
-    this.log = new Log(log, KRendererDebugBitangentsLocal.NAME);
-    this.gl = gl;
+    try {
+      this.log = new Log(log, KRendererDebugBitangentsLocal.NAME);
+      this.gl = gl;
 
-    final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
+      final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
 
-    this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = KMutableMatrices.newMatrices();
-    this.transform_context = new KTransform.Context();
-    this.viewport_size = new VectorM2I();
+      this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
+      this.matrices = KMutableMatrices.newMatrices();
+      this.transform_context = new KTransform.Context();
+      this.viewport_size = new VectorM2I();
 
-    this.program =
-      KProgram.newProgramFromFilesystem(
-        gl.getGLCommon(),
-        version.getNumber(),
-        version.getAPI(),
-        fs,
-        "debug_bitangents_vertex_local",
-        log);
+      this.program =
+        KProgram.newProgramFromFilesystem(
+          gl.getGLCommon(),
+          version.getNumber(),
+          version.getAPI(),
+          fs,
+          "debug_bitangents_vertex_local",
+          log);
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
+    }
   }
 
   @Override public void rendererClose()
@@ -133,29 +123,32 @@ final class KRendererDebugBitangentsLocal extends KAbstractRendererDebug
   @Override public void rendererDebugEvaluate(
     final @Nonnull KFramebufferRGBAUsable framebuffer,
     final @Nonnull KScene scene)
-    throws JCGLException,
-      ConstraintError,
+    throws ConstraintError,
       RException
   {
     final KCamera camera = scene.getCamera();
 
-    this.matrices.withObserver(
-      camera.getViewMatrix(),
-      camera.getProjectionMatrix(),
-      new MatricesObserverFunction<Unit, JCGLException>() {
-        @Override public Unit run(
-          final @Nonnull MatricesObserver o)
-          throws RException,
-            ConstraintError,
-            JCGLException
-        {
-          KRendererDebugBitangentsLocal.this.renderWithObserver(
-            framebuffer,
-            scene,
-            o);
-          return Unit.unit();
-        }
-      });
+    try {
+      this.matrices.withObserver(
+        camera.getViewMatrix(),
+        camera.getProjectionMatrix(),
+        new MatricesObserverFunction<Unit, JCGLException>() {
+          @Override public Unit run(
+            final @Nonnull MatricesObserver o)
+            throws RException,
+              ConstraintError,
+              JCGLException
+          {
+            KRendererDebugBitangentsLocal.this.renderWithObserver(
+              framebuffer,
+              scene,
+              o);
+            return Unit.unit();
+          }
+        });
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
+    }
   }
 
   protected void renderWithObserver(

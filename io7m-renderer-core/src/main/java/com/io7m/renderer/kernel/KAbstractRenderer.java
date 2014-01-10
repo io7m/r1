@@ -16,13 +16,10 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.IOException;
-
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.RException;
 
 public abstract class KAbstractRenderer implements KRenderer
@@ -41,12 +38,9 @@ public abstract class KAbstractRenderer implements KRenderer
       A
       rendererVisitableAccept(
         final @Nonnull V v)
-        throws E,
-          JCGLException,
-          ConstraintError,
-          IOException,
-          KXMLException,
-          RException
+        throws ConstraintError,
+          RException,
+          E
     {
       Constraints.constrainNotNull(v, "Visitor");
       return v.rendererVisitDebug(this);
@@ -67,12 +61,9 @@ public abstract class KAbstractRenderer implements KRenderer
       A
       rendererVisitableAccept(
         final @Nonnull V v)
-        throws E,
-          JCGLException,
-          ConstraintError,
-          IOException,
-          KXMLException,
-          RException
+        throws ConstraintError,
+          RException,
+          E
     {
       Constraints.constrainNotNull(v, "Visitor");
       return v.rendererVisitDeferred(this);
@@ -93,12 +84,9 @@ public abstract class KAbstractRenderer implements KRenderer
       A
       rendererVisitableAccept(
         final @Nonnull V v)
-        throws E,
-          JCGLException,
-          ConstraintError,
-          IOException,
-          KXMLException,
-          RException
+        throws ConstraintError,
+          RException,
+          E
     {
       Constraints.constrainNotNull(v, "Visitor");
       return v.rendererVisitForward(this);
