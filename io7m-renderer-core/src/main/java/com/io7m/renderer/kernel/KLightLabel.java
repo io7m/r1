@@ -23,30 +23,17 @@ import com.io7m.jaux.functional.Option;
 import com.io7m.renderer.kernel.KLight.KProjective;
 
 public enum KLightLabel
+  implements
+  KTexturesRequired
 {
-  LIGHT_LABEL_DIRECTIONAL("LD"),
-
-  LIGHT_LABEL_SPHERICAL("LS"),
-
-  LIGHT_LABEL_PROJECTIVE("LP"),
-  LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC("LPSMB"),
-  LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444("LPSMBP4"),
-  LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_VARIANCE("LPSMV")
+  LIGHT_LABEL_DIRECTIONAL("LD", 0),
+  LIGHT_LABEL_PROJECTIVE("LP", 1),
+  LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC("LPSMB", 2),
+  LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444("LPSMBP4", 2),
+  LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_VARIANCE("LPSMV", 2),
+  LIGHT_LABEL_SPHERICAL("LS", 0)
 
   ;
-
-  private final @Nonnull String code;
-
-  private KLightLabel(
-    final @Nonnull String code)
-  {
-    this.code = code;
-  }
-
-  @Override public @Nonnull String toString()
-  {
-    return this.code;
-  }
 
   public static @Nonnull KLightLabel fromLight(
     final @Nonnull KGraphicsCapabilities caps,
@@ -79,5 +66,26 @@ public enum KLightLabel
     }
 
     throw new UnreachableCodeException();
+  }
+
+  private final @Nonnull String code;
+  private final int             textures_required;
+
+  private KLightLabel(
+    final @Nonnull String code,
+    final int textures_required)
+  {
+    this.code = code;
+    this.textures_required = textures_required;
+  }
+
+  @Override public @Nonnull String toString()
+  {
+    return this.code;
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

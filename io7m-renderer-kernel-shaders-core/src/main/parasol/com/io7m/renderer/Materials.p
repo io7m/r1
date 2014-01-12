@@ -63,9 +63,8 @@ module Materials is
   --
 
   type environment is record
-    mix              : float, -- The linear mix factor between the surface albedo and the environment
-    reflection_mix   : float, -- The linear mix factor between the reflection and refraction terms
-    refraction_index : float  -- The index of refraction
+    -- The linear mix factor between the surface albedo and the environment reflection
+    mix : float
   end;
 
   --

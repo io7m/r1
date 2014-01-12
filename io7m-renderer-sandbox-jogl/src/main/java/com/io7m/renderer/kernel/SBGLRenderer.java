@@ -67,7 +67,6 @@ import com.io7m.jcanephora.JCBExecutionException;
 import com.io7m.jcanephora.JCBExecutorProcedure;
 import com.io7m.jcanephora.JCBProgram;
 import com.io7m.jcanephora.JCBProgramProcedure;
-import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLImplementationJOGL;
@@ -1396,7 +1395,19 @@ final class SBGLRenderer implements GLEventListener
       }
       case KRENDERER_FORWARD:
       {
-        throw new UnimplementedCodeException();
+        return KRendererForwardActual.rendererNew(
+          this.gi,
+          KShadowMapRendererActual.newRenderer(
+            this.gi,
+            this.label_cache,
+            this.shader_cache,
+            this.shadow_cache,
+            this.capabilities,
+            this.log),
+          this.label_cache,
+          this.shader_cache,
+          this.capabilities,
+          this.log);
       }
       case KRENDERER_BLUR_DEMO:
       {
@@ -1421,10 +1432,7 @@ final class SBGLRenderer implements GLEventListener
   }
 
   private void loadNewRendererIfNecessary()
-    throws JCGLCompileException,
-      JCGLUnsupportedException,
-      JCGLException,
-      ConstraintError,
+    throws ConstraintError,
       RException
   {
     final SBKRendererType rn = this.renderer_new.getAndSet(null);

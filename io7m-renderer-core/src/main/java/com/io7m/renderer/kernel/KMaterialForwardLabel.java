@@ -22,7 +22,7 @@ import javax.annotation.concurrent.Immutable;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 
-@Immutable final class KMaterialForwardLabel
+@Immutable final class KMaterialForwardLabel implements KTexturesRequired
 {
   private static boolean makeImpliesSpecularMap(
     final @Nonnull KMaterialSpecularLabel specular,
@@ -39,14 +39,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
     switch (environment) {
       case ENVIRONMENT_NONE:
       case ENVIRONMENT_REFLECTIVE:
-      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
-      case ENVIRONMENT_REFRACTIVE:
       {
         break;
       }
       case ENVIRONMENT_REFLECTIVE_MAPPED:
-      case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
-      case ENVIRONMENT_REFRACTIVE_MAPPED:
       {
         return true;
       }
@@ -92,12 +88,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
     switch (environment) {
       case ENVIRONMENT_NONE:
       case ENVIRONMENT_REFLECTIVE:
-      case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
-      case ENVIRONMENT_REFRACTIVE:
         break;
       case ENVIRONMENT_REFLECTIVE_MAPPED:
-      case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
-      case ENVIRONMENT_REFRACTIVE_MAPPED:
         return true;
     }
 
@@ -115,22 +107,22 @@ import com.io7m.jaux.Constraints.ConstraintError;
     final StringBuilder buffer = new StringBuilder();
     buffer.append(a.code);
     buffer.append("_");
-    buffer.append(b.code);
-    if (m.code.isEmpty() == false) {
+    buffer.append(b.getCode());
+    if (m.getCode().isEmpty() == false) {
       buffer.append("_");
-      buffer.append(m.code);
+      buffer.append(m.getCode());
     }
-    if (n.code.isEmpty() == false) {
+    if (n.getCode().isEmpty() == false) {
       buffer.append("_");
-      buffer.append(n.code);
+      buffer.append(n.getCode());
     }
-    if (e.code.isEmpty() == false) {
+    if (e.getCode().isEmpty() == false) {
       buffer.append("_");
-      buffer.append(e.code);
+      buffer.append(e.getCode());
     }
-    if (s.code.isEmpty() == false) {
+    if (s.getCode().isEmpty() == false) {
       buffer.append("_");
-      buffer.append(s.code);
+      buffer.append(s.getCode());
     }
     return buffer.toString();
   }
@@ -144,6 +136,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
   private final @Nonnull KMaterialAlbedoLabel      albedo;
   private final @Nonnull KMaterialNormalLabel      normal;
   private final @Nonnull KMaterialSpecularLabel    specular;
+  private final int                                texture_units_required;
 
   KMaterialForwardLabel(
     final @Nonnull KMaterialAlphaLabel alpha,
@@ -181,6 +174,15 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
     this.implies_specular_map =
       KMaterialForwardLabel.makeImpliesSpecularMap(specular, environment);
+
+    int req = 0;
+    req += alpha.kTexturesGetRequired();
+    req += albedo.kTexturesGetRequired();
+    req += emissive.kTexturesGetRequired();
+    req += environment.kTexturesGetRequired();
+    req += normal.kTexturesGetRequired();
+    req += specular.kTexturesGetRequired();
+    this.texture_units_required = req;
   }
 
   @Override public boolean equals(
@@ -273,5 +275,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
   public boolean impliesUV()
   {
     return this.implies_uv;
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.texture_units_required;
   }
 }

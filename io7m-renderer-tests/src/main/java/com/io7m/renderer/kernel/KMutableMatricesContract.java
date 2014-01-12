@@ -191,7 +191,7 @@ public abstract class KMutableMatricesContract extends TestContract
       final Option<TextureCubeStatic> no_texture_cube =
         new Option.None<TextureCubeStatic>();
       final KMaterialEnvironment environment =
-        new KMaterialEnvironment(0.0f, no_texture_cube, 0.0f, 0.0f, false);
+        new KMaterialEnvironment(0.0f, no_texture_cube, false);
       final KMaterialNormal normal = new KMaterialNormal(no_texture);
       final KMaterialSpecular specular =
         new KMaterialSpecular(0.0f, 0.0f, no_texture);
@@ -230,7 +230,8 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixI4x4F<RTransformView> view =
       new RMatrixI4x4F<RTransformView>();
 
-    final AtomicReference<MatricesObserver> saved = new AtomicReference<MatricesObserver>();
+    final AtomicReference<MatricesObserver> saved =
+      new AtomicReference<MatricesObserver>();
 
     mm.withObserver(
       view,
@@ -248,13 +249,15 @@ public abstract class KMutableMatricesContract extends TestContract
     return saved;
   }
 
-  private static AtomicReference<MatricesProjectiveLight> saveProjectiveDangerously(
-    final @Nonnull KMutableMatrices mm,
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull RMatrixI4x4F<RTransformProjection> projection,
-    final @Nonnull RMatrixI4x4F<RTransformView> view)
-    throws ConstraintError,
-      RException
+  private static
+    AtomicReference<MatricesProjectiveLight>
+    saveProjectiveDangerously(
+      final @Nonnull KMutableMatrices mm,
+      final @Nonnull JCGLInterfaceCommon gc,
+      final @Nonnull RMatrixI4x4F<RTransformProjection> projection,
+      final @Nonnull RMatrixI4x4F<RTransformView> view)
+      throws ConstraintError,
+        RException
   {
     final AtomicReference<MatricesProjectiveLight> saved =
       new AtomicReference<MatricesProjectiveLight>();
@@ -292,7 +295,7 @@ public abstract class KMutableMatricesContract extends TestContract
       ConstraintError,
       RException
   {
-    final TestContext tc = this.newTestContext();
+    final TestContext tc = this.newTestContext(8);
     final JCGLImplementation g = tc.getGLImplementation();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
@@ -305,7 +308,8 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixI4x4F<RTransformView> view =
       new RMatrixI4x4F<RTransformView>(m_view);
 
-    final AtomicReference<MatricesInstance> saved = new AtomicReference<MatricesInstance>();
+    final AtomicReference<MatricesInstance> saved =
+      new AtomicReference<MatricesInstance>();
 
     mm.withObserver(
       view,
@@ -346,7 +350,8 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<MatricesInstance> saved = this.saveInstanceDangerously(mm);
+    final AtomicReference<MatricesInstance> saved =
+      this.saveInstanceDangerously(mm);
     saved.get().getMatrixModel();
   }
 
@@ -357,7 +362,8 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<MatricesInstance> saved = this.saveInstanceDangerously(mm);
+    final AtomicReference<MatricesInstance> saved =
+      this.saveInstanceDangerously(mm);
     saved.get().getMatrixModelView();
   }
 
@@ -368,7 +374,8 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<MatricesInstance> saved = this.saveInstanceDangerously(mm);
+    final AtomicReference<MatricesInstance> saved =
+      this.saveInstanceDangerously(mm);
     saved.get().getMatrixNormal();
   }
 
@@ -379,7 +386,7 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final TestContext tc = this.newTestContext();
+    final TestContext tc = this.newTestContext(8);
     final JCGLImplementation g = tc.getGLImplementation();
     final AtomicBoolean instance_once = new AtomicBoolean();
 
@@ -472,7 +479,7 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final TestContext tc = this.newTestContext();
+    final TestContext tc = this.newTestContext(8);
     final JCGLImplementation g = tc.getGLImplementation();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
@@ -530,7 +537,7 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final TestContext tc = this.newTestContext();
+    final TestContext tc = this.newTestContext(8);
     final JCGLImplementation g = tc.getGLImplementation();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
@@ -791,7 +798,7 @@ public abstract class KMutableMatricesContract extends TestContract
         JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final TestContext tc = this.newTestContext();
+    final TestContext tc = this.newTestContext(8);
     final JCGLInterfaceCommon gc = tc.getGLImplementation().getGLCommon();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
@@ -823,7 +830,7 @@ public abstract class KMutableMatricesContract extends TestContract
         JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final TestContext tc = this.newTestContext();
+    final TestContext tc = this.newTestContext(8);
     final JCGLInterfaceCommon gc = tc.getGLImplementation().getGLCommon();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
@@ -853,7 +860,7 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final TestContext tc = this.newTestContext();
+    final TestContext tc = this.newTestContext(8);
     final JCGLImplementation g = tc.getGLImplementation();
     final JCGLInterfaceCommon gc = g.getGLCommon();
 
@@ -971,7 +978,7 @@ public abstract class KMutableMatricesContract extends TestContract
         JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final TestContext tc = this.newTestContext();
+    final TestContext tc = this.newTestContext(8);
     final JCGLImplementation g = tc.getGLImplementation();
     final JCGLInterfaceCommon gc = g.getGLCommon();
 
@@ -1036,7 +1043,7 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final TestContext tc = this.newTestContext();
+    final TestContext tc = this.newTestContext(8);
     final JCGLImplementation g = tc.getGLImplementation();
     final JCGLInterfaceCommon gc = g.getGLCommon();
 
@@ -1105,7 +1112,7 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final TestContext tc = this.newTestContext();
+    final TestContext tc = this.newTestContext(8);
     final JCGLImplementation g = tc.getGLImplementation();
     final JCGLInterfaceCommon gc = g.getGLCommon();
     final AtomicBoolean projective_once = new AtomicBoolean();
@@ -1187,7 +1194,7 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final TestContext tc = this.newTestContext();
+    final TestContext tc = this.newTestContext(8);
     final JCGLInterfaceCommon gc = tc.getGLImplementation().getGLCommon();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
@@ -1247,7 +1254,7 @@ public abstract class KMutableMatricesContract extends TestContract
         JCGLException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final TestContext tc = this.newTestContext();
+    final TestContext tc = this.newTestContext(8);
     final JCGLInterfaceCommon gc = tc.getGLImplementation().getGLCommon();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =

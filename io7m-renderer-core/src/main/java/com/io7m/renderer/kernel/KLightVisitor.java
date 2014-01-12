@@ -16,45 +16,31 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.RException;
+import com.io7m.renderer.kernel.KLight.KDirectional;
+import com.io7m.renderer.kernel.KLight.KProjective;
+import com.io7m.renderer.kernel.KLight.KSphere;
 
-public interface KRenderer extends KRendererVisitable
+public interface KLightVisitor<A, E extends Throwable>
 {
-  /**
-   * Delete all resources associated with this renderer.
-   */
+  public A kLightVisitDirectional(
+    final @Nonnull KDirectional l)
+    throws ConstraintError,
+      RException,
+      E;
 
-  public void rendererClose()
-    throws RException,
-      ConstraintError;
+  public A kLightVisitProjective(
+    final @Nonnull KProjective l)
+    throws ConstraintError,
+      RException,
+      E;
 
-  /**
-   * Retrieve a reference to the debugging interface (optionally) supported by
-   * the renderer. Returns <code>null</code> if debugging is not supported.
-   */
-
-  public @CheckForNull KRendererDebugging rendererDebug();
-
-  /**
-   * Retrieve the name of the renderer.
-   */
-
-  public @Nonnull String rendererGetName();
-
-  /**
-   * Set the colour to which the renderer will clear the colour buffer prior
-   * to rendering.
-   * 
-   * @throws ConstraintError
-   *           Iff <code>rgba == null</code>.
-   */
-
-  public void rendererSetBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-    throws ConstraintError;
+  public A kLightVisitSpherical(
+    final @Nonnull KSphere l)
+    throws ConstraintError,
+      RException,
+      E;
 }

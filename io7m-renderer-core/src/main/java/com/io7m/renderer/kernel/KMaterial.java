@@ -28,7 +28,7 @@ import com.io7m.renderer.RTransformTexture;
  * Object materials.
  */
 
-@Immutable public final class KMaterial
+@Immutable public final class KMaterial implements KTexturesRequired
 {
   private final @Nonnull KMaterialAlbedo                 albedo;
   private final @Nonnull KMaterialAlpha                  alpha;
@@ -37,6 +37,7 @@ import com.io7m.renderer.RTransformTexture;
   private final @Nonnull KMaterialNormal                 normal;
   private final @Nonnull KMaterialSpecular               specular;
   private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
+  private final int                                      textures_required;
 
   KMaterial(
     final @Nonnull KMaterialAlpha alpha,
@@ -56,6 +57,15 @@ import com.io7m.renderer.RTransformTexture;
     this.normal = Constraints.constrainNotNull(normal, "Normal");
     this.specular = Constraints.constrainNotNull(specular, "Specular");
     this.uv_matrix = Constraints.constrainNotNull(uv_matrix, "UV matrix");
+
+    int req = 0;
+    req += this.alpha.kTexturesGetRequired();
+    req += this.albedo.kTexturesGetRequired();
+    req += this.emissive.kTexturesGetRequired();
+    req += this.environment.kTexturesGetRequired();
+    req += this.normal.kTexturesGetRequired();
+    req += this.specular.kTexturesGetRequired();
+    this.textures_required = req;
   }
 
   @Override public boolean equals(
@@ -163,5 +173,10 @@ import com.io7m.renderer.RTransformTexture;
     builder.append(this.uv_matrix);
     builder.append("]");
     return builder.toString();
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

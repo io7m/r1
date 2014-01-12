@@ -24,10 +24,12 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.ArrayBuffer;
 
 enum KMaterialSpecularLabel
+  implements
+  KTexturesRequired
 {
-  SPECULAR_CONSTANT("SC"),
-  SPECULAR_MAPPED("SM"),
-  SPECULAR_NONE("");
+  SPECULAR_CONSTANT("SC", 0),
+  SPECULAR_MAPPED("SM", 1),
+  SPECULAR_NONE("", 0);
 
   static @Nonnull KMaterialSpecularLabel fromInstance(
     final @Nonnull KMeshInstance instance,
@@ -62,16 +64,24 @@ enum KMaterialSpecularLabel
     throw new UnreachableCodeException();
   }
 
-  final @Nonnull String code;
+  private final @Nonnull String code;
+  private int                   textures_required;
 
   private KMaterialSpecularLabel(
-    final @Nonnull String code)
+    final @Nonnull String code,
+    final int textures_required)
   {
     this.code = code;
+    this.textures_required = textures_required;
   }
 
   public @Nonnull String getCode()
   {
     return this.code;
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

@@ -38,7 +38,7 @@ module DirectionalLight is
   -- for a surface.
   --
 
-  type directions is record
+  type vectors is record
     ots        : vector_3f, -- Direction from observer to surface ("V")
     normal     : vector_3f, -- Surface normal ("N")
     stl        : vector_3f, -- Direction from surface to light source ("L")
@@ -47,22 +47,22 @@ module DirectionalLight is
 
   --
   -- Given a directional light [light], a surface normal [n],
-  -- and an observer at [p], calculate all relevant directions
+  -- and an observer at [p], calculate all relevant vectors
   -- for simulating lighting.
   --
   -- Note that calculations are in eye-space and therefore the
   -- observer is assumed to be at (0.0, 0.0, 0.0).
   --
 
-  function directions (
+  function vectors (
     light : t,
     p     : vector_3f,
     n     : vector_3f
-  ) : directions =
+  ) : vectors =
     let
       value ots = V3.normalize (p);
     in
-      record directions {
+      record vectors {
         ots        = ots,
         normal     = n,
         stl        = V3.normalize (V3.negate (light.direction)),
@@ -77,7 +77,7 @@ module DirectionalLight is
 
   function diffuse_colour (
     light : t,
-    d     : directions,
+    d     : vectors,
     e     : float
   ) : vector_3f =
     let
@@ -101,7 +101,7 @@ module DirectionalLight is
     n     : vector_3f
   ) : vector_3f =
     let
-      value d = directions (light, new vector_3f(0.0, 0.0, 0.0), n);
+      value d = vectors (light, new vector_3f(0.0, 0.0, 0.0), n);
       value c = diffuse_colour (light, d, 0.0);
     in
       c
@@ -114,7 +114,7 @@ module DirectionalLight is
 
   function specular_colour (
     light : t,
-    d     : directions,
+    d     : vectors,
     s     : M.specular
   ) : vector_3f =
     let
@@ -140,7 +140,7 @@ module DirectionalLight is
     material    : M.t
   ) : vector_3f =
     let
-      value d  = directions (light, p, n);
+      value d  = vectors (light, p, n);
       value dc = diffuse_colour (light, d, 0.0);
       value sc = specular_colour (light, d, material.specular);
     in
@@ -163,7 +163,7 @@ module DirectionalLight is
     material : M.t
   ) : vector_3f =
     let
-      value d  = directions (light, p, n);
+      value d  = vectors (light, p, n);
       value dc = diffuse_colour (light, d, material.emissive.emissive);
       value sc = specular_colour (light, d, material.specular);
     in
@@ -182,7 +182,7 @@ module DirectionalLight is
     material : M.t
   ) : vector_3f =
     let
-      value d = directions (light, new vector_3f(0.0, 0.0, 0.0), n);
+      value d = vectors (light, new vector_3f(0.0, 0.0, 0.0), n);
       value c = diffuse_colour (light, d, material.emissive.emissive);
     in
       c

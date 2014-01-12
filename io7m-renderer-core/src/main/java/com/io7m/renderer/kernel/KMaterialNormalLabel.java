@@ -23,10 +23,12 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.ArrayBuffer;
 
 enum KMaterialNormalLabel
+  implements
+  KTexturesRequired
 {
-  NORMAL_MAPPED("NM"),
-  NORMAL_NONE(""),
-  NORMAL_VERTEX("NV");
+  NORMAL_MAPPED("NM", 1),
+  NORMAL_NONE("", 0),
+  NORMAL_VERTEX("NV", 0);
 
   static @Nonnull KMaterialNormalLabel fromInstance(
     final @Nonnull KMeshInstance instance)
@@ -52,16 +54,24 @@ enum KMaterialNormalLabel
     return KMaterialNormalLabel.NORMAL_NONE;
   }
 
-  final @Nonnull String code;
+  private final @Nonnull String code;
+  private int                   textures_required;
 
   private KMaterialNormalLabel(
-    final @Nonnull String code)
+    final @Nonnull String code,
+    final int textures_required)
   {
     this.code = code;
+    this.textures_required = textures_required;
   }
 
   public @Nonnull String getCode()
   {
     return this.code;
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

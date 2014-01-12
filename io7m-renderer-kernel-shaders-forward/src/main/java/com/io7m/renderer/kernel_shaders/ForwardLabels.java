@@ -74,11 +74,7 @@ final class ForwardLabels
   {
     ENVIRONMENT_NONE(""),
     ENVIRONMENT_REFLECTIVE("EL"),
-    ENVIRONMENT_REFLECTIVE_MAPPED("ELM"),
-    ENVIRONMENT_REFLECTIVE_REFRACTIVE("ELR"),
-    ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED("ELRM"),
-    ENVIRONMENT_REFRACTIVE("ER"),
-    ENVIRONMENT_REFRACTIVE_MAPPED("ERM");
+    ENVIRONMENT_REFLECTIVE_MAPPED("ELM");
 
     private final @Nonnull String code;
 
@@ -243,12 +239,8 @@ final class ForwardLabels
                       switch (this.environment) {
                         case ENVIRONMENT_NONE:
                         case ENVIRONMENT_REFLECTIVE:
-                        case ENVIRONMENT_REFLECTIVE_REFRACTIVE:
-                        case ENVIRONMENT_REFRACTIVE:
                           return false;
                         case ENVIRONMENT_REFLECTIVE_MAPPED:
-                        case ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED:
-                        case ENVIRONMENT_REFRACTIVE_MAPPED:
                           return true;
                       }
                     }
@@ -385,7 +377,8 @@ final class ForwardLabels
   {
     LIGHT_DIRECTIONAL("LD"),
     LIGHT_PROJECTIVE("LP"),
-    LIGHT_PROJECTIVE_SHADOW_MAPPED("LPSM"),
+    LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC("LPSMB"),
+    LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444("LPSMBP4"),
     LIGHT_SPHERICAL("LS")
 
     ;

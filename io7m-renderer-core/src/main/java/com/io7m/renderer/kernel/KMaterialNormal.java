@@ -28,15 +28,17 @@ import com.io7m.jcanephora.Texture2DStatic;
  * Material properties related to surface normals.
  */
 
-@Immutable public final class KMaterialNormal
+@Immutable public final class KMaterialNormal implements KTexturesRequired
 {
   private final @Nonnull Option<Texture2DStatic> texture;
+  private final int                              textures_required;
 
   KMaterialNormal(
     final @Nonnull Option<Texture2DStatic> texture)
     throws ConstraintError
   {
     this.texture = Constraints.constrainNotNull(texture, "Texture");
+    this.textures_required = this.texture.isSome() ? 1 : 0;
   }
 
   @Override public boolean equals(
@@ -78,5 +80,10 @@ import com.io7m.jcanephora.Texture2DStatic;
     builder.append(this.texture);
     builder.append("]");
     return builder.toString();
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

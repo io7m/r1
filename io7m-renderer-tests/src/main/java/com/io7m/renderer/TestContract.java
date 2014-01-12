@@ -24,7 +24,8 @@ import com.io7m.jcanephora.JCGLUnsupportedException;
 
 public abstract class TestContract
 {
-  public abstract @Nonnull TestContext newTestContext()
+  public abstract @Nonnull TestContext newTestContext(
+    final int units)
     throws JCGLException,
       JCGLUnsupportedException,
       ConstraintError;
