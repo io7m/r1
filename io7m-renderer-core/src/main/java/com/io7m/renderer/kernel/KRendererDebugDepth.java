@@ -97,8 +97,7 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
   }
 
   @Override public void rendererClose()
-    throws JCGLException,
-      ConstraintError
+    throws ConstraintError
   {
     // Nothing
   }

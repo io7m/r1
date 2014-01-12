@@ -332,8 +332,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     protected final @Nonnull JTextField     texture;
     protected final @Nonnull JButton        texture_select;
     protected final @Nonnull SBFloatHSlider mix;
-    protected final @Nonnull SBFloatHSlider reflection_mix;
-    protected final @Nonnull SBFloatHSlider refraction_index;
     protected final @Nonnull JCheckBox      spec_map;
 
     public EnvironmentSettings(
@@ -359,9 +357,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       });
 
       this.mix = new SBFloatHSlider("Mix", 0.0f, 1.0f);
-      this.reflection_mix = new SBFloatHSlider("Reflection mix", 0.0f, 1.0f);
-      this.refraction_index =
-        new SBFloatHSlider("Refraction index", 0.0f, 10.0f);
       this.spec_map = new JCheckBox();
     }
 
@@ -370,38 +365,21 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
     {
       dg
         .row()
-        .grid()
-        .add(new JLabel("Texture"))
+        .grid(new JLabel("Texture"))
         .add(this.texture, 3)
         .add(this.texture_select);
 
       dg
         .row()
-        .grid()
-        .add(this.mix.getLabel())
+        .grid(this.mix.getLabel())
         .add(this.mix.getSlider(), 3)
         .add(this.mix.getField());
-
-      dg
-        .row()
-        .grid()
-        .add(this.reflection_mix.getLabel())
-        .add(this.reflection_mix.getSlider(), 3)
-        .add(this.reflection_mix.getField());
-
-      dg
-        .row()
-        .grid()
-        .add(this.refraction_index.getLabel())
-        .add(this.refraction_index.getSlider(), 3)
-        .add(this.refraction_index.getField());
 
       dg.emptyRow();
 
       dg
         .row()
-        .grid()
-        .add(new JLabel("Mix from specular map"))
+        .grid(new JLabel("Mix from specular map"))
         .add(this.spec_map, 4);
     }
 
@@ -414,8 +392,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       final PathVirtual tt = mat_e.getTexture();
       this.texture.setText(tt == null ? "" : tt.toString());
       this.mix.setCurrent(mat_e.getMix());
-      this.reflection_mix.setCurrent(mat_e.getReflectionMix());
-      this.refraction_index.setCurrent(mat_e.getRefractionIndex());
       this.spec_map.setSelected(mat_e.getMixFromSpecularMap());
     }
 
@@ -431,8 +407,6 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
         new SBMaterialEnvironmentDescription(
           environment_texture_value,
           this.mix.getCurrent(),
-          this.reflection_mix.getCurrent(),
-          this.refraction_index.getCurrent(),
           this.spec_map.isSelected());
 
       return environment;

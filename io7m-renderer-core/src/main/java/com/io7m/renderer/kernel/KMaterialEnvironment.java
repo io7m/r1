@@ -28,27 +28,24 @@ import com.io7m.jcanephora.TextureCubeStatic;
  * Material properties related to surface environment mapping.
  */
 
-@Immutable public final class KMaterialEnvironment
+@Immutable public final class KMaterialEnvironment implements
+  KTexturesRequired
 {
   private final float                              mix;
   private final boolean                            mix_mapped;
-  private final float                              reflection_mix;
-  private final float                              refraction_index;
   private final @Nonnull Option<TextureCubeStatic> texture;
+  private final int                                textures_required;
 
   KMaterialEnvironment(
     final float mix,
     final @Nonnull Option<TextureCubeStatic> texture,
-    final float refraction_index,
-    final float reflection_mix,
     final boolean mix_mapped)
     throws ConstraintError
   {
     this.mix = mix;
     this.texture = Constraints.constrainNotNull(texture, "Texture");
-    this.refraction_index = refraction_index;
-    this.reflection_mix = reflection_mix;
     this.mix_mapped = mix_mapped;
+    this.textures_required = this.texture.isSome() ? 1 : 0;
   }
 
   @Override public boolean equals(
@@ -70,19 +67,7 @@ import com.io7m.jcanephora.TextureCubeStatic;
     if (this.mix_mapped != other.mix_mapped) {
       return false;
     }
-    if (Float.floatToIntBits(this.reflection_mix) != Float
-      .floatToIntBits(other.reflection_mix)) {
-      return false;
-    }
-    if (Float.floatToIntBits(this.refraction_index) != Float
-      .floatToIntBits(other.refraction_index)) {
-      return false;
-    }
-    if (this.texture == null) {
-      if (other.texture != null) {
-        return false;
-      }
-    } else if (!this.texture.equals(other.texture)) {
+    if (!this.texture.equals(other.texture)) {
       return false;
     }
     return true;
@@ -98,16 +83,6 @@ import com.io7m.jcanephora.TextureCubeStatic;
     return this.mix_mapped;
   }
 
-  public float getReflectionMix()
-  {
-    return this.reflection_mix;
-  }
-
-  public float getRefractionIndex()
-  {
-    return this.refraction_index;
-  }
-
   public @Nonnull Option<TextureCubeStatic> getTexture()
   {
     return this.texture;
@@ -119,8 +94,6 @@ import com.io7m.jcanephora.TextureCubeStatic;
     int result = 1;
     result = (prime * result) + Float.floatToIntBits(this.mix);
     result = (prime * result) + (this.mix_mapped ? 1231 : 1237);
-    result = (prime * result) + Float.floatToIntBits(this.reflection_mix);
-    result = (prime * result) + Float.floatToIntBits(this.refraction_index);
     result = (prime * result) + this.texture.hashCode();
     return result;
   }
@@ -128,17 +101,18 @@ import com.io7m.jcanephora.TextureCubeStatic;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KMaterialEnvironment ");
+    builder.append("[MaterialEnvironment ");
     builder.append(this.mix);
     builder.append(" ");
-    builder.append(this.refraction_index);
-    builder.append(" ");
-    builder.append(this.reflection_mix);
+    builder.append(this.mix_mapped);
     builder.append(" ");
     builder.append(this.texture);
-    builder.append(" ");
-    builder.append(this.mix_mapped);
     builder.append("]");
     return builder.toString();
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

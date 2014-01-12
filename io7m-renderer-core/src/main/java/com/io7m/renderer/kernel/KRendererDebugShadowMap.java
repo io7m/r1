@@ -17,6 +17,8 @@
 package com.io7m.renderer.kernel;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -24,14 +26,12 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LUCache;
-import com.io7m.jlucache.LUCacheException;
 import com.io7m.jlucache.PCache;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
@@ -111,10 +111,9 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
   }
 
   @Override public void rendererClose()
-    throws JCGLException,
-      ConstraintError
+    throws ConstraintError
   {
-
+    // Nothing
   }
 
   @Override public @CheckForNull KRendererDebugging rendererDebug()
@@ -145,27 +144,23 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
         scene);
 
     try {
+      final Debugging d = KRendererDebugShadowMap.this.debug;
+
       this.shadow_renderer.shadowMapRendererEvaluate(
         scene.getCamera(),
         batched.getBatchedShadow(),
-        new KShadowMapsWith<Unit, JCGLException>() {
+        new KShadowMapWith<Unit, JCGLException>() {
           @Override public Unit withMaps(
-            final @Nonnull PCache<KShadow, KShadowMap, RException> cache)
+            final @Nonnull KShadowMapContext cache)
             throws ConstraintError,
               RException
           {
-            try {
-              if (KRendererDebugShadowMap.this.debug != null) {
-                KRendererDebugShadowMap.this.debug
-                  .debugPerformDumpShadowMaps(cache, batched
-                    .getBatchedShadow()
-                    .getShadowCasters()
-                    .keySet());
-              }
-              return Unit.unit();
-            } catch (final LUCacheException e) {
-              throw new UnreachableCodeException(e);
+            if (d != null) {
+              final Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>> casters =
+                batched.getBatchedShadow().getShadowCasters();
+              d.debugPerformDumpShadowMaps(cache, casters.keySet());
             }
+            return Unit.unit();
           }
         });
     } catch (final JCGLException e) {
@@ -209,11 +204,10 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
     @SuppressWarnings("synthetic-access") public
       void
       debugPerformDumpShadowMaps(
-        final @Nonnull PCache<KShadow, KShadowMap, RException> cache,
+        final @Nonnull KShadowMapContext cache,
         final @Nonnull Collection<KLight> lights)
         throws ConstraintError,
-          RException,
-          LUCacheException
+          RException
     {
       final DebugShadowMapReceiver dump =
         this.dump_shadow_maps.getAndSet(null);
@@ -240,7 +234,7 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
                 case OPTION_SOME:
                 {
                   final KShadow ks = ((Option.Some<KShadow>) os).value;
-                  final KShadowMap map = cache.pcCacheGet(ks);
+                  final KShadowMap map = cache.getShadowMap(ks);
                   dump.receive(ks, map);
                   break;
                 }

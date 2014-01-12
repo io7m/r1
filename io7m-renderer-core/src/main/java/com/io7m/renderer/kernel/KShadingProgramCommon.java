@@ -749,7 +749,7 @@ final class KShadingProgramCommon
     final float intensity = light.getIntensity();
     KShadingProgramCommon.putLightSphericalIntensity(program, intensity);
     final float radius = light.getRadius();
-    KShadingProgramCommon.putLightSphericalRadius(program, radius);
+    KShadingProgramCommon.putLightSphericalRange(program, radius);
     final float falloff = light.getFalloff();
     KShadingProgramCommon.putLightSphericalFalloff(program, falloff);
   }
@@ -836,22 +836,21 @@ final class KShadingProgramCommon
     program.programUniformUseExisting("light_spherical.position");
   }
 
-  static void putLightSphericalRadius(
-
+  static void putLightSphericalRange(
     final @Nonnull JCBProgram program,
-    final float radius)
+    final float range)
     throws ConstraintError,
       JCGLException
   {
-    program.programUniformPutFloat("light_spherical.radius", radius);
+    program.programUniformPutFloat("light_spherical.range", range);
   }
 
-  static void putLightSphericalRadiusReuse(
+  static void putLightSphericalRangeReuse(
     final @Nonnull JCBProgram program)
     throws ConstraintError,
       JCGLException
   {
-    program.programUniformUseExisting("light_spherical.radius");
+    program.programUniformUseExisting("light_spherical.range");
   }
 
   static void putLightSphericalReuse(
@@ -862,7 +861,7 @@ final class KShadingProgramCommon
     KShadingProgramCommon.putLightSphericalPositionReuse(program);
     KShadingProgramCommon.putLightSphericalColourReuse(program);
     KShadingProgramCommon.putLightSphericalIntensityReuse(program);
-    KShadingProgramCommon.putLightSphericalRadiusReuse(program);
+    KShadingProgramCommon.putLightSphericalRangeReuse(program);
     KShadingProgramCommon.putLightSphericalFalloffReuse(program);
   }
 
@@ -972,12 +971,6 @@ final class KShadingProgramCommon
       JCGLException
   {
     KShadingProgramCommon.putMaterialEnvironmentMix(program, envi.getMix());
-    KShadingProgramCommon.putMaterialEnvironmentReflectionMix(
-      program,
-      envi.getReflectionMix());
-    KShadingProgramCommon.putMaterialEnvironmentRefractionIndex(
-      program,
-      envi.getRefractionIndex());
   }
 
   static void putMaterialEnvironmentMix(
@@ -1263,6 +1256,14 @@ final class KShadingProgramCommon
     program.programUniformPutTextureUnit("t_projection", unit);
   }
 
+  static void putTextureProjectionReuse(
+    final @Nonnull JCBProgram program)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    program.programUniformUseExisting("t_projection");
+  }
+
   static void putTextureShadowMap(
     final @Nonnull JCBProgram program,
     final @Nonnull TextureUnit unit)
@@ -1270,6 +1271,14 @@ final class KShadingProgramCommon
       ConstraintError
   {
     program.programUniformPutTextureUnit("t_shadow", unit);
+  }
+
+  static void putTextureShadowMapReuse(
+    final @Nonnull JCBProgram program)
+    throws JCGLException,
+      ConstraintError
+  {
+    program.programUniformUseExisting("t_shadow");
   }
 
   static void putTextureSpecular(

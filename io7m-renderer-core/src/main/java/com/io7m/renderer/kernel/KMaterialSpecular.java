@@ -28,11 +28,12 @@ import com.io7m.jcanephora.Texture2DStatic;
  * Material properties related to surface specular highlights.
  */
 
-@Immutable public final class KMaterialSpecular
+@Immutable public final class KMaterialSpecular implements KTexturesRequired
 {
   private final float                            exponent;
   private final float                            intensity;
   private final @Nonnull Option<Texture2DStatic> texture;
+  private final int                              textures_required;
 
   KMaterialSpecular(
     final float intensity,
@@ -43,6 +44,7 @@ import com.io7m.jcanephora.Texture2DStatic;
     this.texture = Constraints.constrainNotNull(texture, "Texture");
     this.intensity = intensity;
     this.exponent = exponent;
+    this.textures_required = this.texture.isSome() ? 1 : 0;
   }
 
   @Override public boolean equals(
@@ -108,5 +110,10 @@ import com.io7m.jcanephora.Texture2DStatic;
     builder.append(this.exponent);
     builder.append("]");
     return builder.toString();
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

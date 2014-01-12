@@ -23,7 +23,7 @@ import javax.annotation.concurrent.Immutable;
  * Material properties related to translucency.
  */
 
-@Immutable public final class KMaterialAlpha
+@Immutable public final class KMaterialAlpha implements KTexturesRequired
 {
   public static enum OpacityType
   {
@@ -160,6 +160,11 @@ import javax.annotation.concurrent.Immutable;
   public boolean isTranslucent()
   {
     return this.type == OpacityType.ALPHA_TRANSLUCENT;
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return 0;
   }
 
   @Override public String toString()

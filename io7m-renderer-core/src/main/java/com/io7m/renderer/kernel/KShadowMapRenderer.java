@@ -26,7 +26,7 @@ public interface KShadowMapRenderer
   public <A, E extends Throwable> A shadowMapRendererEvaluate(
     final @Nonnull KCamera camera,
     final @Nonnull KSceneBatchedShadow batches,
-    final @Nonnull KShadowMapsWith<A, E> with)
+    final @Nonnull KShadowMapWith<A, E> with)
     throws ConstraintError,
       E,
       RException;

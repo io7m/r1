@@ -110,11 +110,15 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
   }
 
   @Override public void rendererClose()
-    throws JCGLException,
-      ConstraintError
+    throws ConstraintError,
+      RException
   {
-    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-    gc.programDelete(this.program.getProgram());
+    try {
+      final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+      gc.programDelete(this.program.getProgram());
+    } catch (final JCGLException x) {
+      throw RException.fromJCGLException(x);
+    }
   }
 
   @Override public @CheckForNull KRendererDebugging rendererDebug()

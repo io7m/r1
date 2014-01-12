@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,11 +24,12 @@ import com.io7m.renderer.TestContext;
 
 public final class KMutableMatricesTest extends KMutableMatricesContract
 {
-  @Override public TestContext newTestContext()
+  @Override public TestContext newTestContext(
+    final int units)
     throws JCGLException,
       JCGLUnsupportedException,
       ConstraintError
   {
-    return JOGLTestContext.makeContextWithDefault();
+    return JOGLTestContext.makeContextWithDefault(units);
   }
 }

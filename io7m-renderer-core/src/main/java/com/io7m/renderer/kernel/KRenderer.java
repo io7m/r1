@@ -20,8 +20,8 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.renderer.RException;
 
 public interface KRenderer extends KRendererVisitable
 {
@@ -30,7 +30,7 @@ public interface KRenderer extends KRendererVisitable
    */
 
   public void rendererClose()
-    throws JCGLException,
+    throws RException,
       ConstraintError;
 
   /**

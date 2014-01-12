@@ -20,15 +20,30 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jlucache.PCache;
 import com.io7m.renderer.RException;
 
-public interface KShadowMapsWith<A, E extends Throwable>
+interface KTextureUnitContextInitial
 {
-  public A withMaps(
-    final @Nonnull PCache<KShadow, KShadowMap, RException> cache)
-    throws ConstraintError,
-      JCGLException,
-      RException,
-      E;
+  public int getTextureCountTotal();
+
+  public int getTextureCountForContext();
+
+  /**
+   * Create a new context and execute <code>f</code> with the new context. Any
+   * texture units allocated by <code>f</code> will be released when
+   * <code>f</code> returns.
+   * 
+   * @throws JCGLException
+   *           Iff an OpenGL error occurs.
+   * @throws RException
+   *           Iff <code>f</code> throws <code>RException</code>.
+   * @throws ConstraintError
+   *           Iff <code>f</code> attempts to allocate too many texture units.
+   */
+
+  public void withContext(
+    final @Nonnull KTextureUnitWith f)
+    throws JCGLException,
+      ConstraintError,
+      RException;
 }

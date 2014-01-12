@@ -22,7 +22,6 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.MatrixM4x4F.Context;
@@ -299,8 +298,7 @@ final class KMutableMatrices
     @Override public Context getMatrixContext()
       throws ConstraintError
     {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
+      return this.parent.getMatrixContext();
     }
 
     @Override public
@@ -308,15 +306,13 @@ final class KMutableMatrices
       getMatrixProjection()
         throws ConstraintError
     {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
+      return this.parent.getMatrixProjection();
     }
 
     @Override public RMatrixReadable4x4F<RTransformView> getMatrixView()
       throws ConstraintError
     {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
+      return this.parent.getMatrixView();
     }
 
     @Override public
@@ -324,8 +320,7 @@ final class KMutableMatrices
       getMatrixViewInverse()
         throws ConstraintError
     {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
+      return this.parent.getMatrixViewInverse();
     }
 
     @Override public
@@ -333,8 +328,7 @@ final class KMutableMatrices
       getMatrixProjectiveProjection()
         throws ConstraintError
     {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
+      return this.parent.getMatrixProjectiveProjection();
     }
 
     @Override public
@@ -342,8 +336,7 @@ final class KMutableMatrices
       getMatrixProjectiveView()
         throws ConstraintError
     {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
+      return this.parent.getMatrixProjectiveView();
     }
   }
 
@@ -522,8 +515,8 @@ final class KMutableMatrices
        * Calculate projection and view matrices.
        */
 
-      projection.makeMatrixM4x4F(this.matrix_projection);
       view.makeMatrixM4x4F(this.matrix_view);
+      projection.makeMatrixM4x4F(this.matrix_projection);
 
       MatrixM4x4F.invertWithContext(
         KMutableMatrices.this.matrix_context,
