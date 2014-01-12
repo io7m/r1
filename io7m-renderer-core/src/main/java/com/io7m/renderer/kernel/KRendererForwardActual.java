@@ -67,6 +67,8 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLight;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunction;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
+import com.io7m.renderer.kernel.KTranslucent.KTranslucentLit;
+import com.io7m.renderer.kernel.KTranslucent.KTranslucentUnlit;
 
 public final class KRendererForwardActual extends KAbstractRendererForward
 {
@@ -260,6 +262,27 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     }
   }
 
+  private static void putShadowMapReuse(
+    final @Nonnull JCBProgram program,
+    final @Nonnull KProjective light)
+    throws JCGLException,
+      ConstraintError
+  {
+    final Some<KShadow> some = (Some<KShadow>) light.getShadow();
+
+    switch (some.value.getType()) {
+      case SHADOW_MAPPED_BASIC:
+      {
+        KShadingProgramCommon.putTextureShadowMapReuse(program);
+        break;
+      }
+      case SHADOW_MAPPED_SOFT:
+      {
+        throw new UnimplementedCodeException();
+      }
+    }
+  }
+
   public static @Nonnull KRendererForwardActual rendererNew(
     final @Nonnull JCGLImplementation g,
     final @Nonnull KShadowMapRenderer shadow_renderer,
@@ -280,10 +303,11 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   }
 
   /**
-   * Render a specific opaque instance.
+   * Render a specific instance, assuming all program state for the current
+   * light (if any) has been configured.
    */
 
-  protected static void renderOpaqueInstance(
+  protected static void renderInstance(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KTextureUnitContext units,
     final @Nonnull MatricesInstance mwi,
@@ -511,7 +535,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
               ConstraintError,
               RException
           {
-            KRendererForwardActual.renderOpaqueInstance(
+            KRendererForwardActual.renderInstance(
               gc,
               unit_context,
               mwi,
@@ -571,7 +595,10 @@ public final class KRendererForwardActual extends KAbstractRendererForward
         program,
         light);
       KShadingProgramCommon.putTextureProjectionReuse(program);
-      KShadingProgramCommon.putTextureShadowMapReuse(program);
+
+      if (light.hasShadow()) {
+        KRendererForwardActual.putShadowMapReuse(program, light);
+      }
 
       mwp.withInstance(
         i,
@@ -586,7 +613,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
               program,
               mwi.getMatrixProjectiveModelView());
 
-            KRendererForwardActual.renderOpaqueInstance(
+            KRendererForwardActual.renderInstance(
               gc,
               unit_context,
               mwi,
@@ -634,7 +661,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
               ConstraintError,
               RException
           {
-            KRendererForwardActual.renderOpaqueInstance(
+            KRendererForwardActual.renderInstance(
               gc,
               unit_context,
               mwi,
@@ -679,7 +706,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
                   JCGLException,
                   RException
               {
-                KRendererForwardActual.renderOpaqueInstance(
+                KRendererForwardActual.renderInstance(
                   gc,
                   context,
                   mwi,
@@ -694,15 +721,243 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     }
   }
 
+  protected static void renderTranslucentLitInstanceWithLight(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KShadowMapContext shadow_context,
+    final @Nonnull KTextureUnitContext texture_units,
+    final @Nonnull MatricesObserver mwo,
+    final @Nonnull KMaterialForwardLabel label,
+    final @Nonnull KLight light,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KMeshInstanceTransformed instance)
+    throws JCGLException,
+      ConstraintError,
+      RException
+  {
+    KShadingProgramCommon.putMatrixProjection(
+      program,
+      mwo.getMatrixProjection());
+
+    light.kLightAccept(new KLightVisitor<Unit, JCGLException>() {
+      @Override public Unit kLightVisitDirectional(
+        final @Nonnull KDirectional l)
+        throws ConstraintError,
+          RException,
+          JCGLException
+      {
+        KRendererForwardActual
+          .renderTranslucentLitInstanceWithLightDirectional(
+            gc,
+            texture_units,
+            mwo,
+            label,
+            l,
+            program,
+            instance);
+        return Unit.unit();
+      }
+
+      @Override public Unit kLightVisitProjective(
+        final @Nonnull KProjective l)
+        throws ConstraintError,
+          RException,
+          JCGLException
+      {
+        return mwo.withProjectiveLight(
+          l,
+          new MatricesProjectiveLightFunction<Unit, JCGLException>() {
+            @Override public Unit run(
+              final MatricesProjectiveLight mwp)
+              throws JCGLException,
+                ConstraintError,
+                RException
+            {
+              KRendererForwardActual
+                .renderTranslucentLitInstanceWithLightProjective(
+                  gc,
+                  shadow_context,
+                  texture_units,
+                  mwp,
+                  label,
+                  l,
+                  program,
+                  instance);
+              return Unit.unit();
+            }
+          });
+      }
+
+      @Override public Unit kLightVisitSpherical(
+        final @Nonnull KSphere l)
+        throws ConstraintError,
+          RException,
+          JCGLException
+      {
+        KRendererForwardActual
+          .renderTranslucentLitInstanceWithLightSpherical(
+            gc,
+            texture_units,
+            mwo,
+            label,
+            l,
+            program,
+            instance);
+        return Unit.unit();
+      }
+    });
+  }
+
+  protected static void renderTranslucentLitInstanceWithLightDirectional(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KTextureUnitContext texture_units,
+    final @Nonnull MatricesObserver mwo,
+    final @Nonnull KMaterialForwardLabel label,
+    final @Nonnull KDirectional l,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KMeshInstanceTransformed instance)
+    throws JCGLException,
+      ConstraintError,
+      RException
+  {
+    KShadingProgramCommon.putLightDirectional(
+      program,
+      mwo.getMatrixContext(),
+      mwo.getMatrixView(),
+      l);
+
+    mwo.withInstance(
+      instance,
+      new MatricesInstanceFunction<Unit, JCGLException>() {
+        @Override public Unit run(
+          final @Nonnull MatricesInstance mwi)
+          throws JCGLException,
+            ConstraintError,
+            RException
+        {
+          KRendererForwardActual.renderInstance(
+            gc,
+            texture_units,
+            mwi,
+            label,
+            program,
+            instance);
+          return Unit.unit();
+        }
+      });
+  }
+
+  protected static void renderTranslucentLitInstanceWithLightProjective(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KShadowMapContext shadow_context,
+    final @Nonnull KTextureUnitContext texture_units,
+    final @Nonnull MatricesProjectiveLight mwp,
+    final @Nonnull KMaterialForwardLabel label,
+    final @Nonnull KProjective light,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KMeshInstanceTransformed instance)
+    throws JCGLException,
+      ConstraintError,
+      RException
+  {
+    if (light.hasShadow()) {
+      KRendererForwardActual.putShadow(
+        shadow_context,
+        texture_units,
+        program,
+        light);
+    }
+
+    KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
+      program,
+      mwp.getMatrixContext(),
+      mwp.getMatrixView(),
+      light);
+
+    KShadingProgramCommon.putMatrixProjectiveProjection(
+      program,
+      mwp.getMatrixProjectiveProjection());
+
+    KShadingProgramCommon.putTextureProjection(
+      program,
+      texture_units.withTexture2D(light.getTexture()));
+
+    mwp.withInstance(
+      instance,
+      new MatricesInstanceWithProjectiveFunction<Unit, JCGLException>() {
+        @Override public Unit run(
+          final @Nonnull MatricesInstanceWithProjective mwi)
+          throws JCGLException,
+            ConstraintError,
+            RException
+        {
+          KShadingProgramCommon.putMatrixProjectiveModelView(
+            program,
+            mwi.getMatrixProjectiveModelView());
+
+          KRendererForwardActual.renderInstance(
+            gc,
+            texture_units,
+            mwi,
+            label,
+            program,
+            instance);
+          return Unit.unit();
+        }
+      });
+  }
+
+  protected static void renderTranslucentLitInstanceWithLightSpherical(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KTextureUnitContext texture_units,
+    final @Nonnull MatricesObserver mwo,
+    final @Nonnull KMaterialForwardLabel label,
+    final @Nonnull KSphere l,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KMeshInstanceTransformed instance)
+    throws JCGLException,
+      ConstraintError,
+      RException
+  {
+    KShadingProgramCommon.putLightSpherical(
+      program,
+      mwo.getMatrixContext(),
+      mwo.getMatrixView(),
+      l);
+
+    mwo.withInstance(
+      instance,
+      new MatricesInstanceFunction<Unit, JCGLException>() {
+        @Override public Unit run(
+          final @Nonnull MatricesInstance mwi)
+          throws JCGLException,
+            ConstraintError,
+            RException
+        {
+          KRendererForwardActual.renderInstance(
+            gc,
+            texture_units,
+            mwi,
+            label,
+            program,
+            instance);
+          return Unit.unit();
+        }
+      });
+  }
+
   private final @Nonnull VectorM4F                             background;
   private final @Nonnull KLabelDecider                         decider;
   private final @Nonnull KDepthRenderer                        depth;
   private final @Nonnull JCGLImplementation                    g;
   private final @Nonnull Log                                   log;
   private final @Nonnull KMutableMatrices                      matrices;
+
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
+
   private final @Nonnull KShadowMapRenderer                    shadow_renderer;
+
   private final @Nonnull KTextureUnitAllocator                 texture_units;
+
   private final @Nonnull VectorM2I                             viewport_size;
 
   private KRendererForwardActual(
@@ -742,14 +997,12 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   @Override public void rendererClose()
     throws ConstraintError
   {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
+    // Nothing
   }
 
   @Override public KRendererDebugging rendererDebug()
   {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
+    return null;
   }
 
   @Override public void rendererForwardEvaluate(
@@ -877,7 +1130,6 @@ public final class KRendererForwardActual extends KAbstractRendererForward
         });
       }
     }
-
   }
 
   /**
@@ -995,6 +1247,20 @@ public final class KRendererForwardActual extends KAbstractRendererForward
               batched,
               mwo);
 
+            /**
+             * Render all translucent instances into the framebuffer.
+             */
+
+            gc.cullingDisable();
+            gc.colorBufferMask(true, true, true, true);
+            gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
+            gc.depthBufferWriteDisable();
+            KRendererForwardActual.this.renderTranslucent(
+              gc,
+              shadow_context,
+              batched,
+              mwo);
+
           } finally {
             gc.framebufferDrawUnbind();
           }
@@ -1003,5 +1269,129 @@ public final class KRendererForwardActual extends KAbstractRendererForward
         }
       });
 
+  }
+
+  protected void renderTranslucent(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KShadowMapContext shadow_context,
+    final @Nonnull KSceneBatchedForward batched,
+    final @Nonnull MatricesObserver mwo)
+    throws JCGLException,
+      ConstraintError,
+      RException,
+      LUCacheException
+  {
+    for (final KTranslucent translucent : batched.getBatchesTranslucent()) {
+      translucent
+        .translucentAccept(new KTranslucentVisitor<Unit, LUCacheException>() {
+          @Override public Unit translucentVisitLit(
+            final @Nonnull KTranslucentLit t)
+            throws ConstraintError,
+              JCGLException,
+              RException,
+              LUCacheException
+          {
+            KRendererForwardActual.this.renderTranslucentLit(
+              gc,
+              shadow_context,
+              mwo,
+              t);
+            return Unit.unit();
+          }
+
+          @Override public Unit translucentVisitUnlit(
+            final @Nonnull KTranslucentUnlit t)
+            throws ConstraintError,
+              JCGLException,
+              RException
+          {
+            KRendererForwardActual.this.renderTranslucentUnlit(gc, mwo, t);
+            return Unit.unit();
+          }
+        });
+    }
+  }
+
+  protected void renderTranslucentLit(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KShadowMapContext shadow_context,
+    final @Nonnull MatricesObserver mwo,
+    final @Nonnull KTranslucentLit t)
+    throws ConstraintError,
+      RException,
+      JCGLException,
+      LUCacheException
+  {
+    final KTextureUnitAllocator unit_allocator = this.texture_units;
+    final List<KLight> lights = t.getLights();
+
+    for (int index = 0; index < lights.size(); ++index) {
+      final KLight light = lights.get(index);
+      final KMaterialForwardLabel label = t.getLabel();
+      final KMeshInstanceTransformed instance = t.getInstance();
+
+      final String shader_name =
+        KRendererForwardActual.makeLitShaderName(this.decider, light, label);
+
+      final int required = label.kTexturesGetRequired();
+      if (unit_allocator.hasEnoughUnits(required) == false) {
+        throw RException.notEnoughTextureUnits(
+          shader_name,
+          required,
+          unit_allocator.getUnitCount());
+      }
+
+      /**
+       * The first light that falls upon a translucent surface essentially
+       * provides the degree of opacity for that surface. Further light
+       * contributions apply lighting to the object.
+       */
+
+      if (index == 0) {
+        gc.blendingEnable(
+          BlendFunction.BLEND_ONE,
+          BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
+      } else {
+        gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+      }
+
+      final KProgram kprogram = this.shader_cache.luCacheGet(shader_name);
+      kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
+        @Override public void call(
+          final @Nonnull JCBProgram program)
+          throws ConstraintError,
+            JCGLException,
+            RException
+        {
+          unit_allocator.withContext(new KTextureUnitWith() {
+            @Override public void run(
+              final @Nonnull KTextureUnitContext texture_unit_ctx)
+              throws ConstraintError,
+                JCGLException,
+                RException
+            {
+              KRendererForwardActual.renderTranslucentLitInstanceWithLight(
+                gc,
+                shadow_context,
+                texture_unit_ctx,
+                mwo,
+                label,
+                light,
+                program,
+                instance);
+            }
+          });
+        }
+      });
+    }
+  }
+
+  protected void renderTranslucentUnlit(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull MatricesObserver mwo,
+    final @Nonnull KTranslucentUnlit t)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
   }
 }
