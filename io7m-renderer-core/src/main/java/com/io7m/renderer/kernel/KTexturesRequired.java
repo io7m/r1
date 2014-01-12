@@ -14,36 +14,14 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer;
+package com.io7m.renderer.kernel;
 
-import java.io.IOException;
+/**
+ * The number of textures a particular object (typically a material or light)
+ * requires when rendering.
+ */
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jcanephora.JCGLException;
-import com.io7m.jvvfs.FilesystemError;
-import com.io7m.renderer.RException.RResourceException;
-import com.io7m.renderer.kernel.KXMLException;
-
-public interface RExceptionVisitor<T, E extends Throwable>
+interface KTexturesRequired
 {
-  public T visitFilesystemException(
-    final @Nonnull FilesystemError e)
-    throws E;
-
-  public T visitIOException(
-    final @Nonnull IOException e)
-    throws E;
-
-  public T visitJCGLException(
-    final @Nonnull JCGLException e)
-    throws E;
-
-  public T visitResourceException(
-    final @Nonnull RResourceException e)
-    throws E;
-
-  public T visitXMLException(
-    final @Nonnull KXMLException e)
-    throws E;
+  public int kTexturesGetRequired();
 }

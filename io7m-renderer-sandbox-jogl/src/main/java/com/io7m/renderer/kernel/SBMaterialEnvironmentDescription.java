@@ -22,23 +22,17 @@ import com.io7m.jvvfs.PathVirtual;
 
 public final class SBMaterialEnvironmentDescription
 {
-  private final @CheckForNull PathVirtual texture;
   private final float                     mix;
-  private final float                     reflection_mix;
-  private final float                     refraction_index;
   private final boolean                   mix_mapped;
+  private final @CheckForNull PathVirtual texture;
 
   SBMaterialEnvironmentDescription(
     final @CheckForNull PathVirtual texture,
     final float mix,
-    final float reflection_mix,
-    final float refraction_index,
     final boolean mix_mapped)
   {
     this.texture = texture;
     this.mix = mix;
-    this.reflection_mix = reflection_mix;
-    this.refraction_index = refraction_index;
     this.mix_mapped = mix_mapped;
   }
 
@@ -56,25 +50,13 @@ public final class SBMaterialEnvironmentDescription
     }
     final SBMaterialEnvironmentDescription other =
       (SBMaterialEnvironmentDescription) obj;
-    if (this.mix_mapped != other.mix_mapped) {
-      return false;
-    }
     if (Float.floatToIntBits(this.mix) != Float.floatToIntBits(other.mix)) {
       return false;
     }
-    if (Float.floatToIntBits(this.reflection_mix) != Float
-      .floatToIntBits(other.reflection_mix)) {
+    if (this.mix_mapped != other.mix_mapped) {
       return false;
     }
-    if (Float.floatToIntBits(this.refraction_index) != Float
-      .floatToIntBits(other.refraction_index)) {
-      return false;
-    }
-    if (this.texture == null) {
-      if (other.texture != null) {
-        return false;
-      }
-    } else if (!this.texture.equals(other.texture)) {
+    if (!this.texture.equals(other.texture)) {
       return false;
     }
     return true;
@@ -85,14 +67,9 @@ public final class SBMaterialEnvironmentDescription
     return this.mix;
   }
 
-  public float getReflectionMix()
+  public boolean getMixFromSpecularMap()
   {
-    return this.reflection_mix;
-  }
-
-  public float getRefractionIndex()
-  {
-    return this.refraction_index;
+    return this.mix_mapped;
   }
 
   public @CheckForNull PathVirtual getTexture()
@@ -104,35 +81,22 @@ public final class SBMaterialEnvironmentDescription
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + (this.mix_mapped ? 1231 : 1237);
     result = (prime * result) + Float.floatToIntBits(this.mix);
-    result = (prime * result) + Float.floatToIntBits(this.reflection_mix);
-    result = (prime * result) + Float.floatToIntBits(this.refraction_index);
-    result =
-      (prime * result)
-        + ((this.texture == null) ? 0 : this.texture.hashCode());
+    result = (prime * result) + (this.mix_mapped ? 1231 : 1237);
+    result = (prime * result) + this.texture.hashCode();
     return result;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("SBMaterialEnvironmentDescription [texture=");
+    builder.append("[SBMaterialEnvironmentDescription texture=");
     builder.append(this.texture);
     builder.append(", mix=");
     builder.append(this.mix);
-    builder.append(", reflection_mix=");
-    builder.append(this.reflection_mix);
-    builder.append(", refraction_index=");
-    builder.append(this.refraction_index);
     builder.append(", mix_mapped=");
     builder.append(this.mix_mapped);
     builder.append("]");
     return builder.toString();
-  }
-
-  public boolean getMixFromSpecularMap()
-  {
-    return this.mix_mapped;
   }
 }

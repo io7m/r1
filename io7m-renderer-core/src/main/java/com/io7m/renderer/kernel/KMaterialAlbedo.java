@@ -30,11 +30,12 @@ import com.io7m.renderer.RVectorI4F;
  * Material properties related to surface albedo.
  */
 
-@Immutable public final class KMaterialAlbedo
+@Immutable public final class KMaterialAlbedo implements KTexturesRequired
 {
   private final @Nonnull RVectorI4F<RSpaceRGBA>  colour;
   private final float                            mix;
   private final @Nonnull Option<Texture2DStatic> texture;
+  private final int                              textures_required;
 
   KMaterialAlbedo(
     final @Nonnull RVectorI4F<RSpaceRGBA> colour,
@@ -45,6 +46,7 @@ import com.io7m.renderer.RVectorI4F;
     this.colour = Constraints.constrainNotNull(colour, "Colour");
     this.mix = mix;
     this.texture = Constraints.constrainNotNull(texture, "Texture");
+    this.textures_required = this.texture.isSome() ? 1 : 0;
   }
 
   @Override public boolean equals(
@@ -116,5 +118,10 @@ import com.io7m.renderer.RVectorI4F;
     builder.append(this.texture);
     builder.append("]");
     return builder.toString();
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

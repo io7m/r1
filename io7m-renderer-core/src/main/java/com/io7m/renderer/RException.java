@@ -126,6 +126,28 @@ public abstract class RException extends Throwable implements
     }
   }
 
+  public static final class RResourceException extends RException
+  {
+    private static final long serialVersionUID;
+
+    static {
+      serialVersionUID = 6485344312996126052L;
+    }
+
+    private RResourceException(
+      final @Nonnull String message)
+    {
+      super(message);
+    }
+
+    @Override public <T, E extends Throwable> T exceptionAccept(
+      final @Nonnull RExceptionVisitor<T, E> v)
+      throws E
+    {
+      return v.visitResourceException(this);
+    }
+  }
+
   private static final long serialVersionUID;
 
   static {
@@ -162,6 +184,28 @@ public abstract class RException extends Throwable implements
       final @Nonnull KXMLException x)
   {
     return new RKXMLException(x);
+  }
+
+  @SuppressWarnings("synthetic-access") public static
+    RException
+    notEnoughTextureUnits(
+      final @Nonnull String shader_name,
+      final int required,
+      final int have)
+  {
+    return new RResourceException(
+      String
+        .format(
+          "Not enough texture units available to render material %s: Needs %d, but %d are available",
+          shader_name,
+          Integer.valueOf(required),
+          Integer.valueOf(have)));
+  }
+
+  protected RException(
+    final @Nonnull String message)
+  {
+    super(message);
   }
 
   protected RException(

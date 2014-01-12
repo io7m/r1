@@ -23,9 +23,11 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.ArrayBuffer;
 
 enum KMaterialAlbedoLabel
+  implements
+  KTexturesRequired
 {
-  ALBEDO_COLOURED("BC"),
-  ALBEDO_TEXTURED("BT");
+  ALBEDO_COLOURED("BC", 0),
+  ALBEDO_TEXTURED("BT", 1);
 
   static @Nonnull KMaterialAlbedoLabel fromInstance(
     final @Nonnull KMeshInstance instance)
@@ -49,16 +51,24 @@ enum KMaterialAlbedoLabel
     return KMaterialAlbedoLabel.ALBEDO_COLOURED;
   }
 
-  final @Nonnull String code;
+  private final @Nonnull String code;
+  private final int             textures_required;
 
   private KMaterialAlbedoLabel(
-    final @Nonnull String code)
+    final @Nonnull String code,
+    final int textures_required)
   {
     this.code = code;
+    this.textures_required = textures_required;
   }
 
   public @Nonnull String getCode()
   {
     return this.code;
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

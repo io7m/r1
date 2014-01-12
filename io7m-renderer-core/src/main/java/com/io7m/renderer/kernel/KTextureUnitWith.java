@@ -16,45 +16,17 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.RException;
 
-public interface KRenderer extends KRendererVisitable
+interface KTextureUnitWith
 {
-  /**
-   * Delete all resources associated with this renderer.
-   */
-
-  public void rendererClose()
-    throws RException,
-      ConstraintError;
-
-  /**
-   * Retrieve a reference to the debugging interface (optionally) supported by
-   * the renderer. Returns <code>null</code> if debugging is not supported.
-   */
-
-  public @CheckForNull KRendererDebugging rendererDebug();
-
-  /**
-   * Retrieve the name of the renderer.
-   */
-
-  public @Nonnull String rendererGetName();
-
-  /**
-   * Set the colour to which the renderer will clear the colour buffer prior
-   * to rendering.
-   * 
-   * @throws ConstraintError
-   *           Iff <code>rgba == null</code>.
-   */
-
-  public void rendererSetBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-    throws ConstraintError;
+  public void run(
+    final @Nonnull KTextureUnitContext context)
+    throws ConstraintError,
+      JCGLException,
+      RException;
 }

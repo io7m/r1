@@ -115,7 +115,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
   @Override public <A, E extends Throwable> A shadowMapRendererEvaluate(
     final @Nonnull KCamera camera,
     final @Nonnull KSceneBatchedShadow batches,
-    final @Nonnull KShadowMapsWith<A, E> with)
+    final @Nonnull KShadowMapWith<A, E> with)
     throws ConstraintError,
       RException,
       E
@@ -124,7 +124,26 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
     try {
       this.renderShadowMapsInitialize(batches.getShadowCasters().keySet());
       this.renderShadowMapsPre(camera, batches);
-      return with.withMaps(this.shadow_cache);
+      return with.withMaps(new KShadowMapContext() {
+        @SuppressWarnings("synthetic-access") @Override public
+          KShadowMap
+          getShadowMap(
+            final @Nonnull KShadow shadow)
+            throws ConstraintError,
+              RException
+        {
+          try {
+            return KShadowMapRendererActual.this.shadow_cache
+              .pcCacheGet(shadow);
+          } catch (final ConstraintError e) {
+            throw e;
+          } catch (final RException e) {
+            throw e;
+          } catch (final LUCacheException e) {
+            throw new UnreachableCodeException(e);
+          }
+        }
+      });
     } catch (final LUCacheException e) {
       throw new UnreachableCodeException(e);
     } catch (final JCGLException e) {
@@ -140,8 +159,6 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
     throws ConstraintError,
       RException
   {
-    final JCGLInterfaceCommon gc = this.g.getGLCommon();
-
     this.matrices.withObserver(
       camera.getViewMatrix(),
       camera.getProjectionMatrix(),
@@ -152,7 +169,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
             ConstraintError,
             RException
         {
-          KShadowMapRendererActual.this.renderShadowMaps(camera, batched, mo);
+          KShadowMapRendererActual.this.renderShadowMaps(batched, mo);
           return Unit.unit();
         }
       });
@@ -216,12 +233,13 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
   }
 
   void renderShadowMaps(
-    final @Nonnull KCamera camera,
     final @Nonnull KSceneBatchedShadow batched,
     final @Nonnull MatricesObserver mo)
     throws RException,
       ConstraintError
   {
+    final PCache<KShadow, KShadowMap, RException> cache = this.shadow_cache;
+
     final Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>> casters =
       batched.getShadowCasters();
 
@@ -261,11 +279,10 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
                     case SHADOW_MAPPED_BASIC:
                     {
                       final KShadowMapBasic smb =
-                        (KShadowMapBasic) KShadowMapRendererActual.this.shadow_cache
-                          .pcCacheGet(shadow);
+                        (KShadowMapBasic) cache.pcCacheGet(shadow);
 
                       KShadowMapRendererActual.this
-                        .renderShadowMapBasicBatch(batch, shadow, smb, mwp);
+                        .renderShadowMapBasicBatch(batch, smb, mwp);
                     }
                   }
 
@@ -286,7 +303,6 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
     void
     renderShadowMapBasicBatch(
       final @Nonnull Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>> batch,
-      final @Nonnull KShadow shadow,
       final @Nonnull KShadowMapBasic smb,
       final @Nonnull MatricesProjectiveLight mwp)
       throws ConstraintError,

@@ -188,11 +188,15 @@ final class KRendererBlurDemo extends KAbstractRendererForward
   }
 
   @Override public void rendererClose()
-    throws JCGLException,
-      ConstraintError
+    throws ConstraintError,
+      RException
   {
-    this.blur_0.kFramebufferDelete(this.gl);
-    this.blur_1.kFramebufferDelete(this.gl);
+    try {
+      this.blur_0.kFramebufferDelete(this.gl);
+      this.blur_1.kFramebufferDelete(this.gl);
+    } catch (final JCGLException x) {
+      throw RException.fromJCGLException(x);
+    }
   }
 
   @Override public @CheckForNull KRendererDebugging rendererDebug()
