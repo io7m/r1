@@ -16,8 +16,10 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -1281,7 +1283,9 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       RException,
       LUCacheException
   {
-    for (final KTranslucent translucent : batched.getBatchesTranslucent()) {
+    final List<KTranslucent> translucents = batched.getBatchesTranslucent();
+
+    for (final KTranslucent translucent : translucents) {
       translucent
         .translucentAccept(new KTranslucentVisitor<Unit, LUCacheException>() {
           @Override public Unit translucentVisitLit(
@@ -1303,7 +1307,8 @@ public final class KRendererForwardActual extends KAbstractRendererForward
             final @Nonnull KTranslucentUnlit t)
             throws ConstraintError,
               JCGLException,
-              RException
+              RException,
+              LUCacheException
           {
             KRendererForwardActual.this.renderTranslucentUnlit(gc, mwo, t);
             return Unit.unit();
@@ -1323,12 +1328,15 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       LUCacheException
   {
     final KTextureUnitAllocator unit_allocator = this.texture_units;
-    final List<KLight> lights = t.getLights();
+    final Set<KLight> lights = t.translucentGetLights();
 
-    for (int index = 0; index < lights.size(); ++index) {
-      final KLight light = lights.get(index);
-      final KMaterialForwardLabel label = t.getLabel();
-      final KMeshInstanceTransformed instance = t.getInstance();
+    boolean first = true;
+    final Iterator<KLight> iter = lights.iterator();
+    while (iter.hasNext()) {
+      final KLight light = iter.next();
+      final KMeshInstanceTransformed instance = t.translucentGetInstance();
+      final KMaterialForwardLabel label =
+        this.decider.getForwardLabel(instance.getInstance());
 
       final String shader_name =
         KRendererForwardActual.makeLitShaderName(this.decider, light, label);
@@ -1347,7 +1355,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
        * contributions apply lighting to the object.
        */
 
-      if (index == 0) {
+      if (first) {
         gc.blendingEnable(
           BlendFunction.BLEND_ONE,
           BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
@@ -1383,6 +1391,8 @@ public final class KRendererForwardActual extends KAbstractRendererForward
           });
         }
       });
+
+      first = false;
     }
   }
 
@@ -1390,8 +1400,64 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull MatricesObserver mwo,
     final @Nonnull KTranslucentUnlit t)
+    throws ConstraintError,
+      RException,
+      LUCacheException,
+      JCGLException
   {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
+    final KTextureUnitAllocator unit_allocator = this.texture_units;
+    final KMeshInstanceTransformed instance = t.translucentGetInstance();
+    final KMaterialForwardLabel label =
+      this.decider.getForwardLabel(instance.getInstance());
+
+    final String shader_name =
+      KRendererForwardActual.makeUnlitShaderName(label);
+
+    gc.blendingEnable(
+      BlendFunction.BLEND_ONE,
+      BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
+
+    final KProgram kprogram = this.shader_cache.luCacheGet(shader_name);
+    kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
+      @Override public void call(
+        final @Nonnull JCBProgram program)
+        throws ConstraintError,
+          JCGLException,
+          RException
+      {
+        unit_allocator.withContext(new KTextureUnitWith() {
+          @Override public void run(
+            final @Nonnull KTextureUnitContext texture_unit_ctx)
+            throws ConstraintError,
+              JCGLException,
+              RException
+          {
+            mwo.withInstance(
+              instance,
+              new MatricesInstanceFunction<Unit, JCGLException>() {
+                @Override public Unit run(
+                  final @Nonnull MatricesInstance mwi)
+                  throws JCGLException,
+                    ConstraintError,
+                    RException
+                {
+                  KShadingProgramCommon.putMatrixProjection(
+                    program,
+                    mwi.getMatrixProjection());
+
+                  KRendererForwardActual.renderInstance(
+                    gc,
+                    texture_unit_ctx,
+                    mwi,
+                    label,
+                    program,
+                    instance);
+                  return Unit.unit();
+                }
+              });
+          }
+        });
+      }
+    });
   }
 }
