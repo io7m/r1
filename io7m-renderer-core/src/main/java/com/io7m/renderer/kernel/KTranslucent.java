@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -29,32 +29,14 @@ abstract class KTranslucent implements KTranslucentVisitable
   static final class KTranslucentLit extends KTranslucent
   {
     private final @Nonnull KMeshInstanceTransformed instance;
-    private final @Nonnull KMaterialForwardLabel    label;
-    private final @Nonnull List<KLight>             lights;
+    private final @Nonnull Set<KLight>              lights;
 
     KTranslucentLit(
       final @Nonnull KMeshInstanceTransformed instance,
-      final @Nonnull KMaterialForwardLabel label,
-      final @Nonnull List<KLight> lights)
+      final @Nonnull Set<KLight> lights)
     {
       this.instance = instance;
-      this.label = label;
       this.lights = lights;
-    }
-
-    @Nonnull KMeshInstanceTransformed getInstance()
-    {
-      return this.instance;
-    }
-
-    @Nonnull KMaterialForwardLabel getLabel()
-    {
-      return this.label;
-    }
-
-    @Nonnull List<KLight> getLights()
-    {
-      return this.lights;
     }
 
     @Override public
@@ -69,29 +51,26 @@ abstract class KTranslucent implements KTranslucentVisitable
     {
       return v.translucentVisitLit(this);
     }
+
+    public @Nonnull KMeshInstanceTransformed translucentGetInstance()
+    {
+      return this.instance;
+    }
+
+    public @Nonnull Set<KLight> translucentGetLights()
+    {
+      return this.lights;
+    }
   }
 
   static final class KTranslucentUnlit extends KTranslucent
   {
     private final @Nonnull KMeshInstanceTransformed instance;
-    private final @Nonnull KMaterialForwardLabel    label;
 
     KTranslucentUnlit(
-      final @Nonnull KMeshInstanceTransformed instance,
-      final @Nonnull KMaterialForwardLabel label)
+      final @Nonnull KMeshInstanceTransformed instance)
     {
       this.instance = instance;
-      this.label = label;
-    }
-
-    public @Nonnull KMeshInstanceTransformed getInstance()
-    {
-      return this.instance;
-    }
-
-    public @Nonnull KMaterialForwardLabel getLabel()
-    {
-      return this.label;
     }
 
     @Override public
@@ -105,6 +84,11 @@ abstract class KTranslucent implements KTranslucentVisitable
           ConstraintError
     {
       return v.translucentVisitUnlit(this);
+    }
+
+    public @Nonnull KMeshInstanceTransformed translucentGetInstance()
+    {
+      return this.instance;
     }
   }
 }

@@ -20,11 +20,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -102,6 +103,7 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
+import com.io7m.jtensors.VectorReadable3F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityAll;
 import com.io7m.jvvfs.FSCapabilityRead;
@@ -2043,43 +2045,25 @@ final class SBGLRenderer implements GLEventListener
 
       this.scene_lights = scene_things.first;
 
-      /**
-       * Sort objects by Z (from the origin, not from the observer, for
-       * testing purposes). This will ensure that translucent objects are
-       * rendered from farthest to nearest.
-       */
-
-      final LinkedList<Pair<KMeshInstanceTransformed, SBInstance>> instances =
-        new LinkedList<Pair<KMeshInstanceTransformed, SBInstance>>(
-          scene_things.second);
-
-      Collections.sort(
-        instances,
-        new Comparator<Pair<KMeshInstanceTransformed, SBInstance>>() {
-          @Override public int compare(
-            final Pair<KMeshInstanceTransformed, SBInstance> o1,
-            final Pair<KMeshInstanceTransformed, SBInstance> o2)
-          {
-            final float o1z =
-              o1.first.getTransform().getTranslation().getZF();
-            final float o2z =
-              o2.first.getTransform().getTranslation().getZF();
-            return Float.compare(o1z, o2z);
-          }
-        });
-
       final KSceneBuilder builder =
         KScene.newBuilder(this.label_cache, kcamera);
 
       /**
-       * For each light, add instances.
+       * For each light, add instances. The adding of translucent objects is
+       * deferred in order to allow them to be sorted into draw order.
        * 
        * XXX: Assume that all instances will cast shadows (this is something
        * that would be configured on a per-instance basis outside of the
        * kernel).
-       * 
-       * XXX: In reality, translucent objects must be specified in draw-order.
        */
+
+      final ArrayList<Pair<KMeshInstanceTransformed, SBInstance>> translucents =
+        new ArrayList<Pair<KMeshInstanceTransformed, SBInstance>>();
+
+      final HashSet<KLight> all_lights = new HashSet<KLight>();
+      for (final SBLight light : scene_things.first) {
+        all_lights.add(light.getLight());
+      }
 
       for (final SBLight light : scene_things.first) {
         final KLight klight = light.getLight();
@@ -2099,9 +2083,7 @@ final class SBGLRenderer implements GLEventListener
               }
               case ALPHA_TRANSLUCENT:
               {
-                builder.sceneAddTranslucentLitVisibleWithShadow(
-                  klight,
-                  instance);
+                translucents.add(pair);
                 break;
               }
             }
@@ -2114,11 +2096,46 @@ final class SBGLRenderer implements GLEventListener
               }
               case ALPHA_TRANSLUCENT:
               {
-                builder.sceneAddTranslucentUnlit(instance);
+                translucents.add(pair);
                 break;
               }
             }
           }
+        }
+      }
+
+      /**
+       * Sort translucents by their distance from z = 0, for testing purposes.
+       * 
+       * XXX: In reality, they're drawn furthest to nearest from the
+       * perspective of the observer.
+       */
+
+      Collections.sort(
+        translucents,
+        new Comparator<Pair<KMeshInstanceTransformed, SBInstance>>() {
+          @Override public int compare(
+            final @Nonnull Pair<KMeshInstanceTransformed, SBInstance> o1,
+            final @Nonnull Pair<KMeshInstanceTransformed, SBInstance> o2)
+          {
+            final KMeshInstanceTransformed ok1 = o1.first;
+            final KMeshInstanceTransformed ok2 = o2.first;
+            final VectorReadable3F o1t = ok1.getTransform().getTranslation();
+            final VectorReadable3F o2t = ok2.getTransform().getTranslation();
+            return Float.compare(o1t.getZF(), o2t.getZF());
+          }
+        });
+
+      for (final Pair<KMeshInstanceTransformed, SBInstance> pair : translucents) {
+        if (pair.second.getDescription().isLit()) {
+          builder.sceneAddTranslucentLit(pair.first, all_lights);
+          for (final KLight k : all_lights) {
+            if (k.hasShadow()) {
+              builder.sceneAddInvisibleWithShadow(k, pair.first);
+            }
+          }
+        } else {
+          builder.sceneAddTranslucentUnlit(pair.first);
         }
       }
 
