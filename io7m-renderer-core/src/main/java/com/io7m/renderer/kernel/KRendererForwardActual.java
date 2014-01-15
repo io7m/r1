@@ -32,6 +32,8 @@ import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
+import com.io7m.jcanephora.FaceSelection;
+import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.JCBExecutorProcedure;
@@ -969,13 +971,9 @@ public final class KRendererForwardActual extends KAbstractRendererForward
   private final @Nonnull JCGLImplementation                    g;
   private final @Nonnull Log                                   log;
   private final @Nonnull KMutableMatrices                      matrices;
-
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
-
   private final @Nonnull KShadowMapRenderer                    shadow_renderer;
-
   private final @Nonnull KTextureUnitAllocator                 texture_units;
-
   private final @Nonnull VectorM2I                             viewport_size;
 
   private KRendererForwardActual(
@@ -1007,6 +1005,8 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       this.viewport_size = new VectorM2I();
       this.background = new VectorM4F();
       this.texture_units = KTextureUnitAllocator.newAllocator(g);
+
+      this.log.debug("initialized");
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
     }
@@ -1030,11 +1030,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       RException
   {
     final KSceneBatchedForward batched =
-      KSceneBatchedForward.newBatchedScene(
-        this.decider,
-        this.decider,
-        this.decider,
-        scene);
+      KSceneBatchedForward.newBatchedScene(this.decider, this.decider, scene);
 
     final KCamera camera = scene.getCamera();
     try {
@@ -1212,7 +1208,9 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       new RMatrixI4x4F<RTransformView>(mwo.getMatrixView()),
       new RMatrixI4x4F<RTransformProjection>(mwo.getMatrixProjection()),
       batched.getBatchesDepth(),
-      framebuffer);
+      framebuffer,
+      FaceSelection.FACE_BACK,
+      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
 
     final VectorM2I viewport = this.viewport_size;
     final VectorM4F backdrop = this.background;
@@ -1251,11 +1249,14 @@ public final class KRendererForwardActual extends KAbstractRendererForward
              * framebuffer.
              */
 
+            gc.cullingEnable(
+              FaceSelection.FACE_BACK,
+              FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+
             gc.colorBufferMask(true, true, true, true);
             gc.colorBufferClearV4f(backdrop);
             gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
             gc.depthBufferWriteDisable();
-            gc.colorBufferMask(true, true, true, true);
             gc.blendingEnable(
               BlendFunction.BLEND_ONE,
               BlendFunction.BLEND_ONE);

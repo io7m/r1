@@ -20,50 +20,37 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.UnreachableCodeException;
 
-enum KMaterialDepthLabel
+public enum KMaterialDepthVarianceLabel
 {
-  DEPTH_CONSTANT("C"),
-  DEPTH_MAPPED("M"),
-  DEPTH_UNIFORM("U"), ;
+  DEPTH_VARIANCE_CONSTANT("depth_variance_C"),
+  DEPTH_VARIANCE_MAPPED("depth_variance_M"),
+  DEPTH_VARIANCE_UNIFORM("depth_variance_U"), ;
 
-  public static @Nonnull KMaterialDepthLabel fromMaterial(
-    final @Nonnull KMaterialAlbedoLabel albedo,
-    final @Nonnull KMaterial material)
+  public static @Nonnull KMaterialDepthVarianceLabel fromDepthLabel(
+    final @Nonnull KMaterialDepthLabel k)
   {
-    final KMaterialAlpha a = material.getAlpha();
-
-    switch (a.getOpacityType()) {
-      case ALPHA_OPAQUE:
-      {
-        return DEPTH_CONSTANT;
-      }
-      case ALPHA_OPAQUE_ALBEDO_ALPHA_TO_DEPTH:
-      case ALPHA_TRANSLUCENT:
-      {
-        switch (albedo) {
-          case ALBEDO_COLOURED:
-            return DEPTH_UNIFORM;
-          case ALBEDO_TEXTURED:
-            return DEPTH_MAPPED;
-        }
-
-        throw new UnreachableCodeException();
-      }
+    switch (k) {
+      case DEPTH_CONSTANT:
+        return DEPTH_VARIANCE_CONSTANT;
+      case DEPTH_MAPPED:
+        return DEPTH_VARIANCE_MAPPED;
+      case DEPTH_UNIFORM:
+        return DEPTH_VARIANCE_UNIFORM;
     }
 
     throw new UnreachableCodeException();
   }
 
-  private final @Nonnull String code;
+  private final @Nonnull String name;
 
-  private KMaterialDepthLabel(
-    final @Nonnull String code)
+  private KMaterialDepthVarianceLabel(
+    final @Nonnull String name)
   {
-    this.code = code;
+    this.name = name;
   }
 
-  public @Nonnull String getCode()
+  public @Nonnull String getName()
   {
-    return this.code;
+    return this.name;
   }
 }

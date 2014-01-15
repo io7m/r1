@@ -115,7 +115,6 @@ import com.io7m.renderer.kernel.KScene.KSceneOpaques;
   }
 
   static @Nonnull KSceneBatchedForward newBatchedScene(
-    final @Nonnull KMaterialShadowLabelCache shadow_labels,
     final @Nonnull KMaterialDepthLabelCache depth_labels,
     final @Nonnull KMaterialForwardLabelCache forward_labels,
     final @Nonnull KScene scene)
@@ -142,7 +141,7 @@ import com.io7m.renderer.kernel.KScene.KSceneOpaques;
         opaques.getUnlitInstances());
 
     final KSceneBatchedShadow batched_shadow =
-      KSceneBatchedShadow.newBatchedScene(scene.getShadows(), shadow_labels);
+      KSceneBatchedShadow.newBatchedScene(scene.getShadows(), depth_labels);
 
     return new KSceneBatchedForward(
       batches_opaque_unlit,
