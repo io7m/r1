@@ -42,13 +42,13 @@ public final class SBLightShadowControls implements IHideable
 {
   private static final class SBLightShadowMappedBasicControls
   {
-    private final @Nonnull RowGroup                  row_group;
-    private final @Nonnull SBIntegerHSlider          size;
     private final @Nonnull SBFloatHSlider            depth_bias;
     private final @Nonnull SBFloatHSlider            factor_maximum;
     private final @Nonnull SBFloatHSlider            factor_minimum;
-    private final @Nonnull SBShadowPrecisionSelector precision;
     private final @Nonnull SBShadowFilterSelector    filter;
+    private final @Nonnull SBShadowPrecisionSelector precision;
+    private final @Nonnull RowGroup                  row_group;
+    private final @Nonnull SBIntegerHSlider          size;
 
     private SBLightShadowMappedBasicControls()
       throws ConstraintError
@@ -133,13 +133,14 @@ public final class SBLightShadowControls implements IHideable
 
   private static final class SBLightShadowMappedVarianceControls
   {
-    private final @Nonnull RowGroup                  row_group;
-    private final @Nonnull SBIntegerHSlider          size;
     private final @Nonnull SBFloatHSlider            factor_maximum;
     private final @Nonnull SBFloatHSlider            factor_minimum;
-    private final @Nonnull SBShadowPrecisionSelector precision;
     private final @Nonnull SBShadowFilterSelector    filter;
+    private final @Nonnull SBFloatHSlider            light_bleed_reduction;
     private final @Nonnull SBFloatHSlider            minimum_variance;
+    private final @Nonnull SBShadowPrecisionSelector precision;
+    private final @Nonnull RowGroup                  row_group;
+    private final @Nonnull SBIntegerHSlider          size;
 
     private SBLightShadowMappedVarianceControls()
       throws ConstraintError
@@ -149,6 +150,8 @@ public final class SBLightShadowControls implements IHideable
       this.factor_minimum = new SBFloatHSlider("Minimum", 0.0f, 1.0f);
       this.minimum_variance =
         new SBFloatHSlider("Minimum variance", 0.0f, 0.01f);
+      this.light_bleed_reduction =
+        new SBFloatHSlider("Light bleed reduction", 0.0f, 1.0f);
       this.precision = new SBShadowPrecisionSelector();
       this.filter = new SBShadowFilterSelector();
       this.row_group = new RowGroup();
@@ -166,12 +169,6 @@ public final class SBLightShadowControls implements IHideable
       layout
         .row()
         .group(this.row_group)
-        .grid(this.minimum_variance.getLabel())
-        .add(this.minimum_variance.getSlider(), 3)
-        .add(this.minimum_variance.getField());
-      layout
-        .row()
-        .group(this.row_group)
         .grid(this.factor_maximum.getLabel())
         .add(this.factor_maximum.getSlider(), 3)
         .add(this.factor_maximum.getField());
@@ -181,6 +178,19 @@ public final class SBLightShadowControls implements IHideable
         .grid(this.factor_minimum.getLabel())
         .add(this.factor_minimum.getSlider(), 3)
         .add(this.factor_minimum.getField());
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(this.minimum_variance.getLabel())
+        .add(this.minimum_variance.getSlider(), 3)
+        .add(this.minimum_variance.getField());
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(this.light_bleed_reduction.getLabel())
+        .add(this.light_bleed_reduction.getSlider(), 3)
+        .add(this.light_bleed_reduction.getField());
+
       layout
         .row()
         .group(this.row_group)
@@ -206,6 +216,7 @@ public final class SBLightShadowControls implements IHideable
         this.factor_maximum.getCurrent(),
         this.factor_minimum.getCurrent(),
         this.minimum_variance.getCurrent(),
+        this.light_bleed_reduction.getCurrent(),
         (KShadowPrecision) this.precision.getSelectedItem(),
         (KShadowFilter) this.filter.getSelectedItem());
     }
@@ -217,6 +228,7 @@ public final class SBLightShadowControls implements IHideable
       this.minimum_variance.setCurrent(smv.getMinimumVariance());
       this.factor_maximum.setCurrent(smv.getFactorMaximum());
       this.factor_minimum.setCurrent(smv.getFactorMinimum());
+      this.light_bleed_reduction.setCurrent(smv.getLightBleedReduction());
       this.precision.setSelectedItem(smv.getPrecision());
       this.filter.setSelectedItem(smv.getFilter());
     }
@@ -251,12 +263,12 @@ public final class SBLightShadowControls implements IHideable
     return new SBLightShadowControls(parent);
   }
 
+  private final @Nonnull RowGroup                            group;
   private final @Nonnull SBLightShadowMappedBasicControls    mapped_basic_controls;
   private final @Nonnull SBLightShadowMappedVarianceControls mapped_variance_controls;
+  private final @Nonnull JFrame                              parent;
   private final @Nonnull JCheckBox                           shadow;
   private final @Nonnull SBLightShadowTypeSelector           type_select;
-  private final @Nonnull JFrame                              parent;
-  private final @Nonnull RowGroup                            group;
 
   @SuppressWarnings("synthetic-access") private SBLightShadowControls(
     final @Nonnull JFrame parent)
@@ -356,6 +368,11 @@ public final class SBLightShadowControls implements IHideable
     this.parent.pack();
   }
 
+  @Override public void forceShow()
+  {
+    this.group.forceShow();
+  }
+
   public @Nonnull Option<SBLightShadowDescription> getShadow()
     throws ConstraintError
   {
@@ -377,6 +394,12 @@ public final class SBLightShadowControls implements IHideable
     }
 
     throw new UnreachableCodeException();
+  }
+
+  @Override public void hide()
+  {
+    this.group.forceShow();
+    this.group.hide();
   }
 
   public void setDescription(
@@ -419,20 +442,9 @@ public final class SBLightShadowControls implements IHideable
     }
   }
 
-  @Override public void hide()
-  {
-    this.group.forceShow();
-    this.group.hide();
-  }
-
   @Override public void show()
   {
     this.group.forceShow();
     this.group.show();
-  }
-
-  @Override public void forceShow()
-  {
-    this.group.forceShow();
   }
 }

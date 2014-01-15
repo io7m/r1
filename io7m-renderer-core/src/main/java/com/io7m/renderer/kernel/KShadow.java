@@ -139,6 +139,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
   {
     private final float factor_max;
     private final float factor_min;
+    private final float light_bleed_reduction;
     private final float minimum_variance;
     private final int   size_exponent;
 
@@ -148,6 +149,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final float factor_max,
       final float factor_min,
       final float minimum_variance,
+      final float light_bleed_reduction,
       final @Nonnull KShadowPrecision shadow_precision,
       final @Nonnull KShadowFilter shadow_filter)
       throws ConstraintError
@@ -157,6 +159,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
         light_id,
         shadow_precision,
         shadow_filter);
+
       this.size_exponent =
         Constraints.constrainRange(
           size_exponent,
@@ -166,6 +169,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       this.factor_max = factor_max;
       this.factor_min = factor_min;
       this.minimum_variance = minimum_variance;
+      this.light_bleed_reduction = light_bleed_reduction;
     }
 
     @Override public boolean equals(
@@ -189,6 +193,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
         .floatToIntBits(other.factor_min)) {
         return false;
       }
+      if (Float.floatToIntBits(this.light_bleed_reduction) != Float
+        .floatToIntBits(other.light_bleed_reduction)) {
+        return false;
+      }
       if (Float.floatToIntBits(this.minimum_variance) != Float
         .floatToIntBits(other.minimum_variance)) {
         return false;
@@ -209,6 +217,11 @@ import com.io7m.jaux.Constraints.ConstraintError;
       return this.factor_min;
     }
 
+    public float getLightBleedReduction()
+    {
+      return this.light_bleed_reduction;
+    }
+
     public float getMinimumVariance()
     {
       return this.minimum_variance;
@@ -225,6 +238,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
       int result = super.hashCode();
       result = (prime * result) + Float.floatToIntBits(this.factor_max);
       result = (prime * result) + Float.floatToIntBits(this.factor_min);
+      result =
+        (prime * result) + Float.floatToIntBits(this.light_bleed_reduction);
       result = (prime * result) + Float.floatToIntBits(this.minimum_variance);
       result = (prime * result) + this.size_exponent;
       return result;
@@ -237,10 +252,12 @@ import com.io7m.jaux.Constraints.ConstraintError;
       builder.append(this.factor_max);
       builder.append(" factor_min=");
       builder.append(this.factor_min);
-      builder.append(" size_exponent=");
-      builder.append(this.size_exponent);
       builder.append(" minimum_variance=");
       builder.append(this.minimum_variance);
+      builder.append(" size_exponent=");
+      builder.append(this.size_exponent);
+      builder.append(" light_bleed_reduction=");
+      builder.append(this.light_bleed_reduction);
       builder.append("]");
       return builder.toString();
     }
@@ -294,7 +311,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final int size_exponent,
       final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float factor_max,
       final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float factor_min,
-      final float minimum_variance,
+      final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float minimum_variance,
+      final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float light_bleed_reduction,
       final @Nonnull KShadowPrecision shadow_precision,
       final @Nonnull KShadowFilter shadow_filter)
       throws ConstraintError
@@ -305,6 +323,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       factor_max,
       factor_min,
       minimum_variance,
+      light_bleed_reduction,
       shadow_precision,
       shadow_filter);
   }

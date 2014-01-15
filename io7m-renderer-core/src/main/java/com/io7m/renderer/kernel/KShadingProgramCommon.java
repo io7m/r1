@@ -1230,6 +1230,9 @@ final class KShadingProgramCommon
     KShadingProgramCommon.putShadowVarianceFactorMinimum(
       program,
       shadow.getFactorMinimum());
+    KShadingProgramCommon.putShadowVarianceLightBleedReduction(
+      program,
+      shadow.getLightBleedReduction());
   }
 
   static void putShadowVarianceFactorMaximum(
@@ -1266,6 +1269,23 @@ final class KShadingProgramCommon
     program.programUniformUseExisting("shadow_variance.factor_min");
   }
 
+  static void putShadowVarianceLightBleedReduction(
+    final @Nonnull JCBProgram program,
+    final float r)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    program.programUniformPutFloat("shadow_variance.bleed_reduction", r);
+  }
+
+  static void putShadowVarianceLightBleedReductionReuse(
+    final @Nonnull JCBProgram program)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    program.programUniformUseExisting("shadow_variance.bleed_reduction");
+  }
+
   static void putShadowVarianceMinimumVariance(
     final @Nonnull JCBProgram program,
     final float min)
@@ -1291,6 +1311,7 @@ final class KShadingProgramCommon
     KShadingProgramCommon.putShadowVarianceMinimumVarianceReuse(program);
     KShadingProgramCommon.putShadowVarianceFactorMaximumReuse(program);
     KShadingProgramCommon.putShadowVarianceFactorMinimumReuse(program);
+    KShadingProgramCommon.putShadowVarianceLightBleedReductionReuse(program);
   }
 
   static void putTextureAlbedo(

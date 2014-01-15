@@ -158,8 +158,9 @@ import com.io7m.jaux.Constraints.ConstraintError;
   {
     private final float                     factor_max;
     private final float                     factor_min;
-    private final float                     minimum_variance;
     private final @Nonnull KShadowFilter    filter;
+    private final float                     light_bleed_reduction;
+    private final float                     minimum_variance;
     private final @Nonnull KShadowPrecision precision;
     private final int                       size;
 
@@ -167,6 +168,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final float factor_max,
       final float factor_min,
       final float minimum_variance,
+      final float light_bleed_reduction,
       final @Nonnull KShadowPrecision precision,
       final @Nonnull KShadowFilter filter,
       final int size)
@@ -177,6 +179,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       this.factor_max = factor_max;
       this.factor_min = factor_min;
       this.minimum_variance = minimum_variance;
+      this.light_bleed_reduction = light_bleed_reduction;
       this.precision = Constraints.constrainNotNull(precision, "Precision");
       this.filter = Constraints.constrainNotNull(filter, "Filter");
     }
@@ -234,6 +237,16 @@ import com.io7m.jaux.Constraints.ConstraintError;
       return this.filter;
     }
 
+    public float getLightBleedReduction()
+    {
+      return this.light_bleed_reduction;
+    }
+
+    public float getMinimumVariance()
+    {
+      return this.minimum_variance;
+    }
+
     public @Nonnull KShadowPrecision getPrecision()
     {
       return this.precision;
@@ -275,11 +288,6 @@ import com.io7m.jaux.Constraints.ConstraintError;
       builder.append("]");
       return builder.toString();
     }
-
-    public float getMinimumVariance()
-    {
-      return this.minimum_variance;
-    }
   }
 
   public static @Nonnull
@@ -309,6 +317,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final float factor_max,
       final float factor_min,
       final float minimum_variance,
+      final float light_bleed_reduction,
       final @Nonnull KShadowPrecision precision,
       final @Nonnull KShadowFilter filter)
       throws ConstraintError
@@ -317,6 +326,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       factor_max,
       factor_min,
       minimum_variance,
+      light_bleed_reduction,
       precision,
       filter,
       size);
