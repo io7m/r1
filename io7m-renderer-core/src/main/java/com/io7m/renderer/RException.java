@@ -29,100 +29,88 @@ public abstract class RException extends Throwable implements
 {
   public static final class RFilesystemException extends RException
   {
-    private static final long              serialVersionUID;
+    private static final long serialVersionUID;
 
     static {
       serialVersionUID = -6738063184220278663L;
     }
-
-    private final @Nonnull FilesystemError x;
 
     private RFilesystemException(
       final @Nonnull FilesystemError e)
     {
       super(e);
-      this.x = e;
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
       final @Nonnull RExceptionVisitor<T, E> v)
       throws E
     {
-      return v.visitFilesystemException(this.x);
+      return v.visitFilesystemException((FilesystemError) this.getCause());
     }
   }
 
   public static final class RIOException extends RException
   {
-    private static final long          serialVersionUID;
+    private static final long serialVersionUID;
     static {
       serialVersionUID = 3534241141400066374L;
     }
-
-    private final @Nonnull IOException x;
 
     private RIOException(
       final @Nonnull IOException e)
     {
       super(e);
-      this.x = e;
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
       final @Nonnull RExceptionVisitor<T, E> v)
       throws E
     {
-      return v.visitIOException(this.x);
+      return v.visitIOException((IOException) this.getCause());
     }
   }
 
   public static final class RJCGLException extends RException
   {
-    private static final long            serialVersionUID;
+    private static final long serialVersionUID;
 
     static {
       serialVersionUID = -6738063184220278663L;
     }
 
-    private final @Nonnull JCGLException x;
-
     private RJCGLException(
       final @Nonnull JCGLException e)
     {
       super(e);
-      this.x = e;
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
       final @Nonnull RExceptionVisitor<T, E> v)
       throws E
     {
-      return v.visitJCGLException(this.x);
+      return v.visitJCGLException((JCGLException) this.getCause());
     }
   }
 
   public static final class RKXMLException extends RException
   {
-    private static final long            serialVersionUID;
+    private static final long serialVersionUID;
 
     static {
       serialVersionUID = 2784663722958676921L;
     }
 
-    private final @Nonnull KXMLException x;
-
     private RKXMLException(
       final @Nonnull KXMLException e)
     {
       super(e);
-      this.x = e;
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
       final @Nonnull RExceptionVisitor<T, E> v)
       throws E
     {
-      return v.visitXMLException(this.x);
+      return v.visitXMLException((KXMLException) this.getCause());
     }
   }
 

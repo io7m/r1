@@ -20,11 +20,17 @@ import javax.annotation.Nonnull;
 
 import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 
 public interface KShadowMapVisitor<A, E extends Throwable>
 {
   public A kShadowMapVisitBasic(
     final @Nonnull KShadowMapBasic sm)
+    throws E,
+      RException;
+
+  public A kShadowMapVisitVariance(
+    final @Nonnull KShadowMapVariance sm)
     throws E,
       RException;
 }

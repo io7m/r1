@@ -121,6 +121,7 @@ import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KRendererDebugging.DebugShadowMapReceiver;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.SBLight.SBLightProjective;
 import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
@@ -735,9 +736,6 @@ final class SBGLRenderer implements GLEventListener
       config.getShaderArchiveForwardFile(),
       PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
-      config.getShaderArchiveShadowFile(),
-      PathVirtual.ROOT);
-    this.filesystem.mountArchiveFromAnywhere(
       config.getShaderArchivePostprocessingFile(),
       PathVirtual.ROOT);
 
@@ -1112,55 +1110,77 @@ final class SBGLRenderer implements GLEventListener
       if (this.input_state.wantShadowMapDump()) {
         this.log.debug("Dumping shadow maps");
         final KRendererDebugging d = r.rendererDebug();
-        assert d != null;
+        if (d != null) {
+          d.debugForEachShadowMap(new DebugShadowMapReceiver() {
+            final StringBuilder name = new StringBuilder();
 
-        d.debugForEachShadowMap(new DebugShadowMapReceiver() {
-          final StringBuilder name = new StringBuilder();
+            @Override public void receive(
+              final @Nonnull KShadow shadow,
+              final @Nonnull KShadowMap map)
+            {
+              try {
+                final StringBuilder n = this.name;
+                n.setLength(0);
+                n.append("shadow-");
+                n.append(shadow.getLightID());
 
-          @Override public void receive(
-            final @Nonnull KShadow shadow,
-            final @Nonnull KShadowMap map)
-          {
-            try {
-              final StringBuilder n = this.name;
-              n.setLength(0);
-              n.append("shadow-");
-              n.append(shadow.getLightID());
+                map
+                  .kShadowMapAccept(new KShadowMapVisitor<Unit, ConstraintError>() {
+                    @SuppressWarnings("synthetic-access") @Override public
+                      Unit
+                      kShadowMapVisitBasic(
+                        final KShadowMapBasic smb)
+                        throws ConstraintError,
+                          RException
+                    {
+                      try {
+                        SBTextureUtilities
+                          .textureDumpTimestampedTemporary2DStatic(
+                            SBGLRenderer.this.gi,
+                            smb.kFramebufferGetDepthTexture(),
+                            n.toString(),
+                            SBGLRenderer.this.log);
+                      } catch (final FileNotFoundException e) {
+                        e.printStackTrace();
+                      } catch (final IOException e) {
+                        e.printStackTrace();
+                      } catch (final JCGLException e) {
+                        e.printStackTrace();
+                      }
+                      return Unit.unit();
+                    }
 
-              map
-                .kShadowMapAccept(new KShadowMapVisitor<Unit, ConstraintError>() {
-                  @SuppressWarnings("synthetic-access") @Override public
-                    Unit
-                    kShadowMapVisitBasic(
-                      final KShadowMapBasic smb)
+                    @Override public Unit kShadowMapVisitVariance(
+                      final @Nonnull KShadowMapVariance smv)
                       throws ConstraintError,
                         RException
-                  {
-                    try {
-                      SBTextureUtilities
-                        .textureDumpTimestampedTemporary2DStatic(
-                          SBGLRenderer.this.gi,
-                          smb.kFramebufferGetDepthTexture(),
-                          n.toString(),
-                          SBGLRenderer.this.log);
-                    } catch (final FileNotFoundException e) {
-                      e.printStackTrace();
-                    } catch (final IOException e) {
-                      e.printStackTrace();
-                    } catch (final JCGLException e) {
-                      e.printStackTrace();
+                    {
+                      try {
+                        SBTextureUtilities
+                          .textureDumpTimestampedTemporary2DStatic(
+                            SBGLRenderer.this.gi,
+                            smv.kFramebufferGetDepthTexture(),
+                            n.toString(),
+                            SBGLRenderer.this.log);
+                      } catch (final FileNotFoundException e) {
+                        e.printStackTrace();
+                      } catch (final IOException e) {
+                        e.printStackTrace();
+                      } catch (final JCGLException e) {
+                        e.printStackTrace();
+                      }
+                      return Unit.unit();
                     }
-                    return Unit.unit();
-                  }
-                });
+                  });
 
-            } catch (final ConstraintError e) {
-              e.printStackTrace();
-            } catch (final RException e) {
-              e.printStackTrace();
+              } catch (final ConstraintError e) {
+                e.printStackTrace();
+              } catch (final RException e) {
+                e.printStackTrace();
+              }
             }
-          }
-        });
+          });
+        }
       }
     }
   }
@@ -1427,6 +1447,14 @@ final class SBGLRenderer implements GLEventListener
           this.capabilities,
           this.log,
           this.shadow_cache);
+      }
+      case KRENDERER_DEBUG_DEPTH_VARIANCE:
+      {
+        return KRendererDebugDepthVariance.rendererNew(
+          this.gi,
+          this.label_cache,
+          this.shader_cache,
+          this.log);
       }
     }
 

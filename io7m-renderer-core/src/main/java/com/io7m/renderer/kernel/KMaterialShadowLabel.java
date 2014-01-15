@@ -32,7 +32,9 @@ enum KMaterialShadowLabel
   SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444("shadow_BUP4"),
   SHADOW_BASIC_DEPTH_MAPPED_PACKED4444("shadow_BMP4"),
 
-  ;
+  SHADOW_VARIANCE_DEPTH_CONSTANT("shadow_VC"),
+  SHADOW_VARIANCE_DEPTH_UNIFORM("shadow_VU"),
+  SHADOW_VARIANCE_DEPTH_MAPPED("shadow_VM"), ;
 
   public static @Nonnull KMaterialShadowLabel fromShadow(
     final @Nonnull KMaterialDepthLabel caster,
@@ -47,10 +49,33 @@ enum KMaterialShadowLabel
       {
         return KMaterialShadowLabel.fromShadowBasic(caster);
       }
-      case SHADOW_MAPPED_SOFT:
+      case SHADOW_MAPPED_VARIANCE:
       {
-        throw new UnimplementedCodeException();
+        return KMaterialShadowLabel.fromShadowVariance(caster);
       }
+    }
+
+    throw new UnreachableCodeException();
+  }
+
+  private static @Nonnull KMaterialShadowLabel fromShadowVariance(
+    final @Nonnull KMaterialDepthLabel caster)
+  {
+    switch (caster) {
+      case DEPTH_VARIANCE_CONSTANT:
+      case DEPTH_CONSTANT:
+        return SHADOW_VARIANCE_DEPTH_CONSTANT;
+      case DEPTH_VARIANCE_MAPPED:
+      case DEPTH_MAPPED:
+        return SHADOW_VARIANCE_DEPTH_MAPPED;
+      case DEPTH_UNIFORM:
+      case DEPTH_VARIANCE_UNIFORM:
+        return SHADOW_VARIANCE_DEPTH_UNIFORM;
+
+      case DEPTH_CONSTANT_PACKED4444:
+      case DEPTH_MAPPED_PACKED4444:
+      case DEPTH_UNIFORM_PACKED4444:
+        throw new UnreachableCodeException();
     }
 
     throw new UnreachableCodeException();
@@ -72,6 +97,12 @@ enum KMaterialShadowLabel
         return SHADOW_BASIC_DEPTH_UNIFORM;
       case DEPTH_UNIFORM_PACKED4444:
         return SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444;
+      case DEPTH_VARIANCE_CONSTANT:
+        return SHADOW_VARIANCE_DEPTH_CONSTANT;
+      case DEPTH_VARIANCE_MAPPED:
+        return SHADOW_VARIANCE_DEPTH_MAPPED;
+      case DEPTH_VARIANCE_UNIFORM:
+        return SHADOW_VARIANCE_DEPTH_UNIFORM;
     }
 
     throw new UnreachableCodeException();
@@ -92,9 +123,12 @@ enum KMaterialShadowLabel
       case SHADOW_BASIC_DEPTH_CONSTANT_PACKED4444:
       case SHADOW_BASIC_DEPTH_UNIFORM:
       case SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444:
+      case SHADOW_VARIANCE_DEPTH_CONSTANT:
+      case SHADOW_VARIANCE_DEPTH_UNIFORM:
         return false;
       case SHADOW_BASIC_DEPTH_MAPPED:
       case SHADOW_BASIC_DEPTH_MAPPED_PACKED4444:
+      case SHADOW_VARIANCE_DEPTH_MAPPED:
         return true;
     }
 

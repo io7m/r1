@@ -19,7 +19,6 @@ package com.io7m.renderer.kernel;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.CheckForNull;
@@ -28,18 +27,20 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Unit;
+import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.DepthFunction;
+import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LUCache;
 import com.io7m.jlucache.PCache;
+import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.RException;
-import com.io7m.renderer.RMatrixI4x4F;
-import com.io7m.renderer.RTransformProjection;
-import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererForward;
 import com.io7m.renderer.kernel.KLight.KProjective;
 
@@ -150,15 +151,45 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
         scene.getCamera(),
         batched.getBatchedShadow(),
         new KShadowMapWith<Unit, JCGLException>() {
-          @Override public Unit withMaps(
-            final @Nonnull KShadowMapContext cache)
-            throws ConstraintError,
-              RException
+          @SuppressWarnings("synthetic-access") @Override public
+            Unit
+            withMaps(
+              final @Nonnull KShadowMapContext cache)
+              throws ConstraintError,
+                RException,
+                JCGLException
           {
             if (d != null) {
               final Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>> casters =
                 batched.getBatchedShadow().getShadowCasters();
               d.debugPerformDumpShadowMaps(cache, casters.keySet());
+            }
+
+            final FramebufferReferenceUsable fb =
+              framebuffer.kFramebufferGetColorFramebuffer();
+            final JCGLInterfaceCommon gc =
+              KRendererDebugShadowMap.this.gl.getGLCommon();
+
+            gc.framebufferDrawBind(fb);
+            try {
+              final AreaInclusive area = framebuffer.kFramebufferGetArea();
+              KRendererDebugShadowMap.this.viewport_size.x =
+                (int) area.getRangeX().getInterval();
+              KRendererDebugShadowMap.this.viewport_size.y =
+                (int) area.getRangeY().getInterval();
+              gc.viewportSet(
+                VectorI2I.ZERO,
+                KRendererDebugShadowMap.this.viewport_size);
+
+              gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+              gc.depthBufferWriteEnable();
+              gc.depthBufferClear(1.0f);
+              gc.colorBufferMask(true, true, true, true);
+              gc.colorBufferClear4f(1.0f, 0.0f, 0.0f, 0.1f);
+              gc.blendingDisable();
+
+            } finally {
+              gc.framebufferDrawUnbind();
             }
             return Unit.unit();
           }
@@ -166,22 +197,6 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
     }
-  }
-
-  protected void debugDumpShadowMaps(
-    final @Nonnull PCache<KShadow, KShadowMap, RException> cache,
-    final @Nonnull Set<KLight> lights)
-  {
-
-  }
-
-  protected void renderScene(
-    final @Nonnull KFramebufferForwardUsable framebuffer,
-    final @Nonnull KSceneBatchedForward batched,
-    final @Nonnull RMatrixI4x4F<RTransformView> matrix_view,
-    final @Nonnull RMatrixI4x4F<RTransformProjection> matrix_projection)
-  {
-
   }
 
   private class Debugging implements KRendererDebugging

@@ -69,6 +69,52 @@ final class KDepthRenderer
     return new KDepthRenderer(gi, shader_cache, caps, log);
   }
 
+  private static void renderConfigureDepthColorMasks(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KMaterialDepthLabel label)
+    throws ConstraintError,
+      JCGLException
+  {
+    switch (label) {
+      case DEPTH_CONSTANT_PACKED4444:
+      case DEPTH_MAPPED_PACKED4444:
+      case DEPTH_UNIFORM_PACKED4444:
+      {
+        /**
+         * Packed formats require writing depth values to the colour buffer.
+         */
+
+        gc.colorBufferMask(true, true, true, true);
+        break;
+      }
+
+      case DEPTH_CONSTANT:
+      case DEPTH_MAPPED:
+      case DEPTH_UNIFORM:
+      {
+        /**
+         * Simple depth formats do not require a colour buffer at all.
+         */
+
+        gc.colorBufferMask(false, false, false, false);
+        break;
+      }
+
+      case DEPTH_VARIANCE_CONSTANT:
+      case DEPTH_VARIANCE_MAPPED:
+      case DEPTH_VARIANCE_UNIFORM:
+      {
+        /**
+         * Variance formats write depth values to the red and green channels
+         * of the colour buffer.
+         */
+
+        gc.colorBufferMask(true, true, true, true);
+        break;
+      }
+    }
+  }
+
   protected static void renderDepthPassBatch(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull MatricesObserver mwo,
@@ -117,11 +163,13 @@ final class KDepthRenderer
     KShadingProgramCommon.putMatrixModelView(jp, mwi.getMatrixModelView());
 
     switch (label) {
+      case DEPTH_VARIANCE_CONSTANT:
       case DEPTH_CONSTANT_PACKED4444:
       case DEPTH_CONSTANT:
       {
         break;
       }
+      case DEPTH_VARIANCE_MAPPED:
       case DEPTH_MAPPED_PACKED4444:
       case DEPTH_MAPPED:
       {
@@ -134,6 +182,7 @@ final class KDepthRenderer
           units.get(0));
         break;
       }
+      case DEPTH_VARIANCE_UNIFORM:
       case DEPTH_UNIFORM_PACKED4444:
       case DEPTH_UNIFORM:
       {
@@ -160,11 +209,14 @@ final class KDepthRenderer
         case DEPTH_UNIFORM_PACKED4444:
         case DEPTH_CONSTANT:
         case DEPTH_CONSTANT_PACKED4444:
+        case DEPTH_VARIANCE_CONSTANT:
+        case DEPTH_VARIANCE_UNIFORM:
         {
           break;
         }
         case DEPTH_MAPPED:
         case DEPTH_MAPPED_PACKED4444:
+        case DEPTH_VARIANCE_MAPPED:
         {
           KShadingProgramCommon.bindAttributeUV(jp, array);
           break;
@@ -184,12 +236,12 @@ final class KDepthRenderer
       gc.arrayBufferUnbind();
     }
   }
-
   private final @Nonnull KGraphicsCapabilities                 caps;
   private final @Nonnull JCGLImplementation                    g;
   private final @Nonnull Log                                   log;
   private final @Nonnull KMutableMatrices                      matrices;
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
+
   private final @Nonnull VectorM2I                             viewport_size;
 
   private KDepthRenderer(
@@ -239,31 +291,6 @@ final class KDepthRenderer
     }
   }
 
-  private void renderConfigureDepthColorMasks(
-    final @Nonnull JCGLInterfaceCommon gc)
-    throws ConstraintError,
-      JCGLException
-  {
-    if (this.caps.getSupportsDepthTextures()) {
-
-      /**
-       * For non-packed formats, depth values will be written to a depth
-       * texture at the framebuffer depth attachment. Mask off the colour
-       * buffer to prevent writes.
-       */
-
-      gc.colorBufferMask(false, false, false, false);
-      return;
-    }
-
-    /**
-     * Otherwise, packed depth values will be written to the color buffer
-     * (with real depth values going to the depth renderbuffer).
-     */
-
-    gc.colorBufferMask(true, true, true, true);
-  }
-
   private
     void
     renderDepthPassBatches(
@@ -276,6 +303,13 @@ final class KDepthRenderer
         RException
   {
     for (final KMaterialDepthLabel label : batches.keySet()) {
+      KDepthRenderer.renderConfigureDepthColorMasks(gc, label);
+      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+      gc.depthBufferWriteEnable();
+      gc.depthBufferClear(1.0f);
+      gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
+      gc.blendingDisable();
+
       final List<KMeshInstanceTransformed> batch = batches.get(label);
       final KProgram program = this.shader_cache.luCacheGet(label.getName());
       final JCBExecutionAPI exec = program.getExecutable();
@@ -324,13 +358,6 @@ final class KDepthRenderer
       gc.cullingEnable(
         FaceSelection.FACE_BACK,
         FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-
-      this.renderConfigureDepthColorMasks(gc);
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-      gc.depthBufferWriteEnable();
-      gc.depthBufferClear(1.0f);
-      gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
-      gc.blendingDisable();
 
       this.renderDepthPassBatches(batches, gc, mwo);
     } catch (final LUCacheException e) {
