@@ -53,17 +53,17 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 
-final class KRendererDebugDepth extends KAbstractRendererDebug
+final class KRendererDebugDepthVariance extends KAbstractRendererDebug
 {
   private static final @Nonnull String NAME = "debug-depth";
 
-  public static KRendererDebugDepth rendererNew(
+  public static KRendererDebugDepthVariance rendererNew(
     final @Nonnull JCGLImplementation g,
     final @Nonnull KMaterialDepthLabelCache depth_labels,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull Log log)
   {
-    return new KRendererDebugDepth(g, depth_labels, shader_cache, log);
+    return new KRendererDebugDepthVariance(g, depth_labels, shader_cache, log);
   }
 
   private final @Nonnull VectorM4F                             background;
@@ -75,15 +75,15 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
   private final @Nonnull KTransform.Context                    transform_context;
   private final @Nonnull VectorM2I                             viewport_size;
 
-  private KRendererDebugDepth(
+  private KRendererDebugDepthVariance(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull KMaterialDepthLabelCache depth_labels,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull Log log)
   {
-    super(KRendererDebugDepth.NAME);
+    super(KRendererDebugDepthVariance.NAME);
 
-    this.log = new Log(log, KRendererDebugDepth.NAME);
+    this.log = new Log(log, KRendererDebugDepthVariance.NAME);
     this.gl = gl;
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
@@ -127,7 +127,11 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
               ConstraintError,
               RException
           {
-            KRendererDebugDepth.this.renderScene(framebuffer, scene, gc, mo);
+            KRendererDebugDepthVariance.this.renderScene(
+              framebuffer,
+              scene,
+              gc,
+              mo);
             return Unit.unit();
           }
         });
@@ -240,6 +244,36 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
     }
   }
 
+  private static @Nonnull KMaterialDepthLabel forceVariance(
+    final @Nonnull KMaterialDepthLabel label)
+  {
+    switch (label) {
+      case DEPTH_CONSTANT:
+      case DEPTH_CONSTANT_PACKED4444:
+      {
+        return KMaterialDepthLabel.DEPTH_VARIANCE_CONSTANT;
+      }
+      case DEPTH_MAPPED:
+      case DEPTH_MAPPED_PACKED4444:
+      {
+        return KMaterialDepthLabel.DEPTH_VARIANCE_MAPPED;
+      }
+      case DEPTH_UNIFORM:
+      case DEPTH_UNIFORM_PACKED4444:
+      {
+        return KMaterialDepthLabel.DEPTH_VARIANCE_UNIFORM;
+      }
+      case DEPTH_VARIANCE_CONSTANT:
+      case DEPTH_VARIANCE_MAPPED:
+      case DEPTH_VARIANCE_UNIFORM:
+      {
+        return label;
+      }
+    }
+
+    throw new UnreachableCodeException();
+  }
+
   private void renderInstancePre(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull MatricesObserver mo,
@@ -257,10 +291,13 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
       }
 
       final KMaterialDepthLabel label =
-        KRendererDebugDepth.this.depth_labels.getDepthLabel(ii);
+        KRendererDebugDepthVariance
+          .forceVariance(KRendererDebugDepthVariance.this.depth_labels
+            .getDepthLabel(ii));
 
       final KProgram kp =
-        KRendererDebugDepth.this.shader_cache.luCacheGet(label.getName());
+        KRendererDebugDepthVariance.this.shader_cache.luCacheGet(label
+          .getName());
 
       final JCBExecutionAPI e = kp.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
@@ -274,7 +311,12 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
             p,
             mo.getMatrixProjection());
 
-          KRendererDebugDepth.this.renderInstance(gc, p, mi, instance, label);
+          KRendererDebugDepthVariance.this.renderInstance(
+            gc,
+            p,
+            mi,
+            instance,
+            label);
         }
       });
 
@@ -296,18 +338,20 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
       framebuffer.kFramebufferGetColorFramebuffer();
 
     final AreaInclusive area = framebuffer.kFramebufferGetArea();
-    KRendererDebugDepth.this.viewport_size.x =
+    KRendererDebugDepthVariance.this.viewport_size.x =
       (int) area.getRangeX().getInterval();
-    KRendererDebugDepth.this.viewport_size.y =
+    KRendererDebugDepthVariance.this.viewport_size.y =
       (int) area.getRangeY().getInterval();
 
     gc.framebufferDrawBind(output_buffer);
     try {
-      gc.viewportSet(VectorI2I.ZERO, KRendererDebugDepth.this.viewport_size);
+      gc.viewportSet(
+        VectorI2I.ZERO,
+        KRendererDebugDepthVariance.this.viewport_size);
 
       gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
       gc.depthBufferClear(1.0f);
-      gc.colorBufferClearV4f(KRendererDebugDepth.this.background);
+      gc.colorBufferClearV4f(KRendererDebugDepthVariance.this.background);
       gc.blendingDisable();
 
       final Set<KMeshInstanceTransformed> instances =
@@ -323,8 +367,11 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
                 ConstraintError,
                 RException
             {
-              KRendererDebugDepth.this
-                .renderInstancePre(gc, mo, instance, mi);
+              KRendererDebugDepthVariance.this.renderInstancePre(
+                gc,
+                mo,
+                instance,
+                mi);
               return Unit.unit();
             }
           });

@@ -25,7 +25,6 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.Unit;
@@ -68,7 +67,10 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLight;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunction;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedVariance;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.KTranslucent.KTranslucentLit;
 import com.io7m.renderer.kernel.KTranslucent.KTranslucentUnlit;
 
@@ -249,22 +251,33 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     switch (some.value.getType()) {
       case SHADOW_MAPPED_BASIC:
       {
+        final KShadowMappedBasic shadow = (KShadowMappedBasic) some.value;
         final KShadowMap.KShadowMapBasic map =
-          (KShadowMapBasic) shadow_context.getShadowMap(some.value);
+          (KShadowMapBasic) shadow_context.getShadowMap(shadow);
         final TextureUnit unit =
           unit_context.withTexture2D(map.kFramebufferGetDepthTexture());
 
-        KShadingProgramCommon.putTextureShadowMap(program, unit);
+        KShadingProgramCommon.putShadowBasic(program, shadow);
+        KShadingProgramCommon.putTextureShadowMapBasic(program, unit);
         break;
       }
-      case SHADOW_MAPPED_SOFT:
+      case SHADOW_MAPPED_VARIANCE:
       {
-        throw new UnimplementedCodeException();
+        final KShadowMappedVariance shadow =
+          (KShadowMappedVariance) some.value;
+        final KShadowMap.KShadowMapVariance map =
+          (KShadowMapVariance) shadow_context.getShadowMap(shadow);
+        final TextureUnit unit =
+          unit_context.withTexture2D(map.kFramebufferGetDepthTexture());
+
+        KShadingProgramCommon.putShadowVariance(program, shadow);
+        KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
+        break;
       }
     }
   }
 
-  private static void putShadowMapReuse(
+  private static void putShadowReuse(
     final @Nonnull JCBProgram program,
     final @Nonnull KProjective light)
     throws JCGLException,
@@ -275,12 +288,15 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     switch (some.value.getType()) {
       case SHADOW_MAPPED_BASIC:
       {
-        KShadingProgramCommon.putTextureShadowMapReuse(program);
+        KShadingProgramCommon.putShadowBasicReuse(program);
+        KShadingProgramCommon.putTextureShadowMapBasicReuse(program);
         break;
       }
-      case SHADOW_MAPPED_SOFT:
+      case SHADOW_MAPPED_VARIANCE:
       {
-        throw new UnimplementedCodeException();
+        KShadingProgramCommon.putShadowVarianceReuse(program);
+        KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
+        break;
       }
     }
   }
@@ -599,7 +615,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       KShadingProgramCommon.putTextureProjectionReuse(program);
 
       if (light.hasShadow()) {
-        KRendererForwardActual.putShadowMapReuse(program, light);
+        KRendererForwardActual.putShadowReuse(program, light);
       }
 
       mwp.withInstance(

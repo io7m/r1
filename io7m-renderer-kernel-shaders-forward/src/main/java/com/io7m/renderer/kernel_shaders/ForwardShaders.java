@@ -36,6 +36,7 @@ public final class ForwardShaders
       }
       case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
       case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
       {
         b.append("  in f_position_light_eye  : vector_4f;\n");
         b.append("  in f_position_light_clip : vector_4f;\n");
@@ -242,8 +243,18 @@ public final class ForwardShaders
             b.append("  -- Projective light (shadow mapping) parameters\n");
             b.append("  parameter light_projective : Light.t;\n");
             b.append("  parameter t_projection     : sampler_2d;\n");
-            b.append("  parameter t_shadow         : sampler_2d;\n");
+            b.append("  parameter t_shadow_basic   : sampler_2d;\n");
             b.append("  parameter shadow_basic     : ShadowBasic.t;\n");
+            break;
+          }
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
+          {
+            b
+              .append("  -- Projective light (variance shadow mapping) parameters\n");
+            b.append("  parameter light_projective  : Light.t;\n");
+            b.append("  parameter t_projection      : sampler_2d;\n");
+            b.append("  parameter t_shadow_variance : sampler_2d;\n");
+            b.append("  parameter shadow_variance   : ShadowVariance.t;\n");
             break;
           }
         }
@@ -437,7 +448,7 @@ public final class ForwardShaders
                 b.append("      f_position_eye [x y z],\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
+                b.append("      t_shadow_basic,\n");
                 b.append("      shadow_basic\n");
                 b.append("    );\n");
                 break;
@@ -453,7 +464,7 @@ public final class ForwardShaders
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
+                b.append("      t_shadow_basic,\n");
                 b.append("      shadow_basic\n");
                 b.append("    );\n");
                 break;
@@ -474,7 +485,7 @@ public final class ForwardShaders
                 b.append("      f_position_eye [x y z],\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
+                b.append("      t_shadow_basic,\n");
                 b.append("      shadow_basic\n");
                 b.append("    );\n");
                 break;
@@ -491,8 +502,44 @@ public final class ForwardShaders
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
+                b.append("      t_shadow_basic,\n");
                 b.append("      shadow_basic\n");
+                b.append("    );\n");
+                break;
+              }
+            }
+            break;
+          }
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
+          {
+            switch (label.getSpecular()) {
+              case SPECULAR_NONE:
+              {
+                b.append("  value light_term : vector_3f =\n");
+                b.append("    PL.diffuse_only_shadowed_variance (\n");
+                b.append("      light_projective,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      t_projection,\n");
+                b.append("      f_position_light_clip,\n");
+                b.append("      t_shadow_variance,\n");
+                b.append("      shadow_variance\n");
+                b.append("    );\n");
+                break;
+              }
+              case SPECULAR_CONSTANT:
+              case SPECULAR_MAPPED:
+              {
+                b.append("  value light_term : vector_3f =\n");
+                b.append("    PL.diffuse_specular_shadowed_variance (\n");
+                b.append("      light_projective,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m,\n");
+                b.append("      t_projection,\n");
+                b.append("      f_position_light_clip,\n");
+                b.append("      t_shadow_variance,\n");
+                b.append("      shadow_variance\n");
                 b.append("    );\n");
                 break;
               }
@@ -577,7 +624,7 @@ public final class ForwardShaders
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
+                b.append("      t_shadow_basic,\n");
                 b.append("      shadow_basic\n");
                 b.append("    );\n");
                 break;
@@ -594,7 +641,7 @@ public final class ForwardShaders
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
+                b.append("      t_shadow_basic,\n");
                 b.append("      shadow_basic\n");
                 b.append("    );\n");
                 break;
@@ -617,7 +664,7 @@ public final class ForwardShaders
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
+                b.append("      t_shadow_basic,\n");
                 b.append("      shadow_basic\n");
                 b.append("    );\n");
                 break;
@@ -634,7 +681,7 @@ public final class ForwardShaders
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow,\n");
+                b.append("      t_shadow_basic,\n");
                 b.append("      shadow_basic\n");
                 b.append("    );\n");
                 break;
@@ -670,6 +717,46 @@ public final class ForwardShaders
                 b.append("      m,\n");
                 b.append("      t_projection,\n");
                 b.append("      f_position_light_clip\n");
+                b.append("    );\n");
+                break;
+              }
+            }
+            break;
+          }
+
+          case LIGHT_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
+          {
+            switch (label.getSpecular()) {
+              case SPECULAR_NONE:
+              {
+                b.append("  value light_term : vector_3f =\n");
+                b
+                  .append("    PL.diffuse_only_emissive_shadowed_variance (\n");
+                b.append("      light_projective,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m,\n");
+                b.append("      t_projection,\n");
+                b.append("      f_position_light_clip,\n");
+                b.append("      t_shadow_variance,\n");
+                b.append("      shadow_variance\n");
+                b.append("    );\n");
+                break;
+              }
+              case SPECULAR_CONSTANT:
+              case SPECULAR_MAPPED:
+              {
+                b.append("  value light_term : vector_3f =\n");
+                b
+                  .append("    PL.diffuse_specular_emissive_shadowed_variance (\n");
+                b.append("      light_projective,\n");
+                b.append("      n,\n");
+                b.append("      f_position_eye [x y z],\n");
+                b.append("      m,\n");
+                b.append("      t_projection,\n");
+                b.append("      f_position_light_clip,\n");
+                b.append("      t_shadow_variance,\n");
+                b.append("      shadow_variance\n");
                 b.append("    );\n");
                 break;
               }
@@ -1069,6 +1156,7 @@ public final class ForwardShaders
     b.append("\n");
     b.append("import com.io7m.renderer.Light;\n");
     b.append("import com.io7m.renderer.ShadowBasic;\n");
+    b.append("import com.io7m.renderer.ShadowVariance;\n");
     b.append("\n");
   }
 
@@ -1142,6 +1230,7 @@ public final class ForwardShaders
       }
       case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
       case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
       {
         b.append("  -- Projective light (shadow mapped) outputs\n");
         b.append("  out f_position_light_eye  : vector_4f;\n");
@@ -1217,6 +1306,7 @@ public final class ForwardShaders
       case LIGHT_PROJECTIVE:
       case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
       case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
       {
         b.append("  -- Projective light parameters\n");
         b.append("  parameter m_projective_modelview  : matrix_4x4f;\n");
@@ -1282,6 +1372,7 @@ public final class ForwardShaders
       case LIGHT_PROJECTIVE:
       case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
       case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
       {
         b.append("  value position_light_eye : vector_4f =\n");
         b.append("    M4.multiply_vector (\n");
@@ -1371,6 +1462,7 @@ public final class ForwardShaders
       }
       case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC:
       case LIGHT_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+      case LIGHT_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
       {
         b.append("  out f_position_light_eye  = position_light_eye;\n");
         b.append("  out f_position_light_clip = position_light_clip;\n");

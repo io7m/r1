@@ -283,18 +283,19 @@ abstract class SBLightDescription
               kshadow = Option.some(ks);
               break;
             }
-            case SHADOW_MAPPED_SOFT:
+            case SHADOW_MAPPED_VARIANCE:
             {
-              final SBLightShadowMappedVarianceDescription smb =
+              final SBLightShadowMappedVarianceDescription smv =
                 (SBLightShadowDescription.SBLightShadowMappedVarianceDescription) s;
               final KShadow ks =
                 KShadow.newMappedVariance(
                   this.getID(),
-                  smb.getSize(),
-                  smb.getFactorMaximum(),
-                  smb.getFactorMinimum(),
-                  smb.getPrecision(),
-                  smb.getFilter());
+                  smv.getSize(),
+                  smv.getFactorMaximum(),
+                  smv.getFactorMinimum(),
+                  smv.getMinimumVariance(),
+                  smv.getPrecision(),
+                  smv.getFilter());
               kshadow = Option.some(ks);
               break;
             }

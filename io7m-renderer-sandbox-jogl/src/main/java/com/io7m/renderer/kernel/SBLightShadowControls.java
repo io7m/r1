@@ -139,6 +139,7 @@ public final class SBLightShadowControls implements IHideable
     private final @Nonnull SBFloatHSlider            factor_minimum;
     private final @Nonnull SBShadowPrecisionSelector precision;
     private final @Nonnull SBShadowFilterSelector    filter;
+    private final @Nonnull SBFloatHSlider            minimum_variance;
 
     private SBLightShadowMappedVarianceControls()
       throws ConstraintError
@@ -146,6 +147,8 @@ public final class SBLightShadowControls implements IHideable
       this.size = new SBIntegerHSlider("Size", 1, 10);
       this.factor_maximum = new SBFloatHSlider("Maximum", 0.0f, 1.0f);
       this.factor_minimum = new SBFloatHSlider("Minimum", 0.0f, 1.0f);
+      this.minimum_variance =
+        new SBFloatHSlider("Minimum variance", 0.0f, 0.01f);
       this.precision = new SBShadowPrecisionSelector();
       this.filter = new SBShadowFilterSelector();
       this.row_group = new RowGroup();
@@ -160,6 +163,12 @@ public final class SBLightShadowControls implements IHideable
         .grid(this.size.getLabel())
         .add(this.size.getSlider(), 3)
         .add(this.size.getField());
+      layout
+        .row()
+        .group(this.row_group)
+        .grid(this.minimum_variance.getLabel())
+        .add(this.minimum_variance.getSlider(), 3)
+        .add(this.minimum_variance.getField());
       layout
         .row()
         .group(this.row_group)
@@ -196,18 +205,20 @@ public final class SBLightShadowControls implements IHideable
         this.size.getCurrent(),
         this.factor_maximum.getCurrent(),
         this.factor_minimum.getCurrent(),
+        this.minimum_variance.getCurrent(),
         (KShadowPrecision) this.precision.getSelectedItem(),
         (KShadowFilter) this.filter.getSelectedItem());
     }
 
     public void setDescription(
-      final SBLightShadowMappedVarianceDescription smb)
+      final SBLightShadowMappedVarianceDescription smv)
     {
-      this.size.setCurrent(smb.getSize());
-      this.factor_maximum.setCurrent(smb.getFactorMaximum());
-      this.factor_minimum.setCurrent(smb.getFactorMinimum());
-      this.precision.setSelectedItem(smb.getPrecision());
-      this.filter.setSelectedItem(smb.getFilter());
+      this.size.setCurrent(smv.getSize());
+      this.minimum_variance.setCurrent(smv.getMinimumVariance());
+      this.factor_maximum.setCurrent(smv.getFactorMaximum());
+      this.factor_minimum.setCurrent(smv.getFactorMinimum());
+      this.precision.setSelectedItem(smv.getPrecision());
+      this.filter.setSelectedItem(smv.getFilter());
     }
   }
 
@@ -334,7 +345,7 @@ public final class SBLightShadowControls implements IHideable
         this.mapped_variance_controls.getRowGroup().hide();
         break;
       }
-      case SHADOW_MAPPED_SOFT:
+      case SHADOW_MAPPED_VARIANCE:
       {
         this.mapped_variance_controls.getRowGroup().forceShow();
         this.mapped_basic_controls.getRowGroup().hide();
@@ -355,7 +366,7 @@ public final class SBLightShadowControls implements IHideable
           return new Option.Some<SBLightShadowDescription>(
             this.mapped_basic_controls.getShadow());
         }
-        case SHADOW_MAPPED_SOFT:
+        case SHADOW_MAPPED_VARIANCE:
         {
           return new Option.Some<SBLightShadowDescription>(
             this.mapped_variance_controls.getShadow());
@@ -393,13 +404,16 @@ public final class SBLightShadowControls implements IHideable
               .setDescription((SBLightShadowMappedBasicDescription) d);
             break;
           }
-          case SHADOW_MAPPED_SOFT:
+          case SHADOW_MAPPED_VARIANCE:
           {
             this.mapped_variance_controls
               .setDescription((SBLightShadowMappedVarianceDescription) d);
             break;
           }
         }
+
+        this.type_select.setSelectedItem(d.getType());
+        this.controlsSelectType(d.getType());
         break;
       }
     }

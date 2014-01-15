@@ -49,22 +49,11 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLight;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunction;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.KTransform.Context;
 
 public final class KShadowMapRendererActual implements KShadowMapRenderer
 {
-  private final @Nonnull JCGLImplementation                      g;
-  private final @Nonnull StringBuilder                           label_cache;
-  private final @Nonnull KMaterialShadowLabelCache               label_decider;
-  private final @Nonnull RMatrixM4x4F<RTransformView>            m4_view;
-  private final @Nonnull KMutableMatrices                        matrices;
-  private final @Nonnull LUCache<String, KProgram, RException>   shader_cache;
-  private final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache;
-  private final @Nonnull VectorM2I                               viewport_size;
-  private final @Nonnull Context                                 transform_context;
-  private final @Nonnull Log                                     log;
-  private final @Nonnull KDepthRenderer                          depth_renderer;
-
   public static @Nonnull KShadowMapRendererActual newRenderer(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull KMaterialShadowLabelCache label_decider,
@@ -82,6 +71,18 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       caps,
       log);
   }
+  private final @Nonnull KDepthRenderer                          depth_renderer;
+  private final @Nonnull JCGLImplementation                      g;
+  private final @Nonnull StringBuilder                           label_cache;
+  private final @Nonnull KMaterialShadowLabelCache               label_decider;
+  private final @Nonnull Log                                     log;
+  private final @Nonnull RMatrixM4x4F<RTransformView>            m4_view;
+  private final @Nonnull KMutableMatrices                        matrices;
+  private final @Nonnull LUCache<String, KProgram, RException>   shader_cache;
+  private final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache;
+  private final @Nonnull Context                                 transform_context;
+
+  private final @Nonnull VectorM2I                               viewport_size;
 
   private KShadowMapRendererActual(
     final @Nonnull JCGLImplementation gl,
@@ -112,124 +113,32 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       KDepthRenderer.newDepthRenderer(gl, shader_cache, caps, log);
   }
 
-  @Override public <A, E extends Throwable> A shadowMapRendererEvaluate(
-    final @Nonnull KCamera camera,
-    final @Nonnull KSceneBatchedShadow batches,
-    final @Nonnull KShadowMapWith<A, E> with)
-    throws ConstraintError,
-      RException,
-      E
+  protected
+    void
+    renderShadowMapBasicBatch(
+      final @Nonnull Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>> batch,
+      final @Nonnull KShadowMapBasic smb,
+      final @Nonnull MatricesProjectiveLight mwp)
+      throws ConstraintError,
+        RException
   {
-    this.shadow_cache.pcPeriodStart();
-    try {
-      this.renderShadowMapsInitialize(batches.getShadowCasters().keySet());
-      this.renderShadowMapsPre(camera, batches);
-      return with.withMaps(new KShadowMapContext() {
-        @SuppressWarnings("synthetic-access") @Override public
-          KShadowMap
-          getShadowMap(
-            final @Nonnull KShadow shadow)
-            throws ConstraintError,
-              RException
-        {
-          try {
-            return KShadowMapRendererActual.this.shadow_cache
-              .pcCacheGet(shadow);
-          } catch (final ConstraintError e) {
-            throw e;
-          } catch (final RException e) {
-            throw e;
-          } catch (final LUCacheException e) {
-            throw new UnreachableCodeException(e);
-          }
-        }
-      });
-    } catch (final LUCacheException e) {
-      throw new UnreachableCodeException(e);
-    } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
-    } finally {
-      this.shadow_cache.pcPeriodEnd();
+    final HashMap<KMaterialDepthLabel, List<KMeshInstanceTransformed>> depth_batches =
+      new HashMap<KMaterialDepthLabel, List<KMeshInstanceTransformed>>();
+
+    for (final KMaterialShadowLabel label : batch.keySet()) {
+      final List<KMeshInstanceTransformed> instances = batch.get(label);
+      depth_batches
+        .put(KMaterialDepthLabel.fromShadowLabel(label), instances);
     }
-  }
 
-  private void renderShadowMapsPre(
-    final @Nonnull KCamera camera,
-    final @Nonnull KSceneBatchedShadow batched)
-    throws ConstraintError,
-      RException
-  {
-    this.matrices.withObserver(
-      camera.getViewMatrix(),
-      camera.getProjectionMatrix(),
-      new MatricesObserverFunction<Unit, ConstraintError>() {
-        @Override public Unit run(
-          final @Nonnull MatricesObserver mo)
-          throws ConstraintError,
-            ConstraintError,
-            RException
-        {
-          KShadowMapRendererActual.this.renderShadowMaps(batched, mo);
-          return Unit.unit();
-        }
-      });
+    final RMatrixI4x4F<RTransformView> view =
+      new RMatrixI4x4F<RTransformView>(mwp.getMatrixProjectiveView());
+    final RMatrixI4x4F<RTransformProjection> proj =
+      new RMatrixI4x4F<RTransformProjection>(
+        mwp.getMatrixProjectiveProjection());
 
-  }
-
-  private void renderShadowMapsInitialize(
-    final @Nonnull Set<KLight> lights)
-    throws ConstraintError,
-      LUCacheException,
-      JCGLException,
-      RException
-  {
-    final JCGLInterfaceCommon gc = this.g.getGLCommon();
-
-    for (final KLight light : lights) {
-      assert light.hasShadow();
-
-      switch (light.getType()) {
-        case LIGHT_DIRECTIONAL:
-        case LIGHT_SPHERE:
-        {
-          throw new UnimplementedCodeException();
-        }
-        case LIGHT_PROJECTIVE:
-        {
-          final KProjective projective = (KLight.KProjective) light;
-          final KShadow shadow =
-            ((Option.Some<KShadow>) projective.getShadow()).value;
-
-          switch (shadow.getType()) {
-            case SHADOW_MAPPED_SOFT:
-            {
-              throw new UnimplementedCodeException();
-            }
-            case SHADOW_MAPPED_BASIC:
-            {
-              final KShadowMapBasic smb =
-                (KShadowMapBasic) this.shadow_cache.pcCacheGet(shadow);
-
-              final FramebufferReferenceUsable fb =
-                smb.kFramebufferGetDepthPassFramebuffer();
-
-              gc.framebufferDrawBind(fb);
-              try {
-                gc.colorBufferMask(true, true, true, true);
-                gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
-                gc.depthBufferWriteEnable();
-                gc.depthBufferClear(1.0f);
-              } finally {
-                gc.framebufferDrawUnbind();
-              }
-              break;
-            }
-          }
-
-          break;
-        }
-      }
-    }
+    final KFramebufferDepthUsable fb = smb;
+    this.depth_renderer.depthRendererEvaluate(view, proj, depth_batches, fb);
   }
 
   void renderShadowMaps(
@@ -272,17 +181,21 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
                     ((Option.Some<KShadow>) projective.getShadow()).value;
 
                   switch (shadow.getType()) {
-                    case SHADOW_MAPPED_SOFT:
+                    case SHADOW_MAPPED_VARIANCE:
                     {
-                      throw new UnimplementedCodeException();
+                      final KShadowMapVariance smv =
+                        (KShadowMapVariance) cache.pcCacheGet(shadow);
+                      KShadowMapRendererActual.this
+                        .renderShadowMapVarianceBatch(batch, smv, mwp);
+                      break;
                     }
                     case SHADOW_MAPPED_BASIC:
                     {
                       final KShadowMapBasic smb =
                         (KShadowMapBasic) cache.pcCacheGet(shadow);
-
                       KShadowMapRendererActual.this
                         .renderShadowMapBasicBatch(batch, smb, mwp);
+                      break;
                     }
                   }
 
@@ -299,11 +212,105 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
     }
   }
 
+  private void renderShadowMapsInitialize(
+    final @Nonnull Set<KLight> lights)
+    throws ConstraintError,
+      LUCacheException,
+      JCGLException,
+      RException
+  {
+    final JCGLInterfaceCommon gc = this.g.getGLCommon();
+
+    for (final KLight light : lights) {
+      assert light.hasShadow();
+
+      switch (light.getType()) {
+        case LIGHT_DIRECTIONAL:
+        case LIGHT_SPHERE:
+        {
+          throw new UnimplementedCodeException();
+        }
+        case LIGHT_PROJECTIVE:
+        {
+          final KProjective projective = (KLight.KProjective) light;
+          final KShadow shadow =
+            ((Option.Some<KShadow>) projective.getShadow()).value;
+
+          switch (shadow.getType()) {
+            case SHADOW_MAPPED_VARIANCE:
+            {
+              final KShadowMapVariance smv =
+                (KShadowMapVariance) this.shadow_cache.pcCacheGet(shadow);
+
+              final FramebufferReferenceUsable fb =
+                smv.kFramebufferGetDepthPassFramebuffer();
+
+              gc.framebufferDrawBind(fb);
+              try {
+                gc.colorBufferMask(true, true, true, true);
+                gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
+                gc.depthBufferWriteEnable();
+                gc.depthBufferClear(1.0f);
+              } finally {
+                gc.framebufferDrawUnbind();
+              }
+              break;
+            }
+            case SHADOW_MAPPED_BASIC:
+            {
+              final KShadowMapBasic smb =
+                (KShadowMapBasic) this.shadow_cache.pcCacheGet(shadow);
+
+              final FramebufferReferenceUsable fb =
+                smb.kFramebufferGetDepthPassFramebuffer();
+
+              gc.framebufferDrawBind(fb);
+              try {
+                gc.colorBufferMask(true, true, true, true);
+                gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
+                gc.depthBufferWriteEnable();
+                gc.depthBufferClear(1.0f);
+              } finally {
+                gc.framebufferDrawUnbind();
+              }
+              break;
+            }
+          }
+
+          break;
+        }
+      }
+    }
+  }
+
+  private void renderShadowMapsPre(
+    final @Nonnull KCamera camera,
+    final @Nonnull KSceneBatchedShadow batched)
+    throws ConstraintError,
+      RException
+  {
+    this.matrices.withObserver(
+      camera.getViewMatrix(),
+      camera.getProjectionMatrix(),
+      new MatricesObserverFunction<Unit, ConstraintError>() {
+        @Override public Unit run(
+          final @Nonnull MatricesObserver mo)
+          throws ConstraintError,
+            ConstraintError,
+            RException
+        {
+          KShadowMapRendererActual.this.renderShadowMaps(batched, mo);
+          return Unit.unit();
+        }
+      });
+
+  }
+
   protected
     void
-    renderShadowMapBasicBatch(
+    renderShadowMapVarianceBatch(
       final @Nonnull Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>> batch,
-      final @Nonnull KShadowMapBasic smb,
+      final @Nonnull KShadowMapVariance smv,
       final @Nonnull MatricesProjectiveLight mwp)
       throws ConstraintError,
         RException
@@ -323,9 +330,48 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       new RMatrixI4x4F<RTransformProjection>(
         mwp.getMatrixProjectiveProjection());
 
-    final KFramebufferDepthUsable fb = smb;
+    this.depth_renderer.depthRendererEvaluate(view, proj, depth_batches, smv);
+  }
 
-    this.depth_renderer.depthRendererEvaluate(view, proj, depth_batches, fb);
+  @Override public <A, E extends Throwable> A shadowMapRendererEvaluate(
+    final @Nonnull KCamera camera,
+    final @Nonnull KSceneBatchedShadow batches,
+    final @Nonnull KShadowMapWith<A, E> with)
+    throws ConstraintError,
+      RException,
+      E
+  {
+    this.shadow_cache.pcPeriodStart();
+    try {
+      this.renderShadowMapsInitialize(batches.getShadowCasters().keySet());
+      this.renderShadowMapsPre(camera, batches);
+      return with.withMaps(new KShadowMapContext() {
+        @SuppressWarnings("synthetic-access") @Override public
+          KShadowMap
+          getShadowMap(
+            final @Nonnull KShadow shadow)
+            throws ConstraintError,
+              RException
+        {
+          try {
+            return KShadowMapRendererActual.this.shadow_cache
+              .pcCacheGet(shadow);
+          } catch (final ConstraintError e) {
+            throw e;
+          } catch (final RException e) {
+            throw e;
+          } catch (final LUCacheException e) {
+            throw new UnreachableCodeException(e);
+          }
+        }
+      });
+    } catch (final LUCacheException e) {
+      throw new UnreachableCodeException(e);
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
+    } finally {
+      this.shadow_cache.pcPeriodEnd();
+    }
   }
 
 }

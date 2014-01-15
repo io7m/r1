@@ -20,7 +20,6 @@
     <module>io7m-renderer-kernel-shaders-depth</module>
     <module>io7m-renderer-kernel-shaders-forward</module>
     <module>io7m-renderer-kernel-shaders-postprocessing</module>
-    <module>io7m-renderer-kernel-shaders-shadow</module>
     <module>io7m-renderer-sandbox-jogl</module>
     <module>io7m-renderer-tests-jogl</module>
     <module>io7m-renderer-tests</module>

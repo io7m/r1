@@ -20,7 +20,6 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Level;
@@ -28,6 +27,7 @@ import com.io7m.jlog.Log;
 import com.io7m.jlucache.LUCacheLoader;
 import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedVariance;
 
 final class KShadowCacheLoader implements
   LUCacheLoader<KShadow, KShadowMap, RException>
@@ -74,9 +74,28 @@ final class KShadowCacheLoader implements
   {
     try {
       switch (s.getType()) {
-        case SHADOW_MAPPED_SOFT:
+        case SHADOW_MAPPED_VARIANCE:
         {
-          throw new UnimplementedCodeException();
+          final KShadowMappedVariance smv = (KShadowMappedVariance) s;
+          final long size = 2 << (smv.getSizeExponent() - 1);
+
+          if (this.log.enabled(Level.LOG_DEBUG)) {
+            this.message.setLength(0);
+            this.message.append("Allocating ");
+            this.message.append(size);
+            this.message.append("x");
+            this.message.append(size);
+            this.message.append(" shadow map");
+            this.log.debug(this.message.toString());
+          }
+
+          final KShadowFilter filter = smv.getShadowFilter();
+          return KShadowMap.KShadowMapVariance.newShadowMapVariance(
+            this.gi,
+            (int) size,
+            (int) size,
+            filter,
+            smv.getShadowPrecision());
         }
         case SHADOW_MAPPED_BASIC:
         {
