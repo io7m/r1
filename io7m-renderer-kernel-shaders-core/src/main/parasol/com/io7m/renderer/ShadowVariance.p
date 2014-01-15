@@ -31,9 +31,10 @@ module ShadowVariance is
   import com.io7m.renderer.Transform as T;
 
   type t is record
-    factor_min   : float,
-    factor_max   : float,
-    variance_min : float
+    factor_min      : float,
+    factor_max      : float,
+    variance_min    : float,
+    bleed_reduction : float
   end;
 
   function chebyshev_upper_bound (
@@ -50,6 +51,18 @@ module ShadowVariance is
       max
     end;
 
+  function linear_step (
+    min : float,
+    max : float,
+    x   : float
+  ) : float =
+    let
+      value vsm = F.subtract (x, min);
+      value msm = F.subtract (max, min);
+    in
+      F.clamp (F.divide (vsm, msm), 0.0, 1.0)
+    end;
+
   function factor (
     config            : t,
     t_shadow_variance : sampler_2d,
@@ -63,9 +76,11 @@ module ShadowVariance is
           T.clip_to_texture (p);
         value moments =
           S2.texture (t_shadow_variance, current_tex [x y]) [x y];
+        value p_max =
+          chebyshev_upper_bound (config, moments, current_tex [z]);
       in
         F.clamp (
-          chebyshev_upper_bound (config, moments, current_tex [z]),
+          linear_step (config.bleed_reduction, 1.0, p_max),
           config.factor_min,
           config.factor_max)
       end
