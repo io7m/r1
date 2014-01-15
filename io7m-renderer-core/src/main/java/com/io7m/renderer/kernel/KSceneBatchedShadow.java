@@ -24,32 +24,29 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Option.Some;
 
 public final class KSceneBatchedShadow
 {
   public static @Nonnull KSceneBatchedShadow newBatchedScene(
     final @Nonnull KScene.KSceneShadows shadows,
-    final @Nonnull KMaterialShadowLabelCache shadow_labels)
+    final @Nonnull KMaterialDepthLabelCache depth_labels)
     throws ConstraintError
   {
     final Map<KLight, List<KMeshInstanceTransformed>> casters =
       shadows.getShadowCasters();
-    final Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>> batched_casters =
-      new HashMap<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>>();
+    final Map<KLight, Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>>> batched_casters =
+      new HashMap<KLight, Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>>>();
 
     for (final KLight light : casters.keySet()) {
       assert light.hasShadow();
 
       final List<KMeshInstanceTransformed> instances = casters.get(light);
-      final HashMap<KMaterialShadowLabel, List<KMeshInstanceTransformed>> by_label =
-        new HashMap<KMaterialShadowLabel, List<KMeshInstanceTransformed>>();
+      final HashMap<KMaterialDepthLabel, List<KMeshInstanceTransformed>> by_label =
+        new HashMap<KMaterialDepthLabel, List<KMeshInstanceTransformed>>();
 
       for (final KMeshInstanceTransformed i : instances) {
-        final Some<KShadow> shadow = (Some<KShadow>) light.getShadow();
-
-        final KMaterialShadowLabel label =
-          shadow_labels.getShadowLabel(i.getInstance(), shadow.value);
+        final KMaterialDepthLabel label =
+          depth_labels.getDepthLabel(i.getInstance());
 
         List<KMeshInstanceTransformed> label_casters = null;
         if (by_label.containsKey(label)) {
@@ -69,16 +66,16 @@ public final class KSceneBatchedShadow
     return new KSceneBatchedShadow(batched_casters);
   }
 
-  private final @Nonnull Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>> shadow_casters;
+  private final @Nonnull Map<KLight, Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>>> shadow_casters;
 
   private KSceneBatchedShadow(
-    final @Nonnull Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>> shadow_casters)
+    final @Nonnull Map<KLight, Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>>> shadow_casters)
   {
     this.shadow_casters = shadow_casters;
   }
 
   public @Nonnull
-    Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>>
+    Map<KLight, Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>>>
     getShadowCasters()
   {
     return this.shadow_casters;

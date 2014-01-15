@@ -84,7 +84,7 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull KGraphicsCapabilities caps,
     final @Nonnull Log log,
-    final @Nonnull KMaterialShadowLabelCache label_decider,
+    final @Nonnull KMaterialDepthLabelCache label_decider,
     final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache)
     throws ConstraintError
   {
@@ -100,14 +100,15 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
 
     this.depth_renderer =
       KDepthRenderer.newDepthRenderer(gl, shader_cache, caps, log);
+
     this.shadow_renderer =
       KShadowMapRendererActual.newRenderer(
         gl,
-        label_decider,
         shader_cache,
         shadow_cache,
         caps,
         log);
+
     this.decider = decider;
   }
 
@@ -138,11 +139,7 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
     final KCamera camera = scene.getCamera();
 
     final KSceneBatchedForward batched =
-      KSceneBatchedForward.newBatchedScene(
-        this.decider,
-        this.decider,
-        this.decider,
-        scene);
+      KSceneBatchedForward.newBatchedScene(this.decider, this.decider, scene);
 
     try {
       final Debugging d = KRendererDebugShadowMap.this.debug;
@@ -160,7 +157,7 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
                 JCGLException
           {
             if (d != null) {
-              final Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>> casters =
+              final Map<KLight, Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>>> casters =
                 batched.getBatchedShadow().getShadowCasters();
               d.debugPerformDumpShadowMaps(cache, casters.keySet());
             }
