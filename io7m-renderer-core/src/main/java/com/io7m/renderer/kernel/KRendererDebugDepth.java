@@ -162,21 +162,15 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
     KShadingProgramCommon.putMatrixModelView(p, mi.getMatrixModelView());
 
     switch (label) {
-      case DEPTH_VARIANCE_CONSTANT:
-      case DEPTH_CONSTANT_PACKED4444:
       case DEPTH_CONSTANT:
       {
         break;
       }
-      case DEPTH_VARIANCE_UNIFORM:
-      case DEPTH_UNIFORM_PACKED4444:
       case DEPTH_UNIFORM:
       {
         KShadingProgramCommon.putMaterial(p, material);
         break;
       }
-      case DEPTH_VARIANCE_MAPPED:
-      case DEPTH_MAPPED_PACKED4444:
       case DEPTH_MAPPED:
       {
         KShadingProgramCommon.putMaterial(p, material);
@@ -203,17 +197,11 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
       KShadingProgramCommon.bindAttributePosition(p, array);
 
       switch (label) {
-        case DEPTH_CONSTANT_PACKED4444:
         case DEPTH_CONSTANT:
         case DEPTH_UNIFORM:
-        case DEPTH_UNIFORM_PACKED4444:
-        case DEPTH_VARIANCE_CONSTANT:
-        case DEPTH_VARIANCE_UNIFORM:
         {
           break;
         }
-        case DEPTH_VARIANCE_MAPPED:
-        case DEPTH_MAPPED_PACKED4444:
         case DEPTH_MAPPED:
         {
           KShadingProgramCommon.bindAttributeUV(p, array);
@@ -260,7 +248,9 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
         KRendererDebugDepth.this.depth_labels.getDepthLabel(ii);
 
       final KProgram kp =
-        KRendererDebugDepth.this.shader_cache.luCacheGet(label.getName());
+        KRendererDebugDepth.this.shader_cache.luCacheGet(String.format(
+          "depth_%s",
+          label.getCode()));
 
       final JCBExecutionAPI e = kp.getExecutable();
       e.execRun(new JCBExecutorProcedure() {

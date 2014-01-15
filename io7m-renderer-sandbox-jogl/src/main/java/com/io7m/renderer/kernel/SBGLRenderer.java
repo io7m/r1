@@ -1421,7 +1421,6 @@ final class SBGLRenderer implements GLEventListener
           this.gi,
           KShadowMapRendererActual.newRenderer(
             this.gi,
-            this.label_cache,
             this.shader_cache,
             this.shadow_cache,
             this.capabilities,

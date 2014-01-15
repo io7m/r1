@@ -57,83 +57,26 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 
-final class KDepthRenderer
+public final class KDepthVarianceRenderer
 {
-  private static enum InternalDepthLabel
-  {
-    DEPTH_INTERNAL_CONSTANT("depth_C"),
-    DEPTH_INTERNAL_CONSTANT_PACKED4444("depth_CP4"),
-    DEPTH_INTERNAL_MAPPED("depth_M"),
-    DEPTH_INTERNAL_MAPPED_PACKED4444("depth_MP4"),
-    DEPTH_INTERNAL_UNIFORM("depth_U"),
-    DEPTH_INTERNAL_UNIFORM_PACKED4444("depth_UP4")
-
-    ;
-
-    static @Nonnull InternalDepthLabel fromDepthLabel(
-      final @Nonnull KGraphicsCapabilities caps,
-      final @Nonnull KMaterialDepthLabel label)
-    {
-      switch (label) {
-        case DEPTH_CONSTANT:
-        {
-          if (caps.getSupportsDepthTextures()) {
-            return DEPTH_INTERNAL_CONSTANT;
-          }
-          return DEPTH_INTERNAL_CONSTANT_PACKED4444;
-        }
-        case DEPTH_MAPPED:
-        {
-          if (caps.getSupportsDepthTextures()) {
-            return DEPTH_INTERNAL_MAPPED;
-          }
-          return DEPTH_INTERNAL_MAPPED_PACKED4444;
-        }
-        case DEPTH_UNIFORM:
-        {
-          if (caps.getSupportsDepthTextures()) {
-            return DEPTH_INTERNAL_UNIFORM;
-          }
-          return DEPTH_INTERNAL_UNIFORM_PACKED4444;
-        }
-      }
-
-      throw new UnreachableCodeException();
-    }
-
-    private final @Nonnull String name;
-
-    private InternalDepthLabel(
-      final @Nonnull String name)
-    {
-      this.name = name;
-    }
-
-    public @Nonnull String getName()
-    {
-      return this.name;
-    }
-  }
-
-  public static @Nonnull KDepthRenderer newDepthRenderer(
+  public static @Nonnull KDepthVarianceRenderer newDepthVarianceRenderer(
     final @Nonnull JCGLImplementation gi,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull KGraphicsCapabilities caps,
     final @Nonnull Log log)
     throws ConstraintError
   {
-    return new KDepthRenderer(gi, shader_cache, caps, log);
+    return new KDepthVarianceRenderer(gi, shader_cache, log);
   }
 
   protected static void renderDepthPassBatch(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull MatricesObserver mwo,
     final @Nonnull JCBProgram jp,
-    final @Nonnull InternalDepthLabel label,
+    final @Nonnull KMaterialDepthVarianceLabel label,
     final @Nonnull List<KMeshInstanceTransformed> batch)
-    throws ConstraintError,
-      JCGLException,
-      RException
+    throws JCGLException,
+      RException,
+      ConstraintError
   {
     for (final KMeshInstanceTransformed i : batch) {
       mwo.withInstance(
@@ -145,7 +88,12 @@ final class KDepthRenderer
               ConstraintError,
               RException
           {
-            KDepthRenderer.renderDepthPassInstance(gc, mwi, jp, label, i);
+            KDepthVarianceRenderer.renderDepthPassInstance(
+              gc,
+              mwi,
+              jp,
+              label,
+              i);
             return Unit.unit();
           }
         });
@@ -156,11 +104,10 @@ final class KDepthRenderer
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull MatricesInstance mwi,
     final @Nonnull JCBProgram jp,
-    final @Nonnull InternalDepthLabel label,
+    final @Nonnull KMaterialDepthVarianceLabel label,
     final @Nonnull KMeshInstanceTransformed i)
     throws JCGLException,
-      ConstraintError,
-      JCBExecutionException
+      ConstraintError
   {
     final KMaterial material = i.getInstance().getMaterial();
     final List<TextureUnit> units = gc.textureGetUnits();
@@ -173,13 +120,11 @@ final class KDepthRenderer
     KShadingProgramCommon.putMatrixModelView(jp, mwi.getMatrixModelView());
 
     switch (label) {
-      case DEPTH_INTERNAL_CONSTANT:
-      case DEPTH_INTERNAL_CONSTANT_PACKED4444:
+      case DEPTH_VARIANCE_CONSTANT:
       {
         break;
       }
-      case DEPTH_INTERNAL_MAPPED:
-      case DEPTH_INTERNAL_MAPPED_PACKED4444:
+      case DEPTH_VARIANCE_MAPPED:
       {
         KShadingProgramCommon.putMaterial(jp, material);
         KShadingProgramCommon.putMatrixUV(jp, mwi.getMatrixUV());
@@ -190,8 +135,7 @@ final class KDepthRenderer
           units.get(0));
         break;
       }
-      case DEPTH_INTERNAL_UNIFORM:
-      case DEPTH_INTERNAL_UNIFORM_PACKED4444:
+      case DEPTH_VARIANCE_UNIFORM:
       {
         KShadingProgramCommon.putMaterial(jp, material);
         break;
@@ -212,15 +156,12 @@ final class KDepthRenderer
       KShadingProgramCommon.bindAttributePosition(jp, array);
 
       switch (label) {
-        case DEPTH_INTERNAL_CONSTANT:
-        case DEPTH_INTERNAL_CONSTANT_PACKED4444:
-        case DEPTH_INTERNAL_UNIFORM:
-        case DEPTH_INTERNAL_UNIFORM_PACKED4444:
+        case DEPTH_VARIANCE_UNIFORM:
+        case DEPTH_VARIANCE_CONSTANT:
         {
           break;
         }
-        case DEPTH_INTERNAL_MAPPED:
-        case DEPTH_INTERNAL_MAPPED_PACKED4444:
+        case DEPTH_VARIANCE_MAPPED:
         {
           KShadingProgramCommon.bindAttributeUV(jp, array);
           break;
@@ -241,17 +182,15 @@ final class KDepthRenderer
     }
   }
 
-  private final @Nonnull KGraphicsCapabilities                 caps;
   private final @Nonnull JCGLImplementation                    g;
   private final @Nonnull Log                                   log;
   private final @Nonnull KMutableMatrices                      matrices;
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
   private final @Nonnull VectorM2I                             viewport_size;
 
-  private KDepthRenderer(
+  private KDepthVarianceRenderer(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull KGraphicsCapabilities caps,
     final @Nonnull Log log)
     throws ConstraintError
   {
@@ -260,17 +199,16 @@ final class KDepthRenderer
     this.g = Constraints.constrainNotNull(gl, "OpenGL implementation");
     this.shader_cache =
       Constraints.constrainNotNull(shader_cache, "Shader cache");
-    this.caps = Constraints.constrainNotNull(caps, "Capabilities");
     this.matrices = KMutableMatrices.newMatrices();
     this.viewport_size = new VectorM2I();
   }
 
   public
     void
-    depthRendererEvaluate(
+    depthVarianceRendererEvaluate(
       final @Nonnull RMatrixI4x4F<RTransformView> view,
       final @Nonnull RMatrixI4x4F<RTransformProjection> projection,
-      final @Nonnull Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batches,
+      final @Nonnull Map<KMaterialDepthVarianceLabel, List<KMeshInstanceTransformed>> batches,
       final @Nonnull KFramebufferDepthUsable framebuffer,
       final @Nonnull FaceSelection faces,
       final @Nonnull FaceWindingOrder order)
@@ -288,7 +226,7 @@ final class KDepthRenderer
               RException,
               JCGLException
           {
-            KDepthRenderer.this.renderScene(
+            KDepthVarianceRenderer.this.renderScene(
               batches,
               framebuffer,
               mwo,
@@ -302,22 +240,10 @@ final class KDepthRenderer
     }
   }
 
-  private void renderConfigureDepthColorMasks(
-    final @Nonnull JCGLInterfaceCommon gc)
-    throws ConstraintError,
-      JCGLException
-  {
-    if (this.caps.getSupportsDepthTextures()) {
-      gc.colorBufferMask(false, false, false, false);
-    } else {
-      gc.colorBufferMask(true, true, true, true);
-    }
-  }
-
   private
     void
     renderDepthPassBatches(
-      final @Nonnull Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batches,
+      final @Nonnull Map<KMaterialDepthVarianceLabel, List<KMeshInstanceTransformed>> batches,
       final @Nonnull JCGLInterfaceCommon gc,
       final @Nonnull MatricesObserver mwo)
       throws ConstraintError,
@@ -325,11 +251,15 @@ final class KDepthRenderer
         JCGLException,
         RException
   {
-    for (final KMaterialDepthLabel depth : batches.keySet()) {
-      final InternalDepthLabel label =
-        InternalDepthLabel.fromDepthLabel(this.caps, depth);
+    gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+    gc.depthBufferWriteEnable();
+    gc.depthBufferClear(1.0f);
+    gc.colorBufferMask(true, true, true, true);
+    gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
+    gc.blendingDisable();
 
-      final List<KMeshInstanceTransformed> batch = batches.get(depth);
+    for (final KMaterialDepthVarianceLabel label : batches.keySet()) {
+      final List<KMeshInstanceTransformed> batch = batches.get(label);
       final KProgram program = this.shader_cache.luCacheGet(label.getName());
       final JCBExecutionAPI exec = program.getExecutable();
 
@@ -344,7 +274,12 @@ final class KDepthRenderer
           KShadingProgramCommon.putMatrixProjection(
             jp,
             mwo.getMatrixProjection());
-          KDepthRenderer.renderDepthPassBatch(gc, mwo, jp, label, batch);
+          KDepthVarianceRenderer.renderDepthPassBatch(
+            gc,
+            mwo,
+            jp,
+            label,
+            batch);
         }
       });
     }
@@ -353,13 +288,13 @@ final class KDepthRenderer
   protected
     void
     renderScene(
-      final @Nonnull Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batches,
+      final @Nonnull Map<KMaterialDepthVarianceLabel, List<KMeshInstanceTransformed>> batches,
       final @Nonnull KFramebufferDepthUsable framebuffer,
       final @Nonnull MatricesObserver mwo,
       final @Nonnull FaceSelection faces,
       final @Nonnull FaceWindingOrder order)
-      throws JCGLException,
-        ConstraintError,
+      throws ConstraintError,
+        JCGLException,
         RException
   {
     final JCGLInterfaceCommon gc = this.g.getGLCommon();
@@ -370,20 +305,9 @@ final class KDepthRenderer
     gc.framebufferDrawBind(fb);
     try {
       final AreaInclusive area = framebuffer.kFramebufferGetArea();
-      KDepthRenderer.this.viewport_size.x =
-        (int) area.getRangeX().getInterval();
-      KDepthRenderer.this.viewport_size.y =
-        (int) area.getRangeY().getInterval();
-      gc.viewportSet(VectorI2I.ZERO, KDepthRenderer.this.viewport_size);
-
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-      gc.depthBufferWriteEnable();
-      gc.depthBufferClear(1.0f);
-      gc.colorBufferMask(true, true, true, true);
-      gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
-      gc.blendingDisable();
-      this.renderConfigureDepthColorMasks(gc);
-
+      this.viewport_size.x = (int) area.getRangeX().getInterval();
+      this.viewport_size.y = (int) area.getRangeY().getInterval();
+      gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
       gc.cullingEnable(faces, order);
       this.renderDepthPassBatches(batches, gc, mwo);
     } catch (final LUCacheException e) {

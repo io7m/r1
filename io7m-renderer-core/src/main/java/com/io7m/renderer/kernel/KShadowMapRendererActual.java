@@ -29,6 +29,8 @@ import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Unit;
+import com.io7m.jcanephora.FaceSelection;
+import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
@@ -56,7 +58,6 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
 {
   public static @Nonnull KShadowMapRendererActual newRenderer(
     final @Nonnull JCGLImplementation gl,
-    final @Nonnull KMaterialShadowLabelCache label_decider,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache,
     final @Nonnull KGraphicsCapabilities caps,
@@ -65,28 +66,26 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
   {
     return new KShadowMapRendererActual(
       gl,
-      label_decider,
       shader_cache,
       shadow_cache,
       caps,
       log);
   }
+
   private final @Nonnull KDepthRenderer                          depth_renderer;
+  private final @Nonnull KDepthVarianceRenderer                  depth_variance_renderer;
   private final @Nonnull JCGLImplementation                      g;
   private final @Nonnull StringBuilder                           label_cache;
-  private final @Nonnull KMaterialShadowLabelCache               label_decider;
   private final @Nonnull Log                                     log;
   private final @Nonnull RMatrixM4x4F<RTransformView>            m4_view;
   private final @Nonnull KMutableMatrices                        matrices;
   private final @Nonnull LUCache<String, KProgram, RException>   shader_cache;
   private final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache;
   private final @Nonnull Context                                 transform_context;
-
   private final @Nonnull VectorM2I                               viewport_size;
 
   private KShadowMapRendererActual(
     final @Nonnull JCGLImplementation gl,
-    final @Nonnull KMaterialShadowLabelCache label_decider,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache,
     final @Nonnull KGraphicsCapabilities caps,
@@ -100,8 +99,6 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       Constraints.constrainNotNull(shader_cache, "Shader cache");
     this.shadow_cache =
       Constraints.constrainNotNull(shadow_cache, "Shadow cache");
-    this.label_decider =
-      Constraints.constrainNotNull(label_decider, "Label decider");
 
     this.viewport_size = new VectorM2I();
     this.label_cache = new StringBuilder();
@@ -111,34 +108,38 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
 
     this.depth_renderer =
       KDepthRenderer.newDepthRenderer(gl, shader_cache, caps, log);
+    this.depth_variance_renderer =
+      KDepthVarianceRenderer.newDepthVarianceRenderer(gl, shader_cache, log);
   }
 
   protected
     void
     renderShadowMapBasicBatch(
-      final @Nonnull Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>> batch,
+      final @Nonnull Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batches,
       final @Nonnull KShadowMapBasic smb,
       final @Nonnull MatricesProjectiveLight mwp)
       throws ConstraintError,
         RException
   {
-    final HashMap<KMaterialDepthLabel, List<KMeshInstanceTransformed>> depth_batches =
-      new HashMap<KMaterialDepthLabel, List<KMeshInstanceTransformed>>();
-
-    for (final KMaterialShadowLabel label : batch.keySet()) {
-      final List<KMeshInstanceTransformed> instances = batch.get(label);
-      depth_batches
-        .put(KMaterialDepthLabel.fromShadowLabel(label), instances);
-    }
-
     final RMatrixI4x4F<RTransformView> view =
       new RMatrixI4x4F<RTransformView>(mwp.getMatrixProjectiveView());
     final RMatrixI4x4F<RTransformProjection> proj =
       new RMatrixI4x4F<RTransformProjection>(
         mwp.getMatrixProjectiveProjection());
 
+    /**
+     * Basic shadow mapping produces fewer artifacts if front faces are
+     * culled.
+     */
+
     final KFramebufferDepthUsable fb = smb;
-    this.depth_renderer.depthRendererEvaluate(view, proj, depth_batches, fb);
+    this.depth_renderer.depthRendererEvaluate(
+      view,
+      proj,
+      batches,
+      fb,
+      FaceSelection.FACE_FRONT,
+      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
   }
 
   void renderShadowMaps(
@@ -149,12 +150,13 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
   {
     final PCache<KShadow, KShadowMap, RException> cache = this.shadow_cache;
 
-    final Map<KLight, Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>>> casters =
+    final Map<KLight, Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>>> casters =
       batched.getShadowCasters();
 
     for (final KLight light : casters.keySet()) {
       assert light.hasShadow();
-      final Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>> batch =
+
+      final Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batch =
         casters.get(light);
 
       switch (light.getType()) {
@@ -309,28 +311,41 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
   protected
     void
     renderShadowMapVarianceBatch(
-      final @Nonnull Map<KMaterialShadowLabel, List<KMeshInstanceTransformed>> batch,
+      final @Nonnull Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batch,
       final @Nonnull KShadowMapVariance smv,
       final @Nonnull MatricesProjectiveLight mwp)
       throws ConstraintError,
         RException
   {
-    final HashMap<KMaterialDepthLabel, List<KMeshInstanceTransformed>> depth_batches =
-      new HashMap<KMaterialDepthLabel, List<KMeshInstanceTransformed>>();
-
-    for (final KMaterialShadowLabel label : batch.keySet()) {
-      final List<KMeshInstanceTransformed> instances = batch.get(label);
-      depth_batches
-        .put(KMaterialDepthLabel.fromShadowLabel(label), instances);
-    }
-
     final RMatrixI4x4F<RTransformView> view =
       new RMatrixI4x4F<RTransformView>(mwp.getMatrixProjectiveView());
     final RMatrixI4x4F<RTransformProjection> proj =
       new RMatrixI4x4F<RTransformProjection>(
         mwp.getMatrixProjectiveProjection());
 
-    this.depth_renderer.depthRendererEvaluate(view, proj, depth_batches, smv);
+    final HashMap<KMaterialDepthVarianceLabel, List<KMeshInstanceTransformed>> vbatch =
+      new HashMap<KMaterialDepthVarianceLabel, List<KMeshInstanceTransformed>>();
+    for (final KMaterialDepthLabel k : batch.keySet()) {
+      final KMaterialDepthVarianceLabel vlabel =
+        KMaterialDepthVarianceLabel.fromDepthLabel(k);
+
+      assert batch.containsKey(k);
+      vbatch.put(vlabel, batch.get(k));
+    }
+    assert batch.size() == vbatch.size();
+
+    /**
+     * Variance shadow mapping does not require front-face culling, so only
+     * front faces are rendered into the depth buffer.
+     */
+
+    this.depth_variance_renderer.depthVarianceRendererEvaluate(
+      view,
+      proj,
+      vbatch,
+      smv,
+      FaceSelection.FACE_BACK,
+      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
   }
 
   @Override public <A, E extends Throwable> A shadowMapRendererEvaluate(

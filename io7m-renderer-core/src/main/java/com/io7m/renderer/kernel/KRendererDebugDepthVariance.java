@@ -55,7 +55,7 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 
 final class KRendererDebugDepthVariance extends KAbstractRendererDebug
 {
-  private static final @Nonnull String NAME = "debug-depth";
+  private static final @Nonnull String NAME = "debug-depth-variance";
 
   public static KRendererDebugDepthVariance rendererNew(
     final @Nonnull JCGLImplementation g,
@@ -166,21 +166,15 @@ final class KRendererDebugDepthVariance extends KAbstractRendererDebug
     KShadingProgramCommon.putMatrixModelView(p, mi.getMatrixModelView());
 
     switch (label) {
-      case DEPTH_VARIANCE_CONSTANT:
-      case DEPTH_CONSTANT_PACKED4444:
       case DEPTH_CONSTANT:
       {
         break;
       }
-      case DEPTH_VARIANCE_UNIFORM:
-      case DEPTH_UNIFORM_PACKED4444:
       case DEPTH_UNIFORM:
       {
         KShadingProgramCommon.putMaterial(p, material);
         break;
       }
-      case DEPTH_VARIANCE_MAPPED:
-      case DEPTH_MAPPED_PACKED4444:
       case DEPTH_MAPPED:
       {
         KShadingProgramCommon.putMaterial(p, material);
@@ -207,17 +201,11 @@ final class KRendererDebugDepthVariance extends KAbstractRendererDebug
       KShadingProgramCommon.bindAttributePosition(p, array);
 
       switch (label) {
-        case DEPTH_CONSTANT_PACKED4444:
         case DEPTH_CONSTANT:
         case DEPTH_UNIFORM:
-        case DEPTH_UNIFORM_PACKED4444:
-        case DEPTH_VARIANCE_CONSTANT:
-        case DEPTH_VARIANCE_UNIFORM:
         {
           break;
         }
-        case DEPTH_VARIANCE_MAPPED:
-        case DEPTH_MAPPED_PACKED4444:
         case DEPTH_MAPPED:
         {
           KShadingProgramCommon.bindAttributeUV(p, array);
@@ -244,36 +232,6 @@ final class KRendererDebugDepthVariance extends KAbstractRendererDebug
     }
   }
 
-  private static @Nonnull KMaterialDepthLabel forceVariance(
-    final @Nonnull KMaterialDepthLabel label)
-  {
-    switch (label) {
-      case DEPTH_CONSTANT:
-      case DEPTH_CONSTANT_PACKED4444:
-      {
-        return KMaterialDepthLabel.DEPTH_VARIANCE_CONSTANT;
-      }
-      case DEPTH_MAPPED:
-      case DEPTH_MAPPED_PACKED4444:
-      {
-        return KMaterialDepthLabel.DEPTH_VARIANCE_MAPPED;
-      }
-      case DEPTH_UNIFORM:
-      case DEPTH_UNIFORM_PACKED4444:
-      {
-        return KMaterialDepthLabel.DEPTH_VARIANCE_UNIFORM;
-      }
-      case DEPTH_VARIANCE_CONSTANT:
-      case DEPTH_VARIANCE_MAPPED:
-      case DEPTH_VARIANCE_UNIFORM:
-      {
-        return label;
-      }
-    }
-
-    throw new UnreachableCodeException();
-  }
-
   private void renderInstancePre(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull MatricesObserver mo,
@@ -291,13 +249,12 @@ final class KRendererDebugDepthVariance extends KAbstractRendererDebug
       }
 
       final KMaterialDepthLabel label =
-        KRendererDebugDepthVariance
-          .forceVariance(KRendererDebugDepthVariance.this.depth_labels
-            .getDepthLabel(ii));
-
+        KRendererDebugDepthVariance.this.depth_labels.getDepthLabel(ii);
+      final String program_name =
+        String.format("depth_variance_%s", label.getCode());
       final KProgram kp =
-        KRendererDebugDepthVariance.this.shader_cache.luCacheGet(label
-          .getName());
+        KRendererDebugDepthVariance.this.shader_cache
+          .luCacheGet(program_name);
 
       final JCBExecutionAPI e = kp.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
