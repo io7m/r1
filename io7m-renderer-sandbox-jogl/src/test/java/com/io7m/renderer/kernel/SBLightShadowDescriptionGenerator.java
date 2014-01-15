@@ -62,6 +62,7 @@ public final class SBLightShadowDescriptionGenerator implements
             (float) Math.random(),
             (float) Math.random(),
             (float) Math.random(),
+            (float) Math.random(),
             this.prec_gen.next(),
             this.filter_gen.next());
         }

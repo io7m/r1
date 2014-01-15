@@ -294,6 +294,7 @@ abstract class SBLightDescription
                   smv.getFactorMaximum(),
                   smv.getFactorMinimum(),
                   smv.getMinimumVariance(),
+                  smv.getLightBleedReduction(),
                   smv.getPrecision(),
                   smv.getFilter());
               kshadow = Option.some(ks);
