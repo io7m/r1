@@ -313,11 +313,7 @@ final class KRendererBlurDemo extends KAbstractRendererForward
                   JCGLException,
                   Exception
               {
-                try {
-                  gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                } catch (final ConstraintError x) {
-                  throw new UnreachableCodeException(x);
-                }
+                gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
               }
             });
 
@@ -389,11 +385,7 @@ final class KRendererBlurDemo extends KAbstractRendererForward
                   JCGLException,
                   Exception
               {
-                try {
-                  gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                } catch (final ConstraintError x) {
-                  throw new UnreachableCodeException(x);
-                }
+                gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
               }
             });
 
@@ -458,11 +450,7 @@ final class KRendererBlurDemo extends KAbstractRendererForward
                   JCGLException,
                   Exception
               {
-                try {
-                  gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                } catch (final ConstraintError x) {
-                  throw new UnreachableCodeException(x);
-                }
+                gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
               }
             });
 
@@ -535,11 +523,7 @@ final class KRendererBlurDemo extends KAbstractRendererForward
             JCGLException,
             Exception
         {
-          try {
-            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-          } catch (final ConstraintError x) {
-            throw new UnreachableCodeException(x);
-          }
+          gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
         }
       });
 
