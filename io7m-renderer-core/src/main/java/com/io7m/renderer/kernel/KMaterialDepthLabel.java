@@ -22,15 +22,16 @@ import com.io7m.jaux.UnreachableCodeException;
 
 enum KMaterialDepthLabel
 {
-  DEPTH_CONSTANT("C", false),
-  DEPTH_CONSTANT_PACKED4444("CP4", true),
-  DEPTH_MAPPED("M", false),
+  DEPTH_CONSTANT("depth_C", false),
+  DEPTH_CONSTANT_PACKED4444("depth_CP4", true),
+  DEPTH_MAPPED("depth_M", false),
+  DEPTH_MAPPED_PACKED4444("depth_MP4", true),
+  DEPTH_UNIFORM("depth_U", false),
+  DEPTH_UNIFORM_PACKED4444("depth_UP4", true),
 
-  DEPTH_MAPPED_PACKED4444("MP4", true),
-  DEPTH_UNIFORM("U", false),
-  DEPTH_UNIFORM_PACKED4444("UP4", true)
-
-  ;
+  DEPTH_VARIANCE_CONSTANT("depth_variance_C", false),
+  DEPTH_VARIANCE_MAPPED("depth_variance_M", true),
+  DEPTH_VARIANCE_UNIFORM("depth_variance_U", false), ;
 
   public static @Nonnull KMaterialDepthLabel fromMaterial(
     final @Nonnull KGraphicsCapabilities caps,
@@ -107,27 +108,26 @@ enum KMaterialDepthLabel
         return DEPTH_UNIFORM;
       case SHADOW_BASIC_DEPTH_UNIFORM_PACKED4444:
         return DEPTH_UNIFORM_PACKED4444;
+      case SHADOW_VARIANCE_DEPTH_CONSTANT:
+        return DEPTH_VARIANCE_CONSTANT;
+      case SHADOW_VARIANCE_DEPTH_MAPPED:
+        return DEPTH_VARIANCE_MAPPED;
+      case SHADOW_VARIANCE_DEPTH_UNIFORM:
+        return DEPTH_VARIANCE_UNIFORM;
     }
 
     throw new UnreachableCodeException();
   }
 
-  private final @Nonnull String code;
   private final @Nonnull String name;
   private final boolean         packed;
 
   private KMaterialDepthLabel(
-    final @Nonnull String code,
+    final @Nonnull String name,
     final boolean packed)
   {
-    this.code = code;
-    this.name = "depth_" + code;
+    this.name = name;
     this.packed = packed;
-  }
-
-  public @Nonnull String getCode()
-  {
-    return this.code;
   }
 
   public @Nonnull String getName()

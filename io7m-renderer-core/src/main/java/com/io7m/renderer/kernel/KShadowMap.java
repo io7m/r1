@@ -17,10 +17,12 @@
 package com.io7m.renderer.kernel;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jcanephora.AreaInclusive;
@@ -39,6 +41,7 @@ import com.io7m.jcanephora.JCGLInterfaceGL2;
 import com.io7m.jcanephora.JCGLInterfaceGL3;
 import com.io7m.jcanephora.JCGLInterfaceGLES2;
 import com.io7m.jcanephora.JCGLInterfaceGLES3;
+import com.io7m.jcanephora.JCGLRenderbuffersGL3ES3;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.JCGLTextures2DStaticGL3ES3;
 import com.io7m.jcanephora.JCGLUnsupportedException;
@@ -126,6 +129,23 @@ public abstract class KShadowMap implements KShadowMapType
               .getBytesPerPixel());
       }
 
+      @Override public AreaInclusive kFramebufferGetArea()
+      {
+        return this.depth.getArea();
+      }
+
+      @Override public
+        FramebufferReferenceUsable
+        kFramebufferGetDepthPassFramebuffer()
+      {
+        return this.framebuffer;
+      }
+
+      @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
+      {
+        return this.depth;
+      }
+
       @Override public void kShadowMapDelete(
         final JCGLImplementation g)
         throws RException,
@@ -145,23 +165,6 @@ public abstract class KShadowMap implements KShadowMapType
       @Override public long kShadowMapGetSizeBytes()
       {
         return this.size;
-      }
-
-      @Override public
-        FramebufferReferenceUsable
-        kFramebufferGetDepthPassFramebuffer()
-      {
-        return this.framebuffer;
-      }
-
-      @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
-      {
-        return this.depth;
-      }
-
-      @Override public AreaInclusive kFramebufferGetArea()
-      {
-        return this.depth.getArea();
       }
     }
 
@@ -272,6 +275,11 @@ public abstract class KShadowMap implements KShadowMapType
               .getBytesPerPixel());
       }
 
+      @Override public AreaInclusive kFramebufferGetArea()
+      {
+        return this.depth.getArea();
+      }
+
       @Override public
         FramebufferReferenceUsable
         kFramebufferGetDepthPassFramebuffer()
@@ -282,11 +290,6 @@ public abstract class KShadowMap implements KShadowMapType
       @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
       {
         return this.depth;
-      }
-
-      @Override public AreaInclusive kFramebufferGetArea()
-      {
-        return this.depth.getArea();
       }
 
       @Override public void kShadowMapDelete(
@@ -380,6 +383,11 @@ public abstract class KShadowMap implements KShadowMapType
               .getBytesPerPixel());
       }
 
+      @Override public AreaInclusive kFramebufferGetArea()
+      {
+        return this.depth.getArea();
+      }
+
       @Override public
         FramebufferReferenceUsable
         kFramebufferGetDepthPassFramebuffer()
@@ -390,11 +398,6 @@ public abstract class KShadowMap implements KShadowMapType
       @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
       {
         return this.depth;
-      }
-
-      @Override public AreaInclusive kFramebufferGetArea()
-      {
-        return this.depth.getArea();
       }
 
       @Override public void kShadowMapDelete(
@@ -495,6 +498,11 @@ public abstract class KShadowMap implements KShadowMapType
         this.size = rb_size + tc_size;
       }
 
+      @Override public AreaInclusive kFramebufferGetArea()
+      {
+        return this.depth.getArea();
+      }
+
       @Override public
         FramebufferReferenceUsable
         kFramebufferGetDepthPassFramebuffer()
@@ -505,11 +513,6 @@ public abstract class KShadowMap implements KShadowMapType
       @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
       {
         return this.depth;
-      }
-
-      @Override public AreaInclusive kFramebufferGetArea()
-      {
-        return this.depth.getArea();
       }
 
       @Override public void kShadowMapDelete(
@@ -622,6 +625,241 @@ public abstract class KShadowMap implements KShadowMapType
     {
       return v.kShadowMapVisitBasic(this);
     }
+  }
+
+  public static abstract class KShadowMapVariance extends KShadowMap implements
+    KFramebufferDepthUsable
+  {
+    private static final class KShadowMapVarianceGL3ES3 extends
+      KShadowMapVariance
+    {
+      public static
+        <G extends JCGLTextures2DStaticGL3ES3 & JCGLFramebuffersGL3 & JCGLRenderbuffersGL3ES3>
+        KShadowMapVariance
+        newShadowMapVariance(
+          final @Nonnull G gl,
+          final int width,
+          final int height,
+          final @Nonnull KShadowFilter filter,
+          final @Nonnull KShadowPrecision precision)
+          throws JCGLException,
+            ConstraintError
+      {
+        Texture2DStatic variance = null;
+        Renderbuffer<RenderableDepth> renderbuffer = null;
+
+        switch (precision) {
+          case SHADOW_PRECISION_16:
+          {
+            renderbuffer = gl.renderbufferAllocateDepth16(width, height);
+            variance =
+              gl.texture2DStaticAllocateRG16f(
+                "variance-rg16f",
+                width,
+                height,
+                TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                filter.getMinification(),
+                filter.getMagnification());
+            break;
+          }
+          case SHADOW_PRECISION_24:
+          case SHADOW_PRECISION_32:
+          {
+            renderbuffer = gl.renderbufferAllocateDepth24(width, height);
+            variance =
+              gl.texture2DStaticAllocateRG32f(
+                "variance-rg32f",
+                width,
+                height,
+                TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+                filter.getMinification(),
+                filter.getMagnification());
+            break;
+          }
+        }
+
+        assert variance != null;
+
+        final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
+          new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
+        final List<FramebufferColorAttachmentPoint> points =
+          gl.framebufferGetColorAttachmentPoints();
+        final List<FramebufferDrawBuffer> buffers =
+          gl.framebufferGetDrawBuffers();
+        mappings.put(buffers.get(0), points.get(0));
+
+        final FramebufferReference fb = gl.framebufferAllocate();
+        gl.framebufferDrawBind(fb);
+
+        try {
+          gl.framebufferDrawAttachDepthRenderbuffer(fb, renderbuffer);
+          gl.framebufferDrawAttachColorTexture2D(fb, variance);
+          gl.framebufferDrawSetBuffers(fb, mappings);
+
+          final FramebufferStatus status = gl.framebufferDrawValidate(fb);
+          switch (status) {
+            case FRAMEBUFFER_STATUS_COMPLETE:
+              break;
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
+            case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
+            case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
+            case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
+            case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
+              throw new JCGLUnsupportedException(
+                "Could not initialize framebuffer: " + status);
+          }
+        } finally {
+          gl.framebufferDrawUnbind();
+        }
+
+        return new KShadowMapVarianceGL3ES3(variance, renderbuffer, fb);
+      }
+
+      private final @Nonnull Texture2DStatic               depth;
+      private final @Nonnull FramebufferReference          framebuffer;
+      private final @Nonnull Renderbuffer<RenderableDepth> renderbuffer;
+      private final int                                    size;
+
+      private KShadowMapVarianceGL3ES3(
+        final @Nonnull Texture2DStatic depth,
+        final @Nonnull Renderbuffer<RenderableDepth> renderbuffer,
+        final @Nonnull FramebufferReference framebuffer)
+      {
+        this.depth = depth;
+        this.framebuffer = framebuffer;
+        this.renderbuffer = renderbuffer;
+
+        final int ds =
+          this.depth.getHeight()
+            * (this.depth.getWidth() * this.depth
+              .getType()
+              .getBytesPerPixel());
+        final int rs =
+          depth.getHeight()
+            * (this.renderbuffer.getWidth() * renderbuffer
+              .getType()
+              .getBytesPerPixel());
+
+        this.size = ds + rs;
+      }
+
+      @Override public @Nonnull AreaInclusive kFramebufferGetArea()
+      {
+        return this.depth.getArea();
+      }
+
+      @Override public @Nonnull
+        FramebufferReferenceUsable
+        kFramebufferGetDepthPassFramebuffer()
+      {
+        return this.framebuffer;
+      }
+
+      @Override public @Nonnull
+        Texture2DStaticUsable
+        kFramebufferGetDepthTexture()
+      {
+        return this.depth;
+      }
+
+      @Override public
+        <A, E extends Throwable, V extends KShadowMapVisitor<A, E>>
+        A
+        kShadowMapAccept(
+          final @Nonnull V v)
+          throws E,
+            RException
+      {
+        return v.kShadowMapVisitVariance(this);
+      }
+
+      @Override public void kShadowMapDelete(
+        final @Nonnull JCGLImplementation g)
+        throws RException,
+          ConstraintError
+      {
+        try {
+          final JCGLInterfaceCommon gc = g.getGLCommon();
+          gc.framebufferDelete(this.framebuffer);
+          gc.renderbufferDelete(this.renderbuffer);
+          gc.texture2DStaticDelete(this.depth);
+        } catch (final JCGLRuntimeException e) {
+          throw RException.fromJCGLException(e);
+        } finally {
+          super.setDeleted(true);
+        }
+      }
+
+      @Override public long kShadowMapGetSizeBytes()
+      {
+        return this.size;
+      }
+    }
+
+    public static @Nonnull KShadowMap newShadowMapVariance(
+      final @Nonnull JCGLImplementation g,
+      final int width,
+      final int height,
+      final @Nonnull KShadowFilter filter,
+      final @Nonnull KShadowPrecision precision)
+      throws RException,
+        ConstraintError
+    {
+      try {
+        return g
+          .implementationAccept(new JCGLImplementationVisitor<KShadowMapVariance, JCGLException>() {
+            @Override public KShadowMapVariance implementationIsGL2(
+              final @Nonnull JCGLInterfaceGL2 gl)
+              throws JCGLException,
+                ConstraintError
+            {
+              // TODO: XXX
+              throw new UnimplementedCodeException();
+            }
+
+            @Override public KShadowMapVariance implementationIsGL3(
+              final @Nonnull JCGLInterfaceGL3 gl)
+              throws JCGLException,
+                ConstraintError
+            {
+              return KShadowMapVarianceGL3ES3.newShadowMapVariance(
+                gl,
+                width,
+                height,
+                filter,
+                precision);
+            }
+
+            @Override public KShadowMapVariance implementationIsGLES2(
+              final @Nonnull JCGLInterfaceGLES2 gl)
+              throws JCGLException,
+                ConstraintError
+            {
+              // TODO: XXX
+              throw new UnimplementedCodeException();
+            }
+
+            @Override public KShadowMapVariance implementationIsGLES3(
+              final @Nonnull JCGLInterfaceGLES3 gl)
+              throws JCGLException,
+                ConstraintError
+            {
+              return KShadowMapVarianceGL3ES3.newShadowMapVariance(
+                gl,
+                width,
+                height,
+                filter,
+                precision);
+            }
+          });
+      } catch (final JCGLException e) {
+        throw RException.fromJCGLException(e);
+      }
+    }
+
   }
 
   private boolean deleted;

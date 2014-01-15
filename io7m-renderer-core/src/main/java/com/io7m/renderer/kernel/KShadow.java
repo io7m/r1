@@ -135,23 +135,25 @@ import com.io7m.jaux.Constraints.ConstraintError;
     }
   }
 
-  @Immutable final static class KShadowMappedSoft extends KShadow
+  @Immutable final static class KShadowMappedVariance extends KShadow
   {
     private final float factor_max;
     private final float factor_min;
+    private final float minimum_variance;
     private final int   size_exponent;
 
-    @SuppressWarnings("synthetic-access") private KShadowMappedSoft(
+    @SuppressWarnings("synthetic-access") private KShadowMappedVariance(
       final @Nonnull Integer light_id,
       final int size_exponent,
       final float factor_max,
       final float factor_min,
+      final float minimum_variance,
       final @Nonnull KShadowPrecision shadow_precision,
       final @Nonnull KShadowFilter shadow_filter)
       throws ConstraintError
     {
       super(
-        Type.SHADOW_MAPPED_BASIC,
+        Type.SHADOW_MAPPED_VARIANCE,
         light_id,
         shadow_precision,
         shadow_filter);
@@ -163,6 +165,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
           "Shadow size exponent");
       this.factor_max = factor_max;
       this.factor_min = factor_min;
+      this.minimum_variance = minimum_variance;
     }
 
     @Override public boolean equals(
@@ -177,13 +180,17 @@ import com.io7m.jaux.Constraints.ConstraintError;
       if (this.getClass() != obj.getClass()) {
         return false;
       }
-      final KShadowMappedSoft other = (KShadowMappedSoft) obj;
+      final KShadowMappedVariance other = (KShadowMappedVariance) obj;
       if (Float.floatToIntBits(this.factor_max) != Float
         .floatToIntBits(other.factor_max)) {
         return false;
       }
       if (Float.floatToIntBits(this.factor_min) != Float
         .floatToIntBits(other.factor_min)) {
+        return false;
+      }
+      if (Float.floatToIntBits(this.minimum_variance) != Float
+        .floatToIntBits(other.minimum_variance)) {
         return false;
       }
       if (this.size_exponent != other.size_exponent) {
@@ -202,6 +209,11 @@ import com.io7m.jaux.Constraints.ConstraintError;
       return this.factor_min;
     }
 
+    public float getMinimumVariance()
+    {
+      return this.minimum_variance;
+    }
+
     public int getSizeExponent()
     {
       return this.size_exponent;
@@ -213,6 +225,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       int result = super.hashCode();
       result = (prime * result) + Float.floatToIntBits(this.factor_max);
       result = (prime * result) + Float.floatToIntBits(this.factor_min);
+      result = (prime * result) + Float.floatToIntBits(this.minimum_variance);
       result = (prime * result) + this.size_exponent;
       return result;
     }
@@ -220,12 +233,14 @@ import com.io7m.jaux.Constraints.ConstraintError;
     @Override public String toString()
     {
       final StringBuilder builder = new StringBuilder();
-      builder.append("[KShadowMappedSoft size_exponent=");
-      builder.append(this.size_exponent);
-      builder.append(" factor_max=");
+      builder.append("[KShadowMappedVariance factor_max=");
       builder.append(this.factor_max);
       builder.append(" factor_min=");
       builder.append(this.factor_min);
+      builder.append(" size_exponent=");
+      builder.append(this.size_exponent);
+      builder.append(" minimum_variance=");
+      builder.append(this.minimum_variance);
       builder.append("]");
       return builder.toString();
     }
@@ -234,7 +249,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
   static enum Type
   {
     SHADOW_MAPPED_BASIC("Mapped basic"),
-    SHADOW_MAPPED_SOFT("Mapped soft");
+    SHADOW_MAPPED_VARIANCE("Mapped variance");
 
     private final @Nonnull String name;
 
@@ -273,21 +288,23 @@ import com.io7m.jaux.Constraints.ConstraintError;
   }
 
   @SuppressWarnings("synthetic-access") public static @Nonnull
-    KShadowMappedSoft
+    KShadowMappedVariance
     newMappedVariance(
       final @Nonnull Integer light_id,
       final int size_exponent,
       final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float factor_max,
       final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float factor_min,
+      final float minimum_variance,
       final @Nonnull KShadowPrecision shadow_precision,
       final @Nonnull KShadowFilter shadow_filter)
       throws ConstraintError
   {
-    return new KShadowMappedSoft(
+    return new KShadowMappedVariance(
       light_id,
       size_exponent,
       factor_max,
       factor_min,
+      minimum_variance,
       shadow_precision,
       shadow_filter);
   }

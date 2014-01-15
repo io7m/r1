@@ -158,6 +158,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
   {
     private final float                     factor_max;
     private final float                     factor_min;
+    private final float                     minimum_variance;
     private final @Nonnull KShadowFilter    filter;
     private final @Nonnull KShadowPrecision precision;
     private final int                       size;
@@ -165,15 +166,17 @@ import com.io7m.jaux.Constraints.ConstraintError;
     private SBLightShadowMappedVarianceDescription(
       final float factor_max,
       final float factor_min,
+      final float minimum_variance,
       final @Nonnull KShadowPrecision precision,
       final @Nonnull KShadowFilter filter,
       final int size)
       throws ConstraintError
     {
-      super(KShadow.Type.SHADOW_MAPPED_SOFT);
+      super(KShadow.Type.SHADOW_MAPPED_VARIANCE);
       this.size = Constraints.constrainRange(size, 1, 10, "Shadow map size");
       this.factor_max = factor_max;
       this.factor_min = factor_min;
+      this.minimum_variance = minimum_variance;
       this.precision = Constraints.constrainNotNull(precision, "Precision");
       this.filter = Constraints.constrainNotNull(filter, "Filter");
     }
@@ -201,6 +204,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
         return false;
       }
       if (this.filter != other.filter) {
+        return false;
+      }
+      if (Float.floatToIntBits(this.minimum_variance) != Float
+        .floatToIntBits(other.minimum_variance)) {
         return false;
       }
       if (this.precision != other.precision) {
@@ -244,6 +251,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       result = (prime * result) + Float.floatToIntBits(this.factor_max);
       result = (prime * result) + Float.floatToIntBits(this.factor_min);
       result = (prime * result) + this.filter.hashCode();
+      result = (prime * result) + Float.floatToIntBits(this.minimum_variance);
       result = (prime * result) + this.precision.hashCode();
       result = (prime * result) + this.size;
       return result;
@@ -252,18 +260,25 @@ import com.io7m.jaux.Constraints.ConstraintError;
     @Override public String toString()
     {
       final StringBuilder builder = new StringBuilder();
-      builder.append("SBLightShadowMappedVarianceDescription [factor_max=");
+      builder.append("[SBLightShadowMappedVarianceDescription factor_max=");
       builder.append(this.factor_max);
       builder.append(", factor_min=");
       builder.append(this.factor_min);
-      builder.append(", precision=");
-      builder.append(this.precision);
+      builder.append(", minimum_variance=");
+      builder.append(this.minimum_variance);
       builder.append(", filter=");
       builder.append(this.filter);
+      builder.append(", precision=");
+      builder.append(this.precision);
       builder.append(", size=");
       builder.append(this.size);
       builder.append("]");
       return builder.toString();
+    }
+
+    public float getMinimumVariance()
+    {
+      return this.minimum_variance;
     }
   }
 
@@ -293,6 +308,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final int size,
       final float factor_max,
       final float factor_min,
+      final float minimum_variance,
       final @Nonnull KShadowPrecision precision,
       final @Nonnull KShadowFilter filter)
       throws ConstraintError
@@ -300,6 +316,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     return new SBLightShadowMappedVarianceDescription(
       factor_max,
       factor_min,
+      minimum_variance,
       precision,
       filter,
       size);
