@@ -43,12 +43,13 @@ module ShadowVariance is
     depth   : float
   ) : float =
     let
+      value p        = new float (F.lesser_or_equal (depth, moments [x]));
       value variance = F.subtract (moments [y], F.multiply (moments [x], moments [x]));
       value variance = F.maximum (config.variance_min, variance);
       value delta    = F.subtract (depth, moments [x]);
-      value max      = F.divide (variance, F.add (variance, F.multiply (delta, delta)));
+      value p_max    = F.divide (variance, F.add (variance, F.multiply (delta, delta)));
     in
-      max
+      F.maximum (p, p_max)
     end;
 
   function linear_step (
@@ -68,22 +69,22 @@ module ShadowVariance is
     t_shadow_variance : sampler_2d,
     p                 : vector_4f
   ) : float =
-    if F.lesser (p [w], 0.0) then
-      0.0
-    else
-      let
-        value current_tex =
-          T.clip_to_texture (p);
-        value moments =
-          S2.texture (t_shadow_variance, current_tex [x y]) [x y];
-        value p_max =
-          chebyshev_upper_bound (config, moments, current_tex [z]);
-      in
+    let
+      value not_behind =
+        new float (F.greater_or_equal (p [w], 0.0));
+      value current_tex =
+        T.clip_to_texture (p);
+      value moments =
+        S2.texture (t_shadow_variance, current_tex [x y]) [x y];
+      value p_max =
+        chebyshev_upper_bound (config, moments, current_tex [z]);
+      value clamped =
         F.clamp (
           linear_step (config.bleed_reduction, 1.0, p_max),
           config.factor_min,
-          config.factor_max)
-      end
+          config.factor_max);
+    in
+      F.multiply (clamped, not_behind)
     end;
 
   shader vertex shadow_simple_v is
