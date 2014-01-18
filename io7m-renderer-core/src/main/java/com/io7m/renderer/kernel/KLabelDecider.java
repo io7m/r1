@@ -104,9 +104,9 @@ final class KLabelDecider implements
   private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialEmissiveLabel, ConstraintError>    emissive_cache;
   private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialEnvironmentLabel, ConstraintError> environment_cache;
   private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialForwardLabel, ConstraintError>     forward_cache;
+  private final @Nonnull LRUCacheTrivial<KLight, KLightLabel, ConstraintError>                      light_cache;
   private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialNormalLabel, ConstraintError>      normal_cache;
   private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialSpecularLabel, ConstraintError>    specular_cache;
-  private final @Nonnull LRUCacheTrivial<KLight, KLightLabel, ConstraintError>                      light_cache;
 
   private KLabelDecider(
     final @Nonnull KGraphicsCapabilities capabilities,
@@ -420,6 +420,17 @@ final class KLabelDecider implements
     }
   }
 
+  @Override public @Nonnull KMaterialDepthLabel getDepthLabel(
+    final @Nonnull KMeshInstance instance)
+    throws ConstraintError
+  {
+    try {
+      return this.depth_cache.cacheGetLU(instance);
+    } catch (final JCacheException x) {
+      throw new UnreachableCodeException(x);
+    }
+  }
+
   @Override public @Nonnull KMaterialEmissiveLabel getEmissiveLabel(
     final @Nonnull KMeshInstance instance)
     throws ConstraintError
@@ -453,28 +464,6 @@ final class KLabelDecider implements
     }
   }
 
-  @Override public @Nonnull KMaterialNormalLabel getNormalLabel(
-    final @Nonnull KMeshInstance instance)
-    throws ConstraintError
-  {
-    try {
-      return this.normal_cache.cacheGetLU(instance);
-    } catch (final JCacheException x) {
-      throw new UnreachableCodeException(x);
-    }
-  }
-
-  @Override public @Nonnull KMaterialSpecularLabel getSpecularLabel(
-    final @Nonnull KMeshInstance instance)
-    throws ConstraintError
-  {
-    try {
-      return this.specular_cache.cacheGetLU(instance);
-    } catch (final JCacheException x) {
-      throw new UnreachableCodeException(x);
-    }
-  }
-
   @Override public @Nonnull KLightLabel getLightLabel(
     final @Nonnull KLight light)
     throws ConstraintError
@@ -486,12 +475,37 @@ final class KLabelDecider implements
     }
   }
 
-  @Override public @Nonnull KMaterialDepthLabel getDepthLabel(
+  @Override public @Nonnull KMaterialNormalLabel getNormalLabel(
     final @Nonnull KMeshInstance instance)
     throws ConstraintError
   {
     try {
-      return this.depth_cache.cacheGetLU(instance);
+      return this.normal_cache.cacheGetLU(instance);
+    } catch (final JCacheException x) {
+      throw new UnreachableCodeException(x);
+    }
+  }
+
+  public @Nonnull BigInteger getSize()
+  {
+    return this.albedo_cache
+      .cacheSize()
+      .add(this.alpha_cache.cacheSize())
+      .add(this.depth_cache.cacheSize())
+      .add(this.emissive_cache.cacheSize())
+      .add(this.environment_cache.cacheSize())
+      .add(this.forward_cache.cacheSize())
+      .add(this.normal_cache.cacheSize())
+      .add(this.specular_cache.cacheSize())
+      .add(this.light_cache.cacheSize());
+  }
+
+  @Override public @Nonnull KMaterialSpecularLabel getSpecularLabel(
+    final @Nonnull KMeshInstance instance)
+    throws ConstraintError
+  {
+    try {
+      return this.specular_cache.cacheGetLU(instance);
     } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     }

@@ -1147,6 +1147,11 @@ public final class SBSceneController implements
   {
     return this.shaders;
   }
+
+  @Override public Future<SBCacheStatistics> rendererGetCacheStatistics()
+  {
+    return this.renderer.getCacheStatistics();
+  }
 }
 
 interface SBSceneControllerInstances extends
@@ -1230,6 +1235,8 @@ interface SBSceneControllerRenderer
 
 interface SBSceneControllerRendererControl
 {
+  public @Nonnull Future<SBCacheStatistics> rendererGetCacheStatistics();
+
   public @Nonnull RMatrixI4x4F<RTransformProjection> rendererGetProjection();
 
   public void rendererSetBackgroundColour(
