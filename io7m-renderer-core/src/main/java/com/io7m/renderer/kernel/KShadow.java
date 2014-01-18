@@ -29,7 +29,6 @@ import com.io7m.jaux.Constraints.ConstraintError;
     private final float depth_bias;
     private final float factor_max;
     private final float factor_min;
-    private final int   size_exponent;
 
     @SuppressWarnings("synthetic-access") private KShadowMappedBasic(
       final @Nonnull Integer light_id,
@@ -41,17 +40,17 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final @Nonnull KShadowFilter shadow_filter)
       throws ConstraintError
     {
-      super(
-        Type.SHADOW_MAPPED_BASIC,
+      super(new KShadowMapDescription(
         light_id,
+        shadow_filter,
         shadow_precision,
-        shadow_filter);
-      this.size_exponent =
+        KShadowType.SHADOW_MAPPED_BASIC,
         Constraints.constrainRange(
           size_exponent,
           1,
           Integer.MAX_VALUE,
-          "Shadow size exponent");
+          "Shadow size exponent")));
+
       this.depth_bias = depth_bias;
       this.factor_max = factor_max;
       this.factor_min = factor_min;
@@ -82,9 +81,6 @@ import com.io7m.jaux.Constraints.ConstraintError;
         .floatToIntBits(other.factor_min)) {
         return false;
       }
-      if (this.size_exponent != other.size_exponent) {
-        return false;
-      }
       return true;
     }
 
@@ -103,11 +99,6 @@ import com.io7m.jaux.Constraints.ConstraintError;
       return this.factor_min;
     }
 
-    public int getSizeExponent()
-    {
-      return this.size_exponent;
-    }
-
     @Override public int hashCode()
     {
       final int prime = 31;
@@ -115,16 +106,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
       result = (prime * result) + Float.floatToIntBits(this.depth_bias);
       result = (prime * result) + Float.floatToIntBits(this.factor_max);
       result = (prime * result) + Float.floatToIntBits(this.factor_min);
-      result = (prime * result) + this.size_exponent;
       return result;
     }
 
     @Override public String toString()
     {
       final StringBuilder builder = new StringBuilder();
-      builder.append("[KShadowMappedBasic size_exponent=");
-      builder.append(this.size_exponent);
-      builder.append(" depth_bias=");
+      builder.append("[KShadowMappedBasic depth_bias=");
       builder.append(this.depth_bias);
       builder.append(" factor_max=");
       builder.append(this.factor_max);
@@ -141,7 +129,6 @@ import com.io7m.jaux.Constraints.ConstraintError;
     private final float factor_min;
     private final float light_bleed_reduction;
     private final float minimum_variance;
-    private final int   size_exponent;
 
     @SuppressWarnings("synthetic-access") private KShadowMappedVariance(
       final @Nonnull Integer light_id,
@@ -154,18 +141,17 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final @Nonnull KShadowFilter shadow_filter)
       throws ConstraintError
     {
-      super(
-        Type.SHADOW_MAPPED_VARIANCE,
+      super(new KShadowMapDescription(
         light_id,
+        shadow_filter,
         shadow_precision,
-        shadow_filter);
-
-      this.size_exponent =
+        KShadowType.SHADOW_MAPPED_VARIANCE,
         Constraints.constrainRange(
           size_exponent,
           1,
           Integer.MAX_VALUE,
-          "Shadow size exponent");
+          "Shadow size exponent")));
+
       this.factor_max = factor_max;
       this.factor_min = factor_min;
       this.minimum_variance = minimum_variance;
@@ -201,9 +187,6 @@ import com.io7m.jaux.Constraints.ConstraintError;
         .floatToIntBits(other.minimum_variance)) {
         return false;
       }
-      if (this.size_exponent != other.size_exponent) {
-        return false;
-      }
       return true;
     }
 
@@ -227,11 +210,6 @@ import com.io7m.jaux.Constraints.ConstraintError;
       return this.minimum_variance;
     }
 
-    public int getSizeExponent()
-    {
-      return this.size_exponent;
-    }
-
     @Override public int hashCode()
     {
       final int prime = 31;
@@ -241,7 +219,6 @@ import com.io7m.jaux.Constraints.ConstraintError;
       result =
         (prime * result) + Float.floatToIntBits(this.light_bleed_reduction);
       result = (prime * result) + Float.floatToIntBits(this.minimum_variance);
-      result = (prime * result) + this.size_exponent;
       return result;
     }
 
@@ -254,31 +231,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
       builder.append(this.factor_min);
       builder.append(" minimum_variance=");
       builder.append(this.minimum_variance);
-      builder.append(" size_exponent=");
-      builder.append(this.size_exponent);
       builder.append(" light_bleed_reduction=");
       builder.append(this.light_bleed_reduction);
       builder.append("]");
       return builder.toString();
-    }
-  }
-
-  static enum Type
-  {
-    SHADOW_MAPPED_BASIC("Mapped basic"),
-    SHADOW_MAPPED_VARIANCE("Mapped variance");
-
-    private final @Nonnull String name;
-
-    private Type(
-      final @Nonnull String name)
-    {
-      this.name = name;
-    }
-
-    @Override public @Nonnull String toString()
-    {
-      return this.name;
     }
   }
 
@@ -328,24 +284,14 @@ import com.io7m.jaux.Constraints.ConstraintError;
       shadow_filter);
   }
 
-  private final @Nonnull Integer          light_id;
-  private final @Nonnull KShadowFilter    shadow_filter;
-  private final @Nonnull KShadowPrecision shadow_precision;
-  private final @Nonnull Type             type;
+  private final @Nonnull KShadowMapDescription description;
 
   private KShadow(
-    final @Nonnull Type type,
-    final @Nonnull Integer light_id,
-    final @Nonnull KShadowPrecision shadow_precision,
-    final @Nonnull KShadowFilter filter)
+    final @Nonnull KShadowMapDescription description)
     throws ConstraintError
   {
-    this.light_id = Constraints.constrainNotNull(light_id, "Light ID");
-    this.type = Constraints.constrainNotNull(type, "Type");
-    this.shadow_precision =
-      Constraints.constrainNotNull(shadow_precision, "Shadow precision");
-    this.shadow_filter =
-      Constraints.constrainNotNull(filter, "Shadow filter");
+    this.description =
+      Constraints.constrainNotNull(description, "Description");
   }
 
   @Override public boolean equals(
@@ -361,64 +307,22 @@ import com.io7m.jaux.Constraints.ConstraintError;
       return false;
     }
     final KShadow other = (KShadow) obj;
-    if (!this.light_id.equals(other.light_id)) {
-      return false;
-    }
-    if (this.shadow_filter != other.shadow_filter) {
-      return false;
-    }
-    if (this.shadow_precision != other.shadow_precision) {
-      return false;
-    }
-    if (this.type != other.type) {
+    if (!this.description.equals(other.description)) {
       return false;
     }
     return true;
   }
 
-  public @Nonnull Integer getLightID()
+  public @Nonnull KShadowMapDescription getDescription()
   {
-    return this.light_id;
-  }
-
-  public @Nonnull KShadowFilter getShadowFilter()
-  {
-    return this.shadow_filter;
-  }
-
-  public @Nonnull KShadowPrecision getShadowPrecision()
-  {
-    return this.shadow_precision;
-  }
-
-  public @Nonnull Type getType()
-  {
-    return this.type;
+    return this.description;
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.light_id.hashCode();
-    result = (prime * result) + this.shadow_filter.hashCode();
-    result = (prime * result) + this.shadow_precision.hashCode();
-    result = (prime * result) + this.type.hashCode();
+    result = (prime * result) + this.description.hashCode();
     return result;
-  }
-
-  @Override public String toString()
-  {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("KShadow [light_id=");
-    builder.append(this.light_id);
-    builder.append(", shadow_precision=");
-    builder.append(this.shadow_precision);
-    builder.append(", type=");
-    builder.append(this.type);
-    builder.append(", shadow_filter=");
-    builder.append(this.shadow_filter);
-    builder.append("]");
-    return builder.toString();
   }
 }

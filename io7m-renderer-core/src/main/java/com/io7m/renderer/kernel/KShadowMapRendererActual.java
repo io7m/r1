@@ -56,13 +56,15 @@ import com.io7m.renderer.kernel.KTransform.Context;
 
 public final class KShadowMapRendererActual implements KShadowMapRenderer
 {
-  public static @Nonnull KShadowMapRendererActual newRenderer(
-    final @Nonnull JCGLImplementation gl,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache,
-    final @Nonnull KGraphicsCapabilities caps,
-    final @Nonnull Log log)
-    throws ConstraintError
+  public static @Nonnull
+    KShadowMapRendererActual
+    newRenderer(
+      final @Nonnull JCGLImplementation gl,
+      final @Nonnull LUCache<String, KProgram, RException> shader_cache,
+      final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache,
+      final @Nonnull KGraphicsCapabilities caps,
+      final @Nonnull Log log)
+      throws ConstraintError
   {
     return new KShadowMapRendererActual(
       gl,
@@ -72,22 +74,22 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       log);
   }
 
-  private final @Nonnull KDepthRenderer                          depth_renderer;
-  private final @Nonnull KDepthVarianceRenderer                  depth_variance_renderer;
-  private final @Nonnull JCGLImplementation                      g;
-  private final @Nonnull StringBuilder                           label_cache;
-  private final @Nonnull Log                                     log;
-  private final @Nonnull RMatrixM4x4F<RTransformView>            m4_view;
-  private final @Nonnull KMutableMatrices                        matrices;
-  private final @Nonnull LUCache<String, KProgram, RException>   shader_cache;
-  private final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache;
-  private final @Nonnull Context                                 transform_context;
-  private final @Nonnull VectorM2I                               viewport_size;
+  private final @Nonnull KDepthRenderer                                        depth_renderer;
+  private final @Nonnull KDepthVarianceRenderer                                depth_variance_renderer;
+  private final @Nonnull JCGLImplementation                                    g;
+  private final @Nonnull StringBuilder                                         label_cache;
+  private final @Nonnull Log                                                   log;
+  private final @Nonnull RMatrixM4x4F<RTransformView>                          m4_view;
+  private final @Nonnull KMutableMatrices                                      matrices;
+  private final @Nonnull LUCache<String, KProgram, RException>                 shader_cache;
+  private final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache;
+  private final @Nonnull Context                                               transform_context;
+  private final @Nonnull VectorM2I                                             viewport_size;
 
   private KShadowMapRendererActual(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache,
+    final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache,
     final @Nonnull KGraphicsCapabilities caps,
     final Log log)
     throws ConstraintError
@@ -148,7 +150,8 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
     throws RException,
       ConstraintError
   {
-    final PCache<KShadow, KShadowMap, RException> cache = this.shadow_cache;
+    final PCache<KShadowMapDescription, KShadowMap, RException> cache =
+      this.shadow_cache;
 
     final Map<KLight, Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>>> casters =
       batched.getShadowCasters();
@@ -181,12 +184,13 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
                 try {
                   final KShadow shadow =
                     ((Option.Some<KShadow>) projective.getShadow()).value;
+                  final KShadowMapDescription desc = shadow.getDescription();
 
-                  switch (shadow.getType()) {
+                  switch (desc.getType()) {
                     case SHADOW_MAPPED_VARIANCE:
                     {
                       final KShadowMapVariance smv =
-                        (KShadowMapVariance) cache.pcCacheGet(shadow);
+                        (KShadowMapVariance) cache.pcCacheGet(desc);
                       KShadowMapRendererActual.this
                         .renderShadowMapVarianceBatch(batch, smv, mwp);
                       break;
@@ -194,7 +198,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
                     case SHADOW_MAPPED_BASIC:
                     {
                       final KShadowMapBasic smb =
-                        (KShadowMapBasic) cache.pcCacheGet(shadow);
+                        (KShadowMapBasic) cache.pcCacheGet(desc);
                       KShadowMapRendererActual.this
                         .renderShadowMapBasicBatch(batch, smb, mwp);
                       break;
@@ -237,12 +241,13 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
           final KProjective projective = (KLight.KProjective) light;
           final KShadow shadow =
             ((Option.Some<KShadow>) projective.getShadow()).value;
+          final KShadowMapDescription desc = shadow.getDescription();
 
-          switch (shadow.getType()) {
+          switch (desc.getType()) {
             case SHADOW_MAPPED_VARIANCE:
             {
               final KShadowMapVariance smv =
-                (KShadowMapVariance) this.shadow_cache.pcCacheGet(shadow);
+                (KShadowMapVariance) this.shadow_cache.pcCacheGet(desc);
 
               final FramebufferReferenceUsable fb =
                 smv.kFramebufferGetDepthPassFramebuffer();
@@ -261,7 +266,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
             case SHADOW_MAPPED_BASIC:
             {
               final KShadowMapBasic smb =
-                (KShadowMapBasic) this.shadow_cache.pcCacheGet(shadow);
+                (KShadowMapBasic) this.shadow_cache.pcCacheGet(desc);
 
               final FramebufferReferenceUsable fb =
                 smb.kFramebufferGetDepthPassFramebuffer();
@@ -370,7 +375,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
         {
           try {
             return KShadowMapRendererActual.this.shadow_cache
-              .pcCacheGet(shadow);
+              .pcCacheGet(shadow.getDescription());
           } catch (final ConstraintError e) {
             throw e;
           } catch (final RException e) {

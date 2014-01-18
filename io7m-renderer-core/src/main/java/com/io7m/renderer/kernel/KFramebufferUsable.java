@@ -16,6 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
+import javax.annotation.Nonnull;
+
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLResourceUsable;
 
@@ -25,5 +27,5 @@ public interface KFramebufferUsable extends JCGLResourceUsable
    * Retrieve the size of the area to which rendering will occur.
    */
 
-  public AreaInclusive kFramebufferGetArea();
+  public @Nonnull AreaInclusive kFramebufferGetArea();
 }

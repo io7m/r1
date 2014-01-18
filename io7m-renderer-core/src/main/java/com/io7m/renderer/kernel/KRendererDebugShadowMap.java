@@ -48,14 +48,16 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
 {
   private static final @Nonnull String NAME = "debug-shadow-map";
 
-  public static KRendererDebugShadowMap rendererNew(
-    final @Nonnull JCGLImplementation g,
-    final @Nonnull KLabelDecider decider,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull KGraphicsCapabilities caps,
-    final @Nonnull Log log,
-    final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache)
-    throws ConstraintError
+  public static
+    KRendererDebugShadowMap
+    rendererNew(
+      final @Nonnull JCGLImplementation g,
+      final @Nonnull KLabelDecider decider,
+      final @Nonnull LUCache<String, KProgram, RException> shader_cache,
+      final @Nonnull KGraphicsCapabilities caps,
+      final @Nonnull Log log,
+      final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache)
+      throws ConstraintError
   {
     return new KRendererDebugShadowMap(
       g,
@@ -63,7 +65,6 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
       shader_cache,
       caps,
       log,
-      decider,
       shadow_cache);
   }
 
@@ -84,8 +85,7 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull KGraphicsCapabilities caps,
     final @Nonnull Log log,
-    final @Nonnull KMaterialDepthLabelCache label_decider,
-    final @Nonnull PCache<KShadow, KShadowMap, RException> shadow_cache)
+    final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache)
     throws ConstraintError
   {
     super(KRendererDebugShadowMap.NAME);
@@ -136,8 +136,6 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
     throws ConstraintError,
       RException
   {
-    final KCamera camera = scene.getCamera();
-
     final KSceneBatchedForward batched =
       KSceneBatchedForward.newBatchedScene(this.decider, this.decider, scene);
 

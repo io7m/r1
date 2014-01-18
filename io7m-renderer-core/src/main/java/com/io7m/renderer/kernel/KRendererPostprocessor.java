@@ -21,29 +21,11 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RException;
 
-public interface KRendererVisitor<A, E extends Throwable>
+public interface KRendererPostprocessor extends KRenderer
 {
-  public A rendererVisitDebug(
-    final @Nonnull KRendererDebug r)
-    throws E,
-      ConstraintError,
-      RException;
-
-  public A rendererVisitDeferred(
-    final @Nonnull KRendererDeferred r)
-    throws E,
-      ConstraintError,
-      RException;
-
-  public A rendererVisitForward(
-    final @Nonnull KRendererForward r)
-    throws E,
-      ConstraintError,
-      RException;
-
-  public A rendererVisitPostprocessor(
-    final @Nonnull KRendererPostprocessor r)
-    throws E,
-      ConstraintError,
+  public void rendererPostprocessorEvaluate(
+    final @Nonnull KFramebufferRGBAUsable input,
+    final @Nonnull KFramebufferRGBAUsable output)
+    throws ConstraintError,
       RException;
 }
