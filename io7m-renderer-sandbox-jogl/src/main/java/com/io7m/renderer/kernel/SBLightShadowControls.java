@@ -34,7 +34,6 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
-import com.io7m.renderer.kernel.KShadow.Type;
 import com.io7m.renderer.kernel.SBLightShadowDescription.SBLightShadowMappedBasicDescription;
 import com.io7m.renderer.kernel.SBLightShadowDescription.SBLightShadowMappedVarianceDescription;
 
@@ -300,8 +299,8 @@ public final class SBLightShadowControls implements IHideable
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-        final KShadow.Type type =
-          (KShadow.Type) SBLightShadowControls.this.type_select
+        final KShadowType type =
+          (KShadowType) SBLightShadowControls.this.type_select
             .getSelectedItem();
         SBLightShadowControls.this.controlsSelectType(type);
       }
@@ -345,7 +344,7 @@ public final class SBLightShadowControls implements IHideable
   }
 
   protected void controlsSelectType(
-    final @Nonnull Type type)
+    final @Nonnull KShadowType type)
   {
     this.mapped_basic_controls.getRowGroup().forceShow();
     this.mapped_variance_controls.getRowGroup().forceShow();
@@ -377,7 +376,7 @@ public final class SBLightShadowControls implements IHideable
     throws ConstraintError
   {
     if (this.shadow.isSelected()) {
-      switch ((KShadow.Type) this.type_select.getSelectedItem()) {
+      switch ((KShadowType) this.type_select.getSelectedItem()) {
         case SHADOW_MAPPED_BASIC:
         {
           return new Option.Some<SBLightShadowDescription>(

@@ -50,7 +50,9 @@ public enum KLightLabel
           return LIGHT_LABEL_PROJECTIVE;
         }
         final KShadow shadow = ((Option.Some<KShadow>) shadow_opt).value;
-        switch (shadow.getType()) {
+        final KShadowMapDescription desc = shadow.getDescription();
+
+        switch (desc.getType()) {
           case SHADOW_MAPPED_BASIC:
             if (caps.getSupportsDepthTextures()) {
               return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC;

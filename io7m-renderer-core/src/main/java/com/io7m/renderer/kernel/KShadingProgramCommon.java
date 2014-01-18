@@ -677,7 +677,9 @@ final class KShadingProgramCommon
       case OPTION_SOME:
       {
         final KShadow ks = ((Option.Some<KShadow>) light.getShadow()).value;
-        switch (ks.getType()) {
+        final KShadowMapDescription desc = ks.getDescription();
+
+        switch (desc.getType()) {
           case SHADOW_MAPPED_BASIC:
           {
             final KShadowMappedBasic ksmb = (KShadow.KShadowMappedBasic) ks;
@@ -717,7 +719,9 @@ final class KShadingProgramCommon
       case OPTION_SOME:
       {
         final KShadow ks = ((Option.Some<KShadow>) light.getShadow()).value;
-        switch (ks.getType()) {
+        final KShadowMapDescription desc = ks.getDescription();
+
+        switch (desc.getType()) {
           case SHADOW_MAPPED_BASIC:
           {
             KShadingProgramCommon.putShadowBasicReuse(program);

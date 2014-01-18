@@ -662,7 +662,7 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull LRUCacheConfig                                            shader_cache_config;
   private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>             shader_load_queue;
   private final @Nonnull HashMap<String, SBShader>                           shaders;
-  private @Nonnull PCache<KShadow, KShadowMap, RException>                   shadow_cache;
+  private @Nonnull PCache<KShadowMapDescription, KShadowMap, RException>     shadow_cache;
   private @Nonnull PCacheConfig                                              shadow_cache_config;
   private @Nonnull HashMap<PathVirtual, KMesh>                               sphere_meshes;
   private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>      texture_cube_delete_queue;
@@ -1122,7 +1122,7 @@ final class SBGLRenderer implements GLEventListener
                 final StringBuilder n = this.name;
                 n.setLength(0);
                 n.append("shadow-");
-                n.append(shadow.getLightID());
+                n.append(shadow.getDescription().getLightID());
 
                 map
                   .kShadowMapAccept(new KShadowMapVisitor<Unit, ConstraintError>() {
@@ -2177,7 +2177,7 @@ final class SBGLRenderer implements GLEventListener
         this.renderer
           .rendererVisitableAccept(new KRendererVisitor<Unit, RException>() {
             @Override public Unit rendererVisitDebug(
-              final KRendererDebug r)
+              final @Nonnull KRendererDebug r)
               throws ConstraintError,
                 RException
             {
@@ -2186,19 +2186,29 @@ final class SBGLRenderer implements GLEventListener
             }
 
             @Override public Unit rendererVisitDeferred(
-              final KRendererDeferred r)
+              final @Nonnull KRendererDeferred r)
             {
               // TODO: No deferred renderers yet
               throw new UnimplementedCodeException();
             }
 
             @Override public Unit rendererVisitForward(
-              final KRendererForward r)
+              final @Nonnull KRendererForward r)
               throws ConstraintError,
                 RException
             {
               r.rendererForwardEvaluate(fb, builder.sceneCreate());
               return Unit.unit();
+            }
+
+            @Override public Unit rendererVisitPostprocessor(
+              final @Nonnull KRendererPostprocessor r)
+              throws RException,
+                ConstraintError,
+                RException
+            {
+              // TODO Auto-generated method stub
+              throw new UnimplementedCodeException();
             }
           });
       }

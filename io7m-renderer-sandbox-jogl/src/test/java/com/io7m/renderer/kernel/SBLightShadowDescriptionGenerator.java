@@ -35,7 +35,7 @@ public final class SBLightShadowDescriptionGenerator implements
   public SBLightShadowDescriptionGenerator()
   {
     this.index_gen =
-      new IntegerGenerator(0, KShadow.Type.values().length - 1);
+      new IntegerGenerator(0, KShadowType.values().length - 1);
     this.size_gen = new IntegerGenerator(1, 10);
     this.prec_gen = new KShadowPrecisionGenerator();
     this.filter_gen = new KShadowFilterGenerator();
@@ -44,7 +44,7 @@ public final class SBLightShadowDescriptionGenerator implements
   @Override public SBLightShadowDescription next()
   {
     try {
-      switch (KShadow.Type.values()[this.index_gen.nextInt()]) {
+      switch (KShadowType.values()[this.index_gen.nextInt()]) {
         case SHADOW_MAPPED_BASIC:
         {
           return SBLightShadowDescription.newShadowMappedBasic(

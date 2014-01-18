@@ -43,7 +43,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final @Nonnull KShadowFilter filter)
       throws ConstraintError
     {
-      super(KShadow.Type.SHADOW_MAPPED_BASIC);
+      super(KShadowType.SHADOW_MAPPED_BASIC);
       this.size = Constraints.constrainRange(size, 1, 10, "Shadow map size");
       this.depth_bias = depth_bias;
       this.factor_max = factor_max;
@@ -174,7 +174,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final int size)
       throws ConstraintError
     {
-      super(KShadow.Type.SHADOW_MAPPED_VARIANCE);
+      super(KShadowType.SHADOW_MAPPED_VARIANCE);
       this.size = Constraints.constrainRange(size, 1, 10, "Shadow map size");
       this.factor_max = factor_max;
       this.factor_min = factor_min;
@@ -332,10 +332,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
       size);
   }
 
-  private final @Nonnull KShadow.Type type;
+  private final @Nonnull KShadowType type;
 
   private SBLightShadowDescription(
-    final @Nonnull KShadow.Type type)
+    final @Nonnull KShadowType type)
     throws ConstraintError
   {
     this.type = Constraints.constrainNotNull(type, "Type");
@@ -360,7 +360,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     return true;
   }
 
-  public @Nonnull KShadow.Type getType()
+  public @Nonnull KShadowType getType()
   {
     return this.type;
   }
