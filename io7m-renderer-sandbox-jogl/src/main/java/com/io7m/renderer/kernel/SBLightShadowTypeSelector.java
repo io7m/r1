@@ -18,7 +18,7 @@ package com.io7m.renderer.kernel;
 
 import javax.swing.JComboBox;
 
-final class SBLightShadowTypeSelector extends JComboBox<KShadow.Type>
+final class SBLightShadowTypeSelector extends JComboBox<KShadowType>
 {
   private static final long serialVersionUID;
 
@@ -28,7 +28,7 @@ final class SBLightShadowTypeSelector extends JComboBox<KShadow.Type>
 
   public SBLightShadowTypeSelector()
   {
-    for (final KShadow.Type type : KShadow.Type.values()) {
+    for (final KShadowType type : KShadowType.values()) {
       this.addItem(type);
     }
 

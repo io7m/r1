@@ -26,14 +26,12 @@ import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jlucache.LUCacheLoader;
 import com.io7m.renderer.RException;
-import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
-import com.io7m.renderer.kernel.KShadow.KShadowMappedVariance;
 
 final class KShadowCacheLoader implements
-  LUCacheLoader<KShadow, KShadowMap, RException>
+  LUCacheLoader<KShadowMapDescription, KShadowMap, RException>
 {
   public static @Nonnull
-    LUCacheLoader<KShadow, KShadowMap, RException>
+    LUCacheLoader<KShadowMapDescription, KShadowMap, RException>
     newLoader(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull Log log)
@@ -69,15 +67,14 @@ final class KShadowCacheLoader implements
   }
 
   @Override public KShadowMap luCacheLoadFrom(
-    final @Nonnull KShadow s)
+    final @Nonnull KShadowMapDescription s)
     throws RException
   {
     try {
       switch (s.getType()) {
         case SHADOW_MAPPED_VARIANCE:
         {
-          final KShadowMappedVariance smv = (KShadowMappedVariance) s;
-          final long size = 2 << (smv.getSizeExponent() - 1);
+          final long size = 2 << (s.getSizeExponent() - 1);
 
           if (this.log.enabled(Level.LOG_DEBUG)) {
             this.message.setLength(0);
@@ -89,18 +86,17 @@ final class KShadowCacheLoader implements
             this.log.debug(this.message.toString());
           }
 
-          final KShadowFilter filter = smv.getShadowFilter();
+          final KShadowFilter filter = s.getShadowFilter();
           return KShadowMap.KShadowMapVariance.newShadowMapVariance(
             this.gi,
             (int) size,
             (int) size,
             filter,
-            smv.getShadowPrecision());
+            s.getShadowPrecision());
         }
         case SHADOW_MAPPED_BASIC:
         {
-          final KShadowMappedBasic smb = (KShadowMappedBasic) s;
-          final long size = 2 << (smb.getSizeExponent() - 1);
+          final long size = 2 << (s.getSizeExponent() - 1);
 
           if (this.log.enabled(Level.LOG_DEBUG)) {
             this.message.setLength(0);
@@ -112,13 +108,13 @@ final class KShadowCacheLoader implements
             this.log.debug(this.message.toString());
           }
 
-          final KShadowFilter filter = smb.getShadowFilter();
+          final KShadowFilter filter = s.getShadowFilter();
           return KShadowMap.KShadowMapBasic.newShadowMapBasic(
             this.gi,
             (int) size,
             (int) size,
             filter,
-            smb.getShadowPrecision());
+            s.getShadowPrecision());
         }
       }
 

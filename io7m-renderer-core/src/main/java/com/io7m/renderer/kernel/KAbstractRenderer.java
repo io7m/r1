@@ -22,7 +22,7 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RException;
 
-public abstract class KAbstractRenderer implements KRenderer
+abstract class KAbstractRenderer implements KRenderer
 {
   public static abstract class KAbstractRendererDebug extends
     KAbstractRenderer implements KRendererDebug
@@ -90,6 +90,29 @@ public abstract class KAbstractRenderer implements KRenderer
     {
       Constraints.constrainNotNull(v, "Visitor");
       return v.rendererVisitForward(this);
+    }
+  }
+
+  public static abstract class KAbstractRendererPostprocessor extends
+    KAbstractRenderer implements KRendererPostprocessor
+  {
+    protected KAbstractRendererPostprocessor(
+      final @Nonnull String name)
+    {
+      super(name);
+    }
+
+    @Override public final
+      <A, E extends Throwable, V extends KRendererVisitor<A, E>>
+      A
+      rendererVisitableAccept(
+        final @Nonnull V v)
+        throws ConstraintError,
+          RException,
+          E
+    {
+      Constraints.constrainNotNull(v, "Visitor");
+      return v.rendererVisitPostprocessor(this);
     }
   }
 

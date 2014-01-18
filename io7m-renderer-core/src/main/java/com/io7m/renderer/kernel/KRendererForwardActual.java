@@ -249,8 +249,9 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       JCGLException
   {
     final Some<KShadow> some = (Some<KShadow>) light.getShadow();
+    final KShadowMapDescription desc = some.value.getDescription();
 
-    switch (some.value.getType()) {
+    switch (desc.getType()) {
       case SHADOW_MAPPED_BASIC:
       {
         final KShadowMappedBasic shadow = (KShadowMappedBasic) some.value;
@@ -286,8 +287,9 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       ConstraintError
   {
     final Some<KShadow> some = (Some<KShadow>) light.getShadow();
+    final KShadowMapDescription desc = some.value.getDescription();
 
-    switch (some.value.getType()) {
+    switch (desc.getType()) {
       case SHADOW_MAPPED_BASIC:
       {
         KShadingProgramCommon.putShadowBasicReuse(program);
