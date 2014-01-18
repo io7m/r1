@@ -25,6 +25,8 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Unit;
+import com.io7m.jcache.JCacheException;
+import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
@@ -40,8 +42,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
-import com.io7m.jlucache.LUCache;
-import com.io7m.jlucache.LUCacheException;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
@@ -254,7 +254,7 @@ final class KRendererDebugDepthVariance extends KAbstractRendererDebug
         String.format("depth_variance_%s", label.getCode());
       final KProgram kp =
         KRendererDebugDepthVariance.this.shader_cache
-          .luCacheGet(program_name);
+          .cacheGetLU(program_name);
 
       final JCBExecutionAPI e = kp.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
@@ -277,7 +277,7 @@ final class KRendererDebugDepthVariance extends KAbstractRendererDebug
         }
       });
 
-    } catch (final LUCacheException x) {
+    } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     }
   }
