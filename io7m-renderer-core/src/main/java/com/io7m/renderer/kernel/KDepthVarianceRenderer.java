@@ -25,6 +25,8 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Unit;
+import com.io7m.jcache.JCacheException;
+import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
@@ -44,8 +46,6 @@ import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
-import com.io7m.jlucache.LUCache;
-import com.io7m.jlucache.LUCacheException;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.renderer.RException;
@@ -247,7 +247,7 @@ public final class KDepthVarianceRenderer
       final @Nonnull JCGLInterfaceCommon gc,
       final @Nonnull MatricesObserver mwo)
       throws ConstraintError,
-        LUCacheException,
+        JCacheException,
         JCGLException,
         RException
   {
@@ -260,7 +260,7 @@ public final class KDepthVarianceRenderer
 
     for (final KMaterialDepthVarianceLabel label : batches.keySet()) {
       final List<KMeshInstanceTransformed> batch = batches.get(label);
-      final KProgram program = this.shader_cache.luCacheGet(label.getName());
+      final KProgram program = this.shader_cache.cacheGetLU(label.getName());
       final JCBExecutionAPI exec = program.getExecutable();
 
       exec.execRun(new JCBExecutorProcedure() {
@@ -310,7 +310,7 @@ public final class KDepthVarianceRenderer
       gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
       gc.cullingEnable(faces, order);
       this.renderDepthPassBatches(batches, gc, mwo);
-    } catch (final LUCacheException e) {
+    } catch (final JCacheException e) {
       throw new UnreachableCodeException(e);
     } finally {
       gc.framebufferDrawUnbind();

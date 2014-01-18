@@ -16,25 +16,27 @@
 
 package com.io7m.renderer.kernel;
 
+import java.math.BigInteger;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jcache.JCacheLoader;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jlog.Log;
-import com.io7m.jlucache.LUCacheLoader;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.renderer.RException;
 
 final class KShaderCacheLoader implements
-  LUCacheLoader<String, KProgram, RException>
+  JCacheLoader<String, KProgram, RException>
 {
   public static @Nonnull
-    LUCacheLoader<String, KProgram, RException>
+    JCacheLoader<String, KProgram, RException>
     newLoader(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull FSCapabilityRead fs,
@@ -60,7 +62,7 @@ final class KShaderCacheLoader implements
     this.fs = Constraints.constrainNotNull(fs, "Filesystem");
   }
 
-  @Override public void luCacheClose(
+  @Override public void cacheValueClose(
     final @Nonnull KProgram v)
     throws RException
   {
@@ -77,7 +79,7 @@ final class KShaderCacheLoader implements
     }
   }
 
-  @Override public @Nonnull KProgram luCacheLoadFrom(
+  @Override public @Nonnull KProgram cacheValueLoad(
     final @Nonnull String name)
     throws RException
   {
@@ -100,9 +102,9 @@ final class KShaderCacheLoader implements
     }
   }
 
-  @Override public long luCacheSizeOf(
+  @Override public @Nonnull BigInteger cacheValueSizeOf(
     final @Nonnull KProgram v)
   {
-    return 1;
+    return BigInteger.ONE;
   }
 }

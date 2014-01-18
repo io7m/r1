@@ -28,6 +28,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.Unit;
+import com.io7m.jcache.JCacheException;
+import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.BlendFunction;
@@ -47,8 +49,6 @@ import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
-import com.io7m.jlucache.LUCache;
-import com.io7m.jlucache.LUCacheException;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
@@ -1053,7 +1053,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
                 batched,
                 mwo);
               return Unit.unit();
-            } catch (final LUCacheException e) {
+            } catch (final JCacheException e) {
               throw new UnreachableCodeException(e);
             }
           }
@@ -1082,7 +1082,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     throws JCGLException,
       ConstraintError,
       RException,
-      LUCacheException
+      JCacheException
   {
     this.renderOpaqueLitBatches(gc, shadow_context, batched, mwo);
     this.renderOpaqueUnlitBatches(gc, batched, mwo);
@@ -1100,7 +1100,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     throws ConstraintError,
       JCGLException,
       RException,
-      LUCacheException
+      JCacheException
   {
     final Map<KLight, Map<KMaterialForwardLabel, List<KMeshInstanceTransformed>>> by_light =
       batched.getBatchesOpaqueLit();
@@ -1125,7 +1125,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
         }
 
         final KTextureUnitAllocator unit_allocator = this.texture_units;
-        final KProgram kprogram = this.shader_cache.luCacheGet(shader_name);
+        final KProgram kprogram = this.shader_cache.cacheGetLU(shader_name);
         kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
           @Override public void call(
             final JCBProgram program)
@@ -1158,7 +1158,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     final @Nonnull MatricesObserver mwo)
     throws ConstraintError,
       RException,
-      LUCacheException,
+      JCacheException,
       JCGLException
   {
     final Map<KMaterialForwardLabel, List<KMeshInstanceTransformed>> unlit =
@@ -1171,7 +1171,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
         KRendererForwardActual.makeUnlitShaderName(label);
 
       final KTextureUnitAllocator units = this.texture_units;
-      final KProgram kprogram = this.shader_cache.luCacheGet(shader_name);
+      final KProgram kprogram = this.shader_cache.cacheGetLU(shader_name);
       kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
         @Override public void call(
           final JCBProgram program)
@@ -1198,7 +1198,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     final @Nonnull MatricesObserver mwo)
     throws ConstraintError,
       RException,
-      LUCacheException
+      JCacheException
   {
     final JCGLInterfaceCommon gc = this.g.getGLCommon();
 
@@ -1224,13 +1224,13 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     this.shadow_renderer.shadowMapRendererEvaluate(
       camera,
       batched.getBatchedShadow(),
-      new KShadowMapWith<Unit, LUCacheException>() {
+      new KShadowMapWith<Unit, JCacheException>() {
         @Override public Unit withMaps(
           final @Nonnull KShadowMapContext shadow_context)
           throws ConstraintError,
             JCGLException,
             RException,
-            LUCacheException
+            JCacheException
         {
           /**
            * Render scene with rendered shadow maps.
@@ -1300,19 +1300,19 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     throws JCGLException,
       ConstraintError,
       RException,
-      LUCacheException
+      JCacheException
   {
     final List<KTranslucent> translucents = batched.getBatchesTranslucent();
 
     for (final KTranslucent translucent : translucents) {
       translucent
-        .translucentAccept(new KTranslucentVisitor<Unit, LUCacheException>() {
+        .translucentAccept(new KTranslucentVisitor<Unit, JCacheException>() {
           @Override public Unit translucentVisitLit(
             final @Nonnull KTranslucentLit t)
             throws ConstraintError,
               JCGLException,
               RException,
-              LUCacheException
+              JCacheException
           {
             KRendererForwardActual.this.renderTranslucentLit(
               gc,
@@ -1327,7 +1327,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
             throws ConstraintError,
               JCGLException,
               RException,
-              LUCacheException
+              JCacheException
           {
             KRendererForwardActual.this.renderTranslucentUnlit(gc, mwo, t);
             return Unit.unit();
@@ -1344,7 +1344,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     throws ConstraintError,
       RException,
       JCGLException,
-      LUCacheException
+      JCacheException
   {
     final KTextureUnitAllocator unit_allocator = this.texture_units;
     final Set<KLight> lights = t.translucentGetLights();
@@ -1382,7 +1382,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
         gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
       }
 
-      final KProgram kprogram = this.shader_cache.luCacheGet(shader_name);
+      final KProgram kprogram = this.shader_cache.cacheGetLU(shader_name);
       kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
         @Override public void call(
           final @Nonnull JCBProgram program)
@@ -1421,7 +1421,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
     final @Nonnull KTranslucentUnlit t)
     throws ConstraintError,
       RException,
-      LUCacheException,
+      JCacheException,
       JCGLException
   {
     final KTextureUnitAllocator unit_allocator = this.texture_units;
@@ -1436,7 +1436,7 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       BlendFunction.BLEND_ONE,
       BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
 
-    final KProgram kprogram = this.shader_cache.luCacheGet(shader_name);
+    final KProgram kprogram = this.shader_cache.cacheGetLU(shader_name);
     kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
       @Override public void call(
         final @Nonnull JCBProgram program)
