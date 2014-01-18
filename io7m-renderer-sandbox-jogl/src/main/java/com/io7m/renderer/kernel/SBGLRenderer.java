@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,6 +51,12 @@ import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Pair;
 import com.io7m.jaux.functional.Unit;
+import com.io7m.jcache.LRUCacheConfig;
+import com.io7m.jcache.LRUCacheTrivial;
+import com.io7m.jcache.PCache;
+import com.io7m.jcache.PCacheConfig;
+import com.io7m.jcache.PCacheConfig.Builder;
+import com.io7m.jcache.PCacheTrivial;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferUsable;
@@ -89,12 +96,6 @@ import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jlog.Log;
-import com.io7m.jlucache.LRUCacheConfig;
-import com.io7m.jlucache.LRUCacheTrivial;
-import com.io7m.jlucache.PCache;
-import com.io7m.jlucache.PCacheConfig;
-import com.io7m.jlucache.PCacheConfig.Builder;
-import com.io7m.jlucache.PCacheTrivial;
 import com.io7m.jparasol.xml.PGLSLMetaXML;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionM4F;
@@ -1258,7 +1259,7 @@ final class SBGLRenderer implements GLEventListener
       final JCGLSLVersion version = gl.metaGetSLVersion();
 
       this.shader_cache_config =
-        LRUCacheConfig.empty().withMaximumCapacity(1024);
+        LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(1024));
       this.shader_cache =
         LRUCacheTrivial.newCache(
           KShaderCacheLoader.newLoader(this.gi, this.filesystem, this.log),
@@ -1266,12 +1267,13 @@ final class SBGLRenderer implements GLEventListener
 
       this.capabilities = KGraphicsCapabilities.getCapabilities(this.gi);
 
-      this.label_cache = KLabelDecider.newDecider(this.capabilities, 8192);
+      this.label_cache =
+        KLabelDecider.newDecider(this.capabilities, BigInteger.valueOf(8192));
 
       {
         final Builder b = PCacheConfig.newBuilder();
         b.setNoMaximumSize();
-        b.setMaximumAge(60);
+        b.setMaximumAge(BigInteger.valueOf(60));
         this.shadow_cache_config = b.create();
         this.shadow_cache =
           PCacheTrivial.newCache(

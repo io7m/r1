@@ -16,22 +16,24 @@
 
 package com.io7m.renderer.kernel;
 
+import java.math.BigInteger;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jcache.JCacheLoader;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
-import com.io7m.jlucache.LUCacheLoader;
 import com.io7m.renderer.RException;
 
 final class KShadowCacheLoader implements
-  LUCacheLoader<KShadowMapDescription, KShadowMap, RException>
+  JCacheLoader<KShadowMapDescription, KShadowMap, RException>
 {
   public static @Nonnull
-    LUCacheLoader<KShadowMapDescription, KShadowMap, RException>
+    JCacheLoader<KShadowMapDescription, KShadowMap, RException>
     newLoader(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull Log log)
@@ -55,7 +57,7 @@ final class KShadowCacheLoader implements
     this.message = new StringBuilder();
   }
 
-  @Override public void luCacheClose(
+  @Override public void cacheValueClose(
     final @Nonnull KShadowMap v)
     throws RException
   {
@@ -66,7 +68,7 @@ final class KShadowCacheLoader implements
     }
   }
 
-  @Override public KShadowMap luCacheLoadFrom(
+  @Override public KShadowMap cacheValueLoad(
     final @Nonnull KShadowMapDescription s)
     throws RException
   {
@@ -124,9 +126,9 @@ final class KShadowCacheLoader implements
     }
   }
 
-  @Override public long luCacheSizeOf(
+  @Override public BigInteger cacheValueSizeOf(
     final @Nonnull KShadowMap f)
   {
-    return f.kShadowMapGetSizeBytes();
+    return BigInteger.valueOf(f.kShadowMapGetSizeBytes());
   }
 }

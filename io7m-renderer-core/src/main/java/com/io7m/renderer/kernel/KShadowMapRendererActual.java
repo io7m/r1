@@ -29,6 +29,9 @@ import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Unit;
+import com.io7m.jcache.JCacheException;
+import com.io7m.jcache.LUCache;
+import com.io7m.jcache.PCache;
 import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
@@ -36,9 +39,6 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jlog.Log;
-import com.io7m.jlucache.LUCache;
-import com.io7m.jlucache.LUCacheException;
-import com.io7m.jlucache.PCache;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.renderer.RException;
 import com.io7m.renderer.RMatrixI4x4F;
@@ -190,7 +190,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
                     case SHADOW_MAPPED_VARIANCE:
                     {
                       final KShadowMapVariance smv =
-                        (KShadowMapVariance) cache.pcCacheGet(desc);
+                        (KShadowMapVariance) cache.cacheGetPeriodic(desc);
                       KShadowMapRendererActual.this
                         .renderShadowMapVarianceBatch(batch, smv, mwp);
                       break;
@@ -198,7 +198,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
                     case SHADOW_MAPPED_BASIC:
                     {
                       final KShadowMapBasic smb =
-                        (KShadowMapBasic) cache.pcCacheGet(desc);
+                        (KShadowMapBasic) cache.cacheGetPeriodic(desc);
                       KShadowMapRendererActual.this
                         .renderShadowMapBasicBatch(batch, smb, mwp);
                       break;
@@ -206,7 +206,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
                   }
 
                   return Unit.unit();
-                } catch (final LUCacheException e) {
+                } catch (final JCacheException e) {
                   throw new UnreachableCodeException(e);
                 }
               }
@@ -221,7 +221,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
   private void renderShadowMapsInitialize(
     final @Nonnull Set<KLight> lights)
     throws ConstraintError,
-      LUCacheException,
+      JCacheException,
       JCGLException,
       RException
   {
@@ -247,7 +247,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
             case SHADOW_MAPPED_VARIANCE:
             {
               final KShadowMapVariance smv =
-                (KShadowMapVariance) this.shadow_cache.pcCacheGet(desc);
+                (KShadowMapVariance) this.shadow_cache.cacheGetPeriodic(desc);
 
               final FramebufferReferenceUsable fb =
                 smv.kFramebufferGetDepthPassFramebuffer();
@@ -266,7 +266,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
             case SHADOW_MAPPED_BASIC:
             {
               final KShadowMapBasic smb =
-                (KShadowMapBasic) this.shadow_cache.pcCacheGet(desc);
+                (KShadowMapBasic) this.shadow_cache.cacheGetPeriodic(desc);
 
               final FramebufferReferenceUsable fb =
                 smb.kFramebufferGetDepthPassFramebuffer();
@@ -361,7 +361,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       RException,
       E
   {
-    this.shadow_cache.pcPeriodStart();
+    this.shadow_cache.cachePeriodStart();
     try {
       this.renderShadowMapsInitialize(batches.getShadowCasters().keySet());
       this.renderShadowMapsPre(camera, batches);
@@ -375,22 +375,22 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
         {
           try {
             return KShadowMapRendererActual.this.shadow_cache
-              .pcCacheGet(shadow.getDescription());
+              .cacheGetPeriodic(shadow.getDescription());
           } catch (final ConstraintError e) {
             throw e;
           } catch (final RException e) {
             throw e;
-          } catch (final LUCacheException e) {
+          } catch (final JCacheException e) {
             throw new UnreachableCodeException(e);
           }
         }
       });
-    } catch (final LUCacheException e) {
+    } catch (final JCacheException e) {
       throw new UnreachableCodeException(e);
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
     } finally {
-      this.shadow_cache.pcPeriodEnd();
+      this.shadow_cache.cachePeriodEnd();
     }
   }
 

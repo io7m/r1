@@ -146,9 +146,9 @@
       <version>0.23.6</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.jlucache</groupId>
-      <artifactId>io7m-jlucache</artifactId>
-      <version>0.2.1</version>
+      <groupId>com.io7m.jcache</groupId>
+      <artifactId>io7m-jcache</artifactId>
+      <version>[0.3.0, 0.4.0)</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
