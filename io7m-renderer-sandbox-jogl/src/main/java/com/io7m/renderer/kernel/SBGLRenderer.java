@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -156,6 +156,26 @@ final class SBGLRenderer implements GLEventListener
           }
 
           throw new JCGLRuntimeException(-1, "OpenGL not ready!");
+        }
+      });
+    }
+  }
+
+  private class CacheStatisticsFuture extends FutureTask<SBCacheStatistics>
+  {
+    CacheStatisticsFuture()
+    {
+      super(new Callable<SBCacheStatistics>() {
+        @SuppressWarnings("synthetic-access") @Override public
+          SBCacheStatistics
+          call()
+            throws Exception
+        {
+          return new SBCacheStatistics(
+            SBGLRenderer.this.label_cache.getSize(),
+            SBGLRenderer.this.shader_cache.cacheItemCount(),
+            SBGLRenderer.this.shadow_cache.cacheItemCount(),
+            SBGLRenderer.this.shadow_cache.cacheSize());
         }
       });
     }
@@ -666,6 +686,7 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull PCache<KShadowMapDescription, KShadowMap, RException>     shadow_cache;
   private @Nonnull PCacheConfig                                              shadow_cache_config;
   private @Nonnull HashMap<PathVirtual, KMesh>                               sphere_meshes;
+  private final @Nonnull ConcurrentLinkedQueue<CacheStatisticsFuture>        cache_statistics_queue;
   private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>      texture_cube_delete_queue;
   private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>        texture_cube_load_queue;
   private final @Nonnull TextureLoader                                       texture_loader;
@@ -707,6 +728,9 @@ final class SBGLRenderer implements GLEventListener
     this.texture2d_delete_queue =
       new ConcurrentLinkedQueue<Texture2DDeleteFuture>();
     this.textures_2d = new HashMap<PathVirtual, Texture2DStatic>();
+
+    this.cache_statistics_queue =
+      new ConcurrentLinkedQueue<CacheStatisticsFuture>();
 
     this.texture_cube_load_queue =
       new ConcurrentLinkedQueue<TextureCubeLoadFuture>();
@@ -1101,6 +1125,7 @@ final class SBGLRenderer implements GLEventListener
     SBGLRenderer.processQueue(this.texture_cube_load_queue);
     SBGLRenderer.processQueue(this.mesh_load_queue);
     SBGLRenderer.processQueue(this.shader_load_queue);
+    SBGLRenderer.processQueue(this.cache_statistics_queue);
   }
 
   private void handleShadowMapDumpRequest()
@@ -2363,5 +2388,12 @@ final class SBGLRenderer implements GLEventListener
   void unsetCustomProjection()
   {
     this.camera_custom_projection.set(null);
+  }
+
+  @Nonnull Future<SBCacheStatistics> getCacheStatistics()
+  {
+    final CacheStatisticsFuture f = new CacheStatisticsFuture();
+    this.cache_statistics_queue.add(f);
+    return f;
   }
 }
