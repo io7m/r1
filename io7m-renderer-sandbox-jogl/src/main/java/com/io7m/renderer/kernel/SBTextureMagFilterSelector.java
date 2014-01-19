@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,23 +16,26 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
+import javax.swing.JComboBox;
 
-import net.java.quickcheck.Generator;
-import net.java.quickcheck.generator.support.IntegerGenerator;
+import com.io7m.jcanephora.TextureFilterMagnification;
 
-public final class KShadowFilterGenerator implements Generator<KShadowFilter>
+public final class SBTextureMagFilterSelector extends
+  JComboBox<TextureFilterMagnification>
 {
-  private final @Nonnull IntegerGenerator index_gen;
+  private static final long serialVersionUID = -1080392482805214287L;
 
-  public KShadowFilterGenerator()
+  public SBTextureMagFilterSelector()
   {
-    this.index_gen =
-      new IntegerGenerator(0, KShadowFilter.values().length - 1);
+    for (final TextureFilterMagnification type : TextureFilterMagnification
+      .values()) {
+      this.addItem(type);
+    }
+    this.setSelectedItem(TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
   }
 
-  @Override public KShadowFilter next()
+  @Override public TextureFilterMagnification getSelectedItem()
   {
-    return KShadowFilter.values()[this.index_gen.nextInt()];
+    return (TextureFilterMagnification) super.getSelectedItem();
   }
 }

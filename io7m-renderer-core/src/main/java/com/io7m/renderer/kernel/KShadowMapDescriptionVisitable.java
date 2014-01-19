@@ -21,11 +21,14 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RException;
 
-public interface KRendererPostprocessor extends KRenderer
+public interface KShadowMapDescriptionVisitable
 {
-  public void rendererPostprocessorEvaluate(
-    final @Nonnull KFramebufferRGBAUsable input,
-    final @Nonnull KFramebufferRGBAUsable output)
-    throws ConstraintError,
-      RException;
+  public
+    <A, E extends Throwable, V extends KShadowMapDescriptionVisitor<A, E>>
+    A
+    kShadowMapDescriptionAccept(
+      final @Nonnull V v)
+      throws E,
+        ConstraintError,
+        RException;
 }

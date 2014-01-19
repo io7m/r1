@@ -209,7 +209,7 @@ public final class KDepthVarianceRenderer
       final @Nonnull RMatrixI4x4F<RTransformView> view,
       final @Nonnull RMatrixI4x4F<RTransformProjection> projection,
       final @Nonnull Map<KMaterialDepthVarianceLabel, List<KMeshInstanceTransformed>> batches,
-      final @Nonnull KFramebufferDepthUsable framebuffer,
+      final @Nonnull KFramebufferDepthVarianceUsable framebuffer,
       final @Nonnull FaceSelection faces,
       final @Nonnull FaceWindingOrder order)
       throws ConstraintError,
@@ -289,7 +289,7 @@ public final class KDepthVarianceRenderer
     void
     renderScene(
       final @Nonnull Map<KMaterialDepthVarianceLabel, List<KMeshInstanceTransformed>> batches,
-      final @Nonnull KFramebufferDepthUsable framebuffer,
+      final @Nonnull KFramebufferDepthVarianceUsable framebuffer,
       final @Nonnull MatricesObserver mwo,
       final @Nonnull FaceSelection faces,
       final @Nonnull FaceWindingOrder order)
@@ -300,7 +300,7 @@ public final class KDepthVarianceRenderer
     final JCGLInterfaceCommon gc = this.g.getGLCommon();
 
     final FramebufferReferenceUsable fb =
-      framebuffer.kFramebufferGetDepthPassFramebuffer();
+      framebuffer.kFramebufferGetDepthVariancePassFramebuffer();
 
     gc.framebufferDrawBind(fb);
     try {

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,29 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-/**
- * A hint regarding the number of bits of precision available in the buffers
- * used for shadow mapping.
- */
-
-public enum KShadowPrecision
+public interface KFramebufferDepthVarianceType extends
+  KFramebuffer,
+  KFramebufferDepthVarianceUsable
 {
-  SHADOW_PRECISION_16("16"),
-  SHADOW_PRECISION_24("24"),
-  SHADOW_PRECISION_32("32");
-
-  private final @Nonnull String name;
-
-  private KShadowPrecision(
-    final @Nonnull String name)
-  {
-    this.name = name;
-  }
-
-  @Override public @Nonnull String toString()
-  {
-    return this.name;
-  }
+  // No extras
 }

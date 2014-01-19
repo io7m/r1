@@ -41,8 +41,14 @@ public interface KRendererVisitor<A, E extends Throwable>
       ConstraintError,
       RException;
 
-  public A rendererVisitPostprocessor(
-    final @Nonnull KRendererPostprocessor r)
+  public A rendererVisitPostprocessorDepth(
+    final @Nonnull KRendererPostprocessorDepth r)
+    throws E,
+      ConstraintError,
+      RException;
+
+  public A rendererVisitPostprocessorRGBA(
+    final @Nonnull KRendererPostprocessorRGBA r)
     throws E,
       ConstraintError,
       RException;

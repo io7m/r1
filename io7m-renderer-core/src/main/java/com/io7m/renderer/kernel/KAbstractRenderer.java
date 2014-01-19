@@ -93,10 +93,10 @@ abstract class KAbstractRenderer implements KRenderer
     }
   }
 
-  public static abstract class KAbstractRendererPostprocessor extends
-    KAbstractRenderer implements KRendererPostprocessor
+  public static abstract class KAbstractRendererPostprocessorRGBA extends
+    KAbstractRenderer implements KRendererPostprocessorRGBA
   {
-    protected KAbstractRendererPostprocessor(
+    protected KAbstractRendererPostprocessorRGBA(
       final @Nonnull String name)
     {
       super(name);
@@ -112,7 +112,30 @@ abstract class KAbstractRenderer implements KRenderer
           E
     {
       Constraints.constrainNotNull(v, "Visitor");
-      return v.rendererVisitPostprocessor(this);
+      return v.rendererVisitPostprocessorRGBA(this);
+    }
+  }
+
+  public static abstract class KAbstractRendererPostprocessorDepth extends
+    KAbstractRenderer implements KRendererPostprocessorDepth
+  {
+    protected KAbstractRendererPostprocessorDepth(
+      final @Nonnull String name)
+    {
+      super(name);
+    }
+
+    @Override public final
+      <A, E extends Throwable, V extends KRendererVisitor<A, E>>
+      A
+      rendererVisitableAccept(
+        final @Nonnull V v)
+        throws ConstraintError,
+          RException,
+          E
+    {
+      Constraints.constrainNotNull(v, "Visitor");
+      return v.rendererVisitPostprocessorDepth(this);
     }
   }
 

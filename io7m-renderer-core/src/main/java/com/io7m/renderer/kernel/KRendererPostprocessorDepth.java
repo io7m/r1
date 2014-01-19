@@ -19,46 +19,13 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
-import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.RException;
 
-public final class KRendererPostprocessorBlur extends
-  KAbstractRenderer.KAbstractRendererPostprocessor
+public interface KRendererPostprocessorDepth extends KRenderer
 {
-  private KRendererPostprocessorBlur(
-    final @Nonnull String name)
-  {
-    super(name);
-  }
-
-  @Override public void rendererClose()
-    throws RException,
-      ConstraintError
-  {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public void rendererPostprocessorEvaluate(
-    final @Nonnull KFramebufferRGBAUsable input,
-    final @Nonnull KFramebufferRGBAUsable output)
+  public void rendererPostprocessorEvaluateDepth(
+    final @Nonnull KFramebufferDepthUsable input,
+    final @Nonnull KFramebufferDepthUsable output)
     throws ConstraintError,
-      RException
-  {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public KRendererDebugging rendererDebug()
-  {
-    return null;
-  }
-
-  @Override public void rendererSetBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-    throws ConstraintError
-  {
-    // Nothing
-  }
+      RException;
 }

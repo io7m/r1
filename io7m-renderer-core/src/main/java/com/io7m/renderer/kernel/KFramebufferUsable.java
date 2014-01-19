@@ -28,4 +28,11 @@ public interface KFramebufferUsable extends JCGLResourceUsable
    */
 
   public @Nonnull AreaInclusive kFramebufferGetArea();
+
+  /**
+   * Retrieve the size in bytes of all the resources that make up the
+   * framebuffer.
+   */
+
+  public long kFramebufferGetSizeBytes();
 }

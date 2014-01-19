@@ -118,9 +118,14 @@ import com.io7m.renderer.RTransformModel;
 import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthDescription;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferForwardDescription;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferRGBADescription;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KRendererDebugging.DebugShadowMapReceiver;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedVariance;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.SBLight.SBLightProjective;
@@ -1148,13 +1153,35 @@ final class SBGLRenderer implements GLEventListener
                 final StringBuilder n = this.name;
                 n.setLength(0);
                 n.append("shadow-");
-                n.append(shadow.getDescription().getLightID());
+
+                shadow
+                  .shadowAccept(new KShadowVisitor<Unit, ConstraintError>() {
+                    @Override public Unit shadowVisitBasic(
+                      final @Nonnull KShadowMappedBasic s)
+                      throws RException,
+                        ConstraintError
+                    {
+                      n.append("basic-");
+                      n.append(s.getDescription().getLightID());
+                      return Unit.unit();
+                    }
+
+                    @Override public Unit shadowVisitVariance(
+                      final @Nonnull KShadowMappedVariance s)
+                      throws RException,
+                        ConstraintError
+                    {
+                      n.append("variance-");
+                      n.append(s.getDescription().getLightID());
+                      return Unit.unit();
+                    }
+                  });
 
                 map
                   .kShadowMapAccept(new KShadowMapVisitor<Unit, ConstraintError>() {
                     @SuppressWarnings("synthetic-access") @Override public
                       Unit
-                      kShadowMapVisitBasic(
+                      shadowMapVisitBasic(
                         final KShadowMapBasic smb)
                         throws ConstraintError,
                           RException
@@ -1163,7 +1190,9 @@ final class SBGLRenderer implements GLEventListener
                         SBTextureUtilities
                           .textureDumpTimestampedTemporary2DStatic(
                             SBGLRenderer.this.gi,
-                            smb.kFramebufferGetDepthTexture(),
+                            smb
+                              .getFramebuffer()
+                              .kFramebufferGetDepthTexture(),
                             n.toString(),
                             SBGLRenderer.this.log);
                       } catch (final FileNotFoundException e) {
@@ -1176,7 +1205,7 @@ final class SBGLRenderer implements GLEventListener
                       return Unit.unit();
                     }
 
-                    @Override public Unit kShadowMapVisitVariance(
+                    @Override public Unit shadowMapVisitVariance(
                       final @Nonnull KShadowMapVariance smv)
                       throws ConstraintError,
                         RException
@@ -1185,7 +1214,9 @@ final class SBGLRenderer implements GLEventListener
                         SBTextureUtilities
                           .textureDumpTimestampedTemporary2DStatic(
                             SBGLRenderer.this.gi,
-                            smv.kFramebufferGetDepthTexture(),
+                            smv
+                              .getFramebuffer()
+                              .kFramebufferGetDepthVarianceTexture(),
                             n.toString(),
                             SBGLRenderer.this.log);
                       } catch (final FileNotFoundException e) {
@@ -1202,6 +1233,8 @@ final class SBGLRenderer implements GLEventListener
               } catch (final ConstraintError e) {
                 e.printStackTrace();
               } catch (final RException e) {
+                e.printStackTrace();
+              } catch (final JCGLException e) {
                 e.printStackTrace();
               }
             }
@@ -1457,13 +1490,6 @@ final class SBGLRenderer implements GLEventListener
           this.capabilities,
           this.log);
       }
-      case KRENDERER_BLUR_DEMO:
-      {
-        return KRendererBlurDemo.rendererNew(
-          this.gi,
-          this.filesystem,
-          this.log);
-      }
       case KRENDERER_DEBUG_SHADOW_MAP:
       {
         return KRendererDebugShadowMap.rendererNew(
@@ -1523,8 +1549,6 @@ final class SBGLRenderer implements GLEventListener
   /**
    * Reload those resources that are dependent on the size of the
    * screen/drawable (such as the framebuffer, and the screen-sized quad).
-   * 
-   * @throws JCGLUnsupportedException
    */
 
   private void reloadSizedResources(
@@ -1532,18 +1556,30 @@ final class SBGLRenderer implements GLEventListener
     final @Nonnull JCGLImplementation g)
     throws ConstraintError,
       JCGLException,
-      JCGLUnsupportedException
+      JCGLUnsupportedException,
+      RException
   {
     final AreaInclusive size = SBGLRenderer.drawableArea(drawable);
     final JCGLInterfaceCommon gc = g.getGLCommon();
 
     final KFramebufferForwardType old = this.framebuffer;
-    this.framebuffer =
-      KFramebufferForward.newFramebuffer(
-        g,
+
+    final KFramebufferRGBADescription rgba_description =
+      new KFramebufferRGBADescription(
         size,
+        TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
         TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-        TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+        KRGBAPrecision.RGBA_PRECISION_8);
+    final KFramebufferDepthDescription depth_description =
+      new KFramebufferDepthDescription(
+        size,
+        TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+        KDepthPrecision.DEPTH_PRECISION_24);
+    final KFramebufferForwardDescription description =
+      new KFramebufferForwardDescription(rgba_description, depth_description);
+
+    this.framebuffer = KFramebufferForward.newFramebuffer(g, description);
     if (old != null) {
       old.kFramebufferDelete(g);
     }
@@ -2228,8 +2264,18 @@ final class SBGLRenderer implements GLEventListener
               return Unit.unit();
             }
 
-            @Override public Unit rendererVisitPostprocessor(
-              final @Nonnull KRendererPostprocessor r)
+            @Override public Unit rendererVisitPostprocessorRGBA(
+              final @Nonnull KRendererPostprocessorRGBA r)
+              throws RException,
+                ConstraintError,
+                RException
+            {
+              // TODO Auto-generated method stub
+              throw new UnimplementedCodeException();
+            }
+
+            @Override public Unit rendererVisitPostprocessorDepth(
+              final @Nonnull KRendererPostprocessorDepth r)
               throws RException,
                 ConstraintError,
                 RException
@@ -2256,6 +2302,8 @@ final class SBGLRenderer implements GLEventListener
     } catch (final JCGLException e) {
       this.failedPermanently(e);
     } catch (final ConstraintError e) {
+      this.failedPermanently(e);
+    } catch (final RException e) {
       this.failedPermanently(e);
     }
   }

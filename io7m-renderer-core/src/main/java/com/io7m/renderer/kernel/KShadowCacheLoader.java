@@ -24,10 +24,15 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcache.JCacheLoader;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.RException;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
+import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapBasicDescription;
+import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapVarianceDescription;
 
 final class KShadowCacheLoader implements
   JCacheLoader<KShadowMapDescription, KShadowMap, RException>
@@ -72,57 +77,52 @@ final class KShadowCacheLoader implements
     final @Nonnull KShadowMapDescription s)
     throws RException
   {
+    final long size = 2 << (s.getSizeExponent() - 1);
+    if (this.log.enabled(Level.LOG_DEBUG)) {
+      this.message.setLength(0);
+      this.message.append("Allocating ");
+      this.message.append(size);
+      this.message.append("x");
+      this.message.append(size);
+      this.message.append(" shadow map");
+      this.log.debug(this.message.toString());
+    }
+
+    final JCGLImplementation gli = this.gi;
     try {
-      switch (s.getType()) {
-        case SHADOW_MAPPED_VARIANCE:
-        {
-          final long size = 2 << (s.getSizeExponent() - 1);
-
-          if (this.log.enabled(Level.LOG_DEBUG)) {
-            this.message.setLength(0);
-            this.message.append("Allocating ");
-            this.message.append(size);
-            this.message.append("x");
-            this.message.append(size);
-            this.message.append(" shadow map");
-            this.log.debug(this.message.toString());
+      return s
+        .kShadowMapDescriptionAccept(new KShadowMapDescriptionVisitor<KShadowMap, JCGLException>() {
+          @Override public @Nonnull
+            KShadowMap
+            shadowMapDescriptionVisitBasic(
+              final @Nonnull KShadowMapBasicDescription sm)
+              throws RException,
+                ConstraintError
+          {
+            final KFramebufferDepth framebuffer =
+              KFramebufferDepth.newDepthFramebuffer(gli, sm.getDescription());
+            return new KShadowMapBasic(sm, framebuffer);
           }
 
-          final KShadowFilter filter = s.getShadowFilter();
-          return KShadowMap.KShadowMapVariance.newShadowMapVariance(
-            this.gi,
-            (int) size,
-            (int) size,
-            filter,
-            s.getShadowPrecision());
-        }
-        case SHADOW_MAPPED_BASIC:
-        {
-          final long size = 2 << (s.getSizeExponent() - 1);
-
-          if (this.log.enabled(Level.LOG_DEBUG)) {
-            this.message.setLength(0);
-            this.message.append("Allocating ");
-            this.message.append(size);
-            this.message.append("x");
-            this.message.append(size);
-            this.message.append(" shadow map");
-            this.log.debug(this.message.toString());
+          @Override public @Nonnull
+            KShadowMap
+            shadowMapDescriptionVisitVariance(
+              final @Nonnull KShadowMapVarianceDescription sm)
+              throws RException,
+                JCGLException,
+                ConstraintError
+          {
+            final KFramebufferDepthVariance framebuffer =
+              KFramebufferDepthVariance.newDepthVarianceFramebuffer(
+                gli,
+                sm.getDescription());
+            return new KShadowMapVariance(sm, framebuffer);
           }
-
-          final KShadowFilter filter = s.getShadowFilter();
-          return KShadowMap.KShadowMapBasic.newShadowMapBasic(
-            this.gi,
-            (int) size,
-            (int) size,
-            filter,
-            s.getShadowPrecision());
-        }
-      }
-
-      throw new UnreachableCodeException();
-    } catch (final ConstraintError x) {
-      throw new UnreachableCodeException(x);
+        });
+    } catch (final ConstraintError e) {
+      throw new UnreachableCodeException(e);
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
     }
   }
 

@@ -16,10 +16,23 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KFramebufferForwardType extends
-  KFramebufferRGBA,
-  KFramebufferDepthType,
-  KFramebufferForwardUsable
+import javax.swing.JComboBox;
+
+public final class SBDepthPrecisionSelector extends
+  JComboBox<KDepthPrecision>
 {
-  // No extras.
+  private static final long serialVersionUID = -1080392482805214287L;
+
+  public SBDepthPrecisionSelector()
+  {
+    for (final KDepthPrecision type : KDepthPrecision.values()) {
+      this.addItem(type);
+    }
+    this.setSelectedItem(KDepthPrecision.DEPTH_PRECISION_24);
+  }
+
+  @Override public KDepthPrecision getSelectedItem()
+  {
+    return (KDepthPrecision) super.getSelectedItem();
+  }
 }

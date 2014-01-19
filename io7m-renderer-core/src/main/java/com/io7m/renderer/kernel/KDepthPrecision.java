@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,17 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.swing.JComboBox;
-
-public final class SBShadowFilterSelector extends JComboBox<KShadowFilter>
+public enum KDepthPrecision
 {
-  private static final long serialVersionUID = -1174463966109424043L;
-
-  public SBShadowFilterSelector()
-  {
-    for (final KShadowFilter type : KShadowFilter.values()) {
-      this.addItem(type);
-    }
-    this.setSelectedItem(KShadowFilter.SHADOW_FILTER_LINEAR);
-  }
+  DEPTH_PRECISION_16,
+  DEPTH_PRECISION_24,
+  DEPTH_PRECISION_32F
 }
