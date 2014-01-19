@@ -21,36 +21,29 @@ import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.renderer.RException;
+import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapBasicDescription;
+import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapVarianceDescription;
 
-@Immutable abstract class KShadow
+@Immutable abstract class KShadow implements KShadowVisitable
 {
   @Immutable final static class KShadowMappedBasic extends KShadow
   {
-    private final float depth_bias;
-    private final float factor_max;
-    private final float factor_min;
+    private final float                               depth_bias;
+    private final @Nonnull KShadowMapBasicDescription description;
+    private final float                               factor_max;
+    private final float                               factor_min;
 
-    @SuppressWarnings("synthetic-access") private KShadowMappedBasic(
-      final @Nonnull Integer light_id,
-      final int size_exponent,
+    private KShadowMappedBasic(
       final float depth_bias,
       final float factor_max,
       final float factor_min,
-      final @Nonnull KShadowPrecision shadow_precision,
-      final @Nonnull KShadowFilter shadow_filter)
+      final @Nonnull KShadowMapBasicDescription description)
       throws ConstraintError
     {
-      super(new KShadowMapDescription(
-        light_id,
-        shadow_filter,
-        shadow_precision,
-        KShadowType.SHADOW_MAPPED_BASIC,
-        Constraints.constrainRange(
-          size_exponent,
-          1,
-          Integer.MAX_VALUE,
-          "Shadow size exponent")));
-
+      this.description =
+        Constraints.constrainNotNull(description, "Description");
       this.depth_bias = depth_bias;
       this.factor_max = factor_max;
       this.factor_min = factor_min;
@@ -62,7 +55,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
       if (this == obj) {
         return true;
       }
-      if (!super.equals(obj)) {
+      if (obj == null) {
         return false;
       }
       if (this.getClass() != obj.getClass()) {
@@ -71,6 +64,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
       final KShadowMappedBasic other = (KShadowMappedBasic) obj;
       if (Float.floatToIntBits(this.depth_bias) != Float
         .floatToIntBits(other.depth_bias)) {
+        return false;
+      }
+      if (this.description == null) {
+        if (other.description != null) {
+          return false;
+        }
+      } else if (!this.description.equals(other.description)) {
         return false;
       }
       if (Float.floatToIntBits(this.factor_max) != Float
@@ -89,6 +89,11 @@ import com.io7m.jaux.Constraints.ConstraintError;
       return this.depth_bias;
     }
 
+    public @Nonnull KShadowMapBasicDescription getDescription()
+    {
+      return this.description;
+    }
+
     public float getFactorMaximum()
     {
       return this.factor_max;
@@ -102,17 +107,33 @@ import com.io7m.jaux.Constraints.ConstraintError;
     @Override public int hashCode()
     {
       final int prime = 31;
-      int result = super.hashCode();
+      int result = 1;
       result = (prime * result) + Float.floatToIntBits(this.depth_bias);
+      result = (prime * result) + this.description.hashCode();
       result = (prime * result) + Float.floatToIntBits(this.factor_max);
       result = (prime * result) + Float.floatToIntBits(this.factor_min);
       return result;
     }
 
+    @Override public
+      <T, E extends Throwable, V extends KShadowVisitor<T, E>>
+      T
+      shadowAccept(
+        final @Nonnull V v)
+        throws E,
+          JCGLException,
+          RException,
+          ConstraintError
+    {
+      return v.shadowVisitBasic(this);
+    }
+
     @Override public String toString()
     {
       final StringBuilder builder = new StringBuilder();
-      builder.append("[KShadowMappedBasic depth_bias=");
+      builder.append("[KShadowMappedBasic description=");
+      builder.append(this.description);
+      builder.append(" depth_bias=");
       builder.append(this.depth_bias);
       builder.append(" factor_max=");
       builder.append(this.factor_max);
@@ -125,33 +146,22 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
   @Immutable final static class KShadowMappedVariance extends KShadow
   {
-    private final float factor_max;
-    private final float factor_min;
-    private final float light_bleed_reduction;
-    private final float minimum_variance;
+    private final @Nonnull KShadowMapVarianceDescription description;
+    private final float                                  factor_max;
+    private final float                                  factor_min;
+    private final float                                  light_bleed_reduction;
+    private final float                                  minimum_variance;
 
-    @SuppressWarnings("synthetic-access") private KShadowMappedVariance(
-      final @Nonnull Integer light_id,
-      final int size_exponent,
+    private KShadowMappedVariance(
       final float factor_max,
       final float factor_min,
       final float minimum_variance,
       final float light_bleed_reduction,
-      final @Nonnull KShadowPrecision shadow_precision,
-      final @Nonnull KShadowFilter shadow_filter)
+      final @Nonnull KShadowMapVarianceDescription description)
       throws ConstraintError
     {
-      super(new KShadowMapDescription(
-        light_id,
-        shadow_filter,
-        shadow_precision,
-        KShadowType.SHADOW_MAPPED_VARIANCE,
-        Constraints.constrainRange(
-          size_exponent,
-          1,
-          Integer.MAX_VALUE,
-          "Shadow size exponent")));
-
+      this.description =
+        Constraints.constrainNotNull(description, "Description");
       this.factor_max = factor_max;
       this.factor_min = factor_min;
       this.minimum_variance = minimum_variance;
@@ -164,13 +174,20 @@ import com.io7m.jaux.Constraints.ConstraintError;
       if (this == obj) {
         return true;
       }
-      if (!super.equals(obj)) {
+      if (obj == null) {
         return false;
       }
       if (this.getClass() != obj.getClass()) {
         return false;
       }
       final KShadowMappedVariance other = (KShadowMappedVariance) obj;
+      if (this.description == null) {
+        if (other.description != null) {
+          return false;
+        }
+      } else if (!this.description.equals(other.description)) {
+        return false;
+      }
       if (Float.floatToIntBits(this.factor_max) != Float
         .floatToIntBits(other.factor_max)) {
         return false;
@@ -188,6 +205,11 @@ import com.io7m.jaux.Constraints.ConstraintError;
         return false;
       }
       return true;
+    }
+
+    public @Nonnull KShadowMapVarianceDescription getDescription()
+    {
+      return this.description;
     }
 
     public float getFactorMaximum()
@@ -213,13 +235,27 @@ import com.io7m.jaux.Constraints.ConstraintError;
     @Override public int hashCode()
     {
       final int prime = 31;
-      int result = super.hashCode();
+      int result = 1;
+      result = (prime * result) + this.description.hashCode();
       result = (prime * result) + Float.floatToIntBits(this.factor_max);
       result = (prime * result) + Float.floatToIntBits(this.factor_min);
       result =
         (prime * result) + Float.floatToIntBits(this.light_bleed_reduction);
       result = (prime * result) + Float.floatToIntBits(this.minimum_variance);
       return result;
+    }
+
+    @Override public
+      <T, E extends Throwable, V extends KShadowVisitor<T, E>>
+      T
+      shadowAccept(
+        final @Nonnull V v)
+        throws E,
+          JCGLException,
+          RException,
+          ConstraintError
+    {
+      return v.shadowVisitVariance(this);
     }
 
     @Override public String toString()
@@ -229,10 +265,12 @@ import com.io7m.jaux.Constraints.ConstraintError;
       builder.append(this.factor_max);
       builder.append(" factor_min=");
       builder.append(this.factor_min);
-      builder.append(" minimum_variance=");
-      builder.append(this.minimum_variance);
       builder.append(" light_bleed_reduction=");
       builder.append(this.light_bleed_reduction);
+      builder.append(" minimum_variance=");
+      builder.append(this.minimum_variance);
+      builder.append(" description=");
+      builder.append(this.description);
       builder.append("]");
       return builder.toString();
     }
@@ -241,88 +279,34 @@ import com.io7m.jaux.Constraints.ConstraintError;
   @SuppressWarnings("synthetic-access") public static @Nonnull
     KShadowMappedBasic
     newMappedBasic(
-      final @Nonnull Integer light_id,
-      final int size_exponent,
-      final @KSuggestedRangeF(upper = 0.001f, lower = 0.0001f) float depth_bias,
-      final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float factor_max,
-      final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float factor_min,
-      final @Nonnull KShadowPrecision shadow_precision,
-      final @Nonnull KShadowFilter shadow_filter)
+      final float depth_bias,
+      final float factor_max,
+      final float factor_min,
+      final @Nonnull KShadowMapBasicDescription description)
       throws ConstraintError
   {
     return new KShadowMappedBasic(
-      light_id,
-      size_exponent,
       depth_bias,
       factor_max,
       factor_min,
-      shadow_precision,
-      shadow_filter);
+      description);
   }
 
   @SuppressWarnings("synthetic-access") public static @Nonnull
     KShadowMappedVariance
     newMappedVariance(
-      final @Nonnull Integer light_id,
-      final int size_exponent,
-      final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float factor_max,
-      final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float factor_min,
-      final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float minimum_variance,
-      final @KSuggestedRangeF(upper = 1.0f, lower = 0.0f) float light_bleed_reduction,
-      final @Nonnull KShadowPrecision shadow_precision,
-      final @Nonnull KShadowFilter shadow_filter)
+      final float factor_max,
+      final float factor_min,
+      final float minimum_variance,
+      final float light_bleed_reduction,
+      final @Nonnull KShadowMapVarianceDescription description)
       throws ConstraintError
   {
     return new KShadowMappedVariance(
-      light_id,
-      size_exponent,
       factor_max,
       factor_min,
       minimum_variance,
       light_bleed_reduction,
-      shadow_precision,
-      shadow_filter);
-  }
-
-  private final @Nonnull KShadowMapDescription description;
-
-  private KShadow(
-    final @Nonnull KShadowMapDescription description)
-    throws ConstraintError
-  {
-    this.description =
-      Constraints.constrainNotNull(description, "Description");
-  }
-
-  @Override public boolean equals(
-    final Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KShadow other = (KShadow) obj;
-    if (!this.description.equals(other.description)) {
-      return false;
-    }
-    return true;
-  }
-
-  public @Nonnull KShadowMapDescription getDescription()
-  {
-    return this.description;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.description.hashCode();
-    return result;
+      description);
   }
 }

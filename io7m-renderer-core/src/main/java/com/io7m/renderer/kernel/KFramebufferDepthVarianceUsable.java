@@ -20,9 +20,9 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthDescription;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthVarianceDescription;
 
-public interface KFramebufferDepthUsable extends KFramebufferUsable
+public interface KFramebufferDepthVarianceUsable extends KFramebufferUsable
 {
   /**
    * <p>
@@ -38,22 +38,19 @@ public interface KFramebufferDepthUsable extends KFramebufferUsable
 
   public @Nonnull
     FramebufferReferenceUsable
-    kFramebufferGetDepthPassFramebuffer();
+    kFramebufferGetDepthVariancePassFramebuffer();
 
   /**
-   * Retrieve the current depth values of the scene as a texture. If the
-   * current OpenGL version does not support depth textures, the texture will
-   * be in a packed colour format that must be decoded to retrieve the
-   * original depths.
+   * Retrieve the current depth variance values of the scene as a texture.
    */
 
-  public @Nonnull Texture2DStaticUsable kFramebufferGetDepthTexture();
+  public @Nonnull Texture2DStaticUsable kFramebufferGetDepthVarianceTexture();
 
   /**
    * Retrieve a description of this framebuffer.
    */
 
   public @Nonnull
-    KFramebufferDepthDescription
-    kFramebufferGetDepthDescription();
+    KFramebufferDepthVarianceDescription
+    kFramebufferGetDepthVarianceDescription();
 }

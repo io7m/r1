@@ -16,10 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KFramebufferForwardType extends
-  KFramebufferRGBA,
-  KFramebufferDepthType,
-  KFramebufferForwardUsable
+public enum KDepthVariancePrecision
 {
-  // No extras.
+  DEPTH_VARIANCE_PRECISION_16F,
+  DEPTH_VARIANCE_PRECISION_32F
 }

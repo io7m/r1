@@ -249,60 +249,77 @@ public final class KRendererForwardActual extends KAbstractRendererForward
       JCGLException
   {
     final Some<KShadow> some = (Some<KShadow>) light.getShadow();
-    final KShadowMapDescription desc = some.value.getDescription();
-
-    switch (desc.getType()) {
-      case SHADOW_MAPPED_BASIC:
+    some.value.shadowAccept(new KShadowVisitor<Unit, JCGLException>() {
+      @Override public Unit shadowVisitBasic(
+        final @Nonnull KShadowMappedBasic s)
+        throws JCGLException,
+          RException,
+          ConstraintError
       {
-        final KShadowMappedBasic shadow = (KShadowMappedBasic) some.value;
-        final KShadowMap.KShadowMapBasic map =
-          (KShadowMapBasic) shadow_context.getShadowMap(shadow);
-        final TextureUnit unit =
-          unit_context.withTexture2D(map.kFramebufferGetDepthTexture());
+        final KShadowMapBasic map =
+          (KShadowMapBasic) shadow_context.getShadowMap(s);
 
-        KShadingProgramCommon.putShadowBasic(program, shadow);
+        final TextureUnit unit =
+          unit_context.withTexture2D(map
+            .getFramebuffer()
+            .kFramebufferGetDepthTexture());
+
+        KShadingProgramCommon.putShadowBasic(program, s);
         KShadingProgramCommon.putTextureShadowMapBasic(program, unit);
-        break;
+        return Unit.unit();
       }
-      case SHADOW_MAPPED_VARIANCE:
-      {
-        final KShadowMappedVariance shadow =
-          (KShadowMappedVariance) some.value;
-        final KShadowMap.KShadowMapVariance map =
-          (KShadowMapVariance) shadow_context.getShadowMap(shadow);
-        final TextureUnit unit =
-          unit_context.withTexture2D(map.kFramebufferGetDepthTexture());
 
-        KShadingProgramCommon.putShadowVariance(program, shadow);
+      @Override public Unit shadowVisitVariance(
+        final @Nonnull KShadowMappedVariance s)
+        throws JCGLException,
+          RException,
+          ConstraintError
+      {
+        final KShadowMapVariance map =
+          (KShadowMapVariance) shadow_context.getShadowMap(s);
+        final TextureUnit unit =
+          unit_context.withTexture2D(map
+            .getFramebuffer()
+            .kFramebufferGetDepthVarianceTexture());
+
+        KShadingProgramCommon.putShadowVariance(program, s);
         KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
-        break;
+        return Unit.unit();
       }
-    }
+    });
   }
 
   private static void putShadowReuse(
     final @Nonnull JCBProgram program,
     final @Nonnull KProjective light)
     throws JCGLException,
-      ConstraintError
+      ConstraintError,
+      RException
   {
     final Some<KShadow> some = (Some<KShadow>) light.getShadow();
-    final KShadowMapDescription desc = some.value.getDescription();
-
-    switch (desc.getType()) {
-      case SHADOW_MAPPED_BASIC:
+    some.value.shadowAccept(new KShadowVisitor<Unit, JCGLException>() {
+      @Override public Unit shadowVisitBasic(
+        final @Nonnull KShadowMappedBasic s)
+        throws JCGLException,
+          RException,
+          ConstraintError
       {
         KShadingProgramCommon.putShadowBasicReuse(program);
         KShadingProgramCommon.putTextureShadowMapBasicReuse(program);
-        break;
+        return Unit.unit();
       }
-      case SHADOW_MAPPED_VARIANCE:
+
+      @Override public Unit shadowVisitVariance(
+        final @Nonnull KShadowMappedVariance s)
+        throws JCGLException,
+          RException,
+          ConstraintError
       {
         KShadingProgramCommon.putShadowVarianceReuse(program);
         KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
-        break;
+        return Unit.unit();
       }
-    }
+    });
   }
 
   public static @Nonnull KRendererForwardActual rendererNew(

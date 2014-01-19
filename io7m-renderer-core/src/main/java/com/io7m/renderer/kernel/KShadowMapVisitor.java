@@ -24,12 +24,12 @@ import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 
 public interface KShadowMapVisitor<A, E extends Throwable>
 {
-  public A kShadowMapVisitBasic(
+  public A shadowMapVisitBasic(
     final @Nonnull KShadowMapBasic sm)
     throws E,
       RException;
 
-  public A kShadowMapVisitVariance(
+  public A shadowMapVisitVariance(
     final @Nonnull KShadowMapVariance sm)
     throws E,
       RException;

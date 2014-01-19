@@ -16,10 +16,26 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KFramebufferForwardType extends
-  KFramebufferRGBA,
-  KFramebufferDepthType,
-  KFramebufferForwardUsable
+import javax.swing.JComboBox;
+
+import com.io7m.jcanephora.TextureFilterMinification;
+
+public final class SBTextureMinFilterSelector extends
+  JComboBox<TextureFilterMinification>
 {
-  // No extras.
+  private static final long serialVersionUID = -1080392482805214287L;
+
+  public SBTextureMinFilterSelector()
+  {
+    for (final TextureFilterMinification type : TextureFilterMinification
+      .values()) {
+      this.addItem(type);
+    }
+    this.setSelectedItem(TextureFilterMinification.TEXTURE_FILTER_LINEAR);
+  }
+
+  @Override public TextureFilterMinification getSelectedItem()
+  {
+    return (TextureFilterMinification) super.getSelectedItem();
+  }
 }
