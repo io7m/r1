@@ -16,10 +16,16 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KFramebufferForwardType extends
-  KFramebufferRGBA,
-  KFramebufferDepthType,
-  KFramebufferForwardUsable
+import javax.annotation.Nonnull;
+
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.RException;
+
+public interface KRendererPostprocessorRGBA extends KRenderer
 {
-  // No extras.
+  public void rendererPostprocessorEvaluateRGBA(
+    final @Nonnull KFramebufferRGBAUsable input,
+    final @Nonnull KFramebufferRGBAUsable output)
+    throws ConstraintError,
+      RException;
 }

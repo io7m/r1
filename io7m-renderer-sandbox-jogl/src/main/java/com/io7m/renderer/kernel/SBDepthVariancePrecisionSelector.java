@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,16 +18,23 @@ package com.io7m.renderer.kernel;
 
 import javax.swing.JComboBox;
 
-public final class SBShadowPrecisionSelector extends
-  JComboBox<KShadowPrecision>
+public final class SBDepthVariancePrecisionSelector extends
+  JComboBox<KDepthVariancePrecision>
 {
-  private static final long serialVersionUID = -1174463966109424043L;
+  private static final long serialVersionUID = -1080392482805214287L;
 
-  public SBShadowPrecisionSelector()
+  public SBDepthVariancePrecisionSelector()
   {
-    for (final KShadowPrecision type : KShadowPrecision.values()) {
+    for (final KDepthVariancePrecision type : KDepthVariancePrecision
+      .values()) {
       this.addItem(type);
     }
-    this.setSelectedItem(KShadowPrecision.SHADOW_PRECISION_16);
+    this
+      .setSelectedItem(KDepthVariancePrecision.DEPTH_VARIANCE_PRECISION_32F);
+  }
+
+  @Override public KDepthVariancePrecision getSelectedItem()
+  {
+    return (KDepthVariancePrecision) super.getSelectedItem();
   }
 }

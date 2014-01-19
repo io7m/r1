@@ -18,9 +18,14 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KLight.KProjective;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedVariance;
 
 public enum KLightLabel
   implements
@@ -49,19 +54,39 @@ public enum KLightLabel
         if (shadow_opt.isNone()) {
           return LIGHT_LABEL_PROJECTIVE;
         }
-        final KShadow shadow = ((Option.Some<KShadow>) shadow_opt).value;
-        final KShadowMapDescription desc = shadow.getDescription();
 
-        switch (desc.getType()) {
-          case SHADOW_MAPPED_BASIC:
-            if (caps.getSupportsDepthTextures()) {
-              return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC;
-            }
-            return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444;
-          case SHADOW_MAPPED_VARIANCE:
-            return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_VARIANCE;
+        final KShadow shadow = ((Option.Some<KShadow>) shadow_opt).value;
+        try {
+          return shadow
+            .shadowAccept(new KShadowVisitor<KLightLabel, ConstraintError>() {
+              @Override public KLightLabel shadowVisitBasic(
+                final KShadowMappedBasic s)
+                throws JCGLException,
+                  RException,
+                  ConstraintError
+              {
+                if (caps.getSupportsDepthTextures()) {
+                  return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC;
+                }
+                return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444;
+              }
+
+              @Override public KLightLabel shadowVisitVariance(
+                final KShadowMappedVariance s)
+                throws JCGLException,
+                  RException,
+                  ConstraintError
+              {
+                return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_VARIANCE;
+              }
+            });
+        } catch (final JCGLException e) {
+          throw new UnreachableCodeException(e);
+        } catch (final ConstraintError e) {
+          throw new UnreachableCodeException(e);
+        } catch (final RException e) {
+          throw new UnreachableCodeException(e);
         }
-        throw new UnreachableCodeException();
       }
       case LIGHT_SPHERE:
         return LIGHT_LABEL_SPHERICAL;

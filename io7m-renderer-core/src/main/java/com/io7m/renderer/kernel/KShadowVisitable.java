@@ -16,10 +16,21 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KFramebufferForwardType extends
-  KFramebufferRGBA,
-  KFramebufferDepthType,
-  KFramebufferForwardUsable
+import javax.annotation.Nonnull;
+
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.renderer.RException;
+
+public interface KShadowVisitable
 {
-  // No extras.
+  public
+    <T, E extends Throwable, V extends KShadowVisitor<T, E>>
+    T
+    shadowAccept(
+      final @Nonnull V v)
+      throws E,
+        JCGLException,
+        RException,
+        ConstraintError;
 }

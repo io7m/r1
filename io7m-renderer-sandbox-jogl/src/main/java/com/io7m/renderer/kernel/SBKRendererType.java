@@ -33,8 +33,7 @@ enum SBKRendererType
   KRENDERER_DEBUG_NORMALS_MAP_EYE("debug-normals-map-eye"),
   KRENDERER_DEBUG_NORMALS_MAP_TANGENT("debug-normals-map-tangent"),
   KRENDERER_DEBUG_SHADOW_MAP("debug-shadow-map"),
-  KRENDERER_FORWARD("forward"),
-  KRENDERER_BLUR_DEMO("blur-demo")
+  KRENDERER_FORWARD("forward")
 
   ;
 

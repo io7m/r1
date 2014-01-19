@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,22 +18,22 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import net.java.quickcheck.Generator;
-import net.java.quickcheck.generator.support.IntegerGenerator;
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.RException;
+import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapBasicDescription;
+import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapVarianceDescription;
 
-public final class KShadowPrecisionGenerator implements
-  Generator<KShadowPrecision>
+public interface KShadowMapDescriptionVisitor<A, E extends Throwable>
 {
-  private final @Nonnull IntegerGenerator index_gen;
+  public A shadowMapDescriptionVisitBasic(
+    final @Nonnull KShadowMapBasicDescription sm)
+    throws E,
+      ConstraintError,
+      RException;
 
-  public KShadowPrecisionGenerator()
-  {
-    this.index_gen =
-      new IntegerGenerator(0, KShadowPrecision.values().length - 1);
-  }
-
-  @Override public KShadowPrecision next()
-  {
-    return KShadowPrecision.values()[this.index_gen.nextInt()];
-  }
+  public A shadowMapDescriptionVisitVariance(
+    final @Nonnull KShadowMapVarianceDescription sm)
+    throws E,
+      ConstraintError,
+      RException;
 }

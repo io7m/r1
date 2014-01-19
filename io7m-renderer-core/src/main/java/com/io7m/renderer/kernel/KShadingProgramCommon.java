@@ -22,6 +22,7 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Option.Some;
+import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.ArrayBufferUsable;
@@ -36,6 +37,7 @@ import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorM4F;
+import com.io7m.renderer.RException;
 import com.io7m.renderer.RMatrixReadable3x3F;
 import com.io7m.renderer.RMatrixReadable4x4F;
 import com.io7m.renderer.RSpaceObject;
@@ -652,7 +654,8 @@ final class KShadingProgramCommon
     final @Nonnull RMatrixReadable4x4F<RTransformView> view,
     final @Nonnull KProjective light)
     throws JCGLException,
-      ConstraintError
+      ConstraintError,
+      RException
   {
     KShadingProgramCommon.putLightProjectivePosition(
       program,
@@ -677,23 +680,29 @@ final class KShadingProgramCommon
       case OPTION_SOME:
       {
         final KShadow ks = ((Option.Some<KShadow>) light.getShadow()).value;
-        final KShadowMapDescription desc = ks.getDescription();
+        ks.shadowAccept(new KShadowVisitor<Unit, JCGLException>() {
+          @Override public Unit shadowVisitBasic(
+            final @Nonnull KShadowMappedBasic s)
+            throws JCGLException,
+              JCGLException,
+              RException,
+              ConstraintError
+          {
+            KShadingProgramCommon.putShadowBasic(program, s);
+            return Unit.unit();
+          }
 
-        switch (desc.getType()) {
-          case SHADOW_MAPPED_BASIC:
+          @Override public Unit shadowVisitVariance(
+            final @Nonnull KShadowMappedVariance s)
+            throws JCGLException,
+              JCGLException,
+              RException,
+              ConstraintError
           {
-            final KShadowMappedBasic ksmb = (KShadow.KShadowMappedBasic) ks;
-            KShadingProgramCommon.putShadowBasic(program, ksmb);
-            break;
+            KShadingProgramCommon.putShadowVariance(program, s);
+            return Unit.unit();
           }
-          case SHADOW_MAPPED_VARIANCE:
-          {
-            final KShadowMappedVariance ksmv =
-              (KShadow.KShadowMappedVariance) ks;
-            KShadingProgramCommon.putShadowVariance(program, ksmv);
-            break;
-          }
-        }
+        });
         break;
       }
     }
@@ -703,7 +712,8 @@ final class KShadingProgramCommon
     final @Nonnull JCBProgram program,
     final @Nonnull KLight.KProjective light)
     throws JCGLException,
-      ConstraintError
+      ConstraintError,
+      RException
   {
     KShadingProgramCommon.putLightProjectivePositionReuse(program);
     KShadingProgramCommon.putLightProjectiveColourReuse(program);
@@ -719,20 +729,29 @@ final class KShadingProgramCommon
       case OPTION_SOME:
       {
         final KShadow ks = ((Option.Some<KShadow>) light.getShadow()).value;
-        final KShadowMapDescription desc = ks.getDescription();
-
-        switch (desc.getType()) {
-          case SHADOW_MAPPED_BASIC:
+        ks.shadowAccept(new KShadowVisitor<Unit, JCGLException>() {
+          @Override public Unit shadowVisitBasic(
+            final @Nonnull KShadowMappedBasic s)
+            throws JCGLException,
+              JCGLException,
+              RException,
+              ConstraintError
           {
             KShadingProgramCommon.putShadowBasicReuse(program);
-            break;
+            return Unit.unit();
           }
-          case SHADOW_MAPPED_VARIANCE:
+
+          @Override public Unit shadowVisitVariance(
+            final @Nonnull KShadowMappedVariance s)
+            throws JCGLException,
+              JCGLException,
+              RException,
+              ConstraintError
           {
             KShadingProgramCommon.putShadowVarianceReuse(program);
-            break;
+            return Unit.unit();
           }
-        }
+        });
         break;
       }
     }

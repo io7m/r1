@@ -20,29 +20,139 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.RException;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthDescription;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthVarianceDescription;
 
-final class KShadowMapDescription
+abstract class KShadowMapDescription implements
+  KShadowMapDescriptionVisitable
 {
-  private final @Nonnull Integer          light_id;
-  private final @Nonnull KShadowFilter    shadow_filter;
-  private final @Nonnull KShadowPrecision shadow_precision;
-  private final int                       size_exponent;
-  private final @Nonnull KShadowType      type;
+  static final class KShadowMapBasicDescription extends KShadowMapDescription
+  {
+    private final @Nonnull KFramebufferDepthDescription description;
+
+    KShadowMapBasicDescription(
+      final @Nonnull Integer light_id,
+      final @Nonnull KFramebufferDepthDescription description,
+      final int size_exponent)
+      throws ConstraintError
+    {
+      super(light_id, size_exponent);
+      this.description =
+        Constraints.constrainNotNull(description, "Description");
+    }
+
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (!super.equals(obj)) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final KShadowMapBasicDescription other =
+        (KShadowMapBasicDescription) obj;
+      return this.description.equals(other.description);
+    }
+
+    public @Nonnull KFramebufferDepthDescription getDescription()
+    {
+      return this.description;
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = super.hashCode();
+      result = (prime * result) + this.description.hashCode();
+      return result;
+    }
+
+    @Override public
+      <A, E extends Throwable, V extends KShadowMapDescriptionVisitor<A, E>>
+      A
+      kShadowMapDescriptionAccept(
+        final @Nonnull V v)
+        throws RException,
+          ConstraintError,
+          E
+    {
+      return v.shadowMapDescriptionVisitBasic(this);
+    }
+  }
+
+  static final class KShadowMapVarianceDescription extends
+    KShadowMapDescription
+  {
+    private final @Nonnull KFramebufferDepthVarianceDescription description;
+
+    KShadowMapVarianceDescription(
+      final @Nonnull Integer light_id,
+      final @Nonnull KFramebufferDepthVarianceDescription description,
+      final int size_exponent)
+      throws ConstraintError
+    {
+      super(light_id, size_exponent);
+      this.description =
+        Constraints.constrainNotNull(description, "Description");
+    }
+
+    @Override public boolean equals(
+      final Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (!super.equals(obj)) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final KShadowMapVarianceDescription other =
+        (KShadowMapVarianceDescription) obj;
+      return this.description.equals(other.description);
+    }
+
+    public @Nonnull KFramebufferDepthVarianceDescription getDescription()
+    {
+      return this.description;
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = super.hashCode();
+      result = (prime * result) + this.description.hashCode();
+      return result;
+    }
+
+    @Override public
+      <A, E extends Throwable, V extends KShadowMapDescriptionVisitor<A, E>>
+      A
+      kShadowMapDescriptionAccept(
+        final @Nonnull V v)
+        throws E,
+          RException,
+          ConstraintError
+    {
+      return v.shadowMapDescriptionVisitVariance(this);
+    }
+  }
+
+  private final @Nonnull Integer light_id;
+  private final int              size_exponent;
 
   KShadowMapDescription(
     final @Nonnull Integer light_id,
-    final @Nonnull KShadowFilter shadow_filter,
-    final @Nonnull KShadowPrecision shadow_precision,
-    final @Nonnull KShadowType type,
     final int size_exponent)
     throws ConstraintError
   {
     this.light_id = Constraints.constrainNotNull(light_id, "Light ID");
-    this.type = Constraints.constrainNotNull(type, "Type");
-    this.shadow_precision =
-      Constraints.constrainNotNull(shadow_precision, "Shadow precision");
-    this.shadow_filter =
-      Constraints.constrainNotNull(shadow_filter, "Shadow filter");
     this.size_exponent =
       (int) Constraints.constrainRange(size_exponent, 1, Integer.MAX_VALUE);
   }
@@ -63,16 +173,7 @@ final class KShadowMapDescription
     if (!this.light_id.equals(other.light_id)) {
       return false;
     }
-    if (this.shadow_filter != other.shadow_filter) {
-      return false;
-    }
-    if (this.shadow_precision != other.shadow_precision) {
-      return false;
-    }
     if (this.size_exponent != other.size_exponent) {
-      return false;
-    }
-    if (this.type != other.type) {
       return false;
     }
     return true;
@@ -83,24 +184,9 @@ final class KShadowMapDescription
     return this.light_id;
   }
 
-  @Nonnull KShadowFilter getShadowFilter()
-  {
-    return this.shadow_filter;
-  }
-
-  @Nonnull KShadowPrecision getShadowPrecision()
-  {
-    return this.shadow_precision;
-  }
-
   int getSizeExponent()
   {
     return this.size_exponent;
-  }
-
-  @Nonnull KShadowType getType()
-  {
-    return this.type;
   }
 
   @Override public int hashCode()
@@ -108,10 +194,7 @@ final class KShadowMapDescription
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.light_id.hashCode();
-    result = (prime * result) + this.shadow_filter.hashCode();
-    result = (prime * result) + this.shadow_precision.hashCode();
     result = (prime * result) + this.size_exponent;
-    result = (prime * result) + this.type.hashCode();
     return result;
   }
 }

@@ -19,23 +19,46 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jaux.UnimplementedCodeException;
+import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.RException;
 
-public interface KFramebuffer extends KFramebufferUsable
+public final class KRendererPostprocessorBlurRGBA extends
+  KAbstractRenderer.KAbstractRendererPostprocessorRGBA
 {
-  /**
-   * Delete all resources associated with this framebuffer.
-   * 
-   * @throws ConstraintError
-   *           Iff <code>g == null</code>, or an internal constraint error
-   *           occurs.
-   * @throws RException
-   *           Iff an internal OpenGL error occurs.
-   */
+  private KRendererPostprocessorBlurRGBA(
+    final @Nonnull String name)
+  {
+    super(name);
+  }
 
-  public void kFramebufferDelete(
-    final @Nonnull JCGLImplementation g)
+  @Override public void rendererClose()
+    throws RException,
+      ConstraintError
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public void rendererPostprocessorEvaluateRGBA(
+    final @Nonnull KFramebufferRGBAUsable input,
+    final @Nonnull KFramebufferRGBAUsable output)
     throws ConstraintError,
-      RException;
+      RException
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public KRendererDebugging rendererDebug()
+  {
+    return null;
+  }
+
+  @Override public void rendererSetBackgroundRGBA(
+    final @Nonnull VectorReadable4F rgba)
+    throws ConstraintError
+  {
+    // Nothing
+  }
 }
