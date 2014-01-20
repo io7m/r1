@@ -679,7 +679,7 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>                              mesh_delete_queue;
   private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                                mesh_load_queue;
   private final @Nonnull HashMap<PathVirtual, KMesh>                                          meshes;
-  private @CheckForNull KRendererPostprocessorRGBA                                            postprocessor;
+  private @CheckForNull KPostprocessor                                                        postprocessor;
   private final @Nonnull AtomicReference<SBKPostprocessorType>                                postprocessor_new;
   private @CheckForNull KProgram                                                              program_ccolour;
   private @CheckForNull KProgram                                                              program_uv;
@@ -1544,7 +1544,7 @@ final class SBGLRenderer implements GLEventListener
     throw new UnreachableCodeException();
   }
 
-  private @CheckForNull KRendererPostprocessorRGBA initPostprocessor(
+  private @CheckForNull KPostprocessor initPostprocessor(
     final @Nonnull SBKPostprocessorType rp)
     throws ConstraintError,
       RException
@@ -1556,7 +1556,15 @@ final class SBGLRenderer implements GLEventListener
       }
       case KPOSTPROCESSOR_BLUR:
       {
-        return KRendererPostprocessorBlurRGBA.rendererNew(
+        return KPostprocessorBlurRGBA.rendererNew(
+          this.gi,
+          this.rgba_cache,
+          this.shader_cache,
+          this.log);
+      }
+      case KPOSTPROCESSOR_FOG:
+      {
+        return KPostprocessorFog.rendererNew(
           this.gi,
           this.rgba_cache,
           this.shader_cache,
@@ -1585,10 +1593,10 @@ final class SBGLRenderer implements GLEventListener
 
     final SBKPostprocessorType rp = this.postprocessor_new.getAndSet(null);
     if (rp != null) {
-      final KRendererPostprocessorRGBA old = this.postprocessor;
+      final KPostprocessor old = this.postprocessor;
       this.postprocessor = this.initPostprocessor(rp);
       if (old != null) {
-        old.rendererClose();
+        old.postprocessorClose();
       }
     }
   }
@@ -2326,32 +2334,46 @@ final class SBGLRenderer implements GLEventListener
               r.rendererForwardEvaluate(fb, builder.sceneCreate());
               return Unit.unit();
             }
-
-            @Override public Unit rendererVisitPostprocessorDepth(
-              final @Nonnull KRendererPostprocessorDepth r)
-              throws RException,
-                ConstraintError,
-                RException
-            {
-              // TODO Auto-generated method stub
-              throw new UnimplementedCodeException();
-            }
-
-            @Override public Unit rendererVisitPostprocessorRGBA(
-              final @Nonnull KRendererPostprocessorRGBA r)
-              throws RException,
-                ConstraintError,
-                RException
-            {
-              // TODO Auto-generated method stub
-              throw new UnimplementedCodeException();
-            }
           });
 
         if (this.postprocessor != null) {
-          this.postprocessor.rendererPostprocessorEvaluateRGBA(
-            this.framebuffer,
-            this.framebuffer);
+          this.postprocessor
+            .postprocessorVisitableAccept(new KPostprocessorVisitor<Unit, RException>() {
+              @Override public Unit postprocessorVisitDepth(
+                final @Nonnull KPostprocessorDepth r)
+                throws RException,
+                  ConstraintError,
+                  RException
+              {
+                // TODO Auto-generated method stub
+                throw new UnimplementedCodeException();
+              }
+
+              @Override public Unit postprocessorVisitRGBA(
+                final @Nonnull KPostprocessorRGBA r)
+                throws RException,
+                  ConstraintError,
+                  RException
+              {
+                r.postprocessorEvaluateRGBA(
+                  SBGLRenderer.this.framebuffer,
+                  SBGLRenderer.this.framebuffer);
+                return Unit.unit();
+              }
+
+              @Override public Unit postprocessorVisitRGBAWithDepth(
+                final @Nonnull KPostprocessorRGBAWithDepth r)
+                throws RException,
+                  ConstraintError,
+                  RException
+              {
+                r.postprocessorEvaluateRGBAWithDepth(
+                  SBGLRenderer.this.framebuffer,
+                  SBGLRenderer.this.framebuffer);
+                return Unit.unit();
+              }
+            });
+
         }
       }
     }

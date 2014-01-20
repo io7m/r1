@@ -44,21 +44,22 @@ import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
-import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.jtensors.VectorM3F;
 import com.io7m.renderer.RException;
+import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorRGBAWithDepth;
 import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferRGBADescription;
 
-public final class KRendererPostprocessorBlurRGBA extends
-  KAbstractRenderer.KAbstractRendererPostprocessorRGBA
+public final class KPostprocessorFog extends
+  KAbstractPostprocessorRGBAWithDepth
 {
   private static final @Nonnull String NAME;
 
   static {
-    NAME = "postprocessor-blur-rgba";
+    NAME = "postprocessor-fog";
   }
 
   public static @Nonnull
-    KRendererPostprocessorBlurRGBA
+    KPostprocessorFog
     rendererNew(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
@@ -67,14 +68,10 @@ public final class KRendererPostprocessorBlurRGBA extends
       throws ConstraintError,
         RException
   {
-    return new KRendererPostprocessorBlurRGBA(
-      gi,
-      rgba_cache,
-      shader_cache,
-      log);
+    return new KPostprocessorFog(gi, rgba_cache, shader_cache, log);
   }
 
-  private float                                                                              blur_size;
+  private final @Nonnull VectorM3F                                                           fog_colour;
   private final @Nonnull JCGLImplementation                                                  gi;
   private final @Nonnull Log                                                                 log;
   private final @Nonnull KUnitQuad                                                           quad;
@@ -82,7 +79,7 @@ public final class KRendererPostprocessorBlurRGBA extends
   private final @Nonnull LUCache<String, KProgram, RException>                               shader_cache;
   private final @Nonnull VectorM2I                                                           viewport_size;
 
-  private KRendererPostprocessorBlurRGBA(
+  private KPostprocessorFog(
     final @Nonnull JCGLImplementation gi,
     final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
@@ -90,7 +87,7 @@ public final class KRendererPostprocessorBlurRGBA extends
     throws ConstraintError,
       RException
   {
-    super(KRendererPostprocessorBlurRGBA.NAME);
+    super(KPostprocessorFog.NAME);
 
     try {
       this.gi = Constraints.constrainNotNull(gi, "GL implementation");
@@ -101,24 +98,27 @@ public final class KRendererPostprocessorBlurRGBA extends
       this.log =
         new Log(
           Constraints.constrainNotNull(log, "Log"),
-          KRendererPostprocessorBlurRGBA.NAME);
+          KPostprocessorFog.NAME);
 
       this.viewport_size = new VectorM2I();
       this.quad = KUnitQuad.newQuad(gi.getGLCommon(), this.log);
-      this.blur_size = 1.0f;
+      this.fog_colour = new VectorM3F(0.1f, 0.1f, 0.1f);
 
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
     }
   }
 
-  private void evaluateBlurH(
-    final @Nonnull KFramebufferRGBAUsable input,
-    final @Nonnull KFramebufferRGBAUsable output)
-    throws JCGLRuntimeException,
-      ConstraintError,
-      RException,
-      JCacheException
+  private
+    <F extends KFramebufferRGBAUsable & KFramebufferDepthUsable>
+    void
+    evaluateFog(
+      final F input,
+      final KFramebufferRGBAUsable output)
+      throws JCGLRuntimeException,
+        ConstraintError,
+        RException,
+        JCacheException
   {
     final JCGLInterfaceCommon gc = this.gi.getGLCommon();
     final AreaInclusive area = output.kFramebufferGetArea();
@@ -126,15 +126,15 @@ public final class KRendererPostprocessorBlurRGBA extends
     this.viewport_size.y = (int) area.getRangeY().getInterval();
     final List<TextureUnit> units = gc.textureGetUnits();
 
-    final KProgram blur_h =
-      this.shader_cache.cacheGetLU("postprocessing_gaussian_blur_horizontal");
+    final KProgram fog = this.shader_cache.cacheGetLU("postprocessing_fog");
 
     try {
       gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
       gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
+      gc.colorBufferClearV3f(this.fog_colour);
       gc.blendingDisable();
 
-      final JCBExecutionAPI e = blur_h.getExecutable();
+      final JCBExecutionAPI e = fog.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
         @SuppressWarnings("synthetic-access") @Override public void call(
           final @Nonnull JCBProgram p)
@@ -144,22 +144,28 @@ public final class KRendererPostprocessorBlurRGBA extends
         {
           try {
             final ArrayBufferUsable array =
-              KRendererPostprocessorBlurRGBA.this.quad.getArray();
+              KPostprocessorFog.this.quad.getArray();
             final IndexBufferUsable indices =
-              KRendererPostprocessorBlurRGBA.this.quad.getIndices();
+              KPostprocessorFog.this.quad.getIndices();
 
             gc.arrayBufferBind(array);
             KShadingProgramCommon.bindAttributePosition(p, array);
             KShadingProgramCommon.bindAttributeUV(p, array);
 
-            final long width =
-              input.kFramebufferGetArea().getRangeX().getInterval();
-            p.programUniformPutFloat("image_width", width
-              / KRendererPostprocessorBlurRGBA.this.blur_size);
+            final TextureUnit image_unit = units.get(0);
+            final TextureUnit depth_unit = units.get(1);
+            gc.texture2DStaticBind(
+              image_unit,
+              input.kFramebufferGetRGBATexture());
+            gc.texture2DStaticBind(
+              depth_unit,
+              input.kFramebufferGetDepthTexture());
 
-            final TextureUnit unit = units.get(0);
-            gc.texture2DStaticBind(unit, input.kFramebufferGetRGBATexture());
-            p.programUniformPutTextureUnit("t_image", unit);
+            p.programUniformPutVector3f(
+              "fog.colour",
+              KPostprocessorFog.this.fog_colour);
+            p.programUniformPutTextureUnit("t_image", image_unit);
+            p.programUniformPutTextureUnit("t_image_depth", depth_unit);
             p.programExecute(new JCBProgramProcedure() {
               @Override public void call()
                 throws ConstraintError,
@@ -186,7 +192,7 @@ public final class KRendererPostprocessorBlurRGBA extends
     }
   }
 
-  private void evaluateBlurV(
+  private void evaluateId(
     final @Nonnull KFramebufferRGBAUsable input,
     final @Nonnull KFramebufferRGBAUsable output)
     throws JCGLRuntimeException,
@@ -200,15 +206,16 @@ public final class KRendererPostprocessorBlurRGBA extends
     this.viewport_size.y = (int) area.getRangeY().getInterval();
     final List<TextureUnit> units = gc.textureGetUnits();
 
-    final KProgram blur_v =
-      this.shader_cache.cacheGetLU("postprocessing_gaussian_blur_vertical");
+    final KProgram id =
+      this.shader_cache.cacheGetLU("postprocessing_identity");
 
     try {
       gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
       gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
+      gc.colorBufferClearV3f(this.fog_colour);
       gc.blendingDisable();
 
-      final JCBExecutionAPI e = blur_v.getExecutable();
+      final JCBExecutionAPI e = id.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
         @SuppressWarnings("synthetic-access") @Override public void call(
           final @Nonnull JCBProgram p)
@@ -218,22 +225,20 @@ public final class KRendererPostprocessorBlurRGBA extends
         {
           try {
             final ArrayBufferUsable array =
-              KRendererPostprocessorBlurRGBA.this.quad.getArray();
+              KPostprocessorFog.this.quad.getArray();
             final IndexBufferUsable indices =
-              KRendererPostprocessorBlurRGBA.this.quad.getIndices();
+              KPostprocessorFog.this.quad.getIndices();
 
             gc.arrayBufferBind(array);
             KShadingProgramCommon.bindAttributePosition(p, array);
             KShadingProgramCommon.bindAttributeUV(p, array);
 
-            final long height =
-              input.kFramebufferGetArea().getRangeY().getInterval();
-            p.programUniformPutFloat("image_height", height
-              / KRendererPostprocessorBlurRGBA.this.blur_size);
+            final TextureUnit image_unit = units.get(0);
+            gc.texture2DStaticBind(
+              image_unit,
+              input.kFramebufferGetRGBATexture());
 
-            final TextureUnit unit = units.get(0);
-            gc.texture2DStaticBind(unit, input.kFramebufferGetRGBATexture());
-            p.programUniformPutTextureUnit("t_image", unit);
+            p.programUniformPutTextureUnit("t_image", image_unit);
             p.programExecute(new JCBProgramProcedure() {
               @Override public void call()
                 throws ConstraintError,
@@ -260,7 +265,7 @@ public final class KRendererPostprocessorBlurRGBA extends
     }
   }
 
-  @Override public void rendererClose()
+  @Override public void postprocessorClose()
     throws RException,
       ConstraintError
   {
@@ -271,16 +276,14 @@ public final class KRendererPostprocessorBlurRGBA extends
     }
   }
 
-  @Override public KRendererDebugging rendererDebug()
-  {
-    return null;
-  }
-
-  @Override public void rendererPostprocessorEvaluateRGBA(
-    final @Nonnull KFramebufferRGBAUsable input,
-    final @Nonnull KFramebufferRGBAUsable output)
-    throws ConstraintError,
-      RException
+  @Override public
+    <F extends KFramebufferRGBAUsable & KFramebufferDepthUsable>
+    void
+    postprocessorEvaluateRGBAWithDepth(
+      final @Nonnull F input,
+      final @Nonnull KFramebufferRGBAUsable output)
+      throws ConstraintError,
+        RException
   {
     try {
       final BLUCacheReceipt<KFramebufferRGBADescription, KFramebufferRGBA> receipt =
@@ -288,8 +291,8 @@ public final class KRendererPostprocessorBlurRGBA extends
 
       try {
         final KFramebufferRGBA temp = receipt.getValue();
-        this.evaluateBlurH(input, temp);
-        this.evaluateBlurV(temp, output);
+        this.evaluateFog(input, temp);
+        this.evaluateId(temp, output);
       } finally {
         receipt.returnToCache();
       }
@@ -299,12 +302,5 @@ public final class KRendererPostprocessorBlurRGBA extends
     } catch (final JCacheException e) {
       throw RException.fromJCacheException(e);
     }
-  }
-
-  @Override public void rendererSetBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-    throws ConstraintError
-  {
-    // Nothing
   }
 }

@@ -21,23 +21,19 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RException;
 
-public interface KRendererVisitor<A, E extends Throwable>
+public interface KPostprocessor extends KPostprocessorVisitable
 {
-  public A rendererVisitDebug(
-    final @Nonnull KRendererDebug r)
-    throws E,
-      ConstraintError,
-      RException;
+  /**
+   * Delete all resources associated with this renderer.
+   */
 
-  public A rendererVisitDeferred(
-    final @Nonnull KRendererDeferred r)
-    throws E,
-      ConstraintError,
-      RException;
+  public void postprocessorClose()
+    throws RException,
+      ConstraintError;
 
-  public A rendererVisitForward(
-    final @Nonnull KRendererForward r)
-    throws E,
-      ConstraintError,
-      RException;
+  /**
+   * Retrieve the name of the postprocessor.
+   */
+
+  public @Nonnull String postprocessorGetName();
 }
