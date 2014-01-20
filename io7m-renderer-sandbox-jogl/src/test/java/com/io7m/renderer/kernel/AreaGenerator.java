@@ -16,10 +16,25 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KFramebufferForwardType extends
-  KFramebufferRGBAType,
-  KFramebufferDepthType,
-  KFramebufferForwardUsable
+import net.java.quickcheck.Generator;
+
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.RangeInclusive;
+import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jcanephora.AreaInclusive;
+
+public final class AreaGenerator implements Generator<AreaInclusive>
 {
-  // No extras.
+  @Override public AreaInclusive next()
+  {
+    try {
+      final RangeInclusive range_x =
+        new RangeInclusive(0, (long) Math.abs(Math.random() * 100000));
+      final RangeInclusive range_y =
+        new RangeInclusive(0, (long) Math.abs(Math.random() * 100000));
+      return new AreaInclusive(range_x, range_y);
+    } catch (final ConstraintError x) {
+      throw new UnreachableCodeException(x);
+    }
+  }
 }

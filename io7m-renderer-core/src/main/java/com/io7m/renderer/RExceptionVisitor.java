@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.renderer.RException.RResourceException;
@@ -33,6 +34,10 @@ public interface RExceptionVisitor<T, E extends Throwable>
 
   public T visitIOException(
     final @Nonnull IOException e)
+    throws E;
+
+  public T visitJCacheException(
+    final @Nonnull JCacheException e)
     throws E;
 
   public T visitJCGLException(

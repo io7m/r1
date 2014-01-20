@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,7 +34,7 @@ import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapBasicDescription;
 import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapVarianceDescription;
 
-final class KShadowCacheLoader implements
+final class KShadowMapCacheLoader implements
   JCacheLoader<KShadowMapDescription, KShadowMap, RException>
 {
   public static @Nonnull
@@ -44,14 +44,14 @@ final class KShadowCacheLoader implements
       final @Nonnull Log log)
       throws ConstraintError
   {
-    return new KShadowCacheLoader(gi, log);
+    return new KShadowMapCacheLoader(gi, log);
   }
 
   private final @Nonnull JCGLImplementation gi;
   private final @Nonnull Log                log;
   private final @Nonnull StringBuilder      message;
 
-  private KShadowCacheLoader(
+  private KShadowMapCacheLoader(
     final @Nonnull JCGLImplementation gi,
     final @Nonnull Log log)
     throws ConstraintError

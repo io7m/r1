@@ -16,10 +16,16 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KFramebufferForwardType extends
-  KFramebufferRGBAType,
-  KFramebufferDepthType,
-  KFramebufferForwardUsable
+import net.java.quickcheck.Generator;
+
+import com.io7m.jcanephora.TextureFilterMagnification;
+
+public final class TextureFilterMagGenerator implements
+  Generator<TextureFilterMagnification>
 {
-  // No extras.
+  @Override public TextureFilterMagnification next()
+  {
+    return TextureFilterMagnification.values()[(int) (Math.random() * TextureFilterMagnification
+      .values().length)];
+  }
 }
