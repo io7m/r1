@@ -22,86 +22,86 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RException;
 
-abstract class KAbstractRenderer implements KRenderer
+abstract class KAbstractPostprocessor implements KPostprocessor
 {
-  public static abstract class KAbstractRendererDebug extends
-    KAbstractRenderer implements KRendererDebug
+  public static abstract class KAbstractPostprocessorDepth extends
+    KAbstractPostprocessor implements KPostprocessorDepth
   {
-    protected KAbstractRendererDebug(
+    protected KAbstractPostprocessorDepth(
       final @Nonnull String name)
     {
       super(name);
     }
 
     @Override public final
-      <A, E extends Throwable, V extends KRendererVisitor<A, E>>
+      <A, E extends Throwable, V extends KPostprocessorVisitor<A, E>>
       A
-      rendererVisitableAccept(
+      postprocessorVisitableAccept(
         final @Nonnull V v)
         throws ConstraintError,
           RException,
           E
     {
       Constraints.constrainNotNull(v, "Visitor");
-      return v.rendererVisitDebug(this);
+      return v.postprocessorVisitDepth(this);
     }
   }
 
-  public static abstract class KAbstractRendererDeferred extends
-    KAbstractRenderer implements KRendererDeferred
+  public static abstract class KAbstractPostprocessorRGBA extends
+    KAbstractPostprocessor implements KPostprocessorRGBA
   {
-    protected KAbstractRendererDeferred(
+    protected KAbstractPostprocessorRGBA(
       final @Nonnull String name)
     {
       super(name);
     }
 
     @Override public final
-      <A, E extends Throwable, V extends KRendererVisitor<A, E>>
+      <A, E extends Throwable, V extends KPostprocessorVisitor<A, E>>
       A
-      rendererVisitableAccept(
+      postprocessorVisitableAccept(
         final @Nonnull V v)
         throws ConstraintError,
           RException,
           E
     {
       Constraints.constrainNotNull(v, "Visitor");
-      return v.rendererVisitDeferred(this);
+      return v.postprocessorVisitRGBA(this);
     }
   }
 
-  public static abstract class KAbstractRendererForward extends
-    KAbstractRenderer implements KRendererForward
+  public static abstract class KAbstractPostprocessorRGBAWithDepth extends
+    KAbstractPostprocessor implements KPostprocessorRGBAWithDepth
   {
-    protected KAbstractRendererForward(
+    protected KAbstractPostprocessorRGBAWithDepth(
       final @Nonnull String name)
     {
       super(name);
     }
 
     @Override public final
-      <A, E extends Throwable, V extends KRendererVisitor<A, E>>
+      <A, E extends Throwable, V extends KPostprocessorVisitor<A, E>>
       A
-      rendererVisitableAccept(
+      postprocessorVisitableAccept(
         final @Nonnull V v)
         throws ConstraintError,
           RException,
           E
     {
       Constraints.constrainNotNull(v, "Visitor");
-      return v.rendererVisitForward(this);
+      return v.postprocessorVisitRGBAWithDepth(this);
     }
   }
 
   private final @Nonnull String name;
 
-  protected KAbstractRenderer(
+  protected KAbstractPostprocessor(
     final @Nonnull String name)
   {
     this.name = name;
   }
 
-  @Override public final @Nonnull String rendererGetName()
+  @Override public final @Nonnull String postprocessorGetName()
   {
     return this.name;
   }

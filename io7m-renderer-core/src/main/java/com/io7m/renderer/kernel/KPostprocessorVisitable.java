@@ -21,11 +21,14 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RException;
 
-public interface KRendererPostprocessorDepth extends KRenderer
+public interface KPostprocessorVisitable
 {
-  public void rendererPostprocessorEvaluateDepth(
-    final @Nonnull KFramebufferDepthUsable input,
-    final @Nonnull KFramebufferDepthUsable output)
-    throws ConstraintError,
-      RException;
+  public
+    <A, E extends Throwable, V extends KPostprocessorVisitor<A, E>>
+    A
+    postprocessorVisitableAccept(
+      final @Nonnull V v)
+      throws E,
+        ConstraintError,
+        RException;
 }

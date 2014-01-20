@@ -21,7 +21,8 @@ import javax.annotation.Nonnull;
 public enum SBKPostprocessorType
 {
   KPOSTPROCESSOR_NONE("none"),
-  KPOSTPROCESSOR_BLUR("blur")
+  KPOSTPROCESSOR_BLUR("blur"),
+  KPOSTPROCESSOR_FOG("fog")
 
   ;
 

@@ -21,11 +21,11 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RException;
 
-public interface KRendererPostprocessorRGBA extends KRenderer
+public interface KPostprocessorDepth extends KPostprocessor
 {
-  public void rendererPostprocessorEvaluateRGBA(
-    final @Nonnull KFramebufferRGBAUsable input,
-    final @Nonnull KFramebufferRGBAUsable output)
+  public void postprocessorEvaluateDepth(
+    final @Nonnull KFramebufferDepthUsable input,
+    final @Nonnull KFramebufferDepthUsable output)
     throws ConstraintError,
       RException;
 }

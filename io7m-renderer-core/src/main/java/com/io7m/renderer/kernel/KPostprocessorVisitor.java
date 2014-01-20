@@ -21,22 +21,22 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RException;
 
-public interface KRendererVisitor<A, E extends Throwable>
+public interface KPostprocessorVisitor<A, E extends Throwable>
 {
-  public A rendererVisitDebug(
-    final @Nonnull KRendererDebug r)
+  public A postprocessorVisitDepth(
+    final @Nonnull KPostprocessorDepth r)
     throws E,
       ConstraintError,
       RException;
 
-  public A rendererVisitDeferred(
-    final @Nonnull KRendererDeferred r)
+  public A postprocessorVisitRGBA(
+    final @Nonnull KPostprocessorRGBA r)
     throws E,
       ConstraintError,
       RException;
 
-  public A rendererVisitForward(
-    final @Nonnull KRendererForward r)
+  public A postprocessorVisitRGBAWithDepth(
+    final @Nonnull KPostprocessorRGBAWithDepth r)
     throws E,
       ConstraintError,
       RException;
