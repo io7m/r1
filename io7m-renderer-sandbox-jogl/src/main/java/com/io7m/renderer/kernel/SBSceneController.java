@@ -1152,6 +1152,12 @@ public final class SBSceneController implements
   {
     return this.renderer.getCacheStatistics();
   }
+
+  @Override public void rendererPostprocessorSetType(
+    final @Nonnull SBKPostprocessorType type)
+  {
+    this.renderer.setPostprocessor(type);
+  }
 }
 
 interface SBSceneControllerInstances extends
@@ -1249,6 +1255,9 @@ interface SBSceneControllerRendererControl
 
   public void rendererSetType(
     final @Nonnull SBKRendererType type);
+
+  public void rendererPostprocessorSetType(
+    final @Nonnull SBKPostprocessorType type);
 
   public void rendererShowAxes(
     final boolean enabled);

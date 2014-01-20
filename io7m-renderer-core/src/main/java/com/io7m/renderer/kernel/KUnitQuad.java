@@ -21,6 +21,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttributeDescriptor;
@@ -36,11 +37,15 @@ import com.io7m.jcanephora.IndexBufferWritableData;
 import com.io7m.jcanephora.JCGLArrayBuffers;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLIndexBuffers;
+import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jcanephora.JCGLResourceSized;
+import com.io7m.jcanephora.JCGLResourceUsable;
+import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 
-public final class KUnitQuad
+public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
 {
   public static @Nonnull
     <G extends JCGLArrayBuffers & JCGLIndexBuffers>
@@ -119,6 +124,7 @@ public final class KUnitQuad
 
   private final @Nonnull ArrayBuffer array;
   private final @Nonnull IndexBuffer indices;
+  private boolean                    deleted;
 
   private KUnitQuad(
     final @Nonnull ArrayBuffer array,
@@ -126,6 +132,7 @@ public final class KUnitQuad
   {
     this.array = array;
     this.indices = indices;
+    this.deleted = false;
   }
 
   @Override public boolean equals(
@@ -178,5 +185,31 @@ public final class KUnitQuad
     builder.append(this.indices);
     builder.append("]");
     return builder.toString();
+  }
+
+  public void delete(
+    final @Nonnull JCGLInterfaceCommon gc)
+    throws ConstraintError,
+      JCGLRuntimeException
+  {
+    Constraints.constrainArbitrary(this.deleted == false, "Not deleted");
+
+    try {
+      gc.arrayBufferDelete(this.array);
+      gc.indexBufferDelete(this.indices);
+    } finally {
+      this.deleted = true;
+    }
+  }
+
+  @Override public long resourceGetSizeBytes()
+  {
+    return this.array.resourceGetSizeBytes()
+      + this.indices.resourceGetSizeBytes();
+  }
+
+  @Override public boolean resourceIsDeleted()
+  {
+    return this.deleted;
   }
 }
