@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.renderer.kernel.KXMLException;
@@ -67,6 +68,28 @@ public abstract class RException extends Throwable implements
       throws E
     {
       return v.visitIOException((IOException) this.getCause());
+    }
+  }
+
+  public static final class RJCacheException extends RException
+  {
+    private static final long serialVersionUID;
+
+    static {
+      serialVersionUID = -6738063184220278663L;
+    }
+
+    private RJCacheException(
+      final @Nonnull JCacheException e)
+    {
+      super(e);
+    }
+
+    @Override public <T, E extends Throwable> T exceptionAccept(
+      final @Nonnull RExceptionVisitor<T, E> v)
+      throws E
+    {
+      return v.visitJCacheException((JCacheException) this.getCause());
     }
   }
 
@@ -156,6 +179,14 @@ public abstract class RException extends Throwable implements
       final @Nonnull IOException x)
   {
     return new RIOException(x);
+  }
+
+  @SuppressWarnings("synthetic-access") public static
+    RException
+    fromJCacheException(
+      final @Nonnull JCacheException e)
+  {
+    return new RJCacheException(e);
   }
 
   @SuppressWarnings("synthetic-access") public static @Nonnull

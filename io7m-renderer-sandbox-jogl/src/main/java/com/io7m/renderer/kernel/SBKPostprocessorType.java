@@ -16,10 +16,25 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KFramebufferForwardType extends
-  KFramebufferRGBAType,
-  KFramebufferDepthType,
-  KFramebufferForwardUsable
+import javax.annotation.Nonnull;
+
+public enum SBKPostprocessorType
 {
-  // No extras.
+  KPOSTPROCESSOR_NONE("none"),
+  KPOSTPROCESSOR_BLUR("blur")
+
+  ;
+
+  final @Nonnull String name;
+
+  private SBKPostprocessorType(
+    final @Nonnull String name)
+  {
+    this.name = name;
+  }
+
+  public @Nonnull String getName()
+  {
+    return this.name;
+  }
 }

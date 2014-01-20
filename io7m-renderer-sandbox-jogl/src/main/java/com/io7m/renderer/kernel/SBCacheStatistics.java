@@ -23,6 +23,8 @@ import javax.annotation.Nonnull;
 public final class SBCacheStatistics
 {
   private final @Nonnull BigInteger cached_labels;
+  private final @Nonnull BigInteger cached_rgba_framebuffers;
+  private final @Nonnull BigInteger cached_rgba_framebuffers_bytes;
   private final @Nonnull BigInteger cached_shaders;
   private final @Nonnull BigInteger cached_shadow_maps;
   private final @Nonnull BigInteger cached_shadow_maps_bytes;
@@ -31,17 +33,31 @@ public final class SBCacheStatistics
     final @Nonnull BigInteger cached_labels,
     final @Nonnull BigInteger cached_shaders,
     final @Nonnull BigInteger cached_shadow_maps,
-    final @Nonnull BigInteger cached_shadow_maps_bytes)
+    final @Nonnull BigInteger cached_shadow_maps_bytes,
+    final @Nonnull BigInteger cached_rgba_framebuffers,
+    final @Nonnull BigInteger cached_rgba_framebuffers_bytes)
   {
     this.cached_labels = cached_labels;
     this.cached_shaders = cached_shaders;
     this.cached_shadow_maps = cached_shadow_maps;
     this.cached_shadow_maps_bytes = cached_shadow_maps_bytes;
+    this.cached_rgba_framebuffers = cached_rgba_framebuffers;
+    this.cached_rgba_framebuffers_bytes = cached_rgba_framebuffers_bytes;
   }
 
   public @Nonnull BigInteger getCachedLabels()
   {
     return this.cached_labels;
+  }
+
+  public @Nonnull BigInteger getCachedRGBAFramebuffers()
+  {
+    return this.cached_rgba_framebuffers;
+  }
+
+  public @Nonnull BigInteger getCachedRGBAFramebuffersBytes()
+  {
+    return this.cached_rgba_framebuffers_bytes;
   }
 
   public @Nonnull BigInteger getCachedShaders()

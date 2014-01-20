@@ -16,10 +16,14 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KFramebufferForwardType extends
-  KFramebufferRGBAType,
-  KFramebufferDepthType,
-  KFramebufferForwardUsable
+import net.java.quickcheck.Generator;
+
+public final class KDepthPrecisionGenerator implements
+  Generator<KDepthPrecision>
 {
-  // No extras.
+  @Override public KDepthPrecision next()
+  {
+    return KDepthPrecision.values()[(int) (Math.random() * KDepthPrecision
+      .values().length)];
+  }
 }

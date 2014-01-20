@@ -121,6 +121,7 @@ final class SBMainWindow extends JFrame
     bar.add(SBMainWindow.makeMenuFile(controller, window, log));
     bar.add(SBMainWindow.makeMenuEdit(lights_window, objects_window));
     bar.add(SBMainWindow.makeMenuRenderer(window, log, controller));
+    bar.add(SBMainWindow.makeMenuPostprocessor(window, log, controller));
     bar.add(SBMainWindow.makeMenuView(camera_window, controller));
     bar.add(SBMainWindow.makeMenuDebug(logs_window, stats_window));
     return bar;
@@ -333,6 +334,34 @@ final class SBMainWindow extends JFrame
     menu.add(save);
     menu.add(new JSeparator());
     menu.add(quit);
+    return menu;
+  }
+
+  private static @Nonnull
+    <C extends SBSceneControllerRendererControl & SBSceneControllerShaders>
+    JMenu
+    makeMenuPostprocessor(
+      final @Nonnull JFrame main_window,
+      final @Nonnull Log log,
+      final @Nonnull C controller)
+  {
+    final ButtonGroup renderer_group = new ButtonGroup();
+    final JMenu menu = new JMenu("Postprocessor");
+
+    for (final SBKPostprocessorType type : SBKPostprocessorType.values()) {
+      final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
+      b.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          controller.rendererPostprocessorSetType(type);
+        }
+      });
+
+      renderer_group.add(b);
+      menu.add(b);
+    }
+
     return menu;
   }
 
