@@ -58,7 +58,7 @@ public final class KPostprocessorBlurRGBA extends KAbstractPostprocessorRGBA
 
   public static @Nonnull
     KPostprocessorBlurRGBA
-    rendererNew(
+    postprocessorNew(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
       final @Nonnull LUCache<String, KProgram, RException> shader_cache,

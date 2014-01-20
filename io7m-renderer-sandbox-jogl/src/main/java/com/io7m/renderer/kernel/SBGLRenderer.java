@@ -1556,7 +1556,7 @@ final class SBGLRenderer implements GLEventListener
       }
       case KPOSTPROCESSOR_BLUR:
       {
-        return KPostprocessorBlurRGBA.rendererNew(
+        return KPostprocessorBlurRGBA.postprocessorNew(
           this.gi,
           this.rgba_cache,
           this.shader_cache,
@@ -1564,7 +1564,7 @@ final class SBGLRenderer implements GLEventListener
       }
       case KPOSTPROCESSOR_FOG:
       {
-        return KPostprocessorFog.rendererNew(
+        return KPostprocessorFog.postprocessorNew(
           this.gi,
           this.rgba_cache,
           this.shader_cache,

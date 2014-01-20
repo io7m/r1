@@ -60,7 +60,7 @@ public final class KPostprocessorFog extends
 
   public static @Nonnull
     KPostprocessorFog
-    rendererNew(
+    postprocessorNew(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
       final @Nonnull LUCache<String, KProgram, RException> shader_cache,
