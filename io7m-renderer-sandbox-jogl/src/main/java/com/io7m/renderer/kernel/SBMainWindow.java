@@ -56,8 +56,6 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Callbacks;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeKernel;
-import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeSpecific;
 import com.jogamp.opengl.util.Animator;
 
 final class SBMainWindow extends JFrame
@@ -115,6 +113,7 @@ final class SBMainWindow extends JFrame
       final @Nonnull SBCameraWindow camera_window,
       final @Nonnull SBLightsWindow lights_window,
       final @Nonnull SBLogsWindow logs_window,
+      final @Nonnull SBStatisticsWindow stats_window,
       final @Nonnull SBObjectsWindow objects_window,
       final @Nonnull Log log)
   {
@@ -122,19 +121,25 @@ final class SBMainWindow extends JFrame
     bar.add(SBMainWindow.makeMenuFile(controller, window, log));
     bar.add(SBMainWindow.makeMenuEdit(lights_window, objects_window));
     bar.add(SBMainWindow.makeMenuRenderer(window, log, controller));
+    bar.add(SBMainWindow.makeMenuPostprocessor(window, log, controller));
     bar.add(SBMainWindow.makeMenuView(camera_window, controller));
-    bar.add(SBMainWindow.makeMenuDebug(logs_window));
+    bar.add(SBMainWindow.makeMenuDebug(logs_window, stats_window));
     return bar;
   }
 
   private static @Nonnull JMenu makeMenuDebug(
-    final @Nonnull SBLogsWindow log_window)
+    final @Nonnull SBLogsWindow log_window,
+    final @Nonnull SBStatisticsWindow stats_window)
   {
     final JMenu menu = new JMenu("Debug");
+
     final JCheckBoxMenuItem logs =
       SBMainWindow.makeMenuDebugLogsMenuItem(log_window);
+    final JCheckBoxMenuItem stats =
+      SBMainWindow.makeMenuDebugStatisticsMenuItem(stats_window);
 
     menu.add(logs);
+    menu.add(stats);
     return menu;
   }
 
@@ -142,6 +147,12 @@ final class SBMainWindow extends JFrame
     final @Nonnull SBLogsWindow log_window)
   {
     return SBMainWindow.makeWindowCheckbox("Logs...", log_window);
+  }
+
+  private static JCheckBoxMenuItem makeMenuDebugStatisticsMenuItem(
+    final @Nonnull SBStatisticsWindow stats_window)
+  {
+    return SBMainWindow.makeWindowCheckbox("Statistics...", stats_window);
   }
 
   private static @Nonnull JMenu makeMenuEdit(
@@ -329,15 +340,41 @@ final class SBMainWindow extends JFrame
   private static @Nonnull
     <C extends SBSceneControllerRendererControl & SBSceneControllerShaders>
     JMenu
+    makeMenuPostprocessor(
+      final @Nonnull JFrame main_window,
+      final @Nonnull Log log,
+      final @Nonnull C controller)
+  {
+    final ButtonGroup renderer_group = new ButtonGroup();
+    final JMenu menu = new JMenu("Postprocessor");
+
+    for (final SBKPostprocessorType type : SBKPostprocessorType.values()) {
+      final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
+      b.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          controller.rendererPostprocessorSetType(type);
+        }
+      });
+
+      renderer_group.add(b);
+      menu.add(b);
+    }
+
+    return menu;
+  }
+
+  private static @Nonnull
+    <C extends SBSceneControllerRendererControl & SBSceneControllerShaders>
+    JMenu
     makeMenuRenderer(
       final @Nonnull JFrame main_window,
       final @Nonnull Log log,
       final @Nonnull C controller)
   {
     final ButtonGroup renderer_group = new ButtonGroup();
-
     final JMenu menu = new JMenu("Renderer");
-    final JMenu kr_menu = new JMenu("Kernel renderers");
 
     for (final SBKRendererType type : SBKRendererType.values()) {
       final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
@@ -345,50 +382,13 @@ final class SBMainWindow extends JFrame
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
         {
-          try {
-            final SBRendererTypeKernel kt =
-              new SBRendererType.SBRendererTypeKernel(type);
-            controller.rendererSetType(kt);
-          } catch (final ConstraintError x) {
-            throw new UnreachableCodeException();
-          }
+          controller.rendererSetType(type);
         }
       });
 
       renderer_group.add(b);
-      kr_menu.add(b);
+      menu.add(b);
     }
-
-    menu.add(kr_menu);
-
-    final JRadioButtonMenuItem b =
-      new JRadioButtonMenuItem("Specific shader...");
-    b.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
-      {
-        final SBShadersDialog d =
-          new SBShadersDialog(main_window, log, controller);
-        d.setVisible(true);
-        d.addWindowListener(new WindowAdapter() {
-          @Override public void windowClosing(
-            final @Nonnull WindowEvent w)
-          {
-            try {
-              final SBShader s = d.getSelectedShader();
-              if (s != null) {
-                controller.rendererSetType(new SBRendererTypeSpecific(s));
-              }
-            } catch (final ConstraintError x) {
-              throw new UnreachableCodeException();
-            }
-          }
-        });
-      }
-    });
-
-    renderer_group.add(b);
-    menu.add(b);
 
     return menu;
   }
@@ -603,6 +603,8 @@ final class SBMainWindow extends JFrame
     final SBObjectsWindow objects_window =
       new SBObjectsWindow(controller, log);
     final SBCameraWindow camera_window = new SBCameraWindow(controller, log);
+    final SBStatisticsWindow stats_window =
+      new SBStatisticsWindow(controller);
 
     log.setCallback(new Callbacks() {
       private final @Nonnull StringBuilder builder = new StringBuilder();
@@ -774,6 +776,7 @@ final class SBMainWindow extends JFrame
       camera_window,
       lights_window,
       logs_window,
+      stats_window,
       objects_window,
       log));
   }

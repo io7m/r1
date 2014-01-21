@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,25 +16,21 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.IOException;
-
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLCompileException;
-import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.renderer.RException;
 
-public interface KRenderer
+public interface KRenderer extends KRendererVisitable
 {
   /**
    * Delete all resources associated with this renderer.
    */
 
   public void rendererClose()
-    throws JCGLException,
+    throws RException,
       ConstraintError;
 
   /**
@@ -45,38 +41,14 @@ public interface KRenderer
   public @CheckForNull KRendererDebugging rendererDebug();
 
   /**
-   * <p>
-   * Render the scene <code>scene</code> to the given framebuffer.
-   * </p>
-   * 
-   * @throws ConstraintError
-   *           Iff <code>scene == null || framebuffer == null</code> .
-   * @throws JCGLCompileException
-   *           Iff a shader cannot be compiled.
-   * @throws JCGLUnsupportedException
-   *           Iff a shader or other resource cannot be created or used on the
-   *           current OpenGL implementation.
-   * @throws IOException
-   *           Iff an I/O exception occurs during rendering.
-   * @throws KXMLException
-   *           Iff an XML resource cannot be validated or parsed.
+   * Retrieve the name of the renderer.
    */
 
-  public void rendererEvaluate(
-    final @Nonnull KFramebufferRGBAUsable framebuffer,
-    final @Nonnull KScene scene)
-    throws JCGLException,
-      ConstraintError,
-      JCGLCompileException,
-      JCGLUnsupportedException,
-      IOException,
-      KXMLException;
+  public @Nonnull String rendererGetName();
 
   /**
-   * <p>
-   * Set the colour to which the renderer will clear the given framebuffer
-   * when rendering.
-   * </p>
+   * Set the colour to which the renderer will clear the colour buffer prior
+   * to rendering.
    * 
    * @throws ConstraintError
    *           Iff <code>rgba == null</code>.

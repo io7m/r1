@@ -28,10 +28,11 @@ import com.io7m.jcanephora.Texture2DStatic;
  * Material properties related to surface emission.
  */
 
-@Immutable public final class KMaterialEmissive
+@Immutable public final class KMaterialEmissive implements KTexturesRequired
 {
   private final float                            emission;
   private final @Nonnull Option<Texture2DStatic> texture;
+  private final int                              textures_required;
 
   KMaterialEmissive(
     final float emission,
@@ -40,6 +41,7 @@ import com.io7m.jcanephora.Texture2DStatic;
   {
     this.emission = emission;
     this.texture = Constraints.constrainNotNull(texture, "Texture");
+    this.textures_required = this.texture.isSome() ? 1 : 0;
   }
 
   @Override public boolean equals(
@@ -93,5 +95,10 @@ import com.io7m.jcanephora.Texture2DStatic;
     builder.append(this.texture);
     builder.append("]");
     return builder.toString();
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

@@ -20,11 +20,9 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLExtensionDepthTexture;
-import com.io7m.jcanephora.JCGLExtensionESDepthTexture;
 import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.JCGLImplementationVisitor;
 import com.io7m.jcanephora.JCGLInterfaceGL2;
 import com.io7m.jcanephora.JCGLInterfaceGL3;
 import com.io7m.jcanephora.JCGLInterfaceGLES2;
@@ -38,51 +36,44 @@ import com.io7m.jcanephora.JCGLInterfaceGLES3;
 public final class KGraphicsCapabilities
 {
   private static boolean decideDepthTextures(
-    final JCGLImplementation gi)
+    final @Nonnull JCGLImplementation gi)
+    throws JCGLException,
+      ConstraintError
   {
-    {
-      final Option<JCGLInterfaceGL3> o = gi.getGL3();
-      if (o.isSome()) {
-        return true;
-      }
-    }
-
-    {
-      final Option<JCGLInterfaceGLES3> o = gi.getGLES3();
-      if (o.isSome()) {
-        return true;
-      }
-    }
-
-    {
-      final Option<JCGLInterfaceGL2> o = gi.getGL2();
-      if (o.isSome()) {
-        final JCGLInterfaceGL2 g = ((Option.Some<JCGLInterfaceGL2>) o).value;
-        final Option<JCGLExtensionDepthTexture> e = g.extensionDepthTexture();
-
-        if (e.isSome()) {
-          return true;
+    return gi.implementationAccept(
+      new JCGLImplementationVisitor<Boolean, ConstraintError>() {
+        @Override public Boolean implementationIsGLES2(
+          final @Nonnull JCGLInterfaceGLES2 gl)
+          throws JCGLException,
+            ConstraintError
+        {
+          return Boolean.valueOf(gl.extensionDepthTexture().isSome());
         }
-      }
-    }
 
-    {
-      final Option<JCGLInterfaceGLES2> o = gi.getGLES2();
-
-      if (o.isSome()) {
-        final JCGLInterfaceGLES2 g =
-          ((Option.Some<JCGLInterfaceGLES2>) o).value;
-
-        final Option<JCGLExtensionESDepthTexture> e =
-          g.extensionDepthTexture();
-
-        if (e.isSome()) {
-          return true;
+        @Override public Boolean implementationIsGLES3(
+          final @Nonnull JCGLInterfaceGLES3 gl)
+          throws JCGLException,
+            ConstraintError
+        {
+          return Boolean.TRUE;
         }
-      }
-    }
 
-    return false;
+        @Override public Boolean implementationIsGL2(
+          final @Nonnull JCGLInterfaceGL2 gl)
+          throws JCGLException,
+            ConstraintError
+        {
+          return Boolean.TRUE;
+        }
+
+        @Override public Boolean implementationIsGL3(
+          final @Nonnull JCGLInterfaceGL3 gl)
+          throws JCGLException,
+            ConstraintError
+        {
+          return Boolean.TRUE;
+        }
+      }).booleanValue();
   }
 
   public static @Nonnull KGraphicsCapabilities getCapabilities(

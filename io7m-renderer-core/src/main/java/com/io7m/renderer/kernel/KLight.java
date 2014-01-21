@@ -19,9 +19,11 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.renderer.RException;
 import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceWorld;
@@ -33,7 +35,7 @@ import com.io7m.renderer.RVectorReadable3F;
  * Lights.
  */
 
-@Immutable public abstract class KLight
+@Immutable public abstract class KLight implements KLightVisitable
 {
   @Immutable public static final class KDirectional extends KLight
   {
@@ -109,6 +111,18 @@ import com.io7m.renderer.RVectorReadable3F;
       builder.append(this.direction);
       builder.append("]");
       return builder.toString();
+    }
+
+    @Override public
+      <A, E extends Throwable, V extends KLightVisitor<A, E>>
+      A
+      kLightAccept(
+        final V v)
+        throws E,
+          ConstraintError,
+          RException
+    {
+      return v.kLightVisitDirectional(this);
     }
   }
 
@@ -284,6 +298,18 @@ import com.io7m.renderer.RVectorReadable3F;
       builder.append("]");
       return builder.toString();
     }
+
+    @Override public
+      <A, E extends Throwable, V extends KLightVisitor<A, E>>
+      A
+      kLightAccept(
+        final V v)
+        throws E,
+          ConstraintError,
+          RException
+    {
+      return v.kLightVisitProjective(this);
+    }
   }
 
   @Immutable public static final class KSphere extends KLight
@@ -394,6 +420,18 @@ import com.io7m.renderer.RVectorReadable3F;
       builder.append(this.falloff);
       builder.append("]");
       return builder.toString();
+    }
+
+    @Override public
+      <A, E extends Throwable, V extends KLightVisitor<A, E>>
+      A
+      kLightAccept(
+        final V v)
+        throws E,
+          ConstraintError,
+          RException
+    {
+      return v.kLightVisitSpherical(this);
     }
   }
 

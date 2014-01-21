@@ -16,27 +16,29 @@
 
 package com.io7m.renderer.kernel;
 
+import java.math.BigInteger;
+
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jlucache.LRUCacheConfig;
-import com.io7m.jlucache.LRUCacheTrivial;
-import com.io7m.jlucache.LUCacheException;
-import com.io7m.jlucache.LUCacheLoader;
+import com.io7m.jcache.JCacheException;
+import com.io7m.jcache.JCacheLoader;
+import com.io7m.jcache.LRUCacheConfig;
+import com.io7m.jcache.LRUCacheTrivial;
 
 final class KLabelDecider implements
   KLightLabelCache,
   KMaterialAlbedoLabelCache,
   KMaterialAlphaLabelCache,
+  KMaterialDepthLabelCache,
   KMaterialEmissiveLabelCache,
   KMaterialEnvironmentLabelCache,
   KMaterialNormalLabelCache,
   KMaterialSpecularLabelCache,
-  KMaterialForwardLabelCache,
-  KMaterialShadowLabelCache
+  KMaterialForwardLabelCache
 {
   @Immutable private static final class ShadowCacheKey
   {
@@ -86,7 +88,7 @@ final class KLabelDecider implements
 
   public static @Nonnull KLabelDecider newDecider(
     final @Nonnull KGraphicsCapabilities capabilities,
-    final long cache_labels)
+    final @Nonnull BigInteger cache_labels)
     throws ConstraintError
   {
     final LRUCacheConfig config =
@@ -98,14 +100,13 @@ final class KLabelDecider implements
   private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialAlphaLabel, ConstraintError>       alpha_cache;
   private final @Nonnull LRUCacheConfig                                                             cache_config;
   private final @Nonnull KGraphicsCapabilities                                                      capabilities;
+  private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialDepthLabel, ConstraintError>       depth_cache;
   private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialEmissiveLabel, ConstraintError>    emissive_cache;
   private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialEnvironmentLabel, ConstraintError> environment_cache;
   private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialForwardLabel, ConstraintError>     forward_cache;
-  private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialNormalLabel, ConstraintError>      normal_cache;
-  private final @Nonnull LRUCacheTrivial<ShadowCacheKey, KMaterialShadowLabel, ConstraintError>     shadow_cache;
-  private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialShadowCastLabel, ConstraintError>  shadow_caster_cache;
-  private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialSpecularLabel, ConstraintError>    specular_cache;
   private final @Nonnull LRUCacheTrivial<KLight, KLightLabel, ConstraintError>                      light_cache;
+  private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialNormalLabel, ConstraintError>      normal_cache;
+  private final @Nonnull LRUCacheTrivial<KMeshInstance, KMaterialSpecularLabel, ConstraintError>    specular_cache;
 
   private KLabelDecider(
     final @Nonnull KGraphicsCapabilities capabilities,
@@ -120,25 +121,25 @@ final class KLabelDecider implements
     this.albedo_cache =
       LRUCacheTrivial
         .newCache(
-          new LUCacheLoader<KMeshInstance, KMaterialAlbedoLabel, ConstraintError>() {
-            @Override public void luCacheClose(
+          new JCacheLoader<KMeshInstance, KMaterialAlbedoLabel, ConstraintError>() {
+            @Override public void cacheValueClose(
               final @Nonnull KMaterialAlbedoLabel v)
               throws ConstraintError
             {
               // Nothing
             }
 
-            @Override public KMaterialAlbedoLabel luCacheLoadFrom(
+            @Override public KMaterialAlbedoLabel cacheValueLoad(
               final @Nonnull KMeshInstance instance)
               throws ConstraintError
             {
               return KMaterialAlbedoLabel.fromInstance(instance);
             }
 
-            @Override public long luCacheSizeOf(
+            @Override public @Nonnull BigInteger cacheValueSizeOf(
               final @Nonnull KMaterialAlbedoLabel v)
             {
-              return 1;
+              return BigInteger.ONE;
             }
           },
           this.cache_config);
@@ -146,25 +147,59 @@ final class KLabelDecider implements
     this.alpha_cache =
       LRUCacheTrivial
         .newCache(
-          new LUCacheLoader<KMeshInstance, KMaterialAlphaLabel, ConstraintError>() {
-            @Override public void luCacheClose(
+          new JCacheLoader<KMeshInstance, KMaterialAlphaLabel, ConstraintError>() {
+            @Override public void cacheValueClose(
               final @Nonnull KMaterialAlphaLabel v)
               throws ConstraintError
             {
               // Nothing
             }
 
-            @Override public KMaterialAlphaLabel luCacheLoadFrom(
+            @Override public KMaterialAlphaLabel cacheValueLoad(
               final @Nonnull KMeshInstance instance)
               throws ConstraintError
             {
               return KMaterialAlphaLabel.fromMaterial(instance.getMaterial());
             }
 
-            @Override public long luCacheSizeOf(
+            @Override public @Nonnull BigInteger cacheValueSizeOf(
               final @Nonnull KMaterialAlphaLabel v)
             {
-              return 1;
+              return BigInteger.ONE;
+            }
+          },
+          this.cache_config);
+
+    this.depth_cache =
+      LRUCacheTrivial
+        .newCache(
+          new JCacheLoader<KMeshInstance, KMaterialDepthLabel, ConstraintError>() {
+            @Override public void cacheValueClose(
+              final @Nonnull KMaterialDepthLabel v)
+              throws ConstraintError
+            {
+              // Nothing
+            }
+
+            @Override public KMaterialDepthLabel cacheValueLoad(
+              final @Nonnull KMeshInstance instance)
+              throws ConstraintError
+            {
+              try {
+                final KMaterialAlbedoLabel albedo =
+                  KLabelDecider.this.albedo_cache.cacheGetLU(instance);
+                return KMaterialDepthLabel.fromMaterial(
+                  albedo,
+                  instance.getMaterial());
+              } catch (final JCacheException e) {
+                throw new UnreachableCodeException(e);
+              }
+            }
+
+            @Override public @Nonnull BigInteger cacheValueSizeOf(
+              final @Nonnull KMaterialDepthLabel v)
+            {
+              return BigInteger.ONE;
             }
           },
           this.cache_config);
@@ -172,25 +207,25 @@ final class KLabelDecider implements
     this.emissive_cache =
       LRUCacheTrivial
         .newCache(
-          new LUCacheLoader<KMeshInstance, KMaterialEmissiveLabel, ConstraintError>() {
-            @Override public void luCacheClose(
+          new JCacheLoader<KMeshInstance, KMaterialEmissiveLabel, ConstraintError>() {
+            @Override public void cacheValueClose(
               final @Nonnull KMaterialEmissiveLabel v)
               throws ConstraintError
             {
               // Nothing
             }
 
-            @Override public KMaterialEmissiveLabel luCacheLoadFrom(
+            @Override public KMaterialEmissiveLabel cacheValueLoad(
               final @Nonnull KMeshInstance instance)
               throws ConstraintError
             {
               return KMaterialEmissiveLabel.fromInstance(instance);
             }
 
-            @Override public long luCacheSizeOf(
+            @Override public @Nonnull BigInteger cacheValueSizeOf(
               final @Nonnull KMaterialEmissiveLabel v)
             {
-              return 1;
+              return BigInteger.ONE;
             }
           },
           this.cache_config);
@@ -198,8 +233,8 @@ final class KLabelDecider implements
     this.environment_cache =
       LRUCacheTrivial
         .newCache(
-          new LUCacheLoader<KMeshInstance, KMaterialEnvironmentLabel, ConstraintError>() {
-            @Override public void luCacheClose(
+          new JCacheLoader<KMeshInstance, KMaterialEnvironmentLabel, ConstraintError>() {
+            @Override public void cacheValueClose(
               final @Nonnull KMaterialEnvironmentLabel v)
               throws ConstraintError
             {
@@ -208,48 +243,48 @@ final class KLabelDecider implements
 
             @SuppressWarnings("synthetic-access") @Override public
               KMaterialEnvironmentLabel
-              luCacheLoadFrom(
+              cacheValueLoad(
                 final @Nonnull KMeshInstance instance)
                 throws ConstraintError
             {
               try {
                 return KMaterialEnvironmentLabel.fromInstance(
                   instance,
-                  KLabelDecider.this.normal_cache.luCacheGet(instance));
-              } catch (final LUCacheException x) {
+                  KLabelDecider.this.normal_cache.cacheGetLU(instance));
+              } catch (final JCacheException x) {
                 throw new UnreachableCodeException(x);
               }
             }
 
-            @Override public long luCacheSizeOf(
+            @Override public @Nonnull BigInteger cacheValueSizeOf(
               final @Nonnull KMaterialEnvironmentLabel v)
             {
-              return 1;
+              return BigInteger.ONE;
             }
           }, this.cache_config);
 
     this.normal_cache =
       LRUCacheTrivial
         .newCache(
-          new LUCacheLoader<KMeshInstance, KMaterialNormalLabel, ConstraintError>() {
-            @Override public void luCacheClose(
+          new JCacheLoader<KMeshInstance, KMaterialNormalLabel, ConstraintError>() {
+            @Override public void cacheValueClose(
               final @Nonnull KMaterialNormalLabel v)
               throws ConstraintError
             {
               // Nothing
             }
 
-            @Override public KMaterialNormalLabel luCacheLoadFrom(
+            @Override public KMaterialNormalLabel cacheValueLoad(
               final @Nonnull KMeshInstance instance)
               throws ConstraintError
             {
               return KMaterialNormalLabel.fromInstance(instance);
             }
 
-            @Override public long luCacheSizeOf(
+            @Override public @Nonnull BigInteger cacheValueSizeOf(
               final @Nonnull KMaterialNormalLabel v)
             {
-              return 1;
+              return BigInteger.ONE;
             }
           },
           this.cache_config);
@@ -257,8 +292,8 @@ final class KLabelDecider implements
     this.specular_cache =
       LRUCacheTrivial
         .newCache(
-          new LUCacheLoader<KMeshInstance, KMaterialSpecularLabel, ConstraintError>() {
-            @Override public void luCacheClose(
+          new JCacheLoader<KMeshInstance, KMaterialSpecularLabel, ConstraintError>() {
+            @Override public void cacheValueClose(
               final @Nonnull KMaterialSpecularLabel v)
               throws ConstraintError
             {
@@ -267,31 +302,31 @@ final class KLabelDecider implements
 
             @SuppressWarnings("synthetic-access") @Override public
               KMaterialSpecularLabel
-              luCacheLoadFrom(
+              cacheValueLoad(
                 final @Nonnull KMeshInstance instance)
                 throws ConstraintError
             {
               try {
                 return KMaterialSpecularLabel.fromInstance(
                   instance,
-                  KLabelDecider.this.normal_cache.luCacheGet(instance));
-              } catch (final LUCacheException x) {
+                  KLabelDecider.this.normal_cache.cacheGetLU(instance));
+              } catch (final JCacheException x) {
                 throw new UnreachableCodeException(x);
               }
             }
 
-            @Override public long luCacheSizeOf(
+            @Override public @Nonnull BigInteger cacheValueSizeOf(
               final @Nonnull KMaterialSpecularLabel v)
             {
-              return 1;
+              return BigInteger.ONE;
             }
           }, this.cache_config);
 
     this.forward_cache =
       LRUCacheTrivial
         .newCache(
-          new LUCacheLoader<KMeshInstance, KMaterialForwardLabel, ConstraintError>() {
-            @Override public void luCacheClose(
+          new JCacheLoader<KMeshInstance, KMaterialForwardLabel, ConstraintError>() {
+            @Override public void cacheValueClose(
               final @Nonnull KMaterialForwardLabel v)
               throws ConstraintError
             {
@@ -300,23 +335,23 @@ final class KLabelDecider implements
 
             @SuppressWarnings("synthetic-access") @Override public
               KMaterialForwardLabel
-              luCacheLoadFrom(
+              cacheValueLoad(
                 final @Nonnull KMeshInstance instance)
                 throws ConstraintError
             {
               try {
                 final KMaterialAlphaLabel alpha =
-                  KLabelDecider.this.alpha_cache.luCacheGet(instance);
+                  KLabelDecider.this.alpha_cache.cacheGetLU(instance);
                 final KMaterialAlbedoLabel albedo =
-                  KLabelDecider.this.albedo_cache.luCacheGet(instance);
+                  KLabelDecider.this.albedo_cache.cacheGetLU(instance);
                 final KMaterialEmissiveLabel emissive =
-                  KLabelDecider.this.emissive_cache.luCacheGet(instance);
+                  KLabelDecider.this.emissive_cache.cacheGetLU(instance);
                 final KMaterialEnvironmentLabel environment =
-                  KLabelDecider.this.environment_cache.luCacheGet(instance);
+                  KLabelDecider.this.environment_cache.cacheGetLU(instance);
                 final KMaterialNormalLabel normal =
-                  KLabelDecider.this.normal_cache.luCacheGet(instance);
+                  KLabelDecider.this.normal_cache.cacheGetLU(instance);
                 final KMaterialSpecularLabel specular =
-                  KLabelDecider.this.specular_cache.luCacheGet(instance);
+                  KLabelDecider.this.specular_cache.cacheGetLU(instance);
 
                 return new KMaterialForwardLabel(
                   alpha,
@@ -325,113 +360,39 @@ final class KLabelDecider implements
                   environment,
                   normal,
                   specular);
-              } catch (final LUCacheException x) {
+              } catch (final JCacheException x) {
                 throw new UnreachableCodeException(x);
               }
             }
 
-            @Override public long luCacheSizeOf(
+            @Override public @Nonnull BigInteger cacheValueSizeOf(
               final @Nonnull KMaterialForwardLabel v)
             {
-              return 1;
+              return BigInteger.ONE;
             }
           }, this.cache_config);
-
-    this.shadow_caster_cache =
-      LRUCacheTrivial
-        .newCache(
-          new LUCacheLoader<KMeshInstance, KMaterialShadowCastLabel, ConstraintError>() {
-            @Override public void luCacheClose(
-              final @Nonnull KMaterialShadowCastLabel v)
-              throws ConstraintError
-            {
-              // Nothing
-            }
-
-            @SuppressWarnings("synthetic-access") @Override public
-              KMaterialShadowCastLabel
-              luCacheLoadFrom(
-                final @Nonnull KMeshInstance instance)
-                throws ConstraintError
-            {
-              try {
-                final KMaterialAlbedoLabel albedo =
-                  KLabelDecider.this.albedo_cache.luCacheGet(instance);
-                final KMaterialAlphaLabel alpha =
-                  KLabelDecider.this.alpha_cache.luCacheGet(instance);
-                return KMaterialShadowCastLabel.fromLabels(albedo, alpha);
-              } catch (final LUCacheException x) {
-                throw new UnreachableCodeException(x);
-              }
-            }
-
-            @Override public long luCacheSizeOf(
-              final @Nonnull KMaterialShadowCastLabel v)
-            {
-              return 1;
-            }
-          }, this.cache_config);
-
-    this.shadow_cache =
-      LRUCacheTrivial
-        .newCache(
-          new LUCacheLoader<ShadowCacheKey, KMaterialShadowLabel, ConstraintError>() {
-            @Override public void luCacheClose(
-              final @Nonnull KMaterialShadowLabel v)
-              throws ConstraintError
-            {
-              // Nothing
-            }
-
-            @SuppressWarnings("synthetic-access") @Override public
-              KMaterialShadowLabel
-              luCacheLoadFrom(
-                final @Nonnull ShadowCacheKey key)
-                throws ConstraintError
-            {
-              try {
-                final KMaterialShadowCastLabel caster =
-                  KLabelDecider.this.shadow_caster_cache
-                    .luCacheGet(key.instance);
-
-                return KMaterialShadowLabel.fromShadow(
-                  KLabelDecider.this.capabilities,
-                  caster,
-                  key.shadow);
-              } catch (final LUCacheException x) {
-                throw new UnreachableCodeException(x);
-              }
-            }
-
-            @Override public long luCacheSizeOf(
-              final @Nonnull KMaterialShadowLabel v)
-            {
-              return 1;
-            }
-          },
-          this.cache_config);
 
     this.light_cache =
       LRUCacheTrivial.newCache(
-        new LUCacheLoader<KLight, KLightLabel, ConstraintError>() {
-          @Override public void luCacheClose(
+        new JCacheLoader<KLight, KLightLabel, ConstraintError>() {
+          @Override public void cacheValueClose(
             final @Nonnull KLightLabel v)
             throws ConstraintError
           {
             // Nothing
           }
 
-          @Override public KLightLabel luCacheLoadFrom(
+          @Override public KLightLabel cacheValueLoad(
             final @Nonnull KLight key)
             throws ConstraintError
           {
             return KLightLabel.fromLight(capabilities, key);
           }
 
-          @Override public long luCacheSizeOf(
+          @Override public @Nonnull BigInteger cacheValueSizeOf(
             final @Nonnull KLightLabel v)
           {
-            return 1;
+            return BigInteger.ONE;
           }
         },
         this.cache_config);
@@ -442,8 +403,8 @@ final class KLabelDecider implements
     throws ConstraintError
   {
     try {
-      return this.albedo_cache.luCacheGet(instance);
-    } catch (final LUCacheException x) {
+      return this.albedo_cache.cacheGetLU(instance);
+    } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     }
   }
@@ -453,8 +414,19 @@ final class KLabelDecider implements
     throws ConstraintError
   {
     try {
-      return this.alpha_cache.luCacheGet(instance);
-    } catch (final LUCacheException x) {
+      return this.alpha_cache.cacheGetLU(instance);
+    } catch (final JCacheException x) {
+      throw new UnreachableCodeException(x);
+    }
+  }
+
+  @Override public @Nonnull KMaterialDepthLabel getDepthLabel(
+    final @Nonnull KMeshInstance instance)
+    throws ConstraintError
+  {
+    try {
+      return this.depth_cache.cacheGetLU(instance);
+    } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     }
   }
@@ -464,8 +436,8 @@ final class KLabelDecider implements
     throws ConstraintError
   {
     try {
-      return this.emissive_cache.luCacheGet(instance);
-    } catch (final LUCacheException x) {
+      return this.emissive_cache.cacheGetLU(instance);
+    } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     }
   }
@@ -475,8 +447,8 @@ final class KLabelDecider implements
     throws ConstraintError
   {
     try {
-      return this.environment_cache.luCacheGet(instance);
-    } catch (final LUCacheException x) {
+      return this.environment_cache.cacheGetLU(instance);
+    } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     }
   }
@@ -486,8 +458,19 @@ final class KLabelDecider implements
     throws ConstraintError
   {
     try {
-      return this.forward_cache.luCacheGet(instance);
-    } catch (final LUCacheException x) {
+      return this.forward_cache.cacheGetLU(instance);
+    } catch (final JCacheException x) {
+      throw new UnreachableCodeException(x);
+    }
+  }
+
+  @Override public @Nonnull KLightLabel getLightLabel(
+    final @Nonnull KLight light)
+    throws ConstraintError
+  {
+    try {
+      return this.light_cache.cacheGetLU(light);
+    } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     }
   }
@@ -497,23 +480,24 @@ final class KLabelDecider implements
     throws ConstraintError
   {
     try {
-      return this.normal_cache.luCacheGet(instance);
-    } catch (final LUCacheException x) {
+      return this.normal_cache.cacheGetLU(instance);
+    } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     }
   }
 
-  @Override public @Nonnull KMaterialShadowLabel getShadowLabel(
-    final @Nonnull KMeshInstance instance,
-    final @Nonnull KShadow shadow)
-    throws ConstraintError
+  public @Nonnull BigInteger getSize()
   {
-    try {
-      return this.shadow_cache
-        .luCacheGet(new ShadowCacheKey(instance, shadow));
-    } catch (final LUCacheException x) {
-      throw new UnreachableCodeException(x);
-    }
+    return this.albedo_cache
+      .cacheSize()
+      .add(this.alpha_cache.cacheSize())
+      .add(this.depth_cache.cacheSize())
+      .add(this.emissive_cache.cacheSize())
+      .add(this.environment_cache.cacheSize())
+      .add(this.forward_cache.cacheSize())
+      .add(this.normal_cache.cacheSize())
+      .add(this.specular_cache.cacheSize())
+      .add(this.light_cache.cacheSize());
   }
 
   @Override public @Nonnull KMaterialSpecularLabel getSpecularLabel(
@@ -521,21 +505,9 @@ final class KLabelDecider implements
     throws ConstraintError
   {
     try {
-      return this.specular_cache.luCacheGet(instance);
-    } catch (final LUCacheException x) {
+      return this.specular_cache.cacheGetLU(instance);
+    } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     }
   }
-
-  @Override public KLightLabel getLightLabel(
-    final @Nonnull KLight light)
-    throws ConstraintError
-  {
-    try {
-      return this.light_cache.luCacheGet(light);
-    } catch (final LUCacheException x) {
-      throw new UnreachableCodeException(x);
-    }
-  }
-
 }

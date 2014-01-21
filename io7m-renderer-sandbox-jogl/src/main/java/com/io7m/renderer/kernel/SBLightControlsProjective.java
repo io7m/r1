@@ -291,7 +291,7 @@ public final class SBLightControlsProjective implements
       path,
       this.colour.getColour(),
       this.intensity.getCurrent(),
-      this.shadow.getShadow(),
+      this.shadow.getShadow(new_id),
       new_id);
   }
 

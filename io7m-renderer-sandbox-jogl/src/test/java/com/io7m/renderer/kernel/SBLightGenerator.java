@@ -82,8 +82,7 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
             this.projection_gen.next();
           final QuaternionI4F orientation = this.quat_gen.next();
           final PathVirtual texture = this.path_gen.next();
-          final Option<SBLightShadowDescription> shadow =
-            Option.some(this.shad_gen.next());
+          final Option<KShadow> shadow = Option.some(this.shad_gen.next());
 
           return new SBLightDescription.SBLightDescriptionProjective(
             orientation,

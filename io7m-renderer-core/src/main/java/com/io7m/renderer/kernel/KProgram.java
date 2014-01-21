@@ -63,6 +63,7 @@ import com.io7m.jparasol.xml.VertexParameter;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.RException;
 
 @Immutable public final class KProgram
 {
@@ -524,12 +525,7 @@ import com.io7m.jvvfs.PathVirtual;
     final @Nonnull String name,
     final @Nonnull Log log)
     throws ConstraintError,
-      FilesystemError,
-      IOException,
-      JCGLUnsupportedException,
-      JCGLCompileException,
-      JCGLException,
-      KXMLException
+      RException
   {
     try {
       Constraints.constrainNotNull(gl, "GL");
@@ -554,13 +550,20 @@ import com.io7m.jvvfs.PathVirtual;
       return KProgram.loadUncompacted(gl, fs, version, api, name, m, logp);
 
     } catch (final ValidityException x) {
-      throw KXMLException.validityException(x);
+      throw RException.fromRKXMLException(KXMLException.validityException(x));
     } catch (final ParsingException x) {
-      throw KXMLException.parsingException(x);
+      throw RException.fromRKXMLException(KXMLException.parsingException(x));
     } catch (final SAXException x) {
-      throw KXMLException.saxException(x);
+      throw RException.fromRKXMLException(KXMLException.saxException(x));
     } catch (final ParserConfigurationException x) {
-      throw KXMLException.parserConfigurationException(x);
+      throw RException.fromRKXMLException(KXMLException
+        .parserConfigurationException(x));
+    } catch (final IOException e) {
+      throw RException.fromIOException(e);
+    } catch (final FilesystemError e) {
+      throw RException.fromFilesystemException(e);
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
     }
   }
 
