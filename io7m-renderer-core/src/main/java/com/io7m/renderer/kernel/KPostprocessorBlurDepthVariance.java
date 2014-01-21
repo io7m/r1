@@ -30,11 +30,11 @@ import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.renderer.RException;
-import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorRGBA;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferRGBADescription;
+import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorDepthVariance;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthVarianceDescription;
 
 public final class KPostprocessorBlurDepthVariance extends
-  KAbstractPostprocessorRGBA
+  KAbstractPostprocessorDepthVariance
 {
   private static final @Nonnull String NAME;
 
@@ -46,7 +46,7 @@ public final class KPostprocessorBlurDepthVariance extends
     KPostprocessorBlurDepthVariance
     postprocessorNew(
       final @Nonnull JCGLImplementation gi,
-      final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
+      final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> rgba_cache,
       final @Nonnull LUCache<String, KProgram, RException> shader_cache,
       final @Nonnull Log log)
       throws ConstraintError,
@@ -59,17 +59,17 @@ public final class KPostprocessorBlurDepthVariance extends
       log);
   }
 
-  private float                                                                              blur_size;
-  private final @Nonnull JCGLImplementation                                                  gi;
-  private final @Nonnull Log                                                                 log;
-  private final @Nonnull KUnitQuad                                                           quad;
-  private final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache;
-  private final @Nonnull LUCache<String, KProgram, RException>                               shader_cache;
-  private final @Nonnull VectorM2I                                                           viewport_size;
+  private float                                                                                                blur_size;
+  private final @Nonnull JCGLImplementation                                                                    gi;
+  private final @Nonnull Log                                                                                   log;
+  private final @Nonnull KUnitQuad                                                                             quad;
+  private final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> depth_variance_cache;
+  private final @Nonnull LUCache<String, KProgram, RException>                                                 shader_cache;
+  private final @Nonnull VectorM2I                                                                             viewport_size;
 
   private KPostprocessorBlurDepthVariance(
     final @Nonnull JCGLImplementation gi,
-    final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
+    final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> rgba_cache,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull Log log)
     throws ConstraintError,
@@ -79,8 +79,10 @@ public final class KPostprocessorBlurDepthVariance extends
 
     try {
       this.gi = Constraints.constrainNotNull(gi, "GL implementation");
-      this.rgba_cache =
-        Constraints.constrainNotNull(rgba_cache, "RGBA framebuffer cache");
+      this.depth_variance_cache =
+        Constraints.constrainNotNull(
+          rgba_cache,
+          "DepthVariance framebuffer cache");
       this.shader_cache =
         Constraints.constrainNotNull(shader_cache, "Shader cache");
       this.log =
@@ -108,38 +110,42 @@ public final class KPostprocessorBlurDepthVariance extends
     }
   }
 
-  @Override public void postprocessorEvaluateRGBA(
-    final @Nonnull KFramebufferRGBAUsable input,
-    final @Nonnull KFramebufferRGBAUsable output)
+  @Override public void postprocessorEvaluateDepthVariance(
+    final @Nonnull KFramebufferDepthVarianceUsable input,
+    final @Nonnull KFramebufferDepthVarianceUsable output)
     throws ConstraintError,
       RException
   {
     try {
-      final BLUCacheReceipt<KFramebufferRGBADescription, KFramebufferRGBA> receipt =
-        this.rgba_cache.bluCacheGet(input.kFramebufferGetRGBADescription());
-
+      final BLUCacheReceipt<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance> receipt =
+        this.depth_variance_cache.bluCacheGet(input
+          .kFramebufferGetDepthVarianceDescription());
       try {
-        final KFramebufferRGBA temp = receipt.getValue();
+        final KFramebufferDepthVariance temp = receipt.getValue();
         KPostprocessorBlurCommon.evaluateBlurH(
           this.gi,
           this.viewport_size,
           this.blur_size,
           this.quad,
-          this.shader_cache,
-          input.kFramebufferGetRGBATexture(),
+          this.shader_cache
+            .cacheGetLU("postprocessing_gaussian_blur_horizontal_4f"),
+          input.kFramebufferGetDepthVarianceTexture(),
           input.kFramebufferGetArea(),
-          temp.kFramebufferGetColorFramebuffer(),
-          temp.kFramebufferGetArea());
+          temp.kFramebufferGetDepthVariancePassFramebuffer(),
+          temp.kFramebufferGetArea(),
+          true);
         KPostprocessorBlurCommon.evaluateBlurV(
           this.gi,
           this.viewport_size,
           this.quad,
           this.blur_size,
-          this.shader_cache,
-          temp.kFramebufferGetRGBATexture(),
+          this.shader_cache
+            .cacheGetLU("postprocessing_gaussian_blur_vertical_4f"),
+          temp.kFramebufferGetDepthVarianceTexture(),
           temp.kFramebufferGetArea(),
-          output.kFramebufferGetColorFramebuffer(),
-          output.kFramebufferGetArea());
+          output.kFramebufferGetDepthVariancePassFramebuffer(),
+          output.kFramebufferGetArea(),
+          true);
       } finally {
         receipt.returnToCache();
       }

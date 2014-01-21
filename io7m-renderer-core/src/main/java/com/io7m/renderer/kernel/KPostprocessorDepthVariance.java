@@ -23,7 +23,7 @@ import com.io7m.renderer.RException;
 
 public interface KPostprocessorDepthVariance extends KPostprocessor
 {
-  public void postprocessorEvaluateDepth(
+  public void postprocessorEvaluateDepthVariance(
     final @Nonnull KFramebufferDepthVarianceUsable input,
     final @Nonnull KFramebufferDepthVarianceUsable output)
     throws ConstraintError,

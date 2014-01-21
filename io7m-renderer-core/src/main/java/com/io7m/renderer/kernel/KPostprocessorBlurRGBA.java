@@ -120,21 +120,25 @@ public final class KPostprocessorBlurRGBA extends KAbstractPostprocessorRGBA
           this.viewport_size,
           this.blur_size,
           this.quad,
-          this.shader_cache,
+          this.shader_cache
+            .cacheGetLU("postprocessing_gaussian_blur_horizontal_4f"),
           input.kFramebufferGetRGBATexture(),
           input.kFramebufferGetArea(),
           temp.kFramebufferGetColorFramebuffer(),
-          temp.kFramebufferGetArea());
+          temp.kFramebufferGetArea(),
+          false);
         KPostprocessorBlurCommon.evaluateBlurV(
           this.gi,
           this.viewport_size,
           this.quad,
           this.blur_size,
-          this.shader_cache,
+          this.shader_cache
+            .cacheGetLU("postprocessing_gaussian_blur_vertical_4f"),
           temp.kFramebufferGetRGBATexture(),
           temp.kFramebufferGetArea(),
           output.kFramebufferGetColorFramebuffer(),
-          output.kFramebufferGetArea());
+          output.kFramebufferGetArea(),
+          false);
       } finally {
         receipt.returnToCache();
       }

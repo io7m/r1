@@ -22,8 +22,6 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcache.JCacheException;
-import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsable;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
@@ -42,7 +40,6 @@ import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
-import com.io7m.renderer.RException;
 
 final class KPostprocessorBlurCommon
 {
@@ -56,26 +53,28 @@ final class KPostprocessorBlurCommon
     final @Nonnull VectorM2I viewport_size,
     final float blur_size,
     final @Nonnull KUnitQuad quad,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
+    final @Nonnull KProgram blur_h,
     final @Nonnull Texture2DStaticUsable input_texture,
     final @Nonnull AreaInclusive input_area,
     final @Nonnull FramebufferReferenceUsable output,
-    final @Nonnull AreaInclusive output_area)
+    final @Nonnull AreaInclusive output_area,
+    final boolean has_depth)
     throws JCGLRuntimeException,
-      ConstraintError,
-      RException,
-      JCacheException
+      ConstraintError
   {
     final JCGLInterfaceCommon gc = gi.getGLCommon();
     viewport_size.x = (int) output_area.getRangeX().getInterval();
     viewport_size.y = (int) output_area.getRangeY().getInterval();
     final List<TextureUnit> units = gc.textureGetUnits();
 
-    final KProgram blur_h =
-      shader_cache.cacheGetLU("postprocessing_gaussian_blur_horizontal");
-
     try {
       gc.framebufferDrawBind(output);
+
+      if (has_depth) {
+        gc.depthBufferTestDisable();
+        gc.depthBufferWriteDisable();
+      }
+
       gc.viewportSet(VectorI2I.ZERO, viewport_size);
       gc.blendingDisable();
 
@@ -132,27 +131,29 @@ final class KPostprocessorBlurCommon
     final @Nonnull VectorM2I viewport_size,
     final @Nonnull KUnitQuad quad,
     final float blur_size,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
+    final @Nonnull KProgram blur_v,
     final @Nonnull Texture2DStaticUsable input_texture,
     final @Nonnull AreaInclusive input_area,
     final @Nonnull FramebufferReferenceUsable output,
-    final @Nonnull AreaInclusive output_area)
+    final @Nonnull AreaInclusive output_area,
+    final boolean has_depth)
     throws JCGLRuntimeException,
-      ConstraintError,
-      RException,
-      JCacheException
+      ConstraintError
   {
     final JCGLInterfaceCommon gc = gi.getGLCommon();
     viewport_size.x = (int) output_area.getRangeX().getInterval();
     viewport_size.y = (int) output_area.getRangeY().getInterval();
     final List<TextureUnit> units = gc.textureGetUnits();
 
-    final KProgram blur_v =
-      shader_cache.cacheGetLU("postprocessing_gaussian_blur_vertical");
-
     try {
       gc.framebufferDrawBind(output);
       gc.viewportSet(VectorI2I.ZERO, viewport_size);
+
+      if (has_depth) {
+        gc.depthBufferTestDisable();
+        gc.depthBufferWriteDisable();
+      }
+
       gc.blendingDisable();
 
       final JCBExecutionAPI e = blur_v.getExecutable();
