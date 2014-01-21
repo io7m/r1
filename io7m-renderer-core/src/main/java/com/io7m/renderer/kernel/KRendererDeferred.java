@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,45 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
-import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jtensors.VectorReadable4F;
-
-final class KRendererDeferred implements KRenderer
+public interface KRendererDeferred
 {
-  KRendererDeferred(
-    @SuppressWarnings("unused") final @Nonnull JCGLImplementation gl)
-  {
-    throw new UnimplementedCodeException();
-  }
 
-  @Override public void rendererClose()
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public @CheckForNull KRendererDebugging rendererDebug()
-  {
-    return null;
-  }
-
-  @Override public void rendererEvaluate(
-    final @Nonnull KFramebufferRGBAUsable framebuffer,
-    final @Nonnull KScene scene)
-    throws JCGLException,
-      ConstraintError
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public void rendererSetBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-  {
-    throw new UnimplementedCodeException();
-  }
 }

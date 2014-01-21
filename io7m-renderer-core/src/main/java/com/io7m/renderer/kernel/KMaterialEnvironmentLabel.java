@@ -23,15 +23,12 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 
 enum KMaterialEnvironmentLabel
+  implements
+  KTexturesRequired
 {
-  ENVIRONMENT_NONE(""),
-  ENVIRONMENT_REFLECTIVE("EL"),
-  ENVIRONMENT_REFLECTIVE_MAPPED("ELM"),
-  ENVIRONMENT_REFLECTIVE_REFRACTIVE("ELR"),
-
-  ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED("ELRM"),
-  ENVIRONMENT_REFRACTIVE("ER"),
-  ENVIRONMENT_REFRACTIVE_MAPPED("ERM"),
+  ENVIRONMENT_NONE("", 0),
+  ENVIRONMENT_REFLECTIVE("EL", 1),
+  ENVIRONMENT_REFLECTIVE_MAPPED("ELM", 1)
 
   ;
 
@@ -56,25 +53,10 @@ enum KMaterialEnvironmentLabel
         final KMaterialEnvironment e = material.getEnvironment();
         if (e.getTexture().isSome()) {
           if (e.getMix() > 0.0) {
-            if (e.getReflectionMix() == 0.0) {
-
-              if (e.getMixFromSpecularMap() && has_specular_map) {
-                return KMaterialEnvironmentLabel.ENVIRONMENT_REFRACTIVE_MAPPED;
-              }
-              return KMaterialEnvironmentLabel.ENVIRONMENT_REFRACTIVE;
-            }
-            if (e.getReflectionMix() == 1.0) {
-              if (e.getMixFromSpecularMap() && has_specular_map) {
-                return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE_MAPPED;
-              }
-              return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE;
-            }
-
             if (e.getMixFromSpecularMap() && has_specular_map) {
-              return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE_REFRACTIVE_MAPPED;
+              return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE_MAPPED;
             }
-
-            return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE_REFRACTIVE;
+            return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE;
           }
         }
 
@@ -85,16 +67,24 @@ enum KMaterialEnvironmentLabel
     throw new UnreachableCodeException();
   }
 
-  final @Nonnull String code;
+  private final @Nonnull String code;
+  private int                   textures_required;
 
   private KMaterialEnvironmentLabel(
-    final @Nonnull String code)
+    final @Nonnull String code,
+    final int textures_required)
   {
     this.code = code;
+    this.textures_required = textures_required;
   }
 
   public @Nonnull String getCode()
   {
     return this.code;
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

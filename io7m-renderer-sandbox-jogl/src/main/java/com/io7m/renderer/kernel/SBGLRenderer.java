@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,11 +20,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -47,8 +49,17 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
+import com.io7m.jaux.functional.Unit;
+import com.io7m.jcache.BLUCacheConfig;
+import com.io7m.jcache.BLUCacheTrivial;
+import com.io7m.jcache.JCacheLoader;
+import com.io7m.jcache.LRUCacheConfig;
+import com.io7m.jcache.LRUCacheTrivial;
+import com.io7m.jcache.PCache;
+import com.io7m.jcache.PCacheConfig;
+import com.io7m.jcache.PCacheConfig.Builder;
+import com.io7m.jcache.PCacheTrivial;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferUsable;
@@ -67,16 +78,15 @@ import com.io7m.jcanephora.JCBExecutionException;
 import com.io7m.jcanephora.JCBExecutorProcedure;
 import com.io7m.jcanephora.JCBProgram;
 import com.io7m.jcanephora.JCBProgramProcedure;
-import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLImplementationJOGL;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLInterfaceGL3;
+import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.ProjectionMatrix;
-import com.io7m.jcanephora.Texture2DReadableData;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureFilterMagnification;
@@ -89,12 +99,6 @@ import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jlog.Log;
-import com.io7m.jlucache.LRUCacheConfig;
-import com.io7m.jlucache.LRUCacheTrivial;
-import com.io7m.jlucache.PCache;
-import com.io7m.jlucache.PCacheConfig;
-import com.io7m.jlucache.PCacheConfig.Builder;
-import com.io7m.jlucache.PCacheTrivial;
 import com.io7m.jparasol.xml.PGLSLMetaXML;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionM4F;
@@ -103,30 +107,60 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
+import com.io7m.jtensors.VectorReadable3F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityAll;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.RException;
 import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RTransformModel;
 import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthDescription;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthVarianceDescription;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferForwardDescription;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferRGBADescription;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KRendererDebugging.DebugShadowMapReceiver;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
+import com.io7m.renderer.kernel.KShadow.KShadowMappedVariance;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.SBLight.SBLightProjective;
-import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeKernel;
-import com.io7m.renderer.kernel.SBRendererType.SBRendererTypeSpecific;
 import com.io7m.renderer.xml.RXMLException;
 import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
 import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
 
 final class SBGLRenderer implements GLEventListener
 {
+  private class CacheStatisticsFuture extends FutureTask<SBCacheStatistics>
+  {
+    CacheStatisticsFuture()
+    {
+      super(new Callable<SBCacheStatistics>() {
+        @SuppressWarnings("synthetic-access") @Override public
+          SBCacheStatistics
+          call()
+            throws Exception
+        {
+          return new SBCacheStatistics(
+            SBGLRenderer.this.label_cache.getSize(),
+            SBGLRenderer.this.shader_cache.cacheItemCount(),
+            SBGLRenderer.this.shadow_cache.cacheItemCount(),
+            SBGLRenderer.this.shadow_cache.cacheSize(),
+            SBGLRenderer.this.rgba_cache.cacheItemCount(),
+            SBGLRenderer.this.rgba_cache.cacheSize());
+        }
+      });
+    }
+  }
+
   private class MeshDeleteFuture extends FutureTask<Void>
   {
     MeshDeleteFuture(
@@ -152,7 +186,7 @@ final class SBGLRenderer implements GLEventListener
             }
           }
 
-          throw new JCGLException(-1, "OpenGL not ready!");
+          throw new JCGLRuntimeException(-1, "OpenGL not ready!");
         }
       });
     }
@@ -211,7 +245,7 @@ final class SBGLRenderer implements GLEventListener
             }
           }
 
-          throw new JCGLException(-1, "OpenGL not ready!");
+          throw new JCGLRuntimeException(-1, "OpenGL not ready!");
         }
       });
     }
@@ -325,7 +359,7 @@ final class SBGLRenderer implements GLEventListener
             }
           }
 
-          throw new JCGLException(-1, "OpenGL not ready!");
+          throw new JCGLRuntimeException(-1, "OpenGL not ready!");
         }
       });
     }
@@ -353,7 +387,7 @@ final class SBGLRenderer implements GLEventListener
             }
           }
 
-          throw new JCGLException(-1, "OpenGL not ready!");
+          throw new JCGLRuntimeException(-1, "OpenGL not ready!");
         }
       });
     }
@@ -403,33 +437,13 @@ final class SBGLRenderer implements GLEventListener
               }
 
               SBGLRenderer.this.log.debug("Loaded " + path);
-
-              switch (SBGLRenderer.this.gi.getGL3().type) {
-                case OPTION_NONE:
-                {
-                  break;
-                }
-                case OPTION_SOME:
-                {
-                  final JCGLInterfaceGL3 gl3 =
-                    ((Option.Some<JCGLInterfaceGL3>) SBGLRenderer.this.gi
-                      .getGL3()).value;
-                  final Texture2DReadableData tr =
-                    gl3.texture2DStaticGetImage(t);
-                  SBTextureUtilities.textureDumpTimestampedTemporary(
-                    tr,
-                    ((Option.Some<String>) path.getBaseName()).value);
-                  break;
-                }
-              }
-
               return t;
             } catch (final ConstraintError e) {
               throw new UnreachableCodeException();
             }
           }
 
-          throw new JCGLException(-1, "OpenGL not ready!");
+          throw new JCGLRuntimeException(-1, "OpenGL not ready!");
         }
       });
     }
@@ -457,7 +471,7 @@ final class SBGLRenderer implements GLEventListener
             }
           }
 
-          throw new JCGLException(-1, "OpenGL not ready!");
+          throw new JCGLRuntimeException(-1, "OpenGL not ready!");
         }
       });
     }
@@ -525,7 +539,7 @@ final class SBGLRenderer implements GLEventListener
             }
           }
 
-          throw new JCGLException(-1, "OpenGL not ready!");
+          throw new JCGLRuntimeException(-1, "OpenGL not ready!");
         }
       });
     }
@@ -633,65 +647,74 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private @Nonnull SBVisibleAxes                                              axes;
-  private final @Nonnull AtomicBoolean                                        axes_show;
-  private final @Nonnull AtomicReference<VectorI3F>                           background_colour;
-  private final @Nonnull SBFirstPersonCamera                                  camera;
-  private @Nonnull SceneObserver                                              camera_current;
-  private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>>  camera_custom_projection;
-  private @Nonnull KTransform                                                 camera_transform;
-  private final @Nonnull KTransform.Context                                   camera_transform_context;
-  private @Nonnull RMatrixI4x4F<RTransformView>                               camera_view_matrix;
-  private final @Nonnull RMatrixM4x4F<RTransformView>                         camera_view_matrix_temporary;
-  private final SandboxConfig                                                 config;
-  private final @Nonnull AtomicReference<SBSceneControllerRenderer>           controller;
-  private final @Nonnull FSCapabilityAll                                      filesystem;
-  private boolean                                                             first;
-  private @CheckForNull KFramebufferRGBA                                      framebuffer;
-  private @CheckForNull JCGLImplementationJOGL                                gi;
-  private @Nonnull SBVisibleGridPlane                                         grid;
-  private final @Nonnull AtomicBoolean                                        grid_show;
-  private final @Nonnull SBInputState                                         input_state;
-  private @Nonnull KLabelDecider                                              label_cache;
-  private final @Nonnull AtomicBoolean                                        lights_show;
-  private final @Nonnull AtomicBoolean                                        lights_show_surface;
-  private final @Nonnull Log                                                  log;
-  private final @Nonnull RMatrixM4x4F<RTransformModel>                        matrix_model;
-  private final @Nonnull RMatrixM4x4F<RTransformModel>                        matrix_model_temporary;
-  private final @Nonnull RMatrixM4x4F<RTransformModelView>                    matrix_modelview;
-  private final @Nonnull RMatrixM4x4F<RTransformProjection>                   matrix_projection;
-  private final @Nonnull RMatrixM4x4F<RTransformView>                         matrix_view;
-  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>              mesh_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                mesh_load_queue;
-  private final @Nonnull HashMap<PathVirtual, KMesh>                          meshes;
-  private @CheckForNull KProgram                                              program_ccolour;
-  private @CheckForNull KProgram                                              program_uv;
-  private @CheckForNull KProgram                                              program_vcolour;
-  private final @Nonnull Map<SBProjectionDescription, SBVisibleProjection>    projection_cache;
-  private final @Nonnull QuaternionM4F.Context                                qm4f_context;
-  private @CheckForNull KRenderer                                             renderer;
-  private final @Nonnull AtomicReference<SBRendererType>                      renderer_new;
-  private final @Nonnull SBSoftRestrictions                                   restrictions;
-  private final @Nonnull AtomicReference<RunningState>                        running;
-  private Collection<SBLight>                                                 scene_lights;
-  private @CheckForNull SBQuad                                                screen_quad;
-  private @Nonnull LRUCacheTrivial<String, KProgram, KShaderCacheException>   shader_cache;
-  private @Nonnull LRUCacheConfig                                             shader_cache_config;
-  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>              shader_load_queue;
-  private final @Nonnull HashMap<String, SBShader>                            shaders;
-  private @Nonnull PCache<KShadow, KFramebufferShadow, KShadowCacheException> shadow_cache;
-  private @Nonnull PCacheConfig                                               shadow_cache_config;
-  private @Nonnull KShadowMapRendererActual                                   shadow_map_renderer;
-  private @Nonnull HashMap<PathVirtual, KMesh>                                sphere_meshes;
-  private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>       texture_cube_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>         texture_cube_load_queue;
-  private final @Nonnull TextureLoader                                        texture_loader;
-  private @CheckForNull List<TextureUnit>                                     texture_units;
-  private final @Nonnull ConcurrentLinkedQueue<Texture2DDeleteFuture>         texture2d_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<Texture2DLoadFuture>           texture2d_load_queue;
-  private final @Nonnull HashMap<PathVirtual, Texture2DStatic>                textures_2d;
-  private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>              textures_cube;
-  private @Nonnull AreaInclusive                                              viewport;
+  private @Nonnull SBVisibleAxes                                                                                axes;
+  private final @Nonnull AtomicBoolean                                                                          axes_show;
+  private final @Nonnull AtomicReference<VectorI3F>                                                             background_colour;
+  private final @Nonnull ConcurrentLinkedQueue<CacheStatisticsFuture>                                           cache_statistics_queue;
+  private final @Nonnull SBFirstPersonCamera                                                                    camera;
+  private @Nonnull SceneObserver                                                                                camera_current;
+  private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>>                                    camera_custom_projection;
+  private @Nonnull KTransform                                                                                   camera_transform;
+  private final @Nonnull KTransform.Context                                                                     camera_transform_context;
+  private @Nonnull RMatrixI4x4F<RTransformView>                                                                 camera_view_matrix;
+  private final @Nonnull RMatrixM4x4F<RTransformView>                                                           camera_view_matrix_temporary;
+  private @Nonnull KGraphicsCapabilities                                                                        capabilities;
+  private final SandboxConfig                                                                                   config;
+  private final @Nonnull AtomicReference<SBSceneControllerRenderer>                                             controller;
+  private final @Nonnull FSCapabilityAll                                                                        filesystem;
+  private boolean                                                                                               first;
+  private @CheckForNull KFramebufferForwardType                                                                 framebuffer;
+  private @CheckForNull JCGLImplementationJOGL                                                                  gi;
+  private @Nonnull SBVisibleGridPlane                                                                           grid;
+  private final @Nonnull AtomicBoolean                                                                          grid_show;
+  private final @Nonnull SBInputState                                                                           input_state;
+  private @Nonnull KLabelDecider                                                                                label_cache;
+  private final @Nonnull AtomicBoolean                                                                          lights_show;
+  private final @Nonnull AtomicBoolean                                                                          lights_show_surface;
+  private final @Nonnull Log                                                                                    log;
+  private final @Nonnull RMatrixM4x4F<RTransformModel>                                                          matrix_model;
+  private final @Nonnull RMatrixM4x4F<RTransformModel>                                                          matrix_model_temporary;
+  private final @Nonnull RMatrixM4x4F<RTransformModelView>                                                      matrix_modelview;
+  private final @Nonnull RMatrixM4x4F<RTransformProjection>                                                     matrix_projection;
+  private final @Nonnull RMatrixM4x4F<RTransformView>                                                           matrix_view;
+  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>                                                mesh_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                                                  mesh_load_queue;
+  private final @Nonnull HashMap<PathVirtual, KMesh>                                                            meshes;
+  private @CheckForNull KPostprocessor                                                                          postprocessor;
+  private final @Nonnull AtomicReference<SBKPostprocessorType>                                                  postprocessor_new;
+  private @CheckForNull KProgram                                                                                program_ccolour;
+  private @CheckForNull KProgram                                                                                program_uv;
+  private @CheckForNull KProgram                                                                                program_vcolour;
+  private final @Nonnull Map<SBProjectionDescription, SBVisibleProjection>                                      projection_cache;
+  private final @Nonnull QuaternionM4F.Context                                                                  qm4f_context;
+  private @CheckForNull KRenderer                                                                               renderer;
+  private final @Nonnull AtomicReference<SBKRendererType>                                                       renderer_new;
+  private final @Nonnull SBSoftRestrictions                                                                     restrictions;
+  private @Nonnull BLUCacheTrivial<KFramebufferRGBADescription, KFramebufferRGBA, RException>                   rgba_cache;
+  private @Nonnull BLUCacheConfig                                                                               rgba_cache_config;
+  private @Nonnull JCacheLoader<KFramebufferRGBADescription, KFramebufferRGBA, RException>                      rgba_cache_loader;
+  private @Nonnull BLUCacheTrivial<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> depth_variance_cache;
+  private @Nonnull BLUCacheConfig                                                                               depth_variance_cache_config;
+  private @Nonnull JCacheLoader<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException>    depth_variance_cache_loader;
+  private final @Nonnull AtomicReference<RunningState>                                                          running;
+  private Collection<SBLight>                                                                                   scene_lights;
+  private @CheckForNull SBQuad                                                                                  screen_quad;
+  private @Nonnull LRUCacheTrivial<String, KProgram, RException>                                                shader_cache;
+  private @Nonnull LRUCacheConfig                                                                               shader_cache_config;
+  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>                                                shader_load_queue;
+  private final @Nonnull HashMap<String, SBShader>                                                              shaders;
+  private @Nonnull PCache<KShadowMapDescription, KShadowMap, RException>                                        shadow_cache;
+  private @Nonnull PCacheConfig                                                                                 shadow_cache_config;
+  private @Nonnull HashMap<PathVirtual, KMesh>                                                                  sphere_meshes;
+  private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>                                         texture_cube_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>                                           texture_cube_load_queue;
+  private final @Nonnull TextureLoader                                                                          texture_loader;
+  private @CheckForNull List<TextureUnit>                                                                       texture_units;
+  private final @Nonnull ConcurrentLinkedQueue<Texture2DDeleteFuture>                                           texture2d_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<Texture2DLoadFuture>                                             texture2d_load_queue;
+  private final @Nonnull HashMap<PathVirtual, Texture2DStatic>                                                  textures_2d;
+  private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>                                                textures_cube;
+  private @Nonnull AreaInclusive                                                                                viewport;
 
   public SBGLRenderer(
     final @Nonnull SandboxConfig config,
@@ -704,7 +727,14 @@ final class SBGLRenderer implements GLEventListener
     this.restrictions = SBSoftRestrictions.newRestrictions(config);
 
     this.log = new Log(log, "gl");
-    log.debug("Shader archive: " + config.getShaderArchiveFile());
+    log.debug("Shader debug archive: " + config.getShaderArchiveDebugFile());
+    log
+      .debug("Shader shadow archive: " + config.getShaderArchiveShadowFile());
+    log.debug("Shader forward archive: "
+      + config.getShaderArchiveForwardFile());
+    log.debug("Shader postprocessing archive: "
+      + config.getShaderArchivePostprocessingFile());
+    log.debug("Shader depth archive: " + config.getShaderArchiveDepthFile());
 
     this.controller = new AtomicReference<SBSceneControllerRenderer>();
     this.qm4f_context = new QuaternionM4F.Context();
@@ -717,6 +747,9 @@ final class SBGLRenderer implements GLEventListener
     this.texture2d_delete_queue =
       new ConcurrentLinkedQueue<Texture2DDeleteFuture>();
     this.textures_2d = new HashMap<PathVirtual, Texture2DStatic>();
+
+    this.cache_statistics_queue =
+      new ConcurrentLinkedQueue<CacheStatisticsFuture>();
 
     this.texture_cube_load_queue =
       new ConcurrentLinkedQueue<TextureCubeLoadFuture>();
@@ -738,7 +771,16 @@ final class SBGLRenderer implements GLEventListener
       PathVirtual.ROOT);
     this.filesystem.mountClasspathArchive(KRenderer.class, PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
-      config.getShaderArchiveFile(),
+      config.getShaderArchiveDebugFile(),
+      PathVirtual.ROOT);
+    this.filesystem.mountArchiveFromAnywhere(
+      config.getShaderArchiveDepthFile(),
+      PathVirtual.ROOT);
+    this.filesystem.mountArchiveFromAnywhere(
+      config.getShaderArchiveForwardFile(),
+      PathVirtual.ROOT);
+    this.filesystem.mountArchiveFromAnywhere(
+      config.getShaderArchivePostprocessingFile(),
       PathVirtual.ROOT);
 
     this.background_colour =
@@ -770,7 +812,9 @@ final class SBGLRenderer implements GLEventListener
     this.running =
       new AtomicReference<RunningState>(RunningState.STATE_INITIAL);
 
-    this.renderer_new = new AtomicReference<SBRendererType>();
+    this.postprocessor_new = new AtomicReference<SBKPostprocessorType>();
+    this.postprocessor = null;
+    this.renderer_new = new AtomicReference<SBKRendererType>();
     this.renderer = null;
 
     this.first = true;
@@ -1031,6 +1075,8 @@ final class SBGLRenderer implements GLEventListener
       this.failed(e);
     } catch (final Exception e) {
       this.failed(e);
+    } catch (final RException e) {
+      this.failed(e);
     }
   }
 
@@ -1052,6 +1098,13 @@ final class SBGLRenderer implements GLEventListener
   {
     SBErrorBox.showErrorWithTitleLater(this.log, "Renderer disabled", e);
     this.running.set(RunningState.STATE_FAILED_PERMANENTLY);
+  }
+
+  @Nonnull Future<SBCacheStatistics> getCacheStatistics()
+  {
+    final CacheStatisticsFuture f = new CacheStatisticsFuture();
+    this.cache_statistics_queue.add(f);
+    return f;
   }
 
   @Nonnull SBInputState getInputState()
@@ -1100,6 +1153,7 @@ final class SBGLRenderer implements GLEventListener
     SBGLRenderer.processQueue(this.texture_cube_load_queue);
     SBGLRenderer.processQueue(this.mesh_load_queue);
     SBGLRenderer.processQueue(this.shader_load_queue);
+    SBGLRenderer.processQueue(this.cache_statistics_queue);
   }
 
   private void handleShadowMapDumpRequest()
@@ -1110,20 +1164,105 @@ final class SBGLRenderer implements GLEventListener
       if (this.input_state.wantShadowMapDump()) {
         this.log.debug("Dumping shadow maps");
         final KRendererDebugging d = r.rendererDebug();
-        d.debugForEachShadowMap(new DebugShadowMapReceiver() {
+        if (d != null) {
+          d.debugForEachShadowMap(new DebugShadowMapReceiver() {
+            final StringBuilder name = new StringBuilder();
 
-          private final StringBuilder name = new StringBuilder();
+            @Override public void receive(
+              final @Nonnull KShadow shadow,
+              final @Nonnull KShadowMap map)
+            {
+              try {
+                final StringBuilder n = this.name;
+                n.setLength(0);
+                n.append("shadow-");
 
-          @Override public void receive(
-            final @Nonnull KShadow shadow,
-            final @Nonnull KFramebufferShadow fb)
-          {
-            this.name.setLength(0);
-            this.name.append("shadow-");
-            this.name.append(shadow.getLightID());
-            throw new UnimplementedCodeException();
-          }
-        });
+                shadow
+                  .shadowAccept(new KShadowVisitor<Unit, ConstraintError>() {
+                    @Override public Unit shadowVisitBasic(
+                      final @Nonnull KShadowMappedBasic s)
+                      throws RException,
+                        ConstraintError
+                    {
+                      n.append("basic-");
+                      n.append(s.getDescription().getLightID());
+                      return Unit.unit();
+                    }
+
+                    @Override public Unit shadowVisitVariance(
+                      final @Nonnull KShadowMappedVariance s)
+                      throws RException,
+                        ConstraintError
+                    {
+                      n.append("variance-");
+                      n.append(s.getDescription().getLightID());
+                      return Unit.unit();
+                    }
+                  });
+
+                map
+                  .kShadowMapAccept(new KShadowMapVisitor<Unit, ConstraintError>() {
+                    @SuppressWarnings("synthetic-access") @Override public
+                      Unit
+                      shadowMapVisitBasic(
+                        final KShadowMapBasic smb)
+                        throws ConstraintError,
+                          RException
+                    {
+                      try {
+                        SBTextureUtilities
+                          .textureDumpTimestampedTemporary2DStatic(
+                            SBGLRenderer.this.gi,
+                            smb
+                              .getFramebuffer()
+                              .kFramebufferGetDepthTexture(),
+                            n.toString(),
+                            SBGLRenderer.this.log);
+                      } catch (final FileNotFoundException e) {
+                        e.printStackTrace();
+                      } catch (final IOException e) {
+                        e.printStackTrace();
+                      } catch (final JCGLException e) {
+                        e.printStackTrace();
+                      }
+                      return Unit.unit();
+                    }
+
+                    @Override public Unit shadowMapVisitVariance(
+                      final @Nonnull KShadowMapVariance smv)
+                      throws ConstraintError,
+                        RException
+                    {
+                      try {
+                        SBTextureUtilities
+                          .textureDumpTimestampedTemporary2DStatic(
+                            SBGLRenderer.this.gi,
+                            smv
+                              .getFramebuffer()
+                              .kFramebufferGetDepthVarianceTexture(),
+                            n.toString(),
+                            SBGLRenderer.this.log);
+                      } catch (final FileNotFoundException e) {
+                        e.printStackTrace();
+                      } catch (final IOException e) {
+                        e.printStackTrace();
+                      } catch (final JCGLException e) {
+                        e.printStackTrace();
+                      }
+                      return Unit.unit();
+                    }
+                  });
+
+              } catch (final ConstraintError e) {
+                e.printStackTrace();
+              } catch (final RException e) {
+                e.printStackTrace();
+              } catch (final JCGLException e) {
+                e.printStackTrace();
+              }
+            }
+          });
+        }
       }
     }
   }
@@ -1138,7 +1277,7 @@ final class SBGLRenderer implements GLEventListener
       this.log.debug("Taking framebuffer snapshot");
       SBTextureUtilities.textureDumpTimestampedTemporary2DStatic(
         this.gi,
-        this.framebuffer.kframebufferGetRGBAOutputTexture(),
+        this.framebuffer.kFramebufferGetRGBATexture(),
         "framebuffer",
         this.log);
     }
@@ -1184,8 +1323,6 @@ final class SBGLRenderer implements GLEventListener
       }
     } catch (final JCGLException e) {
       this.failedPermanently(e);
-    } catch (final JCGLUnsupportedException e) {
-      this.failedPermanently(e);
     } catch (final ConstraintError e) {
       this.failedPermanently(e);
     }
@@ -1193,7 +1330,8 @@ final class SBGLRenderer implements GLEventListener
 
   private void initializeResources(
     final GLAutoDrawable drawable)
-    throws Error
+    throws Error,
+      RException
   {
     this.log.debug("Initializing resources");
 
@@ -1201,34 +1339,52 @@ final class SBGLRenderer implements GLEventListener
       final JCGLInterfaceCommon gl = this.gi.getGLCommon();
       final JCGLSLVersion version = gl.metaGetSLVersion();
 
+      this.rgba_cache_config =
+        BLUCacheConfig
+          .empty()
+          .withMaximumBorrowsPerKey(BigInteger.TEN)
+          .withMaximumCapacity(BigInteger.valueOf(128L * 1024L * 1024L));
+      this.rgba_cache_loader =
+        KFramebufferRGBACacheLoader.newLoader(this.gi, this.log);
+      this.rgba_cache =
+        BLUCacheTrivial.newCache(
+          this.rgba_cache_loader,
+          this.rgba_cache_config);
+
+      this.depth_variance_cache_config =
+        BLUCacheConfig
+          .empty()
+          .withMaximumBorrowsPerKey(BigInteger.TEN)
+          .withMaximumCapacity(BigInteger.valueOf(128L * 1024L * 1024L));
+      this.depth_variance_cache_loader =
+        KFramebufferDepthVarianceCacheLoader.newLoader(this.gi, this.log);
+      this.depth_variance_cache =
+        BLUCacheTrivial.newCache(
+          this.depth_variance_cache_loader,
+          this.depth_variance_cache_config);
+
       this.shader_cache_config =
-        LRUCacheConfig.empty().withMaximumCapacity(1024);
+        LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(1024));
       this.shader_cache =
         LRUCacheTrivial.newCache(
           KShaderCacheLoader.newLoader(this.gi, this.filesystem, this.log),
           this.shader_cache_config);
 
-      final KGraphicsCapabilities capabilities =
-        KGraphicsCapabilities.getCapabilities(this.gi);
-      this.label_cache = KLabelDecider.newDecider(capabilities, 8192);
+      this.capabilities = KGraphicsCapabilities.getCapabilities(this.gi);
+
+      this.label_cache =
+        KLabelDecider.newDecider(this.capabilities, BigInteger.valueOf(8192));
 
       {
         final Builder b = PCacheConfig.newBuilder();
         b.setNoMaximumSize();
-        b.setMaximumAge(60);
+        b.setMaximumAge(BigInteger.valueOf(60));
         this.shadow_cache_config = b.create();
         this.shadow_cache =
           PCacheTrivial.newCache(
-            KShadowCacheLoader.newLoader(this.gi, this.log),
+            KShadowMapCacheLoader.newLoader(this.gi, this.log),
             this.shadow_cache_config);
       }
-
-      this.shadow_map_renderer =
-        KShadowMapRendererActual.newRenderer(
-          this.gi,
-          this.label_cache,
-          this.shader_cache,
-          this.shadow_cache);
 
       this.viewport = SBGLRenderer.drawableArea(drawable);
       this.axes = new SBVisibleAxes(gl, 50, 50, 50, this.log);
@@ -1267,15 +1423,11 @@ final class SBGLRenderer implements GLEventListener
           "debug_flat_uv",
           this.log);
 
-      this.reloadSizedResources(drawable, gl);
+      this.reloadSizedResources(drawable, this.gi);
       this.running.set(RunningState.STATE_RUNNING);
     } catch (final JCGLException e) {
       this.failedPermanently(e);
-    } catch (final JCGLUnsupportedException e) {
-      this.failedPermanently(e);
     } catch (final ConstraintError e) {
-      this.failedPermanently(e);
-    } catch (final JCGLCompileException e) {
       this.failedPermanently(e);
     } catch (final FilesystemError e) {
       this.failedPermanently(e);
@@ -1283,20 +1435,13 @@ final class SBGLRenderer implements GLEventListener
       this.failedPermanently(e);
     } catch (final RXMLException e) {
       this.failedPermanently(e);
-    } catch (final KXMLException e) {
-      this.failedPermanently(e);
     }
   }
 
   private @Nonnull KRenderer initKernelRenderer(
     final @Nonnull SBKRendererType type)
-    throws JCGLCompileException,
-      JCGLUnsupportedException,
-      FilesystemError,
-      IOException,
-      JCGLException,
-      ConstraintError,
-      KXMLException
+    throws ConstraintError,
+      RException
   {
     switch (type) {
       case KRENDERER_DEBUG_BITANGENTS_EYE:
@@ -1317,7 +1462,8 @@ final class SBGLRenderer implements GLEventListener
       {
         return KRendererDebugDepth.rendererNew(
           this.gi,
-          this.filesystem,
+          this.label_cache,
+          this.shader_cache,
           this.log);
       }
       case KRENDERER_DEBUG_NORMALS_MAP_EYE:
@@ -1378,16 +1524,34 @@ final class SBGLRenderer implements GLEventListener
       }
       case KRENDERER_FORWARD:
       {
-        return KRendererForward.rendererNew(
+        return KRendererForwardActual.rendererNew(
           this.gi,
-          this.shader_cache,
-          this.shadow_map_renderer,
+          KShadowMapRendererActual.newRenderer(
+            this.gi,
+            this.shader_cache,
+            this.shadow_cache,
+            this.depth_variance_cache,
+            this.capabilities,
+            this.log),
           this.label_cache,
+          this.shader_cache,
+          this.capabilities,
           this.log);
       }
-      case KRENDERER_DEBUG_DEPTH_SHADOW:
+      case KRENDERER_DEBUG_SHADOW_MAP:
       {
-        return KRendererDebugDepthShadow.rendererNew(
+        return KRendererDebugShadowMap.rendererNew(
+          this.gi,
+          this.label_cache,
+          this.shader_cache,
+          this.capabilities,
+          this.log,
+          this.shadow_cache,
+          this.depth_variance_cache);
+      }
+      case KRENDERER_DEBUG_DEPTH_VARIANCE:
+      {
+        return KRendererDebugDepthVariance.rendererNew(
           this.gi,
           this.label_cache,
           this.shader_cache,
@@ -1398,45 +1562,59 @@ final class SBGLRenderer implements GLEventListener
     throw new UnreachableCodeException();
   }
 
-  private void loadNewRendererIfNecessary()
-    throws JCGLCompileException,
-      JCGLUnsupportedException,
-      FilesystemError,
-      IOException,
-      JCGLException,
-      ConstraintError,
-      KXMLException
+  private @CheckForNull KPostprocessor initPostprocessor(
+    final @Nonnull SBKPostprocessorType rp)
+    throws ConstraintError,
+      RException
   {
-    final SBRendererType rn = this.renderer_new.getAndSet(null);
+    switch (rp) {
+      case KPOSTPROCESSOR_NONE:
+      {
+        return null;
+      }
+      case KPOSTPROCESSOR_BLUR:
+      {
+        return KPostprocessorBlurRGBA.postprocessorNew(
+          this.gi,
+          this.rgba_cache,
+          this.shader_cache,
+          this.log);
+      }
+      case KPOSTPROCESSOR_FOG:
+      {
+        return KPostprocessorFog.postprocessorNew(
+          this.gi,
+          this.rgba_cache,
+          this.shader_cache,
+          this.log);
+      }
+    }
+
+    throw new UnreachableCodeException();
+  }
+
+  private void loadNewRendererIfNecessary()
+    throws ConstraintError,
+      RException
+  {
+    final SBKRendererType rn = this.renderer_new.getAndSet(null);
     if (rn != null) {
       final KRenderer old = this.renderer;
 
-      switch (rn.getType()) {
-        case TYPE_KERNEL:
-        {
-          final SBRendererTypeKernel rnk = (SBRendererTypeKernel) rn;
-          this.renderer = this.initKernelRenderer(rnk.getRenderer());
-          this.running.set(RunningState.STATE_RUNNING);
-          break;
-        }
-        case TYPE_SPECIFIC:
-        {
-          final SBRendererTypeSpecific rns = (SBRendererTypeSpecific) rn;
-          final KProgram p = rns.getShader().getProgram();
-          this.renderer =
-            SBRendererSpecific.rendererNew(
-              this.gi,
-              this.filesystem,
-              this.label_cache,
-              this.log,
-              p);
-          this.running.set(RunningState.STATE_RUNNING);
-          break;
-        }
-      }
+      this.renderer = this.initKernelRenderer(rn);
+      this.running.set(RunningState.STATE_RUNNING);
 
       if (old != null) {
         old.rendererClose();
+      }
+    }
+
+    final SBKPostprocessorType rp = this.postprocessor_new.getAndSet(null);
+    if (rp != null) {
+      final KPostprocessor old = this.postprocessor;
+      this.postprocessor = this.initPostprocessor(rp);
+      if (old != null) {
+        old.postprocessorClose();
       }
     }
   }
@@ -1460,32 +1638,48 @@ final class SBGLRenderer implements GLEventListener
   /**
    * Reload those resources that are dependent on the size of the
    * screen/drawable (such as the framebuffer, and the screen-sized quad).
-   * 
-   * @throws JCGLUnsupportedException
    */
 
   private void reloadSizedResources(
     final @Nonnull GLAutoDrawable drawable,
-    final @Nonnull JCGLInterfaceCommon gl)
+    final @Nonnull JCGLImplementation g)
     throws ConstraintError,
       JCGLException,
-      JCGLUnsupportedException
+      JCGLUnsupportedException,
+      RException
   {
     final AreaInclusive size = SBGLRenderer.drawableArea(drawable);
+    final JCGLInterfaceCommon gc = g.getGLCommon();
 
-    final KFramebuffer old = this.framebuffer;
-    this.framebuffer = KFramebufferCommon.newBasicRGBA(this.gi, size);
+    final KFramebufferForwardType old = this.framebuffer;
+
+    final KFramebufferRGBADescription rgba_description =
+      new KFramebufferRGBADescription(
+        size,
+        TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+        KRGBAPrecision.RGBA_PRECISION_8);
+    final KFramebufferDepthDescription depth_description =
+      new KFramebufferDepthDescription(
+        size,
+        TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+        KDepthPrecision.DEPTH_PRECISION_24);
+    final KFramebufferForwardDescription description =
+      new KFramebufferForwardDescription(rgba_description, depth_description);
+
+    this.framebuffer = KFramebufferForward.newFramebuffer(g, description);
     if (old != null) {
-      old.kframebufferDelete(this.gi);
+      old.kFramebufferDelete(g);
     }
 
     if (this.screen_quad != null) {
-      gl.arrayBufferDelete(this.screen_quad.getArrayBuffer());
-      gl.indexBufferDelete(this.screen_quad.getIndexBuffer());
+      gc.arrayBufferDelete(this.screen_quad.getArrayBuffer());
+      gc.indexBufferDelete(this.screen_quad.getIndexBuffer());
     }
 
     this.screen_quad =
-      new SBQuad(gl, drawable.getWidth(), drawable.getHeight(), -1, this.log);
+      new SBQuad(gc, drawable.getWidth(), drawable.getHeight(), -1, this.log);
   }
 
   private void renderResultsToScreen(
@@ -1665,8 +1859,7 @@ final class SBGLRenderer implements GLEventListener
 
             gl.texture2DStaticBind(
               SBGLRenderer.this.texture_units.get(0),
-              SBGLRenderer.this.framebuffer
-                .kframebufferGetRGBAOutputTexture());
+              SBGLRenderer.this.framebuffer.kFramebufferGetRGBATexture());
             KShadingProgramCommon.putTextureAlbedo(
               program,
               SBGLRenderer.this.texture_units.get(0));
@@ -2009,12 +2202,8 @@ final class SBGLRenderer implements GLEventListener
   }
 
   private void renderScene()
-    throws JCGLException,
-      ConstraintError,
-      JCGLCompileException,
-      JCGLUnsupportedException,
-      IOException,
-      KXMLException
+    throws ConstraintError,
+      RException
   {
     final SBSceneControllerRenderer c = this.controller.get();
 
@@ -2035,45 +2224,25 @@ final class SBGLRenderer implements GLEventListener
 
       this.scene_lights = scene_things.first;
 
-      /**
-       * Sort objects by Z (from the origin, not from the observer, for
-       * testing purposes). This will ensure that translucent objects are
-       * rendered from farthest to nearest.
-       */
-
-      final LinkedList<Pair<KMeshInstanceTransformed, SBInstance>> instances =
-        new LinkedList<Pair<KMeshInstanceTransformed, SBInstance>>(
-          scene_things.second);
-
-      Collections.sort(
-        instances,
-        new Comparator<Pair<KMeshInstanceTransformed, SBInstance>>() {
-          @Override public int compare(
-            final Pair<KMeshInstanceTransformed, SBInstance> o1,
-            final Pair<KMeshInstanceTransformed, SBInstance> o2)
-          {
-            final float o1z =
-              o1.first.getTransform().getTranslation().getZF();
-            final float o2z =
-              o2.first.getTransform().getTranslation().getZF();
-            return Float.compare(o1z, o2z);
-          }
-        });
-
       final KSceneBuilder builder =
         KScene.newBuilder(this.label_cache, kcamera);
 
       /**
-       * For each light, add instances.
+       * For each light, add instances. The adding of translucent objects is
+       * deferred in order to allow them to be sorted into draw order.
        * 
        * XXX: Assume that all instances will cast shadows (this is something
        * that would be configured on a per-instance basis outside of the
        * kernel).
-       * 
-       * XXX: In reality, translucent objects must be specified in draw-order
-       * for each light and for the observer (the orders for each will be
-       * different). For testing purposes only, use the same order for all.
        */
+
+      final ArrayList<Pair<KMeshInstanceTransformed, SBInstance>> translucents =
+        new ArrayList<Pair<KMeshInstanceTransformed, SBInstance>>();
+
+      final HashSet<KLight> all_lights = new HashSet<KLight>();
+      for (final SBLight light : scene_things.first) {
+        all_lights.add(light.getLight());
+      }
 
       for (final SBLight light : scene_things.first) {
         final KLight klight = light.getLight();
@@ -2093,12 +2262,7 @@ final class SBGLRenderer implements GLEventListener
               }
               case ALPHA_TRANSLUCENT:
               {
-                builder.sceneAddTranslucentLitVisibleWithoutShadow(
-                  klight,
-                  instance);
-                builder.sceneAddTranslucentInvisibleShadowCaster(
-                  klight,
-                  instance);
+                translucents.add(pair);
                 break;
               }
             }
@@ -2111,11 +2275,46 @@ final class SBGLRenderer implements GLEventListener
               }
               case ALPHA_TRANSLUCENT:
               {
-                builder.sceneAddTranslucentUnlit(instance);
+                translucents.add(pair);
                 break;
               }
             }
           }
+        }
+      }
+
+      /**
+       * Sort translucents by their distance from z = 0, for testing purposes.
+       * 
+       * XXX: In reality, they're drawn furthest to nearest from the
+       * perspective of the observer.
+       */
+
+      Collections.sort(
+        translucents,
+        new Comparator<Pair<KMeshInstanceTransformed, SBInstance>>() {
+          @Override public int compare(
+            final @Nonnull Pair<KMeshInstanceTransformed, SBInstance> o1,
+            final @Nonnull Pair<KMeshInstanceTransformed, SBInstance> o2)
+          {
+            final KMeshInstanceTransformed ok1 = o1.first;
+            final KMeshInstanceTransformed ok2 = o2.first;
+            final VectorReadable3F o1t = ok1.getTransform().getTranslation();
+            final VectorReadable3F o2t = ok2.getTransform().getTranslation();
+            return Float.compare(o1t.getZF(), o2t.getZF());
+          }
+        });
+
+      for (final Pair<KMeshInstanceTransformed, SBInstance> pair : translucents) {
+        if (pair.second.getDescription().isLit()) {
+          builder.sceneAddTranslucentLit(pair.first, all_lights);
+          for (final KLight k : all_lights) {
+            if (k.hasShadow()) {
+              builder.sceneAddInvisibleWithShadow(k, pair.first);
+            }
+          }
+        } else {
+          builder.sceneAddTranslucentUnlit(pair.first);
         }
       }
 
@@ -2125,9 +2324,85 @@ final class SBGLRenderer implements GLEventListener
           0.0f,
           0.0f,
           0.0f));
-        this.renderer.rendererEvaluate(
-          this.framebuffer,
-          builder.sceneCreate());
+
+        final KFramebufferForwardType fb = SBGLRenderer.this.framebuffer;
+        this.renderer
+          .rendererVisitableAccept(new KRendererVisitor<Unit, RException>() {
+            @Override public Unit rendererVisitDebug(
+              final @Nonnull KRendererDebug r)
+              throws ConstraintError,
+                RException
+            {
+              r.rendererDebugEvaluate(fb, builder.sceneCreate());
+              return Unit.unit();
+            }
+
+            @Override public Unit rendererVisitDeferred(
+              final @Nonnull KRendererDeferred r)
+            {
+              // TODO: No deferred renderers yet
+              throw new UnimplementedCodeException();
+            }
+
+            @Override public Unit rendererVisitForward(
+              final @Nonnull KRendererForward r)
+              throws ConstraintError,
+                RException
+            {
+              r.rendererForwardEvaluate(fb, builder.sceneCreate());
+              return Unit.unit();
+            }
+          });
+
+        if (this.postprocessor != null) {
+          this.postprocessor
+            .postprocessorVisitableAccept(new KPostprocessorVisitor<Unit, RException>() {
+              @Override public Unit postprocessorVisitDepth(
+                final @Nonnull KPostprocessorDepth r)
+                throws RException,
+                  ConstraintError,
+                  RException
+              {
+                // TODO Auto-generated method stub
+                throw new UnimplementedCodeException();
+              }
+
+              @Override public Unit postprocessorVisitRGBA(
+                final @Nonnull KPostprocessorRGBA r)
+                throws RException,
+                  ConstraintError,
+                  RException
+              {
+                r.postprocessorEvaluateRGBA(
+                  SBGLRenderer.this.framebuffer,
+                  SBGLRenderer.this.framebuffer);
+                return Unit.unit();
+              }
+
+              @Override public Unit postprocessorVisitRGBAWithDepth(
+                final @Nonnull KPostprocessorRGBAWithDepth r)
+                throws RException,
+                  ConstraintError,
+                  RException
+              {
+                r.postprocessorEvaluateRGBAWithDepth(
+                  SBGLRenderer.this.framebuffer,
+                  SBGLRenderer.this.framebuffer);
+                return Unit.unit();
+              }
+
+              @Override public Unit postprocessorVisitDepthVariance(
+                final KPostprocessorDepthVariance r)
+                throws RException,
+                  ConstraintError,
+                  RException
+              {
+                // TODO Auto-generated method stub
+                throw new UnimplementedCodeException();
+              }
+            });
+
+        }
       }
     }
   }
@@ -2142,13 +2417,12 @@ final class SBGLRenderer implements GLEventListener
     try {
       this.log.debug("Reshape " + width + "x" + height);
       this.viewport = SBGLRenderer.drawableArea(drawable);
-      final JCGLInterfaceCommon gl = this.gi.getGLCommon();
-      this.reloadSizedResources(drawable, gl);
+      this.reloadSizedResources(drawable, this.gi);
     } catch (final JCGLException e) {
       this.failedPermanently(e);
     } catch (final ConstraintError e) {
       this.failedPermanently(e);
-    } catch (final JCGLUnsupportedException e) {
+    } catch (final RException e) {
       this.failedPermanently(e);
     }
   }
@@ -2173,8 +2447,14 @@ final class SBGLRenderer implements GLEventListener
     this.camera_custom_projection.set(p);
   }
 
+  void setPostprocessor(
+    final @Nonnull SBKPostprocessorType type)
+  {
+    this.postprocessor_new.set(type);
+  }
+
   void setRenderer(
-    final @Nonnull SBRendererType type)
+    final @Nonnull SBKRendererType type)
   {
     this.renderer_new.set(type);
   }

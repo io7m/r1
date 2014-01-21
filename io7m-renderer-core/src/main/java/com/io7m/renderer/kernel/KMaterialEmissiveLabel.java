@@ -23,10 +23,12 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.ArrayBuffer;
 
 enum KMaterialEmissiveLabel
+  implements
+  KTexturesRequired
 {
-  EMISSIVE_CONSTANT("MC"),
-  EMISSIVE_MAPPED("MM"),
-  EMISSIVE_NONE("");
+  EMISSIVE_CONSTANT("MC", 0),
+  EMISSIVE_MAPPED("MM", 1),
+  EMISSIVE_NONE("", 0);
 
   static @Nonnull KMaterialEmissiveLabel fromInstance(
     final @Nonnull KMeshInstance instance)
@@ -50,16 +52,24 @@ enum KMaterialEmissiveLabel
     return KMaterialEmissiveLabel.EMISSIVE_CONSTANT;
   }
 
-  final @Nonnull String code;
+  private final @Nonnull String code;
+  private int                   textures_required;
 
   private KMaterialEmissiveLabel(
-    final @Nonnull String code)
+    final @Nonnull String code,
+    final int textures_required)
   {
     this.code = code;
+    this.textures_required = textures_required;
   }
 
   public @Nonnull String getCode()
   {
     return this.code;
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

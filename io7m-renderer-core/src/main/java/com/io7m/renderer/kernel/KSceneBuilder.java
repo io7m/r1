@@ -16,6 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.Set;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -29,18 +31,48 @@ public interface KSceneBuilder
 {
   /**
    * <p>
-   * Add an instance <code>instance</code> which is expected to have an opaque
-   * material lit by light <code>light</code>. The object will not appear in
-   * the rendered scene, but will cast a shadow if <code>light</code> is
-   * configured to produce shadows.
+   * Add an invisible instance <code>instance</code> associated with light
+   * <code>light</code>. The instance will not appear in the rendered scene,
+   * but will cast a shadow if <code>light</code> is configured to produce
+   * shadows.
    * </p>
    * <p>
-   * Due to depth buffering, opaque objects may be rendered in any order and
+   * Shadow casting is controlled by depth buffering (even for translucent
+   * instances) and therefore the order that shadow casting instances are
+   * added to the scene has no effect on the rendered image with respect to
+   * shadows.
+   * </p>
+   * <p>
+   * Allowing instances to appear in scenes purely as shadow casters is
+   * supported in order to allow separate, simplified geometry to be used for
+   * shadow casting.
+   * </p>
+   * 
+   * @throws ConstraintError
+   *           If any of the following hold:
+   *           <ul>
+   *           <li><code>light == null || instance == null</code></li>
+   *           </ul>
+   */
+
+  public void sceneAddInvisibleWithShadow(
+    final @Nonnull KLight light,
+    final @Nonnull KMeshInstanceTransformed instance)
+    throws ConstraintError;
+
+  /**
+   * <p>
+   * Add an instance <code>instance</code> which is expected to have an opaque
+   * material lit by light <code>light</code>. The instance will not cast a
+   * shadow, even if <code>light</code> is configured to produce them.
+   * </p>
+   * <p>
+   * Due to depth buffering, opaque instances may be rendered in any order and
    * therefore the order that they are added to the scene has no effect on the
    * rendered image.
    * </p>
    * <p>
-   * Allowing objects to appear in scenes purely as shadow casters is
+   * Allowing instances to appear in scenes without casting shadows is
    * supported in order to allow separate, simplified geometry to be used for
    * shadow casting.
    * </p>
@@ -51,36 +83,8 @@ public interface KSceneBuilder
    *           <li><code>light == null || instance == null</code></li>
    *           <li>The material used for <code>instance</code> is translucent</li>
    *           </ul>
-   */
-
-  public void sceneAddOpaqueInvisibleWithShadow(
-    final @Nonnull KLight light,
-    final @Nonnull KMeshInstanceTransformed instance)
-    throws ConstraintError;
-
-  /**
-   * <p>
-   * Add an instance <code>instance</code> which is expected to have an opaque
-   * material lit by light <code>light</code>. The object will not cast a
-   * shadow, even if <code>light</code> is configured to produce them.
-   * </p>
-   * <p>
-   * Due to depth buffering, opaque objects may be rendered in any order and
-   * therefore the order that they are added to the scene has no effect on the
-   * rendered image.
-   * </p>
-   * <p>
-   * Allowing objects to appear in scenes without casting shadows is supported
-   * in order to allow separate, simplified geometry to be used for shadow
-   * casting.
-   * </p>
    * 
-   * @throws ConstraintError
-   *           If any of the following hold:
-   *           <ul>
-   *           <li><code>light == null || instance == null</code></li>
-   *           <li>The material used for <code>instance</code> is translucent</li>
-   *           </ul>
+   * @see #sceneAddInvisibleShadowCaster(KLight, KMeshInstanceTransformed)
    */
 
   public void sceneAddOpaqueLitVisibleWithoutShadow(
@@ -94,7 +98,7 @@ public interface KSceneBuilder
    * material lit by light <code>light</code>.
    * </p>
    * <p>
-   * Due to depth buffering, opaque objects may be rendered in any order and
+   * Due to depth buffering, opaque instances may be rendered in any order and
    * therefore the order that they are added to the scene has no effect on the
    * rendered image.
    * </p>
@@ -109,6 +113,8 @@ public interface KSceneBuilder
    *           <li><code>light == null || instance == null</code></li>
    *           <li>The material used for <code>instance</code> is translucent</li>
    *           </ul>
+   * 
+   * @see #sceneAddInvisibleShadowCaster(KLight, KMeshInstanceTransformed)
    */
 
   public void sceneAddOpaqueLitVisibleWithShadow(
@@ -122,7 +128,7 @@ public interface KSceneBuilder
    * material and is unaffected by lighting.
    * </p>
    * <p>
-   * Due to depth buffering, opaque objects may be rendered in any order and
+   * Due to depth buffering, opaque instances may be rendered in any order and
    * therefore the order that they are added to the scene has no effect on the
    * rendered image.
    * </p>
@@ -141,48 +147,22 @@ public interface KSceneBuilder
 
   /**
    * <p>
-   * Add an instance <code>instance</code>, which is expected to have a
-   * translucent material, that will cast shadows with respect to
-   * <code>light</code> and will not appear in the final rendered image.
-   * Because translucent objects are rendering-order dependent, translucent
-   * shadow casters must be explicitly added in the correct order for each
-   * light.
-   * </p>
-   * 
-   * @throws ConstraintError
-   *           If any of the following hold:
-   *           <ul>
-   *           <li><code>light == null || instance == null</code></li>
-   *           <li>The material used for <code>instance</code> is not
-   *           translucent</li>
-   *           </ul>
-   */
-
-  public void sceneAddTranslucentInvisibleShadowCaster(
-    final @Nonnull KLight light,
-    final @Nonnull KMeshInstanceTransformed instance)
-    throws ConstraintError;
-
-  /**
-   * <p>
    * Add an instance <code>instance</code> which is expected to have a
-   * translucent material lit by light <code>light</code>. The object will not
-   * cast a shadow, even if <code>light</code> is configured to produce them.
-   * Because translucent objects are rendering-order dependent, translucent
-   * shadow casters must be explicitly added in the correct order for each
-   * light. See
-   * {@link #sceneAddTranslucentInvisibleShadowCaster(KLight, KMeshInstanceTransformed)}
-   * .
+   * translucent material lit by lights <code>lights</code>. The instance will
+   * not cast a shadow, even if <code>light</code> is configured to produce
+   * them. To make the instance cast shadows for a particular light, it must
+   * also be added to the scene with
+   * {@link #sceneAddInvisibleWithShadow(KLight, KMeshInstanceTransformed)}.
    * </p>
    * <p>
-   * Translucent objects are rendered in the order that they are added to the
-   * scene. If translucent object <code>B</code> is added to the scene after
-   * translucent object <code>A</code>, then <code>B</code> will be rendered
-   * on top of <code>A</code>, even if <code>A</code> is closer to the
-   * observer than <code>B</code>. Due to depth buffering, translucent objects
-   * will correctly overlap and be overlapped by opaque objects, without
-   * needing to be added to the scene in any particular order with respect to
-   * opaque objects.
+   * Translucent instances are rendered in the order that they are added to
+   * the scene. If translucent instance <code>B</code> is added to the scene
+   * after translucent instance <code>A</code>, then <code>B</code> will be
+   * rendered on top of <code>A</code>, even if <code>A</code> is closer to
+   * the observer than <code>B</code>. Due to depth buffering, translucent
+   * instances will correctly overlap and be overlapped by opaque instances,
+   * without needing to be added to the scene in any particular order with
+   * respect to opaque instances.
    * </p>
    * 
    * @throws ConstraintError
@@ -193,13 +173,12 @@ public interface KSceneBuilder
    *           translucent</li>
    *           </ul>
    * 
-   * @see #sceneAddTranslucentInvisibleShadowCaster(KLight,
-   *      KMeshInstanceTransformed)
+   * @see #sceneAddInvisibleShadowCaster(KLight, KMeshInstanceTransformed)
    */
 
-  public void sceneAddTranslucentLitVisibleWithoutShadow(
-    final @Nonnull KLight light,
-    final @Nonnull KMeshInstanceTransformed instance)
+  public void sceneAddTranslucentLit(
+    final @Nonnull KMeshInstanceTransformed instance,
+    final @Nonnull Set<KLight> light)
     throws ConstraintError;
 
   /**
