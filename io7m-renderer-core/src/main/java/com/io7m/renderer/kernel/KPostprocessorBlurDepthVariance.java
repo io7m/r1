@@ -33,16 +33,17 @@ import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorRGBA;
 import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferRGBADescription;
 
-public final class KPostprocessorBlurRGBA extends KAbstractPostprocessorRGBA
+public final class KPostprocessorBlurDepthVariance extends
+  KAbstractPostprocessorRGBA
 {
   private static final @Nonnull String NAME;
 
   static {
-    NAME = "postprocessor-blur-rgba";
+    NAME = "postprocessor-blur-depth-variance";
   }
 
   public static @Nonnull
-    KPostprocessorBlurRGBA
+    KPostprocessorBlurDepthVariance
     postprocessorNew(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
@@ -51,7 +52,11 @@ public final class KPostprocessorBlurRGBA extends KAbstractPostprocessorRGBA
       throws ConstraintError,
         RException
   {
-    return new KPostprocessorBlurRGBA(gi, rgba_cache, shader_cache, log);
+    return new KPostprocessorBlurDepthVariance(
+      gi,
+      rgba_cache,
+      shader_cache,
+      log);
   }
 
   private float                                                                              blur_size;
@@ -62,7 +67,7 @@ public final class KPostprocessorBlurRGBA extends KAbstractPostprocessorRGBA
   private final @Nonnull LUCache<String, KProgram, RException>                               shader_cache;
   private final @Nonnull VectorM2I                                                           viewport_size;
 
-  private KPostprocessorBlurRGBA(
+  private KPostprocessorBlurDepthVariance(
     final @Nonnull JCGLImplementation gi,
     final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
@@ -70,7 +75,7 @@ public final class KPostprocessorBlurRGBA extends KAbstractPostprocessorRGBA
     throws ConstraintError,
       RException
   {
-    super(KPostprocessorBlurRGBA.NAME);
+    super(KPostprocessorBlurDepthVariance.NAME);
 
     try {
       this.gi = Constraints.constrainNotNull(gi, "GL implementation");
@@ -81,7 +86,7 @@ public final class KPostprocessorBlurRGBA extends KAbstractPostprocessorRGBA
       this.log =
         new Log(
           Constraints.constrainNotNull(log, "Log"),
-          KPostprocessorBlurRGBA.NAME);
+          KPostprocessorBlurDepthVariance.NAME);
 
       this.viewport_size = new VectorM2I();
       this.quad = KUnitQuad.newQuad(gi.getGLCommon(), this.log);
