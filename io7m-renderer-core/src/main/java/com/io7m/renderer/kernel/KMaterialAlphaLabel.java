@@ -22,6 +22,8 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 
 enum KMaterialAlphaLabel
+  implements
+  KTexturesRequired
 {
   ALPHA_OPAQUE("AO"),
   ALPHA_TRANSLUCENT("AT");
@@ -50,5 +52,10 @@ enum KMaterialAlphaLabel
   public @Nonnull String getCode()
   {
     return this.code;
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return 0;
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,13 +16,36 @@
 
 package com.io7m.renderer.kernel;
 
+import javax.annotation.Nonnull;
+
+import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferRGBADescription;
 
 public interface KFramebufferRGBAUsable extends KFramebufferUsable
 {
   /**
-   * Retrieve the texture that backs the main RGBA output buffer.
+   * <p>
+   * Retrieve a reference to the framebuffer to which the scene will be
+   * rendered.
+   * </p>
    */
 
-  public Texture2DStaticUsable kframebufferGetRGBAOutputTexture();
+  public @Nonnull
+    FramebufferReferenceUsable
+    kFramebufferGetColorFramebuffer();
+
+  /**
+   * Retrieve the RGBA colour texture that backs the scene framebuffer.
+   */
+
+  public @Nonnull Texture2DStaticUsable kFramebufferGetRGBATexture();
+
+  /**
+   * Retrieve a description of this framebuffer.
+   */
+
+  public @Nonnull
+    KFramebufferRGBADescription
+    kFramebufferGetRGBADescription();
 }

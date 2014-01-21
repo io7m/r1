@@ -21,7 +21,7 @@ import javax.annotation.Nonnull;
 enum SBKRendererType
 {
   KRENDERER_DEBUG_DEPTH("debug-depth"),
-  KRENDERER_DEBUG_DEPTH_SHADOW("debug-depth-shadow"),
+  KRENDERER_DEBUG_DEPTH_VARIANCE("debug-depth-variance"),
   KRENDERER_DEBUG_UV_VERTEX("debug-uv-vertex"),
   KRENDERER_DEBUG_BITANGENTS_LOCAL("debug-bitangents-local"),
   KRENDERER_DEBUG_BITANGENTS_EYE("debug-bitangents-eye"),
@@ -32,7 +32,8 @@ enum SBKRendererType
   KRENDERER_DEBUG_NORMALS_MAP_LOCAL("debug-normals-map-local"),
   KRENDERER_DEBUG_NORMALS_MAP_EYE("debug-normals-map-eye"),
   KRENDERER_DEBUG_NORMALS_MAP_TANGENT("debug-normals-map-tangent"),
-  KRENDERER_FORWARD("forward"),
+  KRENDERER_DEBUG_SHADOW_MAP("debug-shadow-map"),
+  KRENDERER_FORWARD("forward")
 
   ;
 

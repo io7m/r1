@@ -29,6 +29,7 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLImplementationJOGL;
+import com.io7m.jcanephora.JCGLSoftRestrictions;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FSCapabilityAll;
@@ -336,7 +337,8 @@ public final class JOGLTestContext
     return new TestContext(fs, gi, log);
   }
 
-  public static TestContext makeContextWithDefault()
+  public static TestContext makeContextWithDefault(
+    final int units)
     throws JCGLException,
       JCGLUnsupportedException,
       ConstraintError
@@ -346,8 +348,26 @@ public final class JOGLTestContext
     final FSCapabilityAll fs = JOGLTestContext.getFS(log);
 
     final GLContext ctx = JOGLTestContext.getContext(GLProfile.getDefault());
+    final JCGLSoftRestrictions r = new JCGLSoftRestrictions() {
+      @Override public int restrictTextureUnitCount(
+        final int count)
+      {
+        return 8;
+      }
+
+      @Override public boolean restrictExtensionVisibility(
+        final String name)
+      {
+        return true;
+      }
+    };
+
     final JCGLImplementation gi =
-      JCGLImplementationJOGL.newImplementationWithDebugging(ctx, log);
+      JCGLImplementationJOGL.newImplementationWithDebuggingAndRestrictions(
+        ctx,
+        log,
+        r);
+
     return new TestContext(fs, gi, log);
   }
 

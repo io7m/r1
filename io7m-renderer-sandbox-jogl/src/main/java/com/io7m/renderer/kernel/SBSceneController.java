@@ -81,7 +81,6 @@ import com.io7m.renderer.kernel.SBLight.SBLightSpherical;
 import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionDirectional;
 import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionProjective;
 import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionSpherical;
-import com.io7m.renderer.xml.RXMLException;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 
@@ -439,7 +438,7 @@ public final class SBSceneController implements
       ExecutionException,
       ValidityException,
       ParsingException,
-      RXMLException
+      com.io7m.renderer.xml.RXMLException
   {
     final PathVirtual path = fs.filesystemCopyInTextureCube(file);
     return this.internalTextureCubeLoadFromPath(
@@ -741,7 +740,10 @@ public final class SBSceneController implements
             .getTexture());
 
       final KMaterialAlpha alpha =
-        new KMaterialAlpha(sd_alpha.isTranslucent(), sd_alpha.getOpacity());
+        new KMaterialAlpha(
+          sd_alpha.getOpacityType(),
+          sd_alpha.getOpacity(),
+          sd_alpha.getDepthThreshold());
 
       final KMaterialAlbedo diff =
         new KMaterialAlbedo(
@@ -762,8 +764,6 @@ public final class SBSceneController implements
         new KMaterialEnvironment(
           sd_envi.getMix(),
           environment_map,
-          sd_envi.getRefractionIndex(),
-          sd_envi.getReflectionMix(),
           sd_envi.getMixFromSpecularMap());
 
       final KMaterialNormal norm = new KMaterialNormal(normal_map);
@@ -801,7 +801,7 @@ public final class SBSceneController implements
   }
 
   @Override public void rendererSetType(
-    final @Nonnull SBRendererType type)
+    final @Nonnull SBKRendererType type)
   {
     this.renderer.setRenderer(type);
   }
@@ -1147,6 +1147,17 @@ public final class SBSceneController implements
   {
     return this.shaders;
   }
+
+  @Override public Future<SBCacheStatistics> rendererGetCacheStatistics()
+  {
+    return this.renderer.getCacheStatistics();
+  }
+
+  @Override public void rendererPostprocessorSetType(
+    final @Nonnull SBKPostprocessorType type)
+  {
+    this.renderer.setPostprocessor(type);
+  }
 }
 
 interface SBSceneControllerInstances extends
@@ -1230,6 +1241,8 @@ interface SBSceneControllerRenderer
 
 interface SBSceneControllerRendererControl
 {
+  public @Nonnull Future<SBCacheStatistics> rendererGetCacheStatistics();
+
   public @Nonnull RMatrixI4x4F<RTransformProjection> rendererGetProjection();
 
   public void rendererSetBackgroundColour(
@@ -1241,7 +1254,10 @@ interface SBSceneControllerRendererControl
     final @Nonnull RMatrixI4x4F<RTransformProjection> p);
 
   public void rendererSetType(
-    final @Nonnull SBRendererType type);
+    final @Nonnull SBKRendererType type);
+
+  public void rendererPostprocessorSetType(
+    final @Nonnull SBKPostprocessorType type);
 
   public void rendererShowAxes(
     final boolean enabled);

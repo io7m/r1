@@ -59,8 +59,47 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.io7m.renderer.kernel-shaders</groupId>
-      <artifactId>io7m-renderer-kernel-shaders</artifactId>
+      <groupId>com.io7m.renderer.kernel-shaders.debug</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-debug</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.renderer.kernel-shaders.depth</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-depth</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.renderer.kernel-shaders.forward</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-forward</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.renderer.kernel-shaders.postprocessing</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-postprocessing</artifactId>
       <version>${project.version}</version>
       <classifier>shaders</classifier>
       <type>zip</type>
@@ -74,7 +113,7 @@
     <dependency>
       <groupId>com.io7m.jparasol.xml</groupId>
       <artifactId>io7m-jparasol-xml</artifactId>
-      <version>[0.3.6, 0.4.0)</version>
+      <version>[0.3.15, 0.4.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jtensors</groupId>
@@ -89,27 +128,27 @@
     <dependency>
       <groupId>com.io7m.jcanephora.core</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
-      <version>0.23.2</version>
+      <version>0.24.0</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.checkedexec</groupId>
       <artifactId>io7m-jcanephora-checkedexec</artifactId>
-      <version>0.23.2</version>
+      <version>0.24.0</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.batchexec</groupId>
       <artifactId>io7m-jcanephora-batchexec</artifactId>
-      <version>0.23.2</version>
+      <version>0.24.0</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.framebuffer</groupId>
       <artifactId>io7m-jcanephora-framebuffer</artifactId>
-      <version>0.23.2</version>
+      <version>0.24.0</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.jlucache</groupId>
-      <artifactId>io7m-jlucache</artifactId>
-      <version>0.2.1</version>
+      <groupId>com.io7m.jcache</groupId>
+      <artifactId>io7m-jcache</artifactId>
+      <version>[0.3.0, 0.4.0)</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
