@@ -27,10 +27,27 @@ import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
 final class SBTextFieldUtilities
 {
+  private static final Color  DEFAULT_FIELD_BACKGROUND;
   private static final Border DEFAULT_FIELD_BORDER;
 
   static {
-    DEFAULT_FIELD_BORDER = new JTextField().getBorder();
+    final JTextField f = new JTextField();
+    DEFAULT_FIELD_BORDER = f.getBorder();
+    DEFAULT_FIELD_BACKGROUND = f.getBackground();
+  }
+
+  private static void fieldRestoreVisual(
+    final JTextField field)
+  {
+    field.setBorder(SBTextFieldUtilities.DEFAULT_FIELD_BORDER);
+    field.setBackground(SBTextFieldUtilities.DEFAULT_FIELD_BACKGROUND);
+  }
+
+  private static void fieldSetErrorVisual(
+    final JTextField field)
+  {
+    field.setBorder(BorderFactory.createLineBorder(Color.RED));
+    field.setBackground(Color.PINK);
   }
 
   static float getFieldFloatOrError(
@@ -39,12 +56,26 @@ final class SBTextFieldUtilities
   {
     try {
       final float r = Float.parseFloat(field.getText());
-      field.setBorder(SBTextFieldUtilities.DEFAULT_FIELD_BORDER);
+      SBTextFieldUtilities.fieldRestoreVisual(field);
       return r;
     } catch (final NumberFormatException e) {
-      field.setBorder(BorderFactory.createLineBorder(Color.RED));
+      SBTextFieldUtilities.fieldSetErrorVisual(field);
       throw new SBException.SBExceptionInputError(
         "Field must be a real number");
+    }
+  }
+
+  public static int getFieldIntegerOrError(
+    final @Nonnull JTextField field)
+    throws SBExceptionInputError
+  {
+    try {
+      final int r = Integer.parseInt(field.getText());
+      SBTextFieldUtilities.fieldRestoreVisual(field);
+      return r;
+    } catch (final NumberFormatException e) {
+      SBTextFieldUtilities.fieldSetErrorVisual(field);
+      throw new SBException.SBExceptionInputError("Field must be an integer");
     }
   }
 
@@ -54,10 +85,10 @@ final class SBTextFieldUtilities
   {
     final String s = field.getText();
     if (s.equals("")) {
-      field.setBorder(BorderFactory.createLineBorder(Color.RED));
+      SBTextFieldUtilities.fieldSetErrorVisual(field);
       throw new SBException.SBExceptionInputError("Field must not be empty");
     }
-    field.setBorder(SBTextFieldUtilities.DEFAULT_FIELD_BORDER);
+    SBTextFieldUtilities.fieldRestoreVisual(field);
     return s;
   }
 }

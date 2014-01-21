@@ -19,67 +19,164 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jaux.functional.Option;
-import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.jtensors.VectorI3F;
-import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.jaux.Constraints;
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.RMatrixI3x3F;
+import com.io7m.renderer.RTransformTexture;
 
 /**
  * Object materials.
  */
 
-@Immutable final class KMaterial
+@Immutable public final class KMaterial implements KTexturesRequired
 {
-  private final @Nonnull VectorI3F               diffuse;
-  private final @Nonnull Option<Texture2DStatic> texture_diffuse_0;
-  private final @Nonnull Option<Texture2DStatic> texture_diffuse_1;
-  private final @Nonnull Option<Texture2DStatic> texture_normal;
-  private final @Nonnull Option<Texture2DStatic> texture_specular;
-  private final float                            specular_exponent;
+  private final @Nonnull KMaterialAlbedo                 albedo;
+  private final @Nonnull KMaterialAlpha                  alpha;
+  private final @Nonnull KMaterialEmissive               emissive;
+  private final @Nonnull KMaterialEnvironment            environment;
+  private final @Nonnull KMaterialNormal                 normal;
+  private final @Nonnull KMaterialSpecular               specular;
+  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
+  private final int                                      textures_required;
 
   KMaterial(
-    final @Nonnull VectorReadable3F diffuse,
-    final @Nonnull Option<Texture2DStatic> texture_diffuse_0,
-    final @Nonnull Option<Texture2DStatic> texture_diffuse_1,
-    final @Nonnull Option<Texture2DStatic> texture_normal,
-    final @Nonnull Option<Texture2DStatic> texture_specular,
-    final float specular_exponent)
+    final @Nonnull KMaterialAlpha alpha,
+    final @Nonnull KMaterialAlbedo diffuse,
+    final @Nonnull KMaterialEmissive emissive,
+    final @Nonnull KMaterialEnvironment environment,
+    final @Nonnull KMaterialNormal normal,
+    final @Nonnull KMaterialSpecular specular,
+    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix)
+    throws ConstraintError
   {
-    this.diffuse = new VectorI3F(diffuse);
-    this.texture_diffuse_0 = texture_diffuse_0;
-    this.texture_diffuse_1 = texture_diffuse_1;
-    this.texture_normal = texture_normal;
-    this.texture_specular = texture_specular;
-    this.specular_exponent = specular_exponent;
+    this.alpha = Constraints.constrainNotNull(alpha, "Alpha");
+    this.albedo = Constraints.constrainNotNull(diffuse, "Albedo");
+    this.emissive = Constraints.constrainNotNull(emissive, "Emissive");
+    this.environment =
+      Constraints.constrainNotNull(environment, "Environment");
+    this.normal = Constraints.constrainNotNull(normal, "Normal");
+    this.specular = Constraints.constrainNotNull(specular, "Specular");
+    this.uv_matrix = Constraints.constrainNotNull(uv_matrix, "UV matrix");
+
+    int req = 0;
+    req += this.alpha.kTexturesGetRequired();
+    req += this.albedo.kTexturesGetRequired();
+    req += this.emissive.kTexturesGetRequired();
+    req += this.environment.kTexturesGetRequired();
+    req += this.normal.kTexturesGetRequired();
+    req += this.specular.kTexturesGetRequired();
+    this.textures_required = req;
   }
 
-  public float getSpecularExponent()
+  @Override public boolean equals(
+    final Object obj)
   {
-    return this.specular_exponent;
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KMaterial other = (KMaterial) obj;
+    if (!this.alpha.equals(other.alpha)) {
+      return false;
+    }
+    if (!this.albedo.equals(other.albedo)) {
+      return false;
+    }
+    if (!this.emissive.equals(other.emissive)) {
+      return false;
+    }
+    if (!this.environment.equals(other.environment)) {
+      return false;
+    }
+    if (!this.normal.equals(other.normal)) {
+      return false;
+    }
+    if (!this.specular.equals(other.specular)) {
+      return false;
+    }
+    if (!this.uv_matrix.equals(other.uv_matrix)) {
+      return false;
+    }
+    return true;
   }
 
-  @Nonnull VectorReadable3F getDiffuse()
+  public @Nonnull KMaterialAlbedo getAlbedo()
   {
-    return this.diffuse;
+    return this.albedo;
   }
 
-  @Nonnull Option<Texture2DStatic> getTextureDiffuse0()
+  public @Nonnull KMaterialAlpha getAlpha()
   {
-    return this.texture_diffuse_0;
+    return this.alpha;
   }
 
-  @Nonnull Option<Texture2DStatic> getTextureDiffuse1()
+  public @Nonnull KMaterialEmissive getEmissive()
   {
-    return this.texture_diffuse_1;
+    return this.emissive;
   }
 
-  @Nonnull Option<Texture2DStatic> getTextureNormal()
+  public @Nonnull KMaterialEnvironment getEnvironment()
   {
-    return this.texture_normal;
+    return this.environment;
   }
 
-  @Nonnull Option<Texture2DStatic> getTextureSpecular()
+  public @Nonnull KMaterialNormal getNormal()
   {
-    return this.texture_specular;
+    return this.normal;
+  }
+
+  public @Nonnull KMaterialSpecular getSpecular()
+  {
+    return this.specular;
+  }
+
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
+  {
+    return this.uv_matrix;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.alpha.hashCode();
+    result = (prime * result) + this.albedo.hashCode();
+    result = (prime * result) + this.emissive.hashCode();
+    result = (prime * result) + this.environment.hashCode();
+    result = (prime * result) + this.normal.hashCode();
+    result = (prime * result) + this.specular.hashCode();
+    result = (prime * result) + this.uv_matrix.hashCode();
+    return result;
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder builder = new StringBuilder();
+    builder.append("[KMaterial ");
+    builder.append(this.alpha);
+    builder.append(" ");
+    builder.append(this.albedo);
+    builder.append(" ");
+    builder.append(this.emissive);
+    builder.append(" ");
+    builder.append(this.specular);
+    builder.append(" ");
+    builder.append(this.environment);
+    builder.append(" ");
+    builder.append(this.normal);
+    builder.append(" ");
+    builder.append(this.uv_matrix);
+    builder.append("]");
+    return builder.toString();
+  }
+
+  @Override public int kTexturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

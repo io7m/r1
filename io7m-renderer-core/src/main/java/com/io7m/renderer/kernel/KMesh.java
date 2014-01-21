@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.IndexBuffer;
@@ -40,7 +41,7 @@ import com.io7m.jcanephora.IndexBuffer;
  * <ul>
  */
 
-public final class KMesh
+@Immutable public final class KMesh
 {
   private final @Nonnull ArrayBuffer array;
   private final @Nonnull IndexBuffer indices;
@@ -53,12 +54,12 @@ public final class KMesh
     this.indices = indices;
   }
 
-  @Nonnull ArrayBuffer getArrayBuffer()
+  public @Nonnull ArrayBuffer getArrayBuffer()
   {
     return this.array;
   }
 
-  @Nonnull IndexBuffer getIndexBuffer()
+  public @Nonnull IndexBuffer getIndexBuffer()
   {
     return this.indices;
   }

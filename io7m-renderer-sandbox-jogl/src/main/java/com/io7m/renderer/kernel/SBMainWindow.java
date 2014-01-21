@@ -25,6 +25,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,20 +51,22 @@ import javax.swing.JSeparator;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileFilter;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Callbacks;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
-import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.util.Animator;
 
 final class SBMainWindow extends JFrame
 {
+  protected final static @Nonnull FileFilter SCENE_FILTER;
+
   private static final long                  serialVersionUID;
 
   static {
     serialVersionUID = -4478810823021843490L;
   }
-
-  protected final static @Nonnull FileFilter SCENE_FILTER;
 
   static {
     SCENE_FILTER = new FileFilter() {
@@ -80,34 +83,63 @@ final class SBMainWindow extends JFrame
     };
   }
 
+  private static @Nonnull GLProfile getGLProfile(
+    final @Nonnull SandboxConfig config)
+  {
+    switch (config.getOpenGLProfile()) {
+      case OPENGL_PROFILE_DEFAULT:
+        return GLProfile.getDefault();
+      case OPENGL_PROFILE_GL2:
+        return GLProfile.get(GLProfile.GL2);
+      case OPENGL_PROFILE_GL3:
+        return GLProfile.get(GLProfile.GL3);
+      case OPENGL_PROFILE_GL4:
+        return GLProfile.get(GLProfile.GL4);
+      case OPENGL_PROFILE_GLES2:
+        return GLProfile.get(GLProfile.GLES2);
+      case OPENGL_PROFILE_GLES3:
+        return GLProfile.get(GLProfile.GLES3);
+    }
+
+    throw new UnreachableCodeException();
+  }
+
   private static @Nonnull
-    <C extends SBSceneControllerRendererControl & SBSceneControllerIO>
+    <C extends SBSceneControllerRendererControl & SBSceneControllerIO & SBSceneControllerShaders>
     JMenuBar
     makeMenuBar(
       final @Nonnull C controller,
       final @Nonnull SBMainWindow window,
+      final @Nonnull SBCameraWindow camera_window,
       final @Nonnull SBLightsWindow lights_window,
       final @Nonnull SBLogsWindow logs_window,
+      final @Nonnull SBStatisticsWindow stats_window,
       final @Nonnull SBObjectsWindow objects_window,
       final @Nonnull Log log)
   {
     final JMenuBar bar = new JMenuBar();
     bar.add(SBMainWindow.makeMenuFile(controller, window, log));
     bar.add(SBMainWindow.makeMenuEdit(lights_window, objects_window));
-    bar.add(SBMainWindow.makeMenuRenderer(controller));
-    bar.add(SBMainWindow.makeMenuView(controller));
-    bar.add(SBMainWindow.makeMenuDebug(logs_window));
+    bar.add(SBMainWindow.makeMenuRenderer(window, log, controller));
+    bar.add(SBMainWindow.makeMenuPostprocessor(window, log, controller));
+    bar.add(SBMainWindow.makeMenuView(camera_window, controller));
+    bar.add(SBMainWindow.makeMenuDebug(logs_window, stats_window));
     return bar;
   }
 
   private static @Nonnull JMenu makeMenuDebug(
-    final @Nonnull SBLogsWindow log_window)
+    final @Nonnull SBLogsWindow log_window,
+    final @Nonnull SBStatisticsWindow stats_window)
   {
     final JMenu menu = new JMenu("Debug");
+
     final JCheckBoxMenuItem logs =
       SBMainWindow.makeMenuDebugLogsMenuItem(log_window);
+    final JCheckBoxMenuItem stats =
+      SBMainWindow.makeMenuDebugStatisticsMenuItem(stats_window);
 
     menu.add(logs);
+    menu.add(stats);
     return menu;
   }
 
@@ -115,6 +147,12 @@ final class SBMainWindow extends JFrame
     final @Nonnull SBLogsWindow log_window)
   {
     return SBMainWindow.makeWindowCheckbox("Logs...", log_window);
+  }
+
+  private static JCheckBoxMenuItem makeMenuDebugStatisticsMenuItem(
+    final @Nonnull SBStatisticsWindow stats_window)
+  {
+    return SBMainWindow.makeWindowCheckbox("Statistics...", stats_window);
   }
 
   private static @Nonnull JMenu makeMenuEdit(
@@ -145,6 +183,14 @@ final class SBMainWindow extends JFrame
     return SBMainWindow.makeWindowCheckbox("Objects...", objects_window);
   }
 
+  private static @Nonnull JCheckBoxMenuItem makeMenuEditShadersMenuItem(
+    final @Nonnull SBShadersWindow shaders_window)
+  {
+    return SBMainWindow.makeWindowCheckbox(
+      "ForwardShaders...",
+      shaders_window);
+  }
+
   private static @Nonnull JMenu makeMenuFile(
     final @Nonnull SBSceneControllerIO controller,
     final @Nonnull SBMainWindow window,
@@ -173,7 +219,11 @@ final class SBMainWindow extends JFrame
                 @Override protected Void doInBackground()
                   throws Exception
                 {
-                  return controller.ioLoadScene(selected).get();
+                  try {
+                    return controller.ioLoadScene(selected).get();
+                  } catch (final ConstraintError x) {
+                    throw new IOException(x);
+                  }
                 }
 
                 @SuppressWarnings("synthetic-access") @Override protected
@@ -188,9 +238,12 @@ final class SBMainWindow extends JFrame
                       log,
                       open_recent);
                   } catch (final InterruptedException x) {
-                    SBErrorBox.showError(log, "Interrupted", x);
+                    SBErrorBox.showErrorWithTitleLater(log, "Interrupted", x);
                   } catch (final ExecutionException x) {
-                    SBErrorBox.showError(log, "I/O error", x.getCause());
+                    SBErrorBox.showErrorWithTitleLater(
+                      log,
+                      "I/O error",
+                      x.getCause());
                   }
                 }
               };
@@ -227,9 +280,13 @@ final class SBMainWindow extends JFrame
                 @Override protected Void doInBackground()
                   throws Exception
                 {
-                  return controller
-                    .ioSaveScene(chooser.getSelectedFile())
-                    .get();
+                  try {
+                    return controller
+                      .ioSaveScene(chooser.getSelectedFile())
+                      .get();
+                  } catch (final ConstraintError x) {
+                    throw new IOException(x);
+                  }
                 }
 
                 @Override protected void done()
@@ -237,9 +294,12 @@ final class SBMainWindow extends JFrame
                   try {
                     this.get();
                   } catch (final InterruptedException x) {
-                    SBErrorBox.showError(log, "Interrupted", x);
+                    SBErrorBox.showErrorWithTitleLater(log, "Interrupted", x);
                   } catch (final ExecutionException x) {
-                    SBErrorBox.showError(log, "I/O error", x.getCause());
+                    SBErrorBox.showErrorWithTitleLater(
+                      log,
+                      "I/O error",
+                      x.getCause());
                   }
                 }
               };
@@ -277,61 +337,47 @@ final class SBMainWindow extends JFrame
     return menu;
   }
 
-  private static void makeOpenRecentMenu(
-    final @Nonnull SBSceneControllerIO controller,
-    final @Nonnull Log log,
-    final @Nonnull JMenu open_recent)
+  private static @Nonnull
+    <C extends SBSceneControllerRendererControl & SBSceneControllerShaders>
+    JMenu
+    makeMenuPostprocessor(
+      final @Nonnull JFrame main_window,
+      final @Nonnull Log log,
+      final @Nonnull C controller)
   {
-    final List<File> recent_items = SBMainWindow.recentlyUsedLoad();
-    open_recent.removeAll();
+    final ButtonGroup renderer_group = new ButtonGroup();
+    final JMenu menu = new JMenu("Postprocessor");
 
-    for (final File file : recent_items) {
-      final JMenuItem item = new JMenuItem(file.toString());
-      item.addActionListener(new ActionListener() {
+    for (final SBKPostprocessorType type : SBKPostprocessorType.values()) {
+      final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
+      b.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
         {
-          final SwingWorker<Void, Void> worker =
-            new SwingWorker<Void, Void>() {
-              @Override protected Void doInBackground()
-                throws Exception
-              {
-                return controller.ioLoadScene(file).get();
-              }
-
-              @SuppressWarnings("synthetic-access") @Override protected
-                void
-                done()
-              {
-                try {
-                  this.get();
-                } catch (final InterruptedException x) {
-                  SBErrorBox.showError(log, "Interrupted", x);
-                } catch (final ExecutionException x) {
-                  SBErrorBox.showError(log, "I/O error", x.getCause());
-                }
-              }
-            };
-
-          worker.execute();
+          controller.rendererPostprocessorSetType(type);
         }
       });
-      open_recent.add(item);
+
+      renderer_group.add(b);
+      menu.add(b);
     }
 
-    open_recent.setEnabled(recent_items.size() > 0);
+    return menu;
   }
 
-  private static @Nonnull JMenu makeMenuRenderer(
-    final @Nonnull SBSceneControllerRendererControl controller)
+  private static @Nonnull
+    <C extends SBSceneControllerRendererControl & SBSceneControllerShaders>
+    JMenu
+    makeMenuRenderer(
+      final @Nonnull JFrame main_window,
+      final @Nonnull Log log,
+      final @Nonnull C controller)
   {
+    final ButtonGroup renderer_group = new ButtonGroup();
     final JMenu menu = new JMenu("Renderer");
-    final ButtonGroup group = new ButtonGroup();
 
-    for (final SBRendererType type : SBRendererType.values()) {
+    for (final SBKRendererType type : SBKRendererType.values()) {
       final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
-      b.setSelected(type == SBRendererType.RENDERER_FLAT_TEXTURED);
-
       b.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
           final @Nonnull ActionEvent e)
@@ -340,7 +386,7 @@ final class SBMainWindow extends JFrame
         }
       });
 
-      group.add(b);
+      renderer_group.add(b);
       menu.add(b);
     }
 
@@ -348,6 +394,7 @@ final class SBMainWindow extends JFrame
   }
 
   private static @Nonnull JMenu makeMenuView(
+    final @Nonnull SBCameraWindow camera_window,
     final @Nonnull SBSceneControllerRendererControl controller)
   {
     final JMenu menu = new JMenu("View");
@@ -405,12 +452,67 @@ final class SBMainWindow extends JFrame
       }
     });
 
-    menu.add(bg_colour);
+    final JCheckBoxMenuItem camera =
+      SBMainWindow.makeWindowCheckbox("Camera...", camera_window);
+
     menu.add(axes);
     menu.add(grid);
     menu.add(lights);
     menu.add(lights_radii);
+    menu.add(new JSeparator());
+    menu.add(bg_colour);
+    menu.add(camera);
     return menu;
+  }
+
+  private static void makeOpenRecentMenu(
+    final @Nonnull SBSceneControllerIO controller,
+    final @Nonnull Log log,
+    final @Nonnull JMenu open_recent)
+  {
+    final List<File> recent_items = SBMainWindow.recentlyUsedLoad();
+    open_recent.removeAll();
+
+    for (final File file : recent_items) {
+      final JMenuItem item = new JMenuItem(file.toString());
+      item.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          final SwingWorker<Void, Void> worker =
+            new SwingWorker<Void, Void>() {
+              @Override protected Void doInBackground()
+                throws Exception
+              {
+                try {
+                  return controller.ioLoadScene(file).get();
+                } catch (final ConstraintError x) {
+                  throw new IOException(x);
+                }
+              }
+
+              @Override protected void done()
+              {
+                try {
+                  this.get();
+                } catch (final InterruptedException x) {
+                  SBErrorBox.showErrorWithTitleLater(log, "Interrupted", x);
+                } catch (final ExecutionException x) {
+                  SBErrorBox.showErrorWithTitleLater(
+                    log,
+                    "I/O error",
+                    x.getCause());
+                }
+              }
+            };
+
+          worker.execute();
+        }
+      });
+      open_recent.add(item);
+    }
+
+    open_recent.setEnabled(recent_items.size() > 0);
   }
 
   private static @Nonnull JCheckBoxMenuItem makeWindowCheckbox(
@@ -489,6 +591,7 @@ final class SBMainWindow extends JFrame
   protected final @Nonnull SBGLRenderer renderer;
 
   public SBMainWindow(
+    final @Nonnull SandboxConfig config,
     final @Nonnull SBSceneController controller,
     final @Nonnull SBGLRenderer renderer,
     final @Nonnull Log log)
@@ -499,6 +602,9 @@ final class SBMainWindow extends JFrame
     final SBLogsWindow logs_window = new SBLogsWindow();
     final SBObjectsWindow objects_window =
       new SBObjectsWindow(controller, log);
+    final SBCameraWindow camera_window = new SBCameraWindow(controller, log);
+    final SBStatisticsWindow stats_window =
+      new SBStatisticsWindow(controller);
 
     log.setCallback(new Callbacks() {
       private final @Nonnull StringBuilder builder = new StringBuilder();
@@ -532,8 +638,10 @@ final class SBMainWindow extends JFrame
     });
 
     try {
-      final GLProfile profile = this.getGLProfile();
+      final GLProfile profile = SBMainWindow.getGLProfile(config);
       final GLCapabilities caps = new GLCapabilities(profile);
+
+      log.debug("caps: " + caps);
       final GLCanvas canvas = new GLCanvas(caps);
       canvas.addGLEventListener(renderer);
       canvas.addKeyListener(new KeyListener() {
@@ -618,6 +726,22 @@ final class SBMainWindow extends JFrame
             case 'e':
               this.input.setRotatingRight(false);
               break;
+
+            case 't':
+              this.input.setWantFramebufferSnapshot(true);
+              break;
+            case 'p':
+              this.input.setWantPauseToggle(true);
+              break;
+            case 'o':
+              this.input.setWantStepOneFrame(true);
+              break;
+            case 'n':
+              this.input.setWantNextCamera(true);
+              break;
+            case 'm':
+              this.input.setWantDumpShadowMaps();
+              break;
           }
         }
 
@@ -628,32 +752,32 @@ final class SBMainWindow extends JFrame
         }
       });
 
-      final FPSAnimator animator = new FPSAnimator(canvas, 60);
+      final Animator animator = new Animator(canvas);
       animator.start();
 
       final Container pane = this.getContentPane();
       pane.add(canvas);
+
+      this.addWindowFocusListener(new WindowAdapter() {
+        @Override public void windowGainedFocus(
+          final WindowEvent e)
+        {
+          canvas.requestFocusInWindow();
+        }
+      });
+
     } catch (final GLException e) {
-      SBErrorBox.showError(log, "Renderer disabled", e);
+      SBErrorBox.showErrorWithTitleLater(log, "Renderer disabled", e);
     }
 
     this.setJMenuBar(SBMainWindow.makeMenuBar(
       controller,
       this,
+      camera_window,
       lights_window,
       logs_window,
+      stats_window,
       objects_window,
       log));
-  }
-
-  private @Nonnull GLProfile getGLProfile()
-  {
-    if (GLProfile.isAvailable(GLProfile.GL3)) {
-      return GLProfile.get(GLProfile.GL3);
-    }
-    if (GLProfile.isAvailable(GLProfile.GL3bc)) {
-      return GLProfile.get(GLProfile.GL3bc);
-    }
-    return GLProfile.get(GLProfile.GL2ES2);
   }
 }

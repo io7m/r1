@@ -32,6 +32,11 @@ final class SBInputState
   private final @Nonnull AtomicBoolean rotating_right;
   private final @Nonnull AtomicBoolean rotating_up;
   private final @Nonnull AtomicBoolean rotating_down;
+  private final @Nonnull AtomicBoolean want_next_camera;
+  private final @Nonnull AtomicBoolean want_pause_toggle;
+  private final @Nonnull AtomicBoolean want_step_one;
+  private final @Nonnull AtomicBoolean want_framebuffer_snapshot;
+  private final @Nonnull AtomicBoolean want_dump_shadow_maps;
 
   public SBInputState()
   {
@@ -45,6 +50,11 @@ final class SBInputState
     this.rotating_right = new AtomicBoolean();
     this.rotating_up = new AtomicBoolean();
     this.rotating_down = new AtomicBoolean();
+    this.want_next_camera = new AtomicBoolean();
+    this.want_pause_toggle = new AtomicBoolean();
+    this.want_step_one = new AtomicBoolean();
+    this.want_framebuffer_snapshot = new AtomicBoolean();
+    this.want_dump_shadow_maps = new AtomicBoolean();
   }
 
   boolean isMovingBackward()
@@ -155,5 +165,59 @@ final class SBInputState
     final boolean r)
   {
     this.rotating_up.set(r);
+  }
+
+  void setWantFramebufferSnapshot(
+    final boolean b)
+  {
+    this.want_framebuffer_snapshot.set(b);
+  }
+
+  void setWantNextCamera(
+    final boolean b)
+  {
+    this.want_next_camera.set(b);
+  }
+
+  void setWantPauseToggle(
+    final boolean b)
+  {
+    this.want_pause_toggle.set(b);
+  }
+
+  void setWantStepOneFrame(
+    final boolean b)
+  {
+    this.want_step_one.set(b);
+  }
+
+  boolean wantFramebufferSnaphot()
+  {
+    return this.want_framebuffer_snapshot.getAndSet(false);
+  }
+
+  boolean wantNextCamera()
+  {
+    return this.want_next_camera.getAndSet(false);
+  }
+
+  boolean wantPauseToggle()
+  {
+    return this.want_pause_toggle.getAndSet(false);
+  }
+
+  boolean wantStepOneFrame()
+  {
+    return this.want_step_one.getAndSet(false);
+  }
+
+  boolean wantShadowMapDump()
+  {
+    return this.want_dump_shadow_maps.getAndSet(false);
+  }
+
+  void setWantDumpShadowMaps()
+  {
+    this.want_dump_shadow_maps.set(true);
   }
 }

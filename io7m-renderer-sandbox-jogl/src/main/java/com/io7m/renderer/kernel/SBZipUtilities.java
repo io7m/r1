@@ -21,121 +21,19 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.SecureRandom;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 
 final class SBZipUtilities
 {
-  interface BaseDirectory
-  {
-    @Nonnull File getFile();
-  }
-
-  static class TemporaryDirectory implements BaseDirectory
-  {
-    private final @Nonnull File file;
-
-    /**
-     * Request a new temporary directory, create it, tell the JVM to remove it
-     * on exit.
-     */
-
-    TemporaryDirectory(
-      final @Nonnull Log log)
-    {
-      final SecureRandom r = new SecureRandom();
-      final byte[] bytes = new byte[16];
-      r.nextBytes(bytes);
-
-      final String tmpdir_name = System.getProperty("java.io.tmpdir");
-      if (tmpdir_name == null) {
-        throw new AssertionError("System property java.io.tmpdir is unset!");
-      }
-
-      final File tmpdir = new File(tmpdir_name);
-      final StringBuilder name = new StringBuilder();
-      name.append("sandbox-");
-      for (final byte b : bytes) {
-        name.append(String.format("%x", Byte.valueOf(b)));
-      }
-
-      this.file = new File(tmpdir, name.toString());
-      log.debug("Creating temporary directory: " + this.file);
-
-      if (this.file.toString().length() < 2) {
-        throw new AssertionError(
-          "Paranoia: temporary directory name is too short");
-      }
-      if (this.file.exists()) {
-        throw new AssertionError("Temporary directory "
-          + this.file
-          + " already exists");
-      }
-      if (this.file.mkdirs() == false) {
-        throw new AssertionError("Temporary directory "
-          + this.file
-          + " could not be created");
-      }
-
-      SBZipUtilities.deleteOnExit(log, this.file);
-    }
-
-    @Override public @Nonnull File getFile()
-    {
-      return this.file;
-    }
-  }
-
-  /**
-   * Copy the contents of <code>stream</code> to the file <code>out</code>.
-   */
-
-  private static void copyStreamOut(
-    final @Nonnull InputStream input,
-    final @Nonnull File out)
-    throws FileNotFoundException,
-      IOException
-  {
-    FileOutputStream stream = null;
-
-    try {
-      stream = new FileOutputStream(out);
-      SBZipUtilities.copyStreams(input, stream);
-    } finally {
-      if (stream != null) {
-        stream.close();
-      }
-    }
-  }
-
-  /**
-   * Copy the contents of stream <code>input<code> to <code>output</code>.
-   */
-
-  private static void copyStreams(
-    final @Nonnull InputStream input,
-    final @Nonnull OutputStream output)
-    throws IOException
-  {
-    final byte buffer[] = new byte[8192];
-
-    for (;;) {
-      final int r = input.read(buffer);
-      if (r == -1) {
-        output.flush();
-        return;
-      }
-      output.write(buffer, 0, r);
-    }
-  }
-
   /**
    * Unpack the zip file identified by <code>zip_stream</code> to the
    * directory <code>outdir</code>.
@@ -175,7 +73,7 @@ final class SBZipUtilities
         }
 
         log.debug(" unzip: Creating file " + output_file);
-        SBZipUtilities.copyStreamOut(zip_stream, output_file);
+        SBIOUtilities.copyStreamOut(zip_stream, output_file);
       }
 
       /**
@@ -202,41 +100,143 @@ final class SBZipUtilities
           + parent);
       }
 
-      SBZipUtilities.deleteOnExit(log, output_file);
+      SBIOUtilities.deleteOnExit(log, output_file);
       zip_stream.closeEntry();
     }
   }
 
-  static void deleteOnExit(
-    final @Nonnull Log log,
-    final @Nonnull File file)
+  public static void main(
+    final String args[])
+    throws IOException
   {
-    log.debug("Marking for deletion: " + file);
-    file.deleteOnExit();
+    if (args.length != 2) {
+      System.err.println("usage: output.zip file");
+      System.exit(1);
+    }
+
+    final Properties props = new Properties();
+    props.setProperty("com.io7m.renderer.logs.sandbox", "true");
+    props.setProperty("com.io7m.renderer.sandbox.level", "LOG_DEBUG");
+    final Log log = new Log(props, "com.io7m.renderer", "sandbox");
+
+    final File file = new File(args[0]);
+    final File root = new File(args[1]);
+
+    final ZipOutputStream fo =
+      new ZipOutputStream(new FileOutputStream(file));
+    fo.setLevel(9);
+
+    SBZipUtilities.zipToStream(log, fo, root);
+
+    fo.finish();
+    fo.flush();
+    fo.close();
   }
 
   /**
-   * Unpack all zip files given in the resource lists above to a temporary
-   * directory prior to test execution.
+   * Unzip <code>file</code> to <code>output</code>.
    */
 
-  static @Nonnull TemporaryDirectory unzip(
+  static void unzip(
     final @Nonnull Log log,
-    final @Nonnull File file)
+    final @Nonnull File file,
+    final @Nonnull File output)
     throws FileNotFoundException,
       IOException
   {
     final Log zlog = new Log(log, "unzip");
-    final TemporaryDirectory d = new TemporaryDirectory(zlog);
-
     final ZipInputStream stream =
       new ZipInputStream(new FileInputStream(file));
     try {
-      SBZipUtilities.copyZipStreamUnpack(zlog, stream, d.getFile());
+      SBZipUtilities.copyZipStreamUnpack(zlog, stream, output);
     } finally {
       stream.close();
     }
+  }
 
-    return d;
+  static @Nonnull File unzipToTemporary(
+    final @Nonnull Log log,
+    final @Nonnull File file,
+    final @Nonnull String prefix,
+    final int attempts)
+    throws IOException,
+      ConstraintError
+  {
+    final File output =
+      SBIOUtilities.makeTemporaryDirectory(log, prefix, attempts);
+    SBZipUtilities.unzip(log, file, output);
+    return output;
+  }
+
+  static void zipToStream(
+    final @Nonnull Log log,
+    final @Nonnull ZipOutputStream fo,
+    final @Nonnull File root)
+    throws IOException
+  {
+    final byte[] buffer = new byte[8192];
+    SBZipUtilities.zipToStreamRecursive(log, fo, buffer, "", root);
+  }
+
+  private static void zipToStreamRecursive(
+    final @Nonnull Log log,
+    final @Nonnull ZipOutputStream fo,
+    final @Nonnull byte[] buffer,
+    final @Nonnull String path,
+    final @Nonnull File actual)
+    throws IOException
+  {
+    if (log.enabled(Level.LOG_DEBUG)) {
+      final StringBuilder s = new StringBuilder();
+      s.append("zip ");
+      s.append(path);
+      s.append(" ");
+      s.append(actual.toString());
+      log.debug(s.toString());
+    }
+
+    if (actual.isFile()) {
+      final FileInputStream stream = new FileInputStream(actual);
+      try {
+        final ZipEntry entry = new ZipEntry(path);
+        fo.putNextEntry(entry);
+
+        for (;;) {
+          final int r = stream.read(buffer);
+          if (r == -1) {
+            break;
+          }
+          fo.write(buffer, 0, r);
+        }
+
+        fo.flush();
+        fo.closeEntry();
+      } finally {
+        stream.close();
+      }
+    } else {
+      final String[] files = actual.list();
+      if (files == null) {
+        return;
+      }
+
+      if (path.isEmpty() == false) {
+        final ZipEntry entry = new ZipEntry(path + "/");
+        fo.putNextEntry(entry);
+        fo.flush();
+        fo.closeEntry();
+      }
+
+      for (final String name : files) {
+        final String path_new = (path + "/" + name).replaceFirst("^/", "");
+        final File actual_new = new File(actual, name);
+        SBZipUtilities.zipToStreamRecursive(
+          log,
+          fo,
+          buffer,
+          path_new,
+          actual_new);
+      }
+    }
   }
 }

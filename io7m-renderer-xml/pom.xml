@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer.xml</groupId>
   <artifactId>io7m-renderer-xml</artifactId>
-  <version>0.4.0</version>
+  <version>0.6.0</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-xml</name>
   <description>3D renderer (XML functions)</description>
@@ -66,12 +66,12 @@
     <dependency>
       <groupId>com.io7m.jtensors</groupId>
       <artifactId>io7m-jtensors</artifactId>
-      <version>[5.2.1, 6.0.0)</version>
+      <version>[5.3.1, 6.0.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jvvfs.core</groupId>
       <artifactId>io7m-jvvfs-core</artifactId>
-      <version>[3.0.0, 4.0.0)</version>
+      <version>[3.1.1, 4.0.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.renderer.core</groupId>
@@ -81,7 +81,7 @@
     <dependency>
       <groupId>com.io7m.jcanephora.core</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
-      <version>0.9.17</version>
+      <version>0.24.0</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -92,12 +92,12 @@
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
-      <version>2.0.1</version>
+      <version>2.0.2</version>
     </dependency>
     <dependency>
-      <groupId>xom</groupId>
+      <groupId>com.io7m.xom</groupId>
       <artifactId>xom</artifactId>
-      <version>1.2.5</version>
+      <version>1.2.10</version>
     </dependency>
   </dependencies>
 
@@ -180,12 +180,6 @@
                   <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
                   <Built-By>io7m</Built-By>
                 </manifestEntries>
-                <manifestSection>
-                  <name>com/io7m/renderer</name>
-                  <manifestEntries>
-                    <Sealed>true</Sealed>
-                  </manifestEntries>
-                </manifestSection>
               </archive>
             </configuration>
           </execution>

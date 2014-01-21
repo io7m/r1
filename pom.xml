@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer</groupId>
   <artifactId>io7m-renderer</artifactId>
-  <version>0.4.0</version>
+  <version>0.6.0</version>
   <packaging>pom</packaging>
   <name>io7m-renderer</name>
   <description>3D renderer</description>
@@ -12,6 +15,11 @@
 
   <modules>
     <module>io7m-renderer-core</module>
+    <module>io7m-renderer-kernel-shaders-core</module>
+    <module>io7m-renderer-kernel-shaders-debug</module>
+    <module>io7m-renderer-kernel-shaders-depth</module>
+    <module>io7m-renderer-kernel-shaders-forward</module>
+    <module>io7m-renderer-kernel-shaders-postprocessing</module>
     <module>io7m-renderer-sandbox-jogl</module>
     <module>io7m-renderer-tests-jogl</module>
     <module>io7m-renderer-tests</module>

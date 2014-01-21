@@ -24,15 +24,15 @@ public class RVectorI2F<T extends RSpace> extends VectorI2F implements
   RVectorReadable2F<T>
 {
   public RVectorI2F(
-    final @Nonnull RVectorReadable2F<T> v)
-  {
-    super(v);
-  }
-
-  public RVectorI2F(
     final float x,
     final float y)
   {
     super(x, y);
+  }
+
+  public RVectorI2F(
+    final @Nonnull RVectorReadable2F<T> v)
+  {
+    super(v);
   }
 }

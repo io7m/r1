@@ -24,16 +24,16 @@ public class RVectorI3F<T extends RSpace> extends VectorI3F implements
   RVectorReadable3F<T>
 {
   public RVectorI3F(
-    final @Nonnull RVectorReadable3F<T> v)
-  {
-    super(v);
-  }
-
-  public RVectorI3F(
     final float x,
     final float y,
     final float z)
   {
     super(x, y, z);
+  }
+
+  public RVectorI3F(
+    final @Nonnull RVectorReadable3F<T> v)
+  {
+    super(v);
   }
 }

@@ -153,7 +153,7 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
         RXMLMeshParserVBO.this.parsing,
         "Parsing in progress");
       Constraints.constrainArbitrary(
-        this.cursor_index.canWrite() == false,
+        this.cursor_index.isValid() == false,
         "Index buffer completely assigned");
 
       this.gl.indexBufferUpdate(this.indices_data);
@@ -208,11 +208,7 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
         a.add(KMeshAttributes.ATTRIBUTE_UV);
       }
 
-      final ArrayBufferAttributeDescriptor[] ab =
-        new ArrayBufferAttributeDescriptor[a.size()];
-      a.toArray(ab);
-
-      this.type = new ArrayBufferTypeDescriptor(ab);
+      this.type = new ArrayBufferTypeDescriptor(a);
       this.mtype = mt;
     }
 
@@ -311,36 +307,41 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
 
       if (this.cursor_pos != null) {
         Constraints.constrainArbitrary(
-          this.cursor_pos.canWrite() == false,
+          this.cursor_pos.isValid() == false,
           "Position attributes completely assigned");
       }
       if (this.cursor_normal != null) {
         Constraints.constrainArbitrary(
-          this.cursor_normal.canWrite() == false,
-          "Normal attributes completely assigned");
+          this.cursor_normal.isValid() == false,
+          "KMaterialNormalLabel attributes completely assigned");
       }
       if (this.cursor_tangent3f != null) {
         Constraints.constrainArbitrary(
-          this.cursor_tangent3f.canWrite() == false,
+          this.cursor_tangent3f.isValid() == false,
           "Tangent3f attributes completely assigned");
       }
       if (this.cursor_tangent4f != null) {
         Constraints.constrainArbitrary(
-          this.cursor_tangent4f.canWrite() == false,
+          this.cursor_tangent4f.isValid() == false,
           "Tangent4f attributes completely assigned");
       }
       if (this.cursor_bitangent != null) {
         Constraints.constrainArbitrary(
-          this.cursor_bitangent.canWrite() == false,
+          this.cursor_bitangent.isValid() == false,
           "Bitangent attributes completely assigned");
       }
       if (this.cursor_uv != null) {
         Constraints.constrainArbitrary(
-          this.cursor_uv.canWrite() == false,
+          this.cursor_uv.isValid() == false,
           "UV attributes completely assigned");
       }
 
-      this.gl.arrayBufferUpdate(this.array_data);
+      this.gl.arrayBufferBind(RXMLMeshParserVBO.this.array);
+      try {
+        this.gl.arrayBufferUpdate(this.array_data);
+      } finally {
+        this.gl.arrayBufferUnbind();
+      }
     }
 
     @Override public void eventMeshVerticesStarted(

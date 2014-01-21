@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,112 +16,172 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.IOException;
-import java.util.concurrent.Callable;
+import java.util.List;
+import java.util.Set;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
+import com.io7m.jaux.functional.Unit;
+import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.DepthFunction;
-import com.io7m.jcanephora.Framebuffer;
+import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.IndexBuffer;
-import com.io7m.jcanephora.JCGLCompileException;
+import com.io7m.jcanephora.JCBExecutionAPI;
+import com.io7m.jcanephora.JCBExecutionException;
+import com.io7m.jcanephora.JCBExecutorProcedure;
+import com.io7m.jcanephora.JCBProgram;
+import com.io7m.jcanephora.JCBProgramProcedure;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
-import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.ProgramReference;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureUnit;
-import com.io7m.jcanephora.checkedexec.JCCEExecutionCallable;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.MatrixM3x3F;
-import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
-import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.RException;
+import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererDebug;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 
-final class KRendererDebugNormalsMapTangent implements KRenderer
+final class KRendererDebugNormalsMapTangent extends KAbstractRendererDebug
 {
-  private final @Nonnull MatrixM3x3F           matrix_normal;
-  private final @Nonnull MatrixM4x4F           matrix_modelview;
-  private final @Nonnull MatrixM4x4F           matrix_model;
-  private final @Nonnull MatrixM4x4F           matrix_view;
-  private final @Nonnull MatrixM4x4F           matrix_projection;
-  private final @Nonnull MatrixM4x4F.Context   matrix_context;
-  private final @Nonnull KTransform.Context    transform_context;
-  private final @Nonnull JCGLImplementation    gl;
-  private final @Nonnull ProgramReference      program;
-  private final @Nonnull Log                   log;
-  private final @Nonnull VectorM4F             background;
-  private final @Nonnull VectorM2I             viewport_size;
-  private final @Nonnull JCCEExecutionCallable exec;
+  private static final @Nonnull String NAME = "debug-normals-map-tangent";
 
-  KRendererDebugNormalsMapTangent(
+  public static KRendererDebugNormalsMapTangent rendererNew(
+    final @Nonnull JCGLImplementation g,
+    final @Nonnull FSCapabilityRead fs,
+    final @Nonnull Log log)
+    throws ConstraintError,
+      RException
+  {
+    return new KRendererDebugNormalsMapTangent(g, fs, log);
+  }
+
+  private final @Nonnull VectorM4F          background;
+  private final @Nonnull JCGLImplementation gl;
+  private final @Nonnull Log                log;
+  private final @Nonnull KMutableMatrices   matrices;
+  private final @Nonnull KProgram           program;
+  private final @Nonnull KTransform.Context transform_context;
+  private final @Nonnull VectorM2I          viewport_size;
+
+  private KRendererDebugNormalsMapTangent(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
-    throws JCGLCompileException,
-      ConstraintError,
-      JCGLUnsupportedException,
-      FilesystemError,
-      IOException,
-      JCGLException
+    throws ConstraintError,
+      RException
   {
-    this.log = new Log(log, "krenderer-debug-normals-map-tangent");
-    this.gl = gl;
+    super(KRendererDebugNormalsMapTangent.NAME);
 
-    final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
+    try {
+      this.log = new Log(log, KRendererDebugNormalsMapTangent.NAME);
+      this.gl = gl;
 
-    this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrix_modelview = new MatrixM4x4F();
-    this.matrix_projection = new MatrixM4x4F();
-    this.matrix_model = new MatrixM4x4F();
-    this.matrix_view = new MatrixM4x4F();
-    this.matrix_normal = new MatrixM3x3F();
-    this.matrix_context = new MatrixM4x4F.Context();
-    this.transform_context = new KTransform.Context();
-    this.viewport_size = new VectorM2I();
+      final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
 
-    this.program =
-      KShaderUtilities.makeParasolProgramSingleOutput(
-        gl.getGLCommon(),
-        version.getNumber(),
-        version.getAPI(),
-        fs,
-        "debug_normals_map_tangent",
-        log);
+      this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
+      this.matrices = KMutableMatrices.newMatrices();
+      this.transform_context = new KTransform.Context();
+      this.viewport_size = new VectorM2I();
 
-    this.exec = new JCCEExecutionCallable(this.program);
+      this.program =
+        KProgram.newProgramFromFilesystem(
+          gl.getGLCommon(),
+          version.getNumber(),
+          version.getAPI(),
+          fs,
+          "debug_normals_map_tangent",
+          log);
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
+    }
   }
 
-  @Override public void render(
-    final @Nonnull Framebuffer result,
+  @Override public void rendererClose()
+    throws ConstraintError,
+      RException
+  {
+    try {
+      final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+      gc.programDelete(this.program.getProgram());
+    } catch (final JCGLException x) {
+      throw RException.fromJCGLException(x);
+    }
+  }
+
+  @Override public @CheckForNull KRendererDebugging rendererDebug()
+  {
+    return null;
+  }
+
+  @Override public void rendererDebugEvaluate(
+    final @Nonnull KFramebufferRGBAUsable framebuffer,
     final @Nonnull KScene scene)
-    throws JCGLException,
+    throws RException,
       ConstraintError
   {
     final KCamera camera = scene.getCamera();
-    camera.getProjectionMatrix().makeMatrixM4x4F(this.matrix_projection);
-    camera.getViewMatrix().makeMatrixM4x4F(this.matrix_view);
-
-    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-
-    this.viewport_size.x = result.getWidth();
-    this.viewport_size.y = result.getHeight();
 
     try {
-      gc.framebufferDrawBind(result.getFramebuffer());
+      this.matrices.withObserver(
+        camera.getViewMatrix(),
+        camera.getProjectionMatrix(),
+        new MatricesObserverFunction<Unit, JCGLException>() {
+          @Override public Unit run(
+            final @Nonnull MatricesObserver o)
+            throws RException,
+              ConstraintError,
+              JCGLException
+          {
+            KRendererDebugNormalsMapTangent.this.renderWithObserver(
+              framebuffer,
+              scene,
+              o);
+            return Unit.unit();
+          }
+        });
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
+    }
+  }
+
+  @Override public void rendererSetBackgroundRGBA(
+    final @Nonnull VectorReadable4F rgba)
+  {
+    VectorM4F.copy(rgba, this.background);
+  }
+
+  protected void renderWithObserver(
+    final @Nonnull KFramebufferRGBAUsable framebuffer,
+    final @Nonnull KScene scene,
+    final @Nonnull MatricesObserver mo)
+    throws ConstraintError,
+      JCGLException
+  {
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+
+    final FramebufferReferenceUsable output_buffer =
+      framebuffer.kFramebufferGetColorFramebuffer();
+    final AreaInclusive area = framebuffer.kFramebufferGetArea();
+    this.viewport_size.x = (int) area.getRangeX().getInterval();
+    this.viewport_size.y = (int) area.getRangeY().getInterval();
+
+    try {
+      gc.framebufferDrawBind(output_buffer);
       gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
 
       gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
@@ -129,65 +189,90 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
       gc.colorBufferClearV4f(this.background);
       gc.blendingDisable();
 
-      this.exec.execPrepare(gc);
-      this.exec.execUniformPutMatrix4x4F(
-        gc,
-        "m_projection",
-        this.matrix_projection);
-      this.exec.execCancel();
+      final JCBExecutionAPI e = this.program.getExecutable();
+      e.execRun(new JCBExecutorProcedure() {
+        @Override public void call(
+          final @Nonnull JCBProgram p)
+          throws ConstraintError,
+            JCGLException,
+            Exception,
+            RException
+        {
+          KShadingProgramCommon.putMatrixProjection(
+            p,
+            mo.getMatrixProjection());
 
-      for (final KMeshInstance mesh : scene.getMeshes()) {
-        this.renderMesh(gc, mesh);
-      }
+          final Set<KMeshInstanceTransformed> instances =
+            scene.getVisibleInstances();
+
+          for (final KMeshInstanceTransformed i : instances) {
+            mo.withInstance(
+              i,
+              new MatricesInstanceFunction<Unit, JCGLException>() {
+                @SuppressWarnings("synthetic-access") @Override public
+                  Unit
+                  run(
+                    final @Nonnull MatricesInstance mi)
+                    throws ConstraintError,
+                      RException,
+                      JCGLException
+                {
+                  KRendererDebugNormalsMapTangent.this.renderMesh(
+                    gc,
+                    p,
+                    i,
+                    mi);
+                  return Unit.unit();
+                }
+              });
+          }
+        }
+      });
+
+    } catch (final JCBExecutionException x) {
+      throw new UnreachableCodeException(x);
     } finally {
       gc.framebufferDrawUnbind();
     }
   }
 
-  private void renderMesh(
+  @SuppressWarnings("static-method") private void renderMesh(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KMeshInstance instance)
+    final @Nonnull JCBProgram p,
+    final @Nonnull KMeshInstanceTransformed i,
+    final @Nonnull MatricesInstance mi)
     throws ConstraintError,
-      JCGLException
+      JCGLException,
+      JCBExecutionException
   {
-    final KTransform transform = instance.getTransform();
-    transform.makeMatrix4x4F(this.transform_context, this.matrix_model);
+    /**
+     * Upload matrices.
+     */
 
-    MatrixM4x4F.multiply(
-      this.matrix_view,
-      this.matrix_model,
-      this.matrix_modelview);
-
-    KRendererCommon.makeNormalMatrix(
-      this.matrix_modelview,
-      this.matrix_normal);
+    KShadingProgramCommon.putMatrixProjectionReuse(p);
+    KShadingProgramCommon.putMatrixModelView(p, mi.getMatrixModelView());
 
     /**
      * Upload matrices, set textures.
      */
 
-    this.exec.execPrepare(gc);
-    this.exec.execUniformUseExisting("m_projection");
-    this.exec.execUniformPutMatrix4x4F(
-      gc,
-      "m_modelview",
-      this.matrix_modelview);
-
-    final TextureUnit[] texture_units = gc.textureGetUnits();
+    final List<TextureUnit> texture_units = gc.textureGetUnits();
+    final KMeshInstance instance = i.getInstance();
     final KMaterial material = instance.getMaterial();
 
     {
-      final Option<Texture2DStatic> normal_opt = material.getTextureNormal();
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
-          texture_units[0],
+          texture_units.get(0),
           ((Option.Some<Texture2DStatic>) normal_opt).value);
       } else {
-        gc.texture2DStaticUnbind(texture_units[0]);
+        gc.texture2DStaticUnbind(texture_units.get(0));
       }
     }
 
-    this.exec.execUniformPutTextureUnit(gc, "t_normal", texture_units[0]);
+    KShadingProgramCommon.putTextureNormal(p, texture_units.get(0));
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -199,46 +284,25 @@ final class KRendererDebugNormalsMapTangent implements KRenderer
       final IndexBuffer indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
+      KShadingProgramCommon.bindAttributePosition(p, array);
+      KShadingProgramCommon.bindAttributeUV(p, array);
 
-      final ArrayBufferAttribute a_pos =
-        array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      this.exec.execAttributeBind(gc, "v_position", a_pos);
-
-      if (array.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
-        final ArrayBufferAttribute a_uv =
-          array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-        this.exec.execAttributeBind(gc, "v_uv", a_uv);
-      } else {
-        this.exec.execAttributePutVector2F(gc, "v_uv", VectorI2F.ZERO);
-      }
-
-      this.exec.execSetCallable(new Callable<Void>() {
-        @Override public Void call()
-          throws Exception
+      p.programExecute(new JCBProgramProcedure() {
+        @Override public void call()
+          throws ConstraintError,
+            JCGLException,
+            Exception
         {
           try {
             gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-          } catch (final ConstraintError e) {
-            throw new UnreachableCodeException();
+          } catch (final ConstraintError x) {
+            throw new UnreachableCodeException(x);
           }
-          return null;
         }
       });
-
-      try {
-        this.exec.execRun(gc);
-      } catch (final Exception e) {
-        throw new UnreachableCodeException();
-      }
 
     } finally {
       gc.arrayBufferUnbind();
     }
-  }
-
-  @Override public void setBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-  {
-    VectorM4F.copy(rgba, this.background);
   }
 }

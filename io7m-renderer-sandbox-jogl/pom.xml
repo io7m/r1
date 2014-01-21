@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer.sandbox-jogl</groupId>
   <artifactId>io7m-renderer-sandbox-jogl</artifactId>
-  <version>0.4.0</version>
+  <version>0.6.0</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-sandbox-jogl</name>
   <description>JOGL renderer sandbox</description>
@@ -61,27 +61,27 @@
     <dependency>
       <groupId>com.io7m.jvvfs.core</groupId>
       <artifactId>io7m-jvvfs-core</artifactId>
-      <version>[3.0.0, 4.0.0)</version>
+      <version>[3.1.1, 4.0.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jtensors</groupId>
       <artifactId>io7m-jtensors</artifactId>
-      <version>[5.0.0, 6.0.0)</version>
+      <version>[5.3.1, 6.0.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.jogl</groupId>
       <artifactId>io7m-jcanephora-jogl</artifactId>
-      <version>0.9.17</version>
+      <version>0.24.0</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.texload-imageio</groupId>
       <artifactId>io7m-jcanephora-texload-imageio</artifactId>
-      <version>0.9.17</version>
+      <version>0.24.0</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.framebuffer</groupId>
       <artifactId>io7m-jcanephora-framebuffer</artifactId>
-      <version>0.9.17</version>
+      <version>0.24.0</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.renderer.core</groupId>
@@ -94,6 +94,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.io7m.jparasol.xml</groupId>
+      <artifactId>io7m-jparasol-xml</artifactId>
+      <version>[0.3.15, 0.4.0)</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -102,27 +107,22 @@
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
-      <version>2.0.1</version>
+      <version>2.0.2</version>
     </dependency>
     <dependency>
       <groupId>org.jogamp.gluegen</groupId>
       <artifactId>gluegen-rt-main</artifactId>
-      <version>2.0.2</version>
+      <version>2.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.jogamp.jogl</groupId>
       <artifactId>jogl-all-main</artifactId>
-      <version>2.0.2</version>
+      <version>2.1.0</version>
     </dependency>
     <dependency>
     	<groupId>net.java.dev.designgridlayout</groupId>
     	<artifactId>designgridlayout</artifactId>
     	<version>1.11</version>
-    </dependency>
-    <dependency>
-    	<groupId>xom</groupId>
-    	<artifactId>xom</artifactId>
-    	<version>1.2.5</version>
     </dependency>
     <dependency>
     	<groupId>org.pcollections</groupId>
@@ -134,6 +134,11 @@
     	<artifactId>quickcheck</artifactId>
     	<version>0.6</version>
     	<scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.thoughtworks.xstream</groupId>
+      <artifactId>xstream</artifactId>
+      <version>1.4.5</version>
     </dependency>
   </dependencies>
 
@@ -203,9 +208,12 @@
         <executions>
           <!-- Produce custom manifest in jar files -->
           <execution>
-            <id>code-jar</id>
+            <id>default-jar</id>
             <configuration>
               <archive>
+                <manifest>
+                  <mainClass>com.io7m.renderer.kernel.Sandbox</mainClass>
+                </manifest>
                 <manifestEntries>
                   <Specification-Title>${project.name}</Specification-Title>
                   <Specification-Version>${project.version}</Specification-Version>
@@ -287,22 +295,83 @@
         </configuration>
       </plugin>
 
+      <!-- Produce windows binaries -->
+      <plugin>
+        <groupId>com.akathist.maven.plugins.launch4j</groupId>
+        <artifactId>launch4j-maven-plugin</artifactId>
+        <version>1.5.2</version>
+        <executions>
+          <execution>
+            <id>l4j-sandbox-gui</id>
+            <phase>package</phase>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
+            <configuration>
+              <headerType>gui</headerType>
+              <outfile>target/sandbox.exe</outfile>
+              <dontWrapJar>true</dontWrapJar>
+              <jar>lib/${project.name}-${project.version}.jar</jar>
+              <icon>src/main/resources/com/io7m/renderer/sandbox/icon.ico</icon>
+              <errTitle>sandbox</errTitle>
+              <cmdLine>sandbox.conf</cmdLine>
+              <classPath>
+                <mainClass>com.io7m.renderer.kernel.Sandbox</mainClass>
+                <jarLocation>lib/</jarLocation>
+              </classPath>
+              <jre>
+                <minVersion>1.6.0</minVersion>
+                <opts>
+                  <opt>-Dcom.io7m.renderer.sandbox.no_console=true</opt>
+                </opts>
+              </jre>
+            </configuration>
+          </execution>
+          <execution>
+            <id>l4j-sandbox-console</id>
+            <phase>package</phase>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
+            <configuration>
+              <headerType>console</headerType>
+              <outfile>target/sandbox-console.exe</outfile>
+              <dontWrapJar>true</dontWrapJar>
+              <jar>lib/${project.name}-${project.version}.jar</jar>
+              <icon>src/main/resources/com/io7m/renderer/sandbox/icon.ico</icon>
+              <errTitle>sandbox</errTitle>
+              <cmdLine>sandbox.conf</cmdLine>
+              <classPath>
+                <mainClass>com.io7m.renderer.kernel.Sandbox</mainClass>
+                <jarLocation>lib/</jarLocation>
+              </classPath>
+              <jre>
+                <minVersion>1.6.0</minVersion>
+                <opts>
+                  <opt>-Dcom.io7m.renderer.sandbox.no_console=true</opt>
+                </opts>
+              </jre>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- Produce application archive -->
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.4</version>
-        <configuration>
-          <descriptors>
-            <descriptor>assembly-app.xml</descriptor>
-          </descriptors>
-        </configuration>
         <executions>
           <execution>
-            <id>make-assembly</id>
+            <id>make-assembly-app</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/app.xml</descriptor>
+              </descriptors>
+            </configuration>
           </execution>
         </executions>
       </plugin>
