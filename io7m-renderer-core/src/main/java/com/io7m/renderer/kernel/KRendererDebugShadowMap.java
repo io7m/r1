@@ -27,6 +27,7 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Unit;
+import com.io7m.jcache.BLUCache;
 import com.io7m.jcache.LUCache;
 import com.io7m.jcache.PCache;
 import com.io7m.jcanephora.AreaInclusive;
@@ -42,6 +43,7 @@ import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererForward;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.kernel.KLight.KProjective;
 
 final class KRendererDebugShadowMap extends KAbstractRendererForward
@@ -56,8 +58,10 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
       final @Nonnull LUCache<String, KProgram, RException> shader_cache,
       final @Nonnull KGraphicsCapabilities caps,
       final @Nonnull Log log,
-      final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache)
-      throws ConstraintError
+      final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache,
+      final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> depth_variance_cache)
+      throws ConstraintError,
+        RException
   {
     return new KRendererDebugShadowMap(
       g,
@@ -65,7 +69,8 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
       shader_cache,
       caps,
       log,
-      shadow_cache);
+      shadow_cache,
+      depth_variance_cache);
   }
 
   private final @Nonnull VectorM4F          background;
@@ -85,8 +90,10 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull KGraphicsCapabilities caps,
     final @Nonnull Log log,
-    final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache)
-    throws ConstraintError
+    final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache,
+    final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> depth_variance_cache)
+    throws ConstraintError,
+      RException
   {
     super(KRendererDebugShadowMap.NAME);
 
@@ -106,6 +113,7 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
         gl,
         shader_cache,
         shadow_cache,
+        depth_variance_cache,
         caps,
         log);
 

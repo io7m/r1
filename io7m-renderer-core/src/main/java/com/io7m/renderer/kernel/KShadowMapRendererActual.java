@@ -29,6 +29,7 @@ import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Unit;
+import com.io7m.jcache.BLUCache;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCache;
 import com.io7m.jcache.PCache;
@@ -44,6 +45,7 @@ import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
+import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.kernel.KLight.KProjective;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
@@ -63,20 +65,24 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       final @Nonnull JCGLImplementation gl,
       final @Nonnull LUCache<String, KProgram, RException> shader_cache,
       final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache,
+      final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> depth_variance_cache,
       final @Nonnull KGraphicsCapabilities caps,
       final @Nonnull Log log)
-      throws ConstraintError
+      throws ConstraintError,
+        RException
   {
     return new KShadowMapRendererActual(
       gl,
       shader_cache,
       shadow_cache,
+      depth_variance_cache,
       caps,
       log);
   }
 
   private final @Nonnull KDepthRenderer                                        depth_renderer;
   private final @Nonnull KDepthVarianceRenderer                                depth_variance_renderer;
+  private final @Nonnull KPostprocessorBlurDepthVariance                       blur;
   private final @Nonnull JCGLImplementation                                    g;
   private final @Nonnull StringBuilder                                         label_cache;
   private final @Nonnull Log                                                   log;
@@ -91,9 +97,11 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
     final @Nonnull JCGLImplementation gl,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache,
+    final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> depth_variance_cache,
     final @Nonnull KGraphicsCapabilities caps,
-    final Log log)
-    throws ConstraintError
+    final @Nonnull Log log)
+    throws ConstraintError,
+      RException
   {
     this.log =
       new Log(Constraints.constrainNotNull(log, "Log"), "shadow-renderer");
@@ -113,6 +121,12 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       KDepthRenderer.newDepthRenderer(gl, shader_cache, caps, log);
     this.depth_variance_renderer =
       KDepthVarianceRenderer.newDepthVarianceRenderer(gl, shader_cache, log);
+    this.blur =
+      KPostprocessorBlurDepthVariance.postprocessorNew(
+        this.g,
+        depth_variance_cache,
+        shader_cache,
+        log);
   }
 
   protected
@@ -377,6 +391,10 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       smv.getFramebuffer(),
       FaceSelection.FACE_BACK,
       FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+
+    this.blur.postprocessorEvaluateDepthVariance(
+      smv.getFramebuffer(),
+      smv.getFramebuffer());
   }
 
   @Override public <A, E extends Throwable> A shadowMapRendererEvaluate(
