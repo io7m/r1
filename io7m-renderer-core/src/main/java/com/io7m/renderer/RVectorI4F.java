@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 <code@io7m.com> http://io7m.com
+ * Copyright © 2013 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,9 +14,27 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel;
+package com.io7m.renderer;
 
-public interface KRendererDeferred
+import javax.annotation.Nonnull;
+
+import com.io7m.jtensors.VectorI4F;
+
+public final class RVectorI4F<T extends RSpace> extends VectorI4F implements
+  RVectorReadable4F<T>
 {
+  public RVectorI4F(
+    final float x,
+    final float y,
+    final float z,
+    final float w)
+  {
+    super(x, y, z, w);
+  }
 
+  public RVectorI4F(
+    final @Nonnull RVectorReadable4F<T> v)
+  {
+    super(v);
+  }
 }

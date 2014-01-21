@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 <code@io7m.com> http://io7m.com
+ * Copyright © 2013 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,34 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KRendererDeferred
-{
+import java.awt.event.WindowEvent;
 
+import javax.annotation.Nonnull;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+
+final class SBWindowUtilities
+{
+  /**
+   * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given dialog.
+   */
+
+  static void closeDialog(
+    final @Nonnull JDialog dialog)
+  {
+    final WindowEvent ev =
+      new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING);
+    dialog.dispatchEvent(ev);
+  }
+
+  /**
+   * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given window.
+   */
+
+  static void closeWindow(
+    final @Nonnull JFrame frame)
+  {
+    final WindowEvent ev = new WindowEvent(frame, WindowEvent.WINDOW_CLOSING);
+    frame.dispatchEvent(ev);
+  }
 }

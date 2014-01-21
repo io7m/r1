@@ -19,32 +19,40 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jaux.Constraints;
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jvvfs.PathVirtual;
+
 @Immutable final class SBMesh implements Comparable<SBMesh>
 {
-  private final @Nonnull SBMeshDescription description;
-  private final @Nonnull KMesh             mesh;
+  private final @Nonnull PathVirtual path;
+  private final @Nonnull KMesh       mesh;
 
   SBMesh(
-    final @Nonnull SBMeshDescription description,
+    final @Nonnull PathVirtual path,
     final @Nonnull KMesh mesh)
+    throws ConstraintError
   {
-    this.description = description;
+    Constraints.constrainNotNull(path, "Path");
+    Constraints.constrainNotNull(mesh, "Mesh");
+
+    this.path = path;
     this.mesh = mesh;
   }
 
   @Override public int compareTo(
     final @Nonnull SBMesh o)
   {
-    return this.description.compareTo(this.description);
-  }
-
-  public @Nonnull SBMeshDescription getDescription()
-  {
-    return this.description;
+    return this.path.compareTo(this.path);
   }
 
   public @Nonnull KMesh getMesh()
   {
     return this.mesh;
+  }
+
+  public @Nonnull PathVirtual getPath()
+  {
+    return this.path;
   }
 }

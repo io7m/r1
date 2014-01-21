@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.CheckForNull;
@@ -23,6 +24,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
@@ -39,6 +41,8 @@ import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.Primitives;
+import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
@@ -52,18 +56,18 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 
-final class KRendererDebugUVVertex extends KAbstractRendererDebug
+final class KRendererDebugNormalsMapLocal extends KAbstractRendererDebug
 {
-  private static final @Nonnull String NAME = "debug-uv-vertex";
+  private static final @Nonnull String NAME = "debug-normals-map-local";
 
-  public static KRendererDebugUVVertex rendererNew(
+  public static KRendererDebugNormalsMapLocal rendererNew(
     final @Nonnull JCGLImplementation g,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
     throws ConstraintError,
       RException
   {
-    return new KRendererDebugUVVertex(g, fs, log);
+    return new KRendererDebugNormalsMapLocal(g, fs, log);
   }
 
   private final @Nonnull VectorM4F          background;
@@ -74,17 +78,17 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
   private final @Nonnull KTransform.Context transform_context;
   private final @Nonnull VectorM2I          viewport_size;
 
-  private KRendererDebugUVVertex(
+  private KRendererDebugNormalsMapLocal(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
     throws ConstraintError,
       RException
   {
-    super(KRendererDebugUVVertex.NAME);
+    super(KRendererDebugNormalsMapLocal.NAME);
 
     try {
-      this.log = new Log(log, KRendererDebugUVVertex.NAME);
+      this.log = new Log(log, KRendererDebugNormalsMapLocal.NAME);
       this.gl = gl;
 
       final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
@@ -100,7 +104,7 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
           version.getNumber(),
           version.getAPI(),
           fs,
-          "debug_uv",
+          "debug_normals_map_local",
           log);
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
@@ -143,7 +147,7 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
               ConstraintError,
               JCGLException
           {
-            KRendererDebugUVVertex.this.renderWithObserver(
+            KRendererDebugNormalsMapLocal.this.renderWithObserver(
               framebuffer,
               scene,
               o);
@@ -153,12 +157,6 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
     }
-  }
-
-  @Override public void rendererSetBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-  {
-    VectorM4F.copy(rgba, this.background);
   }
 
   protected void renderWithObserver(
@@ -213,7 +211,7 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
                       RException,
                       JCGLException
                 {
-                  KRendererDebugUVVertex.this.renderMesh(gc, p, i, mi);
+                  KRendererDebugNormalsMapLocal.renderMesh(gc, p, i, mi);
                   return Unit.unit();
                 }
               });
@@ -228,15 +226,15 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
     }
   }
 
-  @SuppressWarnings("static-method") private void renderMesh(
+  private static void renderMesh(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCBProgram p,
     final @Nonnull KMeshInstanceTransformed i,
     final @Nonnull MatricesInstance mi)
-    throws ConstraintError,
-      JCGLException,
-      JCBExecutionException
+    throws JCGLException,
+      ConstraintError
   {
+
     /**
      * Upload matrices.
      */
@@ -245,24 +243,46 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
     KShadingProgramCommon.putMatrixModelView(p, mi.getMatrixModelView());
 
     /**
+     * Upload matrices, set textures.
+     */
+
+    final List<TextureUnit> texture_units = gc.textureGetUnits();
+    final KMeshInstance instance = i.getInstance();
+    final KMaterial material = instance.getMaterial();
+
+    {
+      final Option<Texture2DStatic> normal_opt =
+        material.getNormal().getTexture();
+      if (normal_opt.isSome()) {
+        gc.texture2DStaticBind(
+          texture_units.get(0),
+          ((Option.Some<Texture2DStatic>) normal_opt).value);
+      } else {
+        gc.texture2DStaticUnbind(texture_units.get(0));
+      }
+    }
+
+    KShadingProgramCommon.putTextureNormal(p, texture_units.get(0));
+
+    /**
      * Associate array attributes with program attributes, and draw mesh.
      */
 
     try {
-      final KMeshInstance instance = i.getInstance();
       final KMesh mesh = instance.getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePosition(p, array);
+      KShadingProgramCommon.bindAttributeNormal(p, array);
+      KShadingProgramCommon.bindAttributeTangent4(p, array);
       KShadingProgramCommon.bindAttributeUV(p, array);
 
       p.programExecute(new JCBProgramProcedure() {
         @Override public void call()
           throws ConstraintError,
-            JCGLException,
-            Exception
+            JCGLException
         {
           try {
             gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
@@ -275,5 +295,11 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
     } finally {
       gc.arrayBufferUnbind();
     }
+  }
+
+  @Override public void rendererSetBackgroundRGBA(
+    final @Nonnull VectorReadable4F rgba)
+  {
+    VectorM4F.copy(rgba, this.background);
   }
 }

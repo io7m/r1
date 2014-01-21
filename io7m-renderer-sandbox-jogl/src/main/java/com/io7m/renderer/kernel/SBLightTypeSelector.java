@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 <code@io7m.com> http://io7m.com
+ * Copyright © 2013 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,24 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KRendererDeferred
-{
+import javax.swing.JComboBox;
 
+import com.io7m.renderer.kernel.KLight.Type;
+
+final class SBLightTypeSelector extends JComboBox<KLight.Type>
+{
+  private static final long serialVersionUID;
+
+  static {
+    serialVersionUID = 319658390826132910L;
+  }
+
+  public SBLightTypeSelector()
+  {
+    for (final Type type : KLight.Type.values()) {
+      this.addItem(type);
+    }
+
+    this.setSelectedItem(KLight.Type.LIGHT_DIRECTIONAL);
+  }
 }

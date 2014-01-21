@@ -16,6 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -32,6 +35,8 @@ import com.io7m.jcanephora.JCGLArrayBuffers;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLIndexBuffers;
 import com.io7m.jcanephora.UsageHint;
+import com.io7m.jlog.Level;
+import com.io7m.jlog.Log;
 
 public final class SBQuad
 {
@@ -42,19 +47,30 @@ public final class SBQuad
     final @Nonnull G gl,
     final int width,
     final int height,
-    final int z)
+    final int z,
+    final @Nonnull Log log)
     throws ConstraintError,
       JCGLException
   {
-    final ArrayBufferAttributeDescriptor[] ab =
-      new ArrayBufferAttributeDescriptor[3];
+    if (log.enabled(Level.LOG_DEBUG)) {
+      final StringBuilder m = new StringBuilder();
+      m.append("Allocate quad ");
+      m.append(width);
+      m.append("x");
+      m.append(height);
+      m.append(" at ");
+      m.append(z);
+      log.debug(m.toString());
+    }
 
-    ab[0] = KMeshAttributes.ATTRIBUTE_POSITION;
-    ab[1] = KMeshAttributes.ATTRIBUTE_NORMAL;
-    ab[2] = KMeshAttributes.ATTRIBUTE_UV;
-
+    final List<ArrayBufferAttributeDescriptor> abs =
+      new ArrayList<ArrayBufferAttributeDescriptor>();
+    abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
+    abs.add(KMeshAttributes.ATTRIBUTE_NORMAL);
+    abs.add(KMeshAttributes.ATTRIBUTE_UV);
     final ArrayBufferTypeDescriptor array_type =
-      new ArrayBufferTypeDescriptor(ab);
+      new ArrayBufferTypeDescriptor(abs);
+
     this.array =
       gl.arrayBufferAllocate(4, array_type, UsageHint.USAGE_STATIC_DRAW);
 

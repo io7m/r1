@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -52,18 +52,18 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 
-final class KRendererDebugUVVertex extends KAbstractRendererDebug
+final class KRendererDebugBitangentsLocal extends KAbstractRendererDebug
 {
-  private static final @Nonnull String NAME = "debug-uv-vertex";
+  private static final @Nonnull String NAME = "debug-bitangents-local";
 
-  public static KRendererDebugUVVertex rendererNew(
+  public static KRendererDebugBitangentsLocal rendererNew(
     final @Nonnull JCGLImplementation g,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
-    throws ConstraintError,
-      RException
+    throws RException,
+      ConstraintError
   {
-    return new KRendererDebugUVVertex(g, fs, log);
+    return new KRendererDebugBitangentsLocal(g, fs, log);
   }
 
   private final @Nonnull VectorM4F          background;
@@ -74,17 +74,17 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
   private final @Nonnull KTransform.Context transform_context;
   private final @Nonnull VectorM2I          viewport_size;
 
-  private KRendererDebugUVVertex(
+  private KRendererDebugBitangentsLocal(
     final @Nonnull JCGLImplementation gl,
     final @Nonnull FSCapabilityRead fs,
     final @Nonnull Log log)
-    throws ConstraintError,
-      RException
+    throws RException,
+      ConstraintError
   {
-    super(KRendererDebugUVVertex.NAME);
+    super(KRendererDebugBitangentsLocal.NAME);
 
     try {
-      this.log = new Log(log, KRendererDebugUVVertex.NAME);
+      this.log = new Log(log, KRendererDebugBitangentsLocal.NAME);
       this.gl = gl;
 
       final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
@@ -100,7 +100,7 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
           version.getNumber(),
           version.getAPI(),
           fs,
-          "debug_uv",
+          "debug_bitangents_vertex_local",
           log);
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
@@ -143,7 +143,7 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
               ConstraintError,
               JCGLException
           {
-            KRendererDebugUVVertex.this.renderWithObserver(
+            KRendererDebugBitangentsLocal.this.renderWithObserver(
               framebuffer,
               scene,
               o);
@@ -153,12 +153,6 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
     }
-  }
-
-  @Override public void rendererSetBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-  {
-    VectorM4F.copy(rgba, this.background);
   }
 
   protected void renderWithObserver(
@@ -213,7 +207,7 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
                       RException,
                       JCGLException
                 {
-                  KRendererDebugUVVertex.this.renderMesh(gc, p, i, mi);
+                  KRendererDebugBitangentsLocal.this.renderMesh(gc, p, i, mi);
                   return Unit.unit();
                 }
               });
@@ -226,6 +220,12 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
     } finally {
       gc.framebufferDrawUnbind();
     }
+  }
+
+  @Override public void rendererSetBackgroundRGBA(
+    final @Nonnull VectorReadable4F rgba)
+  {
+    VectorM4F.copy(rgba, this.background);
   }
 
   @SuppressWarnings("static-method") private void renderMesh(
@@ -249,14 +249,14 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
      */
 
     try {
-      final KMeshInstance instance = i.getInstance();
-      final KMesh mesh = instance.getMesh();
+      final KMesh mesh = i.getInstance().getMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePosition(p, array);
-      KShadingProgramCommon.bindAttributeUV(p, array);
+      KShadingProgramCommon.bindAttributeNormal(p, array);
+      KShadingProgramCommon.bindAttributeTangent4(p, array);
 
       p.programExecute(new JCBProgramProcedure() {
         @Override public void call()
@@ -271,7 +271,6 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
           }
         }
       });
-
     } finally {
       gc.arrayBufferUnbind();
     }
