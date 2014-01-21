@@ -21,29 +21,11 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.RException;
 
-public interface KPostprocessorVisitor<A, E extends Throwable>
+public interface KPostprocessorDepthVariance extends KPostprocessor
 {
-  public A postprocessorVisitDepth(
-    final @Nonnull KPostprocessorDepth r)
-    throws E,
-      ConstraintError,
-      RException;
-
-  public A postprocessorVisitDepthVariance(
-    final @Nonnull KPostprocessorDepthVariance r)
-    throws E,
-      ConstraintError,
-      RException;
-
-  public A postprocessorVisitRGBA(
-    final @Nonnull KPostprocessorRGBA r)
-    throws E,
-      ConstraintError,
-      RException;
-
-  public A postprocessorVisitRGBAWithDepth(
-    final @Nonnull KPostprocessorRGBAWithDepth r)
-    throws E,
-      ConstraintError,
+  public void postprocessorEvaluateDepth(
+    final @Nonnull KFramebufferDepthVarianceUsable input,
+    final @Nonnull KFramebufferDepthVarianceUsable output)
+    throws ConstraintError,
       RException;
 }

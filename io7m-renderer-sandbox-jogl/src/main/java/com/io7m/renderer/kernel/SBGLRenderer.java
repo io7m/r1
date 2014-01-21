@@ -2372,6 +2372,16 @@ final class SBGLRenderer implements GLEventListener
                   SBGLRenderer.this.framebuffer);
                 return Unit.unit();
               }
+
+              @Override public Unit postprocessorVisitDepthVariance(
+                final KPostprocessorDepthVariance r)
+                throws RException,
+                  ConstraintError,
+                  RException
+              {
+                // TODO Auto-generated method stub
+                throw new UnimplementedCodeException();
+              }
             });
 
         }

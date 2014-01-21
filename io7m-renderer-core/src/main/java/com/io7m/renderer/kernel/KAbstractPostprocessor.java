@@ -47,6 +47,29 @@ abstract class KAbstractPostprocessor implements KPostprocessor
     }
   }
 
+  public static abstract class KAbstractPostprocessorDepthVariance extends
+    KAbstractPostprocessor implements KPostprocessorDepthVariance
+  {
+    protected KAbstractPostprocessorDepthVariance(
+      final @Nonnull String name)
+    {
+      super(name);
+    }
+
+    @Override public final
+      <A, E extends Throwable, V extends KPostprocessorVisitor<A, E>>
+      A
+      postprocessorVisitableAccept(
+        final @Nonnull V v)
+        throws ConstraintError,
+          RException,
+          E
+    {
+      Constraints.constrainNotNull(v, "Visitor");
+      return v.postprocessorVisitDepthVariance(this);
+    }
+  }
+
   public static abstract class KAbstractPostprocessorRGBA extends
     KAbstractPostprocessor implements KPostprocessorRGBA
   {
