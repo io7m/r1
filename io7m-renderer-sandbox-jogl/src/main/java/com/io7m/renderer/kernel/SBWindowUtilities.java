@@ -19,10 +19,23 @@ package com.io7m.renderer.kernel;
 import java.awt.event.WindowEvent;
 
 import javax.annotation.Nonnull;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 
 final class SBWindowUtilities
 {
+  /**
+   * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given dialog.
+   */
+
+  static void closeDialog(
+    final @Nonnull JDialog dialog)
+  {
+    final WindowEvent ev =
+      new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING);
+    dialog.dispatchEvent(ev);
+  }
+
   /**
    * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given window.
    */

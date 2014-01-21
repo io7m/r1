@@ -19,31 +19,78 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jaux.Constraints;
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.RMatrixI4x4F;
+import com.io7m.renderer.RTransformProjection;
+import com.io7m.renderer.RTransformView;
+
 /**
  * An orientable "camera" with a specific projection.
  */
 
 @Immutable final class KCamera
 {
-  private final @Nonnull KMatrix4x4F<KMatrixView>       view;
-  private final @Nonnull KMatrix4x4F<KMatrixProjection> projection;
+  public static @Nonnull KCamera make(
+    final @Nonnull RMatrixI4x4F<RTransformView> view,
+    final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
+    throws ConstraintError
+  {
+    return new KCamera(
+      Constraints.constrainNotNull(view, "View matrix"),
+      Constraints.constrainNotNull(projection, "Projection matrix"));
+  }
 
-  KCamera(
-    final @Nonnull KMatrix4x4F<KMatrixView> view,
-    final @Nonnull KMatrix4x4F<KMatrixProjection> projection)
+  private final @Nonnull RMatrixI4x4F<RTransformProjection> projection;
+  private final @Nonnull RMatrixI4x4F<RTransformView>       view;
+
+  private KCamera(
+    final @Nonnull RMatrixI4x4F<RTransformView> view,
+    final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
   {
     this.view = view;
     this.projection = projection;
   }
 
-  public @Nonnull KMatrix4x4F<KMatrixProjection> getProjectionMatrix()
+  @Override public boolean equals(
+    final Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KCamera other = (KCamera) obj;
+    if (!this.projection.equals(other.projection)) {
+      return false;
+    }
+    if (!this.view.equals(other.view)) {
+      return false;
+    }
+    return true;
+  }
+
+  public @Nonnull RMatrixI4x4F<RTransformProjection> getProjectionMatrix()
   {
     return this.projection;
   }
 
-  public @Nonnull KMatrix4x4F<KMatrixView> getViewMatrix()
+  public @Nonnull RMatrixI4x4F<RTransformView> getViewMatrix()
   {
     return this.view;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.projection.hashCode();
+    result = (prime * result) + this.view.hashCode();
+    return result;
   }
 
   @Override public String toString()

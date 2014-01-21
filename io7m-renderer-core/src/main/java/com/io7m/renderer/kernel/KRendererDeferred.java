@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,30 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jcanephora.Framebuffer;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jtensors.VectorReadable4F;
-
-final class KRendererDeferred implements KRenderer
+public interface KRendererDeferred
 {
-  KRendererDeferred(
-    final @Nonnull JCGLImplementation gl)
-  {
-    // Nothing
-  }
 
-  @Override public void render(
-    final @Nonnull Framebuffer result,
-    final @Nonnull KScene scene)
-  {
-
-  }
-
-  @Override public void setBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-  {
-
-  }
 }

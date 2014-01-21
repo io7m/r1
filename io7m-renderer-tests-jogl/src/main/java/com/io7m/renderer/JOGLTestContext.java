@@ -29,6 +29,7 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLImplementationJOGL;
+import com.io7m.jcanephora.JCGLSoftRestrictions;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FSCapabilityAll;
@@ -238,7 +239,8 @@ public final class JOGLTestContext
 
     final GLContext ctx =
       JOGLTestContext.getContext(GLProfile.get(GLProfile.GLES2));
-    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
+    final JCGLImplementation gi =
+      JCGLImplementationJOGL.newImplementationWithDebugging(ctx, log);
 
     return new TestContext(fs, gi, log);
   }
@@ -254,7 +256,8 @@ public final class JOGLTestContext
 
     final GLContext ctx =
       JOGLTestContext.getContext(GLProfile.get(GLProfile.GLES3));
-    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
+    final JCGLImplementation gi =
+      JCGLImplementationJOGL.newImplementationWithDebugging(ctx, log);
 
     final VersionNumber version = ctx.getGLVersionNumber();
     if (version.getMajor() != 3) {
@@ -277,7 +280,8 @@ public final class JOGLTestContext
 
     final GLContext ctx =
       JOGLTestContext.getContext(GLProfile.get(GLProfile.GL2));
-    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
+    final JCGLImplementation gi =
+      JCGLImplementationJOGL.newImplementationWithDebugging(ctx, log);
 
     return new TestContext(fs, gi, log);
   }
@@ -293,7 +297,8 @@ public final class JOGLTestContext
 
     final GLContext ctx =
       JOGLTestContext.getContext(GLProfile.get(GLProfile.GL2));
-    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
+    final JCGLImplementation gi =
+      JCGLImplementationJOGL.newImplementationWithDebugging(ctx, log);
 
     final VersionNumber version = ctx.getGLVersionNumber();
     if (version.getMajor() != 3) {
@@ -314,7 +319,8 @@ public final class JOGLTestContext
 
     final GLContext ctx =
       JOGLTestContext.getContext(GLProfile.get(GLProfile.GL3));
-    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
+    final JCGLImplementation gi =
+      JCGLImplementationJOGL.newImplementationWithDebugging(ctx, log);
 
     final VersionNumber version = ctx.getGLVersionNumber();
     if (version.getMajor() != 3) {
@@ -331,7 +337,8 @@ public final class JOGLTestContext
     return new TestContext(fs, gi, log);
   }
 
-  public static TestContext makeContextWithDefault()
+  public static TestContext makeContextWithDefault(
+    final int units)
     throws JCGLException,
       JCGLUnsupportedException,
       ConstraintError
@@ -341,7 +348,26 @@ public final class JOGLTestContext
     final FSCapabilityAll fs = JOGLTestContext.getFS(log);
 
     final GLContext ctx = JOGLTestContext.getContext(GLProfile.getDefault());
-    final JCGLImplementation gi = new JCGLImplementationJOGL(ctx, log);
+    final JCGLSoftRestrictions r = new JCGLSoftRestrictions() {
+      @Override public int restrictTextureUnitCount(
+        final int count)
+      {
+        return 8;
+      }
+
+      @Override public boolean restrictExtensionVisibility(
+        final String name)
+      {
+        return true;
+      }
+    };
+
+    final JCGLImplementation gi =
+      JCGLImplementationJOGL.newImplementationWithDebuggingAndRestrictions(
+        ctx,
+        log,
+        r);
+
     return new TestContext(fs, gi, log);
   }
 

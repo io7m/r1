@@ -189,7 +189,7 @@ public final class MeshBasic
     final @Nonnull RVectorI3F<RSpaceObject> normal)
     throws ConstraintError
   {
-    this.normals.add(Constraints.constrainNotNull(normal, "Normal"));
+    this.normals.add(Constraints.constrainNotNull(normal, "KMaterialNormalLabel"));
     return this.normals.size() - 1;
   }
 
@@ -297,7 +297,7 @@ public final class MeshBasic
       normal,
       0,
       this.normals.size() - 1,
-      "Normal in range");
+      "KMaterialNormalLabel in range");
 
     if (this.hasUV()) {
       Constraints.constrainRange(uv, 0, this.uvs.size() - 1, "UV in range");

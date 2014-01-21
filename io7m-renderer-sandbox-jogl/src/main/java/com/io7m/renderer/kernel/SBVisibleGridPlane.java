@@ -16,6 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
@@ -31,12 +34,11 @@ import com.io7m.jcanephora.IndexBufferWritableData;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.UsageHint;
+import com.io7m.jlog.Level;
+import com.io7m.jlog.Log;
 
 public final class SBVisibleGridPlane
 {
-
-  private final @Nonnull ArrayBuffer array;
-  private final @Nonnull IndexBuffer indices;
 
   private static long elementsRequired(
     final int x,
@@ -55,20 +57,34 @@ public final class SBVisibleGridPlane
     return x_points + z_points;
   }
 
+  private final @Nonnull ArrayBuffer array;
+  private final @Nonnull IndexBuffer indices;
+
   SBVisibleGridPlane(
     final @Nonnull JCGLInterfaceCommon gl,
     final int x,
     final int y,
-    final int z)
+    final int z,
+    final @Nonnull Log log)
     throws ConstraintError,
       JCGLException
   {
-    final ArrayBufferAttributeDescriptor[] attributes =
-      new ArrayBufferAttributeDescriptor[2];
-    attributes[0] = KMeshAttributes.ATTRIBUTE_POSITION;
-    attributes[1] = KMeshAttributes.ATTRIBUTE_COLOUR;
-    final ArrayBufferTypeDescriptor type =
-      new ArrayBufferTypeDescriptor(attributes);
+    if (log.enabled(Level.LOG_DEBUG)) {
+      final StringBuilder m = new StringBuilder();
+      m.append("Allocate grid plane ");
+      m.append(x);
+      m.append(" ");
+      m.append(y);
+      m.append(" ");
+      m.append(z);
+      log.debug(m.toString());
+    }
+
+    final List<ArrayBufferAttributeDescriptor> abs =
+      new ArrayList<ArrayBufferAttributeDescriptor>();
+    abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
+    abs.add(KMeshAttributes.ATTRIBUTE_COLOUR);
+    final ArrayBufferTypeDescriptor type = new ArrayBufferTypeDescriptor(abs);
 
     final long elements = SBVisibleGridPlane.elementsRequired(x, z);
     this.array =
@@ -109,7 +125,12 @@ public final class SBVisibleGridPlane
       ++index;
     }
 
-    gl.arrayBufferUpdate(array_map);
+    gl.arrayBufferBind(this.array);
+    try {
+      gl.arrayBufferUpdate(array_map);
+    } finally {
+      gl.arrayBufferUnbind();
+    }
     gl.indexBufferUpdate(index_map);
   }
 

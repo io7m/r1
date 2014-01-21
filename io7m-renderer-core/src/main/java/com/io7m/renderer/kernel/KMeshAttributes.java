@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
@@ -27,8 +28,16 @@ import com.io7m.jcanephora.JCGLScalarType;
  * Standard names and types for attributes in vertex data.
  */
 
-public class KMeshAttributes
+@Immutable public final class KMeshAttributes
 {
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_BITANGENT;
+
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_COLOUR;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_NORMAL;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_POSITION;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT3;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT4;
+  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_UV;
   static {
     try {
       ATTRIBUTE_BITANGENT =
@@ -73,12 +82,4 @@ public class KMeshAttributes
       throw new UnreachableCodeException();
     }
   }
-
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_BITANGENT;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_COLOUR;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_NORMAL;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_POSITION;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT3;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT4;
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_UV;
 }

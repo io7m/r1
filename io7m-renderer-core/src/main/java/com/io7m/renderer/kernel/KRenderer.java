@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,38 +16,45 @@
 
 package com.io7m.renderer.kernel;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.Framebuffer;
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.renderer.RException;
 
-interface KRenderer
+public interface KRenderer extends KRendererVisitable
 {
   /**
-   * <p>
-   * Render the scene <code>scene</code> to the framebuffer
-   * <code>result</code>.
-   * </p>
-   * 
-   * @throws ConstraintError
-   *           Iff <code>result == null || scene == null</code>.
+   * Delete all resources associated with this renderer.
    */
 
-  void render(
-    final @Nonnull Framebuffer result,
-    final @Nonnull KScene scene)
-    throws JCGLException,
+  public void rendererClose()
+    throws RException,
       ConstraintError;
 
   /**
-   * <p>
-   * Set the colour to which the renderer will clear the given framebuffer
-   * when rendering.
-   * </p>
+   * Retrieve a reference to the debugging interface (optionally) supported by
+   * the renderer. Returns <code>null</code> if debugging is not supported.
    */
 
-  void setBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba);
+  public @CheckForNull KRendererDebugging rendererDebug();
+
+  /**
+   * Retrieve the name of the renderer.
+   */
+
+  public @Nonnull String rendererGetName();
+
+  /**
+   * Set the colour to which the renderer will clear the colour buffer prior
+   * to rendering.
+   * 
+   * @throws ConstraintError
+   *           Iff <code>rgba == null</code>.
+   */
+
+  public void rendererSetBackgroundRGBA(
+    final @Nonnull VectorReadable4F rgba)
+    throws ConstraintError;
 }

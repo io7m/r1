@@ -24,17 +24,17 @@ public final class RVectorI4F<T extends RSpace> extends VectorI4F implements
   RVectorReadable4F<T>
 {
   public RVectorI4F(
-    final @Nonnull RVectorReadable4F<T> v)
-  {
-    super(v);
-  }
-
-  public RVectorI4F(
     final float x,
     final float y,
     final float z,
     final float w)
   {
     super(x, y, z, w);
+  }
+
+  public RVectorI4F(
+    final @Nonnull RVectorReadable4F<T> v)
+  {
+    super(v);
   }
 }

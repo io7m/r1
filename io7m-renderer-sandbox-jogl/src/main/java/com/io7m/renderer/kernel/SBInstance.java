@@ -16,30 +16,27 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jtensors.VectorI3F;
+import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.RMatrixI3x3F;
 import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RTransformTexture;
 import com.io7m.renderer.RVectorI3F;
 
 @Immutable final class SBInstance
 {
   private final @Nonnull SBInstanceDescription description;
-  private final @CheckForNull SBTexture        map_diffuse;
-  private final @CheckForNull SBTexture        map_normal;
-  private final @CheckForNull SBTexture        map_specular;
+  private final @Nonnull SBMaterial            material;
 
   public SBInstance(
     final @Nonnull SBInstanceDescription description,
-    final @CheckForNull SBTexture map_diffuse,
-    final @CheckForNull SBTexture map_normal,
-    final @CheckForNull SBTexture map_specular)
+    final @Nonnull SBMaterial material)
   {
     this.description = description;
-    this.map_diffuse = map_diffuse;
-    this.map_normal = map_normal;
-    this.map_specular = map_specular;
+    this.material = material;
   }
 
   public @Nonnull SBInstanceDescription getDescription()
@@ -47,24 +44,19 @@ import com.io7m.renderer.RVectorI3F;
     return this.description;
   }
 
-  public @CheckForNull SBTexture getDiffuseMap()
-  {
-    return this.map_diffuse;
-  }
-
   public @Nonnull Integer getID()
   {
     return this.description.getID();
   }
 
-  public @Nonnull String getMesh()
+  public @Nonnull SBMaterial getMaterial()
   {
-    return this.description.getMesh();
+    return this.material;
   }
 
-  public @CheckForNull SBTexture getNormalMap()
+  public @Nonnull PathVirtual getMesh()
   {
-    return this.map_normal;
+    return this.description.getMesh();
   }
 
   public @Nonnull RVectorI3F<SBDegrees> getOrientation()
@@ -77,22 +69,24 @@ import com.io7m.renderer.RVectorI3F;
     return this.description.getPosition();
   }
 
-  public float getSpecularExponent()
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
   {
-    return this.description.getSpecularExponent();
-  }
-
-  public @CheckForNull SBTexture getSpecularMap()
-  {
-    return this.map_specular;
+    return this.description.getUVMatrix();
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBInstance  ");
-    builder.append(this.getID());
+    builder.append("[SBInstance ");
+    builder.append(this.description);
+    builder.append(" ");
+    builder.append(this.material);
     builder.append("]");
     return builder.toString();
+  }
+
+  public @Nonnull VectorI3F getScale()
+  {
+    return this.description.getScale();
   }
 }

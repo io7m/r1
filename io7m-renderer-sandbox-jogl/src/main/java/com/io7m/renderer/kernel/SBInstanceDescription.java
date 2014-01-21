@@ -16,96 +16,45 @@
 
 package com.io7m.renderer.kernel;
 
-import java.net.URI;
-
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import nu.xom.Element;
-
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jtensors.VectorI3F;
+import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.RMatrixI3x3F;
 import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RTransformTexture;
 import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLUtilities;
 
 @Immutable final class SBInstanceDescription
 {
-  static @Nonnull SBInstanceDescription fromXML(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
-  {
-    final URI uri = SBSceneDescription.SCENE_XML_URI;
-
-    RXMLUtilities.checkIsElement(e, "instance", uri);
-
-    final Element eid = RXMLUtilities.getChild(e, "id", uri);
-    final Element ep = RXMLUtilities.getChild(e, "position", uri);
-    final Element eo = RXMLUtilities.getChild(e, "orientation", uri);
-    final Element ed = RXMLUtilities.getChild(e, "diffuse", uri);
-    final Element en = RXMLUtilities.getChild(e, "normal", uri);
-    final Element es = RXMLUtilities.getChild(e, "specular", uri);
-    final Element ese = RXMLUtilities.getChild(e, "specular-exponent", uri);
-    final Element em = RXMLUtilities.getChild(e, "mesh", uri);
-
-    final int id = RXMLUtilities.getElementInteger(eid);
-
-    final RVectorI3F<RSpaceWorld> position =
-      RXMLUtilities.getElementVector3f(ep, uri);
-    final RVectorI3F<SBDegrees> orientation =
-      RXMLUtilities.getElementVector3f(eo, uri);
-
-    final String diffuse =
-      (ed.getValue().length() == 0) ? null : ed.getValue();
-    final String normal =
-      (en.getValue().length() == 0) ? null : en.getValue();
-    final String specular =
-      (es.getValue().length() == 0) ? null : es.getValue();
-
-    final float specular_exponent = RXMLUtilities.getElementFloat(ese);
-
-    final String mesh = RXMLUtilities.getElementNonEmptyString(em);
-
-    return new SBInstanceDescription(
-      Integer.valueOf(id),
-      position,
-      orientation,
-      mesh,
-      diffuse,
-      normal,
-      specular,
-      specular_exponent);
-  }
-
-  private final @Nonnull Integer                 id;
-  private final @Nonnull RVectorI3F<RSpaceWorld> position;
-  private final @Nonnull RVectorI3F<SBDegrees>   orientation;
-  private final @Nonnull String                  mesh;
-  private final @CheckForNull String             diffuse;
-  private final @CheckForNull String             normal;
-  private final @CheckForNull String             specular;
-  private final float                            specular_exponent;
+  private final @Nonnull Integer                         id;
+  private final @Nonnull RVectorI3F<RSpaceWorld>         position;
+  private final @Nonnull VectorI3F                       scale;
+  private final @Nonnull RVectorI3F<SBDegrees>           orientation;
+  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
+  private final @Nonnull PathVirtual                     mesh;
+  private final @Nonnull SBMaterialDescription           material;
+  private final boolean                                  lit;
 
   public SBInstanceDescription(
     final @Nonnull Integer id,
     final @Nonnull RVectorI3F<RSpaceWorld> position,
+    final @Nonnull VectorI3F scale,
     final @Nonnull RVectorI3F<SBDegrees> orientation,
-    final @Nonnull String mesh,
-    final @CheckForNull String diffuse,
-    final @CheckForNull String normal,
-    final @CheckForNull String specular,
-    final float specular_exponent)
+    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix,
+    final @Nonnull PathVirtual mesh,
+    final @Nonnull SBMaterialDescription material,
+    final boolean lit)
   {
     this.id = id;
     this.position = position;
+    this.scale = scale;
     this.orientation = orientation;
     this.mesh = mesh;
-    this.diffuse = diffuse;
-    this.normal = normal;
-    this.specular = specular;
-    this.specular_exponent = specular_exponent;
+    this.material = material;
+    this.uv_matrix = uv_matrix;
+    this.lit = lit;
   }
 
   @Override public boolean equals(
@@ -121,65 +70,31 @@ import com.io7m.renderer.xml.RXMLUtilities;
       return false;
     }
     final SBInstanceDescription other = (SBInstanceDescription) obj;
-    if (this.diffuse == null) {
-      if (other.diffuse != null) {
-        return false;
-      }
-    } else if (!this.diffuse.equals(other.diffuse)) {
+    if (!this.id.equals(other.id)) {
       return false;
     }
-    if (this.id == null) {
-      if (other.id != null) {
-        return false;
-      }
-    } else if (!this.id.equals(other.id)) {
+    if (this.lit != other.lit) {
       return false;
     }
-    if (this.mesh == null) {
-      if (other.mesh != null) {
-        return false;
-      }
-    } else if (!this.mesh.equals(other.mesh)) {
+    if (!this.material.equals(other.material)) {
       return false;
     }
-    if (this.normal == null) {
-      if (other.normal != null) {
-        return false;
-      }
-    } else if (!this.normal.equals(other.normal)) {
+    if (!this.mesh.equals(other.mesh)) {
       return false;
     }
-    if (this.orientation == null) {
-      if (other.orientation != null) {
-        return false;
-      }
-    } else if (!this.orientation.equals(other.orientation)) {
+    if (!this.orientation.equals(other.orientation)) {
       return false;
     }
-    if (this.position == null) {
-      if (other.position != null) {
-        return false;
-      }
-    } else if (!this.position.equals(other.position)) {
+    if (!this.position.equals(other.position)) {
       return false;
     }
-    if (this.specular == null) {
-      if (other.specular != null) {
-        return false;
-      }
-    } else if (!this.specular.equals(other.specular)) {
+    if (!this.scale.equals(other.scale)) {
       return false;
     }
-    if (Float.floatToIntBits(this.specular_exponent) != Float
-      .floatToIntBits(other.specular_exponent)) {
+    if (!this.uv_matrix.equals(other.uv_matrix)) {
       return false;
     }
     return true;
-  }
-
-  public @CheckForNull String getDiffuse()
-  {
-    return this.diffuse;
   }
 
   public @Nonnull Integer getID()
@@ -187,14 +102,19 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return this.id;
   }
 
-  public @Nonnull String getMesh()
+  boolean isLit()
   {
-    return this.mesh;
+    return this.lit;
   }
 
-  public @CheckForNull String getNormal()
+  public @Nonnull SBMaterialDescription getMaterial()
   {
-    return this.normal;
+    return this.material;
+  }
+
+  public @Nonnull PathVirtual getMesh()
+  {
+    return this.mesh;
   }
 
   public @Nonnull RVectorI3F<SBDegrees> getOrientation()
@@ -207,120 +127,51 @@ import com.io7m.renderer.xml.RXMLUtilities;
     return this.position;
   }
 
-  public @CheckForNull String getSpecular()
+  public @Nonnull VectorI3F getScale()
   {
-    return this.specular;
+    return this.scale;
   }
 
-  public float getSpecularExponent()
+  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
   {
-    return this.specular_exponent;
+    return this.uv_matrix;
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
-    result =
-      (prime * result)
-        + ((this.diffuse == null) ? 0 : this.diffuse.hashCode());
-    result = (prime * result) + ((this.id == null) ? 0 : this.id.hashCode());
-    result =
-      (prime * result) + ((this.mesh == null) ? 0 : this.mesh.hashCode());
-    result =
-      (prime * result) + ((this.normal == null) ? 0 : this.normal.hashCode());
-    result =
-      (prime * result)
-        + ((this.orientation == null) ? 0 : this.orientation.hashCode());
-    result =
-      (prime * result)
-        + ((this.position == null) ? 0 : this.position.hashCode());
-    result =
-      (prime * result)
-        + ((this.specular == null) ? 0 : this.specular.hashCode());
-    result = (prime * result) + Float.floatToIntBits(this.specular_exponent);
+    result = (prime * result) + this.id.hashCode();
+    result = (prime * result) + (this.lit ? 1231 : 1237);
+    result = (prime * result) + this.material.hashCode();
+    result = (prime * result) + this.mesh.hashCode();
+    result = (prime * result) + this.orientation.hashCode();
+    result = (prime * result) + this.position.hashCode();
+    result = (prime * result) + this.scale.hashCode();
+    result = (prime * result) + this.uv_matrix.hashCode();
     return result;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBInstanceDescription ");
+    builder.append("[SBInstanceDescription [id=");
     builder.append(this.id);
-    builder.append(" ");
+    builder.append(", position=");
     builder.append(this.position);
-    builder.append(" ");
+    builder.append(", scale=");
+    builder.append(this.scale);
+    builder.append(", orientation=");
     builder.append(this.orientation);
-    builder.append(" ");
+    builder.append(", uv_matrix=");
+    builder.append(this.uv_matrix);
+    builder.append(", mesh=");
     builder.append(this.mesh);
-    builder.append(" ");
-    builder.append(this.diffuse);
-    builder.append(" ");
-    builder.append(this.normal);
-    builder.append(" ");
-    builder.append(this.specular);
-    builder.append(" ");
-    builder.append(this.specular_exponent);
+    builder.append(", material=");
+    builder.append(this.material);
+    builder.append(", lit=");
+    builder.append(this.lit);
     builder.append("]");
     return builder.toString();
-  }
-
-  @SuppressWarnings("boxing") @Nonnull Element toXML()
-  {
-    final String uri = SBSceneDescription.SCENE_XML_URI.toString();
-    final Element e = new Element("s:instance", uri);
-
-    final Element eid = new Element("s:id", uri);
-    eid.appendChild(this.getID().toString());
-
-    final Element eo = new Element("s:orientation", uri);
-    final Element eox = new Element("s:x", uri);
-    eox.appendChild(Float.toString(this.orientation.getXF()));
-    final Element eoy = new Element("s:y", uri);
-    eoy.appendChild(Float.toString(this.orientation.getYF()));
-    final Element eoz = new Element("s:z", uri);
-    eoz.appendChild(Float.toString(this.orientation.getZF()));
-    eo.appendChild(eox);
-    eo.appendChild(eoy);
-    eo.appendChild(eoz);
-
-    final Element ep = new Element("s:position", uri);
-    final Element epx = new Element("s:x", uri);
-    epx.appendChild(Float.toString(this.position.getXF()));
-    final Element epy = new Element("s:y", uri);
-    epy.appendChild(Float.toString(this.position.getYF()));
-    final Element epz = new Element("s:z", uri);
-    epz.appendChild(Float.toString(this.position.getZF()));
-    ep.appendChild(epx);
-    ep.appendChild(epy);
-    ep.appendChild(epz);
-
-    final Element em = new Element("s:mesh", uri);
-    em.appendChild(this.mesh);
-
-    final Element ed = new Element("s:diffuse", uri);
-    if (this.diffuse != null) {
-      ed.appendChild(this.diffuse);
-    }
-    final Element en = new Element("s:normal", uri);
-    if (this.normal != null) {
-      en.appendChild(this.normal);
-    }
-    final Element es = new Element("s:specular", uri);
-    if (this.specular != null) {
-      es.appendChild(this.specular);
-    }
-    final Element ese = new Element("s:specular-exponent", uri);
-    ese.appendChild(String.format("%.6f", this.specular_exponent));
-
-    e.appendChild(eid);
-    e.appendChild(eo);
-    e.appendChild(ep);
-    e.appendChild(em);
-    e.appendChild(ed);
-    e.appendChild(en);
-    e.appendChild(es);
-    e.appendChild(ese);
-    return e;
   }
 }

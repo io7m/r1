@@ -43,11 +43,11 @@ import com.io7m.jtensors.VectorReadable3F;
 
   @NotThreadSafe static final class Context
   {
-    final @Nonnull QuaternionM4F       t_rotation;
-    final @Nonnull MatrixM4x4F         t_matrix4x4;
-    final @Nonnull MatrixM4x4F.Context t_matrix4x4_context;
     final @Nonnull MatrixM3x3F         t_matrix3x3;
     final @Nonnull MatrixM3x3F.Context t_matrix3x3_context;
+    final @Nonnull MatrixM4x4F         t_matrix4x4;
+    final @Nonnull MatrixM4x4F.Context t_matrix4x4_context;
+    final @Nonnull QuaternionM4F       t_rotation;
 
     Context()
     {
@@ -59,14 +59,17 @@ import com.io7m.jtensors.VectorReadable3F;
     }
   }
 
-  private final @Nonnull VectorI3F     translation;
   private final @Nonnull QuaternionI4F orientation;
+  private final @Nonnull VectorI3F     scale;
+  private final @Nonnull VectorI3F     translation;
 
   KTransform(
     final @Nonnull VectorReadable3F translation,
+    final @Nonnull VectorReadable3F scale,
     final @Nonnull QuaternionReadable4F orientation)
   {
     this.translation = new VectorI3F(translation);
+    this.scale = new VectorI3F(scale);
     this.orientation = new QuaternionI4F(orientation);
   }
 
@@ -84,6 +87,9 @@ import com.io7m.jtensors.VectorReadable3F;
     }
     final KTransform other = (KTransform) obj;
     if (!this.orientation.equals(other.orientation)) {
+      return false;
+    }
+    if (!this.scale.equals(other.scale)) {
       return false;
     }
     if (!this.translation.equals(other.translation)) {
@@ -107,6 +113,7 @@ import com.io7m.jtensors.VectorReadable3F;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.orientation.hashCode();
+    result = (prime * result) + this.scale.hashCode();
     result = (prime * result) + this.translation.hashCode();
     return result;
   }
@@ -127,20 +134,13 @@ import com.io7m.jtensors.VectorReadable3F;
     MatrixM4x4F.setIdentity(m);
     MatrixM4x4F.translateByVector3FInPlace(m, this.translation);
 
+    MatrixM4x4F.set(m, 0, 0, m.get(0, 0) * this.scale.x);
+    MatrixM4x4F.set(m, 1, 1, m.get(1, 1) * this.scale.y);
+    MatrixM4x4F.set(m, 2, 2, m.get(2, 2) * this.scale.z);
+
     QuaternionM4F
       .makeRotationMatrix4x4(this.orientation, context.t_matrix4x4);
     MatrixM4x4F.multiplyInPlace(m, context.t_matrix4x4);
-  }
-
-  @Override public String toString()
-  {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("[KTransform ");
-    builder.append(this.translation);
-    builder.append(" ");
-    builder.append(this.orientation);
-    builder.append("]");
-    return builder.toString();
   }
 
   @Nonnull VectorReadable3F rotateVector3F(
@@ -151,5 +151,18 @@ import com.io7m.jtensors.VectorReadable3F;
     QuaternionM4F
       .makeRotationMatrix4x4(this.orientation, context.t_matrix4x4);
     return MatrixM3x3F.multiplyVector3F(context.t_matrix3x3, v, out);
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder builder = new StringBuilder();
+    builder.append("[KTransform ");
+    builder.append(this.translation);
+    builder.append(" ");
+    builder.append(this.scale);
+    builder.append(" ");
+    builder.append(this.orientation);
+    builder.append("]");
+    return builder.toString();
   }
 }
