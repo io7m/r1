@@ -117,10 +117,12 @@ import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.RException;
 import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RMatrixM4x4F;
+import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RTransformModel;
 import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.RTransformView;
+import com.io7m.renderer.RVectorI3F;
 import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferForwardDescription;
@@ -222,8 +224,11 @@ final class SBGLRenderer implements GLEventListener
                   gl,
                   UsageHint.USAGE_STATIC_DRAW);
 
-              final KMesh km =
-                new KMesh(p.getArrayBuffer(), p.getIndexBuffer());
+              final ArrayBuffer array = p.getArrayBuffer();
+              final IndexBuffer index = p.getIndexBuffer();
+              final RVectorI3F<RSpaceObject> lower = p.getBoundsLower();
+              final RVectorI3F<RSpaceObject> upper = p.getBoundsUpper();
+              final KMesh km = new KMesh(array, index, lower, upper);
               final String name = p.getName();
 
               if (SBGLRenderer.this.meshes.containsKey(name)) {
@@ -628,8 +633,9 @@ final class SBGLRenderer implements GLEventListener
 
       final ArrayBuffer ab = p.getArrayBuffer();
       final IndexBuffer ib = p.getIndexBuffer();
-
-      return new SBMesh(path, new KMesh(ab, ib));
+      final RVectorI3F<RSpaceObject> lower = p.getBoundsLower();
+      final RVectorI3F<RSpaceObject> upper = p.getBoundsUpper();
+      return new SBMesh(path, new KMesh(ab, ib, lower, upper));
     } finally {
       stream.close();
     }

@@ -124,7 +124,9 @@ public interface RXMLMeshParserEvents<E extends Throwable>
     throws E,
       ConstraintError;
 
-  public void eventMeshVerticesEnded()
+  public void eventMeshVerticesEnded(
+    final @Nonnull RVectorI3F<RSpaceObject> bounds_lower,
+    final @Nonnull RVectorI3F<RSpaceObject> bounds_upper)
     throws E,
       ConstraintError;
 
