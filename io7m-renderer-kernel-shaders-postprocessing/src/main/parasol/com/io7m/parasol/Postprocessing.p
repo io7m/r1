@@ -19,7 +19,6 @@ package com.io7m.renderer;
 module Postprocessing is
 
   import com.io7m.parasol.Sampler2D as S2;
-  import com.io7m.renderer.Gaussian;
 
   --
   -- A vertex shader that assumes the input vertices are already in clip space.
@@ -36,44 +35,6 @@ module Postprocessing is
   as
     out f_position_clip = clip;
     out f_uv            = v_uv;
-  end;
-
-  --
-  -- Horizontal and vertical blur shaders.
-  --
-
-  shader fragment blur_horizontal_f is
-    parameter t_image     : sampler_2d;
-    parameter image_width : float;
-    in        f_uv        : vector_2f;
-    out       out_0       : vector_4f as 0;
-  with
-    value rgba =
-      Gaussian.blur_horizontal (t_image, f_uv, image_width);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader fragment blur_vertical_f is
-    parameter t_image      : sampler_2d;
-    parameter image_height : float;
-    in        f_uv         : vector_2f;
-    out       out_0        : vector_4f as 0;
-  with
-    value rgba =
-      Gaussian.blur_vertical (t_image, f_uv, image_height);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program blur_horizontal is
-    vertex   screen_quad;
-    fragment blur_horizontal_f;
-  end;
-
-  shader program blur_vertical is
-    vertex   screen_quad;
-    fragment blur_vertical_f;
   end;
 
   --

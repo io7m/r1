@@ -31,7 +31,7 @@ module Gaussian is
   value gauss_weight1 = 0.3162162162;
   value gauss_weight2 = 0.0702702703;
 
-  function blur_horizontal (
+  function blur_horizontal_4f (
     t    : sampler_2d,
     u    : vector_2f,
     size : float
@@ -64,7 +64,7 @@ module Gaussian is
       sum
     end;
 
-  function blur_vertical (
+  function blur_vertical_4f (
     t    : sampler_2d,
     u    : vector_2f,
     size : float
@@ -93,6 +93,72 @@ module Gaussian is
       value c   = new vector_2f (u [x], y);
       value r   = V4.multiply_scalar (S2.texture (t, c), gauss_weight2);
       value sum = V4.add (r, sum);
+    in
+      sum
+    end;
+
+  function blur_horizontal_2f (
+    t    : sampler_2d,
+    u    : vector_2f,
+    size : float
+  ) : vector_2f =
+    let
+      value size = F.divide (1.0, size);
+
+      value sum = V2.multiply_scalar (S2.texture (t, u) [x y], gauss_weight0);
+
+      value x   = F.add (u [x], F.multiply (size, gauss_offset1));
+      value c   = new vector_2f (x, u [y]);
+      value r   = V2.multiply_scalar (S2.texture (t, c) [x y], gauss_weight1);
+      value sum = V2.add (r, sum);
+
+      value x   = F.add (u [x], F.multiply (size, gauss_offset2));
+      value c   = new vector_2f (x, u [y]);
+      value r   = V2.multiply_scalar (S2.texture (t, c) [x y], gauss_weight2);
+      value sum = V2.add (r, sum);
+      
+      value x   = F.subtract (u [x], F.multiply (size, gauss_offset1));
+      value c   = new vector_2f (x, u [y]);
+      value r   = V2.multiply_scalar (S2.texture (t, c) [x y], gauss_weight1);
+      value sum = V2.add (r, sum);
+
+      value x   = F.subtract (u [x], F.multiply (size, gauss_offset2));
+      value c   = new vector_2f (x, u [y]);
+      value r   = V2.multiply_scalar (S2.texture (t, c) [x y], gauss_weight2);
+      value sum = V2.add (r, sum);
+    in
+      sum
+    end;
+
+  function blur_vertical_2f (
+    t    : sampler_2d,
+    u    : vector_2f,
+    size : float
+  ) : vector_2f =
+    let
+      value size = F.divide (1.0, size);
+
+      value sum = V2.multiply_scalar (S2.texture (t, u) [x y], gauss_weight0);
+
+      value y   = F.add (u [y], F.multiply (size, gauss_offset1));
+      value c   = new vector_2f (u [x], y);
+      value r   = V2.multiply_scalar (S2.texture (t, c) [x y], gauss_weight1);
+      value sum = V2.add (r, sum);
+
+      value y   = F.add (u [y], F.multiply (size, gauss_offset2));
+      value c   = new vector_2f (u [x], y);
+      value r   = V2.multiply_scalar (S2.texture (t, c) [x y], gauss_weight2);
+      value sum = V2.add (r, sum);
+      
+      value y   = F.subtract (u [y], F.multiply (size, gauss_offset1));
+      value c   = new vector_2f (u [x], y);
+      value r   = V2.multiply_scalar (S2.texture (t, c) [x y], gauss_weight1);
+      value sum = V2.add (r, sum);
+
+      value y   = F.subtract (u [y], F.multiply (size, gauss_offset2));
+      value c   = new vector_2f (u [x], y);
+      value r   = V2.multiply_scalar (S2.texture (t, c) [x y], gauss_weight2);
+      value sum = V2.add (r, sum);
     in
       sum
     end;
