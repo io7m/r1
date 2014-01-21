@@ -21,6 +21,9 @@ import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.renderer.RSpaceObject;
+import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.RVectorReadable3F;
 
 /**
  * <p>
@@ -43,20 +46,36 @@ import com.io7m.jcanephora.IndexBuffer;
 
 @Immutable public final class KMesh
 {
-  private final @Nonnull ArrayBuffer array;
-  private final @Nonnull IndexBuffer indices;
+  private final @Nonnull ArrayBuffer              array;
+  private final @Nonnull RVectorI3F<RSpaceObject> bounds_lower;
+  private final @Nonnull RVectorI3F<RSpaceObject> bounds_upper;
+  private final @Nonnull IndexBuffer              indices;
 
   KMesh(
     final @Nonnull ArrayBuffer array,
-    final @Nonnull IndexBuffer indices)
+    final @Nonnull IndexBuffer indices,
+    final @Nonnull RVectorI3F<RSpaceObject> bounds_lower,
+    final @Nonnull RVectorI3F<RSpaceObject> bounds_upper)
   {
     this.array = array;
     this.indices = indices;
+    this.bounds_lower = bounds_lower;
+    this.bounds_upper = bounds_upper;
   }
 
   public @Nonnull ArrayBuffer getArrayBuffer()
   {
     return this.array;
+  }
+
+  public @Nonnull RVectorReadable3F<RSpaceObject> getBoundsLower()
+  {
+    return this.bounds_lower;
+  }
+
+  public @Nonnull RVectorReadable3F<RSpaceObject> getBoundsUpper()
+  {
+    return this.bounds_upper;
   }
 
   public @Nonnull IndexBuffer getIndexBuffer()

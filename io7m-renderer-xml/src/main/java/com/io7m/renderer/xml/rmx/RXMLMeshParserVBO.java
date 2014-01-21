@@ -57,19 +57,19 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
 {
   private class Events implements RXMLMeshParserEvents<JCGLException>
   {
-    private @CheckForNull RXMLMeshType              mtype;
-    private @CheckForNull ArrayBufferTypeDescriptor type;
-    private final @Nonnull G                        gl;
-    private final @Nonnull UsageHint                usage;
     private @CheckForNull ArrayBufferWritableData   array_data;
-    private @CheckForNull IndexBufferWritableData   indices_data;
+    private @CheckForNull CursorWritable3f          cursor_bitangent;
     private @CheckForNull CursorWritableIndex       cursor_index;
-    private @CheckForNull CursorWritable3f          cursor_pos;
     private @CheckForNull CursorWritable3f          cursor_normal;
-    private @CheckForNull CursorWritable2f          cursor_uv;
+    private @CheckForNull CursorWritable3f          cursor_pos;
     private @CheckForNull CursorWritable3f          cursor_tangent3f;
     private @CheckForNull CursorWritable4f          cursor_tangent4f;
-    private @CheckForNull CursorWritable3f          cursor_bitangent;
+    private @CheckForNull CursorWritable2f          cursor_uv;
+    private final @Nonnull G                        gl;
+    private @CheckForNull IndexBufferWritableData   indices_data;
+    private @CheckForNull RXMLMeshType              mtype;
+    private @CheckForNull ArrayBufferTypeDescriptor type;
+    private final @Nonnull UsageHint                usage;
 
     public Events(
       final @Nonnull G g,
@@ -212,6 +212,18 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
       this.mtype = mt;
     }
 
+    @Override public void eventMeshVertexBitangent(
+      final int index,
+      final @Nonnull RVectorI3F<RSpaceObject> bitangent)
+      throws JCGLException,
+        ConstraintError
+    {
+      Constraints.constrainArbitrary(
+        RXMLMeshParserVBO.this.parsing,
+        "Parsing in progress");
+      this.cursor_bitangent.put3f(bitangent.x, bitangent.y, bitangent.z);
+    }
+
     @Override public void eventMeshVertexEnded(
       final int index)
       throws ConstraintError
@@ -274,18 +286,6 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
       this.cursor_tangent4f.put4f(tangent.x, tangent.y, tangent.z, tangent.w);
     }
 
-    @Override public void eventMeshVertexBitangent(
-      final int index,
-      final @Nonnull RVectorI3F<RSpaceObject> bitangent)
-      throws JCGLException,
-        ConstraintError
-    {
-      Constraints.constrainArbitrary(
-        RXMLMeshParserVBO.this.parsing,
-        "Parsing in progress");
-      this.cursor_bitangent.put3f(bitangent.x, bitangent.y, bitangent.z);
-    }
-
     @Override public void eventMeshVertexUV(
       final int index,
       final @Nonnull RVectorI2F<RSpaceTexture> uv)
@@ -297,9 +297,13 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
       this.cursor_uv.put2f(uv.x, uv.y);
     }
 
-    @Override public void eventMeshVerticesEnded()
-      throws JCGLException,
-        ConstraintError
+    @SuppressWarnings("synthetic-access") @Override public
+      void
+      eventMeshVerticesEnded(
+        final @Nonnull RVectorI3F<RSpaceObject> lower,
+        final @Nonnull RVectorI3F<RSpaceObject> upper)
+        throws JCGLException,
+          ConstraintError
     {
       Constraints.constrainArbitrary(
         RXMLMeshParserVBO.this.parsing,
@@ -342,6 +346,9 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
       } finally {
         this.gl.arrayBufferUnbind();
       }
+
+      RXMLMeshParserVBO.this.bounds_lower = lower;
+      RXMLMeshParserVBO.this.bounds_upper = upper;
     }
 
     @Override public void eventMeshVerticesStarted(
@@ -427,14 +434,16 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
     return new RXMLMeshParserVBO<G>(g, hint, e);
   }
 
+  protected @CheckForNull ArrayBuffer                  array;
+  private @Nonnull RVectorI3F<RSpaceObject>            bounds_lower;
+  private @Nonnull RVectorI3F<RSpaceObject>            bounds_upper;
+  protected boolean                                    error;
   private final @Nonnull Events                        events;
+  protected @CheckForNull IndexBuffer                  indices;
+  protected @CheckForNull String                       name;
   private final @Nonnull RXMLMeshParser<JCGLException> parser;
   protected boolean                                    parsing;
   protected boolean                                    success;
-  protected boolean                                    error;
-  protected @CheckForNull ArrayBuffer                  array;
-  protected @CheckForNull IndexBuffer                  indices;
-  protected @CheckForNull String                       name;
 
   private RXMLMeshParserVBO(
     final @Nonnull G g,
@@ -463,6 +472,34 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffers & JCGLIndexBuffe
   {
     Constraints.constrainArbitrary(this.success, "Parsing was successful");
     return this.array;
+  }
+
+  /**
+   * Retrieve the lower bounds of all the vertices in the parsed mesh.
+   * 
+   * @throws ConstraintError
+   *           Iff parsing was not successful.
+   */
+
+  public final @Nonnull RVectorI3F<RSpaceObject> getBoundsLower()
+    throws ConstraintError
+  {
+    Constraints.constrainArbitrary(this.success, "Parsing was successful");
+    return this.bounds_lower;
+  }
+
+  /**
+   * Retrieve the upper bounds of all the vertices in the parsed mesh.
+   * 
+   * @throws ConstraintError
+   *           Iff parsing was not successful.
+   */
+
+  public final @Nonnull RVectorI3F<RSpaceObject> getBoundsUpper()
+    throws ConstraintError
+  {
+    Constraints.constrainArbitrary(this.success, "Parsing was successful");
+    return this.bounds_upper;
   }
 
   /**
