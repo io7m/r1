@@ -28,6 +28,7 @@ import nu.xom.ValidityException;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jtensors.VectorM3F;
 import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RSpaceTexture;
 import com.io7m.renderer.RVectorI2F;
@@ -216,6 +217,11 @@ public final class RXMLMeshParser<E extends Throwable>
   {
     assert ev.getLocalName().equals("vertices");
 
+    final VectorM3F bounds_lower =
+      new VectorM3F(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+    final VectorM3F bounds_upper =
+      new VectorM3F(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
+
     final int count =
       RXMLUtilities.getAttributeInteger(RXMLUtilities.getAttribute(
         ev,
@@ -243,9 +249,18 @@ public final class RXMLMeshParser<E extends Throwable>
       final Element v = evs.get(index);
 
       events.eventMeshVertexStarted(index);
-      events.eventMeshVertexPosition(
-        index,
-        RXMLMeshParser.parseVertexPosition(v));
+
+      final RVectorI3F<RSpaceObject> position =
+        RXMLMeshParser.parseVertexPosition(v);
+
+      bounds_lower.x = Math.min(position.x, bounds_lower.x);
+      bounds_lower.y = Math.min(position.y, bounds_lower.y);
+      bounds_lower.z = Math.min(position.z, bounds_lower.z);
+      bounds_upper.x = Math.max(position.x, bounds_upper.x);
+      bounds_upper.y = Math.max(position.y, bounds_upper.y);
+      bounds_upper.z = Math.max(position.z, bounds_upper.z);
+
+      events.eventMeshVertexPosition(index, position);
 
       if (type.hasNormal()) {
         final Element n =
@@ -300,7 +315,13 @@ public final class RXMLMeshParser<E extends Throwable>
       events.eventMeshVertexEnded(index);
     }
 
-    events.eventMeshVerticesEnded();
+    events.eventMeshVerticesEnded(new RVectorI3F<RSpaceObject>(
+      bounds_lower.x,
+      bounds_lower.y,
+      bounds_lower.z), new RVectorI3F<RSpaceObject>(
+      bounds_upper.x,
+      bounds_upper.y,
+      bounds_upper.z));
   }
 
   private final @Nonnull RXMLMeshParserEvents<E> events;

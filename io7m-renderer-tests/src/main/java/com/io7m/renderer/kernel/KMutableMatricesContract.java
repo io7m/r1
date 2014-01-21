@@ -61,6 +61,7 @@ import com.io7m.renderer.RMatrixM3x3F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RMatrixReadable3x3F;
 import com.io7m.renderer.RMatrixReadable4x4F;
+import com.io7m.renderer.RSpaceObject;
 import com.io7m.renderer.RSpaceRGB;
 import com.io7m.renderer.RSpaceRGBA;
 import com.io7m.renderer.RSpaceWorld;
@@ -177,7 +178,11 @@ public abstract class KMutableMatricesContract extends TestContract
         KMutableMatricesContract.makeArrayBuffer(g.getGLCommon());
       final IndexBuffer indices =
         KMutableMatricesContract.makeIndexBuffer(g.getGLCommon());
-      final KMesh mesh = new KMesh(array, indices);
+      final KMesh mesh =
+        new KMesh(array, indices, new RVectorI3F<RSpaceObject>(
+          0.0f,
+          0.0f,
+          0.0f), new RVectorI3F<RSpaceObject>(0.0f, 0.0f, 0.0f));
       final KMaterialAlpha alpha =
         new KMaterialAlpha(OpacityType.ALPHA_OPAQUE, 1.0f, 0.0f);
       final RVectorI4F<RSpaceRGBA> colour =
