@@ -901,6 +901,7 @@ final class SBObjectsPanel extends JPanel implements SBSceneChangeListener
       this.orientation_y.setText(Float.toString(ori.getYF()));
       this.orientation_z.setText(Float.toString(ori.getZF()));
 
+      this.general_settings.mpLoadFrom(initial_desc);
       this.albedo_settings.mpLoadFrom(initial_desc);
       this.alpha_settings.mpLoadFrom(initial_desc);
       this.environment_settings.mpLoadFrom(initial_desc);
