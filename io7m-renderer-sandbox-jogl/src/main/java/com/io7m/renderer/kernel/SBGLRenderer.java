@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
@@ -733,9 +734,14 @@ final class SBGLRenderer implements GLEventListener
     this.restrictions = SBSoftRestrictions.newRestrictions(config);
 
     this.log = new Log(log, "gl");
+
+    {
+      final Package p = GL.class.getPackage();
+      log.debug("JOGL title: " + p.getImplementationTitle());
+      log.debug("JOGL version: " + p.getImplementationVersion());
+    }
+
     log.debug("Shader debug archive: " + config.getShaderArchiveDebugFile());
-    log
-      .debug("Shader shadow archive: " + config.getShaderArchiveShadowFile());
     log.debug("Shader forward archive: "
       + config.getShaderArchiveForwardFile());
     log.debug("Shader postprocessing archive: "
