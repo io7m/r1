@@ -62,7 +62,6 @@ public final class SandboxConfig
   private final @Nonnull File            shader_archive_depth_file;
   private final @Nonnull File            shader_archive_forward_file;
   private final @Nonnull File            shader_archive_postprocessing_file;
-  private final @Nonnull File            shader_archive_shadow_file;
 
   public SandboxConfig(
     final @Nonnull Properties props)
@@ -80,10 +79,6 @@ public final class SandboxConfig
       new File(PropertyUtils.getString(
         props,
         "com.io7m.renderer.sandbox.shaders.depth"));
-    this.shader_archive_shadow_file =
-      new File(PropertyUtils.getString(
-        props,
-        "com.io7m.renderer.sandbox.shaders.shadow"));
     this.shader_archive_forward_file =
       new File(PropertyUtils.getString(
         props,
@@ -152,11 +147,6 @@ public final class SandboxConfig
   public @Nonnull File getShaderArchivePostprocessingFile()
   {
     return this.shader_archive_postprocessing_file;
-  }
-
-  public @Nonnull File getShaderArchiveShadowFile()
-  {
-    return this.shader_archive_shadow_file;
   }
 
   public boolean isOpenGLDebug()

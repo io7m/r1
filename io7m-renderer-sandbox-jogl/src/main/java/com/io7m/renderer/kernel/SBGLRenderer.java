@@ -734,8 +734,6 @@ final class SBGLRenderer implements GLEventListener
 
     this.log = new Log(log, "gl");
     log.debug("Shader debug archive: " + config.getShaderArchiveDebugFile());
-    log
-      .debug("Shader shadow archive: " + config.getShaderArchiveShadowFile());
     log.debug("Shader forward archive: "
       + config.getShaderArchiveForwardFile());
     log.debug("Shader postprocessing archive: "
