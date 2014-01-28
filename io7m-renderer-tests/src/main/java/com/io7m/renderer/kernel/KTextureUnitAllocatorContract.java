@@ -31,8 +31,13 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.jcanephora.TextureCubeStatic;
+import com.io7m.jcanephora.JCGLImplementationVisitor;
+import com.io7m.jcanephora.JCGLInterfaceGL2;
+import com.io7m.jcanephora.JCGLInterfaceGL3;
+import com.io7m.jcanephora.JCGLInterfaceGLES2;
+import com.io7m.jcanephora.JCGLInterfaceGLES3;
+import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.TextureCubeStaticUsable;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureUnit;
@@ -191,6 +196,154 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
     });
   }
 
+  private static @Nonnull Texture2DStaticUsable makeTexture2D(
+    final @Nonnull JCGLImplementation gi)
+    throws JCGLException,
+      ConstraintError
+  {
+    return gi
+      .implementationAccept(new JCGLImplementationVisitor<Texture2DStaticUsable, JCGLException>() {
+
+        @Override public Texture2DStaticUsable implementationIsGL2(
+          final JCGLInterfaceGL2 gl)
+          throws JCGLException,
+            ConstraintError,
+            JCGLException
+        {
+          return gl.texture2DStaticAllocateRGB8(
+            "texture",
+            128,
+            128,
+            TextureWrapS.TEXTURE_WRAP_REPEAT,
+            TextureWrapT.TEXTURE_WRAP_REPEAT,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+        }
+
+        @Override public Texture2DStaticUsable implementationIsGL3(
+          final JCGLInterfaceGL3 gl)
+          throws JCGLException,
+            ConstraintError,
+            JCGLException
+        {
+          return gl.texture2DStaticAllocateRGB8(
+            "texture",
+            128,
+            128,
+            TextureWrapS.TEXTURE_WRAP_REPEAT,
+            TextureWrapT.TEXTURE_WRAP_REPEAT,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+        }
+
+        @Override public Texture2DStaticUsable implementationIsGLES2(
+          final JCGLInterfaceGLES2 gl)
+          throws JCGLException,
+            ConstraintError,
+            JCGLException
+        {
+          return gl.texture2DStaticAllocateRGB565(
+            "texture",
+            128,
+            128,
+            TextureWrapS.TEXTURE_WRAP_REPEAT,
+            TextureWrapT.TEXTURE_WRAP_REPEAT,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+        }
+
+        @Override public Texture2DStaticUsable implementationIsGLES3(
+          final JCGLInterfaceGLES3 gl)
+          throws JCGLException,
+            ConstraintError,
+            JCGLException
+        {
+          return gl.texture2DStaticAllocateRGB8(
+            "texture",
+            128,
+            128,
+            TextureWrapS.TEXTURE_WRAP_REPEAT,
+            TextureWrapT.TEXTURE_WRAP_REPEAT,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+        }
+      });
+  }
+
+  private static @Nonnull TextureCubeStaticUsable makeTextureCube(
+    final @Nonnull JCGLImplementation gi)
+    throws JCGLException,
+      ConstraintError
+  {
+    return gi
+      .implementationAccept(new JCGLImplementationVisitor<TextureCubeStaticUsable, JCGLException>() {
+
+        @Override public TextureCubeStaticUsable implementationIsGL2(
+          final JCGLInterfaceGL2 gl)
+          throws JCGLException,
+            ConstraintError,
+            JCGLException
+        {
+          return gl.textureCubeStaticAllocateRGB8(
+            "texture",
+            128,
+            TextureWrapR.TEXTURE_WRAP_REPEAT,
+            TextureWrapS.TEXTURE_WRAP_REPEAT,
+            TextureWrapT.TEXTURE_WRAP_REPEAT,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+        }
+
+        @Override public TextureCubeStaticUsable implementationIsGL3(
+          final JCGLInterfaceGL3 gl)
+          throws JCGLException,
+            ConstraintError,
+            JCGLException
+        {
+          return gl.textureCubeStaticAllocateRGB8(
+            "texture",
+            128,
+            TextureWrapR.TEXTURE_WRAP_REPEAT,
+            TextureWrapS.TEXTURE_WRAP_REPEAT,
+            TextureWrapT.TEXTURE_WRAP_REPEAT,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+        }
+
+        @Override public TextureCubeStaticUsable implementationIsGLES2(
+          final JCGLInterfaceGLES2 gl)
+          throws JCGLException,
+            ConstraintError,
+            JCGLException
+        {
+          return gl.textureCubeStaticAllocateRGB565(
+            "texture",
+            128,
+            TextureWrapR.TEXTURE_WRAP_REPEAT,
+            TextureWrapS.TEXTURE_WRAP_REPEAT,
+            TextureWrapT.TEXTURE_WRAP_REPEAT,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+        }
+
+        @Override public TextureCubeStaticUsable implementationIsGLES3(
+          final JCGLInterfaceGLES3 gl)
+          throws JCGLException,
+            ConstraintError,
+            JCGLException
+        {
+          return gl.textureCubeStaticAllocateRGB8(
+            "texture",
+            128,
+            TextureWrapR.TEXTURE_WRAP_REPEAT,
+            TextureWrapS.TEXTURE_WRAP_REPEAT,
+            TextureWrapT.TEXTURE_WRAP_REPEAT,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+        }
+      });
+  }
+
   @Test public void testUseAll_2D_0()
     throws JCGLException,
       ConstraintError,
@@ -202,15 +355,8 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
     final AtomicInteger called = new AtomicInteger(0);
 
-    final Texture2DStatic t =
-      g.getGLCommon().texture2DStaticAllocateRGB8(
-        "t",
-        4,
-        4,
-        TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-        TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+    final Texture2DStaticUsable t =
+      KTextureUnitAllocatorContract.makeTexture2D(tc.getGLImplementation());
 
     final AtomicReference<KTextureUnitContextInitial> previous =
       new AtomicReference<KTextureUnitContextInitial>(a);
@@ -246,15 +392,8 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
     final List<TextureUnit> units = g.getGLCommon().textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
 
-    final Texture2DStatic t =
-      g.getGLCommon().texture2DStaticAllocateRGB8(
-        "t",
-        4,
-        4,
-        TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-        TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+    final Texture2DStaticUsable t =
+      KTextureUnitAllocatorContract.makeTexture2D(tc.getGLImplementation());
 
     final AtomicReference<KTextureUnitContextInitial> previous =
       new AtomicReference<KTextureUnitContextInitial>(a);
@@ -289,15 +428,8 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
 
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
 
-    final Texture2DStatic t =
-      g.getGLCommon().texture2DStaticAllocateRGB8(
-        "t",
-        4,
-        4,
-        TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-        TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+    final Texture2DStaticUsable t =
+      KTextureUnitAllocatorContract.makeTexture2D(tc.getGLImplementation());
 
     final AtomicBoolean caught = new AtomicBoolean(false);
 
@@ -441,15 +573,8 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
     final AtomicInteger called = new AtomicInteger(0);
 
-    final TextureCubeStatic t =
-      g.getGLCommon().textureCubeStaticAllocateRGBA8(
-        "t",
-        4,
-        TextureWrapR.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-        TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+    final TextureCubeStaticUsable t =
+      KTextureUnitAllocatorContract.makeTextureCube(tc.getGLImplementation());
 
     final AtomicReference<KTextureUnitContextInitial> previous =
       new AtomicReference<KTextureUnitContextInitial>(a);
@@ -485,15 +610,8 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
     final List<TextureUnit> units = g.getGLCommon().textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
 
-    final TextureCubeStatic t =
-      g.getGLCommon().textureCubeStaticAllocateRGBA8(
-        "t",
-        4,
-        TextureWrapR.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-        TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+    final TextureCubeStaticUsable t =
+      KTextureUnitAllocatorContract.makeTextureCube(tc.getGLImplementation());
 
     final AtomicReference<KTextureUnitContextInitial> previous =
       new AtomicReference<KTextureUnitContextInitial>(a);
@@ -528,15 +646,8 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
 
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
 
-    final TextureCubeStatic t =
-      g.getGLCommon().textureCubeStaticAllocateRGBA8(
-        "t",
-        4,
-        TextureWrapR.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-        TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+    final TextureCubeStaticUsable t =
+      KTextureUnitAllocatorContract.makeTextureCube(tc.getGLImplementation());
 
     final AtomicBoolean caught = new AtomicBoolean(false);
 

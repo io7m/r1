@@ -23,11 +23,16 @@ import javax.annotation.Nonnull;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.RException.RNotSupportedException;
 import com.io7m.renderer.RException.RResourceException;
 import com.io7m.renderer.kernel.KXMLException;
 
 public interface RExceptionVisitor<T, E extends Throwable>
 {
+  public T visitNotSupportedException(
+    final @Nonnull RNotSupportedException e)
+    throws E;
+
   public T visitFilesystemException(
     final @Nonnull FilesystemError e)
     throws E;
