@@ -418,11 +418,10 @@ final class SBGLRenderer implements GLEventListener
           SBGLRenderer.this.log.debug("Loading " + path);
 
           if (SBGLRenderer.this.gi != null) {
-            final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
             try {
               final Texture2DStatic t =
-                SBGLRenderer.this.texture_loader.load2DStaticInferredCommon(
-                  gl,
+                SBGLRenderer.this.texture_loader.load2DStaticInferred(
+                  SBGLRenderer.this.gi,
                   wrap_s,
                   wrap_t,
                   filter_min,
@@ -508,11 +507,10 @@ final class SBGLRenderer implements GLEventListener
           SBGLRenderer.this.log.debug("Loading " + path);
 
           if (SBGLRenderer.this.gi != null) {
-            final JCGLInterfaceCommon gl = SBGLRenderer.this.gi.getGLCommon();
             try {
               final TextureCubeStatic t =
-                SBGLRenderer.this.texture_loader.loadCubeRHStaticRGB8(
-                  gl,
+                SBGLRenderer.this.texture_loader.loadCubeRHStaticInferred(
+                  SBGLRenderer.this.gi,
                   wrap_r,
                   wrap_s,
                   wrap_t,
