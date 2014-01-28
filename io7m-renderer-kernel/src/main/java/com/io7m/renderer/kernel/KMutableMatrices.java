@@ -715,7 +715,7 @@ final class KMutableMatrices
   private final @Nonnull AtomicBoolean                   observer_active;
   private final @Nonnull ProjectiveLightSingleton        projective;
   private final @Nonnull AtomicBoolean                   projective_active;
-  private final @Nonnull KTransform.Context              transform_context;
+  private final @Nonnull KTransformContext              transform_context;
 
   private KMutableMatrices()
   {
@@ -725,7 +725,7 @@ final class KMutableMatrices
     this.instance_with_projective =
       new InstanceWithProjectiveSingleton(this.projective);
     this.matrix_context = new MatrixM4x4F.Context();
-    this.transform_context = new KTransform.Context();
+    this.transform_context = new KTransformContext();
 
     this.observer_active = new AtomicBoolean();
     this.projective_active = new AtomicBoolean();

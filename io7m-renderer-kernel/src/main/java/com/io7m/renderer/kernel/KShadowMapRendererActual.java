@@ -55,7 +55,6 @@ import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
 import com.io7m.renderer.kernel.KShadow.KShadowMappedVariance;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
-import com.io7m.renderer.kernel.KTransform.Context;
 
 public final class KShadowMapRendererActual implements KShadowMapRenderer
 {
@@ -90,7 +89,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
   private final @Nonnull KMutableMatrices                                      matrices;
   private final @Nonnull LUCache<String, KProgram, RException>                 shader_cache;
   private final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache;
-  private final @Nonnull Context                                               transform_context;
+  private final @Nonnull KTransformContext                                               transform_context;
   private final @Nonnull VectorM2I                                             viewport_size;
 
   private KShadowMapRendererActual(
@@ -114,7 +113,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
     this.viewport_size = new VectorM2I();
     this.label_cache = new StringBuilder();
     this.matrices = KMutableMatrices.newMatrices();
-    this.transform_context = new KTransform.Context();
+    this.transform_context = new KTransformContext();
     this.m4_view = new RMatrixM4x4F<RTransformView>();
 
     this.depth_renderer =

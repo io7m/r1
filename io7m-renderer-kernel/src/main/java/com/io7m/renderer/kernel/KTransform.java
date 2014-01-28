@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
-import javax.annotation.concurrent.NotThreadSafe;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.MatrixM3x3F;
@@ -36,29 +35,6 @@ import com.io7m.jtensors.VectorReadable3F;
 
 @Immutable final class KTransform
 {
-  /**
-   * Preallocated storage to allow various function to execute without
-   * allocating.
-   */
-
-  @NotThreadSafe static final class Context
-  {
-    final @Nonnull MatrixM3x3F         t_matrix3x3;
-    final @Nonnull MatrixM3x3F.Context t_matrix3x3_context;
-    final @Nonnull MatrixM4x4F         t_matrix4x4;
-    final @Nonnull MatrixM4x4F.Context t_matrix4x4_context;
-    final @Nonnull QuaternionM4F       t_rotation;
-
-    Context()
-    {
-      this.t_rotation = new QuaternionM4F();
-      this.t_matrix4x4 = new MatrixM4x4F();
-      this.t_matrix4x4_context = new MatrixM4x4F.Context();
-      this.t_matrix3x3 = new MatrixM3x3F();
-      this.t_matrix3x3_context = new MatrixM3x3F.Context();
-    }
-  }
-
   private final @Nonnull QuaternionI4F orientation;
   private final @Nonnull VectorI3F     scale;
   private final @Nonnull VectorI3F     translation;
@@ -127,7 +103,7 @@ import com.io7m.jtensors.VectorReadable3F;
    */
 
   void makeMatrix4x4F(
-    final @Nonnull Context context,
+    final @Nonnull KTransformContext context,
     final @Nonnull MatrixM4x4F m)
     throws ConstraintError
   {
@@ -144,7 +120,7 @@ import com.io7m.jtensors.VectorReadable3F;
   }
 
   @Nonnull VectorReadable3F rotateVector3F(
-    final @Nonnull Context context,
+    final @Nonnull KTransformContext context,
     final @Nonnull VectorI3F v)
   {
     final VectorM3F out = new VectorM3F();

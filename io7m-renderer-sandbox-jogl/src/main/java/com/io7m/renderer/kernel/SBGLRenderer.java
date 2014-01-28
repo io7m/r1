@@ -660,7 +660,7 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull SceneObserver                                                                                camera_current;
   private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>>                                    camera_custom_projection;
   private @Nonnull KTransform                                                                                   camera_transform;
-  private final @Nonnull KTransform.Context                                                                     camera_transform_context;
+  private final @Nonnull KTransformContext                                                                     camera_transform_context;
   private @Nonnull RMatrixI4x4F<RTransformView>                                                                 camera_view_matrix;
   private final @Nonnull RMatrixM4x4F<RTransformView>                                                           camera_view_matrix_temporary;
   private @Nonnull KGraphicsCapabilities                                                                        capabilities;
@@ -816,7 +816,7 @@ final class SBGLRenderer implements GLEventListener
     this.camera = new SBFirstPersonCamera(0.0f, 1.0f, 5.0f);
     this.camera_current = new SceneObserverCamera();
     this.camera_view_matrix_temporary = new RMatrixM4x4F<RTransformView>();
-    this.camera_transform_context = new KTransform.Context();
+    this.camera_transform_context = new KTransformContext();
 
     this.input_state = new SBInputState();
     this.running =
