@@ -5,13 +5,13 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.io7m.renderer.core</groupId>
-  <artifactId>io7m-renderer-core</artifactId>
+  <groupId>com.io7m.renderer.kernel</groupId>
+  <artifactId>io7m-renderer-kernel</artifactId>
   <version>0.7.0</version>
   <packaging>jar</packaging>
-  <name>io7m-renderer-core</name>
-  <description>3D renderer (core API)</description>
-  <url>http://mvn.io7m.com/renderer-core/</url>
+  <name>io7m-renderer-kernel</name>
+  <description>3D renderer (kernel API)</description>
+  <url>http://mvn.io7m.com/renderer-kernel/</url>
 
   <licenses>
     <license>
@@ -44,7 +44,7 @@
     <site>
       <id>io7m</id>
       <name>io7m.com</name>
-      <url>http://mvn.io7m.com/renderer-core/</url>
+      <url>http://mvn.io7m.com/renderer-kernel/</url>
     </site>
   </distributionManagement>
 

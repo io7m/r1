@@ -14,7 +14,7 @@
   <url>http://mvn.io7m.com/renderer/</url>
 
   <modules>
-    <module>io7m-renderer-core</module>
+    <module>io7m-renderer-kernel</module>
     <module>io7m-renderer-kernel-shaders-core</module>
     <module>io7m-renderer-kernel-shaders-debug</module>
     <module>io7m-renderer-kernel-shaders-depth</module>
