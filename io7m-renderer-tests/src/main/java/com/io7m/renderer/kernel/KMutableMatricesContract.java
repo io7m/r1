@@ -37,9 +37,12 @@ import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.JCGLArrayBuffers;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.JCGLImplementationVisitor;
 import com.io7m.jcanephora.JCGLIndexBuffers;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLTextures2DStaticCommon;
+import com.io7m.jcanephora.JCGLInterfaceGL2;
+import com.io7m.jcanephora.JCGLInterfaceGL3;
+import com.io7m.jcanephora.JCGLInterfaceGLES2;
+import com.io7m.jcanephora.JCGLInterfaceGLES3;
 import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Texture2DStatic;
@@ -116,18 +119,78 @@ public abstract class KMutableMatricesContract extends TestContract
   }
 
   private static @Nonnull KProjective makeKProjective(
-    final @Nonnull JCGLTextures2DStaticCommon t)
+    final @Nonnull JCGLImplementation gi)
   {
     try {
       final Texture2DStaticUsable texture =
-        t.texture2DStaticAllocateRGB8(
-          "texture",
-          128,
-          128,
-          TextureWrapS.TEXTURE_WRAP_REPEAT,
-          TextureWrapT.TEXTURE_WRAP_REPEAT,
-          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-          TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+        gi
+          .implementationAccept(new JCGLImplementationVisitor<Texture2DStaticUsable, JCGLException>() {
+
+            @Override public Texture2DStaticUsable implementationIsGL2(
+              final JCGLInterfaceGL2 gl)
+              throws JCGLException,
+                ConstraintError,
+                JCGLException
+            {
+              return gl.texture2DStaticAllocateRGB8(
+                "texture",
+                128,
+                128,
+                TextureWrapS.TEXTURE_WRAP_REPEAT,
+                TextureWrapT.TEXTURE_WRAP_REPEAT,
+                TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+                TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+            }
+
+            @Override public Texture2DStaticUsable implementationIsGL3(
+              final JCGLInterfaceGL3 gl)
+              throws JCGLException,
+                ConstraintError,
+                JCGLException
+            {
+              return gl.texture2DStaticAllocateRGB8(
+                "texture",
+                128,
+                128,
+                TextureWrapS.TEXTURE_WRAP_REPEAT,
+                TextureWrapT.TEXTURE_WRAP_REPEAT,
+                TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+                TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+            }
+
+            @Override public Texture2DStaticUsable implementationIsGLES2(
+              final JCGLInterfaceGLES2 gl)
+              throws JCGLException,
+                ConstraintError,
+                JCGLException
+            {
+              return gl.texture2DStaticAllocateRGB565(
+                "texture",
+                128,
+                128,
+                TextureWrapS.TEXTURE_WRAP_REPEAT,
+                TextureWrapT.TEXTURE_WRAP_REPEAT,
+                TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+                TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+            }
+
+            @Override public Texture2DStaticUsable implementationIsGLES3(
+              final JCGLInterfaceGLES3 gl)
+              throws JCGLException,
+                ConstraintError,
+                JCGLException
+            {
+              return gl.texture2DStaticAllocateRGB8(
+                "texture",
+                128,
+                128,
+                TextureWrapS.TEXTURE_WRAP_REPEAT,
+                TextureWrapT.TEXTURE_WRAP_REPEAT,
+                TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+                TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+            }
+          });
+
       final RVectorReadable3F<RSpaceWorld> position =
         new RVectorI3F<RSpaceWorld>(0, 0, 0);
       final QuaternionI4F orientation = new QuaternionI4F();
@@ -258,7 +321,7 @@ public abstract class KMutableMatricesContract extends TestContract
     AtomicReference<MatricesProjectiveLight>
     saveProjectiveDangerously(
       final @Nonnull KMutableMatrices mm,
-      final @Nonnull JCGLInterfaceCommon gc,
+      final @Nonnull JCGLImplementation gi,
       final @Nonnull RMatrixI4x4F<RTransformProjection> projection,
       final @Nonnull RMatrixI4x4F<RTransformView> view)
       throws ConstraintError,
@@ -277,7 +340,7 @@ public abstract class KMutableMatricesContract extends TestContract
             RException
         {
           return o.withProjectiveLight(
-            KMutableMatricesContract.makeKProjective(gc),
+            KMutableMatricesContract.makeKProjective(gi),
             new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
               @Override public Unit run(
                 final MatricesProjectiveLight p)
@@ -804,7 +867,6 @@ public abstract class KMutableMatricesContract extends TestContract
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final TestContext tc = this.newTestContext(8);
-    final JCGLInterfaceCommon gc = tc.getGLImplementation().getGLCommon();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
@@ -819,7 +881,7 @@ public abstract class KMutableMatricesContract extends TestContract
     final AtomicReference<MatricesProjectiveLight> saved =
       KMutableMatricesContract.saveProjectiveDangerously(
         mm,
-        gc,
+        tc.getGLImplementation(),
         projection,
         view);
 
@@ -836,7 +898,6 @@ public abstract class KMutableMatricesContract extends TestContract
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final TestContext tc = this.newTestContext(8);
-    final JCGLInterfaceCommon gc = tc.getGLImplementation().getGLCommon();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
@@ -851,7 +912,7 @@ public abstract class KMutableMatricesContract extends TestContract
     final AtomicReference<MatricesProjectiveLight> saved =
       KMutableMatricesContract.saveProjectiveDangerously(
         mm,
-        gc,
+        tc.getGLImplementation(),
         projection,
         view);
 
@@ -866,8 +927,6 @@ public abstract class KMutableMatricesContract extends TestContract
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final TestContext tc = this.newTestContext(8);
-    final JCGLImplementation g = tc.getGLImplementation();
-    final JCGLInterfaceCommon gc = g.getGLCommon();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
@@ -891,7 +950,7 @@ public abstract class KMutableMatricesContract extends TestContract
             RException
         {
           return o.withProjectiveLight(
-            KMutableMatricesContract.makeKProjective(gc),
+            KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
             new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
               @Override public Unit run(
                 final @Nonnull MatricesProjectiveLight p)
@@ -899,7 +958,8 @@ public abstract class KMutableMatricesContract extends TestContract
                   RException
               {
                 return p.withInstance(
-                  KMutableMatricesContract.makeMeshInstance(g),
+                  KMutableMatricesContract.makeMeshInstance(tc
+                    .getGLImplementation()),
                   new MatricesInstanceWithProjectiveFunction<Unit, ConstraintError>() {
                     @Override public Unit run(
                       final MatricesInstanceWithProjective i)
@@ -984,8 +1044,6 @@ public abstract class KMutableMatricesContract extends TestContract
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final TestContext tc = this.newTestContext(8);
-    final JCGLImplementation g = tc.getGLImplementation();
-    final JCGLInterfaceCommon gc = g.getGLCommon();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
@@ -1007,7 +1065,7 @@ public abstract class KMutableMatricesContract extends TestContract
             RException
         {
           return o.withProjectiveLight(
-            KMutableMatricesContract.makeKProjective(gc),
+            KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
             new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
               @Override public Unit run(
                 final @Nonnull MatricesProjectiveLight p)
@@ -1015,7 +1073,8 @@ public abstract class KMutableMatricesContract extends TestContract
                   RException
               {
                 return p.withInstance(
-                  KMutableMatricesContract.makeMeshInstance(g),
+                  KMutableMatricesContract.makeMeshInstance(tc
+                    .getGLImplementation()),
                   new MatricesInstanceWithProjectiveFunction<Unit, ConstraintError>() {
                     @Override public Unit run(
                       final MatricesInstanceWithProjective i)
@@ -1023,7 +1082,8 @@ public abstract class KMutableMatricesContract extends TestContract
                         RException
                     {
                       return p.withInstance(
-                        KMutableMatricesContract.makeMeshInstance(g),
+                        KMutableMatricesContract.makeMeshInstance(tc
+                          .getGLImplementation()),
                         new MatricesInstanceWithProjectiveFunction<Unit, ConstraintError>() {
                           @Override public Unit run(
                             final MatricesInstanceWithProjective i2)
@@ -1049,8 +1109,6 @@ public abstract class KMutableMatricesContract extends TestContract
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final TestContext tc = this.newTestContext(8);
-    final JCGLImplementation g = tc.getGLImplementation();
-    final JCGLInterfaceCommon gc = g.getGLCommon();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
@@ -1072,7 +1130,7 @@ public abstract class KMutableMatricesContract extends TestContract
             RException
         {
           return o.withProjectiveLight(
-            KMutableMatricesContract.makeKProjective(gc),
+            KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
             new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
               @Override public Unit run(
                 final @Nonnull MatricesProjectiveLight p)
@@ -1080,7 +1138,8 @@ public abstract class KMutableMatricesContract extends TestContract
                   RException
               {
                 p.withInstance(
-                  KMutableMatricesContract.makeMeshInstance(g),
+                  KMutableMatricesContract.makeMeshInstance(tc
+                    .getGLImplementation()),
                   new MatricesInstanceWithProjectiveFunction<Unit, ConstraintError>() {
                     @Override public Unit run(
                       final MatricesInstanceWithProjective i)
@@ -1092,7 +1151,8 @@ public abstract class KMutableMatricesContract extends TestContract
                   });
 
                 p.withInstance(
-                  KMutableMatricesContract.makeMeshInstance(g),
+                  KMutableMatricesContract.makeMeshInstance(tc
+                    .getGLImplementation()),
                   new MatricesInstanceWithProjectiveFunction<Unit, ConstraintError>() {
                     @Override public Unit run(
                       final MatricesInstanceWithProjective i)
@@ -1118,8 +1178,6 @@ public abstract class KMutableMatricesContract extends TestContract
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final TestContext tc = this.newTestContext(8);
-    final JCGLImplementation g = tc.getGLImplementation();
-    final JCGLInterfaceCommon gc = g.getGLCommon();
     final AtomicBoolean projective_once = new AtomicBoolean();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
@@ -1150,7 +1208,7 @@ public abstract class KMutableMatricesContract extends TestContract
             RException
         {
           return o.withProjectiveLight(
-            KMutableMatricesContract.makeKProjective(gc),
+            KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
             new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
               @Override public Unit run(
                 final MatricesProjectiveLight p)
@@ -1200,7 +1258,6 @@ public abstract class KMutableMatricesContract extends TestContract
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final TestContext tc = this.newTestContext(8);
-    final JCGLInterfaceCommon gc = tc.getGLImplementation().getGLCommon();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
@@ -1222,7 +1279,7 @@ public abstract class KMutableMatricesContract extends TestContract
             RException
         {
           o.withProjectiveLight(
-            KMutableMatricesContract.makeKProjective(gc),
+            KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
             new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
               @Override public Unit run(
                 final MatricesProjectiveLight p)
@@ -1234,7 +1291,7 @@ public abstract class KMutableMatricesContract extends TestContract
             });
 
           o.withProjectiveLight(
-            KMutableMatricesContract.makeKProjective(gc),
+            KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
             new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
               @Override public Unit run(
                 final MatricesProjectiveLight p)
@@ -1260,7 +1317,6 @@ public abstract class KMutableMatricesContract extends TestContract
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final TestContext tc = this.newTestContext(8);
-    final JCGLInterfaceCommon gc = tc.getGLImplementation().getGLCommon();
 
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
@@ -1282,7 +1338,7 @@ public abstract class KMutableMatricesContract extends TestContract
             RException
         {
           return o.withProjectiveLight(
-            KMutableMatricesContract.makeKProjective(gc),
+            KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
             new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
               @Override public Unit run(
                 final @Nonnull MatricesProjectiveLight _)
@@ -1290,7 +1346,8 @@ public abstract class KMutableMatricesContract extends TestContract
                   RException
               {
                 return o.withProjectiveLight(
-                  KMutableMatricesContract.makeKProjective(gc),
+                  KMutableMatricesContract.makeKProjective(tc
+                    .getGLImplementation()),
                   new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
                     @Override public Unit run(
                       final @Nonnull MatricesProjectiveLight __)
