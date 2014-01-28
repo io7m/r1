@@ -119,7 +119,7 @@ final class KMutableMatrices
        */
 
       final KTransform transform = i.getTransform();
-      transform.makeMatrix4x4F(
+      transform.transformMakeMatrix4x4F(
         KMutableMatrices.this.transform_context,
         this.matrix_model);
 
@@ -262,7 +262,7 @@ final class KMutableMatrices
        */
 
       final KTransform transform = i.getTransform();
-      transform.makeMatrix4x4F(
+      transform.transformMakeMatrix4x4F(
         KMutableMatrices.this.transform_context,
         this.matrix_model);
 
@@ -715,7 +715,7 @@ final class KMutableMatrices
   private final @Nonnull AtomicBoolean                   observer_active;
   private final @Nonnull ProjectiveLightSingleton        projective;
   private final @Nonnull AtomicBoolean                   projective_active;
-  private final @Nonnull KTransformContext              transform_context;
+  private final @Nonnull KTransformContext               transform_context;
 
   private KMutableMatrices()
   {

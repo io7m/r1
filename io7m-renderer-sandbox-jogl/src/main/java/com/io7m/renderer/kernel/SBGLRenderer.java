@@ -108,7 +108,6 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
-import com.io7m.jtensors.VectorReadable3F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityAll;
 import com.io7m.jvvfs.FSCapabilityRead;
@@ -119,6 +118,7 @@ import com.io7m.renderer.RException;
 import com.io7m.renderer.RMatrixI4x4F;
 import com.io7m.renderer.RMatrixM4x4F;
 import com.io7m.renderer.RSpaceObject;
+import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.RTransformModel;
 import com.io7m.renderer.RTransformModelView;
 import com.io7m.renderer.RTransformProjection;
@@ -659,8 +659,7 @@ final class SBGLRenderer implements GLEventListener
   private final @Nonnull SBFirstPersonCamera                                                                    camera;
   private @Nonnull SceneObserver                                                                                camera_current;
   private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>>                                    camera_custom_projection;
-  private @Nonnull KTransform                                                                                   camera_transform;
-  private final @Nonnull KTransformContext                                                                     camera_transform_context;
+  private final @Nonnull KTransformContext                                                                      camera_transform_context;
   private @Nonnull RMatrixI4x4F<RTransformView>                                                                 camera_view_matrix;
   private final @Nonnull RMatrixM4x4F<RTransformView>                                                           camera_view_matrix_temporary;
   private @Nonnull KGraphicsCapabilities                                                                        capabilities;
@@ -2307,11 +2306,9 @@ final class SBGLRenderer implements GLEventListener
             final @Nonnull Pair<KMeshInstanceTransformed, SBInstance> o1,
             final @Nonnull Pair<KMeshInstanceTransformed, SBInstance> o2)
           {
-            final KMeshInstanceTransformed ok1 = o1.first;
-            final KMeshInstanceTransformed ok2 = o2.first;
-            final VectorReadable3F o1t = ok1.getTransform().getTranslation();
-            final VectorReadable3F o2t = ok2.getTransform().getTranslation();
-            return Float.compare(o1t.getZF(), o2t.getZF());
+            final RVectorI3F<RSpaceWorld> pos1 = o1.second.getPosition();
+            final RVectorI3F<RSpaceWorld> pos2 = o2.second.getPosition();
+            return Float.compare(pos1.getZF(), pos2.getZF());
           }
         });
 

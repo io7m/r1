@@ -54,9 +54,7 @@ import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jtensors.QuaternionI4F;
-import com.io7m.jtensors.QuaternionReadable4F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.jtensors.VectorReadable3F;
 import com.io7m.renderer.RException;
 import com.io7m.renderer.RMatrixI3x3F;
 import com.io7m.renderer.RMatrixI4x4F;
@@ -232,9 +230,6 @@ public abstract class KMutableMatricesContract extends TestContract
     final JCGLImplementation g)
   {
     try {
-      final VectorReadable3F translation = new VectorI3F();
-      final VectorReadable3F scale = new VectorI3F();
-      final QuaternionReadable4F orientation = new QuaternionI4F();
       final RMatrixI3x3F<RTransformTexture> uv_matrix =
         new RMatrixI3x3F<RTransformTexture>();
       final ArrayBuffer array =
@@ -275,11 +270,16 @@ public abstract class KMutableMatricesContract extends TestContract
 
       final KMeshInstance kmi =
         new KMeshInstance(Integer.valueOf(23), material, mesh);
+
+      final QuaternionI4F orientation = new QuaternionI4F();
+      final VectorI3F scale = new VectorI3F(0, 0, 0);
+      final RVectorI3F<RSpaceWorld> translation =
+        new RVectorI3F<RSpaceWorld>(0.0f, 0.0f, 0.0f);
+      final KTransform trans =
+        KTransform.newOSTTransform(orientation, scale, translation);
+
       final KMeshInstanceTransformed kmit =
-        new KMeshInstanceTransformed(kmi, new KTransform(
-          translation,
-          scale,
-          orientation), uv_matrix);
+        new KMeshInstanceTransformed(kmi, trans, uv_matrix);
       return kmit;
     } catch (final ConstraintError e) {
       throw new AssertionError(e);

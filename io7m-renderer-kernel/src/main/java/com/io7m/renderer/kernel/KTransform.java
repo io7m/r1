@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,78 +20,121 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
-import com.io7m.jtensors.QuaternionReadable4F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.jtensors.VectorM3F;
-import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.renderer.RMatrixI4x4F;
+import com.io7m.renderer.RSpaceWorld;
+import com.io7m.renderer.RTransformModel;
+import com.io7m.renderer.RVectorI3F;
 
-/**
- * A translation from the origin, and an orientation.
- */
-
-@Immutable final class KTransform
+@Immutable abstract class KTransform implements KTransformVisitable
 {
-  private final @Nonnull QuaternionI4F orientation;
-  private final @Nonnull VectorI3F     scale;
-  private final @Nonnull VectorI3F     translation;
-
-  KTransform(
-    final @Nonnull VectorReadable3F translation,
-    final @Nonnull VectorReadable3F scale,
-    final @Nonnull QuaternionReadable4F orientation)
+  @Immutable static final class KTransformMatrix4x4 extends KTransform
   {
-    this.translation = new VectorI3F(translation);
-    this.scale = new VectorI3F(scale);
-    this.orientation = new QuaternionI4F(orientation);
+    private final @Nonnull RMatrixI4x4F<RTransformModel> model;
+
+    KTransformMatrix4x4(
+      final @Nonnull RMatrixI4x4F<RTransformModel> model)
+    {
+      this.model = model;
+    }
+
+    public @Nonnull RMatrixI4x4F<RTransformModel> getModel()
+    {
+      return this.model;
+    }
+
+    @Override void transformMakeMatrix4x4F(
+      final @Nonnull KTransformContext context,
+      final @Nonnull MatrixM4x4F m)
+    {
+      this.model.makeMatrixM4x4F(m);
+    }
+
+    @Override public
+      <A, E extends Throwable, V extends KTransformVisitor<A, E>>
+      A
+      transformVisitableAccept(
+        final @Nonnull V v)
+        throws E
+    {
+      return v.transformMatrix4x4Visit(this);
+    }
   }
 
-  @Override public boolean equals(
-    final Object obj)
+  @Immutable static final class KTransformOST extends KTransform
   {
-    if (this == obj) {
-      return true;
+    private final @Nonnull QuaternionI4F           orientation;
+    private final @Nonnull VectorI3F               scale;
+    private final @Nonnull RVectorI3F<RSpaceWorld> translation;
+
+    KTransformOST(
+      final @Nonnull QuaternionI4F orientation,
+      final @Nonnull VectorI3F scale,
+      final @Nonnull RVectorI3F<RSpaceWorld> translation)
+    {
+      this.translation = translation;
+      this.scale = scale;
+      this.orientation = orientation;
     }
-    if (obj == null) {
-      return false;
+
+    public @Nonnull QuaternionI4F getOrientation()
+    {
+      return this.orientation;
     }
-    if (this.getClass() != obj.getClass()) {
-      return false;
+
+    public @Nonnull VectorI3F getScale()
+    {
+      return this.scale;
     }
-    final KTransform other = (KTransform) obj;
-    if (!this.orientation.equals(other.orientation)) {
-      return false;
+
+    public @Nonnull RVectorI3F<RSpaceWorld> getTranslation()
+    {
+      return this.translation;
     }
-    if (!this.scale.equals(other.scale)) {
-      return false;
+
+    @Override void transformMakeMatrix4x4F(
+      final @Nonnull KTransformContext context,
+      final @Nonnull MatrixM4x4F m)
+    {
+      MatrixM4x4F.setIdentity(m);
+      MatrixM4x4F.translateByVector3FInPlace(m, this.translation);
+
+      MatrixM4x4F.set(m, 0, 0, m.get(0, 0) * this.scale.x);
+      MatrixM4x4F.set(m, 1, 1, m.get(1, 1) * this.scale.y);
+      MatrixM4x4F.set(m, 2, 2, m.get(2, 2) * this.scale.z);
+
+      QuaternionM4F.makeRotationMatrix4x4(
+        this.orientation,
+        context.t_matrix4x4);
+      MatrixM4x4F.multiplyInPlace(m, context.t_matrix4x4);
     }
-    if (!this.translation.equals(other.translation)) {
-      return false;
+
+    @Override public
+      <A, E extends Throwable, V extends KTransformVisitor<A, E>>
+      A
+      transformVisitableAccept(
+        final @Nonnull V v)
+        throws E
+    {
+      return v.transformOSTVisit(this);
     }
-    return true;
   }
 
-  @Nonnull QuaternionReadable4F getOrientation()
+  public static @Nonnull KTransform newMatrixTransform(
+    final @Nonnull RMatrixI4x4F<RTransformModel> model)
   {
-    return this.orientation;
+    return new KTransformMatrix4x4(model);
   }
 
-  @Nonnull VectorReadable3F getTranslation()
+  public static @Nonnull KTransform newOSTTransform(
+    final @Nonnull QuaternionI4F orientation,
+    final @Nonnull VectorI3F scale,
+    final @Nonnull RVectorI3F<RSpaceWorld> translation)
   {
-    return this.translation;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.orientation.hashCode();
-    result = (prime * result) + this.scale.hashCode();
-    result = (prime * result) + this.translation.hashCode();
-    return result;
+    return new KTransformOST(orientation, scale, translation);
   }
 
   /**
@@ -102,43 +145,7 @@ import com.io7m.jtensors.VectorReadable3F;
    *           Iff <code>m == null</code>.
    */
 
-  void makeMatrix4x4F(
+  abstract void transformMakeMatrix4x4F(
     final @Nonnull KTransformContext context,
-    final @Nonnull MatrixM4x4F m)
-    throws ConstraintError
-  {
-    MatrixM4x4F.setIdentity(m);
-    MatrixM4x4F.translateByVector3FInPlace(m, this.translation);
-
-    MatrixM4x4F.set(m, 0, 0, m.get(0, 0) * this.scale.x);
-    MatrixM4x4F.set(m, 1, 1, m.get(1, 1) * this.scale.y);
-    MatrixM4x4F.set(m, 2, 2, m.get(2, 2) * this.scale.z);
-
-    QuaternionM4F
-      .makeRotationMatrix4x4(this.orientation, context.t_matrix4x4);
-    MatrixM4x4F.multiplyInPlace(m, context.t_matrix4x4);
-  }
-
-  @Nonnull VectorReadable3F rotateVector3F(
-    final @Nonnull KTransformContext context,
-    final @Nonnull VectorI3F v)
-  {
-    final VectorM3F out = new VectorM3F();
-    QuaternionM4F
-      .makeRotationMatrix4x4(this.orientation, context.t_matrix4x4);
-    return MatrixM3x3F.multiplyVector3F(context.t_matrix3x3, v, out);
-  }
-
-  @Override public String toString()
-  {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("[KTransform ");
-    builder.append(this.translation);
-    builder.append(" ");
-    builder.append(this.scale);
-    builder.append(" ");
-    builder.append(this.orientation);
-    builder.append("]");
-    return builder.toString();
-  }
+    final @Nonnull MatrixM4x4F m);
 }
