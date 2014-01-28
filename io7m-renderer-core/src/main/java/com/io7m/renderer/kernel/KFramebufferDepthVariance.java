@@ -23,7 +23,6 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
 import com.io7m.jcanephora.FramebufferDrawBuffer;
@@ -61,10 +60,14 @@ abstract class KFramebufferDepthVariance implements
       KFramebufferDepthVariance
       newDepthVarianceFramebuffer(
         final @Nonnull G gl,
-        final @Nonnull KFramebufferDepthVarianceDescription description)
+        final @Nonnull KFramebufferDepthVarianceDescription description,
+        final boolean allow_16f,
+        final boolean allow_32f)
         throws ConstraintError,
           JCGLException
     {
+      assert allow_16f || allow_32f;
+
       final AreaInclusive area = description.getArea();
       final int width = (int) area.getRangeX().getInterval();
       final int height = (int) area.getRangeY().getInterval();
@@ -112,9 +115,31 @@ abstract class KFramebufferDepthVariance implements
         }
       }
 
-      Texture2DStatic variance = null;
+      int precision = 16;
       switch (description.getDepthVariancePrecision()) {
         case DEPTH_VARIANCE_PRECISION_16F:
+        {
+          if (allow_16f) {
+            precision = 16;
+          } else {
+            precision = 32;
+          }
+          break;
+        }
+        case DEPTH_VARIANCE_PRECISION_32F:
+        {
+          if (allow_32f) {
+            precision = 32;
+          } else {
+            precision = 16;
+          }
+          break;
+        }
+      }
+
+      Texture2DStatic variance = null;
+      switch (precision) {
+        case 16:
         {
           variance =
             gl.texture2DStaticAllocateRG16f(
@@ -127,7 +152,7 @@ abstract class KFramebufferDepthVariance implements
               description.getFilterMagnification());
           break;
         }
-        case DEPTH_VARIANCE_PRECISION_32F:
+        case 32:
         {
           variance =
             gl.texture2DStaticAllocateRG32f(
@@ -260,8 +285,7 @@ abstract class KFramebufferDepthVariance implements
             ConstraintError,
             RException
         {
-          // TODO Auto-generated method stub
-          throw new UnimplementedCodeException();
+          throw RException.varianceShadowMapsNotSupported();
         }
 
         @Override public KFramebufferDepthVariance implementationIsGL3(
@@ -272,7 +296,9 @@ abstract class KFramebufferDepthVariance implements
         {
           return KFramebufferDepthVarianceGL3ES3.newDepthVarianceFramebuffer(
             gl,
-            description);
+            description,
+            true,
+            true);
         }
 
         @Override public KFramebufferDepthVariance implementationIsGLES2(
@@ -281,8 +307,7 @@ abstract class KFramebufferDepthVariance implements
             ConstraintError,
             RException
         {
-          // TODO Auto-generated method stub
-          throw new UnimplementedCodeException();
+          throw RException.varianceShadowMapsNotSupported();
         }
 
         @Override public KFramebufferDepthVariance implementationIsGLES3(
@@ -291,17 +316,22 @@ abstract class KFramebufferDepthVariance implements
             ConstraintError,
             RException
         {
-          return KFramebufferDepthVarianceGL3ES3.newDepthVarianceFramebuffer(
-            gl,
-            description);
+          if (gl.hasColourBufferFloat() || gl.hasColourBufferHalfFloat()) {
+            return KFramebufferDepthVarianceGL3ES3
+              .newDepthVarianceFramebuffer(
+                gl,
+                description,
+                gl.hasColourBufferHalfFloat(),
+                gl.hasColourBufferFloat());
+          }
+
+          throw RException.varianceShadowMapsNotSupported();
         }
       });
   }
 
   private final @Nonnull AreaInclusive area;
-
   private boolean                      deleted;
-
   private final long                   size;
 
   protected KFramebufferDepthVariance(

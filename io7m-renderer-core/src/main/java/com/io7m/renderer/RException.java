@@ -159,6 +159,28 @@ public abstract class RException extends Throwable implements
     }
   }
 
+  public static final class RNotSupportedException extends RException
+  {
+    private static final long serialVersionUID;
+
+    static {
+      serialVersionUID = 1140529563547632005L;
+    }
+
+    private RNotSupportedException(
+      final @Nonnull String message)
+    {
+      super(message);
+    }
+
+    @Override public <T, E extends Throwable> T exceptionAccept(
+      final @Nonnull RExceptionVisitor<T, E> v)
+      throws E
+    {
+      return v.visitNotSupportedException(this);
+    }
+  }
+
   private static final long serialVersionUID;
 
   static {
@@ -219,6 +241,19 @@ public abstract class RException extends Throwable implements
           shader_name,
           Integer.valueOf(required),
           Integer.valueOf(have)));
+  }
+
+  @SuppressWarnings("synthetic-access") public static
+    RNotSupportedException
+    varianceShadowMapsNotSupported()
+  {
+    final StringBuilder m = new StringBuilder();
+    m.append("Variance shadow maps are not supported on this platform.\n");
+    m.append("Variance shadow maps are currently supported on:\n");
+    m.append("  OpenGL >= 3.0 or\n");
+    m.append("  OpenGL ES >= 3.0 with GL_EXT_color_buffer_float or\n");
+    m.append("  OpenGL ES >= 3.0 with GL_EXT_color_buffer_half_float\n");
+    return new RNotSupportedException(m.toString());
   }
 
   protected RException(
