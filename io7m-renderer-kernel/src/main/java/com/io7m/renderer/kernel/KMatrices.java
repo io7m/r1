@@ -62,7 +62,7 @@ import com.io7m.renderer.RVectorReadable3F;
    */
 
   private static void makeViewMatrixActual(
-    final @Nonnull KTransform.Context context,
+    final @Nonnull KTransformContext context,
     final @Nonnull RVectorReadable3F<RSpaceWorld> position,
     final @Nonnull QuaternionReadable4F orientation,
     final @Nonnull RMatrixM4x4F<?> view)
@@ -86,7 +86,7 @@ import com.io7m.renderer.RVectorReadable3F;
    */
 
   static void makeViewMatrix(
-    final @Nonnull KTransform.Context context,
+    final @Nonnull KTransformContext context,
     final @Nonnull RVectorReadable3F<RSpaceWorld> position,
     final @Nonnull QuaternionReadable4F orientation,
     final @Nonnull RMatrixM4x4F<RTransformView> view)
@@ -101,13 +101,13 @@ import com.io7m.renderer.RVectorReadable3F;
    * </p>
    * <p>
    * Identical to
-   * {@link #makeViewMatrix(com.io7m.renderer.kernel.KTransform.Context, RVectorReadable3F, QuaternionReadable4F, RMatrixM4x4F)}
+   * {@link #makeViewMatrix(com.io7m.renderer.kernel.KTransform.KTransformContext, RVectorReadable3F, QuaternionReadable4F, RMatrixM4x4F)}
    * but with a different phantom type parameter on the view matrix type.
    * </p>
    */
 
   static void makeViewMatrixProjective(
-    final @Nonnull KTransform.Context context,
+    final @Nonnull KTransformContext context,
     final @Nonnull RVectorReadable3F<RSpaceWorld> position,
     final @Nonnull QuaternionReadable4F orientation,
     final @Nonnull RMatrixM4x4F<RTransformProjectiveView> view)

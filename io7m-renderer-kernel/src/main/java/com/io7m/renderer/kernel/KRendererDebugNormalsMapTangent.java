@@ -75,7 +75,7 @@ final class KRendererDebugNormalsMapTangent extends KAbstractRendererDebug
   private final @Nonnull Log                log;
   private final @Nonnull KMutableMatrices   matrices;
   private final @Nonnull KProgram           program;
-  private final @Nonnull KTransform.Context transform_context;
+  private final @Nonnull KTransformContext transform_context;
   private final @Nonnull VectorM2I          viewport_size;
 
   private KRendererDebugNormalsMapTangent(
@@ -95,7 +95,7 @@ final class KRendererDebugNormalsMapTangent extends KAbstractRendererDebug
 
       this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
       this.matrices = KMutableMatrices.newMatrices();
-      this.transform_context = new KTransform.Context();
+      this.transform_context = new KTransformContext();
       this.viewport_size = new VectorM2I();
 
       this.program =
