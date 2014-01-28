@@ -28,12 +28,15 @@ import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Option;
+import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.JCGLImplementationVisitor;
 import com.io7m.jcanephora.JCGLInterfaceGL2;
 import com.io7m.jcanephora.JCGLInterfaceGL3;
+import com.io7m.jcanephora.JCGLInterfaceGLES2;
+import com.io7m.jcanephora.JCGLInterfaceGLES3;
 import com.io7m.jcanephora.SpatialCursorReadable1f;
 import com.io7m.jcanephora.SpatialCursorReadable2f;
 import com.io7m.jcanephora.SpatialCursorReadable3f;
@@ -72,43 +75,50 @@ public final class SBTextureUtilities
       log.debug(message.toString());
     }
 
-    {
-      final Option<JCGLInterfaceGL3> og = gi.getGL3();
-      switch (og.type) {
-        case OPTION_NONE:
+    gi
+      .implementationAccept(new JCGLImplementationVisitor<Unit, IOException>() {
+        @Override public Unit implementationIsGL2(
+          final @Nonnull JCGLInterfaceGL2 gl)
+          throws JCGLException,
+            ConstraintError,
+            FileNotFoundException,
+            IOException
         {
-          break;
-        }
-        case OPTION_SOME:
-        {
-          final JCGLInterfaceGL3 g =
-            ((Option.Some<JCGLInterfaceGL3>) og).value;
-          final Texture2DReadableData r = g.texture2DStaticGetImage(t);
+          final Texture2DReadableData r = gl.texture2DStaticGetImage(t);
           SBTextureUtilities.textureDumpAsRGB(t.getType(), r, file);
-          return;
+          return Unit.unit();
         }
-      }
-    }
 
-    {
-      final Option<JCGLInterfaceGL2> og = gi.getGL2();
-      switch (og.type) {
-        case OPTION_NONE:
+        @Override public Unit implementationIsGL3(
+          final @Nonnull JCGLInterfaceGL3 gl)
+          throws JCGLException,
+            ConstraintError,
+            FileNotFoundException,
+            IOException
         {
-          break;
-        }
-        case OPTION_SOME:
-        {
-          final JCGLInterfaceGL2 g =
-            ((Option.Some<JCGLInterfaceGL2>) og).value;
-          final Texture2DReadableData r = g.texture2DStaticGetImage(t);
+          final Texture2DReadableData r = gl.texture2DStaticGetImage(t);
           SBTextureUtilities.textureDumpAsRGB(t.getType(), r, file);
-          return;
+          return Unit.unit();
         }
-      }
-    }
 
-    log.debug("Cannot dump textures on this implementation");
+        @Override public Unit implementationIsGLES2(
+          final @Nonnull JCGLInterfaceGLES2 gl)
+          throws JCGLException,
+            ConstraintError
+        {
+          log.debug("Cannot dump textures on this implementation");
+          return Unit.unit();
+        }
+
+        @Override public Unit implementationIsGLES3(
+          final @Nonnull JCGLInterfaceGLES3 gl)
+          throws JCGLException,
+            ConstraintError
+        {
+          log.debug("Cannot dump textures on this implementation");
+          return Unit.unit();
+        }
+      });
   }
 
   public static void textureDumpAsRGB(

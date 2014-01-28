@@ -51,7 +51,6 @@ import com.io7m.jcanephora.RenderableDepth;
 import com.io7m.jcanephora.Renderbuffer;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.jcanephora.TextureTypeMeta;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.renderer.RException;
@@ -154,8 +153,6 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       final @Nonnull KFramebufferForwardDescription description)
     {
       super(c.getArea(), c.resourceGetSizeBytes() + d.resourceGetSizeBytes());
-      assert TextureTypeMeta.isColourRenderable(c.getType(), version);
-      assert TextureTypeMeta.isDepthRenderable(d.getType());
       this.color = c;
       this.depth = d;
       this.framebuffer = fb;
@@ -387,8 +384,6 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       final @Nonnull KFramebufferForwardDescription description)
     {
       super(c.getArea(), c.resourceGetSizeBytes() + d.resourceGetSizeBytes());
-      assert TextureTypeMeta.isColourRenderable(c.getType(), version);
-      assert TextureTypeMeta.isDepthRenderable(d.getType());
       this.color = c;
       this.depth = d;
       this.framebuffer = fb;
@@ -534,8 +529,6 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       final @Nonnull JCGLVersion version)
     {
       super(c.getArea(), c.resourceGetSizeBytes() + d.resourceGetSizeBytes());
-      assert TextureTypeMeta.isColourRenderable(c.getType(), version);
-      assert TextureTypeMeta.isDepthRenderable(d.getType());
       this.color = c;
       this.depth = d;
       this.framebuffer = fb;
@@ -702,8 +695,6 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       super(c.getArea(), c.resourceGetSizeBytes()
         + dt.resourceGetSizeBytes()
         + dr.resourceGetSizeBytes());
-      assert TextureTypeMeta.isColourRenderable(c.getType(), version);
-      assert TextureTypeMeta.isColourRenderable(dt.getType(), version);
       this.color = c;
       this.depth = dt;
       this.depth_rb = dr;
