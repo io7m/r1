@@ -28,7 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
-import net.java.dev.designgridlayout.IRowCreator;
+import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
@@ -37,14 +37,14 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorReadable3F;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
-public final class SBOrientationInput
+public final class SBOrientationInput implements SBControls
 {
   static final class RotationDialog extends JFrame
   {
-    private static final long             serialVersionUID;
     private static final VectorReadable3F AXIS_X;
     private static final VectorReadable3F AXIS_Y;
     private static final VectorReadable3F AXIS_Z;
+    private static final long             serialVersionUID;
 
     static {
       serialVersionUID = 5132901751477130242L;
@@ -53,12 +53,12 @@ public final class SBOrientationInput
       AXIS_Z = new VectorI3F(0.0f, 0.0f, 1.0f);
     }
 
-    private final @Nonnull SBFloatHSlider slider_x;
-    private final @Nonnull SBFloatHSlider slider_y;
-    private final @Nonnull SBFloatHSlider slider_z;
     private final @Nonnull JButton        cancel;
     private final @Nonnull JButton        ok;
     private boolean                       selected = false;
+    private final @Nonnull SBFloatHSlider slider_x;
+    private final @Nonnull SBFloatHSlider slider_y;
+    private final @Nonnull SBFloatHSlider slider_z;
 
     RotationDialog()
       throws ConstraintError
@@ -67,9 +67,9 @@ public final class SBOrientationInput
       this.slider_y = new SBFloatHSlider("Y", -360.0f, 360.0f);
       this.slider_z = new SBFloatHSlider("Z", -360.0f, 360.0f);
 
-      this.slider_x.setCurrent(0.0f);
-      this.slider_y.setCurrent(0.0f);
-      this.slider_z.setCurrent(0.0f);
+      this.slider_x.setCurrent(-360.0f);
+      this.slider_y.setCurrent(-360.0f);
+      this.slider_z.setCurrent(-360.0f);
 
       this.cancel = new JButton("Cancel");
       this.cancel.addActionListener(new ActionListener() {
@@ -82,8 +82,10 @@ public final class SBOrientationInput
 
       this.ok = new JButton("OK");
       this.ok.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(
-          final ActionEvent e)
+        @SuppressWarnings("synthetic-access") @Override public
+          void
+          actionPerformed(
+            final ActionEvent e)
         {
           RotationDialog.this.selected = true;
           SBWindowUtilities.closeWindow(RotationDialog.this);
@@ -91,15 +93,14 @@ public final class SBOrientationInput
       });
 
       final DesignGridLayout dg = new DesignGridLayout(this.getContentPane());
-      this.slider_x.addToLayout(dg.row());
-      this.slider_y.addToLayout(dg.row());
-      this.slider_z.addToLayout(dg.row());
+      this.slider_x.controlsAddToLayout(dg);
+      this.slider_y.controlsAddToLayout(dg);
+      this.slider_z.controlsAddToLayout(dg);
       dg.row().right().add(this.cancel).add(this.ok);
     }
 
     @Nonnull QuaternionI4F getQuaternion()
     {
-      final QuaternionI4F q = new QuaternionI4F();
       final QuaternionI4F qx =
         QuaternionI4F.makeFromAxisAngle(
           RotationDialog.AXIS_X,
@@ -122,25 +123,27 @@ public final class SBOrientationInput
     }
   }
 
-  private final @Nonnull JLabel     label;
-  private final @Nonnull JTextField orientation_x;
-  private final @Nonnull JTextField orientation_y;
-  private final @Nonnull JTextField orientation_z;
-  private final @Nonnull JTextField orientation_w;
-  private final @Nonnull JButton    select;
-
   public static @Nonnull SBOrientationInput newInput()
   {
     return new SBOrientationInput();
   }
 
+  private final @Nonnull RowGroup   group;
+  private final @Nonnull JLabel     label;
+  private final @Nonnull JTextField orientation_w;
+  private final @Nonnull JTextField orientation_x;
+  private final @Nonnull JTextField orientation_y;
+  private final @Nonnull JTextField orientation_z;
+  private final @Nonnull JButton    select;
+
   private SBOrientationInput()
   {
     this.label = new JLabel("Orientation");
-    this.orientation_x = new JTextField("0.0");
-    this.orientation_y = new JTextField("0.0");
-    this.orientation_z = new JTextField("0.0");
-    this.orientation_w = new JTextField("0.0");
+    this.orientation_x = new JTextField("0.000000");
+    this.orientation_y = new JTextField("0.000000");
+    this.orientation_z = new JTextField("0.000000");
+    this.orientation_w = new JTextField("0.000000");
+    this.group = new RowGroup();
 
     this.select = new JButton("Select...");
     this.select.addActionListener(new ActionListener() {
@@ -152,8 +155,10 @@ public final class SBOrientationInput
           d.pack();
           d.setVisible(true);
           d.addWindowListener(new WindowAdapter() {
-            @Override public void windowClosing(
-              final WindowEvent _)
+            @SuppressWarnings("synthetic-access") @Override public
+              void
+              windowClosing(
+                final WindowEvent _)
             {
               if (d.isSelected()) {
                 final QuaternionI4F o = d.getQuaternion();
@@ -171,9 +176,32 @@ public final class SBOrientationInput
         } catch (final ConstraintError x) {
           throw new UnreachableCodeException(x);
         }
-
       }
     });
+  }
+
+  @Override public void controlsAddToLayout(
+    final @Nonnull DesignGridLayout layout)
+  {
+    layout
+      .row()
+      .group(this.group)
+      .grid(this.label)
+      .add(this.orientation_x)
+      .add(this.orientation_y)
+      .add(this.orientation_z)
+      .add(this.orientation_w)
+      .add(this.select);
+  }
+
+  @Override public void controlsHide()
+  {
+    this.group.hide();
+  }
+
+  @Override public void controlsShow()
+  {
+    this.group.forceShow();
   }
 
   public @Nonnull JLabel getLabel()
@@ -223,17 +251,5 @@ public final class SBOrientationInput
     this.orientation_y.setText(Float.toString(q.getYF()));
     this.orientation_z.setText(Float.toString(q.getZF()));
     this.orientation_w.setText(Float.toString(q.getWF()));
-  }
-
-  public void addToLayout(
-    final @Nonnull IRowCreator row)
-  {
-    row
-      .grid(this.label)
-      .add(this.orientation_x)
-      .add(this.orientation_y)
-      .add(this.orientation_z)
-      .add(this.orientation_w)
-      .add(this.select);
   }
 }

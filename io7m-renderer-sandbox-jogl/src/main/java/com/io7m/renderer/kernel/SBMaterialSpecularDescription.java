@@ -17,14 +17,20 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 import com.io7m.jvvfs.PathVirtual;
 
 public final class SBMaterialSpecularDescription
 {
-  private final @CheckForNull PathVirtual texture;
-  private final float                     intensity;
+  public static @Nonnull SBMaterialSpecularDescription getDefault()
+  {
+    return new SBMaterialSpecularDescription(null, 0.0f, 0.0f);
+  }
+
   private final float                     exponent;
+  private final float                     intensity;
+  private final @CheckForNull PathVirtual texture;
 
   SBMaterialSpecularDescription(
     final @CheckForNull PathVirtual texture,

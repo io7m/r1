@@ -26,25 +26,27 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 
 final class KSceneBatchedDepth
 {
   static interface Builder
   {
     public void sceneAddInstance(
-      final @Nonnull KMeshInstanceTransformed instance)
+      final @Nonnull KInstanceTransformedOpaque instance)
       throws ConstraintError;
 
     public @Nonnull
-      Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>>
+      Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>
       sceneCreate();
   }
 
   private static final class KSceneBatchedDepthBuilder implements Builder
   {
-    private final @Nonnull KMaterialDepthLabelCache                                 cache;
-    private final @Nonnull Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> in_progress;
-    private boolean                                                                 valid;
+    private final @Nonnull KMaterialDepthLabelCache                                   cache;
+    private final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> in_progress;
+    private boolean                                                                   valid;
 
     public KSceneBatchedDepthBuilder(
       final @Nonnull KMaterialDepthLabelCache cache)
@@ -53,11 +55,11 @@ final class KSceneBatchedDepth
       this.valid = true;
       this.cache = Constraints.constrainNotNull(cache, "Depth label cache");
       this.in_progress =
-        new HashMap<KMaterialDepthLabel, List<KMeshInstanceTransformed>>();
+        new HashMap<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>();
     }
 
     @Override public void sceneAddInstance(
-      final @Nonnull KMeshInstanceTransformed instance)
+      final @Nonnull KInstanceTransformedOpaque instance)
       throws ConstraintError
     {
       Constraints.constrainNotNull(instance, "Instance");
@@ -65,11 +67,11 @@ final class KSceneBatchedDepth
 
       final KMaterialDepthLabel depth_label =
         this.cache.getDepthLabel(instance.getInstance());
-      List<KMeshInstanceTransformed> depth_batch;
+      List<KInstanceTransformedOpaque> depth_batch;
       if (this.in_progress.containsKey(depth_label)) {
         depth_batch = this.in_progress.get(depth_label);
       } else {
-        depth_batch = new ArrayList<KMeshInstanceTransformed>();
+        depth_batch = new ArrayList<KInstanceTransformedOpaque>();
       }
 
       depth_batch.add(instance);
@@ -77,7 +79,7 @@ final class KSceneBatchedDepth
     }
 
     @Override public @Nonnull
-      Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>>
+      Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>
       sceneCreate()
     {
       this.valid = false;

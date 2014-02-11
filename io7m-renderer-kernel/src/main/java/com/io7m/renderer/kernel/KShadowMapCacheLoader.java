@@ -28,11 +28,13 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
-import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapBasicDescription;
-import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapVarianceDescription;
+import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
+import com.io7m.renderer.kernel.types.KShadowMapDescription;
+import com.io7m.renderer.kernel.types.KShadowMapDescriptionVisitor;
+import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
+import com.io7m.renderer.types.RException;
 
 final class KShadowMapCacheLoader implements
   JCacheLoader<KShadowMapDescription, KShadowMap, RException>
@@ -77,7 +79,7 @@ final class KShadowMapCacheLoader implements
     final @Nonnull KShadowMapDescription s)
     throws RException
   {
-    final long size = 2 << (s.getSizeExponent() - 1);
+    final long size = 2 << (s.mapGetSizeExponent() - 1);
     if (this.log.enabled(Level.LOG_DEBUG)) {
       this.message.setLength(0);
       this.message.append("Allocating ");

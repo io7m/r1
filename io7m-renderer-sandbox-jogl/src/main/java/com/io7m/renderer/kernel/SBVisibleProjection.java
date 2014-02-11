@@ -43,6 +43,7 @@ import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.SBProjectionDescription.SBProjectionFrustum;
 import com.io7m.renderer.kernel.SBProjectionDescription.SBProjectionOrthographic;
 import com.io7m.renderer.kernel.SBProjectionDescription.SBProjectionPerspective;
+import com.io7m.renderer.kernel.types.KMeshAttributes;
 
 public abstract class SBVisibleProjection
 {

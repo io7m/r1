@@ -22,8 +22,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.xml.parsers.ParserConfigurationException;
@@ -41,7 +41,10 @@ import com.io7m.jparasol.CompilerError;
 import com.io7m.jparasol.frontend.Frontend;
 import com.io7m.jparasol.xml.Batch;
 import com.io7m.jparasol.xml.PGLSLCompactor;
-import com.io7m.renderer.kernel_shaders.ForwardLabels.ForwardLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueLitLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueUnlitLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularLitLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularUnlitLabel;
 
 public final class ForwardMakeAll
 {
@@ -98,9 +101,30 @@ public final class ForwardMakeAll
       }
     }
 
-    final List<ForwardLabel> forwardLabels = ForwardLabels.allLabels();
-    ForwardMakeAll.makeSources(forwardLabels, out_parasol_dir);
-    ForwardMakeAll.makeBatch(forwardLabels, out_batch);
+    final Set<KMaterialForwardOpaqueUnlitLabel> opaque_unlit =
+      KMaterialForwardOpaqueUnlitLabel.allLabels();
+    ForwardMakeAll.makeSourcesOpaqueUnlit(opaque_unlit, out_parasol_dir);
+    final Set<KMaterialForwardOpaqueLitLabel> opaque_lit =
+      KMaterialForwardOpaqueLitLabel.allLabels();
+    ForwardMakeAll.makeSourcesOpaqueLit(opaque_lit, out_parasol_dir);
+
+    final Set<KMaterialForwardTranslucentRegularUnlitLabel> translucent_regular_unlit =
+      KMaterialForwardTranslucentRegularUnlitLabel.allLabels();
+    ForwardMakeAll.makeSourcesTranslucentRegularUnlit(
+      translucent_regular_unlit,
+      out_parasol_dir);
+    final Set<KMaterialForwardTranslucentRegularLitLabel> translucent_regular_lit =
+      KMaterialForwardTranslucentRegularLitLabel.allLabels();
+    ForwardMakeAll.makeSourcesTranslucentRegularLit(
+      translucent_regular_lit,
+      out_parasol_dir);
+
+    ForwardMakeAll.makeBatch(
+      opaque_unlit,
+      opaque_lit,
+      translucent_regular_unlit,
+      translucent_regular_lit,
+      out_batch);
 
     final String[] sources = ForwardMakeAll.getSourcesList(out_parasol_dir);
     ForwardMakeAll.makeCompileSources(
@@ -111,15 +135,145 @@ public final class ForwardMakeAll
       out_glsl_compact_dir);
   }
 
-  public static void makeBatch(
-    final @Nonnull List<ForwardLabel> forwardLabels,
-    final @Nonnull File file)
+  private static void makeSourcesOpaqueLit(
+    final @Nonnull Set<KMaterialForwardOpaqueLitLabel> opaque_lit,
+    final @Nonnull File dir)
     throws IOException
+  {
+    if (dir.isDirectory() == false) {
+      throw new IOException(dir + " is not a directory");
+    }
+
+    for (final KMaterialForwardOpaqueLitLabel l : opaque_lit) {
+      final String code = l.labelGetCode();
+
+      final File file = new File(dir, "Fwd_" + code + ".p");
+      System.err.println("info: writing: " + file);
+
+      final FileWriter writer = new FileWriter(file);
+      try {
+        writer.append(ForwardShaders.moduleForwardOpaqueLit(l));
+      } finally {
+        writer.flush();
+        writer.close();
+      }
+    }
+  }
+
+  private static void makeSourcesOpaqueUnlit(
+    final @Nonnull Set<KMaterialForwardOpaqueUnlitLabel> opaque_unlit,
+    final @Nonnull File dir)
+    throws IOException
+  {
+    if (dir.isDirectory() == false) {
+      throw new IOException(dir + " is not a directory");
+    }
+
+    for (final KMaterialForwardOpaqueUnlitLabel l : opaque_unlit) {
+      final String code = l.labelGetCode();
+
+      final File file = new File(dir, "Fwd_" + code + ".p");
+      System.err.println("info: writing: " + file);
+
+      final FileWriter writer = new FileWriter(file);
+      try {
+        writer.append(ForwardShaders.moduleForwardOpaqueUnlit(l));
+      } finally {
+        writer.flush();
+        writer.close();
+      }
+    }
+  }
+
+  private static
+    void
+    makeSourcesTranslucentRegularLit(
+      final @Nonnull Set<KMaterialForwardTranslucentRegularLitLabel> opaque_lit,
+      final @Nonnull File dir)
+      throws IOException
+  {
+    if (dir.isDirectory() == false) {
+      throw new IOException(dir + " is not a directory");
+    }
+
+    for (final KMaterialForwardTranslucentRegularLitLabel l : opaque_lit) {
+      final String code = l.labelGetCode();
+
+      final File file = new File(dir, "Fwd_" + code + ".p");
+      System.err.println("info: writing: " + file);
+
+      final FileWriter writer = new FileWriter(file);
+      try {
+        writer.append(ForwardShaders.moduleForwardTranslucentRegularLit(l));
+      } finally {
+        writer.flush();
+        writer.close();
+      }
+    }
+  }
+
+  private static
+    void
+    makeSourcesTranslucentRegularUnlit(
+      final @Nonnull Set<KMaterialForwardTranslucentRegularUnlitLabel> opaque_unlit,
+      final @Nonnull File dir)
+      throws IOException
+  {
+    if (dir.isDirectory() == false) {
+      throw new IOException(dir + " is not a directory");
+    }
+
+    for (final KMaterialForwardTranslucentRegularUnlitLabel l : opaque_unlit) {
+      final String code = l.labelGetCode();
+
+      final File file = new File(dir, "Fwd_" + code + ".p");
+      System.err.println("info: writing: " + file);
+
+      final FileWriter writer = new FileWriter(file);
+      try {
+        writer.append(ForwardShaders.moduleForwardTranslucentRegularUnlit(l));
+      } finally {
+        writer.flush();
+        writer.close();
+      }
+    }
+  }
+
+  public static
+    void
+    makeBatch(
+      final Set<KMaterialForwardOpaqueUnlitLabel> opaque_unlit,
+      final Set<KMaterialForwardOpaqueLitLabel> opaque_lit,
+      final Set<KMaterialForwardTranslucentRegularUnlitLabel> translucent_regular_unlit,
+      final Set<KMaterialForwardTranslucentRegularLitLabel> translucent_regular_lit,
+      final @Nonnull File file)
+      throws IOException
   {
     final FileWriter writer = new FileWriter(file);
 
-    for (final ForwardLabel l : forwardLabels) {
-      final String code = l.getCode();
+    for (final KMaterialForwardOpaqueUnlitLabel l : opaque_unlit) {
+      final String code = l.labelGetCode();
+      writer.append("fwd_" + code);
+      writer.append(" : com.io7m.renderer.kernel.Fwd_" + code + ".p");
+      writer.append("\n");
+    }
+
+    for (final KMaterialForwardOpaqueLitLabel l : opaque_lit) {
+      final String code = l.labelGetCode();
+      writer.append("fwd_" + code);
+      writer.append(" : com.io7m.renderer.kernel.Fwd_" + code + ".p");
+      writer.append("\n");
+    }
+
+    for (final KMaterialForwardTranslucentRegularUnlitLabel l : translucent_regular_unlit) {
+      final String code = l.labelGetCode();
+      writer.append("fwd_" + code);
+      writer.append(" : com.io7m.renderer.kernel.Fwd_" + code + ".p");
+      writer.append("\n");
+    }
+
+    for (final KMaterialForwardTranslucentRegularLitLabel l : translucent_regular_lit) {
+      final String code = l.labelGetCode();
       writer.append("fwd_" + code);
       writer.append(" : com.io7m.renderer.kernel.Fwd_" + code + ".p");
       writer.append("\n");
@@ -182,30 +336,5 @@ public final class ForwardMakeAll
     final Properties props = new Properties();
     props.setProperty("com.io7m.parasol.logs.compactor", "false");
     return new Log(props, "com.io7m.parasol", "compactor");
-  }
-
-  public static void makeSources(
-    final @Nonnull List<ForwardLabel> forwardLabels,
-    final @Nonnull File dir)
-    throws IOException
-  {
-    if (dir.isDirectory() == false) {
-      throw new IOException(dir + " is not a directory");
-    }
-
-    for (final ForwardLabel l : forwardLabels) {
-      final String code = l.getCode();
-
-      final File file = new File(dir, "Fwd_" + code + ".p");
-      System.err.println("info: writing: " + file);
-
-      final FileWriter writer = new FileWriter(file);
-      try {
-        writer.append(ForwardShaders.moduleForward(l));
-      } finally {
-        writer.flush();
-        writer.close();
-      }
-    }
   }
 }

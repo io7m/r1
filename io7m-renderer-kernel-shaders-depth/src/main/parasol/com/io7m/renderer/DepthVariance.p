@@ -26,9 +26,7 @@ module DepthVariance is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Fragment;
 
-  import com.io7m.renderer.Albedo    as A;
-  import com.io7m.renderer.Materials as M;
-  import com.io7m.renderer.Pack      as P;
+  import com.io7m.renderer.Albedo;
   import com.io7m.renderer.Depth;
 
   function variance (d : float) : vector_2f =
@@ -50,13 +48,15 @@ module DepthVariance is
   end;
 
   shader fragment depth_variance_U_f is
-    in f_position      : vector_4f;
-    parameter material : M.t;
-    out out_0          : vector_4f as 0;
+    in f_position           : vector_4f;
+    parameter p_albedo      : Albedo.t;
+    parameter p_opacity     : float;
+    parameter p_alpha_depth : float;
+    out out_0               : vector_4f as 0;
   with
-    value albedo : vector_4f = A.translucent (material.albedo);
-    value alpha = F.multiply (albedo [w], material.alpha.opacity);
-    discard (F.lesser (alpha, material.alpha.depth_threshold));
+    value albedo : vector_4f = Albedo.translucent (p_albedo);
+    value alpha = F.multiply (albedo [w], p_opacity);
+    discard (F.lesser (alpha, p_alpha_depth));
 
     value rgba =
       new vector_4f (variance (Fragment.coordinate [z]), 0.0, 1.0);
@@ -70,21 +70,23 @@ module DepthVariance is
   end;
 
   shader fragment depth_variance_M_f is
-    in f_uv            : vector_2f;
-    in f_position      : vector_4f;
-    out out_0          : vector_4f as 0;
-    parameter material : M.t;
-    parameter t_albedo : sampler_2d;
+    in f_uv                 : vector_2f;
+    in f_position           : vector_4f;
+    out out_0               : vector_4f as 0;
+    parameter p_albedo      : Albedo.t;
+    parameter p_opacity     : float;
+    parameter p_alpha_depth : float;
+    parameter t_albedo      : sampler_2d;
   with
     value albedo : vector_4f =
-      A.textured_translucent (
+      Albedo.textured_translucent (
         t_albedo,
         f_uv,
-        material.albedo
+        p_albedo
       );
 
-    value alpha = F.multiply (albedo [w], material.alpha.opacity);
-    discard (F.lesser (alpha, material.alpha.depth_threshold));
+    value alpha = F.multiply (albedo [w], p_opacity);
+    discard (F.lesser (alpha, p_alpha_depth));
     
     value rgba =
       new vector_4f (variance (Fragment.coordinate [z]), 0.0, 1.0);

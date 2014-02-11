@@ -23,9 +23,11 @@ package com.io7m.renderer;
 
 module DirectionalLight is
 
-  import com.io7m.parasol.Vector3f   as V3;
-  import com.io7m.parasol.Float      as F;
-  import com.io7m.renderer.Materials as M;
+  import com.io7m.parasol.Vector3f as V3;
+  import com.io7m.parasol.Float    as F;
+
+  import com.io7m.renderer.Emission;
+  import com.io7m.renderer.Specular;
 
   type t is record
     colour    : vector_3f,
@@ -115,7 +117,7 @@ module DirectionalLight is
   function specular_colour (
     light : t,
     d     : vectors,
-    s     : M.specular
+    s     : Specular.t
   ) : vector_3f =
     let
       value factor =
@@ -128,28 +130,28 @@ module DirectionalLight is
 
   --
   -- Given a directional light [light], a surface normal [n],
-  -- surface properties given by [material],
+  -- surface properties given by [s],
   -- and the current point [p] on the surface to be lit,
   -- calculate the diffuse and specular terms for the surface.
   --
 
   function diffuse_specular (
-    light       : t,
-    n           : vector_3f,
-    p           : vector_3f,
-    material    : M.t
+    light : t,
+    n     : vector_3f,
+    p     : vector_3f,
+    s     : Specular.t
   ) : vector_3f =
     let
       value d  = vectors (light, p, n);
       value dc = diffuse_colour (light, d, 0.0);
-      value sc = specular_colour (light, d, material.specular);
+      value sc = specular_colour (light, d, s);
     in
       V3.add (dc, sc)
     end;
 
   --
   -- Given a directional light [light], a surface normal [n],
-  -- surface properties given by [material],
+  -- surface properties given by [m] and [s],
   -- and the current point [p] on the surface to be lit,
   -- calculate the diffuse and specular terms for the surface,
   -- including the emissive value as the minimum resulting
@@ -157,15 +159,16 @@ module DirectionalLight is
   --
 
   function diffuse_specular_emissive (
-    light    : t,
-    n        : vector_3f,
-    p        : vector_3f,
-    material : M.t
+    light : t,
+    n     : vector_3f,
+    p     : vector_3f,
+    m     : Emission.t,
+    s     : Specular.t
   ) : vector_3f =
     let
       value d  = vectors (light, p, n);
-      value dc = diffuse_colour (light, d, material.emissive.emissive);
-      value sc = specular_colour (light, d, material.specular);
+      value dc = diffuse_colour (light, d, m.amount);
+      value sc = specular_colour (light, d, s);
     in
       V3.add (dc, sc)
     end;
@@ -177,13 +180,13 @@ module DirectionalLight is
   --
 
   function diffuse_only_emissive (
-    light    : t,
-    n        : vector_3f,
-    material : M.t
+    light : t,
+    n     : vector_3f,
+    m     : Emission.t
   ) : vector_3f =
     let
       value d = vectors (light, new vector_3f(0.0, 0.0, 0.0), n);
-      value c = diffuse_colour (light, d, material.emissive.emissive);
+      value c = diffuse_colour (light, d, m.amount);
     in
       c
     end;

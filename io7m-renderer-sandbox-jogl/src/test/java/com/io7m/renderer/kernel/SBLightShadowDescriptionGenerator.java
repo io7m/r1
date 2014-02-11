@@ -26,10 +26,15 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthDescription;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthVarianceDescription;
-import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapBasicDescription;
-import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapVarianceDescription;
+import com.io7m.renderer.kernel.types.KDepthPrecision;
+import com.io7m.renderer.kernel.types.KDepthVariancePrecision;
+import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
+import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
+import com.io7m.renderer.kernel.types.KShadow;
+import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
+import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
+import com.io7m.renderer.kernel.types.KShadowMappedBasic;
+import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 
 public final class SBLightShadowDescriptionGenerator implements
   Generator<KShadow>
@@ -61,18 +66,17 @@ public final class SBLightShadowDescriptionGenerator implements
         case SHADOW_MAPPED_BASIC:
         {
           final KFramebufferDepthDescription description =
-            new KFramebufferDepthDescription(
+            KFramebufferDepthDescription.newDescription(
               this.area_gen.next(),
               this.filter_mag_gen.next(),
               this.filter_min_gen.next(),
               this.depth_prec_gen.next());
           final KShadowMapBasicDescription map_description =
-            new KShadowMapBasicDescription(
+            KShadowMapBasicDescription.newDescription(
               this.index_gen.next(),
               description,
               this.index_gen.next().intValue());
-          return KShadow.newMappedBasic(
-            (float) Math.random(),
+          return KShadowMappedBasic.newMappedBasic(
             (float) Math.random(),
             (float) Math.random(),
             map_description);
@@ -80,19 +84,18 @@ public final class SBLightShadowDescriptionGenerator implements
         case SHADOW_MAPPED_VARIANCE:
         {
           final KFramebufferDepthVarianceDescription description =
-            new KFramebufferDepthVarianceDescription(
+            KFramebufferDepthVarianceDescription.newDescription(
               this.area_gen.next(),
               this.filter_mag_gen.next(),
               this.filter_min_gen.next(),
               this.depth_prec_gen.next(),
               this.depth_variance_prec_gen.next());
           final KShadowMapVarianceDescription map_description =
-            new KShadowMapVarianceDescription(
+            KShadowMapVarianceDescription.newDescription(
               this.index_gen.next(),
               description,
               this.index_gen.next().intValue());
-          return KShadow.newMappedVariance(
-            (float) Math.random(),
+          return KShadowMappedVariance.newMappedVariance(
             (float) Math.random(),
             (float) Math.random(),
             (float) Math.random(),

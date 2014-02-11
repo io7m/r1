@@ -20,8 +20,8 @@ import net.java.quickcheck.Generator;
 
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorReadable3F;
-import com.io7m.renderer.RMatrixI3x3F;
-import com.io7m.renderer.RTransform;
+import com.io7m.renderer.types.RMatrixI3x3F;
+import com.io7m.renderer.types.RTransform;
 
 final class RMatrix3x3FGenerator<T extends RTransform> implements
   Generator<RMatrixI3x3F<T>>
@@ -43,6 +43,7 @@ final class RMatrix3x3FGenerator<T extends RTransform> implements
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f);
-    return new RMatrixI3x3F<T>(column_0, column_1, column_2);
+
+    return RMatrixI3x3F.newFromColumns(column_0, column_1, column_2);
   }
 }

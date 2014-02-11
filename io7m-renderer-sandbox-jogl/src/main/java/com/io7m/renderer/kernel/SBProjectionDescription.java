@@ -23,8 +23,8 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.renderer.RMatrixI4x4F;
-import com.io7m.renderer.RTransformProjection;
+import com.io7m.renderer.types.RMatrixI4x4F;
+import com.io7m.renderer.types.RTransformProjection;
 
 @Immutable public abstract class SBProjectionDescription
 {
@@ -164,7 +164,7 @@ import com.io7m.renderer.RTransformProjection;
         this.top,
         this.near,
         this.far);
-      return new RMatrixI4x4F<RTransformProjection>(temporary);
+      return RMatrixI4x4F.newFromReadable(temporary);
     }
   }
 
@@ -304,7 +304,7 @@ import com.io7m.renderer.RTransformProjection;
         this.top,
         this.near,
         this.far);
-      return new RMatrixI4x4F<RTransformProjection>(temporary);
+      return RMatrixI4x4F.newFromReadable(temporary);
     }
   }
 
@@ -414,7 +414,7 @@ import com.io7m.renderer.RTransformProjection;
         this.far,
         this.aspect,
         this.horizontal_fov);
-      return new RMatrixI4x4F<RTransformProjection>(temporary);
+      return RMatrixI4x4F.newFromReadable(temporary);
     }
   }
 

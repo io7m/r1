@@ -29,7 +29,7 @@ import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureCubeStaticUsable;
 import com.io7m.jcanephora.TextureUnit;
-import com.io7m.renderer.RException;
+import com.io7m.renderer.types.RException;
 
 /**
  * <p>

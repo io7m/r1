@@ -63,7 +63,8 @@ import com.io7m.jparasol.xml.VertexParameter;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.RException;
+import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RXMLException;
 
 @Immutable public final class KProgram
 {
@@ -441,7 +442,7 @@ import com.io7m.renderer.RException;
       JCGLUnsupportedException,
       JCGLCompileException,
       JCGLException,
-      KXMLException
+      RXMLException
   {
     try {
       Constraints.constrainNotNull(gl, "GL");
@@ -469,13 +470,13 @@ import com.io7m.renderer.RException;
         m,
         logp);
     } catch (final ValidityException x) {
-      throw KXMLException.validityException(x);
+      throw RXMLException.validityException(x);
     } catch (final ParsingException x) {
-      throw KXMLException.parsingException(x);
+      throw RXMLException.parsingException(x);
     } catch (final SAXException x) {
-      throw KXMLException.saxException(x);
+      throw RXMLException.saxException(x);
     } catch (final ParserConfigurationException x) {
-      throw KXMLException.parserConfigurationException(x);
+      throw RXMLException.parserConfigurationException(x);
     }
   }
 
@@ -550,14 +551,13 @@ import com.io7m.renderer.RException;
       return KProgram.loadUncompacted(gl, fs, version, api, name, m, logp);
 
     } catch (final ValidityException x) {
-      throw RException.fromRKXMLException(KXMLException.validityException(x));
+      throw RXMLException.validityException(x);
     } catch (final ParsingException x) {
-      throw RException.fromRKXMLException(KXMLException.parsingException(x));
+      throw RXMLException.parsingException(x);
     } catch (final SAXException x) {
-      throw RException.fromRKXMLException(KXMLException.saxException(x));
+      throw RXMLException.saxException(x);
     } catch (final ParserConfigurationException x) {
-      throw RException.fromRKXMLException(KXMLException
-        .parserConfigurationException(x));
+      throw RXMLException.parserConfigurationException(x);
     } catch (final IOException e) {
       throw RException.fromIOException(e);
     } catch (final FilesystemError e) {

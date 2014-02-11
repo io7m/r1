@@ -36,13 +36,27 @@ import com.io7m.renderer.kernel.SBProjectionDescription.SBProjectionPerspective;
 public final class SBProjectionMatrixPerspectiveControls implements
   SBProjectionMatrixDescriptionControls
 {
-  private final @Nonnull JTextField        near;
-  private final @Nonnull JTextField        far;
-  private final @Nonnull JTextField        aspect;
-  private final @Nonnull JTextField        fov;
-  private final @Nonnull JButton           defaults;
-  private @Nonnull SBProjectionPerspective current;
-  private final @Nonnull RowGroup          group;
+  public static void main(
+    final String args[])
+  {
+    SwingUtilities.invokeLater(new Runnable() {
+      @SuppressWarnings("unused") @Override public void run()
+      {
+        new SBExampleWindow("Perspective") {
+          private static final long serialVersionUID = 6048725370293855922L;
+
+          @Override public void addToLayout(
+            final DesignGridLayout layout)
+            throws ConstraintError
+          {
+            final SBProjectionMatrixPerspectiveControls controls =
+              SBProjectionMatrixPerspectiveControls.newControls();
+            controls.controlsAddToLayout(layout);
+          }
+        };
+      }
+    });
+  }
 
   public static @Nonnull SBProjectionMatrixPerspectiveControls newControls()
     throws ConstraintError
@@ -50,10 +64,13 @@ public final class SBProjectionMatrixPerspectiveControls implements
     return new SBProjectionMatrixPerspectiveControls();
   }
 
-  @Override public @Nonnull RowGroup getGroup()
-  {
-    return this.group;
-  }
+  private final @Nonnull JTextField        aspect;
+  private @Nonnull SBProjectionPerspective current;
+  private final @Nonnull JButton           defaults;
+  private final @Nonnull JTextField        far;
+  private final @Nonnull JTextField        fov;
+  private final @Nonnull RowGroup          group;
+  private final @Nonnull JTextField        near;
 
   private SBProjectionMatrixPerspectiveControls()
     throws ConstraintError
@@ -84,7 +101,7 @@ public final class SBProjectionMatrixPerspectiveControls implements
     });
   }
 
-  @Override public void addToLayout(
+  @Override public void controlsAddToLayout(
     final DesignGridLayout layout)
   {
     layout
@@ -96,6 +113,16 @@ public final class SBProjectionMatrixPerspectiveControls implements
     layout.row().group(this.group).grid(new JLabel("Near")).add(this.near, 3);
     layout.row().group(this.group).grid(new JLabel("Far")).add(this.far, 3);
     layout.row().group(this.group).right().add(this.defaults);
+  }
+
+  @Override public void controlsHide()
+  {
+    this.group.hide();
+  }
+
+  @Override public void controlsShow()
+  {
+    this.group.forceShow();
   }
 
   @Override public @Nonnull SBProjectionDescription getDescription()
@@ -119,28 +146,6 @@ public final class SBProjectionMatrixPerspectiveControls implements
     this.fov.setText(Double.toString(p.getHorizontalFOV()));
     this.near.setText(Double.toString(p.getNear()));
     this.far.setText(Double.toString(p.getFar()));
-  }
-
-  public static void main(
-    final String args[])
-  {
-    SwingUtilities.invokeLater(new Runnable() {
-      @SuppressWarnings("unused") @Override public void run()
-      {
-        new SBExampleWindow("Perspective") {
-          private static final long serialVersionUID = 6048725370293855922L;
-
-          @Override public void addToLayout(
-            final DesignGridLayout layout)
-            throws ConstraintError
-          {
-            final SBProjectionMatrixPerspectiveControls controls =
-              SBProjectionMatrixPerspectiveControls.newControls();
-            controls.addToLayout(layout);
-          }
-        };
-      }
-    });
   }
 
   public void setDescription(

@@ -48,14 +48,18 @@ import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
-import com.io7m.renderer.RException;
-import com.io7m.renderer.RMatrixI4x4F;
-import com.io7m.renderer.RTransformProjection;
-import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
+import com.io7m.renderer.kernel.types.KInstance;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KMaterialOpaque;
+import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RMatrixI4x4F;
+import com.io7m.renderer.types.RTransformProjection;
+import com.io7m.renderer.types.RTransformView;
 
 public final class KDepthVarianceRenderer
 {
@@ -73,12 +77,12 @@ public final class KDepthVarianceRenderer
     final @Nonnull MatricesObserver mwo,
     final @Nonnull JCBProgram jp,
     final @Nonnull KMaterialDepthVarianceLabel label,
-    final @Nonnull List<KMeshInstanceTransformed> batch)
+    final @Nonnull List<KInstanceTransformedOpaque> batch)
     throws JCGLException,
       RException,
       ConstraintError
   {
-    for (final KMeshInstanceTransformed i : batch) {
+    for (final KInstanceTransformedOpaque i : batch) {
       mwo.withInstance(
         i,
         new MatricesInstanceFunction<Unit, JCGLException>() {
@@ -100,16 +104,25 @@ public final class KDepthVarianceRenderer
     }
   }
 
+  private static void putMaterialOpaque(
+    final @Nonnull JCBProgram jp,
+    final @Nonnull KMaterialOpaque material)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMaterialAlbedo(jp, material.materialGetAlbedo());
+  }
+
   protected static void renderDepthPassInstance(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull MatricesInstance mwi,
     final @Nonnull JCBProgram jp,
     final @Nonnull KMaterialDepthVarianceLabel label,
-    final @Nonnull KMeshInstanceTransformed i)
+    final @Nonnull KInstanceTransformedOpaque i)
     throws JCGLException,
       ConstraintError
   {
-    final KMaterial material = i.getInstance().getMaterial();
+    final KMaterialOpaque material = i.getInstance().instanceGetMaterial();
     final List<TextureUnit> units = gc.textureGetUnits();
 
     /**
@@ -126,18 +139,18 @@ public final class KDepthVarianceRenderer
       }
       case DEPTH_VARIANCE_MAPPED:
       {
-        KShadingProgramCommon.putMaterial(jp, material);
+        KDepthVarianceRenderer.putMaterialOpaque(jp, material);
         KShadingProgramCommon.putMatrixUV(jp, mwi.getMatrixUV());
         KShadingProgramCommon.bindPutTextureAlbedo(
           jp,
           gc,
-          material,
+          material.materialGetAlbedo(),
           units.get(0));
         break;
       }
       case DEPTH_VARIANCE_UNIFORM:
       {
-        KShadingProgramCommon.putMaterial(jp, material);
+        KDepthVarianceRenderer.putMaterialOpaque(jp, material);
         break;
       }
     }
@@ -147,8 +160,8 @@ public final class KDepthVarianceRenderer
      */
 
     try {
-      final KMeshInstance actual = i.getInstance();
-      final KMesh mesh = actual.getMesh();
+      final KInstance actual = i.getInstance();
+      final KMesh mesh = actual.instanceGetMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
 
@@ -208,7 +221,7 @@ public final class KDepthVarianceRenderer
     depthVarianceRendererEvaluate(
       final @Nonnull RMatrixI4x4F<RTransformView> view,
       final @Nonnull RMatrixI4x4F<RTransformProjection> projection,
-      final @Nonnull Map<KMaterialDepthVarianceLabel, List<KMeshInstanceTransformed>> batches,
+      final @Nonnull Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaque>> batches,
       final @Nonnull KFramebufferDepthVarianceUsable framebuffer,
       final @Nonnull FaceSelection faces,
       final @Nonnull FaceWindingOrder order)
@@ -243,7 +256,7 @@ public final class KDepthVarianceRenderer
   private
     void
     renderDepthPassBatches(
-      final @Nonnull Map<KMaterialDepthVarianceLabel, List<KMeshInstanceTransformed>> batches,
+      final @Nonnull Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaque>> batches,
       final @Nonnull JCGLInterfaceCommon gc,
       final @Nonnull MatricesObserver mwo)
       throws ConstraintError,
@@ -259,7 +272,7 @@ public final class KDepthVarianceRenderer
     gc.blendingDisable();
 
     for (final KMaterialDepthVarianceLabel label : batches.keySet()) {
-      final List<KMeshInstanceTransformed> batch = batches.get(label);
+      final List<KInstanceTransformedOpaque> batch = batches.get(label);
       final KProgram program = this.shader_cache.cacheGetLU(label.getName());
       final JCBExecutionAPI exec = program.getExecutable();
 
@@ -288,7 +301,7 @@ public final class KDepthVarianceRenderer
   protected
     void
     renderScene(
-      final @Nonnull Map<KMaterialDepthVarianceLabel, List<KMeshInstanceTransformed>> batches,
+      final @Nonnull Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaque>> batches,
       final @Nonnull KFramebufferDepthVarianceUsable framebuffer,
       final @Nonnull MatricesObserver mwo,
       final @Nonnull FaceSelection faces,

@@ -28,7 +28,7 @@ import nu.xom.Element;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.RXMLUtilities;
 
 @Immutable public final class CubeMap

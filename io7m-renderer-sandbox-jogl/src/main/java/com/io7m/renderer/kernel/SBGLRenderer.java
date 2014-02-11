@@ -114,29 +114,46 @@ import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.RException;
-import com.io7m.renderer.RMatrixI4x4F;
-import com.io7m.renderer.RMatrixM4x4F;
-import com.io7m.renderer.RSpaceObject;
-import com.io7m.renderer.RSpaceWorld;
-import com.io7m.renderer.RTransformModel;
-import com.io7m.renderer.RTransformModelView;
-import com.io7m.renderer.RTransformProjection;
-import com.io7m.renderer.RTransformView;
-import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthDescription;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthVarianceDescription;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferForwardDescription;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferRGBADescription;
-import com.io7m.renderer.kernel.KLight.KProjective;
-import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.KRendererDebugging.DebugShadowMapReceiver;
-import com.io7m.renderer.kernel.KShadow.KShadowMappedBasic;
-import com.io7m.renderer.kernel.KShadow.KShadowMappedVariance;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
-import com.io7m.renderer.kernel.SBLight.SBLightProjective;
-import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.kernel.types.KCamera;
+import com.io7m.renderer.kernel.types.KDepthPrecision;
+import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
+import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
+import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
+import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
+import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
+import com.io7m.renderer.kernel.types.KInstanceTransformed;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucent;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceTransformedVisitor;
+import com.io7m.renderer.kernel.types.KLight;
+import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.kernel.types.KRGBAPrecision;
+import com.io7m.renderer.kernel.types.KScene;
+import com.io7m.renderer.kernel.types.KSceneBuilder;
+import com.io7m.renderer.kernel.types.KShadow;
+import com.io7m.renderer.kernel.types.KShadowMapDescription;
+import com.io7m.renderer.kernel.types.KShadowMappedBasic;
+import com.io7m.renderer.kernel.types.KShadowMappedVariance;
+import com.io7m.renderer.kernel.types.KShadowVisitor;
+import com.io7m.renderer.kernel.types.KTransformContext;
+import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RMatrixI4x4F;
+import com.io7m.renderer.types.RMatrixM4x4F;
+import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RTransformModel;
+import com.io7m.renderer.types.RTransformModelView;
+import com.io7m.renderer.types.RTransformProjection;
+import com.io7m.renderer.types.RTransformView;
+import com.io7m.renderer.types.RVectorI3F;
+import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
 import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
 
@@ -229,7 +246,7 @@ final class SBGLRenderer implements GLEventListener
               final IndexBuffer index = p.getIndexBuffer();
               final RVectorI3F<RSpaceObject> lower = p.getBoundsLower();
               final RVectorI3F<RSpaceObject> upper = p.getBoundsUpper();
-              final KMesh km = new KMesh(array, index, lower, upper);
+              final KMesh km = KMesh.newMesh(array, index, lower, upper);
               final String name = p.getName();
 
               if (SBGLRenderer.this.meshes.containsKey(name)) {
@@ -634,7 +651,7 @@ final class SBGLRenderer implements GLEventListener
       final IndexBuffer ib = p.getIndexBuffer();
       final RVectorI3F<RSpaceObject> lower = p.getBoundsLower();
       final RVectorI3F<RSpaceObject> upper = p.getBoundsUpper();
-      return new SBMesh(path, new KMesh(ab, ib, lower, upper));
+      return new SBMesh(path, KMesh.newMesh(ab, ib, lower, upper));
     } finally {
       stream.close();
     }
@@ -815,7 +832,7 @@ final class SBGLRenderer implements GLEventListener
     this.camera = new SBFirstPersonCamera(0.0f, 1.0f, 5.0f);
     this.camera_current = new SceneObserverCamera();
     this.camera_view_matrix_temporary = new RMatrixM4x4F<RTransformView>();
-    this.camera_transform_context = new KTransformContext();
+    this.camera_transform_context = KTransformContext.newContext();
 
     this.input_state = new SBInputState();
     this.running =
@@ -830,24 +847,45 @@ final class SBGLRenderer implements GLEventListener
   }
 
   private void cameraGetNext()
+    throws RException,
+      ConstraintError
   {
     switch (this.camera_current.getType()) {
       case OBSERVER_CAMERA:
       {
         for (final SBLight l : this.scene_lights) {
-          switch (l.getType()) {
-            case LIGHT_DIRECTIONAL:
-            case LIGHT_SPHERE:
+          l.lightVisitableAccept(new SBLightVisitor<Unit, ConstraintError>() {
+            @Override public Unit lightVisitDirectional(
+              final SBLightDirectional kl)
+              throws ConstraintError,
+                RException,
+                ConstraintError
             {
-              break;
+              return Unit.unit();
             }
-            case LIGHT_PROJECTIVE:
+
+            @SuppressWarnings("synthetic-access") @Override public
+              Unit
+              lightVisitProjective(
+                final SBLightProjective kl)
+                throws ConstraintError,
+                  RException,
+                  ConstraintError
             {
-              final SBLightProjective lp = (SBLightProjective) l;
-              this.cameraSet(new SceneObserverProjectiveLight(lp));
-              return;
+              SBGLRenderer.this
+                .cameraSet(new SceneObserverProjectiveLight(kl));
+              return Unit.unit();
             }
-          }
+
+            @Override public Unit lightVisitSpherical(
+              final SBLightSpherical kl)
+              throws ConstraintError,
+                RException,
+                ConstraintError
+            {
+              return Unit.unit();
+            }
+          });
         }
         break;
       }
@@ -864,19 +902,39 @@ final class SBGLRenderer implements GLEventListener
           }
 
           if (found_first) {
-            switch (l.getType()) {
-              case LIGHT_DIRECTIONAL:
-              case LIGHT_SPHERE:
-              {
-                break;
-              }
-              case LIGHT_PROJECTIVE:
-              {
-                final SBLightProjective lp = (SBLightProjective) l;
-                this.cameraSet(new SceneObserverProjectiveLight(lp));
-                return;
-              }
-            }
+            l
+              .lightVisitableAccept(new SBLightVisitor<Unit, ConstraintError>() {
+                @Override public Unit lightVisitDirectional(
+                  final SBLightDirectional kl)
+                  throws ConstraintError,
+                    RException,
+                    ConstraintError
+                {
+                  return Unit.unit();
+                }
+
+                @SuppressWarnings("synthetic-access") @Override public
+                  Unit
+                  lightVisitProjective(
+                    final SBLightProjective kl)
+                    throws ConstraintError,
+                      RException,
+                      ConstraintError
+                {
+                  SBGLRenderer.this
+                    .cameraSet(new SceneObserverProjectiveLight(kl));
+                  return Unit.unit();
+                }
+
+                @Override public Unit lightVisitSpherical(
+                  final SBLightSpherical kl)
+                  throws ConstraintError,
+                    RException,
+                    ConstraintError
+                {
+                  return Unit.unit();
+                }
+              });
           }
         }
 
@@ -887,6 +945,8 @@ final class SBGLRenderer implements GLEventListener
   }
 
   private void cameraHandle()
+    throws RException,
+      ConstraintError
   {
     final double speed = 0.01;
 
@@ -942,7 +1002,7 @@ final class SBGLRenderer implements GLEventListener
       {
         final SceneObserverProjectiveLight observer =
           (SceneObserverProjectiveLight) this.camera_current;
-        final KProjective actual = observer.getLight().getLight();
+        final KLightProjective actual = observer.getLight().getLight();
         KMatrices.makeViewMatrix(
           this.camera_transform_context,
           actual.getPosition(),
@@ -950,7 +1010,7 @@ final class SBGLRenderer implements GLEventListener
           this.camera_view_matrix_temporary);
 
         this.camera_view_matrix =
-          new RMatrixI4x4F<RTransformView>(this.camera_view_matrix_temporary);
+          RMatrixI4x4F.newFromReadable(this.camera_view_matrix_temporary);
         break;
       }
     }
@@ -989,7 +1049,7 @@ final class SBGLRenderer implements GLEventListener
       {
         final SceneObserverProjectiveLight observer =
           (SceneObserverProjectiveLight) this.camera_current;
-        final KProjective actual = observer.getLight().getLight();
+        final KLightProjective actual = observer.getLight().getLight();
         final RMatrixI4x4F<RTransformProjection> p = actual.getProjection();
         MatrixM4x4F.setIdentity(this.matrix_projection);
         p.makeMatrixM4x4F(this.matrix_projection);
@@ -1082,9 +1142,9 @@ final class SBGLRenderer implements GLEventListener
       this.failed(e);
     } catch (final ConstraintError e) {
       this.failed(e);
-    } catch (final Exception e) {
-      this.failed(e);
     } catch (final RException e) {
+      this.failed(e);
+    } catch (final Exception e) {
       this.failed(e);
     }
   }
@@ -1123,8 +1183,9 @@ final class SBGLRenderer implements GLEventListener
 
   @Nonnull RMatrixI4x4F<RTransformProjection> getProjection()
   {
-    // XXX: Not thread safe!
-    return new RMatrixI4x4F<RTransformProjection>(this.matrix_projection);
+    // XXX: Not thread safe! Something else may modify the matrix while it is
+    // being read
+    return RMatrixI4x4F.newFromReadable(this.matrix_projection);
   }
 
   private void handlePauseToggleRequest()
@@ -1188,23 +1249,27 @@ final class SBGLRenderer implements GLEventListener
 
                 shadow
                   .shadowAccept(new KShadowVisitor<Unit, ConstraintError>() {
-                    @Override public Unit shadowVisitBasic(
+                    @Override public Unit shadowVisitMappedBasic(
                       final @Nonnull KShadowMappedBasic s)
-                      throws RException,
+                      throws ConstraintError,
+                        JCGLException,
+                        RException,
                         ConstraintError
                     {
                       n.append("basic-");
-                      n.append(s.getDescription().getLightID());
+                      n.append(s.getDescription().mapGetLightID());
                       return Unit.unit();
                     }
 
-                    @Override public Unit shadowVisitVariance(
+                    @Override public Unit shadowVisitMappedVariance(
                       final @Nonnull KShadowMappedVariance s)
-                      throws RException,
+                      throws ConstraintError,
+                        JCGLException,
+                        RException,
                         ConstraintError
                     {
                       n.append("variance-");
-                      n.append(s.getDescription().getLightID());
+                      n.append(s.getDescription().mapGetLightID());
                       return Unit.unit();
                     }
                   });
@@ -1663,19 +1728,23 @@ final class SBGLRenderer implements GLEventListener
     final KFramebufferForwardType old = this.framebuffer;
 
     final KFramebufferRGBADescription rgba_description =
-      new KFramebufferRGBADescription(
+      KFramebufferRGBADescription.newDescription(
         size,
         TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
         TextureFilterMinification.TEXTURE_FILTER_LINEAR,
         KRGBAPrecision.RGBA_PRECISION_8);
+
     final KFramebufferDepthDescription depth_description =
-      new KFramebufferDepthDescription(
+      KFramebufferDepthDescription.newDescription(
         size,
         TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
         TextureFilterMinification.TEXTURE_FILTER_LINEAR,
         KDepthPrecision.DEPTH_PRECISION_24);
+
     final KFramebufferForwardDescription description =
-      new KFramebufferForwardDescription(rgba_description, depth_description);
+      KFramebufferForwardDescription.newDescription(
+        rgba_description,
+        depth_description);
 
     this.framebuffer = KFramebufferForward.newFramebuffer(g, description);
     if (old != null) {
@@ -1909,178 +1978,55 @@ final class SBGLRenderer implements GLEventListener
         this.matrix_modelview);
 
       for (final SBLight light : this.scene_lights) {
-        switch (light.getType()) {
-          case LIGHT_DIRECTIONAL:
+        light.lightVisitableAccept(new SBLightVisitor<Unit, JCGLException>() {
+          @Override public Unit lightVisitDirectional(
+            final @Nonnull SBLightDirectional l)
+            throws ConstraintError,
+              RException,
+              ConstraintError
           {
-            break;
+            return Unit.unit();
           }
-          case LIGHT_SPHERE:
+
+          @SuppressWarnings("synthetic-access") @Override public
+            Unit
+            lightVisitProjective(
+              final @Nonnull SBLightProjective l)
+              throws ConstraintError,
+                RException,
+                ConstraintError,
+                JCGLException
           {
-            final KLight.KSphere lp = (KSphere) light.getLight();
-            final KMesh mesh =
-              this.sphere_meshes.get(SBGLRenderer.SPHERE_16_8_MESH);
-
-            final VectorM4F colour =
-              new VectorM4F(
-                lp.getColour().x,
-                lp.getColour().y,
-                lp.getColour().z,
-                1.0f);
-
-            /**
-             * Render center.
-             */
-
-            MatrixM4x4F.setIdentity(this.matrix_model);
-            MatrixM4x4F.translateByVector3FInPlace(
-              this.matrix_model,
-              lp.getPosition());
-            MatrixM4x4F.set(this.matrix_model, 0, 0, 0.05f);
-            MatrixM4x4F.set(this.matrix_model, 1, 1, 0.05f);
-            MatrixM4x4F.set(this.matrix_model, 2, 2, 0.05f);
-
-            MatrixM4x4F.multiply(
-              this.matrix_view,
-              this.matrix_model,
-              this.matrix_modelview);
-
-            final JCBExecutionAPI e = this.program_ccolour.getExecutable();
-            e.execRun(new JCBExecutorProcedure() {
-              @SuppressWarnings("synthetic-access") @Override public
-                void
-                call(
-                  final @Nonnull JCBProgram program)
-                  throws ConstraintError,
-                    JCGLException,
-                    JCBExecutionException
-              {
-                final IndexBuffer indices = mesh.getIndexBuffer();
-                final ArrayBuffer array = mesh.getArrayBuffer();
-
-                KShadingProgramCommon.putMatrixProjection(
-                  program,
-                  SBGLRenderer.this.matrix_projection);
-                KShadingProgramCommon.putMatrixModelView(
-                  program,
-                  SBGLRenderer.this.matrix_modelview);
-                program.programUniformPutVector4f("f_ccolour", colour);
-
-                gl.arrayBufferBind(array);
-                try {
-                  KShadingProgramCommon.bindAttributePosition(program, array);
-
-                  program.programExecute(new JCBProgramProcedure() {
-                    @Override public void call()
-                      throws ConstraintError,
-                        JCGLException,
-                        Throwable
-                    {
-                      gl
-                        .drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                    }
-                  });
-                } finally {
-                  gl.arrayBufferUnbind();
-                }
-              }
-            });
-
-            /**
-             * Render surface.
-             */
-
-            if (this.lights_show_surface.get()) {
-              MatrixM4x4F.set(this.matrix_model, 0, 0, lp.getRadius());
-              MatrixM4x4F.set(this.matrix_model, 1, 1, lp.getRadius());
-              MatrixM4x4F.set(this.matrix_model, 2, 2, lp.getRadius());
-
-              MatrixM4x4F.multiply(
-                this.matrix_view,
-                this.matrix_model,
-                this.matrix_modelview);
-
-              e.execRun(new JCBExecutorProcedure() {
-                @SuppressWarnings("synthetic-access") @Override public
-                  void
-                  call(
-                    final @Nonnull JCBProgram program)
-                    throws ConstraintError,
-                      JCGLException,
-                      JCBExecutionException
-                {
-                  final IndexBuffer indices = mesh.getIndexBuffer();
-                  final ArrayBuffer array = mesh.getArrayBuffer();
-
-                  KShadingProgramCommon.putMatrixProjection(
-                    program,
-                    SBGLRenderer.this.matrix_projection);
-                  KShadingProgramCommon.putMatrixModelView(
-                    program,
-                    SBGLRenderer.this.matrix_modelview);
-
-                  colour.w = colour.w * 0.1f;
-                  program.programUniformPutVector4f("f_ccolour", colour);
-
-                  gl.arrayBufferBind(array);
-                  try {
-                    KShadingProgramCommon.bindAttributePosition(
-                      program,
-                      array);
-
-                    program.programExecute(new JCBProgramProcedure() {
-                      @Override public void call()
-                        throws ConstraintError,
-                          JCGLException,
-                          Throwable
-                      {
-                        gl.drawElements(
-                          Primitives.PRIMITIVE_TRIANGLES,
-                          indices);
-                      }
-                    });
-                  } finally {
-                    gl.arrayBufferUnbind();
-                  }
-                }
-              });
-            }
-            break;
-          }
-          case LIGHT_PROJECTIVE:
-          {
-            final SBLightProjective actual =
-              (SBLight.SBLightProjective) light;
-            final KLight.KProjective lp = actual.getLight();
+            final KLightProjective kp = l.getLight();
 
             final KMesh mesh =
-              this.sphere_meshes.get(SBGLRenderer.SPHERE_16_8_MESH);
+              SBGLRenderer.this.sphere_meshes
+                .get(SBGLRenderer.SPHERE_16_8_MESH);
 
             final VectorM4F colour =
-              new VectorM4F(
-                lp.getColour().x,
-                lp.getColour().y,
-                lp.getColour().z,
-                1.0f);
+              new VectorM4F(kp.lightGetColour().x, kp.lightGetColour().y, kp
+                .lightGetColour().z, 1.0f);
 
             {
               /**
                * Render center.
                */
 
-              MatrixM4x4F.setIdentity(this.matrix_model);
+              MatrixM4x4F.setIdentity(SBGLRenderer.this.matrix_model);
               MatrixM4x4F.translateByVector3FInPlace(
-                this.matrix_model,
-                lp.getPosition());
-              MatrixM4x4F.set(this.matrix_model, 0, 0, 0.05f);
-              MatrixM4x4F.set(this.matrix_model, 1, 1, 0.05f);
-              MatrixM4x4F.set(this.matrix_model, 2, 2, 0.05f);
+                SBGLRenderer.this.matrix_model,
+                kp.getPosition());
+              MatrixM4x4F.set(SBGLRenderer.this.matrix_model, 0, 0, 0.05f);
+              MatrixM4x4F.set(SBGLRenderer.this.matrix_model, 1, 1, 0.05f);
+              MatrixM4x4F.set(SBGLRenderer.this.matrix_model, 2, 2, 0.05f);
 
               MatrixM4x4F.multiply(
-                this.matrix_view,
-                this.matrix_model,
-                this.matrix_modelview);
+                SBGLRenderer.this.matrix_view,
+                SBGLRenderer.this.matrix_model,
+                SBGLRenderer.this.matrix_modelview);
 
-              final JCBExecutionAPI e = this.program_ccolour.getExecutable();
+              final JCBExecutionAPI e =
+                SBGLRenderer.this.program_ccolour.getExecutable();
               e.execRun(new JCBExecutorProcedure() {
                 @SuppressWarnings("synthetic-access") @Override public
                   void
@@ -2129,37 +2075,42 @@ final class SBGLRenderer implements GLEventListener
              * Render frustum.
              */
 
-            if (this.lights_show_surface.get()) {
-              MatrixM4x4F.setIdentity(this.matrix_model);
+            if (SBGLRenderer.this.lights_show_surface.get()) {
+              MatrixM4x4F.setIdentity(SBGLRenderer.this.matrix_model);
               MatrixM4x4F.translateByVector3FInPlace(
-                this.matrix_model,
-                lp.getPosition());
+                SBGLRenderer.this.matrix_model,
+                kp.getPosition());
 
               QuaternionM4F.makeRotationMatrix4x4(
-                lp.getOrientation(),
-                this.matrix_model_temporary);
+                kp.getOrientation(),
+                SBGLRenderer.this.matrix_model_temporary);
 
               MatrixM4x4F.multiplyInPlace(
-                this.matrix_model,
-                this.matrix_model_temporary);
+                SBGLRenderer.this.matrix_model,
+                SBGLRenderer.this.matrix_model_temporary);
 
               MatrixM4x4F.multiply(
-                this.matrix_view,
-                this.matrix_model,
-                this.matrix_modelview);
+                SBGLRenderer.this.matrix_view,
+                SBGLRenderer.this.matrix_model,
+                SBGLRenderer.this.matrix_modelview);
 
               final SBProjectionDescription description =
-                actual.getDescription().getProjection();
+                l.getDescription().getProjection();
 
               final SBVisibleProjection vp;
-              if (this.projection_cache.containsKey(description)) {
-                vp = this.projection_cache.get(description);
+              if (SBGLRenderer.this.projection_cache.containsKey(description)) {
+                vp = SBGLRenderer.this.projection_cache.get(description);
               } else {
-                vp = SBVisibleProjection.make(gl, description, this.log);
-                this.projection_cache.put(description, vp);
+                vp =
+                  SBVisibleProjection.make(
+                    gl,
+                    description,
+                    SBGLRenderer.this.log);
+                SBGLRenderer.this.projection_cache.put(description, vp);
               }
 
-              final JCBExecutionAPI e = this.program_ccolour.getExecutable();
+              final JCBExecutionAPI e =
+                SBGLRenderer.this.program_ccolour.getExecutable();
 
               e.execRun(new JCBExecutorProcedure() {
                 @SuppressWarnings("synthetic-access") @Override public
@@ -2203,16 +2154,167 @@ final class SBGLRenderer implements GLEventListener
               });
             }
 
-            break;
+            return Unit.unit();
           }
-        }
+
+          @Override public Unit lightVisitSpherical(
+            final @Nonnull SBLightSpherical l)
+            throws ConstraintError,
+              RException,
+              ConstraintError,
+              JCGLException
+          {
+            final KLightSphere kp = l.getLight();
+
+            final KMesh mesh =
+              SBGLRenderer.this.sphere_meshes
+                .get(SBGLRenderer.SPHERE_16_8_MESH);
+
+            final VectorM4F colour =
+              new VectorM4F(kp.lightGetColour().x, kp.lightGetColour().y, kp
+                .lightGetColour().z, 1.0f);
+
+            /**
+             * Render center.
+             */
+
+            MatrixM4x4F.setIdentity(SBGLRenderer.this.matrix_model);
+            MatrixM4x4F.translateByVector3FInPlace(
+              SBGLRenderer.this.matrix_model,
+              kp.getPosition());
+            MatrixM4x4F.set(SBGLRenderer.this.matrix_model, 0, 0, 0.05f);
+            MatrixM4x4F.set(SBGLRenderer.this.matrix_model, 1, 1, 0.05f);
+            MatrixM4x4F.set(SBGLRenderer.this.matrix_model, 2, 2, 0.05f);
+
+            MatrixM4x4F.multiply(
+              SBGLRenderer.this.matrix_view,
+              SBGLRenderer.this.matrix_model,
+              SBGLRenderer.this.matrix_modelview);
+
+            final JCBExecutionAPI e =
+              SBGLRenderer.this.program_ccolour.getExecutable();
+            e.execRun(new JCBExecutorProcedure() {
+              @SuppressWarnings("synthetic-access") @Override public
+                void
+                call(
+                  final @Nonnull JCBProgram program)
+                  throws ConstraintError,
+                    JCGLException,
+                    JCBExecutionException
+              {
+                final IndexBuffer indices = mesh.getIndexBuffer();
+                final ArrayBuffer array = mesh.getArrayBuffer();
+
+                KShadingProgramCommon.putMatrixProjection(
+                  program,
+                  SBGLRenderer.this.matrix_projection);
+                KShadingProgramCommon.putMatrixModelView(
+                  program,
+                  SBGLRenderer.this.matrix_modelview);
+                program.programUniformPutVector4f("f_ccolour", colour);
+
+                gl.arrayBufferBind(array);
+                try {
+                  KShadingProgramCommon.bindAttributePosition(program, array);
+
+                  program.programExecute(new JCBProgramProcedure() {
+                    @Override public void call()
+                      throws ConstraintError,
+                        JCGLException,
+                        Throwable
+                    {
+                      gl
+                        .drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+                    }
+                  });
+                } finally {
+                  gl.arrayBufferUnbind();
+                }
+              }
+            });
+
+            /**
+             * Render surface.
+             */
+
+            if (SBGLRenderer.this.lights_show_surface.get()) {
+              MatrixM4x4F.set(
+                SBGLRenderer.this.matrix_model,
+                0,
+                0,
+                kp.getRadius());
+              MatrixM4x4F.set(
+                SBGLRenderer.this.matrix_model,
+                1,
+                1,
+                kp.getRadius());
+              MatrixM4x4F.set(
+                SBGLRenderer.this.matrix_model,
+                2,
+                2,
+                kp.getRadius());
+
+              MatrixM4x4F.multiply(
+                SBGLRenderer.this.matrix_view,
+                SBGLRenderer.this.matrix_model,
+                SBGLRenderer.this.matrix_modelview);
+
+              e.execRun(new JCBExecutorProcedure() {
+                @SuppressWarnings("synthetic-access") @Override public
+                  void
+                  call(
+                    final @Nonnull JCBProgram program)
+                    throws ConstraintError,
+                      JCGLException,
+                      JCBExecutionException
+                {
+                  final IndexBuffer indices = mesh.getIndexBuffer();
+                  final ArrayBuffer array = mesh.getArrayBuffer();
+
+                  KShadingProgramCommon.putMatrixProjection(
+                    program,
+                    SBGLRenderer.this.matrix_projection);
+                  KShadingProgramCommon.putMatrixModelView(
+                    program,
+                    SBGLRenderer.this.matrix_modelview);
+
+                  colour.w = colour.w * 0.1f;
+                  program.programUniformPutVector4f("f_ccolour", colour);
+
+                  gl.arrayBufferBind(array);
+                  try {
+                    KShadingProgramCommon.bindAttributePosition(
+                      program,
+                      array);
+
+                    program.programExecute(new JCBProgramProcedure() {
+                      @Override public void call()
+                        throws ConstraintError,
+                          JCGLException,
+                          Throwable
+                      {
+                        gl.drawElements(
+                          Primitives.PRIMITIVE_TRIANGLES,
+                          indices);
+                      }
+                    });
+                  } finally {
+                    gl.arrayBufferUnbind();
+                  }
+                }
+              });
+            }
+            return Unit.unit();
+          }
+        });
       }
     }
   }
 
   private void renderScene()
     throws ConstraintError,
-      RException
+      RException,
+      JCGLException
   {
     final SBSceneControllerRenderer c = this.controller.get();
 
@@ -2223,18 +2325,17 @@ final class SBGLRenderer implements GLEventListener
       this.cameraMakePerspectiveProjection(size_x, size_y);
 
       final RMatrixI4x4F<RTransformProjection> projection =
-        new RMatrixI4x4F<RTransformProjection>(this.matrix_projection);
+        RMatrixI4x4F.newFromReadable(this.matrix_projection);
 
       final KCamera kcamera =
-        KCamera.make(this.camera_view_matrix, projection);
+        KCamera.newCamera(this.camera_view_matrix, projection);
 
-      final Pair<Collection<SBLight>, Collection<Pair<KMeshInstanceTransformed, SBInstance>>> scene_things =
+      final Pair<Collection<SBLight>, Collection<Pair<KInstanceTransformed, SBInstance>>> scene_things =
         c.rendererGetScene();
 
       this.scene_lights = scene_things.first;
 
-      final KSceneBuilder builder =
-        KScene.newBuilder(this.label_cache, kcamera);
+      final KSceneBuilder builder = KScene.newBuilder(kcamera);
 
       /**
        * For each light, add instances. The adding of translucent objects is
@@ -2245,8 +2346,8 @@ final class SBGLRenderer implements GLEventListener
        * kernel).
        */
 
-      final ArrayList<Pair<KMeshInstanceTransformed, SBInstance>> translucents =
-        new ArrayList<Pair<KMeshInstanceTransformed, SBInstance>>();
+      final ArrayList<Pair<KInstanceTransformedTranslucent, SBInstance>> translucents =
+        new ArrayList<Pair<KInstanceTransformedTranslucent, SBInstance>>();
 
       final HashSet<KLight> all_lights = new HashSet<KLight>();
       for (final SBLight light : scene_things.first) {
@@ -2256,39 +2357,54 @@ final class SBGLRenderer implements GLEventListener
       for (final SBLight light : scene_things.first) {
         final KLight klight = light.getLight();
 
-        for (final Pair<KMeshInstanceTransformed, SBInstance> pair : scene_things.second) {
-          final KMeshInstanceTransformed instance = pair.first;
+        for (final Pair<KInstanceTransformed, SBInstance> pair : scene_things.second) {
+          pair.first
+            .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, RException>() {
+              @Override public Unit transformedVisitOpaque(
+                final @Nonnull KInstanceTransformedOpaque i)
+                throws RException,
+                  ConstraintError,
+                  RException,
+                  JCGLException
+              {
+                if (pair.second.isLit()) {
+                  builder.sceneAddOpaqueLitVisibleWithShadow(klight, i);
+                } else {
+                  builder.sceneAddOpaqueUnlit(i);
+                }
+                return Unit.unit();
+              }
 
-          final KMaterialAlphaLabel alpha =
-            this.label_cache.getAlphaLabel(instance.getInstance());
+              @Override public Unit transformedVisitTranslucentRefractive(
+                final @Nonnull KInstanceTransformedTranslucentRefractive i)
+                throws RException,
+                  ConstraintError,
+                  RException,
+                  JCGLException
+              {
+                final Pair<KInstanceTransformedTranslucent, SBInstance> p =
+                  new Pair<KInstanceTransformedTranslucent, SBInstance>(
+                    i,
+                    pair.second);
+                translucents.add(p);
+                return Unit.unit();
+              }
 
-          if (pair.second.getDescription().isLit()) {
-            switch (alpha) {
-              case ALPHA_OPAQUE:
+              @Override public Unit transformedVisitTranslucentRegular(
+                final @Nonnull KInstanceTransformedTranslucentRegular i)
+                throws RException,
+                  ConstraintError,
+                  RException,
+                  JCGLException
               {
-                builder.sceneAddOpaqueLitVisibleWithShadow(klight, instance);
-                break;
+                final Pair<KInstanceTransformedTranslucent, SBInstance> p =
+                  new Pair<KInstanceTransformedTranslucent, SBInstance>(
+                    i,
+                    pair.second);
+                translucents.add(p);
+                return Unit.unit();
               }
-              case ALPHA_TRANSLUCENT:
-              {
-                translucents.add(pair);
-                break;
-              }
-            }
-          } else {
-            switch (alpha) {
-              case ALPHA_OPAQUE:
-              {
-                builder.sceneAddOpaqueUnlit(instance);
-                break;
-              }
-              case ALPHA_TRANSLUCENT:
-              {
-                translucents.add(pair);
-                break;
-              }
-            }
-          }
+            });
         }
       }
 
@@ -2301,10 +2417,12 @@ final class SBGLRenderer implements GLEventListener
 
       Collections.sort(
         translucents,
-        new Comparator<Pair<KMeshInstanceTransformed, SBInstance>>() {
-          @Override public int compare(
-            final @Nonnull Pair<KMeshInstanceTransformed, SBInstance> o1,
-            final @Nonnull Pair<KMeshInstanceTransformed, SBInstance> o2)
+        new Comparator<Pair<KInstanceTransformedTranslucent, SBInstance>>() {
+          @Override public
+            int
+            compare(
+              final @Nonnull Pair<KInstanceTransformedTranslucent, SBInstance> o1,
+              final @Nonnull Pair<KInstanceTransformedTranslucent, SBInstance> o2)
           {
             final RVectorI3F<RSpaceWorld> pos1 = o1.second.getPosition();
             final RVectorI3F<RSpaceWorld> pos2 = o2.second.getPosition();
@@ -2312,17 +2430,45 @@ final class SBGLRenderer implements GLEventListener
           }
         });
 
-      for (final Pair<KMeshInstanceTransformed, SBInstance> pair : translucents) {
-        if (pair.second.getDescription().isLit()) {
-          builder.sceneAddTranslucentLit(pair.first, all_lights);
-          for (final KLight k : all_lights) {
-            if (k.hasShadow()) {
-              builder.sceneAddInvisibleWithShadow(k, pair.first);
+      for (final Pair<KInstanceTransformedTranslucent, SBInstance> pair : translucents) {
+        pair.first
+          .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, RException>() {
+            @Override public Unit transformedVisitOpaque(
+              final @Nonnull KInstanceTransformedOpaque i)
+              throws RException,
+                ConstraintError,
+                RException,
+                JCGLException
+            {
+              throw new UnreachableCodeException();
             }
-          }
-        } else {
-          builder.sceneAddTranslucentUnlit(pair.first);
-        }
+
+            @Override public Unit transformedVisitTranslucentRefractive(
+              final @Nonnull KInstanceTransformedTranslucentRefractive i)
+              throws RException,
+                ConstraintError,
+                RException,
+                JCGLException
+            {
+              builder.sceneAddTranslucentUnlit(i);
+              return Unit.unit();
+            }
+
+            @Override public Unit transformedVisitTranslucentRegular(
+              final @Nonnull KInstanceTransformedTranslucentRegular i)
+              throws RException,
+                ConstraintError,
+                RException,
+                JCGLException
+            {
+              if (pair.second.isLit()) {
+                builder.sceneAddTranslucentLit(i, all_lights);
+              } else {
+                builder.sceneAddTranslucentUnlit(i);
+              }
+              return Unit.unit();
+            }
+          });
       }
 
       if (this.renderer != null) {

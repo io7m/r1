@@ -21,9 +21,9 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.renderer.RException;
-import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapBasicDescription;
-import com.io7m.renderer.kernel.KShadowMapDescription.KShadowMapVarianceDescription;
+import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
+import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
+import com.io7m.renderer.types.RException;
 
 abstract class KShadowMap implements KShadowMapType
 {

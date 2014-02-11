@@ -20,7 +20,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.renderer.RException;
+import com.io7m.renderer.types.RException;
 
 interface KTextureUnitWith
 {

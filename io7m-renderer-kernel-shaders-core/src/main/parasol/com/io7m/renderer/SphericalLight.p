@@ -23,10 +23,11 @@ package com.io7m.renderer;
 
 module SphericalLight is
 
-  import com.io7m.parasol.Vector3f   as V3;
-  import com.io7m.parasol.Float      as F;
+  import com.io7m.parasol.Vector3f as V3;
+  import com.io7m.parasol.Float    as F;
 
-  import com.io7m.renderer.Materials as M;
+  import com.io7m.renderer.Emission;
+  import com.io7m.renderer.Specular;
   import com.io7m.renderer.Light;
 
   --
@@ -77,7 +78,7 @@ module SphericalLight is
   function specular_colour (
     light : Light.t,
     d     : Light.vectors,
-    s     : M.specular
+    s     : Specular.t
   ) : vector_3f =
     let
       value factor =
@@ -90,20 +91,20 @@ module SphericalLight is
 
   --
   -- Given a spherical light [light], a surface normal [n],
-  -- surface properties [material], and assuming an observer at [p],
+  -- surface properties [s], and assuming an observer at [p],
   -- calculate the diffuse and specular terms for the surface.
   --
 
   function diffuse_specular (
-    light    : Light.t,
-    n        : vector_3f,
-    p        : vector_3f,
-    material : M.t
+    light : Light.t,
+    n     : vector_3f,
+    p     : vector_3f,
+    s     : Specular.t
   ) : vector_3f =
     let
       value r  = Light.calculate (light, p, n);
       value dc = diffuse_colour (light, r.vectors, 0.0);
-      value sc = specular_colour (light, r.vectors, material.specular);
+      value sc = specular_colour (light, r.vectors, s);
     in
       V3.multiply_scalar (V3.add (dc, sc), r.attenuation)
     end;
@@ -117,15 +118,16 @@ module SphericalLight is
   --
 
   function diffuse_specular_emissive (
-    light    : Light.t,
-    n        : vector_3f,
-    p        : vector_3f,
-    material : M.t
+    light : Light.t,
+    n     : vector_3f,
+    p     : vector_3f,
+    m     : Emission.t,
+    s     : Specular.t
   ) : vector_3f =
     let
       value r = Light.calculate (light, p, n);
-      value dc = diffuse_colour (light, r.vectors, material.emissive.emissive);
-      value sc = specular_colour (light, r.vectors, material.specular);
+      value dc = diffuse_colour (light, r.vectors, m.amount);
+      value sc = specular_colour (light, r.vectors, s);
     in
       V3.multiply_scalar (V3.add (dc, sc), r.attenuation)
     end;
@@ -139,14 +141,14 @@ module SphericalLight is
   --
 
   function diffuse_only_emissive (
-    light    : Light.t,
-    n        : vector_3f,
-    p        : vector_3f,
-    material : M.t
+    light : Light.t,
+    n     : vector_3f,
+    p     : vector_3f,
+    m     : Emission.t
   ) : vector_3f =
     let
       value r = Light.calculate (light, p, n);
-      value c = diffuse_colour (light, r.vectors, material.emissive.emissive);
+      value c = diffuse_colour (light, r.vectors, m.amount);
     in
       V3.multiply_scalar (c, r.attenuation)
     end;

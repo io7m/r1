@@ -18,13 +18,8 @@ package com.io7m.renderer.kernel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Future;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -37,114 +32,19 @@ import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.TextureFilterMagnification;
-import com.io7m.jcanephora.TextureFilterMinification;
-import com.io7m.jcanephora.TextureWrapR;
-import com.io7m.jcanephora.TextureWrapS;
-import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.RSpaceWorld;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionProjective;
+import com.io7m.renderer.types.RSpaceWorld;
 
 public final class SBLightControlsProjective implements
-  SBLightDescriptionControls
+  SBControlsDataType<SBLightDescriptionProjective>,
+  SBLightControlsType
 {
-  static class K implements
-    SBSceneControllerLights,
-    SBSceneControllerTextures
-  {
-    @Override public void sceneChangeListenerAdd(
-      final SBSceneChangeListener listener)
-    {
-      // TODO Auto-generated method stub
-    }
-
-    @Override public
-      <T extends SBTexture2DKind>
-      Future<SBTexture2D<T>>
-      sceneTexture2DLoad(
-        final File file,
-        final TextureWrapS wrap_s,
-        final TextureWrapT wrap_t,
-        final TextureFilterMinification filter_min,
-        final TextureFilterMagnification filter_mag)
-        throws ConstraintError
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override public Future<SBTextureCube> sceneTextureCubeLoad(
-      final File file,
-      final TextureWrapR wrap_r,
-      final TextureWrapS wrap_s,
-      final TextureWrapT wrap_t,
-      final TextureFilterMinification filter_min,
-      final TextureFilterMagnification filter_mag)
-      throws ConstraintError
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override public Map<PathVirtual, SBTexture2D<?>> sceneTextures2DGet()
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override public Map<PathVirtual, SBTextureCube> sceneTexturesCubeGet()
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override public void sceneLightAddByDescription(
-      final SBLightDescription d)
-      throws ConstraintError
-    {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override public boolean sceneLightExists(
-      final Integer id)
-      throws ConstraintError
-    {
-      // TODO Auto-generated method stub
-      return false;
-    }
-
-    @Override public Integer sceneLightFreshID()
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override public SBLight sceneLightGet(
-      final Integer id)
-      throws ConstraintError
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override public void sceneLightRemove(
-      final Integer id)
-      throws ConstraintError
-    {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override public Collection<SBLight> sceneLightsGetAll()
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-  }
+  /**
+   * Simple test app.
+   */
 
   public static void main(
     final String args[])
@@ -162,9 +62,14 @@ public final class SBLightControlsProjective implements
             final DesignGridLayout layout)
             throws ConstraintError
           {
+            final SBExampleController controller = new SBExampleController();
             final SBLightControlsProjective controls =
-              SBLightControlsProjective.newControls(this, new K(), jlog);
-            controls.addToLayout(layout);
+              SBLightControlsProjective.newControls(
+                this,
+                controller,
+                Integer.valueOf(0),
+                jlog);
+            controls.controlsAddToLayout(layout);
           }
         };
       }
@@ -172,15 +77,16 @@ public final class SBLightControlsProjective implements
   }
 
   public static @Nonnull
-    <C extends SBSceneControllerTextures & SBSceneControllerLights>
+    <C extends SBSceneControllerTextures>
     SBLightControlsProjective
     newControls(
       final @Nonnull JFrame parent,
       final @Nonnull C controller,
+      final @Nonnull Integer id,
       final @Nonnull Log log)
       throws ConstraintError
   {
-    return new SBLightControlsProjective(parent, controller, log);
+    return new SBLightControlsProjective(parent, controller, id, log);
   }
 
   private final @Nonnull SBFloatHSlider               falloff;
@@ -194,19 +100,20 @@ public final class SBLightControlsProjective implements
   private final @Nonnull SBColourInput                colour;
   private final @Nonnull SBLightShadowControls        shadow;
   private final @Nonnull SBSceneControllerTextures    texture_controller;
-  private final @Nonnull SBSceneControllerLights      light_controller;
   private final @Nonnull JFrame                       parent;
+  private final @Nonnull Integer                      id;
 
-  private <C extends SBSceneControllerTextures & SBSceneControllerLights> SBLightControlsProjective(
+  private <C extends SBSceneControllerTextures> SBLightControlsProjective(
     final @Nonnull JFrame parent,
     final @Nonnull C controller,
+    final @Nonnull Integer id,
     final @Nonnull Log log)
     throws ConstraintError
   {
     this.parent = Constraints.constrainNotNull(parent, "Parent");
     this.texture_controller =
       Constraints.constrainNotNull(controller, "Controller");
-    this.light_controller = controller;
+    this.id = Constraints.constrainNotNull(id, "ID field");
 
     this.group = new RowGroup();
     this.colour = SBColourInput.newInput(parent, "Colour");
@@ -221,8 +128,10 @@ public final class SBLightControlsProjective implements
     this.texture.setEditable(false);
     this.texture_select = new JButton("Select...");
     this.texture_select.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final ActionEvent e)
+      @SuppressWarnings("synthetic-access") @Override public
+        void
+        actionPerformed(
+          final ActionEvent e)
       {
         final SBTextures2DWindow twindow =
           new SBTextures2DWindow(
@@ -238,14 +147,14 @@ public final class SBLightControlsProjective implements
     this.intensity.setCurrent(1.0f);
   }
 
-  @Override public void addToLayout(
+  @Override public void controlsAddToLayout(
     final @Nonnull DesignGridLayout layout)
   {
-    this.intensity.addToLayout(layout.row().group(this.group));
-    this.colour.addToLayout(layout.row().group(this.group));
-    this.position.addToLayout(layout.row().group(this.group));
-    this.orientation.addToLayout(layout.row().group(this.group));
-    this.falloff.addToLayout(layout.row().group(this.group));
+    this.intensity.controlsAddToLayout(layout);
+    this.colour.controlsAddToLayout(layout);
+    this.position.controlsAddToLayout(layout);
+    this.orientation.controlsAddToLayout(layout);
+    this.falloff.controlsAddToLayout(layout);
 
     layout
       .row()
@@ -254,8 +163,8 @@ public final class SBLightControlsProjective implements
       .add(this.texture, 3)
       .add(this.texture_select);
 
-    this.projection.addToLayout(layout);
-    this.shadow.addToLayout(layout);
+    this.projection.controlsAddToLayout(layout);
+    this.shadow.controlsAddToLayout(layout);
   }
 
   public void setDescription(
@@ -271,14 +180,41 @@ public final class SBLightControlsProjective implements
     this.shadow.setDescription(description.getShadow());
   }
 
-  @Override public SBLightDescription getDescription(
-    final @CheckForNull Integer id)
+  @Override public void controlsHide()
+  {
+    this.intensity.controlsHide();
+    this.colour.controlsHide();
+    this.position.controlsHide();
+    this.orientation.controlsHide();
+    this.falloff.controlsHide();
+    this.group.hide();
+    this.projection.controlsHide();
+    this.shadow.controlsHide();
+  }
+
+  @Override public void controlsShow()
+  {
+    this.intensity.controlsShow();
+    this.colour.controlsShow();
+    this.position.controlsShow();
+    this.orientation.controlsShow();
+    this.falloff.controlsShow();
+    this.group.forceShow();
+    this.projection.controlsShow();
+    this.shadow.controlsShow();
+  }
+
+  @Override public void controlsLoadFrom(
+    final SBLightDescriptionProjective t)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public SBLightDescriptionProjective controlsSave()
     throws SBExceptionInputError,
       ConstraintError
   {
-    final Integer new_id =
-      id != null ? id : this.light_controller.sceneLightFreshID();
-
     final PathVirtual path =
       PathVirtual.ofString(SBTextFieldUtilities
         .getFieldNonEmptyStringOrError(this.texture));
@@ -291,33 +227,7 @@ public final class SBLightControlsProjective implements
       path,
       this.colour.getColour(),
       this.intensity.getCurrent(),
-      this.shadow.getShadow(new_id),
-      new_id);
-  }
-
-  @Override public void hide()
-  {
-    this.projection.forceShow();
-    this.projection.hide();
-    this.shadow.forceShow();
-    this.shadow.hide();
-    this.group.hide();
-    this.parent.pack();
-  }
-
-  @Override public void show()
-  {
-    this.projection.forceShow();
-    this.shadow.forceShow();
-    this.group.show();
-    this.parent.pack();
-  }
-
-  @Override public void forceShow()
-  {
-    this.projection.forceShow();
-    this.shadow.forceShow();
-    this.group.forceShow();
-    this.parent.pack();
+      this.shadow.getShadow(this.id),
+      this.id);
   }
 }

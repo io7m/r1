@@ -45,7 +45,7 @@ import org.apache.commons.cli.PosixParser;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.collada.ColladaDocument;
 import com.io7m.renderer.xml.collada.ColladaGeometry;
 import com.io7m.renderer.xml.collada.ColladaGeometryID;

@@ -18,20 +18,12 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import net.java.dev.designgridlayout.DesignGridLayout;
-import net.java.dev.designgridlayout.RowGroup;
-
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
-public interface SBProjectionMatrixDescriptionControls
+public interface SBProjectionMatrixDescriptionControls extends SBControls
 {
   public @Nonnull SBProjectionDescription getDescription()
     throws SBExceptionInputError,
       ConstraintError;
-
-  public @Nonnull RowGroup getGroup();
-
-  public void addToLayout(
-    final @Nonnull DesignGridLayout layout);
 }
