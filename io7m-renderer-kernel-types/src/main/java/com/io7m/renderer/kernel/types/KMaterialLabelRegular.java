@@ -22,8 +22,38 @@ import javax.annotation.Nonnull;
  * The type of labels for regular materials that can be lit.
  */
 
-public interface KMaterialLabelRegular extends KMaterialLabelRegularUnlit
+public interface KMaterialLabelRegular extends KLabel
 {
+  /**
+   * @return The albedo label
+   */
+
+  @Nonnull KMaterialAlbedoLabel labelGetAlbedo();
+
+  /**
+   * @return The environment label
+   */
+
+  @Nonnull KMaterialEnvironmentLabel labelGetEnvironment();
+
+  /**
+   * @return The normal-mapping label
+   */
+
+  @Nonnull KMaterialNormalLabel labelGetNormal();
+
+  /**
+   * @return If the material implies a specular map
+   */
+
+  boolean labelImpliesSpecularMap();
+
+  /**
+   * @return If the material implies UV-mapped texturing at all
+   */
+
+  boolean labelImpliesUV();
+
   /**
    * @return The emissive label
    */

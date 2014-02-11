@@ -31,13 +31,18 @@ import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.kernel.types.KInstance;
 import com.io7m.renderer.kernel.types.KInstanceOpaque;
 import com.io7m.renderer.kernel.types.KInstanceRegular;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.renderer.kernel.types.KLight;
 import com.io7m.renderer.kernel.types.KLightLabel;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoLabel;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 import com.io7m.renderer.kernel.types.KMaterialEmissiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialEnvironmentLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueLitLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueUnlitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardRegularLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularLitLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularUnlitLabel;
 import com.io7m.renderer.kernel.types.KMaterialNormalLabel;
 import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
 
@@ -49,7 +54,11 @@ final class KLabelDecider implements
   KMaterialEnvironmentLabelCache,
   KMaterialNormalLabelCache,
   KMaterialSpecularLabelCache,
-  KMaterialForwardRegularLabelCache
+  KMaterialForwardRegularLabelCache,
+  KMaterialForwardOpaqueUnlitLabelCache,
+  KMaterialForwardOpaqueLitLabelCache,
+  KMaterialForwardTranslucentRegularLitLabelCache,
+  KMaterialForwardTranslucentRegularUnlitLabelCache
 {
   public static @Nonnull KLabelDecider newDecider(
     final @Nonnull KGraphicsCapabilities capabilities,
@@ -61,16 +70,18 @@ final class KLabelDecider implements
     return new KLabelDecider(capabilities, config);
   }
 
-  private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialAlbedoLabel, ConstraintError>         albedo_cache;
-  private final @Nonnull LRUCacheConfig                                                                   cache_config;
-  private final @Nonnull KGraphicsCapabilities                                                            capabilities;
-  private final @Nonnull LRUCacheTrivial<KInstanceOpaque, KMaterialDepthLabel, ConstraintError>           depth_cache;
-  private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialEmissiveLabel, ConstraintError>       emissive_cache;
-  private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialEnvironmentLabel, ConstraintError>    environment_cache;
-  private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialForwardRegularLabel, ConstraintError> forward_regular_cache;
-  private final @Nonnull LRUCacheTrivial<KLight, KLightLabel, ConstraintError>                            light_cache;
-  private final @Nonnull LRUCacheTrivial<KInstance, KMaterialNormalLabel, ConstraintError>                normal_cache;
-  private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialSpecularLabel, ConstraintError>       specular_cache;
+  private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialAlbedoLabel, ConstraintError>                                    albedo_cache;
+  private final @Nonnull LRUCacheConfig                                                                                              cache_config;
+  private final @Nonnull KGraphicsCapabilities                                                                                       capabilities;
+  private final @Nonnull LRUCacheTrivial<KInstanceOpaque, KMaterialDepthLabel, ConstraintError>                                      depth_cache;
+  private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialEmissiveLabel, ConstraintError>                                  emissive_cache;
+  private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialEnvironmentLabel, ConstraintError>                               environment_cache;
+  private final @Nonnull LRUCacheTrivial<KInstanceOpaque, KMaterialForwardOpaqueUnlitLabel, ConstraintError>                         forward_opaque_unlit_cache;
+  private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialForwardRegularLabel, ConstraintError>                            forward_regular_cache;
+  private final @Nonnull LRUCacheTrivial<KInstanceTranslucentRegular, KMaterialForwardTranslucentRegularUnlitLabel, ConstraintError> forward_translucent_regular_unlit_cache;
+  private final @Nonnull LRUCacheTrivial<KLight, KLightLabel, ConstraintError>                                                       light_cache;
+  private final @Nonnull LRUCacheTrivial<KInstance, KMaterialNormalLabel, ConstraintError>                                           normal_cache;
+  private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialSpecularLabel, ConstraintError>                                  specular_cache;
 
   private KLabelDecider(
     final @Nonnull KGraphicsCapabilities capabilities,
@@ -260,6 +271,86 @@ final class KLabelDecider implements
             }
           }, this.cache_config);
 
+    this.forward_opaque_unlit_cache =
+      LRUCacheTrivial
+        .newCache(
+          new JCacheLoader<KInstanceOpaque, KMaterialForwardOpaqueUnlitLabel, ConstraintError>() {
+            @Override public void cacheValueClose(
+              final @Nonnull KMaterialForwardOpaqueUnlitLabel v)
+              throws ConstraintError
+            {
+              // Nothing
+            }
+
+            @SuppressWarnings("synthetic-access") @Override public
+              KMaterialForwardOpaqueUnlitLabel
+              cacheValueLoad(
+                final @Nonnull KInstanceOpaque instance)
+                throws ConstraintError
+            {
+              try {
+                final KMaterialAlbedoLabel albedo =
+                  KLabelDecider.this.albedo_cache.cacheGetLU(instance);
+                final KMaterialEnvironmentLabel environment =
+                  KLabelDecider.this.environment_cache.cacheGetLU(instance);
+                final KMaterialNormalLabel normal =
+                  KLabelDecider.this.normal_cache.cacheGetLU(instance);
+                return KMaterialForwardOpaqueUnlitLabel.newLabel(
+                  albedo,
+                  environment,
+                  normal);
+              } catch (final JCacheException x) {
+                throw new UnreachableCodeException(x);
+              }
+            }
+
+            @Override public BigInteger cacheValueSizeOf(
+              final @Nonnull KMaterialForwardOpaqueUnlitLabel v)
+            {
+              return BigInteger.ONE;
+            }
+          }, this.cache_config);
+
+    this.forward_translucent_regular_unlit_cache =
+      LRUCacheTrivial
+        .newCache(
+          new JCacheLoader<KInstanceTranslucentRegular, KMaterialForwardTranslucentRegularUnlitLabel, ConstraintError>() {
+            @Override public void cacheValueClose(
+              final @Nonnull KMaterialForwardTranslucentRegularUnlitLabel v)
+              throws ConstraintError
+            {
+              // Nothing
+            }
+
+            @SuppressWarnings("synthetic-access") @Override public
+              KMaterialForwardTranslucentRegularUnlitLabel
+              cacheValueLoad(
+                final @Nonnull KInstanceTranslucentRegular instance)
+                throws ConstraintError
+            {
+              try {
+                final KMaterialAlbedoLabel albedo =
+                  KLabelDecider.this.albedo_cache.cacheGetLU(instance);
+                final KMaterialEnvironmentLabel environment =
+                  KLabelDecider.this.environment_cache.cacheGetLU(instance);
+                final KMaterialNormalLabel normal =
+                  KLabelDecider.this.normal_cache.cacheGetLU(instance);
+                return KMaterialForwardTranslucentRegularUnlitLabel.newLabel(
+                  albedo,
+                  environment,
+                  normal);
+              } catch (final JCacheException x) {
+                throw new UnreachableCodeException(x);
+              }
+            }
+
+            @Override public BigInteger cacheValueSizeOf(
+              final @Nonnull KMaterialForwardTranslucentRegularUnlitLabel v)
+            {
+              return BigInteger.ONE;
+            }
+          }, this.cache_config);
+
     this.forward_regular_cache =
       LRUCacheTrivial
         .newCache(
@@ -378,6 +469,29 @@ final class KLabelDecider implements
     }
   }
 
+  @Override public KMaterialForwardOpaqueLitLabel getForwardLabelOpaqueLit(
+    final @Nonnull KLight light,
+    final @Nonnull KInstanceOpaque instance)
+    throws ConstraintError
+  {
+    return KMaterialForwardOpaqueLitLabel.newLabel(
+      this.getLightLabel(light),
+      this.getForwardLabelRegular(instance));
+  }
+
+  @Override public
+    KMaterialForwardOpaqueUnlitLabel
+    getForwardLabelOpaqueUnlit(
+      final @Nonnull KInstanceOpaque instance)
+      throws ConstraintError
+  {
+    try {
+      return this.forward_opaque_unlit_cache.cacheGetLU(instance);
+    } catch (final JCacheException e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
   @Override public KMaterialForwardRegularLabel getForwardLabelRegular(
     final @Nonnull KInstanceRegular instance)
     throws ConstraintError
@@ -386,6 +500,32 @@ final class KLabelDecider implements
       return this.forward_regular_cache.cacheGetLU(instance);
     } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
+    }
+  }
+
+  @Override public
+    KMaterialForwardTranslucentRegularLitLabel
+    getForwardLabelTranslucentRegularLit(
+      final @Nonnull KLight light,
+      final @Nonnull KInstanceTranslucentRegular instance)
+      throws ConstraintError
+  {
+    return KMaterialForwardTranslucentRegularLitLabel.newLabel(
+      this.getLightLabel(light),
+      this.getForwardLabelRegular(instance));
+  }
+
+  @Override public
+    KMaterialForwardTranslucentRegularUnlitLabel
+    getForwardLabelTranslucentRegularUnlit(
+      final @Nonnull KInstanceTranslucentRegular instance)
+      throws ConstraintError
+  {
+    try {
+      return this.forward_translucent_regular_unlit_cache
+        .cacheGetLU(instance);
+    } catch (final JCacheException e) {
+      throw new UnreachableCodeException(e);
     }
   }
 
@@ -418,6 +558,8 @@ final class KLabelDecider implements
       .add(this.depth_cache.cacheSize())
       .add(this.emissive_cache.cacheSize())
       .add(this.environment_cache.cacheSize())
+      .add(this.forward_translucent_regular_unlit_cache.cacheSize())
+      .add(this.forward_opaque_unlit_cache.cacheSize())
       .add(this.forward_regular_cache.cacheSize())
       .add(this.normal_cache.cacheSize())
       .add(this.specular_cache.cacheSize())

@@ -32,7 +32,7 @@ import com.io7m.jaux.UnreachableCodeException;
 
 @Immutable public final class KMaterialForwardTranslucentRegularUnlitLabel implements
   KTexturesRequired,
-  KMaterialLabelRegularUnlit
+  KMaterialLabelRegular
 {
   /**
    * @return The set of all possible unlit labels.
@@ -136,7 +136,7 @@ import com.io7m.jaux.UnreachableCodeException;
     final @Nonnull KMaterialNormalLabel normal)
   {
     final StringBuilder buffer = new StringBuilder();
-    buffer.append("U_T_");
+    buffer.append("fwd_U_T_");
     buffer.append(albedo.labelGetCode());
     if (normal.labelGetCode().isEmpty() == false) {
       buffer.append("_");
@@ -182,9 +182,7 @@ import com.io7m.jaux.UnreachableCodeException;
   private final @Nonnull KMaterialEnvironmentLabel environment;
   private final boolean                            implies_specular_map;
   private final boolean                            implies_uv;
-
   private final @Nonnull KMaterialNormalLabel      normal;
-
   private final int                                texture_units_required;
 
   private KMaterialForwardTranslucentRegularUnlitLabel(
@@ -237,6 +235,11 @@ import com.io7m.jaux.UnreachableCodeException;
     return this.code;
   }
 
+  @Override public KMaterialEmissiveLabel labelGetEmissive()
+  {
+    return KMaterialEmissiveLabel.EMISSIVE_NONE;
+  }
+
   @Override public KMaterialEnvironmentLabel labelGetEnvironment()
   {
     return this.environment;
@@ -245,6 +248,11 @@ import com.io7m.jaux.UnreachableCodeException;
   @Override public KMaterialNormalLabel labelGetNormal()
   {
     return this.normal;
+  }
+
+  @Override public KMaterialSpecularLabel labelGetSpecular()
+  {
+    return KMaterialSpecularLabel.SPECULAR_NONE;
   }
 
   @Override public boolean labelImpliesSpecularMap()
