@@ -105,7 +105,7 @@ public final class SBFloatHSlider implements SBControls
               .getFieldFloatOrError(SBFloatHSlider.this.field);
           SBFloatHSlider.this.setCurrent(actual);
         } catch (final SBExceptionInputError x) {
-
+          // Fail silently
         }
       }
     });

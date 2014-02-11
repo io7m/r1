@@ -124,8 +124,8 @@ final class SBMainWindow extends JFrame
       lights_window,
       materials_window,
       instances_window));
-    bar.add(SBMainWindow.makeMenuRenderer(window, log, controller));
-    bar.add(SBMainWindow.makeMenuPostprocessor(window, log, controller));
+    bar.add(SBMainWindow.makeMenuRenderer(controller));
+    bar.add(SBMainWindow.makeMenuPostprocessor(controller));
     bar.add(SBMainWindow.makeMenuView(camera_window, controller));
     bar.add(SBMainWindow.makeMenuDebug(logs_window, stats_window));
     return bar;
@@ -355,8 +355,6 @@ final class SBMainWindow extends JFrame
     <C extends SBSceneControllerRendererControl & SBSceneControllerShaders>
     JMenu
     makeMenuPostprocessor(
-      final @Nonnull JFrame main_window,
-      final @Nonnull Log log,
       final @Nonnull C controller)
   {
     final ButtonGroup renderer_group = new ButtonGroup();
@@ -383,8 +381,6 @@ final class SBMainWindow extends JFrame
     <C extends SBSceneControllerRendererControl & SBSceneControllerShaders>
     JMenu
     makeMenuRenderer(
-      final @Nonnull JFrame main_window,
-      final @Nonnull Log log,
       final @Nonnull C controller)
   {
     final ButtonGroup renderer_group = new ButtonGroup();
