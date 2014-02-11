@@ -27,7 +27,6 @@ import com.io7m.renderer.types.RTransformTexture;
 
 public interface KMaterial extends KTexturesRequired, KMaterialVisitable
 {
-
   /**
    * @return The material values relating to surface normals.
    */

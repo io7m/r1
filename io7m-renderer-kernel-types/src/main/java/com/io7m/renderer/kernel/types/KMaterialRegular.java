@@ -25,12 +25,6 @@ import javax.annotation.Nonnull;
 public interface KMaterialRegular extends KMaterial
 {
   /**
-   * @return The material environment mapping properties
-   */
-
-  @Nonnull KMaterialEnvironment materialGetEnvironment();
-
-  /**
    * @return The material albedo properties
    */
 
@@ -41,6 +35,12 @@ public interface KMaterialRegular extends KMaterial
    */
 
   @Nonnull KMaterialEmissive materialGetEmissive();
+
+  /**
+   * @return The material environment mapping properties
+   */
+
+  @Nonnull KMaterialEnvironment materialGetEnvironment();
 
   /**
    * @return The material specularity properties

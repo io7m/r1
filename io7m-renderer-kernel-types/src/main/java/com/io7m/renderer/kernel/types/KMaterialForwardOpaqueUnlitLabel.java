@@ -34,6 +34,53 @@ import com.io7m.jaux.UnreachableCodeException;
   KTexturesRequired,
   KMaterialLabelRegularUnlit
 {
+  /**
+   * @return The set of all possible unlit labels.
+   */
+
+  public static @Nonnull Set<KMaterialForwardOpaqueUnlitLabel> allLabels()
+  {
+    try {
+      final Set<KMaterialForwardOpaqueUnlitLabel> s =
+        new HashSet<KMaterialForwardOpaqueUnlitLabel>();
+
+      for (final KMaterialNormalLabel normal : KMaterialNormalLabel.values()) {
+        switch (normal) {
+          case NORMAL_MAPPED:
+          case NORMAL_VERTEX:
+          {
+            for (final KMaterialAlbedoLabel albedo : KMaterialAlbedoLabel
+              .values()) {
+              for (final KMaterialEnvironmentLabel env : KMaterialEnvironmentLabel
+                .values()) {
+                s.add(new KMaterialForwardOpaqueUnlitLabel(
+                  albedo,
+                  env,
+                  normal));
+              }
+            }
+            break;
+          }
+          case NORMAL_NONE:
+          {
+            for (final KMaterialAlbedoLabel albedo : KMaterialAlbedoLabel
+              .values()) {
+              s.add(new KMaterialForwardOpaqueUnlitLabel(
+                albedo,
+                KMaterialEnvironmentLabel.ENVIRONMENT_NONE,
+                normal));
+            }
+            break;
+          }
+        }
+      }
+
+      return s;
+    } catch (final ConstraintError e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
   private static boolean makeImpliesSpecularMap(
     final @Nonnull KMaterialEnvironmentLabel environment)
   {
@@ -99,15 +146,6 @@ import com.io7m.jaux.UnreachableCodeException;
     }
     return buffer.toString();
   }
-
-  private final @Nonnull KMaterialAlbedoLabel      albedo;
-  private final @Nonnull String                    code;
-  private final @Nonnull KMaterialEnvironmentLabel environment;
-  private final boolean                            implies_specular_map;
-  private final boolean                            implies_uv;
-  private final @Nonnull KMaterialNormalLabel      normal;
-  private final int                                texture_units_required;
-
   /**
    * Create a new unlit forward-rendering label.
    * 
@@ -133,6 +171,15 @@ import com.io7m.jaux.UnreachableCodeException;
       in_environment,
       in_normal);
   }
+  private final @Nonnull KMaterialAlbedoLabel      albedo;
+  private final @Nonnull String                    code;
+  private final @Nonnull KMaterialEnvironmentLabel environment;
+  private final boolean                            implies_specular_map;
+  private final boolean                            implies_uv;
+
+  private final @Nonnull KMaterialNormalLabel      normal;
+
+  private final int                                texture_units_required;
 
   private KMaterialForwardOpaqueUnlitLabel(
     final @Nonnull KMaterialAlbedoLabel in_albedo,
@@ -173,66 +220,14 @@ import com.io7m.jaux.UnreachableCodeException;
     this.texture_units_required = req;
   }
 
-  @Override public int texturesGetRequired()
+  @Override public KMaterialAlbedoLabel labelGetAlbedo()
   {
-    return this.texture_units_required;
-  }
-
-  /**
-   * @return The set of all possible unlit labels.
-   */
-
-  public static @Nonnull Set<KMaterialForwardOpaqueUnlitLabel> allLabels()
-  {
-    try {
-      final Set<KMaterialForwardOpaqueUnlitLabel> s =
-        new HashSet<KMaterialForwardOpaqueUnlitLabel>();
-
-      for (final KMaterialNormalLabel normal : KMaterialNormalLabel.values()) {
-        switch (normal) {
-          case NORMAL_MAPPED:
-          case NORMAL_VERTEX:
-          {
-            for (final KMaterialAlbedoLabel albedo : KMaterialAlbedoLabel
-              .values()) {
-              for (final KMaterialEnvironmentLabel env : KMaterialEnvironmentLabel
-                .values()) {
-                s.add(new KMaterialForwardOpaqueUnlitLabel(
-                  albedo,
-                  env,
-                  normal));
-              }
-            }
-            break;
-          }
-          case NORMAL_NONE:
-          {
-            for (final KMaterialAlbedoLabel albedo : KMaterialAlbedoLabel
-              .values()) {
-              s.add(new KMaterialForwardOpaqueUnlitLabel(
-                albedo,
-                KMaterialEnvironmentLabel.ENVIRONMENT_NONE,
-                normal));
-            }
-            break;
-          }
-        }
-      }
-
-      return s;
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    return this.albedo;
   }
 
   @Override public @Nonnull String labelGetCode()
   {
     return this.code;
-  }
-
-  @Override public KMaterialAlbedoLabel labelGetAlbedo()
-  {
-    return this.albedo;
   }
 
   @Override public KMaterialEnvironmentLabel labelGetEnvironment()
@@ -253,5 +248,10 @@ import com.io7m.jaux.UnreachableCodeException;
   @Override public boolean labelImpliesUV()
   {
     return this.implies_uv;
+  }
+
+  @Override public int texturesGetRequired()
+  {
+    return this.texture_units_required;
   }
 }

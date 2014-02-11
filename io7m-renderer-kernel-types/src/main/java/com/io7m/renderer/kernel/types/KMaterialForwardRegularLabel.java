@@ -297,6 +297,11 @@ import com.io7m.jaux.UnreachableCodeException;
     return this.albedo;
   }
 
+  @Override public @Nonnull String labelGetCode()
+  {
+    return this.code;
+  }
+
   @Override public @Nonnull KMaterialEmissiveLabel labelGetEmissive()
   {
     return this.emissive;
@@ -325,11 +330,6 @@ import com.io7m.jaux.UnreachableCodeException;
   @Override public boolean labelImpliesUV()
   {
     return this.implies_uv;
-  }
-
-  @Override public @Nonnull String labelGetCode()
-  {
-    return this.code;
   }
 
   @Override public int texturesGetRequired()

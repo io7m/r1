@@ -32,7 +32,7 @@ import com.io7m.jcanephora.Texture2DStatic;
 
 @Immutable public final class KMaterialNormal implements KTexturesRequired
 {
-  private static final @Nonnull KMaterialNormal  EMPTY;
+  private static final @Nonnull KMaterialNormal EMPTY;
 
   static {
     try {

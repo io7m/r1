@@ -76,7 +76,7 @@ import com.io7m.renderer.types.RException;
     if (this == obj) {
       return true;
     }
-    if (!super.equals(obj)) {
+    if (obj == null) {
       return false;
     }
     if (this.getClass() != obj.getClass()) {
@@ -84,17 +84,18 @@ import com.io7m.renderer.types.RException;
     }
     final KInstanceTranslucentRefractive other =
       (KInstanceTranslucentRefractive) obj;
-    if (!this.material.equals(other.material)) {
-      return false;
-    }
-    return true;
+    return this.id.equals(other.id)
+      && this.material.equals(other.material)
+      && this.mesh.equals(other.mesh);
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
-    int result = super.hashCode();
+    int result = 1;
+    result = (prime * result) + this.id.hashCode();
     result = (prime * result) + this.material.hashCode();
+    result = (prime * result) + this.mesh.hashCode();
     return result;
   }
 

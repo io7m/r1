@@ -34,26 +34,6 @@ import com.io7m.renderer.types.RException;
 public interface KMaterialTranslucentVisitor<A, E extends Throwable>
 {
   /**
-   * Visit a regular translucent material.
-   * 
-   * @param m
-   *          The material
-   * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
-   * @throws RException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  @Nonnull A materialVisitTranslucentRegular(
-    final @Nonnull KMaterialTranslucentRegular m)
-    throws E,
-      RException,
-      ConstraintError;
-
-  /**
    * Visit a refractive translucent material.
    * 
    * @param m
@@ -69,6 +49,26 @@ public interface KMaterialTranslucentVisitor<A, E extends Throwable>
 
   @Nonnull A materialVisitTranslucentRefractive(
     final @Nonnull KMaterialTranslucentRefractive m)
+    throws E,
+      RException,
+      ConstraintError;
+
+  /**
+   * Visit a regular translucent material.
+   * 
+   * @param m
+   *          The material
+   * @return A value of type <code>A</code>
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  @Nonnull A materialVisitTranslucentRegular(
+    final @Nonnull KMaterialTranslucentRegular m)
     throws E,
       RException,
       ConstraintError;

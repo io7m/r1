@@ -80,10 +80,10 @@ import com.io7m.jcanephora.TextureCubeStatic;
   {
     return KMaterialEnvironment.EMPTY;
   }
+
   private final float                              mix;
   private final boolean                            mix_mapped;
   private final @Nonnull Option<TextureCubeStatic> texture;
-
   private final int                                textures_required;
 
   private KMaterialEnvironment(

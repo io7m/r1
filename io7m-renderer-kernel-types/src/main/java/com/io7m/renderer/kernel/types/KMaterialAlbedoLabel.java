@@ -43,6 +43,23 @@ public enum KMaterialAlbedoLabel
 
   ALBEDO_TEXTURED("BT", 1);
 
+  private static @Nonnull KMaterialAlbedoLabel fromInstanceData(
+    final @Nonnull ArrayBufferUsable a,
+    final @Nonnull KMaterialAlbedo albedo)
+    throws ConstraintError
+  {
+    if (a.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+      if (albedo.getTexture().isSome()) {
+        if (albedo.getMix() == 0.0) {
+          return KMaterialAlbedoLabel.ALBEDO_COLOURED;
+        }
+        return KMaterialAlbedoLabel.ALBEDO_TEXTURED;
+      }
+    }
+
+    return KMaterialAlbedoLabel.ALBEDO_COLOURED;
+  }
+
   /**
    * Derive an albedo label for the given instance.
    * 
@@ -63,23 +80,6 @@ public enum KMaterialAlbedoLabel
     final KMaterialRegular material = instance.instanceGetMaterial();
     final KMaterialAlbedo albedo = material.materialGetAlbedo();
     return KMaterialAlbedoLabel.fromInstanceData(a, albedo);
-  }
-
-  private static @Nonnull KMaterialAlbedoLabel fromInstanceData(
-    final @Nonnull ArrayBufferUsable a,
-    final @Nonnull KMaterialAlbedo albedo)
-    throws ConstraintError
-  {
-    if (a.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
-      if (albedo.getTexture().isSome()) {
-        if (albedo.getMix() == 0.0) {
-          return KMaterialAlbedoLabel.ALBEDO_COLOURED;
-        }
-        return KMaterialAlbedoLabel.ALBEDO_TEXTURED;
-      }
-    }
-
-    return KMaterialAlbedoLabel.ALBEDO_COLOURED;
   }
 
   private final @Nonnull String code;

@@ -49,30 +49,6 @@ public enum KMaterialEnvironmentLabel
 
   ENVIRONMENT_REFLECTIVE_MAPPED("ELM", 1);
 
-  /**
-   * Derive an environment mapping label for the given instance.
-   * 
-   * @param instance
-   *          The instance
-   * @param n
-   *          The normal mapping label for the instance
-   * @return An emissive label
-   * @throws ConstraintError
-   *           Iff the instance is <code>null</code>
-   */
-
-  public static @Nonnull KMaterialEnvironmentLabel fromInstanceRegular(
-    final @Nonnull KMaterialNormalLabel n,
-    final @Nonnull KInstanceRegular instance)
-    throws ConstraintError
-  {
-    Constraints.constrainNotNull(instance, "Instance");
-    final KMaterialRegular m = instance.instanceGetMaterial();
-    final KMaterialSpecular s = m.materialGetSpecular();
-    final KMaterialEnvironment e = m.materialGetEnvironment();
-    return KMaterialEnvironmentLabel.fromInstanceData(n, s, e);
-  }
-
   private static @Nonnull KMaterialEnvironmentLabel fromInstanceData(
     final @Nonnull KMaterialNormalLabel normal,
     final @Nonnull KMaterialSpecular specular,
@@ -101,6 +77,30 @@ public enum KMaterialEnvironmentLabel
     }
 
     throw new UnreachableCodeException();
+  }
+
+  /**
+   * Derive an environment mapping label for the given instance.
+   * 
+   * @param instance
+   *          The instance
+   * @param n
+   *          The normal mapping label for the instance
+   * @return An emissive label
+   * @throws ConstraintError
+   *           Iff the instance is <code>null</code>
+   */
+
+  public static @Nonnull KMaterialEnvironmentLabel fromInstanceRegular(
+    final @Nonnull KMaterialNormalLabel n,
+    final @Nonnull KInstanceRegular instance)
+    throws ConstraintError
+  {
+    Constraints.constrainNotNull(instance, "Instance");
+    final KMaterialRegular m = instance.instanceGetMaterial();
+    final KMaterialSpecular s = m.materialGetSpecular();
+    final KMaterialEnvironment e = m.materialGetEnvironment();
+    return KMaterialEnvironmentLabel.fromInstanceData(n, s, e);
   }
 
   private final @Nonnull String code;
