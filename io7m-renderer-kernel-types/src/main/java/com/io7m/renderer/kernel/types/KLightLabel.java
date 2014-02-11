@@ -165,13 +165,13 @@ public enum KLightLabel
     this.textures_required = in_textures_required;
   }
 
-  @Override public int texturesGetRequired()
-  {
-    return this.textures_required;
-  }
-
   @Override public String labelGetCode()
   {
     return this.code;
+  }
+
+  @Override public int texturesGetRequired()
+  {
+    return this.textures_required;
   }
 }

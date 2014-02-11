@@ -70,6 +70,44 @@ import com.io7m.renderer.types.RException;
   private static final class Builder implements KSceneBuilder
   {
     private static final @Nonnull KInstanceTransformedVisitor<KTranslucent, ConstraintError> IDENTITY_TRANSLUCENT;
+    static {
+      IDENTITY_TRANSLUCENT =
+        new KInstanceTransformedVisitor<KTranslucent, ConstraintError>() {
+          @Override public @Nonnull KTranslucent transformedVisitOpaque(
+            final @Nonnull KInstanceTransformedOpaque i)
+            throws ConstraintError,
+              ConstraintError,
+              RException,
+              JCGLException
+          {
+            throw new UnreachableCodeException();
+          }
+
+          @Override public @Nonnull
+            KTranslucent
+            transformedVisitTranslucentRefractive(
+              final @Nonnull KInstanceTransformedTranslucentRefractive i)
+              throws ConstraintError,
+                ConstraintError,
+                RException,
+                JCGLException
+          {
+            return i;
+          }
+
+          @Override public @Nonnull
+            KTranslucent
+            transformedVisitTranslucentRegular(
+              final @Nonnull KInstanceTransformedTranslucentRegular i)
+              throws ConstraintError,
+                ConstraintError,
+                RException,
+                JCGLException
+          {
+            return i;
+          }
+        };
+    }
     private final @Nonnull KCamera                                                           camera;
     private @Nonnull MapPSet<KLight>                                                         lights_all;
     private @Nonnull MapPSet<KInstanceTransformed>                                           lit;
@@ -80,6 +118,7 @@ import com.io7m.renderer.types.RException;
     private @Nonnull MapPSet<KInstanceTransformedOpaque>                                     unlit_opaque;
     private @Nonnull MapPSet<KInstanceTransformed>                                           visible_instances;
     private @Nonnull MapPSet<KInstanceTransformedOpaque>                                     visible_opaque;
+
     private @Nonnull PVector<KTranslucent>                                                   visible_translucent_ordered;
 
     protected Builder(
@@ -211,43 +250,18 @@ import com.io7m.renderer.types.RException;
       this.visible_instances = this.visible_instances.plus(instance);
     }
 
-    static {
-      IDENTITY_TRANSLUCENT =
-        new KInstanceTransformedVisitor<KTranslucent, ConstraintError>() {
-          @Override public @Nonnull KTranslucent transformedVisitOpaque(
-            final @Nonnull KInstanceTransformedOpaque i)
-            throws ConstraintError,
-              ConstraintError,
-              RException,
-              JCGLException
-          {
-            throw new UnreachableCodeException();
-          }
+    @Override public void sceneAddTranslucentLit(
+      final @Nonnull KInstanceTransformedTranslucentRegular instance,
+      final @Nonnull Set<KLight> lights)
+      throws ConstraintError
+    {
+      this.checkNotUnlit(instance);
 
-          @Override public @Nonnull
-            KTranslucent
-            transformedVisitTranslucentRefractive(
-              final @Nonnull KInstanceTransformedTranslucentRefractive i)
-              throws ConstraintError,
-                ConstraintError,
-                RException,
-                JCGLException
-          {
-            return i;
-          }
-
-          @Override public @Nonnull
-            KTranslucent
-            transformedVisitTranslucentRegular(
-              final @Nonnull KInstanceTransformedTranslucentRegular i)
-              throws ConstraintError,
-                ConstraintError,
-                RException,
-                JCGLException
-          {
-            return i;
-          }
-        };
+      this.visible_translucent_ordered =
+        this.visible_translucent_ordered.plus(new KTranslucentRegularLit(
+          instance,
+          lights));
+      this.visible_instances = this.visible_instances.plus(instance);
     }
 
     @Override public void sceneAddTranslucentUnlit(
@@ -287,20 +301,6 @@ import com.io7m.renderer.types.RException;
         this.visible_translucent_ordered,
         s,
         this.visible_instances);
-    }
-
-    @Override public void sceneAddTranslucentLit(
-      final @Nonnull KInstanceTransformedTranslucentRegular instance,
-      final @Nonnull Set<KLight> lights)
-      throws ConstraintError
-    {
-      this.checkNotUnlit(instance);
-
-      this.visible_translucent_ordered =
-        this.visible_translucent_ordered.plus(new KTranslucentRegularLit(
-          instance,
-          lights));
-      this.visible_instances = this.visible_instances.plus(instance);
     }
   }
 

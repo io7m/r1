@@ -148,6 +148,7 @@ import com.io7m.jaux.UnreachableCodeException;
     }
     return buffer.toString();
   }
+
   /**
    * Create a new unlit forward-rendering label.
    * 
@@ -175,6 +176,7 @@ import com.io7m.jaux.UnreachableCodeException;
       in_environment,
       in_normal);
   }
+
   private final @Nonnull KMaterialAlbedoLabel      albedo;
   private final @Nonnull String                    code;
   private final @Nonnull KMaterialEnvironmentLabel environment;

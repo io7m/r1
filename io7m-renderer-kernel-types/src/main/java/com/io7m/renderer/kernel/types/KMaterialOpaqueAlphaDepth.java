@@ -34,15 +34,6 @@ import com.io7m.renderer.types.RTransformTexture;
 @Immutable public final class KMaterialOpaqueAlphaDepth implements
   KMaterialOpaque
 {
-  private final @Nonnull KMaterialAlbedo                 albedo;
-  private final float                                    alpha_threshold;
-  private final @Nonnull KMaterialEmissive               emissive;
-  private final @Nonnull KMaterialEnvironment            environment;
-  private final @Nonnull KMaterialNormal                 normal;
-  private final @Nonnull KMaterialSpecular               specular;
-  private final int                                      textures_required;
-  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
-
   /**
    * Construct a new alpha-to-depth material.
    * 
@@ -84,6 +75,15 @@ import com.io7m.renderer.types.RTransformTexture;
       in_specular,
       in_alpha_threshold);
   }
+  private final @Nonnull KMaterialAlbedo                 albedo;
+  private final float                                    alpha_threshold;
+  private final @Nonnull KMaterialEmissive               emissive;
+  private final @Nonnull KMaterialEnvironment            environment;
+  private final @Nonnull KMaterialNormal                 normal;
+  private final @Nonnull KMaterialSpecular               specular;
+  private final int                                      textures_required;
+
+  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
 
   protected KMaterialOpaqueAlphaDepth(
     final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix,
@@ -214,11 +214,6 @@ import com.io7m.renderer.types.RTransformTexture;
     return v.materialVisitOpaqueAlphaDepth(this);
   }
 
-  @Override public int texturesGetRequired()
-  {
-    return this.textures_required;
-  }
-
   @Override public
     <A, E extends Throwable, V extends KMaterialVisitor<A, E>>
     A
@@ -229,5 +224,10 @@ import com.io7m.renderer.types.RTransformTexture;
         ConstraintError
   {
     return v.materialVisitOpaque(this);
+  }
+
+  @Override public int texturesGetRequired()
+  {
+    return this.textures_required;
   }
 }
