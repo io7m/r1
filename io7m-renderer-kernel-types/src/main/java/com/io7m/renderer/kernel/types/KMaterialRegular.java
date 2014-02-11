@@ -22,7 +22,7 @@ import javax.annotation.Nonnull;
  * The type of regular materials (opaque, or translucent non-refractive).
  */
 
-public interface KMaterialRegular
+public interface KMaterialRegular extends KMaterial
 {
   /**
    * @return The material environment mapping properties

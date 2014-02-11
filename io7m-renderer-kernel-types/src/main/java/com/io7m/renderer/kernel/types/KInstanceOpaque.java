@@ -36,8 +36,8 @@ import com.io7m.renderer.types.RException;
  */
 
 @Immutable public final class KInstanceOpaque implements
-  KInstance,
-  KInstanceWithMaterial<KMaterialOpaque>
+  KInstanceWithMaterial<KMaterialOpaque>,
+  KInstanceRegular
 {
   /**
    * Create a new instance with an opaque material.

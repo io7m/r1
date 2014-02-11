@@ -19,17 +19,12 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.kernel.types.KInstanceOpaque;
-import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceRegular;
 import com.io7m.renderer.kernel.types.KMaterialEmissiveLabel;
 
 interface KMaterialEmissiveLabelCache
 {
-  public @Nonnull KMaterialEmissiveLabel getEmissiveLabelOpaque(
-    final @Nonnull KInstanceOpaque instance)
-    throws ConstraintError;
-
-  public @Nonnull KMaterialEmissiveLabel getEmissiveLabelTranslucentRegular(
-    final @Nonnull KInstanceTranslucentRegular instance)
+  public @Nonnull KMaterialEmissiveLabel getEmissiveLabelRegular(
+    final @Nonnull KInstanceRegular instance)
     throws ConstraintError;
 }
