@@ -42,8 +42,6 @@ import net.java.dev.designgridlayout.Tag;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.types.RException;
 
 public final class SBMaterialsControls implements
   SBSceneChangeListener,
@@ -84,12 +82,26 @@ public final class SBMaterialsControls implements
             final SBMaterialDescription desc = controls.controlsSave();
             controller.sceneMaterialPutByDescription(id, desc);
             SBWindowUtilities.closeWindow(MaterialEditDialog.this);
-          } catch (final SBExceptionInputError x) {
-            log.critical("Could not add material: " + x.getMessage());
-          } catch (final ConstraintError x) {
-            log.critical("Could not add material: " + x.getMessage());
-          } catch (final RException x) {
-            log.critical("Could not add material: " + x.getMessage());
+          } catch (final Throwable x) {
+            final String message =
+              "Could not add material: " + x.getMessage();
+            log.critical(message);
+          }
+        }
+      });
+
+      final JButton apply = new JButton("Apply");
+      apply.addActionListener(new ActionListener() {
+        @Override public void actionPerformed(
+          final @Nonnull ActionEvent e)
+        {
+          try {
+            final SBMaterialDescription desc = controls.controlsSave();
+            controller.sceneMaterialPutByDescription(id, desc);
+          } catch (final Throwable x) {
+            final String message =
+              "Could not add material: " + x.getMessage();
+            log.critical(message);
           }
         }
       });
@@ -103,7 +115,12 @@ public final class SBMaterialsControls implements
         }
       });
 
-      layout.row().bar().add(cancel, Tag.CANCEL).add(ok, Tag.OK);
+      layout
+        .row()
+        .bar()
+        .add(cancel, Tag.CANCEL)
+        .add(ok, Tag.OK)
+        .add(apply, Tag.APPLY);
     }
   }
 
