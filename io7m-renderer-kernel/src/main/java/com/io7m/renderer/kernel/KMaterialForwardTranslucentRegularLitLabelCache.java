@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 <code@io7m.com> http://io7m.com
+ * Copyright © 2013 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,44 +14,21 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel.types;
+package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-/**
- * The type of labels for regular lit materials.
- */
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.renderer.kernel.types.KLight;
+import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularLitLabel;
 
-public interface KMaterialLabelRegularUnlit extends KLabel
+interface KMaterialForwardTranslucentRegularLitLabelCache
 {
-  /**
-   * @return The albedo label
-   */
-
-  @Nonnull KMaterialAlbedoLabel labelGetAlbedo();
-
-  /**
-   * @return The environment label
-   */
-
-  @Nonnull KMaterialEnvironmentLabel labelGetEnvironment();
-
-  /**
-   * @return The normal-mapping label
-   */
-
-  @Nonnull KMaterialNormalLabel labelGetNormal();
-
-  /**
-   * @return If the material implies a specular map
-   */
-
-  boolean labelImpliesSpecularMap();
-
-  /**
-   * @return If the material implies UV-mapped texturing at all
-   */
-
-  boolean labelImpliesUV();
-
+  public @Nonnull
+    KMaterialForwardTranslucentRegularLitLabel
+    getForwardLabelTranslucentRegularLit(
+      final @Nonnull KLight light,
+      final @Nonnull KInstanceTranslucentRegular instance)
+      throws ConstraintError;
 }

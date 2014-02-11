@@ -77,7 +77,11 @@ import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightVisitor;
-import com.io7m.renderer.kernel.types.KMaterialForwardRegularLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueLitLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueUnlitLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularLitLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularUnlitLabel;
+import com.io7m.renderer.kernel.types.KMaterialLabelRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaque;
 import com.io7m.renderer.kernel.types.KMaterialRegular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
@@ -104,44 +108,10 @@ import com.io7m.renderer.types.RTransformView;
     NAME = "forward";
   }
 
-  private static String makeOpaqueLitShaderName(
-    final @Nonnull KLabelDecider decider,
-    final @Nonnull KLight light,
-    final @Nonnull KMaterialForwardRegularLabel label)
-    throws ConstraintError
-  {
-    return String.format("fwd_%s_O_%s", decider
-      .getLightLabel(light)
-      .labelGetCode(), label.labelGetCode());
-  }
-
-  private static String makeOpaqueUnlitShaderName(
-    final KMaterialForwardRegularLabel label)
-  {
-    return String.format("fwd_U_O_%s", label.labelGetCode());
-  }
-
-  private static String makeTranslucentRegularLitShaderName(
-    final @Nonnull KLabelDecider decider,
-    final @Nonnull KLight light,
-    final @Nonnull KMaterialForwardRegularLabel label)
-    throws ConstraintError
-  {
-    return String.format("fwd_%s_T_%s", decider
-      .getLightLabel(light)
-      .labelGetCode(), label.labelGetCode());
-  }
-
-  private static String makeTranslucentRegularUnlitShaderName(
-    final KMaterialForwardRegularLabel label)
-  {
-    return String.format("fwd_U_T_%s", label.labelGetCode());
-  }
-
   private static void putInstanceMatrices(
     final @Nonnull JCBProgram program,
     final @Nonnull MatricesInstance mwi,
-    final @Nonnull KMaterialForwardRegularLabel label)
+    final @Nonnull KMaterialLabelRegular label)
     throws JCGLException,
       ConstraintError
   {
@@ -184,7 +154,7 @@ import com.io7m.renderer.types.RTransformView;
 
   private static void putInstanceTextures(
     final @Nonnull KTextureUnitContext units,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialLabelRegular label,
     final @Nonnull JCBProgram program,
     final @Nonnull KMaterialRegular material)
     throws JCGLException,
@@ -270,7 +240,7 @@ import com.io7m.renderer.types.RTransformView;
 
   private static void putMaterialOpaque(
     final @Nonnull JCBProgram program,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialLabelRegular label,
     final @Nonnull KMaterialOpaque material)
     throws JCGLException,
       ConstraintError
@@ -280,7 +250,7 @@ import com.io7m.renderer.types.RTransformView;
 
   private static void putMaterialRegular(
     final @Nonnull JCBProgram program,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialLabelRegular label,
     final @Nonnull KMaterialRegular material)
     throws ConstraintError,
       JCGLException
@@ -337,7 +307,7 @@ import com.io7m.renderer.types.RTransformView;
 
   private static void putMaterialTranslucentRegular(
     final @Nonnull JCBProgram program,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialLabelRegular label,
     final @Nonnull KMaterialTranslucentRegular material)
     throws JCGLException,
       ConstraintError
@@ -459,7 +429,7 @@ import com.io7m.renderer.types.RTransformView;
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KTextureUnitContext units,
     final @Nonnull MatricesInstance mwi,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialLabelRegular label,
     final @Nonnull JCBProgram program,
     final @Nonnull KInstanceTransformedOpaque instance)
     throws JCGLException,
@@ -539,7 +509,7 @@ import com.io7m.renderer.types.RTransformView;
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KTextureUnitContext units,
     final @Nonnull MatricesInstance mwi,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialLabelRegular label,
     final @Nonnull JCBProgram program,
     final @Nonnull KInstanceTransformedTranslucentRegular instance)
     throws JCGLException,
@@ -619,7 +589,7 @@ import com.io7m.renderer.types.RTransformView;
     final @Nonnull KShadowMapContext shadow_context,
     final @Nonnull KTextureUnitContext texture_unit_ctx,
     final @Nonnull MatricesObserver mwo,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialForwardTranslucentRegularLitLabel label,
     final @Nonnull KLight light,
     final @Nonnull JCBProgram program,
     final @Nonnull KInstanceTransformedTranslucentRegular instance)
@@ -703,7 +673,7 @@ import com.io7m.renderer.types.RTransformView;
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KTextureUnitContext texture_unit_ctx,
     final @Nonnull MatricesObserver mwo,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialForwardTranslucentRegularLitLabel label,
     final @Nonnull KLightDirectional l,
     final @Nonnull JCBProgram program,
     final @Nonnull KInstanceTransformedTranslucentRegular instance)
@@ -743,7 +713,7 @@ import com.io7m.renderer.types.RTransformView;
     final @Nonnull KShadowMapContext shadow_context,
     final @Nonnull KTextureUnitContext texture_unit_ctx,
     final @Nonnull MatricesProjectiveLight mwp,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialForwardTranslucentRegularLitLabel label,
     final @Nonnull KLightProjective light,
     final @Nonnull JCBProgram program,
     final @Nonnull KInstanceTransformedTranslucentRegular instance)
@@ -802,7 +772,7 @@ import com.io7m.renderer.types.RTransformView;
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KTextureUnitContext texture_unit_ctx,
     final @Nonnull MatricesObserver mwo,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialForwardTranslucentRegularLitLabel label,
     final @Nonnull KLightSphere l,
     final @Nonnull JCBProgram program,
     final @Nonnull KInstanceTransformedTranslucentRegular instance)
@@ -843,7 +813,7 @@ import com.io7m.renderer.types.RTransformView;
     final @Nonnull KTextureUnitAllocator unit_allocator,
     final @Nonnull MatricesObserver mwo,
     final @Nonnull KLight light,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialForwardOpaqueLitLabel label,
     final @Nonnull List<KInstanceTransformedOpaque> instances,
     final @Nonnull JCBProgram program)
     throws JCGLException,
@@ -953,7 +923,7 @@ import com.io7m.renderer.types.RTransformView;
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KTextureUnitContext unit_context,
     final @Nonnull MatricesObserver mwo,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialForwardOpaqueLitLabel label,
     final @Nonnull List<KInstanceTransformedOpaque> instances,
     final @Nonnull JCBProgram program,
     final @Nonnull KLightDirectional l)
@@ -997,7 +967,7 @@ import com.io7m.renderer.types.RTransformView;
     final @Nonnull KShadowMapContext shadow_context,
     final @Nonnull KTextureUnitContext unit_context,
     final @Nonnull MatricesProjectiveLight mwp,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialForwardOpaqueLitLabel label,
     final @Nonnull List<KInstanceTransformedOpaque> instances,
     final @Nonnull JCBProgram program,
     final @Nonnull KLightProjective light)
@@ -1069,7 +1039,7 @@ import com.io7m.renderer.types.RTransformView;
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KTextureUnitContext unit_context,
     final @Nonnull MatricesObserver mwo,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialForwardOpaqueLitLabel label,
     final @Nonnull List<KInstanceTransformedOpaque> instances,
     final @Nonnull JCBProgram program,
     final @Nonnull KLightSphere l)
@@ -1112,7 +1082,7 @@ import com.io7m.renderer.types.RTransformView;
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KTextureUnitAllocator units,
     final @Nonnull MatricesObserver mwo,
-    final @Nonnull KMaterialForwardRegularLabel label,
+    final @Nonnull KMaterialForwardOpaqueUnlitLabel label,
     final @Nonnull List<KInstanceTransformedOpaque> instances,
     final @Nonnull JCBProgram program)
     throws JCGLException,
@@ -1166,7 +1136,6 @@ import com.io7m.renderer.types.RTransformView;
   }
 
   private final @Nonnull VectorM4F                             background;
-
   private final @Nonnull KLabelDecider                         decider;
   private final @Nonnull KDepthRenderer                        depth;
   private final @Nonnull JCGLImplementation                    g;
@@ -1295,33 +1264,28 @@ import com.io7m.renderer.types.RTransformView;
       JCacheException,
       JCGLException
   {
-    final Map<KLight, Map<KMaterialForwardRegularLabel, List<KInstanceTransformedOpaque>>> by_light =
+    final Map<KLight, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>>> by_light =
       batched.getBatchesOpaqueLit();
 
     for (final KLight light : by_light.keySet()) {
-      final Map<KMaterialForwardRegularLabel, List<KInstanceTransformedOpaque>> by_label =
+      final Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>> by_label =
         by_light.get(light);
 
-      for (final KMaterialForwardRegularLabel label : by_label.keySet()) {
+      for (final KMaterialForwardOpaqueLitLabel label : by_label.keySet()) {
         final List<KInstanceTransformedOpaque> instances =
           by_label.get(label);
-
-        final String shader_name =
-          KRendererForwardActual.makeOpaqueLitShaderName(
-            this.decider,
-            light,
-            label);
 
         final int required = label.texturesGetRequired();
         if (this.texture_units.hasEnoughUnits(required) == false) {
           throw RException.notEnoughTextureUnits(
-            shader_name,
+            label.labelGetCode(),
             required,
             this.texture_units.getUnitCount());
         }
 
         final KTextureUnitAllocator unit_allocator = this.texture_units;
-        final KProgram kprogram = this.shader_cache.cacheGetLU(shader_name);
+        final KProgram kprogram =
+          this.shader_cache.cacheGetLU(label.labelGetCode());
         kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
           @Override public void call(
             final JCBProgram program)
@@ -1353,17 +1317,15 @@ import com.io7m.renderer.types.RTransformView;
       JCacheException,
       JCGLException
   {
-    final Map<KMaterialForwardRegularLabel, List<KInstanceTransformedOpaque>> unlit =
+    final Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>> unlit =
       batched.getBatchesOpaqueUnlit();
 
-    for (final KMaterialForwardRegularLabel label : unlit.keySet()) {
+    for (final KMaterialForwardOpaqueUnlitLabel label : unlit.keySet()) {
       final List<KInstanceTransformedOpaque> instances = unlit.get(label);
 
-      final String shader_name =
-        KRendererForwardActual.makeOpaqueUnlitShaderName(label);
-
       final KTextureUnitAllocator units = this.texture_units;
-      final KProgram kprogram = this.shader_cache.cacheGetLU(shader_name);
+      final KProgram kprogram =
+        this.shader_cache.cacheGetLU(label.labelGetCode());
       kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
         @Override public void call(
           final JCBProgram program)
@@ -1506,19 +1468,16 @@ import com.io7m.renderer.types.RTransformView;
       final KLight light = iter.next();
       final KInstanceTransformedTranslucentRegular instance =
         t.translucentGetInstance();
-      final KMaterialForwardRegularLabel label =
-        this.decider.getForwardLabelRegular(instance.getInstance());
 
-      final String shader_name =
-        KRendererForwardActual.makeTranslucentRegularLitShaderName(
-          this.decider,
+      final KMaterialForwardTranslucentRegularLitLabel label =
+        this.decider.getForwardLabelTranslucentRegularLit(
           light,
-          label);
+          instance.getInstance());
 
       final int required = label.texturesGetRequired();
       if (unit_allocator.hasEnoughUnits(required) == false) {
         throw RException.notEnoughTextureUnits(
-          shader_name,
+          label.labelGetCode(),
           required,
           unit_allocator.getUnitCount());
       }
@@ -1537,7 +1496,8 @@ import com.io7m.renderer.types.RTransformView;
         gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
       }
 
-      final KProgram kprogram = this.shader_cache.cacheGetLU(shader_name);
+      final KProgram kprogram =
+        this.shader_cache.cacheGetLU(label.labelGetCode());
       kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
         @Override public void call(
           final @Nonnull JCBProgram program)
@@ -1581,16 +1541,15 @@ import com.io7m.renderer.types.RTransformView;
   {
     final KTextureUnitAllocator unit_allocator = this.texture_units;
     final KInstanceTranslucentRegular instance = t.getInstance();
-    final KMaterialForwardRegularLabel label =
-      this.decider.getForwardLabelRegular(instance);
-    final String shader_name =
-      KRendererForwardActual.makeTranslucentRegularUnlitShaderName(label);
+    final KMaterialForwardTranslucentRegularUnlitLabel label =
+      this.decider.getForwardLabelTranslucentRegularUnlit(instance);
 
     gc.blendingEnable(
       BlendFunction.BLEND_ONE,
       BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
 
-    final KProgram kprogram = this.shader_cache.cacheGetLU(shader_name);
+    final KProgram kprogram =
+      this.shader_cache.cacheGetLU(label.labelGetCode());
     kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
       @Override public void call(
         final @Nonnull JCBProgram program)

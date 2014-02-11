@@ -65,11 +65,30 @@ import com.io7m.jaux.UnreachableCodeException;
     final @Nonnull KLightLabel in_light,
     final @Nonnull KMaterialForwardRegularLabel in_opaque)
   {
-    final StringBuilder code = new StringBuilder();
-    code.append(in_light.labelGetCode());
-    code.append("_O_");
-    code.append(in_opaque.labelGetCode());
-    return code.toString();
+    return String.format(
+      "fwd_%s_O_%s",
+      in_light.labelGetCode(),
+      in_opaque.labelGetCode());
+  }
+
+  /**
+   * Construct a new label for the given light and regular label.
+   * 
+   * @param in_light
+   *          The light
+   * @param in_regular
+   *          The regular label
+   * @return A new label
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public static @Nonnull KMaterialForwardOpaqueLitLabel newLabel(
+    final @Nonnull KLightLabel in_light,
+    final @Nonnull KMaterialForwardRegularLabel in_regular)
+    throws ConstraintError
+  {
+    return new KMaterialForwardOpaqueLitLabel(in_light, in_regular);
   }
 
   private final @Nonnull String                       code;
