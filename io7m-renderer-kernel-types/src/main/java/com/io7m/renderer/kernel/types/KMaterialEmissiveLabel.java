@@ -59,33 +59,9 @@ public enum KMaterialEmissiveLabel
    *           Iff the instance is <code>null</code>
    */
 
-  public static @Nonnull KMaterialEmissiveLabel fromInstanceOpaque(
-    final @Nonnull KInstanceOpaque instance)
+  public static @Nonnull KMaterialEmissiveLabel fromInstanceRegular(
+    final @Nonnull KInstanceRegular instance)
     throws ConstraintError
-  {
-    Constraints.constrainNotNull(instance, "Instance");
-    final KMesh mesh = instance.instanceGetMesh();
-    final ArrayBufferUsable a = mesh.getArrayBuffer();
-    final KMaterialEmissive emissive =
-      instance.instanceGetMaterial().materialGetEmissive();
-    return KMaterialEmissiveLabel.fromInstanceData(a, emissive);
-  }
-
-  /**
-   * Derive an emissive label for the given instance.
-   * 
-   * @param instance
-   *          The instance
-   * @return An emissive label
-   * @throws ConstraintError
-   *           Iff the instance is <code>null</code>
-   */
-
-  public static @Nonnull
-    KMaterialEmissiveLabel
-    fromInstanceTranslucentRegular(
-      final @Nonnull KInstanceTranslucentRegular instance)
-      throws ConstraintError
   {
     Constraints.constrainNotNull(instance, "Instance");
     final KMesh mesh = instance.instanceGetMesh();

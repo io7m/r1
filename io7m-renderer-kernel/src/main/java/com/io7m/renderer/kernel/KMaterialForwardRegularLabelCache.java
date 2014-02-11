@@ -19,12 +19,12 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.kernel.types.KInstanceOpaque;
+import com.io7m.renderer.kernel.types.KInstanceRegular;
 import com.io7m.renderer.kernel.types.KMaterialForwardRegularLabel;
 
-interface KMaterialForwardOpaqueLabelCache
+interface KMaterialForwardRegularLabelCache
 {
-  public @Nonnull KMaterialForwardRegularLabel getForwardLabelOpaque(
-    final @Nonnull KInstanceOpaque instance)
+  public @Nonnull KMaterialForwardRegularLabel getForwardLabelRegular(
+    final @Nonnull KInstanceRegular instance)
     throws ConstraintError;
 }

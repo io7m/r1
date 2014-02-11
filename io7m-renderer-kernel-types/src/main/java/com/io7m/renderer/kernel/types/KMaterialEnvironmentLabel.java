@@ -61,39 +61,13 @@ public enum KMaterialEnvironmentLabel
    *           Iff the instance is <code>null</code>
    */
 
-  public static @Nonnull KMaterialEnvironmentLabel fromInstanceOpaque(
+  public static @Nonnull KMaterialEnvironmentLabel fromInstanceRegular(
     final @Nonnull KMaterialNormalLabel n,
-    final @Nonnull KInstanceOpaque instance)
+    final @Nonnull KInstanceRegular instance)
     throws ConstraintError
   {
     Constraints.constrainNotNull(instance, "Instance");
     final KMaterialRegular m = instance.instanceGetMaterial();
-    final KMaterialSpecular s = m.materialGetSpecular();
-    final KMaterialEnvironment e = m.materialGetEnvironment();
-    return KMaterialEnvironmentLabel.fromInstanceData(n, s, e);
-  }
-
-  /**
-   * Derive an environment mapping label for the given instance.
-   * 
-   * @param instance
-   *          The instance
-   * @param n
-   *          The normal mapping label for the instance
-   * @return An emissive label
-   * @throws ConstraintError
-   *           Iff the instance is <code>null</code>
-   */
-
-  public static @Nonnull
-    KMaterialEnvironmentLabel
-    fromInstanceTranslucentRegular(
-      final @Nonnull KMaterialNormalLabel n,
-      final @Nonnull KInstanceTranslucentRegular instance)
-      throws ConstraintError
-  {
-    Constraints.constrainNotNull(instance, "Instance");
-    final KMaterialTranslucentRegular m = instance.instanceGetMaterial();
     final KMaterialSpecular s = m.materialGetSpecular();
     final KMaterialEnvironment e = m.materialGetEnvironment();
     return KMaterialEnvironmentLabel.fromInstanceData(n, s, e);

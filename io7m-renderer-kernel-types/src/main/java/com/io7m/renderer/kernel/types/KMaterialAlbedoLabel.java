@@ -53,36 +53,11 @@ public enum KMaterialAlbedoLabel
    *           Iff the instance is <code>null</code>
    */
 
-  public static @Nonnull KMaterialAlbedoLabel fromInstanceTranslucentRegular(
-    final @Nonnull KInstanceTranslucentRegular instance)
+  public static @Nonnull KMaterialAlbedoLabel fromInstanceRegular(
+    final @Nonnull KInstanceRegular instance)
     throws ConstraintError
   {
     Constraints.constrainNotNull(instance, "Instance");
-
-    final KMesh mesh = instance.instanceGetMesh();
-    final ArrayBufferUsable a = mesh.getArrayBuffer();
-    final KMaterialTranslucentRegular material =
-      instance.instanceGetMaterial();
-    final KMaterialAlbedo albedo = material.materialGetAlbedo();
-    return KMaterialAlbedoLabel.fromInstanceData(a, albedo);
-  }
-
-  /**
-   * Derive an albedo label for the given instance.
-   * 
-   * @param instance
-   *          The instance
-   * @return An albedo label
-   * @throws ConstraintError
-   *           Iff the instance is <code>null</code>
-   */
-
-  public static @Nonnull KMaterialAlbedoLabel fromInstanceOpaque(
-    final @Nonnull KInstanceOpaque instance)
-    throws ConstraintError
-  {
-    Constraints.constrainNotNull(instance, "Instance");
-
     final KMesh mesh = instance.instanceGetMesh();
     final ArrayBufferUsable a = mesh.getArrayBuffer();
     final KMaterialRegular material = instance.instanceGetMaterial();

@@ -88,9 +88,9 @@ public enum KMaterialSpecularLabel
    *           Iff the instance is <code>null</code>
    */
 
-  public static @Nonnull KMaterialSpecularLabel fromInstanceOpaque(
+  public static @Nonnull KMaterialSpecularLabel fromInstanceRegular(
     final @Nonnull KMaterialNormalLabel n,
-    final @Nonnull KInstanceOpaque instance)
+    final @Nonnull KInstanceRegular instance)
     throws ConstraintError
   {
     Constraints.constrainNotNull(instance, "Instance");
@@ -98,32 +98,6 @@ public enum KMaterialSpecularLabel
     final ArrayBufferUsable a = mesh.getArrayBuffer();
     final KMaterialSpecular s =
       instance.instanceGetMaterial().materialGetSpecular();
-    return KMaterialSpecularLabel.fromInstanceData(n, a, s);
-  }
-
-  /**
-   * Derive a specular label for the given instance.
-   * 
-   * @param instance
-   *          The instance
-   * @param n
-   *          The normal-mapping label for the instance
-   * @return A specular label
-   * @throws ConstraintError
-   *           Iff the instance is <code>null</code>
-   */
-
-  public static @Nonnull
-    KMaterialSpecularLabel
-    fromInstanceTranslucentRegular(
-      final @Nonnull KMaterialNormalLabel n,
-      final @Nonnull KInstanceTranslucentRegular instance)
-      throws ConstraintError
-  {
-    Constraints.constrainNotNull(instance, "Instance");
-    final KMesh mesh = instance.instanceGetMesh();
-    final ArrayBufferUsable a = mesh.getArrayBuffer();
-    final KMaterialSpecular s = instance.instanceGetMaterial().materialGetSpecular();
     return KMaterialSpecularLabel.fromInstanceData(n, a, s);
   }
 
