@@ -43,6 +43,7 @@ import net.java.dev.designgridlayout.RowGroup;
 import net.java.dev.designgridlayout.Tag;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jlog.Log;
 
 public final class SBInstancesControls implements
@@ -102,6 +103,23 @@ public final class SBInstancesControls implements
         }
       });
 
+      final JButton apply = new JButton("Apply");
+      apply.addActionListener(new ActionListener() {
+        @SuppressWarnings("synthetic-access") @Override public
+          void
+          actionPerformed(
+            final @Nonnull ActionEvent e)
+        {
+          try {
+            final SBInstance i = controls.controlsSave();
+            controller.sceneInstancePut(i);
+          } catch (final Throwable x) {
+            log.critical(x.getMessage());
+            InstanceEditDialog.this.error.errorSet(x.getMessage());
+          }
+        }
+      });
+
       final JButton cancel = new JButton("Cancel");
       cancel.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
@@ -111,7 +129,12 @@ public final class SBInstancesControls implements
         }
       });
 
-      layout.row().bar().add(cancel, Tag.CANCEL).add(ok, Tag.OK);
+      layout
+        .row()
+        .bar()
+        .add(cancel, Tag.CANCEL)
+        .add(ok, Tag.OK)
+        .add(apply, Tag.APPLY);
     }
   }
 
@@ -328,7 +351,7 @@ public final class SBInstancesControls implements
       @Override public void actionPerformed(
         final @Nonnull ActionEvent e)
       {
-
+        throw new UnimplementedCodeException();
       }
     });
 

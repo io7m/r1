@@ -146,6 +146,24 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
         }
       });
 
+      final JButton apply = new JButton("Apply");
+      apply.addActionListener(new ActionListener() {
+        @SuppressWarnings("synthetic-access") @Override public
+          void
+          actionPerformed(
+            final @Nonnull ActionEvent e)
+        {
+          try {
+            final SBLightDescription i = controls.controlsSave();
+            controller.sceneLightPut(i);
+          } catch (final Throwable x) {
+            final String message = "Could not add light: " + x.getMessage();
+            log.critical(message);
+            LightEditDialog.this.error.errorSet(x.getMessage());
+          }
+        }
+      });
+
       final JButton cancel = new JButton("Cancel");
       cancel.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
@@ -155,7 +173,12 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
         }
       });
 
-      layout.row().bar().add(cancel, Tag.CANCEL).add(ok, Tag.OK);
+      layout
+        .row()
+        .bar()
+        .add(cancel, Tag.CANCEL)
+        .add(ok, Tag.OK)
+        .add(apply, Tag.APPLY);
     }
   }
 
