@@ -30,7 +30,8 @@ import com.io7m.renderer.types.RException;
 
 @Immutable public final class KInstanceTranslucentRegular implements
   KInstanceTranslucent,
-  KInstanceWithMaterial<KMaterialTranslucentRegular>
+  KInstanceWithMaterial<KMaterialTranslucentRegular>,
+  KInstanceRegular
 {
   /**
    * Create a new translucent instance.

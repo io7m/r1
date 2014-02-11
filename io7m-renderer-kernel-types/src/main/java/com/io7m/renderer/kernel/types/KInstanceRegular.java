@@ -16,13 +16,20 @@
 
 package com.io7m.renderer.kernel.types;
 
+import javax.annotation.Nonnull;
+
 /**
- * The type of opaque materials.
+ * The type of regular instances. That is, instances that have materials
+ * applied that are regular (@link {@link KMaterialRegular}).
+ * 
+ * @see KMaterialRegular
  */
 
-public interface KMaterialOpaque extends
-  KMaterialOpaqueVisitable,
-  KMaterialRegular
+public interface KInstanceRegular extends KInstance
 {
-  // Nothing
+  /**
+   * @return The regular material of this instance
+   */
+
+  @Nonnull KMaterialRegular instanceGetMaterial();
 }

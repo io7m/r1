@@ -19,17 +19,12 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.kernel.types.KInstanceOpaque;
-import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceRegular;
 import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
 
 interface KMaterialSpecularLabelCache
 {
-  public @Nonnull KMaterialSpecularLabel getSpecularLabelOpaque(
-    final @Nonnull KInstanceOpaque instance)
-    throws ConstraintError;
-
-  public @Nonnull KMaterialSpecularLabel getSpecularLabelTranslucentRegular(
-    final @Nonnull KInstanceTranslucentRegular instance)
+  public @Nonnull KMaterialSpecularLabel getSpecularLabelRegular(
+    final @Nonnull KInstanceRegular instance)
     throws ConstraintError;
 }

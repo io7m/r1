@@ -92,16 +92,6 @@ public final class SBMaterialControls implements
   private final @Nonnull JFrame                                  parent;
   private final @Nonnull SBMaterialTypeSelector                  selector;
 
-  public @Nonnull Integer getID()
-  {
-    return this.id;
-  }
-
-  public @Nonnull String getName()
-  {
-    return this.name.getText();
-  }
-
   private SBMaterialControls(
     final @Nonnull JFrame parent,
     final @Nonnull Log log,
@@ -225,6 +215,8 @@ public final class SBMaterialControls implements
                 {
                   SBMaterialControls.this.controls_opaque_alpha_depth
                     .controlsLoadFrom(ma);
+                  SBMaterialControls.this.selector
+                    .setSelectedItem(SBMaterialType.MATERIAL_OPAQUE_ALPHA_DEPTH);
                   return Unit.unit();
                 }
 
@@ -236,6 +228,8 @@ public final class SBMaterialControls implements
                 {
                   SBMaterialControls.this.controls_opaque_regular
                     .controlsLoadFrom(mr);
+                  SBMaterialControls.this.selector
+                    .setSelectedItem(SBMaterialType.MATERIAL_OPAQUE_REGULAR);
                   return Unit.unit();
                 }
               });
@@ -259,6 +253,8 @@ public final class SBMaterialControls implements
                 {
                   SBMaterialControls.this.controls_translucent_refractive
                     .controlsLoadFrom(mr);
+                  SBMaterialControls.this.selector
+                    .setSelectedItem(SBMaterialType.MATERIAL_TRANSLUCENT_REFRACTIVE);
                   return Unit.unit();
                 }
 
@@ -272,6 +268,8 @@ public final class SBMaterialControls implements
                 {
                   SBMaterialControls.this.controls_translucent_regular
                     .controlsLoadFrom(mr);
+                  SBMaterialControls.this.selector
+                    .setSelectedItem(SBMaterialType.MATERIAL_TRANSLUCENT_REGULAR);
                   return Unit.unit();
                 }
               });
@@ -354,5 +352,15 @@ public final class SBMaterialControls implements
         break;
       }
     }
+  }
+
+  public @Nonnull Integer getID()
+  {
+    return this.id;
+  }
+
+  public @Nonnull String getName()
+  {
+    return this.name.getText();
   }
 }
