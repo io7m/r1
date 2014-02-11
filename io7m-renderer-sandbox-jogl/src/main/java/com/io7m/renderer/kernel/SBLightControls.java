@@ -146,8 +146,10 @@ public final class SBLightControls implements
 
     this.selector = new SBLightTypeSelector();
     this.selector.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+      @SuppressWarnings("synthetic-access") @Override public
+        void
+        actionPerformed(
+          final @Nonnull ActionEvent e)
       {
         final SBLightType selected =
           SBLightControls.this.selector.getSelectedItem();

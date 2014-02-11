@@ -77,7 +77,7 @@ public final class SBIntegerHSlider
               .getFieldIntegerOrError(SBIntegerHSlider.this.field);
           SBIntegerHSlider.this.setCurrent(actual);
         } catch (final SBExceptionInputError x) {
-
+          // Silently fail
         }
       }
     });
