@@ -357,8 +357,10 @@ public final class SBInstancesControls implements
 
     this.instances.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
-        @Override public void valueChanged(
-          final @Nonnull ListSelectionEvent e)
+        @SuppressWarnings("synthetic-access") @Override public
+          void
+          valueChanged(
+            final @Nonnull ListSelectionEvent e)
         {
           if (SBInstancesControls.this.instances.getSelectedRow() == -1) {
             SBInstancesControls.this.edit.setEnabled(false);

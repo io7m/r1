@@ -27,57 +27,32 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import net.java.dev.designgridlayout.DesignGridLayout;
-import net.java.dev.designgridlayout.RowGroup;
-
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
-public final class SBFloatHSlider implements SBControls
+public final class SBIntegerHSlider
 {
-  private static float convertFromSlider(
-    final int x,
-    final float min,
-    final float max)
-  {
-    final float factor = x / 100.0f;
-    return (factor * (max - min)) + min;
-  }
-
-  private static int convertToSlider(
-    final float f,
-    final float min,
-    final float max)
-  {
-    return (int) (((f - min) / (max - min)) * 100);
-  }
-
-  private float                     current;
+  private final int                 minimum;
+  private final int                 maximum;
   private final @Nonnull JTextField field;
-  private final @Nonnull RowGroup   group;
-  private final @Nonnull JLabel     label;
-  private final float               maximum;
-  private final float               minimum;
   private final @Nonnull JSlider    slider;
+  private final @Nonnull JLabel     label;
 
-  public SBFloatHSlider(
+  public SBIntegerHSlider(
     final @Nonnull String label,
-    final float minimum,
-    final float maximum)
+    final int minimum,
+    final int maximum)
     throws ConstraintError
   {
-    this.label =
-      new JLabel(Constraints.constrainNotNull(label, "ForwardLabel"));
-    this.group = new RowGroup();
-
+    this.label = new JLabel(Constraints.constrainNotNull(label, "Label"));
     this.maximum = maximum;
     this.minimum = minimum;
 
-    this.field = new JTextField(Float.toString(minimum));
+    this.field = new JTextField(Integer.toString(minimum));
     this.slider = new JSlider(SwingConstants.HORIZONTAL);
-    this.slider.setMinimum(0);
-    this.slider.setMaximum(100);
+    this.slider.setMinimum(minimum);
+    this.slider.setMaximum(maximum);
     this.slider.setValue(0);
 
     this.slider.addChangeListener(new ChangeListener() {
@@ -86,10 +61,7 @@ public final class SBFloatHSlider implements SBControls
         stateChanged(
           final @Nonnull ChangeEvent ev)
       {
-        final int slider_current = SBFloatHSlider.this.slider.getValue();
-        SBFloatHSlider.this.current =
-          SBFloatHSlider.convertFromSlider(slider_current, minimum, maximum);
-        SBFloatHSlider.this.refreshText();
+        SBIntegerHSlider.this.refreshText();
       }
     });
 
@@ -100,41 +72,20 @@ public final class SBFloatHSlider implements SBControls
           final ActionEvent e)
       {
         try {
-          final float actual =
+          final int actual =
             SBTextFieldUtilities
-              .getFieldFloatOrError(SBFloatHSlider.this.field);
-          SBFloatHSlider.this.setCurrent(actual);
+              .getFieldIntegerOrError(SBIntegerHSlider.this.field);
+          SBIntegerHSlider.this.setCurrent(actual);
         } catch (final SBExceptionInputError x) {
-          // Fail silently
+          // Silently fail
         }
       }
     });
   }
 
-  @Override public void controlsAddToLayout(
-    final DesignGridLayout layout)
+  public int getCurrent()
   {
-    layout
-      .row()
-      .group(this.group)
-      .grid(this.label)
-      .add(this.slider, 3)
-      .add(this.field);
-  }
-
-  @Override public void controlsHide()
-  {
-    this.group.hide();
-  }
-
-  @Override public void controlsShow()
-  {
-    this.group.forceShow();
-  }
-
-  public float getCurrent()
-  {
-    return this.current;
+    return this.slider.getValue();
   }
 
   public @Nonnull JTextField getField()
@@ -147,12 +98,12 @@ public final class SBFloatHSlider implements SBControls
     return this.label;
   }
 
-  public float getMaximum()
+  public int getMaximum()
   {
     return this.maximum;
   }
 
-  public float getMinimum()
+  public int getMinimum()
   {
     return this.minimum;
   }
@@ -164,18 +115,14 @@ public final class SBFloatHSlider implements SBControls
 
   @SuppressWarnings("boxing") private void refreshText()
   {
-    final String ctext = String.format("%.6f", SBFloatHSlider.this.current);
-    SBFloatHSlider.this.field.setText(ctext);
+    final String ctext = String.format("%d", this.slider.getValue());
+    SBIntegerHSlider.this.field.setText(ctext);
   }
 
   public void setCurrent(
-    final float e)
+    final int e)
   {
-    this.slider.setValue(SBFloatHSlider.convertToSlider(
-      e,
-      this.minimum,
-      this.maximum));
-    this.current = e;
+    this.slider.setValue(e);
     this.refreshText();
   }
 }
