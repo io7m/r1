@@ -48,8 +48,8 @@ import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
-import com.io7m.renderer.RException;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthDescription;
+import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
+import com.io7m.renderer.types.RException;
 
 abstract class KFramebufferDepth implements KFramebufferDepthType
 {

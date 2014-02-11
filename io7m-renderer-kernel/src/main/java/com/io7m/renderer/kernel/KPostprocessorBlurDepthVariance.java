@@ -29,9 +29,9 @@ import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorM2I;
-import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorDepthVariance;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthVarianceDescription;
+import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
+import com.io7m.renderer.types.RException;
 
 public final class KPostprocessorBlurDepthVariance extends
   KAbstractPostprocessorDepthVariance

@@ -17,7 +17,6 @@
 package com.io7m.renderer.kernel;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -49,12 +48,20 @@ import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
-import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererDebug;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
+import com.io7m.renderer.kernel.types.KCamera;
+import com.io7m.renderer.kernel.types.KInstanceOpaque;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KMaterialOpaque;
+import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.kernel.types.KScene;
+import com.io7m.renderer.kernel.types.KScene.KSceneOpaques;
+import com.io7m.renderer.kernel.types.KTransformContext;
+import com.io7m.renderer.types.RException;
 
 final class KRendererDebugNormalsMapEye extends KAbstractRendererDebug
 {
@@ -75,7 +82,7 @@ final class KRendererDebugNormalsMapEye extends KAbstractRendererDebug
   private final @Nonnull Log                log;
   private final @Nonnull KMutableMatrices   matrices;
   private final @Nonnull KProgram           program;
-  private final @Nonnull KTransformContext transform_context;
+  private final @Nonnull KTransformContext  transform_context;
   private final @Nonnull VectorM2I          viewport_size;
 
   private KRendererDebugNormalsMapEye(
@@ -95,7 +102,7 @@ final class KRendererDebugNormalsMapEye extends KAbstractRendererDebug
 
       this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
       this.matrices = KMutableMatrices.newMatrices();
-      this.transform_context = new KTransformContext();
+      this.transform_context = KTransformContext.newContext();
       this.viewport_size = new VectorM2I();
 
       this.program =
@@ -194,23 +201,22 @@ final class KRendererDebugNormalsMapEye extends KAbstractRendererDebug
             p,
             mo.getMatrixProjection());
 
-          final Set<KMeshInstanceTransformed> instances =
-            scene.getVisibleInstances();
-
-          for (final KMeshInstanceTransformed i : instances) {
+          final KSceneOpaques opaques = scene.getOpaques();
+          for (final KInstanceTransformedOpaque o : opaques.getAll()) {
             mo.withInstance(
-              i,
+              o,
               new MatricesInstanceFunction<Unit, JCGLException>() {
                 @Override public Unit run(
                   final @Nonnull MatricesInstance mi)
-                  throws JCGLException,
-                    ConstraintError
+                  throws ConstraintError,
+                    RException,
+                    JCGLException
                 {
-                  KRendererDebugNormalsMapEye.this.renderInstance(
+                  KRendererDebugNormalsMapEye.renderInstanceOpaque(
                     gc,
                     p,
                     mi,
-                    i);
+                    o);
                   return Unit.unit();
                 }
               });
@@ -230,11 +236,11 @@ final class KRendererDebugNormalsMapEye extends KAbstractRendererDebug
     VectorM4F.copy(rgba, this.background);
   }
 
-  @SuppressWarnings("static-method") private void renderInstance(
+  private static void renderInstanceOpaque(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCBProgram p,
     final @Nonnull MatricesInstance mi,
-    final @Nonnull KMeshInstanceTransformed transformed)
+    final @Nonnull KInstanceTransformedOpaque transformed)
     throws ConstraintError,
       JCGLException
   {
@@ -252,12 +258,12 @@ final class KRendererDebugNormalsMapEye extends KAbstractRendererDebug
      */
 
     final List<TextureUnit> texture_units = gc.textureGetUnits();
-    final KMeshInstance instance = transformed.getInstance();
-    final KMaterial material = instance.getMaterial();
+    final KInstanceOpaque instance = transformed.getInstance();
+    final KMaterialOpaque material = instance.instanceGetMaterial();
 
     {
       final Option<Texture2DStatic> normal_opt =
-        material.getNormal().getTexture();
+        material.materialGetNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units.get(0),
@@ -274,7 +280,7 @@ final class KRendererDebugNormalsMapEye extends KAbstractRendererDebug
      */
 
     try {
-      final KMesh mesh = instance.getMesh();
+      final KMesh mesh = instance.instanceGetMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
 

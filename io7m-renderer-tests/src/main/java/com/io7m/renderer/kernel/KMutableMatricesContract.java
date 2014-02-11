@@ -28,7 +28,6 @@ import org.junit.Test;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
-import com.io7m.jaux.functional.Option.None;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttributeDescriptor;
@@ -45,9 +44,7 @@ import com.io7m.jcanephora.JCGLInterfaceGLES2;
 import com.io7m.jcanephora.JCGLInterfaceGLES3;
 import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.JCGLUnsupportedException;
-import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureWrapS;
@@ -55,34 +52,8 @@ import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.RException;
-import com.io7m.renderer.RMatrixI3x3F;
-import com.io7m.renderer.RMatrixI4x4F;
-import com.io7m.renderer.RMatrixM3x3F;
-import com.io7m.renderer.RMatrixM4x4F;
-import com.io7m.renderer.RMatrixReadable3x3F;
-import com.io7m.renderer.RMatrixReadable4x4F;
-import com.io7m.renderer.RSpaceObject;
-import com.io7m.renderer.RSpaceRGB;
-import com.io7m.renderer.RSpaceRGBA;
-import com.io7m.renderer.RSpaceWorld;
-import com.io7m.renderer.RTransformModel;
-import com.io7m.renderer.RTransformModelView;
-import com.io7m.renderer.RTransformNormal;
-import com.io7m.renderer.RTransformProjection;
-import com.io7m.renderer.RTransformProjectiveModelView;
-import com.io7m.renderer.RTransformProjectiveProjection;
-import com.io7m.renderer.RTransformProjectiveView;
-import com.io7m.renderer.RTransformTexture;
-import com.io7m.renderer.RTransformView;
-import com.io7m.renderer.RTransformViewInverse;
-import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.RVectorI4F;
-import com.io7m.renderer.RVectorReadable3F;
 import com.io7m.renderer.TestContext;
 import com.io7m.renderer.TestContract;
-import com.io7m.renderer.kernel.KLight.KProjective;
-import com.io7m.renderer.kernel.KMaterialAlpha.OpacityType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceWithProjective;
@@ -91,6 +62,45 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLight;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunction;
+import com.io7m.renderer.kernel.types.KInstanceOpaque;
+import com.io7m.renderer.kernel.types.KInstanceTransformed;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KMaterialAlbedo;
+import com.io7m.renderer.kernel.types.KMaterialEmissive;
+import com.io7m.renderer.kernel.types.KMaterialEnvironment;
+import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialSpecular;
+import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.kernel.types.KMeshAttributes;
+import com.io7m.renderer.kernel.types.KShadow;
+import com.io7m.renderer.kernel.types.KTransform;
+import com.io7m.renderer.kernel.types.KTransformOST;
+import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RMatrixI3x3F;
+import com.io7m.renderer.types.RMatrixI4x4F;
+import com.io7m.renderer.types.RMatrixM3x3F;
+import com.io7m.renderer.types.RMatrixM4x4F;
+import com.io7m.renderer.types.RMatrixReadable3x3F;
+import com.io7m.renderer.types.RMatrixReadable4x4F;
+import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RSpaceRGB;
+import com.io7m.renderer.types.RSpaceRGBA;
+import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RTransformModel;
+import com.io7m.renderer.types.RTransformModelView;
+import com.io7m.renderer.types.RTransformNormal;
+import com.io7m.renderer.types.RTransformProjection;
+import com.io7m.renderer.types.RTransformProjectiveModelView;
+import com.io7m.renderer.types.RTransformProjectiveProjection;
+import com.io7m.renderer.types.RTransformProjectiveView;
+import com.io7m.renderer.types.RTransformTexture;
+import com.io7m.renderer.types.RTransformView;
+import com.io7m.renderer.types.RTransformViewInverse;
+import com.io7m.renderer.types.RVectorI3F;
+import com.io7m.renderer.types.RVectorI4F;
+import com.io7m.renderer.types.RVectorReadable3F;
 
 public abstract class KMutableMatricesContract extends TestContract
 {
@@ -116,7 +126,7 @@ public abstract class KMutableMatricesContract extends TestContract
     return i.indexBufferAllocateType(JCGLUnsignedType.TYPE_UNSIGNED_BYTE, 3);
   }
 
-  private static @Nonnull KProjective makeKProjective(
+  private static @Nonnull KLightProjective makeKProjective(
     final @Nonnull JCGLImplementation gi)
   {
     try {
@@ -205,10 +215,10 @@ public abstract class KMutableMatricesContract extends TestContract
       m_projection.set(2, 2, 7.0f);
       m_projection.set(3, 3, 7.0f);
       final RMatrixI4x4F<RTransformProjection> projection =
-        new RMatrixI4x4F<RTransformProjection>(m_projection);
+        RMatrixI4x4F.newFromReadable(m_projection);
 
-      final Option<KShadow> shadow = new None<KShadow>();
-      return KProjective.make(
+      final Option<KShadow> shadow = Option.none();
+      return KLightProjective.newProjective(
         Integer.valueOf(23),
         texture,
         position,
@@ -226,60 +236,56 @@ public abstract class KMutableMatricesContract extends TestContract
     }
   }
 
-  private static @Nonnull KMeshInstanceTransformed makeMeshInstance(
+  private static @Nonnull KInstanceTransformed makeMeshInstance(
     final JCGLImplementation g)
   {
     try {
       final RMatrixI3x3F<RTransformTexture> uv_matrix =
-        new RMatrixI3x3F<RTransformTexture>();
+        RMatrixI3x3F.identity();
       final ArrayBuffer array =
         KMutableMatricesContract.makeArrayBuffer(g.getGLCommon());
       final IndexBuffer indices =
         KMutableMatricesContract.makeIndexBuffer(g.getGLCommon());
+
       final KMesh mesh =
-        new KMesh(array, indices, new RVectorI3F<RSpaceObject>(
+        KMesh.newMesh(array, indices, new RVectorI3F<RSpaceObject>(
           0.0f,
           0.0f,
           0.0f), new RVectorI3F<RSpaceObject>(0.0f, 0.0f, 0.0f));
-      final KMaterialAlpha alpha =
-        new KMaterialAlpha(OpacityType.ALPHA_OPAQUE, 1.0f, 0.0f);
+
       final RVectorI4F<RSpaceRGBA> colour =
         new RVectorI4F<RSpaceRGBA>(0.0f, 0.0f, 0.0f, 0.0f);
-      final Option<Texture2DStatic> no_texture =
-        new Option.None<Texture2DStatic>();
       final KMaterialAlbedo albedo =
-        new KMaterialAlbedo(colour, 1.0f, no_texture);
-      final KMaterialEmissive emissive =
-        new KMaterialEmissive(0.0f, no_texture);
-      final Option<TextureCubeStatic> no_texture_cube =
-        new Option.None<TextureCubeStatic>();
+        KMaterialAlbedo.newAlbedoUntextured(colour);
+      final KMaterialEmissive emissive = KMaterialEmissive.newEmissiveNone();
       final KMaterialEnvironment environment =
-        new KMaterialEnvironment(0.0f, no_texture_cube, false);
-      final KMaterialNormal normal = new KMaterialNormal(no_texture);
+        KMaterialEnvironment.newEnvironmentUnmapped();
+      final KMaterialNormal normal = KMaterialNormal.newNormalUnmapped();
       final KMaterialSpecular specular =
-        new KMaterialSpecular(0.0f, 0.0f, no_texture);
-      final KMaterial material =
-        new KMaterial(
-          alpha,
+        KMaterialSpecular.newSpecularUnmapped(0.0f, 1.0f);
+
+      final KMaterialOpaqueRegular material =
+        KMaterialOpaqueRegular.newMaterial(
+          uv_matrix,
+          normal,
           albedo,
           emissive,
           environment,
-          normal,
-          specular,
-          uv_matrix);
+          specular);
 
-      final KMeshInstance kmi =
-        new KMeshInstance(Integer.valueOf(23), material, mesh);
+      final KInstanceOpaque kmi =
+        KInstanceOpaque.newInstance(Integer.valueOf(23), material, mesh);
 
       final QuaternionI4F orientation = new QuaternionI4F();
       final VectorI3F scale = new VectorI3F(0, 0, 0);
       final RVectorI3F<RSpaceWorld> translation =
         new RVectorI3F<RSpaceWorld>(0.0f, 0.0f, 0.0f);
       final KTransform trans =
-        KTransform.newOSTTransform(orientation, scale, translation);
+        KTransformOST.newTransform(orientation, scale, translation);
 
-      final KMeshInstanceTransformed kmit =
-        new KMeshInstanceTransformed(kmi, trans, uv_matrix);
+      final KInstanceTransformedOpaque kmit =
+        KInstanceTransformedOpaque.newInstance(kmi, trans, uv_matrix);
+
       return kmit;
     } catch (final ConstraintError e) {
       throw new AssertionError(e);
@@ -294,9 +300,8 @@ public abstract class KMutableMatricesContract extends TestContract
       RException
   {
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>();
+      RMatrixI4x4F.identity();
+    final RMatrixI4x4F<RTransformView> view = RMatrixI4x4F.identity();
 
     final AtomicReference<MatricesObserver> saved =
       new AtomicReference<MatricesObserver>();
@@ -369,12 +374,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     final AtomicReference<MatricesInstance> saved =
       new AtomicReference<MatricesInstance>();
@@ -461,12 +466,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
@@ -525,9 +530,6 @@ public abstract class KMutableMatricesContract extends TestContract
                     i.getMatrixUV();
                   final RMatrixM3x3F<RTransformTexture> mx =
                     new RMatrixM3x3F<RTransformTexture>();
-                  mx.set(0, 0, 0.0f);
-                  mx.set(1, 1, 0.0f);
-                  mx.set(2, 2, 0.0f);
                   Assert.assertEquals(mx, m);
                 }
 
@@ -553,12 +555,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
@@ -611,12 +613,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
@@ -715,7 +717,7 @@ public abstract class KMutableMatricesContract extends TestContract
     m_projection.set(2, 2, 2.0f);
     m_projection.set(3, 3, 2.0f);
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
@@ -724,7 +726,7 @@ public abstract class KMutableMatricesContract extends TestContract
     m_view.set(2, 2, 3.0f);
     m_view.set(3, 3, 3.0f);
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
@@ -783,12 +785,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
@@ -826,9 +828,8 @@ public abstract class KMutableMatricesContract extends TestContract
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>();
+      RMatrixI4x4F.identity();
+    final RMatrixI4x4F<RTransformView> view = RMatrixI4x4F.identity();
 
     mm.withObserver(
       view,
@@ -871,12 +872,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     final AtomicReference<MatricesProjectiveLight> saved =
       KMutableMatricesContract.saveProjectiveDangerously(
@@ -902,12 +903,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     final AtomicReference<MatricesProjectiveLight> saved =
       KMutableMatricesContract.saveProjectiveDangerously(
@@ -931,12 +932,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     final AtomicBoolean instance_once = new AtomicBoolean(false);
 
@@ -1017,9 +1018,6 @@ public abstract class KMutableMatricesContract extends TestContract
                           i.getMatrixUV();
                         final RMatrixM3x3F<RTransformTexture> mx =
                           new RMatrixM3x3F<RTransformTexture>();
-                        mx.set(0, 0, 0.0f);
-                        mx.set(1, 1, 0.0f);
-                        mx.set(2, 2, 0.0f);
                         Assert.assertEquals(mx, m);
                       }
 
@@ -1048,12 +1046,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
@@ -1113,12 +1111,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
@@ -1187,7 +1185,7 @@ public abstract class KMutableMatricesContract extends TestContract
     m_projection.set(2, 2, 2.0f);
     m_projection.set(3, 3, 2.0f);
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
@@ -1196,7 +1194,7 @@ public abstract class KMutableMatricesContract extends TestContract
     m_view.set(2, 2, 3.0f);
     m_view.set(3, 3, 3.0f);
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
@@ -1262,12 +1260,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
@@ -1321,12 +1319,12 @@ public abstract class KMutableMatricesContract extends TestContract
     final RMatrixM4x4F<RTransformProjection> m_projection =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformProjection> projection =
-      new RMatrixI4x4F<RTransformProjection>(m_projection);
+      RMatrixI4x4F.newFromReadable(m_projection);
 
     final RMatrixM4x4F<RTransformProjection> m_view =
       new RMatrixM4x4F<RTransformProjection>();
     final RMatrixI4x4F<RTransformView> view =
-      new RMatrixI4x4F<RTransformView>(m_view);
+      RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,

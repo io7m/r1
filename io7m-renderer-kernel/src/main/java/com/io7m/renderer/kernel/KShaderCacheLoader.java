@@ -30,7 +30,7 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FSCapabilityRead;
-import com.io7m.renderer.RException;
+import com.io7m.renderer.types.RException;
 
 final class KShaderCacheLoader implements
   JCacheLoader<String, KProgram, RException>

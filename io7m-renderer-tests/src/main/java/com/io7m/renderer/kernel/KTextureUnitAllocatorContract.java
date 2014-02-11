@@ -44,9 +44,9 @@ import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
-import com.io7m.renderer.RException;
 import com.io7m.renderer.TestContext;
 import com.io7m.renderer.TestContract;
+import com.io7m.renderer.types.RException;
 
 public abstract class KTextureUnitAllocatorContract extends TestContract
 {

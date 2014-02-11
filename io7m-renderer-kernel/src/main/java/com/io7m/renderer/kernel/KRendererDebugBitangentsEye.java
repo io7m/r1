@@ -46,12 +46,17 @@ import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
-import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererDebug;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
+import com.io7m.renderer.kernel.types.KCamera;
+import com.io7m.renderer.kernel.types.KInstanceTransformed;
+import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.kernel.types.KScene;
+import com.io7m.renderer.kernel.types.KTransformContext;
+import com.io7m.renderer.types.RException;
 
 @Immutable final class KRendererDebugBitangentsEye extends
   KAbstractRendererDebug
@@ -73,7 +78,7 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
   private final @Nonnull Log                log;
   private final @Nonnull KMutableMatrices   matrices;
   private final @Nonnull KProgram           program;
-  private final @Nonnull KTransformContext transform_context;
+  private final @Nonnull KTransformContext  transform_context;
   private final @Nonnull VectorM2I          viewport_size;
 
   private KRendererDebugBitangentsEye(
@@ -93,7 +98,7 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 
       this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
       this.matrices = KMutableMatrices.newMatrices();
-      this.transform_context = new KTransformContext();
+      this.transform_context = KTransformContext.newContext();
       this.viewport_size = new VectorM2I();
 
       this.program =
@@ -194,10 +199,10 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
             p,
             mo.getMatrixProjection());
 
-          final Set<KMeshInstanceTransformed> instances =
+          final Set<KInstanceTransformed> instances =
             scene.getVisibleInstances();
 
-          for (final KMeshInstanceTransformed i : instances) {
+          for (final KInstanceTransformed i : instances) {
             mo.withInstance(
               i,
               new MatricesInstanceFunction<Unit, JCGLException>() {
@@ -233,7 +238,7 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
   @SuppressWarnings("static-method") private void renderMesh(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCBProgram p,
-    final @Nonnull KMeshInstanceTransformed i,
+    final @Nonnull KInstanceTransformed i,
     final @Nonnull MatricesInstance mi)
     throws ConstraintError,
       JCGLException,
@@ -252,7 +257,7 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
      */
 
     try {
-      final KMesh mesh = i.getInstance().getMesh();
+      final KMesh mesh = i.instanceGetMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
 

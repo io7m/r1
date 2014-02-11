@@ -19,12 +19,12 @@ package com.io7m.renderer.xml.rmx;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.RSpaceObject;
-import com.io7m.renderer.RSpaceTexture;
-import com.io7m.renderer.RVectorI2F;
-import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.RVectorI4F;
-import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RSpaceTexture;
+import com.io7m.renderer.types.RVectorI2F;
+import com.io7m.renderer.types.RVectorI3F;
+import com.io7m.renderer.types.RVectorI4F;
+import com.io7m.renderer.types.RXMLException;
 
 public interface RXMLMeshParserEvents<E extends Throwable>
 {

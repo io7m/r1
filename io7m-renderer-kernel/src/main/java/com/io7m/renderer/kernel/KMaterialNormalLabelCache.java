@@ -19,10 +19,12 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.kernel.types.KInstance;
+import com.io7m.renderer.kernel.types.KMaterialNormalLabel;
 
 interface KMaterialNormalLabelCache
 {
   public @Nonnull KMaterialNormalLabel getNormalLabel(
-    final @Nonnull KMeshInstance instance)
+    final @Nonnull KInstance instance)
     throws ConstraintError;
 }

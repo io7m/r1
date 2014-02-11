@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.kernel.types.KShadow;
 
 /**
  * Optional debugging interface supported by renderers.

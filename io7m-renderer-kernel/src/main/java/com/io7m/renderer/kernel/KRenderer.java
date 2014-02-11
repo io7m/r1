@@ -21,7 +21,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.VectorReadable4F;
-import com.io7m.renderer.RException;
+import com.io7m.renderer.types.RException;
 
 public interface KRenderer extends KRendererVisitable
 {

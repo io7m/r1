@@ -22,27 +22,41 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Unit;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.MatrixM4x4F.Context;
-import com.io7m.renderer.RException;
-import com.io7m.renderer.RMatrixI3x3F;
-import com.io7m.renderer.RMatrixI4x4F;
-import com.io7m.renderer.RMatrixM3x3F;
-import com.io7m.renderer.RMatrixM4x4F;
-import com.io7m.renderer.RMatrixReadable3x3F;
-import com.io7m.renderer.RMatrixReadable4x4F;
-import com.io7m.renderer.RTransformModel;
-import com.io7m.renderer.RTransformModelView;
-import com.io7m.renderer.RTransformNormal;
-import com.io7m.renderer.RTransformProjection;
-import com.io7m.renderer.RTransformProjectiveModelView;
-import com.io7m.renderer.RTransformProjectiveProjection;
-import com.io7m.renderer.RTransformProjectiveView;
-import com.io7m.renderer.RTransformTexture;
-import com.io7m.renderer.RTransformView;
-import com.io7m.renderer.RTransformViewInverse;
-import com.io7m.renderer.kernel.KLight.KProjective;
+import com.io7m.renderer.kernel.types.KInstanceTransformed;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceTransformedVisitor;
+import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KMaterialOpaque;
+import com.io7m.renderer.kernel.types.KMaterialTranslucent;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
+import com.io7m.renderer.kernel.types.KTransform;
+import com.io7m.renderer.kernel.types.KTransformContext;
+import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RMatrixI3x3F;
+import com.io7m.renderer.types.RMatrixI4x4F;
+import com.io7m.renderer.types.RMatrixM3x3F;
+import com.io7m.renderer.types.RMatrixM4x4F;
+import com.io7m.renderer.types.RMatrixReadable3x3F;
+import com.io7m.renderer.types.RMatrixReadable4x4F;
+import com.io7m.renderer.types.RTransformModel;
+import com.io7m.renderer.types.RTransformModelView;
+import com.io7m.renderer.types.RTransformNormal;
+import com.io7m.renderer.types.RTransformProjection;
+import com.io7m.renderer.types.RTransformProjectiveModelView;
+import com.io7m.renderer.types.RTransformProjectiveProjection;
+import com.io7m.renderer.types.RTransformProjectiveView;
+import com.io7m.renderer.types.RTransformTexture;
+import com.io7m.renderer.types.RTransformView;
+import com.io7m.renderer.types.RTransformViewInverse;
 
 final class KMutableMatrices
 {
@@ -108,7 +122,7 @@ final class KMutableMatrices
     }
 
     @SuppressWarnings("synthetic-access") final void instanceStart(
-      final @Nonnull KMeshInstanceTransformed i)
+      final @Nonnull KInstanceTransformed i)
       throws ConstraintError
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -118,7 +132,7 @@ final class KMutableMatrices
        * Calculate model and modelview transforms.
        */
 
-      final KTransform transform = i.getTransform();
+      final KTransform transform = i.instanceGetTransform();
       transform.transformMakeMatrix4x4F(
         KMutableMatrices.this.transform_context,
         this.matrix_model);
@@ -134,12 +148,58 @@ final class KMutableMatrices
        * Calculate texture transform.
        */
 
-      final RMatrixI3x3F<RTransformTexture> km =
-        i.getInstance().getMaterial().getUVMatrix();
-      final RMatrixI3x3F<RTransformTexture> ki = i.getUVMatrix();
+      final RMatrixI3x3F<RTransformTexture> instance_uv_m =
+        i.instanceGetUVMatrix();
+      instance_uv_m.makeMatrixM3x3F(this.matrix_uv);
 
-      km.makeMatrixM3x3F(this.matrix_uv);
-      ki.makeMatrixM3x3F(this.matrix_uv_temp);
+      try {
+        i
+          .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, ConstraintError>() {
+            @Override public Unit transformedVisitOpaque(
+              final @Nonnull KInstanceTransformedOpaque ito)
+              throws ConstraintError
+            {
+              final KMaterialOpaque m =
+                ito.getInstance().instanceGetMaterial();
+              final RMatrixI3x3F<RTransformTexture> material_uv_m =
+                m.materialGetUVMatrix();
+              material_uv_m
+                .makeMatrixM3x3F(InstanceSingleton.this.matrix_uv_temp);
+              return Unit.unit();
+            }
+
+            @Override public Unit transformedVisitTranslucentRegular(
+              final @Nonnull KInstanceTransformedTranslucentRegular itt)
+              throws ConstraintError
+            {
+              final KMaterialTranslucent m =
+                itt.getInstance().instanceGetMaterial();
+              final RMatrixI3x3F<RTransformTexture> material_uv_m =
+                m.materialGetUVMatrix();
+              material_uv_m
+                .makeMatrixM3x3F(InstanceSingleton.this.matrix_uv_temp);
+              return Unit.unit();
+            }
+
+            @Override public Unit transformedVisitTranslucentRefractive(
+              final KInstanceTransformedTranslucentRefractive itt)
+              throws ConstraintError
+            {
+              final KMaterialTranslucent m =
+                itt.getInstance().instanceGetMaterial();
+              final RMatrixI3x3F<RTransformTexture> material_uv_m =
+                m.materialGetUVMatrix();
+              material_uv_m
+                .makeMatrixM3x3F(InstanceSingleton.this.matrix_uv_temp);
+              return Unit.unit();
+            }
+          });
+      } catch (final JCGLException e) {
+        throw new UnreachableCodeException(e);
+      } catch (final RException e) {
+        throw new UnreachableCodeException(e);
+      }
+
       MatrixM3x3F.multiplyInPlace(this.matrix_uv, this.matrix_uv_temp);
     }
 
@@ -250,7 +310,7 @@ final class KMutableMatrices
     }
 
     @SuppressWarnings("synthetic-access") final void instanceStart(
-      final @Nonnull KMeshInstanceTransformed i)
+      final @Nonnull KInstanceTransformed i)
       throws ConstraintError
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -261,7 +321,7 @@ final class KMutableMatrices
        * Calculate model and modelview transforms.
        */
 
-      final KTransform transform = i.getTransform();
+      final KTransform transform = i.instanceGetTransform();
       transform.transformMakeMatrix4x4F(
         KMutableMatrices.this.transform_context,
         this.matrix_model);
@@ -277,12 +337,58 @@ final class KMutableMatrices
        * Calculate texture transform.
        */
 
-      final RMatrixI3x3F<RTransformTexture> km =
-        i.getInstance().getMaterial().getUVMatrix();
-      final RMatrixI3x3F<RTransformTexture> ki = i.getUVMatrix();
+      final RMatrixI3x3F<RTransformTexture> instance_uv_m =
+        i.instanceGetUVMatrix();
+      instance_uv_m.makeMatrixM3x3F(this.matrix_uv);
 
-      km.makeMatrixM3x3F(this.matrix_uv);
-      ki.makeMatrixM3x3F(this.matrix_uv_temp);
+      try {
+        i
+          .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, ConstraintError>() {
+            @Override public Unit transformedVisitOpaque(
+              final @Nonnull KInstanceTransformedOpaque ito)
+              throws ConstraintError
+            {
+              final KMaterialOpaque m =
+                ito.getInstance().instanceGetMaterial();
+              final RMatrixI3x3F<RTransformTexture> material_uv_m =
+                m.materialGetUVMatrix();
+              material_uv_m
+                .makeMatrixM3x3F(InstanceWithProjectiveSingleton.this.matrix_uv_temp);
+              return Unit.unit();
+            }
+
+            @Override public Unit transformedVisitTranslucentRegular(
+              final @Nonnull KInstanceTransformedTranslucentRegular itt)
+              throws ConstraintError
+            {
+              final KMaterialTranslucentRegular m =
+                itt.getInstance().instanceGetMaterial();
+              final RMatrixI3x3F<RTransformTexture> material_uv_m =
+                m.materialGetUVMatrix();
+              material_uv_m
+                .makeMatrixM3x3F(InstanceWithProjectiveSingleton.this.matrix_uv_temp);
+              return Unit.unit();
+            }
+
+            @Override public Unit transformedVisitTranslucentRefractive(
+              final @Nonnull KInstanceTransformedTranslucentRefractive itt)
+              throws ConstraintError
+            {
+              final KMaterialTranslucentRefractive m =
+                itt.getInstance().instanceGetMaterial();
+              final RMatrixI3x3F<RTransformTexture> material_uv_m =
+                m.materialGetUVMatrix();
+              material_uv_m
+                .makeMatrixM3x3F(InstanceWithProjectiveSingleton.this.matrix_uv_temp);
+              return Unit.unit();
+            }
+          });
+      } catch (final JCGLException e) {
+        throw new UnreachableCodeException(e);
+      } catch (final RException e) {
+        throw new UnreachableCodeException(e);
+      }
+
       MatrixM3x3F.multiplyInPlace(this.matrix_uv, this.matrix_uv_temp);
 
       /**
@@ -388,14 +494,14 @@ final class KMutableMatrices
   interface MatricesObserver extends MatricesObserverValues
   {
     public <T, E extends Throwable> T withInstance(
-      final @Nonnull KMeshInstanceTransformed i,
+      final @Nonnull KInstanceTransformed i,
       final @Nonnull MatricesInstanceFunction<T, E> f)
       throws RException,
         E,
         ConstraintError;
 
     public <T, E extends Throwable> T withProjectiveLight(
-      final @Nonnull KProjective p,
+      final @Nonnull KLightProjective p,
       final @Nonnull MatricesProjectiveLightFunction<T, E> f)
       throws RException,
         E,
@@ -429,7 +535,7 @@ final class KMutableMatrices
   interface MatricesProjectiveLight extends MatricesProjectiveLightValues
   {
     public <T, E extends Throwable> T withInstance(
-      final @Nonnull KMeshInstanceTransformed i,
+      final @Nonnull KInstanceTransformed i,
       final @Nonnull MatricesInstanceWithProjectiveFunction<T, E> f)
       throws RException,
         E,
@@ -528,7 +634,7 @@ final class KMutableMatrices
       <T, E extends Throwable>
       T
       withInstance(
-        final @Nonnull KMeshInstanceTransformed i,
+        final @Nonnull KInstanceTransformed i,
         final @Nonnull MatricesInstanceFunction<T, E> f)
         throws RException,
           E,
@@ -556,7 +662,7 @@ final class KMutableMatrices
       <T, E extends Throwable>
       T
       withProjectiveLight(
-        final @Nonnull KProjective p,
+        final @Nonnull KLightProjective p,
         final @Nonnull MatricesProjectiveLightFunction<T, E> f)
         throws E,
           RException,
@@ -619,7 +725,7 @@ final class KMutableMatrices
     }
 
     @SuppressWarnings("synthetic-access") final void projectiveStart(
-      final @Nonnull KProjective p)
+      final @Nonnull KLightProjective p)
     {
       assert KMutableMatrices.this.observerIsActive();
       assert KMutableMatrices.this.projectiveLightIsActive() == false;
@@ -646,7 +752,7 @@ final class KMutableMatrices
       <T, E extends Throwable>
       T
       withInstance(
-        final KMeshInstanceTransformed i,
+        final KInstanceTransformed i,
         final MatricesInstanceWithProjectiveFunction<T, E> f)
         throws RException,
           E,
@@ -725,7 +831,7 @@ final class KMutableMatrices
     this.instance_with_projective =
       new InstanceWithProjectiveSingleton(this.projective);
     this.matrix_context = new MatrixM4x4F.Context();
-    this.transform_context = new KTransformContext();
+    this.transform_context = KTransformContext.newContext();
 
     this.observer_active = new AtomicBoolean();
     this.projective_active = new AtomicBoolean();
