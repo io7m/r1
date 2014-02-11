@@ -85,6 +85,18 @@ import com.io7m.renderer.types.RTransformTexture;
   }
 
   @Override public
+    <A, E extends Throwable, V extends KMaterialTranslucentVisitor<A, E>>
+    A
+    materialTranslucentVisitableAccept(
+      final @Nonnull V v)
+      throws E,
+        RException,
+        ConstraintError
+  {
+    return v.materialVisitTranslucentRefractive(this);
+  }
+
+  @Override public
     <A, E extends Throwable, V extends KMaterialVisitor<A, E>>
     A
     materialVisitableAccept(
@@ -99,17 +111,5 @@ import com.io7m.renderer.types.RTransformTexture;
   @Override public int texturesGetRequired()
   {
     return this.normal.texturesGetRequired();
-  }
-
-  @Override public
-    <A, E extends Throwable, V extends KMaterialTranslucentVisitor<A, E>>
-    A
-    materialTranslucentVisitableAccept(
-      final @Nonnull V v)
-      throws E,
-        RException,
-        ConstraintError
-  {
-    return v.materialVisitTranslucentRefractive(this);
   }
 }

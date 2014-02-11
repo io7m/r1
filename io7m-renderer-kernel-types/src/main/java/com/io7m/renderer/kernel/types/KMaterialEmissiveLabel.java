@@ -49,6 +49,22 @@ public enum KMaterialEmissiveLabel
 
   EMISSIVE_NONE("", 0);
 
+  private static @Nonnull KMaterialEmissiveLabel fromInstanceData(
+    final @Nonnull ArrayBufferUsable a,
+    final @Nonnull KMaterialEmissive emissive)
+    throws ConstraintError
+  {
+    if (emissive.getEmission() == 0.0) {
+      return KMaterialEmissiveLabel.EMISSIVE_NONE;
+    }
+    if (emissive.getTexture().isSome()
+      && a.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+      return KMaterialEmissiveLabel.EMISSIVE_MAPPED;
+    }
+
+    return KMaterialEmissiveLabel.EMISSIVE_CONSTANT;
+  }
+
   /**
    * Derive an emissive label for the given instance.
    * 
@@ -69,22 +85,6 @@ public enum KMaterialEmissiveLabel
     final KMaterialEmissive emissive =
       instance.instanceGetMaterial().materialGetEmissive();
     return KMaterialEmissiveLabel.fromInstanceData(a, emissive);
-  }
-
-  private static @Nonnull KMaterialEmissiveLabel fromInstanceData(
-    final @Nonnull ArrayBufferUsable a,
-    final @Nonnull KMaterialEmissive emissive)
-    throws ConstraintError
-  {
-    if (emissive.getEmission() == 0.0) {
-      return KMaterialEmissiveLabel.EMISSIVE_NONE;
-    }
-    if (emissive.getTexture().isSome()
-      && a.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
-      return KMaterialEmissiveLabel.EMISSIVE_MAPPED;
-    }
-
-    return KMaterialEmissiveLabel.EMISSIVE_CONSTANT;
   }
 
   private final @Nonnull String code;

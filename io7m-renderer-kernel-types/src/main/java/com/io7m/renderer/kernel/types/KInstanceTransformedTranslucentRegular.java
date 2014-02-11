@@ -76,6 +76,25 @@ import com.io7m.renderer.types.RTransformTexture;
     this.instance = Constraints.constrainNotNull(in_instance, "Instance");
   }
 
+  @Override public boolean equals(
+    final Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KInstanceTransformedTranslucentRegular other =
+      (KInstanceTransformedTranslucentRegular) obj;
+    return this.instance.equals(other.instance)
+      && this.transform.equals(other.transform)
+      && this.uv_matrix.equals(other.uv_matrix);
+  }
+
   /**
    * @return The actual instance
    */
@@ -83,6 +102,16 @@ import com.io7m.renderer.types.RTransformTexture;
   public @Nonnull KInstanceTranslucentRegular getInstance()
   {
     return this.instance;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.instance.hashCode();
+    result = (prime * result) + this.transform.hashCode();
+    result = (prime * result) + this.uv_matrix.hashCode();
+    return result;
   }
 
   @Override public @Nonnull Integer instanceGetID()

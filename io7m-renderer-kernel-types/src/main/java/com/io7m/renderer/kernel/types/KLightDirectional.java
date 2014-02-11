@@ -118,18 +118,6 @@ import com.io7m.renderer.types.RVectorReadable3F;
     return result;
   }
 
-  @Override public
-    <A, E extends Throwable, V extends KLightVisitor<A, E>>
-    A
-    lightVisitableAccept(
-      final V v)
-      throws E,
-        ConstraintError,
-        RException
-  {
-    return v.lightVisitDirectional(this);
-  }
-
   @Override public @Nonnull RVectorI3F<RSpaceRGB> lightGetColour()
   {
     return this.colour;
@@ -153,6 +141,18 @@ import com.io7m.renderer.types.RVectorReadable3F;
   @Override public boolean lightHasShadow()
   {
     return false;
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KLightVisitor<A, E>>
+    A
+    lightVisitableAccept(
+      final V v)
+      throws E,
+        ConstraintError,
+        RException
+  {
+    return v.lightVisitDirectional(this);
   }
 
   @Override public String toString()
