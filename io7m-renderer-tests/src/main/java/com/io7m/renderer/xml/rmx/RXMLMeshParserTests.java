@@ -30,12 +30,12 @@ import org.junit.Test;
 import com.io7m.jaux.AlmostEqualFloat.ContextRelative;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.RSpaceObject;
-import com.io7m.renderer.RSpaceTexture;
-import com.io7m.renderer.RVectorI2F;
-import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.RVectorI4F;
-import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RSpaceTexture;
+import com.io7m.renderer.types.RVectorI2F;
+import com.io7m.renderer.types.RVectorI3F;
+import com.io7m.renderer.types.RVectorI4F;
+import com.io7m.renderer.types.RXMLException;
 
 public final class RXMLMeshParserTests
 {
@@ -203,46 +203,28 @@ public final class RXMLMeshParserTests
     return s;
   }
 
-  @Test(expected = RXMLException.class) public void testXMLStreamMalformed()
-    throws RXMLException
+  @Test(expected = RXMLException.RXMLParsingException.class) public
+    void
+    testXMLStreamMalformed()
+      throws IOException,
+        RXMLException,
+        ConstraintError
   {
-    try {
-      final InputStream s = this.getFile("malformed.rmx");
-      RXMLMeshDocument.parseFromStreamValidating(s);
-      s.close();
-    } catch (final IOException e) {
-      throw new AssertionError(e);
-    } catch (final RXMLException e) {
-      Assert.assertEquals(RXMLException.Type.XML_PARSE_ERROR, e.getType());
-      throw e;
-    } catch (final ConstraintError e) {
-      throw new AssertionError(e);
-    } catch (final Throwable e) {
-      throw new AssertionError(e);
-    }
+    final InputStream s = this.getFile("malformed.rmx");
+    RXMLMeshDocument.parseFromStreamValidating(s);
+    s.close();
   }
 
-  @Test(expected = RXMLException.class) public
+  @Test(expected = RXMLException.RXMLSaxExceptions.class) public
     void
     testXMLStreamNotSchemaValid()
-      throws RXMLException
+      throws IOException,
+        RXMLException,
+        ConstraintError
   {
-    try {
-      final InputStream s = this.getFile("invalid.rmx");
-      RXMLMeshDocument.parseFromStreamValidating(s);
-      s.close();
-    } catch (final IOException e) {
-      throw new AssertionError(e);
-    } catch (final RXMLException e) {
-      Assert.assertEquals(
-        RXMLException.Type.XML_VALIDITY_SAX_ERROR,
-        e.getType());
-      throw e;
-    } catch (final ConstraintError e) {
-      throw new AssertionError(e);
-    } catch (final Throwable e) {
-      throw new AssertionError(e);
-    }
+    final InputStream s = this.getFile("invalid.rmx");
+    RXMLMeshDocument.parseFromStreamValidating(s);
+    s.close();
   }
 
   @Test public void testXMLStreamValid()
@@ -304,78 +286,44 @@ public final class RXMLMeshParserTests
 
     } catch (final IOException e) {
       throw new AssertionError(e);
-    } catch (final RXMLException e) {
-      Assert.assertEquals(RXMLException.Type.XML_VALIDITY_ERROR, e.getType());
-      throw e;
     } catch (final ConstraintError e) {
       throw new AssertionError(e);
     }
   }
 
-  @Test(expected = RXMLException.class) public
+  @Test(expected = RXMLException.RXMLValidityException.class) public
     void
     testXMLStreamWrongTriangleCount()
-      throws RXMLException
+      throws Throwable
   {
-    try {
-      final InputStream s = this.getFile("wrongtrianglecount.rmx");
-      final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
-      RXMLMeshParser.parseFromDocument(d, new Show());
-      s.close();
-    } catch (final IOException e) {
-      throw new AssertionError(e);
-    } catch (final RXMLException e) {
-      Assert.assertEquals(RXMLException.Type.XML_VALIDITY_ERROR, e.getType());
-      throw e;
-    } catch (final ConstraintError e) {
-      throw new AssertionError(e);
-    } catch (final Throwable e) {
-      throw new AssertionError(e);
-    }
+    final InputStream s = this.getFile("wrongtrianglecount.rmx");
+    final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
+    RXMLMeshParser.parseFromDocument(d, new Show());
+    s.close();
   }
 
-  @Test(expected = RXMLException.class) public
+  @Test(expected = RXMLException.RXMLValidityException.class) public
     void
     testXMLStreamWrongVersion()
-      throws RXMLException
+      throws Throwable
   {
-    try {
-      final InputStream s = this.getFile("wrongversion.rmx");
-      final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
-      RXMLMeshParser.parseFromDocument(d, new Show());
-      s.close();
-    } catch (final IOException e) {
-      throw new AssertionError(e);
-    } catch (final RXMLException e) {
-      Assert.assertEquals(RXMLException.Type.XML_VALIDITY_ERROR, e.getType());
-      throw e;
-    } catch (final ConstraintError e) {
-      throw new AssertionError(e);
-    } catch (final Throwable e) {
-      throw new AssertionError(e);
-    }
+    final InputStream s = this.getFile("wrongversion.rmx");
+    final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
+    RXMLMeshParser.parseFromDocument(d, new Show());
+    s.close();
   }
 
-  @Test(expected = RXMLException.class) public
+  @Test(expected = RXMLException.RXMLValidityException.class) public
     void
     testXMLStreamWrongVertexCount()
-      throws RXMLException
+      throws RXMLException,
+        ConstraintError,
+        Throwable
   {
-    try {
-      final InputStream s = this.getFile("wrongvertexcount.rmx");
-      final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
-      RXMLMeshParser.parseFromDocument(d, new Show());
-      s.close();
-    } catch (final IOException e) {
-      throw new AssertionError(e);
-    } catch (final RXMLException e) {
-      Assert.assertEquals(RXMLException.Type.XML_VALIDITY_ERROR, e.getType());
-      throw e;
-    } catch (final ConstraintError e) {
-      throw new AssertionError(e);
-    } catch (final Throwable e) {
-      throw new AssertionError(e);
-    }
+    final InputStream s = this.getFile("wrongvertexcount.rmx");
+    final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
+    RXMLMeshParser.parseFromDocument(d, new Show());
+    s.close();
   }
 
   static class Checked implements RXMLMeshParserEvents<Throwable>
@@ -646,9 +594,6 @@ public final class RXMLMeshParserTests
 
     } catch (final IOException e) {
       throw new AssertionError(e);
-    } catch (final RXMLException e) {
-      Assert.assertEquals(RXMLException.Type.XML_VALIDITY_ERROR, e.getType());
-      throw e;
     } catch (final ConstraintError e) {
       throw new AssertionError(e);
     }

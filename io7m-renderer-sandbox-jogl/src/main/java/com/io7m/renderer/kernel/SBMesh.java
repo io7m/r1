@@ -22,6 +22,7 @@ import javax.annotation.concurrent.Immutable;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.kernel.types.KMesh;
 
 @Immutable final class SBMesh implements Comparable<SBMesh>
 {

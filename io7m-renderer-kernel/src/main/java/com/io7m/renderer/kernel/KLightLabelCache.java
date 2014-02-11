@@ -19,6 +19,8 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.kernel.types.KLight;
+import com.io7m.renderer.kernel.types.KLightLabel;
 
 public interface KLightLabelCache
 {

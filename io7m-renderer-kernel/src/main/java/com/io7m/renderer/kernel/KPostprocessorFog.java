@@ -45,9 +45,9 @@ import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM3F;
-import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorRGBAWithDepth;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferRGBADescription;
+import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
+import com.io7m.renderer.types.RException;
 
 public final class KPostprocessorFog extends
   KAbstractPostprocessorRGBAWithDepth

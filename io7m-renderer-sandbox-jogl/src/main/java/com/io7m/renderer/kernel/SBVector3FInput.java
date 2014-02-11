@@ -27,15 +27,15 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
-import net.java.dev.designgridlayout.IRowCreator;
+import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.renderer.RSpace;
-import com.io7m.renderer.RSpaceWorld;
-import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.RVectorReadable3F;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
+import com.io7m.renderer.types.RSpace;
+import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RVectorI3F;
+import com.io7m.renderer.types.RVectorReadable3F;
 
-public final class SBVector3FInput<R extends RSpace>
+public final class SBVector3FInput<R extends RSpace> implements SBControls
 {
   public static @Nonnull <R extends RSpace> SBVector3FInput<R> newInput(
     final @Nonnull String text)
@@ -47,6 +47,7 @@ public final class SBVector3FInput<R extends RSpace>
   private final @Nonnull JTextField field_x;
   private final @Nonnull JTextField field_y;
   private final @Nonnull JTextField field_z;
+  private final @Nonnull RowGroup   group;
 
   private SBVector3FInput(
     final @Nonnull String text)
@@ -55,6 +56,7 @@ public final class SBVector3FInput<R extends RSpace>
     this.field_x = new JTextField("0.0");
     this.field_y = new JTextField("0.0");
     this.field_z = new JTextField("0.0");
+    this.group = new RowGroup();
   }
 
   public @Nonnull RVectorI3F<R> getVector()
@@ -74,16 +76,6 @@ public final class SBVector3FInput<R extends RSpace>
     this.field_z.setText(String.format("%.6f", v.getZF()));
   }
 
-  public void addToLayout(
-    final @Nonnull IRowCreator row)
-  {
-    row
-      .grid(this.label)
-      .add(this.field_x)
-      .add(this.field_y)
-      .add(this.field_z);
-  }
-
   public static void main(
     final String args[])
   {
@@ -96,8 +88,8 @@ public final class SBVector3FInput<R extends RSpace>
         final DesignGridLayout layout = new DesignGridLayout(panel);
 
         final SBVector3FInput<RSpaceWorld> input =
-          SBVector3FInput.newInput("World");
-        input.addToLayout(layout.row());
+          SBVector3FInput.newInput("Position");
+        input.controlsAddToLayout(layout);
 
         frame.setPreferredSize(new Dimension(640, 480));
         frame.pack();
@@ -105,5 +97,27 @@ public final class SBVector3FInput<R extends RSpace>
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
       }
     });
+  }
+
+  @Override public void controlsHide()
+  {
+    this.group.hide();
+  }
+
+  @Override public void controlsShow()
+  {
+    this.group.forceShow();
+  }
+
+  @Override public void controlsAddToLayout(
+    final @Nonnull DesignGridLayout layout)
+  {
+    layout
+      .row()
+      .group(this.group)
+      .grid(this.label)
+      .add(this.field_x)
+      .add(this.field_y)
+      .add(this.field_z);
   }
 }

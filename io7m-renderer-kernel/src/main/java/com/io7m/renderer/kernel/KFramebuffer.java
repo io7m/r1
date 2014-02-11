@@ -20,7 +20,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.renderer.RException;
+import com.io7m.renderer.types.RException;
 
 public interface KFramebuffer extends KFramebufferUsable
 {

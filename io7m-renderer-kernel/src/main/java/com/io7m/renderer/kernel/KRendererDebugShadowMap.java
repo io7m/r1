@@ -25,7 +25,8 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Option;
+import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.PartialFunction;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.BLUCache;
 import com.io7m.jcache.LUCache;
@@ -41,10 +42,21 @@ import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
-import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererForward;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferDepthDescriptionType.KFramebufferDepthVarianceDescription;
-import com.io7m.renderer.kernel.KLight.KProjective;
+import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
+import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KLight;
+import com.io7m.renderer.kernel.types.KLightDirectional;
+import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightVisitor;
+import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
+import com.io7m.renderer.kernel.types.KScene;
+import com.io7m.renderer.kernel.types.KShadow;
+import com.io7m.renderer.kernel.types.KShadowMapDescription;
+import com.io7m.renderer.kernel.types.KTransformContext;
+import com.io7m.renderer.types.RException;
 
 final class KRendererDebugShadowMap extends KAbstractRendererForward
 {
@@ -77,7 +89,7 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
   private final @Nonnull JCGLImplementation gl;
   private final @Nonnull Log                log;
   private final @Nonnull KMutableMatrices   matrices;
-  private final @Nonnull KTransformContext transform_context;
+  private final @Nonnull KTransformContext  transform_context;
   private final @Nonnull VectorM2I          viewport_size;
   private final @Nonnull KDepthRenderer     depth_renderer;
   private final @Nonnull KLabelDecider      decider;
@@ -102,7 +114,7 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrices = KMutableMatrices.newMatrices();
-    this.transform_context = new KTransformContext();
+    this.transform_context = KTransformContext.newContext();
     this.viewport_size = new VectorM2I();
 
     this.depth_renderer =
@@ -163,7 +175,7 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
                 JCGLException
           {
             if (d != null) {
-              final Map<KLight, Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>>> casters =
+              final Map<KLight, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>> casters =
                 batched.getBatchedShadow().getShadowCasters();
               d.debugPerformDumpShadowMaps(cache, casters.keySet());
             }
@@ -234,36 +246,46 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
         KRendererDebugShadowMap.this.log.debug("Dumping shadow maps");
 
         for (final KLight l : lights) {
-          switch (l.getType()) {
-            case LIGHT_DIRECTIONAL:
+          l.lightVisitableAccept(new KLightVisitor<Unit, RException>() {
+            @Override public Unit lightVisitDirectional(
+              final @Nonnull KLightDirectional ld)
+              throws ConstraintError,
+                RException
             {
-              break;
+              return Unit.unit();
             }
-            case LIGHT_PROJECTIVE:
-            {
-              final KProjective kp = (KProjective) l;
-              final Option<KShadow> os = kp.getShadow();
 
-              switch (os.type) {
-                case OPTION_NONE:
-                {
-                  break;
-                }
-                case OPTION_SOME:
-                {
-                  final KShadow ks = ((Option.Some<KShadow>) os).value;
-                  final KShadowMap map = cache.getShadowMap(ks);
-                  dump.receive(ks, map);
-                  break;
-                }
-              }
-              break;
-            }
-            case LIGHT_SPHERE:
+            @Override public Unit lightVisitProjective(
+              final @Nonnull KLightProjective lp)
+              throws ConstraintError,
+                RException
             {
-              break;
+              lp.lightGetShadow().mapPartial(
+                new PartialFunction<KShadow, Unit, RException>() {
+                  @Override public Unit call(
+                    final @Nonnull KShadow ks)
+                    throws RException
+                  {
+                    try {
+                      final KShadowMap map = cache.getShadowMap(ks);
+                      dump.receive(ks, map);
+                      return Unit.unit();
+                    } catch (final ConstraintError x) {
+                      throw new UnreachableCodeException(x);
+                    }
+                  }
+                });
+              return Unit.unit();
             }
-          }
+
+            @Override public Unit lightVisitSpherical(
+              final @Nonnull KLightSphere ls)
+              throws ConstraintError,
+                RException
+            {
+              return Unit.unit();
+            }
+          });
         }
       }
     }

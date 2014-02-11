@@ -19,10 +19,19 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.kernel.types.KInstanceOpaque;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentLabel;
 
 interface KMaterialEnvironmentLabelCache
 {
-  public @Nonnull KMaterialEnvironmentLabel getEnvironmentLabel(
-    final @Nonnull KMeshInstance instance)
+  public @Nonnull KMaterialEnvironmentLabel getEnvironmentLabelOpaque(
+    final @Nonnull KInstanceOpaque instance)
     throws ConstraintError;
+
+  public @Nonnull
+    KMaterialEnvironmentLabel
+    getEnvironmentLabelTranslucentRegular(
+      final @Nonnull KInstanceTranslucentRegular instance)
+      throws ConstraintError;
 }

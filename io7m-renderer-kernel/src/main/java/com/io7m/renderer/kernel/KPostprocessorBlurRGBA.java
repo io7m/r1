@@ -29,9 +29,9 @@ import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorM2I;
-import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorRGBA;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferRGBADescription;
+import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
+import com.io7m.renderer.types.RException;
 
 public final class KPostprocessorBlurRGBA extends KAbstractPostprocessorRGBA
 {

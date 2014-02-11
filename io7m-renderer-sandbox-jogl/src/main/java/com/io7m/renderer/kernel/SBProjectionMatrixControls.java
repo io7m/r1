@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,15 +28,18 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
-import net.java.dev.designgridlayout.IHideable;
 import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.SBProjectionDescription.Type;
 
-public final class SBProjectionMatrixControls implements IHideable
+public final class SBProjectionMatrixControls implements SBControls
 {
+  /**
+   * Simple test app.
+   */
+
   public static void main(
     final String args[])
   {
@@ -52,7 +55,7 @@ public final class SBProjectionMatrixControls implements IHideable
           {
             final SBProjectionMatrixControls controls =
               SBProjectionMatrixControls.newControls();
-            controls.addToLayout(layout);
+            controls.controlsAddToLayout(layout);
           }
         };
       }
@@ -104,8 +107,10 @@ public final class SBProjectionMatrixControls implements IHideable
       .addItem(SBProjectionDescription.Type.PROJECTION_PERSPECTIVE);
 
     this.selector.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+      @SuppressWarnings("synthetic-access") @Override public
+        void
+        actionPerformed(
+          final @Nonnull ActionEvent e)
       {
         final SBProjectionDescription.Type selected =
           (Type) SBProjectionMatrixControls.this.selector.getSelectedItem();
@@ -114,41 +119,32 @@ public final class SBProjectionMatrixControls implements IHideable
     });
   }
 
-  public void addToLayout(
-    final @Nonnull DesignGridLayout layout)
-  {
-    layout
-      .row()
-      .group(this.group)
-      .grid(new JLabel("Projection"))
-      .add(this.selector);
-
-    final Set<Entry<Type, SBProjectionMatrixDescriptionControls>> entries =
-      this.controls.entrySet();
-
-    for (final Entry<Type, SBProjectionMatrixDescriptionControls> e : entries) {
-      e.getValue().addToLayout(layout);
-    }
-
-    this.controlsShowHide((Type) this.selector.getSelectedItem());
-  }
-
   protected void controlsShowHide(
-    final @Nonnull Type selected)
+    final Type selected)
   {
-    final Set<Entry<Type, SBProjectionMatrixDescriptionControls>> entries =
-      this.controls.entrySet();
-
-    for (final Entry<Type, SBProjectionMatrixDescriptionControls> e : entries) {
-      final SBProjectionMatrixDescriptionControls c = e.getValue();
-      final RowGroup g = c.getGroup();
-      g.forceShow();
-      g.hide();
+    switch (selected) {
+      case PROJECTION_FRUSTUM:
+      {
+        this.frustum_controls.controlsShow();
+        this.ortho_controls.controlsHide();
+        this.perspective_controls.controlsHide();
+        break;
+      }
+      case PROJECTION_ORTHOGRAPHIC:
+      {
+        this.frustum_controls.controlsHide();
+        this.ortho_controls.controlsShow();
+        this.perspective_controls.controlsHide();
+        break;
+      }
+      case PROJECTION_PERSPECTIVE:
+      {
+        this.frustum_controls.controlsHide();
+        this.ortho_controls.controlsHide();
+        this.perspective_controls.controlsShow();
+        break;
+      }
     }
-
-    final SBProjectionMatrixDescriptionControls c =
-      this.controls.get(selected);
-    c.getGroup().forceShow();
   }
 
   public SBProjectionDescription getDescription()
@@ -187,9 +183,8 @@ public final class SBProjectionMatrixControls implements IHideable
     }
   }
 
-  @Override public void hide()
+  @Override public void controlsHide()
   {
-    this.group.forceShow();
     this.group.hide();
 
     final Set<Entry<Type, SBProjectionMatrixDescriptionControls>> entries =
@@ -197,20 +192,35 @@ public final class SBProjectionMatrixControls implements IHideable
 
     for (final Entry<Type, SBProjectionMatrixDescriptionControls> e : entries) {
       final SBProjectionMatrixDescriptionControls c = e.getValue();
-      final RowGroup g = c.getGroup();
-      g.hide();
+      c.controlsHide();
     }
   }
 
-  @Override public void show()
-  {
-    this.group.show();
-    this.controlsShowHide((Type) this.selector.getSelectedItem());
-  }
-
-  @Override public void forceShow()
+  @Override public void controlsShow()
   {
     this.group.forceShow();
     this.controlsShowHide((Type) this.selector.getSelectedItem());
+  }
+
+  @Override public void controlsAddToLayout(
+    final DesignGridLayout layout)
+  {
+    final Set<Entry<Type, SBProjectionMatrixDescriptionControls>> entries =
+      this.controls.entrySet();
+
+    layout
+      .row()
+      .group(this.group)
+      .grid(new JLabel("Type"))
+      .add(this.selector);
+
+    for (final Entry<Type, SBProjectionMatrixDescriptionControls> e : entries) {
+      final SBProjectionMatrixDescriptionControls c = e.getValue();
+      c.controlsAddToLayout(layout);
+      c.controlsHide();
+    }
+
+    this.controlsShowHide((Type) SBProjectionMatrixControls.this.selector
+      .getSelectedItem());
   }
 }

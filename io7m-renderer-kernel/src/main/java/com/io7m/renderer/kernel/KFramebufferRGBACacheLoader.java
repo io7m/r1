@@ -27,8 +27,8 @@ import com.io7m.jcache.JCacheLoader;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.RException;
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferRGBADescription;
+import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
+import com.io7m.renderer.types.RException;
 
 final class KFramebufferRGBACacheLoader implements
   JCacheLoader<KFramebufferRGBADescription, KFramebufferRGBA, RException>

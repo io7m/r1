@@ -40,7 +40,7 @@ import com.io7m.jlog.Log;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.cubemap.CubeMap;
 import com.thoughtworks.xstream.XStream;
 

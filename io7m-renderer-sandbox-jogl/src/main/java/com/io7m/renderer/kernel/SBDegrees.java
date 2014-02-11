@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.renderer.RSpace;
+import com.io7m.renderer.types.RSpace;
 
 interface SBDegrees extends RSpace
 {

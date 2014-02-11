@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,25 +16,21 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.Collection;
-
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
-import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.RSpaceWorld;
-import com.io7m.renderer.kernel.KLight.KSphere;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionSpherical;
+import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.types.RSpaceWorld;
 
 public final class SBLightControlsSpherical implements
-  SBLightDescriptionControls
+  SBControlsDataType<SBLightDescriptionSpherical>,
+  SBLightControlsType
 {
   public static void main(
     final String args[])
@@ -50,59 +46,8 @@ public final class SBLightControlsSpherical implements
             throws ConstraintError
           {
             final SBLightControlsSpherical controls =
-              SBLightControlsSpherical.newControls(
-                this,
-                new SBSceneControllerLights() {
-                  @Override public void sceneChangeListenerAdd(
-                    final SBSceneChangeListener listener)
-                  {
-                    // TODO Auto-generated method stub
-                  }
-
-                  @Override public Collection<SBLight> sceneLightsGetAll()
-                  {
-                    // TODO Auto-generated method stub
-                    return null;
-                  }
-
-                  @Override public void sceneLightRemove(
-                    final Integer id)
-                    throws ConstraintError
-                  {
-                    // TODO Auto-generated method stub
-                  }
-
-                  @Override public SBLight sceneLightGet(
-                    final Integer id)
-                    throws ConstraintError
-                  {
-                    // TODO Auto-generated method stub
-                    return null;
-                  }
-
-                  @Override public Integer sceneLightFreshID()
-                  {
-                    // TODO Auto-generated method stub
-                    return null;
-                  }
-
-                  @Override public boolean sceneLightExists(
-                    final Integer id)
-                    throws ConstraintError
-                  {
-                    // TODO Auto-generated method stub
-                    return false;
-                  }
-
-                  @Override public void sceneLightAddByDescription(
-                    final SBLightDescription d)
-                    throws ConstraintError
-                  {
-                    // TODO Auto-generated method stub
-                  }
-                });
-
-            controls.addToLayout(layout);
+              SBLightControlsSpherical.newControls(this, Integer.valueOf(23));
+            controls.controlsAddToLayout(layout);
           }
         };
       }
@@ -111,29 +56,27 @@ public final class SBLightControlsSpherical implements
 
   public static @Nonnull SBLightControlsSpherical newControls(
     final @Nonnull JFrame parent,
-    final @Nonnull SBSceneControllerLights controller)
+    final @Nonnull Integer id)
     throws ConstraintError
   {
-    return new SBLightControlsSpherical(parent, controller);
+    return new SBLightControlsSpherical(parent, id);
   }
 
+  private final @Nonnull SBColourInput                colour;
   private final @Nonnull SBFloatHSlider               falloff;
-  private final @Nonnull RowGroup                     group;
+  private final @Nonnull SBFloatHSlider               intensity;
+  private final @Nonnull JFrame                       parent;
   private final @Nonnull SBVector3FInput<RSpaceWorld> position;
   private final @Nonnull SBFloatHSlider               radius;
-  private final @Nonnull SBFloatHSlider               intensity;
-  private final @Nonnull SBColourInput                colour;
-  private final @Nonnull SBSceneControllerLights      controller;
-  private final @Nonnull JFrame                       parent;
+  private final @Nonnull Integer                      id;
 
   private SBLightControlsSpherical(
     final @Nonnull JFrame parent,
-    final @Nonnull SBSceneControllerLights controller)
+    final @Nonnull Integer id)
     throws ConstraintError
   {
     this.parent = Constraints.constrainNotNull(parent, "Parent");
-    this.controller = Constraints.constrainNotNull(controller, "Controller");
-    this.group = new RowGroup();
+    this.id = Constraints.constrainNotNull(id, "ID");
     this.colour = SBColourInput.newInput(parent, "Colour");
     this.intensity = new SBFloatHSlider("Intensity", 0.0f, 2.0f);
     this.position = SBVector3FInput.newInput("Position");
@@ -145,58 +88,55 @@ public final class SBLightControlsSpherical implements
     this.falloff.setCurrent(1.0f);
   }
 
-  @Override public void addToLayout(
+  @Override public void controlsAddToLayout(
     final @Nonnull DesignGridLayout layout)
   {
-    this.intensity.addToLayout(layout.row().group(this.group));
-    this.colour.addToLayout(layout.row().group(this.group));
-    this.position.addToLayout(layout.row().group(this.group));
-    this.falloff.addToLayout(layout.row().group(this.group));
-    this.radius.addToLayout(layout.row().group(this.group));
+    this.intensity.controlsAddToLayout(layout);
+    this.colour.controlsAddToLayout(layout);
+    this.position.controlsAddToLayout(layout);
+    this.falloff.controlsAddToLayout(layout);
+    this.radius.controlsAddToLayout(layout);
   }
 
-  public void setDescription(
-    final SBLightDescriptionSpherical description)
+  @Override public void controlsHide()
   {
-    final KSphere l = description.getLight();
-    this.intensity.setCurrent(l.getIntensity());
-    this.colour.setColour(l.getColour());
+    this.colour.controlsHide();
+    this.intensity.controlsHide();
+    this.position.controlsHide();
+    this.radius.controlsHide();
+    this.falloff.controlsHide();
+  }
+
+  @Override public void controlsShow()
+  {
+    this.colour.controlsShow();
+    this.intensity.controlsShow();
+    this.position.controlsShow();
+    this.radius.controlsShow();
+    this.falloff.controlsShow();
+  }
+
+  @Override public void controlsLoadFrom(
+    final @Nonnull SBLightDescriptionSpherical d)
+  {
+    final KLightSphere l = d.getLight();
+    this.intensity.setCurrent(l.lightGetIntensity());
+    this.colour.setColour(l.lightGetColour());
     this.position.setVector(l.getPosition());
     this.falloff.setCurrent(l.getFalloff());
     this.radius.setCurrent(l.getRadius());
   }
 
-  @Override public @Nonnull SBLightDescription getDescription(
-    final @CheckForNull Integer id)
+  @Override public @Nonnull SBLightDescriptionSpherical controlsSave()
     throws SBExceptionInputError,
       ConstraintError
   {
-    final Integer new_id =
-      id != null ? id : this.controller.sceneLightFreshID();
-    return new SBLightDescriptionSpherical(KSphere.make(
-      new_id,
+    return new SBLightDescriptionSpherical(KLightSphere.newSpherical(
+      this.id,
       this.colour.getColour(),
       this.intensity.getCurrent(),
       this.position.getVector(),
       this.radius.getCurrent(),
       this.falloff.getCurrent()));
-  }
-
-  @Override public void hide()
-  {
-    this.group.hide();
-    this.parent.pack();
-  }
-
-  @Override public void show()
-  {
-    this.group.show();
-    this.parent.pack();
-  }
-
-  @Override public void forceShow()
-  {
-    this.group.forceShow();
-    this.parent.pack();
   }
 }

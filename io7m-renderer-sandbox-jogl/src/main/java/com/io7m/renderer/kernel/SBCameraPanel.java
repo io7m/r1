@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,33 +30,31 @@ import javax.swing.JSeparator;
 import net.java.dev.designgridlayout.DesignGridLayout;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.renderer.RMatrixI4x4F;
-import com.io7m.renderer.RTransformProjection;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
+import com.io7m.renderer.types.RMatrixI4x4F;
+import com.io7m.renderer.types.RTransformProjection;
 
 public final class SBCameraPanel extends JPanel
 {
-  private static final long                        serialVersionUID;
+  private static final long                           serialVersionUID;
 
   static {
     serialVersionUID = -55144553467054055L;
   }
 
-  protected final @Nonnull JLabel                  error_icon;
-  protected final @Nonnull JLabel                  error_text;
-  protected final @Nonnull SBProjectionMatrixPanel panel;
-  protected final @Nonnull MatrixM4x4F             temporary;
+  protected final @Nonnull JLabel                     error_icon;
+  protected final @Nonnull JLabel                     error_text;
+  protected final @Nonnull SBProjectionMatrixControls controls;
+  protected final @Nonnull MatrixM4x4F                temporary;
 
   public SBCameraPanel(
     final @Nonnull JFrame owner,
-    final @Nonnull SBSceneControllerRendererControl controller,
-    final @Nonnull Log log)
+    final @Nonnull SBSceneControllerRendererControl controller)
     throws IOException,
       ConstraintError
   {
-    this.panel = new SBProjectionMatrixPanel(owner, true);
+    this.controls = SBProjectionMatrixControls.newControls();
     this.temporary = new MatrixM4x4F();
 
     this.error_text = new JLabel("Some informative error text");
@@ -65,7 +63,7 @@ public final class SBCameraPanel extends JPanel
     this.error_icon.setVisible(false);
 
     final DesignGridLayout dg = new DesignGridLayout(this);
-    dg.row().grid().add(this.panel);
+    this.controls.controlsAddToLayout(dg);
 
     final JButton reset = new JButton("Reset");
     reset.addActionListener(new ActionListener() {
@@ -120,7 +118,7 @@ public final class SBCameraPanel extends JPanel
     final @Nonnull SBSceneControllerRendererControl controller)
   {
     try {
-      final SBProjectionDescription m = this.panel.getDescription();
+      final SBProjectionDescription m = this.controls.getDescription();
       final RMatrixI4x4F<RTransformProjection> mat =
         m.makeProjectionMatrix(this.temporary);
       controller.rendererSetCustomProjection(mat);

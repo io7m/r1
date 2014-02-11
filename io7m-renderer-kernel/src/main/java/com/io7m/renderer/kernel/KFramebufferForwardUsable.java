@@ -18,7 +18,7 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.renderer.kernel.KFramebufferDescription.KFramebufferForwardDescription;
+import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 
 public interface KFramebufferForwardUsable extends
   KFramebufferRGBAUsable,

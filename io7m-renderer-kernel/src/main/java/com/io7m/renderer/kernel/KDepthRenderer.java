@@ -48,14 +48,20 @@ import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
-import com.io7m.renderer.RException;
-import com.io7m.renderer.RMatrixI4x4F;
-import com.io7m.renderer.RTransformProjection;
-import com.io7m.renderer.RTransformView;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
+import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
+import com.io7m.renderer.kernel.types.KInstance;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
+import com.io7m.renderer.kernel.types.KMaterialOpaque;
+import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RMatrixI4x4F;
+import com.io7m.renderer.types.RTransformProjection;
+import com.io7m.renderer.types.RTransformView;
 
 final class KDepthRenderer
 {
@@ -130,12 +136,12 @@ final class KDepthRenderer
     final @Nonnull MatricesObserver mwo,
     final @Nonnull JCBProgram jp,
     final @Nonnull InternalDepthLabel label,
-    final @Nonnull List<KMeshInstanceTransformed> batch)
+    final @Nonnull List<KInstanceTransformedOpaque> batch)
     throws ConstraintError,
       JCGLException,
       RException
   {
-    for (final KMeshInstanceTransformed i : batch) {
+    for (final KInstanceTransformedOpaque i : batch) {
       mwo.withInstance(
         i,
         new MatricesInstanceFunction<Unit, JCGLException>() {
@@ -157,12 +163,12 @@ final class KDepthRenderer
     final @Nonnull MatricesInstance mwi,
     final @Nonnull JCBProgram jp,
     final @Nonnull InternalDepthLabel label,
-    final @Nonnull KMeshInstanceTransformed i)
+    final @Nonnull KInstanceTransformedOpaque i)
     throws JCGLException,
       ConstraintError,
       JCBExecutionException
   {
-    final KMaterial material = i.getInstance().getMaterial();
+    final KMaterialOpaque material = i.getInstance().instanceGetMaterial();
     final List<TextureUnit> units = gc.textureGetUnits();
 
     /**
@@ -181,19 +187,19 @@ final class KDepthRenderer
       case DEPTH_INTERNAL_MAPPED:
       case DEPTH_INTERNAL_MAPPED_PACKED4444:
       {
-        KShadingProgramCommon.putMaterial(jp, material);
+        KDepthRenderer.putMaterialOpaque(jp, label, material);
         KShadingProgramCommon.putMatrixUV(jp, mwi.getMatrixUV());
         KShadingProgramCommon.bindPutTextureAlbedo(
           jp,
           gc,
-          material,
+          material.materialGetAlbedo(),
           units.get(0));
         break;
       }
       case DEPTH_INTERNAL_UNIFORM:
       case DEPTH_INTERNAL_UNIFORM_PACKED4444:
       {
-        KShadingProgramCommon.putMaterial(jp, material);
+        KDepthRenderer.putMaterialOpaque(jp, label, material);
         break;
       }
     }
@@ -203,8 +209,8 @@ final class KDepthRenderer
      */
 
     try {
-      final KMeshInstance actual = i.getInstance();
-      final KMesh mesh = actual.getMesh();
+      final KInstance actual = i.getInstance();
+      final KMesh mesh = actual.instanceGetMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
 
@@ -241,6 +247,16 @@ final class KDepthRenderer
     }
   }
 
+  private static void putMaterialOpaque(
+    final @Nonnull JCBProgram jp,
+    final @Nonnull InternalDepthLabel label,
+    final @Nonnull KMaterialOpaque material)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMaterialAlbedo(jp, material.materialGetAlbedo());
+  }
+
   private final @Nonnull KGraphicsCapabilities                 caps;
   private final @Nonnull JCGLImplementation                    g;
   private final @Nonnull Log                                   log;
@@ -270,7 +286,7 @@ final class KDepthRenderer
     depthRendererEvaluate(
       final @Nonnull RMatrixI4x4F<RTransformView> view,
       final @Nonnull RMatrixI4x4F<RTransformProjection> projection,
-      final @Nonnull Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batches,
+      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> batches,
       final @Nonnull KFramebufferDepthUsable framebuffer,
       final @Nonnull FaceSelection faces,
       final @Nonnull FaceWindingOrder order)
@@ -317,7 +333,7 @@ final class KDepthRenderer
   private
     void
     renderDepthPassBatches(
-      final @Nonnull Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batches,
+      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> batches,
       final @Nonnull JCGLInterfaceCommon gc,
       final @Nonnull MatricesObserver mwo)
       throws ConstraintError,
@@ -329,7 +345,7 @@ final class KDepthRenderer
       final InternalDepthLabel label =
         InternalDepthLabel.fromDepthLabel(this.caps, depth);
 
-      final List<KMeshInstanceTransformed> batch = batches.get(depth);
+      final List<KInstanceTransformedOpaque> batch = batches.get(depth);
       final KProgram program = this.shader_cache.cacheGetLU(label.getName());
       final JCBExecutionAPI exec = program.getExecutable();
 
@@ -353,7 +369,7 @@ final class KDepthRenderer
   protected
     void
     renderScene(
-      final @Nonnull Map<KMaterialDepthLabel, List<KMeshInstanceTransformed>> batches,
+      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> batches,
       final @Nonnull KFramebufferDepthUsable framebuffer,
       final @Nonnull MatricesObserver mwo,
       final @Nonnull FaceSelection faces,

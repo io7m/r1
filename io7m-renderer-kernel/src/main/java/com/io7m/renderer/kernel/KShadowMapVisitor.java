@@ -18,9 +18,9 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.renderer.RException;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
+import com.io7m.renderer.types.RException;
 
 public interface KShadowMapVisitor<A, E extends Throwable>
 {

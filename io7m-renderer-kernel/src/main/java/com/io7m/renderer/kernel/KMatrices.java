@@ -27,11 +27,12 @@ import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.QuaternionReadable4F;
 import com.io7m.jtensors.VectorM3F;
-import com.io7m.renderer.RMatrixM4x4F;
-import com.io7m.renderer.RSpaceWorld;
-import com.io7m.renderer.RTransformProjectiveView;
-import com.io7m.renderer.RTransformView;
-import com.io7m.renderer.RVectorReadable3F;
+import com.io7m.renderer.kernel.types.KTransformContext;
+import com.io7m.renderer.types.RMatrixM4x4F;
+import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RTransformProjectiveView;
+import com.io7m.renderer.types.RTransformView;
+import com.io7m.renderer.types.RVectorReadable3F;
 
 @NotThreadSafe final class KMatrices
 {
@@ -70,8 +71,9 @@ import com.io7m.renderer.RVectorReadable3F;
     MatrixM4x4F.setIdentity(view);
 
     final QuaternionI4F inverse_orient = QuaternionI4F.conjugate(orientation);
-    QuaternionM4F.makeRotationMatrix4x4(inverse_orient, context.t_matrix4x4);
-    MatrixM4x4F.multiplyInPlace(view, context.t_matrix4x4);
+    final MatrixM4x4F m4x4 = context.getTemporaryMatrix4x4();
+    QuaternionM4F.makeRotationMatrix4x4(inverse_orient, m4x4);
+    MatrixM4x4F.multiplyInPlace(view, m4x4);
 
     final VectorM3F translate = new VectorM3F();
     translate.x = -position.getXF();

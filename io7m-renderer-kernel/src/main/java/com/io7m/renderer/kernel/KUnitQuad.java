@@ -44,6 +44,7 @@ import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
+import com.io7m.renderer.kernel.types.KMeshAttributes;
 
 public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
 {

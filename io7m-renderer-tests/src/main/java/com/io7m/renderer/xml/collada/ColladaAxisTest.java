@@ -29,9 +29,9 @@ import com.io7m.jaux.AlmostEqualFloat;
 import com.io7m.jaux.AlmostEqualFloat.ContextRelative;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.RSpace;
-import com.io7m.renderer.RSpaceObject;
-import com.io7m.renderer.RVectorI3F;
+import com.io7m.renderer.types.RSpace;
+import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RVectorI3F;
 
 public final class ColladaAxisTest
 {

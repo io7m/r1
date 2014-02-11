@@ -66,6 +66,11 @@
       <type>zip</type>
     </dependency>
     <dependency>
+      <groupId>com.io7m.renderer.kernel.types</groupId>
+      <artifactId>io7m-renderer-kernel-types</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.io7m.jparasol.compiler.frontend</groupId>
       <artifactId>io7m-jparasol-compiler-frontend</artifactId>
       <version>[0.3.15, 0.4.0)</version>

@@ -22,8 +22,8 @@ import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.jtensors.VectorReadable3F;
-import com.io7m.renderer.RMatrixI4x4F;
-import com.io7m.renderer.RTransformView;
+import com.io7m.renderer.types.RMatrixI4x4F;
+import com.io7m.renderer.types.RTransformView;
 
 final class SBFirstPersonCamera
 {
@@ -101,7 +101,7 @@ final class SBFirstPersonCamera
       SBFirstPersonCamera.UP,
       this.derived_matrix);
 
-    return new RMatrixI4x4F<RTransformView>(this.derived_matrix);
+    return RMatrixI4x4F.newFromReadable(this.derived_matrix);
   }
 
   void moveBackward(
