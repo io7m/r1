@@ -139,6 +139,7 @@ import com.io7m.renderer.types.RTransformView;
     switch (label.labelGetEnvironment()) {
       case ENVIRONMENT_REFLECTIVE:
       case ENVIRONMENT_REFLECTIVE_MAPPED:
+      case ENVIRONMENT_REFLECTIVE_DOT_PRODUCT:
       {
         KShadingProgramCommon.putMatrixInverseView(
           program,
@@ -225,6 +226,7 @@ import com.io7m.renderer.types.RTransformView;
       }
       case ENVIRONMENT_REFLECTIVE:
       case ENVIRONMENT_REFLECTIVE_MAPPED:
+      case ENVIRONMENT_REFLECTIVE_DOT_PRODUCT:
       {
         final Some<TextureCubeStatic> some =
           (Some<TextureCubeStatic>) material
@@ -281,6 +283,7 @@ import com.io7m.renderer.types.RTransformView;
       }
       case ENVIRONMENT_REFLECTIVE:
       case ENVIRONMENT_REFLECTIVE_MAPPED:
+      case ENVIRONMENT_REFLECTIVE_DOT_PRODUCT:
       {
         KShadingProgramCommon.putMaterialEnvironment(
           program,

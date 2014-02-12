@@ -118,6 +118,7 @@ import com.io7m.jaux.UnreachableCodeException;
     switch (environment) {
       case ENVIRONMENT_NONE:
       case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_DOT_PRODUCT:
       {
         break;
       }
@@ -167,6 +168,7 @@ import com.io7m.jaux.UnreachableCodeException;
     switch (environment) {
       case ENVIRONMENT_NONE:
       case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_DOT_PRODUCT:
         break;
       case ENVIRONMENT_REFLECTIVE_MAPPED:
         return true;
