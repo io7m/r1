@@ -163,6 +163,7 @@ public final class ForwardShaders
       }
       case ENVIRONMENT_REFLECTIVE:
       case ENVIRONMENT_REFLECTIVE_MAPPED:
+      case ENVIRONMENT_REFLECTIVE_DOT_PRODUCT:
       {
         b.append("  -- Environment mapping parameters\n");
         b.append("  parameter p_environment : Environment.t;\n");
@@ -223,6 +224,7 @@ public final class ForwardShaders
     switch (env) {
       case ENVIRONMENT_NONE:
       case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_DOT_PRODUCT:
       {
         break;
       }
@@ -373,6 +375,7 @@ public final class ForwardShaders
       {
         break;
       }
+      case ENVIRONMENT_REFLECTIVE_DOT_PRODUCT:
       case ENVIRONMENT_REFLECTIVE_MAPPED:
       case ENVIRONMENT_REFLECTIVE:
       {
@@ -923,6 +926,7 @@ public final class ForwardShaders
       }
       case ENVIRONMENT_NONE:
       case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_DOT_PRODUCT:
       {
         break;
       }
@@ -946,6 +950,22 @@ public final class ForwardShaders
       case ENVIRONMENT_NONE:
       {
         b.append("  value surface : vector_4f = albedo;\n");
+        break;
+      }
+      case ENVIRONMENT_REFLECTIVE_DOT_PRODUCT:
+      {
+        b
+          .append("  value v = V3.normalize (V3.negate (f_position_eye [x y z]));\n");
+        b.append("  value e_amount = F.subtract (1.0, V3.dot (n, v));\n");
+        b.append("  value surface : vector_4f =\n");
+        b.append("    new vector_4f (\n");
+        b.append("      V3.interpolate (\n");
+        b.append("        albedo [x y z],\n");
+        b.append("        env [x y z],\n");
+        b.append("        F.multiply (p_environment.mix, e_amount)\n");
+        b.append("      ),\n");
+        b.append("      1.0\n");
+        b.append("    );\n");
         break;
       }
       case ENVIRONMENT_REFLECTIVE:
@@ -986,6 +1006,19 @@ public final class ForwardShaders
       case ENVIRONMENT_NONE:
       {
         b.append("  value surface : vector_4f = albedo;\n");
+        break;
+      }
+      case ENVIRONMENT_REFLECTIVE_DOT_PRODUCT:
+      {
+        b
+          .append("  value v = V3.normalize (V3.negate (f_position_eye [x y z]));\n");
+        b.append("  value e_amount = F.subtract (1.0, V3.dot (n, v));\n");
+        b.append("  value surface : vector_4f =\n");
+        b.append("    V4.interpolate (\n");
+        b.append("      albedo,\n");
+        b.append("      env,\n");
+        b.append("      F.multiply (p_environment.mix, e_amount)\n");
+        b.append("    );\n");
         break;
       }
       case ENVIRONMENT_REFLECTIVE:

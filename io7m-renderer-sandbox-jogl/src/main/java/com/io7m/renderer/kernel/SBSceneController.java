@@ -442,7 +442,7 @@ public final class SBSceneController implements
       return KMaterialEnvironment.newEnvironmentMapped(
         d.getMix(),
         t.getTexture(),
-        d.getMixFromSpecularMap());
+        d.getMixType());
     }
     return KMaterialEnvironment.newEnvironmentUnmapped();
   }
