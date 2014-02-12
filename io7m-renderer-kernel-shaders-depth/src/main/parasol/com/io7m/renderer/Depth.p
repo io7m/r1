@@ -99,13 +99,11 @@ module Depth is
   shader fragment depth_U_f is
     in f_position           : vector_4f;
     parameter p_albedo      : Albedo.t;
-    parameter p_opacity     : float;
     parameter p_alpha_depth : float;
     out out_0               : vector_4f as 0;
   with
     value albedo : vector_4f = Albedo.translucent (p_albedo);
-    value alpha = F.multiply (albedo [w], p_opacity);
-    discard (F.lesser (alpha, p_alpha_depth));
+    discard (F.lesser (albedo [w], p_alpha_depth));
     value rgba = new vector_4f (0.0, Fragment.coordinate [z], 1.0, 1.0);
   as
     out out_0 = rgba;
@@ -125,13 +123,11 @@ module Depth is
   shader fragment depth_UP4_f is
     in f_position           : vector_4f;
     parameter p_albedo      : Albedo.t;
-    parameter p_opacity     : float;
     parameter p_alpha_depth : float;
     out out_0               : vector_4f as 0;
   with
     value albedo : vector_4f = Albedo.translucent (p_albedo);
-    value alpha = F.multiply (albedo [w], p_opacity);
-    discard (F.lesser (alpha, p_alpha_depth));
+    discard (F.lesser (albedo [w], p_alpha_depth));
     value rgba = Pack.pack4444 (Fragment.coordinate [z]);
   as
     out out_0 = rgba;
@@ -182,7 +178,6 @@ module Depth is
     in f_position           : vector_4f;
     out out_0               : vector_4f as 0;
     parameter p_albedo      : Albedo.t;
-    parameter p_opacity     : float;
     parameter p_alpha_depth : float;
     parameter t_albedo      : sampler_2d;
   with
@@ -192,9 +187,7 @@ module Depth is
         f_uv,
         p_albedo
       );
-
-    value alpha = F.multiply (albedo [w], p_opacity);
-    discard (F.lesser (alpha, p_alpha_depth));
+    discard (F.lesser (albedo [w], p_alpha_depth));
     value rgba =
       new vector_4f (0.0, Fragment.coordinate [z], 1.0, 1.0);
   as
@@ -217,7 +210,6 @@ module Depth is
     in f_position           : vector_4f;
     out out_0               : vector_4f as 0;
     parameter p_albedo      : Albedo.t;
-    parameter p_opacity     : float;
     parameter p_alpha_depth : float;
     parameter t_albedo      : sampler_2d;
   with
@@ -227,9 +219,7 @@ module Depth is
         f_uv,
         p_albedo
       );
-
-    value alpha = F.multiply (albedo [w], p_opacity);
-    discard (F.lesser (alpha, p_alpha_depth));
+    discard (F.lesser (albedo [w], p_alpha_depth));
     value rgba = Pack.pack4444 (Fragment.coordinate [z]);
   as
     out out_0 = rgba;
