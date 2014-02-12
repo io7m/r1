@@ -48,8 +48,8 @@ import com.io7m.renderer.types.RTransformTexture;
    *          The environment mapping parameters
    * @param in_specular
    *          The specular parameters
-   * @param in_alpha_opacity
-   *          The opacity
+   * @param in_alpha
+   *          The alpha parameters
    * @return A new material
    * @throws ConstraintError
    *           If any parameter is <code>null</code>
@@ -57,41 +57,41 @@ import com.io7m.renderer.types.RTransformTexture;
 
   public static @Nonnull KMaterialTranslucentRegular newMaterial(
     final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix,
-    final @Nonnull KMaterialNormal in_normal,
     final @Nonnull KMaterialAlbedo in_albedo,
+    final @Nonnull KMaterialAlpha in_alpha,
     final @Nonnull KMaterialEmissive in_emissive,
     final @Nonnull KMaterialEnvironment in_environment,
-    final @Nonnull KMaterialSpecular in_specular,
-    final float in_alpha_opacity)
+    final @Nonnull KMaterialNormal in_normal,
+    final @Nonnull KMaterialSpecular in_specular)
     throws ConstraintError
   {
     return new KMaterialTranslucentRegular(
       in_uv_matrix,
-      in_normal,
       in_albedo,
+      in_alpha,
       in_emissive,
       in_environment,
-      in_specular,
-      in_alpha_opacity);
+      in_normal,
+      in_specular);
   }
 
   private final @Nonnull KMaterialAlbedo                 albedo;
+  private final @Nonnull KMaterialAlpha                  alpha;
   private final @Nonnull KMaterialEmissive               emissive;
   private final @Nonnull KMaterialEnvironment            environment;
   private final @Nonnull KMaterialNormal                 normal;
-  private final float                                    opacity;
   private final @Nonnull KMaterialSpecular               specular;
   private final int                                      textures_required;
   private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
 
   private KMaterialTranslucentRegular(
     final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix,
-    final @Nonnull KMaterialNormal in_normal,
     final @Nonnull KMaterialAlbedo in_albedo,
+    final @Nonnull KMaterialAlpha in_alpha,
     final @Nonnull KMaterialEmissive in_emissive,
     final @Nonnull KMaterialEnvironment in_environment,
-    final @Nonnull KMaterialSpecular in_specular,
-    final float in_opacity)
+    final @Nonnull KMaterialNormal in_normal,
+    final @Nonnull KMaterialSpecular in_specular)
     throws ConstraintError
   {
     this.normal = Constraints.constrainNotNull(in_normal, "Normal");
@@ -101,8 +101,7 @@ import com.io7m.renderer.types.RTransformTexture;
     this.environment =
       Constraints.constrainNotNull(in_environment, "Environment");
     this.specular = Constraints.constrainNotNull(in_specular, "Specular");
-    this.opacity =
-      Constraints.constrainRange(in_opacity, 0.0f, 1.0f, "Opacity");
+    this.alpha = Constraints.constrainNotNull(in_alpha, "Alpha");
 
     int req = 0;
     req += in_albedo.texturesGetRequired();
@@ -135,8 +134,7 @@ import com.io7m.renderer.types.RTransformTexture;
       && this.specular.equals(other.specular)
       && (this.textures_required == other.textures_required)
       && this.uv_matrix.equals(other.uv_matrix)
-      && (Float.floatToIntBits(this.opacity) == Float
-        .floatToIntBits(other.opacity));
+      && this.alpha.equals(other.alpha);
   }
 
   @Override public int hashCode()
@@ -144,6 +142,7 @@ import com.io7m.renderer.types.RTransformTexture;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.albedo.hashCode();
+    result = (prime * result) + this.alpha.hashCode();
     result = (prime * result) + this.emissive.hashCode();
     result = (prime * result) + this.environment.hashCode();
     result = (prime * result) + this.normal.hashCode();
@@ -156,6 +155,15 @@ import com.io7m.renderer.types.RTransformTexture;
   @Override public @Nonnull KMaterialAlbedo materialGetAlbedo()
   {
     return this.albedo;
+  }
+
+  /**
+   * @return The alpha parameters
+   */
+
+  public @Nonnull KMaterialAlpha materialGetAlpha()
+  {
+    return this.alpha;
   }
 
   @Override public @Nonnull KMaterialEmissive materialGetEmissive()
@@ -171,15 +179,6 @@ import com.io7m.renderer.types.RTransformTexture;
   @Override public KMaterialNormal materialGetNormal()
   {
     return this.normal;
-  }
-
-  /**
-   * @return The opacity
-   */
-
-  public float materialGetOpacity()
-  {
-    return this.opacity;
   }
 
   @Override public @Nonnull KMaterialSpecular materialGetSpecular()

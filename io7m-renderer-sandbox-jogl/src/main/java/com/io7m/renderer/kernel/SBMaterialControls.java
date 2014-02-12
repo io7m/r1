@@ -131,6 +131,7 @@ public final class SBMaterialControls implements
       new SBMaterialControlsTranslucentRegular(
         this.name,
         new SBMaterialControlsAlbedo(controller, parent, log),
+        new SBMaterialControlsAlpha(),
         new SBMaterialControlsEmissive(controller, log),
         new SBMaterialControlsEnvironment(controller, log),
         this.controls_normal,
