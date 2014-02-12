@@ -44,17 +44,6 @@ public enum KMaterialEnvironmentLabel
   ENVIRONMENT_REFLECTIVE("EL", 1),
 
   /**
-   * Environment-mapped reflections with reflectivity derived from 1.0 minus
-   * the dot product of the view vector and surface normal. The practical
-   * effect of this is that when the viewer looks directly at a surface, it
-   * sees almost no environment mapping. When the viewer looks almost parallel
-   * to a surface, it sees full environment mapping. This gives a good
-   * approximation of glass and water.
-   */
-
-  ENVIRONMENT_REFLECTIVE_DOT_PRODUCT("ELD", 1),
-
-  /**
    * Environment-mapped reflections with reflectivity taken from specular map.
    */
 
@@ -76,23 +65,10 @@ public enum KMaterialEnvironmentLabel
         final KMaterialEnvironment e = environment;
         if (e.getTexture().isSome()) {
           if (e.getMix() > 0.0) {
-            switch (e.getMixType()) {
-              case ENVIRONMENT_MIX_CONSTANT:
-              {
-                return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE;
-              }
-              case ENVIRONMENT_MIX_DOT_PRODUCT:
-              {
-                return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE_DOT_PRODUCT;
-              }
-              case ENVIRONMENT_MIX_MAPPED:
-              {
-                if (has_specular_map) {
-                  return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE_MAPPED;
-                }
-                return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE;
-              }
+            if (e.getMixMapped()) {
+              return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE_MAPPED;
             }
+            return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE;
           }
         }
 

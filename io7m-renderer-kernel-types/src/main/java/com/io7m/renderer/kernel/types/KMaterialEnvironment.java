@@ -37,11 +37,7 @@ import com.io7m.jcanephora.TextureCubeStatic;
   static {
     final Option<TextureCubeStatic> none = Option.none();
     try {
-      EMPTY =
-        new KMaterialEnvironment(
-          0.0f,
-          none,
-          KMaterialEnvironmentMixType.ENVIRONMENT_MIX_CONSTANT);
+      EMPTY = new KMaterialEnvironment(0.0f, none, false);
     } catch (final ConstraintError e) {
       throw new UnreachableCodeException(e);
     }
@@ -55,8 +51,9 @@ import com.io7m.jcanephora.TextureCubeStatic;
    *          the material
    * @param in_texture
    *          The environment map
-   * @param in_mix_type
-   *          The source of the environment mix value
+   * @param in_mix_mapped
+   *          Whether or not to sample the environment intensity from the
+   *          specular map
    * @return New environment mapping properties
    * @throws ConstraintError
    *           If any parameter is <code>null</code>
@@ -65,13 +62,13 @@ import com.io7m.jcanephora.TextureCubeStatic;
   public static @Nonnull KMaterialEnvironment newEnvironmentMapped(
     final float in_mix,
     final @Nonnull TextureCubeStatic in_texture,
-    final @Nonnull KMaterialEnvironmentMixType in_mix_type)
+    final boolean in_mix_mapped)
     throws ConstraintError
   {
     return new KMaterialEnvironment(
       in_mix,
       Option.some(in_texture),
-      in_mix_type);
+      in_mix_mapped);
   }
 
   /**
@@ -84,20 +81,20 @@ import com.io7m.jcanephora.TextureCubeStatic;
     return KMaterialEnvironment.EMPTY;
   }
 
-  private final float                                mix;
-  private final @Nonnull KMaterialEnvironmentMixType mix_type;
-  private final @Nonnull Option<TextureCubeStatic>   texture;
-  private final int                                  textures_required;
+  private final float                              mix;
+  private final boolean                            mix_mapped;
+  private final @Nonnull Option<TextureCubeStatic> texture;
+  private final int                                textures_required;
 
   private KMaterialEnvironment(
     final float in_mix,
     final @Nonnull Option<TextureCubeStatic> in_texture,
-    final @Nonnull KMaterialEnvironmentMixType in_mix_type)
+    final boolean in_mix_mapped)
     throws ConstraintError
   {
     this.mix = in_mix;
     this.texture = Constraints.constrainNotNull(in_texture, "Texture");
-    this.mix_type = Constraints.constrainNotNull(in_mix_type, "Mix type");
+    this.mix_mapped = in_mix_mapped;
     this.textures_required = this.texture.isSome() ? 1 : 0;
   }
 
@@ -115,7 +112,7 @@ import com.io7m.jcanephora.TextureCubeStatic;
     }
     final KMaterialEnvironment other = (KMaterialEnvironment) obj;
     return (Float.floatToIntBits(this.mix) == Float.floatToIntBits(other.mix))
-      && (this.mix_type == other.mix_type)
+      && (this.mix_mapped == other.mix_mapped)
       && (this.texture.equals(other.texture))
       && (this.textures_required == other.textures_required);
   }
@@ -133,12 +130,13 @@ import com.io7m.jcanephora.TextureCubeStatic;
   }
 
   /**
-   * @return The type of environment mixing for the label
+   * @return <code>true</code> if the environment mix will be sampled from the
+   *         specular map, if any.
    */
 
-  public @Nonnull KMaterialEnvironmentMixType getMixType()
+  public boolean getMixMapped()
   {
-    return this.mix_type;
+    return this.mix_mapped;
   }
 
   /**
@@ -155,7 +153,7 @@ import com.io7m.jcanephora.TextureCubeStatic;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + Float.floatToIntBits(this.mix);
-    result = (prime * result) + (this.mix_type.hashCode());
+    result = (prime * result) + (this.mix_mapped ? 1234 : 4321);
     result = (prime * result) + (this.texture.hashCode());
     result = (prime * result) + this.textures_required;
     return result;
@@ -171,8 +169,8 @@ import com.io7m.jcanephora.TextureCubeStatic;
     final StringBuilder builder = new StringBuilder();
     builder.append("[KMaterialEnvironment mix=");
     builder.append(this.mix);
-    builder.append(" mix_type=");
-    builder.append(this.mix_type);
+    builder.append(" mix_mapped=");
+    builder.append(this.mix_mapped);
     builder.append(" texture=");
     builder.append(this.texture);
     builder.append("]");
