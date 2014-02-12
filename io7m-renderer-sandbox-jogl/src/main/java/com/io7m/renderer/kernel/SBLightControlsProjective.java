@@ -32,7 +32,6 @@ import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
@@ -207,8 +206,14 @@ public final class SBLightControlsProjective implements
   @Override public void controlsLoadFrom(
     final SBLightDescriptionProjective t)
   {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
+    this.intensity.setCurrent(t.getIntensity());
+    this.colour.setColour(t.getColour());
+    this.position.setVector(t.getPosition());
+    this.orientation.setOrientation(t.getOrientation());
+    this.falloff.setCurrent(t.getFalloff());
+    this.projection.setDescription(t.getProjection());
+    this.shadow.setDescription(t.getShadow());
+    this.texture.setText(t.getTexture().toString());
   }
 
   @Override public SBLightDescriptionProjective controlsSave()
