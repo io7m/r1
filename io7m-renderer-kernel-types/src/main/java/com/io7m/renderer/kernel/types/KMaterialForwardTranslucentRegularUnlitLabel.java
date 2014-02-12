@@ -32,7 +32,8 @@ import com.io7m.jaux.UnreachableCodeException;
 
 @Immutable public final class KMaterialForwardTranslucentRegularUnlitLabel implements
   KTexturesRequired,
-  KMaterialLabelRegular
+  KMaterialLabelRegular,
+  KMaterialLabelTranslucent
 {
   /**
    * @return The set of all possible unlit labels.
@@ -51,16 +52,9 @@ import com.io7m.jaux.UnreachableCodeException;
           case NORMAL_MAPPED:
           case NORMAL_VERTEX:
           {
-            for (final KMaterialAlbedoLabel albedo : KMaterialAlbedoLabel
-              .values()) {
-              for (final KMaterialEnvironmentLabel env : KMaterialEnvironmentLabel
-                .values()) {
-                s.add(new KMaterialForwardTranslucentRegularUnlitLabel(
-                  albedo,
-                  env,
-                  normal));
-              }
-            }
+            KMaterialForwardTranslucentRegularUnlitLabel.labelsWithNormals(
+              s,
+              normal);
             break;
           }
           case NORMAL_NONE:
@@ -70,7 +64,8 @@ import com.io7m.jaux.UnreachableCodeException;
               s.add(new KMaterialForwardTranslucentRegularUnlitLabel(
                 albedo,
                 KMaterialEnvironmentLabel.ENVIRONMENT_NONE,
-                normal));
+                normal,
+                KMaterialAlphaOpacityType.ALPHA_OPACITY_CONSTANT));
             }
             break;
           }
@@ -80,6 +75,26 @@ import com.io7m.jaux.UnreachableCodeException;
       return s;
     } catch (final ConstraintError e) {
       throw new UnreachableCodeException(e);
+    }
+  }
+
+  private static void labelsWithNormals(
+    final @Nonnull Set<KMaterialForwardTranslucentRegularUnlitLabel> s,
+    final @Nonnull KMaterialNormalLabel normal)
+    throws ConstraintError
+  {
+    for (final KMaterialAlbedoLabel albedo : KMaterialAlbedoLabel.values()) {
+      for (final KMaterialEnvironmentLabel env : KMaterialEnvironmentLabel
+        .values()) {
+        for (final KMaterialAlphaOpacityType a : KMaterialAlphaOpacityType
+          .values()) {
+          s.add(new KMaterialForwardTranslucentRegularUnlitLabel(
+            albedo,
+            env,
+            normal,
+            a));
+        }
+      }
     }
   }
 
@@ -133,10 +148,13 @@ import com.io7m.jaux.UnreachableCodeException;
   private static @Nonnull String makeLabelCode(
     final @Nonnull KMaterialAlbedoLabel albedo,
     final @Nonnull KMaterialEnvironmentLabel environment,
-    final @Nonnull KMaterialNormalLabel normal)
+    final @Nonnull KMaterialNormalLabel normal,
+    final @Nonnull KMaterialAlphaOpacityType alpha)
   {
     final StringBuilder buffer = new StringBuilder();
-    buffer.append("fwd_U_T_");
+    buffer.append("fwd_U_");
+    buffer.append(alpha.labelGetCode());
+    buffer.append("_");
     buffer.append(albedo.labelGetCode());
     if (normal.labelGetCode().isEmpty() == false) {
       buffer.append("_");
@@ -158,6 +176,8 @@ import com.io7m.jaux.UnreachableCodeException;
    *          The environment-mapping label
    * @param in_normal
    *          The normal label
+   * @param in_alpha
+   *          The alpha type
    * @return A new label
    * @throws ConstraintError
    *           If any parameter is <code>null</code>
@@ -168,13 +188,15 @@ import com.io7m.jaux.UnreachableCodeException;
     newLabel(
       final @Nonnull KMaterialAlbedoLabel in_albedo,
       final @Nonnull KMaterialEnvironmentLabel in_environment,
-      final @Nonnull KMaterialNormalLabel in_normal)
+      final @Nonnull KMaterialNormalLabel in_normal,
+      final @Nonnull KMaterialAlphaOpacityType in_alpha)
       throws ConstraintError
   {
     return new KMaterialForwardTranslucentRegularUnlitLabel(
       in_albedo,
       in_environment,
-      in_normal);
+      in_normal,
+      in_alpha);
   }
 
   private final @Nonnull KMaterialAlbedoLabel      albedo;
@@ -184,29 +206,36 @@ import com.io7m.jaux.UnreachableCodeException;
   private final boolean                            implies_uv;
   private final @Nonnull KMaterialNormalLabel      normal;
   private final int                                texture_units_required;
+  private final @Nonnull KMaterialAlphaOpacityType alpha;
 
   private KMaterialForwardTranslucentRegularUnlitLabel(
     final @Nonnull KMaterialAlbedoLabel in_albedo,
     final @Nonnull KMaterialEnvironmentLabel in_environment,
-    final @Nonnull KMaterialNormalLabel in_normal)
+    final @Nonnull KMaterialNormalLabel in_normal,
+    final @Nonnull KMaterialAlphaOpacityType in_alpha)
     throws ConstraintError
   {
     this.albedo = Constraints.constrainNotNull(in_albedo, "Albedo");
     this.environment =
       Constraints.constrainNotNull(in_environment, "Environment");
     this.normal = Constraints.constrainNotNull(in_normal, "Normal");
+    this.alpha = Constraints.constrainNotNull(in_alpha, "Alpha");
 
     if (this.normal == KMaterialNormalLabel.NORMAL_NONE) {
       Constraints.constrainArbitrary(
         this.environment == KMaterialEnvironmentLabel.ENVIRONMENT_NONE,
         "No environment mapping for no normals");
+      Constraints.constrainArbitrary(
+        KMaterialAlphaOpacityType.ALPHA_OPACITY_ONE_MINUS_DOT != in_alpha,
+        "No dot alpha for no normals");
     }
 
     this.code =
       KMaterialForwardTranslucentRegularUnlitLabel.makeLabelCode(
         in_albedo,
         in_environment,
-        in_normal);
+        in_normal,
+        in_alpha);
 
     this.implies_uv =
       KMaterialForwardTranslucentRegularUnlitLabel.makeImpliesUV(
@@ -268,5 +297,10 @@ import com.io7m.jaux.UnreachableCodeException;
   @Override public int texturesGetRequired()
   {
     return this.texture_units_required;
+  }
+
+  @Override public @Nonnull KMaterialAlphaOpacityType labelGetAlphaType()
+  {
+    return this.alpha;
   }
 }

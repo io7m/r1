@@ -81,6 +81,7 @@ import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KMaterial;
 import com.io7m.renderer.kernel.types.KMaterialAlbedo;
+import com.io7m.renderer.kernel.types.KMaterialAlpha;
 import com.io7m.renderer.kernel.types.KMaterialEmissive;
 import com.io7m.renderer.kernel.types.KMaterialEnvironment;
 import com.io7m.renderer.kernel.types.KMaterialNormal;
@@ -353,13 +354,18 @@ public final class SBSceneController implements
                 throw new UnimplementedCodeException();
               }
 
-              @Override public KMaterial materialVisitTranslucentRegular(
-                final @Nonnull SBMaterialTranslucentRegular mtr)
-                throws ConstraintError,
-                  RException
+              @SuppressWarnings("synthetic-access") @Override public
+                KMaterial
+                materialVisitTranslucentRegular(
+                  final @Nonnull SBMaterialTranslucentRegular mtr)
+                  throws ConstraintError,
+                    RException
               {
                 final SBMaterialDescriptionTranslucentRegular md =
                   mtr.materialGetDescription();
+
+                final KMaterialAlpha in_alpha =
+                  SBSceneController.makeKMaterialAlpha(md.getAlpha());
 
                 final KMaterialNormal in_normal =
                   SBSceneController.makeKMaterialNormal(
@@ -388,12 +394,12 @@ public final class SBSceneController implements
 
                 return KMaterialTranslucentRegular.newMaterial(
                   md.getUVMatrix(),
-                  in_normal,
                   in_albedo,
+                  in_alpha,
                   in_emissive,
                   in_environment,
-                  in_specular,
-                  md.getOpacity());
+                  in_normal,
+                  in_specular);
               }
             });
         }
@@ -414,6 +420,13 @@ public final class SBSceneController implements
         t.getTexture());
     }
     return KMaterialAlbedo.newAlbedoUntextured(d.getColour());
+  }
+
+  private static @Nonnull KMaterialAlpha makeKMaterialAlpha(
+    final @Nonnull SBMaterialAlphaDescription alpha)
+    throws ConstraintError
+  {
+    return KMaterialAlpha.newAlpha(alpha.getType(), alpha.getOpacity());
   }
 
   static @Nonnull KMaterialEmissive makeKMaterialEmissive(

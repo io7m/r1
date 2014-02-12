@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.renderer.kernel.types.KLightLabel;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoLabel;
+import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
 import com.io7m.renderer.kernel.types.KMaterialEmissiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialEnvironmentLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueLitLabel;
@@ -880,7 +881,7 @@ public final class ForwardShaders
     b.append("  -- RGBA translucent lit\n");
     b.append("  value lit  = V3.multiply (surface [x y z], light_term);\n");
     b.append("   -- Premultiply result\n");
-    b.append("  value a = F.multiply (surface [w], p_opacity);\n");
+    b.append("  value a = F.multiply (surface [w], opacity);\n");
     b
       .append("  value rgba = new vector_4f (V3.multiply_scalar (lit, a), a);\n");
   }
@@ -889,7 +890,7 @@ public final class ForwardShaders
     final @Nonnull StringBuilder b)
   {
     b.append("  -- RGBA translucent unlit\n");
-    b.append("  value a = F.multiply (surface [w], p_opacity);\n");
+    b.append("  value a = F.multiply (surface [w], opacity);\n");
     b.append("  -- Premultiply result\n");
     b
       .append("  value rgba = new vector_4f (V3.multiply_scalar (surface [x y z], a), a);\n");
@@ -1169,6 +1170,7 @@ public final class ForwardShaders
     final KMaterialEmissiveLabel emissive = l.labelGetEmissive();
     final KMaterialEnvironmentLabel env = l.labelGetEnvironment();
     final KMaterialSpecularLabel specular = l.labelGetSpecular();
+    final KMaterialAlphaOpacityType alpha = l.labelGetAlphaType();
     final KLightLabel light = l.labelGetLight();
 
     b.append("shader fragment f is\n");
@@ -1185,6 +1187,7 @@ public final class ForwardShaders
     ForwardShaders.fragmentShaderParametersSpecular(b, env, specular);
     b.append("with\n");
     ForwardShaders.fragmentShaderValuesNormal(b, normal);
+    ForwardShaders.fragmentShaderValuesAlpha(b, alpha);
     ForwardShaders.fragmentShaderValuesEmission(b, emissive);
     ForwardShaders.fragmentShaderValuesSpecular(b, specular, env);
     ForwardShaders.fragmentShaderValuesEnvironment(b, env);
@@ -1203,6 +1206,7 @@ public final class ForwardShaders
   {
     final boolean implies_uv = l.labelImpliesUV();
     final KMaterialNormalLabel normal = l.labelGetNormal();
+    final KMaterialAlphaOpacityType alpha = l.labelGetAlphaType();
     final KMaterialAlbedoLabel albedo = l.labelGetAlbedo();
     final KMaterialEnvironmentLabel env = l.labelGetEnvironment();
 
@@ -1220,6 +1224,7 @@ public final class ForwardShaders
     ForwardShaders.fragmentShaderParametersEnvironment(b, env);
     b.append("with\n");
     ForwardShaders.fragmentShaderValuesNormal(b, normal);
+    ForwardShaders.fragmentShaderValuesAlpha(b, alpha);
     ForwardShaders.fragmentShaderValuesSpecular(
       b,
       KMaterialSpecularLabel.SPECULAR_NONE,
@@ -1231,6 +1236,29 @@ public final class ForwardShaders
     b.append("as\n");
     b.append("  out out_0 = rgba;\n");
     b.append("end;\n");
+  }
+
+  private static void fragmentShaderValuesAlpha(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialAlphaOpacityType alpha)
+  {
+    switch (alpha) {
+      case ALPHA_OPACITY_CONSTANT:
+      {
+        b.append("  -- Alpha constant\n");
+        b.append("  value opacity = p_opacity;\n");
+        break;
+      }
+      case ALPHA_OPACITY_ONE_MINUS_DOT:
+      {
+        b.append("  -- Alpha dot\n");
+        b
+          .append("  value o_v = V3.normalize (V3.negate (f_position_eye [x y z]));\n");
+        b.append("  value o_d = F.subtract (1.0, V3.dot (o_v, n))\n;");
+        b.append("  value opacity = F.multiply (o_d, p_opacity);\n");
+        break;
+      }
+    }
   }
 
   private static void moduleProgram(
