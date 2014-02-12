@@ -20,30 +20,26 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.kernel.types.KMaterialEnvironmentMixType;
 
 public final class SBMaterialEnvironmentDescription
 {
   public static @Nonnull SBMaterialEnvironmentDescription getDefault()
   {
-    return new SBMaterialEnvironmentDescription(
-      null,
-      0.0f,
-      KMaterialEnvironmentMixType.ENVIRONMENT_MIX_CONSTANT);
+    return new SBMaterialEnvironmentDescription(null, 0.0f, false);
   }
 
-  private final float                                mix;
-  private final @Nonnull KMaterialEnvironmentMixType mix_type;
-  private final @CheckForNull PathVirtual            texture;
+  private final float                     mix;
+  private final boolean                   mix_mapped;
+  private final @CheckForNull PathVirtual texture;
 
   SBMaterialEnvironmentDescription(
     final @CheckForNull PathVirtual texture,
     final float mix,
-    final @Nonnull KMaterialEnvironmentMixType mix_type)
+    final boolean mix_mapped)
   {
     this.texture = texture;
     this.mix = mix;
-    this.mix_type = mix_type;
+    this.mix_mapped = mix_mapped;
   }
 
   @Override public boolean equals(
@@ -63,7 +59,7 @@ public final class SBMaterialEnvironmentDescription
     if (Float.floatToIntBits(this.mix) != Float.floatToIntBits(other.mix)) {
       return false;
     }
-    if (this.mix_type != other.mix_type) {
+    if (this.mix_mapped != other.mix_mapped) {
       return false;
     }
     if (!this.texture.equals(other.texture)) {
@@ -77,9 +73,9 @@ public final class SBMaterialEnvironmentDescription
     return this.mix;
   }
 
-  public @Nonnull KMaterialEnvironmentMixType getMixType()
+  public boolean getMixMapped()
   {
-    return this.mix_type;
+    return this.mix_mapped;
   }
 
   public @CheckForNull PathVirtual getTexture()
@@ -92,7 +88,7 @@ public final class SBMaterialEnvironmentDescription
     final int prime = 31;
     int result = 1;
     result = (prime * result) + Float.floatToIntBits(this.mix);
-    result = (prime * result) + this.mix_type.hashCode();
+    result = (prime * result) + (this.mix_mapped ? 1234 : 4321);
     result = (prime * result) + this.texture.hashCode();
     return result;
   }
@@ -104,8 +100,8 @@ public final class SBMaterialEnvironmentDescription
     builder.append(this.texture);
     builder.append(", mix=");
     builder.append(this.mix);
-    builder.append(", mix_type=");
-    builder.append(this.mix_type);
+    builder.append(", mix_mapped=");
+    builder.append(this.mix_mapped);
     builder.append("]");
     return builder.toString();
   }
