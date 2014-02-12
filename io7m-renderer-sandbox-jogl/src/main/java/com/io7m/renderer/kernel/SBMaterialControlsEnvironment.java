@@ -22,7 +22,6 @@ import java.awt.event.ActionListener;
 
 import javax.annotation.Nonnull;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
@@ -38,11 +37,11 @@ import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 public final class SBMaterialControlsEnvironment implements
   SBControlsDataType<SBMaterialEnvironmentDescription>
 {
-  protected final @Nonnull JTextField     texture;
-  protected final @Nonnull JButton        texture_select;
-  protected final @Nonnull SBFloatHSlider mix;
-  protected final @Nonnull JCheckBox      spec_map;
-  private final @Nonnull RowGroup         group;
+  protected final @Nonnull JTextField                   texture;
+  protected final @Nonnull JButton                      texture_select;
+  protected final @Nonnull SBFloatHSlider               mix;
+  protected final @Nonnull SBEnvironmentMixTypeSelector mix_type;
+  private final @Nonnull RowGroup                       group;
 
   public SBMaterialControlsEnvironment(
     final @Nonnull SBSceneControllerTextures controller,
@@ -69,7 +68,7 @@ public final class SBMaterialControlsEnvironment implements
     });
 
     this.mix = new SBFloatHSlider("Mix", 0.0f, 1.0f);
-    this.spec_map = new JCheckBox();
+    this.mix_type = new SBEnvironmentMixTypeSelector();
   }
 
   @Override public void controlsAddToLayout(
@@ -97,8 +96,8 @@ public final class SBMaterialControlsEnvironment implements
     dg
       .row()
       .group(this.group)
-      .grid(new JLabel("Mix from specular map"))
-      .add(this.spec_map);
+      .grid(new JLabel("Mix type"))
+      .add(this.mix_type);
   }
 
   @Override public void controlsLoadFrom(
@@ -107,7 +106,7 @@ public final class SBMaterialControlsEnvironment implements
     final PathVirtual tt = mat_e.getTexture();
     this.texture.setText(tt == null ? "" : tt.toString());
     this.mix.setCurrent(mat_e.getMix());
-    this.spec_map.setSelected(mat_e.getMixFromSpecularMap());
+    this.mix_type.setSelectedItem(mat_e.getMixType());
   }
 
   @Override public @Nonnull SBMaterialEnvironmentDescription controlsSave()
@@ -122,7 +121,7 @@ public final class SBMaterialControlsEnvironment implements
       new SBMaterialEnvironmentDescription(
         environment_texture_value,
         this.mix.getCurrent(),
-        this.spec_map.isSelected());
+        this.mix_type.getSelectedItem());
 
     return environment;
   }
