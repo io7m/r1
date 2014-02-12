@@ -57,6 +57,9 @@ import com.io7m.renderer.kernel.types.KInstance;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 import com.io7m.renderer.kernel.types.KMaterialOpaque;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitor;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
@@ -166,7 +169,7 @@ final class KDepthRenderer
     final @Nonnull KInstanceTransformedOpaque i)
     throws JCGLException,
       ConstraintError,
-      JCBExecutionException
+      RException
   {
     final KMaterialOpaque material = i.getInstance().instanceGetMaterial();
     final List<TextureUnit> units = gc.textureGetUnits();
@@ -187,7 +190,10 @@ final class KDepthRenderer
       case DEPTH_INTERNAL_MAPPED:
       case DEPTH_INTERNAL_MAPPED_PACKED4444:
       {
-        KDepthRenderer.putMaterialOpaque(jp, label, material);
+        KShadingProgramCommon.putMaterialAlbedo(
+          jp,
+          material.materialGetAlbedo());
+        KDepthRenderer.putMaterialAlphaDepth(jp, material);
         KShadingProgramCommon.putMatrixUV(jp, mwi.getMatrixUV());
         KShadingProgramCommon.bindPutTextureAlbedo(
           jp,
@@ -199,7 +205,10 @@ final class KDepthRenderer
       case DEPTH_INTERNAL_UNIFORM:
       case DEPTH_INTERNAL_UNIFORM_PACKED4444:
       {
-        KDepthRenderer.putMaterialOpaque(jp, label, material);
+        KShadingProgramCommon.putMaterialAlbedo(
+          jp,
+          material.materialGetAlbedo());
+        KDepthRenderer.putMaterialAlphaDepth(jp, material);
         break;
       }
     }
@@ -247,14 +256,37 @@ final class KDepthRenderer
     }
   }
 
-  private static void putMaterialOpaque(
+  private static void putMaterialAlphaDepth(
     final @Nonnull JCBProgram jp,
-    final @Nonnull InternalDepthLabel label,
     final @Nonnull KMaterialOpaque material)
-    throws JCGLException,
-      ConstraintError
+    throws RException,
+      ConstraintError,
+      JCGLException
   {
-    KShadingProgramCommon.putMaterialAlbedo(jp, material.materialGetAlbedo());
+    material
+      .materialOpaqueVisitableAccept(new KMaterialOpaqueVisitor<Unit, JCGLException>() {
+        @Override public Unit materialVisitOpaqueAlphaDepth(
+          final @Nonnull KMaterialOpaqueAlphaDepth m)
+          throws ConstraintError,
+            RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putMaterialAlphaDepthThreshold(
+            jp,
+            m.getAlphaThreshold());
+          return Unit.unit();
+        }
+
+        @Override public Unit materialVisitOpaqueRegular(
+          final @Nonnull KMaterialOpaqueRegular m)
+          throws ConstraintError,
+            RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putMaterialAlphaDepthThreshold(jp, 0.0f);
+          return Unit.unit();
+        }
+      });
   }
 
   private final @Nonnull KGraphicsCapabilities                 caps;
