@@ -123,6 +123,14 @@ public final class ForwardShaders
     b.append("\n");
   }
 
+  private static void fragmentShaderParametersAlpha(
+    final @Nonnull StringBuilder b)
+  {
+    b.append("  -- Alpha parameters\n");
+    b.append("  parameter p_opacity : float;\n");
+    b.append("\n");
+  }
+
   private static void fragmentShaderParametersEmissive(
     final @Nonnull StringBuilder b,
     final @Nonnull KMaterialEmissiveLabel emissive)
@@ -870,26 +878,21 @@ public final class ForwardShaders
     final @Nonnull StringBuilder b)
   {
     b.append("  -- RGBA translucent lit\n");
-    b.append("  value lit = V3.multiply (surface [x y z], light_term);\n");
-    b.append("\n");
-    b.append("  -- Premultiply alpha\n");
+    b.append("  value lit  = V3.multiply (surface [x y z], light_term);\n");
+    b.append("   -- Premultiply result\n");
     b.append("  value a = F.multiply (surface [w], p_opacity);\n");
-    b.append("  value rgba = new vector_4f (\n");
-    b.append("    V3.multiply_scalar (lit, a),\n");
-    b.append("    a\n");
-    b.append("  );\n");
+    b
+      .append("  value rgba = new vector_4f (V3.multiply_scalar (lit, a), a);\n");
   }
 
   private static void fragmentShaderValuesRGBATranslucentUnlit(
     final @Nonnull StringBuilder b)
   {
     b.append("  -- RGBA translucent unlit\n");
-    b.append("  -- Premultiply alpha\n");
     b.append("  value a = F.multiply (surface [w], p_opacity);\n");
-    b.append("  value rgba = new vector_4f (\n");
-    b.append("    V3.multiply_scalar (surface [x y z], a),\n");
-    b.append("    a\n");
-    b.append("  );\n");
+    b.append("  -- Premultiply result\n");
+    b
+      .append("  value rgba = new vector_4f (V3.multiply_scalar (surface [x y z], a), a);\n");
   }
 
   private static void fragmentShaderValuesSpecular(
@@ -1018,9 +1021,10 @@ public final class ForwardShaders
   public static @Nonnull String moduleForwardOpaqueLit(
     final @Nonnull KMaterialForwardOpaqueLitLabel label)
   {
+    final String module = TitleCase.toTitleCase(label.labelGetCode());
     final StringBuilder b = new StringBuilder();
     b.append("package com.io7m.renderer.kernel;\n");
-    ForwardShaders.moduleStart(b, "Fwd_" + label.labelGetCode());
+    ForwardShaders.moduleStart(b, module);
     ForwardShaders.moduleVertexShaderRegularLit(b, label);
     b.append("\n");
     ForwardShaders.moduleFragmentShaderOpaqueLit(b, label);
@@ -1034,9 +1038,10 @@ public final class ForwardShaders
   public static @Nonnull String moduleForwardOpaqueUnlit(
     final @Nonnull KMaterialForwardOpaqueUnlitLabel label)
   {
+    final String module = TitleCase.toTitleCase(label.labelGetCode());
     final StringBuilder b = new StringBuilder();
     b.append("package com.io7m.renderer.kernel;\n");
-    ForwardShaders.moduleStart(b, "Fwd_" + label.labelGetCode());
+    ForwardShaders.moduleStart(b, module);
     ForwardShaders.moduleVertexShaderRegularUnlit(b, label);
     b.append("\n");
     ForwardShaders.moduleFragmentShaderOpaqueUnlit(b, label);
@@ -1050,9 +1055,10 @@ public final class ForwardShaders
   public static String moduleForwardTranslucentRegularLit(
     final @Nonnull KMaterialForwardTranslucentRegularLitLabel l)
   {
+    final String module = TitleCase.toTitleCase(l.labelGetCode());
     final StringBuilder b = new StringBuilder();
     b.append("package com.io7m.renderer.kernel;\n");
-    ForwardShaders.moduleStart(b, "Fwd_" + l.labelGetCode());
+    ForwardShaders.moduleStart(b, module);
     ForwardShaders.moduleVertexShaderRegularLit(b, l);
     b.append("\n");
     ForwardShaders.moduleFragmentShaderTranslucentRegularLit(b, l);
@@ -1066,9 +1072,10 @@ public final class ForwardShaders
   public static String moduleForwardTranslucentRegularUnlit(
     final @Nonnull KMaterialForwardTranslucentRegularUnlitLabel l)
   {
+    final String module = TitleCase.toTitleCase(l.labelGetCode());
     final StringBuilder b = new StringBuilder();
     b.append("package com.io7m.renderer.kernel;\n");
-    ForwardShaders.moduleStart(b, "Fwd_" + l.labelGetCode());
+    ForwardShaders.moduleStart(b, module);
     ForwardShaders.moduleVertexShaderRegularUnlit(b, l);
     b.append("\n");
     ForwardShaders.moduleFragmentShaderTranslucentRegularUnlit(b, l);
@@ -1188,14 +1195,6 @@ public final class ForwardShaders
     b.append("as\n");
     b.append("  out out_0 = rgba;\n");
     b.append("end;\n");
-  }
-
-  private static void fragmentShaderParametersAlpha(
-    final @Nonnull StringBuilder b)
-  {
-    b.append("  -- Alpha parameters\n");
-    b.append("  parameter p_opacity : float;\n");
-    b.append("\n");
   }
 
   private static void moduleFragmentShaderTranslucentRegularUnlit(
