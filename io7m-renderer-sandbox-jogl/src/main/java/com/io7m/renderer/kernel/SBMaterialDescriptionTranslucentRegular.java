@@ -28,26 +28,27 @@ public final class SBMaterialDescriptionTranslucentRegular implements
   SBMaterialDescriptionTranslucent
 {
   private final @Nonnull SBMaterialAlbedoDescription      albedo;
+  private final @Nonnull SBMaterialAlphaDescription       alpha;
   private final @Nonnull SBMaterialEmissiveDescription    emissive;
   private final @Nonnull SBMaterialEnvironmentDescription environment;
   private final @Nonnull String                           name;
   private final @Nonnull SBMaterialNormalDescription      normal;
-  private final float                                     opacity;
   private final @Nonnull SBMaterialSpecularDescription    specular;
   private final @Nonnull RMatrixI3x3F<RTransformTexture>  uv_matrix;
 
   SBMaterialDescriptionTranslucentRegular(
     final @Nonnull String name,
+    final @Nonnull SBMaterialAlphaDescription alpha,
     final @Nonnull SBMaterialAlbedoDescription albedo,
     final @Nonnull SBMaterialEmissiveDescription emissive,
     final @Nonnull SBMaterialSpecularDescription specular,
     final @Nonnull SBMaterialEnvironmentDescription environment,
     final @Nonnull SBMaterialNormalDescription normal,
-    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix,
-    final float opacity)
+    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix)
     throws ConstraintError
   {
     this.name = Constraints.constrainNotNull(name, "Name");
+    this.alpha = Constraints.constrainNotNull(alpha, "Alpha");
     this.albedo = Constraints.constrainNotNull(albedo, "Albedo");
     this.emissive = Constraints.constrainNotNull(emissive, "Emissive");
     this.specular = Constraints.constrainNotNull(specular, "Specular");
@@ -55,7 +56,6 @@ public final class SBMaterialDescriptionTranslucentRegular implements
       Constraints.constrainNotNull(environment, "Environment");
     this.normal = Constraints.constrainNotNull(normal, "Normal");
     this.uv_matrix = Constraints.constrainNotNull(uv_matrix, "UV matrix");
-    this.opacity = opacity;
   }
 
   @Override public boolean equals(
@@ -72,9 +72,8 @@ public final class SBMaterialDescriptionTranslucentRegular implements
     }
     final SBMaterialDescriptionTranslucentRegular other =
       (SBMaterialDescriptionTranslucentRegular) obj;
-    return (Float.floatToIntBits(this.opacity) == Float
-      .floatToIntBits(other.opacity))
-      && this.albedo.equals(other.albedo)
+    return this.albedo.equals(other.albedo)
+      && this.alpha.equals(other.alpha)
       && this.emissive.equals(other.emissive)
       && this.environment.equals(other.environment)
       && this.normal.equals(other.normal)
@@ -85,6 +84,11 @@ public final class SBMaterialDescriptionTranslucentRegular implements
   public @Nonnull SBMaterialAlbedoDescription getAlbedo()
   {
     return this.albedo;
+  }
+
+  public @Nonnull SBMaterialAlphaDescription getAlpha()
+  {
+    return this.alpha;
   }
 
   public @Nonnull SBMaterialEmissiveDescription getEmissive()
@@ -102,11 +106,6 @@ public final class SBMaterialDescriptionTranslucentRegular implements
     return this.normal;
   }
 
-  public float getOpacity()
-  {
-    return this.opacity;
-  }
-
   public @Nonnull SBMaterialSpecularDescription getSpecular()
   {
     return this.specular;
@@ -121,7 +120,7 @@ public final class SBMaterialDescriptionTranslucentRegular implements
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + Float.floatToIntBits(this.opacity);
+    result = (prime * result) + this.alpha.hashCode();
     result = (prime * result) + this.albedo.hashCode();
     result = (prime * result) + this.emissive.hashCode();
     result = (prime * result) + this.environment.hashCode();

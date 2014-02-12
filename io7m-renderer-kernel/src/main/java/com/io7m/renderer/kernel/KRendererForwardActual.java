@@ -313,9 +313,9 @@ import com.io7m.renderer.types.RTransformView;
       ConstraintError
   {
     KRendererForwardActual.putMaterialRegular(program, label, material);
-    KShadingProgramCommon.putMaterialAlphaOpacity(
-      program,
-      material.materialGetOpacity());
+    KShadingProgramCommon.putMaterialAlphaOpacity(program, material
+      .materialGetAlpha()
+      .getOpacity());
   }
 
   private static void putShadow(

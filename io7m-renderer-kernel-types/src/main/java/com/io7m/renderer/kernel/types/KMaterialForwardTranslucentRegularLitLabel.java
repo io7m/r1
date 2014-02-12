@@ -33,7 +33,8 @@ import com.io7m.jaux.UnreachableCodeException;
 @Immutable public final class KMaterialForwardTranslucentRegularLitLabel implements
   KTexturesRequired,
   KMaterialLabelRegular,
-  KMaterialLabelLit
+  KMaterialLabelLit,
+  KMaterialLabelTranslucent
 {
   /**
    * @return The set of all possible lit translucent regular labels.
@@ -52,7 +53,10 @@ import com.io7m.jaux.UnreachableCodeException;
       for (final KMaterialForwardRegularLabel r : o) {
         if (r.labelGetNormal() != KMaterialNormalLabel.NORMAL_NONE) {
           for (final KLightLabel l : KLightLabel.values()) {
-            s.add(new KMaterialForwardTranslucentRegularLitLabel(l, r));
+            for (final KMaterialAlphaOpacityType a : KMaterialAlphaOpacityType
+              .values()) {
+              s.add(new KMaterialForwardTranslucentRegularLitLabel(l, r, a));
+            }
           }
         }
       }
@@ -65,11 +69,13 @@ import com.io7m.jaux.UnreachableCodeException;
 
   private static @Nonnull String makeLabelCode(
     final @Nonnull KLightLabel in_light,
-    final @Nonnull KMaterialForwardRegularLabel in_opaque)
+    final @Nonnull KMaterialForwardRegularLabel in_opaque,
+    final @Nonnull KMaterialAlphaOpacityType in_alpha)
   {
     return String.format(
-      "fwd_%s_T_%s",
+      "fwd_%s_%s_%s",
       in_light.labelGetCode(),
+      in_alpha.labelGetCode(),
       in_opaque.labelGetCode());
   }
 
@@ -80,6 +86,8 @@ import com.io7m.jaux.UnreachableCodeException;
    *          The light
    * @param in_regular
    *          The regular label
+   * @param in_alpha
+   *          The alpha label
    * @return A new label
    * @throws ConstraintError
    *           If any parameter is <code>null</code>
@@ -87,24 +95,29 @@ import com.io7m.jaux.UnreachableCodeException;
 
   public static @Nonnull KMaterialForwardTranslucentRegularLitLabel newLabel(
     final @Nonnull KLightLabel in_light,
-    final @Nonnull KMaterialForwardRegularLabel in_regular)
+    final @Nonnull KMaterialForwardRegularLabel in_regular,
+    final @Nonnull KMaterialAlphaOpacityType in_alpha)
     throws ConstraintError
   {
     return new KMaterialForwardTranslucentRegularLitLabel(
       in_light,
-      in_regular);
+      in_regular,
+      in_alpha);
   }
 
   private final @Nonnull String                       code;
   private final @Nonnull KLightLabel                  light;
   private final @Nonnull KMaterialForwardRegularLabel regular;
   private final int                                   textures;
+  private final @Nonnull KMaterialAlphaOpacityType    alpha;
 
   private KMaterialForwardTranslucentRegularLitLabel(
     final @Nonnull KLightLabel in_light,
-    final @Nonnull KMaterialForwardRegularLabel in_regular)
+    final @Nonnull KMaterialForwardRegularLabel in_regular,
+    final @Nonnull KMaterialAlphaOpacityType in_alpha)
     throws ConstraintError
   {
+    this.alpha = Constraints.constrainNotNull(in_alpha, "Alpha");
     this.regular = Constraints.constrainNotNull(in_regular, "Regular");
 
     Constraints.constrainArbitrary(
@@ -115,7 +128,8 @@ import com.io7m.jaux.UnreachableCodeException;
     this.code =
       KMaterialForwardTranslucentRegularLitLabel.makeLabelCode(
         in_light,
-        in_regular);
+        in_regular,
+        in_alpha);
 
     this.textures =
       this.light.texturesGetRequired() + this.regular.texturesGetRequired();
@@ -178,5 +192,10 @@ import com.io7m.jaux.UnreachableCodeException;
   @Override public int texturesGetRequired()
   {
     return this.textures;
+  }
+
+  @Override public @Nonnull KMaterialAlphaOpacityType labelGetAlphaType()
+  {
+    return this.alpha;
   }
 }

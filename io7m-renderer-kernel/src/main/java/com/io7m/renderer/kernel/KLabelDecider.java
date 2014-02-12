@@ -35,6 +35,7 @@ import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.renderer.kernel.types.KLight;
 import com.io7m.renderer.kernel.types.KLightLabel;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoLabel;
+import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 import com.io7m.renderer.kernel.types.KMaterialEmissiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialEnvironmentLabel;
@@ -49,6 +50,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
 final class KLabelDecider implements
   KLightLabelCache,
   KMaterialAlbedoLabelCache,
+  KMaterialAlphaLabelCache,
   KMaterialDepthLabelCache,
   KMaterialEmissiveLabelCache,
   KMaterialEnvironmentLabelCache,
@@ -71,6 +73,7 @@ final class KLabelDecider implements
   }
 
   private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialAlbedoLabel, ConstraintError>                                    albedo_cache;
+  private final @Nonnull LRUCacheTrivial<KInstanceTranslucentRegular, KMaterialAlphaOpacityType, ConstraintError>                    alpha_cache;
   private final @Nonnull LRUCacheConfig                                                                                              cache_config;
   private final @Nonnull KGraphicsCapabilities                                                                                       capabilities;
   private final @Nonnull LRUCacheTrivial<KInstanceOpaque, KMaterialDepthLabel, ConstraintError>                                      depth_cache;
@@ -92,6 +95,41 @@ final class KLabelDecider implements
       Constraints.constrainNotNull(capabilities, "Capabilities");
     this.cache_config =
       Constraints.constrainNotNull(cache_config, "Cache config");
+
+    this.alpha_cache =
+      LRUCacheTrivial
+        .newCache(
+          new JCacheLoader<KInstanceTranslucentRegular, KMaterialAlphaOpacityType, ConstraintError>() {
+            @Override public void cacheValueClose(
+              final @Nonnull KMaterialAlphaOpacityType v)
+              throws ConstraintError
+            {
+              // Nothing
+            }
+
+            @SuppressWarnings("synthetic-access") @Override public
+              KMaterialAlphaOpacityType
+              cacheValueLoad(
+                final @Nonnull KInstanceTranslucentRegular instance)
+                throws ConstraintError
+            {
+              try {
+                final KMaterialNormalLabel normal =
+                  KLabelDecider.this.normal_cache.cacheGetLU(instance);
+                return KMaterialAlphaOpacityType.fromInstance(
+                  normal,
+                  instance);
+              } catch (final JCacheException x) {
+                throw new UnreachableCodeException(x);
+              }
+            }
+
+            @Override public @Nonnull BigInteger cacheValueSizeOf(
+              final @Nonnull KMaterialAlphaOpacityType v)
+            {
+              return BigInteger.ONE;
+            }
+          }, this.cache_config);
 
     this.albedo_cache =
       LRUCacheTrivial
@@ -335,10 +373,14 @@ final class KLabelDecider implements
                   KLabelDecider.this.environment_cache.cacheGetLU(instance);
                 final KMaterialNormalLabel normal =
                   KLabelDecider.this.normal_cache.cacheGetLU(instance);
+                final KMaterialAlphaOpacityType alpha =
+                  KLabelDecider.this.alpha_cache.cacheGetLU(instance);
+
                 return KMaterialForwardTranslucentRegularUnlitLabel.newLabel(
                   albedo,
                   environment,
-                  normal);
+                  normal,
+                  alpha);
               } catch (final JCacheException x) {
                 throw new UnreachableCodeException(x);
               }
@@ -434,6 +476,19 @@ final class KLabelDecider implements
     }
   }
 
+  @Override public @Nonnull
+    KMaterialAlphaOpacityType
+    getAlphaLabelTranslucentRegular(
+      final @Nonnull KInstanceTranslucentRegular instance)
+      throws ConstraintError
+  {
+    try {
+      return this.alpha_cache.cacheGetLU(instance);
+    } catch (final JCacheException e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
   @Override public KMaterialDepthLabel getDepthLabel(
     final @Nonnull KInstanceOpaque instance)
     throws ConstraintError
@@ -512,7 +567,8 @@ final class KLabelDecider implements
   {
     return KMaterialForwardTranslucentRegularLitLabel.newLabel(
       this.getLightLabel(light),
-      this.getForwardLabelRegular(instance));
+      this.getForwardLabelRegular(instance),
+      this.getAlphaLabelTranslucentRegular(instance));
   }
 
   @Override public
@@ -555,6 +611,7 @@ final class KLabelDecider implements
   {
     return this.albedo_cache
       .cacheSize()
+      .add(this.alpha_cache.cacheSize())
       .add(this.depth_cache.cacheSize())
       .add(this.emissive_cache.cacheSize())
       .add(this.environment_cache.cacheSize())
