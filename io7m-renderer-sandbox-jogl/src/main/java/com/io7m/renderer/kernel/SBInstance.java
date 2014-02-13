@@ -21,6 +21,7 @@ import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RSpaceObject;
 import com.io7m.renderer.types.RSpaceWorld;
@@ -29,14 +30,15 @@ import com.io7m.renderer.types.RVectorI3F;
 
 @Immutable final class SBInstance
 {
+  private final @Nonnull KFaceSelection                  faces;
   private final @Nonnull Integer                         id;
+  private final boolean                                  lit;
+  private final @Nonnull Integer                         material;
+  private final @Nonnull PathVirtual                     mesh;
+  private final @Nonnull QuaternionI4F                   orientation;
   private final @Nonnull RVectorI3F<RSpaceWorld>         position;
   private final @Nonnull RVectorI3F<RSpaceObject>        scale;
-  private final @Nonnull QuaternionI4F                   orientation;
   private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
-  private final @Nonnull PathVirtual                     mesh;
-  private final @Nonnull Integer                         material;
-  private final boolean                                  lit;
 
   public SBInstance(
     final @Nonnull Integer id,
@@ -46,6 +48,7 @@ import com.io7m.renderer.types.RVectorI3F;
     final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix,
     final @Nonnull PathVirtual mesh,
     final @Nonnull Integer material,
+    final @Nonnull KFaceSelection faces,
     final boolean lit)
   {
     this.id = id;
@@ -55,6 +58,7 @@ import com.io7m.renderer.types.RVectorI3F;
     this.mesh = mesh;
     this.material = material;
     this.uv_matrix = uv_matrix;
+    this.faces = faces;
     this.lit = lit;
   }
 
@@ -95,17 +99,20 @@ import com.io7m.renderer.types.RVectorI3F;
     if (!this.uv_matrix.equals(other.uv_matrix)) {
       return false;
     }
+    if (!this.faces.equals(other.faces)) {
+      return false;
+    }
     return true;
+  }
+
+  public @Nonnull KFaceSelection getFaces()
+  {
+    return this.faces;
   }
 
   public @Nonnull Integer getID()
   {
     return this.id;
-  }
-
-  boolean isLit()
-  {
-    return this.lit;
   }
 
   public @Nonnull Integer getMaterial()
@@ -150,13 +157,19 @@ import com.io7m.renderer.types.RVectorI3F;
     result = (prime * result) + this.position.hashCode();
     result = (prime * result) + this.scale.hashCode();
     result = (prime * result) + this.uv_matrix.hashCode();
+    result = (prime * result) + this.faces.hashCode();
     return result;
+  }
+
+  boolean isLit()
+  {
+    return this.lit;
   }
 
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBInstanceDescription [id=");
+    builder.append("[SBInstance id=");
     builder.append(this.id);
     builder.append(", position=");
     builder.append(this.position);
@@ -170,6 +183,8 @@ import com.io7m.renderer.types.RVectorI3F;
     builder.append(this.mesh);
     builder.append(", material=");
     builder.append(this.material);
+    builder.append(", faces=");
+    builder.append(this.faces);
     builder.append(", lit=");
     builder.append(this.lit);
     builder.append("]");
