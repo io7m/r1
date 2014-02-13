@@ -45,6 +45,7 @@ import com.io7m.jcanephora.JCBProgramProcedure;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureCubeStatic;
@@ -66,6 +67,7 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunction
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KCamera;
+import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.kernel.types.KInstanceOpaque;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
@@ -1606,6 +1608,8 @@ import com.io7m.renderer.types.RTransformView;
     final List<KTranslucent> translucents = batched.getBatchesTranslucent();
 
     for (int index = 0; index < translucents.size(); ++index) {
+      gc.cullingDisable();
+
       final KTranslucent translucent = translucents.get(index);
       translucent
         .translucentAccept(new KTranslucentVisitor<Unit, JCacheException>() {
@@ -1630,6 +1634,10 @@ import com.io7m.renderer.types.RTransformView;
               ConstraintError,
               JCacheException
           {
+            KRendererForwardActual.renderTranslucentRegularConfigureCulling(
+              gc,
+              t.translucentGetInstance().getInstance().instanceGetFaces());
+
             KRendererForwardActual.this.renderTranslucentRegularLit(
               gc,
               shadow_context,
@@ -1645,6 +1653,10 @@ import com.io7m.renderer.types.RTransformView;
               ConstraintError,
               JCacheException
           {
+            KRendererForwardActual.renderTranslucentRegularConfigureCulling(
+              gc,
+              t.getInstance().instanceGetFaces());
+
             KRendererForwardActual.this.renderTranslucentRegularUnlit(
               gc,
               t,
@@ -1652,6 +1664,42 @@ import com.io7m.renderer.types.RTransformView;
             return Unit.unit();
           }
         });
+    }
+  }
+
+  private static void renderTranslucentRegularConfigureCulling(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KFaceSelection faces)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    switch (faces) {
+      case FACE_RENDER_BACK:
+      {
+        gc.cullingEnable(
+          FaceSelection.FACE_FRONT,
+          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+        break;
+      }
+      case FACE_RENDER_FRONT:
+      {
+        gc.cullingEnable(
+          FaceSelection.FACE_BACK,
+          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+        break;
+      }
+      case FACE_RENDER_FRONT_AND_BACK:
+      {
+        gc.cullingDisable();
+        break;
+      }
+      case FACE_RENDER_NONE:
+      {
+        gc.cullingEnable(
+          FaceSelection.FACE_FRONT_AND_BACK,
+          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+        break;
+      }
     }
   }
 }

@@ -42,6 +42,8 @@ import com.io7m.renderer.types.RException;
    *          The material
    * @param in_mesh
    *          The mesh
+   * @param in_faces
+   *          The faces that will be rendered
    * @return A new instance
    * @throws ConstraintError
    *           If any parameter is <code>null</code>
@@ -50,12 +52,18 @@ import com.io7m.renderer.types.RException;
   public static @Nonnull KInstanceTranslucentRegular newInstance(
     final @Nonnull Integer in_id,
     final @Nonnull KMaterialTranslucentRegular in_material,
-    final @Nonnull KMesh in_mesh)
+    final @Nonnull KMesh in_mesh,
+    final @Nonnull KFaceSelection in_faces)
     throws ConstraintError
   {
-    return new KInstanceTranslucentRegular(in_id, in_material, in_mesh);
+    return new KInstanceTranslucentRegular(
+      in_id,
+      in_material,
+      in_mesh,
+      in_faces);
   }
 
+  private final @Nonnull KFaceSelection              faces;
   private final @Nonnull Integer                     id;
   private final @Nonnull KMaterialTranslucentRegular material;
   private final @Nonnull KMesh                       mesh;
@@ -63,12 +71,14 @@ import com.io7m.renderer.types.RException;
   protected KInstanceTranslucentRegular(
     final @Nonnull Integer in_id,
     final @Nonnull KMaterialTranslucentRegular in_material,
-    final @Nonnull KMesh in_mesh)
+    final @Nonnull KMesh in_mesh,
+    final @Nonnull KFaceSelection in_faces)
     throws ConstraintError
   {
     this.id = Constraints.constrainNotNull(in_id, "ID");
     this.mesh = Constraints.constrainNotNull(in_mesh, "Mesh");
     this.material = Constraints.constrainNotNull(in_material, "Material");
+    this.faces = Constraints.constrainNotNull(in_faces, "Faces");
   }
 
   @Override public boolean equals(
@@ -87,7 +97,8 @@ import com.io7m.renderer.types.RException;
       (KInstanceTranslucentRegular) obj;
     return this.id.equals(other.id)
       && this.material.equals(other.material)
-      && this.mesh.equals(other.mesh);
+      && this.mesh.equals(other.mesh)
+      && this.faces.equals(other.faces);
   }
 
   @Override public int hashCode()
@@ -97,7 +108,17 @@ import com.io7m.renderer.types.RException;
     result = (prime * result) + this.id.hashCode();
     result = (prime * result) + this.material.hashCode();
     result = (prime * result) + this.mesh.hashCode();
+    result = (prime * result) + this.faces.hashCode();
     return result;
+  }
+
+  /**
+   * @return The faces that will be rendered
+   */
+
+  public @Nonnull KFaceSelection instanceGetFaces()
+  {
+    return this.faces;
   }
 
   @Override public @Nonnull Integer instanceGetID()

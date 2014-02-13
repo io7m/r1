@@ -131,6 +131,37 @@ public final class SBInstanceControls implements
     }
   }
 
+  protected final static @Nonnull FileFilter MESH_RMB_FILE_FILTER;
+  protected final static @Nonnull FileFilter MESH_RXML_FILE_FILTER;
+
+  static {
+    MESH_RXML_FILE_FILTER = new FileFilter() {
+      @Override public boolean accept(
+        final File f)
+      {
+        return f.isDirectory() || f.toString().endsWith(".rmx");
+      }
+
+      @Override public String getDescription()
+      {
+        return "RXML mesh files (*.rmx)";
+      }
+    };
+
+    MESH_RMB_FILE_FILTER = new FileFilter() {
+      @Override public boolean accept(
+        final File f)
+      {
+        return f.isDirectory() || f.toString().endsWith(".rmb");
+      }
+
+      @Override public String getDescription()
+      {
+        return "RB mesh files (*.rmb)";
+      }
+    };
+  }
+
   public static void main(
     final String args[])
   {
@@ -190,51 +221,21 @@ public final class SBInstanceControls implements
     return new SBInstanceControls(parent, log, controller, id);
   }
 
-  private final @Nonnull SBMatrix3x3Controls<RTransformTexture> matrix_uv;
-  private final @Nonnull SBOrientationInput                     orientation;
-  private final @Nonnull SBVector3FInput<RSpaceWorld>           position;
-  private final @Nonnull SBVector3FInput<RSpaceObject>          scale;
+  private final @Nonnull SBFaceSelectionTypeSelector            faces;
+  private final @Nonnull RowGroup                               group;
+  private final @Nonnull Integer                                id;
+  private final @Nonnull JTextField                             id_field;
+  private final @Nonnull JCheckBox                              lit;
   private final @Nonnull JTextField                             material_id;
   private final @Nonnull JTextField                             material_name;
   private final @Nonnull JButton                                material_select;
-  private final @Nonnull RowGroup                               group;
+  private final @Nonnull SBMatrix3x3Controls<RTransformTexture> matrix_uv;
+  private final @Nonnull JButton                                mesh_load;
   private final @Nonnull JComboBox<PathVirtual>                 mesh_selector;
   private @Nonnull Map<PathVirtual, SBMesh>                     meshes;
-  private final @Nonnull JButton                                mesh_load;
-  private final @Nonnull JTextField                             id_field;
-  private final @Nonnull JCheckBox                              lit;
-  private final @Nonnull Integer                                id;
-
-  protected final static @Nonnull FileFilter                    MESH_RXML_FILE_FILTER;
-  protected final static @Nonnull FileFilter                    MESH_RMB_FILE_FILTER;
-
-  static {
-    MESH_RXML_FILE_FILTER = new FileFilter() {
-      @Override public boolean accept(
-        final File f)
-      {
-        return f.isDirectory() || f.toString().endsWith(".rmx");
-      }
-
-      @Override public String getDescription()
-      {
-        return "RXML mesh files (*.rmx)";
-      }
-    };
-
-    MESH_RMB_FILE_FILTER = new FileFilter() {
-      @Override public boolean accept(
-        final File f)
-      {
-        return f.isDirectory() || f.toString().endsWith(".rmb");
-      }
-
-      @Override public String getDescription()
-      {
-        return "RB mesh files (*.rmb)";
-      }
-    };
-  }
+  private final @Nonnull SBOrientationInput                     orientation;
+  private final @Nonnull SBVector3FInput<RSpaceWorld>           position;
+  private final @Nonnull SBVector3FInput<RSpaceObject>          scale;
 
   public <C extends SBSceneControllerTextures & SBSceneControllerMaterials & SBSceneControllerMeshes> SBInstanceControls(
     final @Nonnull JFrame parent,
@@ -252,6 +253,7 @@ public final class SBInstanceControls implements
     this.matrix_uv = new SBMatrix3x3Controls<RTransformTexture>("UV matrix");
     this.lit = new JCheckBox();
     this.lit.setSelected(true);
+    this.faces = new SBFaceSelectionTypeSelector();
     this.group = new RowGroup();
 
     this.material_id = new JTextField("");
@@ -344,17 +346,6 @@ public final class SBInstanceControls implements
     });
   }
 
-  protected void meshesRefresh(
-    final @Nonnull SBSceneControllerMeshes controller)
-  {
-    this.meshes = controller.sceneMeshesGet();
-
-    this.mesh_selector.removeAllItems();
-    for (final PathVirtual name : this.meshes.keySet()) {
-      this.mesh_selector.addItem(name);
-    }
-  }
-
   @Override public void controlsAddToLayout(
     final @Nonnull DesignGridLayout layout)
   {
@@ -375,6 +366,7 @@ public final class SBInstanceControls implements
       .add(this.material_name, 5)
       .add(this.material_select);
 
+    layout.row().group(this.group).grid(new JLabel("Faces")).add(this.faces);
     layout.row().group(this.group).grid(new JLabel("Lit")).add(this.lit);
     layout.emptyRow();
 
@@ -393,15 +385,6 @@ public final class SBInstanceControls implements
     this.matrix_uv.controlsHide();
   }
 
-  @Override public void controlsShow()
-  {
-    this.group.forceShow();
-    this.position.controlsShow();
-    this.scale.controlsShow();
-    this.orientation.controlsShow();
-    this.matrix_uv.controlsShow();
-  }
-
   @Override public void controlsLoadFrom(
     final SBInstance t)
   {
@@ -412,6 +395,7 @@ public final class SBInstanceControls implements
     this.mesh_selector.setSelectedItem(t.getMesh());
     this.material_id.setText(t.getMaterial().toString());
     this.lit.setSelected(t.isLit());
+    this.faces.setSelectedItem(t.getFaces());
   }
 
   @SuppressWarnings("boxing") @Override public SBInstance controlsSave()
@@ -426,6 +410,27 @@ public final class SBInstanceControls implements
       this.matrix_uv.controlsSave(),
       (PathVirtual) this.mesh_selector.getSelectedItem(),
       SBTextFieldUtilities.getFieldIntegerOrError(this.material_id),
+      this.faces.getSelectedItem(),
       this.lit.isSelected());
+  }
+
+  @Override public void controlsShow()
+  {
+    this.group.forceShow();
+    this.position.controlsShow();
+    this.scale.controlsShow();
+    this.orientation.controlsShow();
+    this.matrix_uv.controlsShow();
+  }
+
+  protected void meshesRefresh(
+    final @Nonnull SBSceneControllerMeshes controller)
+  {
+    this.meshes = controller.sceneMeshesGet();
+
+    this.mesh_selector.removeAllItems();
+    for (final PathVirtual name : this.meshes.keySet()) {
+      this.mesh_selector.addItem(name);
+    }
   }
 }
