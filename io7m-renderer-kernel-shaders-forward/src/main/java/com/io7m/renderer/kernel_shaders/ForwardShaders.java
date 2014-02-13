@@ -879,11 +879,9 @@ public final class ForwardShaders
     final @Nonnull StringBuilder b)
   {
     b.append("  -- RGBA translucent lit\n");
-    b.append("  value lit  = V3.multiply (surface [x y z], light_term);\n");
-    b.append("   -- Premultiply result\n");
+    b.append("  value lit = V3.multiply (surface [x y z], light_term);\n");
     b.append("  value a = F.multiply (surface [w], opacity);\n");
-    b
-      .append("  value rgba = new vector_4f (V3.multiply_scalar (lit, a), a);\n");
+    b.append("  value rgba = new vector_4f (lit, a);\n");
   }
 
   private static void fragmentShaderValuesRGBATranslucentUnlit(
@@ -891,9 +889,7 @@ public final class ForwardShaders
   {
     b.append("  -- RGBA translucent unlit\n");
     b.append("  value a = F.multiply (surface [w], opacity);\n");
-    b.append("  -- Premultiply result\n");
-    b
-      .append("  value rgba = new vector_4f (V3.multiply_scalar (surface [x y z], a), a);\n");
+    b.append("  value rgba = new vector_4f (surface [x y z], a);\n");
   }
 
   private static void fragmentShaderValuesSpecular(
