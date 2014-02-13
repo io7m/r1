@@ -1349,7 +1349,8 @@ public final class SBSceneController implements
                       KInstanceTranslucentRegular.newInstance(
                         instance_id,
                         mtr,
-                        km);
+                        km,
+                        i.getFaces());
                     return KInstanceTransformedTranslucentRegular
                       .newInstance(ki, kt, i.getUVMatrix());
                   }
