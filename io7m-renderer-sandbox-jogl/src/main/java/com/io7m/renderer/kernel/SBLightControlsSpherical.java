@@ -121,7 +121,7 @@ public final class SBLightControlsSpherical implements
   {
     final KLightSphere l = d.getLight();
     this.intensity.setCurrent(l.lightGetIntensity());
-    this.colour.setColour(l.lightGetColour());
+    this.colour.controlsLoadFrom(l.lightGetColour());
     this.position.setVector(l.getPosition());
     this.falloff.setCurrent(l.getFalloff());
     this.radius.setCurrent(l.getRadius());
@@ -133,7 +133,7 @@ public final class SBLightControlsSpherical implements
   {
     return new SBLightDescriptionSpherical(KLightSphere.newSpherical(
       this.id,
-      this.colour.getColour(),
+      this.colour.controlsSave(),
       this.intensity.getCurrent(),
       this.position.getVector(),
       this.radius.getCurrent(),

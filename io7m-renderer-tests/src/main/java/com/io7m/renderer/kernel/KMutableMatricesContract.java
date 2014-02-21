@@ -261,8 +261,10 @@ public abstract class KMutableMatricesContract extends TestContract
       final KMaterialEnvironment environment =
         KMaterialEnvironment.newEnvironmentUnmapped();
       final KMaterialNormal normal = KMaterialNormal.newNormalUnmapped();
+
+      final RVectorI3F<RSpaceRGB> rgb = RVectorI3F.zero();
       final KMaterialSpecular specular =
-        KMaterialSpecular.newSpecularUnmapped(0.0f, 1.0f);
+        KMaterialSpecular.newSpecularUnmapped(rgb, 0.0f);
 
       final KMaterialOpaqueRegular material =
         KMaterialOpaqueRegular.newMaterial(

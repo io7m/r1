@@ -482,12 +482,12 @@ public final class SBSceneController implements
     if (p != null) {
       final SBTexture2D<?> t = textures.get(p);
       return KMaterialSpecular.newSpecularMapped(
-        d.getIntensity(),
+        d.getColour(),
         d.getExponent(),
         t.getTexture());
     }
     return KMaterialSpecular.newSpecularUnmapped(
-      d.getIntensity(),
+      d.getColour(),
       d.getExponent());
   }
 
