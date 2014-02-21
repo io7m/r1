@@ -55,6 +55,9 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 import com.io7m.renderer.kernel.types.KInstance;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
 import com.io7m.renderer.kernel.types.KMaterialOpaque;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitor;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
@@ -113,14 +116,17 @@ public final class KDepthVarianceRenderer
     KShadingProgramCommon.putMaterialAlbedo(jp, material.materialGetAlbedo());
   }
 
-  protected static void renderDepthPassInstance(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull MatricesInstance mwi,
-    final @Nonnull JCBProgram jp,
-    final @Nonnull KMaterialDepthVarianceLabel label,
-    final @Nonnull KInstanceTransformedOpaque i)
-    throws JCGLException,
-      ConstraintError
+  @SuppressWarnings("synthetic-access") protected static
+    void
+    renderDepthPassInstance(
+      final @Nonnull JCGLInterfaceCommon gc,
+      final @Nonnull MatricesInstance mwi,
+      final @Nonnull JCBProgram jp,
+      final @Nonnull KMaterialDepthVarianceLabel label,
+      final @Nonnull KInstanceTransformedOpaque i)
+      throws JCGLException,
+        ConstraintError,
+        RException
   {
     final KMaterialOpaque material = i.getInstance().instanceGetMaterial();
     final List<TextureUnit> units = gc.textureGetUnits();
@@ -132,28 +138,80 @@ public final class KDepthVarianceRenderer
     KShadingProgramCommon.putMatrixProjectionReuse(jp);
     KShadingProgramCommon.putMatrixModelView(jp, mwi.getMatrixModelView());
 
-    switch (label) {
-      case DEPTH_VARIANCE_CONSTANT:
-      {
-        break;
-      }
-      case DEPTH_VARIANCE_MAPPED:
-      {
-        KDepthVarianceRenderer.putMaterialOpaque(jp, material);
-        KShadingProgramCommon.putMatrixUV(jp, mwi.getMatrixUV());
-        KShadingProgramCommon.bindPutTextureAlbedo(
-          jp,
-          gc,
-          material.materialGetAlbedo(),
-          units.get(0));
-        break;
-      }
-      case DEPTH_VARIANCE_UNIFORM:
-      {
-        KDepthVarianceRenderer.putMaterialOpaque(jp, material);
-        break;
-      }
-    }
+    material
+      .materialOpaqueVisitableAccept(new KMaterialOpaqueVisitor<Unit, JCGLException>() {
+        @Override public Unit materialVisitOpaqueAlphaDepth(
+          final @Nonnull KMaterialOpaqueAlphaDepth m)
+          throws ConstraintError,
+            RException,
+            JCGLException
+        {
+          switch (label) {
+            case DEPTH_VARIANCE_CONSTANT:
+            {
+              break;
+            }
+            case DEPTH_VARIANCE_MAPPED:
+            {
+              KDepthVarianceRenderer.putMaterialOpaque(jp, material);
+              KShadingProgramCommon.putMatrixUV(jp, mwi.getMatrixUV());
+              KShadingProgramCommon.bindPutTextureAlbedo(
+                jp,
+                gc,
+                material.materialGetAlbedo(),
+                units.get(0));
+              KShadingProgramCommon.putMaterialAlphaDepthThreshold(
+                jp,
+                m.getAlphaThreshold());
+              break;
+            }
+            case DEPTH_VARIANCE_UNIFORM:
+            {
+              KDepthVarianceRenderer.putMaterialOpaque(jp, material);
+              KShadingProgramCommon.putMaterialAlphaDepthThreshold(
+                jp,
+                m.getAlphaThreshold());
+              break;
+            }
+          }
+
+          return Unit.unit();
+        }
+
+        @Override public Unit materialVisitOpaqueRegular(
+          final @Nonnull KMaterialOpaqueRegular m)
+          throws ConstraintError,
+            RException,
+            JCGLException
+        {
+          switch (label) {
+            case DEPTH_VARIANCE_CONSTANT:
+            {
+              break;
+            }
+            case DEPTH_VARIANCE_MAPPED:
+            {
+              KDepthVarianceRenderer.putMaterialOpaque(jp, material);
+              KShadingProgramCommon.putMatrixUV(jp, mwi.getMatrixUV());
+              KShadingProgramCommon.bindPutTextureAlbedo(
+                jp,
+                gc,
+                material.materialGetAlbedo(),
+                units.get(0));
+              KShadingProgramCommon.putMaterialAlphaDepthThreshold(jp, 0.0f);
+              break;
+            }
+            case DEPTH_VARIANCE_UNIFORM:
+            {
+              KDepthVarianceRenderer.putMaterialOpaque(jp, material);
+              KShadingProgramCommon.putMaterialAlphaDepthThreshold(jp, 0.0f);
+              break;
+            }
+          }
+
+          return Unit.unit();
+        }
+      });
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
