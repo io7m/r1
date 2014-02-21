@@ -116,7 +116,7 @@ public final class SBMaterialControls implements
         new SBMaterialControlsEmissive(controller, log),
         new SBMaterialControlsEnvironment(controller, log),
         this.controls_normal,
-        new SBMaterialControlsSpecular(controller, log),
+        new SBMaterialControlsSpecular(parent, controller, log),
         this.controls_uv);
     this.controls_opaque_alpha_depth =
       new SBMaterialControlsOpaqueAlphaToDepth(
@@ -125,7 +125,7 @@ public final class SBMaterialControls implements
         new SBMaterialControlsEmissive(controller, log),
         new SBMaterialControlsEnvironment(controller, log),
         this.controls_normal,
-        new SBMaterialControlsSpecular(controller, log),
+        new SBMaterialControlsSpecular(parent, controller, log),
         this.controls_uv);
     this.controls_translucent_regular =
       new SBMaterialControlsTranslucentRegular(
@@ -135,7 +135,7 @@ public final class SBMaterialControls implements
         new SBMaterialControlsEmissive(controller, log),
         new SBMaterialControlsEnvironment(controller, log),
         this.controls_normal,
-        new SBMaterialControlsSpecular(controller, log),
+        new SBMaterialControlsSpecular(parent, controller, log),
         this.controls_uv);
     this.controls_translucent_refractive =
       new SBMaterialControlsTranslucentRefractive(

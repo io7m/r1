@@ -34,12 +34,13 @@ import javax.swing.WindowConstants;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RSpaceRGB;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.types.RVectorReadable3F;
 
-public final class SBColourInput implements SBControls
+public final class SBColourInput implements
+  SBControlsDataType<RVectorI3F<RSpaceRGB>>
 {
   public static void main(
     final String args[])
@@ -70,12 +71,12 @@ public final class SBColourInput implements SBControls
     return new SBColourInput(parent, text);
   }
 
+  private final @Nonnull JButton    colour;
   private final @Nonnull JTextField field_x;
   private final @Nonnull JTextField field_y;
   private final @Nonnull JTextField field_z;
-  private final @Nonnull JLabel     label;
-  private final @Nonnull JButton    colour;
   private final @Nonnull RowGroup   group;
+  private final @Nonnull JLabel     label;
 
   private SBColourInput(
     final @Nonnull JFrame parent,
@@ -98,7 +99,7 @@ public final class SBColourInput implements SBControls
           JColorChooser.showDialog(parent, "Select colour...", Color.WHITE);
         if (c != null) {
           final float[] rgb = c.getRGBColorComponents(null);
-          SBColourInput.this.setColour(new RVectorI3F<RSpaceRGB>(
+          SBColourInput.this.controlsLoadFrom(new RVectorI3F<RSpaceRGB>(
             rgb[0],
             rgb[1],
             rgb[2]));
@@ -106,37 +107,8 @@ public final class SBColourInput implements SBControls
       }
     });
 
-    this.setColour(new RVectorI3F<RSpaceRGB>(1.0f, 1.0f, 1.0f));
-  }
-
-  public @Nonnull RVectorI3F<RSpaceRGB> getColour()
-    throws SBExceptionInputError
-  {
-    return new RVectorI3F<RSpaceRGB>(
-      SBTextFieldUtilities.getFieldFloatOrError(this.field_x),
-      SBTextFieldUtilities.getFieldFloatOrError(this.field_y),
-      SBTextFieldUtilities.getFieldFloatOrError(this.field_z));
-  }
-
-  @SuppressWarnings("boxing") public void setColour(
-    final @Nonnull RVectorReadable3F<RSpaceRGB> v)
-  {
-    this.field_x.setText(String.format("%.6f", v.getXF()));
-    this.field_y.setText(String.format("%.6f", v.getYF()));
-    this.field_z.setText(String.format("%.6f", v.getZF()));
-
-    this.colour.setBackground(new Color(v.getXF(), v.getYF(), v.getZF()));
-    this.colour.setForeground(new Color(v.getXF(), v.getYF(), v.getZF()));
-  }
-
-  @Override public void controlsHide()
-  {
-    this.group.hide();
-  }
-
-  @Override public void controlsShow()
-  {
-    this.group.forceShow();
+    final RVectorI3F<RSpaceRGB> rgb = RVectorI3F.zero();
+    this.controlsLoadFrom(rgb);
   }
 
   @Override public void controlsAddToLayout(
@@ -150,5 +122,35 @@ public final class SBColourInput implements SBControls
       .add(this.field_y)
       .add(this.field_z)
       .add(this.colour);
+  }
+
+  @Override public void controlsHide()
+  {
+    this.group.hide();
+  }
+
+  @SuppressWarnings("boxing") @Override public void controlsLoadFrom(
+    final @Nonnull RVectorI3F<RSpaceRGB> v)
+  {
+    this.field_x.setText(String.format("%.6f", v.getXF()));
+    this.field_y.setText(String.format("%.6f", v.getYF()));
+    this.field_z.setText(String.format("%.6f", v.getZF()));
+    this.colour.setBackground(new Color(v.getXF(), v.getYF(), v.getZF()));
+    this.colour.setForeground(new Color(v.getXF(), v.getYF(), v.getZF()));
+  }
+
+  @Override public RVectorI3F<RSpaceRGB> controlsSave()
+    throws SBExceptionInputError,
+      ConstraintError
+  {
+    return new RVectorI3F<RSpaceRGB>(
+      SBTextFieldUtilities.getFieldFloatOrError(this.field_x),
+      SBTextFieldUtilities.getFieldFloatOrError(this.field_y),
+      SBTextFieldUtilities.getFieldFloatOrError(this.field_z));
+  }
+
+  @Override public void controlsShow()
+  {
+    this.group.forceShow();
   }
 }

@@ -22,6 +22,7 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.ArrayBufferUsable;
+import com.io7m.renderer.types.RVectorI3F;
 
 /**
  * Labels for specularity.
@@ -62,7 +63,7 @@ public enum KMaterialSpecularLabel
       case NORMAL_MAPPED:
       case NORMAL_VERTEX:
       {
-        if (s.getIntensity() == 0.0) {
+        if (s.getColour().equals(RVectorI3F.zero())) {
           return KMaterialSpecularLabel.SPECULAR_NONE;
         }
         if (s.getTexture().isSome()

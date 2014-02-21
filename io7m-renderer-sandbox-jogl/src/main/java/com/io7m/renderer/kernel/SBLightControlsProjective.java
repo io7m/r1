@@ -170,7 +170,7 @@ public final class SBLightControlsProjective implements
     final @Nonnull SBLightDescriptionProjective description)
   {
     this.intensity.setCurrent(description.getIntensity());
-    this.colour.setColour(description.getColour());
+    this.colour.controlsLoadFrom(description.getColour());
     this.position.setVector(description.getPosition());
     this.orientation.setOrientation(description.getOrientation());
     this.falloff.setCurrent(description.getFalloff());
@@ -207,7 +207,7 @@ public final class SBLightControlsProjective implements
     final SBLightDescriptionProjective t)
   {
     this.intensity.setCurrent(t.getIntensity());
-    this.colour.setColour(t.getColour());
+    this.colour.controlsLoadFrom(t.getColour());
     this.position.setVector(t.getPosition());
     this.orientation.setOrientation(t.getOrientation());
     this.falloff.setCurrent(t.getFalloff());
@@ -230,7 +230,7 @@ public final class SBLightControlsProjective implements
       this.falloff.getCurrent(),
       this.projection.getDescription(),
       path,
-      this.colour.getColour(),
+      this.colour.controlsSave(),
       this.intensity.getCurrent(),
       this.shadow.getShadow(this.id),
       this.id);
