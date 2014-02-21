@@ -95,7 +95,7 @@ module ProjectiveLight is
       value colour =
         V3.multiply_scalar (V3.multiply_scalar (light_colour, light.intensity), factor);
     in
-      V3.multiply_scalar (colour, s.intensity)
+      V3.multiply (colour, s.colour)
     end;
 
   --
