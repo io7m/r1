@@ -36,6 +36,7 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
+import com.io7m.renderer.kernel.types.KMeshAttributes;
 
 public final class SBVisibleGridPlane
 {

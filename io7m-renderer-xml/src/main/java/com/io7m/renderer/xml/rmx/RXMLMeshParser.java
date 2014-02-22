@@ -29,20 +29,19 @@ import nu.xom.ValidityException;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.VectorM3F;
-import com.io7m.renderer.RSpaceObject;
-import com.io7m.renderer.RSpaceTexture;
-import com.io7m.renderer.RVectorI2F;
-import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.RVectorI4F;
-import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RSpaceTexture;
+import com.io7m.renderer.types.RVectorI2F;
+import com.io7m.renderer.types.RVectorI3F;
+import com.io7m.renderer.types.RVectorI4F;
+import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.RXMLUtilities;
 
 public final class RXMLMeshParser<E extends Throwable>
 {
   private static void checkVersion(
     final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
+    throws RXMLException
   {
     final Attribute a =
       RXMLUtilities.getAttribute(e, "version", RXMLConstants.MESHES_URI);
@@ -53,8 +52,8 @@ public final class RXMLMeshParser<E extends Throwable>
       message.append(version);
       message.append(", supported version is ");
       message.append(RXMLConstants.MESHES_VERSION);
-      throw new RXMLException.RXMLExceptionValidityError(
-        new ValidityException(message.toString()));
+      throw RXMLException.validityException(new ValidityException(message
+        .toString()));
     }
   }
 
@@ -106,8 +105,8 @@ public final class RXMLMeshParser<E extends Throwable>
       message.append(" triangles, but ");
       message.append(size);
       message.append(" were provided");
-      throw new RXMLException.RXMLExceptionValidityError(
-        new ValidityException(message.toString()));
+      throw RXMLException.validityException(new ValidityException(message
+        .toString()));
     }
 
     events.eventMeshTrianglesStarted(count);
@@ -195,8 +194,7 @@ public final class RXMLMeshParser<E extends Throwable>
 
   private static RVectorI3F<RSpaceObject> parseVertexPosition(
     final @Nonnull Element v)
-    throws RXMLException,
-      ConstraintError
+    throws RXMLException
   {
     assert v.getLocalName().equals("v");
 
@@ -239,8 +237,8 @@ public final class RXMLMeshParser<E extends Throwable>
       message.append(" vertices, but ");
       message.append(size);
       message.append(" were provided");
-      throw new RXMLException.RXMLExceptionValidityError(
-        new ValidityException(message.toString()));
+      throw RXMLException.validityException(new ValidityException(message
+        .toString()));
     }
 
     events.eventMeshVerticesStarted(count);

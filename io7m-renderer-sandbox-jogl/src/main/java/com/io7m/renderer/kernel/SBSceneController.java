@@ -34,7 +34,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 import javax.xml.parsers.ParserConfigurationException;
@@ -44,13 +43,16 @@ import nu.xom.ValidityException;
 
 import org.pcollections.HashTreePSet;
 import org.pcollections.MapPSet;
+import org.pcollections.PMap;
+import org.pcollections.PSet;
 import org.xml.sax.SAXException;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Pair;
+import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.CMFKNegativeX;
 import com.io7m.jcanephora.CMFKNegativeY;
 import com.io7m.jcanephora.CMFKNegativeZ;
@@ -67,38 +69,49 @@ import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jlog.Log;
 import com.io7m.jparasol.xml.PGLSLMetaXML;
-import com.io7m.jtensors.QuaternionI4F;
-import com.io7m.jtensors.QuaternionM4F;
-import com.io7m.jtensors.VectorI3F;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.RMatrixI4x4F;
-import com.io7m.renderer.RTransformProjection;
-import com.io7m.renderer.kernel.KLight.KProjective;
-import com.io7m.renderer.kernel.SBLight.SBLightDirectional;
-import com.io7m.renderer.kernel.SBLight.SBLightProjective;
-import com.io7m.renderer.kernel.SBLight.SBLightSpherical;
-import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionDirectional;
-import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionProjective;
-import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionSpherical;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
+import com.io7m.renderer.kernel.types.KInstanceTransformed;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KMaterial;
+import com.io7m.renderer.kernel.types.KMaterialAlbedo;
+import com.io7m.renderer.kernel.types.KMaterialAlpha;
+import com.io7m.renderer.kernel.types.KMaterialEmissive;
+import com.io7m.renderer.kernel.types.KMaterialEnvironment;
+import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KMaterialOpaque;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitor;
+import com.io7m.renderer.kernel.types.KMaterialSpecular;
+import com.io7m.renderer.kernel.types.KMaterialTranslucent;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentVisitor;
+import com.io7m.renderer.kernel.types.KMaterialVisitor;
+import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.kernel.types.KTransform;
+import com.io7m.renderer.kernel.types.KTransformOST;
+import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RMatrixI4x4F;
+import com.io7m.renderer.types.RTransformProjection;
+import com.io7m.renderer.types.RXMLException;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
-
-interface SBSceneChangeListener
-{
-  public void sceneChanged();
-}
-
-interface SBSceneChangeListenerRegistration
-{
-  public void sceneChangeListenerAdd(
-    final @Nonnull SBSceneChangeListener listener);
-}
 
 public final class SBSceneController implements
   SBSceneControllerIO,
   SBSceneControllerLights,
   SBSceneControllerMeshes,
+  SBSceneControllerMaterials,
   SBSceneControllerInstances,
   SBSceneControllerRenderer,
   SBSceneControllerRendererControl,
@@ -107,8 +120,8 @@ public final class SBSceneController implements
 {
   private static class SceneAndFilesystem
   {
-    final @Nonnull SBScene           scene;
     final @Nonnull SBSceneFilesystem filesystem;
+    final @Nonnull SBScene           scene;
 
     SceneAndFilesystem(
       final @Nonnull SBScene scene,
@@ -119,12 +132,568 @@ public final class SBSceneController implements
     }
   }
 
-  private final @Nonnull SBGLRenderer                        renderer;
-  private final @Nonnull Log                                 log;
-  private final @Nonnull LinkedList<SBSceneChangeListener>   listeners;
-  private final @Nonnull AtomicReference<SceneAndFilesystem> state_current;
+  @SuppressWarnings("boxing") private static @Nonnull
+    SBScene
+    internalIOSceneLoadLights(
+      final @Nonnull SBSceneDescription sd,
+      final @Nonnull SBScene scene,
+      final @Nonnull Log log)
+      throws ConstraintError,
+        RException
+  {
+    final AtomicReference<SBScene> scene_temp =
+      new AtomicReference<SBScene>(scene);
+
+    final Collection<SBLightDescription> lights = sd.getLights();
+    log.debug(String.format("loading %d lights", lights.size()));
+
+    for (final SBLightDescription light : lights) {
+      light
+        .lightDescriptionVisitableAccept(new SBLightDescriptionVisitor<Unit, RException>() {
+          @Override public Unit lightVisitDirectional(
+            final @Nonnull SBLightDescriptionDirectional ld)
+            throws ConstraintError,
+              RException
+          {
+            final SBScene s = scene_temp.get();
+            scene_temp.set(s.lightAdd(new SBLightDirectional(ld)));
+            return Unit.unit();
+          }
+
+          @Override public Unit lightVisitProjective(
+            final @Nonnull SBLightDescriptionProjective ld)
+            throws ConstraintError,
+              RException
+          {
+            final SBScene s = scene_temp.get();
+            final SBTexture2D<SBTexture2DKindAlbedo> t =
+              s.texture2DGet(ld.getTexture());
+
+            final KLightProjective kp =
+              KLightProjective.newProjective(
+                ld.getID(),
+                t.getTexture(),
+                ld.getPosition(),
+                ld.getOrientation(),
+                ld.getColour(),
+                ld.getIntensity(),
+                (float) ld.getProjection().getFar(),
+                ld.getFalloff(),
+                ld.getProjectionMatrix(),
+                ld.getShadow());
+
+            scene_temp.set(s.lightAdd(new SBLightProjective(ld, kp)));
+            return Unit.unit();
+          }
+
+          @Override public Unit lightVisitSpherical(
+            final @Nonnull SBLightDescriptionSpherical ld)
+            throws ConstraintError,
+              RException
+          {
+            final SBScene s = scene_temp.get();
+            scene_temp.set(s.lightAdd(new SBLightSpherical(ld)));
+            return Unit.unit();
+          }
+        });
+    }
+
+    return scene_temp.get();
+  }
+
+  @SuppressWarnings("boxing") private static @Nonnull
+    SBScene
+    internalIOSceneLoadMaterials(
+      final @Nonnull SBSceneDescription sd,
+      final @Nonnull SBScene scene,
+      final @Nonnull Log log)
+      throws ConstraintError,
+        RException
+  {
+    final AtomicReference<SBScene> scene_temp =
+      new AtomicReference<SBScene>(scene);
+
+    final PMap<Integer, SBMaterialDescription> materials = sd.getMaterials();
+    log.debug(String.format("loading %d materials", materials.size()));
+
+    for (final Integer id : materials.keySet()) {
+      final SBMaterialDescription md = materials.get(id);
+      final SBScene s = scene_temp.get();
+      final Map<PathVirtual, SBTexture2D<?>> tx2 = s.textures2DGet();
+      final Map<PathVirtual, SBTextureCube> txc = s.texturesCubeGet();
+      scene_temp.set(s.materialPut(SBSceneController.materialFromDescription(
+        id,
+        md,
+        tx2,
+        txc)));
+    }
+    return scene_temp.get();
+  }
+
+  private static @Nonnull KMaterial makeKMaterial(
+    final @Nonnull Map<PathVirtual, SBTexture2D<?>> textures_2d,
+    final @Nonnull Map<PathVirtual, SBTextureCube> textures_cubes,
+    final @Nonnull SBMaterial m)
+    throws RException,
+      ConstraintError
+  {
+    return m
+      .materialVisitableAccept(new SBMaterialVisitor<KMaterial, RException>() {
+        @Override public KMaterial materialVisitOpaque(
+          final @Nonnull SBMaterialOpaque mo)
+          throws ConstraintError,
+            RException
+        {
+          return mo
+            .materialOpaqueVisitableAccept(new SBMaterialOpaqueVisitor<KMaterial, RException>() {
+              @Override public KMaterial materialVisitOpaqueAlphaDepth(
+                final @Nonnull SBMaterialOpaqueAlphaToDepth moa)
+                throws ConstraintError,
+                  RException
+              {
+                final SBMaterialDescriptionOpaqueAlphaToDepth md =
+                  moa.materialGetDescription();
+
+                final KMaterialNormal in_normal =
+                  SBSceneController.makeKMaterialNormal(
+                    textures_2d,
+                    md.getNormal());
+
+                final KMaterialAlbedo in_albedo =
+                  SBSceneController.makeKMaterialAlbedo(
+                    textures_2d,
+                    md.getAlbedo());
+
+                final KMaterialEmissive in_emissive =
+                  SBSceneController.makeKMaterialEmissive(
+                    textures_2d,
+                    md.getEmissive());
+
+                final KMaterialEnvironment in_environment =
+                  SBSceneController.makeKMaterialEnvironment(
+                    textures_cubes,
+                    md.getEnvironment());
+
+                final KMaterialSpecular in_specular =
+                  SBSceneController.makeKMaterialSpecular(
+                    textures_2d,
+                    md.getSpecular());
+
+                return KMaterialOpaqueAlphaDepth.newMaterial(
+                  md.getUVMatrix(),
+                  in_normal,
+                  in_albedo,
+                  in_emissive,
+                  in_environment,
+                  in_specular,
+                  md.getAlphaThreshold());
+              }
+
+              @Override public KMaterial materialVisitOpaqueRegular(
+                final @Nonnull SBMaterialOpaqueRegular mor)
+                throws ConstraintError,
+                  RException
+              {
+                final SBMaterialDescriptionOpaqueRegular md =
+                  mor.materialGetDescription();
+
+                final KMaterialNormal in_normal =
+                  SBSceneController.makeKMaterialNormal(
+                    textures_2d,
+                    md.getNormal());
+
+                final KMaterialAlbedo in_albedo =
+                  SBSceneController.makeKMaterialAlbedo(
+                    textures_2d,
+                    md.getAlbedo());
+
+                final KMaterialEmissive in_emissive =
+                  SBSceneController.makeKMaterialEmissive(
+                    textures_2d,
+                    md.getEmissive());
+
+                final KMaterialEnvironment in_environment =
+                  SBSceneController.makeKMaterialEnvironment(
+                    textures_cubes,
+                    md.getEnvironment());
+
+                final KMaterialSpecular in_specular =
+                  SBSceneController.makeKMaterialSpecular(
+                    textures_2d,
+                    md.getSpecular());
+
+                return KMaterialOpaqueRegular.newMaterial(
+                  md.getUVMatrix(),
+                  in_normal,
+                  in_albedo,
+                  in_emissive,
+                  in_environment,
+                  in_specular);
+              }
+            });
+        }
+
+        @Override public KMaterial materialVisitTranslucent(
+          final @Nonnull SBMaterialTranslucent mt)
+          throws ConstraintError,
+            RException
+        {
+          return mt
+            .materialTranslucentVisitableAccept(new SBMaterialTranslucentVisitor<KMaterial, RException>() {
+              @Override public KMaterial materialVisitTranslucentRefractive(
+                final @Nonnull SBMaterialTranslucentRefractive mtr)
+                throws ConstraintError,
+                  RException
+              {
+                final SBMaterialDescriptionTranslucentRefractive md =
+                  mtr.materialGetDescription();
+
+                final KMaterialNormal in_normal =
+                  SBSceneController.makeKMaterialNormal(
+                    textures_2d,
+                    md.getNormal());
+
+                // TODO
+                throw new UnimplementedCodeException();
+              }
+
+              @SuppressWarnings("synthetic-access") @Override public
+                KMaterial
+                materialVisitTranslucentRegular(
+                  final @Nonnull SBMaterialTranslucentRegular mtr)
+                  throws ConstraintError,
+                    RException
+              {
+                final SBMaterialDescriptionTranslucentRegular md =
+                  mtr.materialGetDescription();
+
+                final KMaterialAlpha in_alpha =
+                  SBSceneController.makeKMaterialAlpha(md.getAlpha());
+
+                final KMaterialNormal in_normal =
+                  SBSceneController.makeKMaterialNormal(
+                    textures_2d,
+                    md.getNormal());
+
+                final KMaterialAlbedo in_albedo =
+                  SBSceneController.makeKMaterialAlbedo(
+                    textures_2d,
+                    md.getAlbedo());
+
+                final KMaterialEmissive in_emissive =
+                  SBSceneController.makeKMaterialEmissive(
+                    textures_2d,
+                    md.getEmissive());
+
+                final KMaterialEnvironment in_environment =
+                  SBSceneController.makeKMaterialEnvironment(
+                    textures_cubes,
+                    md.getEnvironment());
+
+                final KMaterialSpecular in_specular =
+                  SBSceneController.makeKMaterialSpecular(
+                    textures_2d,
+                    md.getSpecular());
+
+                return KMaterialTranslucentRegular.newMaterial(
+                  md.getUVMatrix(),
+                  in_albedo,
+                  in_alpha,
+                  in_emissive,
+                  in_environment,
+                  in_normal,
+                  in_specular);
+              }
+            });
+        }
+      });
+  }
+
+  static @Nonnull KMaterialAlbedo makeKMaterialAlbedo(
+    final @Nonnull Map<PathVirtual, SBTexture2D<?>> textures,
+    final @Nonnull SBMaterialAlbedoDescription d)
+    throws ConstraintError
+  {
+    final PathVirtual p = d.getTexture();
+    if (p != null) {
+      final SBTexture2D<?> t = textures.get(p);
+      return KMaterialAlbedo.newAlbedoTextured(
+        d.getColour(),
+        d.getMix(),
+        t.getTexture());
+    }
+    return KMaterialAlbedo.newAlbedoUntextured(d.getColour());
+  }
+
+  private static @Nonnull KMaterialAlpha makeKMaterialAlpha(
+    final @Nonnull SBMaterialAlphaDescription alpha)
+    throws ConstraintError
+  {
+    return KMaterialAlpha.newAlpha(alpha.getType(), alpha.getOpacity());
+  }
+
+  static @Nonnull KMaterialEmissive makeKMaterialEmissive(
+    final @Nonnull Map<PathVirtual, SBTexture2D<?>> textures,
+    final @Nonnull SBMaterialEmissiveDescription d)
+    throws ConstraintError
+  {
+    final PathVirtual p = d.getTexture();
+    if (p != null) {
+      final SBTexture2D<?> t = textures.get(p);
+      return KMaterialEmissive.newEmissiveMapped(
+        d.getEmission(),
+        t.getTexture());
+    }
+    return KMaterialEmissive.newEmissiveUnmapped(d.getEmission());
+  }
+
+  static @Nonnull KMaterialEnvironment makeKMaterialEnvironment(
+    final @Nonnull Map<PathVirtual, SBTextureCube> textures,
+    final @Nonnull SBMaterialEnvironmentDescription d)
+    throws ConstraintError
+  {
+    final PathVirtual p = d.getTexture();
+    if (p != null) {
+      final SBTextureCube t = textures.get(p);
+      return KMaterialEnvironment.newEnvironmentMapped(
+        d.getMix(),
+        t.getTexture(),
+        d.getMixMapped());
+    }
+    return KMaterialEnvironment.newEnvironmentUnmapped();
+  }
+
+  static @Nonnull KMaterialNormal makeKMaterialNormal(
+    final @Nonnull Map<PathVirtual, SBTexture2D<?>> textures,
+    final @Nonnull SBMaterialNormalDescription d)
+    throws ConstraintError
+  {
+    final PathVirtual p = d.getTexture();
+    if (p != null) {
+      final SBTexture2D<?> t = textures.get(p);
+      return KMaterialNormal.newNormalMapped(t.getTexture());
+    }
+    return KMaterialNormal.newNormalUnmapped();
+  }
+
+  static @Nonnull KMaterialSpecular makeKMaterialSpecular(
+    final @Nonnull Map<PathVirtual, SBTexture2D<?>> textures,
+    final @Nonnull SBMaterialSpecularDescription d)
+    throws ConstraintError
+  {
+    final PathVirtual p = d.getTexture();
+    if (p != null) {
+      final SBTexture2D<?> t = textures.get(p);
+      return KMaterialSpecular.newSpecularMapped(
+        d.getColour(),
+        d.getExponent(),
+        t.getTexture());
+    }
+    return KMaterialSpecular.newSpecularUnmapped(
+      d.getColour(),
+      d.getExponent());
+  }
+
+  private static @Nonnull SBMaterial materialFromDescription(
+    final @Nonnull Integer id,
+    final @Nonnull SBMaterialDescription desc,
+    final @Nonnull Map<PathVirtual, SBTexture2D<?>> tx2,
+    final @Nonnull Map<PathVirtual, SBTextureCube> txc)
+    throws RException,
+      ConstraintError
+  {
+    final SBMaterial m =
+      desc
+        .materialDescriptionVisitableAccept(new SBMaterialDescriptionVisitor<SBMaterial, RException>() {
+          @Override public SBMaterial materialDescriptionVisitOpaque(
+            final @Nonnull SBMaterialDescriptionOpaque mo)
+            throws ConstraintError,
+              RException
+          {
+            return mo
+              .materialDescriptionOpaqueVisitableAccept(new SBMaterialDescriptionOpaqueVisitor<SBMaterial, RException>() {
+                @Override public
+                  SBMaterial
+                  materialDescriptionVisitOpaqueAlphaDepth(
+                    final @Nonnull SBMaterialDescriptionOpaqueAlphaToDepth moatd)
+                    throws ConstraintError,
+                      RException
+                {
+                  final SBMaterialAlbedoDescription albedo =
+                    moatd.getAlbedo();
+                  final SBMaterialEmissiveDescription emissive =
+                    moatd.getEmissive();
+                  final SBMaterialNormalDescription normal =
+                    moatd.getNormal();
+                  final SBMaterialSpecularDescription specular =
+                    moatd.getSpecular();
+                  final SBMaterialEnvironmentDescription environment =
+                    moatd.getEnvironment();
+
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindAlbedo> map_diffuse =
+                    (SBTexture2D<SBTexture2DKindAlbedo>) (albedo.getTexture() != null
+                      ? tx2.get(albedo.getTexture())
+                      : null);
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindEmissive> map_emissive =
+                    (SBTexture2D<SBTexture2DKindEmissive>) (emissive
+                      .getTexture() != null
+                      ? tx2.get(emissive.getTexture())
+                      : null);
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindNormal> map_normal =
+                    (SBTexture2D<SBTexture2DKindNormal>) (normal.getTexture() != null
+                      ? tx2.get(normal.getTexture())
+                      : null);
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindSpecular> map_specular =
+                    (SBTexture2D<SBTexture2DKindSpecular>) (specular
+                      .getTexture() != null
+                      ? tx2.get(specular.getTexture())
+                      : null);
+                  final SBTextureCube map_environment =
+                    environment.getTexture() != null ? txc.get(environment
+                      .getTexture()) : null;
+
+                  return new SBMaterialOpaqueAlphaToDepth(
+                    id,
+                    moatd,
+                    map_diffuse,
+                    map_emissive,
+                    map_environment,
+                    map_normal,
+                    map_specular);
+                }
+
+                @Override public
+                  SBMaterial
+                  materialDescriptionVisitOpaqueRegular(
+                    final @Nonnull SBMaterialDescriptionOpaqueRegular mor)
+                    throws ConstraintError,
+                      RException
+                {
+                  final SBMaterialAlbedoDescription albedo = mor.getAlbedo();
+                  final SBMaterialEmissiveDescription emissive =
+                    mor.getEmissive();
+                  final SBMaterialNormalDescription normal = mor.getNormal();
+                  final SBMaterialSpecularDescription specular =
+                    mor.getSpecular();
+                  final SBMaterialEnvironmentDescription environment =
+                    mor.getEnvironment();
+
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindAlbedo> map_diffuse =
+                    (SBTexture2D<SBTexture2DKindAlbedo>) (albedo.getTexture() != null
+                      ? tx2.get(albedo.getTexture())
+                      : null);
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindEmissive> map_emissive =
+                    (SBTexture2D<SBTexture2DKindEmissive>) (emissive
+                      .getTexture() != null
+                      ? tx2.get(emissive.getTexture())
+                      : null);
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindNormal> map_normal =
+                    (SBTexture2D<SBTexture2DKindNormal>) (normal.getTexture() != null
+                      ? tx2.get(normal.getTexture())
+                      : null);
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindSpecular> map_specular =
+                    (SBTexture2D<SBTexture2DKindSpecular>) (specular
+                      .getTexture() != null
+                      ? tx2.get(specular.getTexture())
+                      : null);
+                  final SBTextureCube map_environment =
+                    environment.getTexture() != null ? txc.get(environment
+                      .getTexture()) : null;
+
+                  return new SBMaterialOpaqueRegular(
+                    id,
+                    mor,
+                    map_diffuse,
+                    map_emissive,
+                    map_environment,
+                    map_normal,
+                    map_specular);
+                }
+              });
+          }
+
+          @Override public SBMaterial materialDescriptionVisitTranslucent(
+            final @Nonnull SBMaterialDescriptionTranslucent mt)
+            throws ConstraintError,
+              RException
+          {
+            return mt
+              .materialDescriptionTranslucentVisitableAccept(new SBMaterialDescriptionTranslucentVisitor<SBMaterial, RException>() {
+                @Override public
+                  SBMaterial
+                  materialDescriptionVisitTranslucentRefractive(
+                    final @Nonnull SBMaterialDescriptionTranslucentRefractive mtr)
+                    throws ConstraintError,
+                      RException
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
+
+                @Override public
+                  SBMaterial
+                  materialDescriptionVisitTranslucentRegular(
+                    final @Nonnull SBMaterialDescriptionTranslucentRegular mtr)
+                    throws ConstraintError,
+                      RException
+                {
+                  final SBMaterialAlbedoDescription albedo = mtr.getAlbedo();
+                  final SBMaterialEmissiveDescription emissive =
+                    mtr.getEmissive();
+                  final SBMaterialNormalDescription normal = mtr.getNormal();
+                  final SBMaterialSpecularDescription specular =
+                    mtr.getSpecular();
+                  final SBMaterialEnvironmentDescription environment =
+                    mtr.getEnvironment();
+
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindAlbedo> map_diffuse =
+                    (SBTexture2D<SBTexture2DKindAlbedo>) (albedo.getTexture() != null
+                      ? tx2.get(albedo.getTexture())
+                      : null);
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindEmissive> map_emissive =
+                    (SBTexture2D<SBTexture2DKindEmissive>) (emissive
+                      .getTexture() != null
+                      ? tx2.get(emissive.getTexture())
+                      : null);
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindNormal> map_normal =
+                    (SBTexture2D<SBTexture2DKindNormal>) (normal.getTexture() != null
+                      ? tx2.get(normal.getTexture())
+                      : null);
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindSpecular> map_specular =
+                    (SBTexture2D<SBTexture2DKindSpecular>) (specular
+                      .getTexture() != null
+                      ? tx2.get(specular.getTexture())
+                      : null);
+                  final SBTextureCube map_environment =
+                    environment.getTexture() != null ? txc.get(environment
+                      .getTexture()) : null;
+
+                  return new SBMaterialTranslucentRegular(
+                    id,
+                    mtr,
+                    map_diffuse,
+                    map_emissive,
+                    map_environment,
+                    map_normal,
+                    map_specular);
+                }
+              });
+          }
+        });
+    return m;
+  }
+
   private final @Nonnull ExecutorService                     exec_pool;
+
+  private final @Nonnull LinkedList<SBSceneChangeListener>   listeners;
+
+  private final @Nonnull Log                                 log;
+
+  private final @Nonnull SBGLRenderer                        renderer;
+
   private final @Nonnull Map<String, SBShader>               shaders;
+
+  private final @Nonnull AtomicReference<SceneAndFilesystem> state_current;
 
   public SBSceneController(
     final @Nonnull SBGLRenderer renderer,
@@ -151,7 +720,8 @@ public final class SBSceneController implements
       IOException,
       ConstraintError,
       InterruptedException,
-      ExecutionException
+      ExecutionException,
+      RException
   {
     final SBSceneFilesystem fs =
       SBSceneFilesystem.filesystemLoadScene(this.log, file);
@@ -181,69 +751,16 @@ public final class SBSceneController implements
       }
 
       SBScene scene = SBScene.empty();
+      scene = this.internalIOSceneLoadTextures2D(fs, sd, scene);
+      scene = this.internalIOSceneLoadTexturesCube(fs, sd, scene);
+      scene =
+        SBSceneController.internalIOSceneLoadMaterials(sd, scene, this.log);
+      scene = this.internalIOSceneLoadMeshes(fs, sd, scene);
+      scene =
+        SBSceneController.internalIOSceneLoadLights(sd, scene, this.log);
 
-      for (final SBTexture2DDescription desc : sd.getTextures2D()) {
-        final SBTexture2D<?> t =
-          this.internalTexture2DLoadFromPath(
-            fs,
-            desc.getPath(),
-            desc.getWrapModeS(),
-            desc.getWrapModeT(),
-            desc.getTextureMin(),
-            desc.getTextureMag());
-        scene = scene.texture2DAdd(t);
-      }
-
-      for (final SBTextureCubeDescription desc : sd.getTexturesCube()) {
-        final SBTextureCube t =
-          this.internalTextureCubeLoadFromPath(
-            fs,
-            desc.getPath(),
-            desc.getWrapModeR(),
-            desc.getWrapModeS(),
-            desc.getWrapModeT(),
-            desc.getTextureMin(),
-            desc.getTextureMag());
-        scene = scene.textureCubeAdd(t);
-      }
-
-      for (final PathVirtual name : sd.getMeshes()) {
-        final SBMesh m = this.internalMeshLoadFromPath(fs, name);
-        scene = scene.meshAdd(m);
-      }
-
-      for (final SBLightDescription light : sd.getLights()) {
-        switch (light.getType()) {
-          case LIGHT_DIRECTIONAL:
-          {
-            final SBLightDescriptionDirectional dd =
-              (SBLightDescriptionDirectional) light;
-            scene = scene.lightAdd(new SBLightDirectional(dd));
-            break;
-          }
-          case LIGHT_PROJECTIVE:
-          {
-            final SBLightDescriptionProjective dd =
-              (SBLightDescriptionProjective) light;
-            final SBTexture2D<SBTexture2DKindAlbedo> t =
-              scene.texture2DGet(dd.getTexture());
-
-            scene = scene.lightAdd(new SBLightProjective(dd, dd.getLight(t)));
-            break;
-          }
-          case LIGHT_SPHERE:
-          {
-            final SBLightDescriptionSpherical dd =
-              (SBLightDescriptionSpherical) light;
-            scene = scene.lightAdd(new SBLightSpherical(dd));
-            break;
-          }
-        }
-
-      }
-
-      for (final SBInstanceDescription i : sd.getInstanceDescriptions()) {
-        scene = scene.instanceAddByDescription(i);
+      for (final SBInstance i : sd.getInstances()) {
+        scene = scene.instanceAdd(i);
       }
 
       return new SceneAndFilesystem(scene, fs);
@@ -251,6 +768,93 @@ public final class SBSceneController implements
     } finally {
       xms.close();
     }
+  }
+
+  @SuppressWarnings("boxing") private @Nonnull
+    SBScene
+    internalIOSceneLoadMeshes(
+      final @Nonnull SBSceneFilesystem fs,
+      final @Nonnull SBSceneDescription sd,
+      final @Nonnull SBScene scene)
+      throws FilesystemError,
+        ConstraintError,
+        InterruptedException,
+        ExecutionException,
+        IOException
+  {
+    SBScene s = scene;
+
+    final PSet<PathVirtual> meshes = sd.getMeshes();
+    this.log.debug(String.format("loading %d meshes", meshes.size()));
+
+    for (final PathVirtual name : meshes) {
+      final SBMesh m = this.internalMeshLoadFromPath(fs, name);
+      s = s.meshAdd(m);
+    }
+    return s;
+  }
+
+  @SuppressWarnings("boxing") private @Nonnull
+    SBScene
+    internalIOSceneLoadTextures2D(
+      final @Nonnull SBSceneFilesystem fs,
+      final @Nonnull SBSceneDescription sd,
+      final @Nonnull SBScene scene)
+      throws FilesystemError,
+        ConstraintError,
+        IOException,
+        InterruptedException,
+        ExecutionException
+  {
+    SBScene s = scene;
+
+    final PSet<SBTexture2DDescription> textures = sd.getTextures2D();
+    this.log.debug(String.format("loading %d 2D textures", textures.size()));
+
+    for (final SBTexture2DDescription desc : textures) {
+      final SBTexture2D<?> t =
+        this.internalTexture2DLoadFromPath(
+          fs,
+          desc.getPath(),
+          desc.getWrapModeS(),
+          desc.getWrapModeT(),
+          desc.getTextureMin(),
+          desc.getTextureMag());
+      s = s.texture2DAdd(t);
+    }
+    return s;
+  }
+
+  @SuppressWarnings("boxing") private @Nonnull
+    SBScene
+    internalIOSceneLoadTexturesCube(
+      final @Nonnull SBSceneFilesystem fs,
+      final @Nonnull SBSceneDescription sd,
+      final @Nonnull SBScene scene)
+      throws FilesystemError,
+        ConstraintError,
+        IOException,
+        InterruptedException,
+        ExecutionException
+  {
+    SBScene s = scene;
+
+    final PSet<SBTextureCubeDescription> cubes = sd.getTexturesCube();
+    this.log.debug(String.format("loading %d cube textures", cubes.size()));
+
+    for (final SBTextureCubeDescription desc : cubes) {
+      final SBTextureCube t =
+        this.internalTextureCubeLoadFromPath(
+          fs,
+          desc.getPath(),
+          desc.getWrapModeR(),
+          desc.getWrapModeS(),
+          desc.getWrapModeT(),
+          desc.getTextureMin(),
+          desc.getTextureMag());
+      s = s.textureCubeAdd(t);
+    }
+    return s;
   }
 
   private void internalIOSceneSave(
@@ -300,7 +904,7 @@ public final class SBSceneController implements
       IOException,
       InterruptedException,
       ExecutionException,
-      KXMLException
+      RException
   {
     final FileInputStream stream = new FileInputStream(file);
     try {
@@ -309,11 +913,11 @@ public final class SBSceneController implements
         this.renderer.shaderLoad(file.getParentFile(), meta);
       return f.get();
     } catch (final SAXException x) {
-      throw KXMLException.saxException(x);
+      throw RXMLException.saxException(x);
     } catch (final ParserConfigurationException x) {
-      throw KXMLException.parserConfigurationException(x);
+      throw RXMLException.parserConfigurationException(x);
     } catch (final ParsingException x) {
-      throw KXMLException.parsingException(x);
+      throw RXMLException.parsingException(x);
     } finally {
       stream.close();
     }
@@ -438,7 +1042,7 @@ public final class SBSceneController implements
       ExecutionException,
       ValidityException,
       ParsingException,
-      com.io7m.renderer.xml.RXMLException
+      RXMLException
   {
     final PathVirtual path = fs.filesystemCopyInTextureCube(file);
     return this.internalTextureCubeLoadFromPath(
@@ -654,136 +1258,157 @@ public final class SBSceneController implements
     return f;
   }
 
+  @Override public Future<SBCacheStatistics> rendererGetCacheStatistics()
+  {
+    return this.renderer.getCacheStatistics();
+  }
+
   @Override public RMatrixI4x4F<RTransformProjection> rendererGetProjection()
   {
     return this.renderer.getProjection();
   }
 
   @Override public @Nonnull
-    Pair<Collection<SBLight>, Collection<Pair<KMeshInstanceTransformed, SBInstance>>>
+    Pair<Collection<SBLight>, Collection<Pair<KInstanceTransformed, SBInstance>>>
     rendererGetScene()
-      throws ConstraintError
+      throws ConstraintError,
+        RException
   {
     final SceneAndFilesystem saf = this.state_current.get();
     final SBScene scene = saf.scene;
 
     final Collection<SBLight> lights = scene.lightsGet();
-    MapPSet<Pair<KMeshInstanceTransformed, SBInstance>> meshes =
+    MapPSet<Pair<KInstanceTransformed, SBInstance>> meshes =
       HashTreePSet.empty();
 
     for (final SBInstance i : scene.instancesGet()) {
       final PathVirtual mesh_path = i.getMesh();
       final SBMesh mesh = scene.meshGet(mesh_path);
-      final SBMaterial mat = i.getMaterial();
+      final Integer mat_id = i.getMaterial();
+      final SBMaterial mat = scene.materialGet(mat_id);
+      final Integer instance_id = i.getID();
 
-      final QuaternionM4F orientation = new QuaternionM4F();
-      final QuaternionI4F rotate_x =
-        QuaternionI4F.makeFromAxisAngle(
-          new VectorI3F(1, 0, 0),
-          Math.toRadians(i.getOrientation().x));
-      final QuaternionI4F rotate_y =
-        QuaternionI4F.makeFromAxisAngle(
-          new VectorI3F(0, 1, 0),
-          Math.toRadians(i.getOrientation().y));
-      final QuaternionI4F rotate_z =
-        QuaternionI4F.makeFromAxisAngle(
-          new VectorI3F(0, 0, 1),
-          Math.toRadians(i.getOrientation().z));
+      final KTransform kt =
+        KTransformOST.newTransform(
+          i.getOrientation(),
+          i.getScale(),
+          i.getPosition());
 
-      QuaternionM4F.multiplyInPlace(orientation, rotate_z);
-      QuaternionM4F.multiplyInPlace(orientation, rotate_y);
-      QuaternionM4F.multiplyInPlace(orientation, rotate_x);
-
-      final Integer id = i.getID();
-
-      final KTransform transform =
-        new KTransform(i.getPosition(), i.getScale(), orientation);
-
-      final SBMaterialAlphaDescription sd_alpha =
-        mat.getDescription().getAlpha();
-      final SBMaterialAlbedoDescription sd_albedo =
-        mat.getDescription().getAlbedo();
-      final SBMaterialEmissiveDescription sd_emiss =
-        mat.getDescription().getEmissive();
-      final SBMaterialSpecularDescription sd_spec =
-        mat.getDescription().getSpecular();
-      final SBMaterialEnvironmentDescription sd_envi =
-        mat.getDescription().getEnvironment();
-
-      final Option<Texture2DStatic> emissive_map =
-        (mat.getEmissiveMap() != null) ? new Option.Some<Texture2DStatic>(mat
-          .getEmissiveMap()
-          .getTexture()) : new Option.None<Texture2DStatic>();
-
-      final Option<Texture2DStatic> diffuse_map =
-        (mat.getDiffuseMap() != null) ? new Option.Some<Texture2DStatic>(mat
-          .getDiffuseMap()
-          .getTexture()) : new Option.None<Texture2DStatic>();
-
-      final Option<Texture2DStatic> normal_map =
-        (mat.getNormalMap() == null)
-          ? new Option.None<Texture2DStatic>()
-          : new Option.Some<Texture2DStatic>(mat.getNormalMap().getTexture());
-
-      final Option<Texture2DStatic> specular_map =
-        (mat.getSpecularMap() == null)
-          ? new Option.None<Texture2DStatic>()
-          : new Option.Some<Texture2DStatic>(mat
-            .getSpecularMap()
-            .getTexture());
-
-      final Option<TextureCubeStatic> environment_map =
-        (mat.getEnvironmentMap() == null)
-          ? new Option.None<TextureCubeStatic>()
-          : new Option.Some<TextureCubeStatic>(mat
-            .getEnvironmentMap()
-            .getTexture());
-
-      final KMaterialAlpha alpha =
-        new KMaterialAlpha(
-          sd_alpha.getOpacityType(),
-          sd_alpha.getOpacity(),
-          sd_alpha.getDepthThreshold());
-
-      final KMaterialAlbedo diff =
-        new KMaterialAlbedo(
-          sd_albedo.getColour(),
-          sd_albedo.getMix(),
-          diffuse_map);
-
-      final KMaterialEmissive emiss =
-        new KMaterialEmissive(sd_emiss.getEmission(), emissive_map);
-
-      final KMaterialSpecular spec =
-        new KMaterialSpecular(
-          sd_spec.getIntensity(),
-          sd_spec.getExponent(),
-          specular_map);
-
-      final KMaterialEnvironment envi =
-        new KMaterialEnvironment(
-          sd_envi.getMix(),
-          environment_map,
-          sd_envi.getMixFromSpecularMap());
-
-      final KMaterialNormal norm = new KMaterialNormal(normal_map);
-
-      final KMaterial material =
-        new KMaterial(alpha, diff, emiss, envi, norm, spec, mat.getUVMatrix());
+      final KMaterial kmat =
+        SBSceneController.makeKMaterial(
+          scene.textures2DGet(),
+          scene.texturesCubeGet(),
+          mat);
 
       final KMesh km = mesh.getMesh();
-      final KMeshInstance kmi = new KMeshInstance(id, material, km);
 
-      final KMeshInstanceTransformed mi =
-        new KMeshInstanceTransformed(kmi, transform, i.getUVMatrix());
+      final KInstanceTransformed kit =
+        kmat
+          .materialVisitableAccept(new KMaterialVisitor<KInstanceTransformed, RException>() {
+            @Override public KInstanceTransformed materialVisitOpaque(
+              final @Nonnull KMaterialOpaque m)
+              throws ConstraintError,
+                RException
+            {
+              return m
+                .materialOpaqueVisitableAccept(new KMaterialOpaqueVisitor<KInstanceTransformed, RException>() {
+                  @Override public
+                    KInstanceTransformed
+                    materialVisitOpaqueAlphaDepth(
+                      final KMaterialOpaqueAlphaDepth mo)
+                      throws ConstraintError,
+                        RException
+                  {
+                    final KInstanceOpaqueAlphaDepth ki =
+                      KInstanceOpaqueAlphaDepth.newInstance(
+                        instance_id,
+                        mo,
+                        km,
+                        i.getFaces());
+                    return KInstanceTransformedOpaqueAlphaDepth.newInstance(
+                      ki,
+                      kt,
+                      i.getUVMatrix());
+                  }
+
+                  @Override public
+                    KInstanceTransformed
+                    materialVisitOpaqueRegular(
+                      final @Nonnull KMaterialOpaqueRegular mo)
+                      throws ConstraintError,
+                        RException
+                  {
+                    final KInstanceOpaqueRegular ki =
+                      KInstanceOpaqueRegular.newInstance(
+                        instance_id,
+                        mo,
+                        km,
+                        i.getFaces());
+                    return KInstanceTransformedOpaqueRegular.newInstance(
+                      ki,
+                      kt,
+                      i.getUVMatrix());
+                  }
+                });
+            }
+
+            @Override public KInstanceTransformed materialVisitTranslucent(
+              final @Nonnull KMaterialTranslucent m)
+              throws ConstraintError,
+                RException
+            {
+              return m
+                .materialTranslucentVisitableAccept(new KMaterialTranslucentVisitor<KInstanceTransformed, RException>() {
+                  @Override public
+                    KInstanceTransformed
+                    materialVisitTranslucentRefractive(
+                      final @Nonnull KMaterialTranslucentRefractive mtr)
+                      throws RException,
+                        ConstraintError
+                  {
+                    final KInstanceTranslucentRefractive ki =
+                      KInstanceTranslucentRefractive.newInstance(
+                        instance_id,
+                        mtr,
+                        km,
+                        i.getFaces());
+                    return KInstanceTransformedTranslucentRefractive
+                      .newInstance(ki, kt, i.getUVMatrix());
+                  }
+
+                  @Override public
+                    KInstanceTransformed
+                    materialVisitTranslucentRegular(
+                      final @Nonnull KMaterialTranslucentRegular mtr)
+                      throws RException,
+                        ConstraintError
+                  {
+                    final KInstanceTranslucentRegular ki =
+                      KInstanceTranslucentRegular.newInstance(
+                        instance_id,
+                        mtr,
+                        km,
+                        i.getFaces());
+                    return KInstanceTransformedTranslucentRegular
+                      .newInstance(ki, kt, i.getUVMatrix());
+                  }
+                });
+            }
+          });
 
       meshes =
-        meshes.plus(new Pair<KMeshInstanceTransformed, SBInstance>(mi, i));
+        meshes.plus(new Pair<KInstanceTransformed, SBInstance>(kit, i));
     }
 
-    return new Pair<Collection<SBLight>, Collection<Pair<KMeshInstanceTransformed, SBInstance>>>(
+    return new Pair<Collection<SBLight>, Collection<Pair<KInstanceTransformed, SBInstance>>>(
       lights,
       meshes);
+  }
+
+  @Override public void rendererPostprocessorSetType(
+    final @Nonnull SBKPostprocessorType type)
+  {
+    this.renderer.setPostprocessor(type);
   }
 
   @Override public void rendererSetBackgroundColour(
@@ -842,23 +1467,6 @@ public final class SBSceneController implements
     this.listeners.add(listener);
   }
 
-  @Override public void sceneInstanceAdd(
-    final @Nonnull SBInstance instance)
-    throws ConstraintError
-  {
-    this.internalStateUpdateSceneOnly(this.state_current.get().scene
-      .instanceAdd(instance));
-  }
-
-  @Override public void sceneInstanceAddByDescription(
-    final @Nonnull SBInstanceDescription desc)
-    throws ConstraintError
-  {
-    final SceneAndFilesystem saf = this.state_current.get();
-    this.internalStateUpdateSceneOnly(saf.scene
-      .instanceAddByDescription(desc));
-  }
-
   @Override public boolean sceneInstanceExists(
     final @Nonnull Integer id)
     throws ConstraintError
@@ -881,6 +1489,14 @@ public final class SBSceneController implements
     return this.state_current.get().scene.instanceGet(id);
   }
 
+  @Override public void sceneInstancePut(
+    final @Nonnull SBInstance i)
+    throws ConstraintError
+  {
+    this.internalStateUpdateSceneOnly(this.state_current.get().scene
+      .instanceAdd(i));
+  }
+
   @Override public void sceneInstanceRemove(
     final @Nonnull Integer id)
     throws ConstraintError
@@ -892,49 +1508,6 @@ public final class SBSceneController implements
   @Override public @Nonnull Collection<SBInstance> sceneInstancesGetAll()
   {
     return this.state_current.get().scene.instancesGet();
-  }
-
-  @Override public void sceneLightAddByDescription(
-    final @Nonnull SBLightDescription d)
-    throws ConstraintError
-  {
-    switch (d.getType()) {
-      case LIGHT_DIRECTIONAL:
-      {
-        final SBLightDescriptionDirectional dd =
-          (SBLightDescriptionDirectional) d;
-        final SBLightDirectional l = new SBLight.SBLightDirectional(dd);
-        this.internalStateUpdateSceneOnly(this.state_current.get().scene
-          .lightAdd(l));
-        break;
-      }
-      case LIGHT_PROJECTIVE:
-      {
-        final SBLightDescriptionProjective dd =
-          (SBLightDescriptionProjective) d;
-
-        @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindAlbedo> t =
-          (SBTexture2D<SBTexture2DKindAlbedo>) this.sceneTextures2DGet().get(
-            dd.getTexture());
-
-        final KProjective kp = dd.getLight(t);
-        final SBLightProjective l = new SBLight.SBLightProjective(dd, kp);
-
-        this.internalStateUpdateSceneOnly(this.state_current.get().scene
-          .lightAdd(l));
-
-        break;
-      }
-      case LIGHT_SPHERE:
-      {
-        final SBLightDescriptionSpherical dd =
-          (SBLightDescriptionSpherical) d;
-
-        this.internalStateUpdateSceneOnly(this.state_current.get().scene
-          .lightAdd(new SBLight.SBLightSpherical(dd)));
-        break;
-      }
-    }
   }
 
   @Override public boolean sceneLightExists(
@@ -959,6 +1532,72 @@ public final class SBSceneController implements
     return this.state_current.get().scene.lightGet(id);
   }
 
+  @SuppressWarnings("synthetic-access") @Override public void sceneLightPut(
+    final @Nonnull SBLightDescription d)
+    throws ConstraintError,
+      RException
+  {
+    final AtomicReference<SceneAndFilesystem> state =
+      SBSceneController.this.state_current;
+
+    d
+      .lightDescriptionVisitableAccept(new SBLightDescriptionVisitor<Unit, ConstraintError>() {
+        @Override public Unit lightVisitDirectional(
+          final @Nonnull SBLightDescriptionDirectional ld)
+          throws ConstraintError,
+            RException,
+            ConstraintError
+        {
+          final SBLightDirectional l = new SBLightDirectional(ld);
+          SBSceneController.this.internalStateUpdateSceneOnly(state.get().scene
+            .lightAdd(l));
+          return Unit.unit();
+        }
+
+        @Override public Unit lightVisitProjective(
+          final @Nonnull SBLightDescriptionProjective ld)
+          throws ConstraintError,
+            RException,
+            ConstraintError
+        {
+          @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindAlbedo> t =
+            (SBTexture2D<SBTexture2DKindAlbedo>) SBSceneController.this
+              .sceneTextures2DGet()
+              .get(ld.getTexture());
+
+          final KLightProjective kp =
+            KLightProjective.newProjective(
+              ld.getID(),
+              t.getTexture(),
+              ld.getPosition(),
+              ld.getOrientation(),
+              ld.getColour(),
+              ld.getIntensity(),
+              (float) ld.getProjection().getFar(),
+              ld.getFalloff(),
+              ld.getProjectionMatrix(),
+              ld.getShadow());
+
+          final SBLightProjective l = new SBLightProjective(ld, kp);
+          SBSceneController.this.internalStateUpdateSceneOnly(state.get().scene
+            .lightAdd(l));
+          return Unit.unit();
+        }
+
+        @Override public Unit lightVisitSpherical(
+          final @Nonnull SBLightDescriptionSpherical ld)
+          throws ConstraintError,
+            RException,
+            ConstraintError
+        {
+          final SBLightSpherical l = new SBLightSpherical(ld);
+          SBSceneController.this.internalStateUpdateSceneOnly(state.get().scene
+            .lightAdd(l));
+          return Unit.unit();
+        }
+      });
+  }
+
   @Override public void sceneLightRemove(
     final @Nonnull Integer id)
     throws ConstraintError
@@ -970,6 +1609,66 @@ public final class SBSceneController implements
   @Override public @Nonnull Collection<SBLight> sceneLightsGetAll()
   {
     return this.state_current.get().scene.lightsGet();
+  }
+
+  @Override public boolean sceneMaterialExists(
+    final @Nonnull Integer id)
+    throws ConstraintError
+  {
+    return this.state_current.get().scene.materialExists(id);
+  }
+
+  @Override public Integer sceneMaterialFreshID()
+  {
+    final Pair<SBScene, Integer> p =
+      this.state_current.get().scene.materialFreshID();
+    this.internalStateUpdateSceneOnly(p.first);
+    return p.second;
+  }
+
+  @Override public SBMaterial sceneMaterialGet(
+    final @Nonnull Integer id)
+    throws ConstraintError
+  {
+    return this.state_current.get().scene.materialGet(id);
+  }
+
+  @Override public void sceneMaterialPut(
+    final @Nonnull SBMaterial material)
+    throws ConstraintError
+  {
+    this.internalStateUpdateSceneOnly(this.state_current.get().scene
+      .materialPut(material));
+  }
+
+  @Override public void sceneMaterialPutByDescription(
+    final @Nonnull Integer id,
+    final @Nonnull SBMaterialDescription desc)
+    throws ConstraintError,
+      RException
+  {
+    final Map<PathVirtual, SBTexture2D<?>> tx2 =
+      SBSceneController.this.sceneTextures2DGet();
+    final Map<PathVirtual, SBTextureCube> txc =
+      SBSceneController.this.sceneTexturesCubeGet();
+
+    final SBMaterial m =
+      SBSceneController.materialFromDescription(id, desc, tx2, txc);
+
+    this.sceneMaterialPut(m);
+  }
+
+  @Override public void sceneMaterialRemove(
+    final @Nonnull Integer id)
+    throws ConstraintError
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public Collection<SBMaterial> sceneMaterialsGetAll()
+  {
+    return this.state_current.get().scene.materialsGet();
   }
 
   @Override public @Nonnull Map<PathVirtual, SBMesh> sceneMeshesGet()
@@ -1147,165 +1846,4 @@ public final class SBSceneController implements
   {
     return this.shaders;
   }
-
-  @Override public Future<SBCacheStatistics> rendererGetCacheStatistics()
-  {
-    return this.renderer.getCacheStatistics();
-  }
-
-  @Override public void rendererPostprocessorSetType(
-    final @Nonnull SBKPostprocessorType type)
-  {
-    this.renderer.setPostprocessor(type);
-  }
-}
-
-interface SBSceneControllerInstances extends
-  SBSceneChangeListenerRegistration
-{
-  public void sceneInstanceAdd(
-    final @Nonnull SBInstance instance)
-    throws ConstraintError;
-
-  public void sceneInstanceAddByDescription(
-    final @Nonnull SBInstanceDescription desc)
-    throws ConstraintError;
-
-  public boolean sceneInstanceExists(
-    final @Nonnull Integer id)
-    throws ConstraintError;
-
-  public @Nonnull Integer sceneInstanceFreshID();
-
-  public @CheckForNull SBInstance sceneInstanceGet(
-    final @Nonnull Integer id)
-    throws ConstraintError;
-
-  public void sceneInstanceRemove(
-    final @Nonnull Integer id)
-    throws ConstraintError;
-
-  public @Nonnull Collection<SBInstance> sceneInstancesGetAll();
-}
-
-interface SBSceneControllerIO
-{
-  public @Nonnull Future<Void> ioLoadScene(
-    final @Nonnull File file)
-    throws ConstraintError;
-
-  public @Nonnull Future<Void> ioSaveScene(
-    final @Nonnull File file)
-    throws ConstraintError;
-}
-
-interface SBSceneControllerLights extends SBSceneChangeListenerRegistration
-{
-  public void sceneLightAddByDescription(
-    final @Nonnull SBLightDescription d)
-    throws ConstraintError;
-
-  public boolean sceneLightExists(
-    final @Nonnull Integer id)
-    throws ConstraintError;
-
-  public @Nonnull Integer sceneLightFreshID();
-
-  public @CheckForNull SBLight sceneLightGet(
-    final @Nonnull Integer id)
-    throws ConstraintError;
-
-  public void sceneLightRemove(
-    final @Nonnull Integer id)
-    throws ConstraintError;
-
-  public @Nonnull Collection<SBLight> sceneLightsGetAll();
-}
-
-interface SBSceneControllerMeshes extends SBSceneChangeListenerRegistration
-{
-  public @Nonnull Map<PathVirtual, SBMesh> sceneMeshesGet();
-
-  public @Nonnull Future<SBMesh> sceneMeshLoad(
-    final @Nonnull File file)
-    throws ConstraintError;
-}
-
-interface SBSceneControllerRenderer
-{
-  public @Nonnull
-    Pair<Collection<SBLight>, Collection<Pair<KMeshInstanceTransformed, SBInstance>>>
-    rendererGetScene()
-      throws ConstraintError;
-}
-
-interface SBSceneControllerRendererControl
-{
-  public @Nonnull Future<SBCacheStatistics> rendererGetCacheStatistics();
-
-  public @Nonnull RMatrixI4x4F<RTransformProjection> rendererGetProjection();
-
-  public void rendererSetBackgroundColour(
-    float r,
-    float g,
-    float b);
-
-  public void rendererSetCustomProjection(
-    final @Nonnull RMatrixI4x4F<RTransformProjection> p);
-
-  public void rendererSetType(
-    final @Nonnull SBKRendererType type);
-
-  public void rendererPostprocessorSetType(
-    final @Nonnull SBKPostprocessorType type);
-
-  public void rendererShowAxes(
-    final boolean enabled);
-
-  public void rendererShowGrid(
-    final boolean enabled);
-
-  public void rendererShowLightRadii(
-    final boolean enabled);
-
-  public void rendererShowLights(
-    final boolean enabled);
-
-  public void rendererUnsetCustomProjection();
-}
-
-interface SBSceneControllerShaders
-{
-  public @Nonnull Future<SBShader> shaderLoad(
-    final @Nonnull File file)
-    throws ConstraintError;
-
-  public @Nonnull Map<String, SBShader> shadersGet();
-}
-
-interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration
-{
-  public @Nonnull
-    <T extends SBTexture2DKind>
-    Future<SBTexture2D<T>>
-    sceneTexture2DLoad(
-      final @Nonnull File file,
-      final @Nonnull TextureWrapS wrap_s,
-      final @Nonnull TextureWrapT wrap_t,
-      final @Nonnull TextureFilterMinification filter_min,
-      final @Nonnull TextureFilterMagnification filter_mag)
-      throws ConstraintError;
-
-  public @Nonnull Future<SBTextureCube> sceneTextureCubeLoad(
-    final @Nonnull File file,
-    final @Nonnull TextureWrapR wrap_r,
-    final @Nonnull TextureWrapS wrap_s,
-    final @Nonnull TextureWrapT wrap_t,
-    final @Nonnull TextureFilterMinification filter_min,
-    final @Nonnull TextureFilterMagnification filter_mag)
-    throws ConstraintError;
-
-  public @Nonnull Map<PathVirtual, SBTexture2D<?>> sceneTextures2DGet();
-
-  public @Nonnull Map<PathVirtual, SBTextureCube> sceneTexturesCubeGet();
 }

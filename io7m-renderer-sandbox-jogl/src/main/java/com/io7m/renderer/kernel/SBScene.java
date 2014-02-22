@@ -48,29 +48,36 @@ import com.io7m.jvvfs.PathVirtual;
     final PMap<PathVirtual, SBMesh> meshes = HashTreePMap.empty();
     final PMap<Integer, SBLight> lights = HashTreePMap.empty();
     final PMap<Integer, SBInstance> instances = HashTreePMap.empty();
+    final PMap<Integer, SBMaterial> materials = HashTreePMap.empty();
 
     return new SBScene(
       textures2d,
       textures_cube,
       meshes,
+      materials,
+      Integer.valueOf(0),
       lights,
       Integer.valueOf(0),
       instances,
       Integer.valueOf(0));
   }
 
-  private final @Nonnull PMap<PathVirtual, SBTexture2D<?>> textures2d;
-  private final @Nonnull PMap<PathVirtual, SBTextureCube>  textures_cube;
-  private final @Nonnull PMap<PathVirtual, SBMesh>         meshes;
-  private final @Nonnull PMap<Integer, SBLight>            lights;
-  private final @Nonnull Integer                           light_id_pool;
-  private final @Nonnull PMap<Integer, SBInstance>         instances;
   private final @Nonnull Integer                           instance_id_pool;
+  private final @Nonnull PMap<Integer, SBInstance>         instances;
+  private final @Nonnull Integer                           light_id_pool;
+  private final @Nonnull PMap<Integer, SBLight>            lights;
+  private final @Nonnull Integer                           material_id_pool;
+  private final @Nonnull PMap<Integer, SBMaterial>         materials;
+  private final @Nonnull PMap<PathVirtual, SBMesh>         meshes;
+  private final @Nonnull PMap<PathVirtual, SBTextureCube>  textures_cube;
+  private final @Nonnull PMap<PathVirtual, SBTexture2D<?>> textures2d;
 
   private SBScene(
     final @Nonnull PMap<PathVirtual, SBTexture2D<?>> textures2d,
     final @Nonnull PMap<PathVirtual, SBTextureCube> textures_cube,
     final @Nonnull PMap<PathVirtual, SBMesh> meshes,
+    final @Nonnull PMap<Integer, SBMaterial> materials,
+    final @Nonnull Integer material_id_pool,
     final @Nonnull PMap<Integer, SBLight> lights,
     final @Nonnull Integer light_id_pool,
     final @Nonnull PMap<Integer, SBInstance> instances,
@@ -79,8 +86,10 @@ import com.io7m.jvvfs.PathVirtual;
     this.textures2d = textures2d;
     this.textures_cube = textures_cube;
     this.meshes = meshes;
+    this.materials = materials;
     this.lights = lights;
     this.light_id_pool = light_id_pool;
+    this.material_id_pool = material_id_pool;
     this.instances = instances;
     this.instance_id_pool = instance_id_pool;
   }
@@ -95,55 +104,12 @@ import com.io7m.jvvfs.PathVirtual;
       this.textures2d,
       this.textures_cube,
       this.meshes,
+      this.materials,
+      this.material_id_pool,
       this.lights,
       this.light_id_pool,
       this.instances.plus(instance.getID(), instance),
       SBScene.currentMaxID(this.instance_id_pool, instance.getID()));
-  }
-
-  public @Nonnull SBScene instanceAddByDescription(
-    final @Nonnull SBInstanceDescription d)
-    throws ConstraintError
-  {
-    Constraints.constrainNotNull(d, "Instance");
-    final SBMaterialDescription md = d.getMaterial();
-
-    final SBTexture2D<SBTexture2DKindAlbedo> albe;
-    final SBTexture2D<SBTexture2DKindEmissive> emis;
-    final SBTexture2D<SBTexture2DKindNormal> norm;
-    final SBTexture2D<SBTexture2DKindSpecular> spec;
-
-    if (md.getAlbedo().getTexture() == null) {
-      albe = null;
-    } else {
-      albe = this.texture2DGet(md.getAlbedo().getTexture());
-    }
-
-    if (md.getEmissive().getTexture() == null) {
-      emis = null;
-    } else {
-      emis = this.texture2DGet(md.getEmissive().getTexture());
-    }
-
-    if (md.getNormal().getTexture() == null) {
-      norm = null;
-    } else {
-      norm = this.texture2DGet(md.getNormal().getTexture());
-    }
-
-    if (md.getSpecular().getTexture() == null) {
-      spec = null;
-    } else {
-      spec = this.texture2DGet(md.getSpecular().getTexture());
-    }
-
-    final SBTextureCube env =
-      (md.getEnvironment().getTexture() == null) ? null : this
-        .textureCubeGet(md.getEnvironment().getTexture());
-
-    final SBMaterial m = new SBMaterial(md, albe, emis, env, norm, spec);
-    final SBInstance instance = new SBInstance(d, m);
-    return this.instanceAdd(instance);
   }
 
   public boolean instanceExists(
@@ -157,14 +123,17 @@ import com.io7m.jvvfs.PathVirtual;
   public @Nonnull Pair<SBScene, Integer> instanceFreshID()
   {
     final Integer id = Integer.valueOf(this.instance_id_pool.intValue() + 1);
+
     return new Pair<SBScene, Integer>(new SBScene(
       this.textures2d,
       this.textures_cube,
       this.meshes,
+      this.materials,
+      this.material_id_pool,
       this.lights,
-      id,
+      this.light_id_pool,
       this.instances,
-      this.instance_id_pool), id);
+      id), id);
   }
 
   public @Nonnull SBInstance instanceGet(
@@ -189,6 +158,8 @@ import com.io7m.jvvfs.PathVirtual;
       this.textures2d,
       this.textures_cube,
       this.meshes,
+      this.materials,
+      this.material_id_pool,
       this.lights.plus(light.getID(), light),
       SBScene.currentMaxID(this.light_id_pool, light.getID()),
       this.instances,
@@ -210,6 +181,8 @@ import com.io7m.jvvfs.PathVirtual;
       this.textures2d,
       this.textures_cube,
       this.meshes,
+      this.materials,
+      this.material_id_pool,
       this.lights,
       id,
       this.instances,
@@ -233,6 +206,8 @@ import com.io7m.jvvfs.PathVirtual;
       this.textures2d,
       this.textures_cube,
       this.meshes,
+      this.materials,
+      this.material_id_pool,
       this.lights.minus(id),
       this.light_id_pool,
       this.instances,
@@ -264,11 +239,76 @@ import com.io7m.jvvfs.PathVirtual;
       desc = desc.lightAdd(l.getDescription());
     }
 
+    for (final Integer mid : this.materials.keySet()) {
+      desc =
+        desc.materialAdd(mid, this.materials
+          .get(mid)
+          .materialGetDescription());
+    }
+
     for (final SBInstance i : this.instances.values()) {
-      desc = desc.instanceAdd(i.getDescription());
+      desc = desc.instanceAdd(i);
     }
 
     return desc;
+  }
+
+  public boolean materialExists(
+    final @Nonnull Integer id)
+    throws ConstraintError
+  {
+    Constraints.constrainNotNull(id, "ID");
+    return this.materials.containsKey(id);
+  }
+
+  public @Nonnull Pair<SBScene, Integer> materialFreshID()
+  {
+    final Integer id = Integer.valueOf(this.material_id_pool.intValue() + 1);
+    return new Pair<SBScene, Integer>(new SBScene(
+      this.textures2d,
+      this.textures_cube,
+      this.meshes,
+      this.materials,
+      id,
+      this.lights,
+      this.light_id_pool,
+      this.instances,
+      this.instance_id_pool), id);
+  }
+
+  public @Nonnull SBMaterial materialGet(
+    final @Nonnull Integer id)
+    throws ConstraintError
+  {
+    Constraints.constrainNotNull(id, "ID");
+    Constraints.constrainArbitrary(
+      this.materials.containsKey(id),
+      "Material exists");
+    return this.materials.get(id);
+  }
+
+  public @Nonnull SBScene materialPut(
+    final @Nonnull SBMaterial material)
+    throws ConstraintError
+  {
+    Constraints.constrainNotNull(material, "Material");
+    final Integer id = material.materialGetID();
+
+    return new SBScene(
+      this.textures2d,
+      this.textures_cube,
+      this.meshes,
+      this.materials.plus(id, material),
+      SBScene.currentMaxID(this.material_id_pool, id),
+      this.lights,
+      this.light_id_pool,
+      this.instances,
+      this.instance_id_pool);
+  }
+
+  public @Nonnull Collection<SBMaterial> materialsGet()
+  {
+    return this.materials.values();
   }
 
   public @Nonnull SBScene meshAdd(
@@ -281,6 +321,8 @@ import com.io7m.jvvfs.PathVirtual;
       this.textures2d,
       this.textures_cube,
       this.meshes.plus(mesh.getPath(), mesh),
+      this.materials,
+      this.material_id_pool,
       this.lights,
       this.light_id_pool,
       this.instances,
@@ -310,6 +352,8 @@ import com.io7m.jvvfs.PathVirtual;
       this.textures2d,
       this.textures_cube,
       this.meshes,
+      this.materials,
+      this.material_id_pool,
       this.lights,
       this.light_id_pool,
       this.instances.minus(id),
@@ -326,6 +370,8 @@ import com.io7m.jvvfs.PathVirtual;
       this.textures2d.plus(texture.getPath(), texture),
       this.textures_cube,
       this.meshes,
+      this.materials,
+      this.material_id_pool,
       this.lights,
       this.light_id_pool,
       this.instances,
@@ -352,6 +398,8 @@ import com.io7m.jvvfs.PathVirtual;
       this.textures2d,
       this.textures_cube.plus(texture.getPath(), texture),
       this.meshes,
+      this.materials,
+      this.material_id_pool,
       this.lights,
       this.light_id_pool,
       this.instances,

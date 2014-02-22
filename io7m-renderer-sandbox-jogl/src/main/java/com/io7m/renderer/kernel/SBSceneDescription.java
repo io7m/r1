@@ -33,7 +33,7 @@ import com.io7m.jvvfs.PathVirtual;
   static final int SCENE_XML_VERSION;
 
   static {
-    SCENE_XML_VERSION = 14;
+    SCENE_XML_VERSION = 15;
   }
 
   public static @Nonnull SBSceneDescription empty()
@@ -42,13 +42,15 @@ import com.io7m.jvvfs.PathVirtual;
     final PSet<SBTextureCubeDescription> textures_cube = HashTreePSet.empty();
     final PSet<PathVirtual> meshes = HashTreePSet.empty();
     final PMap<Integer, SBLightDescription> lights = HashTreePMap.empty();
-    final PMap<Integer, SBInstanceDescription> instances =
+    final PMap<Integer, SBMaterialDescription> materials =
       HashTreePMap.empty();
+    final PMap<Integer, SBInstance> instances = HashTreePMap.empty();
 
     return new SBSceneDescription(
       SBSceneDescription.SCENE_XML_VERSION,
       textures_2d,
       textures_cube,
+      materials,
       meshes,
       lights,
       instances);
@@ -57,22 +59,25 @@ import com.io7m.jvvfs.PathVirtual;
   private final @Nonnull PSet<SBTexture2DDescription>         textures_2d;
   private final @Nonnull PSet<SBTextureCubeDescription>       textures_cube;
   private final @Nonnull PSet<PathVirtual>                    meshes;
+  private final @Nonnull PMap<Integer, SBMaterialDescription> materials;
   private final @Nonnull PMap<Integer, SBLightDescription>    lights;
-  private final @Nonnull PMap<Integer, SBInstanceDescription> instances;
+  private final @Nonnull PMap<Integer, SBInstance>            instances;
   private final int                                           schema_version;
 
   private SBSceneDescription(
     final int schema_version,
     final @Nonnull PSet<SBTexture2DDescription> textures_2d,
     final @Nonnull PSet<SBTextureCubeDescription> textures_cube,
-    final @Nonnull PSet<PathVirtual> models,
+    final @Nonnull PMap<Integer, SBMaterialDescription> materials,
+    final @Nonnull PSet<PathVirtual> meshes,
     final @Nonnull PMap<Integer, SBLightDescription> lights,
-    final @Nonnull PMap<Integer, SBInstanceDescription> instances)
+    final @Nonnull PMap<Integer, SBInstance> instances)
   {
     this.schema_version = schema_version;
     this.textures_2d = textures_2d;
     this.textures_cube = textures_cube;
-    this.meshes = models;
+    this.materials = materials;
+    this.meshes = meshes;
     this.lights = lights;
     this.instances = instances;
   }
@@ -108,7 +113,7 @@ import com.io7m.jvvfs.PathVirtual;
     return true;
   }
 
-  public @Nonnull Collection<SBInstanceDescription> getInstanceDescriptions()
+  public @Nonnull Collection<SBInstance> getInstances()
   {
     return this.instances.values();
   }
@@ -116,6 +121,11 @@ import com.io7m.jvvfs.PathVirtual;
   public @Nonnull Collection<SBLightDescription> getLights()
   {
     return this.lights.values();
+  }
+
+  public @Nonnull PMap<Integer, SBMaterialDescription> getMaterials()
+  {
+    return this.materials;
   }
 
   public @Nonnull PSet<PathVirtual> getMeshes()
@@ -150,12 +160,13 @@ import com.io7m.jvvfs.PathVirtual;
   }
 
   public @Nonnull SBSceneDescription instanceAdd(
-    final @Nonnull SBInstanceDescription d)
+    final @Nonnull SBInstance d)
   {
     return new SBSceneDescription(
       this.schema_version,
       this.textures_2d,
       this.textures_cube,
+      this.materials,
       this.meshes,
       this.lights,
       this.instances.plus(d.getID(), d));
@@ -168,8 +179,9 @@ import com.io7m.jvvfs.PathVirtual;
       this.schema_version,
       this.textures_2d,
       this.textures_cube,
+      this.materials,
       this.meshes,
-      this.lights.plus(l.getID(), l),
+      this.lights.plus(l.lightGetID(), l),
       this.instances);
   }
 
@@ -180,6 +192,7 @@ import com.io7m.jvvfs.PathVirtual;
       this.schema_version,
       this.textures_2d,
       this.textures_cube,
+      this.materials,
       this.meshes.plus(d),
       this.lights,
       this.instances);
@@ -192,6 +205,21 @@ import com.io7m.jvvfs.PathVirtual;
       this.schema_version,
       this.textures_2d.plus(t),
       this.textures_cube,
+      this.materials,
+      this.meshes,
+      this.lights,
+      this.instances);
+  }
+
+  public @Nonnull SBSceneDescription materialAdd(
+    final @Nonnull Integer id,
+    final @Nonnull SBMaterialDescription t)
+  {
+    return new SBSceneDescription(
+      this.schema_version,
+      this.textures_2d,
+      this.textures_cube,
+      this.materials.plus(id, t),
       this.meshes,
       this.lights,
       this.instances);
@@ -204,6 +232,7 @@ import com.io7m.jvvfs.PathVirtual;
       this.schema_version,
       this.textures_2d,
       this.textures_cube.plus(t),
+      this.materials,
       this.meshes,
       this.lights,
       this.instances);

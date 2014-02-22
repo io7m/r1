@@ -22,9 +22,9 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM3F;
-import com.io7m.renderer.RSpace;
-import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.RVectorReadable3F;
+import com.io7m.renderer.types.RSpace;
+import com.io7m.renderer.types.RVectorI3F;
+import com.io7m.renderer.types.RVectorReadable3F;
 
 /**
  * <p>
