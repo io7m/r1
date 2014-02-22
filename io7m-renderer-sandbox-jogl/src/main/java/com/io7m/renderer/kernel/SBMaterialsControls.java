@@ -340,6 +340,7 @@ public final class SBMaterialsControls implements
       });
 
     controller.sceneChangeListenerAdd(this);
+    this.materials_model.refreshMaterials();
   }
 
   @Override public void controlsAddToLayout(
