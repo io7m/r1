@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer.kernel</groupId>
   <artifactId>io7m-renderer-kernel</artifactId>
-  <version>0.7.0</version>
+  <version>0.8.0</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-kernel</name>
   <description>3D renderer (kernel API)</description>

@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer.tests.jogl</groupId>
   <artifactId>io7m-renderer-tests-jogl</artifactId>
-  <version>0.7.0</version>
+  <version>0.8.0</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-tests-jogl</name>
   <description>3D renderer (JOGL frontend to unit tests)</description>
