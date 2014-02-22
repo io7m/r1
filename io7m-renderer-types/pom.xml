@@ -5,13 +5,13 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.io7m.renderer.tests</groupId>
-  <artifactId>io7m-renderer-tests</artifactId>
+  <groupId>com.io7m.renderer.types</groupId>
+  <artifactId>io7m-renderer-types</artifactId>
   <version>0.8.0</version>
   <packaging>jar</packaging>
-  <name>io7m-renderer-tests</name>
-  <description>3D renderer (unit tests)</description>
-  <url>http://mvn.io7m.com/renderer-tests/</url>
+  <name>io7m-renderer-types</name>
+  <description>3D renderer (common types)</description>
+  <url>http://mvn.io7m.com/renderer-types/</url>
 
   <licenses>
     <license>
@@ -44,7 +44,7 @@
     <site>
       <id>io7m</id>
       <name>io7m.com</name>
-      <url>http://mvn.io7m.com/renderer-tests/</url>
+      <url>http://mvn.io7m.com/renderer-types/</url>
     </site>
   </distributionManagement>
 
@@ -59,26 +59,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.io7m.renderer.kernel</groupId>
-      <artifactId>io7m-renderer-kernel</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.io7m.renderer.kernel.types</groupId>
-      <artifactId>io7m-renderer-kernel-types</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.io7m.renderer.types</groupId>
-      <artifactId>io7m-renderer-types</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.io7m.renderer.xml</groupId>
-      <artifactId>io7m-renderer-xml</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.io7m.jtensors</groupId>
       <artifactId>io7m-jtensors</artifactId>
       <version>[5.3.1, 6.0.0)</version>
@@ -89,14 +69,19 @@
       <version>[3.1.1, 4.0.0)</version>
     </dependency>
     <dependency>
+      <groupId>com.io7m.jcache</groupId>
+      <artifactId>io7m-jcache</artifactId>
+      <version>[0.3.0, 0.4.0)</version>
+    </dependency>
+    <dependency>
       <groupId>com.io7m.jcanephora.core</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
       <version>0.25.0</version>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <groupId>com.io7m.jcanephora.batchexec</groupId>
+      <artifactId>io7m-jcanephora-batchexec</artifactId>
+      <version>0.25.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -107,11 +92,6 @@
       <groupId>com.io7m.xom</groupId>
       <artifactId>xom</artifactId>
       <version>1.2.10</version>
-    </dependency>
-    <dependency>
-    	<groupId>net.java</groupId>
-    	<artifactId>quickcheck</artifactId>
-    	<version>0.6</version>
     </dependency>
   </dependencies>
 
@@ -171,6 +151,29 @@
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
+      </plugin>
+
+      <!-- Check style -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.11</version>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <phase>validate</phase>
+            <configuration>
+              <configLocation>../checkstyle.xml</configLocation>
+              <encoding>UTF-8</encoding>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+              <linkXRef>false</linkXRef>
+            </configuration>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- Produce jar files -->
@@ -318,6 +321,19 @@
                     <versionRange>[1.0.0,)</versionRange>
                     <goals>
                       <goal>transform</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <versionRange>[2.11,)</versionRange>
+                    <goals>
+                      <goal>check</goal>
                     </goals>
                   </pluginExecutionFilter>
                   <action>

@@ -5,13 +5,13 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.io7m.renderer.tests</groupId>
-  <artifactId>io7m-renderer-tests</artifactId>
+  <groupId>com.io7m.renderer.kernel</groupId>
+  <artifactId>io7m-renderer-kernel</artifactId>
   <version>0.8.0</version>
   <packaging>jar</packaging>
-  <name>io7m-renderer-tests</name>
-  <description>3D renderer (unit tests)</description>
-  <url>http://mvn.io7m.com/renderer-tests/</url>
+  <name>io7m-renderer-kernel</name>
+  <description>3D renderer (kernel API)</description>
+  <url>http://mvn.io7m.com/renderer-kernel/</url>
 
   <licenses>
     <license>
@@ -44,7 +44,7 @@
     <site>
       <id>io7m</id>
       <name>io7m.com</name>
-      <url>http://mvn.io7m.com/renderer-tests/</url>
+      <url>http://mvn.io7m.com/renderer-kernel/</url>
     </site>
   </distributionManagement>
 
@@ -59,24 +59,66 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.io7m.renderer.kernel</groupId>
-      <artifactId>io7m-renderer-kernel</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.io7m.renderer.kernel.types</groupId>
       <artifactId>io7m-renderer-kernel-types</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.renderer.types</groupId>
-      <artifactId>io7m-renderer-types</artifactId>
+      <groupId>com.io7m.renderer.kernel-shaders.debug</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-debug</artifactId>
       <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.io7m.renderer.xml</groupId>
-      <artifactId>io7m-renderer-xml</artifactId>
+      <groupId>com.io7m.renderer.kernel-shaders.depth</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-depth</artifactId>
       <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.renderer.kernel-shaders.forward</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-forward</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.renderer.kernel-shaders.postprocessing</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-postprocessing</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.jparasol.xml</groupId>
+      <artifactId>io7m-jparasol-xml</artifactId>
+      <version>[0.3.15, 0.4.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jtensors</groupId>
@@ -94,8 +136,19 @@
       <version>0.25.0</version>
     </dependency>
     <dependency>
+      <groupId>com.io7m.jcanephora.batchexec</groupId>
+      <artifactId>io7m-jcanephora-batchexec</artifactId>
+      <version>0.25.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.jcache</groupId>
+      <artifactId>io7m-jcache</artifactId>
+      <version>[0.3.0, 0.4.0)</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
       <version>4.11</version>
     </dependency>
     <dependency>
@@ -104,14 +157,9 @@
       <version>2.0.2</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.xom</groupId>
-      <artifactId>xom</artifactId>
-      <version>1.2.10</version>
-    </dependency>
-    <dependency>
-    	<groupId>net.java</groupId>
-    	<artifactId>quickcheck</artifactId>
-    	<version>0.6</version>
+      <groupId>org.pcollections</groupId>
+      <artifactId>pcollections</artifactId>
+      <version>2.1.2</version>
     </dependency>
   </dependencies>
 
