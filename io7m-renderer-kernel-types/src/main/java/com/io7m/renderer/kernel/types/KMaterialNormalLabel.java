@@ -91,9 +91,20 @@ public enum KMaterialNormalLabel
     try {
       return instance
         .instanceVisitableAccept(new KInstanceVisitor<KMaterialNormalLabel, ConstraintError>() {
-          @Override public KMaterialNormalLabel instanceVisitOpaque(
-            final @Nonnull KInstanceOpaque i)
+          @Override public KMaterialNormalLabel instanceVisitOpaqueRegular(
+            final @Nonnull KInstanceOpaqueRegular i)
             throws ConstraintError
+          {
+            final KMaterialOpaque material = i.instanceGetMaterial();
+            final KMaterialNormal normal = material.materialGetNormal();
+            return KMaterialNormalLabel.fromInstanceData(a, normal);
+          }
+
+          @Override public
+            KMaterialNormalLabel
+            instanceVisitOpaqueAlphaDepth(
+              final @Nonnull KInstanceOpaqueAlphaDepth i)
+              throws ConstraintError
           {
             final KMaterialOpaque material = i.instanceGetMaterial();
             final KMaterialNormal normal = material.materialGetNormal();

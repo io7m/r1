@@ -61,7 +61,7 @@ import com.io7m.renderer.kernel.types.KTranslucent;
 
       for (int i = 0; i < instances.size(); ++i) {
         final KInstanceTransformedOpaque instance = instances.get(i);
-        final KInstanceOpaque instance_i = instance.getInstance();
+        final KInstanceOpaque instance_i = instance.instanceGet();
         final KMaterialForwardOpaqueLitLabel label =
           decider.getForwardLabelOpaqueLit(light, instance_i);
 
@@ -103,7 +103,7 @@ import com.io7m.renderer.kernel.types.KTranslucent;
       new HashMap<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>>();
 
     for (final KInstanceTransformedOpaque instance : instances) {
-      final KInstanceOpaque i = instance.getInstance();
+      final KInstanceOpaque i = instance.instanceGet();
       final KMaterialForwardOpaqueUnlitLabel label =
         decider.getForwardLabelOpaqueUnlit(i);
 
