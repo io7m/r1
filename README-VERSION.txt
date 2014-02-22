@@ -1,1 +1,1 @@
-io7m-renderer 0.7.0
+io7m-renderer 0.8.0
