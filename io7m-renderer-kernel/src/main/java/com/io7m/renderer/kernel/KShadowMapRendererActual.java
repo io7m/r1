@@ -32,8 +32,6 @@ import com.io7m.jcache.BLUCache;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCache;
 import com.io7m.jcache.PCache;
-import com.io7m.jcanephora.FaceSelection;
-import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
@@ -46,6 +44,7 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunction
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KCamera;
+import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
@@ -154,8 +153,8 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveProjection());
 
     /**
-     * Basic shadow mapping produces fewer artifacts if front faces are
-     * culled.
+     * Basic shadow mapping produces fewer artifacts if only back faces are
+     * rendered.
      */
 
     this.depth_renderer.depthRendererEvaluate(
@@ -163,8 +162,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       proj,
       batches,
       smb.getFramebuffer(),
-      FaceSelection.FACE_FRONT,
-      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+      Option.some(KFaceSelection.FACE_RENDER_BACK));
   }
 
   void renderShadowMaps(
@@ -420,17 +418,17 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
     assert batch.size() == vbatch.size();
 
     /**
-     * Variance shadow mapping does not require front-face culling, so only
-     * front faces are rendered into the depth buffer.
+     * Variance shadow mapping does not require front-face culling, so
+     * per-instance face selection is OK.
      */
 
+    final Option<KFaceSelection> none = Option.none();
     this.depth_variance_renderer.depthVarianceRendererEvaluate(
       view,
       proj,
       vbatch,
       smv.getFramebuffer(),
-      FaceSelection.FACE_BACK,
-      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+      none);
 
     this.blur.postprocessorEvaluateDepthVariance(
       smv.getFramebuffer(),
