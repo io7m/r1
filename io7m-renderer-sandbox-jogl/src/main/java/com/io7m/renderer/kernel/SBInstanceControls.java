@@ -99,6 +99,7 @@ public final class SBInstanceControls implements
             final SBMaterial m = controls.getSelectedMaterial();
             material_id.setText(m.materialGetID().toString());
             material_name.setText(m.materialGetName());
+            SBWindowUtilities.closeWindow(MaterialSelectDialog.this);
           } catch (final ConstraintError x) {
             throw new UnreachableCodeException(x);
           }

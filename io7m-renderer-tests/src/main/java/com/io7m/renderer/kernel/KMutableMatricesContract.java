@@ -62,9 +62,10 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLight;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunction;
-import com.io7m.renderer.kernel.types.KInstanceOpaque;
+import com.io7m.renderer.kernel.types.KFaceSelection;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformed;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KMaterialAlbedo;
 import com.io7m.renderer.kernel.types.KMaterialEmissive;
@@ -261,8 +262,10 @@ public abstract class KMutableMatricesContract extends TestContract
       final KMaterialEnvironment environment =
         KMaterialEnvironment.newEnvironmentUnmapped();
       final KMaterialNormal normal = KMaterialNormal.newNormalUnmapped();
+
+      final RVectorI3F<RSpaceRGB> rgb = RVectorI3F.zero();
       final KMaterialSpecular specular =
-        KMaterialSpecular.newSpecularUnmapped(0.0f, 1.0f);
+        KMaterialSpecular.newSpecularUnmapped(rgb, 0.0f);
 
       final KMaterialOpaqueRegular material =
         KMaterialOpaqueRegular.newMaterial(
@@ -273,8 +276,12 @@ public abstract class KMutableMatricesContract extends TestContract
           environment,
           specular);
 
-      final KInstanceOpaque kmi =
-        KInstanceOpaque.newInstance(Integer.valueOf(23), material, mesh);
+      final KInstanceOpaqueRegular kmi =
+        KInstanceOpaqueRegular.newInstance(
+          Integer.valueOf(23),
+          material,
+          mesh,
+          KFaceSelection.FACE_RENDER_FRONT);
 
       final QuaternionI4F orientation = new QuaternionI4F();
       final VectorI3F scale = new VectorI3F(0, 0, 0);
@@ -283,8 +290,8 @@ public abstract class KMutableMatricesContract extends TestContract
       final KTransform trans =
         KTransformOST.newTransform(orientation, scale, translation);
 
-      final KInstanceTransformedOpaque kmit =
-        KInstanceTransformedOpaque.newInstance(kmi, trans, uv_matrix);
+      final KInstanceTransformedOpaqueRegular kmit =
+        KInstanceTransformedOpaqueRegular.newInstance(kmi, trans, uv_matrix);
 
       return kmit;
     } catch (final ConstraintError e) {

@@ -116,7 +116,7 @@ public final class SBLightControlsDirectional implements
     final SBLightDescriptionDirectional d)
   {
     final KLightDirectional l = d.getLight();
-    this.colour.setColour(l.lightGetColour());
+    this.colour.controlsLoadFrom(l.lightGetColour());
     this.intensity.setCurrent(l.lightGetIntensity());
     this.direction.setVector(l.getDirection());
   }
@@ -129,7 +129,7 @@ public final class SBLightControlsDirectional implements
       KLightDirectional.newDirectional(
         this.id,
         this.direction.getVector(),
-        this.colour.getColour(),
+        this.colour.controlsSave(),
         this.intensity.getCurrent()));
   }
 }

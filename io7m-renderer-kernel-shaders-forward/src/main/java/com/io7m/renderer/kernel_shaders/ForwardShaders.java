@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel_shaders;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KLightLabel;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoLabel;
 import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
@@ -308,17 +309,21 @@ public final class ForwardShaders
     switch (albedo) {
       case ALBEDO_COLOURED:
       {
+        b.append("  -- Coloured albedo\n");
         b.append("  value albedo : vector_4f =\n");
         b.append("    Albedo.opaque (p_albedo);\n");
         break;
       }
       case ALBEDO_TEXTURED:
       {
+        b.append("  -- Textured albedo\n");
         b.append("  value albedo : vector_4f =\n");
         b.append("    Albedo.textured_opaque (t_albedo, f_uv, p_albedo);\n");
         break;
       }
     }
+
+    b.append("\n");
   }
 
   private static void fragmentShaderValuesAlbedoTranslucent(
@@ -328,12 +333,14 @@ public final class ForwardShaders
     switch (albedo) {
       case ALBEDO_COLOURED:
       {
+        b.append("  -- Coloured albedo\n");
         b.append("  value albedo : vector_4f =\n");
         b.append("    Albedo.translucent (p_albedo);\n");
         break;
       }
       case ALBEDO_TEXTURED:
       {
+        b.append("  -- Textured albedo\n");
         b.append("  value albedo : vector_4f =\n");
         b.append("    Albedo.textured_translucent (\n");
         b.append("      t_albedo,\n");
@@ -343,6 +350,33 @@ public final class ForwardShaders
         break;
       }
     }
+
+    b.append("\n");
+  }
+
+  private static void fragmentShaderValuesAlpha(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialAlphaOpacityType alpha)
+  {
+    switch (alpha) {
+      case ALPHA_OPACITY_CONSTANT:
+      {
+        b.append("  -- Alpha constant\n");
+        b.append("  value opacity = p_opacity;\n");
+        break;
+      }
+      case ALPHA_OPACITY_ONE_MINUS_DOT:
+      {
+        b.append("  -- Alpha dot\n");
+        b
+          .append("  value o_v = V3.normalize (V3.negate (f_position_eye [x y z]));\n");
+        b.append("  value o_d = F.subtract (1.0, V3.dot (o_v, n));\n");
+        b.append("  value opacity = F.multiply (o_d, p_opacity);\n");
+        break;
+      }
+    }
+
+    b.append("\n");
   }
 
   private static void fragmentShaderValuesEmission(
@@ -357,10 +391,12 @@ public final class ForwardShaders
       }
       case EMISSIVE_MAPPED:
       {
+        b.append("  -- Emission mapping\n");
         b.append("  value p_emission = record Emission.t {\n");
         b
           .append("    amount = F.multiply (p_emission.amount, S.texture (t_emission, f_uv) [x])\n");
         b.append("  };\n");
+        b.append("\n");
       }
     }
   }
@@ -377,6 +413,7 @@ public final class ForwardShaders
       case ENVIRONMENT_REFLECTIVE_MAPPED:
       case ENVIRONMENT_REFLECTIVE:
       {
+        b.append("  -- Environment mapping\n");
         b.append("  value env : vector_4f =\n");
         b.append("    Environment.reflection (\n");
         b.append("      t_environment,\n");
@@ -384,6 +421,7 @@ public final class ForwardShaders
         b.append("      n,\n");
         b.append("      m_view_inv\n");
         b.append("    );\n");
+        b.append("\n");
         break;
       }
     }
@@ -395,440 +433,324 @@ public final class ForwardShaders
     final @Nonnull KMaterialEmissiveLabel emissive,
     final @Nonnull KMaterialSpecularLabel specular)
   {
+    switch (light) {
+      case LIGHT_LABEL_DIRECTIONAL:
+      {
+        ForwardShaders.fragmentShaderValuesLightDirectional(
+          b,
+          emissive,
+          specular);
+        break;
+      }
+      case LIGHT_LABEL_PROJECTIVE:
+      case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC:
+      case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+      case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
+      {
+        ForwardShaders.fragmentShaderValuesLightProjective(
+          b,
+          light,
+          emissive,
+          specular);
+        break;
+      }
+      case LIGHT_LABEL_SPHERICAL:
+      {
+        ForwardShaders.fragmentShaderValuesLightSpherical(
+          b,
+          emissive,
+          specular);
+        break;
+      }
+    }
+  }
+
+  private static void fragmentShaderValuesLightProjective(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KLightLabel light,
+    final @Nonnull KMaterialEmissiveLabel emissive,
+    final @Nonnull KMaterialSpecularLabel specular)
+  {
+    b.append("  -- Projective light vectors/attenuation\n");
+    b.append("  value light_vectors =\n");
+    b.append("    Light.calculate (\n");
+    b.append("      light_projective,\n");
+    b.append("      f_position_eye [x y z],\n");
+    b.append("      n\n");
+    b.append("    );\n");
+    b.append("  value light_texel =\n");
+    b.append("    ProjectiveLight.light_texel (\n");
+    b.append("      t_projection,\n");
+    b.append("      f_position_light_clip\n");
+    b.append("    );\n");
+    b.append("  value light_colour =\n");
+    b.append("    V3.multiply (\n");
+    b.append("      light_texel [x y z],\n");
+    b.append("      light_projective.colour\n");
+    b.append("    );\n");
+
+    switch (light) {
+      case LIGHT_LABEL_PROJECTIVE:
+      {
+        b.append("  value light_attenuation = light_vectors.attenuation;\n");
+        break;
+      }
+      case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC:
+      {
+        b.append("  value light_shadow =\n");
+        b.append("    ShadowBasic.factor (\n");
+        b.append("      shadow_basic,\n");
+        b.append("      t_shadow_basic,\n");
+        b.append("      f_position_light_clip\n");
+        b.append("    );\n");
+        b.append("  value light_attenuation =\n");
+        b.append("    F.multiply (\n");
+        b.append("      light_shadow,\n");
+        b.append("      light_vectors.attenuation\n");
+        b.append("    );\n");
+        break;
+      }
+      case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+      {
+        b.append("  value light_shadow =\n");
+        b.append("    ShadowBasic.factor_packed4444 (\n");
+        b.append("      shadow_basic,\n");
+        b.append("      t_shadow_basic,\n");
+        b.append("      f_position_light_clip\n");
+        b.append("    );\n");
+        b.append("  value light_attenuation =\n");
+        b.append("    F.multiply (\n");
+        b.append("      light_shadow,\n");
+        b.append("      light_vectors.attenuation\n");
+        b.append("    );\n");
+        break;
+      }
+      case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
+      {
+        b.append("  value light_shadow =\n");
+        b.append("    ShadowVariance.factor (\n");
+        b.append("      shadow_variance,\n");
+        b.append("      t_shadow_variance,\n");
+        b.append("      f_position_light_clip\n");
+        b.append("    );\n");
+        b.append("  value light_attenuation =\n");
+        b.append("    F.multiply (\n");
+        b.append("      light_shadow,\n");
+        b.append("      light_vectors.attenuation\n");
+        b.append("    );\n");
+        break;
+      }
+      case LIGHT_LABEL_DIRECTIONAL:
+      case LIGHT_LABEL_SPHERICAL:
+      {
+        throw new UnreachableCodeException();
+      }
+    }
+
     switch (emissive) {
       case EMISSIVE_NONE:
       {
-        switch (light) {
-          case LIGHT_LABEL_DIRECTIONAL:
-          {
-            switch (specular) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    DirectionalLight.diffuse_only (light_directional, n);\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b.append("    DirectionalLight.diffuse_specular (\n");
-                b.append("      light_directional,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_specular\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-          case LIGHT_LABEL_SPHERICAL:
-          {
-            switch (specular) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b.append("    SphericalLight.diffuse_only (\n");
-                b.append("      light_spherical,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z]\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b.append("    SphericalLight.diffuse_specular (\n");
-                b.append("      light_spherical,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_specular\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-          case LIGHT_LABEL_PROJECTIVE:
-          {
-            switch (specular) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b.append("    ProjectiveLight.diffuse_only (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b.append("    ProjectiveLight.diffuse_specular (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n ");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_specular,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-
-          case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC:
-          {
-            switch (specular) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    ProjectiveLight.diffuse_only_shadowed_basic (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow_basic,\n");
-                b.append("      shadow_basic\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    ProjectiveLight.diffuse_specular_shadowed_basic (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_specular,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow_basic,\n");
-                b.append("      shadow_basic\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-
-          case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
-          {
-            switch (specular) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    ProjectiveLight.diffuse_only_shadowed_basic_packed4444 (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow_basic,\n");
-                b.append("      shadow_basic\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    ProjectiveLight.diffuse_specular_shadowed_basic_packed4444 (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_specular,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow_basic,\n");
-                b.append("      shadow_basic\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-          case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
-          {
-            switch (specular) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    ProjectiveLight.diffuse_only_shadowed_variance (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow_variance,\n");
-                b.append("      shadow_variance\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    ProjectiveLight.diffuse_specular_shadowed_variance (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_specular,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow_variance,\n");
-                b.append("      shadow_variance\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-        }
+        b.append("\n");
+        b.append("  -- Projective non-emissive diffuse light term\n");
+        b.append("  value light_diffuse_unattenuated : vector_3f =\n");
+        b.append("    ProjectiveLight.diffuse_colour (\n");
+        b.append("      light_projective,\n");
+        b.append("      light_vectors.vectors,\n");
+        b.append("      light_colour,\n");
+        b.append("      0.0\n");
+        b.append("    );\n");
         break;
       }
       case EMISSIVE_CONSTANT:
       case EMISSIVE_MAPPED:
       {
-        switch (light) {
-          case LIGHT_LABEL_DIRECTIONAL:
-          {
-            switch (specular) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b.append("    DirectionalLight.diffuse_only_emissive (\n");
-                b.append("      light_directional,\n");
-                b.append("      n,\n");
-                b.append("      p_emission\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    DirectionalLight.diffuse_specular_emissive (\n");
-                b.append("      light_directional,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_emission,\n");
-                b.append("      p_specular\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-          case LIGHT_LABEL_SPHERICAL:
-          {
-            switch (specular) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b.append("    SphericalLight.diffuse_only_emissive (\n");
-                b.append("      light_spherical,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_emission\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b.append("    SphericalLight.diffuse_specular_emissive (\n");
-                b.append("      light_spherical,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_emission,\n");
-                b.append("      p_specular\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-
-          case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC:
-          {
-            switch (specular) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    ProjectiveLight.diffuse_only_emissive_shadowed_basic (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_emission,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow_basic,\n");
-                b.append("      shadow_basic\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    ProjectiveLight.diffuse_specular_emissive_shadowed_basic (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_emission,\n");
-                b.append("      p_specular,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow_basic,\n");
-                b.append("      shadow_basic\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-
-          case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
-          {
-            switch (specular) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    ProjectiveLight.diffuse_only_emissive_shadowed_basic_packed4444 (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_emission,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow_basic,\n");
-                b.append("      shadow_basic\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    ProjectiveLight.diffuse_specular_emissive_shadowed_basic_packed4444 (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_emission,\n");
-                b.append("      p_specular,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow_basic,\n");
-                b.append("      shadow_basic\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-
-          case LIGHT_LABEL_PROJECTIVE:
-          {
-            switch (specular) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b.append("    ProjectiveLight.diffuse_only_emissive (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_emission,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b.append("    ProjectiveLight.diffuse_specular_emissive (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_emission,\n");
-                b.append("      p_specular,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-
-          case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
-          {
-            switch (specular) {
-              case SPECULAR_NONE:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    ProjectiveLight.diffuse_only_emissive_shadowed_variance (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_emission,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow_variance,\n");
-                b.append("      shadow_variance\n");
-                b.append("    );\n");
-                break;
-              }
-              case SPECULAR_CONSTANT:
-              case SPECULAR_MAPPED:
-              {
-                b.append("  value light_term : vector_3f =\n");
-                b
-                  .append("    ProjectiveLight.diffuse_specular_emissive_shadowed_variance (\n");
-                b.append("      light_projective,\n");
-                b.append("      n,\n");
-                b.append("      f_position_eye [x y z],\n");
-                b.append("      p_emission,\n");
-                b.append("      p_specular,\n");
-                b.append("      t_projection,\n");
-                b.append("      f_position_light_clip,\n");
-                b.append("      t_shadow_variance,\n");
-                b.append("      shadow_variance\n");
-                b.append("    );\n");
-                break;
-              }
-            }
-            break;
-          }
-        }
+        b.append("  -- Projective emissive diffuse light term\n");
+        b.append("  value light_diffuse_unattenuated : vector_3f =\n");
+        b.append("    ProjectiveLight.diffuse_colour (\n");
+        b.append("      light_projective,\n");
+        b.append("      light_vectors.vectors,\n");
+        b.append("      light_colour,\n");
+        b.append("      p_emission.amount\n");
+        b.append("    );\n");
         break;
       }
     }
+
+    b.append("  value light_diffuse : vector_3f =\n");
+    b.append("    V3.multiply_scalar (\n");
+    b.append("      light_diffuse_unattenuated,\n");
+    b.append("      light_attenuation\n");
+    b.append("    );\n");
+    b.append("\n");
+
+    switch (specular) {
+      case SPECULAR_NONE:
+      {
+        b.append("  -- Projective (no) specular light term\n");
+        break;
+      }
+      case SPECULAR_CONSTANT:
+      case SPECULAR_MAPPED:
+      {
+        b.append("  -- Projective specular light term\n");
+        b.append("  value light_specular_unattenuated : vector_3f =\n");
+        b.append("    ProjectiveLight.specular_colour (\n");
+        b.append("      light_projective,\n");
+        b.append("      light_vectors.vectors,\n");
+        b.append("      light_colour,\n");
+        b.append("      p_specular\n");
+        b.append("    );\n");
+        b.append("  value light_specular : vector_3f =\n");
+        b.append("    V3.multiply_scalar (\n");
+        b.append("      light_specular_unattenuated,\n");
+        b.append("      light_attenuation\n");
+        b.append("    );\n");
+        break;
+      }
+    }
+
+    b.append("\n");
+  }
+
+  private static void fragmentShaderValuesLightDirectional(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialEmissiveLabel emissive,
+    final @Nonnull KMaterialSpecularLabel specular)
+  {
+    b.append("  -- Directional light vectors\n");
+    b.append("  value light_vectors =\n");
+    b.append("    DirectionalLight.vectors (\n");
+    b.append("      light_directional,\n");
+    b.append("      f_position_eye [x y z],\n");
+    b.append("      n\n");
+    b.append("    );\n");
+    b.append("\n");
+
+    switch (emissive) {
+      case EMISSIVE_NONE:
+      {
+        b.append("  -- Directional non-emissive diffuse light term\n");
+        b.append("  value light_diffuse : vector_3f =\n");
+        b.append("    DirectionalLight.diffuse_colour (\n");
+        b.append("      light_directional,\n");
+        b.append("      light_vectors,\n");
+        b.append("      0.0\n");
+        b.append("    );\n");
+        break;
+      }
+      case EMISSIVE_CONSTANT:
+      case EMISSIVE_MAPPED:
+      {
+        b.append("  -- Directional emissive diffuse light term\n");
+        b.append("  value light_diffuse : vector_3f =\n");
+        b.append("    DirectionalLight.diffuse_colour (\n");
+        b.append("      light_directional,\n");
+        b.append("      light_vectors,\n");
+        b.append("      p_emission.amount\n");
+        b.append("    );\n");
+        break;
+      }
+    }
+
+    b.append("\n");
+
+    switch (specular) {
+      case SPECULAR_NONE:
+      {
+        b.append("  -- Directional (no) specular light term\n");
+        break;
+      }
+      case SPECULAR_CONSTANT:
+      case SPECULAR_MAPPED:
+      {
+        b.append("  -- Directional specular light term\n");
+        b.append("  value light_specular : vector_3f =\n");
+        b.append("    DirectionalLight.specular_colour (\n");
+        b.append("      light_directional,\n");
+        b.append("      light_vectors,\n");
+        b.append("      p_specular\n");
+        b.append("    );\n");
+        break;
+      }
+    }
+
+    b.append("\n");
+  }
+
+  private static void fragmentShaderValuesLightSpherical(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialEmissiveLabel emissive,
+    final @Nonnull KMaterialSpecularLabel specular)
+  {
+    b.append("  -- Spherical light vectors/attenuation\n");
+    b.append("  value light_vectors =\n");
+    b.append("    Light.calculate (\n");
+    b.append("      light_spherical,\n");
+    b.append("      f_position_eye [x y z],\n");
+    b.append("      n\n");
+    b.append("    );\n");
+
+    switch (emissive) {
+      case EMISSIVE_NONE:
+      {
+        b.append("\n");
+        b.append("  -- Spherical non-emissive diffuse light term\n");
+        b.append("  value light_diffuse_unattenuated : vector_3f =\n");
+        b.append("    SphericalLight.diffuse_colour (\n");
+        b.append("      light_spherical,\n");
+        b.append("      light_vectors.vectors,\n");
+        b.append("      0.0\n");
+        b.append("    );\n");
+        break;
+      }
+      case EMISSIVE_CONSTANT:
+      case EMISSIVE_MAPPED:
+      {
+        b.append("  -- Spherical emissive diffuse light term\n");
+        b.append("  value light_diffuse_unattenuated : vector_3f =\n");
+        b.append("    SphericalLight.diffuse_colour (\n");
+        b.append("      light_spherical,\n");
+        b.append("      light_vectors.vectors,\n");
+        b.append("      p_emission.amount\n");
+        b.append("    );\n");
+        break;
+      }
+    }
+
+    b.append("  value light_diffuse : vector_3f =\n");
+    b.append("    V3.multiply_scalar (\n");
+    b.append("      light_diffuse_unattenuated,\n");
+    b.append("      light_vectors.attenuation\n");
+    b.append("    );\n");
+    b.append("\n");
+
+    switch (specular) {
+      case SPECULAR_NONE:
+      {
+        b.append("  -- Spherical (no) specular light term\n");
+        break;
+      }
+      case SPECULAR_CONSTANT:
+      case SPECULAR_MAPPED:
+      {
+        b.append("  -- Spherical specular light term\n");
+        b.append("  value light_specular_unattenuated : vector_3f =\n");
+        b.append("    SphericalLight.specular_colour (\n");
+        b.append("      light_spherical,\n");
+        b.append("      light_vectors.vectors,\n");
+        b.append("      p_specular\n");
+        b.append("    );\n");
+
+        b.append("  value light_specular : vector_3f =\n");
+        b.append("    V3.multiply_scalar (\n");
+        b.append("      light_specular_unattenuated,\n");
+        b.append("      light_vectors.attenuation\n");
+        b.append("    );\n");
+        break;
+      }
+    }
+
+    b.append("\n");
   }
 
   private static void fragmentShaderValuesNormal(
@@ -838,6 +760,7 @@ public final class ForwardShaders
     switch (normal) {
       case NORMAL_MAPPED:
       {
+        b.append("  -- Mapped normals\n");
         b.append("  value n = Normals.bump (\n");
         b.append("    t_normal,\n");
         b.append("    m_normal,\n");
@@ -846,6 +769,7 @@ public final class ForwardShaders
         b.append("    V3.normalize (f_bitangent),\n");
         b.append("    f_uv\n");
         b.append("  );\n");
+        b.append("\n");
         break;
       }
       case NORMAL_NONE:
@@ -854,18 +778,36 @@ public final class ForwardShaders
       }
       case NORMAL_VERTEX:
       {
+        b.append("  -- Vertex normals\n");
         b.append("  value n = V3.normalize (f_normal_eye);\n");
+        b.append("\n");
         break;
       }
     }
   }
 
   private static void fragmentShaderValuesRGBAOpaqueLit(
-    final @Nonnull StringBuilder b)
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialSpecularLabel specular)
   {
     b.append("  -- RGBA opaque lit\n");
-    b.append("  value lit = V3.multiply (surface [x y z], light_term);\n");
-    b.append("  value rgba = new vector_4f (lit [x y z], 1.0);\n");
+    b
+      .append("  value lit_d = V3.multiply (surface [x y z], light_diffuse);\n");
+
+    switch (specular) {
+      case SPECULAR_CONSTANT:
+      case SPECULAR_MAPPED:
+      {
+        b.append("  value lit_s = V3.add (lit_d, light_specular);\n");
+        b.append("  value rgba = new vector_4f (lit_s [x y z], 1.0);\n");
+        break;
+      }
+      case SPECULAR_NONE:
+      {
+        b.append("  value rgba = new vector_4f (lit_d [x y z], 1.0);\n");
+        break;
+      }
+    }
   }
 
   private static void fragmentShaderValuesRGBAOpaqueUnlit(
@@ -876,12 +818,31 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesRGBATranslucentLit(
-    final @Nonnull StringBuilder b)
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialSpecularLabel specular)
   {
     b.append("  -- RGBA translucent lit\n");
-    b.append("  value lit = V3.multiply (surface [x y z], light_term);\n");
-    b.append("  value a = F.multiply (surface [w], opacity);\n");
-    b.append("  value rgba = new vector_4f (lit, a);\n");
+    b
+      .append("  value lit_d = V3.multiply (surface [x y z], light_diffuse);\n");
+
+    switch (specular) {
+      case SPECULAR_CONSTANT:
+      case SPECULAR_MAPPED:
+      {
+        b
+          .append("  value lit_s = new vector_4f (light_specular, VectorAux.average_3f (light_specular));\n");
+        b
+          .append("  value lit_a = V4.add (new vector_4f (lit_d, surface [w]), lit_s);\n");
+        b.append("  value rgba = V4.multiply_scalar (lit_a, opacity);\n");
+        break;
+      }
+      case SPECULAR_NONE:
+      {
+        b.append("  value a = F.multiply (surface [w], opacity);\n");
+        b.append("  value rgba = new vector_4f (lit_d, a);\n");
+        break;
+      }
+    }
   }
 
   private static void fragmentShaderValuesRGBATranslucentUnlit(
@@ -926,12 +887,15 @@ public final class ForwardShaders
     }
 
     if (sample_specular) {
-      b.append("  value specular_sample = S.texture (t_specular, f_uv);\n");
-      b.append("  value p_specular = record Specular.t {\n");
-      b.append("    exponent  = p_specular.exponent,\n");
+      b.append("  -- Mapped specular\n");
       b
-        .append("    intensity = F.multiply (p_specular.intensity, specular_sample [x])\n");
+        .append("  value specular_sample = S.texture (t_specular, f_uv) [x y z];\n");
+      b.append("  value p_specular = record Specular.t {\n");
+      b.append("    exponent = p_specular.exponent,\n");
+      b
+        .append("    colour = V3.multiply (p_specular.colour, specular_sample)\n");
       b.append("  };\n");
+      b.append("\n");
     }
   }
 
@@ -942,11 +906,13 @@ public final class ForwardShaders
     switch (env) {
       case ENVIRONMENT_NONE:
       {
+        b.append("  -- No environment mapping\n");
         b.append("  value surface : vector_4f = albedo;\n");
         break;
       }
       case ENVIRONMENT_REFLECTIVE:
       {
+        b.append("  -- Uniform environment mapping\n");
         b.append("  value surface : vector_4f =\n");
         b.append("    new vector_4f (\n");
         b.append("      V3.interpolate (\n");
@@ -960,6 +926,7 @@ public final class ForwardShaders
       }
       case ENVIRONMENT_REFLECTIVE_MAPPED:
       {
+        b.append("  -- Mapped environment mapping\n");
         b.append("  value surface : vector_4f =\n");
         b.append("    new vector_4f (\n");
         b.append("      V3.interpolate (\n");
@@ -973,6 +940,8 @@ public final class ForwardShaders
         break;
       }
     }
+
+    b.append("\n");
   }
 
   private static void fragmentShaderValuesSurfaceTranslucent(
@@ -982,11 +951,13 @@ public final class ForwardShaders
     switch (env) {
       case ENVIRONMENT_NONE:
       {
+        b.append("  -- No environment mapping\n");
         b.append("  value surface : vector_4f = albedo;\n");
         break;
       }
       case ENVIRONMENT_REFLECTIVE:
       {
+        b.append("  -- Uniform environment mapping\n");
         b.append("  value surface : vector_4f =\n");
         b.append("    V4.interpolate (\n");
         b.append("      albedo,\n");
@@ -997,6 +968,7 @@ public final class ForwardShaders
       }
       case ENVIRONMENT_REFLECTIVE_MAPPED:
       {
+        b.append("  -- Mapped environment mapping\n");
         b.append("  value surface : vector_4f =\n");
         b.append("    V4.interpolate (\n");
         b.append("      albedo,\n");
@@ -1007,6 +979,8 @@ public final class ForwardShaders
         break;
       }
     }
+
+    b.append("\n");
   }
 
   private static void moduleEnd(
@@ -1115,7 +1089,7 @@ public final class ForwardShaders
     ForwardShaders.fragmentShaderValuesLight(b, light, emissive, specular);
     ForwardShaders.fragmentShaderValuesAlbedoOpaque(b, albedo);
     ForwardShaders.fragmentShaderValuesSurfaceOpaque(b, env);
-    ForwardShaders.fragmentShaderValuesRGBAOpaqueLit(b);
+    ForwardShaders.fragmentShaderValuesRGBAOpaqueLit(b, specular);
     b.append("as\n");
     b.append("  out out_0 = rgba;\n");
     b.append("end;\n");
@@ -1190,7 +1164,7 @@ public final class ForwardShaders
     ForwardShaders.fragmentShaderValuesLight(b, light, emissive, specular);
     ForwardShaders.fragmentShaderValuesAlbedoTranslucent(b, albedo);
     ForwardShaders.fragmentShaderValuesSurfaceTranslucent(b, env);
-    ForwardShaders.fragmentShaderValuesRGBATranslucentLit(b);
+    ForwardShaders.fragmentShaderValuesRGBATranslucentLit(b, specular);
     b.append("as\n");
     b.append("  out out_0 = rgba;\n");
     b.append("end;\n");
@@ -1234,29 +1208,6 @@ public final class ForwardShaders
     b.append("end;\n");
   }
 
-  private static void fragmentShaderValuesAlpha(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialAlphaOpacityType alpha)
-  {
-    switch (alpha) {
-      case ALPHA_OPACITY_CONSTANT:
-      {
-        b.append("  -- Alpha constant\n");
-        b.append("  value opacity = p_opacity;\n");
-        break;
-      }
-      case ALPHA_OPACITY_ONE_MINUS_DOT:
-      {
-        b.append("  -- Alpha dot\n");
-        b
-          .append("  value o_v = V3.normalize (V3.negate (f_position_eye [x y z]));\n");
-        b.append("  value o_d = F.subtract (1.0, V3.dot (o_v, n))\n;");
-        b.append("  value opacity = F.multiply (o_d, p_opacity);\n");
-        break;
-      }
-    }
-  }
-
   private static void moduleProgram(
     final @Nonnull StringBuilder b)
   {
@@ -1293,6 +1244,7 @@ public final class ForwardShaders
     b.append("import com.io7m.renderer.ShadowVariance;\n");
     b.append("import com.io7m.renderer.Specular;\n");
     b.append("import com.io7m.renderer.SphericalLight;\n");
+    b.append("import com.io7m.renderer.VectorAux;\n");
     b.append("\n");
   }
 

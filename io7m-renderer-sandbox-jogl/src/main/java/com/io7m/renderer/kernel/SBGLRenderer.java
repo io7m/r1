@@ -125,7 +125,8 @@ import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.kernel.types.KInstanceTransformed;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucent;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
@@ -2360,8 +2361,23 @@ final class SBGLRenderer implements GLEventListener
         for (final Pair<KInstanceTransformed, SBInstance> pair : scene_things.second) {
           pair.first
             .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, RException>() {
-              @Override public Unit transformedVisitOpaque(
-                final @Nonnull KInstanceTransformedOpaque i)
+              @Override public Unit transformedVisitOpaqueRegular(
+                final @Nonnull KInstanceTransformedOpaqueRegular i)
+                throws RException,
+                  ConstraintError,
+                  RException,
+                  JCGLException
+              {
+                if (pair.second.isLit()) {
+                  builder.sceneAddOpaqueLitVisibleWithShadow(klight, i);
+                } else {
+                  builder.sceneAddOpaqueUnlit(i);
+                }
+                return Unit.unit();
+              }
+
+              @Override public Unit transformedVisitOpaqueAlphaDepth(
+                final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
                 throws RException,
                   ConstraintError,
                   RException,
@@ -2433,10 +2449,18 @@ final class SBGLRenderer implements GLEventListener
       for (final Pair<KInstanceTransformedTranslucent, SBInstance> pair : translucents) {
         pair.first
           .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, RException>() {
-            @Override public Unit transformedVisitOpaque(
-              final @Nonnull KInstanceTransformedOpaque i)
-              throws RException,
-                ConstraintError,
+            @Override public Unit transformedVisitOpaqueRegular(
+              final @Nonnull KInstanceTransformedOpaqueRegular i)
+              throws ConstraintError,
+                RException,
+                JCGLException
+            {
+              throw new UnreachableCodeException();
+            }
+
+            @Override public Unit transformedVisitOpaqueAlphaDepth(
+              final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
+              throws ConstraintError,
                 RException,
                 JCGLException
             {
@@ -2445,8 +2469,7 @@ final class SBGLRenderer implements GLEventListener
 
             @Override public Unit transformedVisitTranslucentRefractive(
               final @Nonnull KInstanceTransformedTranslucentRefractive i)
-              throws RException,
-                ConstraintError,
+              throws ConstraintError,
                 RException,
                 JCGLException
             {
@@ -2456,8 +2479,7 @@ final class SBGLRenderer implements GLEventListener
 
             @Override public Unit transformedVisitTranslucentRegular(
               final @Nonnull KInstanceTransformedTranslucentRegular i)
-              throws RException,
-                ConstraintError,
+              throws ConstraintError,
                 RException,
                 JCGLException
             {

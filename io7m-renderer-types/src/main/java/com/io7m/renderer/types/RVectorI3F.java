@@ -31,6 +31,12 @@ import com.io7m.jtensors.VectorI3F;
 public class RVectorI3F<T extends RSpace> extends VectorI3F implements
   RVectorReadable3F<T>
 {
+  private static final @Nonnull RVectorI3F<?> ZERO_FIELD;
+
+  static {
+    ZERO_FIELD = new RVectorI3F<RSpace>(0.0f, 0.0f, 0.0f);
+  }
+
   /**
    * Construct a new vector.
    * 
@@ -61,5 +67,19 @@ public class RVectorI3F<T extends RSpace> extends VectorI3F implements
     final @Nonnull RVectorReadable3F<T> v)
   {
     super(v);
+  }
+
+  /**
+   * @return The zero vector.
+   * @param <T>
+   *          The desired coordinate space
+   */
+
+  @SuppressWarnings("unchecked") public static
+    <T extends RSpace>
+    RVectorI3F<T>
+    zero()
+  {
+    return (RVectorI3F<T>) RVectorI3F.ZERO_FIELD;
   }
 }

@@ -22,6 +22,7 @@ import java.awt.event.ActionListener;
 
 import javax.annotation.Nonnull;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
@@ -39,11 +40,12 @@ public final class SBMaterialControlsSpecular implements
 {
   protected final @Nonnull JTextField     texture;
   protected final @Nonnull JButton        texture_select;
-  protected final @Nonnull SBFloatHSlider intensity;
   protected final @Nonnull SBFloatHSlider exponent;
   private final @Nonnull RowGroup         group;
+  private final @Nonnull SBColourInput    colour;
 
   public SBMaterialControlsSpecular(
+    final @Nonnull JFrame parent,
     final @Nonnull SBSceneControllerTextures controller,
     final @Nonnull Log log)
     throws ConstraintError
@@ -68,7 +70,7 @@ public final class SBMaterialControlsSpecular implements
     });
 
     this.exponent = new SBFloatHSlider("Exponent", 1.0f, 128.0f);
-    this.intensity = new SBFloatHSlider("Intensity", 0.0f, 1.0f);
+    this.colour = SBColourInput.newInput(parent, "Colour");
   }
 
   @Override public void controlsAddToLayout(
@@ -85,12 +87,7 @@ public final class SBMaterialControlsSpecular implements
       .add(this.texture, 3)
       .add(this.texture_select);
 
-    dg
-      .row()
-      .group(this.group)
-      .grid(this.intensity.getLabel())
-      .add(this.intensity.getSlider(), 3)
-      .add(this.intensity.getField());
+    this.colour.controlsAddToLayout(dg);
 
     dg
       .row()
@@ -106,7 +103,7 @@ public final class SBMaterialControlsSpecular implements
     final PathVirtual tt = mat_s.getTexture();
     this.texture.setText(tt == null ? "" : tt.toString());
     this.exponent.setCurrent(mat_s.getExponent());
-    this.intensity.setCurrent(mat_s.getIntensity());
+    this.colour.controlsLoadFrom(mat_s.getColour());
   }
 
   @Override public SBMaterialSpecularDescription controlsSave()
@@ -120,7 +117,7 @@ public final class SBMaterialControlsSpecular implements
     final SBMaterialSpecularDescription specular =
       new SBMaterialSpecularDescription(
         specular_texture_value,
-        this.intensity.getCurrent(),
+        this.colour.controlsSave(),
         this.exponent.getCurrent());
 
     return specular;
@@ -129,10 +126,12 @@ public final class SBMaterialControlsSpecular implements
   @Override public void controlsHide()
   {
     this.group.hide();
+    this.colour.controlsHide();
   }
 
   @Override public void controlsShow()
   {
     this.group.forceShow();
+    this.colour.controlsShow();
   }
 }
