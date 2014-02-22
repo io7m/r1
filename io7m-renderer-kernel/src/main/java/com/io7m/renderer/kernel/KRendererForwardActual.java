@@ -27,6 +27,7 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
@@ -45,7 +46,6 @@ import com.io7m.jcanephora.JCBProgramProcedure;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureCubeStatic;
@@ -448,7 +448,7 @@ import com.io7m.renderer.types.RTransformView;
         final KMesh mesh = instance.instanceGetMesh();
         final ArrayBuffer array = mesh.getArrayBuffer();
         final IndexBuffer indices = mesh.getIndexBuffer();
-        final KInstanceOpaque actual = instance.getInstance();
+        final KInstanceOpaque actual = instance.instanceGet();
         final KMaterialOpaque material = actual.instanceGetMaterial();
 
         KRendererForwardActual.putInstanceMatrices(program, mwi, label);
@@ -484,6 +484,10 @@ import com.io7m.renderer.types.RTransformView;
           if (label.labelImpliesUV()) {
             KShadingProgramCommon.bindAttributeUV(program, array);
           }
+
+          KRendererCommon.renderConfigureFaceCulling(
+            gc,
+            actual.instanceGetFaces());
 
           program.programExecute(new JCBProgramProcedure() {
             @Override public void call()
@@ -1366,13 +1370,14 @@ import com.io7m.renderer.types.RTransformView;
       RMatrixI4x4F.newFromReadable(mwo.getMatrixView());
     final RMatrixI4x4F<RTransformProjection> m_proj =
       RMatrixI4x4F.newFromReadable(mwo.getMatrixProjection());
+
+    final Option<KFaceSelection> none = Option.none();
     this.depth.depthRendererEvaluate(
       m_view,
       m_proj,
       batched.getBatchesDepth(),
       framebuffer,
-      FaceSelection.FACE_BACK,
-      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+      none);
 
     final VectorM2I viewport = this.viewport_size;
     final VectorM4F backdrop = this.background;
@@ -1634,9 +1639,10 @@ import com.io7m.renderer.types.RTransformView;
               ConstraintError,
               JCacheException
           {
-            KRendererForwardActual.renderTranslucentRegularConfigureCulling(
-              gc,
-              t.translucentGetInstance().getInstance().instanceGetFaces());
+            KRendererCommon.renderConfigureFaceCulling(gc, t
+              .translucentGetInstance()
+              .getInstance()
+              .instanceGetFaces());
 
             KRendererForwardActual.this.renderTranslucentRegularLit(
               gc,
@@ -1653,9 +1659,9 @@ import com.io7m.renderer.types.RTransformView;
               ConstraintError,
               JCacheException
           {
-            KRendererForwardActual.renderTranslucentRegularConfigureCulling(
-              gc,
-              t.getInstance().instanceGetFaces());
+            KRendererCommon.renderConfigureFaceCulling(gc, t
+              .getInstance()
+              .instanceGetFaces());
 
             KRendererForwardActual.this.renderTranslucentRegularUnlit(
               gc,
@@ -1664,42 +1670,6 @@ import com.io7m.renderer.types.RTransformView;
             return Unit.unit();
           }
         });
-    }
-  }
-
-  private static void renderTranslucentRegularConfigureCulling(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KFaceSelection faces)
-    throws JCGLRuntimeException,
-      ConstraintError
-  {
-    switch (faces) {
-      case FACE_RENDER_BACK:
-      {
-        gc.cullingEnable(
-          FaceSelection.FACE_FRONT,
-          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-        break;
-      }
-      case FACE_RENDER_FRONT:
-      {
-        gc.cullingEnable(
-          FaceSelection.FACE_BACK,
-          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-        break;
-      }
-      case FACE_RENDER_FRONT_AND_BACK:
-      {
-        gc.cullingDisable();
-        break;
-      }
-      case FACE_RENDER_NONE:
-      {
-        gc.cullingEnable(
-          FaceSelection.FACE_FRONT_AND_BACK,
-          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-        break;
-      }
     }
   }
 }
