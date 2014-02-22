@@ -18,22 +18,25 @@ package com.io7m.renderer.kernel;
 
 import javax.swing.JComboBox;
 
-import com.io7m.renderer.kernel.KLight.Type;
-
-final class SBLightTypeSelector extends JComboBox<KLight.Type>
+final class SBLightTypeSelector extends JComboBox<SBLightType>
 {
   private static final long serialVersionUID;
 
   static {
-    serialVersionUID = 319658390826132910L;
+    serialVersionUID = 7551147942514234160L;
   }
 
   public SBLightTypeSelector()
   {
-    for (final Type type : KLight.Type.values()) {
+    for (final SBLightType type : SBLightType.values()) {
       this.addItem(type);
     }
 
-    this.setSelectedItem(KLight.Type.LIGHT_DIRECTIONAL);
+    this.setSelectedItem(SBLightType.LIGHT_DIRECTIONAL);
+  }
+
+  @Override public SBLightType getSelectedItem()
+  {
+    return (SBLightType) super.getSelectedItem();
   }
 }

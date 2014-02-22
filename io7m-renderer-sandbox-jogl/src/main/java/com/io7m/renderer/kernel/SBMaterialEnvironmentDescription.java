@@ -17,11 +17,17 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 import com.io7m.jvvfs.PathVirtual;
 
 public final class SBMaterialEnvironmentDescription
 {
+  public static @Nonnull SBMaterialEnvironmentDescription getDefault()
+  {
+    return new SBMaterialEnvironmentDescription(null, 0.0f, false);
+  }
+
   private final float                     mix;
   private final boolean                   mix_mapped;
   private final @CheckForNull PathVirtual texture;
@@ -67,7 +73,7 @@ public final class SBMaterialEnvironmentDescription
     return this.mix;
   }
 
-  public boolean getMixFromSpecularMap()
+  public boolean getMixMapped()
   {
     return this.mix_mapped;
   }
@@ -82,7 +88,7 @@ public final class SBMaterialEnvironmentDescription
     final int prime = 31;
     int result = 1;
     result = (prime * result) + Float.floatToIntBits(this.mix);
-    result = (prime * result) + (this.mix_mapped ? 1231 : 1237);
+    result = (prime * result) + (this.mix_mapped ? 1234 : 4321);
     result = (prime * result) + this.texture.hashCode();
     return result;
   }

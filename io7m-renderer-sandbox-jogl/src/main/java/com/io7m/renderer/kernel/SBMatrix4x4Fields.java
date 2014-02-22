@@ -22,9 +22,9 @@ import javax.swing.JTextField;
 import net.java.dev.designgridlayout.IRowCreator;
 
 import com.io7m.jtensors.VectorI4F;
-import com.io7m.renderer.RMatrixI4x4F;
-import com.io7m.renderer.RTransform;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
+import com.io7m.renderer.types.RMatrixI4x4F;
+import com.io7m.renderer.types.RTransform;
 
 public final class SBMatrix4x4Fields<T extends RTransform>
 {
@@ -94,7 +94,8 @@ public final class SBMatrix4x4Fields<T extends RTransform>
         SBTextFieldUtilities.getFieldFloatOrError(this
           .getRowColumnField(3, 3)));
 
-    return new RMatrixI4x4F<T>(column_0, column_1, column_2, column_3);
+    return RMatrixI4x4F
+      .newFromColumns(column_0, column_1, column_2, column_3);
   }
 
   public @Nonnull JTextField getRowColumnField(

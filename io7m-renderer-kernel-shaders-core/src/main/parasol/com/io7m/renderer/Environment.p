@@ -24,8 +24,16 @@ module Environment is
   import com.io7m.parasol.Float       as F;
   import com.io7m.parasol.Matrix4x4f  as M4;
 
-  import com.io7m.renderer.CubeMap   as CM;
-  import com.io7m.renderer.Materials as M;
+  import com.io7m.renderer.CubeMap;
+
+  --
+  -- Material information relating to environment mapping
+  --
+
+  type t is record
+    -- The linear mix factor between the surface albedo and the environment reflection
+    mix : float
+  end;
 
   --
   -- Calculate a reflection from the cube texture [t], assuming
@@ -45,7 +53,7 @@ module Environment is
       value r  = V3.reflect (vn, nn);
       value ri = M4.multiply_vector (m, new vector_4f (r, 0.0));
     in 
-      CM.texture (t, ri [x y z])
+      CubeMap.texture (t, ri [x y z])
     end;
 
 end;

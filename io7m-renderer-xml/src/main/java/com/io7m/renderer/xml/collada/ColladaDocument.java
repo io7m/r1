@@ -38,7 +38,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.RXMLUtilities;
 import com.io7m.renderer.xml.collada.ColladaSource.ColladaSourceArray2F;
 import com.io7m.renderer.xml.collada.ColladaSource.ColladaSourceArray3F;
@@ -127,8 +127,7 @@ public final class ColladaDocument
 
   private static @Nonnull Element getVerticesElementForGeometry(
     final @Nonnull Element eg)
-    throws RXMLException,
-      ConstraintError
+    throws RXMLException
   {
     final Element em =
       RXMLUtilities.getChild(eg, "mesh", ColladaDocument.COLLADA_URI);

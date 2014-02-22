@@ -25,14 +25,10 @@ module ShadowVariance is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Sampler2D  as S2;
 
-  import com.io7m.renderer.Albedo    as A;
-  import com.io7m.renderer.Pack      as P;
-  import com.io7m.renderer.Materials as M;
-  import com.io7m.renderer.Transform as T;
+  import com.io7m.renderer.Transform;
 
   type t is record
     factor_min      : float,
-    factor_max      : float,
     variance_min    : float,
     bleed_reduction : float
   end;
@@ -73,73 +69,18 @@ module ShadowVariance is
       value not_behind =
         new float (F.greater_or_equal (p [w], 0.0));
       value current_tex =
-        T.clip_to_texture (p);
+        Transform.clip_to_texture (p);
       value moments =
         S2.texture (t_shadow_variance, current_tex [x y]) [x y];
       value p_max =
         chebyshev_upper_bound (config, moments, current_tex [z]);
       value clamped =
-        F.clamp (
+        F.maximum (
           linear_step (config.bleed_reduction, 1.0, p_max),
-          config.factor_min,
-          config.factor_max);
+          config.factor_min
+        );
     in
       F.multiply (clamped, not_behind)
     end;
-
-  shader vertex shadow_simple_v is
-    in         v_position              : vector_3f;
-    out        f_position              : vector_4f;
-    out vertex f_position_light_clip   : vector_4f;
-    out        f_position_scene_clip   : vector_4f;
-    parameter  m_modelview             : matrix_4x4f;
-    parameter  m_projection            : matrix_4x4f;
-    parameter  m_projective_modelview  : matrix_4x4f;
-    parameter  m_projective_projection : matrix_4x4f;
-  with
-    value light_clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projective_projection, m_projective_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-    value light_position =
-      M4.multiply_vector (
-        m_projective_modelview,
-        new vector_4f (v_position, 1.0)
-      );
-    value scene_clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-  as
-    out f_position_light_clip = light_clip_position;
-    out f_position_scene_clip = scene_clip_position;
-    out f_position            = light_position;
-  end;
-
-  shader fragment shadow_VC_f is
-    in f_position_scene_clip    : vector_4f;
-    in f_position               : vector_4f;
-    parameter t_shadow_variance : sampler_2d;
-    parameter shadow_variance   : t;
-    out out_0                   : vector_4f as 0;
-  with
-    value f =
-      factor (
-        shadow_variance,
-        t_shadow_variance,
-        f_position_scene_clip
-      );
-    value rgba =
-      new vector_4f (f, f, f, 1.0);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program shadow_VC is
-    vertex   shadow_simple_v;
-    fragment shadow_VC_f;
-  end;
 
 end;

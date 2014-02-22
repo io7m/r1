@@ -14,15 +14,17 @@
   <url>http://mvn.io7m.com/renderer/</url>
 
   <modules>
-    <module>io7m-renderer-core</module>
     <module>io7m-renderer-kernel-shaders-core</module>
     <module>io7m-renderer-kernel-shaders-debug</module>
     <module>io7m-renderer-kernel-shaders-depth</module>
     <module>io7m-renderer-kernel-shaders-forward</module>
     <module>io7m-renderer-kernel-shaders-postprocessing</module>
+    <module>io7m-renderer-kernel-types</module>
+    <module>io7m-renderer-kernel</module>
     <module>io7m-renderer-sandbox-jogl</module>
     <module>io7m-renderer-tests-jogl</module>
     <module>io7m-renderer-tests</module>
+    <module>io7m-renderer-types</module>
     <module>io7m-renderer-xml</module>
   </modules>
 

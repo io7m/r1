@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.Collection;
-
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -28,51 +25,17 @@ import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.RSpaceWorld;
-import com.io7m.renderer.kernel.KLight.KDirectional;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionDirectional;
+import com.io7m.renderer.kernel.types.KLightDirectional;
+import com.io7m.renderer.types.RSpaceWorld;
 
 public final class SBLightControlsDirectional implements
-  SBLightDescriptionControls
+  SBControlsDataType<SBLightDescriptionDirectional>,
+  SBLightControlsType
 {
-  private final @Nonnull SBVector3FInput<RSpaceWorld> direction;
-  private final @Nonnull SBFloatHSlider               intensity;
-  private final @Nonnull SBColourInput                colour;
-  private final @Nonnull RowGroup                     group;
-  private final @Nonnull SBSceneControllerLights      controller;
-  private final @Nonnull JFrame                       parent;
-
-  public static @Nonnull SBLightControlsDirectional newControls(
-    final @Nonnull JFrame parent,
-    final @Nonnull SBSceneControllerLights controller)
-    throws ConstraintError
-  {
-    return new SBLightControlsDirectional(parent, controller);
-  }
-
-  private SBLightControlsDirectional(
-    final @Nonnull JFrame parent,
-    final @Nonnull SBSceneControllerLights controller)
-    throws ConstraintError
-  {
-    this.parent = Constraints.constrainNotNull(parent, "Parent");
-    this.controller = Constraints.constrainNotNull(controller, "Controller");
-    this.group = new RowGroup();
-    this.colour = SBColourInput.newInput(parent, "Colour");
-    this.direction = SBVector3FInput.newInput("Direction");
-    this.intensity = new SBFloatHSlider("Intensity", 0.0f, 2.0f);
-
-    this.intensity.setCurrent(1.0f);
-  }
-
-  @Override public void addToLayout(
-    final @Nonnull DesignGridLayout layout)
-  {
-    this.intensity.addToLayout(layout.row().group(this.group));
-    this.colour.addToLayout(layout.row().group(this.group));
-    this.direction.addToLayout(layout.row().group(this.group));
-  }
+  /**
+   * Simple test app.
+   */
 
   public static void main(
     final String args[])
@@ -88,103 +51,85 @@ public final class SBLightControlsDirectional implements
             throws ConstraintError
           {
             final SBLightControlsDirectional controls =
-              SBLightControlsDirectional.newControls(
-                this,
-                new SBSceneControllerLights() {
-                  @Override public void sceneChangeListenerAdd(
-                    final SBSceneChangeListener listener)
-                  {
-                    // TODO Auto-generated method stub
-                  }
-
-                  @Override public Collection<SBLight> sceneLightsGetAll()
-                  {
-                    // TODO Auto-generated method stub
-                    return null;
-                  }
-
-                  @Override public void sceneLightRemove(
-                    final Integer id)
-                    throws ConstraintError
-                  {
-                    // TODO Auto-generated method stub
-                  }
-
-                  @Override public SBLight sceneLightGet(
-                    final Integer id)
-                    throws ConstraintError
-                  {
-                    // TODO Auto-generated method stub
-                    return null;
-                  }
-
-                  @Override public Integer sceneLightFreshID()
-                  {
-                    // TODO Auto-generated method stub
-                    return null;
-                  }
-
-                  @Override public boolean sceneLightExists(
-                    final Integer id)
-                    throws ConstraintError
-                  {
-                    // TODO Auto-generated method stub
-                    return false;
-                  }
-
-                  @Override public void sceneLightAddByDescription(
-                    final SBLightDescription d)
-                    throws ConstraintError
-                  {
-                    // TODO Auto-generated method stub
-                  }
-                });
-            controls.addToLayout(layout);
+              SBLightControlsDirectional.newControls(this, Integer.valueOf(0));
+            controls.controlsAddToLayout(layout);
           }
         };
       }
     });
   }
 
-  public void setDescription(
-    final @Nonnull SBLightDescriptionDirectional description)
+  public static @Nonnull SBLightControlsDirectional newControls(
+    final @Nonnull JFrame parent,
+    final @Nonnull Integer id)
+    throws ConstraintError
   {
-    final KDirectional l = description.getLight();
-    this.colour.setColour(l.getColour());
-    this.intensity.setCurrent(l.getIntensity());
+    return new SBLightControlsDirectional(parent, id);
+  }
+
+  private final @Nonnull SBColourInput                colour;
+  private final @Nonnull SBVector3FInput<RSpaceWorld> direction;
+  private final @Nonnull RowGroup                     group;
+  private final @Nonnull SBFloatHSlider               intensity;
+  private final @Nonnull JFrame                       parent;
+  private final @Nonnull Integer                      id;
+
+  private SBLightControlsDirectional(
+    final @Nonnull JFrame parent,
+    final @Nonnull Integer id)
+    throws ConstraintError
+  {
+    this.parent = Constraints.constrainNotNull(parent, "Parent");
+    this.group = new RowGroup();
+    this.colour = SBColourInput.newInput(parent, "Colour");
+    this.direction = SBVector3FInput.newInput("Direction");
+    this.id = id;
+    this.intensity = new SBFloatHSlider("Intensity", 0.0f, 2.0f);
+    this.intensity.setCurrent(1.0f);
+  }
+
+  @Override public void controlsAddToLayout(
+    final @Nonnull DesignGridLayout layout)
+  {
+    this.intensity.controlsAddToLayout(layout);
+    this.colour.controlsAddToLayout(layout);
+    this.direction.controlsAddToLayout(layout);
+  }
+
+  @Override public void controlsHide()
+  {
+    this.group.hide();
+    this.intensity.controlsHide();
+    this.colour.controlsHide();
+    this.direction.controlsHide();
+  }
+
+  @Override public void controlsShow()
+  {
+    this.group.forceShow();
+    this.intensity.controlsShow();
+    this.colour.controlsShow();
+    this.direction.controlsShow();
+  }
+
+  @Override public void controlsLoadFrom(
+    final SBLightDescriptionDirectional d)
+  {
+    final KLightDirectional l = d.getLight();
+    this.colour.controlsLoadFrom(l.lightGetColour());
+    this.intensity.setCurrent(l.lightGetIntensity());
     this.direction.setVector(l.getDirection());
   }
 
-  @Override public @Nonnull SBLightDescription getDescription(
-    final @CheckForNull Integer id)
+  @Override public SBLightDescriptionDirectional controlsSave()
     throws SBExceptionInputError,
       ConstraintError
   {
-    final Integer new_id =
-      id != null ? id : this.controller.sceneLightFreshID();
-
-    return new SBLightDescriptionDirectional(KDirectional.make(
-      new_id,
-      this.direction.getVector(),
-      this.colour.getColour(),
-      this.intensity.getCurrent()));
-  }
-
-  @Override public void hide()
-  {
-    this.group.hide();
-    this.parent.pack();
-  }
-
-  @Override public void show()
-  {
-    this.group.show();
-    this.parent.pack();
-  }
-
-  @Override public void forceShow()
-  {
-    this.group.forceShow();
-    this.parent.pack();
+    return new SBLightDescriptionDirectional(
+      KLightDirectional.newDirectional(
+        this.id,
+        this.direction.getVector(),
+        this.colour.controlsSave(),
+        this.intensity.getCurrent()));
   }
 }

@@ -40,13 +40,13 @@ import com.io7m.jcanephora.JCGLArrayBuffers;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLIndexBuffers;
 import com.io7m.jcanephora.UsageHint;
-import com.io7m.renderer.RSpaceObject;
-import com.io7m.renderer.RSpaceTexture;
-import com.io7m.renderer.RVectorI2F;
-import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.RVectorI4F;
-import com.io7m.renderer.kernel.KMeshAttributes;
-import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.kernel.types.KMeshAttributes;
+import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RSpaceTexture;
+import com.io7m.renderer.types.RVectorI2F;
+import com.io7m.renderer.types.RVectorI3F;
+import com.io7m.renderer.types.RVectorI4F;
+import com.io7m.renderer.types.RXMLException;
 
 /**
  * An implementation of the {@link RXMLMeshParserEvents} interface that

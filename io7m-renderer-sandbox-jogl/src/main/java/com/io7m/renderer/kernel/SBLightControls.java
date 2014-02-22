@@ -18,18 +18,13 @@ package com.io7m.renderer.kernel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.util.Collection;
 import java.util.EnumMap;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.Future;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.swing.JComboBox;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -40,119 +35,15 @@ import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.TextureFilterMagnification;
-import com.io7m.jcanephora.TextureFilterMinification;
-import com.io7m.jcanephora.TextureWrapR;
-import com.io7m.jcanephora.TextureWrapS;
-import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Unit;
 import com.io7m.jlog.Log;
-import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.kernel.KLight.Type;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionDirectional;
-import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionProjective;
-import com.io7m.renderer.kernel.SBLightDescription.SBLightDescriptionSpherical;
+import com.io7m.renderer.types.RException;
 
-public final class SBLightControls
+public final class SBLightControls implements
+  SBControlsDataType<SBLightDescription>
 {
-  static class K implements
-    SBSceneControllerLights,
-    SBSceneControllerTextures
-  {
-
-    @Override public void sceneChangeListenerAdd(
-      final SBSceneChangeListener listener)
-    {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override public
-      <T extends SBTexture2DKind>
-      Future<SBTexture2D<T>>
-      sceneTexture2DLoad(
-        final File file,
-        final TextureWrapS wrap_s,
-        final TextureWrapT wrap_t,
-        final TextureFilterMinification filter_min,
-        final TextureFilterMagnification filter_mag)
-        throws ConstraintError
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override public Future<SBTextureCube> sceneTextureCubeLoad(
-      final File file,
-      final TextureWrapR wrap_r,
-      final TextureWrapS wrap_s,
-      final TextureWrapT wrap_t,
-      final TextureFilterMinification filter_min,
-      final TextureFilterMagnification filter_mag)
-      throws ConstraintError
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override public Map<PathVirtual, SBTexture2D<?>> sceneTextures2DGet()
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override public Map<PathVirtual, SBTextureCube> sceneTexturesCubeGet()
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override public void sceneLightAddByDescription(
-      final SBLightDescription d)
-      throws ConstraintError
-    {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override public boolean sceneLightExists(
-      final Integer id)
-      throws ConstraintError
-    {
-      // TODO Auto-generated method stub
-      return false;
-    }
-
-    @Override public Integer sceneLightFreshID()
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override public SBLight sceneLightGet(
-      final Integer id)
-      throws ConstraintError
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override public void sceneLightRemove(
-      final Integer id)
-      throws ConstraintError
-    {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override public Collection<SBLight> sceneLightsGetAll()
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-  }
-
   public static void main(
     final String args[])
   {
@@ -169,10 +60,32 @@ public final class SBLightControls
             final DesignGridLayout layout)
             throws ConstraintError
           {
+            final SBExampleController controller = new SBExampleController();
             final SBLightControls controls =
-              SBLightControls.newControls(this, new K(), jlog);
-            controls.addToLayout(layout);
-            controls.setID(Integer.valueOf(23));
+              SBLightControls.newControls(
+                this,
+                controller,
+                Integer.valueOf(23),
+                jlog);
+            controls.controlsAddToLayout(layout);
+
+            final JButton hide = new JButton("Hide");
+            hide.addActionListener(new ActionListener() {
+              @Override public void actionPerformed(
+                final ActionEvent e)
+              {
+                controls.controlsHide();
+              }
+            });
+            final JButton show = new JButton("Show");
+            show.addActionListener(new ActionListener() {
+              @Override public void actionPerformed(
+                final ActionEvent e)
+              {
+                controls.controlsShow();
+              }
+            });
+            layout.row().grid().add(hide).add(show);
           }
         };
       }
@@ -185,135 +98,183 @@ public final class SBLightControls
     newControls(
       final @Nonnull JFrame parent,
       final @Nonnull C controller,
+      final @Nonnull Integer id,
       final @Nonnull Log log)
       throws ConstraintError
   {
-    return new SBLightControls(parent, controller, log);
+    return new SBLightControls(parent, controller, id, log);
   }
 
-  private final @Nonnull EnumMap<Type, SBLightDescriptionControls> controls;
+  private final @Nonnull EnumMap<SBLightType, SBLightControlsType> controls;
   private final @Nonnull SBLightControlsDirectional                directional_controls;
-  private final @Nonnull SBLightControlsSpherical                  spherical_controls;
-  private final @Nonnull SBLightControlsProjective                 projective_controls;
-  private final @Nonnull JComboBox<Type>                           selector;
+  private final @Nonnull RowGroup                                  group;
+  private @Nonnull Integer                                         id;
+  private final @Nonnull JTextField                                id_field;
   private final @Nonnull JFrame                                    parent;
-  private final @Nonnull RowGroup                                  id_group;
-  private final @Nonnull JTextField                                id;
-  private @CheckForNull Integer                                    id_actual;
+  private final @Nonnull SBLightControlsProjective                 projective_controls;
+  private final @Nonnull SBLightTypeSelector                       selector;
+  private final @Nonnull SBLightControlsSpherical                  spherical_controls;
 
   private <C extends SBSceneControllerLights & SBSceneControllerTextures> SBLightControls(
     final @Nonnull JFrame parent,
     final @Nonnull C controller,
+    final @Nonnull Integer id,
     final @Nonnull Log log)
     throws ConstraintError
   {
     this.parent = Constraints.constrainNotNull(parent, "Parent");
 
-    this.id_group = new RowGroup();
-    this.id = new JTextField();
-    this.id.setEditable(false);
-    this.id_actual = null;
+    this.group = new RowGroup();
+    this.id_field = new JTextField(id.toString());
+    this.id_field.setEditable(false);
+    this.id = id;
 
     this.directional_controls =
-      SBLightControlsDirectional.newControls(parent, controller);
+      SBLightControlsDirectional.newControls(parent, id);
     this.spherical_controls =
-      SBLightControlsSpherical.newControls(parent, controller);
+      SBLightControlsSpherical.newControls(parent, id);
     this.projective_controls =
-      SBLightControlsProjective.newControls(parent, controller, log);
+      SBLightControlsProjective.newControls(parent, controller, id, log);
 
-    this.controls = new EnumMap<Type, SBLightDescriptionControls>(Type.class);
-    this.controls.put(Type.LIGHT_DIRECTIONAL, this.directional_controls);
-    this.controls.put(Type.LIGHT_SPHERE, this.spherical_controls);
-    this.controls.put(Type.LIGHT_PROJECTIVE, this.projective_controls);
+    this.controls =
+      new EnumMap<SBLightType, SBLightControlsType>(SBLightType.class);
+    this.controls.put(
+      SBLightType.LIGHT_DIRECTIONAL,
+      this.directional_controls);
+    this.controls.put(SBLightType.LIGHT_SPHERICAL, this.spherical_controls);
+    this.controls.put(SBLightType.LIGHT_PROJECTIVE, this.projective_controls);
 
     this.selector = new SBLightTypeSelector();
     this.selector.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+      @SuppressWarnings("synthetic-access") @Override public
+        void
+        actionPerformed(
+          final @Nonnull ActionEvent e)
       {
-        final Type selected =
-          (Type) SBLightControls.this.selector.getSelectedItem();
+        final SBLightType selected =
+          SBLightControls.this.selector.getSelectedItem();
         SBLightControls.this.controlsShowHide(selected);
       }
     });
   }
 
-  public void addToLayout(
+  @Override public void controlsAddToLayout(
     final @Nonnull DesignGridLayout layout)
   {
-    layout.row().group(this.id_group).grid(new JLabel("ID")).add(this.id);
-    this.id_group.hide();
+    layout.row().group(this.group).grid(new JLabel("ID")).add(this.id_field);
+    layout
+      .row()
+      .group(this.group)
+      .grid(new JLabel("Light"))
+      .add(this.selector);
 
-    layout.row().grid(new JLabel("Light")).add(this.selector);
-
-    final Set<Entry<Type, SBLightDescriptionControls>> entries =
+    final Set<Entry<SBLightType, SBLightControlsType>> entries =
       this.controls.entrySet();
 
-    for (final Entry<Type, SBLightDescriptionControls> e : entries) {
-      e.getValue().addToLayout(layout);
+    for (final Entry<SBLightType, SBLightControlsType> e : entries) {
+      e.getValue().controlsAddToLayout(layout);
     }
 
-    this.controlsShowHide((Type) this.selector.getSelectedItem());
+    this.controlsShowHide(this.selector.getSelectedItem());
   }
 
-  protected void controlsShowHide(
-    final @Nonnull Type selected)
+  @Override public void controlsHide()
   {
-    final Set<Entry<Type, SBLightDescriptionControls>> entries =
-      this.controls.entrySet();
-
-    for (final Entry<Type, SBLightDescriptionControls> e : entries) {
-      final SBLightDescriptionControls c = e.getValue();
-      c.forceShow();
-      c.hide();
-    }
-
-    final SBLightDescriptionControls c = this.controls.get(selected);
-    c.forceShow();
-    this.parent.pack();
+    this.group.hide();
+    this.directional_controls.controlsHide();
+    this.spherical_controls.controlsHide();
+    this.projective_controls.controlsHide();
   }
 
-  public SBLightDescription getDescription()
+  @Override @SuppressWarnings("synthetic-access") public
+    void
+    controlsLoadFrom(
+      final @Nonnull SBLightDescription d)
+  {
+    this.id = d.lightGetID();
+    this.id_field.setText(this.id.toString());
+
+    try {
+      d
+        .lightDescriptionVisitableAccept(new SBLightDescriptionVisitor<Unit, ConstraintError>() {
+          @Override public Unit lightVisitDirectional(
+            final @Nonnull SBLightDescriptionDirectional l)
+            throws ConstraintError,
+              RException,
+              ConstraintError
+          {
+            SBLightControls.this.selector
+              .setSelectedItem(SBLightType.LIGHT_DIRECTIONAL);
+            SBLightControls.this.directional_controls.controlsLoadFrom(l);
+            return Unit.unit();
+          }
+
+          @Override public Unit lightVisitProjective(
+            final @Nonnull SBLightDescriptionProjective l)
+            throws ConstraintError,
+              RException,
+              ConstraintError
+          {
+            SBLightControls.this.selector
+              .setSelectedItem(SBLightType.LIGHT_PROJECTIVE);
+            SBLightControls.this.projective_controls.controlsLoadFrom(l);
+            return Unit.unit();
+          }
+
+          @Override public Unit lightVisitSpherical(
+            final @Nonnull SBLightDescriptionSpherical l)
+            throws ConstraintError,
+              RException,
+              ConstraintError
+          {
+            SBLightControls.this.selector
+              .setSelectedItem(SBLightType.LIGHT_SPHERICAL);
+            SBLightControls.this.spherical_controls.controlsLoadFrom(l);
+            return Unit.unit();
+          }
+        });
+    } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    } catch (final ConstraintError e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
+  @Override public SBLightDescription controlsSave()
     throws SBExceptionInputError,
       ConstraintError
   {
-    return this.controls.get(this.selector.getSelectedItem()).getDescription(
-      this.id_actual);
-  }
-
-  public void setID(
-    final @Nonnull Integer id)
-  {
-    this.id_group.forceShow();
-    this.id.setText(id.toString());
-    this.id_actual = id;
-  }
-
-  public void setDescription(
-    final @Nonnull SBLightDescription description)
-  {
-    this.setID(description.getID());
-    this.selector.setSelectedItem(description.getType());
-
-    switch (description.getType()) {
+    switch (this.selector.getSelectedItem()) {
       case LIGHT_DIRECTIONAL:
-      {
-        this.directional_controls
-          .setDescription((SBLightDescriptionDirectional) description);
-        break;
-      }
-      case LIGHT_SPHERE:
-      {
-        this.spherical_controls
-          .setDescription((SBLightDescriptionSpherical) description);
-        break;
-      }
+        return this.directional_controls.controlsSave();
       case LIGHT_PROJECTIVE:
-      {
-        this.projective_controls
-          .setDescription((SBLightDescriptionProjective) description);
-        break;
-      }
+        return this.projective_controls.controlsSave();
+      case LIGHT_SPHERICAL:
+        return this.spherical_controls.controlsSave();
     }
+
+    throw new UnreachableCodeException();
+  }
+
+  @Override public void controlsShow()
+  {
+    this.group.forceShow();
+    this.controlsShowHide(this.selector.getSelectedItem());
+  }
+
+  protected void controlsShowHide(
+    final @Nonnull SBLightType selected)
+  {
+    final Set<Entry<SBLightType, SBLightControlsType>> entries =
+      this.controls.entrySet();
+
+    for (final Entry<SBLightType, SBLightControlsType> e : entries) {
+      final SBLightControlsType c = e.getValue();
+      c.controlsHide();
+    }
+
+    final SBLightControlsType c = this.controls.get(selected);
+    c.controlsShow();
+    this.parent.pack();
   }
 }

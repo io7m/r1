@@ -27,13 +27,14 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import net.java.dev.designgridlayout.IRowCreator;
+import net.java.dev.designgridlayout.DesignGridLayout;
+import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
-public final class SBFloatHSlider
+public final class SBFloatHSlider implements SBControls
 {
   private static float convertFromSlider(
     final int x,
@@ -52,12 +53,13 @@ public final class SBFloatHSlider
     return (int) (((f - min) / (max - min)) * 100);
   }
 
-  private final float               minimum;
-  private final float               maximum;
   private float                     current;
   private final @Nonnull JTextField field;
-  private final @Nonnull JSlider    slider;
+  private final @Nonnull RowGroup   group;
   private final @Nonnull JLabel     label;
+  private final float               maximum;
+  private final float               minimum;
+  private final @Nonnull JSlider    slider;
 
   public SBFloatHSlider(
     final @Nonnull String label,
@@ -67,6 +69,8 @@ public final class SBFloatHSlider
   {
     this.label =
       new JLabel(Constraints.constrainNotNull(label, "ForwardLabel"));
+    this.group = new RowGroup();
+
     this.maximum = maximum;
     this.minimum = minimum;
 
@@ -101,10 +105,31 @@ public final class SBFloatHSlider
               .getFieldFloatOrError(SBFloatHSlider.this.field);
           SBFloatHSlider.this.setCurrent(actual);
         } catch (final SBExceptionInputError x) {
-
+          // Fail silently
         }
       }
     });
+  }
+
+  @Override public void controlsAddToLayout(
+    final DesignGridLayout layout)
+  {
+    layout
+      .row()
+      .group(this.group)
+      .grid(this.label)
+      .add(this.slider, 3)
+      .add(this.field);
+  }
+
+  @Override public void controlsHide()
+  {
+    this.group.hide();
+  }
+
+  @Override public void controlsShow()
+  {
+    this.group.forceShow();
   }
 
   public float getCurrent()
@@ -152,11 +177,5 @@ public final class SBFloatHSlider
       this.maximum));
     this.current = e;
     this.refreshText();
-  }
-
-  public void addToLayout(
-    final @Nonnull IRowCreator row)
-  {
-    row.grid(this.label).add(this.slider, 3).add(this.field);
   }
 }

@@ -16,25 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
 public enum SBShadowType
 {
-  SHADOW_MAPPED_BASIC("Mapped basic"),
-  SHADOW_MAPPED_VARIANCE("Mapped variance")
-
-  ;
-
-  private final @Nonnull String name;
-
-  private SBShadowType(
-    final @Nonnull String name)
-  {
-    this.name = name;
-  }
-
-  @Override public @Nonnull String toString()
-  {
-    return this.name;
-  }
+  SHADOW_MAPPED_BASIC,
+  SHADOW_MAPPED_VARIANCE;
 }

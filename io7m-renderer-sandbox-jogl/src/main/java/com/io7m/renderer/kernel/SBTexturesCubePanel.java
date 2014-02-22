@@ -262,8 +262,10 @@ final class SBTexturesCubePanel extends JPanel
 
     this.selector = new JComboBox<PathVirtual>();
     this.selector.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+      @SuppressWarnings("synthetic-access") @Override public
+        void
+        actionPerformed(
+          final @Nonnull ActionEvent e)
       {
         final PathVirtual name =
           (PathVirtual) SBTexturesCubePanel.this.selector.getSelectedItem();

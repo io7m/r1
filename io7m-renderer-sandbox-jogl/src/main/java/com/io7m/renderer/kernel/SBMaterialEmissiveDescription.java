@@ -17,11 +17,17 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 import com.io7m.jvvfs.PathVirtual;
 
 public final class SBMaterialEmissiveDescription
 {
+  public static @Nonnull SBMaterialEmissiveDescription getDefault()
+  {
+    return new SBMaterialEmissiveDescription(0.0f, null);
+  }
+
   private final float                     emission;
   private final @CheckForNull PathVirtual texture;
 

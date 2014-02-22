@@ -32,14 +32,15 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
-import net.java.dev.designgridlayout.IRowCreator;
+import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.renderer.RSpaceRGB;
-import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.RVectorReadable3F;
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
+import com.io7m.renderer.types.RSpaceRGB;
+import com.io7m.renderer.types.RVectorI3F;
 
-public final class SBColourInput
+public final class SBColourInput implements
+  SBControlsDataType<RVectorI3F<RSpaceRGB>>
 {
   public static void main(
     final String args[])
@@ -53,7 +54,7 @@ public final class SBColourInput
         final DesignGridLayout layout = new DesignGridLayout(panel);
 
         final SBColourInput input = SBColourInput.newInput(frame, "Colour");
-        input.addToLayout(layout.row());
+        input.controlsAddToLayout(layout);
 
         frame.setPreferredSize(new Dimension(640, 480));
         frame.pack();
@@ -70,17 +71,20 @@ public final class SBColourInput
     return new SBColourInput(parent, text);
   }
 
+  private final @Nonnull JButton    colour;
   private final @Nonnull JTextField field_x;
   private final @Nonnull JTextField field_y;
   private final @Nonnull JTextField field_z;
+  private final @Nonnull RowGroup   group;
   private final @Nonnull JLabel     label;
-  private final @Nonnull JButton    colour;
 
   private SBColourInput(
     final @Nonnull JFrame parent,
     final @Nonnull String text)
   {
     this.label = new JLabel(text);
+    this.group = new RowGroup();
+
     this.field_x = new JTextField("0.0");
     this.field_y = new JTextField("0.0");
     this.field_z = new JTextField("0.0");
@@ -95,7 +99,7 @@ public final class SBColourInput
           JColorChooser.showDialog(parent, "Select colour...", Color.WHITE);
         if (c != null) {
           final float[] rgb = c.getRGBColorComponents(null);
-          SBColourInput.this.setColour(new RVectorI3F<RSpaceRGB>(
+          SBColourInput.this.controlsLoadFrom(new RVectorI3F<RSpaceRGB>(
             rgb[0],
             rgb[1],
             rgb[2]));
@@ -103,13 +107,16 @@ public final class SBColourInput
       }
     });
 
-    this.setColour(new RVectorI3F<RSpaceRGB>(1.0f, 1.0f, 1.0f));
+    final RVectorI3F<RSpaceRGB> rgb = RVectorI3F.zero();
+    this.controlsLoadFrom(rgb);
   }
 
-  public void addToLayout(
-    final @Nonnull IRowCreator row)
+  @Override public void controlsAddToLayout(
+    final DesignGridLayout layout)
   {
-    row
+    layout
+      .row()
+      .group(this.group)
       .grid(this.label)
       .add(this.field_x)
       .add(this.field_y)
@@ -117,8 +124,24 @@ public final class SBColourInput
       .add(this.colour);
   }
 
-  public @Nonnull RVectorI3F<RSpaceRGB> getColour()
-    throws SBExceptionInputError
+  @Override public void controlsHide()
+  {
+    this.group.hide();
+  }
+
+  @SuppressWarnings("boxing") @Override public void controlsLoadFrom(
+    final @Nonnull RVectorI3F<RSpaceRGB> v)
+  {
+    this.field_x.setText(String.format("%.6f", v.getXF()));
+    this.field_y.setText(String.format("%.6f", v.getYF()));
+    this.field_z.setText(String.format("%.6f", v.getZF()));
+    this.colour.setBackground(new Color(v.getXF(), v.getYF(), v.getZF()));
+    this.colour.setForeground(new Color(v.getXF(), v.getYF(), v.getZF()));
+  }
+
+  @Override public RVectorI3F<RSpaceRGB> controlsSave()
+    throws SBExceptionInputError,
+      ConstraintError
   {
     return new RVectorI3F<RSpaceRGB>(
       SBTextFieldUtilities.getFieldFloatOrError(this.field_x),
@@ -126,14 +149,8 @@ public final class SBColourInput
       SBTextFieldUtilities.getFieldFloatOrError(this.field_z));
   }
 
-  @SuppressWarnings("boxing") public void setColour(
-    final @Nonnull RVectorReadable3F<RSpaceRGB> v)
+  @Override public void controlsShow()
   {
-    this.field_x.setText(String.format("%.6f", v.getXF()));
-    this.field_y.setText(String.format("%.6f", v.getYF()));
-    this.field_z.setText(String.format("%.6f", v.getZF()));
-
-    this.colour.setBackground(new Color(v.getXF(), v.getYF(), v.getZF()));
-    this.colour.setForeground(new Color(v.getXF(), v.getYF(), v.getZF()));
+    this.group.forceShow();
   }
 }

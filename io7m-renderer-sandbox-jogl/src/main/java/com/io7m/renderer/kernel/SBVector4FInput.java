@@ -29,11 +29,11 @@ import javax.swing.WindowConstants;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.IRowCreator;
 
-import com.io7m.renderer.RSpace;
-import com.io7m.renderer.RSpaceWorld;
-import com.io7m.renderer.RVectorI4F;
-import com.io7m.renderer.RVectorReadable4F;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
+import com.io7m.renderer.types.RSpace;
+import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RVectorI4F;
+import com.io7m.renderer.types.RVectorReadable4F;
 
 public final class SBVector4FInput<R extends RSpace>
 {

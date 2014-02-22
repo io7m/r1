@@ -21,15 +21,29 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.RSpaceRGBA;
-import com.io7m.renderer.RVectorI4F;
+import com.io7m.renderer.types.RSpaceRGBA;
+import com.io7m.renderer.types.RVectorI4F;
 
 public final class SBMaterialAlbedoDescription
 {
   private final @Nonnull RVectorI4F<RSpaceRGBA> colour;
   private final float                           mix;
   private final @CheckForNull PathVirtual       texture;
+
+  public static @Nonnull SBMaterialAlbedoDescription getDefault()
+  {
+    try {
+      return new SBMaterialAlbedoDescription(new RVectorI4F<RSpaceRGBA>(
+        1.0f,
+        1.0f,
+        1.0f,
+        1.0f), 0.0f, null);
+    } catch (final ConstraintError e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
 
   public SBMaterialAlbedoDescription(
     final @Nonnull RVectorI4F<RSpaceRGBA> colour,

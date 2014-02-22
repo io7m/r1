@@ -39,11 +39,7 @@ import org.xml.sax.XMLReader;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.xml.RXMLException;
-import com.io7m.renderer.xml.RXMLException.RXMLExceptionParseError;
-import com.io7m.renderer.xml.RXMLException.RXMLExceptionParserConfigurationError;
-import com.io7m.renderer.xml.RXMLException.RXMLExceptionValidityError;
-import com.io7m.renderer.xml.RXMLException.RXMLExceptionValiditySAXErrors;
+import com.io7m.renderer.types.RXMLException;
 
 public final class RXMLMeshDocument
 {
@@ -112,21 +108,20 @@ public final class RXMLMeshDocument
       final Document d = builder.build(s);
 
       if (exceptions.size() > 0) {
-        throw new RXMLExceptionValiditySAXErrors(exceptions);
+        throw RXMLException.saxExceptions(exceptions);
       }
 
       return d;
     } catch (final SAXException e) {
       final ArrayList<SAXException> es = new ArrayList<SAXException>();
       es.add(e);
-      throw new RXMLExceptionValiditySAXErrors(es);
+      throw RXMLException.saxExceptions(es);
     } catch (final ValidityException e) {
-      throw new RXMLExceptionValidityError(e);
+      throw RXMLException.validityException(e);
     } catch (final ParsingException e) {
-      throw new RXMLExceptionParseError(e);
+      throw RXMLException.parsingException(e);
     } catch (final ParserConfigurationException e) {
-      throw new RXMLExceptionParserConfigurationError(e);
+      throw RXMLException.parserConfigurationException(e);
     }
   }
-
 }

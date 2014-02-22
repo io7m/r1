@@ -79,8 +79,8 @@
       <version>0.25.0</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.renderer.core</groupId>
-      <artifactId>io7m-renderer-core</artifactId>
+      <groupId>com.io7m.renderer.kernel</groupId>
+      <artifactId>io7m-renderer-kernel</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
