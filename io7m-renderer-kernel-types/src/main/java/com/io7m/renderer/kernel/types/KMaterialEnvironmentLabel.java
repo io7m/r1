@@ -58,14 +58,16 @@ public enum KMaterialEnvironmentLabel
 
     switch (normal) {
       case NORMAL_NONE:
+      {
         return KMaterialEnvironmentLabel.ENVIRONMENT_NONE;
+      }
       case NORMAL_MAPPED:
       case NORMAL_VERTEX:
       {
         final KMaterialEnvironment e = environment;
         if (e.getTexture().isSome()) {
           if (e.getMix() > 0.0) {
-            if (e.getMixMapped()) {
+            if (e.getMixMapped() && has_specular_map) {
               return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE_MAPPED;
             }
             return KMaterialEnvironmentLabel.ENVIRONMENT_REFLECTIVE;

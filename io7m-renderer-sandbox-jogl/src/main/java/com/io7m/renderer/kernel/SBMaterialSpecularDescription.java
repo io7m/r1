@@ -20,25 +20,28 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.types.RSpaceRGB;
+import com.io7m.renderer.types.RVectorI3F;
 
 public final class SBMaterialSpecularDescription
 {
   public static @Nonnull SBMaterialSpecularDescription getDefault()
   {
-    return new SBMaterialSpecularDescription(null, 0.0f, 0.0f);
+    final RVectorI3F<RSpaceRGB> rgb = RVectorI3F.zero();
+    return new SBMaterialSpecularDescription(null, rgb, 1.0f);
   }
 
-  private final float                     exponent;
-  private final float                     intensity;
-  private final @CheckForNull PathVirtual texture;
+  private final float                          exponent;
+  private final @Nonnull RVectorI3F<RSpaceRGB> colour;
+  private final @CheckForNull PathVirtual      texture;
 
   SBMaterialSpecularDescription(
     final @CheckForNull PathVirtual texture,
-    final float intensity,
+    final @Nonnull RVectorI3F<RSpaceRGB> colour,
     final float exponent)
   {
     this.texture = texture;
-    this.intensity = intensity;
+    this.colour = colour;
     this.exponent = exponent;
   }
 
@@ -56,12 +59,15 @@ public final class SBMaterialSpecularDescription
     }
     final SBMaterialSpecularDescription other =
       (SBMaterialSpecularDescription) obj;
-    if (Float.floatToIntBits(this.exponent) != Float
-      .floatToIntBits(other.exponent)) {
+    if (this.colour == null) {
+      if (other.colour != null) {
+        return false;
+      }
+    } else if (!this.colour.equals(other.colour)) {
       return false;
     }
-    if (Float.floatToIntBits(this.intensity) != Float
-      .floatToIntBits(other.intensity)) {
+    if (Float.floatToIntBits(this.exponent) != Float
+      .floatToIntBits(other.exponent)) {
       return false;
     }
     if (this.texture == null) {
@@ -79,9 +85,9 @@ public final class SBMaterialSpecularDescription
     return this.exponent;
   }
 
-  public float getIntensity()
+  public final RVectorI3F<RSpaceRGB> getColour()
   {
-    return this.intensity;
+    return this.colour;
   }
 
   public @CheckForNull PathVirtual getTexture()
@@ -93,8 +99,9 @@ public final class SBMaterialSpecularDescription
   {
     final int prime = 31;
     int result = 1;
+    result =
+      (prime * result) + ((this.colour == null) ? 0 : this.colour.hashCode());
     result = (prime * result) + Float.floatToIntBits(this.exponent);
-    result = (prime * result) + Float.floatToIntBits(this.intensity);
     result =
       (prime * result)
         + ((this.texture == null) ? 0 : this.texture.hashCode());
@@ -104,12 +111,12 @@ public final class SBMaterialSpecularDescription
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("SBMaterialSpecularDescription [texture=");
-    builder.append(this.texture);
-    builder.append(", intensity=");
-    builder.append(this.intensity);
-    builder.append(", exponent=");
+    builder.append("SBMaterialSpecularDescription [exponent=");
     builder.append(this.exponent);
+    builder.append(", colour=");
+    builder.append(this.colour);
+    builder.append(", texture=");
+    builder.append(this.texture);
     builder.append("]");
     return builder.toString();
   }
