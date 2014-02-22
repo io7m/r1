@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer.kernel-shaders.depth</groupId>
   <artifactId>io7m-renderer-kernel-shaders-depth</artifactId>
-  <version>0.7.0</version>
+  <version>0.8.0</version>
   <packaging>jar</packaging>
   <name>io7m-renderer-kernel-shaders-depth</name>
   <description>3D renderer (depth-only shaders)</description>
