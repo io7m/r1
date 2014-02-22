@@ -23,6 +23,8 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.renderer.types.RSpaceRGB;
+import com.io7m.renderer.types.RVectorI3F;
 
 /**
  * Material properties related to surface specular highlights.
@@ -33,8 +35,8 @@ import com.io7m.jcanephora.Texture2DStatic;
   /**
    * Construct new mapped specularity properties.
    * 
-   * @param in_intensity
-   *          The specular intensity
+   * @param in_colour
+   *          The specular colour
    * @param in_exponent
    *          The specular exponent
    * @param in_texture
@@ -45,13 +47,13 @@ import com.io7m.jcanephora.Texture2DStatic;
    */
 
   public static @Nonnull KMaterialSpecular newSpecularMapped(
-    final float in_intensity,
+    final @Nonnull RVectorI3F<RSpaceRGB> in_colour,
     final float in_exponent,
     final @Nonnull Texture2DStatic in_texture)
     throws ConstraintError
   {
     return new KMaterialSpecular(
-      in_intensity,
+      in_colour,
       in_exponent,
       Option.some(in_texture));
   }
@@ -59,8 +61,8 @@ import com.io7m.jcanephora.Texture2DStatic;
   /**
    * Construct new unmapped specularity properties.
    * 
-   * @param in_intensity
-   *          The specular intensity
+   * @param in_colour
+   *          The specular colour
    * @param in_exponent
    *          The specular exponent
    * @return New specularity properties
@@ -69,27 +71,27 @@ import com.io7m.jcanephora.Texture2DStatic;
    */
 
   public static @Nonnull KMaterialSpecular newSpecularUnmapped(
-    final float in_intensity,
+    final @Nonnull RVectorI3F<RSpaceRGB> in_colour,
     final float in_exponent)
     throws ConstraintError
   {
     final Option<Texture2DStatic> none = Option.none();
-    return new KMaterialSpecular(in_intensity, in_exponent, none);
+    return new KMaterialSpecular(in_colour, in_exponent, none);
   }
 
+  private final @Nonnull RVectorI3F<RSpaceRGB>   colour;
   private final float                            exponent;
-  private final float                            intensity;
   private final @Nonnull Option<Texture2DStatic> texture;
   private final int                              textures_required;
 
   private KMaterialSpecular(
-    final float in_intensity,
+    final @Nonnull RVectorI3F<RSpaceRGB> in_colour,
     final float in_exponent,
     final @Nonnull Option<Texture2DStatic> in_texture)
     throws ConstraintError
   {
     this.texture = Constraints.constrainNotNull(in_texture, "Texture");
-    this.intensity = in_intensity;
+    this.colour = Constraints.constrainNotNull(in_colour, "Colour");
     this.exponent = in_exponent;
     this.textures_required = this.texture.isSome() ? 1 : 0;
   }
@@ -111,8 +113,7 @@ import com.io7m.jcanephora.Texture2DStatic;
       .floatToIntBits(other.exponent)) {
       return false;
     }
-    if (Float.floatToIntBits(this.intensity) != Float
-      .floatToIntBits(other.intensity)) {
+    if (!this.colour.equals(other.colour)) {
       return false;
     }
     if (!this.texture.equals(other.texture)) {
@@ -122,21 +123,21 @@ import com.io7m.jcanephora.Texture2DStatic;
   }
 
   /**
+   * @return The specular colour
+   */
+
+  public @Nonnull RVectorI3F<RSpaceRGB> getColour()
+  {
+    return this.colour;
+  }
+
+  /**
    * @return The specular exponent
    */
 
   public float getExponent()
   {
     return this.exponent;
-  }
-
-  /**
-   * @return The specular intensity
-   */
-
-  public float getIntensity()
-  {
-    return this.intensity;
   }
 
   /**
@@ -153,7 +154,7 @@ import com.io7m.jcanephora.Texture2DStatic;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + Float.floatToIntBits(this.exponent);
-    result = (prime * result) + Float.floatToIntBits(this.intensity);
+    result = (prime * result) + this.colour.hashCode();
     result = (prime * result) + this.texture.hashCode();
     return result;
   }
@@ -169,7 +170,7 @@ import com.io7m.jcanephora.Texture2DStatic;
     builder.append("[KMaterialSpecular ");
     builder.append(this.texture);
     builder.append(" ");
-    builder.append(this.intensity);
+    builder.append(this.colour);
     builder.append(" ");
     builder.append(this.exponent);
     builder.append("]");

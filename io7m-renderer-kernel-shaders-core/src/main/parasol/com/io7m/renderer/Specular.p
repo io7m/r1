@@ -23,8 +23,8 @@ module Specular is
   --
 
   type t is record
-    exponent  : float, -- The specular exponent in the range [1, 127]
-    intensity : float  -- The specular intensity in the range [0, 1]
+    exponent : float,    -- The specular exponent in the range [1, 127]
+    colour   : vector_3f -- The specular colour/intensity
   end;
 
 end;

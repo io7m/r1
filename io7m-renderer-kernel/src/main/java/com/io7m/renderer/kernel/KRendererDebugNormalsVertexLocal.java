@@ -257,7 +257,7 @@ final class KRendererDebugNormalsVertexLocal extends KAbstractRendererDebug
      */
 
     try {
-      final KInstance instance = i.getInstance();
+      final KInstance instance = i.instanceGet();
       final KMesh mesh = instance.instanceGetMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();

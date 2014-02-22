@@ -50,7 +50,7 @@ public final class KSceneBatchedShadow
 
       for (final KInstanceTransformedOpaque i : instances) {
         final KMaterialDepthLabel label =
-          depth_labels.getDepthLabel(i.getInstance());
+          depth_labels.getDepthLabel(i.instanceGet());
 
         List<KInstanceTransformedOpaque> label_casters = null;
         if (by_label.containsKey(label)) {

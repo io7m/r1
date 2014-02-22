@@ -66,7 +66,7 @@ final class KSceneBatchedDepth
       Constraints.constrainArbitrary(this.valid, "Builder is still valid");
 
       final KMaterialDepthLabel depth_label =
-        this.cache.getDepthLabel(instance.getInstance());
+        this.cache.getDepthLabel(instance.instanceGet());
       List<KInstanceTransformedOpaque> depth_batch;
       if (this.in_progress.containsKey(depth_label)) {
         depth_batch = this.in_progress.get(depth_label);

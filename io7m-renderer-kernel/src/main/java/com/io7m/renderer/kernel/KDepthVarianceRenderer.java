@@ -24,14 +24,14 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option;
+import com.io7m.jaux.functional.PartialFunction;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
-import com.io7m.jcanephora.FaceSelection;
-import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.JCBExecutionAPI;
@@ -52,16 +52,20 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
-import com.io7m.renderer.kernel.types.KInstance;
+import com.io7m.renderer.kernel.types.KFaceSelection;
+import com.io7m.renderer.kernel.types.KInstanceOpaque;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
 import com.io7m.renderer.kernel.types.KMaterialOpaque;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitor;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RTransformProjection;
 import com.io7m.renderer.types.RTransformView;
 
-public final class KDepthVarianceRenderer
+@SuppressWarnings("synthetic-access") final class KDepthVarianceRenderer
 {
   public static @Nonnull KDepthVarianceRenderer newDepthVarianceRenderer(
     final @Nonnull JCGLImplementation gi,
@@ -72,12 +76,22 @@ public final class KDepthVarianceRenderer
     return new KDepthVarianceRenderer(gi, shader_cache, log);
   }
 
-  protected static void renderDepthPassBatch(
+  private static void putMaterialOpaque(
+    final @Nonnull JCBProgram jp,
+    final @Nonnull KMaterialOpaque material)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMaterialAlbedo(jp, material.materialGetAlbedo());
+  }
+
+  private static void renderDepthPassBatch(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull MatricesObserver mwo,
     final @Nonnull JCBProgram jp,
     final @Nonnull KMaterialDepthVarianceLabel label,
-    final @Nonnull List<KInstanceTransformedOpaque> batch)
+    final @Nonnull List<KInstanceTransformedOpaque> batch,
+    final @Nonnull Option<KFaceSelection> faces)
     throws JCGLException,
       RException,
       ConstraintError
@@ -97,32 +111,26 @@ public final class KDepthVarianceRenderer
               mwi,
               jp,
               label,
-              i);
+              i,
+              faces);
             return Unit.unit();
           }
         });
     }
   }
 
-  private static void putMaterialOpaque(
-    final @Nonnull JCBProgram jp,
-    final @Nonnull KMaterialOpaque material)
-    throws JCGLException,
-      ConstraintError
-  {
-    KShadingProgramCommon.putMaterialAlbedo(jp, material.materialGetAlbedo());
-  }
-
-  protected static void renderDepthPassInstance(
+  private static void renderDepthPassInstance(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull MatricesInstance mwi,
     final @Nonnull JCBProgram jp,
     final @Nonnull KMaterialDepthVarianceLabel label,
-    final @Nonnull KInstanceTransformedOpaque i)
+    final @Nonnull KInstanceTransformedOpaque i,
+    final @Nonnull Option<KFaceSelection> faces)
     throws JCGLException,
-      ConstraintError
+      ConstraintError,
+      RException
   {
-    final KMaterialOpaque material = i.getInstance().instanceGetMaterial();
+    final KMaterialOpaque material = i.instanceGet().instanceGetMaterial();
     final List<TextureUnit> units = gc.textureGetUnits();
 
     /**
@@ -132,35 +140,87 @@ public final class KDepthVarianceRenderer
     KShadingProgramCommon.putMatrixProjectionReuse(jp);
     KShadingProgramCommon.putMatrixModelView(jp, mwi.getMatrixModelView());
 
-    switch (label) {
-      case DEPTH_VARIANCE_CONSTANT:
-      {
-        break;
-      }
-      case DEPTH_VARIANCE_MAPPED:
-      {
-        KDepthVarianceRenderer.putMaterialOpaque(jp, material);
-        KShadingProgramCommon.putMatrixUV(jp, mwi.getMatrixUV());
-        KShadingProgramCommon.bindPutTextureAlbedo(
-          jp,
-          gc,
-          material.materialGetAlbedo(),
-          units.get(0));
-        break;
-      }
-      case DEPTH_VARIANCE_UNIFORM:
-      {
-        KDepthVarianceRenderer.putMaterialOpaque(jp, material);
-        break;
-      }
-    }
+    material
+      .materialOpaqueVisitableAccept(new KMaterialOpaqueVisitor<Unit, JCGLException>() {
+        @Override public Unit materialVisitOpaqueAlphaDepth(
+          final @Nonnull KMaterialOpaqueAlphaDepth m)
+          throws ConstraintError,
+            RException,
+            JCGLException
+        {
+          switch (label) {
+            case DEPTH_VARIANCE_CONSTANT:
+            {
+              break;
+            }
+            case DEPTH_VARIANCE_MAPPED:
+            {
+              KDepthVarianceRenderer.putMaterialOpaque(jp, material);
+              KShadingProgramCommon.putMatrixUV(jp, mwi.getMatrixUV());
+              KShadingProgramCommon.bindPutTextureAlbedo(
+                jp,
+                gc,
+                material.materialGetAlbedo(),
+                units.get(0));
+              KShadingProgramCommon.putMaterialAlphaDepthThreshold(
+                jp,
+                m.getAlphaThreshold());
+              break;
+            }
+            case DEPTH_VARIANCE_UNIFORM:
+            {
+              KDepthVarianceRenderer.putMaterialOpaque(jp, material);
+              KShadingProgramCommon.putMaterialAlphaDepthThreshold(
+                jp,
+                m.getAlphaThreshold());
+              break;
+            }
+          }
+
+          return Unit.unit();
+        }
+
+        @Override public Unit materialVisitOpaqueRegular(
+          final @Nonnull KMaterialOpaqueRegular m)
+          throws ConstraintError,
+            RException,
+            JCGLException
+        {
+          switch (label) {
+            case DEPTH_VARIANCE_CONSTANT:
+            {
+              break;
+            }
+            case DEPTH_VARIANCE_MAPPED:
+            {
+              KDepthVarianceRenderer.putMaterialOpaque(jp, material);
+              KShadingProgramCommon.putMatrixUV(jp, mwi.getMatrixUV());
+              KShadingProgramCommon.bindPutTextureAlbedo(
+                jp,
+                gc,
+                material.materialGetAlbedo(),
+                units.get(0));
+              KShadingProgramCommon.putMaterialAlphaDepthThreshold(jp, 0.0f);
+              break;
+            }
+            case DEPTH_VARIANCE_UNIFORM:
+            {
+              KDepthVarianceRenderer.putMaterialOpaque(jp, material);
+              KShadingProgramCommon.putMaterialAlphaDepthThreshold(jp, 0.0f);
+              break;
+            }
+          }
+
+          return Unit.unit();
+        }
+      });
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
      */
 
     try {
-      final KInstance actual = i.getInstance();
+      final KInstanceOpaque actual = i.instanceGet();
       final KMesh mesh = actual.instanceGetMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
@@ -179,6 +239,12 @@ public final class KDepthVarianceRenderer
           KShadingProgramCommon.bindAttributeUV(jp, array);
           break;
         }
+      }
+
+      if (faces.isNone()) {
+        KRendererCommon.renderConfigureFaceCulling(
+          gc,
+          actual.instanceGetFaces());
       }
 
       jp.programExecute(new JCBProgramProcedure() {
@@ -223,8 +289,7 @@ public final class KDepthVarianceRenderer
       final @Nonnull RMatrixI4x4F<RTransformProjection> projection,
       final @Nonnull Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaque>> batches,
       final @Nonnull KFramebufferDepthVarianceUsable framebuffer,
-      final @Nonnull FaceSelection faces,
-      final @Nonnull FaceWindingOrder order)
+      final @Nonnull Option<KFaceSelection> faces)
       throws ConstraintError,
         RException
   {
@@ -243,8 +308,7 @@ public final class KDepthVarianceRenderer
               batches,
               framebuffer,
               mwo,
-              faces,
-              order);
+              faces);
             return Unit.unit();
           }
         });
@@ -258,7 +322,8 @@ public final class KDepthVarianceRenderer
     renderDepthPassBatches(
       final @Nonnull Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaque>> batches,
       final @Nonnull JCGLInterfaceCommon gc,
-      final @Nonnull MatricesObserver mwo)
+      final @Nonnull MatricesObserver mwo,
+      final @Nonnull Option<KFaceSelection> faces)
       throws ConstraintError,
         JCacheException,
         JCGLException,
@@ -292,20 +357,20 @@ public final class KDepthVarianceRenderer
             mwo,
             jp,
             label,
-            batch);
+            batch,
+            faces);
         }
       });
     }
   }
 
-  protected
+  private
     void
     renderScene(
       final @Nonnull Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaque>> batches,
       final @Nonnull KFramebufferDepthVarianceUsable framebuffer,
       final @Nonnull MatricesObserver mwo,
-      final @Nonnull FaceSelection faces,
-      final @Nonnull FaceWindingOrder order)
+      final @Nonnull Option<KFaceSelection> faces)
       throws ConstraintError,
         JCGLException,
         RException
@@ -321,8 +386,27 @@ public final class KDepthVarianceRenderer
       this.viewport_size.x = (int) area.getRangeX().getInterval();
       this.viewport_size.y = (int) area.getRangeY().getInterval();
       gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
-      gc.cullingEnable(faces, order);
-      this.renderDepthPassBatches(batches, gc, mwo);
+
+      /**
+       * Override per-instance face culling if requested.
+       */
+
+      faces
+        .mapPartial(new PartialFunction<KFaceSelection, Unit, JCGLException>() {
+          @Override public Unit call(
+            final @Nonnull KFaceSelection f)
+            throws JCGLException
+          {
+            try {
+              KRendererCommon.renderConfigureFaceCulling(gc, f);
+              return Unit.unit();
+            } catch (final ConstraintError x) {
+              throw new UnreachableCodeException(x);
+            }
+          }
+        });
+
+      this.renderDepthPassBatches(batches, gc, mwo, faces);
     } catch (final JCacheException e) {
       throw new UnreachableCodeException(e);
     } finally {

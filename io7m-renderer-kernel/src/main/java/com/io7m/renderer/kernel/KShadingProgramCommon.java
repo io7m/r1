@@ -1052,9 +1052,7 @@ final class KShadingProgramCommon
     KShadingProgramCommon.putMaterialSpecularExponent(
       program,
       m.getExponent());
-    KShadingProgramCommon.putMaterialSpecularIntensity(
-      program,
-      m.getIntensity());
+    KShadingProgramCommon.putMaterialSpecularColour(program, m.getColour());
   }
 
   static void putMaterialSpecularExponent(
@@ -1066,13 +1064,13 @@ final class KShadingProgramCommon
     program.programUniformPutFloat("p_specular.exponent", e);
   }
 
-  static void putMaterialSpecularIntensity(
+  static void putMaterialSpecularColour(
     final @Nonnull JCBProgram program,
-    final float i)
+    final @Nonnull RVectorReadable3F<RSpaceRGB> colour)
     throws ConstraintError,
       JCGLException
   {
-    program.programUniformPutFloat("p_specular.intensity", i);
+    program.programUniformPutVector3f("p_specular.colour", colour);
   }
 
   static void putMatrixInverseView(
