@@ -16,6 +16,8 @@
 
 package com.io7m.renderer.kernel.types;
 
+import javax.annotation.Nonnull;
+
 /**
  * <p>
  * An instance that will be rendered in "translucent" mode.
@@ -29,5 +31,10 @@ package com.io7m.renderer.kernel.types;
 
 public interface KInstanceTranslucent extends KInstance
 {
-  // Nothing
+
+  /**
+   * @return The faces that will be rendered
+   */
+
+  @Nonnull KFaceSelection instanceGetFaces();
 }
