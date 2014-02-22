@@ -35,7 +35,7 @@ import com.io7m.renderer.types.RException;
 public interface KInstanceVisitor<A, E extends Throwable>
 {
   /**
-   * Visit an opaque instance.
+   * Visit a regular opaque instance.
    * 
    * @param i
    *          The instance
@@ -50,8 +50,31 @@ public interface KInstanceVisitor<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A instanceVisitOpaque(
-    final @Nonnull KInstanceOpaque i)
+  @Nonnull A instanceVisitOpaqueRegular(
+    final @Nonnull KInstanceOpaqueRegular i)
+    throws E,
+      ConstraintError,
+      RException,
+      JCGLException;
+
+  /**
+   * Visit an opaque alpha-to-depth instance.
+   * 
+   * @param i
+   *          The instance
+   * @return A value of type <code>A</code>
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   * @throws JCGLException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  @Nonnull A instanceVisitOpaqueAlphaDepth(
+    final @Nonnull KInstanceOpaqueAlphaDepth i)
     throws E,
       ConstraintError,
       RException,

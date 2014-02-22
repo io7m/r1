@@ -73,12 +73,24 @@ import com.io7m.renderer.types.RException;
     static {
       IDENTITY_TRANSLUCENT =
         new KInstanceTransformedVisitor<KTranslucent, ConstraintError>() {
-          @Override public @Nonnull KTranslucent transformedVisitOpaque(
-            final @Nonnull KInstanceTransformedOpaque i)
-            throws ConstraintError,
-              ConstraintError,
-              RException,
-              JCGLException
+          @Override public @Nonnull
+            KTranslucent
+            transformedVisitOpaqueAlphaDepth(
+              final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
+              throws ConstraintError,
+                RException,
+                JCGLException
+          {
+            throw new UnreachableCodeException();
+          }
+
+          @Override public @Nonnull
+            KTranslucent
+            transformedVisitOpaqueRegular(
+              final @Nonnull KInstanceTransformedOpaqueRegular i)
+              throws ConstraintError,
+                RException,
+                JCGLException
           {
             throw new UnreachableCodeException();
           }
@@ -100,7 +112,6 @@ import com.io7m.renderer.types.RException;
             transformedVisitTranslucentRegular(
               final @Nonnull KInstanceTransformedTranslucentRegular i)
               throws ConstraintError,
-                ConstraintError,
                 RException,
                 JCGLException
           {
@@ -108,6 +119,7 @@ import com.io7m.renderer.types.RException;
           }
         };
     }
+
     private final @Nonnull KCamera                                                           camera;
     private @Nonnull MapPSet<KLight>                                                         lights_all;
     private @Nonnull MapPSet<KInstanceTransformed>                                           lit;
@@ -118,7 +130,6 @@ import com.io7m.renderer.types.RException;
     private @Nonnull MapPSet<KInstanceTransformedOpaque>                                     unlit_opaque;
     private @Nonnull MapPSet<KInstanceTransformed>                                           visible_instances;
     private @Nonnull MapPSet<KInstanceTransformedOpaque>                                     visible_opaque;
-
     private @Nonnull PVector<KTranslucent>                                                   visible_translucent_ordered;
 
     protected Builder(

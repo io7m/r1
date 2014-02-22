@@ -255,7 +255,7 @@ final class KRendererDebugNormalsMapLocal extends KAbstractRendererDebug
      */
 
     final List<TextureUnit> texture_units = gc.textureGetUnits();
-    final KMaterial material = i.getInstance().instanceGetMaterial();
+    final KMaterial material = i.instanceGet().instanceGetMaterial();
 
     {
       final Option<Texture2DStatic> normal_opt =

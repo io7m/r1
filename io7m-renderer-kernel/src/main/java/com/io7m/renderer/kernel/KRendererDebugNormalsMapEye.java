@@ -258,7 +258,7 @@ final class KRendererDebugNormalsMapEye extends KAbstractRendererDebug
      */
 
     final List<TextureUnit> texture_units = gc.textureGetUnits();
-    final KInstanceOpaque instance = transformed.getInstance();
+    final KInstanceOpaque instance = transformed.instanceGet();
     final KMaterialOpaque material = instance.instanceGetMaterial();
 
     {

@@ -29,7 +29,8 @@ import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.renderer.kernel.types.KInstanceTransformed;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedVisitor;
@@ -81,6 +82,12 @@ final class KMutableMatrices
       this.matrix_uv_temp = new RMatrixM3x3F<RTransformTexture>();
     }
 
+    @Override public Context getMatrixContext()
+      throws ConstraintError
+    {
+      return this.parent.getMatrixContext();
+    }
+
     @SuppressWarnings("synthetic-access") @Override public
       RMatrixReadable4x4F<RTransformModel>
       getMatrixModel()
@@ -111,6 +118,14 @@ final class KMutableMatrices
       return this.matrix_normal;
     }
 
+    @Override public
+      RMatrixReadable4x4F<RTransformProjection>
+      getMatrixProjection()
+        throws ConstraintError
+    {
+      return this.parent.getMatrixProjection();
+    }
+
     @SuppressWarnings("synthetic-access") @Override public
       RMatrixM3x3F<RTransformTexture>
       getMatrixUV()
@@ -119,6 +134,20 @@ final class KMutableMatrices
       assert KMutableMatrices.this.observerIsActive();
       assert KMutableMatrices.this.instanceIsActive();
       return this.matrix_uv;
+    }
+
+    @Override public RMatrixReadable4x4F<RTransformView> getMatrixView()
+      throws ConstraintError
+    {
+      return this.parent.getMatrixView();
+    }
+
+    @Override public
+      RMatrixReadable4x4F<RTransformViewInverse>
+      getMatrixViewInverse()
+        throws ConstraintError
+    {
+      return this.parent.getMatrixViewInverse();
     }
 
     @SuppressWarnings("synthetic-access") final void instanceStart(
@@ -155,12 +184,12 @@ final class KMutableMatrices
       try {
         i
           .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, ConstraintError>() {
-            @Override public Unit transformedVisitOpaque(
-              final @Nonnull KInstanceTransformedOpaque ito)
+            @Override public Unit transformedVisitOpaqueAlphaDepth(
+              final @Nonnull KInstanceTransformedOpaqueAlphaDepth ito)
               throws ConstraintError
             {
               final KMaterialOpaque m =
-                ito.getInstance().instanceGetMaterial();
+                ito.instanceGet().instanceGetMaterial();
               final RMatrixI3x3F<RTransformTexture> material_uv_m =
                 m.materialGetUVMatrix();
               material_uv_m
@@ -168,12 +197,12 @@ final class KMutableMatrices
               return Unit.unit();
             }
 
-            @Override public Unit transformedVisitTranslucentRegular(
-              final @Nonnull KInstanceTransformedTranslucentRegular itt)
+            @Override public Unit transformedVisitOpaqueRegular(
+              final @Nonnull KInstanceTransformedOpaqueRegular ito)
               throws ConstraintError
             {
-              final KMaterialTranslucent m =
-                itt.getInstance().instanceGetMaterial();
+              final KMaterialOpaque m =
+                ito.instanceGet().instanceGetMaterial();
               final RMatrixI3x3F<RTransformTexture> material_uv_m =
                 m.materialGetUVMatrix();
               material_uv_m
@@ -193,6 +222,19 @@ final class KMutableMatrices
                 .makeMatrixM3x3F(InstanceSingleton.this.matrix_uv_temp);
               return Unit.unit();
             }
+
+            @Override public Unit transformedVisitTranslucentRegular(
+              final @Nonnull KInstanceTransformedTranslucentRegular itt)
+              throws ConstraintError
+            {
+              final KMaterialTranslucent m =
+                itt.getInstance().instanceGetMaterial();
+              final RMatrixI3x3F<RTransformTexture> material_uv_m =
+                m.materialGetUVMatrix();
+              material_uv_m
+                .makeMatrixM3x3F(InstanceSingleton.this.matrix_uv_temp);
+              return Unit.unit();
+            }
           });
       } catch (final JCGLException e) {
         throw new UnreachableCodeException(e);
@@ -201,34 +243,6 @@ final class KMutableMatrices
       }
 
       MatrixM3x3F.multiplyInPlace(this.matrix_uv, this.matrix_uv_temp);
-    }
-
-    @Override public Context getMatrixContext()
-      throws ConstraintError
-    {
-      return this.parent.getMatrixContext();
-    }
-
-    @Override public
-      RMatrixReadable4x4F<RTransformProjection>
-      getMatrixProjection()
-        throws ConstraintError
-    {
-      return this.parent.getMatrixProjection();
-    }
-
-    @Override public RMatrixReadable4x4F<RTransformView> getMatrixView()
-      throws ConstraintError
-    {
-      return this.parent.getMatrixView();
-    }
-
-    @Override public
-      RMatrixReadable4x4F<RTransformViewInverse>
-      getMatrixViewInverse()
-        throws ConstraintError
-    {
-      return this.parent.getMatrixViewInverse();
     }
   }
 
@@ -257,6 +271,12 @@ final class KMutableMatrices
         new RMatrixM4x4F<RTransformProjectiveModelView>();
     }
 
+    @Override public Context getMatrixContext()
+      throws ConstraintError
+    {
+      return this.parent.getMatrixContext();
+    }
+
     @SuppressWarnings("synthetic-access") @Override public
       RMatrixReadable4x4F<RTransformModel>
       getMatrixModel()
@@ -291,11 +311,35 @@ final class KMutableMatrices
     }
 
     @Override public
+      RMatrixReadable4x4F<RTransformProjection>
+      getMatrixProjection()
+        throws ConstraintError
+    {
+      return this.parent.getMatrixProjection();
+    }
+
+    @Override public
       RMatrixM4x4F<RTransformProjectiveModelView>
       getMatrixProjectiveModelView()
         throws ConstraintError
     {
       return this.matrix_projective_modelview;
+    }
+
+    @Override public
+      RMatrixM4x4F<RTransformProjectiveProjection>
+      getMatrixProjectiveProjection()
+        throws ConstraintError
+    {
+      return this.parent.getMatrixProjectiveProjection();
+    }
+
+    @Override public
+      RMatrixM4x4F<RTransformProjectiveView>
+      getMatrixProjectiveView()
+        throws ConstraintError
+    {
+      return this.parent.getMatrixProjectiveView();
     }
 
     @SuppressWarnings("synthetic-access") @Override public
@@ -307,6 +351,20 @@ final class KMutableMatrices
       assert KMutableMatrices.this.projectiveLightIsActive();
       assert KMutableMatrices.this.instanceIsActive();
       return this.matrix_uv;
+    }
+
+    @Override public RMatrixReadable4x4F<RTransformView> getMatrixView()
+      throws ConstraintError
+    {
+      return this.parent.getMatrixView();
+    }
+
+    @Override public
+      RMatrixReadable4x4F<RTransformViewInverse>
+      getMatrixViewInverse()
+        throws ConstraintError
+    {
+      return this.parent.getMatrixViewInverse();
     }
 
     @SuppressWarnings("synthetic-access") final void instanceStart(
@@ -344,12 +402,12 @@ final class KMutableMatrices
       try {
         i
           .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, ConstraintError>() {
-            @Override public Unit transformedVisitOpaque(
-              final @Nonnull KInstanceTransformedOpaque ito)
+            @Override public Unit transformedVisitOpaqueAlphaDepth(
+              final @Nonnull KInstanceTransformedOpaqueAlphaDepth ito)
               throws ConstraintError
             {
               final KMaterialOpaque m =
-                ito.getInstance().instanceGetMaterial();
+                ito.instanceGet().instanceGetMaterial();
               final RMatrixI3x3F<RTransformTexture> material_uv_m =
                 m.materialGetUVMatrix();
               material_uv_m
@@ -357,12 +415,12 @@ final class KMutableMatrices
               return Unit.unit();
             }
 
-            @Override public Unit transformedVisitTranslucentRegular(
-              final @Nonnull KInstanceTransformedTranslucentRegular itt)
+            @Override public Unit transformedVisitOpaqueRegular(
+              final @Nonnull KInstanceTransformedOpaqueRegular ito)
               throws ConstraintError
             {
-              final KMaterialTranslucentRegular m =
-                itt.getInstance().instanceGetMaterial();
+              final KMaterialOpaque m =
+                ito.instanceGet().instanceGetMaterial();
               final RMatrixI3x3F<RTransformTexture> material_uv_m =
                 m.materialGetUVMatrix();
               material_uv_m
@@ -375,6 +433,19 @@ final class KMutableMatrices
               throws ConstraintError
             {
               final KMaterialTranslucentRefractive m =
+                itt.getInstance().instanceGetMaterial();
+              final RMatrixI3x3F<RTransformTexture> material_uv_m =
+                m.materialGetUVMatrix();
+              material_uv_m
+                .makeMatrixM3x3F(InstanceWithProjectiveSingleton.this.matrix_uv_temp);
+              return Unit.unit();
+            }
+
+            @Override public Unit transformedVisitTranslucentRegular(
+              final @Nonnull KInstanceTransformedTranslucentRegular itt)
+              throws ConstraintError
+            {
+              final KMaterialTranslucentRegular m =
                 itt.getInstance().instanceGetMaterial();
               final RMatrixI3x3F<RTransformTexture> material_uv_m =
                 m.materialGetUVMatrix();
@@ -399,50 +470,6 @@ final class KMutableMatrices
         this.parent.getMatrixProjectiveView(),
         this.matrix_model,
         this.matrix_projective_modelview);
-    }
-
-    @Override public Context getMatrixContext()
-      throws ConstraintError
-    {
-      return this.parent.getMatrixContext();
-    }
-
-    @Override public
-      RMatrixReadable4x4F<RTransformProjection>
-      getMatrixProjection()
-        throws ConstraintError
-    {
-      return this.parent.getMatrixProjection();
-    }
-
-    @Override public RMatrixReadable4x4F<RTransformView> getMatrixView()
-      throws ConstraintError
-    {
-      return this.parent.getMatrixView();
-    }
-
-    @Override public
-      RMatrixReadable4x4F<RTransformViewInverse>
-      getMatrixViewInverse()
-        throws ConstraintError
-    {
-      return this.parent.getMatrixViewInverse();
-    }
-
-    @Override public
-      RMatrixM4x4F<RTransformProjectiveProjection>
-      getMatrixProjectiveProjection()
-        throws ConstraintError
-    {
-      return this.parent.getMatrixProjectiveProjection();
-    }
-
-    @Override public
-      RMatrixM4x4F<RTransformProjectiveView>
-      getMatrixProjectiveView()
-        throws ConstraintError
-    {
-      return this.parent.getMatrixProjectiveView();
     }
   }
 
@@ -704,6 +731,20 @@ final class KMutableMatrices
         new RMatrixM4x4F<RTransformProjectiveView>();
     }
 
+    @Override public Context getMatrixContext()
+      throws ConstraintError
+    {
+      return this.parent.getMatrixContext();
+    }
+
+    @Override public
+      RMatrixReadable4x4F<RTransformProjection>
+      getMatrixProjection()
+        throws ConstraintError
+    {
+      return this.parent.getMatrixProjection();
+    }
+
     @SuppressWarnings("synthetic-access") @Override public
       RMatrixM4x4F<RTransformProjectiveProjection>
       getMatrixProjectiveProjection()
@@ -722,6 +763,20 @@ final class KMutableMatrices
       assert KMutableMatrices.this.observerIsActive();
       assert KMutableMatrices.this.projectiveLightIsActive();
       return this.matrix_projective_view;
+    }
+
+    @Override public RMatrixReadable4x4F<RTransformView> getMatrixView()
+      throws ConstraintError
+    {
+      return this.parent.getMatrixView();
+    }
+
+    @Override public
+      RMatrixReadable4x4F<RTransformViewInverse>
+      getMatrixViewInverse()
+        throws ConstraintError
+    {
+      return this.parent.getMatrixViewInverse();
     }
 
     @SuppressWarnings("synthetic-access") final void projectiveStart(
@@ -777,34 +832,6 @@ final class KMutableMatrices
       } finally {
         KMutableMatrices.this.instanceSetStopped();
       }
-    }
-
-    @Override public Context getMatrixContext()
-      throws ConstraintError
-    {
-      return this.parent.getMatrixContext();
-    }
-
-    @Override public
-      RMatrixReadable4x4F<RTransformProjection>
-      getMatrixProjection()
-        throws ConstraintError
-    {
-      return this.parent.getMatrixProjection();
-    }
-
-    @Override public RMatrixReadable4x4F<RTransformView> getMatrixView()
-      throws ConstraintError
-    {
-      return this.parent.getMatrixView();
-    }
-
-    @Override public
-      RMatrixReadable4x4F<RTransformViewInverse>
-      getMatrixViewInverse()
-        throws ConstraintError
-    {
-      return this.parent.getMatrixViewInverse();
     }
   }
 
