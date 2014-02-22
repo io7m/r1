@@ -123,6 +123,7 @@ import com.io7m.jvvfs.PathVirtual;
   public @Nonnull Pair<SBScene, Integer> instanceFreshID()
   {
     final Integer id = Integer.valueOf(this.instance_id_pool.intValue() + 1);
+
     return new Pair<SBScene, Integer>(new SBScene(
       this.textures2d,
       this.textures_cube,
@@ -130,9 +131,9 @@ import com.io7m.jvvfs.PathVirtual;
       this.materials,
       this.material_id_pool,
       this.lights,
-      id,
+      this.light_id_pool,
       this.instances,
-      this.instance_id_pool), id);
+      id), id);
   }
 
   public @Nonnull SBInstance instanceGet(
@@ -291,12 +292,14 @@ import com.io7m.jvvfs.PathVirtual;
     throws ConstraintError
   {
     Constraints.constrainNotNull(material, "Material");
+    final Integer id = material.materialGetID();
+
     return new SBScene(
       this.textures2d,
       this.textures_cube,
       this.meshes,
-      this.materials.plus(material.materialGetID(), material),
-      this.material_id_pool,
+      this.materials.plus(id, material),
+      SBScene.currentMaxID(this.material_id_pool, id),
       this.lights,
       this.light_id_pool,
       this.instances,
