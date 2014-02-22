@@ -17,119 +17,28 @@
 package com.io7m.renderer.kernel.types;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLException;
-import com.io7m.renderer.types.RException;
 
 /**
  * <p>
- * An instance with an opaque material applied.
+ * An instance that will be rendered in opaque mode.
  * </p>
  * <p>
- * Opaque instances may be rendered in any order, and the depth buffer is used
- * to ensure that the instances appear at the correct perceived distance
- * onscreen.
+ * Opaque instances are rendered in an arbitrary order, using the depth buffer
+ * to ensure that objects appear at the correct perceived distance.
  * </p>
  */
 
-@Immutable public final class KInstanceOpaque implements
-  KInstanceWithMaterial<KMaterialOpaque>,
-  KInstanceRegular
+public interface KInstanceOpaque extends KInstanceRegular
 {
   /**
-   * Create a new instance with an opaque material.
-   * 
-   * @param in_id
-   *          The identifier of the instance
-   * @param in_material
-   *          The material
-   * @param in_mesh
-   *          The mesh
-   * @return A new instance
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
+   * @return The regular material of this instance
    */
 
-  public static @Nonnull KInstanceOpaque newInstance(
-    final @Nonnull Integer in_id,
-    final @Nonnull KMaterialOpaque in_material,
-    final @Nonnull KMesh in_mesh)
-    throws ConstraintError
-  {
-    return new KInstanceOpaque(in_id, in_material, in_mesh);
-  }
+  @Override @Nonnull KMaterialOpaque instanceGetMaterial();
 
-  private final @Nonnull Integer         id;
-  private final @Nonnull KMaterialOpaque material;
-  private final @Nonnull KMesh           mesh;
+  /**
+   * @return The faces that will be rendered
+   */
 
-  private KInstanceOpaque(
-    final @Nonnull Integer in_id,
-    final @Nonnull KMaterialOpaque in_material,
-    final @Nonnull KMesh in_mesh)
-    throws ConstraintError
-  {
-    this.id = Constraints.constrainNotNull(in_id, "ID");
-    this.mesh = Constraints.constrainNotNull(in_mesh, "Mesh");
-    this.material = Constraints.constrainNotNull(in_material, "Material");
-  }
-
-  @Override public boolean equals(
-    final Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KInstanceOpaque other = (KInstanceOpaque) obj;
-    return this.id.equals(other.id)
-      && this.material.equals(other.material)
-      && this.mesh.equals(other.mesh);
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.id.hashCode();
-    result = (prime * result) + this.material.hashCode();
-    result = (prime * result) + this.mesh.hashCode();
-    return result;
-  }
-
-  @Override public @Nonnull Integer instanceGetID()
-  {
-    return this.id;
-  }
-
-  @Override public KMaterialOpaque instanceGetMaterial()
-  {
-    return this.material;
-  }
-
-  @Override public @Nonnull KMesh instanceGetMesh()
-  {
-    return this.mesh;
-  }
-
-  @Override public
-    <A, E extends Throwable, V extends KInstanceVisitor<A, E>>
-    A
-    instanceVisitableAccept(
-      final @Nonnull V v)
-      throws E,
-        JCGLException,
-        ConstraintError,
-        RException
-  {
-    return v.instanceVisitOpaque(this);
-  }
+  @Nonnull KFaceSelection instanceGetFaces();
 }

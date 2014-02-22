@@ -55,6 +55,8 @@ import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KInstanceOpaque;
 import com.io7m.renderer.kernel.types.KInstanceTransformed;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedVisitor;
@@ -177,7 +179,7 @@ final class KRendererDebugDepthVariance extends KAbstractRendererDebug
       JCGLException
   {
     final KMaterialOpaque material =
-      instance.getInstance().instanceGetMaterial();
+      instance.instanceGet().instanceGetMaterial();
     final List<TextureUnit> units = gc.textureGetUnits();
 
     /**
@@ -215,7 +217,7 @@ final class KRendererDebugDepthVariance extends KAbstractRendererDebug
      */
 
     try {
-      final KMesh mesh = instance.getInstance().instanceGetMesh();
+      final KMesh mesh = instance.instanceGet().instanceGetMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
 
@@ -264,7 +266,7 @@ final class KRendererDebugDepthVariance extends KAbstractRendererDebug
       RException
   {
     try {
-      final KInstanceOpaque ii = instance.getInstance();
+      final KInstanceOpaque ii = instance.instanceGet();
 
       final KMaterialDepthLabel label =
         KRendererDebugDepthVariance.this.depth_labels.getDepthLabel(ii);
@@ -334,8 +336,35 @@ final class KRendererDebugDepthVariance extends KAbstractRendererDebug
       for (final KInstanceTransformed instance : instances) {
         instance
           .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, JCGLException>() {
-            @Override public Unit transformedVisitOpaque(
-              final @Nonnull KInstanceTransformedOpaque i)
+            @Override public Unit transformedVisitOpaqueRegular(
+              final @Nonnull KInstanceTransformedOpaqueRegular i)
+              throws JCGLException,
+                RException,
+                ConstraintError
+            {
+              return mo.withInstance(
+                instance,
+                new MatricesInstanceFunction<Unit, JCGLException>() {
+                  @SuppressWarnings("synthetic-access") @Override public
+                    Unit
+                    run(
+                      final @Nonnull MatricesInstance mi)
+                      throws JCGLException,
+                        ConstraintError,
+                        RException
+                  {
+                    KRendererDebugDepthVariance.this.renderInstancePre(
+                      gc,
+                      mo,
+                      i,
+                      mi);
+                    return Unit.unit();
+                  }
+                });
+            }
+
+            @Override public Unit transformedVisitOpaqueAlphaDepth(
+              final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
               throws JCGLException,
                 RException,
                 ConstraintError

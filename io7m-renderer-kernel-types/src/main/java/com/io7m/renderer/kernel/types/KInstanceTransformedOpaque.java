@@ -17,146 +17,16 @@
 package com.io7m.renderer.kernel.types;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLException;
-import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RMatrixI3x3F;
-import com.io7m.renderer.types.RTransformTexture;
 
 /**
- * An opaque instance ({@link KInstanceOpaque}) with a specific transform and
- * texture matrix.
+ * An opaque instance with a specific transform and texture matrix.
  */
 
-@Immutable public final class KInstanceTransformedOpaque implements
-  KInstanceTransformed
+public interface KInstanceTransformedOpaque extends KInstanceTransformed
 {
   /**
-   * Construct a new opaque instance.
-   * 
-   * @param in_instance
-   *          The actual instance
-   * @param in_transform
-   *          The transform applied to the instance
-   * @param in_uv_matrix
-   *          The per-instance UV matrix
-   * @return A new instance
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
+   * @return The actual opaque instance
    */
 
-  public static @Nonnull KInstanceTransformedOpaque newInstance(
-    final @Nonnull KInstanceOpaque in_instance,
-    final @Nonnull KTransform in_transform,
-    final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix)
-    throws ConstraintError
-  {
-    return new KInstanceTransformedOpaque(
-      in_instance,
-      in_transform,
-      in_uv_matrix);
-  }
-  private final @Nonnull KInstanceOpaque                 instance;
-  private final @Nonnull KTransform                      transform;
-
-  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
-
-  private KInstanceTransformedOpaque(
-    final @Nonnull KInstanceOpaque in_instance,
-    final @Nonnull KTransform in_transform,
-    final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix)
-    throws ConstraintError
-  {
-    this.transform = Constraints.constrainNotNull(in_transform, "Transform");
-    this.uv_matrix = Constraints.constrainNotNull(in_uv_matrix, "UV matrix");
-    this.instance = Constraints.constrainNotNull(in_instance, "Instance");
-  }
-
-  @Override public boolean equals(
-    final Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KInstanceTransformedOpaque other = (KInstanceTransformedOpaque) obj;
-    return this.instance.equals(other.instance)
-      && this.transform.equals(other.transform)
-      && this.uv_matrix.equals(other.uv_matrix);
-  }
-
-  /**
-   * @return The actual instance
-   */
-
-  public @Nonnull KInstanceOpaque getInstance()
-  {
-    return this.instance;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.instance.hashCode();
-    result = (prime * result) + this.transform.hashCode();
-    result = (prime * result) + this.uv_matrix.hashCode();
-    return result;
-  }
-
-  @Override public @Nonnull Integer instanceGetID()
-  {
-    return this.instance.instanceGetID();
-  }
-
-  @Override public @Nonnull KMesh instanceGetMesh()
-  {
-    return this.instance.instanceGetMesh();
-  }
-
-  @Override public @Nonnull KTransform instanceGetTransform()
-  {
-    return this.transform;
-  }
-
-  @Override public @Nonnull
-    RMatrixI3x3F<RTransformTexture>
-    instanceGetUVMatrix()
-  {
-    return this.uv_matrix;
-  }
-
-  @Override public
-    <A, E extends Throwable, V extends KInstanceVisitor<A, E>>
-    A
-    instanceVisitableAccept(
-      final @Nonnull V v)
-      throws E,
-        ConstraintError,
-        RException,
-        JCGLException
-  {
-    return v.instanceVisitOpaque(this.instance);
-  }
-
-  @Override public
-    <A, E extends Throwable, V extends KInstanceTransformedVisitor<A, E>>
-    A
-    transformedVisitableAccept(
-      final @Nonnull V v)
-      throws E,
-        JCGLException,
-        ConstraintError,
-        RException
-  {
-    return v.transformedVisitOpaque(this);
-  }
+  @Nonnull KInstanceOpaque instanceGet();
 }

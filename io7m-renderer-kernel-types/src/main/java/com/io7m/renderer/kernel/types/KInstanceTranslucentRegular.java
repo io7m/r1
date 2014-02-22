@@ -112,15 +112,6 @@ import com.io7m.renderer.types.RException;
     return result;
   }
 
-  /**
-   * @return The faces that will be rendered
-   */
-
-  public @Nonnull KFaceSelection instanceGetFaces()
-  {
-    return this.faces;
-  }
-
   @Override public @Nonnull Integer instanceGetID()
   {
     return this.id;
@@ -147,5 +138,10 @@ import com.io7m.renderer.types.RException;
         RException
   {
     return v.instanceVisitTranslucentRegular(this);
+  }
+
+  @Override public KFaceSelection instanceGetFaces()
+  {
+    return this.faces;
   }
 }

@@ -18,8 +18,14 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.FaceSelection;
+import com.io7m.jcanephora.FaceWindingOrder;
+import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixReadable4x4F;
+import com.io7m.renderer.kernel.types.KFaceSelection;
 
 /**
  * Functions common to all renderers.
@@ -54,5 +60,45 @@ final class KRendererCommon
     mr.set(2, 2, m.getRowColumnF(2, 2));
     MatrixM3x3F.invertInPlace(mr);
     MatrixM3x3F.transposeInPlace(mr);
+  }
+
+  /**
+   * Configure culling such that <code>faces</code> will be rendered.
+   */
+
+  static void renderConfigureFaceCulling(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KFaceSelection faces)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    switch (faces) {
+      case FACE_RENDER_BACK:
+      {
+        gc.cullingEnable(
+          FaceSelection.FACE_FRONT,
+          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+        break;
+      }
+      case FACE_RENDER_FRONT:
+      {
+        gc.cullingEnable(
+          FaceSelection.FACE_BACK,
+          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+        break;
+      }
+      case FACE_RENDER_FRONT_AND_BACK:
+      {
+        gc.cullingDisable();
+        break;
+      }
+      case FACE_RENDER_NONE:
+      {
+        gc.cullingEnable(
+          FaceSelection.FACE_FRONT_AND_BACK,
+          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+        break;
+      }
+    }
   }
 }

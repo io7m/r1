@@ -71,9 +71,11 @@ import com.io7m.jlog.Log;
 import com.io7m.jparasol.xml.PGLSLMetaXML;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.kernel.types.KInstanceOpaque;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformed;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
@@ -88,6 +90,7 @@ import com.io7m.renderer.kernel.types.KMaterialNormal;
 import com.io7m.renderer.kernel.types.KMaterialOpaque;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitor;
 import com.io7m.renderer.kernel.types.KMaterialSpecular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucent;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
@@ -1307,12 +1310,46 @@ public final class SBSceneController implements
               throws ConstraintError,
                 RException
             {
-              final KInstanceOpaque ki =
-                KInstanceOpaque.newInstance(instance_id, m, km);
-              return KInstanceTransformedOpaque.newInstance(
-                ki,
-                kt,
-                i.getUVMatrix());
+              return m
+                .materialOpaqueVisitableAccept(new KMaterialOpaqueVisitor<KInstanceTransformed, RException>() {
+                  @Override public
+                    KInstanceTransformed
+                    materialVisitOpaqueAlphaDepth(
+                      final KMaterialOpaqueAlphaDepth mo)
+                      throws ConstraintError,
+                        RException
+                  {
+                    final KInstanceOpaqueAlphaDepth ki =
+                      KInstanceOpaqueAlphaDepth.newInstance(
+                        instance_id,
+                        mo,
+                        km,
+                        i.getFaces());
+                    return KInstanceTransformedOpaqueAlphaDepth.newInstance(
+                      ki,
+                      kt,
+                      i.getUVMatrix());
+                  }
+
+                  @Override public
+                    KInstanceTransformed
+                    materialVisitOpaqueRegular(
+                      final @Nonnull KMaterialOpaqueRegular mo)
+                      throws ConstraintError,
+                        RException
+                  {
+                    final KInstanceOpaqueRegular ki =
+                      KInstanceOpaqueRegular.newInstance(
+                        instance_id,
+                        mo,
+                        km,
+                        i.getFaces());
+                    return KInstanceTransformedOpaqueRegular.newInstance(
+                      ki,
+                      kt,
+                      i.getUVMatrix());
+                  }
+                });
             }
 
             @Override public KInstanceTransformed materialVisitTranslucent(
@@ -1333,7 +1370,8 @@ public final class SBSceneController implements
                       KInstanceTranslucentRefractive.newInstance(
                         instance_id,
                         mtr,
-                        km);
+                        km,
+                        i.getFaces());
                     return KInstanceTransformedTranslucentRefractive
                       .newInstance(ki, kt, i.getUVMatrix());
                   }
