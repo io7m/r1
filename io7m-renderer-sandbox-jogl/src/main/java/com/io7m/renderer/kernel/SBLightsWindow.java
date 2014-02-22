@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,8 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 
+import net.java.dev.designgridlayout.DesignGridLayout;
+
 import com.io7m.jlog.Log;
 
 final class SBLightsWindow extends JFrame
@@ -26,15 +28,18 @@ final class SBLightsWindow extends JFrame
   private static final long serialVersionUID;
 
   static {
-    serialVersionUID = 4283712509235461406L;
+    serialVersionUID = -674862326268846104L;
   }
 
-  public <C extends SBSceneControllerTextures & SBSceneControllerLights> SBLightsWindow(
+  public <C extends SBSceneControllerLights & SBSceneControllerTextures> SBLightsWindow(
     final @Nonnull C controller,
     final @Nonnull Log log)
   {
     super("Lights");
-    this.getContentPane().add(new SBLightsPanel(controller, log));
+    final SBLightsControls controls = new SBLightsControls(controller, log);
+    final DesignGridLayout layout =
+      new DesignGridLayout(this.getContentPane());
+    controls.controlsAddToLayout(layout);
     this.pack();
   }
 }

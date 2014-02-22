@@ -18,6 +18,8 @@ package com.io7m.renderer.kernel;
 
 import javax.swing.JComboBox;
 
+import com.io7m.renderer.kernel.types.KDepthPrecision;
+
 public final class SBDepthPrecisionSelector extends
   JComboBox<KDepthPrecision>
 {

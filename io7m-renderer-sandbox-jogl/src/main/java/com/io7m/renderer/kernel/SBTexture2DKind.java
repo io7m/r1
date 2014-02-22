@@ -18,30 +18,30 @@ package com.io7m.renderer.kernel;
 
 interface SBTexture2DKind
 {
-
+  // No value-level representation
 }
 
 interface SBTexture2DKindAlbedo extends SBTexture2DKind
 {
-
+  // No value-level representation
 }
 
 interface SBTexture2DKindEmissive extends SBTexture2DKind
 {
-
+  // No value-level representation
 }
 
 interface SBTexture2DKindEnvironment extends SBTexture2DKind
 {
-
+  // No value-level representation
 }
 
 interface SBTexture2DKindNormal extends SBTexture2DKind
 {
-
+  // No value-level representation
 }
 
 interface SBTexture2DKindSpecular extends SBTexture2DKind
 {
-
+  // No value-level representation
 }

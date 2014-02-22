@@ -20,9 +20,9 @@ import javax.annotation.Nonnull;
 import javax.swing.JTextField;
 
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.RMatrixI3x3F;
-import com.io7m.renderer.RTransform;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
+import com.io7m.renderer.types.RMatrixI3x3F;
+import com.io7m.renderer.types.RTransform;
 
 public final class SBMatrix3x3Fields<T extends RTransform>
 {
@@ -75,7 +75,7 @@ public final class SBMatrix3x3Fields<T extends RTransform>
         SBTextFieldUtilities.getFieldFloatOrError(this
           .getRowColumnField(2, 2)));
 
-    return new RMatrixI3x3F<T>(column_0, column_1, column_2);
+    return RMatrixI3x3F.newFromColumns(column_0, column_1, column_2);
   }
 
   public @Nonnull JTextField getRowColumnField(

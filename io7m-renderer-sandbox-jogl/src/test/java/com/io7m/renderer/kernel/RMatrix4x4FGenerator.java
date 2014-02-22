@@ -20,8 +20,8 @@ import net.java.quickcheck.Generator;
 
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorReadable4F;
-import com.io7m.renderer.RMatrixI4x4F;
-import com.io7m.renderer.RTransform;
+import com.io7m.renderer.types.RMatrixI4x4F;
+import com.io7m.renderer.types.RTransform;
 
 final class RMatrix4x4FGenerator<T extends RTransform> implements
   Generator<RMatrixI4x4F<T>>
@@ -56,6 +56,7 @@ final class RMatrix4x4FGenerator<T extends RTransform> implements
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f);
 
-    return new RMatrixI4x4F<T>(column_0, column_1, column_2, column_3);
+    return RMatrixI4x4F
+      .newFromColumns(column_0, column_1, column_2, column_3);
   }
 }

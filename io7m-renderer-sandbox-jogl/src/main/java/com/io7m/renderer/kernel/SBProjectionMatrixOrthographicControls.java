@@ -36,15 +36,31 @@ import com.io7m.renderer.kernel.SBProjectionDescription.SBProjectionOrthographic
 public final class SBProjectionMatrixOrthographicControls implements
   SBProjectionMatrixDescriptionControls
 {
-  private final @Nonnull JTextField         left;
-  private final @Nonnull JTextField         right;
-  private final @Nonnull JTextField         bottom;
-  private final @Nonnull JTextField         top;
-  private final @Nonnull JTextField         near;
-  private final @Nonnull JTextField         far;
-  private final @Nonnull JButton            defaults;
-  private @Nonnull SBProjectionOrthographic current;
-  private final @Nonnull RowGroup           group;
+  /**
+   * Simple test app.
+   */
+
+  public static void main(
+    final String args[])
+  {
+    SwingUtilities.invokeLater(new Runnable() {
+      @SuppressWarnings("unused") @Override public void run()
+      {
+        new SBExampleWindow("Orthographic") {
+          private static final long serialVersionUID = 6048725370293855922L;
+
+          @Override public void addToLayout(
+            final DesignGridLayout layout)
+            throws ConstraintError
+          {
+            final SBProjectionMatrixOrthographicControls controls =
+              SBProjectionMatrixOrthographicControls.newControls();
+            controls.controlsAddToLayout(layout);
+          }
+        };
+      }
+    });
+  }
 
   public static @Nonnull SBProjectionMatrixOrthographicControls newControls()
     throws ConstraintError
@@ -52,10 +68,15 @@ public final class SBProjectionMatrixOrthographicControls implements
     return new SBProjectionMatrixOrthographicControls();
   }
 
-  @Override public @Nonnull RowGroup getGroup()
-  {
-    return this.group;
-  }
+  private final @Nonnull JTextField         bottom;
+  private @Nonnull SBProjectionOrthographic current;
+  private final @Nonnull JButton            defaults;
+  private final @Nonnull JTextField         far;
+  private final @Nonnull RowGroup           group;
+  private final @Nonnull JTextField         left;
+  private final @Nonnull JTextField         near;
+  private final @Nonnull JTextField         right;
+  private final @Nonnull JTextField         top;
 
   private SBProjectionMatrixOrthographicControls()
     throws ConstraintError
@@ -88,7 +109,7 @@ public final class SBProjectionMatrixOrthographicControls implements
     });
   }
 
-  @Override public void addToLayout(
+  @Override public void controlsAddToLayout(
     final DesignGridLayout layout)
   {
     layout.row().group(this.group).grid(new JLabel("Left")).add(this.left, 3);
@@ -106,6 +127,16 @@ public final class SBProjectionMatrixOrthographicControls implements
     layout.row().group(this.group).grid(new JLabel("Near")).add(this.near, 3);
     layout.row().group(this.group).grid(new JLabel("Far")).add(this.far, 3);
     layout.row().group(this.group).right().add(this.defaults);
+  }
+
+  @Override public void controlsHide()
+  {
+    this.group.hide();
+  }
+
+  @Override public void controlsShow()
+  {
+    this.group.forceShow();
   }
 
   @Override public @Nonnull SBProjectionDescription getDescription()
@@ -133,28 +164,6 @@ public final class SBProjectionMatrixOrthographicControls implements
     this.bottom.setText(Double.toString(p.getBottom()));
     this.near.setText(Double.toString(p.getNear()));
     this.far.setText(Double.toString(p.getFar()));
-  }
-
-  public static void main(
-    final String args[])
-  {
-    SwingUtilities.invokeLater(new Runnable() {
-      @SuppressWarnings("unused") @Override public void run()
-      {
-        new SBExampleWindow("Orthographic") {
-          private static final long serialVersionUID = 6048725370293855922L;
-
-          @Override public void addToLayout(
-            final DesignGridLayout layout)
-            throws ConstraintError
-          {
-            final SBProjectionMatrixOrthographicControls controls =
-              SBProjectionMatrixOrthographicControls.newControls();
-            controls.addToLayout(layout);
-          }
-        };
-      }
-    });
   }
 
   public void setDescription(

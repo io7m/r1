@@ -29,14 +29,14 @@ module ProjectiveLight is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Sampler2D  as S2;
 
-  import com.io7m.renderer.Pack           as P;
-  import com.io7m.renderer.Materials      as M;
-  import com.io7m.renderer.SphericalLight as SL;
-  import com.io7m.renderer.Transform      as T;
-
+  import com.io7m.renderer.Emission;
   import com.io7m.renderer.Light;
+  import com.io7m.renderer.Pack;
   import com.io7m.renderer.ShadowBasic;
   import com.io7m.renderer.ShadowVariance;
+  import com.io7m.renderer.Specular;
+  import com.io7m.renderer.SphericalLight;
+  import com.io7m.renderer.Transform;
 
   --
   -- Sample a texel from the given texture [t], given clip-space 
@@ -52,7 +52,7 @@ module ProjectiveLight is
     if F.lesser (u [w], 0.0) then
       new vector_4f (0.0, 0.0, 0.0, 1.0)
     else
-      S2.texture (t, T.clip_to_texture (u) [x y])
+      S2.texture (t, Transform.clip_to_texture (u) [x y])
     end;
 
   --
@@ -87,7 +87,7 @@ module ProjectiveLight is
     light        : Light.t,
     d            : Light.vectors,
     light_colour : vector_3f,
-    s            : M.specular
+    s            : Specular.t
   ) : vector_3f =
     let
       value factor =
@@ -95,7 +95,7 @@ module ProjectiveLight is
       value colour =
         V3.multiply_scalar (V3.multiply_scalar (light_colour, light.intensity), factor);
     in
-      V3.multiply_scalar (colour, s.intensity)
+      V3.multiply (colour, s.colour)
     end;
 
   --
@@ -130,7 +130,7 @@ module ProjectiveLight is
     light : Light.t,
     n     : vector_3f,
     p     : vector_3f,
-    m     : M.t,
+    m     : Emission.t,
     t     : sampler_2d,
     u     : vector_4f
   ) : vector_3f =
@@ -139,7 +139,7 @@ module ProjectiveLight is
 
       value tx = light_texel (t, u);
       value lc = V3.multiply (light.colour, tx [x y z]);
-      value c  = diffuse_colour (light, r.vectors, lc, m.emissive.emissive);
+      value c  = diffuse_colour (light, r.vectors, lc, m.amount);
     in
       V3.multiply_scalar (c, r.attenuation)
     end;
@@ -153,7 +153,7 @@ module ProjectiveLight is
     light : Light.t,
     n     : vector_3f,
     p     : vector_3f,
-    m     : M.t,
+    s     : Specular.t,
     t     : sampler_2d,
     u     : vector_4f
   ) : vector_3f =
@@ -163,7 +163,7 @@ module ProjectiveLight is
       value tx = light_texel (t, u);
       value lc = V3.multiply (light.colour, tx [x y z]);
       value dc = diffuse_colour (light, r.vectors, lc, 0.0);
-      value sc = specular_colour (light, r.vectors, lc, m.specular);
+      value sc = specular_colour (light, r.vectors, lc, s);
     in
       V3.multiply_scalar (V3.add (dc, sc), r.attenuation)
     end;
@@ -178,7 +178,8 @@ module ProjectiveLight is
     light : Light.t,
     n     : vector_3f,
     p     : vector_3f,
-    m     : M.t,
+    m     : Emission.t,
+    s     : Specular.t,
     t     : sampler_2d,
     u     : vector_4f
   ) : vector_3f =
@@ -187,8 +188,8 @@ module ProjectiveLight is
 
       value tx = light_texel (t, u);
       value lc = V3.multiply (light.colour, tx [x y z]);
-      value dc = diffuse_colour (light, r.vectors, lc, m.emissive.emissive);
-      value sc = specular_colour (light, r.vectors, lc, m.specular);
+      value dc = diffuse_colour (light, r.vectors, lc, m.amount);
+      value sc = specular_colour (light, r.vectors, lc, s);
     in
       V3.multiply_scalar (V3.add (dc, sc), r.attenuation)
     end;
@@ -274,7 +275,7 @@ module ProjectiveLight is
     light        : Light.t,
     n            : vector_3f,
     p            : vector_3f,
-    m            : M.t,
+    m            : Emission.t,
     t_light      : sampler_2d,
     p_light_clip : vector_4f,
     t_shadow     : sampler_2d,
@@ -285,20 +286,19 @@ module ProjectiveLight is
 
       value tx = light_texel (t_light, p_light_clip);
       value lc = V3.multiply (light.colour, tx [x y z]);
-      value dc = diffuse_colour (light, r.vectors, lc, 0.0);
-      value sc = specular_colour (light, r.vectors, lc, m.specular);
+      value dc = diffuse_colour (light, r.vectors, lc, m.amount);
 
       value sf = ShadowBasic.factor (shadow, t_shadow, p_light_clip);
       value sa = F.multiply (sf, r.attenuation);
     in
-      V3.multiply_scalar (V3.add (dc, sc), sa)
+      V3.multiply_scalar (dc, sa)
     end;
 
   function diffuse_only_emissive_shadowed_basic_packed4444 (
     light        : Light.t,
     n            : vector_3f,
     p            : vector_3f,
-    m            : M.t,
+    m            : Emission.t,
     t_light      : sampler_2d,
     p_light_clip : vector_4f,
     t_shadow     : sampler_2d,
@@ -309,20 +309,19 @@ module ProjectiveLight is
 
       value tx = light_texel (t_light, p_light_clip);
       value lc = V3.multiply (light.colour, tx [x y z]);
-      value dc = diffuse_colour (light, r.vectors, lc, 0.0);
-      value sc = specular_colour (light, r.vectors, lc, m.specular);
+      value dc = diffuse_colour (light, r.vectors, lc, m.amount);
 
       value sf = ShadowBasic.factor_packed4444 (shadow, t_shadow, p_light_clip);
       value sa = F.multiply (sf, r.attenuation);
     in
-      V3.multiply_scalar (V3.add (dc, sc), sa)
+      V3.multiply_scalar (dc, sa)
     end;
 
   function diffuse_only_emissive_shadowed_variance (
     light        : Light.t,
     n            : vector_3f,
     p            : vector_3f,
-    m            : M.t,
+    m            : Emission.t,
     t_light      : sampler_2d,
     p_light_clip : vector_4f,
     t_shadow     : sampler_2d,
@@ -333,13 +332,12 @@ module ProjectiveLight is
 
       value tx = light_texel (t_light, p_light_clip);
       value lc = V3.multiply (light.colour, tx [x y z]);
-      value dc = diffuse_colour (light, r.vectors, lc, 0.0);
-      value sc = specular_colour (light, r.vectors, lc, m.specular);
+      value dc = diffuse_colour (light, r.vectors, lc, m.amount);
 
       value sf = ShadowVariance.factor (shadow, t_shadow, p_light_clip);
       value sa = F.multiply (sf, r.attenuation);
     in
-      V3.multiply_scalar (V3.add (dc, sc), sa)
+      V3.multiply_scalar (dc, sa)
     end;
 
   --
@@ -351,7 +349,7 @@ module ProjectiveLight is
     light        : Light.t,
     n            : vector_3f,
     p            : vector_3f,
-    m            : M.t,
+    s            : Specular.t,
     t_light      : sampler_2d,
     p_light_clip : vector_4f,
     t_shadow     : sampler_2d,
@@ -363,7 +361,7 @@ module ProjectiveLight is
       value tx = light_texel (t_light, p_light_clip);
       value lc = V3.multiply (light.colour, tx [x y z]);
       value dc = diffuse_colour (light, r.vectors, lc, 0.0);
-      value sc = specular_colour (light, r.vectors, lc, m.specular);
+      value sc = specular_colour (light, r.vectors, lc, s);
 
       value sf = ShadowBasic.factor (shadow, t_shadow, p_light_clip);
       value sa = F.multiply (sf, r.attenuation);
@@ -375,7 +373,7 @@ module ProjectiveLight is
     light        : Light.t,
     n            : vector_3f,
     p            : vector_3f,
-    m            : M.t,
+    s            : Specular.t,
     t_light      : sampler_2d,
     p_light_clip : vector_4f,
     t_shadow     : sampler_2d,
@@ -387,7 +385,7 @@ module ProjectiveLight is
       value tx = light_texel (t_light, p_light_clip);
       value lc = V3.multiply (light.colour, tx [x y z]);
       value dc = diffuse_colour (light, r.vectors, lc, 0.0);
-      value sc = specular_colour (light, r.vectors, lc, m.specular);
+      value sc = specular_colour (light, r.vectors, lc, s);
 
       value sf = ShadowBasic.factor (shadow, t_shadow, p_light_clip);
       value sa = F.multiply (sf, r.attenuation);
@@ -399,7 +397,7 @@ module ProjectiveLight is
     light        : Light.t,
     n            : vector_3f,
     p            : vector_3f,
-    m            : M.t,
+    s            : Specular.t,
     t_light      : sampler_2d,
     p_light_clip : vector_4f,
     t_shadow     : sampler_2d,
@@ -411,7 +409,7 @@ module ProjectiveLight is
       value tx = light_texel (t_light, p_light_clip);
       value lc = V3.multiply (light.colour, tx [x y z]);
       value dc = diffuse_colour (light, r.vectors, lc, 0.0);
-      value sc = specular_colour (light, r.vectors, lc, m.specular);
+      value sc = specular_colour (light, r.vectors, lc, s);
 
       value sf = ShadowVariance.factor (shadow, t_shadow, p_light_clip);
       value sa = F.multiply (sf, r.attenuation);
@@ -429,7 +427,8 @@ module ProjectiveLight is
     light        : Light.t,
     n            : vector_3f,
     p            : vector_3f,
-    m            : M.t,
+    m            : Emission.t,
+    s            : Specular.t,
     t_light      : sampler_2d,
     p_light_clip : vector_4f,
     t_shadow     : sampler_2d,
@@ -440,8 +439,8 @@ module ProjectiveLight is
 
       value tx = light_texel (t_light, p_light_clip);
       value lc = V3.multiply (light.colour, tx [x y z]);
-      value dc = diffuse_colour (light, r.vectors, lc, m.emissive.emissive);
-      value sc = specular_colour (light, r.vectors, lc, m.specular);
+      value dc = diffuse_colour (light, r.vectors, lc, m.amount);
+      value sc = specular_colour (light, r.vectors, lc, s);
 
       value sf = ShadowBasic.factor (shadow, t_shadow, p_light_clip);
       value sa = F.multiply (sf, r.attenuation);
@@ -453,7 +452,8 @@ module ProjectiveLight is
     light        : Light.t,
     n            : vector_3f,
     p            : vector_3f,
-    m            : M.t,
+    m            : Emission.t,
+    s            : Specular.t,
     t_light      : sampler_2d,
     p_light_clip : vector_4f,
     t_shadow     : sampler_2d,
@@ -464,8 +464,8 @@ module ProjectiveLight is
 
       value tx = light_texel (t_light, p_light_clip);
       value lc = V3.multiply (light.colour, tx [x y z]);
-      value dc = diffuse_colour (light, r.vectors, lc, m.emissive.emissive);
-      value sc = specular_colour (light, r.vectors, lc, m.specular);
+      value dc = diffuse_colour (light, r.vectors, lc, m.amount);
+      value sc = specular_colour (light, r.vectors, lc, s);
 
       value sf = ShadowBasic.factor_packed4444 (shadow, t_shadow, p_light_clip);
       value sa = F.multiply (sf, r.attenuation);
@@ -477,7 +477,8 @@ module ProjectiveLight is
     light        : Light.t,
     n            : vector_3f,
     p            : vector_3f,
-    m            : M.t,
+    m            : Emission.t,
+    s            : Specular.t,
     t_light      : sampler_2d,
     p_light_clip : vector_4f,
     t_shadow     : sampler_2d,
@@ -488,8 +489,8 @@ module ProjectiveLight is
 
       value tx = light_texel (t_light, p_light_clip);
       value lc = V3.multiply (light.colour, tx [x y z]);
-      value dc = diffuse_colour (light, r.vectors, lc, m.emissive.emissive);
-      value sc = specular_colour (light, r.vectors, lc, m.specular);
+      value dc = diffuse_colour (light, r.vectors, lc, m.amount);
+      value sc = specular_colour (light, r.vectors, lc, s);
 
       value sf = ShadowVariance.factor (shadow, t_shadow, p_light_clip);
       value sa = F.multiply (sf, r.attenuation);

@@ -18,8 +18,8 @@ package com.io7m.renderer.kernel;
 
 import net.java.quickcheck.Generator;
 
-import com.io7m.renderer.RSpace;
-import com.io7m.renderer.RVectorI4F;
+import com.io7m.renderer.types.RSpace;
+import com.io7m.renderer.types.RVectorI4F;
 
 public final class SBVectorI4FGenerator<T extends RSpace> implements
   Generator<RVectorI4F<T>>

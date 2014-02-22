@@ -18,6 +18,8 @@ package com.io7m.renderer.kernel;
 
 import net.java.quickcheck.Generator;
 
+import com.io7m.renderer.kernel.types.KDepthPrecision;
+
 public final class KDepthPrecisionGenerator implements
   Generator<KDepthPrecision>
 {

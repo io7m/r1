@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -114,14 +114,18 @@ final class SBMainWindow extends JFrame
       final @Nonnull SBLightsWindow lights_window,
       final @Nonnull SBLogsWindow logs_window,
       final @Nonnull SBStatisticsWindow stats_window,
-      final @Nonnull SBObjectsWindow objects_window,
+      final @Nonnull SBMaterialsWindow materials_window,
+      final @Nonnull SBInstancesWindow instances_window,
       final @Nonnull Log log)
   {
     final JMenuBar bar = new JMenuBar();
     bar.add(SBMainWindow.makeMenuFile(controller, window, log));
-    bar.add(SBMainWindow.makeMenuEdit(lights_window, objects_window));
-    bar.add(SBMainWindow.makeMenuRenderer(window, log, controller));
-    bar.add(SBMainWindow.makeMenuPostprocessor(window, log, controller));
+    bar.add(SBMainWindow.makeMenuEdit(
+      lights_window,
+      materials_window,
+      instances_window));
+    bar.add(SBMainWindow.makeMenuRenderer(controller));
+    bar.add(SBMainWindow.makeMenuPostprocessor(controller));
     bar.add(SBMainWindow.makeMenuView(camera_window, controller));
     bar.add(SBMainWindow.makeMenuDebug(logs_window, stats_window));
     return bar;
@@ -157,17 +161,21 @@ final class SBMainWindow extends JFrame
 
   private static @Nonnull JMenu makeMenuEdit(
     final @Nonnull SBLightsWindow lights_window,
-    final @Nonnull SBObjectsWindow objects_window)
+    final @Nonnull SBMaterialsWindow materials_window,
+    final @Nonnull SBInstancesWindow instances_window)
   {
     final JMenu menu = new JMenu("Edit");
 
-    final JCheckBoxMenuItem objects =
-      SBMainWindow.makeMenuEditObjectsMenuItem(objects_window);
+    final JCheckBoxMenuItem instances =
+      SBMainWindow.makeMenuEditInstancesMenuItem(instances_window);
     final JCheckBoxMenuItem lights =
       SBMainWindow.makeMenuEditLightsMenuItem(lights_window);
+    final JCheckBoxMenuItem materials =
+      SBMainWindow.makeMenuEditMaterialsMenuItem(materials_window);
 
+    menu.add(materials);
     menu.add(lights);
-    menu.add(objects);
+    menu.add(instances);
     return menu;
   }
 
@@ -177,10 +185,16 @@ final class SBMainWindow extends JFrame
     return SBMainWindow.makeWindowCheckbox("Lights...", lights_window);
   }
 
-  private static @Nonnull JCheckBoxMenuItem makeMenuEditObjectsMenuItem(
-    final @Nonnull SBObjectsWindow objects_window)
+  private static @Nonnull JCheckBoxMenuItem makeMenuEditInstancesMenuItem(
+    final @Nonnull SBInstancesWindow instances_window)
   {
-    return SBMainWindow.makeWindowCheckbox("Objects...", objects_window);
+    return SBMainWindow.makeWindowCheckbox("Instances...", instances_window);
+  }
+
+  private static @Nonnull JCheckBoxMenuItem makeMenuEditMaterialsMenuItem(
+    final @Nonnull SBMaterialsWindow materials_window)
+  {
+    return SBMainWindow.makeWindowCheckbox("Materials...", materials_window);
   }
 
   private static @Nonnull JCheckBoxMenuItem makeMenuEditShadersMenuItem(
@@ -341,8 +355,6 @@ final class SBMainWindow extends JFrame
     <C extends SBSceneControllerRendererControl & SBSceneControllerShaders>
     JMenu
     makeMenuPostprocessor(
-      final @Nonnull JFrame main_window,
-      final @Nonnull Log log,
       final @Nonnull C controller)
   {
     final ButtonGroup renderer_group = new ButtonGroup();
@@ -369,8 +381,6 @@ final class SBMainWindow extends JFrame
     <C extends SBSceneControllerRendererControl & SBSceneControllerShaders>
     JMenu
     makeMenuRenderer(
-      final @Nonnull JFrame main_window,
-      final @Nonnull Log log,
       final @Nonnull C controller)
   {
     final ButtonGroup renderer_group = new ButtonGroup();
@@ -600,8 +610,10 @@ final class SBMainWindow extends JFrame
 
     final SBLightsWindow lights_window = new SBLightsWindow(controller, log);
     final SBLogsWindow logs_window = new SBLogsWindow();
-    final SBObjectsWindow objects_window =
-      new SBObjectsWindow(controller, log);
+    final SBInstancesWindow instances_window =
+      new SBInstancesWindow(controller, log);
+    final SBMaterialsWindow materials_window =
+      new SBMaterialsWindow(controller, log);
     final SBCameraWindow camera_window = new SBCameraWindow(controller, log);
     final SBStatisticsWindow stats_window =
       new SBStatisticsWindow(controller);
@@ -777,7 +789,8 @@ final class SBMainWindow extends JFrame
       lights_window,
       logs_window,
       stats_window,
-      objects_window,
+      materials_window,
+      instances_window,
       log));
   }
 }

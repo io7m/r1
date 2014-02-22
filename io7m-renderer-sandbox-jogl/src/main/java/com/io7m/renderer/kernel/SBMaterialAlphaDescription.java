@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,54 +18,19 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.renderer.kernel.KMaterialAlpha.OpacityType;
+import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
 
-public final class SBMaterialAlphaDescription
+final class SBMaterialAlphaDescription
 {
-  private final float                depth_threshold;
-  private final float                opacity;
-  private final @Nonnull OpacityType type;
+  private final float                              opacity;
+  private final @Nonnull KMaterialAlphaOpacityType type;
 
-  SBMaterialAlphaDescription(
-    final @Nonnull OpacityType type,
-    final float opacity,
-    final float depth_threshold)
+  public SBMaterialAlphaDescription(
+    final @Nonnull KMaterialAlphaOpacityType type,
+    final float opacity)
   {
     this.type = type;
     this.opacity = opacity;
-    this.depth_threshold = depth_threshold;
-  }
-
-  @Override public boolean equals(
-    final Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final SBMaterialAlphaDescription other = (SBMaterialAlphaDescription) obj;
-    if (Float.floatToIntBits(this.depth_threshold) != Float
-      .floatToIntBits(other.depth_threshold)) {
-      return false;
-    }
-    if (Float.floatToIntBits(this.opacity) != Float
-      .floatToIntBits(other.opacity)) {
-      return false;
-    }
-    if (this.type != other.type) {
-      return false;
-    }
-    return true;
-  }
-
-  public float getDepthThreshold()
-  {
-    return this.depth_threshold;
   }
 
   public float getOpacity()
@@ -73,36 +38,8 @@ public final class SBMaterialAlphaDescription
     return this.opacity;
   }
 
-  public @Nonnull OpacityType getOpacityType()
+  public @Nonnull KMaterialAlphaOpacityType getType()
   {
     return this.type;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + Float.floatToIntBits(this.depth_threshold);
-    result = (prime * result) + Float.floatToIntBits(this.opacity);
-    result = (prime * result) + this.type.hashCode();
-    return result;
-  }
-
-  public boolean isTranslucent()
-  {
-    return this.type == OpacityType.ALPHA_TRANSLUCENT;
-  }
-
-  @Override public String toString()
-  {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("[SBMaterialAlphaDescription opacity=");
-    builder.append(this.opacity);
-    builder.append(" depth_threshold=");
-    builder.append(this.depth_threshold);
-    builder.append(" type=");
-    builder.append(this.type);
-    builder.append("]");
-    return builder.toString();
   }
 }

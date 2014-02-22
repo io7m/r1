@@ -26,12 +26,13 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.RSpaceRGB;
-import com.io7m.renderer.RSpaceWorld;
-import com.io7m.renderer.RVectorI3F;
-import com.io7m.renderer.RVectorReadable3F;
-import com.io7m.renderer.kernel.KLight.KDirectional;
-import com.io7m.renderer.kernel.KLight.KSphere;
+import com.io7m.renderer.kernel.types.KLightDirectional;
+import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KShadow;
+import com.io7m.renderer.types.RSpaceRGB;
+import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RVectorI3F;
+import com.io7m.renderer.types.RVectorReadable3F;
 
 public final class SBLightGenerator implements Generator<SBLightDescription>
 {
@@ -46,7 +47,7 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
 
   public SBLightGenerator()
   {
-    this.index_gen = new IntegerGenerator(0, KLight.Type.values().length - 1);
+    this.index_gen = new IntegerGenerator(0, SBLightType.values().length - 1);
     this.world_gen = new SBVectorI3FGenerator<RSpaceWorld>();
     this.colour_gen = new SBVectorI3FGenerator<RSpaceRGB>();
     this.path_gen = new PathVirtualGenerator();
@@ -61,7 +62,7 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
     try {
       this.id = Integer.valueOf(this.id.intValue() + 1);
 
-      switch (KLight.Type.values()[this.index_gen.next().intValue()]) {
+      switch (SBLightType.values()[this.index_gen.next().intValue()]) {
         case LIGHT_DIRECTIONAL:
         {
           final RVectorReadable3F<RSpaceWorld> direction =
@@ -69,8 +70,12 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
           final RVectorReadable3F<RSpaceRGB> colour = this.colour_gen.next();
           final float intensity = (float) Math.random();
 
-          return new SBLightDescription.SBLightDescriptionDirectional(
-            KDirectional.make(this.id, direction, colour, intensity));
+          return new SBLightDescriptionDirectional(
+            KLightDirectional.newDirectional(
+              this.id,
+              direction,
+              colour,
+              intensity));
         }
         case LIGHT_PROJECTIVE:
         {
@@ -84,7 +89,7 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
           final PathVirtual texture = this.path_gen.next();
           final Option<KShadow> shadow = Option.some(this.shad_gen.next());
 
-          return new SBLightDescription.SBLightDescriptionProjective(
+          return new SBLightDescriptionProjective(
             orientation,
             position,
             falloff,
@@ -95,7 +100,7 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
             shadow,
             this.id);
         }
-        case LIGHT_SPHERE:
+        case LIGHT_SPHERICAL:
         {
           final RVectorI3F<RSpaceRGB> colour = this.colour_gen.next();
           final float intensity = (float) Math.random();
@@ -103,14 +108,13 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
           final float radius = (float) Math.random() * 64.0f;
           final RVectorI3F<RSpaceWorld> position = this.world_gen.next();
 
-          return new SBLightDescription.SBLightDescriptionSpherical(
-            KSphere.make(
-              this.id,
-              colour,
-              intensity,
-              position,
-              radius,
-              falloff));
+          return new SBLightDescriptionSpherical(KLightSphere.newSpherical(
+            this.id,
+            colour,
+            intensity,
+            position,
+            radius,
+            falloff));
         }
       }
     } catch (final ConstraintError e) {

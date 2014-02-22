@@ -34,7 +34,7 @@ import org.junit.Test;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.xml.RXMLException;
+import com.io7m.renderer.types.RXMLException;
 
 public class ColladaDocumentTest
 {
