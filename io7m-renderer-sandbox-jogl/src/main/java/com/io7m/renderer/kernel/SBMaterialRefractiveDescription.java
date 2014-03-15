@@ -14,37 +14,16 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel.types;
+package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-/**
- * A description of the refractive properties of a material.
- */
-
-@Immutable public final class KMaterialRefractive
+public final class SBMaterialRefractiveDescription
 {
   private final float scale;
 
-  /**
-   * Create new refractive material properties
-   * 
-   * @param scale
-   *          The amount by which to scale the refraction
-   * @return New refractive properties
-   */
-
-  public static @Nonnull KMaterialRefractive newRefractive(
+  public SBMaterialRefractiveDescription(
     final float scale)
   {
-    return new KMaterialRefractive(scale);
-  }
-
-  private KMaterialRefractive(
-    final float in_scale)
-  {
-    this.scale = in_scale;
+    this.scale = scale;
   }
 
   @Override public boolean equals(
@@ -59,16 +38,13 @@ import javax.annotation.concurrent.Immutable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KMaterialRefractive other = (KMaterialRefractive) obj;
+    final SBMaterialRefractiveDescription other =
+      (SBMaterialRefractiveDescription) obj;
     if (Float.floatToIntBits(this.scale) != Float.floatToIntBits(other.scale)) {
       return false;
     }
     return true;
   }
-
-  /**
-   * @return The amount by which to scale the refraction
-   */
 
   public float getScale()
   {
@@ -86,7 +62,7 @@ import javax.annotation.concurrent.Immutable;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KMaterialRefractive scale=");
+    builder.append("[SBMaterialRefractiveDescription scale=");
     builder.append(this.scale);
     builder.append("]");
     return builder.toString();

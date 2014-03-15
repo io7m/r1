@@ -31,15 +31,18 @@ public final class SBMaterialControlsTranslucentRefractive implements
   private final @Nonnull SBMaterialControlsNormal               controls_normal;
   private final @Nonnull SBMatrix3x3Controls<RTransformTexture> controls_uv;
   private final @Nonnull JTextField                             name;
+  private final @Nonnull SBFloatHSlider                         scale;
 
   public SBMaterialControlsTranslucentRefractive(
     final @Nonnull JTextField name,
     final @Nonnull SBMaterialControlsNormal controls_normal,
     final @Nonnull SBMatrix3x3Controls<RTransformTexture> controls_uv)
+    throws ConstraintError
   {
     this.name = name;
     this.controls_normal = controls_normal;
     this.controls_uv = controls_uv;
+    this.scale = new SBFloatHSlider("Scale", 0.0f, 1.0f);
   }
 
   @Override public void controlsAddToLayout(
@@ -53,16 +56,12 @@ public final class SBMaterialControlsTranslucentRefractive implements
     // Nothing
   }
 
-  @Override public void controlsShow()
-  {
-    // Nothing
-  }
-
   @Override public void controlsLoadFrom(
     final @Nonnull SBMaterialDescriptionTranslucentRefractive desc)
   {
     this.controls_normal.controlsLoadFrom(desc.getNormal());
     this.controls_uv.controlsLoadFrom(desc.getUVMatrix());
+    this.scale.setCurrent(desc.getRefractive().getScale());
   }
 
   @Override public SBMaterialDescriptionTranslucentRefractive controlsSave()
@@ -72,6 +71,12 @@ public final class SBMaterialControlsTranslucentRefractive implements
     return new SBMaterialDescriptionTranslucentRefractive(
       this.name.getText(),
       this.controls_normal.controlsSave(),
+      new SBMaterialRefractiveDescription(this.scale.getCurrent()),
       this.controls_uv.controlsSave());
+  }
+
+  @Override public void controlsShow()
+  {
+    // Nothing
   }
 }

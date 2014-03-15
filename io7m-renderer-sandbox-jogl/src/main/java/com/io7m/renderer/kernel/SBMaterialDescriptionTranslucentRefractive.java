@@ -27,18 +27,21 @@ import com.io7m.renderer.types.RTransformTexture;
 public final class SBMaterialDescriptionTranslucentRefractive implements
   SBMaterialDescriptionTranslucent
 {
-  private final @Nonnull SBMaterialNormalDescription     normal;
-  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
   private final @Nonnull String                          name;
+  private final @Nonnull SBMaterialNormalDescription     normal;
+  private final @Nonnull SBMaterialRefractiveDescription refractive;
+  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
 
   SBMaterialDescriptionTranslucentRefractive(
     final @Nonnull String name,
     final @Nonnull SBMaterialNormalDescription normal,
+    final @Nonnull SBMaterialRefractiveDescription refractive,
     final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix)
     throws ConstraintError
   {
     this.name = Constraints.constrainNotNull(name, "Name");
     this.normal = Constraints.constrainNotNull(normal, "Normal");
+    this.refractive = Constraints.constrainNotNull(refractive, "Refractive");
     this.uv_matrix = Constraints.constrainNotNull(uv_matrix, "UV matrix");
   }
 
@@ -57,12 +60,18 @@ public final class SBMaterialDescriptionTranslucentRefractive implements
     final SBMaterialDescriptionTranslucentRefractive other =
       (SBMaterialDescriptionTranslucentRefractive) obj;
     return this.normal.equals(other.normal)
+      && this.refractive.equals(other.refractive)
       && this.uv_matrix.equals(other.uv_matrix);
   }
 
   public @Nonnull SBMaterialNormalDescription getNormal()
   {
     return this.normal;
+  }
+
+  public @Nonnull SBMaterialRefractiveDescription getRefractive()
+  {
+    return this.refractive;
   }
 
   public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
@@ -75,8 +84,14 @@ public final class SBMaterialDescriptionTranslucentRefractive implements
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.normal.hashCode();
+    result = (prime * result) + this.refractive.hashCode();
     result = (prime * result) + this.uv_matrix.hashCode();
     return result;
+  }
+
+  @Override public @Nonnull String materialDescriptionGetName()
+  {
+    return this.name;
   }
 
   @Override public
@@ -101,10 +116,5 @@ public final class SBMaterialDescriptionTranslucentRefractive implements
         ConstraintError
   {
     return v.materialDescriptionVisitTranslucent(this);
-  }
-
-  @Override public @Nonnull String materialDescriptionGetName()
-  {
-    return this.name;
   }
 }
