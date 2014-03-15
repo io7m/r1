@@ -25,7 +25,6 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Option.Some;
@@ -406,6 +405,7 @@ import com.io7m.renderer.types.RTransformView;
   public static @Nonnull KRendererForwardActual rendererNew(
     final @Nonnull JCGLImplementation g,
     final @Nonnull KShadowMapRenderer shadow_renderer,
+    final @Nonnull KRefractionRenderer refraction_renderer,
     final @Nonnull KLabelDecider decider,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull KGraphicsCapabilities caps,
@@ -416,6 +416,7 @@ import com.io7m.renderer.types.RTransformView;
     return new KRendererForwardActual(
       g,
       shadow_renderer,
+      refraction_renderer,
       decider,
       shader_cache,
       caps,
@@ -1131,14 +1132,15 @@ import com.io7m.renderer.types.RTransformView;
     }
   }
 
-  private static void renderTranslucentRefractive(
+  private void renderTranslucentRefractive(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KShadowMapContext shadow_context,
+    final @Nonnull KFramebufferRGBAUsable framebuffer,
     final @Nonnull KInstanceTransformedTranslucentRefractive t,
     final @Nonnull MatricesObserver mwo)
+    throws RException,
+      ConstraintError
   {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
+    this.refraction_renderer.rendererRefractionEvaluate(framebuffer, mwo, t);
   }
 
   private final @Nonnull VectorM4F                             background;
@@ -1149,12 +1151,14 @@ import com.io7m.renderer.types.RTransformView;
   private final @Nonnull KMutableMatrices                      matrices;
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
   private final @Nonnull KShadowMapRenderer                    shadow_renderer;
+  private final @Nonnull KRefractionRenderer                   refraction_renderer;
   private final @Nonnull KTextureUnitAllocator                 texture_units;
   private final @Nonnull VectorM2I                             viewport_size;
 
   private KRendererForwardActual(
     final @Nonnull JCGLImplementation g,
     final @Nonnull KShadowMapRenderer shadow_renderer,
+    final @Nonnull KRefractionRenderer refraction_renderer,
     final @Nonnull KLabelDecider decider,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull KGraphicsCapabilities caps,
@@ -1174,6 +1178,10 @@ import com.io7m.renderer.types.RTransformView;
         Constraints.constrainNotNull(shader_cache, "Shader cache");
       this.shadow_renderer =
         Constraints.constrainNotNull(shadow_renderer, "Shadow renderer");
+      this.refraction_renderer =
+        Constraints.constrainNotNull(
+          refraction_renderer,
+          "Refraction renderer");
       this.decider = Constraints.constrainNotNull(decider, "Decider");
       this.matrices = KMutableMatrices.newMatrices();
       this.depth =
@@ -1443,6 +1451,7 @@ import com.io7m.renderer.types.RTransformView;
             gc.depthBufferWriteDisable();
             KRendererForwardActual.this.renderTranslucents(
               gc,
+              framebuffer,
               shadow_context,
               batched,
               mwo);
@@ -1602,6 +1611,7 @@ import com.io7m.renderer.types.RTransformView;
 
   private void renderTranslucents(
     final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KFramebufferRGBAUsable framebuffer,
     final @Nonnull KShadowMapContext shadow_context,
     final @Nonnull KSceneBatchedForward batched,
     final @Nonnull MatricesObserver mwo)
@@ -1624,9 +1634,9 @@ import com.io7m.renderer.types.RTransformView;
               RException,
               ConstraintError
           {
-            KRendererForwardActual.renderTranslucentRefractive(
+            KRendererForwardActual.this.renderTranslucentRefractive(
               gc,
-              shadow_context,
+              framebuffer,
               t,
               mwo);
             return Unit.unit();

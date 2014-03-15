@@ -91,6 +91,7 @@ import com.io7m.renderer.kernel.types.KMaterialOpaque;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitor;
+import com.io7m.renderer.kernel.types.KMaterialRefractive;
 import com.io7m.renderer.kernel.types.KMaterialSpecular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucent;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
@@ -353,8 +354,15 @@ public final class SBSceneController implements
                     textures_2d,
                     md.getNormal());
 
-                // TODO
-                throw new UnimplementedCodeException();
+                final KMaterialRefractive in_refractive =
+                  KMaterialRefractive.newRefractive(md
+                    .getRefractive()
+                    .getScale());
+
+                return KMaterialTranslucentRefractive.newMaterial(
+                  md.getUVMatrix(),
+                  in_normal,
+                  in_refractive);
               }
 
               @SuppressWarnings("synthetic-access") @Override public
@@ -626,8 +634,17 @@ public final class SBSceneController implements
                     throws ConstraintError,
                       RException
                 {
-                  // TODO Auto-generated method stub
-                  throw new UnimplementedCodeException();
+                  final SBMaterialNormalDescription normal = mtr.getNormal();
+
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindNormal> map_normal =
+                    (SBTexture2D<SBTexture2DKindNormal>) (normal.getTexture() != null
+                      ? tx2.get(normal.getTexture())
+                      : null);
+
+                  return new SBMaterialTranslucentRefractive(
+                    id,
+                    mtr,
+                    map_normal);
                 }
 
                 @Override public

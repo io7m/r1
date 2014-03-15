@@ -18,37 +18,25 @@ package com.io7m.renderer.types;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.VectorM2I;
 
 /**
- * An immutable 3D vector type indexed by the coordinate space of the
- * components.
+ * A mutable 2D vector type indexed by the coordinate space of the components.
  * 
  * @param <T>
  *          A phantom type parameter describing the coordinate space
  */
 
-public class RVectorI3F<T extends RSpace> extends VectorI3F implements
-  RVectorReadable3F<T>
+public final class RVectorM2I<T extends RSpace> extends VectorM2I implements
+  RVectorReadable2I<T>
 {
-  private static final @Nonnull RVectorI3F<?> ZERO_FIELD;
-
-  static {
-    ZERO_FIELD = new RVectorI3F<RSpace>(0.0f, 0.0f, 0.0f);
-  }
-
   /**
-   * @return The zero vector.
-   * @param <T>
-   *          The desired coordinate space
+   * Construct a new vector, initialized to all zeroes.
    */
 
-  @SuppressWarnings("unchecked") public static
-    <T extends RSpace>
-    RVectorI3F<T>
-    zero()
+  public RVectorM2I()
   {
-    return (RVectorI3F<T>) RVectorI3F.ZERO_FIELD;
+    super();
   }
 
   /**
@@ -58,38 +46,25 @@ public class RVectorI3F<T extends RSpace> extends VectorI3F implements
    *          The x component
    * @param y
    *          The y component
-   * @param z
-   *          The z component
    */
 
-  public RVectorI3F(
-    final float x,
-    final float y,
-    final float z)
+  public RVectorM2I(
+    final int x,
+    final int y)
   {
-    super(x, y, z);
+    super(x, y);
   }
 
   /**
    * Construct a new vector.
    * 
    * @param v
-   *          The readable vector from which to take values
+   *          The vector from which to take values
    */
 
-  public RVectorI3F(
-    final @Nonnull RVectorReadable3F<T> v)
+  public RVectorM2I(
+    final @Nonnull RVectorReadable2I<T> v)
   {
     super(v);
-  }
-
-  /**
-   * @return The current coordinates as homogeneous coordinates (with
-   *         <code>w == 1.0</code>).
-   */
-
-  public final @Nonnull RVectorI4F<T> getHomogeneous()
-  {
-    return new RVectorI4F<T>(this.x, this.y, this.z, 1.0f);
   }
 }
