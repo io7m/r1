@@ -1132,26 +1132,16 @@ import com.io7m.renderer.types.RTransformView;
     }
   }
 
-  private void renderTranslucentRefractive(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KFramebufferRGBAUsable framebuffer,
-    final @Nonnull KInstanceTransformedTranslucentRefractive t,
-    final @Nonnull MatricesObserver mwo)
-    throws RException,
-      ConstraintError
-  {
-    this.refraction_renderer.rendererRefractionEvaluate(framebuffer, mwo, t);
-  }
-
   private final @Nonnull VectorM4F                             background;
+
   private final @Nonnull KLabelDecider                         decider;
   private final @Nonnull KDepthRenderer                        depth;
   private final @Nonnull JCGLImplementation                    g;
   private final @Nonnull Log                                   log;
   private final @Nonnull KMutableMatrices                      matrices;
+  private final @Nonnull KRefractionRenderer                   refraction_renderer;
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
   private final @Nonnull KShadowMapRenderer                    shadow_renderer;
-  private final @Nonnull KRefractionRenderer                   refraction_renderer;
   private final @Nonnull KTextureUnitAllocator                 texture_units;
   private final @Nonnull VectorM2I                             viewport_size;
 
@@ -1465,6 +1455,20 @@ import com.io7m.renderer.types.RTransformView;
       });
   }
 
+  private
+    <F extends KFramebufferRGBAUsable & KFramebufferDepthUsable>
+    void
+    renderTranslucentRefractive(
+      final @Nonnull JCGLInterfaceCommon gc,
+      final @Nonnull F framebuffer,
+      final @Nonnull KInstanceTransformedTranslucentRefractive t,
+      final @Nonnull MatricesObserver mwo)
+      throws RException,
+        ConstraintError
+  {
+    this.refraction_renderer.rendererRefractionEvaluate(framebuffer, mwo, t);
+  }
+
   private void renderTranslucentRegularLit(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KShadowMapContext shadow_context,
@@ -1609,16 +1613,19 @@ import com.io7m.renderer.types.RTransformView;
     });
   }
 
-  private void renderTranslucents(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KFramebufferRGBAUsable framebuffer,
-    final @Nonnull KShadowMapContext shadow_context,
-    final @Nonnull KSceneBatchedForward batched,
-    final @Nonnull MatricesObserver mwo)
-    throws JCGLException,
-      RException,
-      ConstraintError,
-      JCacheException
+  private
+    <F extends KFramebufferRGBAUsable & KFramebufferDepthUsable>
+    void
+    renderTranslucents(
+      final @Nonnull JCGLInterfaceCommon gc,
+      final @Nonnull F framebuffer,
+      final @Nonnull KShadowMapContext shadow_context,
+      final @Nonnull KSceneBatchedForward batched,
+      final @Nonnull MatricesObserver mwo)
+      throws JCGLException,
+        RException,
+        ConstraintError,
+        JCacheException
   {
     final List<KTranslucent> translucents = batched.getBatchesTranslucent();
 

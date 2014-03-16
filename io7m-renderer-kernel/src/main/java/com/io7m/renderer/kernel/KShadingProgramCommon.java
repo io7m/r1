@@ -44,6 +44,7 @@ import com.io7m.renderer.kernel.types.KMaterialAlbedo;
 import com.io7m.renderer.kernel.types.KMaterialEmissive;
 import com.io7m.renderer.kernel.types.KMaterialEnvironment;
 import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KMaterialRefractive;
 import com.io7m.renderer.kernel.types.KMaterialSpecular;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
 import com.io7m.renderer.kernel.types.KShadow;
@@ -75,33 +76,40 @@ import com.io7m.renderer.types.RVectorReadable4F;
 
 final class KShadingProgramCommon
 {
-  private static final String MATRIX_NAME_MODEL                 = "m_model";
-  private static final String MATRIX_NAME_MODELVIEW             =
-                                                                  "m_modelview";
-  private static final String MATRIX_NAME_NORMAL                = "m_normal";
-  private static final String MATRIX_NAME_PROJECTION            =
-                                                                  "m_projection";
-  private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW  =
-                                                                  "m_projective_modelview";
-  private static final String MATRIX_NAME_PROJECTIVE_PROJECTION =
-                                                                  "m_projective_projection";
-  private static final String MATRIX_NAME_UV                    = "m_uv";
-  private static final String MATRIX_NAME_VIEW_INVERSE          =
-                                                                  "m_view_inv";
-  private static final String TEXTURE_NAME_ALBEDO               = "t_albedo";
-  private static final String TEXTURE_NAME_EMISSION             =
-                                                                  "t_emission";
-  private static final String TEXTURE_NAME_ENVIRONMENT          =
-                                                                  "t_environment";
-  private static final String TEXTURE_NAME_NORMAL               = "t_normal";
-  private static final String TEXTURE_NAME_PROJECTION           =
-                                                                  "t_projection";
-  private static final String TEXTURE_NAME_SHADOW_BASIC         =
-                                                                  "t_shadow_basic";
-  private static final String TEXTURE_NAME_SHADOW_VARIANCE      =
-                                                                  "t_shadow_variance";
-  private static final String TEXTURE_NAME_SPECULAR             =
-                                                                  "t_specular";
+  private static final String MATRIX_NAME_MODEL                   = "m_model";
+  private static final String MATRIX_NAME_MODELVIEW               =
+                                                                    "m_modelview";
+  private static final String MATRIX_NAME_NORMAL                  =
+                                                                    "m_normal";
+  private static final String MATRIX_NAME_PROJECTION              =
+                                                                    "m_projection";
+  private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW    =
+                                                                    "m_projective_modelview";
+  private static final String MATRIX_NAME_PROJECTIVE_PROJECTION   =
+                                                                    "m_projective_projection";
+  private static final String MATRIX_NAME_UV                      = "m_uv";
+  private static final String MATRIX_NAME_VIEW_INVERSE            =
+                                                                    "m_view_inv";
+  private static final String TEXTURE_NAME_ALBEDO                 =
+                                                                    "t_albedo";
+  private static final String TEXTURE_NAME_EMISSION               =
+                                                                    "t_emission";
+  private static final String TEXTURE_NAME_ENVIRONMENT            =
+                                                                    "t_environment";
+  private static final String TEXTURE_NAME_NORMAL                 =
+                                                                    "t_normal";
+  private static final String TEXTURE_NAME_PROJECTION             =
+                                                                    "t_projection";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE       =
+                                                                    "t_refraction_scene";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE_DEPTH =
+                                                                    "t_refraction_scene_depth";
+  private static final String TEXTURE_NAME_SHADOW_BASIC           =
+                                                                    "t_shadow_basic";
+  private static final String TEXTURE_NAME_SHADOW_VARIANCE        =
+                                                                    "t_shadow_variance";
+  private static final String TEXTURE_NAME_SPECULAR               =
+                                                                    "t_specular";
 
   static void bindAttributeColour(
     final @Nonnull JCBProgram program,
@@ -967,15 +975,6 @@ final class KShadingProgramCommon
     program.programUniformPutFloat("p_albedo.mix", mix);
   }
 
-  static void putMaterialAlphaOpacity(
-    final @Nonnull JCBProgram program,
-    final float opacity)
-    throws JCGLException,
-      ConstraintError
-  {
-    program.programUniformPutFloat("p_opacity", opacity);
-  }
-
   static void putMaterialAlphaDepthThreshold(
     final @Nonnull JCBProgram program,
     final float threshold)
@@ -983,6 +982,15 @@ final class KShadingProgramCommon
       ConstraintError
   {
     program.programUniformPutFloat("p_alpha_depth", threshold);
+  }
+
+  static void putMaterialAlphaOpacity(
+    final @Nonnull JCBProgram program,
+    final float opacity)
+    throws JCGLException,
+      ConstraintError
+  {
+    program.programUniformPutFloat("p_opacity", opacity);
   }
 
   static void putMaterialEmissive(
@@ -1023,25 +1031,25 @@ final class KShadingProgramCommon
     program.programUniformPutFloat("p_environment.mix", mix);
   }
 
-  // public static void putMaterialOpaque(
-  // final @Nonnull JCBProgram program,
-  // final @Nonnull KMaterialOpaque material)
-  // throws JCGLException,
-  // ConstraintError
-  // {
-  // KShadingProgramCommon.putMaterialAlbedo(
-  // program,
-  // material.materialGetAlbedo());
-  // KShadingProgramCommon.putMaterialEmissive(
-  // program,
-  // material.materialGetEmissive());
-  // KShadingProgramCommon.putMaterialEnvironment(
-  // program,
-  // material.materialGetEnvironment());
-  // KShadingProgramCommon.putMaterialSpecular(
-  // program,
-  // material.materialGetSpecular());
-  // }
+  static void putMaterialRefractive(
+    final @Nonnull JCBProgram program,
+    final @Nonnull KMaterialRefractive material)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMaterialRefractiveScale(
+      program,
+      material.getScale());
+  }
+
+  static void putMaterialRefractiveScale(
+    final @Nonnull JCBProgram program,
+    final float scale)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    program.programUniformPutFloat("p_refraction.scale", scale);
+  }
 
   static void putMaterialSpecular(
     final @Nonnull JCBProgram program,
@@ -1055,15 +1063,6 @@ final class KShadingProgramCommon
     KShadingProgramCommon.putMaterialSpecularColour(program, m.getColour());
   }
 
-  static void putMaterialSpecularExponent(
-    final @Nonnull JCBProgram program,
-    final float e)
-    throws ConstraintError,
-      JCGLException
-  {
-    program.programUniformPutFloat("p_specular.exponent", e);
-  }
-
   static void putMaterialSpecularColour(
     final @Nonnull JCBProgram program,
     final @Nonnull RVectorReadable3F<RSpaceRGB> colour)
@@ -1071,6 +1070,15 @@ final class KShadingProgramCommon
       JCGLException
   {
     program.programUniformPutVector3f("p_specular.colour", colour);
+  }
+
+  static void putMaterialSpecularExponent(
+    final @Nonnull JCBProgram program,
+    final float e)
+    throws ConstraintError,
+      JCGLException
+  {
+    program.programUniformPutFloat("p_specular.exponent", e);
   }
 
   static void putMatrixInverseView(
@@ -1185,6 +1193,28 @@ final class KShadingProgramCommon
     program.programUniformPutMatrix3x3f(
       KShadingProgramCommon.MATRIX_NAME_UV,
       m);
+  }
+
+  static void putRefractionTextureScene(
+    final @Nonnull JCBProgram program,
+    final @Nonnull TextureUnit unit)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_REFRACTION_SCENE,
+      unit);
+  }
+
+  static void putRefractionTextureSceneDepth(
+    final @Nonnull JCBProgram program,
+    final @Nonnull TextureUnit unit)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_REFRACTION_SCENE_DEPTH,
+      unit);
   }
 
   static void putShadowBasic(

@@ -16,17 +16,16 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
 /**
- * The type of labels for lit materials.
+ * Information about whether a given material implies UV-mapped textures.
  */
 
-public interface KMaterialLabelLit extends KLabel, KMaterialLabelImpliesUV
+public interface KMaterialLabelImpliesUV
 {
+
   /**
-   * @return The label of the current light for this material.
+   * @return If the material implies UV-mapped texturing at all
    */
 
-  @Nonnull KLightLabel labelGetLight();
+  boolean labelImpliesUV();
 }

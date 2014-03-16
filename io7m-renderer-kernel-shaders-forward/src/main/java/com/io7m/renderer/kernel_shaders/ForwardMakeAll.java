@@ -43,6 +43,7 @@ import com.io7m.jparasol.xml.Batch;
 import com.io7m.jparasol.xml.PGLSLCompactor;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueLitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueUnlitLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRefractiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularLitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularUnlitLabel;
 
@@ -111,6 +112,7 @@ public final class ForwardMakeAll
     final Set<KMaterialForwardOpaqueUnlitLabel> opaque_unlit =
       KMaterialForwardOpaqueUnlitLabel.allLabels();
     ForwardMakeAll.makeSourcesOpaqueUnlit(opaque_unlit, out_parasol_dir);
+
     final Set<KMaterialForwardOpaqueLitLabel> opaque_lit =
       KMaterialForwardOpaqueLitLabel.allLabels();
     ForwardMakeAll.makeSourcesOpaqueLit(opaque_lit, out_parasol_dir);
@@ -120,10 +122,17 @@ public final class ForwardMakeAll
     ForwardMakeAll.makeSourcesTranslucentRegularUnlit(
       translucent_regular_unlit,
       out_parasol_dir);
+
     final Set<KMaterialForwardTranslucentRegularLitLabel> translucent_regular_lit =
       KMaterialForwardTranslucentRegularLitLabel.allLabels();
     ForwardMakeAll.makeSourcesTranslucentRegularLit(
       translucent_regular_lit,
+      out_parasol_dir);
+
+    final Set<KMaterialForwardTranslucentRefractiveLabel> translucent_refractive =
+      KMaterialForwardTranslucentRefractiveLabel.allLabels();
+    ForwardMakeAll.makeSourcesTranslucentRefractive(
+      translucent_refractive,
       out_parasol_dir);
 
     ForwardMakeAll.makeBatch(
@@ -131,6 +140,7 @@ public final class ForwardMakeAll
       opaque_lit,
       translucent_regular_unlit,
       translucent_regular_lit,
+      translucent_refractive,
       out_batch);
 
     final String[] sources = ForwardMakeAll.getSourcesList(out_parasol_dir);
@@ -149,6 +159,7 @@ public final class ForwardMakeAll
       final Set<KMaterialForwardOpaqueLitLabel> opaque_lit,
       final Set<KMaterialForwardTranslucentRegularUnlitLabel> translucent_regular_unlit,
       final Set<KMaterialForwardTranslucentRegularLitLabel> translucent_regular_lit,
+      final Set<KMaterialForwardTranslucentRefractiveLabel> translucent_refractive,
       final @Nonnull File file)
       throws IOException
   {
@@ -179,6 +190,14 @@ public final class ForwardMakeAll
     }
 
     for (final KMaterialForwardTranslucentRegularLitLabel l : translucent_regular_lit) {
+      final String code = l.labelGetCode();
+      final String module = TitleCase.toTitleCase(code);
+      writer.append(code);
+      writer.append(" : com.io7m.renderer.kernel." + module + ".p");
+      writer.append("\n");
+    }
+
+    for (final KMaterialForwardTranslucentRefractiveLabel l : translucent_refractive) {
       final String code = l.labelGetCode();
       final String module = TitleCase.toTitleCase(code);
       writer.append(code);
@@ -290,8 +309,8 @@ public final class ForwardMakeAll
 
   private static
     void
-    makeSourcesTranslucentRegularLit(
-      final @Nonnull Set<KMaterialForwardTranslucentRegularLitLabel> opaque_lit,
+    makeSourcesTranslucentRefractive(
+      final @Nonnull Set<KMaterialForwardTranslucentRefractiveLabel> refractive,
       final @Nonnull File dir)
       throws IOException
   {
@@ -299,7 +318,34 @@ public final class ForwardMakeAll
       throw new IOException(dir + " is not a directory");
     }
 
-    for (final KMaterialForwardTranslucentRegularLitLabel l : opaque_lit) {
+    for (final KMaterialForwardTranslucentRefractiveLabel l : refractive) {
+      final String code = TitleCase.toTitleCase(l.labelGetCode());
+
+      final File file = new File(dir, code + ".p");
+      System.err.println("info: writing: " + file);
+
+      final FileWriter writer = new FileWriter(file);
+      try {
+        writer.append(ForwardShaders.moduleForwardTranslucentRefractive(l));
+      } finally {
+        writer.flush();
+        writer.close();
+      }
+    }
+  }
+
+  private static
+    void
+    makeSourcesTranslucentRegularLit(
+      final @Nonnull Set<KMaterialForwardTranslucentRegularLitLabel> translucent_lit,
+      final @Nonnull File dir)
+      throws IOException
+  {
+    if (dir.isDirectory() == false) {
+      throw new IOException(dir + " is not a directory");
+    }
+
+    for (final KMaterialForwardTranslucentRegularLitLabel l : translucent_lit) {
       final String code = TitleCase.toTitleCase(l.labelGetCode());
 
       final File file = new File(dir, code + ".p");
@@ -318,7 +364,7 @@ public final class ForwardMakeAll
   private static
     void
     makeSourcesTranslucentRegularUnlit(
-      final @Nonnull Set<KMaterialForwardTranslucentRegularUnlitLabel> opaque_unlit,
+      final @Nonnull Set<KMaterialForwardTranslucentRegularUnlitLabel> translucent_unlit,
       final @Nonnull File dir)
       throws IOException
   {
@@ -326,7 +372,7 @@ public final class ForwardMakeAll
       throw new IOException(dir + " is not a directory");
     }
 
-    for (final KMaterialForwardTranslucentRegularUnlitLabel l : opaque_unlit) {
+    for (final KMaterialForwardTranslucentRegularUnlitLabel l : translucent_unlit) {
       final String code = TitleCase.toTitleCase(l.labelGetCode());
 
       final File file = new File(dir, code + ".p");
