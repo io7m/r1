@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.swing.JTextField;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
+import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
@@ -32,6 +33,7 @@ public final class SBMaterialControlsTranslucentRefractive implements
   private final @Nonnull SBMatrix3x3Controls<RTransformTexture> controls_uv;
   private final @Nonnull JTextField                             name;
   private final @Nonnull SBFloatHSlider                         scale;
+  private final @Nonnull RowGroup                               group;
 
   public SBMaterialControlsTranslucentRefractive(
     final @Nonnull JTextField name,
@@ -39,6 +41,7 @@ public final class SBMaterialControlsTranslucentRefractive implements
     final @Nonnull SBMatrix3x3Controls<RTransformTexture> controls_uv)
     throws ConstraintError
   {
+    this.group = new RowGroup();
     this.name = name;
     this.controls_normal = controls_normal;
     this.controls_uv = controls_uv;
@@ -48,12 +51,17 @@ public final class SBMaterialControlsTranslucentRefractive implements
   @Override public void controlsAddToLayout(
     final @Nonnull DesignGridLayout layout)
   {
-    // Nothing
+    layout
+      .row()
+      .group(this.group)
+      .grid(this.scale.getLabel())
+      .add(this.scale.getSlider(), 4)
+      .add(this.scale.getField());
   }
 
   @Override public void controlsHide()
   {
-    // Nothing
+    this.group.hide();
   }
 
   @Override public void controlsLoadFrom(
@@ -77,6 +85,6 @@ public final class SBMaterialControlsTranslucentRefractive implements
 
   @Override public void controlsShow()
   {
-    // Nothing
+    this.group.forceShow();
   }
 }

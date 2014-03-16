@@ -74,6 +74,15 @@ import com.io7m.renderer.types.RTransformTexture;
       Constraints.constrainNotNull(in_refractive, "Refractive");
   }
 
+  /**
+   * @return The refraction parameters for the material
+   */
+
+  public @Nonnull KMaterialRefractive getRefractive()
+  {
+    return this.refractive;
+  }
+
   @Override public KMaterialNormal materialGetNormal()
   {
     return this.normal;
