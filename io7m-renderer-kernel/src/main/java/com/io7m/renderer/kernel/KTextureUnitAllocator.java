@@ -43,9 +43,9 @@ import com.io7m.renderer.types.RException;
  * "allocated" such that
  * <code>∀n. allocated(c₀) + allocated(c₁) ... + allocated(cₙ) &lt;= u</code>
  * (where <code>allocated(c)</code> denotes the number of units marked by
- * <code>c</code>. If a context attempts to allocate more units than are left,
- * an error is raised. A context automatically returns all of its associated
- * allocated units when it is destroyed.
+ * <code>c</code>). If a context attempts to allocate more units than are
+ * left, an error is raised. A context automatically returns all of its
+ * associated allocated units when it is destroyed.
  * </p>
  */
 
