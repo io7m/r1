@@ -22,6 +22,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.JCacheLoader;
@@ -47,6 +48,7 @@ import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRefractiveLabel
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularLitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularUnlitLabel;
 import com.io7m.renderer.kernel.types.KMaterialNormalLabel;
+import com.io7m.renderer.kernel.types.KMaterialRefractiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
 
 final class KLabelDecider implements
@@ -58,6 +60,7 @@ final class KLabelDecider implements
   KMaterialEnvironmentLabelCache,
   KMaterialNormalLabelCache,
   KMaterialSpecularLabelCache,
+  KMaterialRefractiveLabelCache,
   KMaterialForwardRegularLabelCache,
   KMaterialForwardOpaqueUnlitLabelCache,
   KMaterialForwardOpaqueLitLabelCache,
@@ -89,6 +92,7 @@ final class KLabelDecider implements
   private final @Nonnull LRUCacheTrivial<KLight, KLightLabel, ConstraintError>                                                        light_cache;
   private final @Nonnull LRUCacheTrivial<KInstance, KMaterialNormalLabel, ConstraintError>                                            normal_cache;
   private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialSpecularLabel, ConstraintError>                                   specular_cache;
+  private final @Nonnull LRUCacheTrivial<KInstanceTranslucentRefractive, KMaterialRefractiveLabel, ConstraintError>                   refractive_cache;
 
   private KLabelDecider(
     final @Nonnull KGraphicsCapabilities capabilities,
@@ -216,6 +220,32 @@ final class KLabelDecider implements
 
             @Override public @Nonnull BigInteger cacheValueSizeOf(
               final @Nonnull KMaterialEmissiveLabel v)
+            {
+              return BigInteger.ONE;
+            }
+          },
+          this.cache_config);
+
+    this.refractive_cache =
+      LRUCacheTrivial
+        .newCache(
+          new JCacheLoader<KInstanceTranslucentRefractive, KMaterialRefractiveLabel, ConstraintError>() {
+            @Override public void cacheValueClose(
+              final @Nonnull KMaterialRefractiveLabel v)
+              throws ConstraintError
+            {
+              // Nothing
+            }
+
+            @Override public KMaterialRefractiveLabel cacheValueLoad(
+              final @Nonnull KInstanceTranslucentRefractive instance)
+              throws ConstraintError
+            {
+              return KMaterialRefractiveLabel.fromInstance(instance);
+            }
+
+            @Override public @Nonnull BigInteger cacheValueSizeOf(
+              final @Nonnull KMaterialRefractiveLabel v)
             {
               return BigInteger.ONE;
             }
@@ -417,9 +447,12 @@ final class KLabelDecider implements
               try {
                 final KMaterialNormalLabel normal =
                   KLabelDecider.this.normal_cache.cacheGetLU(instance);
+                final KMaterialRefractiveLabel refractive =
+                  KLabelDecider.this.refractive_cache.cacheGetLU(instance);
 
-                return KMaterialForwardTranslucentRefractiveLabel
-                  .newLabel(normal);
+                return KMaterialForwardTranslucentRefractiveLabel.newLabel(
+                  refractive,
+                  normal);
               } catch (final JCacheException x) {
                 throw new UnreachableCodeException(x);
               }
@@ -667,6 +700,7 @@ final class KLabelDecider implements
       .add(this.depth_cache.cacheSize())
       .add(this.emissive_cache.cacheSize())
       .add(this.environment_cache.cacheSize())
+      .add(this.refractive_cache.cacheSize())
       .add(this.forward_translucent_regular_unlit_cache.cacheSize())
       .add(this.forward_translucent_refractive_cache.cacheSize())
       .add(this.forward_opaque_unlit_cache.cacheSize())
@@ -685,5 +719,13 @@ final class KLabelDecider implements
     } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     }
+  }
+
+  @Override public KMaterialRefractiveLabel getRefractiveLabel(
+    final @Nonnull KInstanceTranslucentRefractive instance)
+    throws ConstraintError
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
   }
 }

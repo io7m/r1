@@ -357,7 +357,7 @@ public final class SBSceneController implements
                 final KMaterialRefractive in_refractive =
                   KMaterialRefractive.newRefractive(md
                     .getRefractive()
-                    .getScale());
+                    .getScale(), md.getRefractive().isMasked());
 
                 return KMaterialTranslucentRefractive.newMaterial(
                   md.getUVMatrix(),

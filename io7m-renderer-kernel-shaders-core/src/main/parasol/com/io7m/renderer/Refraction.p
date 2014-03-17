@@ -35,7 +35,7 @@ module Refraction is
     scale : float
   end;
 
-  function refraction (
+  function refraction_masked (
     refraction   : t,
     t_scene      : sampler_2d,
     t_scene_mask : sampler_2d,
@@ -52,6 +52,21 @@ module Refraction is
       value mask_there  = Sampler2D.texture (t_scene_mask, uv_there) [x];
     in
       Vector4f.interpolate (scene_here, scene_there, mask_there)
+    end;
+
+  function refraction_unmasked (
+    refraction  : t,
+    t_scene     : sampler_2d,
+    n           : vector_3f,
+    p           : vector_4f
+  ) : vector_4f =
+    let
+      value n           = Vector3f.multiply_scalar (n, refraction.scale);
+      value displaced   = new vector_4f (Vector3f.add (p [x y z], n), p [w]);
+      value uv_there    = Transform.clip_to_texture (displaced) [x y];
+      value scene_there = Sampler2D.texture (t_scene, uv_there);
+    in
+      scene_there
     end;
 
 end;
