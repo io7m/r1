@@ -23,6 +23,7 @@ module Refraction is
   import com.io7m.parasol.Sampler2D;
   import com.io7m.parasol.Vector2f;
   import com.io7m.parasol.Vector3f;
+  import com.io7m.parasol.Vector4f;
 
   import com.io7m.renderer.Transform;
 
@@ -35,18 +36,22 @@ module Refraction is
   end;
 
   function refraction (
-    refraction    : t,
-    t_scene       : sampler_2d,
-    t_scene_depth : sampler_2d,
-    n             : vector_3f,
-    p             : vector_4f
+    refraction   : t,
+    t_scene      : sampler_2d,
+    t_scene_mask : sampler_2d,
+    n            : vector_3f,
+    p            : vector_4f
   ) : vector_4f =
     let
-      value n = Vector3f.multiply_scalar (n, refraction.scale);
-      value c = new vector_4f (Vector3f.add (p [x y z], n), p [w]);
-      value u = Transform.clip_to_texture (c);
+      value n           = Vector3f.multiply_scalar (n, refraction.scale);
+      value displaced   = new vector_4f (Vector3f.add (p [x y z], n), p [w]);
+      value uv_there    = Transform.clip_to_texture (displaced) [x y];
+      value uv_here     = Transform.clip_to_texture (p) [x y];
+      value scene_there = Sampler2D.texture (t_scene, uv_there);
+      value scene_here  = Sampler2D.texture (t_scene, uv_here);
+      value mask_there  = Sampler2D.texture (t_scene_mask, uv_there) [x];
     in
-      Sampler2D.texture (t_scene, u [x y])
+      Vector4f.interpolate (scene_here, scene_there, mask_there)
     end;
 
 end;

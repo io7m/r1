@@ -685,10 +685,10 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull SBVisibleAxes                                                                                axes;
   private final @Nonnull AtomicBoolean                                                                          axes_show;
   private final @Nonnull AtomicReference<VectorI3F>                                                             background_colour;
-  private @Nonnull LRUCacheTrivial<KMeshBounds<RSpaceObject>, KMeshBoundsTriangles<RSpaceObject>, RException>   bounds_triangles_cache;
-  private @Nonnull LRUCacheConfig                                                                               bounds_triangles_cache_config;
   private @Nonnull LRUCacheTrivial<KMesh, KMeshBounds<RSpaceObject>, RException>                                bounds_cache;
   private @Nonnull LRUCacheConfig                                                                               bounds_cache_config;
+  private @Nonnull LRUCacheTrivial<KMeshBounds<RSpaceObject>, KMeshBoundsTriangles<RSpaceObject>, RException>   bounds_triangles_cache;
+  private @Nonnull LRUCacheConfig                                                                               bounds_triangles_cache_config;
   private final @Nonnull ConcurrentLinkedQueue<CacheStatisticsFuture>                                           cache_statistics_queue;
   private final @Nonnull SBFirstPersonCamera                                                                    camera;
   private @Nonnull SceneObserver                                                                                camera_current;
@@ -704,6 +704,9 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull JCacheLoader<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException>    depth_variance_cache_loader;
   private final @Nonnull FSCapabilityAll                                                                        filesystem;
   private boolean                                                                                               first;
+  private @Nonnull BLUCacheTrivial<KFramebufferForwardDescription, KFramebufferForwardType, RException>         forward_cache;
+  private @Nonnull BLUCacheConfig                                                                               forward_cache_config;
+  private @Nonnull JCacheLoader<KFramebufferForwardDescription, KFramebufferForwardType, RException>            forward_cache_loader;
   private @CheckForNull KFramebufferForwardType                                                                 framebuffer;
   private @CheckForNull JCGLImplementationJOGL                                                                  gi;
   private @Nonnull SBVisibleGridPlane                                                                           grid;
@@ -1442,6 +1445,18 @@ final class SBGLRenderer implements GLEventListener
           this.rgba_cache_loader,
           this.rgba_cache_config);
 
+      this.forward_cache_config =
+        BLUCacheConfig
+          .empty()
+          .withMaximumBorrowsPerKey(BigInteger.TEN)
+          .withMaximumCapacity(BigInteger.valueOf(128L * 1024L * 1024L));
+      this.forward_cache_loader =
+        KFramebufferForwardCacheLoader.newLoader(this.gi, this.log);
+      this.forward_cache =
+        BLUCacheTrivial.newCache(
+          this.forward_cache_loader,
+          this.forward_cache_config);
+
       this.depth_variance_cache_config =
         BLUCacheConfig
           .empty()
@@ -1641,7 +1656,7 @@ final class SBGLRenderer implements GLEventListener
           KRefractionRendererActual.newRenderer(
             this.gi,
             this.shader_cache,
-            this.rgba_cache,
+            this.forward_cache,
             this.bounds_cache,
             this.bounds_triangles_cache,
             this.label_cache,

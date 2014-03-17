@@ -206,9 +206,9 @@ public final class ForwardShaders
     final @Nonnull StringBuilder b)
   {
     b.append("  -- Refraction parameters\n");
-    b.append("  parameter p_refraction             : Refraction.t;\n");
-    b.append("  parameter t_refraction_scene       : sampler_2d;\n");
-    b.append("  parameter t_refraction_scene_depth : sampler_2d;\n");
+    b.append("  parameter p_refraction            : Refraction.t;\n");
+    b.append("  parameter t_refraction_scene      : sampler_2d;\n");
+    b.append("  parameter t_refraction_scene_mask : sampler_2d;\n");
     b.append("\n");
   }
 
@@ -806,7 +806,7 @@ public final class ForwardShaders
     b.append("    Refraction.refraction (\n");
     b.append("      p_refraction,\n");
     b.append("      t_refraction_scene,\n");
-    b.append("      t_refraction_scene_depth,\n");
+    b.append("      t_refraction_scene_mask,\n");
     b.append("      n,\n");
     b.append("      f_position_clip\n");
     b.append("    );\n");

@@ -76,40 +76,37 @@ import com.io7m.renderer.types.RVectorReadable4F;
 
 final class KShadingProgramCommon
 {
-  private static final String MATRIX_NAME_MODEL                   = "m_model";
-  private static final String MATRIX_NAME_MODELVIEW               =
-                                                                    "m_modelview";
-  private static final String MATRIX_NAME_NORMAL                  =
-                                                                    "m_normal";
-  private static final String MATRIX_NAME_PROJECTION              =
-                                                                    "m_projection";
-  private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW    =
-                                                                    "m_projective_modelview";
-  private static final String MATRIX_NAME_PROJECTIVE_PROJECTION   =
-                                                                    "m_projective_projection";
-  private static final String MATRIX_NAME_UV                      = "m_uv";
-  private static final String MATRIX_NAME_VIEW_INVERSE            =
-                                                                    "m_view_inv";
-  private static final String TEXTURE_NAME_ALBEDO                 =
-                                                                    "t_albedo";
-  private static final String TEXTURE_NAME_EMISSION               =
-                                                                    "t_emission";
-  private static final String TEXTURE_NAME_ENVIRONMENT            =
-                                                                    "t_environment";
-  private static final String TEXTURE_NAME_NORMAL                 =
-                                                                    "t_normal";
-  private static final String TEXTURE_NAME_PROJECTION             =
-                                                                    "t_projection";
-  private static final String TEXTURE_NAME_REFRACTION_SCENE       =
-                                                                    "t_refraction_scene";
-  private static final String TEXTURE_NAME_REFRACTION_SCENE_DEPTH =
-                                                                    "t_refraction_scene_depth";
-  private static final String TEXTURE_NAME_SHADOW_BASIC           =
-                                                                    "t_shadow_basic";
-  private static final String TEXTURE_NAME_SHADOW_VARIANCE        =
-                                                                    "t_shadow_variance";
-  private static final String TEXTURE_NAME_SPECULAR               =
-                                                                    "t_specular";
+  private static final String MATRIX_NAME_MODEL                  = "m_model";
+  private static final String MATRIX_NAME_MODELVIEW              =
+                                                                   "m_modelview";
+  private static final String MATRIX_NAME_NORMAL                 = "m_normal";
+  private static final String MATRIX_NAME_PROJECTION             =
+                                                                   "m_projection";
+  private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW   =
+                                                                   "m_projective_modelview";
+  private static final String MATRIX_NAME_PROJECTIVE_PROJECTION  =
+                                                                   "m_projective_projection";
+  private static final String MATRIX_NAME_UV                     = "m_uv";
+  private static final String MATRIX_NAME_VIEW_INVERSE           =
+                                                                   "m_view_inv";
+  private static final String TEXTURE_NAME_ALBEDO                = "t_albedo";
+  private static final String TEXTURE_NAME_EMISSION              =
+                                                                   "t_emission";
+  private static final String TEXTURE_NAME_ENVIRONMENT           =
+                                                                   "t_environment";
+  private static final String TEXTURE_NAME_NORMAL                = "t_normal";
+  private static final String TEXTURE_NAME_PROJECTION            =
+                                                                   "t_projection";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE      =
+                                                                   "t_refraction_scene";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE_MASK =
+                                                                   "t_refraction_scene_mask";
+  private static final String TEXTURE_NAME_SHADOW_BASIC          =
+                                                                   "t_shadow_basic";
+  private static final String TEXTURE_NAME_SHADOW_VARIANCE       =
+                                                                   "t_shadow_variance";
+  private static final String TEXTURE_NAME_SPECULAR              =
+                                                                   "t_specular";
 
   static void bindAttributeColour(
     final @Nonnull JCBProgram program,
@@ -1206,14 +1203,14 @@ final class KShadingProgramCommon
       unit);
   }
 
-  static void putRefractionTextureSceneDepth(
+  static void putRefractionTextureSceneMask(
     final @Nonnull JCBProgram program,
     final @Nonnull TextureUnit unit)
     throws JCGLRuntimeException,
       ConstraintError
   {
     program.programUniformPutTextureUnit(
-      KShadingProgramCommon.TEXTURE_NAME_REFRACTION_SCENE_DEPTH,
+      KShadingProgramCommon.TEXTURE_NAME_REFRACTION_SCENE_MASK,
       unit);
   }
 
