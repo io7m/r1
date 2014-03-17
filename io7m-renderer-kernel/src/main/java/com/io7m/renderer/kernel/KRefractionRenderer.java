@@ -24,13 +24,10 @@ import com.io7m.renderer.types.RException;
 
 public interface KRefractionRenderer
 {
-  public
-    <F extends KFramebufferRGBAUsable & KFramebufferDepthUsable>
-    void
-    rendererRefractionEvaluate(
-      final @Nonnull F framebuffer,
-      final @Nonnull KMutableMatrices.MatricesObserver observer,
-      final @Nonnull KInstanceTransformedTranslucentRefractive r)
-      throws ConstraintError,
-        RException;
+  public void rendererRefractionEvaluate(
+    final @Nonnull KFramebufferForwardUsable framebuffer,
+    final @Nonnull KMutableMatrices.MatricesObserver observer,
+    final @Nonnull KInstanceTransformedTranslucentRefractive r)
+    throws ConstraintError,
+      RException;
 }
