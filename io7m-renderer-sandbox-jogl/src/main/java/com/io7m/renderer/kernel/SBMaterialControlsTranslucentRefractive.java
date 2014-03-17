@@ -80,6 +80,7 @@ public final class SBMaterialControlsTranslucentRefractive implements
     this.controls_normal.controlsLoadFrom(desc.getNormal());
     this.controls_uv.controlsLoadFrom(desc.getUVMatrix());
     this.scale.setCurrent(desc.getRefractive().getScale());
+    this.masked.setSelected(desc.getRefractive().isMasked());
   }
 
   @Override public SBMaterialDescriptionTranslucentRefractive controlsSave()
