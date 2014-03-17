@@ -814,9 +814,29 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesRefractionRGBA(
-    final StringBuilder b,
-    final KMaterialRefractiveLabel refractive)
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialNormalLabel normal,
+    final @Nonnull KMaterialRefractiveLabel refractive)
   {
+    switch (normal) {
+      case NORMAL_MAPPED:
+      {
+        b.append("  value refract_n =\n");
+        b.append("    Normals.unpack (t_normal, f_uv);\n");
+        break;
+      }
+      case NORMAL_NONE:
+      {
+        throw new UnreachableCodeException();
+      }
+      case NORMAL_VERTEX:
+      {
+        b.append("  value refract_n =\n");
+        b.append("    f_normal_eye;\n");
+        break;
+      }
+    }
+
     switch (refractive) {
       case REFRACTIVE_MASKED:
       {
@@ -825,7 +845,7 @@ public final class ForwardShaders
         b.append("      p_refraction,\n");
         b.append("      t_refraction_scene,\n");
         b.append("      t_refraction_scene_mask,\n");
-        b.append("      n,\n");
+        b.append("      refract_n,\n");
         b.append("      f_position_clip\n");
         b.append("    );\n");
         break;
@@ -836,7 +856,7 @@ public final class ForwardShaders
         b.append("    Refraction.refraction_unmasked (\n");
         b.append("      p_refraction,\n");
         b.append("      t_refraction_scene,\n");
-        b.append("      n,\n");
+        b.append("      refract_n,\n");
         b.append("      f_position_clip\n");
         b.append("    );\n");
         break;
@@ -1220,8 +1240,7 @@ public final class ForwardShaders
     ForwardShaders.fragmentShaderParametersNormal(b, normal);
     ForwardShaders.fragmentShaderParametersRefractive(b, refractive);
     b.append("with\n");
-    ForwardShaders.fragmentShaderValuesNormal(b, normal);
-    ForwardShaders.fragmentShaderValuesRefractionRGBA(b, refractive);
+    ForwardShaders.fragmentShaderValuesRefractionRGBA(b, normal, refractive);
     b.append("as\n");
     b.append("  out out_0 = rgba;\n");
     b.append("end;\n");
