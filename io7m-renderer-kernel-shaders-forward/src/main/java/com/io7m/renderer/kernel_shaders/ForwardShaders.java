@@ -33,6 +33,7 @@ import com.io7m.renderer.kernel.types.KMaterialLabelImpliesUV;
 import com.io7m.renderer.kernel.types.KMaterialLabelLit;
 import com.io7m.renderer.kernel.types.KMaterialLabelRegular;
 import com.io7m.renderer.kernel.types.KMaterialNormalLabel;
+import com.io7m.renderer.kernel.types.KMaterialRefractiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
 
 public final class ForwardShaders
@@ -203,13 +204,26 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderParametersRefractive(
-    final @Nonnull StringBuilder b)
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialRefractiveLabel refractive)
   {
     b.append("  -- Refraction parameters\n");
     b.append("  parameter p_refraction            : Refraction.t;\n");
     b.append("  parameter t_refraction_scene      : sampler_2d;\n");
-    b.append("  parameter t_refraction_scene_mask : sampler_2d;\n");
-    b.append("\n");
+
+    switch (refractive) {
+      case REFRACTIVE_MASKED:
+      {
+        b.append("  parameter t_refraction_scene_mask : sampler_2d;\n");
+        b.append("\n");
+        break;
+      }
+      case REFRACTIVE_UNMASKED:
+      {
+        b.append("\n");
+        break;
+      }
+    }
   }
 
   private static void fragmentShaderParametersSpecular(
@@ -800,16 +814,34 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesRefractionRGBA(
-    final StringBuilder b)
+    final StringBuilder b,
+    final KMaterialRefractiveLabel refractive)
   {
-    b.append("  value rgba =\n");
-    b.append("    Refraction.refraction (\n");
-    b.append("      p_refraction,\n");
-    b.append("      t_refraction_scene,\n");
-    b.append("      t_refraction_scene_mask,\n");
-    b.append("      n,\n");
-    b.append("      f_position_clip\n");
-    b.append("    );\n");
+    switch (refractive) {
+      case REFRACTIVE_MASKED:
+      {
+        b.append("  value rgba =\n");
+        b.append("    Refraction.refraction_masked (\n");
+        b.append("      p_refraction,\n");
+        b.append("      t_refraction_scene,\n");
+        b.append("      t_refraction_scene_mask,\n");
+        b.append("      n,\n");
+        b.append("      f_position_clip\n");
+        b.append("    );\n");
+        break;
+      }
+      case REFRACTIVE_UNMASKED:
+      {
+        b.append("  value rgba =\n");
+        b.append("    Refraction.refraction_unmasked (\n");
+        b.append("      p_refraction,\n");
+        b.append("      t_refraction_scene,\n");
+        b.append("      n,\n");
+        b.append("      f_position_clip\n");
+        b.append("    );\n");
+        break;
+      }
+    }
   }
 
   private static void fragmentShaderValuesRGBAOpaqueLit(
@@ -1179,16 +1211,17 @@ public final class ForwardShaders
   {
     final boolean implies_uv = l.labelImpliesUV();
     final KMaterialNormalLabel normal = l.labelGetNormal();
+    final KMaterialRefractiveLabel refractive = l.getRefractive();
 
     b.append("shader fragment f is\n");
     ForwardShaders.fragmentShaderStandardIO(b);
     ForwardShaders.fragmentShaderAttributesUV(b, implies_uv);
     ForwardShaders.fragmentShaderAttributesNormal(b, normal);
     ForwardShaders.fragmentShaderParametersNormal(b, normal);
-    ForwardShaders.fragmentShaderParametersRefractive(b);
+    ForwardShaders.fragmentShaderParametersRefractive(b, refractive);
     b.append("with\n");
     ForwardShaders.fragmentShaderValuesNormal(b, normal);
-    ForwardShaders.fragmentShaderValuesRefractionRGBA(b);
+    ForwardShaders.fragmentShaderValuesRefractionRGBA(b, refractive);
     b.append("as\n");
     b.append("  out out_0 = rgba;\n");
     b.append("end;\n");

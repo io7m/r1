@@ -18,12 +18,15 @@ package com.io7m.renderer.kernel;
 
 public final class SBMaterialRefractiveDescription
 {
-  private final float scale;
+  private final boolean masked;
+  private final float   scale;
 
   public SBMaterialRefractiveDescription(
-    final float scale)
+    final float scale,
+    final boolean masked)
   {
     this.scale = scale;
+    this.masked = masked;
   }
 
   @Override public boolean equals(
@@ -40,6 +43,9 @@ public final class SBMaterialRefractiveDescription
     }
     final SBMaterialRefractiveDescription other =
       (SBMaterialRefractiveDescription) obj;
+    if (this.masked != other.masked) {
+      return false;
+    }
     if (Float.floatToIntBits(this.scale) != Float.floatToIntBits(other.scale)) {
       return false;
     }
@@ -55,8 +61,14 @@ public final class SBMaterialRefractiveDescription
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + (this.masked ? 1231 : 1237);
     result = (prime * result) + Float.floatToIntBits(this.scale);
     return result;
+  }
+
+  public boolean isMasked()
+  {
+    return this.masked;
   }
 
   @Override public String toString()
@@ -64,6 +76,8 @@ public final class SBMaterialRefractiveDescription
     final StringBuilder builder = new StringBuilder();
     builder.append("[SBMaterialRefractiveDescription scale=");
     builder.append(this.scale);
+    builder.append(" masked=");
+    builder.append(this.masked);
     builder.append("]");
     return builder.toString();
   }

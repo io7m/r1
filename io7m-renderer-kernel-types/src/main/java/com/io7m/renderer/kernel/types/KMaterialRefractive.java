@@ -25,26 +25,32 @@ import javax.annotation.concurrent.Immutable;
 
 @Immutable public final class KMaterialRefractive
 {
-  private final float scale;
-
   /**
    * Create new refractive material properties
    * 
    * @param scale
    *          The amount by which to scale the refraction
+   * @param masked
+   *          Whether or not to mask the refraction
    * @return New refractive properties
    */
 
   public static @Nonnull KMaterialRefractive newRefractive(
-    final float scale)
+    final float scale,
+    final boolean masked)
   {
-    return new KMaterialRefractive(scale);
+    return new KMaterialRefractive(scale, masked);
   }
 
+  private final boolean masked;
+  private final float   scale;
+
   private KMaterialRefractive(
-    final float in_scale)
+    final float in_scale,
+    final boolean in_masked)
   {
     this.scale = in_scale;
+    this.masked = in_masked;
   }
 
   @Override public boolean equals(
@@ -60,6 +66,9 @@ import javax.annotation.concurrent.Immutable;
       return false;
     }
     final KMaterialRefractive other = (KMaterialRefractive) obj;
+    if (this.masked != other.masked) {
+      return false;
+    }
     if (Float.floatToIntBits(this.scale) != Float.floatToIntBits(other.scale)) {
       return false;
     }
@@ -79,8 +88,18 @@ import javax.annotation.concurrent.Immutable;
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + (this.masked ? 1231 : 1237);
     result = (prime * result) + Float.floatToIntBits(this.scale);
     return result;
+  }
+
+  /**
+   * @return If masked refraction is to be used
+   */
+
+  public boolean isMasked()
+  {
+    return this.masked;
   }
 
   @Override public String toString()
@@ -88,6 +107,8 @@ import javax.annotation.concurrent.Immutable;
     final StringBuilder builder = new StringBuilder();
     builder.append("[KMaterialRefractive scale=");
     builder.append(this.scale);
+    builder.append(" masked=");
+    builder.append(this.masked);
     builder.append("]");
     return builder.toString();
   }
