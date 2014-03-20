@@ -28,16 +28,13 @@ public final class SBMaterialTranslucentRefractive implements
   private final @Nonnull SBMaterialDescriptionTranslucentRefractive description;
   private final @Nonnull Integer                                    id;
   private final @CheckForNull SBTexture2D<SBTexture2DKindNormal>    map_normal;
-  private final @Nonnull String                                     name;
 
   public SBMaterialTranslucentRefractive(
     final @Nonnull Integer id,
-    final @Nonnull String name,
     final @Nonnull SBMaterialDescriptionTranslucentRefractive description,
     final @CheckForNull SBTexture2D<SBTexture2DKindNormal> map_normal)
   {
     this.id = id;
-    this.name = name;
     this.description = description;
     this.map_normal = map_normal;
   }
@@ -49,7 +46,7 @@ public final class SBMaterialTranslucentRefractive implements
 
   @Override public @Nonnull String materialGetName()
   {
-    return this.name;
+    return this.description.materialDescriptionGetName();
   }
 
   @Override public

@@ -133,12 +133,12 @@
     <dependency>
       <groupId>com.io7m.jcanephora.core</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
-      <version>0.25.0</version>
+      <version>0.26.0</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.batchexec</groupId>
       <artifactId>io7m-jcanephora-batchexec</artifactId>
-      <version>0.25.0</version>
+      <version>0.26.0</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcache</groupId>

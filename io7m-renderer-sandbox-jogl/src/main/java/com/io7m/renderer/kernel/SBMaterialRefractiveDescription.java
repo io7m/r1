@@ -14,43 +14,19 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel.types;
+package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-/**
- * A description of the refractive properties of a material.
- */
-
-@Immutable public final class KMaterialRefractive
+public final class SBMaterialRefractiveDescription
 {
-  /**
-   * Create new refractive material properties
-   * 
-   * @param scale
-   *          The amount by which to scale the refraction
-   * @param masked
-   *          Whether or not to mask the refraction
-   * @return New refractive properties
-   */
-
-  public static @Nonnull KMaterialRefractive newRefractive(
-    final float scale,
-    final boolean masked)
-  {
-    return new KMaterialRefractive(scale, masked);
-  }
-
   private final boolean masked;
   private final float   scale;
 
-  private KMaterialRefractive(
-    final float in_scale,
-    final boolean in_masked)
+  public SBMaterialRefractiveDescription(
+    final float scale,
+    final boolean masked)
   {
-    this.scale = in_scale;
-    this.masked = in_masked;
+    this.scale = scale;
+    this.masked = masked;
   }
 
   @Override public boolean equals(
@@ -65,7 +41,8 @@ import javax.annotation.concurrent.Immutable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KMaterialRefractive other = (KMaterialRefractive) obj;
+    final SBMaterialRefractiveDescription other =
+      (SBMaterialRefractiveDescription) obj;
     if (this.masked != other.masked) {
       return false;
     }
@@ -74,10 +51,6 @@ import javax.annotation.concurrent.Immutable;
     }
     return true;
   }
-
-  /**
-   * @return The amount by which to scale the refraction
-   */
 
   public float getScale()
   {
@@ -93,10 +66,6 @@ import javax.annotation.concurrent.Immutable;
     return result;
   }
 
-  /**
-   * @return If masked refraction is to be used
-   */
-
   public boolean isMasked()
   {
     return this.masked;
@@ -105,7 +74,7 @@ import javax.annotation.concurrent.Immutable;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[KMaterialRefractive scale=");
+    builder.append("[SBMaterialRefractiveDescription scale=");
     builder.append(this.scale);
     builder.append(" masked=");
     builder.append(this.masked);

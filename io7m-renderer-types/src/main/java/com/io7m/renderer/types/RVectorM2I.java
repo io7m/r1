@@ -14,19 +14,57 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel.types;
+package com.io7m.renderer.types;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jtensors.VectorM2I;
+
 /**
- * The type of labels for lit materials.
+ * A mutable 2D vector type indexed by the coordinate space of the components.
+ * 
+ * @param <T>
+ *          A phantom type parameter describing the coordinate space
  */
 
-public interface KMaterialLabelLit extends KLabel, KMaterialLabelImpliesUV
+public final class RVectorM2I<T extends RSpace> extends VectorM2I implements
+  RVectorReadable2I<T>
 {
   /**
-   * @return The label of the current light for this material.
+   * Construct a new vector, initialized to all zeroes.
    */
 
-  @Nonnull KLightLabel labelGetLight();
+  public RVectorM2I()
+  {
+    super();
+  }
+
+  /**
+   * Construct a new vector.
+   * 
+   * @param x
+   *          The x component
+   * @param y
+   *          The y component
+   */
+
+  public RVectorM2I(
+    final int x,
+    final int y)
+  {
+    super(x, y);
+  }
+
+  /**
+   * Construct a new vector.
+   * 
+   * @param v
+   *          The vector from which to take values
+   */
+
+  public RVectorM2I(
+    final @Nonnull RVectorReadable2I<T> v)
+  {
+    super(v);
+  }
 }

@@ -38,6 +38,20 @@ public class RVectorI3F<T extends RSpace> extends VectorI3F implements
   }
 
   /**
+   * @return The zero vector.
+   * @param <T>
+   *          The desired coordinate space
+   */
+
+  @SuppressWarnings("unchecked") public static
+    <T extends RSpace>
+    RVectorI3F<T>
+    zero()
+  {
+    return (RVectorI3F<T>) RVectorI3F.ZERO_FIELD;
+  }
+
+  /**
    * Construct a new vector.
    * 
    * @param x
@@ -70,16 +84,12 @@ public class RVectorI3F<T extends RSpace> extends VectorI3F implements
   }
 
   /**
-   * @return The zero vector.
-   * @param <T>
-   *          The desired coordinate space
+   * @return The current coordinates as homogeneous coordinates (with
+   *         <code>w == 1.0</code>).
    */
 
-  @SuppressWarnings("unchecked") public static
-    <T extends RSpace>
-    RVectorI3F<T>
-    zero()
+  public final @Nonnull RVectorI4F<T> getHomogeneous()
   {
-    return (RVectorI3F<T>) RVectorI3F.ZERO_FIELD;
+    return new RVectorI4F<T>(this.x, this.y, this.z, 1.0f);
   }
 }
