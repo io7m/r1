@@ -18,6 +18,7 @@ package com.io7m.renderer;
 
 module Postprocessing is
 
+  import com.io7m.parasol.Matrix3x3f;
   import com.io7m.parasol.Sampler2D as S2;
 
   --
@@ -25,16 +26,19 @@ module Postprocessing is
   --
 
   shader vertex screen_quad is
-    in  v_position             : vector_3f;
-    in  v_uv                   : vector_2f;
-    out f_uv                   : vector_2f;
+    parameter  m_uv            : matrix_3x3f;
+    in         v_position      : vector_3f;
+    in         v_uv            : vector_2f;
+    out        f_uv            : vector_2f;
     out vertex f_position_clip : vector_4f;
   with
     value clip =
       new vector_4f (v_position, 1.0);
+    value uv =
+      Matrix3x3f.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];
   as
     out f_position_clip = clip;
-    out f_uv            = v_uv;
+    out f_uv            = uv;
   end;
 
   --

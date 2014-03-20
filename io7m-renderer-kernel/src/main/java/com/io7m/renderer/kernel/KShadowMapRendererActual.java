@@ -43,6 +43,7 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLight;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunction;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
+import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
@@ -430,7 +431,10 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       smv.getFramebuffer(),
       none);
 
+    // XXX: Actual parameters...
+    final KBlurParameters params = KBlurParameters.newBuilder().build();
     this.blur.postprocessorEvaluateDepthVariance(
+      params,
       smv.getFramebuffer(),
       smv.getFramebuffer());
   }

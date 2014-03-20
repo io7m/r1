@@ -21,9 +21,10 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
-public interface KPostprocessorDepthVariance extends KPostprocessor
+public interface KPostprocessorDepthVariance<C> extends KPostprocessor
 {
   public void postprocessorEvaluateDepthVariance(
+    final @Nonnull C config,
     final @Nonnull KFramebufferDepthVarianceUsable input,
     final @Nonnull KFramebufferDepthVarianceUsable output)
     throws ConstraintError,

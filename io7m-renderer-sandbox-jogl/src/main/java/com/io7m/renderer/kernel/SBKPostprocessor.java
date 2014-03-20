@@ -19,13 +19,29 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcache.BLUCache;
+import com.io7m.jcache.LUCache;
+import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jlog.Log;
+import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
-public interface KPostprocessorDepth<C> extends KPostprocessor
+public interface SBKPostprocessor
 {
-  public void postprocessorEvaluateDepth(
-    final @Nonnull KFramebufferDepthUsable input,
-    final @Nonnull KFramebufferDepthUsable output)
-    throws ConstraintError,
-      RException;
+    void
+    postprocessorInitialize(
+      final @Nonnull JCGLImplementation gi,
+      final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
+      final @Nonnull LUCache<String, KProgram, RException> shader_cache,
+      final @Nonnull Log log)
+      throws RException,
+        ConstraintError;
+
+  void postprocessorRun(
+    final @Nonnull KFramebufferRGBAUsable input,
+    final @Nonnull KFramebufferRGBAUsable output)
+    throws RException,
+      ConstraintError;
+
+  void postprocessorClose();
 }

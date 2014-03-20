@@ -21,12 +21,13 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
-public interface KPostprocessorRGBAWithDepth extends KPostprocessor
+public interface KPostprocessorRGBAWithDepth<C> extends KPostprocessor
 {
   public
     <F extends KFramebufferRGBAUsable & KFramebufferDepthUsable>
     void
     postprocessorEvaluateRGBAWithDepth(
+      final @Nonnull C config,
       final @Nonnull F input,
       final @Nonnull KFramebufferRGBAUsable output)
       throws ConstraintError,
