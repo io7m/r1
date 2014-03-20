@@ -23,26 +23,26 @@ import com.io7m.renderer.types.RException;
 
 public interface KPostprocessorVisitor<A, E extends Throwable>
 {
-  public A postprocessorVisitDepth(
-    final @Nonnull KPostprocessorDepth r)
+  public <C> A postprocessorVisitDepth(
+    final @Nonnull KPostprocessorDepth<C> r)
     throws E,
       ConstraintError,
       RException;
 
-  public A postprocessorVisitDepthVariance(
-    final @Nonnull KPostprocessorDepthVariance r)
+  public <C> A postprocessorVisitDepthVariance(
+    final @Nonnull KPostprocessorDepthVariance<C> r)
     throws E,
       ConstraintError,
       RException;
 
-  public A postprocessorVisitRGBA(
-    final @Nonnull KPostprocessorRGBA r)
+  public <C> A postprocessorVisitRGBA(
+    final @Nonnull KPostprocessorRGBA<C> r)
     throws E,
       ConstraintError,
       RException;
 
-  public A postprocessorVisitRGBAWithDepth(
-    final @Nonnull KPostprocessorRGBAWithDepth r)
+  public <C> A postprocessorVisitRGBAWithDepth(
+    final @Nonnull KPostprocessorRGBAWithDepth<C> r)
     throws E,
       ConstraintError,
       RException;

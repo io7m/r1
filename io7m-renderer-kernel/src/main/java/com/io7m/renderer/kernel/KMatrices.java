@@ -28,14 +28,23 @@ import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.QuaternionReadable4F;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.renderer.kernel.types.KTransformContext;
+import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RMatrixM4x4F;
+import com.io7m.renderer.types.RMatrixReadable3x3F;
 import com.io7m.renderer.types.RSpaceWorld;
 import com.io7m.renderer.types.RTransformProjectiveView;
+import com.io7m.renderer.types.RTransformTexture;
 import com.io7m.renderer.types.RTransformView;
 import com.io7m.renderer.types.RVectorReadable3F;
 
 @NotThreadSafe final class KMatrices
 {
+  public static final @Nonnull RMatrixReadable3x3F<RTransformTexture> IDENTITY_UV;
+
+  static {
+    IDENTITY_UV = new RMatrixM3x3F<RTransformTexture>();
+  }
+
   /**
    * Produce a normal matrix for the given modelview matrix.
    */

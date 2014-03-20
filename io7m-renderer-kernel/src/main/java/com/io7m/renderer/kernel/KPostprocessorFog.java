@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.BLUCache;
 import com.io7m.jcache.BLUCacheReceipt;
 import com.io7m.jcache.JCacheException;
@@ -50,7 +51,7 @@ import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
 public final class KPostprocessorFog extends
-  KAbstractPostprocessorRGBAWithDepth
+  KAbstractPostprocessorRGBAWithDepth<Unit>
 {
   private static final @Nonnull String NAME;
 
@@ -280,6 +281,7 @@ public final class KPostprocessorFog extends
     <F extends KFramebufferRGBAUsable & KFramebufferDepthUsable>
     void
     postprocessorEvaluateRGBAWithDepth(
+      final @Nonnull Unit parameters,
       final @Nonnull F input,
       final @Nonnull KFramebufferRGBAUsable output)
       throws ConstraintError,

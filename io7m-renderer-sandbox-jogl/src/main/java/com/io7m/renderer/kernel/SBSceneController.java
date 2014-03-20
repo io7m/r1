@@ -1422,12 +1422,6 @@ public final class SBSceneController implements
       meshes);
   }
 
-  @Override public void rendererPostprocessorSetType(
-    final @Nonnull SBKPostprocessorType type)
-  {
-    this.renderer.setPostprocessor(type);
-  }
-
   @Override public void rendererSetBackgroundColour(
     final float r,
     final float g,
@@ -1862,5 +1856,11 @@ public final class SBSceneController implements
   @Override public @Nonnull Map<String, SBShader> shadersGet()
   {
     return this.shaders;
+  }
+
+  @Override public void rendererPostprocessorSet(
+    final @Nonnull SBKPostprocessor p)
+  {
+    this.renderer.setPostprocessor(p);
   }
 }

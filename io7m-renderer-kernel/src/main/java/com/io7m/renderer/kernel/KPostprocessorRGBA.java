@@ -21,9 +21,10 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
-public interface KPostprocessorRGBA extends KPostprocessor
+public interface KPostprocessorRGBA<C> extends KPostprocessor
 {
   public void postprocessorEvaluateRGBA(
+    final @Nonnull C config,
     final @Nonnull KFramebufferRGBAUsable input,
     final @Nonnull KFramebufferRGBAUsable output)
     throws ConstraintError,
