@@ -14,19 +14,20 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel.types;
+package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-/**
- * The type of labels for lit materials.
- */
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
+import com.io7m.renderer.types.RException;
 
-public interface KMaterialLabelLit extends KLabel, KMaterialLabelImpliesUV
+public interface KRefractionRenderer
 {
-  /**
-   * @return The label of the current light for this material.
-   */
-
-  @Nonnull KLightLabel labelGetLight();
+  public void rendererRefractionEvaluate(
+    final @Nonnull KFramebufferForwardUsable framebuffer,
+    final @Nonnull KMutableMatrices.MatricesObserver observer,
+    final @Nonnull KInstanceTransformedTranslucentRefractive r)
+    throws ConstraintError,
+      RException;
 }

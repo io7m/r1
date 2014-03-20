@@ -135,6 +135,8 @@ import com.io7m.renderer.kernel.types.KLight;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.kernel.types.KMeshBounds;
+import com.io7m.renderer.kernel.types.KMeshBoundsTriangles;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBuilder;
@@ -261,6 +263,16 @@ final class SBGLRenderer implements GLEventListener
               message.setLength(0);
               message.append("Loaded mesh ");
               message.append(name);
+              SBGLRenderer.this.log.debug(message.toString());
+
+              message.setLength(0);
+              message.append("Mesh lower bound: ");
+              message.append(km.getBoundsLower());
+              SBGLRenderer.this.log.debug(message.toString());
+
+              message.setLength(0);
+              message.append("Mesh upper bound: ");
+              message.append(km.getBoundsUpper());
               SBGLRenderer.this.log.debug(message.toString());
 
               return new SBMesh(path, km);
@@ -673,6 +685,10 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull SBVisibleAxes                                                                                axes;
   private final @Nonnull AtomicBoolean                                                                          axes_show;
   private final @Nonnull AtomicReference<VectorI3F>                                                             background_colour;
+  private @Nonnull LRUCacheTrivial<KMesh, KMeshBounds<RSpaceObject>, RException>                                bounds_cache;
+  private @Nonnull LRUCacheConfig                                                                               bounds_cache_config;
+  private @Nonnull LRUCacheTrivial<KMeshBounds<RSpaceObject>, KMeshBoundsTriangles<RSpaceObject>, RException>   bounds_triangles_cache;
+  private @Nonnull LRUCacheConfig                                                                               bounds_triangles_cache_config;
   private final @Nonnull ConcurrentLinkedQueue<CacheStatisticsFuture>                                           cache_statistics_queue;
   private final @Nonnull SBFirstPersonCamera                                                                    camera;
   private @Nonnull SceneObserver                                                                                camera_current;
@@ -683,8 +699,14 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull KGraphicsCapabilities                                                                        capabilities;
   private final SandboxConfig                                                                                   config;
   private final @Nonnull AtomicReference<SBSceneControllerRenderer>                                             controller;
+  private @Nonnull BLUCacheTrivial<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> depth_variance_cache;
+  private @Nonnull BLUCacheConfig                                                                               depth_variance_cache_config;
+  private @Nonnull JCacheLoader<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException>    depth_variance_cache_loader;
   private final @Nonnull FSCapabilityAll                                                                        filesystem;
   private boolean                                                                                               first;
+  private @Nonnull BLUCacheTrivial<KFramebufferForwardDescription, KFramebufferForwardType, RException>         forward_cache;
+  private @Nonnull BLUCacheConfig                                                                               forward_cache_config;
+  private @Nonnull JCacheLoader<KFramebufferForwardDescription, KFramebufferForwardType, RException>            forward_cache_loader;
   private @CheckForNull KFramebufferForwardType                                                                 framebuffer;
   private @CheckForNull JCGLImplementationJOGL                                                                  gi;
   private @Nonnull SBVisibleGridPlane                                                                           grid;
@@ -715,9 +737,6 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull BLUCacheTrivial<KFramebufferRGBADescription, KFramebufferRGBA, RException>                   rgba_cache;
   private @Nonnull BLUCacheConfig                                                                               rgba_cache_config;
   private @Nonnull JCacheLoader<KFramebufferRGBADescription, KFramebufferRGBA, RException>                      rgba_cache_loader;
-  private @Nonnull BLUCacheTrivial<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> depth_variance_cache;
-  private @Nonnull BLUCacheConfig                                                                               depth_variance_cache_config;
-  private @Nonnull JCacheLoader<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException>    depth_variance_cache_loader;
   private final @Nonnull AtomicReference<RunningState>                                                          running;
   private Collection<SBLight>                                                                                   scene_lights;
   private @CheckForNull SBQuad                                                                                  screen_quad;
@@ -1426,6 +1445,18 @@ final class SBGLRenderer implements GLEventListener
           this.rgba_cache_loader,
           this.rgba_cache_config);
 
+      this.forward_cache_config =
+        BLUCacheConfig
+          .empty()
+          .withMaximumBorrowsPerKey(BigInteger.TEN)
+          .withMaximumCapacity(BigInteger.valueOf(128L * 1024L * 1024L));
+      this.forward_cache_loader =
+        KFramebufferForwardCacheLoader.newLoader(this.gi, this.log);
+      this.forward_cache =
+        BLUCacheTrivial.newCache(
+          this.forward_cache_loader,
+          this.forward_cache_config);
+
       this.depth_variance_cache_config =
         BLUCacheConfig
           .empty()
@@ -1444,6 +1475,20 @@ final class SBGLRenderer implements GLEventListener
         LRUCacheTrivial.newCache(
           KShaderCacheLoader.newLoader(this.gi, this.filesystem, this.log),
           this.shader_cache_config);
+
+      this.bounds_cache_config =
+        LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(8192));
+      this.bounds_cache =
+        LRUCacheTrivial.newCache(
+          KMeshBoundsObjectSpaceCacheLoader.newLoader(),
+          this.bounds_cache_config);
+
+      this.bounds_triangles_cache_config =
+        LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(8192));
+      this.bounds_triangles_cache =
+        LRUCacheTrivial.newCache(
+          KMeshBoundsTrianglesObjectSpaceCacheLoader.newLoader(),
+          this.bounds_triangles_cache_config);
 
       this.capabilities = KGraphicsCapabilities.getCapabilities(this.gi);
 
@@ -1606,6 +1651,15 @@ final class SBGLRenderer implements GLEventListener
             this.shader_cache,
             this.shadow_cache,
             this.depth_variance_cache,
+            this.capabilities,
+            this.log),
+          KRefractionRendererActual.newRenderer(
+            this.gi,
+            this.shader_cache,
+            this.forward_cache,
+            this.bounds_cache,
+            this.bounds_triangles_cache,
+            this.label_cache,
             this.capabilities,
             this.log),
           this.label_cache,
@@ -2361,8 +2415,8 @@ final class SBGLRenderer implements GLEventListener
         for (final Pair<KInstanceTransformed, SBInstance> pair : scene_things.second) {
           pair.first
             .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, RException>() {
-              @Override public Unit transformedVisitOpaqueRegular(
-                final @Nonnull KInstanceTransformedOpaqueRegular i)
+              @Override public Unit transformedVisitOpaqueAlphaDepth(
+                final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
                 throws RException,
                   ConstraintError,
                   RException,
@@ -2376,8 +2430,8 @@ final class SBGLRenderer implements GLEventListener
                 return Unit.unit();
               }
 
-              @Override public Unit transformedVisitOpaqueAlphaDepth(
-                final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
+              @Override public Unit transformedVisitOpaqueRegular(
+                final @Nonnull KInstanceTransformedOpaqueRegular i)
                 throws RException,
                   ConstraintError,
                   RException,
@@ -2449,8 +2503,8 @@ final class SBGLRenderer implements GLEventListener
       for (final Pair<KInstanceTransformedTranslucent, SBInstance> pair : translucents) {
         pair.first
           .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, RException>() {
-            @Override public Unit transformedVisitOpaqueRegular(
-              final @Nonnull KInstanceTransformedOpaqueRegular i)
+            @Override public Unit transformedVisitOpaqueAlphaDepth(
+              final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
               throws ConstraintError,
                 RException,
                 JCGLException
@@ -2458,8 +2512,8 @@ final class SBGLRenderer implements GLEventListener
               throw new UnreachableCodeException();
             }
 
-            @Override public Unit transformedVisitOpaqueAlphaDepth(
-              final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
+            @Override public Unit transformedVisitOpaqueRegular(
+              final @Nonnull KInstanceTransformedOpaqueRegular i)
               throws ConstraintError,
                 RException,
                 JCGLException
@@ -2542,6 +2596,16 @@ final class SBGLRenderer implements GLEventListener
                 throw new UnimplementedCodeException();
               }
 
+              @Override public Unit postprocessorVisitDepthVariance(
+                final KPostprocessorDepthVariance r)
+                throws RException,
+                  ConstraintError,
+                  RException
+              {
+                // TODO Auto-generated method stub
+                throw new UnimplementedCodeException();
+              }
+
               @Override public Unit postprocessorVisitRGBA(
                 final @Nonnull KPostprocessorRGBA r)
                 throws RException,
@@ -2564,16 +2628,6 @@ final class SBGLRenderer implements GLEventListener
                   SBGLRenderer.this.framebuffer,
                   SBGLRenderer.this.framebuffer);
                 return Unit.unit();
-              }
-
-              @Override public Unit postprocessorVisitDepthVariance(
-                final KPostprocessorDepthVariance r)
-                throws RException,
-                  ConstraintError,
-                  RException
-              {
-                // TODO Auto-generated method stub
-                throw new UnimplementedCodeException();
               }
             });
 

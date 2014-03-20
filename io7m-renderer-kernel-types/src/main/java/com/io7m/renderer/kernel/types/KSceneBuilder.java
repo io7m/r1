@@ -94,7 +94,7 @@ public interface KSceneBuilder
    *           <li>The material used for <code>instance</code> is translucent</li>
    *           </ul>
    * 
-   * @see #sceneAddInvisibleWithShadow(KLight, KMeshInstanceTransformed)
+   * @see #sceneAddInvisibleWithShadow(KLight, KInstanceTransformedOpaque)
    */
 
   void sceneAddOpaqueLitVisibleWithoutShadow(

@@ -22,7 +22,7 @@ import javax.annotation.Nonnull;
  * The type of labels for translucent materials.
  */
 
-public interface KMaterialLabelTranslucent
+public interface KMaterialLabelTranslucent extends KMaterialLabelImpliesUV
 {
   /**
    * @return The alpha opacity type for the material

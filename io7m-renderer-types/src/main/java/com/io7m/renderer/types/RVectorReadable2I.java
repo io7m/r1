@@ -14,19 +14,18 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel.types;
+package com.io7m.renderer.types;
 
-import javax.annotation.Nonnull;
+import com.io7m.jtensors.VectorReadable2I;
 
 /**
- * The type of labels for lit materials.
+ * The type of readable 2D vectors indexed by their coordinate space
+ * 
+ * @param <T>
+ *          A phantom type parameter describing the coordinate space
  */
 
-public interface KMaterialLabelLit extends KLabel, KMaterialLabelImpliesUV
+public interface RVectorReadable2I<T extends RSpace> extends VectorReadable2I
 {
-  /**
-   * @return The label of the current light for this material.
-   */
-
-  @Nonnull KLightLabel labelGetLight();
+  // See super-interfaces.
 }

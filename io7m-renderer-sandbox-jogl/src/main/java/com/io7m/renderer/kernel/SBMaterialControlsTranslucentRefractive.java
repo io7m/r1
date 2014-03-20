@@ -17,9 +17,12 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
+import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
@@ -31,31 +34,44 @@ public final class SBMaterialControlsTranslucentRefractive implements
   private final @Nonnull SBMaterialControlsNormal               controls_normal;
   private final @Nonnull SBMatrix3x3Controls<RTransformTexture> controls_uv;
   private final @Nonnull JTextField                             name;
+  private final @Nonnull SBFloatHSlider                         scale;
+  private final @Nonnull JCheckBox                              masked;
+  private final @Nonnull RowGroup                               group;
 
   public SBMaterialControlsTranslucentRefractive(
     final @Nonnull JTextField name,
     final @Nonnull SBMaterialControlsNormal controls_normal,
     final @Nonnull SBMatrix3x3Controls<RTransformTexture> controls_uv)
+    throws ConstraintError
   {
+    this.group = new RowGroup();
     this.name = name;
     this.controls_normal = controls_normal;
     this.controls_uv = controls_uv;
+    this.scale = new SBFloatHSlider("Scale", 0.0f, 1.0f);
+    this.masked = new JCheckBox();
   }
 
   @Override public void controlsAddToLayout(
     final @Nonnull DesignGridLayout layout)
   {
-    // Nothing
+    layout
+      .row()
+      .group(this.group)
+      .grid(this.scale.getLabel())
+      .add(this.scale.getSlider(), 4)
+      .add(this.scale.getField());
+
+    layout
+      .row()
+      .group(this.group)
+      .grid(new JLabel("Masked"))
+      .add(this.masked);
   }
 
   @Override public void controlsHide()
   {
-    // Nothing
-  }
-
-  @Override public void controlsShow()
-  {
-    // Nothing
+    this.group.hide();
   }
 
   @Override public void controlsLoadFrom(
@@ -63,6 +79,8 @@ public final class SBMaterialControlsTranslucentRefractive implements
   {
     this.controls_normal.controlsLoadFrom(desc.getNormal());
     this.controls_uv.controlsLoadFrom(desc.getUVMatrix());
+    this.scale.setCurrent(desc.getRefractive().getScale());
+    this.masked.setSelected(desc.getRefractive().isMasked());
   }
 
   @Override public SBMaterialDescriptionTranslucentRefractive controlsSave()
@@ -72,6 +90,13 @@ public final class SBMaterialControlsTranslucentRefractive implements
     return new SBMaterialDescriptionTranslucentRefractive(
       this.name.getText(),
       this.controls_normal.controlsSave(),
-      this.controls_uv.controlsSave());
+      new SBMaterialRefractiveDescription(
+        this.scale.getCurrent(),
+        this.masked.isSelected()), this.controls_uv.controlsSave());
+  }
+
+  @Override public void controlsShow()
+  {
+    this.group.forceShow();
   }
 }

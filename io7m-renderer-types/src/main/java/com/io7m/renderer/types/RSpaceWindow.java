@@ -14,19 +14,13 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel.types;
-
-import javax.annotation.Nonnull;
+package com.io7m.renderer.types;
 
 /**
- * The type of labels for lit materials.
+ * A type representing the window space.
  */
 
-public interface KMaterialLabelLit extends KLabel, KMaterialLabelImpliesUV
+public interface RSpaceWindow extends RSpace
 {
-  /**
-   * @return The label of the current light for this material.
-   */
-
-  @Nonnull KLightLabel labelGetLight();
+  // No value-level representation.
 }

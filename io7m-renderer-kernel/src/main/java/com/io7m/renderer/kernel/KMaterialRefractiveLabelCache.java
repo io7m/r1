@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 <code@io7m.com> http://io7m.com
+ * Copyright © 2013 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,19 +14,17 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel.types;
+package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-/**
- * The type of labels for lit materials.
- */
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KMaterialRefractiveLabel;
 
-public interface KMaterialLabelLit extends KLabel, KMaterialLabelImpliesUV
+interface KMaterialRefractiveLabelCache
 {
-  /**
-   * @return The label of the current light for this material.
-   */
-
-  @Nonnull KLightLabel labelGetLight();
+  public @Nonnull KMaterialRefractiveLabel getRefractiveLabel(
+    final @Nonnull KInstanceTranslucentRefractive instance)
+    throws ConstraintError;
 }
