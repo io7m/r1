@@ -38,8 +38,6 @@ import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureUnit;
-import com.io7m.jtensors.VectorI2I;
-import com.io7m.jtensors.VectorM2I;
 
 final class KPostprocessorBlurCommon
 {
@@ -50,7 +48,6 @@ final class KPostprocessorBlurCommon
 
   static void evaluateBlurH(
     final @Nonnull JCGLImplementation gi,
-    final @Nonnull VectorM2I viewport_size,
     final float blur_size,
     final @Nonnull KUnitQuad quad,
     final @Nonnull KProgram blur_h,
@@ -63,8 +60,6 @@ final class KPostprocessorBlurCommon
       ConstraintError
   {
     final JCGLInterfaceCommon gc = gi.getGLCommon();
-    viewport_size.x = (int) output_area.getRangeX().getInterval();
-    viewport_size.y = (int) output_area.getRangeY().getInterval();
     final List<TextureUnit> units = gc.textureGetUnits();
 
     try {
@@ -75,8 +70,9 @@ final class KPostprocessorBlurCommon
         gc.depthBufferWriteDisable();
       }
 
-      gc.viewportSet(VectorI2I.ZERO, viewport_size);
+      gc.viewportSet(output_area);
       gc.blendingDisable();
+      gc.cullingDisable();
 
       final JCBExecutionAPI e = blur_h.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
@@ -129,7 +125,6 @@ final class KPostprocessorBlurCommon
 
   static void evaluateBlurV(
     final @Nonnull JCGLImplementation gi,
-    final @Nonnull VectorM2I viewport_size,
     final @Nonnull KUnitQuad quad,
     final float blur_size,
     final @Nonnull KProgram blur_v,
@@ -142,13 +137,11 @@ final class KPostprocessorBlurCommon
       ConstraintError
   {
     final JCGLInterfaceCommon gc = gi.getGLCommon();
-    viewport_size.x = (int) output_area.getRangeX().getInterval();
-    viewport_size.y = (int) output_area.getRangeY().getInterval();
     final List<TextureUnit> units = gc.textureGetUnits();
 
     try {
       gc.framebufferDrawBind(output);
-      gc.viewportSet(VectorI2I.ZERO, viewport_size);
+      gc.viewportSet(output_area);
 
       if (has_depth) {
         gc.depthBufferTestDisable();
@@ -156,6 +149,7 @@ final class KPostprocessorBlurCommon
       }
 
       gc.blendingDisable();
+      gc.cullingDisable();
 
       final JCBExecutionAPI e = blur_v.getExecutable();
       e.execRun(new JCBExecutorProcedure() {

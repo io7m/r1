@@ -76,12 +76,12 @@
     <dependency>
       <groupId>com.io7m.jcanephora.core</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
-      <version>0.27.0</version>
+      <version>0.28.0</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcanephora.batchexec</groupId>
       <artifactId>io7m-jcanephora-batchexec</artifactId>
-      <version>0.27.0</version>
+      <version>0.28.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>

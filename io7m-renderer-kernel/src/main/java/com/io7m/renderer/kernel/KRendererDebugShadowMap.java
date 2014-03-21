@@ -38,8 +38,6 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.VectorI2I;
-import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererForward;
@@ -90,7 +88,6 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
   private final @Nonnull Log                log;
   private final @Nonnull KMutableMatrices   matrices;
   private final @Nonnull KTransformContext  transform_context;
-  private final @Nonnull VectorM2I          viewport_size;
   private final @Nonnull KDepthRenderer     depth_renderer;
   private final @Nonnull KLabelDecider      decider;
   private final @Nonnull KShadowMapRenderer shadow_renderer;
@@ -115,7 +112,6 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrices = KMutableMatrices.newMatrices();
     this.transform_context = KTransformContext.newContext();
-    this.viewport_size = new VectorM2I();
 
     this.depth_renderer =
       KDepthRenderer.newDepthRenderer(gl, shader_cache, caps, log);
@@ -188,13 +184,7 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
             gc.framebufferDrawBind(fb);
             try {
               final AreaInclusive area = framebuffer.kFramebufferGetArea();
-              KRendererDebugShadowMap.this.viewport_size.x =
-                (int) area.getRangeX().getInterval();
-              KRendererDebugShadowMap.this.viewport_size.y =
-                (int) area.getRangeY().getInterval();
-              gc.viewportSet(
-                VectorI2I.ZERO,
-                KRendererDebugShadowMap.this.viewport_size);
+              gc.viewportSet(area);
 
               gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
               gc.depthBufferWriteEnable();

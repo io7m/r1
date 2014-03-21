@@ -28,7 +28,6 @@ import com.io7m.jcache.BLUCache;
 import com.io7m.jcache.BLUCacheReceipt;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCache;
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsable;
 import com.io7m.jcanephora.IndexBufferUsable;
 import com.io7m.jcanephora.JCBExecutionAPI;
@@ -43,8 +42,6 @@ import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.VectorI2I;
-import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorRGBAWithDepth;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
@@ -78,7 +75,6 @@ public final class KPostprocessorFog extends
   private final @Nonnull KUnitQuad                                                           quad;
   private final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache;
   private final @Nonnull LUCache<String, KProgram, RException>                               shader_cache;
-  private final @Nonnull VectorM2I                                                           viewport_size;
 
   private KPostprocessorFog(
     final @Nonnull JCGLImplementation gi,
@@ -101,7 +97,6 @@ public final class KPostprocessorFog extends
           Constraints.constrainNotNull(log, "Log"),
           KPostprocessorFog.NAME);
 
-      this.viewport_size = new VectorM2I();
       this.quad = KUnitQuad.newQuad(gi.getGLCommon(), this.log);
       this.fog_colour = new VectorM3F(0.1f, 0.1f, 0.1f);
 
@@ -122,18 +117,16 @@ public final class KPostprocessorFog extends
         JCacheException
   {
     final JCGLInterfaceCommon gc = this.gi.getGLCommon();
-    final AreaInclusive area = output.kFramebufferGetArea();
-    this.viewport_size.x = (int) area.getRangeX().getInterval();
-    this.viewport_size.y = (int) area.getRangeY().getInterval();
     final List<TextureUnit> units = gc.textureGetUnits();
 
     final KProgram fog = this.shader_cache.cacheGetLU("postprocessing_fog");
 
     try {
       gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
-      gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
+      gc.viewportSet(output.kFramebufferGetArea());
       gc.colorBufferClearV3f(this.fog_colour);
       gc.blendingDisable();
+      gc.cullingDisable();
 
       final JCBExecutionAPI e = fog.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
@@ -202,9 +195,6 @@ public final class KPostprocessorFog extends
       JCacheException
   {
     final JCGLInterfaceCommon gc = this.gi.getGLCommon();
-    final AreaInclusive area = output.kFramebufferGetArea();
-    this.viewport_size.x = (int) area.getRangeX().getInterval();
-    this.viewport_size.y = (int) area.getRangeY().getInterval();
     final List<TextureUnit> units = gc.textureGetUnits();
 
     final KProgram id =
@@ -212,9 +202,10 @@ public final class KPostprocessorFog extends
 
     try {
       gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
-      gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
+      gc.viewportSet(output.kFramebufferGetArea());
       gc.colorBufferClearV3f(this.fog_colour);
       gc.blendingDisable();
+      gc.cullingDisable();
 
       final JCBExecutionAPI e = id.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
