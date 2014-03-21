@@ -27,7 +27,6 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCache;
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
@@ -42,8 +41,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.VectorI2I;
-import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererDebug;
@@ -90,7 +87,6 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
   private final @Nonnull KMutableMatrices                      matrices;
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
   private final @Nonnull KTransformContext                     transform_context;
-  private final @Nonnull VectorM2I                             viewport_size;
 
   private KRendererDebugDepth(
     final @Nonnull JCGLImplementation gl,
@@ -106,7 +102,6 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrices = KMutableMatrices.newMatrices();
     this.transform_context = KTransformContext.newContext();
-    this.viewport_size = new VectorM2I();
     this.depth_labels = depth_labels;
     this.shader_cache = shader_cache;
 
@@ -363,15 +358,9 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
     final FramebufferReferenceUsable output_buffer =
       framebuffer.kFramebufferGetColorFramebuffer();
 
-    final AreaInclusive area = framebuffer.kFramebufferGetArea();
-    KRendererDebugDepth.this.viewport_size.x =
-      (int) area.getRangeX().getInterval();
-    KRendererDebugDepth.this.viewport_size.y =
-      (int) area.getRangeY().getInterval();
-
     gc.framebufferDrawBind(output_buffer);
     try {
-      gc.viewportSet(VectorI2I.ZERO, KRendererDebugDepth.this.viewport_size);
+      gc.viewportSet(framebuffer.kFramebufferGetArea());
 
       gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
       gc.depthBufferClear(1.0f);

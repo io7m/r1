@@ -31,7 +31,6 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.VectorM2I;
 import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorDepthVariance;
 import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
@@ -100,7 +99,6 @@ public final class KPostprocessorBlurDepthVariance extends
   private final @Nonnull Log                                                                                   log;
   private final @Nonnull KUnitQuad                                                                             quad;
   private final @Nonnull LUCache<String, KProgram, RException>                                                 shader_cache;
-  private final @Nonnull VectorM2I                                                                             viewport_size;
   private final @Nonnull KRegionCopier                                                                         copier;
 
   private KPostprocessorBlurDepthVariance(
@@ -127,7 +125,6 @@ public final class KPostprocessorBlurDepthVariance extends
           Constraints.constrainNotNull(log, "Log"),
           KPostprocessorBlurDepthVariance.NAME);
 
-      this.viewport_size = new VectorM2I();
       this.quad = KUnitQuad.newQuad(gi.getGLCommon(), this.log);
 
     } catch (final JCGLException e) {
@@ -150,7 +147,6 @@ public final class KPostprocessorBlurDepthVariance extends
 
     KPostprocessorBlurCommon.evaluateBlurH(
       this.gi,
-      this.viewport_size,
       parameters.getBlurSize(),
       this.quad,
       this.shader_cache
@@ -163,7 +159,6 @@ public final class KPostprocessorBlurDepthVariance extends
 
     KPostprocessorBlurCommon.evaluateBlurV(
       this.gi,
-      this.viewport_size,
       this.quad,
       parameters.getBlurSize(),
       this.shader_cache
@@ -181,6 +176,7 @@ public final class KPostprocessorBlurDepthVariance extends
   {
     try {
       this.quad.delete(this.gi.getGLCommon());
+      this.copier.close();
     } catch (final JCGLRuntimeException e) {
       throw RException.fromJCGLException(e);
     }
@@ -198,16 +194,19 @@ public final class KPostprocessorBlurDepthVariance extends
       /**
        * If zero passes were specified, and the input isn't equal to the
        * output, then it's necessary to copy the data over without blurring.
+       * Otherwise, no postprocess is applied.
        */
 
       final int passes = parameters.getPasses();
-      if ((passes == 0) && (input != output)) {
-        this.copier.copyFramebufferRegionDepthVariance(
-          input,
-          input.kFramebufferGetArea(),
-          output,
-          output.kFramebufferGetArea(),
-          FramebufferBlitFilter.FRAMEBUFFER_BLIT_FILTER_NEAREST);
+      if (passes == 0) {
+        if (input != output) {
+          this.copier.copyFramebufferRegionDepthVariance(
+            input,
+            input.kFramebufferGetArea(),
+            output,
+            output.kFramebufferGetArea(),
+            FramebufferBlitFilter.FRAMEBUFFER_BLIT_FILTER_NEAREST);
+        }
         return;
       }
 

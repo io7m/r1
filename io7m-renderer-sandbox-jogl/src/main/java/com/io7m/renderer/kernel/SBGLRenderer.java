@@ -103,7 +103,6 @@ import com.io7m.jlog.Log;
 import com.io7m.jparasol.xml.PGLSLMetaXML;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionM4F;
-import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorM2I;
@@ -1803,10 +1802,17 @@ final class SBGLRenderer implements GLEventListener
 
     assert gl.framebufferDrawAnyIsBound() == false;
 
-    gl.viewportSet(VectorI2I.ZERO, size);
+    final RangeInclusive range_x =
+      new RangeInclusive(0, drawable.getWidth() - 1);
+    final RangeInclusive range_y =
+      new RangeInclusive(0, drawable.getHeight() - 1);
+    final AreaInclusive area = new AreaInclusive(range_x, range_y);
+
+    gl.viewportSet(area);
     gl.colorBufferClearV3f(this.background_colour.get());
     gl.depthBufferWriteEnable();
     gl.depthBufferClear(1.0f);
+    gl.depthBufferWriteDisable();
     gl.depthBufferTestDisable();
     gl.blendingEnable(
       BlendFunction.BLEND_SOURCE_ALPHA,

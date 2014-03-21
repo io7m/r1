@@ -26,11 +26,11 @@ import com.io7m.jcache.BLUCacheReceipt;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.FramebufferBlitFilter;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.VectorM2I;
 import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorRGBA;
 import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
@@ -92,7 +92,7 @@ public final class KPostprocessorBlurRGBA extends
   private final @Nonnull KUnitQuad                                                           quad;
   private final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache;
   private final @Nonnull LUCache<String, KProgram, RException>                               shader_cache;
-  private final @Nonnull VectorM2I                                                           viewport_size;
+  private final @Nonnull KRegionCopier                                                       copier;
 
   private KPostprocessorBlurRGBA(
     final @Nonnull JCGLImplementation gi,
@@ -110,12 +110,12 @@ public final class KPostprocessorBlurRGBA extends
         Constraints.constrainNotNull(rgba_cache, "RGBA framebuffer cache");
       this.shader_cache =
         Constraints.constrainNotNull(shader_cache, "Shader cache");
+      this.copier = KRegionCopier.newCopier(gi, shader_cache, log);
       this.log =
         new Log(
           Constraints.constrainNotNull(log, "Log"),
           KPostprocessorBlurRGBA.NAME);
 
-      this.viewport_size = new VectorM2I();
       this.quad = KUnitQuad.newQuad(gi.getGLCommon(), this.log);
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
@@ -128,6 +128,7 @@ public final class KPostprocessorBlurRGBA extends
   {
     try {
       this.quad.delete(this.gi.getGLCommon());
+      this.copier.close();
     } catch (final JCGLRuntimeException e) {
       throw RException.fromJCGLException(e);
     }
@@ -148,7 +149,6 @@ public final class KPostprocessorBlurRGBA extends
 
     KPostprocessorBlurCommon.evaluateBlurH(
       this.gi,
-      this.viewport_size,
       parameters.getBlurSize(),
       this.quad,
       this.shader_cache
@@ -159,18 +159,18 @@ public final class KPostprocessorBlurRGBA extends
       temporary.kFramebufferGetArea(),
       false);
 
-    KPostprocessorBlurCommon.evaluateBlurV(
-      this.gi,
-      this.viewport_size,
-      this.quad,
-      parameters.getBlurSize(),
-      this.shader_cache
-        .cacheGetLU("postprocessing_gaussian_blur_vertical_4f"),
-      temporary.kFramebufferGetRGBATexture(),
-      temporary.kFramebufferGetArea(),
-      target.kFramebufferGetColorFramebuffer(),
-      target.kFramebufferGetArea(),
-      false);
+    KPostprocessorBlurCommon
+      .evaluateBlurV(
+        this.gi,
+        this.quad,
+        parameters.getBlurSize(),
+        this.shader_cache
+          .cacheGetLU("postprocessing_gaussian_blur_vertical_4f"),
+        temporary.kFramebufferGetRGBATexture(),
+        temporary.kFramebufferGetArea(),
+        target.kFramebufferGetColorFramebuffer(),
+        target.kFramebufferGetArea(),
+        false);
   }
 
   @Override public void postprocessorEvaluateRGBA(
@@ -186,11 +186,29 @@ public final class KPostprocessorBlurRGBA extends
       final KFramebufferRGBADescription new_desc =
         KPostprocessorBlurRGBA.makeScaledDescription(parameters, desc);
 
+      /**
+       * If zero passes were specified, and the input isn't equal to the
+       * output, then it's necessary to copy the data over without blurring.
+       * Otherwise, no postprocess is applied.
+       */
+
+      final int passes = parameters.getPasses();
+      if (passes == 0) {
+        if (input != output) {
+          this.copier.copyFramebufferRegionRGBA(
+            input,
+            input.kFramebufferGetArea(),
+            output,
+            output.kFramebufferGetArea(),
+            FramebufferBlitFilter.FRAMEBUFFER_BLIT_FILTER_NEAREST);
+        }
+        return;
+      }
+
       final BLUCacheReceipt<KFramebufferRGBADescription, KFramebufferRGBA> receipt_a =
         this.rgba_cache.bluCacheGet(new_desc);
 
       try {
-        final int passes = parameters.getPasses();
         if (passes == 1) {
           this.onePass(parameters, input, receipt_a.getValue(), output);
           return;

@@ -31,7 +31,6 @@ import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCache;
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
@@ -50,7 +49,6 @@ import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.VectorI2I;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
@@ -451,6 +449,10 @@ import com.io7m.renderer.types.RTransformView;
         final IndexBuffer indices = mesh.getIndexBuffer();
         final KInstanceOpaque actual = instance.instanceGet();
         final KMaterialOpaque material = actual.instanceGetMaterial();
+
+        KRendererCommon.renderConfigureFaceCulling(
+          gc,
+          actual.instanceGetFaces());
 
         KRendererForwardActual.putInstanceMatrices(program, mwi, label);
         KRendererForwardActual.putInstanceTextures(
@@ -1360,14 +1362,14 @@ import com.io7m.renderer.types.RTransformView;
   {
     final JCGLInterfaceCommon gc = this.g.getGLCommon();
 
-    /**
-     * Populate depth buffer with opaque objects.
-     */
-
     final RMatrixI4x4F<RTransformView> m_view =
       RMatrixI4x4F.newFromReadable(mwo.getMatrixView());
     final RMatrixI4x4F<RTransformProjection> m_proj =
       RMatrixI4x4F.newFromReadable(mwo.getMatrixProjection());
+
+    /**
+     * Populate depth buffer with opaque objects.
+     */
 
     final Option<KFaceSelection> none = Option.none();
     this.depth.depthRendererEvaluate(
@@ -1376,9 +1378,6 @@ import com.io7m.renderer.types.RTransformView;
       batched.getBatchesDepth(),
       framebuffer,
       none);
-
-    final VectorM2I viewport = this.viewport_size;
-    final VectorM4F backdrop = this.background;
 
     /**
      * Render shadow maps.
@@ -1404,14 +1403,12 @@ import com.io7m.renderer.types.RTransformView;
 
           gc.framebufferDrawBind(fb);
           try {
-            final AreaInclusive area = framebuffer.kFramebufferGetArea();
-            viewport.x = (int) area.getRangeX().getInterval();
-            viewport.y = (int) area.getRangeY().getInterval();
-            gc.viewportSet(VectorI2I.ZERO, viewport);
+            gc.viewportSet(framebuffer.kFramebufferGetArea());
 
             /**
              * Render all opaque instances, blending additively, into the
-             * framebuffer.
+             * framebuffer. Only objects with depths exactly equal to that in
+             * the depth buffer will be rendered.
              */
 
             gc.cullingEnable(
@@ -1419,7 +1416,7 @@ import com.io7m.renderer.types.RTransformView;
               FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
 
             gc.colorBufferMask(true, true, true, true);
-            gc.colorBufferClearV4f(backdrop);
+            gc.colorBufferClearV4f(KRendererForwardActual.this.background);
             gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
             gc.depthBufferWriteDisable();
             gc.blendingEnable(

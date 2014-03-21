@@ -25,7 +25,7 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
-import com.io7m.jaux.functional.PartialFunction;
+import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCache;
@@ -46,8 +46,6 @@ import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.VectorI2I;
-import com.io7m.jtensors.VectorM2I;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
@@ -241,10 +239,18 @@ import com.io7m.renderer.types.RTransformView;
         }
       }
 
+      /**
+       * If there's an override for face culling specified, use it. Otherwise,
+       * use the per-instance face culling settings.
+       */
+
       if (faces.isNone()) {
         KRendererCommon.renderConfigureFaceCulling(
           gc,
           actual.instanceGetFaces());
+      } else {
+        final Some<KFaceSelection> some = (Option.Some<KFaceSelection>) faces;
+        KRendererCommon.renderConfigureFaceCulling(gc, some.value);
       }
 
       jp.programExecute(new JCBProgramProcedure() {
@@ -265,7 +271,6 @@ import com.io7m.renderer.types.RTransformView;
   private final @Nonnull Log                                   log;
   private final @Nonnull KMutableMatrices                      matrices;
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
-  private final @Nonnull VectorM2I                             viewport_size;
 
   private KDepthVarianceRenderer(
     final @Nonnull JCGLImplementation gl,
@@ -279,7 +284,6 @@ import com.io7m.renderer.types.RTransformView;
     this.shader_cache =
       Constraints.constrainNotNull(shader_cache, "Shader cache");
     this.matrices = KMutableMatrices.newMatrices();
-    this.viewport_size = new VectorM2I();
   }
 
   public
@@ -383,28 +387,7 @@ import com.io7m.renderer.types.RTransformView;
     gc.framebufferDrawBind(fb);
     try {
       final AreaInclusive area = framebuffer.kFramebufferGetArea();
-      this.viewport_size.x = (int) area.getRangeX().getInterval();
-      this.viewport_size.y = (int) area.getRangeY().getInterval();
-      gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
-
-      /**
-       * Override per-instance face culling if requested.
-       */
-
-      faces
-        .mapPartial(new PartialFunction<KFaceSelection, Unit, JCGLException>() {
-          @Override public Unit call(
-            final @Nonnull KFaceSelection f)
-            throws JCGLException
-          {
-            try {
-              KRendererCommon.renderConfigureFaceCulling(gc, f);
-              return Unit.unit();
-            } catch (final ConstraintError x) {
-              throw new UnreachableCodeException(x);
-            }
-          }
-        });
+      gc.viewportSet(area);
 
       this.renderDepthPassBatches(batches, gc, mwo, faces);
     } catch (final JCacheException e) {

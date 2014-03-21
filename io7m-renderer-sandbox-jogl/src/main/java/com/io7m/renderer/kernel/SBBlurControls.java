@@ -39,11 +39,9 @@ public final class SBBlurControls implements
         new SBExampleWindow("Shadow") {
           private static final long serialVersionUID = 6048725370293855922L;
 
-          @SuppressWarnings("synthetic-access") @Override public
-            void
-            addToLayout(
-              final DesignGridLayout layout)
-              throws ConstraintError
+          @Override public void addToLayout(
+            final DesignGridLayout layout)
+            throws ConstraintError
           {
             final SBBlurControls c = new SBBlurControls();
             c.controlsAddToLayout(layout);
@@ -63,7 +61,7 @@ public final class SBBlurControls implements
   {
     this.group = new RowGroup();
     this.blur_size = new SBFloatHSlider("Blur size", 0.0f, 16.0f);
-    this.passes = new SBIntegerHSlider("Passes", 1, 32);
+    this.passes = new SBIntegerHSlider("Passes", 0, 32);
     this.scale = new SBFloatHSlider("Scale", 1.0f / 32.0f, 1.0f);
   }
 

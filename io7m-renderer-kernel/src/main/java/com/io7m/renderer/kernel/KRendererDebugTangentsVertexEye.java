@@ -39,8 +39,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.VectorI2I;
-import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
@@ -79,7 +77,6 @@ import com.io7m.renderer.types.RException;
   private final @Nonnull KMutableMatrices   matrices;
   private final @Nonnull KProgram           program;
   private final @Nonnull KTransformContext  transform_context;
-  private final @Nonnull VectorM2I          viewport_size;
 
   private KRendererDebugTangentsVertexEye(
     final @Nonnull JCGLImplementation gl,
@@ -99,7 +96,6 @@ import com.io7m.renderer.types.RException;
       this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
       this.matrices = KMutableMatrices.newMatrices();
       this.transform_context = KTransformContext.newContext();
-      this.viewport_size = new VectorM2I();
 
       this.program =
         KProgram.newProgramFromFilesystem(
@@ -174,12 +170,10 @@ import com.io7m.renderer.types.RException;
     final FramebufferReferenceUsable output_buffer =
       framebuffer.kFramebufferGetColorFramebuffer();
     final AreaInclusive area = framebuffer.kFramebufferGetArea();
-    this.viewport_size.x = (int) area.getRangeX().getInterval();
-    this.viewport_size.y = (int) area.getRangeY().getInterval();
 
     try {
       gc.framebufferDrawBind(output_buffer);
-      gc.viewportSet(VectorI2I.ZERO, this.viewport_size);
+      gc.viewportSet(area);
 
       gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
       gc.depthBufferClear(1.0f);
