@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 import javax.swing.JLabel;
+import javax.swing.JSeparator;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
@@ -25,6 +26,7 @@ import net.java.dev.designgridlayout.RowGroup;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
@@ -40,6 +42,7 @@ final class SBLightShadowMappedVarianceControls implements SBControls
   private final @Nonnull SBFloatHSlider                   minimum_variance;
   private final @Nonnull RowGroup                         row_group;
   private final @Nonnull SBIntegerHSlider                 size;
+  private final @Nonnull SBBlurControls                   blur_controls;
 
   SBLightShadowMappedVarianceControls()
     throws ConstraintError
@@ -60,6 +63,7 @@ final class SBLightShadowMappedVarianceControls implements SBControls
       new SBFloatHSlider("Light bleed reduction", 0.0f, 1.0f);
     this.light_bleed_reduction.setCurrent(0.2f);
 
+    this.blur_controls = new SBBlurControls();
     this.depth_precision = new SBDepthPrecisionSelector();
     this.depth_variance_precision = new SBDepthVariancePrecisionSelector();
     this.row_group = new RowGroup();
@@ -112,16 +116,27 @@ final class SBLightShadowMappedVarianceControls implements SBControls
       .group(this.row_group)
       .grid(new JLabel("Filter (Minification)"))
       .add(this.filter_min, 4);
+
+    layout
+      .row()
+      .group(this.row_group)
+      .left()
+      .add(new JLabel("Blur"))
+      .add(new JSeparator())
+      .fill();
+    this.blur_controls.controlsAddToLayout(layout);
   }
 
   @Override public void controlsHide()
   {
     this.row_group.hide();
+    this.blur_controls.controlsHide();
   }
 
   @Override public void controlsShow()
   {
     this.row_group.forceShow();
+    this.blur_controls.controlsShow();
   }
 
   public @Nonnull RowGroup getRowGroup()
@@ -131,7 +146,8 @@ final class SBLightShadowMappedVarianceControls implements SBControls
 
   public @Nonnull KShadowMappedVariance getShadow(
     final @Nonnull Integer light_id)
-    throws ConstraintError
+    throws ConstraintError,
+      SBExceptionInputError
   {
     final int edge_size = ((int) Math.pow(2, this.size.getCurrent())) - 1;
     final RangeInclusive range_x = new RangeInclusive(0, edge_size);
@@ -156,6 +172,7 @@ final class SBLightShadowMappedVarianceControls implements SBControls
       this.factor_minimum.getCurrent(),
       this.minimum_variance.getCurrent(),
       this.light_bleed_reduction.getCurrent(),
+      this.blur_controls.controlsSave(),
       map_description);
   }
 
@@ -174,5 +191,6 @@ final class SBLightShadowMappedVarianceControls implements SBControls
     this.depth_variance_precision.setSelectedItem(fbd
       .getDepthVariancePrecision());
     this.depth_precision.setSelectedItem(fbd.getDepthPrecision());
+    this.blur_controls.controlsLoadFrom(smv.getBlur());
   }
 }

@@ -117,6 +117,7 @@ final class SBMainWindow extends JFrame
       final @Nonnull SBMaterialsWindow materials_window,
       final @Nonnull SBInstancesWindow instances_window,
       final @Nonnull Log log)
+      throws ConstraintError
   {
     final JMenuBar bar = new JMenuBar();
     bar.add(SBMainWindow.makeMenuFile(controller, window, log));
@@ -356,22 +357,25 @@ final class SBMainWindow extends JFrame
     JMenu
     makeMenuPostprocessor(
       final @Nonnull C controller)
+      throws ConstraintError
   {
     final ButtonGroup renderer_group = new ButtonGroup();
     final JMenu menu = new JMenu("Postprocessor");
 
-    for (final SBKPostprocessorType type : SBKPostprocessorType.values()) {
-      final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
-      b.addActionListener(new ActionListener() {
-        @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
-        {
-          controller.rendererPostprocessorSetType(type);
-        }
-      });
+    {
+      final SBKPostprocessorNone p = new SBKPostprocessorNone(controller);
+      final JCheckBoxMenuItem c =
+        SBMainWindow.makeWindowCheckbox("none", p.getWindow());
+      menu.add(c);
+      renderer_group.add(c);
+    }
 
-      renderer_group.add(b);
-      menu.add(b);
+    {
+      final SBKPostprocessorBlur p = new SBKPostprocessorBlur(controller);
+      final JCheckBoxMenuItem c =
+        SBMainWindow.makeWindowCheckbox("blur", p.getWindow());
+      menu.add(c);
+      renderer_group.add(c);
     }
 
     return menu;
@@ -605,6 +609,7 @@ final class SBMainWindow extends JFrame
     final @Nonnull SBSceneController controller,
     final @Nonnull SBGLRenderer renderer,
     final @Nonnull Log log)
+    throws ConstraintError
   {
     this.renderer = renderer;
 

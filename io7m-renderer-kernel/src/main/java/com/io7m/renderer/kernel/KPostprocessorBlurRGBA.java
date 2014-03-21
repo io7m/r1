@@ -20,25 +20,58 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.RangeInclusive;
 import com.io7m.jcache.BLUCache;
 import com.io7m.jcache.BLUCacheReceipt;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCache;
+import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorM2I;
 import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorRGBA;
+import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
-public final class KPostprocessorBlurRGBA extends KAbstractPostprocessorRGBA
+public final class KPostprocessorBlurRGBA extends
+  KAbstractPostprocessorRGBA<KBlurParameters>
 {
   private static final @Nonnull String NAME;
 
   static {
     NAME = "postprocessor-blur-rgba";
+  }
+
+  private static @Nonnull KFramebufferRGBADescription makeScaledDescription(
+    final @Nonnull KBlurParameters parameters,
+    final @Nonnull KFramebufferRGBADescription desc)
+    throws ConstraintError
+  {
+    if (parameters.getScale() != 1.0f) {
+      final AreaInclusive orig_area = desc.getArea();
+
+      final long width = orig_area.getRangeX().getInterval();
+      final long height = orig_area.getRangeY().getInterval();
+
+      final long scaled_width =
+        Math.max(2, (long) (width * parameters.getScale()));
+      final long scaled_height =
+        Math.max(2, (long) (height * parameters.getScale()));
+
+      final RangeInclusive range_x = new RangeInclusive(0, scaled_width);
+      final RangeInclusive range_y = new RangeInclusive(0, scaled_height);
+      final AreaInclusive area = new AreaInclusive(range_x, range_y);
+
+      return KFramebufferRGBADescription.newDescription(
+        area,
+        desc.getFilterMagnification(),
+        desc.getFilterMinification(),
+        desc.getRGBAPrecision());
+    }
+    return desc;
   }
 
   public static @Nonnull
@@ -54,7 +87,6 @@ public final class KPostprocessorBlurRGBA extends KAbstractPostprocessorRGBA
     return new KPostprocessorBlurRGBA(gi, rgba_cache, shader_cache, log);
   }
 
-  private float                                                                              blur_size;
   private final @Nonnull JCGLImplementation                                                  gi;
   private final @Nonnull Log                                                                 log;
   private final @Nonnull KUnitQuad                                                           quad;
@@ -85,8 +117,6 @@ public final class KPostprocessorBlurRGBA extends KAbstractPostprocessorRGBA
 
       this.viewport_size = new VectorM2I();
       this.quad = KUnitQuad.newQuad(gi.getGLCommon(), this.log);
-      this.blur_size = 1.0f;
-
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
     }
@@ -103,44 +133,97 @@ public final class KPostprocessorBlurRGBA extends KAbstractPostprocessorRGBA
     }
   }
 
+  private void onePass(
+    final @Nonnull KBlurParameters parameters,
+    final @Nonnull KFramebufferRGBAUsable source,
+    final @Nonnull KFramebufferRGBAUsable temporary,
+    final @Nonnull KFramebufferRGBAUsable target)
+    throws JCGLRuntimeException,
+      RException,
+      ConstraintError,
+      JCacheException
+  {
+    assert source != temporary;
+    assert temporary != target;
+
+    KPostprocessorBlurCommon.evaluateBlurH(
+      this.gi,
+      this.viewport_size,
+      parameters.getBlurSize(),
+      this.quad,
+      this.shader_cache
+        .cacheGetLU("postprocessing_gaussian_blur_horizontal_4f"),
+      source.kFramebufferGetRGBATexture(),
+      source.kFramebufferGetArea(),
+      temporary.kFramebufferGetColorFramebuffer(),
+      temporary.kFramebufferGetArea(),
+      false);
+
+    KPostprocessorBlurCommon.evaluateBlurV(
+      this.gi,
+      this.viewport_size,
+      this.quad,
+      parameters.getBlurSize(),
+      this.shader_cache
+        .cacheGetLU("postprocessing_gaussian_blur_vertical_4f"),
+      temporary.kFramebufferGetRGBATexture(),
+      temporary.kFramebufferGetArea(),
+      target.kFramebufferGetColorFramebuffer(),
+      target.kFramebufferGetArea(),
+      false);
+  }
+
   @Override public void postprocessorEvaluateRGBA(
+    final @Nonnull KBlurParameters parameters,
     final @Nonnull KFramebufferRGBAUsable input,
     final @Nonnull KFramebufferRGBAUsable output)
     throws ConstraintError,
       RException
   {
     try {
-      final BLUCacheReceipt<KFramebufferRGBADescription, KFramebufferRGBA> receipt =
-        this.rgba_cache.bluCacheGet(input.kFramebufferGetRGBADescription());
+      final KFramebufferRGBADescription desc =
+        input.kFramebufferGetRGBADescription();
+      final KFramebufferRGBADescription new_desc =
+        KPostprocessorBlurRGBA.makeScaledDescription(parameters, desc);
+
+      final BLUCacheReceipt<KFramebufferRGBADescription, KFramebufferRGBA> receipt_a =
+        this.rgba_cache.bluCacheGet(new_desc);
 
       try {
-        final KFramebufferRGBA temp = receipt.getValue();
-        KPostprocessorBlurCommon.evaluateBlurH(
-          this.gi,
-          this.viewport_size,
-          this.blur_size,
-          this.quad,
-          this.shader_cache
-            .cacheGetLU("postprocessing_gaussian_blur_horizontal_4f"),
-          input.kFramebufferGetRGBATexture(),
-          input.kFramebufferGetArea(),
-          temp.kFramebufferGetColorFramebuffer(),
-          temp.kFramebufferGetArea(),
-          false);
-        KPostprocessorBlurCommon.evaluateBlurV(
-          this.gi,
-          this.viewport_size,
-          this.quad,
-          this.blur_size,
-          this.shader_cache
-            .cacheGetLU("postprocessing_gaussian_blur_vertical_4f"),
-          temp.kFramebufferGetRGBATexture(),
-          temp.kFramebufferGetArea(),
-          output.kFramebufferGetColorFramebuffer(),
-          output.kFramebufferGetArea(),
-          false);
+        final int passes = parameters.getPasses();
+        if (passes == 1) {
+          this.onePass(parameters, input, receipt_a.getValue(), output);
+          return;
+        }
+
+        final BLUCacheReceipt<KFramebufferRGBADescription, KFramebufferRGBA> receipt_b =
+          this.rgba_cache.bluCacheGet(new_desc);
+
+        try {
+          this.onePass(
+            parameters,
+            input,
+            receipt_a.getValue(),
+            receipt_b.getValue());
+
+          for (int pass = 1; pass < passes; ++pass) {
+            final KFramebufferRGBAUsable source = receipt_b.getValue();
+            final KFramebufferRGBAUsable temporary = receipt_a.getValue();
+            final KFramebufferRGBAUsable target;
+            if ((pass + 1) == passes) {
+              target = output;
+            } else {
+              target = receipt_b.getValue();
+            }
+
+            this.onePass(parameters, source, temporary, target);
+          }
+
+        } finally {
+          receipt_b.returnToCache();
+        }
       } finally {
-        receipt.returnToCache();
+        receipt_a.returnToCache();
       }
 
     } catch (final JCGLException e) {

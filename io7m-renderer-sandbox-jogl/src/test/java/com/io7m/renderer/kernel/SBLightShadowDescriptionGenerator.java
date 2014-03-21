@@ -26,6 +26,8 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.renderer.kernel.types.KBlurParameters;
+import com.io7m.renderer.kernel.types.KBlurParameters.Builder;
 import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KDepthVariancePrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
@@ -95,10 +97,18 @@ public final class SBLightShadowDescriptionGenerator implements
               this.index_gen.next(),
               description,
               this.index_gen.next().intValue());
+
+          final Builder bb = KBlurParameters.newBuilder();
+          bb.setBlurSize((float) (Math.random() * 32.0f));
+          bb.setScale((float) Math.random());
+          bb.setPasses((int) (Math.random() * 32));
+
+          final KBlurParameters blur = bb.build();
           return KShadowMappedVariance.newMappedVariance(
             (float) Math.random(),
             (float) Math.random(),
             (float) Math.random(),
+            blur,
             map_description);
         }
       }

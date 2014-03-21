@@ -40,8 +40,8 @@ interface SBSceneControllerRendererControl
   public void rendererSetType(
     final @Nonnull SBKRendererType type);
 
-  public void rendererPostprocessorSetType(
-    final @Nonnull SBKPostprocessorType type);
+  public void rendererPostprocessorSet(
+    final @Nonnull SBKPostprocessor p);
 
   public void rendererShowAxes(
     final boolean enabled);
