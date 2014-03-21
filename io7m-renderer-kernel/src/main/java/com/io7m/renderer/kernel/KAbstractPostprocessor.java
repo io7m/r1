@@ -24,8 +24,8 @@ import com.io7m.renderer.types.RException;
 
 abstract class KAbstractPostprocessor implements KPostprocessor
 {
-  public static abstract class KAbstractPostprocessorDepth extends
-    KAbstractPostprocessor implements KPostprocessorDepth
+  public static abstract class KAbstractPostprocessorDepth<C> extends
+    KAbstractPostprocessor implements KPostprocessorDepth<C>
   {
     protected KAbstractPostprocessorDepth(
       final @Nonnull String name)
@@ -47,8 +47,8 @@ abstract class KAbstractPostprocessor implements KPostprocessor
     }
   }
 
-  public static abstract class KAbstractPostprocessorDepthVariance extends
-    KAbstractPostprocessor implements KPostprocessorDepthVariance
+  public static abstract class KAbstractPostprocessorDepthVariance<C> extends
+    KAbstractPostprocessor implements KPostprocessorDepthVariance<C>
   {
     protected KAbstractPostprocessorDepthVariance(
       final @Nonnull String name)
@@ -70,8 +70,8 @@ abstract class KAbstractPostprocessor implements KPostprocessor
     }
   }
 
-  public static abstract class KAbstractPostprocessorRGBA extends
-    KAbstractPostprocessor implements KPostprocessorRGBA
+  public static abstract class KAbstractPostprocessorRGBA<C> extends
+    KAbstractPostprocessor implements KPostprocessorRGBA<C>
   {
     protected KAbstractPostprocessorRGBA(
       final @Nonnull String name)
@@ -93,8 +93,8 @@ abstract class KAbstractPostprocessor implements KPostprocessor
     }
   }
 
-  public static abstract class KAbstractPostprocessorRGBAWithDepth extends
-    KAbstractPostprocessor implements KPostprocessorRGBAWithDepth
+  public static abstract class KAbstractPostprocessorRGBAWithDepth<C> extends
+    KAbstractPostprocessor implements KPostprocessorRGBAWithDepth<C>
   {
     protected KAbstractPostprocessorRGBAWithDepth(
       final @Nonnull String name)

@@ -43,6 +43,7 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLight;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunction;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
+import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
@@ -240,7 +241,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
                           (KShadowMapVariance) cache.cacheGetPeriodic(s
                             .getDescription());
                         KShadowMapRendererActual.this
-                          .renderShadowMapVarianceBatch(batch, smv, mwp);
+                          .renderShadowMapVarianceBatch(batch, s, smv, mwp);
                         return Unit.unit();
                       }
                     });
@@ -396,6 +397,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
     void
     renderShadowMapVarianceBatch(
       final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> batch,
+      final @Nonnull KShadowMappedVariance shadow,
       final @Nonnull KShadowMapVariance smv,
       final @Nonnull MatricesProjectiveLight mwp)
       throws ConstraintError,
@@ -430,9 +432,14 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       smv.getFramebuffer(),
       none);
 
-    this.blur.postprocessorEvaluateDepthVariance(
-      smv.getFramebuffer(),
-      smv.getFramebuffer());
+    // XXX: Actual parameters...
+    final KBlurParameters params = shadow.getBlur();
+    if (params.getPasses() > 0) {
+      this.blur.postprocessorEvaluateDepthVariance(
+        params,
+        smv.getFramebuffer(),
+        smv.getFramebuffer());
+    }
   }
 
   @Override public <A, E extends Throwable> A shadowMapRendererEvaluate(
