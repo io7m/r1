@@ -60,7 +60,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
     /**
      * <p>
      * Set the number of passes. A greater number of passes will strengthen
-     * the effect of the blur at the cost of processing time.
+     * the effect of the blur at the cost of processing time. A value of
+     * <code>0</code> will result in no blur being applied at all.
      * </p>
      * <p>
      * The default is <code>1</code>.
@@ -69,7 +70,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
      * @param passes
      *          The number of passes
      * @throws ConstraintError
-     *           Iff <code>1 &lt;= passes == false</code>
+     *           Iff <code>0 &lt;= passes == false</code>
      */
 
     void setPasses(
@@ -131,7 +132,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
         this.passes =
           Constraints.constrainRange(
             in_passes,
-            1,
+            0,
             Integer.MAX_VALUE,
             "Passes");
       }

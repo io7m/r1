@@ -36,6 +36,7 @@ import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.PartialFunction;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KShadow;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
@@ -188,7 +189,8 @@ public final class SBLightShadowControls implements SBControls
 
   public @Nonnull Option<KShadow> getShadow(
     final @Nonnull Integer light_id)
-    throws ConstraintError
+    throws ConstraintError,
+      SBExceptionInputError
   {
     if (this.shadow.isSelected()) {
       switch (this.type_select.getSelectedItem()) {

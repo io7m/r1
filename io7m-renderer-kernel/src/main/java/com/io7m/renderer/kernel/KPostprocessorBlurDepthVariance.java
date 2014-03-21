@@ -26,6 +26,7 @@ import com.io7m.jcache.BLUCacheReceipt;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.FramebufferBlitFilter;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLRuntimeException;
@@ -100,6 +101,7 @@ public final class KPostprocessorBlurDepthVariance extends
   private final @Nonnull KUnitQuad                                                                             quad;
   private final @Nonnull LUCache<String, KProgram, RException>                                                 shader_cache;
   private final @Nonnull VectorM2I                                                                             viewport_size;
+  private final @Nonnull KRegionCopier                                                                         copier;
 
   private KPostprocessorBlurDepthVariance(
     final @Nonnull JCGLImplementation gi,
@@ -119,6 +121,7 @@ public final class KPostprocessorBlurDepthVariance extends
           "DepthVariance framebuffer cache");
       this.shader_cache =
         Constraints.constrainNotNull(shader_cache, "Shader cache");
+      this.copier = KRegionCopier.newCopier(gi, shader_cache, log);
       this.log =
         new Log(
           Constraints.constrainNotNull(log, "Log"),
@@ -191,6 +194,23 @@ public final class KPostprocessorBlurDepthVariance extends
       RException
   {
     try {
+
+      /**
+       * If zero passes were specified, and the input isn't equal to the
+       * output, then it's necessary to copy the data over without blurring.
+       */
+
+      final int passes = parameters.getPasses();
+      if ((passes == 0) && (input != output)) {
+        this.copier.copyFramebufferRegionDepthVariance(
+          input,
+          input.kFramebufferGetArea(),
+          output,
+          output.kFramebufferGetArea(),
+          FramebufferBlitFilter.FRAMEBUFFER_BLIT_FILTER_NEAREST);
+        return;
+      }
+
       final KFramebufferDepthVarianceDescription desc =
         input.kFramebufferGetDepthVarianceDescription();
       final KFramebufferDepthVarianceDescription new_desc =
@@ -202,7 +222,6 @@ public final class KPostprocessorBlurDepthVariance extends
         this.depth_variance_cache.bluCacheGet(new_desc);
 
       try {
-        final int passes = parameters.getPasses();
         if (passes == 1) {
           this.onePass(parameters, input, receipt_a.getValue(), output);
           return;
