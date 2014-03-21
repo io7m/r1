@@ -710,14 +710,15 @@ final class KLabelDecider implements
       .add(this.depth_cache.cacheSize())
       .add(this.emissive_cache.cacheSize())
       .add(this.environment_cache.cacheSize())
-      .add(this.refractive_cache.cacheSize())
-      .add(this.forward_translucent_regular_unlit_cache.cacheSize())
-      .add(this.forward_translucent_refractive_cache.cacheSize())
       .add(this.forward_opaque_unlit_cache.cacheSize())
       .add(this.forward_regular_cache.cacheSize())
+      .add(this.forward_translucent_refractive_cache.cacheSize())
+      .add(this.forward_translucent_regular_unlit_cache.cacheSize())
+      .add(this.light_cache.cacheSize())
       .add(this.normal_cache.cacheSize())
-      .add(this.specular_cache.cacheSize())
-      .add(this.light_cache.cacheSize());
+      .add(this.refractive_cache.cacheSize())
+      .add(this.specular_cache.cacheSize());
+
   }
 
   @Override public @Nonnull KMaterialSpecularLabel getSpecularLabelRegular(
