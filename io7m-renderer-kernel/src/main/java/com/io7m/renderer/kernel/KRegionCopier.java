@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnimplementedCodeException;
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
@@ -42,27 +43,37 @@ import com.io7m.renderer.types.RException;
 
 public final class KRegionCopier
 {
-  private static
-    <G extends JCGLFramebuffersGL3>
-    void
-    copyFramebufferRegionRGBAGL3(
-      final @Nonnull G gc,
-      final @Nonnull KFramebufferRGBAUsable source,
-      final @Nonnull AreaInclusive source_area,
-      final @Nonnull KFramebufferRGBAUsable target,
-      final @Nonnull AreaInclusive target_area,
-      final @Nonnull FramebufferBlitFilter blit_filter)
-      throws JCGLRuntimeException,
-        ConstraintError
+  private static final EnumSet<FramebufferBlitBuffer> COLOUR;
+  private static final EnumSet<FramebufferBlitBuffer> DEPTH_COLOUR;
+
+  static {
+    COLOUR = EnumSet.of(FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_COLOR);
+    DEPTH_COLOUR =
+      EnumSet.of(
+        FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_COLOR,
+        FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_DEPTH);
+  }
+
+  private static void copyFramebufferRegionDepthVarianceGL3(
+    final @Nonnull JCGLFramebuffersGL3 gc,
+    final @Nonnull KFramebufferDepthVarianceUsable source,
+    final @Nonnull AreaInclusive source_area,
+    final @Nonnull KFramebufferDepthVarianceUsable target,
+    final @Nonnull AreaInclusive target_area,
+    final @Nonnull FramebufferBlitFilter blit_filter)
+    throws JCGLRuntimeException,
+      ConstraintError
   {
-    gc.framebufferReadBind(source.kFramebufferGetColorFramebuffer());
+    gc.framebufferReadBind(source
+      .kFramebufferGetDepthVariancePassFramebuffer());
     try {
-      gc.framebufferDrawBind(target.kFramebufferGetColorFramebuffer());
+      gc.framebufferDrawBind(target
+        .kFramebufferGetDepthVariancePassFramebuffer());
       try {
         gc.framebufferBlit(
           source_area,
           target_area,
-          EnumSet.of(FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_COLOR),
+          KRegionCopier.DEPTH_COLOUR,
           blit_filter);
       } finally {
         gc.framebufferDrawUnbind();
@@ -72,9 +83,47 @@ public final class KRegionCopier
     }
   }
 
+  private static void copyFramebufferRegionRGBAGL3(
+    final @Nonnull JCGLFramebuffersGL3 gc,
+    final @Nonnull KFramebufferRGBAUsable source,
+    final @Nonnull AreaInclusive source_area,
+    final @Nonnull KFramebufferRGBAUsable target,
+    final @Nonnull AreaInclusive target_area,
+    final @Nonnull FramebufferBlitFilter blit_filter)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    gc.framebufferReadBind(source.kFramebufferGetColorFramebuffer());
+    try {
+      gc.framebufferDrawBind(target.kFramebufferGetColorFramebuffer());
+      try {
+        gc.framebufferBlit(
+          source_area,
+          target_area,
+          KRegionCopier.COLOUR,
+          blit_filter);
+      } finally {
+        gc.framebufferDrawUnbind();
+      }
+    } finally {
+      gc.framebufferReadUnbind();
+    }
+  }
+
+  public static @Nonnull KRegionCopier newCopier(
+    final @Nonnull JCGLImplementation gi,
+    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
+    final @Nonnull Log log)
+    throws RException,
+      ConstraintError
+  {
+    return new KRegionCopier(gi, shader_cache, log);
+  }
+
   private final @Nonnull JCGLImplementation                    g;
   private final @Nonnull Log                                   log;
   private final @Nonnull KUnitQuad                             quad;
+
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
 
   private KRegionCopier(
@@ -92,6 +141,91 @@ public final class KRegionCopier
       this.quad = KUnitQuad.newQuad(gi.getGLCommon(), log);
     } catch (final JCGLException x) {
       throw RException.fromJCGLException(x);
+    }
+  }
+
+  public void close()
+    throws RException
+  {
+    try {
+      this.quad.delete(this.g.getGLCommon());
+    } catch (final JCGLRuntimeException e) {
+      throw RException.fromJCGLException(e);
+    } catch (final ConstraintError e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
+  @SuppressWarnings("synthetic-access") public
+    void
+    copyFramebufferRegionDepthVariance(
+      final @Nonnull KFramebufferDepthVarianceUsable source,
+      final @Nonnull AreaInclusive source_area,
+      final @Nonnull KFramebufferDepthVarianceUsable target,
+      final @Nonnull AreaInclusive target_area,
+      final @Nonnull FramebufferBlitFilter blit_filter)
+      throws RException,
+        ConstraintError
+  {
+    try {
+      this.g
+        .implementationAccept(new JCGLImplementationVisitor<Unit, RException>() {
+          @Override public Unit implementationIsGL2(
+            final JCGLInterfaceGL2 gl)
+            throws JCGLException,
+              ConstraintError
+          {
+            KRegionCopier.copyFramebufferRegionDepthVarianceGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area,
+              blit_filter);
+            return Unit.unit();
+          }
+
+          @Override public Unit implementationIsGL3(
+            final JCGLInterfaceGL3 gl)
+            throws JCGLException,
+              ConstraintError
+          {
+            KRegionCopier.copyFramebufferRegionDepthVarianceGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area,
+              blit_filter);
+            return Unit.unit();
+          }
+
+          @Override public Unit implementationIsGLES2(
+            final JCGLInterfaceGLES2 gl)
+            throws JCGLException,
+              ConstraintError,
+              RException
+          {
+            throw new UnreachableCodeException();
+          }
+
+          @Override public Unit implementationIsGLES3(
+            final JCGLInterfaceGLES3 gl)
+            throws JCGLException,
+              ConstraintError
+          {
+            KRegionCopier.copyFramebufferRegionDepthVarianceGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area,
+              blit_filter);
+            return Unit.unit();
+          }
+        });
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
     }
   }
 

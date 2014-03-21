@@ -241,7 +241,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
                           (KShadowMapVariance) cache.cacheGetPeriodic(s
                             .getDescription());
                         KShadowMapRendererActual.this
-                          .renderShadowMapVarianceBatch(batch, smv, mwp);
+                          .renderShadowMapVarianceBatch(batch, s, smv, mwp);
                         return Unit.unit();
                       }
                     });
@@ -397,6 +397,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
     void
     renderShadowMapVarianceBatch(
       final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> batch,
+      final @Nonnull KShadowMappedVariance shadow,
       final @Nonnull KShadowMapVariance smv,
       final @Nonnull MatricesProjectiveLight mwp)
       throws ConstraintError,
@@ -432,11 +433,13 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
       none);
 
     // XXX: Actual parameters...
-    final KBlurParameters params = KBlurParameters.newBuilder().build();
-    this.blur.postprocessorEvaluateDepthVariance(
-      params,
-      smv.getFramebuffer(),
-      smv.getFramebuffer());
+    final KBlurParameters params = shadow.getBlur();
+    if (params.getPasses() > 0) {
+      this.blur.postprocessorEvaluateDepthVariance(
+        params,
+        smv.getFramebuffer(),
+        smv.getFramebuffer());
+    }
   }
 
   @Override public <A, E extends Throwable> A shadowMapRendererEvaluate(
