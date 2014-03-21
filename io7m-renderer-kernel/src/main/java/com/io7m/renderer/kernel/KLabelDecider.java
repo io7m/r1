@@ -22,7 +22,6 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.JCacheLoader;
@@ -91,8 +90,8 @@ final class KLabelDecider implements
   private final @Nonnull LRUCacheTrivial<KInstanceTranslucentRegular, KMaterialForwardTranslucentRegularUnlitLabel, ConstraintError>  forward_translucent_regular_unlit_cache;
   private final @Nonnull LRUCacheTrivial<KLight, KLightLabel, ConstraintError>                                                        light_cache;
   private final @Nonnull LRUCacheTrivial<KInstance, KMaterialNormalLabel, ConstraintError>                                            normal_cache;
-  private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialSpecularLabel, ConstraintError>                                   specular_cache;
   private final @Nonnull LRUCacheTrivial<KInstanceTranslucentRefractive, KMaterialRefractiveLabel, ConstraintError>                   refractive_cache;
+  private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialSpecularLabel, ConstraintError>                                   specular_cache;
 
   private KLabelDecider(
     final @Nonnull KGraphicsCapabilities capabilities,
@@ -692,6 +691,17 @@ final class KLabelDecider implements
     }
   }
 
+  @Override public KMaterialRefractiveLabel getRefractiveLabel(
+    final @Nonnull KInstanceTranslucentRefractive instance)
+    throws ConstraintError
+  {
+    try {
+      return this.refractive_cache.cacheGetLU(instance);
+    } catch (final JCacheException x) {
+      throw new UnreachableCodeException(x);
+    }
+  }
+
   public @Nonnull BigInteger getSize()
   {
     return this.albedo_cache
@@ -719,13 +729,5 @@ final class KLabelDecider implements
     } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     }
-  }
-
-  @Override public KMaterialRefractiveLabel getRefractiveLabel(
-    final @Nonnull KInstanceTranslucentRefractive instance)
-    throws ConstraintError
-  {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
   }
 }

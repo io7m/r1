@@ -323,6 +323,7 @@ public final class KRegionCopier
   {
     gl.framebufferDrawBind(source.kFramebufferGetColorFramebuffer());
     try {
+      // XXX: Not yet implemented on GLES2
       throw new UnimplementedCodeException();
     } finally {
       gl.framebufferDrawUnbind();
