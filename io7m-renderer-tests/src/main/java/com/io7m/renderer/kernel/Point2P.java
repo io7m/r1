@@ -27,11 +27,11 @@ class Point2P
   final float y;
 
   public Point2P(
-    final float x,
-    final float y)
+    final float ix,
+    final float iy)
   {
-    this.x = x;
-    this.y = y;
+    this.x = ix;
+    this.y = iy;
   }
 
   @Override public boolean equals(

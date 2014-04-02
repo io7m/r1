@@ -29,13 +29,13 @@ public final class TestContext
   private final @Nonnull Log                log;
 
   public TestContext(
-    final @Nonnull FSCapabilityAll fs,
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull Log log)
+    final @Nonnull FSCapabilityAll in_fs,
+    final @Nonnull JCGLImplementation in_gi,
+    final @Nonnull Log in_log)
   {
-    this.fs = fs;
-    this.gi = gi;
-    this.log = log;
+    this.fs = in_fs;
+    this.gi = in_gi;
+    this.log = in_log;
   }
 
   public FSCapabilityAll getFilesystem()
