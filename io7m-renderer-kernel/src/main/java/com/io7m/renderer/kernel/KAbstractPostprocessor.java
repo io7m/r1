@@ -119,9 +119,9 @@ abstract class KAbstractPostprocessor implements KPostprocessor
   private final @Nonnull String name;
 
   protected KAbstractPostprocessor(
-    final @Nonnull String name)
+    final @Nonnull String in_name)
   {
-    this.name = name;
+    this.name = in_name;
   }
 
   @Override public final @Nonnull String postprocessorGetName()

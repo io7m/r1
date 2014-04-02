@@ -94,11 +94,11 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
   private @CheckForNull Debugging           debug;
 
   private KRendererDebugShadowMap(
-    final @Nonnull JCGLImplementation gl,
-    final @Nonnull KLabelDecider decider,
+    final @Nonnull JCGLImplementation in_gl,
+    final @Nonnull KLabelDecider in_decider,
     final @Nonnull LUCache<String, KProgram, RException> shader_cache,
     final @Nonnull KGraphicsCapabilities caps,
-    final @Nonnull Log log,
+    final @Nonnull Log in_log,
     final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache,
     final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> depth_variance_cache)
     throws ConstraintError,
@@ -106,26 +106,26 @@ final class KRendererDebugShadowMap extends KAbstractRendererForward
   {
     super(KRendererDebugShadowMap.NAME);
 
-    this.log = new Log(log, KRendererDebugShadowMap.NAME);
-    this.gl = gl;
+    this.log = new Log(in_log, KRendererDebugShadowMap.NAME);
+    this.gl = in_gl;
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrices = KMutableMatrices.newMatrices();
     this.transform_context = KTransformContext.newContext();
 
     this.depth_renderer =
-      KDepthRenderer.newDepthRenderer(gl, shader_cache, caps, log);
+      KDepthRenderer.newDepthRenderer(in_gl, shader_cache, caps, in_log);
 
     this.shadow_renderer =
       KShadowMapRendererActual.newRenderer(
-        gl,
+        in_gl,
         shader_cache,
         shadow_cache,
         depth_variance_cache,
         caps,
-        log);
+        in_log);
 
-    this.decider = decider;
+    this.decider = in_decider;
   }
 
   @Override public void rendererClose()

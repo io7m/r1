@@ -95,28 +95,28 @@ public final class KPostprocessorBlurRGBA extends
   private final @Nonnull KRegionCopier                                                       copier;
 
   private KPostprocessorBlurRGBA(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull Log log)
+    final @Nonnull JCGLImplementation in_gi,
+    final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> in_rgba_cache,
+    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
+    final @Nonnull Log in_log)
     throws ConstraintError,
       RException
   {
     super(KPostprocessorBlurRGBA.NAME);
 
     try {
-      this.gi = Constraints.constrainNotNull(gi, "GL implementation");
+      this.gi = Constraints.constrainNotNull(in_gi, "GL implementation");
       this.rgba_cache =
-        Constraints.constrainNotNull(rgba_cache, "RGBA framebuffer cache");
+        Constraints.constrainNotNull(in_rgba_cache, "RGBA framebuffer cache");
       this.shader_cache =
-        Constraints.constrainNotNull(shader_cache, "Shader cache");
-      this.copier = KRegionCopier.newCopier(gi, shader_cache, log);
+        Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+      this.copier = KRegionCopier.newCopier(in_gi, in_shader_cache, in_log);
       this.log =
         new Log(
-          Constraints.constrainNotNull(log, "Log"),
+          Constraints.constrainNotNull(in_log, "Log"),
           KPostprocessorBlurRGBA.NAME);
 
-      this.quad = KUnitQuad.newQuad(gi.getGLCommon(), this.log);
+      this.quad = KUnitQuad.newQuad(in_gi.getGLCommon(), this.log);
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
     }

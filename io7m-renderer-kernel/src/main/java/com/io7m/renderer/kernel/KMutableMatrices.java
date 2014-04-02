@@ -71,9 +71,9 @@ final class KMutableMatrices
     private final @Nonnull ObserverSingleton                 parent;
 
     public InstanceSingleton(
-      final @Nonnull ObserverSingleton parent)
+      final @Nonnull ObserverSingleton in_parent)
     {
-      this.parent = parent;
+      this.parent = in_parent;
 
       this.matrix_model = new RMatrixM4x4F<RTransformModel>();
       this.matrix_modelview = new RMatrixM4x4F<RTransformModelView>();
@@ -258,9 +258,9 @@ final class KMutableMatrices
     private final @Nonnull ProjectiveLightSingleton                    parent;
 
     public InstanceWithProjectiveSingleton(
-      final @Nonnull ProjectiveLightSingleton parent)
+      final @Nonnull ProjectiveLightSingleton in_parent)
     {
-      this.parent = parent;
+      this.parent = in_parent;
 
       this.matrix_model = new RMatrixM4x4F<RTransformModel>();
       this.matrix_modelview = new RMatrixM4x4F<RTransformModelView>();
@@ -721,9 +721,9 @@ final class KMutableMatrices
     final @Nonnull ObserverSingleton                            parent;
 
     public ProjectiveLightSingleton(
-      final @Nonnull ObserverSingleton observer)
+      final @Nonnull ObserverSingleton in_observer)
     {
-      this.parent = observer;
+      this.parent = in_observer;
 
       this.matrix_projective_projection =
         new RMatrixM4x4F<RTransformProjectiveProjection>();

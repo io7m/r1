@@ -49,11 +49,12 @@ final class KSceneBatchedDepth
     private boolean                                                                   valid;
 
     public KSceneBatchedDepthBuilder(
-      final @Nonnull KMaterialDepthLabelCache cache)
+      final @Nonnull KMaterialDepthLabelCache in_cache)
       throws ConstraintError
     {
       this.valid = true;
-      this.cache = Constraints.constrainNotNull(cache, "Depth label cache");
+      this.cache =
+        Constraints.constrainNotNull(in_cache, "Depth label cache");
       this.in_progress =
         new HashMap<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>();
     }

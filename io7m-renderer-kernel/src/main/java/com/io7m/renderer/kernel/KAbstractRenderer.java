@@ -96,9 +96,9 @@ abstract class KAbstractRenderer implements KRenderer
   private final @Nonnull String name;
 
   protected KAbstractRenderer(
-    final @Nonnull String name)
+    final @Nonnull String in_name)
   {
-    this.name = name;
+    this.name = in_name;
   }
 
   @Override public final @Nonnull String rendererGetName()

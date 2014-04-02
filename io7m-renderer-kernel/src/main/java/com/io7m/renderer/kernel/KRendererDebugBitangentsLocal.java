@@ -76,19 +76,19 @@ final class KRendererDebugBitangentsLocal extends KAbstractRendererDebug
   private final @Nonnull KTransformContext  transform_context;
 
   private KRendererDebugBitangentsLocal(
-    final @Nonnull JCGLImplementation gl,
+    final @Nonnull JCGLImplementation in_gl,
     final @Nonnull FSCapabilityRead fs,
-    final @Nonnull Log log)
+    final @Nonnull Log in_log)
     throws RException,
       ConstraintError
   {
     super(KRendererDebugBitangentsLocal.NAME);
 
     try {
-      this.log = new Log(log, KRendererDebugBitangentsLocal.NAME);
-      this.gl = gl;
+      this.log = new Log(in_log, KRendererDebugBitangentsLocal.NAME);
+      this.gl = in_gl;
 
-      final JCGLSLVersion version = gl.getGLCommon().metaGetSLVersion();
+      final JCGLSLVersion version = in_gl.getGLCommon().metaGetSLVersion();
 
       this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
       this.matrices = KMutableMatrices.newMatrices();
@@ -96,12 +96,12 @@ final class KRendererDebugBitangentsLocal extends KAbstractRendererDebug
 
       this.program =
         KProgram.newProgramFromFilesystem(
-          gl.getGLCommon(),
+          in_gl.getGLCommon(),
           version.getNumber(),
           version.getAPI(),
           fs,
           "debug_bitangents_vertex_local",
-          log);
+          in_log);
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
     }

@@ -1148,13 +1148,13 @@ import com.io7m.renderer.types.RTransformView;
   private final @Nonnull VectorM2I                             viewport_size;
 
   private KRendererForwardActual(
-    final @Nonnull JCGLImplementation g,
-    final @Nonnull KShadowMapRenderer shadow_renderer,
-    final @Nonnull KRefractionRenderer refraction_renderer,
-    final @Nonnull KLabelDecider decider,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
+    final @Nonnull JCGLImplementation in_g,
+    final @Nonnull KShadowMapRenderer in_shadow_renderer,
+    final @Nonnull KRefractionRenderer in_refraction_renderer,
+    final @Nonnull KLabelDecider in_decider,
+    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
     final @Nonnull KGraphicsCapabilities caps,
-    final @Nonnull Log log)
+    final @Nonnull Log in_log)
     throws ConstraintError,
       RException
   {
@@ -1163,24 +1163,24 @@ import com.io7m.renderer.types.RTransformView;
     try {
       this.log =
         new Log(
-          Constraints.constrainNotNull(log, "Log"),
+          Constraints.constrainNotNull(in_log, "Log"),
           KRendererForwardActual.NAME);
-      this.g = Constraints.constrainNotNull(g, "GL implementation");
+      this.g = Constraints.constrainNotNull(in_g, "GL implementation");
       this.shader_cache =
-        Constraints.constrainNotNull(shader_cache, "Shader cache");
+        Constraints.constrainNotNull(in_shader_cache, "Shader cache");
       this.shadow_renderer =
-        Constraints.constrainNotNull(shadow_renderer, "Shadow renderer");
+        Constraints.constrainNotNull(in_shadow_renderer, "Shadow renderer");
       this.refraction_renderer =
         Constraints.constrainNotNull(
-          refraction_renderer,
+          in_refraction_renderer,
           "Refraction renderer");
-      this.decider = Constraints.constrainNotNull(decider, "Decider");
+      this.decider = Constraints.constrainNotNull(in_decider, "Decider");
       this.matrices = KMutableMatrices.newMatrices();
       this.depth =
-        KDepthRenderer.newDepthRenderer(g, shader_cache, caps, log);
+        KDepthRenderer.newDepthRenderer(in_g, in_shader_cache, caps, in_log);
       this.viewport_size = new VectorM2I();
       this.background = new VectorM4F();
-      this.texture_units = KTextureUnitAllocator.newAllocator(g);
+      this.texture_units = KTextureUnitAllocator.newAllocator(in_g);
 
       this.log.debug("initialized");
     } catch (final JCGLException e) {

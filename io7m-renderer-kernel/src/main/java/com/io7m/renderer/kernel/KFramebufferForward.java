@@ -150,13 +150,13 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       final @Nonnull Texture2DStatic d,
       final @Nonnull FramebufferReference fb,
       final @Nonnull JCGLVersion version,
-      final @Nonnull KFramebufferForwardDescription description)
+      final @Nonnull KFramebufferForwardDescription in_description)
     {
       super(c.getArea(), c.resourceGetSizeBytes() + d.resourceGetSizeBytes());
       this.color = c;
       this.depth = d;
       this.framebuffer = fb;
-      this.description = description;
+      this.description = in_description;
     }
 
     @Override public void kFramebufferDelete(
@@ -381,13 +381,13 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       final @Nonnull Texture2DStatic d,
       final @Nonnull FramebufferReference fb,
       final @Nonnull JCGLVersion version,
-      final @Nonnull KFramebufferForwardDescription description)
+      final @Nonnull KFramebufferForwardDescription in_description)
     {
       super(c.getArea(), c.resourceGetSizeBytes() + d.resourceGetSizeBytes());
       this.color = c;
       this.depth = d;
       this.framebuffer = fb;
-      this.description = description;
+      this.description = in_description;
     }
 
     @Override public void kFramebufferDelete(
@@ -525,14 +525,14 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       final @Nonnull Texture2DStatic c,
       final @Nonnull Texture2DStatic d,
       final @Nonnull FramebufferReference fb,
-      final @Nonnull KFramebufferForwardDescription description,
+      final @Nonnull KFramebufferForwardDescription in_description,
       final @Nonnull JCGLVersion version)
     {
       super(c.getArea(), c.resourceGetSizeBytes() + d.resourceGetSizeBytes());
       this.color = c;
       this.depth = d;
       this.framebuffer = fb;
-      this.description = description;
+      this.description = in_description;
     }
 
     @Override public void kFramebufferDelete(
@@ -687,9 +687,9 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       final @Nonnull Texture2DStatic c,
       final @Nonnull Texture2DStatic dt,
       final @Nonnull Renderbuffer<RenderableDepth> dr,
-      final @Nonnull FramebufferReference fb_depth,
-      final @Nonnull FramebufferReference fb_color,
-      final @Nonnull KFramebufferForwardDescription description,
+      final @Nonnull FramebufferReference in_fb_depth,
+      final @Nonnull FramebufferReference in_fb_color,
+      final @Nonnull KFramebufferForwardDescription in_description,
       final @Nonnull JCGLVersion version)
     {
       super(c.getArea(), c.resourceGetSizeBytes()
@@ -698,9 +698,9 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       this.color = c;
       this.depth = dt;
       this.depth_rb = dr;
-      this.fb_depth = fb_depth;
-      this.fb_color = fb_color;
-      this.description = description;
+      this.fb_depth = in_fb_depth;
+      this.fb_color = in_fb_color;
+      this.description = in_description;
     }
 
     @Override public void kFramebufferDelete(
@@ -869,12 +869,12 @@ abstract class KFramebufferForward implements KFramebufferForwardType
   private final long                   size;
 
   protected KFramebufferForward(
-    final @Nonnull AreaInclusive area,
-    final long size)
+    final @Nonnull AreaInclusive in_area,
+    final long in_size)
   {
     this.deleted = false;
-    this.area = area;
-    this.size = size;
+    this.area = in_area;
+    this.size = in_size;
   }
 
   @Override public final @Nonnull AreaInclusive kFramebufferGetArea()

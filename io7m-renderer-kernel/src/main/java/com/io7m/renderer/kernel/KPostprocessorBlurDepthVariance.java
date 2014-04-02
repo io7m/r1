@@ -102,30 +102,30 @@ public final class KPostprocessorBlurDepthVariance extends
   private final @Nonnull KRegionCopier                                                                         copier;
 
   private KPostprocessorBlurDepthVariance(
-    final @Nonnull JCGLImplementation gi,
+    final @Nonnull JCGLImplementation in_gi,
     final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> rgba_cache,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull Log log)
+    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
+    final @Nonnull Log in_log)
     throws ConstraintError,
       RException
   {
     super(KPostprocessorBlurDepthVariance.NAME);
 
     try {
-      this.gi = Constraints.constrainNotNull(gi, "GL implementation");
+      this.gi = Constraints.constrainNotNull(in_gi, "GL implementation");
       this.depth_variance_cache =
         Constraints.constrainNotNull(
           rgba_cache,
           "DepthVariance framebuffer cache");
       this.shader_cache =
-        Constraints.constrainNotNull(shader_cache, "Shader cache");
-      this.copier = KRegionCopier.newCopier(gi, shader_cache, log);
+        Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+      this.copier = KRegionCopier.newCopier(in_gi, in_shader_cache, in_log);
       this.log =
         new Log(
-          Constraints.constrainNotNull(log, "Log"),
+          Constraints.constrainNotNull(in_log, "Log"),
           KPostprocessorBlurDepthVariance.NAME);
 
-      this.quad = KUnitQuad.newQuad(gi.getGLCommon(), this.log);
+      this.quad = KUnitQuad.newQuad(in_gi.getGLCommon(), this.log);
 
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);

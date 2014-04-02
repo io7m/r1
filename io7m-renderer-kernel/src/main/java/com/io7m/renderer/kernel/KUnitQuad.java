@@ -128,11 +128,11 @@ public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
   private boolean                    deleted;
 
   private KUnitQuad(
-    final @Nonnull ArrayBuffer array,
-    final @Nonnull IndexBuffer indices)
+    final @Nonnull ArrayBuffer in_array,
+    final @Nonnull IndexBuffer in_indices)
   {
-    this.array = array;
-    this.indices = indices;
+    this.array = in_array;
+    this.indices = in_indices;
     this.deleted = false;
   }
 

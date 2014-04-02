@@ -111,14 +111,14 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
     private final @Nonnull FramebufferReference         framebuffer;
 
     private KFramebufferDepthGL2(
-      final @Nonnull Texture2DStatic depth,
-      final @Nonnull FramebufferReference framebuffer,
-      final @Nonnull KFramebufferDepthDescription description)
+      final @Nonnull Texture2DStatic in_depth,
+      final @Nonnull FramebufferReference in_framebuffer,
+      final @Nonnull KFramebufferDepthDescription in_description)
     {
-      super(depth.getArea(), depth.resourceGetSizeBytes());
-      this.depth = depth;
-      this.framebuffer = framebuffer;
-      this.description = description;
+      super(in_depth.getArea(), in_depth.resourceGetSizeBytes());
+      this.depth = in_depth;
+      this.framebuffer = in_framebuffer;
+      this.description = in_description;
     }
 
     @Override public
@@ -254,13 +254,13 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
     private final @Nonnull FramebufferReference         framebuffer;
 
     private KFramebufferDepthGL3ES3(
-      final @Nonnull Texture2DStatic depth,
-      final @Nonnull FramebufferReference framebuffer,
+      final @Nonnull Texture2DStatic in_depth,
+      final @Nonnull FramebufferReference in_framebuffer,
       final @Nonnull KFramebufferDepthDescription d)
     {
-      super(depth.getArea(), depth.resourceGetSizeBytes());
-      this.depth = depth;
-      this.framebuffer = framebuffer;
+      super(in_depth.getArea(), in_depth.resourceGetSizeBytes());
+      this.depth = in_depth;
+      this.framebuffer = in_framebuffer;
       this.description = d;
     }
 
@@ -356,14 +356,14 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
     private final @Nonnull FramebufferReference         framebuffer;
 
     private KFramebufferDepthGLES2WithDepthTexture(
-      final @Nonnull Texture2DStatic depth,
-      final @Nonnull FramebufferReference framebuffer,
-      final @Nonnull KFramebufferDepthDescription description)
+      final @Nonnull Texture2DStatic in_depth,
+      final @Nonnull FramebufferReference in_framebuffer,
+      final @Nonnull KFramebufferDepthDescription in_description)
     {
-      super(depth.getArea(), depth.resourceGetSizeBytes());
-      this.depth = depth;
-      this.framebuffer = framebuffer;
-      this.description = description;
+      super(in_depth.getArea(), in_depth.resourceGetSizeBytes());
+      this.depth = in_depth;
+      this.framebuffer = in_framebuffer;
+      this.description = in_description;
     }
 
     @Override public
@@ -466,16 +466,16 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
 
     private KFramebufferDepthGLES2WithoutDepthTexture(
       final @Nonnull Renderbuffer<RenderableDepth> rb,
-      final @Nonnull Texture2DStatic depth,
-      final @Nonnull KFramebufferDepthDescription description,
-      final @Nonnull FramebufferReference framebuffer)
+      final @Nonnull Texture2DStatic in_depth,
+      final @Nonnull KFramebufferDepthDescription in_description,
+      final @Nonnull FramebufferReference in_framebuffer)
     {
-      super(depth.getArea(), rb.resourceGetSizeBytes()
-        + depth.resourceGetSizeBytes());
-      this.depth = depth;
+      super(in_depth.getArea(), rb.resourceGetSizeBytes()
+        + in_depth.resourceGetSizeBytes());
+      this.depth = in_depth;
       this.renderbuffer = rb;
-      this.framebuffer = framebuffer;
-      this.description = description;
+      this.framebuffer = in_framebuffer;
+      this.description = in_description;
     }
 
     @Override public
@@ -580,11 +580,11 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
   private final @Nonnull AreaInclusive area;
 
   protected KFramebufferDepth(
-    final @Nonnull AreaInclusive area,
-    final long size)
+    final @Nonnull AreaInclusive in_area,
+    final long in_size)
   {
-    this.area = area;
-    this.size = size;
+    this.area = in_area;
+    this.size = in_size;
     this.deleted = false;
   }
 
@@ -599,9 +599,9 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
   }
 
   protected void setDeleted(
-    final boolean deleted)
+    final boolean in_deleted)
   {
-    this.deleted = deleted;
+    this.deleted = in_deleted;
   }
 
   @Override public final boolean resourceIsDeleted()

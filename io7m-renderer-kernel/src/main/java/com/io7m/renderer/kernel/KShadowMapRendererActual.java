@@ -104,21 +104,21 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
 
   private KShadowMapRendererActual(
     final @Nonnull JCGLImplementation gl,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> shadow_cache,
+    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
+    final @Nonnull PCache<KShadowMapDescription, KShadowMap, RException> in_shadow_cache,
     final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> depth_variance_cache,
     final @Nonnull KGraphicsCapabilities caps,
-    final @Nonnull Log log)
+    final @Nonnull Log in_log)
     throws ConstraintError,
       RException
   {
     this.log =
-      new Log(Constraints.constrainNotNull(log, "Log"), "shadow-renderer");
+      new Log(Constraints.constrainNotNull(in_log, "Log"), "shadow-renderer");
     this.g = Constraints.constrainNotNull(gl, "OpenGL implementation");
     this.shader_cache =
-      Constraints.constrainNotNull(shader_cache, "Shader cache");
+      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
     this.shadow_cache =
-      Constraints.constrainNotNull(shadow_cache, "Shadow cache");
+      Constraints.constrainNotNull(in_shadow_cache, "Shadow cache");
 
     this.viewport_size = new VectorM2I();
     this.label_cache = new StringBuilder();
@@ -127,15 +127,18 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
     this.m4_view = new RMatrixM4x4F<RTransformView>();
 
     this.depth_renderer =
-      KDepthRenderer.newDepthRenderer(gl, shader_cache, caps, log);
+      KDepthRenderer.newDepthRenderer(gl, in_shader_cache, caps, in_log);
     this.depth_variance_renderer =
-      KDepthVarianceRenderer.newDepthVarianceRenderer(gl, shader_cache, log);
+      KDepthVarianceRenderer.newDepthVarianceRenderer(
+        gl,
+        in_shader_cache,
+        in_log);
     this.blur =
       KPostprocessorBlurDepthVariance.postprocessorNew(
         this.g,
         depth_variance_cache,
-        shader_cache,
-        log);
+        in_shader_cache,
+        in_log);
   }
 
   protected

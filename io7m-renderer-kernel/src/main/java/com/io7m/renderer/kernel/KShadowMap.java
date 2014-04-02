@@ -33,14 +33,14 @@ abstract class KShadowMap implements KShadowMapType
     private final @Nonnull KFramebufferDepth          framebuffer;
 
     KShadowMapBasic(
-      final @Nonnull KShadowMapBasicDescription description,
-      final @Nonnull KFramebufferDepth framebuffer)
+      final @Nonnull KShadowMapBasicDescription in_description,
+      final @Nonnull KFramebufferDepth in_framebuffer)
       throws ConstraintError
     {
       this.description =
-        Constraints.constrainNotNull(description, "Description");
+        Constraints.constrainNotNull(in_description, "Description");
       this.framebuffer =
-        Constraints.constrainNotNull(framebuffer, "Framebuffer");
+        Constraints.constrainNotNull(in_framebuffer, "Framebuffer");
     }
 
     public @Nonnull KShadowMapBasicDescription getDescription()
@@ -89,14 +89,14 @@ abstract class KShadowMap implements KShadowMapType
     private final @Nonnull KFramebufferDepthVariance     framebuffer;
 
     KShadowMapVariance(
-      final @Nonnull KShadowMapVarianceDescription description,
-      final @Nonnull KFramebufferDepthVariance framebuffer)
+      final @Nonnull KShadowMapVarianceDescription in_description,
+      final @Nonnull KFramebufferDepthVariance in_framebuffer)
       throws ConstraintError
     {
       this.description =
-        Constraints.constrainNotNull(description, "Description");
+        Constraints.constrainNotNull(in_description, "Description");
       this.framebuffer =
-        Constraints.constrainNotNull(framebuffer, "Framebuffer");
+        Constraints.constrainNotNull(in_framebuffer, "Framebuffer");
     }
 
     public @Nonnull KShadowMapVarianceDescription getDescription()

@@ -58,9 +58,9 @@ final class KTextureUnitAllocator implements KTextureUnitContextInitial
     private boolean   has_child;
 
     Context(
-      final int first)
+      final int in_first)
     {
-      this.first = first;
+      this.first = in_first;
       this.count = 0;
       this.has_child = false;
     }
