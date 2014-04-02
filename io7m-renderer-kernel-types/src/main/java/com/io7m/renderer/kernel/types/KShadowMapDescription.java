@@ -18,12 +18,44 @@ package com.io7m.renderer.kernel.types;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.types.RException;
+
 /**
  * The type of shadow maps.
  */
 
-public interface KShadowMapDescription extends KShadowMapDescriptionVisitable
+public interface KShadowMapDescription
 {
+  /**
+   * Be visited by the given generic visitor.
+   * 
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   * @throws ConstraintError
+   *           Iff the visitor raises {@link ConstraintError}
+   * @throws RException
+   *           Iff the visitor raises {@link RException}
+   * 
+   * @param <A>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          A specific visitor subtype
+   */
+
+    <A, E extends Throwable, V extends KShadowMapDescriptionVisitor<A, E>>
+    A
+    kShadowMapDescriptionAccept(
+      final @Nonnull V v)
+      throws E,
+        ConstraintError,
+        RException;
+
   /**
    * @return The identifier of the light associated with the map
    */
