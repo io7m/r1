@@ -34,17 +34,17 @@ public class RVectorI2F<T extends RSpace> extends VectorI2F implements
   /**
    * Construct a new vector.
    * 
-   * @param x
+   * @param ix
    *          The x component
-   * @param y
+   * @param iy
    *          The y component
    */
 
   public RVectorI2F(
-    final float x,
-    final float y)
+    final float ix,
+    final float iy)
   {
-    super(x, y);
+    super(ix, iy);
   }
 
   /**

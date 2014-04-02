@@ -42,17 +42,17 @@ public final class RVectorM2I<T extends RSpace> extends VectorM2I implements
   /**
    * Construct a new vector.
    * 
-   * @param x
+   * @param ix
    *          The x component
-   * @param y
+   * @param iy
    *          The y component
    */
 
   public RVectorM2I(
-    final int x,
-    final int y)
+    final int ix,
+    final int iy)
   {
-    super(x, y);
+    super(ix, iy);
   }
 
   /**

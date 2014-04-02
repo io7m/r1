@@ -42,20 +42,20 @@ public final class RVectorM3F<T extends RSpace> extends VectorM3F implements
   /**
    * Construct a new vector.
    * 
-   * @param x
+   * @param ix
    *          The x component
-   * @param y
+   * @param iy
    *          The y component
-   * @param z
+   * @param iz
    *          The z component
    */
 
   public RVectorM3F(
-    final float x,
-    final float y,
-    final float z)
+    final float ix,
+    final float iy,
+    final float iz)
   {
-    super(x, y, z);
+    super(ix, iy, iz);
   }
 
   /**

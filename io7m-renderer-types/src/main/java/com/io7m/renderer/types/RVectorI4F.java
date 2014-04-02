@@ -34,23 +34,23 @@ public final class RVectorI4F<T extends RSpace> extends VectorI4F implements
   /**
    * Construct a new vector.
    * 
-   * @param x
+   * @param ix
    *          The x component
-   * @param y
+   * @param iy
    *          The y component
-   * @param z
+   * @param iz
    *          The z component
-   * @param w
+   * @param iw
    *          The w component
    */
 
   public RVectorI4F(
-    final float x,
-    final float y,
-    final float z,
-    final float w)
+    final float ix,
+    final float iy,
+    final float iz,
+    final float iw)
   {
-    super(x, y, z, w);
+    super(ix, iy, iz, iw);
   }
 
   /**
