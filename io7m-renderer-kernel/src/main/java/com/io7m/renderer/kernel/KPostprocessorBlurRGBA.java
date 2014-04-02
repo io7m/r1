@@ -36,7 +36,7 @@ import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
-public final class KPostprocessorBlurRGBA extends
+final class KPostprocessorBlurRGBA extends
   KAbstractPostprocessorRGBA<KBlurParameters>
 {
   private static final @Nonnull String NAME;

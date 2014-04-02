@@ -16,6 +16,10 @@
 
 package com.io7m.renderer.kernel;
 
+/**
+ * The type of "image-only" RGBA framebuffers.
+ */
+
 public interface KFramebufferRGBAType extends
   KFramebuffer,
   KFramebufferRGBAUsable

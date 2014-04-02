@@ -47,7 +47,7 @@ import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorRGB
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
-public final class KPostprocessorFog extends
+final class KPostprocessorFog extends
   KAbstractPostprocessorRGBAWithDepth<Unit>
 {
   private static final @Nonnull String NAME;

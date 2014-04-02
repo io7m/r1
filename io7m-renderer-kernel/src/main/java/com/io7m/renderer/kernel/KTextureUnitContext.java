@@ -36,7 +36,7 @@ interface KTextureUnitContext extends KTextureUnitContextInitial
    *           Iff an OpenGL error occurs.
    */
 
-  public @Nonnull TextureUnit withTexture2D(
+  @Nonnull TextureUnit withTexture2D(
     final @Nonnull Texture2DStaticUsable t)
     throws ConstraintError,
       JCGLRuntimeException;
@@ -51,7 +51,7 @@ interface KTextureUnitContext extends KTextureUnitContextInitial
    *           Iff an OpenGL error occurs.
    */
 
-  public @Nonnull TextureUnit withTextureCube(
+  @Nonnull TextureUnit withTextureCube(
     final @Nonnull TextureCubeStaticUsable t)
     throws ConstraintError,
       JCGLRuntimeException;

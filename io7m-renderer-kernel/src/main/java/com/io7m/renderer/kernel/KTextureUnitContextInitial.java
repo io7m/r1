@@ -24,9 +24,9 @@ import com.io7m.renderer.types.RException;
 
 interface KTextureUnitContextInitial
 {
-  public int getTextureCountTotal();
+  int getTextureCountTotal();
 
-  public int getTextureCountForContext();
+  int getTextureCountForContext();
 
   /**
    * Create a new context and execute <code>f</code> with the new context. Any
@@ -41,7 +41,7 @@ interface KTextureUnitContextInitial
    *           Iff <code>f</code> attempts to allocate too many texture units.
    */
 
-  public void withContext(
+  void withContext(
     final @Nonnull KTextureUnitWith f)
     throws JCGLException,
       ConstraintError,

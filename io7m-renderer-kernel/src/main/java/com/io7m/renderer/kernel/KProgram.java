@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 
 import javax.annotation.CheckForNull;
@@ -65,6 +66,10 @@ import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RXMLException;
+
+/**
+ * A kernel program.
+ */
 
 @Immutable public final class KProgram
 {
@@ -175,7 +180,7 @@ import com.io7m.renderer.types.RXMLException;
     }
   }
 
-  public static @Nonnull PathVirtual getShaderPath(
+  private static @Nonnull PathVirtual getShaderPath(
     final @Nonnull JCGLSLVersionNumber version,
     final @Nonnull JCGLApi api,
     final @Nonnull String name)
@@ -186,12 +191,33 @@ import com.io7m.renderer.types.RXMLException;
       KProgram.getShadingLanguageName(version, api));
   }
 
+  /**
+   * Retrieve the path of the directory that contains code and metadata for
+   * the shader <code>name</code>.
+   * 
+   * @param name
+   *          The name of the shader
+   * @return The shader code path
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
   public static @Nonnull PathVirtual getShaderPathDirectory(
     final @Nonnull String name)
     throws ConstraintError
   {
     return KProgram.BASE.appendName(name);
   }
+
+  /**
+   * Retrieve the path to the metadata file for the shader.
+   * 
+   * @param name
+   *          The name of the shader
+   * @return The path to the metadata file for the shader
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
 
   public static @Nonnull PathVirtual getShaderPathMeta(
     final @Nonnull String name)
@@ -431,7 +457,7 @@ import com.io7m.renderer.types.RXMLException;
     }
   }
 
-  public static @Nonnull KProgram newProgramFromDirectory(
+  private static @Nonnull KProgram newProgramFromDirectory(
     final @Nonnull JCGLShadersCommon gl,
     final @Nonnull JCGLSLVersionNumber version,
     final @Nonnull JCGLApi api,
@@ -448,7 +474,7 @@ import com.io7m.renderer.types.RXMLException;
       Constraints.constrainNotNull(gl, "GL");
       Constraints.constrainNotNull(version, "Version");
       Constraints.constrainNotNull(api, "API");
-      Constraints.constrainNotNull(directory, "Filesystem");
+      Constraints.constrainNotNull(directory, "Directory");
       Constraints.constrainNotNull(log, "Log");
 
       final Log logp =
@@ -479,6 +505,36 @@ import com.io7m.renderer.types.RXMLException;
       throw RXMLException.parserConfigurationException(x);
     }
   }
+
+  /**
+   * Load the shader named <code>name</code> from the given directory, for the
+   * given shading language API and version.
+   * 
+   * @param gl
+   *          The OpenGL interface
+   * @param version
+   *          The OpenGL version
+   * @param api
+   *          The OpenGL API
+   * @param directory
+   *          The directory
+   * @param meta
+   *          The shader's metadata
+   * @param log
+   *          A log handle
+   * @return A new program
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   * @throws JCGLUnsupportedException
+   *           If the shading program is not supported on the given API and
+   *           version
+   * @throws IOException
+   *           If an I/O error occurs during loading
+   * @throws JCGLCompileException
+   *           If the program is invalid
+   * @throws JCGLException
+   *           If an OpenGL error occurs
+   */
 
   public static @Nonnull KProgram newProgramFromDirectoryMeta(
     final @Nonnull JCGLInterfaceCommon gl,
@@ -517,6 +573,30 @@ import com.io7m.renderer.types.RXMLException;
       meta,
       logp);
   }
+
+  /**
+   * Load the shader named <code>name</code> from the given filesystem, for
+   * the given shading language API and version.
+   * 
+   * @param gl
+   *          The OpenGL interface
+   * @param version
+   *          The OpenGL version
+   * @param api
+   *          The OpenGL API
+   * @param fs
+   *          The filesystem
+   * @param name
+   *          The name of the shader
+   * @param log
+   *          A log handle
+   * @return A new program
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   * @throws RException
+   *           If an error occurs, such as an OpenGL error, or the program not
+   *           being supported on the current version and API
+   */
 
   public static @Nonnull KProgram newProgramFromFilesystem(
     final @Nonnull JCGLShadersCommon gl,
@@ -567,7 +647,7 @@ import com.io7m.renderer.types.RXMLException;
     }
   }
 
-  public static @Nonnull ProgramReference newProgramFromStreams(
+  private static @Nonnull ProgramReference newProgramFromStreams(
     final @Nonnull JCGLShadersCommon gl,
     final @Nonnull String name,
     final @Nonnull InputStream v_stream,
@@ -644,11 +724,11 @@ import com.io7m.renderer.types.RXMLException;
     lines.add(0, directive.toString());
   }
 
-  private final @Nonnull HashMap<String, JCGLType> declared_attributes;
-  private final @Nonnull HashMap<String, JCGLType> declared_uniforms;
-  private final @Nonnull JCBExecutionAPI           exec;
-  private final @Nonnull PGLSLMetaXML              meta;
-  private final @Nonnull ProgramReference          program;
+  private final @Nonnull Map<String, JCGLType> declared_attributes;
+  private final @Nonnull Map<String, JCGLType> declared_uniforms;
+  private final @Nonnull JCBExecutionAPI       exec;
+  private final @Nonnull PGLSLMetaXML          meta;
+  private final @Nonnull ProgramReference      program;
 
   private KProgram(
     final @Nonnull JCGLShadersCommon gl,
@@ -684,15 +764,27 @@ import com.io7m.renderer.types.RXMLException;
         log);
   }
 
+  /**
+   * @return A reference to the program's executable interface
+   */
+
   public @Nonnull JCBExecutionAPI getExecutable()
   {
     return this.exec;
   }
 
+  /**
+   * @return Information about the compiled program
+   */
+
   public @Nonnull PGLSLMetaXML getMeta()
   {
     return this.meta;
   }
+
+  /**
+   * @return The compiled program
+   */
 
   public @Nonnull ProgramReference getProgram()
   {

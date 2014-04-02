@@ -22,9 +22,26 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.types.RException;
 
+/**
+ * The type of debug renderers.
+ */
+
 public interface KRendererDebug extends KRenderer
 {
-  public void rendererDebugEvaluate(
+  /**
+   * Evaluate a debug renderer, writing data to the given framebuffer.
+   * 
+   * @param framebuffer
+   *          The output framebuffer
+   * @param scene
+   *          The scene
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   * @throws RException
+   *           If any error occurs
+   */
+
+  void rendererDebugEvaluate(
     final @Nonnull KFramebufferRGBAUsable framebuffer,
     final @Nonnull KScene scene)
     throws ConstraintError,

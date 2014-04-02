@@ -22,14 +22,47 @@ import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.types.RException;
 
+/**
+ * The type of shadow map visitors.
+ * 
+ * @param <A>
+ *          The type of returned values
+ * @param <E>
+ *          The type of raised exceptions
+ */
+
 public interface KShadowMapVisitor<A, E extends Throwable>
 {
-  public A shadowMapVisitBasic(
+  /**
+   * Visit a basic shadow map
+   * 
+   * @param sm
+   *          The map
+   * @return A value of type <code>A</code>
+   * @throws E
+   *           If required
+   * @throws RException
+   *           If required
+   */
+
+  A shadowMapVisitBasic(
     final @Nonnull KShadowMapBasic sm)
     throws E,
       RException;
 
-  public A shadowMapVisitVariance(
+  /**
+   * Visit a variance shadow map
+   * 
+   * @param sm
+   *          The map
+   * @return A value of type <code>A</code>
+   * @throws E
+   *           If required
+   * @throws RException
+   *           If required
+   */
+
+  A shadowMapVisitVariance(
     final @Nonnull KShadowMapVariance sm)
     throws E,
       RException;

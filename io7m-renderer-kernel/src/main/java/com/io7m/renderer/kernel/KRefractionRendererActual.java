@@ -89,10 +89,10 @@ import com.io7m.renderer.types.RVectorM3F;
 import com.io7m.renderer.types.RVectorM4F;
 import com.io7m.renderer.types.RVectorReadable3F;
 
-public final class KRefractionRendererActual implements KRefractionRenderer
+final class KRefractionRendererActual implements KRefractionRenderer
 {
   private static final @Nonnull Set<FramebufferBlitBuffer> BLIT_BUFFERS;
-  protected static final @Nonnull VectorReadable4F         WHITE;
+  private static final @Nonnull VectorReadable4F           WHITE;
   private static final int                                 WINDOW_BOUNDS_PADDING;
 
   static {
@@ -181,7 +181,7 @@ public final class KRefractionRendererActual implements KRefractionRenderer
      * homogeneous clipping planes.
      */
 
-    final ArrayList<RTriangle4F<RSpaceClip>> triangles =
+    final List<RTriangle4F<RSpaceClip>> triangles =
       new ArrayList<RTriangle4F<RSpaceClip>>();
     triangles.add(clip_triangles.getBack0());
     triangles.add(clip_triangles.getBack1());
@@ -661,7 +661,7 @@ public final class KRefractionRendererActual implements KRefractionRenderer
 
     final JCGLInterfaceCommon gc = g.getGLCommon();
     kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
-      @Override public void call(
+      @SuppressWarnings("synthetic-access") @Override public void call(
         final @Nonnull JCBProgram program)
         throws ConstraintError,
           JCGLException,
@@ -706,8 +706,7 @@ public final class KRefractionRendererActual implements KRefractionRenderer
           program.programExecute(new JCBProgramProcedure() {
             @Override public void call()
               throws ConstraintError,
-                JCGLException,
-                Throwable
+                JCGLException
             {
               gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
             }
@@ -808,8 +807,7 @@ public final class KRefractionRendererActual implements KRefractionRenderer
               program.programExecute(new JCBProgramProcedure() {
                 @Override public void call()
                   throws ConstraintError,
-                    JCGLException,
-                    Throwable
+                    JCGLException
                 {
                   gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
                 }
@@ -906,8 +904,7 @@ public final class KRefractionRendererActual implements KRefractionRenderer
               program.programExecute(new JCBProgramProcedure() {
                 @Override public void call()
                   throws ConstraintError,
-                    JCGLException,
-                    Throwable
+                    JCGLException
                 {
                   gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
                 }

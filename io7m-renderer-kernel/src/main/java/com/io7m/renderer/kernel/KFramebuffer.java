@@ -22,11 +22,17 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.renderer.types.RException;
 
+/**
+ * The type of framebuffers.
+ */
+
 public interface KFramebuffer extends KFramebufferUsable
 {
   /**
    * Delete all resources associated with this framebuffer.
    * 
+   * @param g
+   *          The OpenGL implementation
    * @throws ConstraintError
    *           Iff <code>g == null</code>, or an internal constraint error
    *           occurs.
@@ -34,7 +40,7 @@ public interface KFramebuffer extends KFramebufferUsable
    *           Iff an internal OpenGL error occurs.
    */
 
-  public void kFramebufferDelete(
+  void kFramebufferDelete(
     final @Nonnull JCGLImplementation g)
     throws ConstraintError,
       RException;

@@ -16,6 +16,10 @@
 
 package com.io7m.renderer.kernel;
 
+/**
+ * The type of depth-renderable framebuffers.
+ */
+
 public interface KFramebufferDepthType extends
   KFramebuffer,
   KFramebufferDepthUsable

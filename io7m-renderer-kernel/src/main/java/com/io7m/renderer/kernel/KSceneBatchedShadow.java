@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,19 +23,39 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
 import com.io7m.renderer.kernel.types.KLight;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 import com.io7m.renderer.kernel.types.KScene;
 
+/**
+ * A scene with the instances batched for shadow map rendering.
+ */
+
 public final class KSceneBatchedShadow
 {
+  /**
+   * Batch all of the given shadow-casting instances by material label.
+   * 
+   * @param shadows
+   *          The shadow-casting instances
+   * @param depth_labels
+   *          The label cache
+   * @return Batched instances
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
   public static @Nonnull KSceneBatchedShadow newBatchedScene(
     final @Nonnull KScene.KSceneShadows shadows,
     final @Nonnull KMaterialDepthLabelCache depth_labels)
     throws ConstraintError
   {
+    Constraints.constrainNotNull(shadows, "Shadows");
+    Constraints.constrainNotNull(depth_labels, "Depth label cache");
+
     final Map<KLight, List<KInstanceTransformedOpaque>> casters =
       shadows.getShadowCasters();
     final Map<KLight, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>> batched_casters =
@@ -45,7 +65,7 @@ public final class KSceneBatchedShadow
       assert light.lightHasShadow();
 
       final List<KInstanceTransformedOpaque> instances = casters.get(light);
-      final HashMap<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> by_label =
+      final Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> by_label =
         new HashMap<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>();
 
       for (final KInstanceTransformedOpaque i : instances) {
@@ -77,6 +97,11 @@ public final class KSceneBatchedShadow
   {
     this.shadow_casters = in_shadow_casters;
   }
+
+  /**
+   * @return All shadow casting instances in the scene, organized by label,
+   *         for each light
+   */
 
   public @Nonnull
     Map<KLight, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>>

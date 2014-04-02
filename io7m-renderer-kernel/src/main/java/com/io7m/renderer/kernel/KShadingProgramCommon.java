@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.Unit;
@@ -1463,5 +1464,10 @@ final class KShadingProgramCommon
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_SPECULAR,
       unit);
+  }
+
+  private KShadingProgramCommon()
+  {
+    throw new UnreachableCodeException();
   }
 }

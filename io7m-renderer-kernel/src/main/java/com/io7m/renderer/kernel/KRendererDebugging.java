@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,9 +27,13 @@ import com.io7m.renderer.kernel.types.KShadow;
 
 public interface KRendererDebugging
 {
-  public interface DebugShadowMapReceiver
+  /**
+   * The type of shadow map receivers.
+   */
+
+  interface DebugShadowMapReceiver
   {
-    public void receive(
+    void receive(
       final @Nonnull KShadow shadow,
       final @Nonnull KShadowMap map);
   }
@@ -37,9 +41,14 @@ public interface KRendererDebugging
   /**
    * Request that the renderer pass any generated shadow maps to
    * <code>receiver</code> on the next evaluation.
+   * 
+   * @param receiver
+   *          The receiver
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
    */
 
-  public void debugForEachShadowMap(
+  void debugForEachShadowMap(
     final @Nonnull DebugShadowMapReceiver receiver)
     throws ConstraintError;
 }

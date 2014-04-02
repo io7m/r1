@@ -98,6 +98,10 @@ import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RTransformProjection;
 import com.io7m.renderer.types.RTransformView;
 
+/**
+ * The primary forward renderer.
+ */
+
 @SuppressWarnings("synthetic-access") public final class KRendererForwardActual extends
   KAbstractRendererForward
 {
@@ -400,6 +404,30 @@ import com.io7m.renderer.types.RTransformView;
     });
   }
 
+  /**
+   * Construct a new forward renderer.
+   * 
+   * @param g
+   *          The OpenGL interface
+   * @param shadow_renderer
+   *          The shadow map renderer
+   * @param refraction_renderer
+   *          The refraction renderer
+   * @param decider
+   *          The label cache
+   * @param shader_cache
+   *          The shader cache
+   * @param caps
+   *          The capabilities of the current OpenGL implementation
+   * @param log
+   *          A log handle
+   * @return A new forward renderer
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   * @throws RException
+   *           If an error occurs
+   */
+
   public static @Nonnull KRendererForwardActual rendererNew(
     final @Nonnull JCGLImplementation g,
     final @Nonnull KShadowMapRenderer shadow_renderer,
@@ -495,8 +523,7 @@ import com.io7m.renderer.types.RTransformView;
           program.programExecute(new JCBProgramProcedure() {
             @Override public void call()
               throws ConstraintError,
-                JCGLException,
-                Throwable
+                JCGLException
             {
               gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
             }
@@ -579,8 +606,7 @@ import com.io7m.renderer.types.RTransformView;
           program.programExecute(new JCBProgramProcedure() {
             @Override public void call()
               throws ConstraintError,
-                JCGLException,
-                Throwable
+                JCGLException
             {
               gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
             }
@@ -1453,7 +1479,6 @@ import com.io7m.renderer.types.RTransformView;
   }
 
   private void renderTranslucentRefractive(
-    final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KFramebufferForwardUsable framebuffer,
     final @Nonnull KInstanceTransformedTranslucentRefractive t,
     final @Nonnull MatricesObserver mwo)
@@ -1633,7 +1658,6 @@ import com.io7m.renderer.types.RTransformView;
               ConstraintError
           {
             KRendererForwardActual.this.renderTranslucentRefractive(
-              gc,
               framebuffer,
               t,
               mwo);

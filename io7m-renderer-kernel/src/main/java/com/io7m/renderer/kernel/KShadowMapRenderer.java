@@ -22,9 +22,38 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.types.RException;
 
+/**
+ * The type of shadow map renderers.
+ */
+
 public interface KShadowMapRenderer
 {
-  public <A, E extends Throwable> A shadowMapRendererEvaluate(
+  /**
+   * Render all shadow maps required to render the given batched scene and
+   * then make those rendered maps available to the given function.
+   * 
+   * @param camera
+   *          The observer
+   * @param batches
+   *          The batched scene
+   * @param with
+   *          The function to evaluate with the renderered maps
+   * @return The value returned by the given function
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code> or the given function
+   *           raises {@link ConstraintError}
+   * @throws E
+   *           If the given function raises <code>E</code>
+   * @throws RException
+   *           If an error occurs, or the given function raises
+   *           {@link RException}
+   * @param <A>
+   *          The type of values returned by the given function
+   * @param <E>
+   *          The type of exceptions raised by the given function
+   */
+
+  <A, E extends Throwable> A shadowMapRendererEvaluate(
     final @Nonnull KCamera camera,
     final @Nonnull KSceneBatchedShadow batches,
     final @Nonnull KShadowMapWith<A, E> with)

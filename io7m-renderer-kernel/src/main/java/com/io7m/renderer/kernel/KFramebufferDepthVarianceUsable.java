@@ -22,34 +22,49 @@ import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 
+/**
+ * The type of usable depth-variance framebuffers.
+ */
+
 public interface KFramebufferDepthVarianceUsable extends KFramebufferUsable
 {
   /**
    * <p>
-   * Retrieve a reference to the framebuffer to which the initial depth-pass
+   * Retrieve a description of this framebuffer.
+   * </p>
+   * 
+   * @return A description of the framebuffer that can be used to allocate
+   *         other framebuffers with the same configuration
+   */
+
+  @Nonnull
+    KFramebufferDepthVarianceDescription
+    kFramebufferGetDepthVarianceDescription();
+
+  /**
+   * <p>
+   * Retrieve a reference to the framebuffer to which the depth-variance data
    * will be rendered.
    * </p>
    * <p>
    * This framebuffer may share a depth attachment with a color buffer on the
    * framebuffer, so rendering to one will typically affect the other.
    * </p>
+   * 
+   * @return A reference to the framebuffer
    */
 
-  public @Nonnull
+  @Nonnull
     FramebufferReferenceUsable
     kFramebufferGetDepthVariancePassFramebuffer();
 
   /**
+   * <p>
    * Retrieve the current depth variance values of the scene as a texture.
+   * </p>
+   * 
+   * @return A reference to the texture that backs the depth-variance buffer
    */
 
-  public @Nonnull Texture2DStaticUsable kFramebufferGetDepthVarianceTexture();
-
-  /**
-   * Retrieve a description of this framebuffer.
-   */
-
-  public @Nonnull
-    KFramebufferDepthVarianceDescription
-    kFramebufferGetDepthVarianceDescription();
+  @Nonnull Texture2DStaticUsable kFramebufferGetDepthVarianceTexture();
 }

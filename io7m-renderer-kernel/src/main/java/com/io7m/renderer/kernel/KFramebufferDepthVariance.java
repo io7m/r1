@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
@@ -172,7 +173,7 @@ abstract class KFramebufferDepthVariance implements
       final List<FramebufferDrawBuffer> buffers =
         gl.framebufferGetDrawBuffers();
 
-      final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
+      final Map<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
         new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
       mappings.put(buffers.get(0), points.get(0));
 

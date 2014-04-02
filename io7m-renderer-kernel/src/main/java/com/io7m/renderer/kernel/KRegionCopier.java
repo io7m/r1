@@ -41,7 +41,7 @@ import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.types.RException;
 
-public final class KRegionCopier
+final class KRegionCopier
 {
   private static final EnumSet<FramebufferBlitBuffer> COLOUR;
   private static final EnumSet<FramebufferBlitBuffer> DEPTH_COLOUR;
@@ -123,7 +123,6 @@ public final class KRegionCopier
   private final @Nonnull JCGLImplementation                    g;
   private final @Nonnull Log                                   log;
   private final @Nonnull KUnitQuad                             quad;
-
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
 
   private KRegionCopier(

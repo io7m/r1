@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,18 +21,22 @@ import javax.annotation.Nonnull;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLResourceUsable;
 
+/**
+ * The type of usable framebuffers.
+ */
+
 public interface KFramebufferUsable extends JCGLResourceUsable
 {
   /**
-   * Retrieve the size of the area to which rendering will occur.
+   * @return The size of the area to which rendering will occur
    */
 
-  public @Nonnull AreaInclusive kFramebufferGetArea();
+  @Nonnull AreaInclusive kFramebufferGetArea();
 
   /**
-   * Retrieve the size in bytes of all the resources that make up the
-   * framebuffer.
+   * @return The size in bytes of all the resources that make up the
+   *         framebuffer
    */
 
-  public long kFramebufferGetSizeBytes();
+  long kFramebufferGetSizeBytes();
 }

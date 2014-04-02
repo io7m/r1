@@ -66,7 +66,7 @@ import com.io7m.renderer.types.RMatrixM4x4F;
 import com.io7m.renderer.types.RTransformProjection;
 import com.io7m.renderer.types.RTransformView;
 
-public final class KShadowMapRendererActual implements KShadowMapRenderer
+final class KShadowMapRendererActual implements KShadowMapRenderer
 {
   public static @Nonnull
     KShadowMapRendererActual
@@ -410,7 +410,7 @@ public final class KShadowMapRendererActual implements KShadowMapRenderer
     final RMatrixI4x4F<RTransformProjection> proj =
       RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveProjection());
 
-    final HashMap<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaque>> vbatch =
+    final Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaque>> vbatch =
       new HashMap<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaque>>();
     for (final KMaterialDepthLabel k : batch.keySet()) {
       final KMaterialDepthVarianceLabel vlabel =

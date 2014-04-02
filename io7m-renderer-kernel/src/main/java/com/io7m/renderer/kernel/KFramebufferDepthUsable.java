@@ -22,8 +22,23 @@ import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 
+/**
+ * The type of usable depth-renderable framebuffers.
+ */
+
 public interface KFramebufferDepthUsable extends KFramebufferUsable
 {
+  /**
+   * <p>
+   * Retrieve a description of this framebuffer.
+   * </p>
+   * 
+   * @return A description of the framebuffer that can be used to allocate
+   *         other framebuffers with the same configuration
+   */
+
+  @Nonnull KFramebufferDepthDescription kFramebufferGetDepthDescription();
+
   /**
    * <p>
    * Retrieve a reference to the framebuffer to which the initial depth-pass
@@ -33,26 +48,22 @@ public interface KFramebufferDepthUsable extends KFramebufferUsable
    * This framebuffer may share a depth attachment with a color buffer on the
    * framebuffer, so rendering to one will typically affect the other.
    * </p>
+   * 
+   * @return A reference to the framebuffer
    */
 
-  public @Nonnull
-    FramebufferReferenceUsable
-    kFramebufferGetDepthPassFramebuffer();
+  @Nonnull FramebufferReferenceUsable kFramebufferGetDepthPassFramebuffer();
 
   /**
+   * <p>
    * Retrieve the current depth values of the scene as a texture. If the
    * current OpenGL version does not support depth textures, the texture will
    * be in a packed colour format that must be decoded to retrieve the
    * original depths.
+   * </p>
+   * 
+   * @return A reference to the texture that backs the depth buffer
    */
 
-  public @Nonnull Texture2DStaticUsable kFramebufferGetDepthTexture();
-
-  /**
-   * Retrieve a description of this framebuffer.
-   */
-
-  public @Nonnull
-    KFramebufferDepthDescription
-    kFramebufferGetDepthDescription();
+  @Nonnull Texture2DStaticUsable kFramebufferGetDepthTexture();
 }

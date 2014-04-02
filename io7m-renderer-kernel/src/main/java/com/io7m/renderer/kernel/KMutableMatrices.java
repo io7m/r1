@@ -150,7 +150,7 @@ final class KMutableMatrices
       return this.parent.getMatrixViewInverse();
     }
 
-    @SuppressWarnings("synthetic-access") final void instanceStart(
+    @SuppressWarnings("synthetic-access") void instanceStart(
       final @Nonnull KInstanceTransformed i)
       throws ConstraintError
     {
@@ -367,7 +367,7 @@ final class KMutableMatrices
       return this.parent.getMatrixViewInverse();
     }
 
-    @SuppressWarnings("synthetic-access") final void instanceStart(
+    @SuppressWarnings("synthetic-access") void instanceStart(
       final @Nonnull KInstanceTransformed i)
       throws ConstraintError
     {
@@ -475,24 +475,22 @@ final class KMutableMatrices
 
   interface MatricesInstance extends MatricesObserverValues
   {
-    public @Nonnull RMatrixReadable4x4F<RTransformModel> getMatrixModel()
+    @Nonnull RMatrixReadable4x4F<RTransformModel> getMatrixModel()
       throws ConstraintError;
 
-    public @Nonnull
-      RMatrixReadable4x4F<RTransformModelView>
-      getMatrixModelView()
-        throws ConstraintError;
-
-    public @Nonnull RMatrixReadable3x3F<RTransformNormal> getMatrixNormal()
+    @Nonnull RMatrixReadable4x4F<RTransformModelView> getMatrixModelView()
       throws ConstraintError;
 
-    public @Nonnull RMatrixM3x3F<RTransformTexture> getMatrixUV()
+    @Nonnull RMatrixReadable3x3F<RTransformNormal> getMatrixNormal()
+      throws ConstraintError;
+
+    @Nonnull RMatrixM3x3F<RTransformTexture> getMatrixUV()
       throws ConstraintError;
   }
 
   interface MatricesInstanceFunction<T, E extends Throwable>
   {
-    public T run(
+    T run(
       final @Nonnull MatricesInstance o)
       throws E,
         ConstraintError,
@@ -503,7 +501,7 @@ final class KMutableMatrices
     MatricesInstance,
     MatricesProjectiveLightValues
   {
-    public @Nonnull
+    @Nonnull
       RMatrixM4x4F<RTransformProjectiveModelView>
       getMatrixProjectiveModelView()
         throws ConstraintError;
@@ -511,7 +509,7 @@ final class KMutableMatrices
 
   interface MatricesInstanceWithProjectiveFunction<T, E extends Throwable>
   {
-    public T run(
+    T run(
       final @Nonnull MatricesInstanceWithProjective o)
       throws E,
         ConstraintError,
@@ -520,14 +518,14 @@ final class KMutableMatrices
 
   interface MatricesObserver extends MatricesObserverValues
   {
-    public <T, E extends Throwable> T withInstance(
+    <T, E extends Throwable> T withInstance(
       final @Nonnull KInstanceTransformed i,
       final @Nonnull MatricesInstanceFunction<T, E> f)
       throws RException,
         E,
         ConstraintError;
 
-    public <T, E extends Throwable> T withProjectiveLight(
+    <T, E extends Throwable> T withProjectiveLight(
       final @Nonnull KLightProjective p,
       final @Nonnull MatricesProjectiveLightFunction<T, E> f)
       throws RException,
@@ -537,7 +535,7 @@ final class KMutableMatrices
 
   interface MatricesObserverFunction<T, E extends Throwable>
   {
-    public T run(
+    T run(
       final @Nonnull MatricesObserver o)
       throws E,
         ConstraintError,
@@ -546,22 +544,22 @@ final class KMutableMatrices
 
   interface MatricesObserverValues
   {
-    public MatrixM4x4F.Context getMatrixContext()
+    MatrixM4x4F.Context getMatrixContext()
       throws ConstraintError;
 
-    public RMatrixReadable4x4F<RTransformProjection> getMatrixProjection()
+    RMatrixReadable4x4F<RTransformProjection> getMatrixProjection()
       throws ConstraintError;
 
-    public RMatrixReadable4x4F<RTransformView> getMatrixView()
+    RMatrixReadable4x4F<RTransformView> getMatrixView()
       throws ConstraintError;
 
-    public RMatrixReadable4x4F<RTransformViewInverse> getMatrixViewInverse()
+    RMatrixReadable4x4F<RTransformViewInverse> getMatrixViewInverse()
       throws ConstraintError;
   }
 
   interface MatricesProjectiveLight extends MatricesProjectiveLightValues
   {
-    public <T, E extends Throwable> T withInstance(
+    <T, E extends Throwable> T withInstance(
       final @Nonnull KInstanceTransformed i,
       final @Nonnull MatricesInstanceWithProjectiveFunction<T, E> f)
       throws RException,
@@ -571,7 +569,7 @@ final class KMutableMatrices
 
   interface MatricesProjectiveLightFunction<T, E extends Throwable>
   {
-    public T run(
+    T run(
       final @Nonnull MatricesProjectiveLight p)
       throws E,
         ConstraintError,
@@ -580,20 +578,19 @@ final class KMutableMatrices
 
   interface MatricesProjectiveLightValues extends MatricesObserverValues
   {
-    public
       RMatrixM4x4F<RTransformProjectiveProjection>
       getMatrixProjectiveProjection()
         throws ConstraintError;
 
-    public RMatrixM4x4F<RTransformProjectiveView> getMatrixProjectiveView()
+    RMatrixM4x4F<RTransformProjectiveView> getMatrixProjectiveView()
       throws ConstraintError;
   }
 
   private class ObserverSingleton implements MatricesObserver
   {
-    final @Nonnull RMatrixM4x4F<RTransformProjection>  matrix_projection;
-    final @Nonnull RMatrixM4x4F<RTransformView>        matrix_view;
-    final @Nonnull RMatrixM4x4F<RTransformViewInverse> matrix_view_inverse;
+    private final @Nonnull RMatrixM4x4F<RTransformProjection>  matrix_projection;
+    private final @Nonnull RMatrixM4x4F<RTransformView>        matrix_view;
+    private final @Nonnull RMatrixM4x4F<RTransformViewInverse> matrix_view_inverse;
 
     public ObserverSingleton()
     {
@@ -716,9 +713,9 @@ final class KMutableMatrices
 
   private class ProjectiveLightSingleton implements MatricesProjectiveLight
   {
-    final @Nonnull RMatrixM4x4F<RTransformProjectiveProjection> matrix_projective_projection;
-    final @Nonnull RMatrixM4x4F<RTransformProjectiveView>       matrix_projective_view;
-    final @Nonnull ObserverSingleton                            parent;
+    private final @Nonnull RMatrixM4x4F<RTransformProjectiveProjection> matrix_projective_projection;
+    private final @Nonnull RMatrixM4x4F<RTransformProjectiveView>       matrix_projective_view;
+    private final @Nonnull ObserverSingleton                            parent;
 
     public ProjectiveLightSingleton(
       final @Nonnull ObserverSingleton in_observer)

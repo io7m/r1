@@ -16,6 +16,10 @@
 
 package com.io7m.renderer.kernel;
 
+/**
+ * The type of forward-rendering framebuffers.
+ */
+
 public interface KFramebufferForwardType extends
   KFramebufferRGBAType,
   KFramebufferDepthType,

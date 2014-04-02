@@ -24,7 +24,7 @@ import com.io7m.renderer.types.RException;
 
 interface KTextureUnitWith
 {
-  public void run(
+  void run(
     final @Nonnull KTextureUnitContext context)
     throws ConstraintError,
       JCGLException,

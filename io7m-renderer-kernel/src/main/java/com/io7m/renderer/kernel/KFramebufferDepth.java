@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
@@ -75,7 +76,7 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
           description.getFilterMinification(),
           description.getFilterMagnification());
 
-      final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> empty =
+      final Map<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> empty =
         new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
 
       final FramebufferReference fb = gl.framebufferAllocate();
@@ -218,7 +219,7 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
 
       assert depth != null;
 
-      final HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> empty =
+      final Map<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> empty =
         new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
 
       final FramebufferReference fb = gl.framebufferAllocate();
