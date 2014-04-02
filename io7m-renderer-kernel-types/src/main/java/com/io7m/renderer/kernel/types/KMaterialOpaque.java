@@ -16,13 +16,43 @@
 
 package com.io7m.renderer.kernel.types;
 
+import javax.annotation.Nonnull;
+
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.types.RException;
+
 /**
  * The type of opaque materials.
  */
 
-public interface KMaterialOpaque extends
-  KMaterialOpaqueVisitable,
-  KMaterialRegular
+public interface KMaterialOpaque extends KMaterialRegular
 {
-  // Nothing
+  /**
+   * Be visited by the given generic visitor.
+   * 
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws ConstraintError
+   *           Iff the visitor raises {@link ConstraintError}
+   * @throws RException
+   *           Iff the visitor raises {@link RException}
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   * 
+   * @param <A>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          A specific visitor subtype
+   */
+
+    <A, E extends Throwable, V extends KMaterialOpaqueVisitor<A, E>>
+    A
+    materialOpaqueVisitableAccept(
+      final @Nonnull V v)
+      throws E,
+        RException,
+        ConstraintError;
 }

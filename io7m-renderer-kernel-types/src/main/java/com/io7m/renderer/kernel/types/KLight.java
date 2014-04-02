@@ -19,7 +19,9 @@ package com.io7m.renderer.kernel.types;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
+import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceRGB;
 import com.io7m.renderer.types.RVectorI3F;
 
@@ -27,8 +29,37 @@ import com.io7m.renderer.types.RVectorI3F;
  * The type of lights.
  */
 
-@Immutable public interface KLight extends KLightVisitable
+@Immutable public interface KLight
 {
+  /**
+   * Be visited by the given generic visitor.
+   * 
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws ConstraintError
+   *           Iff the visitor raises {@link ConstraintError}
+   * @throws RException
+   *           Iff the visitor raises {@link RException}
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   * 
+   * @param <A>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          A specific visitor subtype
+   */
+
+    <A, E extends Throwable, V extends KLightVisitor<A, E>>
+    A
+    lightVisitableAccept(
+      final @Nonnull V v)
+      throws ConstraintError,
+        RException,
+        E;
+
   /**
    * @return The colour of the light
    */

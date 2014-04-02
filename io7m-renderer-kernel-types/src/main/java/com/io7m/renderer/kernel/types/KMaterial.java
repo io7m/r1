@@ -18,6 +18,8 @@ package com.io7m.renderer.kernel.types;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformTexture;
 
@@ -25,7 +27,7 @@ import com.io7m.renderer.types.RTransformTexture;
  * The type of materials applied to instances ({@link KInstance}).
  */
 
-public interface KMaterial extends KTexturesRequired, KMaterialVisitable
+public interface KMaterial extends KTexturesRequired
 {
   /**
    * @return The material values relating to surface normals.
@@ -38,4 +40,33 @@ public interface KMaterial extends KTexturesRequired, KMaterialVisitable
    */
 
   @Nonnull RMatrixI3x3F<RTransformTexture> materialGetUVMatrix();
+
+  /**
+   * Be visited by the given generic visitor.
+   * 
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws ConstraintError
+   *           Iff the visitor raises {@link ConstraintError}
+   * @throws RException
+   *           Iff the visitor raises {@link RException}
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   * 
+   * @param <A>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          A specific visitor subtype
+   */
+
+    <A, E extends Throwable, V extends KMaterialVisitor<A, E>>
+    A
+    materialVisitableAccept(
+      final @Nonnull V v)
+      throws E,
+        RException,
+        ConstraintError;
 }

@@ -18,6 +18,9 @@ package com.io7m.renderer.kernel.types;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformTexture;
 
@@ -26,9 +29,7 @@ import com.io7m.renderer.types.RTransformTexture;
  * {@link KTransform}.
  */
 
-public interface KInstanceTransformed extends
-  KInstance,
-  KInstanceTransformedVisitable
+public interface KInstanceTransformed extends KInstance
 {
   /**
    * @return The transform associated with the instance
@@ -41,4 +42,35 @@ public interface KInstanceTransformed extends
    */
 
   @Nonnull RMatrixI3x3F<RTransformTexture> instanceGetUVMatrix();
+
+  /**
+   * Accept a visitor.
+   * 
+   * @param <A>
+   *          The type of values returned by the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          The type of the visitor
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws E
+   *           If the visitor raises <code>E</code>
+   * @throws ConstraintError
+   *           If the visitor raises {@link ConstraintError}
+   * @throws RException
+   *           If the visitor raises {@link RException}
+   * @throws JCGLException
+   *           If the visitor raises {@link JCGLException}
+   */
+
+    <A, E extends Throwable, V extends KInstanceTransformedVisitor<A, E>>
+    A
+    transformedVisitableAccept(
+      final @Nonnull V v)
+      throws E,
+        ConstraintError,
+        RException,
+        JCGLException;
 }
