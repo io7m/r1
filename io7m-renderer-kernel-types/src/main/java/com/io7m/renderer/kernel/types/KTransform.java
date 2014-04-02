@@ -25,7 +25,7 @@ import com.io7m.jtensors.MatrixM4x4F;
  * ).
  */
 
-public interface KTransform extends KTransformVisitable
+public interface KTransform
 {
   /**
    * Produce a 4x4 matrix for the current transformation, writing the
@@ -40,4 +40,27 @@ public interface KTransform extends KTransformVisitable
   void transformMakeMatrix4x4F(
     final @Nonnull KTransformContext context,
     final @Nonnull MatrixM4x4F m);
+
+  /**
+   * Be visited by the given generic visitor.
+   * 
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   * 
+   * @param <A>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          A specific visitor subtype
+   */
+
+    <A, E extends Throwable, V extends KTransformVisitor<A, E>>
+    A
+    transformVisitableAccept(
+      final @Nonnull V v)
+      throws E;
 }

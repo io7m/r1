@@ -18,12 +18,48 @@ package com.io7m.renderer.kernel.types;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.renderer.types.RException;
+
 /**
  * The type of instances.
  */
 
-public interface KInstance extends KInstanceVisitable
+public interface KInstance
 {
+  /**
+   * Be visited by the given generic visitor.
+   * 
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws ConstraintError
+   *           Iff the visitor raises {@link ConstraintError}
+   * @throws JCGLException
+   *           Iff the visitor raises {@link JCGLException}
+   * @throws RException
+   *           Iff the visitor raises {@link RException}
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   * 
+   * @param <A>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          A specific visitor subtype
+   */
+
+    <A, E extends Throwable, V extends KInstanceVisitor<A, E>>
+    A
+    instanceVisitableAccept(
+      final @Nonnull V v)
+      throws E,
+        ConstraintError,
+        RException,
+        JCGLException;
+
   /**
    * @return The unique identifier of the instance
    */

@@ -16,11 +16,45 @@
 
 package com.io7m.renderer.kernel.types;
 
+import javax.annotation.Nonnull;
+
+import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.renderer.types.RException;
+
 /**
  * The type of shadows.
  */
 
-public interface KShadow extends KShadowVisitable
+public interface KShadow
 {
-  // Nothing
+  /**
+   * Be visited by the given generic visitor.
+   * 
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws ConstraintError
+   *           Iff the visitor raises {@link ConstraintError}
+   * @throws RException
+   *           Iff the visitor raises {@link RException}
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   * @throws JCGLException
+   *           Iff the visitor raises {@link JCGLException}
+   * 
+   * @param <T>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          A specific visitor subtype
+   */
+
+  <T, E extends Throwable, V extends KShadowVisitor<T, E>> T shadowAccept(
+    final @Nonnull V v)
+    throws E,
+      JCGLException,
+      RException,
+      ConstraintError;
 }
