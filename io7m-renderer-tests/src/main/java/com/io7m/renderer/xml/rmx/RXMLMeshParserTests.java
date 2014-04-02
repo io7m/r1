@@ -354,19 +354,19 @@ public final class RXMLMeshParserTests
     private final RVectorI3F<RSpaceObject> expected_upper;
 
     Checked(
-      final @Nonnull String expected_name,
-      final int expected_triangles,
-      final @Nonnull RXMLMeshType expected_type,
-      final int vertices_expected,
-      final @Nonnull RVectorI3F<RSpaceObject> expected_lower,
-      final @Nonnull RVectorI3F<RSpaceObject> expected_upper)
+      final @Nonnull String in_expected_name,
+      final int in_expected_triangles,
+      final @Nonnull RXMLMeshType in_expected_type,
+      final int in_vertices_expected,
+      final @Nonnull RVectorI3F<RSpaceObject> in_expected_lower,
+      final @Nonnull RVectorI3F<RSpaceObject> in_expected_upper)
     {
-      this.expected_name = expected_name;
-      this.expected_triangles = expected_triangles;
-      this.expected_type = expected_type;
-      this.expected_vertices = vertices_expected;
-      this.expected_lower = expected_lower;
-      this.expected_upper = expected_upper;
+      this.expected_name = in_expected_name;
+      this.expected_triangles = in_expected_triangles;
+      this.expected_type = in_expected_type;
+      this.expected_vertices = in_vertices_expected;
+      this.expected_lower = in_expected_lower;
+      this.expected_upper = in_expected_upper;
     }
 
     @Override public void eventError(

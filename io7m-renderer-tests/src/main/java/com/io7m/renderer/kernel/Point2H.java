@@ -1,6 +1,5 @@
 package com.io7m.renderer.kernel;
 
-
 /**
  * 3D homogeneous coordinates.
  */
@@ -38,13 +37,13 @@ class Point2H
   }
 
   public Point2H(
-    final float x,
-    final float y,
-    final float z)
+    final float ix,
+    final float iy,
+    final float iz)
   {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+    this.x = ix;
+    this.y = iy;
+    this.z = iz;
   }
 
   @Override public boolean equals(
