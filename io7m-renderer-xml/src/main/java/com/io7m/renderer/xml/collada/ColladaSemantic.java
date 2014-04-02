@@ -60,9 +60,9 @@ public enum ColladaSemantic
   private final @Nonnull String name;
 
   private ColladaSemantic(
-    final @Nonnull String name)
+    final @Nonnull String in_name)
   {
-    this.name = name;
+    this.name = in_name;
   }
 
   public @Nonnull String getName()

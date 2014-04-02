@@ -30,10 +30,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
   private final @Nonnull List<ColladaVertex> vertices;
 
   public ColladaPoly(
-    final @Nonnull List<ColladaVertex> vertices)
+    final @Nonnull List<ColladaVertex> in_vertices)
     throws ConstraintError
   {
-    this.vertices = Constraints.constrainNotNull(vertices, "Vertices");
+    this.vertices = Constraints.constrainNotNull(in_vertices, "Vertices");
   }
 
   public @Nonnull List<ColladaVertex> getVertices()

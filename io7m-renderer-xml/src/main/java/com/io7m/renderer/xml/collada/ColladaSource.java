@@ -106,12 +106,12 @@ import com.io7m.jtensors.VectorI3F;
 
     @SuppressWarnings("synthetic-access") public ColladaVertices(
       final @Nonnull ColladaSourceID id,
-      final @Nonnull List<ColladaInput> inputs,
+      final @Nonnull List<ColladaInput> in_inputs,
       final @Nonnull ColladaAxis axis)
       throws ConstraintError
     {
       super(Type.SOURCE_VERTICES, id, axis);
-      this.inputs = Constraints.constrainNotNull(inputs, "Inputs");
+      this.inputs = Constraints.constrainNotNull(in_inputs, "Inputs");
     }
 
     public @Nonnull List<ColladaInput> getInputs()
@@ -141,14 +141,14 @@ import com.io7m.jtensors.VectorI3F;
   private final @Nonnull ColladaAxis     axis;
 
   private ColladaSource(
-    final @Nonnull Type type,
-    final @Nonnull ColladaSourceID id,
-    final @Nonnull ColladaAxis axis)
+    final @Nonnull Type in_type,
+    final @Nonnull ColladaSourceID in_id,
+    final @Nonnull ColladaAxis in_axis)
     throws ConstraintError
   {
-    this.id = Constraints.constrainNotNull(id, "ID");
-    this.type = Constraints.constrainNotNull(type, "Type");
-    this.axis = Constraints.constrainNotNull(axis, "Axis");
+    this.id = Constraints.constrainNotNull(in_id, "ID");
+    this.type = Constraints.constrainNotNull(in_type, "Type");
+    this.axis = Constraints.constrainNotNull(in_axis, "Axis");
   }
 
   public @Nonnull ColladaAxis getAxis()

@@ -28,10 +28,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
   private final @Nonnull String actual;
 
   public ColladaSourceID(
-    final @Nonnull String actual)
+    final @Nonnull String in_actual)
     throws ConstraintError
   {
-    this.actual = Constraints.constrainNotNull(actual, "Actual");
+    this.actual = Constraints.constrainNotNull(in_actual, "Actual");
   }
 
   @Override public boolean equals(

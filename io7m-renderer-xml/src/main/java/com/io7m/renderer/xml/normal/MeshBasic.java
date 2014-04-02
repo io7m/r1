@@ -40,13 +40,13 @@ public final class MeshBasic
     private final int v2;
 
     public Triangle(
-      final int v0,
-      final int v1,
-      final int v2)
+      final int in_v0,
+      final int in_v1,
+      final int in_v2)
     {
-      this.v0 = v0;
-      this.v1 = v1;
-      this.v2 = v2;
+      this.v0 = in_v0;
+      this.v1 = in_v1;
+      this.v2 = in_v2;
     }
 
     public int getV0()
@@ -72,13 +72,13 @@ public final class MeshBasic
     private final int uv;
 
     public Vertex(
-      final int position,
-      final int normal,
-      final int uv)
+      final int in_position,
+      final int in_normal,
+      final int in_uv)
     {
-      this.position = position;
-      this.normal = normal;
-      this.uv = uv;
+      this.position = in_position;
+      this.normal = in_normal;
+      this.uv = in_uv;
     }
 
     @Override public String toString()
@@ -162,10 +162,10 @@ public final class MeshBasic
   private boolean                                             has_uv;
 
   private MeshBasic(
-    final @Nonnull String name)
+    final @Nonnull String in_name)
     throws ConstraintError
   {
-    this.name = Constraints.constrainNotNull(name, "Mesh name");
+    this.name = Constraints.constrainNotNull(in_name, "Mesh name");
     this.normals = new ArrayList<RVectorI3F<RSpaceObject>>();
     this.positions = new ArrayList<RVectorI3F<RSpaceObject>>();
     this.uvs = new ArrayList<RVectorI2F<RSpaceTexture>>();
@@ -189,7 +189,9 @@ public final class MeshBasic
     final @Nonnull RVectorI3F<RSpaceObject> normal)
     throws ConstraintError
   {
-    this.normals.add(Constraints.constrainNotNull(normal, "KMaterialNormalLabel"));
+    this.normals.add(Constraints.constrainNotNull(
+      normal,
+      "KMaterialNormalLabel"));
     return this.normals.size() - 1;
   }
 
@@ -212,9 +214,9 @@ public final class MeshBasic
   }
 
   public void setHasUV(
-    final boolean has_uv)
+    final boolean in_has_uv)
   {
-    this.has_uv = has_uv;
+    this.has_uv = in_has_uv;
   }
 
   public int triangleAdd(

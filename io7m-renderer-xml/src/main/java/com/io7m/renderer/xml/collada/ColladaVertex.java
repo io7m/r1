@@ -30,10 +30,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
   private final @Nonnull List<Integer> indices;
 
   public ColladaVertex(
-    final @Nonnull List<Integer> indices)
+    final @Nonnull List<Integer> in_indices)
     throws ConstraintError
   {
-    this.indices = Constraints.constrainNotNull(indices, "Indices");
+    this.indices = Constraints.constrainNotNull(in_indices, "Indices");
   }
 
   public @Nonnull List<Integer> getIndices()

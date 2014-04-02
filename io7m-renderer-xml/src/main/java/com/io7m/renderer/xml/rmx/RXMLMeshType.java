@@ -29,25 +29,25 @@ import com.io7m.jaux.Constraints.ConstraintError;
   private final @Nonnull EnumSet<RXMLMeshAttribute> attributes;
 
   RXMLMeshType(
-    final @Nonnull EnumSet<RXMLMeshAttribute> attributes)
+    final @Nonnull EnumSet<RXMLMeshAttribute> in_attributes)
     throws ConstraintError
   {
-    Constraints.constrainNotNull(attributes, "Attributes");
+    Constraints.constrainNotNull(in_attributes, "Attributes");
 
-    if (attributes.contains(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F)) {
+    if (in_attributes.contains(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F)) {
       Constraints.constrainArbitrary(
-        attributes.contains(RXMLMeshAttribute.TANGENT_4F) == false,
+        in_attributes.contains(RXMLMeshAttribute.TANGENT_4F) == false,
         "Mesh does not contain both 3D and 4D tangents");
     }
 
-    if (attributes.contains(RXMLMeshAttribute.TANGENT_4F)) {
+    if (in_attributes.contains(RXMLMeshAttribute.TANGENT_4F)) {
       Constraints
         .constrainArbitrary(
-          attributes.contains(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F) == false,
+          in_attributes.contains(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F) == false,
           "Mesh does not contain both 3D and 4D tangents");
     }
 
-    this.attributes = attributes;
+    this.attributes = in_attributes;
   }
 
   @Override public boolean equals(

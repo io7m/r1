@@ -44,13 +44,13 @@ public final class MeshTangents
     private final int v2;
 
     public Triangle(
-      final int v0,
-      final int v1,
-      final int v2)
+      final int in_v0,
+      final int in_v1,
+      final int in_v2)
     {
-      this.v0 = v0;
-      this.v1 = v1;
-      this.v2 = v2;
+      this.v0 = in_v0;
+      this.v1 = in_v1;
+      this.v2 = in_v2;
     }
 
     public int getV0()
@@ -78,17 +78,17 @@ public final class MeshTangents
     private final int uv;
 
     public Vertex(
-      final int position,
-      final int normal,
-      final int tangent,
-      final int bitangent,
-      final int uv)
+      final int in_position,
+      final int in_normal,
+      final int in_tangent,
+      final int in_bitangent,
+      final int in_uv)
     {
-      this.position = position;
-      this.normal = normal;
-      this.tangent = tangent;
-      this.bitangent = bitangent;
-      this.uv = uv;
+      this.position = in_position;
+      this.normal = in_normal;
+      this.tangent = in_tangent;
+      this.bitangent = in_bitangent;
+      this.uv = in_uv;
     }
 
     @Override public boolean equals(
@@ -385,25 +385,25 @@ public final class MeshTangents
   private final @Nonnull String                               name;
 
   private MeshTangents(
-    final @Nonnull List<RVectorI3F<RSpaceObject>> normals,
-    final @Nonnull List<RVectorI3F<RSpaceObject>> positions,
-    final @Nonnull List<RVectorI2F<RSpaceTexture>> uvs,
-    final @Nonnull String name)
+    final @Nonnull List<RVectorI3F<RSpaceObject>> in_normals,
+    final @Nonnull List<RVectorI3F<RSpaceObject>> in_positions,
+    final @Nonnull List<RVectorI2F<RSpaceTexture>> in_uvs,
+    final @Nonnull String in_name)
     throws ConstraintError
   {
-    this.name = Constraints.constrainNotNull(name, "Name");
+    this.name = Constraints.constrainNotNull(in_name, "Name");
 
     this.normals =
       new ArrayList<RVectorI3F<RSpaceObject>>(Constraints.constrainNotNull(
-        normals,
+        in_normals,
         "Normals"));
     this.positions =
       new ArrayList<RVectorI3F<RSpaceObject>>(Constraints.constrainNotNull(
-        positions,
+        in_positions,
         "Positions"));
     this.uvs =
       new ArrayList<RVectorI2F<RSpaceTexture>>(Constraints.constrainNotNull(
-        uvs,
+        in_uvs,
         "UVs"));
 
     this.tangents =
