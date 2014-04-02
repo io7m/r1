@@ -50,12 +50,12 @@ public final class SBKPostprocessorBlur
     private final @Nonnull JButton                          ok;
 
     ControlWindow(
-      final @Nonnull SBSceneControllerRendererControl controller,
+      final @Nonnull SBSceneControllerRendererControl in_controller,
       final @Nonnull Postprocessor proc,
       final @Nonnull AtomicReference<KBlurParameters> data)
       throws ConstraintError
     {
-      this.controller = controller;
+      this.controller = in_controller;
       this.controls = new SBBlurControls();
       this.controls.controlsLoadFrom(data.get());
 

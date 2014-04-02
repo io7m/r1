@@ -40,9 +40,9 @@ enum SBKRendererType
   private final @Nonnull String name;
 
   private SBKRendererType(
-    final @Nonnull String name)
+    final @Nonnull String in_name)
   {
-    this.name = name;
+    this.name = in_name;
   }
 
   @Nonnull String getName()

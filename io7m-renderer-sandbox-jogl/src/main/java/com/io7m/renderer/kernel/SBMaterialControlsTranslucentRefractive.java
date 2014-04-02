@@ -39,15 +39,15 @@ public final class SBMaterialControlsTranslucentRefractive implements
   private final @Nonnull RowGroup                               group;
 
   public SBMaterialControlsTranslucentRefractive(
-    final @Nonnull JTextField name,
-    final @Nonnull SBMaterialControlsNormal controls_normal,
-    final @Nonnull SBMatrix3x3Controls<RTransformTexture> controls_uv)
+    final @Nonnull JTextField in_name,
+    final @Nonnull SBMaterialControlsNormal in_controls_normal,
+    final @Nonnull SBMatrix3x3Controls<RTransformTexture> in_controls_uv)
     throws ConstraintError
   {
     this.group = new RowGroup();
-    this.name = name;
-    this.controls_normal = controls_normal;
-    this.controls_uv = controls_uv;
+    this.name = in_name;
+    this.controls_normal = in_controls_normal;
+    this.controls_uv = in_controls_uv;
     this.scale = new SBFloatHSlider("Scale", 0.0f, 1.0f);
     this.masked = new JCheckBox();
   }

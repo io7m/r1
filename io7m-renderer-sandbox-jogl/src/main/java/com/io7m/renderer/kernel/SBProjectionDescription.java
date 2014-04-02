@@ -45,21 +45,21 @@ import com.io7m.renderer.types.RTransformProjection;
     }
 
     @SuppressWarnings("synthetic-access") public SBProjectionFrustum(
-      final double left,
-      final double right,
-      final double bottom,
-      final double top,
-      final double near,
-      final double far)
+      final double in_left,
+      final double in_right,
+      final double in_bottom,
+      final double in_top,
+      final double in_near,
+      final double in_far)
       throws ConstraintError
     {
       super(Type.PROJECTION_FRUSTUM);
-      this.left = left;
-      this.right = right;
-      this.bottom = bottom;
-      this.top = top;
-      this.near = near;
-      this.far = far;
+      this.left = in_left;
+      this.right = in_right;
+      this.bottom = in_bottom;
+      this.top = in_top;
+      this.near = in_near;
+      this.far = in_far;
     }
 
     @Override public boolean equals(
@@ -185,21 +185,21 @@ import com.io7m.renderer.types.RTransformProjection;
     }
 
     @SuppressWarnings("synthetic-access") public SBProjectionOrthographic(
-      final double left,
-      final double right,
-      final double bottom,
-      final double top,
-      final double near,
-      final double far)
+      final double in_left,
+      final double in_right,
+      final double in_bottom,
+      final double in_top,
+      final double in_near,
+      final double in_far)
       throws ConstraintError
     {
       super(Type.PROJECTION_ORTHOGRAPHIC);
-      this.left = left;
-      this.right = right;
-      this.bottom = bottom;
-      this.top = top;
-      this.near = near;
-      this.far = far;
+      this.left = in_left;
+      this.right = in_right;
+      this.bottom = in_bottom;
+      this.top = in_top;
+      this.near = in_near;
+      this.far = in_far;
     }
 
     @Override public boolean equals(
@@ -323,17 +323,17 @@ import com.io7m.renderer.types.RTransformProjection;
     }
 
     @SuppressWarnings("synthetic-access") public SBProjectionPerspective(
-      final double near,
-      final double far,
-      final double aspect,
-      final double horizontal_fov)
+      final double in_near,
+      final double in_far,
+      final double in_aspect,
+      final double in_horizontal_fov)
       throws ConstraintError
     {
       super(Type.PROJECTION_PERSPECTIVE);
-      this.near = near;
-      this.far = far;
-      this.aspect = aspect;
-      this.horizontal_fov = horizontal_fov;
+      this.near = in_near;
+      this.far = in_far;
+      this.aspect = in_aspect;
+      this.horizontal_fov = in_horizontal_fov;
     }
 
     @Override public boolean equals(
@@ -427,9 +427,9 @@ import com.io7m.renderer.types.RTransformProjection;
     private final @Nonnull String name;
 
     private Type(
-      final @Nonnull String name)
+      final @Nonnull String in_name)
     {
-      this.name = name;
+      this.name = in_name;
     }
 
     public @Nonnull String getName()
@@ -446,10 +446,10 @@ import com.io7m.renderer.types.RTransformProjection;
   private final @Nonnull Type type;
 
   private SBProjectionDescription(
-    final @Nonnull Type type)
+    final @Nonnull Type in_type)
     throws ConstraintError
   {
-    this.type = Constraints.constrainNotNull(type, "Type");
+    this.type = Constraints.constrainNotNull(in_type, "Type");
   }
 
   public abstract double getFar();

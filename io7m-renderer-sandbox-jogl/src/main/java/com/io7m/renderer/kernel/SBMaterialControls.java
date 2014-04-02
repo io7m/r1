@@ -93,16 +93,16 @@ public final class SBMaterialControls implements
   private final @Nonnull SBMaterialTypeSelector                  selector;
 
   private SBMaterialControls(
-    final @Nonnull JFrame parent,
+    final @Nonnull JFrame in_parent,
     final @Nonnull Log log,
     final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull Integer id)
+    final @Nonnull Integer in_id)
     throws ConstraintError
   {
-    this.parent = Constraints.constrainNotNull(parent, "Parent");
-    this.id = Constraints.constrainNotNull(id, "ID");
+    this.parent = Constraints.constrainNotNull(in_parent, "Parent");
+    this.id = Constraints.constrainNotNull(in_id, "ID");
     this.group = new RowGroup();
-    this.id_field = new JTextField(id.toString());
+    this.id_field = new JTextField(in_id.toString());
     this.id_field.setEditable(false);
     this.name = new JTextField("");
     this.controls_uv =
@@ -112,30 +112,30 @@ public final class SBMaterialControls implements
     this.controls_opaque_regular =
       new SBMaterialControlsOpaqueRegular(
         this.name,
-        new SBMaterialControlsAlbedo(controller, parent, log),
+        new SBMaterialControlsAlbedo(controller, in_parent, log),
         new SBMaterialControlsEmissive(controller, log),
         new SBMaterialControlsEnvironment(controller, log),
         this.controls_normal,
-        new SBMaterialControlsSpecular(parent, controller, log),
+        new SBMaterialControlsSpecular(in_parent, controller, log),
         this.controls_uv);
     this.controls_opaque_alpha_depth =
       new SBMaterialControlsOpaqueAlphaToDepth(
         this.name,
-        new SBMaterialControlsAlbedo(controller, parent, log),
+        new SBMaterialControlsAlbedo(controller, in_parent, log),
         new SBMaterialControlsEmissive(controller, log),
         new SBMaterialControlsEnvironment(controller, log),
         this.controls_normal,
-        new SBMaterialControlsSpecular(parent, controller, log),
+        new SBMaterialControlsSpecular(in_parent, controller, log),
         this.controls_uv);
     this.controls_translucent_regular =
       new SBMaterialControlsTranslucentRegular(
         this.name,
-        new SBMaterialControlsAlbedo(controller, parent, log),
+        new SBMaterialControlsAlbedo(controller, in_parent, log),
         new SBMaterialControlsAlpha(),
         new SBMaterialControlsEmissive(controller, log),
         new SBMaterialControlsEnvironment(controller, log),
         this.controls_normal,
-        new SBMaterialControlsSpecular(parent, controller, log),
+        new SBMaterialControlsSpecular(in_parent, controller, log),
         this.controls_uv);
     this.controls_translucent_refractive =
       new SBMaterialControlsTranslucentRefractive(

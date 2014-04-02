@@ -64,53 +64,53 @@ public final class SandboxConfig
   private final @Nonnull File            shader_archive_postprocessing_file;
 
   public SandboxConfig(
-    final @Nonnull Properties props)
+    final @Nonnull Properties in_props)
     throws ConstraintError,
       ValueNotFound,
       ValueIncorrectType
   {
-    this.props = Constraints.constrainNotNull(props, "Properties");
+    this.props = Constraints.constrainNotNull(in_props, "Properties");
 
     this.shader_archive_debug_file =
       new File(PropertyUtils.getString(
-        props,
+        in_props,
         "com.io7m.renderer.sandbox.shaders.debug"));
     this.shader_archive_depth_file =
       new File(PropertyUtils.getString(
-        props,
+        in_props,
         "com.io7m.renderer.sandbox.shaders.depth"));
     this.shader_archive_forward_file =
       new File(PropertyUtils.getString(
-        props,
+        in_props,
         "com.io7m.renderer.sandbox.shaders.forward"));
     this.shader_archive_postprocessing_file =
       new File(PropertyUtils.getString(
-        props,
+        in_props,
         "com.io7m.renderer.sandbox.shaders.postprocessing"));
 
     this.opengl_debug =
       PropertyUtils.getOptionalBoolean(
-        props,
+        in_props,
         "com.io7m.renderer.sandbox.opengl.debug",
         true);
     this.opengl_trace =
       PropertyUtils.getOptionalBoolean(
-        props,
+        in_props,
         "com.io7m.renderer.sandbox.opengl.trace",
         false);
     this.hide_extensions =
       SandboxConfig.split(PropertyUtils.getOptionalString(
-        props,
+        in_props,
         "com.io7m.renderer.sandbox.opengl.hide_extensions",
         ""));
     this.restrict_units =
       PropertyUtils.getOptionalInteger(
-        props,
+        in_props,
         "com.io7m.renderer.sandbox.opengl.texture_units",
         -1);
     this.profile =
       SBOpenGLProfile.fromString(PropertyUtils.getString(
-        props,
+        in_props,
         "com.io7m.renderer.sandbox.opengl.profile"));
   }
 

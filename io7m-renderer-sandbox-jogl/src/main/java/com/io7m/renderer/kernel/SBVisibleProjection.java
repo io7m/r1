@@ -581,10 +581,10 @@ public abstract class SBVisibleProjection
   private final @Nonnull SBProjectionDescription.Type type;
 
   private SBVisibleProjection(
-    final @Nonnull SBProjectionDescription.Type type)
+    final @Nonnull SBProjectionDescription.Type in_type)
     throws ConstraintError
   {
-    this.type = Constraints.constrainNotNull(type, "Type");
+    this.type = Constraints.constrainNotNull(in_type, "Type");
   }
 
   public abstract

@@ -71,13 +71,13 @@ public final class SBLightControlsSpherical implements
   private final @Nonnull Integer                      id;
 
   private SBLightControlsSpherical(
-    final @Nonnull JFrame parent,
-    final @Nonnull Integer id)
+    final @Nonnull JFrame in_parent,
+    final @Nonnull Integer in_id)
     throws ConstraintError
   {
-    this.parent = Constraints.constrainNotNull(parent, "Parent");
-    this.id = Constraints.constrainNotNull(id, "ID");
-    this.colour = SBColourInput.newInput(parent, "Colour");
+    this.parent = Constraints.constrainNotNull(in_parent, "Parent");
+    this.id = Constraints.constrainNotNull(in_id, "ID");
+    this.colour = SBColourInput.newInput(in_parent, "Colour");
     this.intensity = new SBFloatHSlider("Intensity", 0.0f, 2.0f);
     this.position = SBVector3FInput.newInput("Position");
     this.radius = new SBFloatHSlider("Radius", 0.0f, 128.0f);

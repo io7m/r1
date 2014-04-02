@@ -103,25 +103,25 @@ public final class SBLightControlsProjective implements
   private final @Nonnull Integer                      id;
 
   private <C extends SBSceneControllerTextures> SBLightControlsProjective(
-    final @Nonnull JFrame parent,
+    final @Nonnull JFrame in_parent,
     final @Nonnull C controller,
-    final @Nonnull Integer id,
+    final @Nonnull Integer in_id,
     final @Nonnull Log log)
     throws ConstraintError
   {
-    this.parent = Constraints.constrainNotNull(parent, "Parent");
+    this.parent = Constraints.constrainNotNull(in_parent, "Parent");
     this.texture_controller =
       Constraints.constrainNotNull(controller, "Controller");
-    this.id = Constraints.constrainNotNull(id, "ID field");
+    this.id = Constraints.constrainNotNull(in_id, "ID field");
 
     this.group = new RowGroup();
-    this.colour = SBColourInput.newInput(parent, "Colour");
+    this.colour = SBColourInput.newInput(in_parent, "Colour");
     this.orientation = SBOrientationInput.newInput();
     this.position = SBVector3FInput.newInput("Position");
     this.falloff = new SBFloatHSlider("Falloff", 0, 64.0f);
     this.projection = SBProjectionMatrixControls.newControls();
     this.intensity = new SBFloatHSlider("Intensity", 0.0f, 2.0f);
-    this.shadow = SBLightShadowControls.newControls(parent);
+    this.shadow = SBLightShadowControls.newControls(in_parent);
 
     this.texture = new JTextField();
     this.texture.setEditable(false);

@@ -64,9 +64,9 @@ final class SBShadersPanel extends JPanel
     private final @Nonnull InputsTableModel model;
 
     public InputsTable(
-      final InputsTableModel model)
+      final InputsTableModel in_model)
     {
-      super(model);
+      super(in_model);
 
       this.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
       this.setAutoCreateRowSorter(true);
@@ -75,7 +75,7 @@ final class SBShadersPanel extends JPanel
       this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       this.setFillsViewportHeight(true);
 
-      this.model = model;
+      this.model = in_model;
     }
   }
 
@@ -91,9 +91,9 @@ final class SBShadersPanel extends JPanel
     }
 
     public InputsTableModel(
-      final @Nonnull Log log)
+      final @Nonnull Log in_log)
     {
-      this.log = new Log(log, "shader-uniform-table");
+      this.log = new Log(in_log, "shader-uniform-table");
       this.column_names = new String[] { "Name", "Type" };
       this.data = new ArrayList<ArrayList<String>>();
     }
@@ -155,9 +155,9 @@ final class SBShadersPanel extends JPanel
     private final @Nonnull OutputsTableModel model;
 
     public OutputsTable(
-      final OutputsTableModel model)
+      final OutputsTableModel in_model)
     {
-      super(model);
+      super(in_model);
 
       this.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
       this.setAutoCreateRowSorter(true);
@@ -166,7 +166,7 @@ final class SBShadersPanel extends JPanel
       this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       this.setFillsViewportHeight(true);
 
-      this.model = model;
+      this.model = in_model;
     }
   }
 
@@ -182,9 +182,9 @@ final class SBShadersPanel extends JPanel
     }
 
     public OutputsTableModel(
-      final @Nonnull Log log)
+      final @Nonnull Log in_log)
     {
-      this.log = new Log(log, "shader-uniform-table");
+      this.log = new Log(in_log, "shader-uniform-table");
       this.column_names = new String[] { "Name", "Index", "Type" };
       this.data = new ArrayList<ArrayList<String>>();
     }
@@ -244,9 +244,9 @@ final class SBShadersPanel extends JPanel
     private final @Nonnull UniformsTableModel model;
 
     public UniformsTable(
-      final UniformsTableModel model)
+      final UniformsTableModel in_model)
     {
-      super(model);
+      super(in_model);
 
       this.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
       this.setAutoCreateRowSorter(true);
@@ -255,7 +255,7 @@ final class SBShadersPanel extends JPanel
       this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       this.setFillsViewportHeight(true);
 
-      this.model = model;
+      this.model = in_model;
     }
   }
 
@@ -271,9 +271,9 @@ final class SBShadersPanel extends JPanel
     }
 
     public UniformsTableModel(
-      final @Nonnull Log log)
+      final @Nonnull Log in_log)
     {
-      this.log = new Log(log, "shader-uniform-table");
+      this.log = new Log(in_log, "shader-uniform-table");
       this.column_names = new String[] { "Name", "Location", "Type" };
       this.data = new ArrayList<ArrayList<String>>();
     }
@@ -341,35 +341,28 @@ final class SBShadersPanel extends JPanel
       }
     };
   }
-  private final @Nonnull JComboBox<String>   selector;
 
+  private final @Nonnull JComboBox<String>   selector;
   private final @Nonnull JButton             open;
   private final @Nonnull Log                 jlog;
   private @Nonnull Map<String, SBShader>     shaders;
-
   private final @Nonnull UniformsTableModel  uniforms_model;
   private final @Nonnull UniformsTable       uniforms_table;
   private final @Nonnull JScrollPane         uniforms_scroller;
   private final @Nonnull InputsTableModel    inputs_model;
-
   private final @Nonnull InputsTable         inputs_table;
-
   private final @Nonnull JScrollPane         inputs_scroller;
-
   private final @Nonnull OutputsTableModel   outputs_model;
-
   private final @Nonnull OutputsTable        outputs_table;
-
   private final @Nonnull JScrollPane         outputs_scroller;
-
   private final @Nonnull JFrame              window;
 
   public SBShadersPanel(
-    final @Nonnull JFrame window,
+    final @Nonnull JFrame in_window,
     final @Nonnull SBSceneControllerShaders controller,
     final @Nonnull Log log)
   {
-    this.window = window;
+    this.window = in_window;
     this.jlog = new Log(log, "ForwardShaders");
     this.shaders = controller.shadersGet();
 

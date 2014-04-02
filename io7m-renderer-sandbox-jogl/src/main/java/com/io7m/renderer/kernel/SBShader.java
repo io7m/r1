@@ -31,14 +31,14 @@ public final class SBShader
   private final @Nonnull PGLSLMetaXML meta;
 
   SBShader(
-    final @Nonnull KProgram program,
-    final @Nonnull File file,
-    final @Nonnull PGLSLMetaXML meta)
+    final @Nonnull KProgram in_program,
+    final @Nonnull File in_file,
+    final @Nonnull PGLSLMetaXML in_meta)
     throws ConstraintError
   {
-    this.program = Constraints.constrainNotNull(program, "Program");
-    this.file = Constraints.constrainNotNull(file, "File");
-    this.meta = Constraints.constrainNotNull(meta, "Meta");
+    this.program = Constraints.constrainNotNull(in_program, "Program");
+    this.file = Constraints.constrainNotNull(in_file, "File");
+    this.meta = Constraints.constrainNotNull(in_meta, "Meta");
   }
 
   @Override public boolean equals(

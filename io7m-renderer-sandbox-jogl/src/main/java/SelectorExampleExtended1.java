@@ -303,9 +303,9 @@ public class SelectorExampleExtended1
     private final String name;
 
     private Type(
-      final String name)
+      final String in_name)
     {
-      this.name = name;
+      this.name = in_name;
     }
 
     @Override public String toString()

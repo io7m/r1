@@ -45,9 +45,9 @@ public enum SBOpenGLProfile
   private final @Nonnull String name;
 
   private SBOpenGLProfile(
-    final @Nonnull String name)
+    final @Nonnull String in_name)
   {
-    this.name = name;
+    this.name = in_name;
   }
 
   @Override public @Nonnull String toString()

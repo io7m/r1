@@ -33,21 +33,21 @@ public final class SBMaterialOpaqueAlphaToDepth implements SBMaterialOpaque
   private final @CheckForNull SBTexture2D<SBTexture2DKindSpecular> map_specular;
 
   public SBMaterialOpaqueAlphaToDepth(
-    final @Nonnull Integer id,
-    final @Nonnull SBMaterialDescriptionOpaqueAlphaToDepth description,
-    final @CheckForNull SBTexture2D<SBTexture2DKindAlbedo> map_diffuse,
-    final @CheckForNull SBTexture2D<SBTexture2DKindEmissive> map_emissive,
-    final @CheckForNull SBTextureCube map_environment,
-    final @CheckForNull SBTexture2D<SBTexture2DKindNormal> map_normal,
-    final @CheckForNull SBTexture2D<SBTexture2DKindSpecular> map_specular)
+    final @Nonnull Integer in_id,
+    final @Nonnull SBMaterialDescriptionOpaqueAlphaToDepth in_description,
+    final @CheckForNull SBTexture2D<SBTexture2DKindAlbedo> in_map_diffuse,
+    final @CheckForNull SBTexture2D<SBTexture2DKindEmissive> in_map_emissive,
+    final @CheckForNull SBTextureCube in_map_environment,
+    final @CheckForNull SBTexture2D<SBTexture2DKindNormal> in_map_normal,
+    final @CheckForNull SBTexture2D<SBTexture2DKindSpecular> in_map_specular)
   {
-    this.id = id;
-    this.description = description;
-    this.map_diffuse = map_diffuse;
-    this.map_emissive = map_emissive;
-    this.map_normal = map_normal;
-    this.map_specular = map_specular;
-    this.map_environment = map_environment;
+    this.id = in_id;
+    this.description = in_description;
+    this.map_diffuse = in_map_diffuse;
+    this.map_emissive = in_map_emissive;
+    this.map_normal = in_map_normal;
+    this.map_specular = in_map_specular;
+    this.map_environment = in_map_environment;
   }
 
   @Override public

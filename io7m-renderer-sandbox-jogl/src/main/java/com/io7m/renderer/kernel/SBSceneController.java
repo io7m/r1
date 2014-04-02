@@ -125,11 +125,11 @@ public final class SBSceneController implements
     final @Nonnull SBScene           scene;
 
     SceneAndFilesystem(
-      final @Nonnull SBScene scene,
-      final @Nonnull SBSceneFilesystem filesystem)
+      final @Nonnull SBScene in_scene,
+      final @Nonnull SBSceneFilesystem in_filesystem)
     {
-      this.scene = scene;
-      this.filesystem = filesystem;
+      this.scene = in_scene;
+      this.filesystem = in_filesystem;
     }
   }
 
@@ -701,32 +701,27 @@ public final class SBSceneController implements
   }
 
   private final @Nonnull ExecutorService                     exec_pool;
-
   private final @Nonnull LinkedList<SBSceneChangeListener>   listeners;
-
   private final @Nonnull Log                                 log;
-
   private final @Nonnull SBGLRenderer                        renderer;
-
   private final @Nonnull Map<String, SBShader>               shaders;
-
   private final @Nonnull AtomicReference<SceneAndFilesystem> state_current;
 
   public SBSceneController(
-    final @Nonnull SBGLRenderer renderer,
-    final @Nonnull Log log)
+    final @Nonnull SBGLRenderer in_renderer,
+    final @Nonnull Log in_log)
     throws FilesystemError,
       IOException,
       ConstraintError
   {
-    this.renderer = renderer;
-    this.log = new Log(log, "control");
+    this.renderer = in_renderer;
+    this.log = new Log(in_log, "control");
     this.listeners = new LinkedList<SBSceneChangeListener>();
     this.shaders = new ConcurrentHashMap<String, SBShader>();
     this.state_current =
       new AtomicReference<SceneAndFilesystem>(new SceneAndFilesystem(
         SBScene.empty(),
-        SBSceneFilesystem.filesystemEmpty(log)));
+        SBSceneFilesystem.filesystemEmpty(in_log)));
     this.exec_pool = Executors.newCachedThreadPool();
   }
 

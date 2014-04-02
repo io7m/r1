@@ -35,9 +35,9 @@ public final class SBMatrix3x3Controls<R extends RTransform> implements
   private final @Nonnull String                 label;
 
   SBMatrix3x3Controls(
-    final @Nonnull String label)
+    final @Nonnull String in_label)
   {
-    this.label = label;
+    this.label = in_label;
     this.group = new RowGroup();
     this.matrix = new SBMatrix3x3Fields<R>();
   }

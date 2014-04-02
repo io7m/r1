@@ -82,10 +82,10 @@ public final class SBLightShadowControls implements SBControls
   private final @Nonnull SBLightShadowTypeSelector           type_select;
 
   @SuppressWarnings("synthetic-access") private SBLightShadowControls(
-    final @Nonnull JFrame parent)
+    final @Nonnull JFrame in_parent)
     throws ConstraintError
   {
-    this.parent = Constraints.constrainNotNull(parent, "Parent");
+    this.parent = Constraints.constrainNotNull(in_parent, "Parent");
 
     this.group = new RowGroup();
     this.mapped_basic_controls = new SBLightShadowMappedBasicControls();

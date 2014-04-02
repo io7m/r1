@@ -26,11 +26,11 @@ final class SBMaterialAlphaDescription
   private final @Nonnull KMaterialAlphaOpacityType type;
 
   public SBMaterialAlphaDescription(
-    final @Nonnull KMaterialAlphaOpacityType type,
-    final float opacity)
+    final @Nonnull KMaterialAlphaOpacityType in_type,
+    final float in_opacity)
   {
-    this.type = type;
-    this.opacity = opacity;
+    this.type = in_type;
+    this.opacity = in_opacity;
   }
 
   public float getOpacity()

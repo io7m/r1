@@ -135,9 +135,9 @@ public final class SBMaterialsControls implements
     private final @Nonnull MaterialsTableModel model;
 
     public MaterialsTable(
-      final MaterialsTableModel model)
+      final MaterialsTableModel in_model)
     {
-      super(model);
+      super(in_model);
 
       this.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
       this.getColumnModel().getColumn(0).setPreferredWidth(16);
@@ -149,7 +149,7 @@ public final class SBMaterialsControls implements
       this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       this.setFillsViewportHeight(true);
 
-      this.model = model;
+      this.model = in_model;
     }
   }
 
@@ -166,13 +166,13 @@ public final class SBMaterialsControls implements
     private final @Nonnull Log                          log;
 
     public MaterialsTableModel(
-      final @Nonnull SBSceneControllerMaterials controller,
-      final @Nonnull Log log)
+      final @Nonnull SBSceneControllerMaterials in_controller,
+      final @Nonnull Log in_log)
     {
-      this.log = new Log(log, "material-table");
+      this.log = new Log(in_log, "material-table");
       this.column_names = new String[] { "ID", "Name" };
       this.data = new ArrayList<ArrayList<String>>();
-      this.controller = controller;
+      this.controller = in_controller;
     }
 
     @Override public int getColumnCount()

@@ -40,19 +40,19 @@ public final class SBIntegerHSlider
   private final @Nonnull JLabel     label;
 
   public SBIntegerHSlider(
-    final @Nonnull String label,
-    final int minimum,
-    final int maximum)
+    final @Nonnull String in_label,
+    final int in_minimum,
+    final int in_maximum)
     throws ConstraintError
   {
-    this.label = new JLabel(Constraints.constrainNotNull(label, "Label"));
-    this.maximum = maximum;
-    this.minimum = minimum;
+    this.label = new JLabel(Constraints.constrainNotNull(in_label, "Label"));
+    this.maximum = in_maximum;
+    this.minimum = in_minimum;
 
-    this.field = new JTextField(Integer.toString(minimum));
+    this.field = new JTextField(Integer.toString(in_minimum));
     this.slider = new JSlider(SwingConstants.HORIZONTAL);
-    this.slider.setMinimum(minimum);
-    this.slider.setMaximum(maximum);
+    this.slider.setMinimum(in_minimum);
+    this.slider.setMaximum(in_maximum);
     this.slider.setValue(0);
 
     this.slider.addChangeListener(new ChangeListener() {

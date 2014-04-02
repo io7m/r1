@@ -75,15 +75,15 @@ public final class SBLightControlsDirectional implements
   private final @Nonnull Integer                      id;
 
   private SBLightControlsDirectional(
-    final @Nonnull JFrame parent,
-    final @Nonnull Integer id)
+    final @Nonnull JFrame in_parent,
+    final @Nonnull Integer in_id)
     throws ConstraintError
   {
-    this.parent = Constraints.constrainNotNull(parent, "Parent");
+    this.parent = Constraints.constrainNotNull(in_parent, "Parent");
     this.group = new RowGroup();
-    this.colour = SBColourInput.newInput(parent, "Colour");
+    this.colour = SBColourInput.newInput(in_parent, "Colour");
     this.direction = SBVector3FInput.newInput("Direction");
-    this.id = id;
+    this.id = in_id;
     this.intensity = new SBFloatHSlider("Intensity", 0.0f, 2.0f);
     this.intensity.setCurrent(1.0f);
   }

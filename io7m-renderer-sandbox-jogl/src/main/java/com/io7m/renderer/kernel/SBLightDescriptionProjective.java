@@ -48,29 +48,29 @@ import com.io7m.renderer.types.RVectorI3F;
   private final @Nonnull Option<KShadow>                    shadow;
 
   SBLightDescriptionProjective(
-    final @Nonnull QuaternionI4F orientation,
-    final @Nonnull RVectorI3F<RSpaceWorld> position,
-    final float falloff,
-    final @Nonnull SBProjectionDescription projection,
-    final @Nonnull PathVirtual texture,
-    final @Nonnull RVectorI3F<RSpaceRGB> colour,
-    final float intensity,
-    final @Nonnull Option<KShadow> shadow,
-    final @Nonnull Integer id)
+    final @Nonnull QuaternionI4F in_orientation,
+    final @Nonnull RVectorI3F<RSpaceWorld> in_position,
+    final float in_falloff,
+    final @Nonnull SBProjectionDescription in_projection,
+    final @Nonnull PathVirtual in_texture,
+    final @Nonnull RVectorI3F<RSpaceRGB> in_colour,
+    final float in_intensity,
+    final @Nonnull Option<KShadow> in_shadow,
+    final @Nonnull Integer in_id)
     throws ConstraintError
   {
-    this.orientation = orientation;
-    this.position = position;
-    this.falloff = falloff;
-    this.texture = texture;
-    this.colour = colour;
-    this.intensity = intensity;
-    this.id = id;
-    this.projection = projection;
-    this.shadow = shadow;
+    this.orientation = in_orientation;
+    this.position = in_position;
+    this.falloff = in_falloff;
+    this.texture = in_texture;
+    this.colour = in_colour;
+    this.intensity = in_intensity;
+    this.id = in_id;
+    this.projection = in_projection;
+    this.shadow = in_shadow;
 
     final MatrixM4x4F temporary = new MatrixM4x4F();
-    this.projection_matrix = projection.makeProjectionMatrix(temporary);
+    this.projection_matrix = in_projection.makeProjectionMatrix(temporary);
   }
 
   @Override public boolean equals(

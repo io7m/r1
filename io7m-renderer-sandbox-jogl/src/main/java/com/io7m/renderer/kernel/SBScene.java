@@ -73,25 +73,25 @@ import com.io7m.jvvfs.PathVirtual;
   private final @Nonnull PMap<PathVirtual, SBTexture2D<?>> textures2d;
 
   private SBScene(
-    final @Nonnull PMap<PathVirtual, SBTexture2D<?>> textures2d,
-    final @Nonnull PMap<PathVirtual, SBTextureCube> textures_cube,
-    final @Nonnull PMap<PathVirtual, SBMesh> meshes,
-    final @Nonnull PMap<Integer, SBMaterial> materials,
-    final @Nonnull Integer material_id_pool,
-    final @Nonnull PMap<Integer, SBLight> lights,
-    final @Nonnull Integer light_id_pool,
-    final @Nonnull PMap<Integer, SBInstance> instances,
-    final @Nonnull Integer instance_id_pool)
+    final @Nonnull PMap<PathVirtual, SBTexture2D<?>> in_textures2d,
+    final @Nonnull PMap<PathVirtual, SBTextureCube> in_textures_cube,
+    final @Nonnull PMap<PathVirtual, SBMesh> in_meshes,
+    final @Nonnull PMap<Integer, SBMaterial> in_materials,
+    final @Nonnull Integer in_material_id_pool,
+    final @Nonnull PMap<Integer, SBLight> in_lights,
+    final @Nonnull Integer in_light_id_pool,
+    final @Nonnull PMap<Integer, SBInstance> in_instances,
+    final @Nonnull Integer in_instance_id_pool)
   {
-    this.textures2d = textures2d;
-    this.textures_cube = textures_cube;
-    this.meshes = meshes;
-    this.materials = materials;
-    this.lights = lights;
-    this.light_id_pool = light_id_pool;
-    this.material_id_pool = material_id_pool;
-    this.instances = instances;
-    this.instance_id_pool = instance_id_pool;
+    this.textures2d = in_textures2d;
+    this.textures_cube = in_textures_cube;
+    this.meshes = in_meshes;
+    this.materials = in_materials;
+    this.lights = in_lights;
+    this.light_id_pool = in_light_id_pool;
+    this.material_id_pool = in_material_id_pool;
+    this.instances = in_instances;
+    this.instance_id_pool = in_instance_id_pool;
   }
 
   public @Nonnull SBScene instanceAdd(

@@ -193,9 +193,9 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
     private final @Nonnull LightsTableModel model;
 
     public LightsTable(
-      final LightsTableModel model)
+      final LightsTableModel in_model)
     {
-      super(model);
+      super(in_model);
 
       this.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
       this.getColumnModel().getColumn(0).setPreferredWidth(16);
@@ -207,7 +207,7 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
       this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       this.setFillsViewportHeight(true);
 
-      this.model = model;
+      this.model = in_model;
     }
   }
 
@@ -225,13 +225,13 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
     private final @Nonnull Log                          log;
 
     public LightsTableModel(
-      final @Nonnull SBSceneControllerLights controller,
-      final @Nonnull Log log)
+      final @Nonnull SBSceneControllerLights in_controller,
+      final @Nonnull Log in_log)
     {
-      this.log = new Log(log, "light-table");
+      this.log = new Log(in_log, "light-table");
       this.column_names = new String[] { "ID", "Type" };
       this.data = new ArrayList<ArrayList<String>>();
-      this.controller = controller;
+      this.controller = in_controller;
     }
 
     @Override public int getColumnCount()

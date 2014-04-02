@@ -31,9 +31,9 @@ public final class SBMaterialNormalDescription
   private final @CheckForNull PathVirtual texture;
 
   public SBMaterialNormalDescription(
-    final @CheckForNull PathVirtual texture)
+    final @CheckForNull PathVirtual in_texture)
   {
-    this.texture = texture;
+    this.texture = in_texture;
   }
 
   @Override public boolean equals(

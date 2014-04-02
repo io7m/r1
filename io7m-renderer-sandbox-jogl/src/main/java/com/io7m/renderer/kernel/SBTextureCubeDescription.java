@@ -38,25 +38,25 @@ import com.io7m.jvvfs.PathVirtual;
   private final @Nonnull TextureFilterMagnification texture_mag;
 
   SBTextureCubeDescription(
-    final @Nonnull PathVirtual path,
-    final @Nonnull TextureWrapR wrap_mode_r,
-    final @Nonnull TextureWrapS wrap_mode_s,
-    final @Nonnull TextureWrapT wrap_mode_t,
-    final @Nonnull TextureFilterMinification texture_min,
-    final @Nonnull TextureFilterMagnification texture_mag)
+    final @Nonnull PathVirtual in_path,
+    final @Nonnull TextureWrapR in_wrap_mode_r,
+    final @Nonnull TextureWrapS in_wrap_mode_s,
+    final @Nonnull TextureWrapT in_wrap_mode_t,
+    final @Nonnull TextureFilterMinification in_texture_min,
+    final @Nonnull TextureFilterMagnification in_texture_mag)
     throws ConstraintError
   {
-    this.path = Constraints.constrainNotNull(path, "Path");
+    this.path = Constraints.constrainNotNull(in_path, "Path");
     this.wrap_mode_r =
-      Constraints.constrainNotNull(wrap_mode_r, "Wrap R mode");
+      Constraints.constrainNotNull(in_wrap_mode_r, "Wrap R mode");
     this.wrap_mode_s =
-      Constraints.constrainNotNull(wrap_mode_s, "Wrap S mode");
+      Constraints.constrainNotNull(in_wrap_mode_s, "Wrap S mode");
     this.wrap_mode_t =
-      Constraints.constrainNotNull(wrap_mode_t, "Wrap T mode");
+      Constraints.constrainNotNull(in_wrap_mode_t, "Wrap T mode");
     this.texture_min =
-      Constraints.constrainNotNull(texture_min, "Texture minification");
+      Constraints.constrainNotNull(in_texture_min, "Texture minification");
     this.texture_mag =
-      Constraints.constrainNotNull(texture_mag, "Texture magnification");
+      Constraints.constrainNotNull(in_texture_mag, "Texture magnification");
   }
 
   @Override public boolean equals(

@@ -30,13 +30,13 @@ public final class SBMaterialTranslucentRefractive implements
   private final @CheckForNull SBTexture2D<SBTexture2DKindNormal>    map_normal;
 
   public SBMaterialTranslucentRefractive(
-    final @Nonnull Integer id,
-    final @Nonnull SBMaterialDescriptionTranslucentRefractive description,
-    final @CheckForNull SBTexture2D<SBTexture2DKindNormal> map_normal)
+    final @Nonnull Integer in_id,
+    final @Nonnull SBMaterialDescriptionTranslucentRefractive in_description,
+    final @CheckForNull SBTexture2D<SBTexture2DKindNormal> in_map_normal)
   {
-    this.id = id;
-    this.description = description;
-    this.map_normal = map_normal;
+    this.id = in_id;
+    this.description = in_description;
+    this.map_normal = in_map_normal;
   }
 
   @Override public @Nonnull Integer materialGetID()

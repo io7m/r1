@@ -35,9 +35,9 @@ public final class SBMatrix4x4Controls<R extends RTransform> implements
   private final @Nonnull String                 label;
 
   SBMatrix4x4Controls(
-    final @Nonnull String label)
+    final @Nonnull String in_label)
   {
-    this.label = label;
+    this.label = in_label;
     this.group = new RowGroup();
     this.matrix = new SBMatrix4x4Fields<R>();
   }

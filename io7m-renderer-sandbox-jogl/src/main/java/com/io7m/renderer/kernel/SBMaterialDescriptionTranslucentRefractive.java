@@ -33,16 +33,17 @@ public final class SBMaterialDescriptionTranslucentRefractive implements
   private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
 
   SBMaterialDescriptionTranslucentRefractive(
-    final @Nonnull String name,
-    final @Nonnull SBMaterialNormalDescription normal,
-    final @Nonnull SBMaterialRefractiveDescription refractive,
-    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix)
+    final @Nonnull String in_name,
+    final @Nonnull SBMaterialNormalDescription in_normal,
+    final @Nonnull SBMaterialRefractiveDescription in_refractive,
+    final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix)
     throws ConstraintError
   {
-    this.name = Constraints.constrainNotNull(name, "Name");
-    this.normal = Constraints.constrainNotNull(normal, "Normal");
-    this.refractive = Constraints.constrainNotNull(refractive, "Refractive");
-    this.uv_matrix = Constraints.constrainNotNull(uv_matrix, "UV matrix");
+    this.name = Constraints.constrainNotNull(in_name, "Name");
+    this.normal = Constraints.constrainNotNull(in_normal, "Normal");
+    this.refractive =
+      Constraints.constrainNotNull(in_refractive, "Refractive");
+    this.uv_matrix = Constraints.constrainNotNull(in_uv_matrix, "UV matrix");
   }
 
   @Override public boolean equals(

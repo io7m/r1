@@ -36,13 +36,13 @@ public final class SBMaterialSpecularDescription
   private final @CheckForNull PathVirtual      texture;
 
   SBMaterialSpecularDescription(
-    final @CheckForNull PathVirtual texture,
-    final @Nonnull RVectorI3F<RSpaceRGB> colour,
-    final float exponent)
+    final @CheckForNull PathVirtual in_texture,
+    final @Nonnull RVectorI3F<RSpaceRGB> in_colour,
+    final float in_exponent)
   {
-    this.texture = texture;
-    this.colour = colour;
-    this.exponent = exponent;
+    this.texture = in_texture;
+    this.colour = in_colour;
+    this.exponent = in_exponent;
   }
 
   @Override public boolean equals(
