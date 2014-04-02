@@ -145,7 +145,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
   private final @Nonnull String negative_x;
 
   public CubeMap(
-    final @Nonnull String name,
+    final @Nonnull String in_name,
     final @Nonnull String pz,
     final @Nonnull String nz,
     final @Nonnull String py,
@@ -154,7 +154,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     final @Nonnull String nx)
     throws ConstraintError
   {
-    Constraints.constrainNotNull(name, "Name");
+    Constraints.constrainNotNull(in_name, "Name");
     Constraints.constrainNotNull(pz, "Positive Z");
     Constraints.constrainNotNull(py, "Positive Y");
     Constraints.constrainNotNull(px, "Positive X");
@@ -162,7 +162,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
     Constraints.constrainNotNull(ny, "Negative Y");
     Constraints.constrainNotNull(nx, "Negative X");
 
-    this.name = name;
+    this.name = in_name;
     this.positive_z = pz;
     this.negative_z = nz;
     this.positive_y = py;

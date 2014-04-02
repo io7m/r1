@@ -242,19 +242,19 @@ public final class ColladaDocument
   private final @Nonnull Log                                         log_geometry;
 
   private ColladaDocument(
-    final @Nonnull Document document,
-    final @Nonnull Log log)
+    final @Nonnull Document in_document,
+    final @Nonnull Log in_log)
     throws ConstraintError,
       RXMLException
   {
-    this.document = Constraints.constrainNotNull(document, "Document");
+    this.document = Constraints.constrainNotNull(in_document, "Document");
     this.message = new StringBuilder();
     this.xpc = new XPathContext("c", ColladaDocument.COLLADA_URI.toString());
-    this.log = new Log(log, "collada-parser");
+    this.log = new Log(in_log, "collada-parser");
     this.log_source = new Log(this.log, "source");
     this.log_geometry = new Log(this.log, "geometry");
 
-    this.log.debug("Initialized document '" + document.getBaseURI() + "'");
+    this.log.debug("Initialized document '" + in_document.getBaseURI() + "'");
     this.sources = new HashMap<ColladaSourceID, ColladaSource>();
     this.geometries = new HashMap<ColladaGeometryID, ColladaGeometry>();
     this.sourcesLoad();

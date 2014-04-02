@@ -326,12 +326,12 @@ public final class RXMLMeshParser<E extends Throwable>
 
   private RXMLMeshParser(
     final @Nonnull Element e,
-    final @Nonnull RXMLMeshParserEvents<E> events)
+    final @Nonnull RXMLMeshParserEvents<E> in_events)
     throws ConstraintError,
       E,
       RXMLException
   {
-    this.events = Constraints.constrainNotNull(events, "Parser events");
+    this.events = Constraints.constrainNotNull(in_events, "Parser events");
 
     try {
       this.events.eventMeshStarted();
@@ -341,25 +341,25 @@ public final class RXMLMeshParser<E extends Throwable>
 
       final Attribute na =
         RXMLUtilities.getAttribute(e, "name", RXMLConstants.MESHES_URI);
-      events.eventMeshName(na.getValue());
+      in_events.eventMeshName(na.getValue());
 
       final Element et =
         RXMLUtilities.getChild(e, "type", RXMLConstants.MESHES_URI);
       final RXMLMeshType mt = RXMLMeshParser.parseType(et);
-      events.eventMeshType(mt);
+      in_events.eventMeshType(mt);
 
       final Element ev =
         RXMLUtilities.getChild(e, "vertices", RXMLConstants.MESHES_URI);
-      RXMLMeshParser.parseVertices(ev, mt, events);
+      RXMLMeshParser.parseVertices(ev, mt, in_events);
 
       final Element etr =
         RXMLUtilities.getChild(e, "triangles", RXMLConstants.MESHES_URI);
-      RXMLMeshParser.parseTriangles(etr, events);
+      RXMLMeshParser.parseTriangles(etr, in_events);
     } catch (final RXMLException x) {
-      events.eventError(x);
+      in_events.eventError(x);
       throw x;
     } finally {
-      events.eventMeshEnded();
+      in_events.eventMeshEnded();
     }
   }
 }

@@ -29,15 +29,15 @@ import com.io7m.jaux.Constraints.ConstraintError;
   private final int                      offset;
 
   public ColladaInput(
-    final @Nonnull ColladaSourceID source,
-    final @Nonnull ColladaSemantic semantic,
-    final int offset)
+    final @Nonnull ColladaSourceID in_source,
+    final @Nonnull ColladaSemantic in_semantic,
+    final int in_offset)
     throws ConstraintError
   {
-    this.source = Constraints.constrainNotNull(source, "Source");
-    this.semantic = Constraints.constrainNotNull(semantic, "Semantic");
+    this.source = Constraints.constrainNotNull(in_source, "Source");
+    this.semantic = Constraints.constrainNotNull(in_semantic, "Semantic");
     this.offset =
-      Constraints.constrainRange(offset, 0, Integer.MAX_VALUE, "Offset");
+      Constraints.constrainRange(in_offset, 0, Integer.MAX_VALUE, "Offset");
   }
 
   @Override public boolean equals(

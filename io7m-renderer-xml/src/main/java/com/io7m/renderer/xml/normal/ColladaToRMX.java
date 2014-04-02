@@ -57,19 +57,19 @@ public final class ColladaToRMX
   private static class ExportConfig
   {
     public ExportConfig(
-      final @Nonnull File input,
-      final @CheckForNull File output,
-      final @Nonnull String mesh_name,
-      final boolean tangents,
-      final boolean bitangents,
-      final @CheckForNull String output_mesh_name)
+      final @Nonnull File in_input,
+      final @CheckForNull File in_output,
+      final @Nonnull String in_mesh_name,
+      final boolean in_tangents,
+      final boolean in_bitangents,
+      final @CheckForNull String in_output_mesh_name)
     {
-      this.input = input;
-      this.output = output;
-      this.mesh_name = mesh_name;
-      this.tangents = tangents || bitangents;
-      this.bitangents = bitangents;
-      this.output_mesh_name = output_mesh_name;
+      this.input = in_input;
+      this.output = in_output;
+      this.mesh_name = in_mesh_name;
+      this.tangents = in_tangents || in_bitangents;
+      this.bitangents = in_bitangents;
+      this.output_mesh_name = in_output_mesh_name;
     }
 
     final @Nonnull File        input;

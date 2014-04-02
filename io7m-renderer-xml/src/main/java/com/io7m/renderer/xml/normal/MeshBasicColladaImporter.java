@@ -169,12 +169,12 @@ public class MeshBasicColladaImporter
   private final @Nonnull MatrixM3x3F matrix;
 
   public MeshBasicColladaImporter(
-    final @Nonnull Log log)
+    final @Nonnull Log in_log)
     throws ConstraintError
   {
     this.log =
       new Log(
-        Constraints.constrainNotNull(log, "Log interface"),
+        Constraints.constrainNotNull(in_log, "Log interface"),
         "mesh-basic-collada-importer");
     this.matrix = new MatrixM3x3F();
   }

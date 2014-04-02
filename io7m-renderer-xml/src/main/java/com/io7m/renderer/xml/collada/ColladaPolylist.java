@@ -32,14 +32,14 @@ import com.io7m.jaux.Constraints.ConstraintError;
   private final @Nonnull List<ColladaPoly>  polygons;
 
   public ColladaPolylist(
-    final @Nonnull List<ColladaInput> inputs,
-    final @Nonnull List<ColladaPoly> polygons)
+    final @Nonnull List<ColladaInput> in_inputs,
+    final @Nonnull List<ColladaPoly> in_polygons)
     throws ConstraintError
   {
-    this.inputs = Constraints.constrainNotNull(inputs, "Inputs");
-    this.polygons = Constraints.constrainNotNull(polygons, "Indices");
+    this.inputs = Constraints.constrainNotNull(in_inputs, "Inputs");
+    this.polygons = Constraints.constrainNotNull(in_polygons, "Indices");
 
-    Collections.sort(inputs, new Comparator<ColladaInput>() {
+    Collections.sort(in_inputs, new Comparator<ColladaInput>() {
       @Override public int compare(
         final @Nonnull ColladaInput o1,
         final @Nonnull ColladaInput o2)

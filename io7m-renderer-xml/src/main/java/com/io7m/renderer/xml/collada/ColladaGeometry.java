@@ -35,14 +35,14 @@ import com.io7m.jaux.Constraints.ConstraintError;
     @SuppressWarnings("synthetic-access") public ColladaMesh(
       final @Nonnull ColladaGeometryID id,
       final @Nonnull ColladaDocument document,
-      final @Nonnull SortedSet<ColladaSourceID> source_ids,
+      final @Nonnull SortedSet<ColladaSourceID> in_source_ids,
       final @Nonnull ColladaPolylist p,
       final @Nonnull ColladaAxis axis)
       throws ConstraintError
     {
       super(Type.GEOMETRY_MESH, document, id, axis);
       this.source_ids =
-        Constraints.constrainNotNull(source_ids, "Source IDs");
+        Constraints.constrainNotNull(in_source_ids, "Source IDs");
       this.polylist = Constraints.constrainNotNull(p, "Polylist");
     }
 
@@ -81,16 +81,16 @@ import com.io7m.jaux.Constraints.ConstraintError;
   private final @Nonnull ColladaDocument   document;
 
   private ColladaGeometry(
-    final @Nonnull Type type,
-    final @Nonnull ColladaDocument document,
-    final @Nonnull ColladaGeometryID id,
-    final @Nonnull ColladaAxis axis)
+    final @Nonnull Type in_type,
+    final @Nonnull ColladaDocument in_document,
+    final @Nonnull ColladaGeometryID in_id,
+    final @Nonnull ColladaAxis in_axis)
     throws ConstraintError
   {
-    this.document = Constraints.constrainNotNull(document, "Document");
-    this.type = Constraints.constrainNotNull(type, "Type");
-    this.id = Constraints.constrainNotNull(id, "ID");
-    this.axis = Constraints.constrainNotNull(axis, "Axis");
+    this.document = Constraints.constrainNotNull(in_document, "Document");
+    this.type = Constraints.constrainNotNull(in_type, "Type");
+    this.id = Constraints.constrainNotNull(in_id, "ID");
+    this.axis = Constraints.constrainNotNull(in_axis, "Axis");
   }
 
   public @Nonnull ColladaAxis getAxis()
