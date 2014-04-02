@@ -423,11 +423,11 @@ abstract class KFramebufferRGBA implements KFramebufferRGBAType
   private final long                   size;
 
   protected KFramebufferRGBA(
-    final @Nonnull AreaInclusive area,
-    final long size)
+    final @Nonnull AreaInclusive in_area,
+    final long in_size)
   {
-    this.area = area;
-    this.size = size;
+    this.area = in_area;
+    this.size = in_size;
     this.deleted = false;
   }
 
@@ -447,8 +447,8 @@ abstract class KFramebufferRGBA implements KFramebufferRGBAType
   }
 
   protected void setDeleted(
-    final boolean deleted)
+    final boolean in_deleted)
   {
-    this.deleted = deleted;
+    this.deleted = in_deleted;
   }
 }

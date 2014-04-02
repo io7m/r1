@@ -169,17 +169,17 @@ import com.io7m.renderer.kernel.types.KTranslucent;
   private final @Nonnull List<KTranslucent>                                                                 translucents;
 
   private KSceneBatchedForward(
-    final @Nonnull Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>> batches_opaque_unlit,
-    final @Nonnull Map<KLight, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>>> batches_opaque_lit,
-    final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> batch_depth,
-    final @Nonnull List<KTranslucent> translucents,
-    final @Nonnull KSceneBatchedShadow shadows)
+    final @Nonnull Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>> in_batches_opaque_unlit,
+    final @Nonnull Map<KLight, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>>> in_batches_opaque_lit,
+    final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> in_batch_depth,
+    final @Nonnull List<KTranslucent> in_translucents,
+    final @Nonnull KSceneBatchedShadow in_shadows)
   {
-    this.batches_opaque_unlit = batches_opaque_unlit;
-    this.batches_opaque_lit = batches_opaque_lit;
-    this.translucents = translucents;
-    this.batch_depth = batch_depth;
-    this.shadows = shadows;
+    this.batches_opaque_unlit = in_batches_opaque_unlit;
+    this.batches_opaque_lit = in_batches_opaque_lit;
+    this.translucents = in_translucents;
+    this.batch_depth = in_batch_depth;
+    this.shadows = in_shadows;
   }
 
   @Nonnull KSceneBatchedShadow getBatchedShadow()

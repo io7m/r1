@@ -54,13 +54,13 @@ final class KShadowMapCacheLoader implements
   private final @Nonnull StringBuilder      message;
 
   private KShadowMapCacheLoader(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull Log log)
+    final @Nonnull JCGLImplementation in_gi,
+    final @Nonnull Log in_log)
     throws ConstraintError
   {
     this.log =
-      new Log(Constraints.constrainNotNull(log, "Log"), "shadow-cache");
-    this.gi = Constraints.constrainNotNull(gi, "OpenGL implementation");
+      new Log(Constraints.constrainNotNull(in_log, "Log"), "shadow-cache");
+    this.gi = Constraints.constrainNotNull(in_gi, "OpenGL implementation");
     this.message = new StringBuilder();
   }
 

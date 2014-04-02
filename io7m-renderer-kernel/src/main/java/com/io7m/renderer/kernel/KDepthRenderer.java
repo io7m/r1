@@ -112,9 +112,9 @@ import com.io7m.renderer.types.RTransformView;
     private final @Nonnull String name;
 
     private InternalDepthLabel(
-      final @Nonnull String name)
+      final @Nonnull String in_name)
     {
-      this.name = name;
+      this.name = in_name;
     }
 
     public @Nonnull String getName()
@@ -318,17 +318,17 @@ import com.io7m.renderer.types.RTransformView;
 
   private KDepthRenderer(
     final @Nonnull JCGLImplementation gl,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull KGraphicsCapabilities caps,
-    final @Nonnull Log log)
+    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
+    final @Nonnull KGraphicsCapabilities in_caps,
+    final @Nonnull Log in_log)
     throws ConstraintError
   {
     this.log =
-      new Log(Constraints.constrainNotNull(log, "log"), "depth-renderer");
+      new Log(Constraints.constrainNotNull(in_log, "log"), "depth-renderer");
     this.g = Constraints.constrainNotNull(gl, "OpenGL implementation");
     this.shader_cache =
-      Constraints.constrainNotNull(shader_cache, "Shader cache");
-    this.caps = Constraints.constrainNotNull(caps, "Capabilities");
+      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+    this.caps = Constraints.constrainNotNull(in_caps, "Capabilities");
     this.matrices = KMutableMatrices.newMatrices();
   }
 

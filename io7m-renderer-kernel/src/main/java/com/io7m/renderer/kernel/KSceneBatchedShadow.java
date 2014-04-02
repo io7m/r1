@@ -73,9 +73,9 @@ public final class KSceneBatchedShadow
   private final @Nonnull Map<KLight, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>> shadow_casters;
 
   private KSceneBatchedShadow(
-    final @Nonnull Map<KLight, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>> shadow_casters)
+    final @Nonnull Map<KLight, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>> in_shadow_casters)
   {
-    this.shadow_casters = shadow_casters;
+    this.shadow_casters = in_shadow_casters;
   }
 
   public @Nonnull

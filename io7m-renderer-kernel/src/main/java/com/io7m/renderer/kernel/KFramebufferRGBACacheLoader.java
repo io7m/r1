@@ -47,15 +47,15 @@ final class KFramebufferRGBACacheLoader implements
   private final @Nonnull Log                log;
 
   private KFramebufferRGBACacheLoader(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull Log log)
+    final @Nonnull JCGLImplementation in_gi,
+    final @Nonnull Log in_log)
     throws ConstraintError
   {
     this.log =
       new Log(
-        Constraints.constrainNotNull(log, "Log"),
+        Constraints.constrainNotNull(in_log, "Log"),
         "framebuffer-rgba-cache");
-    this.gi = Constraints.constrainNotNull(gi, "OpenGL implementation");
+    this.gi = Constraints.constrainNotNull(in_gi, "OpenGL implementation");
   }
 
   @Override public void cacheValueClose(

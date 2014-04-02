@@ -274,15 +274,15 @@ import com.io7m.renderer.types.RTransformView;
 
   private KDepthVarianceRenderer(
     final @Nonnull JCGLImplementation gl,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull Log log)
+    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
+    final @Nonnull Log in_log)
     throws ConstraintError
   {
     this.log =
-      new Log(Constraints.constrainNotNull(log, "log"), "depth-renderer");
+      new Log(Constraints.constrainNotNull(in_log, "log"), "depth-renderer");
     this.g = Constraints.constrainNotNull(gl, "OpenGL implementation");
     this.shader_cache =
-      Constraints.constrainNotNull(shader_cache, "Shader cache");
+      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
     this.matrices = KMutableMatrices.newMatrices();
   }
 

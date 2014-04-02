@@ -652,25 +652,25 @@ import com.io7m.renderer.types.RXMLException;
 
   private KProgram(
     final @Nonnull JCGLShadersCommon gl,
-    final @Nonnull PGLSLMetaXML meta,
-    final @Nonnull ProgramReference program,
+    final @Nonnull PGLSLMetaXML in_meta,
+    final @Nonnull ProgramReference in_program,
     final @Nonnull Log log)
     throws ConstraintError
   {
-    this.meta = Constraints.constrainNotNull(meta, "Meta");
-    this.program = Constraints.constrainNotNull(program, "Program");
+    this.meta = Constraints.constrainNotNull(in_meta, "Meta");
+    this.program = Constraints.constrainNotNull(in_program, "Program");
     this.declared_uniforms = new HashMap<String, JCGLType>();
     this.declared_attributes = new HashMap<String, JCGLType>();
 
-    for (final VertexParameter p : meta.getDeclaredVertexParameters()) {
+    for (final VertexParameter p : in_meta.getDeclaredVertexParameters()) {
       final JCGLType t = JCGLType.fromName(p.getType());
       this.declared_uniforms.put(p.getName(), t);
     }
-    for (final FragmentParameter p : meta.getDeclaredFragmentParameters()) {
+    for (final FragmentParameter p : in_meta.getDeclaredFragmentParameters()) {
       final JCGLType t = JCGLType.fromName(p.getType());
       this.declared_uniforms.put(p.getName(), t);
     }
-    for (final VertexInput p : meta.getDeclaredVertexInputs()) {
+    for (final VertexInput p : in_meta.getDeclaredVertexInputs()) {
       final JCGLType t = JCGLType.fromName(p.getType());
       this.declared_attributes.put(p.getName(), t);
     }
@@ -678,7 +678,7 @@ import com.io7m.renderer.types.RXMLException;
     this.exec =
       JCBExecutor.newExecutorWithDeclarations(
         gl,
-        program,
+        in_program,
         this.declared_uniforms,
         this.declared_attributes,
         log);

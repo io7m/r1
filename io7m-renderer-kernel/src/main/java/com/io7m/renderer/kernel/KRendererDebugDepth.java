@@ -89,21 +89,21 @@ final class KRendererDebugDepth extends KAbstractRendererDebug
   private final @Nonnull KTransformContext                     transform_context;
 
   private KRendererDebugDepth(
-    final @Nonnull JCGLImplementation gl,
-    final @Nonnull KMaterialDepthLabelCache depth_labels,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull Log log)
+    final @Nonnull JCGLImplementation in_gl,
+    final @Nonnull KMaterialDepthLabelCache in_depth_labels,
+    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
+    final @Nonnull Log in_log)
   {
     super(KRendererDebugDepth.NAME);
 
-    this.log = new Log(log, KRendererDebugDepth.NAME);
-    this.gl = gl;
+    this.log = new Log(in_log, KRendererDebugDepth.NAME);
+    this.gl = in_gl;
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
     this.matrices = KMutableMatrices.newMatrices();
     this.transform_context = KTransformContext.newContext();
-    this.depth_labels = depth_labels;
-    this.shader_cache = shader_cache;
+    this.depth_labels = in_depth_labels;
+    this.shader_cache = in_shader_cache;
 
     this.log.debug("initialized");
   }

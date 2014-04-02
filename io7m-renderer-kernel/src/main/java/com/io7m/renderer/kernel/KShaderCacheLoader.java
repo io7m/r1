@@ -51,15 +51,15 @@ final class KShaderCacheLoader implements
   private final @Nonnull Log                log;
 
   private KShaderCacheLoader(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull FSCapabilityRead fs,
-    final @Nonnull Log log)
+    final @Nonnull JCGLImplementation in_gi,
+    final @Nonnull FSCapabilityRead in_fs,
+    final @Nonnull Log in_log)
     throws ConstraintError
   {
     this.log =
-      new Log(Constraints.constrainNotNull(log, "Log"), "shader-cache");
-    this.gi = Constraints.constrainNotNull(gi, "OpenGL implementation");
-    this.fs = Constraints.constrainNotNull(fs, "Filesystem");
+      new Log(Constraints.constrainNotNull(in_log, "Log"), "shader-cache");
+    this.gi = Constraints.constrainNotNull(in_gi, "OpenGL implementation");
+    this.fs = Constraints.constrainNotNull(in_fs, "Filesystem");
   }
 
   @Override public void cacheValueClose(

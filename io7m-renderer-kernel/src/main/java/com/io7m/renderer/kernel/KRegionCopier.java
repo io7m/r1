@@ -128,17 +128,18 @@ public final class KRegionCopier
 
   private KRegionCopier(
     final @Nonnull JCGLImplementation gi,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull Log log)
+    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
+    final @Nonnull Log in_log)
     throws ConstraintError,
       RException
   {
     try {
       this.g = Constraints.constrainNotNull(gi, "OpenGL implementation");
       this.shader_cache =
-        Constraints.constrainNotNull(shader_cache, "Shader cache");
-      this.log = new Log(Constraints.constrainNotNull(log, "Log"), "copier");
-      this.quad = KUnitQuad.newQuad(gi.getGLCommon(), log);
+        Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+      this.log =
+        new Log(Constraints.constrainNotNull(in_log, "Log"), "copier");
+      this.quad = KUnitQuad.newQuad(gi.getGLCommon(), in_log);
     } catch (final JCGLException x) {
       throw RException.fromJCGLException(x);
     }

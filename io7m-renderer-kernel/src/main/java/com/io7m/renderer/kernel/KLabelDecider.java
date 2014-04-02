@@ -94,14 +94,14 @@ final class KLabelDecider implements
   private final @Nonnull LRUCacheTrivial<KInstanceRegular, KMaterialSpecularLabel, ConstraintError>                                   specular_cache;
 
   private KLabelDecider(
-    final @Nonnull KGraphicsCapabilities capabilities,
-    final @Nonnull LRUCacheConfig cache_config)
+    final @Nonnull KGraphicsCapabilities in_capabilities,
+    final @Nonnull LRUCacheConfig in_cache_config)
     throws ConstraintError
   {
     this.capabilities =
-      Constraints.constrainNotNull(capabilities, "Capabilities");
+      Constraints.constrainNotNull(in_capabilities, "Capabilities");
     this.cache_config =
-      Constraints.constrainNotNull(cache_config, "Cache config");
+      Constraints.constrainNotNull(in_cache_config, "Cache config");
 
     this.alpha_cache =
       LRUCacheTrivial
@@ -524,7 +524,7 @@ final class KLabelDecider implements
             final @Nonnull KLight key)
             throws ConstraintError
           {
-            return KLightLabel.fromLight(capabilities, key);
+            return KLightLabel.fromLight(in_capabilities, key);
           }
 
           @Override public @Nonnull BigInteger cacheValueSizeOf(

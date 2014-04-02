@@ -941,34 +941,36 @@ public final class KRefractionRendererActual implements KRefractionRenderer
 
   private KRefractionRendererActual(
     final @Nonnull JCGLImplementation gl,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull BLUCache<KFramebufferForwardDescription, KFramebufferForwardType, RException> forward_cache,
-    final @Nonnull LUCache<KMesh, KMeshBounds<RSpaceObject>, RException> bounds_cache,
-    final @Nonnull LUCache<KMeshBounds<RSpaceObject>, KMeshBoundsTriangles<RSpaceObject>, RException> bounds_tri_cache,
-    final @Nonnull KMaterialForwardTranslucentRefractiveLabelCache label_cache,
+    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
+    final @Nonnull BLUCache<KFramebufferForwardDescription, KFramebufferForwardType, RException> in_forward_cache,
+    final @Nonnull LUCache<KMesh, KMeshBounds<RSpaceObject>, RException> in_bounds_cache,
+    final @Nonnull LUCache<KMeshBounds<RSpaceObject>, KMeshBoundsTriangles<RSpaceObject>, RException> in_bounds_tri_cache,
+    final @Nonnull KMaterialForwardTranslucentRefractiveLabelCache in_label_cache,
     final @Nonnull KGraphicsCapabilities caps,
-    final @Nonnull Log log)
+    final @Nonnull Log in_log)
     throws ConstraintError,
       RException
   {
     try {
       this.log =
-        new Log(Constraints.constrainNotNull(log, "Log"), "shadow-renderer");
+        new Log(
+          Constraints.constrainNotNull(in_log, "Log"),
+          "shadow-renderer");
       this.g = Constraints.constrainNotNull(gl, "OpenGL implementation");
       this.forward_cache =
         Constraints.constrainNotNull(
-          forward_cache,
+          in_forward_cache,
           "Forward framebuffer cache");
       this.shader_cache =
-        Constraints.constrainNotNull(shader_cache, "Shader cache");
+        Constraints.constrainNotNull(in_shader_cache, "Shader cache");
       this.bounds_cache =
-        Constraints.constrainNotNull(bounds_cache, "Bounds cache");
+        Constraints.constrainNotNull(in_bounds_cache, "Bounds cache");
       this.bounds_tri_cache =
         Constraints.constrainNotNull(
-          bounds_tri_cache,
+          in_bounds_tri_cache,
           "Bounds triangle cache");
       this.label_cache =
-        Constraints.constrainNotNull(label_cache, "Label cache");
+        Constraints.constrainNotNull(in_label_cache, "Label cache");
 
       this.texture_units = KTextureUnitAllocator.newAllocator(this.g);
       this.clip_tmp = new RVectorM4F<RSpaceClip>();

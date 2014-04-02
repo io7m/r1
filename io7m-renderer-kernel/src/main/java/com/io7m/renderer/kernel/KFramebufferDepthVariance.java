@@ -215,18 +215,18 @@ abstract class KFramebufferDepthVariance implements
     private final @Nonnull Texture2DStatic                      variance;
 
     public KFramebufferDepthVarianceGL3ES3(
-      final @Nonnull Texture2DStatic depth,
-      final @Nonnull Texture2DStatic variance,
+      final @Nonnull Texture2DStatic in_depth,
+      final @Nonnull Texture2DStatic in_variance,
       final @Nonnull FramebufferReference fb,
-      final @Nonnull KFramebufferDepthVarianceDescription description)
+      final @Nonnull KFramebufferDepthVarianceDescription in_description)
       throws ConstraintError
     {
-      super(depth.getArea(), depth.resourceGetSizeBytes()
-        + variance.resourceGetSizeBytes());
-      this.depth = depth;
-      this.variance = variance;
+      super(in_depth.getArea(), in_depth.resourceGetSizeBytes()
+        + in_variance.resourceGetSizeBytes());
+      this.depth = in_depth;
+      this.variance = in_variance;
       this.framebuffer = fb;
-      this.description = description;
+      this.description = in_description;
     }
 
     @Override public void kFramebufferDelete(
@@ -335,12 +335,12 @@ abstract class KFramebufferDepthVariance implements
   private final long                   size;
 
   protected KFramebufferDepthVariance(
-    final @Nonnull AreaInclusive area,
-    final long size)
+    final @Nonnull AreaInclusive in_area,
+    final long in_size)
     throws ConstraintError
   {
-    this.area = Constraints.constrainNotNull(area, "Area");
-    this.size = size;
+    this.area = Constraints.constrainNotNull(in_area, "Area");
+    this.size = in_size;
     this.deleted = false;
   }
 
@@ -360,8 +360,8 @@ abstract class KFramebufferDepthVariance implements
   }
 
   protected final void setDeleted(
-    final boolean deleted)
+    final boolean in_deleted)
   {
-    this.deleted = deleted;
+    this.deleted = in_deleted;
   }
 }
