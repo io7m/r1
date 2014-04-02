@@ -16,7 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
-public interface KRendererDeferred
-{
+/**
+ * The type of deferred renderers.
+ */
 
+public interface KRendererDeferred extends KRenderer
+{
+  // Nothing
 }

@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
@@ -56,8 +55,7 @@ import com.io7m.renderer.kernel.types.KScene.KSceneOpaques;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 
-@Immutable final class KRendererDebugTangentsVertexEye extends
-  KAbstractRendererDebug
+final class KRendererDebugTangentsVertexEye extends KAbstractRendererDebug
 {
   private static final @Nonnull String NAME = "debug-tangents-vertex-eye";
 

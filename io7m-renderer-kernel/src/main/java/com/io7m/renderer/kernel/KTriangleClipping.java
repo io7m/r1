@@ -39,12 +39,46 @@ import com.io7m.renderer.types.RVectorReadable4F;
 
 public final class KTriangleClipping
 {
+  /**
+   * The <code>-X</code> homogeneous clipping plane.
+   */
+
   public static final @Nonnull VectorI4F       PLANE_NEGATIVE_X;
+
+  /**
+   * The <code>-Y</code> homogeneous clipping plane.
+   */
+
   public static final @Nonnull VectorI4F       PLANE_NEGATIVE_Y;
+
+  /**
+   * The <code>-Z</code> homogeneous clipping plane.
+   */
+
   public static final @Nonnull VectorI4F       PLANE_NEGATIVE_Z;
+
+  /**
+   * The <code>+X</code> homogeneous clipping plane.
+   */
+
   public static final @Nonnull VectorI4F       PLANE_POSITIVE_X;
+
+  /**
+   * The <code>+Y</code> homogeneous clipping plane.
+   */
+
   public static final @Nonnull VectorI4F       PLANE_POSITIVE_Y;
+
+  /**
+   * The <code>+Z</code> homogeneous clipping plane.
+   */
+
   public static final @Nonnull VectorI4F       PLANE_POSITIVE_Z;
+
+  /**
+   * A read-only list of the six homogeneous clipping plane.
+   */
+
   public static final @Nonnull List<VectorI4F> PLANES;
 
   static {
@@ -57,7 +91,7 @@ public final class KTriangleClipping
     PLANE_NEGATIVE_Z = new VectorI4F(0.0f, 0.0f, 1.0f, -1.0f);
     PLANE_POSITIVE_Z = new VectorI4F(0.0f, 0.0f, -1.0f, -1.0f);
 
-    final LinkedList<VectorI4F> p = new LinkedList<VectorI4F>();
+    final List<VectorI4F> p = new LinkedList<VectorI4F>();
     p.add(KTriangleClipping.PLANE_NEGATIVE_X);
     p.add(KTriangleClipping.PLANE_NEGATIVE_Y);
     p.add(KTriangleClipping.PLANE_NEGATIVE_Z);
@@ -75,8 +109,9 @@ public final class KTriangleClipping
    *          The triangle
    * @param plane
    *          The plane
-   * @param results
-   *          The list of resulting triangles
+   * @param <S>
+   *          The type of coordinate space
+   * @return A list of the resulting clipped triangles
    * @throws ConstraintError
    *           Iff any parameter is <code>null</code>
    */
@@ -232,6 +267,16 @@ public final class KTriangleClipping
   /**
    * Clip the given triangle against the given planes, writing the resulting
    * triangles to <code>results</code>.
+   * 
+   * @param triangle
+   *          The triangle
+   * @param planes
+   *          The list of planes
+   * @param <S>
+   *          The type of coordinate space
+   * @return A list of the resulting clipped triangles
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
    */
 
   public static @Nonnull
@@ -245,7 +290,7 @@ public final class KTriangleClipping
     Constraints.constrainNotNull(triangle, "Triangle");
     Constraints.constrainNotNull(planes, "Planes");
 
-    final LinkedList<VectorI4F> in_planes = new LinkedList<VectorI4F>();
+    final List<VectorI4F> in_planes = new LinkedList<VectorI4F>();
     in_planes.addAll(planes);
 
     final List<RTriangle4F<S>> in_triangles =
@@ -303,6 +348,8 @@ public final class KTriangleClipping
    * Return <code>true</code> iff the given point is inside or on the given
    * plane.
    * 
+   * @param <S>
+   *          The type of the coordinate space
    * @param point
    *          The point
    * @param plane

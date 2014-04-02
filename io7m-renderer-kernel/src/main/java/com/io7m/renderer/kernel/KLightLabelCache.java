@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,9 +22,23 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KLight;
 import com.io7m.renderer.kernel.types.KLightLabel;
 
-public interface KLightLabelCache
+/**
+ * The type of light label caches.
+ */
+
+interface KLightLabelCache
 {
-  public @Nonnull KLightLabel getLightLabel(
+  /**
+   * Retrieve the label for the given light.
+   * 
+   * @param light
+   *          The light
+   * @return The label for the given light
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  @Nonnull KLightLabel getLightLabel(
     final @Nonnull KLight light)
     throws ConstraintError;
 }

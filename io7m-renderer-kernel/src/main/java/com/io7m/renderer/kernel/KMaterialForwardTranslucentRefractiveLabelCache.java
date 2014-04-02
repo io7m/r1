@@ -24,7 +24,7 @@ import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRefractiveLabel
 
 interface KMaterialForwardTranslucentRefractiveLabelCache
 {
-  public @Nonnull
+  @Nonnull
     KMaterialForwardTranslucentRefractiveLabel
     getForwardLabelTranslucentRefractive(
       final @Nonnull KInstanceTranslucentRefractive instance)

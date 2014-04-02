@@ -21,9 +21,39 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
+/**
+ * The type of postprocessors that operate on RGBA values.
+ * 
+ * @param <C>
+ *          The type of renderer-specific configuration values
+ */
+
 public interface KPostprocessorRGBA<C> extends KPostprocessor
 {
-  public void postprocessorEvaluateRGBA(
+  /**
+   * <p>
+   * Evaluate the postprocessor, reading from <code>input</code> and writing
+   * to <code>output</code>.
+   * </p>
+   * <p>
+   * All postprocessors must be able to handle the case that
+   * <code>input == output</code>, possibly by performing operations on
+   * temporary internal framebuffers.
+   * </p>
+   * 
+   * @param config
+   *          The postprocessor-specific config values
+   * @param input
+   *          The input framebuffer
+   * @param output
+   *          The output framebuffer
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   * @throws RException
+   *           If any error occurs
+   */
+
+  void postprocessorEvaluateRGBA(
     final @Nonnull C config,
     final @Nonnull KFramebufferRGBAUsable input,
     final @Nonnull KFramebufferRGBAUsable output)

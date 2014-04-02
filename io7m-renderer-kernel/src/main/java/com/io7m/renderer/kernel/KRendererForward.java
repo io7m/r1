@@ -22,9 +22,27 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.types.RException;
 
+/**
+ * The type of forward renderers.
+ */
+
 public interface KRendererForward extends KRenderer
 {
-  public void rendererForwardEvaluate(
+  /**
+   * Evaluate the renderer for the given scene, writing the results to the
+   * given framebuffer.
+   * 
+   * @param framebuffer
+   *          The framebuffer
+   * @param scene
+   *          The scene
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   * @throws RException
+   *           If an error occurs
+   */
+
+  void rendererForwardEvaluate(
     final @Nonnull KFramebufferForwardUsable framebuffer,
     final @Nonnull KScene scene)
     throws ConstraintError,

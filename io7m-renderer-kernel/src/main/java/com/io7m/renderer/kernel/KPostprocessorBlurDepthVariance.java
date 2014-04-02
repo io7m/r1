@@ -36,7 +36,7 @@ import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.types.RException;
 
-public final class KPostprocessorBlurDepthVariance extends
+final class KPostprocessorBlurDepthVariance extends
   KAbstractPostprocessorDepthVariance<KBlurParameters>
 {
   private static final @Nonnull String NAME;

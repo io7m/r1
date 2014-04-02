@@ -22,9 +22,34 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
+/**
+ * The type of functions that execute with compiled shadow maps.
+ * 
+ * @param <A>
+ *          The type of returned values
+ * @param <E>
+ *          The type of raised exceptions
+ */
+
 public interface KShadowMapWith<A, E extends Throwable>
 {
-  public A withMaps(
+  /**
+   * Execute with the shadow maps in the given context.
+   * 
+   * @param context
+   *          The context containing shadow maps
+   * @return A value of type <code>A</code>
+   * @throws ConstraintError
+   *           If required
+   * @throws JCGLException
+   *           If required
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  A withMaps(
     final @Nonnull KShadowMapContext context)
     throws ConstraintError,
       JCGLException,

@@ -20,15 +20,20 @@ import javax.annotation.Nonnull;
 
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 
+/**
+ * The type of usable forward-rendering framebuffers.
+ */
+
 public interface KFramebufferForwardUsable extends
   KFramebufferRGBAUsable,
   KFramebufferDepthUsable
 {
   /**
    * Retrieve a description of this framebuffer.
+   * 
+   * @return A description of the framebuffer that can be used to allocate
+   *         other framebuffers with the same configuration
    */
 
-  public @Nonnull
-    KFramebufferForwardDescription
-    kFramebufferGetForwardDescription();
+  @Nonnull KFramebufferForwardDescription kFramebufferGetForwardDescription();
 }

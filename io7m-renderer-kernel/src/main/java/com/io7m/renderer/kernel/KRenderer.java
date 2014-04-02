@@ -23,38 +23,81 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.types.RException;
 
-public interface KRenderer extends KRendererVisitable
+/**
+ * The type of renderers.
+ */
+
+public interface KRenderer
 {
   /**
    * Delete all resources associated with this renderer.
+   * 
+   * @throws RException
+   *           If an error occurs
+   * @throws ConstraintError
+   *           If an internal constraint error occurs
    */
 
-  public void rendererClose()
+  void rendererClose()
     throws RException,
       ConstraintError;
 
   /**
    * Retrieve a reference to the debugging interface (optionally) supported by
-   * the renderer. Returns <code>null</code> if debugging is not supported.
+   * the renderer.
+   * 
+   * @return A debugging interface, <code>null</code> if debugging is not
+   *         supported
    */
 
-  public @CheckForNull KRendererDebugging rendererDebug();
+  @CheckForNull KRendererDebugging rendererDebug();
 
   /**
-   * Retrieve the name of the renderer.
+   * @return The name of the renderer
    */
 
-  public @Nonnull String rendererGetName();
+  @Nonnull String rendererGetName();
 
   /**
    * Set the colour to which the renderer will clear the colour buffer prior
    * to rendering.
    * 
+   * @param rgba
+   *          The colour to use
    * @throws ConstraintError
    *           Iff <code>rgba == null</code>.
    */
 
-  public void rendererSetBackgroundRGBA(
+  void rendererSetBackgroundRGBA(
     final @Nonnull VectorReadable4F rgba)
     throws ConstraintError;
+
+  /**
+   * Accept a renderer visitor.
+   * 
+   * @param <A>
+   *          The type of values returned by the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          The type of the visitor
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws E
+   *           If the visitor raises <code>E</code>
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code> or the visitor raises
+   *           {@link ConstraintError}
+   * @throws RException
+   *           If the visitor raises {@link RException}
+   */
+
+    <A, E extends Throwable, V extends KRendererVisitor<A, E>>
+    A
+    rendererVisitableAccept(
+      final @Nonnull V v)
+      throws E,
+        ConstraintError,
+        RException;
 }

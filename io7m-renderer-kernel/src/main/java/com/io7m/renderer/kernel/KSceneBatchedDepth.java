@@ -31,13 +31,13 @@ import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 
 final class KSceneBatchedDepth
 {
-  static interface Builder
+  interface Builder
   {
-    public void sceneAddInstance(
+    void sceneAddInstance(
       final @Nonnull KInstanceTransformedOpaque instance)
       throws ConstraintError;
 
-    public @Nonnull
+    @Nonnull
       Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>
       sceneCreate();
   }

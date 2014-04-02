@@ -24,7 +24,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
 
 interface KMaterialSpecularLabelCache
 {
-  public @Nonnull KMaterialSpecularLabel getSpecularLabelRegular(
+  @Nonnull KMaterialSpecularLabel getSpecularLabelRegular(
     final @Nonnull KInstanceRegular instance)
     throws ConstraintError;
 }

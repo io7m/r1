@@ -21,21 +21,72 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
+/**
+ * The type of renderer visitors.
+ * 
+ * @param <A>
+ *          The type of values returned by the visitor
+ * @param <E>
+ *          The type of exceptions raised by the visitor
+ */
+
 public interface KRendererVisitor<A, E extends Throwable>
 {
-  public A rendererVisitDebug(
+  /**
+   * Visit a debug renderer.
+   * 
+   * @param r
+   *          The renderer
+   * @return A value of type <code>A</code>
+   * @throws E
+   *           If required
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   */
+
+  A rendererVisitDebug(
     final @Nonnull KRendererDebug r)
     throws E,
       ConstraintError,
       RException;
 
-  public A rendererVisitDeferred(
+  /**
+   * Visit a deferred renderer.
+   * 
+   * @param r
+   *          The renderer
+   * @return A value of type <code>A</code>
+   * @throws E
+   *           If required
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   */
+
+  A rendererVisitDeferred(
     final @Nonnull KRendererDeferred r)
     throws E,
       ConstraintError,
       RException;
 
-  public A rendererVisitForward(
+  /**
+   * Visit a forward renderer.
+   * 
+   * @param r
+   *          The renderer
+   * @return A value of type <code>A</code>
+   * @throws E
+   *           If required
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   */
+
+  A rendererVisitForward(
     final @Nonnull KRendererForward r)
     throws E,
       ConstraintError,

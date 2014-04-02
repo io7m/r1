@@ -21,9 +21,40 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
+/**
+ * The type of postprocessors that operate on RGBA and depth values.
+ * 
+ * @param <C>
+ *          The type of renderer-specific configuration values
+ */
+
 public interface KPostprocessorRGBAWithDepth<C> extends KPostprocessor
 {
-  public
+  /**
+   * <p>
+   * Evaluate the postprocessor, reading from <code>input</code> and writing
+   * to <code>output</code>.
+   * </p>
+   * <p>
+   * All postprocessors must be able to handle the case that
+   * <code>input == output</code>, possibly by performing operations on
+   * temporary internal framebuffers.
+   * </p>
+   * 
+   * @param <F>
+   *          The type of framebuffers
+   * @param config
+   *          The postprocessor-specific config values
+   * @param input
+   *          The input framebuffer
+   * @param output
+   *          The output framebuffer
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   * @throws RException
+   *           If any error occurs
+   */
+
     <F extends KFramebufferRGBAUsable & KFramebufferDepthUsable>
     void
     postprocessorEvaluateRGBAWithDepth(

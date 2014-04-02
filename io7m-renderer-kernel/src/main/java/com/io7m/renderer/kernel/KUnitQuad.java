@@ -46,8 +46,28 @@ import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
 
+/**
+ * A unit quad, from <code>(-1, -1, 0)</code> to <code>(1, 1, 0)</code>.
+ */
+
 public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
 {
+  /**
+   * Construct a new unit quad.
+   * 
+   * @param gl
+   *          The OpenGL interface
+   * @param log
+   *          A log handle
+   * @param <G>
+   *          The type of OpenGL interface
+   * @return A new unit quad
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   * @throws JCGLException
+   *           If an OpenGL error occurs
+   */
+
   public static @Nonnull
     <G extends JCGLArrayBuffers & JCGLIndexBuffers>
     KUnitQuad
@@ -57,6 +77,9 @@ public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
       throws ConstraintError,
         JCGLException
   {
+    Constraints.constrainNotNull(gl, "OpenGL interface");
+    Constraints.constrainNotNull(log, "Log handle");
+
     if (log.enabled(Level.LOG_DEBUG)) {
       log.debug("Allocate unit quad");
     }
@@ -158,10 +181,18 @@ public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
     return true;
   }
 
+  /**
+   * @return The array buffer that backs the quad
+   */
+
   public @Nonnull ArrayBufferUsable getArray()
   {
     return this.array;
   }
+
+  /**
+   * @return The index buffer that backs the quad
+   */
 
   public @Nonnull IndexBufferUsable getIndices()
   {
@@ -187,6 +218,17 @@ public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
     builder.append("]");
     return builder.toString();
   }
+
+  /**
+   * Delete all resources associated with the quad.
+   * 
+   * @param gc
+   *          The OpenGL interface
+   * @throws ConstraintError
+   *           If the quad is already deleted
+   * @throws JCGLRuntimeException
+   *           If an OpenGL error occurs
+   */
 
   public void delete(
     final @Nonnull JCGLInterfaceCommon gc)

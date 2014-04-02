@@ -16,6 +16,10 @@
 
 package com.io7m.renderer.kernel;
 
+/**
+ * The type of depth-variance framebuffers.
+ */
+
 public interface KFramebufferDepthVarianceType extends
   KFramebuffer,
   KFramebufferDepthVarianceUsable

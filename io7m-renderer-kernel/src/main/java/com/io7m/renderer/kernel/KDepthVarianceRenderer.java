@@ -35,14 +35,12 @@ import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.JCBExecutionAPI;
-import com.io7m.jcanephora.JCBExecutionException;
 import com.io7m.jcanephora.JCBExecutorProcedure;
 import com.io7m.jcanephora.JCBProgram;
 import com.io7m.jcanephora.JCBProgramProcedure;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
@@ -349,9 +347,8 @@ import com.io7m.renderer.types.RTransformView;
         @Override public void call(
           final @Nonnull JCBProgram jp)
           throws ConstraintError,
-            JCGLRuntimeException,
-            JCBExecutionException,
-            Throwable
+            JCGLException,
+            RException
         {
           KShadingProgramCommon.putMatrixProjection(
             jp,

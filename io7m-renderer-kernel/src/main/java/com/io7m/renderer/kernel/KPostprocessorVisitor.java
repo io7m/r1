@@ -21,27 +21,100 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
+/**
+ * The type of postprocessor visitors.
+ * 
+ * @param <A>
+ *          The type of values returned by the visitor
+ * @param <E>
+ *          The type of exceptions raised by the visitor
+ */
+
 public interface KPostprocessorVisitor<A, E extends Throwable>
 {
-  public <C> A postprocessorVisitDepth(
+  /**
+   * Visit a depth postprocessor.
+   * 
+   * @param <C>
+   *          The type of config values
+   * @param r
+   *          The postprocessor
+   * @return A value of type <code>A</code>
+   * @throws E
+   *           If required
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   */
+
+  <C> A postprocessorVisitDepth(
     final @Nonnull KPostprocessorDepth<C> r)
     throws E,
       ConstraintError,
       RException;
 
-  public <C> A postprocessorVisitDepthVariance(
+  /**
+   * Visit a depth-variance postprocessor.
+   * 
+   * @param <C>
+   *          The type of config values
+   * @param r
+   *          The postprocessor
+   * @return A value of type <code>A</code>
+   * @throws E
+   *           If required
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   */
+
+  <C> A postprocessorVisitDepthVariance(
     final @Nonnull KPostprocessorDepthVariance<C> r)
     throws E,
       ConstraintError,
       RException;
 
-  public <C> A postprocessorVisitRGBA(
+  /**
+   * Visit an RGBA postprocessor.
+   * 
+   * @param <C>
+   *          The type of config values
+   * @param r
+   *          The postprocessor
+   * @return A value of type <code>A</code>
+   * @throws E
+   *           If required
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   */
+
+  <C> A postprocessorVisitRGBA(
     final @Nonnull KPostprocessorRGBA<C> r)
     throws E,
       ConstraintError,
       RException;
 
-  public <C> A postprocessorVisitRGBAWithDepth(
+  /**
+   * Visit an RGBA/depth postprocessor.
+   * 
+   * @param <C>
+   *          The type of config values
+   * @param r
+   *          The postprocessor
+   * @return A value of type <code>A</code>
+   * @throws E
+   *           If required
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   */
+
+  <C> A postprocessorVisitRGBAWithDepth(
     final @Nonnull KPostprocessorRGBAWithDepth<C> r)
     throws E,
       ConstraintError,

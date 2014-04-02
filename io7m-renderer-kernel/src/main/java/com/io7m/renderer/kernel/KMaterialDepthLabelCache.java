@@ -24,7 +24,7 @@ import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 
 interface KMaterialDepthLabelCache
 {
-  public @Nonnull KMaterialDepthLabel getDepthLabel(
+  @Nonnull KMaterialDepthLabel getDepthLabel(
     final @Nonnull KInstanceOpaque instance)
     throws ConstraintError;
 }

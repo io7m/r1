@@ -22,30 +22,40 @@ import com.io7m.jcanephora.FramebufferReferenceUsable;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 
+/**
+ * The type of usable "image-only" RGBA framebuffers.
+ */
+
 public interface KFramebufferRGBAUsable extends KFramebufferUsable
 {
   /**
    * <p>
-   * Retrieve a reference to the framebuffer to which the scene will be
-   * rendered.
+   * Retrieve a reference to the color framebuffer.
    * </p>
+   * 
+   * @return A reference to the color framebuffer
    */
 
-  public @Nonnull
-    FramebufferReferenceUsable
-    kFramebufferGetColorFramebuffer();
+  @Nonnull FramebufferReferenceUsable kFramebufferGetColorFramebuffer();
 
   /**
-   * Retrieve the RGBA colour texture that backs the scene framebuffer.
-   */
-
-  public @Nonnull Texture2DStaticUsable kFramebufferGetRGBATexture();
-
-  /**
+   * <p>
    * Retrieve a description of this framebuffer.
+   * </p>
+   * 
+   * @return A description of the framebuffer that can be used to allocate
+   *         other framebuffers with the same configuration
    */
 
-  public @Nonnull
-    KFramebufferRGBADescription
-    kFramebufferGetRGBADescription();
+  @Nonnull KFramebufferRGBADescription kFramebufferGetRGBADescription();
+
+  /**
+   * <p>
+   * Retrieve the RGBA colour texture that backs the scene framebuffer.
+   * </p>
+   * 
+   * @return A reference to the texture that backs the color buffer
+   */
+
+  @Nonnull Texture2DStaticUsable kFramebufferGetRGBATexture();
 }

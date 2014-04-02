@@ -22,9 +22,28 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.types.RException;
 
+/**
+ * The type of refraction renderers.
+ */
+
 public interface KRefractionRenderer
 {
-  public void rendererRefractionEvaluate(
+  /**
+   * Render the given refractive instance.
+   * 
+   * @param framebuffer
+   *          The current scene
+   * @param observer
+   *          The current observer matrices
+   * @param r
+   *          The refractive instance
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   * @throws RException
+   *           If an error occurs
+   */
+
+  void rendererRefractionEvaluate(
     final @Nonnull KFramebufferForwardUsable framebuffer,
     final @Nonnull KMutableMatrices.MatricesObserver observer,
     final @Nonnull KInstanceTransformedTranslucentRefractive r)

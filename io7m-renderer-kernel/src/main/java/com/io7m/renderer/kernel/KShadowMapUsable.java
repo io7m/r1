@@ -16,12 +16,16 @@
 
 package com.io7m.renderer.kernel;
 
+/**
+ * The type of usable shadow maps.
+ */
+
 public interface KShadowMapUsable
 {
   /**
-   * Retrieve the number of bytes consumed by all resources that make up the
-   * shadow map.
+   * @return The number of bytes consumed by all resources that make up the
+   *         shadow map.
    */
 
-  public long kShadowMapGetSizeBytes();
+  long kShadowMapGetSizeBytes();
 }

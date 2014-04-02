@@ -96,10 +96,12 @@ final class KTextureUnitAllocator implements KTextureUnitContextInitial
       }
     }
 
-    @Override public TextureUnit withTexture2D(
-      final @Nonnull Texture2DStaticUsable t)
-      throws ConstraintError,
-        JCGLRuntimeException
+    @SuppressWarnings("synthetic-access") @Override public
+      TextureUnit
+      withTexture2D(
+        final @Nonnull Texture2DStaticUsable t)
+        throws ConstraintError,
+          JCGLRuntimeException
     {
       final TextureUnit unit =
         KTextureUnitAllocator.this.texturesUnitGet(this.first + this.count);
@@ -109,10 +111,12 @@ final class KTextureUnitAllocator implements KTextureUnitContextInitial
       return unit;
     }
 
-    @Override public TextureUnit withTextureCube(
-      final @Nonnull TextureCubeStaticUsable t)
-      throws ConstraintError,
-        JCGLRuntimeException
+    @SuppressWarnings("synthetic-access") @Override public
+      TextureUnit
+      withTextureCube(
+        final @Nonnull TextureCubeStaticUsable t)
+        throws ConstraintError,
+          JCGLRuntimeException
     {
       final TextureUnit unit =
         KTextureUnitAllocator.this.texturesUnitGet(this.first + this.count);
@@ -130,10 +134,10 @@ final class KTextureUnitAllocator implements KTextureUnitContextInitial
     return new KTextureUnitAllocator(gi);
   }
 
-  private int                                  allocated;
-  protected final @Nonnull JCGLInterfaceCommon gc;
-  private boolean                              in_use;
-  private final @Nonnull List<TextureUnit>     units;
+  private int                                allocated;
+  private final @Nonnull JCGLInterfaceCommon gc;
+  private boolean                            in_use;
+  private final @Nonnull List<TextureUnit>   units;
 
   private KTextureUnitAllocator(
     final @Nonnull JCGLImplementation gi)

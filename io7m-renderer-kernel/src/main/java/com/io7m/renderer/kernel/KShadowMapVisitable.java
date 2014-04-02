@@ -20,9 +20,30 @@ import javax.annotation.Nonnull;
 
 import com.io7m.renderer.types.RException;
 
+/**
+ * The type of visitable shadow maps.
+ */
+
 public interface KShadowMapVisitable
 {
-  public
+  /**
+   * Accept a visitor.
+   * 
+   * @param <A>
+   *          The type of values returned by the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          The type of the visitor
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws E
+   *           If the visitor raises <code>E</code>
+   * @throws RException
+   *           If the visitor raises an {@link RException}
+   */
+
     <A, E extends Throwable, V extends KShadowMapVisitor<A, E>>
     A
     kShadowMapAccept(

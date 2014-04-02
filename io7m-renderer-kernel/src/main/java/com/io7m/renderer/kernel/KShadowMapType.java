@@ -16,18 +16,35 @@
 
 package com.io7m.renderer.kernel;
 
+import javax.annotation.Nonnull;
+
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLResourceUsable;
 import com.io7m.renderer.types.RException;
+
+/**
+ * The type of shadow maps.
+ */
 
 public interface KShadowMapType extends
   KShadowMapUsable,
   JCGLResourceUsable,
   KShadowMapVisitable
 {
-  public void kShadowMapDelete(
-    JCGLImplementation g)
+  /**
+   * Delete the current shadow map.
+   * 
+   * @param g
+   *          The OpenGL interface
+   * @throws RException
+   *           If an error occurs
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  void kShadowMapDelete(
+    @Nonnull JCGLImplementation g)
     throws RException,
       ConstraintError;
 }

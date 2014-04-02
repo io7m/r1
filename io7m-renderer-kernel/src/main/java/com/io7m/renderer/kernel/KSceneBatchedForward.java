@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -99,7 +99,7 @@ import com.io7m.renderer.kernel.types.KTranslucent;
       final @Nonnull Set<KInstanceTransformedOpaque> instances)
       throws ConstraintError
   {
-    final HashMap<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>> forward_map =
+    final Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>> forward_map =
       new HashMap<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>>();
 
     for (final KInstanceTransformedOpaque instance : instances) {
