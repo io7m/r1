@@ -30,19 +30,19 @@ public final class SBCacheStatistics
   private final @Nonnull BigInteger cached_shadow_maps_bytes;
 
   public SBCacheStatistics(
-    final @Nonnull BigInteger cached_labels,
-    final @Nonnull BigInteger cached_shaders,
-    final @Nonnull BigInteger cached_shadow_maps,
-    final @Nonnull BigInteger cached_shadow_maps_bytes,
-    final @Nonnull BigInteger cached_rgba_framebuffers,
-    final @Nonnull BigInteger cached_rgba_framebuffers_bytes)
+    final @Nonnull BigInteger in_cached_labels,
+    final @Nonnull BigInteger in_cached_shaders,
+    final @Nonnull BigInteger in_cached_shadow_maps,
+    final @Nonnull BigInteger in_cached_shadow_maps_bytes,
+    final @Nonnull BigInteger in_cached_rgba_framebuffers,
+    final @Nonnull BigInteger in_cached_rgba_framebuffers_bytes)
   {
-    this.cached_labels = cached_labels;
-    this.cached_shaders = cached_shaders;
-    this.cached_shadow_maps = cached_shadow_maps;
-    this.cached_shadow_maps_bytes = cached_shadow_maps_bytes;
-    this.cached_rgba_framebuffers = cached_rgba_framebuffers;
-    this.cached_rgba_framebuffers_bytes = cached_rgba_framebuffers_bytes;
+    this.cached_labels = in_cached_labels;
+    this.cached_shaders = in_cached_shaders;
+    this.cached_shadow_maps = in_cached_shadow_maps;
+    this.cached_shadow_maps_bytes = in_cached_shadow_maps_bytes;
+    this.cached_rgba_framebuffers = in_cached_rgba_framebuffers;
+    this.cached_rgba_framebuffers_bytes = in_cached_rgba_framebuffers_bytes;
   }
 
   public @Nonnull BigInteger getCachedLabels()

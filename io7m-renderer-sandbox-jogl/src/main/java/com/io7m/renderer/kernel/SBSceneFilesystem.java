@@ -167,11 +167,11 @@ public final class SBSceneFilesystem
   private final @Nonnull File       root;
 
   private SBSceneFilesystem(
-    final @Nonnull Log log,
+    final @Nonnull Log in_log,
     final @Nonnull File actual_root,
     final @Nonnull Filesystem initial)
   {
-    this.log = new Log(log, "scene-filesystem");
+    this.log = new Log(in_log, "scene-filesystem");
     this.filesystem = initial;
     this.root = actual_root;
   }

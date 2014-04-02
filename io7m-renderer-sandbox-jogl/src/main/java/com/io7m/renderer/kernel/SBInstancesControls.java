@@ -149,9 +149,9 @@ public final class SBInstancesControls implements
     private final @Nonnull InstancesTableModel model;
 
     public InstancesTable(
-      final InstancesTableModel model)
+      final InstancesTableModel in_model)
     {
-      super(model);
+      super(in_model);
 
       this.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
       this.getColumnModel().getColumn(0).setPreferredWidth(16);
@@ -163,7 +163,7 @@ public final class SBInstancesControls implements
       this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       this.setFillsViewportHeight(true);
 
-      this.model = model;
+      this.model = in_model;
     }
   }
 
@@ -180,13 +180,13 @@ public final class SBInstancesControls implements
     private final @Nonnull Log                          log;
 
     public InstancesTableModel(
-      final @Nonnull SBSceneControllerInstances controller,
-      final @Nonnull Log log)
+      final @Nonnull SBSceneControllerInstances in_controller,
+      final @Nonnull Log in_log)
     {
-      this.log = new Log(log, "instance-table");
+      this.log = new Log(in_log, "instance-table");
       this.column_names = new String[] { "ID", "Mesh" };
       this.data = new ArrayList<ArrayList<String>>();
-      this.controller = controller;
+      this.controller = in_controller;
     }
 
     @Override public int getColumnCount()

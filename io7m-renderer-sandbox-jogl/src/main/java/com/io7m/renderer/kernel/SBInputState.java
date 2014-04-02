@@ -114,9 +114,9 @@ final class SBInputState
   }
 
   void setMovingDown(
-    final boolean moving_down)
+    final boolean in_moving_down)
   {
-    this.moving_down.set(moving_down);
+    this.moving_down.set(in_moving_down);
   }
 
   void setMovingForward(
@@ -126,21 +126,21 @@ final class SBInputState
   }
 
   void setMovingLeft(
-    final boolean moving_left)
+    final boolean in_moving_left)
   {
-    this.moving_left.set(moving_left);
+    this.moving_left.set(in_moving_left);
   }
 
   void setMovingRight(
-    final boolean moving_right)
+    final boolean in_moving_right)
   {
-    this.moving_right.set(moving_right);
+    this.moving_right.set(in_moving_right);
   }
 
   void setMovingUp(
-    final boolean moving_up)
+    final boolean in_moving_up)
   {
-    this.moving_up.set(moving_up);
+    this.moving_up.set(in_moving_up);
   }
 
   void setRotatingDown(

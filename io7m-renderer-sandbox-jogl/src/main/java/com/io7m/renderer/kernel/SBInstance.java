@@ -41,25 +41,25 @@ import com.io7m.renderer.types.RVectorI3F;
   private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
 
   public SBInstance(
-    final @Nonnull Integer id,
-    final @Nonnull RVectorI3F<RSpaceWorld> position,
-    final @Nonnull RVectorI3F<RSpaceObject> scale,
-    final @Nonnull QuaternionI4F orientation,
-    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix,
-    final @Nonnull PathVirtual mesh,
-    final @Nonnull Integer material,
-    final @Nonnull KFaceSelection faces,
-    final boolean lit)
+    final @Nonnull Integer in_id,
+    final @Nonnull RVectorI3F<RSpaceWorld> in_position,
+    final @Nonnull RVectorI3F<RSpaceObject> in_scale,
+    final @Nonnull QuaternionI4F in_orientation,
+    final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix,
+    final @Nonnull PathVirtual in_mesh,
+    final @Nonnull Integer in_material,
+    final @Nonnull KFaceSelection in_faces,
+    final boolean in_lit)
   {
-    this.id = id;
-    this.position = position;
-    this.scale = scale;
-    this.orientation = orientation;
-    this.mesh = mesh;
-    this.material = material;
-    this.uv_matrix = uv_matrix;
-    this.faces = faces;
-    this.lit = lit;
+    this.id = in_id;
+    this.position = in_position;
+    this.scale = in_scale;
+    this.orientation = in_orientation;
+    this.mesh = in_mesh;
+    this.material = in_material;
+    this.uv_matrix = in_uv_matrix;
+    this.faces = in_faces;
+    this.lit = in_lit;
   }
 
   @Override public boolean equals(

@@ -22,11 +22,11 @@ public final class SBMaterialRefractiveDescription
   private final float   scale;
 
   public SBMaterialRefractiveDescription(
-    final float scale,
-    final boolean masked)
+    final float in_scale,
+    final boolean in_masked)
   {
-    this.scale = scale;
-    this.masked = masked;
+    this.scale = in_scale;
+    this.masked = in_masked;
   }
 
   @Override public boolean equals(

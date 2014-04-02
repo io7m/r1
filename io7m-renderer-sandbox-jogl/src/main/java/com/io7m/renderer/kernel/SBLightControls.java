@@ -116,25 +116,26 @@ public final class SBLightControls implements
   private final @Nonnull SBLightControlsSpherical                  spherical_controls;
 
   private <C extends SBSceneControllerLights & SBSceneControllerTextures> SBLightControls(
-    final @Nonnull JFrame parent,
+    final @Nonnull JFrame in_parent,
     final @Nonnull C controller,
-    final @Nonnull Integer id,
+    final @Nonnull Integer in_id,
     final @Nonnull Log log)
     throws ConstraintError
   {
-    this.parent = Constraints.constrainNotNull(parent, "Parent");
+    this.parent = Constraints.constrainNotNull(in_parent, "Parent");
 
     this.group = new RowGroup();
-    this.id_field = new JTextField(id.toString());
+    this.id_field = new JTextField(in_id.toString());
     this.id_field.setEditable(false);
-    this.id = id;
+    this.id = in_id;
 
     this.directional_controls =
-      SBLightControlsDirectional.newControls(parent, id);
+      SBLightControlsDirectional.newControls(in_parent, in_id);
     this.spherical_controls =
-      SBLightControlsSpherical.newControls(parent, id);
+      SBLightControlsSpherical.newControls(in_parent, in_id);
     this.projective_controls =
-      SBLightControlsProjective.newControls(parent, controller, id, log);
+      SBLightControlsProjective
+        .newControls(in_parent, controller, in_id, log);
 
     this.controls =
       new EnumMap<SBLightType, SBLightControlsType>(SBLightType.class);

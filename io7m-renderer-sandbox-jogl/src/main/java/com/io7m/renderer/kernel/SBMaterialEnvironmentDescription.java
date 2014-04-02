@@ -33,13 +33,13 @@ public final class SBMaterialEnvironmentDescription
   private final @CheckForNull PathVirtual texture;
 
   SBMaterialEnvironmentDescription(
-    final @CheckForNull PathVirtual texture,
-    final float mix,
-    final boolean mix_mapped)
+    final @CheckForNull PathVirtual in_texture,
+    final float in_mix,
+    final boolean in_mix_mapped)
   {
-    this.texture = texture;
-    this.mix = mix;
-    this.mix_mapped = mix_mapped;
+    this.texture = in_texture;
+    this.mix = in_mix;
+    this.mix_mapped = in_mix_mapped;
   }
 
   @Override public boolean equals(

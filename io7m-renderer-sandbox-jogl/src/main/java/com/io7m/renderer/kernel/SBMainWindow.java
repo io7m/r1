@@ -607,11 +607,11 @@ final class SBMainWindow extends JFrame
   public SBMainWindow(
     final @Nonnull SandboxConfig config,
     final @Nonnull SBSceneController controller,
-    final @Nonnull SBGLRenderer renderer,
+    final @Nonnull SBGLRenderer in_renderer,
     final @Nonnull Log log)
     throws ConstraintError
   {
-    this.renderer = renderer;
+    this.renderer = in_renderer;
 
     final SBLightsWindow lights_window = new SBLightsWindow(controller, log);
     final SBLogsWindow logs_window = new SBLogsWindow();
@@ -660,9 +660,11 @@ final class SBMainWindow extends JFrame
 
       log.debug("caps: " + caps);
       final GLCanvas canvas = new GLCanvas(caps);
-      canvas.addGLEventListener(renderer);
+      canvas.addGLEventListener(this.renderer);
       canvas.addKeyListener(new KeyListener() {
-        private final @Nonnull SBInputState input = renderer.getInputState();
+        private final @Nonnull SBInputState input =
+                                                    SBMainWindow.this.renderer
+                                                      .getInputState();
 
         @Override public void keyPressed(
           final @Nonnull KeyEvent e)

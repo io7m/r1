@@ -29,9 +29,9 @@ import com.io7m.renderer.types.RException;
   private final @Nonnull KLightDirectional actual;
 
   SBLightDescriptionDirectional(
-    final @Nonnull KLightDirectional actual)
+    final @Nonnull KLightDirectional in_actual)
   {
-    this.actual = actual;
+    this.actual = in_actual;
   }
 
   @Override public boolean equals(

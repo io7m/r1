@@ -30,15 +30,15 @@ import com.io7m.renderer.kernel.types.KMesh;
   private final @Nonnull KMesh       mesh;
 
   SBMesh(
-    final @Nonnull PathVirtual path,
-    final @Nonnull KMesh mesh)
+    final @Nonnull PathVirtual in_path,
+    final @Nonnull KMesh in_mesh)
     throws ConstraintError
   {
-    Constraints.constrainNotNull(path, "Path");
-    Constraints.constrainNotNull(mesh, "Mesh");
+    Constraints.constrainNotNull(in_path, "Path");
+    Constraints.constrainNotNull(in_mesh, "Mesh");
 
-    this.path = path;
-    this.mesh = mesh;
+    this.path = in_path;
+    this.mesh = in_mesh;
   }
 
   @Override public int compareTo(

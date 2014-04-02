@@ -76,9 +76,9 @@ final class SBTextures2DPanel extends JPanel
     }
 
     protected void setImage(
-      final @Nonnull BufferedImage image)
+      final @Nonnull BufferedImage in_image)
     {
-      this.image = image;
+      this.image = in_image;
     }
   }
 

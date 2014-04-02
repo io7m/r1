@@ -62,19 +62,19 @@ public final class SBFloatHSlider implements SBControls
   private final @Nonnull JSlider    slider;
 
   public SBFloatHSlider(
-    final @Nonnull String label,
-    final float minimum,
-    final float maximum)
+    final @Nonnull String in_label,
+    final float in_minimum,
+    final float in_maximum)
     throws ConstraintError
   {
     this.label =
-      new JLabel(Constraints.constrainNotNull(label, "ForwardLabel"));
+      new JLabel(Constraints.constrainNotNull(in_label, "ForwardLabel"));
     this.group = new RowGroup();
 
-    this.maximum = maximum;
-    this.minimum = minimum;
+    this.maximum = in_maximum;
+    this.minimum = in_minimum;
 
-    this.field = new JTextField(Float.toString(minimum));
+    this.field = new JTextField(Float.toString(in_minimum));
     this.slider = new JSlider(SwingConstants.HORIZONTAL);
     this.slider.setMinimum(0);
     this.slider.setMaximum(100);
@@ -88,7 +88,10 @@ public final class SBFloatHSlider implements SBControls
       {
         final int slider_current = SBFloatHSlider.this.slider.getValue();
         SBFloatHSlider.this.current =
-          SBFloatHSlider.convertFromSlider(slider_current, minimum, maximum);
+          SBFloatHSlider.convertFromSlider(
+            slider_current,
+            in_minimum,
+            in_maximum);
         SBFloatHSlider.this.refreshText();
       }
     });

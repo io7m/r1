@@ -31,13 +31,13 @@ import com.io7m.jvvfs.PathVirtual;
   private final @Nonnull BufferedImage          image;
 
   public SBTexture2D(
-    final @Nonnull SBTexture2DDescription description,
-    final @Nonnull Texture2DStatic texture,
-    final @Nonnull BufferedImage image)
+    final @Nonnull SBTexture2DDescription in_description,
+    final @Nonnull Texture2DStatic in_texture,
+    final @Nonnull BufferedImage in_image)
   {
-    this.description = description;
-    this.texture = texture;
-    this.image = image;
+    this.description = in_description;
+    this.texture = in_texture;
+    this.image = in_image;
   }
 
   public @Nonnull SBTexture2DDescription getDescription()

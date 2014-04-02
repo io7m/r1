@@ -30,10 +30,10 @@ import com.io7m.renderer.types.RException;
 
   SBLightProjective(
     final @Nonnull SBLightDescriptionProjective d,
-    final @Nonnull KLightProjective light)
+    final @Nonnull KLightProjective in_light)
   {
     this.description = d;
-    this.light = light;
+    this.light = in_light;
   }
 
   @Override public SBLightDescriptionProjective getDescription()

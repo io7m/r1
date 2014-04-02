@@ -46,14 +46,14 @@ public final class SBMaterialAlbedoDescription
   }
 
   public SBMaterialAlbedoDescription(
-    final @Nonnull RVectorI4F<RSpaceRGBA> colour,
-    final float mix,
-    final @CheckForNull PathVirtual texture)
+    final @Nonnull RVectorI4F<RSpaceRGBA> in_colour,
+    final float in_mix,
+    final @CheckForNull PathVirtual in_texture)
     throws ConstraintError
   {
-    this.colour = Constraints.constrainNotNull(colour, "Colour");
-    this.mix = mix;
-    this.texture = texture;
+    this.colour = Constraints.constrainNotNull(in_colour, "Colour");
+    this.mix = in_mix;
+    this.texture = in_texture;
   }
 
   @Override public boolean equals(

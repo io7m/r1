@@ -32,11 +32,11 @@ public final class SBMaterialEmissiveDescription
   private final @CheckForNull PathVirtual texture;
 
   public SBMaterialEmissiveDescription(
-    final float emission,
-    final @CheckForNull PathVirtual texture)
+    final float in_emission,
+    final @CheckForNull PathVirtual in_texture)
   {
-    this.emission = emission;
-    this.texture = texture;
+    this.emission = in_emission;
+    this.texture = in_texture;
   }
 
   @Override public boolean equals(

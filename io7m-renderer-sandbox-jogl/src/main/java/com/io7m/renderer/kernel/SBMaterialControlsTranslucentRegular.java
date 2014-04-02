@@ -38,23 +38,23 @@ public final class SBMaterialControlsTranslucentRegular implements
   private final @Nonnull JTextField                             name;
 
   public SBMaterialControlsTranslucentRegular(
-    final @Nonnull JTextField name,
-    final @Nonnull SBMaterialControlsAlbedo controls_albedo,
-    final @Nonnull SBMaterialControlsAlpha controls_alpha,
-    final @Nonnull SBMaterialControlsEmissive controls_emissive,
-    final @Nonnull SBMaterialControlsEnvironment controls_environment,
-    final @Nonnull SBMaterialControlsNormal controls_normal,
-    final @Nonnull SBMaterialControlsSpecular controls_specular,
-    final @Nonnull SBMatrix3x3Controls<RTransformTexture> controls_uv)
+    final @Nonnull JTextField in_name,
+    final @Nonnull SBMaterialControlsAlbedo in_controls_albedo,
+    final @Nonnull SBMaterialControlsAlpha in_controls_alpha,
+    final @Nonnull SBMaterialControlsEmissive in_controls_emissive,
+    final @Nonnull SBMaterialControlsEnvironment in_controls_environment,
+    final @Nonnull SBMaterialControlsNormal in_controls_normal,
+    final @Nonnull SBMaterialControlsSpecular in_controls_specular,
+    final @Nonnull SBMatrix3x3Controls<RTransformTexture> in_controls_uv)
   {
-    this.name = name;
-    this.controls_alpha = controls_alpha;
-    this.controls_albedo = controls_albedo;
-    this.controls_emissive = controls_emissive;
-    this.controls_environment = controls_environment;
-    this.controls_normal = controls_normal;
-    this.controls_specular = controls_specular;
-    this.controls_uv = controls_uv;
+    this.name = in_name;
+    this.controls_alpha = in_controls_alpha;
+    this.controls_albedo = in_controls_albedo;
+    this.controls_emissive = in_controls_emissive;
+    this.controls_environment = in_controls_environment;
+    this.controls_normal = in_controls_normal;
+    this.controls_specular = in_controls_specular;
+    this.controls_uv = in_controls_uv;
   }
 
   @Override public void controlsAddToLayout(

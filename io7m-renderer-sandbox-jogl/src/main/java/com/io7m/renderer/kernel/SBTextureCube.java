@@ -35,23 +35,23 @@ public final class SBTextureCube
   private final @Nonnull BufferedImage            negative_x;
 
   SBTextureCube(
-    final @Nonnull SBTextureCubeDescription description,
-    final @Nonnull TextureCubeStatic texture,
-    final @Nonnull BufferedImage positive_z,
-    final @Nonnull BufferedImage negative_z,
-    final @Nonnull BufferedImage positive_y,
-    final @Nonnull BufferedImage negative_y,
-    final @Nonnull BufferedImage positive_x,
-    final @Nonnull BufferedImage negative_x)
+    final @Nonnull SBTextureCubeDescription in_description,
+    final @Nonnull TextureCubeStatic in_texture,
+    final @Nonnull BufferedImage in_positive_z,
+    final @Nonnull BufferedImage in_negative_z,
+    final @Nonnull BufferedImage in_positive_y,
+    final @Nonnull BufferedImage in_negative_y,
+    final @Nonnull BufferedImage in_positive_x,
+    final @Nonnull BufferedImage in_negative_x)
   {
-    this.description = description;
-    this.texture = texture;
-    this.positive_z = positive_z;
-    this.negative_z = negative_z;
-    this.positive_y = positive_y;
-    this.negative_y = negative_y;
-    this.positive_x = positive_x;
-    this.negative_x = negative_x;
+    this.description = in_description;
+    this.texture = in_texture;
+    this.positive_z = in_positive_z;
+    this.negative_z = in_negative_z;
+    this.positive_y = in_positive_y;
+    this.negative_y = in_negative_y;
+    this.positive_x = in_positive_x;
+    this.negative_x = in_negative_x;
   }
 
   public @Nonnull SBTextureCubeDescription getDescription()

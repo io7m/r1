@@ -306,9 +306,9 @@ final class SBGLRenderer implements GLEventListener
     private final @Nonnull Type type;
 
     private SceneObserver(
-      final @Nonnull Type type)
+      final @Nonnull Type in_type)
     {
-      this.type = type;
+      this.type = in_type;
     }
 
     public final @Nonnull Type getType()
@@ -336,10 +336,10 @@ final class SBGLRenderer implements GLEventListener
     private final @Nonnull SBLightProjective light;
 
     @SuppressWarnings("synthetic-access") SceneObserverProjectiveLight(
-      final @Nonnull SBLightProjective light)
+      final @Nonnull SBLightProjective in_light)
     {
       super(SceneObserver.Type.OBSERVER_PROJECTIVE_LIGHT);
-      this.light = light;
+      this.light = in_light;
     }
 
     public @Nonnull SBLightProjective getLight()
@@ -757,35 +757,37 @@ final class SBGLRenderer implements GLEventListener
   private @Nonnull AreaInclusive                                                                                viewport;
 
   public SBGLRenderer(
-    final @Nonnull SandboxConfig config,
-    final @Nonnull Log log)
+    final @Nonnull SandboxConfig in_config,
+    final @Nonnull Log in_log)
     throws ConstraintError,
       FilesystemError
   {
-    Constraints.constrainNotNull(log, "Log");
-    this.config = Constraints.constrainNotNull(config, "Config");
-    this.restrictions = SBSoftRestrictions.newRestrictions(config);
+    Constraints.constrainNotNull(in_log, "Log");
+    this.config = Constraints.constrainNotNull(in_config, "Config");
+    this.restrictions = SBSoftRestrictions.newRestrictions(in_config);
 
-    this.log = new Log(log, "gl");
+    this.log = new Log(in_log, "gl");
 
     {
       final Package p = GL.class.getPackage();
-      log.debug("JOGL title: " + p.getImplementationTitle());
-      log.debug("JOGL version: " + p.getImplementationVersion());
+      in_log.debug("JOGL title: " + p.getImplementationTitle());
+      in_log.debug("JOGL version: " + p.getImplementationVersion());
     }
 
-    log.debug("Shader debug archive: " + config.getShaderArchiveDebugFile());
-    log.debug("Shader forward archive: "
-      + config.getShaderArchiveForwardFile());
-    log.debug("Shader postprocessing archive: "
-      + config.getShaderArchivePostprocessingFile());
-    log.debug("Shader depth archive: " + config.getShaderArchiveDepthFile());
+    in_log.debug("Shader debug archive: "
+      + in_config.getShaderArchiveDebugFile());
+    in_log.debug("Shader forward archive: "
+      + in_config.getShaderArchiveForwardFile());
+    in_log.debug("Shader postprocessing archive: "
+      + in_config.getShaderArchivePostprocessingFile());
+    in_log.debug("Shader depth archive: "
+      + in_config.getShaderArchiveDepthFile());
 
     this.controller = new AtomicReference<SBSceneControllerRenderer>();
     this.qm4f_context = new QuaternionM4F.Context();
 
     this.texture_loader =
-      TextureLoaderImageIO.newTextureLoaderWithAlphaPremultiplication(log);
+      TextureLoaderImageIO.newTextureLoaderWithAlphaPremultiplication(in_log);
 
     this.texture2d_load_queue =
       new ConcurrentLinkedQueue<Texture2DLoadFuture>();
@@ -810,22 +812,22 @@ final class SBGLRenderer implements GLEventListener
       new ConcurrentLinkedQueue<SBGLRenderer.ShaderLoadFuture>();
     this.shaders = new HashMap<String, SBShader>();
 
-    this.filesystem = Filesystem.makeWithoutArchiveDirectory(log);
+    this.filesystem = Filesystem.makeWithoutArchiveDirectory(in_log);
     this.filesystem.mountClasspathArchive(
       SBGLRenderer.class,
       PathVirtual.ROOT);
     this.filesystem.mountClasspathArchive(KRenderer.class, PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
-      config.getShaderArchiveDebugFile(),
+      in_config.getShaderArchiveDebugFile(),
       PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
-      config.getShaderArchiveDepthFile(),
+      in_config.getShaderArchiveDepthFile(),
       PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
-      config.getShaderArchiveForwardFile(),
+      in_config.getShaderArchiveForwardFile(),
       PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
-      config.getShaderArchivePostprocessingFile(),
+      in_config.getShaderArchivePostprocessingFile(),
       PathVirtual.ROOT);
 
     this.background_colour =
@@ -2603,9 +2605,9 @@ final class SBGLRenderer implements GLEventListener
   }
 
   void setController(
-    final @Nonnull SBSceneControllerRenderer renderer)
+    final @Nonnull SBSceneControllerRenderer in_renderer)
   {
-    this.controller.set(renderer);
+    this.controller.set(in_renderer);
   }
 
   void setCustomProjection(

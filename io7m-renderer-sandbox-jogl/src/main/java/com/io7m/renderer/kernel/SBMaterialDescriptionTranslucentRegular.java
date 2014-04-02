@@ -37,25 +37,25 @@ public final class SBMaterialDescriptionTranslucentRegular implements
   private final @Nonnull RMatrixI3x3F<RTransformTexture>  uv_matrix;
 
   SBMaterialDescriptionTranslucentRegular(
-    final @Nonnull String name,
-    final @Nonnull SBMaterialAlphaDescription alpha,
-    final @Nonnull SBMaterialAlbedoDescription albedo,
-    final @Nonnull SBMaterialEmissiveDescription emissive,
-    final @Nonnull SBMaterialSpecularDescription specular,
-    final @Nonnull SBMaterialEnvironmentDescription environment,
-    final @Nonnull SBMaterialNormalDescription normal,
-    final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix)
+    final @Nonnull String in_name,
+    final @Nonnull SBMaterialAlphaDescription in_alpha,
+    final @Nonnull SBMaterialAlbedoDescription in_albedo,
+    final @Nonnull SBMaterialEmissiveDescription in_emissive,
+    final @Nonnull SBMaterialSpecularDescription in_specular,
+    final @Nonnull SBMaterialEnvironmentDescription in_environment,
+    final @Nonnull SBMaterialNormalDescription in_normal,
+    final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix)
     throws ConstraintError
   {
-    this.name = Constraints.constrainNotNull(name, "Name");
-    this.alpha = Constraints.constrainNotNull(alpha, "Alpha");
-    this.albedo = Constraints.constrainNotNull(albedo, "Albedo");
-    this.emissive = Constraints.constrainNotNull(emissive, "Emissive");
-    this.specular = Constraints.constrainNotNull(specular, "Specular");
+    this.name = Constraints.constrainNotNull(in_name, "Name");
+    this.alpha = Constraints.constrainNotNull(in_alpha, "Alpha");
+    this.albedo = Constraints.constrainNotNull(in_albedo, "Albedo");
+    this.emissive = Constraints.constrainNotNull(in_emissive, "Emissive");
+    this.specular = Constraints.constrainNotNull(in_specular, "Specular");
     this.environment =
-      Constraints.constrainNotNull(environment, "Environment");
-    this.normal = Constraints.constrainNotNull(normal, "Normal");
-    this.uv_matrix = Constraints.constrainNotNull(uv_matrix, "UV matrix");
+      Constraints.constrainNotNull(in_environment, "Environment");
+    this.normal = Constraints.constrainNotNull(in_normal, "Normal");
+    this.uv_matrix = Constraints.constrainNotNull(in_uv_matrix, "UV matrix");
   }
 
   @Override public boolean equals(

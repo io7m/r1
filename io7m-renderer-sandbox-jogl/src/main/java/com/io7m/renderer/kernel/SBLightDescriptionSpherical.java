@@ -29,9 +29,9 @@ import com.io7m.renderer.types.RException;
   private final @Nonnull KLightSphere actual;
 
   SBLightDescriptionSpherical(
-    final @Nonnull KLightSphere actual)
+    final @Nonnull KLightSphere in_actual)
   {
-    this.actual = actual;
+    this.actual = in_actual;
   }
 
   @Override public boolean equals(

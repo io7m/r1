@@ -65,21 +65,21 @@ import com.io7m.jvvfs.PathVirtual;
   private final int                                           schema_version;
 
   private SBSceneDescription(
-    final int schema_version,
-    final @Nonnull PSet<SBTexture2DDescription> textures_2d,
-    final @Nonnull PSet<SBTextureCubeDescription> textures_cube,
-    final @Nonnull PMap<Integer, SBMaterialDescription> materials,
-    final @Nonnull PSet<PathVirtual> meshes,
-    final @Nonnull PMap<Integer, SBLightDescription> lights,
-    final @Nonnull PMap<Integer, SBInstance> instances)
+    final int in_schema_version,
+    final @Nonnull PSet<SBTexture2DDescription> in_textures_2d,
+    final @Nonnull PSet<SBTextureCubeDescription> in_textures_cube,
+    final @Nonnull PMap<Integer, SBMaterialDescription> in_materials,
+    final @Nonnull PSet<PathVirtual> in_meshes,
+    final @Nonnull PMap<Integer, SBLightDescription> in_lights,
+    final @Nonnull PMap<Integer, SBInstance> in_instances)
   {
-    this.schema_version = schema_version;
-    this.textures_2d = textures_2d;
-    this.textures_cube = textures_cube;
-    this.materials = materials;
-    this.meshes = meshes;
-    this.lights = lights;
-    this.instances = instances;
+    this.schema_version = in_schema_version;
+    this.textures_2d = in_textures_2d;
+    this.textures_cube = in_textures_cube;
+    this.materials = in_materials;
+    this.meshes = in_meshes;
+    this.lights = in_lights;
+    this.instances = in_instances;
   }
 
   @Override public boolean equals(

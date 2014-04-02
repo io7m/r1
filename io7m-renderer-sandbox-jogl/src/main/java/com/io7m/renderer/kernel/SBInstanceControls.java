@@ -242,10 +242,10 @@ public final class SBInstanceControls implements
     final @Nonnull JFrame parent,
     final @Nonnull Log log,
     final @Nonnull C controller,
-    final @Nonnull Integer id)
+    final @Nonnull Integer in_id)
   {
-    this.id = id;
-    this.id_field = new JTextField(id.toString());
+    this.id = in_id;
+    this.id_field = new JTextField(in_id.toString());
     this.id_field.setEditable(false);
 
     this.position = SBVector3FInput.newInput("Position");

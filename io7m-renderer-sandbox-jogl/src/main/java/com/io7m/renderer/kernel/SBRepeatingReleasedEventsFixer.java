@@ -142,15 +142,15 @@ public class SBRepeatingReleasedEventsFixer implements AWTEventListener
     private static final long serialVersionUID = 1L;
 
     public RepostedKeyEvent(
-      final Component source,
-      final int id,
+      final Component in_source,
+      final int in_id,
       final long when,
       final int modifiers,
       final int keyCode,
       final char keyChar,
       final int keyLocation)
     {
-      super(source, id, when, modifiers, keyCode, keyChar, keyLocation);
+      super(in_source, in_id, when, modifiers, keyCode, keyChar, keyLocation);
     }
   }
 

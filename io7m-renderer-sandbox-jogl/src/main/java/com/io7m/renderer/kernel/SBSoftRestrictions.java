@@ -34,10 +34,10 @@ public final class SBSoftRestrictions implements JCGLSoftRestrictions
   private final @Nonnull SandboxConfig config;
 
   private SBSoftRestrictions(
-    final @Nonnull SandboxConfig config)
+    final @Nonnull SandboxConfig in_config)
     throws ConstraintError
   {
-    this.config = Constraints.constrainNotNull(config, "Config");
+    this.config = Constraints.constrainNotNull(in_config, "Config");
   }
 
   @Override public boolean restrictExtensionVisibility(

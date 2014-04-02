@@ -44,10 +44,10 @@ public final class SBKPostprocessorNone
     private final @Nonnull JButton                          ok;
 
     ControlWindow(
-      final @Nonnull SBSceneControllerRendererControl controller,
+      final @Nonnull SBSceneControllerRendererControl in_controller,
       final @Nonnull Postprocessor proc)
     {
-      this.controller = controller;
+      this.controller = in_controller;
       this.apply = new JButton("Apply");
       this.apply.addActionListener(new ActionListener() {
         @Override public void actionPerformed(

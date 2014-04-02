@@ -28,11 +28,11 @@ abstract class SBException extends Exception
     private final @Nonnull File file;
 
     @SuppressWarnings("synthetic-access") SBExceptionImageLoading(
-      final @Nonnull File file,
+      final @Nonnull File in_file,
       final @Nonnull String message)
     {
-      super(Type.SB_EXCEPTION_IMAGE_LOADING, file + ": " + message);
-      this.file = file;
+      super(Type.SB_EXCEPTION_IMAGE_LOADING, in_file + ": " + message);
+      this.file = in_file;
     }
   }
 
@@ -58,10 +58,10 @@ abstract class SBException extends Exception
   private final @Nonnull Type type;
 
   private SBException(
-    final @Nonnull Type type,
+    final @Nonnull Type in_type,
     final @Nonnull String message)
   {
     super(message);
-    this.type = type;
+    this.type = in_type;
   }
 }
