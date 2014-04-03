@@ -26,10 +26,10 @@
     <module name="AvoidStaticImport"/>
     <module name="BooleanExpressionComplexity"/>
     <module name="ClassDataAbstractionCoupling">
-      <property name="max" value="15"/>
+      <property name="max" value="20"/>
     </module>
     <module name="ClassFanOutComplexity">
-      <property name="max" value="80"/>
+      <property name="max" value="85"/>
     </module>
     <module name="ClassTypeParameterName"/>
     <module name="ConstantName"/>

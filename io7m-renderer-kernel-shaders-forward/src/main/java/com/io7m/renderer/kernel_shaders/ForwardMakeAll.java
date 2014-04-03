@@ -20,22 +20,26 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Nonnull;
-import javax.xml.parsers.ParserConfigurationException;
-
-import nu.xom.ParsingException;
-import nu.xom.ValidityException;
 
 import org.apache.commons.cli.ParseException;
-import org.xml.sax.SAXException;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Pair;
+import com.io7m.jaux.functional.Unit;
 import com.io7m.jlog.Log;
 import com.io7m.jparasol.CompilerError;
 import com.io7m.jparasol.frontend.Frontend;
@@ -56,30 +60,15 @@ public final class ForwardMakeAll
     return new Log(props, "com.io7m.parasol", "compactor");
   }
 
-  private static @Nonnull String[] getSourcesList(
-    final @Nonnull File out_dir)
-  {
-    return out_dir.list(new FilenameFilter() {
-      @Override public boolean accept(
-        final @Nonnull File dir,
-        final @Nonnull String name)
-      {
-        return name.endsWith(".p");
-      }
-    });
-  }
-
   public static void main(
     final String args[])
     throws IOException,
       ConstraintError,
-      ValidityException,
-      NoSuchAlgorithmException,
-      ParsingException,
-      SAXException,
-      ParserConfigurationException,
       ParseException,
-      CompilerError
+      CompilerError,
+      InterruptedException,
+      ExecutionException,
+      TimeoutException
   {
     if (args.length != 3) {
       final String message =
@@ -92,6 +81,7 @@ public final class ForwardMakeAll
     final File out_glsl_dir = new File(args[1]);
     final File out_glsl_compact_dir = new File(args[2]);
     final File out_batch = new File(out_parasol_dir, "batch-forward.txt");
+    final File out_sources = new File(out_parasol_dir, "source-list.txt");
 
     if (out_parasol_dir.mkdirs() == false) {
       if (out_parasol_dir.isDirectory() == false) {
@@ -143,13 +133,34 @@ public final class ForwardMakeAll
       translucent_refractive,
       out_batch);
 
-    final String[] sources = ForwardMakeAll.getSourcesList(out_parasol_dir);
+    ForwardMakeAll.makeSourcesList(out_parasol_dir, out_sources);
     ForwardMakeAll.makeCompileSources(
-      out_parasol_dir,
-      sources,
+      out_sources,
       out_batch,
       out_glsl_dir,
       out_glsl_compact_dir);
+  }
+
+  private static void makeSourcesList(
+    final @Nonnull File out_parasol_dir,
+    final @Nonnull File out_sources)
+    throws IOException
+  {
+    final String[] sources = out_parasol_dir.list(new FilenameFilter() {
+      @Override public boolean accept(
+        final @Nonnull File dir,
+        final @Nonnull String name)
+      {
+        return name.endsWith(".p");
+      }
+    });
+
+    final FileWriter writer = new FileWriter(out_sources);
+    for (final String s : sources) {
+      writer.write(String.format("%s/%s\n", out_parasol_dir, s));
+    }
+    writer.flush();
+    writer.close();
   }
 
   public static
@@ -208,24 +219,28 @@ public final class ForwardMakeAll
     writer.close();
   }
 
+  private static int getThreadCount()
+  {
+    return Runtime.getRuntime().availableProcessors() * 2;
+  }
+
   private static void makeCompileSources(
-    final @Nonnull File source_dir,
-    final @Nonnull String[] sources,
+    final @Nonnull File out_sources,
     final @Nonnull File batch,
     final @Nonnull File out_dir,
     final @Nonnull File out_compact_dir)
-    throws ValidityException,
-      NoSuchAlgorithmException,
-      ParsingException,
-      IOException,
-      SAXException,
-      ParserConfigurationException,
+    throws IOException,
       ConstraintError,
       ParseException,
-      CompilerError
+      CompilerError,
+      InterruptedException,
+      ExecutionException,
+      TimeoutException
   {
     final ArrayList<String> argslist = new ArrayList<String>();
 
+    argslist.add("--threads");
+    argslist.add(Integer.toString(ForwardMakeAll.getThreadCount()));
     argslist.add("--require-es");
     argslist.add("[,]");
     argslist.add("--require-full");
@@ -233,27 +248,64 @@ public final class ForwardMakeAll
     argslist.add("--compile-batch");
     argslist.add(out_dir.toString());
     argslist.add(batch.toString());
-
-    for (final String s : sources) {
-      final File f = new File(source_dir, s);
-      argslist.add(f.toString());
-    }
+    argslist.add(out_sources.toString());
 
     final String[] args = new String[argslist.size()];
     argslist.toArray(args);
     Frontend.run(Frontend.getLog(false), args);
 
-    {
-      final Batch b = Batch.fromFile(out_dir, batch);
-      for (final Pair<String, String> k : b.getTargets()) {
-        final File program_in = new File(out_dir, k.first);
-        final File program_out = new File(out_compact_dir, k.first);
-        System.out.println("info: compact " + program_in);
-        PGLSLCompactor.newCompactor(
-          program_in,
-          program_out,
-          ForwardMakeAll.getLog());
+    ForwardMakeAll.compactSources(batch, out_dir, out_compact_dir);
+  }
+
+  private static void compactSources(
+    final @Nonnull File batch,
+    final @Nonnull File out_dir,
+    final @Nonnull File out_compact_dir)
+    throws IOException,
+      ConstraintError,
+      InterruptedException,
+      ExecutionException,
+      TimeoutException
+  {
+    final Batch b = Batch.fromFile(out_dir, batch);
+
+    final List<Future<Unit>> futures = new ArrayList<Future<Unit>>();
+    final ExecutorService exec =
+      Executors.newFixedThreadPool(ForwardMakeAll.getThreadCount());
+
+    try {
+      final List<Pair<String, String>> targets = b.getTargets();
+      for (int index = 0; index < targets.size(); ++index) {
+        final Pair<String, String> k = targets.get(index);
+
+        futures.add(exec.submit(new Callable<Unit>() {
+          @SuppressWarnings("synthetic-access") @Override public Unit call()
+            throws Exception
+          {
+            try {
+              final File program_in = new File(out_dir, k.first);
+              final File program_out = new File(out_compact_dir, k.first);
+              System.out.println("info: compact " + program_in);
+              PGLSLCompactor.newCompactor(
+                program_in,
+                program_out,
+                ForwardMakeAll.getLog());
+              return Unit.unit();
+            } catch (final ConstraintError e) {
+              throw new UnreachableCodeException(e);
+            }
+          }
+        }));
       }
+
+      for (int index = 0; index < futures.size(); ++index) {
+        final Future<Unit> f = futures.get(index);
+        f.get(10, TimeUnit.SECONDS);
+      }
+
+      System.out.println("info: compactions completed");
+    } finally {
+      exec.shutdown();
     }
   }
 

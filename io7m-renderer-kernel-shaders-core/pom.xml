@@ -61,12 +61,12 @@
     <dependency>
       <groupId>com.io7m.jparasol.compiler.frontend</groupId>
       <artifactId>io7m-jparasol-compiler-frontend</artifactId>
-      <version>[0.3.15, 0.4.0)</version>
+      <version>[0.4.0, 0.5.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jparasol.xml</groupId>
       <artifactId>io7m-jparasol-xml</artifactId>
-      <version>[0.3.15, 0.4.0)</version>
+      <version>[0.4.0, 0.5.0)</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jaux</groupId>

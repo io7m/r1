@@ -36,11 +36,11 @@ module PostprocessingFog is
   with
     value pixel =
       S2.texture (t_image, f_uv);
-    value depth =
+    value depth_sample =
       S2.texture (t_image_depth, f_uv) [x];
     value rgba =
       new vector_4f (
-        V3.interpolate (pixel [x y z], fog.colour, depth),
+        V3.interpolate (pixel [x y z], fog.colour, depth_sample),
         1.0
       );
   as
