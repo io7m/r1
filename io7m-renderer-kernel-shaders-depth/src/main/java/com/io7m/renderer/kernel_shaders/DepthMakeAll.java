@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel_shaders;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -42,10 +43,12 @@ import com.io7m.jparasol.xml.PGLSLCompactor;
 
 public final class DepthMakeAll
 {
-  private static @Nonnull String[] getSourcesList(
-    final @Nonnull File out_dir)
+  private static void makeSourcesList(
+    final @Nonnull File out_parasol_dir,
+    final @Nonnull File out_sources)
+    throws IOException
   {
-    return out_dir.list(new FilenameFilter() {
+    final String[] sources = out_parasol_dir.list(new FilenameFilter() {
       @Override public boolean accept(
         final @Nonnull File dir,
         final @Nonnull String name)
@@ -53,6 +56,13 @@ public final class DepthMakeAll
         return name.endsWith(".p");
       }
     });
+
+    final FileWriter writer = new FileWriter(out_sources);
+    for (final String s : sources) {
+      writer.write(String.format("%s/%s\n", out_parasol_dir, s));
+    }
+    writer.flush();
+    writer.close();
   }
 
   public static void main(
@@ -65,19 +75,21 @@ public final class DepthMakeAll
       ParserConfigurationException,
       ConstraintError,
       ParseException,
-      CompilerError
+      CompilerError,
+      InterruptedException
   {
-    if (args.length != 4) {
+    if (args.length != 5) {
       final String message =
-        "usage: out-batch out-parasol-directory out-glsl-directory out-glsl-compacted-directory";
+        "usage: out-batch out-sources out-parasol-directory out-glsl-directory out-glsl-compacted-directory";
       System.err.println(message);
       throw new IllegalArgumentException(message);
     }
 
     final File out_batch = new File(args[0]);
-    final File out_parasol_dir = new File(args[1]);
-    final File out_glsl_dir = new File(args[2]);
-    final File out_glsl_compact_dir = new File(args[3]);
+    final File out_sources = new File(args[1]);
+    final File out_parasol_dir = new File(args[2]);
+    final File out_glsl_dir = new File(args[3]);
+    final File out_glsl_compact_dir = new File(args[4]);
 
     if (out_parasol_dir.mkdirs() == false) {
       if (out_parasol_dir.isDirectory() == false) {
@@ -95,10 +107,10 @@ public final class DepthMakeAll
       }
     }
 
-    final String[] sources = DepthMakeAll.getSourcesList(out_parasol_dir);
+    DepthMakeAll.makeSourcesList(out_parasol_dir, out_sources);
     DepthMakeAll.makeCompileSources(
       out_parasol_dir,
-      sources,
+      out_sources,
       out_batch,
       out_glsl_dir,
       out_glsl_compact_dir);
@@ -106,7 +118,7 @@ public final class DepthMakeAll
 
   private static void makeCompileSources(
     final @Nonnull File source_dir,
-    final @Nonnull String[] sources,
+    final @Nonnull File out_sources,
     final @Nonnull File batch,
     final @Nonnull File out_dir,
     final @Nonnull File out_compact_dir)
@@ -118,7 +130,8 @@ public final class DepthMakeAll
       ParserConfigurationException,
       ConstraintError,
       ParseException,
-      CompilerError
+      CompilerError,
+      InterruptedException
   {
     final ArrayList<String> argslist = new ArrayList<String>();
 
@@ -129,11 +142,7 @@ public final class DepthMakeAll
     argslist.add("--compile-batch");
     argslist.add(out_dir.toString());
     argslist.add(batch.toString());
-
-    for (final String s : sources) {
-      final File f = new File(source_dir, s);
-      argslist.add(f.toString());
-    }
+    argslist.add(out_sources.toString());
 
     final String[] args = new String[argslist.size()];
     argslist.toArray(args);

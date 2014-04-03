@@ -34,15 +34,15 @@ module ShadowVariance is
   end;
 
   function chebyshev_upper_bound (
-    config  : t,
-    moments : vector_2f,
-    depth   : float
+    config        : t,
+    moments       : vector_2f,
+    depth_current : float
   ) : float =
     let
-      value p        = new float (F.lesser_or_equal (depth, moments [x]));
+      value p        = new float (F.lesser_or_equal (depth_current, moments [x]));
       value variance = F.subtract (moments [y], F.multiply (moments [x], moments [x]));
       value variance = F.maximum (config.variance_min, variance);
-      value delta    = F.subtract (depth, moments [x]);
+      value delta    = F.subtract (depth_current, moments [x]);
       value p_max    = F.divide (variance, F.add (variance, F.multiply (delta, delta)));
     in
       F.maximum (p, p_max)
