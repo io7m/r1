@@ -119,8 +119,8 @@ final class KPostprocessorBlurDepthVariance extends
       this.shader_cache =
         Constraints.constrainNotNull(in_shader_cache, "Shader cache");
 
-      final KRegionCopierNew c =
-        new KRegionCopierNew(in_gi, in_log, in_shader_cache);
+      final KRegionCopier c =
+        new KRegionCopier(in_gi, in_log, in_shader_cache);
       c.copierSetBlittingEnabled(false);
       this.copier = c;
 

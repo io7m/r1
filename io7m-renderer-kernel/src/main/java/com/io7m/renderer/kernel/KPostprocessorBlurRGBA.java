@@ -109,7 +109,7 @@ final class KPostprocessorBlurRGBA extends
         Constraints.constrainNotNull(in_rgba_cache, "RGBA framebuffer cache");
       this.shader_cache =
         Constraints.constrainNotNull(in_shader_cache, "Shader cache");
-      this.copier = new KRegionCopierNew(in_gi, in_log, in_shader_cache);
+      this.copier = new KRegionCopier(in_gi, in_log, in_shader_cache);
       this.log =
         new Log(
           Constraints.constrainNotNull(in_log, "Log"),
