@@ -46,10 +46,6 @@ public interface KFramebufferDepthVarianceUsable extends KFramebufferUsable
    * Retrieve a reference to the framebuffer to which the depth-variance data
    * will be rendered.
    * </p>
-   * <p>
-   * This framebuffer may share a depth attachment with a color buffer on the
-   * framebuffer, so rendering to one will typically affect the other.
-   * </p>
    * 
    * @return A reference to the framebuffer
    */

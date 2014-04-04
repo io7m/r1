@@ -50,6 +50,7 @@ import com.io7m.jcanephora.JCGLInterfaceGLES2;
 import com.io7m.jcanephora.JCGLInterfaceGLES3;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM3x3F;
@@ -57,7 +58,8 @@ import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RTransformTexture;
 
-final class KRegionCopierNew implements KRegionCopierType
+@SuppressWarnings("synthetic-access") final class KRegionCopierNew implements
+  KRegionCopierType
 {
   /**
    * <p>
@@ -134,6 +136,38 @@ final class KRegionCopierNew implements KRegionCopierType
       gc.framebufferReadUnbind();
     }
   }
+
+  private static
+    <G extends JCGLFramebuffersGL3>
+    void
+    copyBlitDepthVarianceOnlyGL3(
+      final @Nonnull G gc,
+      final @Nonnull KFramebufferDepthVarianceUsable source,
+      final @Nonnull AreaInclusive source_area,
+      final @Nonnull KFramebufferDepthVarianceUsable target,
+      final @Nonnull AreaInclusive target_area)
+      throws JCGLRuntimeException,
+        ConstraintError
+  {
+    gc.framebufferReadBind(source
+      .kFramebufferGetDepthVariancePassFramebuffer());
+    try {
+      gc.framebufferDrawBind(target
+        .kFramebufferGetDepthVariancePassFramebuffer());
+      try {
+        gc.framebufferBlit(
+          source_area,
+          target_area,
+          EnumSet.of(FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_COLOR),
+          FramebufferBlitFilter.FRAMEBUFFER_BLIT_FILTER_LINEAR);
+      } finally {
+        gc.framebufferDrawUnbind();
+      }
+    } finally {
+      gc.framebufferReadUnbind();
+    }
+  }
+
   private boolean                                              blit;
   private final @Nonnull JCGLImplementation                    g;
   private final @Nonnull RMatrixM3x3F<RTransformTexture>       matrix_uv;
@@ -172,15 +206,13 @@ final class KRegionCopierNew implements KRegionCopierType
     }
   }
 
-  @SuppressWarnings("synthetic-access") @Override public
-    void
-    copierCopyRGBAOnly(
-      final @Nonnull KFramebufferRGBAUsable source,
-      final @Nonnull AreaInclusive source_area,
-      final @Nonnull KFramebufferRGBAUsable target,
-      final @Nonnull AreaInclusive target_area)
-      throws ConstraintError,
-        RException
+  @Override public void copierCopyRGBAOnly(
+    final @Nonnull KFramebufferRGBAUsable source,
+    final @Nonnull AreaInclusive source_area,
+    final @Nonnull KFramebufferRGBAUsable target,
+    final @Nonnull AreaInclusive target_area)
+    throws ConstraintError,
+      RException
   {
     Constraints.constrainNotNull(source, "Source");
     Constraints.constrainNotNull(source_area, "Source area");
@@ -227,12 +259,13 @@ final class KRegionCopierNew implements KRegionCopierType
               ConstraintError,
               RException
           {
-            KRegionCopierNew.this.copyDrawRGBAOnly(
+            KRegionCopierNew.this.copyDrawColorOnly(
               gl,
-              source,
+              source.kFramebufferGetRGBATexture(),
               source_area,
-              target,
-              target_area);
+              target.kFramebufferGetColorFramebuffer(),
+              target_area,
+              "postprocessing_copy_rgba");
             return Unit.unit();
           }
 
@@ -267,30 +300,25 @@ final class KRegionCopierNew implements KRegionCopierType
     this.blit = in_blit;
   }
 
-  @SuppressWarnings("synthetic-access") private void copyDrawRGBAOnly(
+  private void copyDrawColorOnly(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KFramebufferRGBAUsable source,
-    final @Nonnull AreaInclusive source_area,
-    final @Nonnull KFramebufferRGBAUsable target,
-    final @Nonnull AreaInclusive target_area)
-    throws RException,
-      ConstraintError
+    final @Nonnull Texture2DStaticUsable source,
+    final @Nonnull AreaInclusive source_select_area,
+    final @Nonnull FramebufferReferenceUsable target,
+    final @Nonnull AreaInclusive target_select_area,
+    final @Nonnull String shader_name)
+    throws ConstraintError,
+      RException
   {
     try {
       KRegionCopierNew.calculateRegionMatrices(
-        source.kFramebufferGetArea(),
-        source_area,
+        source.getArea(),
+        source_select_area,
         this.matrix_uv);
 
-      final KProgram kp =
-        this.shader_cache.cacheGetLU("postprocessing_copy_rgba");
-
+      final KProgram kp = this.shader_cache.cacheGetLU(shader_name);
       final List<TextureUnit> units = gc.textureGetUnits();
-
-      final FramebufferReferenceUsable output =
-        target.kFramebufferGetColorFramebuffer();
-
-      gc.framebufferDrawBind(output);
+      gc.framebufferDrawBind(target);
 
       try {
         gc.blendingDisable();
@@ -303,8 +331,8 @@ final class KRegionCopierNew implements KRegionCopierType
         }
 
         try {
-          gc.scissorEnable(target_area);
-          gc.viewportSet(target_area);
+          gc.scissorEnable(target_select_area);
+          gc.viewportSet(target_select_area);
 
           final JCBExecutionAPI e = kp.getExecutable();
           e.execRun(new JCBExecutorProcedure() {
@@ -315,11 +343,8 @@ final class KRegionCopierNew implements KRegionCopierType
                 Exception
             {
               final TextureUnit unit = units.get(0);
-              gc.texture2DStaticBind(
-                unit,
-                source.kFramebufferGetRGBATexture());
+              gc.texture2DStaticBind(unit, source);
               p.programUniformPutTextureUnit("t_image", unit);
-
               KRegionCopierNew.this.drawQuad(gc, p);
             }
           });
@@ -362,7 +387,44 @@ final class KRegionCopierNew implements KRegionCopierType
         target,
         target_area);
     } else {
-      this.copyDrawRGBAOnly(gl, source, source_area, target, target_area);
+      this.copyDrawColorOnly(
+        gl,
+        source.kFramebufferGetRGBATexture(),
+        source_area,
+        target.kFramebufferGetColorFramebuffer(),
+        target_area,
+        "postprocessing_copy_rgba");
+    }
+  }
+
+  private
+    <G extends JCGLInterfaceCommon & JCGLFramebuffersGL3>
+    void
+    copyDepthVarianceOnlyGL3(
+      final @Nonnull G gl,
+      final @Nonnull KFramebufferDepthVarianceUsable source,
+      final @Nonnull AreaInclusive source_area,
+      final @Nonnull KFramebufferDepthVarianceUsable target,
+      final @Nonnull AreaInclusive target_area)
+      throws RException,
+        ConstraintError,
+        JCGLRuntimeException
+  {
+    if (this.blit) {
+      KRegionCopierNew.copyBlitDepthVarianceOnlyGL3(
+        gl,
+        source,
+        source_area,
+        target,
+        target_area);
+    } else {
+      this.copyDrawColorOnly(
+        gl,
+        source.kFramebufferGetDepthVarianceTexture(),
+        source_area,
+        target.kFramebufferGetDepthVariancePassFramebuffer(),
+        target_area,
+        "postprocessing_copy_rgba");
     }
   }
 
@@ -396,6 +458,89 @@ final class KRegionCopierNew implements KRegionCopierType
 
     } finally {
       gc.arrayBufferUnbind();
+    }
+  }
+
+  @Override public void copierCopyDepthVarianceOnly(
+    final @Nonnull KFramebufferDepthVarianceUsable source,
+    final @Nonnull AreaInclusive source_area,
+    final @Nonnull KFramebufferDepthVarianceUsable target,
+    final @Nonnull AreaInclusive target_area)
+    throws ConstraintError,
+      RException
+  {
+    Constraints.constrainNotNull(source, "Source");
+    Constraints.constrainNotNull(source_area, "Source area");
+    Constraints.constrainNotNull(target, "Target");
+    Constraints.constrainNotNull(target_area, "Target area");
+    Constraints.constrainArbitrary(source != target, "Source != Target");
+
+    try {
+      this.g
+        .implementationAccept(new JCGLImplementationVisitor<Unit, RException>() {
+          @Override public Unit implementationIsGL2(
+            final @Nonnull JCGLInterfaceGL2 gl)
+            throws JCGLException,
+              ConstraintError,
+              RException
+          {
+            KRegionCopierNew.this.copyDepthVarianceOnlyGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
+
+          @Override public Unit implementationIsGL3(
+            final @Nonnull JCGLInterfaceGL3 gl)
+            throws JCGLException,
+              ConstraintError,
+              RException
+          {
+            KRegionCopierNew.this.copyDepthVarianceOnlyGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
+
+          @Override public Unit implementationIsGLES2(
+            final @Nonnull JCGLInterfaceGLES2 gl)
+            throws JCGLException,
+              ConstraintError,
+              RException
+          {
+            KRegionCopierNew.this.copyDrawColorOnly(
+              gl,
+              source.kFramebufferGetDepthVarianceTexture(),
+              source_area,
+              target.kFramebufferGetDepthVariancePassFramebuffer(),
+              target_area,
+              "postprocessing_copy_rgba");
+            return Unit.unit();
+          }
+
+          @Override public Unit implementationIsGLES3(
+            final @Nonnull JCGLInterfaceGLES3 gl)
+            throws JCGLException,
+              ConstraintError,
+              RException
+          {
+            KRegionCopierNew.this.copyDepthVarianceOnlyGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
+        });
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
     }
   }
 }
