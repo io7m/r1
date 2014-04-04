@@ -106,10 +106,10 @@ public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
       final CursorWritable2f uv_cursor =
         array_data.getCursor2f(KMeshAttributes.ATTRIBUTE_UV.getName());
 
-      pos_cursor.put3f(-1, 1, 0);
-      pos_cursor.put3f(-1, -1, 0);
-      pos_cursor.put3f(1, -1, 0);
-      pos_cursor.put3f(1, 1, 0);
+      pos_cursor.put3f(-1, 1, -1);
+      pos_cursor.put3f(-1, -1, -1);
+      pos_cursor.put3f(1, -1, -1);
+      pos_cursor.put3f(1, 1, -1);
 
       norm_cursor.put3f(0, 0, 1);
       norm_cursor.put3f(0, 0, 1);

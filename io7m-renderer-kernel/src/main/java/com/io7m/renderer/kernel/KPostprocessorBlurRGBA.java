@@ -26,7 +26,6 @@ import com.io7m.jcache.BLUCacheReceipt;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.FramebufferBlitFilter;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLRuntimeException;
@@ -92,7 +91,7 @@ final class KPostprocessorBlurRGBA extends
   private final @Nonnull KUnitQuad                                                           quad;
   private final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache;
   private final @Nonnull LUCache<String, KProgram, RException>                               shader_cache;
-  private final @Nonnull KRegionCopier                                                       copier;
+  private final @Nonnull KRegionCopierType                                                   copier;
 
   private KPostprocessorBlurRGBA(
     final @Nonnull JCGLImplementation in_gi,
@@ -110,7 +109,7 @@ final class KPostprocessorBlurRGBA extends
         Constraints.constrainNotNull(in_rgba_cache, "RGBA framebuffer cache");
       this.shader_cache =
         Constraints.constrainNotNull(in_shader_cache, "Shader cache");
-      this.copier = KRegionCopier.newCopier(in_gi, in_shader_cache, in_log);
+      this.copier = new KRegionCopierNew(in_gi, in_log, in_shader_cache);
       this.log =
         new Log(
           Constraints.constrainNotNull(in_log, "Log"),
@@ -128,7 +127,7 @@ final class KPostprocessorBlurRGBA extends
   {
     try {
       this.quad.delete(this.gi.getGLCommon());
-      this.copier.close();
+      this.copier.copierClose();
     } catch (final JCGLRuntimeException e) {
       throw RException.fromJCGLException(e);
     }
@@ -195,12 +194,11 @@ final class KPostprocessorBlurRGBA extends
       final int passes = parameters.getPasses();
       if (passes == 0) {
         if (input != output) {
-          this.copier.copyFramebufferRegionRGBA(
+          this.copier.copierCopyRGBAOnly(
             input,
             input.kFramebufferGetArea(),
             output,
-            output.kFramebufferGetArea(),
-            FramebufferBlitFilter.FRAMEBUFFER_BLIT_FILTER_NEAREST);
+            output.kFramebufferGetArea());
         }
         return;
       }

@@ -26,7 +26,6 @@ import com.io7m.jcache.BLUCacheReceipt;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.FramebufferBlitFilter;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLRuntimeException;
@@ -99,7 +98,7 @@ final class KPostprocessorBlurDepthVariance extends
   private final @Nonnull Log                                                                                   log;
   private final @Nonnull KUnitQuad                                                                             quad;
   private final @Nonnull LUCache<String, KProgram, RException>                                                 shader_cache;
-  private final @Nonnull KRegionCopier                                                                         copier;
+  private final @Nonnull KRegionCopierType                                                                     copier;
 
   private KPostprocessorBlurDepthVariance(
     final @Nonnull JCGLImplementation in_gi,
@@ -119,7 +118,12 @@ final class KPostprocessorBlurDepthVariance extends
           "DepthVariance framebuffer cache");
       this.shader_cache =
         Constraints.constrainNotNull(in_shader_cache, "Shader cache");
-      this.copier = KRegionCopier.newCopier(in_gi, in_shader_cache, in_log);
+
+      final KRegionCopierNew c =
+        new KRegionCopierNew(in_gi, in_log, in_shader_cache);
+      c.copierSetBlittingEnabled(false);
+      this.copier = c;
+
       this.log =
         new Log(
           Constraints.constrainNotNull(in_log, "Log"),
@@ -176,7 +180,7 @@ final class KPostprocessorBlurDepthVariance extends
   {
     try {
       this.quad.delete(this.gi.getGLCommon());
-      this.copier.close();
+      this.copier.copierClose();
     } catch (final JCGLRuntimeException e) {
       throw RException.fromJCGLException(e);
     }
@@ -200,12 +204,11 @@ final class KPostprocessorBlurDepthVariance extends
       final int passes = parameters.getPasses();
       if (passes == 0) {
         if (input != output) {
-          this.copier.copyFramebufferRegionDepthVariance(
+          this.copier.copierCopyDepthVarianceOnly(
             input,
             input.kFramebufferGetArea(),
             output,
-            output.kFramebufferGetArea(),
-            FramebufferBlitFilter.FRAMEBUFFER_BLIT_FILTER_NEAREST);
+            output.kFramebufferGetArea());
         }
         return;
       }

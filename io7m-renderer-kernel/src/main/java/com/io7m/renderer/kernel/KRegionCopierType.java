@@ -24,8 +24,79 @@ import com.io7m.renderer.types.RException;
 
 interface KRegionCopierType
 {
+  /**
+   * Close the copier, releasing any resources the copier has allocated.
+   * 
+   * @throws RException
+   *           If an error occurs
+   */
+
   void copierClose()
     throws RException;
+
+  /**
+   * <p>
+   * Copy the given <code>source_area</code> from the colour buffer of
+   * <code>source</code> to the given <code>target_area</code> of the colour
+   * buffer of <code>target</code>. The colour buffer is expected to contain
+   * depth-variance data, but the copying operation is functionally identical
+   * to
+   * {@link #copierCopyRGBAOnly(KFramebufferRGBAUsable, AreaInclusive, KFramebufferRGBAUsable, AreaInclusive)}
+   * .
+   * </p>
+   * <p>
+   * If the sizes of the two areas differ, the region will be scaled to the
+   * correct size.
+   * </p>
+   * 
+   * @param source
+   *          The source framebuffer
+   * @param source_area
+   *          The source area
+   * @param target
+   *          The target framebuffer
+   * @param target_area
+   *          The target area
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>, or if
+   *           <code>source == target</code>
+   * @throws RException
+   *           If an error occurs
+   */
+
+  void copierCopyDepthVarianceOnly(
+    final @Nonnull KFramebufferDepthVarianceUsable source,
+    final @Nonnull AreaInclusive source_area,
+    final @Nonnull KFramebufferDepthVarianceUsable target,
+    final @Nonnull AreaInclusive target_area)
+    throws ConstraintError,
+      RException;
+
+  /**
+   * <p>
+   * Copy the given <code>source_area</code> from the colour buffer of
+   * <code>source</code> to the given <code>target_area</code> of the colour
+   * buffer of <code>target</code>.
+   * </p>
+   * <p>
+   * If the sizes of the two areas differ, the region will be scaled to the
+   * correct size.
+   * </p>
+   * 
+   * @param source
+   *          The source framebuffer
+   * @param source_area
+   *          The source area
+   * @param target
+   *          The target framebuffer
+   * @param target_area
+   *          The target area
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>, or if
+   *           <code>source == target</code>
+   * @throws RException
+   *           If an error occurs
+   */
 
   void copierCopyRGBAOnly(
     final @Nonnull KFramebufferRGBAUsable source,
