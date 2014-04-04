@@ -41,6 +41,7 @@ import com.io7m.jaux.PropertyUtils.ValueIncorrectType;
 import com.io7m.jaux.PropertyUtils.ValueNotFound;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 
 public final class Sandbox
 {
@@ -174,6 +175,9 @@ public final class Sandbox
           System.exit(1);
         } catch (final IOException e) {
           SBErrorBox.showErrorWithTitleLater(log, "I/O error", e);
+          e.printStackTrace();
+        } catch (final SBExceptionInputError e) {
+          SBErrorBox.showErrorWithTitleLater(log, "Input error", e);
           e.printStackTrace();
         }
       }

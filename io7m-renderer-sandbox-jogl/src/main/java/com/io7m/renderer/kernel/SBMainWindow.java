@@ -56,6 +56,7 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Callbacks;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
+import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.jogamp.opengl.util.Animator;
 
 final class SBMainWindow extends JFrame
@@ -117,7 +118,8 @@ final class SBMainWindow extends JFrame
       final @Nonnull SBMaterialsWindow materials_window,
       final @Nonnull SBInstancesWindow instances_window,
       final @Nonnull Log log)
-      throws ConstraintError
+      throws ConstraintError,
+        SBExceptionInputError
   {
     final JMenuBar bar = new JMenuBar();
     bar.add(SBMainWindow.makeMenuFile(controller, window, log));
@@ -357,7 +359,8 @@ final class SBMainWindow extends JFrame
     JMenu
     makeMenuPostprocessor(
       final @Nonnull C controller)
-      throws ConstraintError
+      throws ConstraintError,
+        SBExceptionInputError
   {
     final ButtonGroup renderer_group = new ButtonGroup();
     final JMenu menu = new JMenu("Postprocessor");
@@ -374,6 +377,14 @@ final class SBMainWindow extends JFrame
       final SBKPostprocessorBlur p = new SBKPostprocessorBlur(controller);
       final JCheckBoxMenuItem c =
         SBMainWindow.makeWindowCheckbox("blur", p.getWindow());
+      menu.add(c);
+      renderer_group.add(c);
+    }
+
+    {
+      final SBKPostprocessorCopy p = new SBKPostprocessorCopy(controller);
+      final JCheckBoxMenuItem c =
+        SBMainWindow.makeWindowCheckbox("copy", p.getWindow());
       menu.add(c);
       renderer_group.add(c);
     }
@@ -609,7 +620,8 @@ final class SBMainWindow extends JFrame
     final @Nonnull SBSceneController controller,
     final @Nonnull SBGLRenderer in_renderer,
     final @Nonnull Log log)
-    throws ConstraintError
+    throws ConstraintError,
+      SBExceptionInputError
   {
     this.renderer = in_renderer;
 
