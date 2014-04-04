@@ -58,7 +58,7 @@ import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RTransformTexture;
 
-@SuppressWarnings("synthetic-access") final class KRegionCopierNew implements
+@SuppressWarnings("synthetic-access") final class KRegionCopier implements
   KRegionCopierType
 {
   /**
@@ -175,7 +175,7 @@ import com.io7m.renderer.types.RTransformTexture;
 
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
 
-  KRegionCopierNew(
+  KRegionCopier(
     final @Nonnull JCGLImplementation in_g,
     final @Nonnull Log log,
     final @Nonnull LUCache<String, KProgram, RException> in_shader_cache)
@@ -229,7 +229,7 @@ import com.io7m.renderer.types.RTransformTexture;
               ConstraintError,
               RException
           {
-            KRegionCopierNew.this.copyRGBAOnlyGL3(
+            KRegionCopier.this.copyRGBAOnlyGL3(
               gl,
               source,
               source_area,
@@ -244,7 +244,7 @@ import com.io7m.renderer.types.RTransformTexture;
               ConstraintError,
               RException
           {
-            KRegionCopierNew.this.copyRGBAOnlyGL3(
+            KRegionCopier.this.copyRGBAOnlyGL3(
               gl,
               source,
               source_area,
@@ -259,7 +259,7 @@ import com.io7m.renderer.types.RTransformTexture;
               ConstraintError,
               RException
           {
-            KRegionCopierNew.this.copyDrawColorOnly(
+            KRegionCopier.this.copyDrawColorOnly(
               gl,
               source.kFramebufferGetRGBATexture(),
               source_area,
@@ -275,7 +275,7 @@ import com.io7m.renderer.types.RTransformTexture;
               ConstraintError,
               RException
           {
-            KRegionCopierNew.this.copyRGBAOnlyGL3(
+            KRegionCopier.this.copyRGBAOnlyGL3(
               gl,
               source,
               source_area,
@@ -311,7 +311,7 @@ import com.io7m.renderer.types.RTransformTexture;
       RException
   {
     try {
-      KRegionCopierNew.calculateRegionMatrices(
+      KRegionCopier.calculateRegionMatrices(
         source.getArea(),
         source_select_area,
         this.matrix_uv);
@@ -345,7 +345,7 @@ import com.io7m.renderer.types.RTransformTexture;
               final TextureUnit unit = units.get(0);
               gc.texture2DStaticBind(unit, source);
               p.programUniformPutTextureUnit("t_image", unit);
-              KRegionCopierNew.this.drawQuad(gc, p);
+              KRegionCopier.this.drawQuad(gc, p);
             }
           });
 
@@ -380,7 +380,7 @@ import com.io7m.renderer.types.RTransformTexture;
         JCGLRuntimeException
   {
     if (this.blit) {
-      KRegionCopierNew.copyBlitRGBAOnlyGL3(
+      KRegionCopier.copyBlitRGBAOnlyGL3(
         gl,
         source,
         source_area,
@@ -411,7 +411,7 @@ import com.io7m.renderer.types.RTransformTexture;
         JCGLRuntimeException
   {
     if (this.blit) {
-      KRegionCopierNew.copyBlitDepthVarianceOnlyGL3(
+      KRegionCopier.copyBlitDepthVarianceOnlyGL3(
         gl,
         source,
         source_area,
@@ -436,15 +436,15 @@ import com.io7m.renderer.types.RTransformTexture;
       JCGLException,
       JCBExecutionException
   {
-    final ArrayBufferUsable array = KRegionCopierNew.this.quad.getArray();
-    final IndexBufferUsable indices = KRegionCopierNew.this.quad.getIndices();
+    final ArrayBufferUsable array = KRegionCopier.this.quad.getArray();
+    final IndexBufferUsable indices = KRegionCopier.this.quad.getIndices();
 
     gc.arrayBufferBind(array);
 
     try {
       KShadingProgramCommon.bindAttributePosition(p, array);
       KShadingProgramCommon.bindAttributeUV(p, array);
-      KShadingProgramCommon.putMatrixUV(p, KRegionCopierNew.this.matrix_uv);
+      KShadingProgramCommon.putMatrixUV(p, KRegionCopier.this.matrix_uv);
 
       p.programExecute(new JCBProgramProcedure() {
         @Override public void call()
@@ -484,7 +484,7 @@ import com.io7m.renderer.types.RTransformTexture;
               ConstraintError,
               RException
           {
-            KRegionCopierNew.this.copyDepthVarianceOnlyGL3(
+            KRegionCopier.this.copyDepthVarianceOnlyGL3(
               gl,
               source,
               source_area,
@@ -499,7 +499,7 @@ import com.io7m.renderer.types.RTransformTexture;
               ConstraintError,
               RException
           {
-            KRegionCopierNew.this.copyDepthVarianceOnlyGL3(
+            KRegionCopier.this.copyDepthVarianceOnlyGL3(
               gl,
               source,
               source_area,
@@ -514,7 +514,7 @@ import com.io7m.renderer.types.RTransformTexture;
               ConstraintError,
               RException
           {
-            KRegionCopierNew.this.copyDrawColorOnly(
+            KRegionCopier.this.copyDrawColorOnly(
               gl,
               source.kFramebufferGetDepthVarianceTexture(),
               source_area,
@@ -530,7 +530,7 @@ import com.io7m.renderer.types.RTransformTexture;
               ConstraintError,
               RException
           {
-            KRegionCopierNew.this.copyDepthVarianceOnlyGL3(
+            KRegionCopier.this.copyDepthVarianceOnlyGL3(
               gl,
               source,
               source_area,

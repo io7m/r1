@@ -57,7 +57,7 @@ final class KPostprocessorCopyRGBA extends
   private final @Nonnull Log                                                                 log;
   private final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache;
   private final @Nonnull LUCache<String, KProgram, RException>                               shader_cache;
-  private final @Nonnull KRegionCopierNew                                                    copier;
+  private final @Nonnull KRegionCopier                                                    copier;
 
   private KPostprocessorCopyRGBA(
     final @Nonnull JCGLImplementation in_gi,
@@ -78,7 +78,7 @@ final class KPostprocessorCopyRGBA extends
       Constraints.constrainNotNull(in_rgba_cache, "RGBA framebuffer cache");
     this.shader_cache =
       Constraints.constrainNotNull(in_shader_cache, "Shader cache");
-    this.copier = new KRegionCopierNew(in_gi, in_log, in_shader_cache);
+    this.copier = new KRegionCopier(in_gi, in_log, in_shader_cache);
   }
 
   @Override public void postprocessorClose()
