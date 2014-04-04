@@ -49,7 +49,6 @@ import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererForward;
@@ -1171,7 +1170,6 @@ import com.io7m.renderer.types.RTransformView;
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
   private final @Nonnull KShadowMapRenderer                    shadow_renderer;
   private final @Nonnull KTextureUnitAllocator                 texture_units;
-  private final @Nonnull VectorM2I                             viewport_size;
 
   private KRendererForwardActual(
     final @Nonnull JCGLImplementation in_g,
@@ -1204,7 +1202,6 @@ import com.io7m.renderer.types.RTransformView;
       this.matrices = KMutableMatrices.newMatrices();
       this.depth =
         KDepthRenderer.newDepthRenderer(in_g, in_shader_cache, caps, in_log);
-      this.viewport_size = new VectorM2I();
       this.background = new VectorM4F();
       this.texture_units = KTextureUnitAllocator.newAllocator(in_g);
 
@@ -1437,17 +1434,20 @@ import com.io7m.renderer.types.RTransformView;
              * the depth buffer will be rendered.
              */
 
+            gc.blendingEnable(
+              BlendFunction.BLEND_ONE,
+              BlendFunction.BLEND_ONE);
+
+            gc.colorBufferMask(true, true, true, true);
+            gc.colorBufferClearV4f(KRendererForwardActual.this.background);
+
             gc.cullingEnable(
               FaceSelection.FACE_BACK,
               FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
 
-            gc.colorBufferMask(true, true, true, true);
-            gc.colorBufferClearV4f(KRendererForwardActual.this.background);
             gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
             gc.depthBufferWriteDisable();
-            gc.blendingEnable(
-              BlendFunction.BLEND_ONE,
-              BlendFunction.BLEND_ONE);
+
             KRendererForwardActual.this.renderOpaques(
               gc,
               shadow_context,
@@ -1458,10 +1458,17 @@ import com.io7m.renderer.types.RTransformView;
              * Render all translucent instances into the framebuffer.
              */
 
-            gc.cullingDisable();
+            // Enabled by each translucent instance
+            gc.blendingDisable();
+
             gc.colorBufferMask(true, true, true, true);
+
+            // Enabled by each translucent instance
+            gc.cullingDisable();
+
             gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
             gc.depthBufferWriteDisable();
+
             KRendererForwardActual.this.renderTranslucents(
               gc,
               framebuffer,

@@ -48,6 +48,59 @@ public final class RCoordinates
   }
 
   /**
+   * Convert from clip-space coordinates to window-space coordinates.
+   * 
+   * @see #clipToNDC(RVectorReadable4F, RVectorM3F)
+   * @see #ndcToWindow(RVectorReadable3F, RVectorM3F, AreaInclusive, float,
+   *      float)
+   * 
+   * @param c
+   *          Clip-space coordinates
+   * @param w
+   *          The resulting window space coordinates
+   * @param area
+   *          The area of the window
+   * @param near
+   *          The coordinate of the near clipping plane in window space
+   *          (usually <code>0</code>)
+   * @param far
+   *          The coordinate of the far clipping plane in window space
+   *          (usually <code>1</code>)
+   */
+
+  public static void clipToWindow(
+    final @Nonnull RVectorReadable4F<RSpaceClip> c,
+    final @Nonnull RVectorM3F<RSpaceWindow> w,
+    final @Nonnull AreaInclusive area,
+    final float near,
+    final float far)
+  {
+    final RVectorM3F<RSpaceNDC> n = new RVectorM3F<RSpaceNDC>();
+    RCoordinates.clipToNDC(c, n);
+    RCoordinates.ndcToWindow(n, w, area, near, far);
+  }
+
+  /**
+   * Calculate clip-space coordinates from the given normalized-device space
+   * coordinates.
+   * 
+   * @param c
+   *          The resulting clip coordinates
+   * @param n
+   *          The normalized device coordinates
+   */
+
+  public static void ndcToClip(
+    final @Nonnull RVectorM4F<RSpaceClip> c,
+    final @Nonnull RVectorReadable4F<RSpaceNDC> n)
+  {
+    c.x = n.getXF() * n.getWF();
+    c.y = n.getYF() * n.getWF();
+    c.z = n.getZF() * n.getWF();
+    c.w = n.getWF() * n.getWF();
+  }
+
+  /**
    * Convert normalized device space coordinates ({@link RSpaceNDC}) to window
    * space coordinates ({@link RSpaceWindow}).
    * 
@@ -85,6 +138,43 @@ public final class RCoordinates
     w.x = (wd2 * n.getXF()) + (pos_x + wd2);
     w.y = (hd2 * n.getYF()) + (pos_y + hd2);
     w.z = (fmnd2 * n.getZF()) + fpnd2;
+  }
+
+  /**
+   * Convert window-space coordinates ({@link RSpaceWindow}) to normalized
+   * device space coordinates ({@link RSpaceNDC}).
+   * 
+   * @param n
+   *          The resulting normalized device space coordinates
+   * @param w
+   *          The window space coordinates
+   * @param area
+   *          The area of the window
+   * @param near
+   *          The coordinate of the near clipping plane in window space
+   *          (usually <code>0</code>)
+   * @param far
+   *          The coordinate of the far clipping plane in window space
+   *          (usually <code>1</code>)
+   */
+
+  public static void windowToNDC(
+    final @Nonnull RVectorM3F<RSpaceNDC> n,
+    final @Nonnull RVectorReadable3F<RSpaceWindow> w,
+    final @Nonnull AreaInclusive area,
+    final float near,
+    final float far)
+  {
+    final RangeInclusive rx = area.getRangeX();
+    final RangeInclusive ry = area.getRangeY();
+    final float vx = rx.getLower();
+    final float vy = ry.getLower();
+    final float n_x = ((2.0f * w.getXF()) - (2.0f * vx)) / rx.getInterval();
+    final float n_y = ((2.0f * w.getYF()) - (2.0f * vy)) / ry.getInterval();
+    final float n_z = ((2.0f * w.getZF()) - (far - near)) / (far - near);
+    n.x = n_x - 1.0f;
+    n.y = n_y - 1.0f;
+    n.z = n_z - 1.0f;
   }
 
   private RCoordinates()

@@ -53,6 +53,7 @@ import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 import com.io7m.renderer.kernel.types.KShadowVisitor;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RMatrixReadable3x3F;
 import com.io7m.renderer.types.RMatrixReadable4x4F;
 import com.io7m.renderer.types.RSpaceObject;
@@ -81,6 +82,8 @@ final class KShadingProgramCommon
   private static final String MATRIX_NAME_MODELVIEW              =
                                                                    "m_modelview";
   private static final String MATRIX_NAME_NORMAL                 = "m_normal";
+  private static final String MATRIX_NAME_POSITION               =
+                                                                   "m_position";
   private static final String MATRIX_NAME_PROJECTION             =
                                                                    "m_projection";
   private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW   =
@@ -1121,6 +1124,17 @@ final class KShadingProgramCommon
     program.programUniformPutMatrix3x3f(
       KShadingProgramCommon.MATRIX_NAME_NORMAL,
       mn);
+  }
+
+  static void putMatrixPosition(
+    final @Nonnull JCBProgram program,
+    final @Nonnull RMatrixM3x3F<RTransformModel> m)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    program.programUniformPutMatrix3x3f(
+      KShadingProgramCommon.MATRIX_NAME_POSITION,
+      m);
   }
 
   static void putMatrixProjection(
