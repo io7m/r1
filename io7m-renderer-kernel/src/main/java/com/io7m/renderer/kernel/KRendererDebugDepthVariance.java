@@ -311,12 +311,18 @@ final class KRendererDebugDepthVariance extends KAbstractRendererDebug
 
     gc.framebufferDrawBind(output_buffer);
     try {
-      gc.viewportSet(framebuffer.kFramebufferGetArea());
+      gc.blendingDisable();
 
+      gc.colorBufferMask(true, true, true, true);
+      gc.colorBufferClearV4f(this.background);
+
+      gc.cullingDisable();
+
+      gc.depthBufferWriteEnable();
       gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
       gc.depthBufferClear(1.0f);
-      gc.colorBufferClearV4f(KRendererDebugDepthVariance.this.background);
-      gc.blendingDisable();
+
+      gc.viewportSet(framebuffer.kFramebufferGetArea());
 
       final Set<KInstanceTransformed> instances = scene.getVisibleInstances();
 
