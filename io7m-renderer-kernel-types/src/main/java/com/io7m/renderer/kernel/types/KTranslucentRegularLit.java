@@ -29,21 +29,21 @@ import com.io7m.renderer.types.RException;
  * A regular translucent instance lit by a set of lights.
  */
 
-@Immutable public final class KTranslucentRegularLit implements KTranslucent
+@Immutable public final class KTranslucentRegularLit implements KTranslucentType
 {
   private final @Nonnull KInstanceTransformedTranslucentRegular instance;
-  private final @Nonnull Set<KLight>                            lights;
+  private final @Nonnull Set<KLightType>                            lights;
 
   protected KTranslucentRegularLit(
     final @Nonnull KInstanceTransformedTranslucentRegular in_instance,
-    final @Nonnull Set<KLight> in_lights)
+    final @Nonnull Set<KLightType> in_lights)
   {
     this.instance = in_instance;
     this.lights = in_lights;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KTranslucentVisitor<A, E>>
+    <A, E extends Throwable, V extends KTranslucentVisitorType<A, E>>
     A
     translucentAccept(
       final @Nonnull V v)
@@ -70,7 +70,7 @@ import com.io7m.renderer.types.RException;
    * @return The lights
    */
 
-  public @Nonnull Set<KLight> translucentGetLights()
+  public @Nonnull Set<KLightType> translucentGetLights()
   {
     return this.lights;
   }

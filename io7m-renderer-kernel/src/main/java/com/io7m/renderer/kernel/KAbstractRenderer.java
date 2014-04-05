@@ -22,10 +22,10 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
-abstract class KAbstractRenderer implements KRenderer
+abstract class KAbstractRenderer implements KRendererType
 {
   public static abstract class KAbstractRendererDebug extends
-    KAbstractRenderer implements KRendererDebug
+    KAbstractRenderer implements KRendererDebugType
   {
     protected KAbstractRendererDebug(
       final @Nonnull String name)
@@ -34,7 +34,7 @@ abstract class KAbstractRenderer implements KRenderer
     }
 
     @Override public final
-      <A, E extends Throwable, V extends KRendererVisitor<A, E>>
+      <A, E extends Throwable, V extends KRendererVisitorType<A, E>>
       A
       rendererVisitableAccept(
         final @Nonnull V v)
@@ -48,7 +48,7 @@ abstract class KAbstractRenderer implements KRenderer
   }
 
   public static abstract class KAbstractRendererDeferred extends
-    KAbstractRenderer implements KRendererDeferred
+    KAbstractRenderer implements KRendererDeferredType
   {
     protected KAbstractRendererDeferred(
       final @Nonnull String name)
@@ -57,7 +57,7 @@ abstract class KAbstractRenderer implements KRenderer
     }
 
     @Override public final
-      <A, E extends Throwable, V extends KRendererVisitor<A, E>>
+      <A, E extends Throwable, V extends KRendererVisitorType<A, E>>
       A
       rendererVisitableAccept(
         final @Nonnull V v)
@@ -71,7 +71,7 @@ abstract class KAbstractRenderer implements KRenderer
   }
 
   public static abstract class KAbstractRendererForward extends
-    KAbstractRenderer implements KRendererForward
+    KAbstractRenderer implements KRendererForwardType
   {
     protected KAbstractRendererForward(
       final @Nonnull String name)
@@ -80,7 +80,7 @@ abstract class KAbstractRenderer implements KRenderer
     }
 
     @Override public final
-      <A, E extends Throwable, V extends KRendererVisitor<A, E>>
+      <A, E extends Throwable, V extends KRendererVisitorType<A, E>>
       A
       rendererVisitableAccept(
         final @Nonnull V v)

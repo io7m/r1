@@ -23,9 +23,9 @@ import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.types.RMatrixI3x3F;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceWorld;
-import com.io7m.renderer.types.RTransformTexture;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceWorldType;
+import com.io7m.renderer.types.RTransformTextureType;
 import com.io7m.renderer.types.RVectorI3F;
 
 @Immutable final class SBInstance
@@ -36,16 +36,16 @@ import com.io7m.renderer.types.RVectorI3F;
   private final @Nonnull Integer                         material;
   private final @Nonnull PathVirtual                     mesh;
   private final @Nonnull QuaternionI4F                   orientation;
-  private final @Nonnull RVectorI3F<RSpaceWorld>         position;
-  private final @Nonnull RVectorI3F<RSpaceObject>        scale;
-  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
+  private final @Nonnull RVectorI3F<RSpaceWorldType>         position;
+  private final @Nonnull RVectorI3F<RSpaceObjectType>        scale;
+  private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   public SBInstance(
     final @Nonnull Integer in_id,
-    final @Nonnull RVectorI3F<RSpaceWorld> in_position,
-    final @Nonnull RVectorI3F<RSpaceObject> in_scale,
+    final @Nonnull RVectorI3F<RSpaceWorldType> in_position,
+    final @Nonnull RVectorI3F<RSpaceObjectType> in_scale,
     final @Nonnull QuaternionI4F in_orientation,
-    final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix,
+    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final @Nonnull PathVirtual in_mesh,
     final @Nonnull Integer in_material,
     final @Nonnull KFaceSelection in_faces,
@@ -130,17 +130,17 @@ import com.io7m.renderer.types.RVectorI3F;
     return this.orientation;
   }
 
-  public @Nonnull RVectorI3F<RSpaceWorld> getPosition()
+  public @Nonnull RVectorI3F<RSpaceWorldType> getPosition()
   {
     return this.position;
   }
 
-  public @Nonnull RVectorI3F<RSpaceObject> getScale()
+  public @Nonnull RVectorI3F<RSpaceObjectType> getScale()
   {
     return this.scale;
   }
 
-  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
+  public @Nonnull RMatrixI3x3F<RTransformTextureType> getUVMatrix()
   {
     return this.uv_matrix;
   }

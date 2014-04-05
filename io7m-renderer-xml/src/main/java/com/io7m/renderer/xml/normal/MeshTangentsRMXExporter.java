@@ -26,8 +26,8 @@ import nu.xom.Element;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceTexture;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
@@ -133,11 +133,11 @@ public class MeshTangentsRMXExporter
   {
     final String uri = RXMLConstants.MESHES_URI.toString();
     final List<Vertex> vertices = m.verticesGet();
-    final List<RVectorI3F<RSpaceObject>> positions = m.positionsGet();
-    final List<RVectorI3F<RSpaceObject>> normals = m.normalsGet();
-    final List<RVectorI2F<RSpaceTexture>> uvs = m.uvsGet();
-    final List<RVectorI4F<RSpaceObject>> tangents = m.tangentsGet();
-    final List<RVectorI3F<RSpaceObject>> bitangents = m.bitangentsGet();
+    final List<RVectorI3F<RSpaceObjectType>> positions = m.positionsGet();
+    final List<RVectorI3F<RSpaceObjectType>> normals = m.normalsGet();
+    final List<RVectorI2F<RSpaceTextureType>> uvs = m.uvsGet();
+    final List<RVectorI4F<RSpaceObjectType>> tangents = m.tangentsGet();
+    final List<RVectorI3F<RSpaceObjectType>> bitangents = m.bitangentsGet();
 
     final Element evs = new Element("m:vertices", uri);
     evs.addAttribute(MeshTangentsRMXExporter.intAttribute(
@@ -148,14 +148,14 @@ public class MeshTangentsRMXExporter
       final Element ev = new Element("m:v", uri);
 
       final Element ep = new Element("m:p", uri);
-      final RVectorI3F<RSpaceObject> p = positions.get(v.getPosition());
+      final RVectorI3F<RSpaceObjectType> p = positions.get(v.getPosition());
       ep.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:x", p.x));
       ep.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:y", p.y));
       ep.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", p.z));
       ev.appendChild(ep);
 
       final Element en = new Element("m:n", uri);
-      final RVectorI3F<RSpaceObject> n = normals.get(v.getNormal());
+      final RVectorI3F<RSpaceObjectType> n = normals.get(v.getNormal());
       en.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:x", n.x));
       en.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:y", n.y));
       en.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", n.z));
@@ -163,21 +163,21 @@ public class MeshTangentsRMXExporter
 
       if (write_bitangents) {
         final Element et = new Element("m:t3", uri);
-        final RVectorI4F<RSpaceObject> t = tangents.get(v.getTangent());
+        final RVectorI4F<RSpaceObjectType> t = tangents.get(v.getTangent());
         et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:x", t.x));
         et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:y", t.y));
         et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", t.z));
         ev.appendChild(et);
 
         final Element eb = new Element("m:b", uri);
-        final RVectorI3F<RSpaceObject> b = bitangents.get(v.getTangent());
+        final RVectorI3F<RSpaceObjectType> b = bitangents.get(v.getTangent());
         eb.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:x", b.x));
         eb.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:y", b.y));
         eb.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", b.z));
         ev.appendChild(eb);
       } else {
         final Element et = new Element("m:t4", uri);
-        final RVectorI4F<RSpaceObject> t = tangents.get(v.getTangent());
+        final RVectorI4F<RSpaceObjectType> t = tangents.get(v.getTangent());
         et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:x", t.x));
         et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:y", t.y));
         et.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:z", t.z));
@@ -186,7 +186,7 @@ public class MeshTangentsRMXExporter
       }
 
       final Element eu = new Element("m:u", uri);
-      final RVectorI2F<RSpaceTexture> u = uvs.get(v.getUV());
+      final RVectorI2F<RSpaceTextureType> u = uvs.get(v.getUV());
       eu.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:x", u.x));
       eu.addAttribute(MeshTangentsRMXExporter.floatAttribute("m:y", u.y));
       ev.appendChild(eu);

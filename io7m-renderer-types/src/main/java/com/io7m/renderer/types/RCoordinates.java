@@ -29,8 +29,8 @@ import com.io7m.jcanephora.AreaInclusive;
 public final class RCoordinates
 {
   /**
-   * Convert clip-space coordinates ({@link RSpaceClip}) to normalized device
-   * space coordinates ({@link RSpaceNDC}).
+   * Convert clip-space coordinates ({@link RSpaceClipType}) to normalized device
+   * space coordinates ({@link RSpaceNDCType}).
    * 
    * @param c
    *          Clip-space coordinates
@@ -39,8 +39,8 @@ public final class RCoordinates
    */
 
   public static void clipToNDC(
-    final @Nonnull RVectorReadable4F<RSpaceClip> c,
-    final @Nonnull RVectorM3F<RSpaceNDC> n)
+    final @Nonnull RVectorReadable4FType<RSpaceClipType> c,
+    final @Nonnull RVectorM3F<RSpaceNDCType> n)
   {
     n.x = c.getXF() / c.getWF();
     n.y = c.getYF() / c.getWF();
@@ -50,8 +50,8 @@ public final class RCoordinates
   /**
    * Convert from clip-space coordinates to window-space coordinates.
    * 
-   * @see #clipToNDC(RVectorReadable4F, RVectorM3F)
-   * @see #ndcToWindow(RVectorReadable3F, RVectorM3F, AreaInclusive, float,
+   * @see #clipToNDC(RVectorReadable4FType, RVectorM3F)
+   * @see #ndcToWindow(RVectorReadable3FType, RVectorM3F, AreaInclusive, float,
    *      float)
    * 
    * @param c
@@ -69,13 +69,13 @@ public final class RCoordinates
    */
 
   public static void clipToWindow(
-    final @Nonnull RVectorReadable4F<RSpaceClip> c,
-    final @Nonnull RVectorM3F<RSpaceWindow> w,
+    final @Nonnull RVectorReadable4FType<RSpaceClipType> c,
+    final @Nonnull RVectorM3F<RSpaceWindowType> w,
     final @Nonnull AreaInclusive area,
     final float near,
     final float far)
   {
-    final RVectorM3F<RSpaceNDC> n = new RVectorM3F<RSpaceNDC>();
+    final RVectorM3F<RSpaceNDCType> n = new RVectorM3F<RSpaceNDCType>();
     RCoordinates.clipToNDC(c, n);
     RCoordinates.ndcToWindow(n, w, area, near, far);
   }
@@ -91,8 +91,8 @@ public final class RCoordinates
    */
 
   public static void ndcToClip(
-    final @Nonnull RVectorM4F<RSpaceClip> c,
-    final @Nonnull RVectorReadable4F<RSpaceNDC> n)
+    final @Nonnull RVectorM4F<RSpaceClipType> c,
+    final @Nonnull RVectorReadable4FType<RSpaceNDCType> n)
   {
     c.x = n.getXF() * n.getWF();
     c.y = n.getYF() * n.getWF();
@@ -101,8 +101,8 @@ public final class RCoordinates
   }
 
   /**
-   * Convert normalized device space coordinates ({@link RSpaceNDC}) to window
-   * space coordinates ({@link RSpaceWindow}).
+   * Convert normalized device space coordinates ({@link RSpaceNDCType}) to window
+   * space coordinates ({@link RSpaceWindowType}).
    * 
    * @param n
    *          Normalized device space coordinates
@@ -119,8 +119,8 @@ public final class RCoordinates
    */
 
   public static void ndcToWindow(
-    final @Nonnull RVectorReadable3F<RSpaceNDC> n,
-    final @Nonnull RVectorM3F<RSpaceWindow> w,
+    final @Nonnull RVectorReadable3FType<RSpaceNDCType> n,
+    final @Nonnull RVectorM3F<RSpaceWindowType> w,
     final @Nonnull AreaInclusive area,
     final float near,
     final float far)
@@ -141,8 +141,8 @@ public final class RCoordinates
   }
 
   /**
-   * Convert window-space coordinates ({@link RSpaceWindow}) to normalized
-   * device space coordinates ({@link RSpaceNDC}).
+   * Convert window-space coordinates ({@link RSpaceWindowType}) to normalized
+   * device space coordinates ({@link RSpaceNDCType}).
    * 
    * @param n
    *          The resulting normalized device space coordinates
@@ -159,8 +159,8 @@ public final class RCoordinates
    */
 
   public static void windowToNDC(
-    final @Nonnull RVectorM3F<RSpaceNDC> n,
-    final @Nonnull RVectorReadable3F<RSpaceWindow> w,
+    final @Nonnull RVectorM3F<RSpaceNDCType> n,
+    final @Nonnull RVectorReadable3FType<RSpaceWindowType> w,
     final @Nonnull AreaInclusive area,
     final float near,
     final float far)

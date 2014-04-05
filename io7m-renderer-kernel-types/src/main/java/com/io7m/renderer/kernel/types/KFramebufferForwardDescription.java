@@ -28,7 +28,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
  */
 
 @Immutable public final class KFramebufferForwardDescription implements
-  KFramebufferDescription
+  KFramebufferDescriptionType
 {
   /**
    * Create a new description of a forward-rendering framebuffer.

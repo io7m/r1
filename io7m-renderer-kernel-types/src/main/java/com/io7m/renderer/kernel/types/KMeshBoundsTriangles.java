@@ -22,7 +22,7 @@ import javax.annotation.concurrent.Immutable;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.PartialFunction;
-import com.io7m.renderer.types.RSpace;
+import com.io7m.renderer.types.RSpaceType;
 import com.io7m.renderer.types.RTriangle4F;
 import com.io7m.renderer.types.RVectorI4F;
 
@@ -33,7 +33,7 @@ import com.io7m.renderer.types.RVectorI4F;
  *          The coordinate space for the bounding box
  */
 
-@Immutable public final class KMeshBoundsTriangles<S extends RSpace>
+@Immutable public final class KMeshBoundsTriangles<S extends RSpaceType>
 {
   /**
    * Calculate the triangles that make up the faces of the bounding box
@@ -49,7 +49,7 @@ import com.io7m.renderer.types.RVectorI4F;
    */
 
   public static @Nonnull
-    <S extends RSpace>
+    <S extends RSpaceType>
     KMeshBoundsTriangles<S>
     newBoundsTriangles(
       final @Nonnull KMeshBounds<S> in_bounds)
@@ -336,7 +336,7 @@ import com.io7m.renderer.types.RVectorI4F;
    */
 
   public @Nonnull
-    <T extends RSpace>
+    <T extends RSpaceType>
     KMeshBoundsTriangles<T>
     transform(
       final @Nonnull PartialFunction<RTriangle4F<S>, RTriangle4F<T>, ConstraintError> transform)

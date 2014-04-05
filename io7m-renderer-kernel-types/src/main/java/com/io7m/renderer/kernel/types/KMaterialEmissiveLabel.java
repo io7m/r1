@@ -28,8 +28,8 @@ import com.io7m.jcanephora.ArrayBufferUsable;
 
 public enum KMaterialEmissiveLabel
   implements
-  KTexturesRequired,
-  KLabel
+  KTexturesRequiredType,
+  KLabelType
 {
   /**
    * Constant emission over an instance.
@@ -76,7 +76,7 @@ public enum KMaterialEmissiveLabel
    */
 
   public static @Nonnull KMaterialEmissiveLabel fromInstanceRegular(
-    final @Nonnull KInstanceRegular instance)
+    final @Nonnull KInstanceRegularType instance)
     throws ConstraintError
   {
     Constraints.constrainNotNull(instance, "Instance");

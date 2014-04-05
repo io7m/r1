@@ -23,10 +23,10 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RSpaceRGB;
-import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RSpaceRGBType;
+import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.types.RVectorReadable3F;
+import com.io7m.renderer.types.RVectorReadable3FType;
 
 /**
  * A spherical light emits light from the given location in all directions,
@@ -34,7 +34,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
  * falloff value, and is maximally attenuated at the given radius value.
  */
 
-@Immutable public final class KLightSphere implements KLight
+@Immutable public final class KLightSphere implements KLightType
 {
   /**
    * Construct a new spherical light.
@@ -61,9 +61,9 @@ import com.io7m.renderer.types.RVectorReadable3F;
     KLightSphere
     newSpherical(
       final @Nonnull Integer id,
-      final @Nonnull RVectorReadable3F<RSpaceRGB> colour,
+      final @Nonnull RVectorReadable3FType<RSpaceRGBType> colour,
       final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity,
-      final @Nonnull RVectorReadable3F<RSpaceWorld> position,
+      final @Nonnull RVectorReadable3FType<RSpaceWorldType> position,
       final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius,
       final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float falloff)
       throws ConstraintError
@@ -71,29 +71,29 @@ import com.io7m.renderer.types.RVectorReadable3F;
     return new KLightSphere(id, colour, intensity, position, radius, falloff);
   }
 
-  private final @Nonnull RVectorI3F<RSpaceRGB>                                 colour;
+  private final @Nonnull RVectorI3F<RSpaceRGBType>                                 colour;
   private final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float           falloff;
   private final @Nonnull Integer                                               id;
   private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float            intensity;
-  private final @Nonnull RVectorReadable3F<RSpaceWorld>                        position;
+  private final @Nonnull RVectorReadable3FType<RSpaceWorldType>                        position;
   private final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius;
 
   private KLightSphere(
     final @Nonnull Integer in_id,
-    final @Nonnull RVectorReadable3F<RSpaceRGB> in_colour,
+    final @Nonnull RVectorReadable3FType<RSpaceRGBType> in_colour,
     final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float in_intensity,
-    final @Nonnull RVectorReadable3F<RSpaceWorld> in_position,
+    final @Nonnull RVectorReadable3FType<RSpaceWorldType> in_position,
     final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float in_radius,
     final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float in_falloff)
     throws ConstraintError
   {
     this.id = Constraints.constrainNotNull(in_id, "Identifier");
     this.colour =
-      new RVectorI3F<RSpaceRGB>(Constraints.constrainNotNull(
+      new RVectorI3F<RSpaceRGBType>(Constraints.constrainNotNull(
         in_colour,
         "Colour"));
     this.intensity = in_intensity;
-    this.position = new RVectorI3F<RSpaceWorld>(in_position);
+    this.position = new RVectorI3F<RSpaceWorldType>(in_position);
     this.radius = in_radius;
     this.falloff = in_falloff;
   }
@@ -138,7 +138,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
    * @return The world position of the light
    */
 
-  public @Nonnull RVectorReadable3F<RSpaceWorld> getPosition()
+  public @Nonnull RVectorReadable3FType<RSpaceWorldType> getPosition()
   {
     return this.position;
   }
@@ -162,7 +162,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
     return result;
   }
 
-  @Override public @Nonnull RVectorI3F<RSpaceRGB> lightGetColour()
+  @Override public @Nonnull RVectorI3F<RSpaceRGBType> lightGetColour()
   {
     return this.colour;
   }
@@ -177,7 +177,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
     return this.intensity;
   }
 
-  @Override public Option<KShadow> lightGetShadow()
+  @Override public Option<KShadowType> lightGetShadow()
   {
     return Option.none();
   }
@@ -188,7 +188,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KLightVisitor<A, E>>
+    <A, E extends Throwable, V extends KLightVisitorType<A, E>>
     A
     lightVisitableAccept(
       final V v)

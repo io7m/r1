@@ -22,10 +22,10 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
-abstract class KAbstractPostprocessor implements KPostprocessor
+abstract class KAbstractPostprocessor implements KPostprocessorType
 {
   public static abstract class KAbstractPostprocessorDepth<C> extends
-    KAbstractPostprocessor implements KPostprocessorDepth<C>
+    KAbstractPostprocessor implements KPostprocessorDepthType<C>
   {
     protected KAbstractPostprocessorDepth(
       final @Nonnull String name)
@@ -34,7 +34,7 @@ abstract class KAbstractPostprocessor implements KPostprocessor
     }
 
     @Override public final
-      <A, E extends Throwable, V extends KPostprocessorVisitor<A, E>>
+      <A, E extends Throwable, V extends KPostprocessorVisitorType<A, E>>
       A
       postprocessorVisitableAccept(
         final @Nonnull V v)
@@ -48,7 +48,7 @@ abstract class KAbstractPostprocessor implements KPostprocessor
   }
 
   public static abstract class KAbstractPostprocessorDepthVariance<C> extends
-    KAbstractPostprocessor implements KPostprocessorDepthVariance<C>
+    KAbstractPostprocessor implements KPostprocessorDepthVarianceType<C>
   {
     protected KAbstractPostprocessorDepthVariance(
       final @Nonnull String name)
@@ -57,7 +57,7 @@ abstract class KAbstractPostprocessor implements KPostprocessor
     }
 
     @Override public final
-      <A, E extends Throwable, V extends KPostprocessorVisitor<A, E>>
+      <A, E extends Throwable, V extends KPostprocessorVisitorType<A, E>>
       A
       postprocessorVisitableAccept(
         final @Nonnull V v)
@@ -71,7 +71,7 @@ abstract class KAbstractPostprocessor implements KPostprocessor
   }
 
   public static abstract class KAbstractPostprocessorRGBA<C> extends
-    KAbstractPostprocessor implements KPostprocessorRGBA<C>
+    KAbstractPostprocessor implements KPostprocessorRGBAType<C>
   {
     protected KAbstractPostprocessorRGBA(
       final @Nonnull String name)
@@ -80,7 +80,7 @@ abstract class KAbstractPostprocessor implements KPostprocessor
     }
 
     @Override public final
-      <A, E extends Throwable, V extends KPostprocessorVisitor<A, E>>
+      <A, E extends Throwable, V extends KPostprocessorVisitorType<A, E>>
       A
       postprocessorVisitableAccept(
         final @Nonnull V v)
@@ -94,7 +94,7 @@ abstract class KAbstractPostprocessor implements KPostprocessor
   }
 
   public static abstract class KAbstractPostprocessorRGBAWithDepth<C> extends
-    KAbstractPostprocessor implements KPostprocessorRGBAWithDepth<C>
+    KAbstractPostprocessor implements KPostprocessorRGBAWithDepthType<C>
   {
     protected KAbstractPostprocessorRGBAWithDepth(
       final @Nonnull String name)
@@ -103,7 +103,7 @@ abstract class KAbstractPostprocessor implements KPostprocessor
     }
 
     @Override public final
-      <A, E extends Throwable, V extends KPostprocessorVisitor<A, E>>
+      <A, E extends Throwable, V extends KPostprocessorVisitorType<A, E>>
       A
       postprocessorVisitableAccept(
         final @Nonnull V v)

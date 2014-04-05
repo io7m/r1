@@ -17,7 +17,7 @@ import javax.swing.WindowConstants;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.VectorReadable4F;
-import com.io7m.renderer.types.RSpaceClip;
+import com.io7m.renderer.types.RSpaceClipType;
 import com.io7m.renderer.types.RTriangle4F;
 import com.io7m.renderer.types.RVectorI4F;
 
@@ -317,19 +317,19 @@ import com.io7m.renderer.types.RVectorI4F;
       final Graphics g)
       throws ConstraintError
     {
-      final RVectorI4F<RSpaceClip> p0 =
-        new RVectorI4F<RSpaceClip>(this.tri_p0.x, this.tri_p0.y, 0.0f, 1.0f);
-      final RVectorI4F<RSpaceClip> p1 =
-        new RVectorI4F<RSpaceClip>(this.tri_p1.x, this.tri_p1.y, 0.0f, 1.0f);
-      final RVectorI4F<RSpaceClip> p2 =
-        new RVectorI4F<RSpaceClip>(this.tri_p2.x, this.tri_p2.y, 0.0f, 1.0f);
+      final RVectorI4F<RSpaceClipType> p0 =
+        new RVectorI4F<RSpaceClipType>(this.tri_p0.x, this.tri_p0.y, 0.0f, 1.0f);
+      final RVectorI4F<RSpaceClipType> p1 =
+        new RVectorI4F<RSpaceClipType>(this.tri_p1.x, this.tri_p1.y, 0.0f, 1.0f);
+      final RVectorI4F<RSpaceClipType> p2 =
+        new RVectorI4F<RSpaceClipType>(this.tri_p2.x, this.tri_p2.y, 0.0f, 1.0f);
 
-      final RTriangle4F<RSpaceClip> tri = RTriangle4F.newTriangle(p0, p1, p2);
+      final RTriangle4F<RSpaceClipType> tri = RTriangle4F.newTriangle(p0, p1, p2);
 
-      final List<RTriangle4F<RSpaceClip>> results =
+      final List<RTriangle4F<RSpaceClipType>> results =
         KTriangleClipping.clipTrianglePlanes(tri, KTriangleClipping.PLANES);
 
-      for (final RTriangle4F<RSpaceClip> t : results) {
+      for (final RTriangle4F<RSpaceClipType> t : results) {
         this.drawTriangle(g, Color.MAGENTA, t);
       }
     }
@@ -337,7 +337,7 @@ import com.io7m.renderer.types.RVectorI4F;
     private void drawTriangle(
       final Graphics g,
       final @Nonnull Color c,
-      final @Nonnull RTriangle4F<RSpaceClip> t)
+      final @Nonnull RTriangle4F<RSpaceClipType> t)
     {
       final VectorReadable4F p0 = t.getP0();
       final VectorReadable4F p1 = t.getP1();

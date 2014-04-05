@@ -27,9 +27,9 @@ public final class RCoordinatesTest
 {
   @SuppressWarnings("static-method") @Test public void testClipToNDC_0()
   {
-    final RVectorI4F<RSpaceClip> clip =
-      new RVectorI4F<RSpaceClip>(10.0f, 20.0f, 30.0f, 1.0f);
-    final RVectorM3F<RSpaceNDC> ndc = new RVectorM3F<RSpaceNDC>();
+    final RVectorI4F<RSpaceClipType> clip =
+      new RVectorI4F<RSpaceClipType>(10.0f, 20.0f, 30.0f, 1.0f);
+    final RVectorM3F<RSpaceNDCType> ndc = new RVectorM3F<RSpaceNDCType>();
 
     RCoordinates.clipToNDC(clip, ndc);
 
@@ -40,9 +40,9 @@ public final class RCoordinatesTest
 
   @SuppressWarnings("static-method") @Test public void testClipToNDC_1()
   {
-    final RVectorI4F<RSpaceClip> clip =
-      new RVectorI4F<RSpaceClip>(10.0f, 20.0f, 30.0f, 10.0f);
-    final RVectorM3F<RSpaceNDC> ndc = new RVectorM3F<RSpaceNDC>();
+    final RVectorI4F<RSpaceClipType> clip =
+      new RVectorI4F<RSpaceClipType>(10.0f, 20.0f, 30.0f, 10.0f);
+    final RVectorM3F<RSpaceNDCType> ndc = new RVectorM3F<RSpaceNDCType>();
 
     RCoordinates.clipToNDC(clip, ndc);
 
@@ -53,9 +53,9 @@ public final class RCoordinatesTest
 
   @SuppressWarnings("static-method") @Test public void testClipToNDC_2()
   {
-    final RVectorI4F<RSpaceClip> clip =
-      new RVectorI4F<RSpaceClip>(10.0f, 20.0f, 30.0f, 0.1f);
-    final RVectorM3F<RSpaceNDC> ndc = new RVectorM3F<RSpaceNDC>();
+    final RVectorI4F<RSpaceClipType> clip =
+      new RVectorI4F<RSpaceClipType>(10.0f, 20.0f, 30.0f, 0.1f);
+    final RVectorM3F<RSpaceNDCType> ndc = new RVectorM3F<RSpaceNDCType>();
 
     RCoordinates.clipToNDC(clip, ndc);
 
@@ -71,9 +71,10 @@ public final class RCoordinatesTest
       new AreaInclusive(
         new RangeInclusive(0, 639),
         new RangeInclusive(0, 479));
-    final RVectorI3F<RSpaceNDC> ndc =
-      new RVectorI3F<RSpaceNDC>(-1.0f, -1.0f, -1.0f);
-    final RVectorM3F<RSpaceWindow> window = new RVectorM3F<RSpaceWindow>();
+    final RVectorI3F<RSpaceNDCType> ndc =
+      new RVectorI3F<RSpaceNDCType>(-1.0f, -1.0f, -1.0f);
+    final RVectorM3F<RSpaceWindowType> window =
+      new RVectorM3F<RSpaceWindowType>();
 
     RCoordinates.ndcToWindow(ndc, window, area, 0.0f, 1.0f);
 
@@ -89,9 +90,10 @@ public final class RCoordinatesTest
       new AreaInclusive(
         new RangeInclusive(0, 639),
         new RangeInclusive(0, 479));
-    final RVectorI3F<RSpaceNDC> ndc =
-      new RVectorI3F<RSpaceNDC>(1.0f, 1.0f, 1.0f);
-    final RVectorM3F<RSpaceWindow> window = new RVectorM3F<RSpaceWindow>();
+    final RVectorI3F<RSpaceNDCType> ndc =
+      new RVectorI3F<RSpaceNDCType>(1.0f, 1.0f, 1.0f);
+    final RVectorM3F<RSpaceWindowType> window =
+      new RVectorM3F<RSpaceWindowType>();
 
     RCoordinates.ndcToWindow(ndc, window, area, 0.0f, 1.0f);
 

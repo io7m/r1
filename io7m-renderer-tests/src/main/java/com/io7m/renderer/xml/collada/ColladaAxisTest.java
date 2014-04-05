@@ -29,13 +29,13 @@ import com.io7m.jaux.AlmostEqualFloat;
 import com.io7m.jaux.AlmostEqualFloat.ContextRelative;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.types.RSpace;
-import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RSpaceType;
+import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorI3F;
 
 public final class ColladaAxisTest
 {
-  static class RVectorI3FGenerator<R extends RSpace> implements
+  static class RVectorI3FGenerator<R extends RSpaceType> implements
     Generator<RVectorI3F<R>>
   {
     public RVectorI3FGenerator()
@@ -64,10 +64,10 @@ public final class ColladaAxisTest
     final MatrixM3x3F matrix = new MatrixM3x3F();
 
     QuickCheck.forAllVerbose(
-      new RVectorI3FGenerator<RSpaceObject>(),
-      new AbstractCharacteristic<RVectorI3F<RSpaceObject>>() {
+      new RVectorI3FGenerator<RSpaceObjectType>(),
+      new AbstractCharacteristic<RVectorI3F<RSpaceObjectType>>() {
         @Override protected void doSpecify(
-          final @Nonnull RVectorI3F<RSpaceObject> v)
+          final @Nonnull RVectorI3F<RSpaceObjectType> v)
           throws Throwable
         {
           Assert.assertEquals(v, ColladaAxis.convertAxes(
@@ -84,11 +84,11 @@ public final class ColladaAxisTest
     final MatrixM3x3F matrix = new MatrixM3x3F();
     final ContextRelative cr = ColladaAxisTest.makeRelativeContext();
 
-    final RVectorI3F<RSpaceObject> v_in =
-      new RVectorI3F<RSpaceObject>(1, 0, 0);
-    final RVectorI3F<RSpaceObject> v_exp =
-      new RVectorI3F<RSpaceObject>(0, 1, 0);
-    final RVectorI3F<RSpaceObject> v_out =
+    final RVectorI3F<RSpaceObjectType> v_in =
+      new RVectorI3F<RSpaceObjectType>(1, 0, 0);
+    final RVectorI3F<RSpaceObjectType> v_exp =
+      new RVectorI3F<RSpaceObjectType>(0, 1, 0);
+    final RVectorI3F<RSpaceObjectType> v_out =
       ColladaAxis.convertAxes(
         matrix,
         ColladaAxis.COLLADA_AXIS_X_UP,
@@ -107,11 +107,11 @@ public final class ColladaAxisTest
     final MatrixM3x3F matrix = new MatrixM3x3F();
     final ContextRelative cr = ColladaAxisTest.makeRelativeContext();
 
-    final RVectorI3F<RSpaceObject> v_in =
-      new RVectorI3F<RSpaceObject>(1, 0, 0);
-    final RVectorI3F<RSpaceObject> v_exp =
-      new RVectorI3F<RSpaceObject>(0, 0, 1);
-    final RVectorI3F<RSpaceObject> v_out =
+    final RVectorI3F<RSpaceObjectType> v_in =
+      new RVectorI3F<RSpaceObjectType>(1, 0, 0);
+    final RVectorI3F<RSpaceObjectType> v_exp =
+      new RVectorI3F<RSpaceObjectType>(0, 0, 1);
+    final RVectorI3F<RSpaceObjectType> v_out =
       ColladaAxis.convertAxes(
         matrix,
         ColladaAxis.COLLADA_AXIS_X_UP,
@@ -130,11 +130,11 @@ public final class ColladaAxisTest
     final MatrixM3x3F matrix = new MatrixM3x3F();
     final ContextRelative cr = ColladaAxisTest.makeRelativeContext();
 
-    final RVectorI3F<RSpaceObject> v_in =
-      new RVectorI3F<RSpaceObject>(0, 1, 0);
-    final RVectorI3F<RSpaceObject> v_exp =
-      new RVectorI3F<RSpaceObject>(1, 0, 0);
-    final RVectorI3F<RSpaceObject> v_out =
+    final RVectorI3F<RSpaceObjectType> v_in =
+      new RVectorI3F<RSpaceObjectType>(0, 1, 0);
+    final RVectorI3F<RSpaceObjectType> v_exp =
+      new RVectorI3F<RSpaceObjectType>(1, 0, 0);
+    final RVectorI3F<RSpaceObjectType> v_out =
       ColladaAxis.convertAxes(
         matrix,
         ColladaAxis.COLLADA_AXIS_Y_UP,
@@ -153,10 +153,10 @@ public final class ColladaAxisTest
     final MatrixM3x3F matrix = new MatrixM3x3F();
 
     QuickCheck.forAllVerbose(
-      new RVectorI3FGenerator<RSpaceObject>(),
-      new AbstractCharacteristic<RVectorI3F<RSpaceObject>>() {
+      new RVectorI3FGenerator<RSpaceObjectType>(),
+      new AbstractCharacteristic<RVectorI3F<RSpaceObjectType>>() {
         @Override protected void doSpecify(
-          final @Nonnull RVectorI3F<RSpaceObject> v)
+          final @Nonnull RVectorI3F<RSpaceObjectType> v)
           throws Throwable
         {
           Assert.assertEquals(v, ColladaAxis.convertAxes(
@@ -173,11 +173,11 @@ public final class ColladaAxisTest
     final MatrixM3x3F matrix = new MatrixM3x3F();
     final ContextRelative cr = ColladaAxisTest.makeRelativeContext();
 
-    final RVectorI3F<RSpaceObject> v_in =
-      new RVectorI3F<RSpaceObject>(0, 1, 0);
-    final RVectorI3F<RSpaceObject> v_exp =
-      new RVectorI3F<RSpaceObject>(0, 0, 1);
-    final RVectorI3F<RSpaceObject> v_out =
+    final RVectorI3F<RSpaceObjectType> v_in =
+      new RVectorI3F<RSpaceObjectType>(0, 1, 0);
+    final RVectorI3F<RSpaceObjectType> v_exp =
+      new RVectorI3F<RSpaceObjectType>(0, 0, 1);
+    final RVectorI3F<RSpaceObjectType> v_out =
       ColladaAxis.convertAxes(
         matrix,
         ColladaAxis.COLLADA_AXIS_Y_UP,
@@ -196,11 +196,11 @@ public final class ColladaAxisTest
     final MatrixM3x3F matrix = new MatrixM3x3F();
     final ContextRelative cr = ColladaAxisTest.makeRelativeContext();
 
-    final RVectorI3F<RSpaceObject> v_in =
-      new RVectorI3F<RSpaceObject>(0, 0, 1);
-    final RVectorI3F<RSpaceObject> v_exp =
-      new RVectorI3F<RSpaceObject>(1, 0, 0);
-    final RVectorI3F<RSpaceObject> v_out =
+    final RVectorI3F<RSpaceObjectType> v_in =
+      new RVectorI3F<RSpaceObjectType>(0, 0, 1);
+    final RVectorI3F<RSpaceObjectType> v_exp =
+      new RVectorI3F<RSpaceObjectType>(1, 0, 0);
+    final RVectorI3F<RSpaceObjectType> v_out =
       ColladaAxis.convertAxes(
         matrix,
         ColladaAxis.COLLADA_AXIS_Z_UP,
@@ -219,11 +219,11 @@ public final class ColladaAxisTest
     final MatrixM3x3F matrix = new MatrixM3x3F();
     final ContextRelative cr = ColladaAxisTest.makeRelativeContext();
 
-    final RVectorI3F<RSpaceObject> v_in =
-      new RVectorI3F<RSpaceObject>(0, 0, 1);
-    final RVectorI3F<RSpaceObject> v_exp =
-      new RVectorI3F<RSpaceObject>(0, 1, 0);
-    final RVectorI3F<RSpaceObject> v_out =
+    final RVectorI3F<RSpaceObjectType> v_in =
+      new RVectorI3F<RSpaceObjectType>(0, 0, 1);
+    final RVectorI3F<RSpaceObjectType> v_exp =
+      new RVectorI3F<RSpaceObjectType>(0, 1, 0);
+    final RVectorI3F<RSpaceObjectType> v_out =
       ColladaAxis.convertAxes(
         matrix,
         ColladaAxis.COLLADA_AXIS_Z_UP,
@@ -242,10 +242,10 @@ public final class ColladaAxisTest
     final MatrixM3x3F matrix = new MatrixM3x3F();
 
     QuickCheck.forAllVerbose(
-      new RVectorI3FGenerator<RSpaceObject>(),
-      new AbstractCharacteristic<RVectorI3F<RSpaceObject>>() {
+      new RVectorI3FGenerator<RSpaceObjectType>(),
+      new AbstractCharacteristic<RVectorI3F<RSpaceObjectType>>() {
         @Override protected void doSpecify(
-          final @Nonnull RVectorI3F<RSpaceObject> v)
+          final @Nonnull RVectorI3F<RSpaceObjectType> v)
           throws Throwable
         {
           Assert.assertEquals(v, ColladaAxis.convertAxes(

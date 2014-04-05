@@ -30,14 +30,14 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.types.RSpace;
-import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RSpaceType;
+import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.types.RVectorReadable3F;
+import com.io7m.renderer.types.RVectorReadable3FType;
 
-public final class SBVector3FInput<R extends RSpace> implements SBControls
+public final class SBVector3FInput<R extends RSpaceType> implements SBControls
 {
-  public static @Nonnull <R extends RSpace> SBVector3FInput<R> newInput(
+  public static @Nonnull <R extends RSpaceType> SBVector3FInput<R> newInput(
     final @Nonnull String text)
   {
     return new SBVector3FInput<R>(text);
@@ -69,7 +69,7 @@ public final class SBVector3FInput<R extends RSpace> implements SBControls
   }
 
   @SuppressWarnings("boxing") public void setVector(
-    final @Nonnull RVectorReadable3F<R> v)
+    final @Nonnull RVectorReadable3FType<R> v)
   {
     this.field_x.setText(String.format("%.6f", v.getXF()));
     this.field_y.setText(String.format("%.6f", v.getYF()));
@@ -87,7 +87,7 @@ public final class SBVector3FInput<R extends RSpace> implements SBControls
         final Container panel = frame.getContentPane();
         final DesignGridLayout layout = new DesignGridLayout(panel);
 
-        final SBVector3FInput<RSpaceWorld> input =
+        final SBVector3FInput<RSpaceWorldType> input =
           SBVector3FInput.newInput("Position");
         input.controlsAddToLayout(layout);
 

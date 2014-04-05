@@ -29,9 +29,9 @@ import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueUnlitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRefractiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularLitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularUnlitLabel;
-import com.io7m.renderer.kernel.types.KMaterialLabelImpliesUV;
-import com.io7m.renderer.kernel.types.KMaterialLabelLit;
-import com.io7m.renderer.kernel.types.KMaterialLabelRegular;
+import com.io7m.renderer.kernel.types.KMaterialLabelImpliesUVType;
+import com.io7m.renderer.kernel.types.KMaterialLabelLitType;
+import com.io7m.renderer.kernel.types.KMaterialLabelRegularType;
 import com.io7m.renderer.kernel.types.KMaterialNormalLabel;
 import com.io7m.renderer.kernel.types.KMaterialRefractiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
@@ -1156,7 +1156,7 @@ public final class ForwardShaders
     final @Nonnull StringBuilder b,
     final @Nonnull KMaterialForwardOpaqueLitLabel label)
   {
-    final KMaterialLabelRegular reg = label.getRegular();
+    final KMaterialLabelRegularType reg = label.getRegular();
     final boolean implies_uv = reg.labelImpliesUV();
     final KMaterialNormalLabel normal = reg.labelGetNormal();
     final KMaterialAlbedoLabel albedo = reg.labelGetAlbedo();
@@ -1366,7 +1366,7 @@ public final class ForwardShaders
   }
 
   private static
-    <L extends KMaterialLabelRegular & KMaterialLabelLit>
+    <L extends KMaterialLabelRegularType & KMaterialLabelLitType>
     void
     moduleVertexShaderRegularLit(
       final @Nonnull StringBuilder b,
@@ -1401,7 +1401,7 @@ public final class ForwardShaders
   private static void moduleVertexShaderRegularUnlit(
     final @Nonnull StringBuilder b,
     final @Nonnull KMaterialNormalLabel normal,
-    final @Nonnull KMaterialLabelImpliesUV uv)
+    final @Nonnull KMaterialLabelImpliesUVType uv)
   {
     final boolean implies_uv = uv.labelImpliesUV();
 

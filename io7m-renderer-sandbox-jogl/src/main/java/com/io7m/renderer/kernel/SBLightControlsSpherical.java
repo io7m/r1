@@ -26,7 +26,7 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KLightSphere;
-import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RSpaceWorldType;
 
 public final class SBLightControlsSpherical implements
   SBControlsDataType<SBLightDescriptionSpherical>,
@@ -66,7 +66,7 @@ public final class SBLightControlsSpherical implements
   private final @Nonnull SBFloatHSlider               falloff;
   private final @Nonnull SBFloatHSlider               intensity;
   private final @Nonnull JFrame                       parent;
-  private final @Nonnull SBVector3FInput<RSpaceWorld> position;
+  private final @Nonnull SBVector3FInput<RSpaceWorldType> position;
   private final @Nonnull SBFloatHSlider               radius;
   private final @Nonnull Integer                      id;
 

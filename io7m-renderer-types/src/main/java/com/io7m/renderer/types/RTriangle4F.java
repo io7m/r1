@@ -30,7 +30,7 @@ import com.io7m.jaux.functional.PartialFunction;
  *          The coordinate space in which the points exist
  */
 
-public final class RTriangle4F<S extends RSpace>
+public final class RTriangle4F<S extends RSpaceType>
 {
   /**
    * Construct a new triangle with the given points.
@@ -48,7 +48,7 @@ public final class RTriangle4F<S extends RSpace>
    *           Iff any parameter is <code>null</code>
    */
 
-  public static @Nonnull <S extends RSpace> RTriangle4F<S> newTriangle(
+  public static @Nonnull <S extends RSpaceType> RTriangle4F<S> newTriangle(
     final @Nonnull RVectorI4F<S> in_p0,
     final @Nonnull RVectorI4F<S> in_p1,
     final @Nonnull RVectorI4F<S> in_p2)
@@ -155,7 +155,7 @@ public final class RTriangle4F<S extends RSpace>
    */
 
   public @Nonnull
-    <T extends RSpace>
+    <T extends RSpaceType>
     RTriangle4F<T>
     transform(
       final @Nonnull PartialFunction<RVectorI4F<S>, RVectorI4F<T>, ConstraintError> transform)

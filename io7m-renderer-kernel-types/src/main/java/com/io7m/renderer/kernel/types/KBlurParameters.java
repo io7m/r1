@@ -32,7 +32,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
    * A mutable builder interface for constructing parameters.
    */
 
-  public interface Builder
+  public interface BuilderType
   {
     /**
      * @return A new set of blur parameters initialized to all of the values
@@ -105,9 +105,9 @@ import com.io7m.jaux.Constraints.ConstraintError;
    * @return A new parameter builder
    */
 
-  public static @Nonnull Builder newBuilder()
+  public static @Nonnull BuilderType newBuilder()
   {
-    return new Builder() {
+    return new BuilderType() {
       private float blur_size = 1.0f;
       private int   passes    = 1;
       private float scale     = 1.0f;

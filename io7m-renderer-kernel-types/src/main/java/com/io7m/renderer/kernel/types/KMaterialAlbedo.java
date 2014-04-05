@@ -23,14 +23,14 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.renderer.types.RSpaceRGBA;
+import com.io7m.renderer.types.RSpaceRGBAType;
 import com.io7m.renderer.types.RVectorI4F;
 
 /**
  * Material properties related to surface albedo.
  */
 
-@Immutable public final class KMaterialAlbedo implements KTexturesRequired
+@Immutable public final class KMaterialAlbedo implements KTexturesRequiredType
 {
   /**
    * Create textured albedo properties.
@@ -47,7 +47,7 @@ import com.io7m.renderer.types.RVectorI4F;
    */
 
   public static @Nonnull KMaterialAlbedo newAlbedoTextured(
-    final @Nonnull RVectorI4F<RSpaceRGBA> in_colour,
+    final @Nonnull RVectorI4F<RSpaceRGBAType> in_colour,
     final float in_mix,
     final @Nonnull Texture2DStatic in_texture)
     throws ConstraintError
@@ -66,20 +66,20 @@ import com.io7m.renderer.types.RVectorI4F;
    */
 
   public static @Nonnull KMaterialAlbedo newAlbedoUntextured(
-    final @Nonnull RVectorI4F<RSpaceRGBA> in_colour)
+    final @Nonnull RVectorI4F<RSpaceRGBAType> in_colour)
     throws ConstraintError
   {
     final Option<Texture2DStatic> none = Option.none();
     return new KMaterialAlbedo(in_colour, 0.0f, none);
   }
 
-  private final @Nonnull RVectorI4F<RSpaceRGBA>  colour;
+  private final @Nonnull RVectorI4F<RSpaceRGBAType>  colour;
   private final float                            mix;
   private final @Nonnull Option<Texture2DStatic> texture;
   private final int                              textures_required;
 
   private KMaterialAlbedo(
-    final @Nonnull RVectorI4F<RSpaceRGBA> in_colour,
+    final @Nonnull RVectorI4F<RSpaceRGBAType> in_colour,
     final float in_mix,
     final @Nonnull Option<Texture2DStatic> in_texture)
     throws ConstraintError
@@ -112,7 +112,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The base colour of the surface albedo
    */
 
-  public @Nonnull RVectorI4F<RSpaceRGBA> getColour()
+  public @Nonnull RVectorI4F<RSpaceRGBAType> getColour()
   {
     return this.colour;
   }

@@ -51,9 +51,9 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceWorld;
-import com.io7m.renderer.types.RTransformTexture;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceWorldType;
+import com.io7m.renderer.types.RTransformTextureType;
 
 public final class SBInstanceControls implements
   SBControlsDataType<SBInstance>
@@ -230,13 +230,13 @@ public final class SBInstanceControls implements
   private final @Nonnull JTextField                             material_id;
   private final @Nonnull JTextField                             material_name;
   private final @Nonnull JButton                                material_select;
-  private final @Nonnull SBMatrix3x3Controls<RTransformTexture> matrix_uv;
+  private final @Nonnull SBMatrix3x3Controls<RTransformTextureType> matrix_uv;
   private final @Nonnull JButton                                mesh_load;
   private final @Nonnull JComboBox<PathVirtual>                 mesh_selector;
   private @Nonnull Map<PathVirtual, SBMesh>                     meshes;
   private final @Nonnull SBOrientationInput                     orientation;
-  private final @Nonnull SBVector3FInput<RSpaceWorld>           position;
-  private final @Nonnull SBVector3FInput<RSpaceObject>          scale;
+  private final @Nonnull SBVector3FInput<RSpaceWorldType>           position;
+  private final @Nonnull SBVector3FInput<RSpaceObjectType>          scale;
 
   public <C extends SBSceneControllerTextures & SBSceneControllerMaterials & SBSceneControllerMeshes> SBInstanceControls(
     final @Nonnull JFrame parent,
@@ -251,7 +251,7 @@ public final class SBInstanceControls implements
     this.position = SBVector3FInput.newInput("Position");
     this.scale = SBVector3FInput.newInput("Scale");
     this.orientation = SBOrientationInput.newInput();
-    this.matrix_uv = new SBMatrix3x3Controls<RTransformTexture>("UV matrix");
+    this.matrix_uv = new SBMatrix3x3Controls<RTransformTextureType>("UV matrix");
     this.lit = new JCheckBox();
     this.lit.setSelected(true);
     this.faces = new SBFaceSelectionTypeSelector();

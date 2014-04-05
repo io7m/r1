@@ -24,8 +24,8 @@ import javax.annotation.Nonnull;
 
 public enum KMaterialRefractiveLabel
   implements
-  KTexturesRequired,
-  KLabel
+  KTexturesRequiredType,
+  KLabelType
 {
   /**
    * Masked refraction.

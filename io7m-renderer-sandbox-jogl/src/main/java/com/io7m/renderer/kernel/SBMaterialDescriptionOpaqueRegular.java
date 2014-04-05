@@ -23,7 +23,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
-import com.io7m.renderer.types.RTransformTexture;
+import com.io7m.renderer.types.RTransformTextureType;
 
 public final class SBMaterialDescriptionOpaqueRegular implements
   SBMaterialDescriptionOpaque
@@ -31,7 +31,7 @@ public final class SBMaterialDescriptionOpaqueRegular implements
   public static @Nonnull SBMaterialDescriptionOpaqueRegular getDefault()
   {
     try {
-      final RMatrixI3x3F<RTransformTexture> uv = RMatrixI3x3F.identity();
+      final RMatrixI3x3F<RTransformTextureType> uv = RMatrixI3x3F.identity();
       return new SBMaterialDescriptionOpaqueRegular(
         "Default",
         SBMaterialAlbedoDescription.getDefault(),
@@ -51,7 +51,7 @@ public final class SBMaterialDescriptionOpaqueRegular implements
   private final @Nonnull String                           name;
   private final @Nonnull SBMaterialNormalDescription      normal;
   private final @Nonnull SBMaterialSpecularDescription    specular;
-  private final @Nonnull RMatrixI3x3F<RTransformTexture>  uv_matrix;
+  private final @Nonnull RMatrixI3x3F<RTransformTextureType>  uv_matrix;
 
   SBMaterialDescriptionOpaqueRegular(
     final @Nonnull String in_name,
@@ -60,7 +60,7 @@ public final class SBMaterialDescriptionOpaqueRegular implements
     final @Nonnull SBMaterialSpecularDescription in_specular,
     final @Nonnull SBMaterialEnvironmentDescription in_environment,
     final @Nonnull SBMaterialNormalDescription in_normal,
-    final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix)
+    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
     throws ConstraintError
   {
     this.name = Constraints.constrainNotNull(in_name, "Name");
@@ -120,7 +120,7 @@ public final class SBMaterialDescriptionOpaqueRegular implements
     return this.specular;
   }
 
-  public @Nonnull RMatrixI3x3F<RTransformTexture> getUVMatrix()
+  public @Nonnull RMatrixI3x3F<RTransformTextureType> getUVMatrix()
   {
     return this.uv_matrix;
   }

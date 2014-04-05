@@ -49,9 +49,9 @@ import com.io7m.renderer.types.RException;
  * </p>
  */
 
-final class KTextureUnitAllocator implements KTextureUnitContextInitial
+final class KTextureUnitAllocator implements KTextureUnitContextInitialType
 {
-  private final class Context implements KTextureUnitContext
+  private final class Context implements KTextureUnitContextType
   {
     private int       count;
     private final int first;
@@ -76,7 +76,7 @@ final class KTextureUnitAllocator implements KTextureUnitContextInitial
     }
 
     @Override public void withContext(
-      final KTextureUnitWith f)
+      final KTextureUnitWithType f)
       throws JCGLException,
         ConstraintError,
         RException
@@ -199,7 +199,7 @@ final class KTextureUnitAllocator implements KTextureUnitContextInitial
   }
 
   @Override public void withContext(
-    final @Nonnull KTextureUnitWith f)
+    final @Nonnull KTextureUnitWithType f)
     throws JCGLException,
       ConstraintError,
       RException

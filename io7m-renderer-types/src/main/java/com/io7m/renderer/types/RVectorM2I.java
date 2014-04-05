@@ -27,8 +27,8 @@ import com.io7m.jtensors.VectorM2I;
  *          A phantom type parameter describing the coordinate space
  */
 
-public final class RVectorM2I<T extends RSpace> extends VectorM2I implements
-  RVectorReadable2I<T>
+public final class RVectorM2I<T extends RSpaceType> extends VectorM2I implements
+  RVectorReadable2IType<T>
 {
   /**
    * Construct a new vector, initialized to all zeroes.
@@ -63,7 +63,7 @@ public final class RVectorM2I<T extends RSpace> extends VectorM2I implements
    */
 
   public RVectorM2I(
-    final @Nonnull RVectorReadable2I<T> v)
+    final @Nonnull RVectorReadable2IType<T> v)
   {
     super(v);
   }

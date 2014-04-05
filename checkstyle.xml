@@ -171,9 +171,19 @@
     </module>
     <module name="StringLiteralEquality"/>
     <module name="TrailingComment"/>
+
+    <!-- Restrict class names -->
     <module name="TypeName">
       <property name="format" value="^[A-Z][a-zA-Z0-9_]*$"/>
+      <property name="tokens" value="CLASS_DEF"/>
     </module>
+
+    <!-- Restrict interface type names -->
+    <module name="TypeName">
+      <property name="format" value="^[A-Z][a-zA-Z0-9_]*Type$"/>
+      <property name="tokens" value="INTERFACE_DEF"/>
+    </module>
+
     <module name="TypecastParenPad"/>
     <module name="UncommentedMain"/>
     <module name="UnusedImports"/>

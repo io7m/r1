@@ -28,8 +28,8 @@ import com.io7m.jcanephora.ArrayBufferUsable;
 
 public enum KMaterialAlbedoLabel
   implements
-  KTexturesRequired,
-  KLabel
+  KTexturesRequiredType,
+  KLabelType
 {
   /**
    * Coloured, untextured albedo.
@@ -71,13 +71,13 @@ public enum KMaterialAlbedoLabel
    */
 
   public static @Nonnull KMaterialAlbedoLabel fromInstanceRegular(
-    final @Nonnull KInstanceRegular instance)
+    final @Nonnull KInstanceRegularType instance)
     throws ConstraintError
   {
     Constraints.constrainNotNull(instance, "Instance");
     final KMesh mesh = instance.instanceGetMesh();
     final ArrayBufferUsable a = mesh.getArrayBuffer();
-    final KMaterialRegular material = instance.instanceGetMaterial();
+    final KMaterialRegularType material = instance.instanceGetMaterial();
     final KMaterialAlbedo albedo = material.materialGetAlbedo();
     return KMaterialAlbedoLabel.fromInstanceData(a, albedo);
   }

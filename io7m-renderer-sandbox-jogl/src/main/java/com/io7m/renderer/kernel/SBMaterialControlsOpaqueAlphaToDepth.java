@@ -28,7 +28,7 @@ import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.types.RTransformTexture;
+import com.io7m.renderer.types.RTransformTextureType;
 
 public final class SBMaterialControlsOpaqueAlphaToDepth implements
   SBControlsDataType<SBMaterialDescriptionOpaqueAlphaToDepth>
@@ -38,7 +38,7 @@ public final class SBMaterialControlsOpaqueAlphaToDepth implements
   private final @Nonnull SBMaterialControlsEnvironment          controls_environment;
   private final @Nonnull SBMaterialControlsNormal               controls_normal;
   private final @Nonnull SBMaterialControlsSpecular             controls_specular;
-  private final @Nonnull SBMatrix3x3Controls<RTransformTexture> controls_uv;
+  private final @Nonnull SBMatrix3x3Controls<RTransformTextureType> controls_uv;
   private final @Nonnull SBFloatHSlider                         controls_alpha_threshold;
   private final @Nonnull RowGroup                               group;
   private final @Nonnull JTextField                             name;
@@ -50,7 +50,7 @@ public final class SBMaterialControlsOpaqueAlphaToDepth implements
     final @Nonnull SBMaterialControlsEnvironment in_controls_environment,
     final @Nonnull SBMaterialControlsNormal in_controls_normal,
     final @Nonnull SBMaterialControlsSpecular in_controls_specular,
-    final @Nonnull SBMatrix3x3Controls<RTransformTexture> in_controls_uv)
+    final @Nonnull SBMatrix3x3Controls<RTransformTextureType> in_controls_uv)
     throws ConstraintError
   {
     this.group = new RowGroup();

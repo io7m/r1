@@ -25,7 +25,7 @@ import net.java.dev.designgridlayout.RowGroup;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KBlurParameters;
-import com.io7m.renderer.kernel.types.KBlurParameters.Builder;
+import com.io7m.renderer.kernel.types.KBlurParameters.BuilderType;
 
 public final class SBBlurControls implements
   SBControlsDataType<KBlurParameters>
@@ -105,7 +105,7 @@ public final class SBBlurControls implements
     throws SBExceptionInputError,
       ConstraintError
   {
-    final Builder b = KBlurParameters.newBuilder();
+    final BuilderType b = KBlurParameters.newBuilder();
     b.setBlurSize(this.blur_size.getCurrent());
     b.setPasses(this.passes.getCurrent());
     b.setScale(this.scale.getCurrent());

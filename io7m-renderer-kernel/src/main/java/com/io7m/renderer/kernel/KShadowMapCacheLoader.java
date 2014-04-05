@@ -31,16 +31,16 @@ import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
-import com.io7m.renderer.kernel.types.KShadowMapDescription;
-import com.io7m.renderer.kernel.types.KShadowMapDescriptionVisitor;
+import com.io7m.renderer.kernel.types.KShadowMapDescriptionType;
+import com.io7m.renderer.kernel.types.KShadowMapDescriptionVisitorType;
 import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
 import com.io7m.renderer.types.RException;
 
 final class KShadowMapCacheLoader implements
-  JCacheLoader<KShadowMapDescription, KShadowMap, RException>
+  JCacheLoader<KShadowMapDescriptionType, KShadowMap, RException>
 {
   public static @Nonnull
-    JCacheLoader<KShadowMapDescription, KShadowMap, RException>
+    JCacheLoader<KShadowMapDescriptionType, KShadowMap, RException>
     newLoader(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull Log log)
@@ -76,7 +76,7 @@ final class KShadowMapCacheLoader implements
   }
 
   @Override public KShadowMap cacheValueLoad(
-    final @Nonnull KShadowMapDescription s)
+    final @Nonnull KShadowMapDescriptionType s)
     throws RException
   {
     final long size = 2 << (s.mapGetSizeExponent() - 1);
@@ -93,7 +93,7 @@ final class KShadowMapCacheLoader implements
     final JCGLImplementation gli = this.gi;
     try {
       return s
-        .kShadowMapDescriptionAccept(new KShadowMapDescriptionVisitor<KShadowMap, JCGLException>() {
+        .kShadowMapDescriptionAccept(new KShadowMapDescriptionVisitorType<KShadowMap, JCGLException>() {
           @Override public @Nonnull
             KShadowMap
             shadowMapDescriptionVisitBasic(

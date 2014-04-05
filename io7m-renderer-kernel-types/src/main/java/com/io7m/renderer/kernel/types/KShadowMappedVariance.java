@@ -28,7 +28,7 @@ import com.io7m.renderer.types.RException;
  * A description of a variance-mapped shadow.
  */
 
-@Immutable public final class KShadowMappedVariance implements KShadow
+@Immutable public final class KShadowMappedVariance implements KShadowType
 {
   /**
    * Construct a new variance mapped shadow.
@@ -176,7 +176,7 @@ import com.io7m.renderer.types.RException;
   }
 
   @Override public
-    <T, E extends Throwable, V extends KShadowVisitor<T, E>>
+    <T, E extends Throwable, V extends KShadowVisitorType<T, E>>
     T
     shadowAccept(
       final @Nonnull V v)

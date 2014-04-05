@@ -22,8 +22,8 @@ import javax.annotation.concurrent.Immutable;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjection;
-import com.io7m.renderer.types.RTransformView;
+import com.io7m.renderer.types.RTransformProjectionType;
+import com.io7m.renderer.types.RTransformViewType;
 
 /**
  * An orientable "camera" with a specific projection.
@@ -44,8 +44,8 @@ import com.io7m.renderer.types.RTransformView;
    */
 
   public static @Nonnull KCamera newCamera(
-    final @Nonnull RMatrixI4x4F<RTransformView> view,
-    final @Nonnull RMatrixI4x4F<RTransformProjection> projection)
+    final @Nonnull RMatrixI4x4F<RTransformViewType> view,
+    final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection)
     throws ConstraintError
   {
     return new KCamera(
@@ -53,12 +53,12 @@ import com.io7m.renderer.types.RTransformView;
       Constraints.constrainNotNull(projection, "Projection matrix"));
   }
 
-  private final @Nonnull RMatrixI4x4F<RTransformProjection> projection;
-  private final @Nonnull RMatrixI4x4F<RTransformView>       view;
+  private final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection;
+  private final @Nonnull RMatrixI4x4F<RTransformViewType>       view;
 
   private KCamera(
-    final @Nonnull RMatrixI4x4F<RTransformView> in_view,
-    final @Nonnull RMatrixI4x4F<RTransformProjection> in_projection)
+    final @Nonnull RMatrixI4x4F<RTransformViewType> in_view,
+    final @Nonnull RMatrixI4x4F<RTransformProjectionType> in_projection)
   {
     this.view = in_view;
     this.projection = in_projection;
@@ -90,7 +90,7 @@ import com.io7m.renderer.types.RTransformView;
    * @return The eye-to-clip projection matrix
    */
 
-  public @Nonnull RMatrixI4x4F<RTransformProjection> getProjectionMatrix()
+  public @Nonnull RMatrixI4x4F<RTransformProjectionType> getProjectionMatrix()
   {
     return this.projection;
   }
@@ -99,7 +99,7 @@ import com.io7m.renderer.types.RTransformView;
    * @return The world-to-eye view matrix
    */
 
-  public @Nonnull RMatrixI4x4F<RTransformView> getViewMatrix()
+  public @Nonnull RMatrixI4x4F<RTransformViewType> getViewMatrix()
   {
     return this.view;
   }

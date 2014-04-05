@@ -21,9 +21,9 @@ import net.java.quickcheck.Generator;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransform;
+import com.io7m.renderer.types.RTransformType;
 
-final class RMatrix4x4FGenerator<T extends RTransform> implements
+final class RMatrix4x4FGenerator<T extends RTransformType> implements
   Generator<RMatrixI4x4F<T>>
 {
   @Override public RMatrixI4x4F<T> next()

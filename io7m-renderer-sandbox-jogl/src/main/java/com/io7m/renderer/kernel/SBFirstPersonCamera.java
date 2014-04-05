@@ -23,7 +23,7 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.jtensors.VectorReadable3F;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformView;
+import com.io7m.renderer.types.RTransformViewType;
 
 final class SBFirstPersonCamera
 {
@@ -83,7 +83,7 @@ final class SBFirstPersonCamera
     return this.input_position;
   }
 
-  @Nonnull RMatrixI4x4F<RTransformView> makeViewMatrix()
+  @Nonnull RMatrixI4x4F<RTransformViewType> makeViewMatrix()
   {
     SBFirstPersonCamera.makePitchYawVector(
       this.input_pitch,

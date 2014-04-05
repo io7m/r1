@@ -37,10 +37,10 @@ import com.io7m.jaux.functional.PartialFunction;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.kernel.types.KShadow;
+import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
-import com.io7m.renderer.kernel.types.KShadowVisitor;
+import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.types.RException;
 
 public final class SBLightShadowControls implements SBControls
@@ -187,7 +187,7 @@ public final class SBLightShadowControls implements SBControls
     }
   }
 
-  public @Nonnull Option<KShadow> getShadow(
+  public @Nonnull Option<KShadowType> getShadow(
     final @Nonnull Integer light_id)
     throws ConstraintError,
       SBExceptionInputError
@@ -196,12 +196,12 @@ public final class SBLightShadowControls implements SBControls
       switch (this.type_select.getSelectedItem()) {
         case SHADOW_MAPPED_BASIC:
         {
-          final KShadow s = this.mapped_basic_controls.getShadow(light_id);
+          final KShadowType s = this.mapped_basic_controls.getShadow(light_id);
           return Option.some(s);
         }
         case SHADOW_MAPPED_VARIANCE:
         {
-          final KShadow s = this.mapped_variance_controls.getShadow(light_id);
+          final KShadowType s = this.mapped_variance_controls.getShadow(light_id);
           return Option.some(s);
         }
       }
@@ -213,12 +213,12 @@ public final class SBLightShadowControls implements SBControls
   }
 
   public void setDescription(
-    final @Nonnull Option<KShadow> o)
+    final @Nonnull Option<KShadowType> o)
   {
     try {
-      o.mapPartial(new PartialFunction<KShadow, Unit, ConstraintError>() {
+      o.mapPartial(new PartialFunction<KShadowType, Unit, ConstraintError>() {
         @SuppressWarnings("synthetic-access") @Override public Unit call(
-          final KShadow x)
+          final KShadowType x)
           throws ConstraintError
         {
           SBLightShadowControls.this.shadow.setSelected(true);
@@ -226,7 +226,7 @@ public final class SBLightShadowControls implements SBControls
 
           try {
             return x
-              .shadowAccept(new KShadowVisitor<Unit, ConstraintError>() {
+              .shadowAccept(new KShadowVisitorType<Unit, ConstraintError>() {
                 @Override public Unit shadowVisitMappedBasic(
                   final KShadowMappedBasic s)
                   throws ConstraintError,

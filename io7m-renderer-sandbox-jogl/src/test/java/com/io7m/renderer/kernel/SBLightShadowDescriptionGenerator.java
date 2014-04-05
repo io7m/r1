@@ -27,19 +27,19 @@ import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.renderer.kernel.types.KBlurParameters;
-import com.io7m.renderer.kernel.types.KBlurParameters.Builder;
+import com.io7m.renderer.kernel.types.KBlurParameters.BuilderType;
 import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KDepthVariancePrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
-import com.io7m.renderer.kernel.types.KShadow;
+import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
 import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 
 public final class SBLightShadowDescriptionGenerator implements
-  Generator<KShadow>
+  Generator<KShadowType>
 {
   private final @Nonnull IntegerGenerator                      index_gen;
   private final @Nonnull IntegerGenerator                      size_gen;
@@ -61,7 +61,7 @@ public final class SBLightShadowDescriptionGenerator implements
     this.area_gen = new AreaGenerator();
   }
 
-  @Override public KShadow next()
+  @Override public KShadowType next()
   {
     try {
       switch (SBShadowType.values()[this.index_gen.nextInt()]) {
@@ -98,7 +98,7 @@ public final class SBLightShadowDescriptionGenerator implements
               description,
               this.index_gen.next().intValue());
 
-          final Builder bb = KBlurParameters.newBuilder();
+          final BuilderType bb = KBlurParameters.newBuilder();
           bb.setBlurSize((float) (Math.random() * 32.0f));
           bb.setScale((float) Math.random());
           bb.setPasses((int) (Math.random() * 32));

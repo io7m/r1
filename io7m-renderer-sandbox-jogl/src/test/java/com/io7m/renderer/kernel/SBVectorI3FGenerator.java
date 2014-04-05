@@ -18,10 +18,10 @@ package com.io7m.renderer.kernel;
 
 import net.java.quickcheck.Generator;
 
-import com.io7m.renderer.types.RSpace;
+import com.io7m.renderer.types.RSpaceType;
 import com.io7m.renderer.types.RVectorI3F;
 
-public final class SBVectorI3FGenerator<T extends RSpace> implements
+public final class SBVectorI3FGenerator<T extends RSpaceType> implements
   Generator<RVectorI3F<T>>
 {
   @Override public RVectorI3F<T> next()

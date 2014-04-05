@@ -18,7 +18,7 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.renderer.kernel.types.KLight;
+import com.io7m.renderer.kernel.types.KLightType;
 
 interface SBLight extends SBLightVisitable
 {
@@ -26,5 +26,5 @@ interface SBLight extends SBLightVisitable
 
   @Nonnull SBLightDescription getDescription();
 
-  @Nonnull KLight getLight();
+  @Nonnull KLightType getLight();
 }

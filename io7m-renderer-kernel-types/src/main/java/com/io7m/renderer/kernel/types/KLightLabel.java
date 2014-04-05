@@ -30,8 +30,8 @@ import com.io7m.renderer.types.RException;
 
 public enum KLightLabel
   implements
-  KTexturesRequired,
-  KLabel
+  KTexturesRequiredType,
+  KLabelType
 {
   /**
    * Directional lights.
@@ -82,11 +82,11 @@ public enum KLightLabel
 
   public static @Nonnull KLightLabel fromLight(
     final @Nonnull KGraphicsCapabilities caps,
-    final @Nonnull KLight light)
+    final @Nonnull KLightType light)
   {
     try {
       return light
-        .lightVisitableAccept(new KLightVisitor<KLightLabel, ConstraintError>() {
+        .lightVisitableAccept(new KLightVisitorType<KLightLabel, ConstraintError>() {
           @Override public KLightLabel lightVisitDirectional(
             final @Nonnull KLightDirectional l)
             throws ConstraintError,
@@ -103,11 +103,11 @@ public enum KLightLabel
               ConstraintError
           {
             if (l.lightHasShadow()) {
-              final KShadow shadow =
-                ((Option.Some<KShadow>) l.lightGetShadow()).value;
+              final KShadowType shadow =
+                ((Option.Some<KShadowType>) l.lightGetShadow()).value;
               try {
                 return shadow
-                  .shadowAccept(new KShadowVisitor<KLightLabel, ConstraintError>() {
+                  .shadowAccept(new KShadowVisitorType<KLightLabel, ConstraintError>() {
                     @Override public KLightLabel shadowVisitMappedBasic(
                       final @Nonnull KShadowMappedBasic s)
                       throws ConstraintError,

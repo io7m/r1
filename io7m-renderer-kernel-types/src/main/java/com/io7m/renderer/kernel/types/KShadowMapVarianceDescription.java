@@ -27,7 +27,7 @@ import com.io7m.renderer.types.RException;
  */
 
 public final class KShadowMapVarianceDescription implements
-  KShadowMapDescription
+  KShadowMapDescriptionType
 {
   /**
    * Create a new description of a shadow map.
@@ -120,7 +120,7 @@ public final class KShadowMapVarianceDescription implements
   }
 
   @Override public
-    <A, E extends Throwable, V extends KShadowMapDescriptionVisitor<A, E>>
+    <A, E extends Throwable, V extends KShadowMapDescriptionVisitorType<A, E>>
     A
     kShadowMapDescriptionAccept(
       final @Nonnull V v)

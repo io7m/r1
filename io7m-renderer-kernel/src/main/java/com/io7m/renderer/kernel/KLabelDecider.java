@@ -29,12 +29,12 @@ import com.io7m.jcache.LRUCache;
 import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
-import com.io7m.renderer.kernel.types.KInstance;
-import com.io7m.renderer.kernel.types.KInstanceOpaque;
-import com.io7m.renderer.kernel.types.KInstanceRegular;
+import com.io7m.renderer.kernel.types.KInstanceType;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
+import com.io7m.renderer.kernel.types.KInstanceRegularType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
-import com.io7m.renderer.kernel.types.KLight;
+import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightLabel;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoLabel;
 import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
@@ -52,21 +52,21 @@ import com.io7m.renderer.kernel.types.KMaterialRefractiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
 
 final class KLabelDecider implements
-  KLightLabelCache,
-  KMaterialAlbedoLabelCache,
-  KMaterialAlphaLabelCache,
-  KMaterialDepthLabelCache,
-  KMaterialEmissiveLabelCache,
-  KMaterialEnvironmentLabelCache,
-  KMaterialNormalLabelCache,
-  KMaterialSpecularLabelCache,
-  KMaterialRefractiveLabelCache,
-  KMaterialForwardRegularLabelCache,
-  KMaterialForwardOpaqueUnlitLabelCache,
-  KMaterialForwardOpaqueLitLabelCache,
-  KMaterialForwardTranslucentRegularLitLabelCache,
-  KMaterialForwardTranslucentRegularUnlitLabelCache,
-  KMaterialForwardTranslucentRefractiveLabelCache
+  KLightLabelCacheType,
+  KMaterialAlbedoLabelCacheType,
+  KMaterialAlphaLabelCacheType,
+  KMaterialDepthLabelCacheType,
+  KMaterialEmissiveLabelCacheType,
+  KMaterialEnvironmentLabelCacheType,
+  KMaterialNormalLabelCacheType,
+  KMaterialSpecularLabelCacheType,
+  KMaterialRefractiveLabelCacheType,
+  KMaterialForwardRegularLabelCacheType,
+  KMaterialForwardOpaqueUnlitLabelCacheType,
+  KMaterialForwardOpaqueLitLabelCacheType,
+  KMaterialForwardTranslucentRegularLitLabelCacheType,
+  KMaterialForwardTranslucentRegularUnlitLabelCacheType,
+  KMaterialForwardTranslucentRefractiveLabelCacheType
 {
   public static @Nonnull KLabelDecider newDecider(
     final @Nonnull KGraphicsCapabilities capabilities,
@@ -78,21 +78,21 @@ final class KLabelDecider implements
     return new KLabelDecider(capabilities, config);
   }
 
-  private final @Nonnull LRUCache<KInstanceRegular, KMaterialAlbedoLabel, ConstraintError>                                     albedo_cache;
+  private final @Nonnull LRUCache<KInstanceRegularType, KMaterialAlbedoLabel, ConstraintError>                                     albedo_cache;
   private final @Nonnull LRUCache<KInstanceTranslucentRegular, KMaterialAlphaOpacityType, ConstraintError>                     alpha_cache;
   private final @Nonnull LRUCacheConfig                                                                                        cache_config;
   private final @Nonnull KGraphicsCapabilities                                                                                 capabilities;
-  private final @Nonnull LRUCache<KInstanceOpaque, KMaterialDepthLabel, ConstraintError>                                       depth_cache;
-  private final @Nonnull LRUCache<KInstanceRegular, KMaterialEmissiveLabel, ConstraintError>                                   emissive_cache;
-  private final @Nonnull LRUCache<KInstanceRegular, KMaterialEnvironmentLabel, ConstraintError>                                environment_cache;
-  private final @Nonnull LRUCache<KInstanceOpaque, KMaterialForwardOpaqueUnlitLabel, ConstraintError>                          forward_opaque_unlit_cache;
-  private final @Nonnull LRUCache<KInstanceRegular, KMaterialForwardRegularLabel, ConstraintError>                             forward_regular_cache;
+  private final @Nonnull LRUCache<KInstanceOpaqueType, KMaterialDepthLabel, ConstraintError>                                       depth_cache;
+  private final @Nonnull LRUCache<KInstanceRegularType, KMaterialEmissiveLabel, ConstraintError>                                   emissive_cache;
+  private final @Nonnull LRUCache<KInstanceRegularType, KMaterialEnvironmentLabel, ConstraintError>                                environment_cache;
+  private final @Nonnull LRUCache<KInstanceOpaqueType, KMaterialForwardOpaqueUnlitLabel, ConstraintError>                          forward_opaque_unlit_cache;
+  private final @Nonnull LRUCache<KInstanceRegularType, KMaterialForwardRegularLabel, ConstraintError>                             forward_regular_cache;
   private final @Nonnull LRUCache<KInstanceTranslucentRefractive, KMaterialForwardTranslucentRefractiveLabel, ConstraintError> forward_translucent_refractive_cache;
   private final @Nonnull LRUCache<KInstanceTranslucentRegular, KMaterialForwardTranslucentRegularUnlitLabel, ConstraintError>  forward_translucent_regular_unlit_cache;
-  private final @Nonnull LRUCache<KLight, KLightLabel, ConstraintError>                                                        light_cache;
-  private final @Nonnull LRUCache<KInstance, KMaterialNormalLabel, ConstraintError>                                            normal_cache;
+  private final @Nonnull LRUCache<KLightType, KLightLabel, ConstraintError>                                                        light_cache;
+  private final @Nonnull LRUCache<KInstanceType, KMaterialNormalLabel, ConstraintError>                                            normal_cache;
   private final @Nonnull LRUCache<KInstanceTranslucentRefractive, KMaterialRefractiveLabel, ConstraintError>                   refractive_cache;
-  private final @Nonnull LRUCache<KInstanceRegular, KMaterialSpecularLabel, ConstraintError>                                   specular_cache;
+  private final @Nonnull LRUCache<KInstanceRegularType, KMaterialSpecularLabel, ConstraintError>                                   specular_cache;
 
   private KLabelDecider(
     final @Nonnull KGraphicsCapabilities in_capabilities,
@@ -122,7 +122,7 @@ final class KLabelDecider implements
   }
 
   @Override public @Nonnull KMaterialAlbedoLabel getAlbedoLabelRegular(
-    final @Nonnull KInstanceRegular instance)
+    final @Nonnull KInstanceRegularType instance)
     throws ConstraintError
   {
     try {
@@ -146,7 +146,7 @@ final class KLabelDecider implements
   }
 
   @Override public KMaterialDepthLabel getDepthLabel(
-    final @Nonnull KInstanceOpaque instance)
+    final @Nonnull KInstanceOpaqueType instance)
     throws ConstraintError
   {
     try {
@@ -157,7 +157,7 @@ final class KLabelDecider implements
   }
 
   @Override public @Nonnull KMaterialEmissiveLabel getEmissiveLabelRegular(
-    final @Nonnull KInstanceRegular instance)
+    final @Nonnull KInstanceRegularType instance)
     throws ConstraintError
   {
     try {
@@ -170,7 +170,7 @@ final class KLabelDecider implements
   @Override public @Nonnull
     KMaterialEnvironmentLabel
     getEnvironmentLabelRegular(
-      final @Nonnull KInstanceRegular instance)
+      final @Nonnull KInstanceRegularType instance)
       throws ConstraintError
   {
     try {
@@ -181,8 +181,8 @@ final class KLabelDecider implements
   }
 
   @Override public KMaterialForwardOpaqueLitLabel getForwardLabelOpaqueLit(
-    final @Nonnull KLight light,
-    final @Nonnull KInstanceOpaque instance)
+    final @Nonnull KLightType light,
+    final @Nonnull KInstanceOpaqueType instance)
     throws ConstraintError
   {
     return KMaterialForwardOpaqueLitLabel.newLabel(
@@ -193,7 +193,7 @@ final class KLabelDecider implements
   @Override public
     KMaterialForwardOpaqueUnlitLabel
     getForwardLabelOpaqueUnlit(
-      final @Nonnull KInstanceOpaque instance)
+      final @Nonnull KInstanceOpaqueType instance)
       throws ConstraintError
   {
     try {
@@ -204,7 +204,7 @@ final class KLabelDecider implements
   }
 
   @Override public KMaterialForwardRegularLabel getForwardLabelRegular(
-    final @Nonnull KInstanceRegular instance)
+    final @Nonnull KInstanceRegularType instance)
     throws ConstraintError
   {
     try {
@@ -230,7 +230,7 @@ final class KLabelDecider implements
   @Override public
     KMaterialForwardTranslucentRegularLitLabel
     getForwardLabelTranslucentRegularLit(
-      final @Nonnull KLight light,
+      final @Nonnull KLightType light,
       final @Nonnull KInstanceTranslucentRegular instance)
       throws ConstraintError
   {
@@ -255,7 +255,7 @@ final class KLabelDecider implements
   }
 
   @Override public @Nonnull KLightLabel getLightLabel(
-    final @Nonnull KLight light)
+    final @Nonnull KLightType light)
     throws ConstraintError
   {
     try {
@@ -266,7 +266,7 @@ final class KLabelDecider implements
   }
 
   @Override public @Nonnull KMaterialNormalLabel getNormalLabel(
-    final @Nonnull KInstance instance)
+    final @Nonnull KInstanceType instance)
     throws ConstraintError
   {
     try {
@@ -307,7 +307,7 @@ final class KLabelDecider implements
   }
 
   @Override public @Nonnull KMaterialSpecularLabel getSpecularLabelRegular(
-    final @Nonnull KInstanceRegular instance)
+    final @Nonnull KInstanceRegularType instance)
     throws ConstraintError
   {
     try {
@@ -318,13 +318,13 @@ final class KLabelDecider implements
   }
 
   private
-    LRUCacheTrivial<KInstanceRegular, KMaterialAlbedoLabel, ConstraintError>
+    LRUCacheTrivial<KInstanceRegularType, KMaterialAlbedoLabel, ConstraintError>
     newAlbedoCache()
       throws ConstraintError
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoader<KInstanceRegular, KMaterialAlbedoLabel, ConstraintError>() {
+        new JCacheLoader<KInstanceRegularType, KMaterialAlbedoLabel, ConstraintError>() {
           @Override public void cacheValueClose(
             final @Nonnull KMaterialAlbedoLabel v)
             throws ConstraintError
@@ -333,7 +333,7 @@ final class KLabelDecider implements
           }
 
           @Override public KMaterialAlbedoLabel cacheValueLoad(
-            final @Nonnull KInstanceRegular instance)
+            final @Nonnull KInstanceRegularType instance)
             throws ConstraintError
           {
             return KMaterialAlbedoLabel.fromInstanceRegular(instance);
@@ -388,13 +388,13 @@ final class KLabelDecider implements
   }
 
   private
-    LRUCacheTrivial<KInstanceOpaque, KMaterialDepthLabel, ConstraintError>
+    LRUCacheTrivial<KInstanceOpaqueType, KMaterialDepthLabel, ConstraintError>
     newDepthCache()
       throws ConstraintError
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoader<KInstanceOpaque, KMaterialDepthLabel, ConstraintError>() {
+        new JCacheLoader<KInstanceOpaqueType, KMaterialDepthLabel, ConstraintError>() {
           @Override public void cacheValueClose(
             final @Nonnull KMaterialDepthLabel v)
             throws ConstraintError
@@ -405,7 +405,7 @@ final class KLabelDecider implements
           @SuppressWarnings("synthetic-access") @Override public
             KMaterialDepthLabel
             cacheValueLoad(
-              final @Nonnull KInstanceOpaque instance)
+              final @Nonnull KInstanceOpaqueType instance)
               throws ConstraintError
           {
             try {
@@ -427,13 +427,13 @@ final class KLabelDecider implements
   }
 
   private
-    LRUCacheTrivial<KInstanceRegular, KMaterialEmissiveLabel, ConstraintError>
+    LRUCacheTrivial<KInstanceRegularType, KMaterialEmissiveLabel, ConstraintError>
     newEmissiveCache()
       throws ConstraintError
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoader<KInstanceRegular, KMaterialEmissiveLabel, ConstraintError>() {
+        new JCacheLoader<KInstanceRegularType, KMaterialEmissiveLabel, ConstraintError>() {
           @Override public void cacheValueClose(
             final @Nonnull KMaterialEmissiveLabel v)
             throws ConstraintError
@@ -442,7 +442,7 @@ final class KLabelDecider implements
           }
 
           @Override public KMaterialEmissiveLabel cacheValueLoad(
-            final @Nonnull KInstanceRegular instance)
+            final @Nonnull KInstanceRegularType instance)
             throws ConstraintError
           {
             return KMaterialEmissiveLabel.fromInstanceRegular(instance);
@@ -458,13 +458,13 @@ final class KLabelDecider implements
   }
 
   private
-    LRUCacheTrivial<KInstanceRegular, KMaterialEnvironmentLabel, ConstraintError>
+    LRUCacheTrivial<KInstanceRegularType, KMaterialEnvironmentLabel, ConstraintError>
     newEnvironmentCache()
       throws ConstraintError
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoader<KInstanceRegular, KMaterialEnvironmentLabel, ConstraintError>() {
+        new JCacheLoader<KInstanceRegularType, KMaterialEnvironmentLabel, ConstraintError>() {
           @Override public void cacheValueClose(
             final @Nonnull KMaterialEnvironmentLabel v)
             throws ConstraintError
@@ -475,7 +475,7 @@ final class KLabelDecider implements
           @SuppressWarnings("synthetic-access") @Override public
             KMaterialEnvironmentLabel
             cacheValueLoad(
-              final @Nonnull KInstanceRegular instance)
+              final @Nonnull KInstanceRegularType instance)
               throws ConstraintError
           {
             try {
@@ -496,13 +496,13 @@ final class KLabelDecider implements
   }
 
   private
-    LRUCacheTrivial<KInstanceOpaque, KMaterialForwardOpaqueUnlitLabel, ConstraintError>
+    LRUCacheTrivial<KInstanceOpaqueType, KMaterialForwardOpaqueUnlitLabel, ConstraintError>
     newForwardOpaqueUnlitCache()
       throws ConstraintError
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoader<KInstanceOpaque, KMaterialForwardOpaqueUnlitLabel, ConstraintError>() {
+        new JCacheLoader<KInstanceOpaqueType, KMaterialForwardOpaqueUnlitLabel, ConstraintError>() {
           @Override public void cacheValueClose(
             final @Nonnull KMaterialForwardOpaqueUnlitLabel v)
             throws ConstraintError
@@ -513,7 +513,7 @@ final class KLabelDecider implements
           @SuppressWarnings("synthetic-access") @Override public
             KMaterialForwardOpaqueUnlitLabel
             cacheValueLoad(
-              final @Nonnull KInstanceOpaque instance)
+              final @Nonnull KInstanceOpaqueType instance)
               throws ConstraintError
           {
             try {
@@ -541,13 +541,13 @@ final class KLabelDecider implements
   }
 
   private
-    LRUCacheTrivial<KInstanceRegular, KMaterialForwardRegularLabel, ConstraintError>
+    LRUCacheTrivial<KInstanceRegularType, KMaterialForwardRegularLabel, ConstraintError>
     newForwardRegularCache()
       throws ConstraintError
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoader<KInstanceRegular, KMaterialForwardRegularLabel, ConstraintError>() {
+        new JCacheLoader<KInstanceRegularType, KMaterialForwardRegularLabel, ConstraintError>() {
           @Override public void cacheValueClose(
             final @Nonnull KMaterialForwardRegularLabel v)
             throws ConstraintError
@@ -558,7 +558,7 @@ final class KLabelDecider implements
           @SuppressWarnings("synthetic-access") @Override public
             KMaterialForwardRegularLabel
             cacheValueLoad(
-              final @Nonnull KInstanceRegular instance)
+              final @Nonnull KInstanceRegularType instance)
               throws ConstraintError
           {
             try {
@@ -592,13 +592,13 @@ final class KLabelDecider implements
   }
 
   private
-    LRUCacheTrivial<KLight, KLightLabel, ConstraintError>
+    LRUCacheTrivial<KLightType, KLightLabel, ConstraintError>
     newLightCache(
       final KGraphicsCapabilities in_capabilities)
       throws ConstraintError
   {
     return LRUCacheTrivial.newCache(
-      new JCacheLoader<KLight, KLightLabel, ConstraintError>() {
+      new JCacheLoader<KLightType, KLightLabel, ConstraintError>() {
         @Override public void cacheValueClose(
           final @Nonnull KLightLabel v)
           throws ConstraintError
@@ -607,7 +607,7 @@ final class KLabelDecider implements
         }
 
         @Override public KLightLabel cacheValueLoad(
-          final @Nonnull KLight key)
+          final @Nonnull KLightType key)
           throws ConstraintError
         {
           return KLightLabel.fromLight(in_capabilities, key);
@@ -623,12 +623,12 @@ final class KLabelDecider implements
   }
 
   private
-    LRUCacheTrivial<KInstance, KMaterialNormalLabel, ConstraintError>
+    LRUCacheTrivial<KInstanceType, KMaterialNormalLabel, ConstraintError>
     newNormalCache()
       throws ConstraintError
   {
     return LRUCacheTrivial.newCache(
-      new JCacheLoader<KInstance, KMaterialNormalLabel, ConstraintError>() {
+      new JCacheLoader<KInstanceType, KMaterialNormalLabel, ConstraintError>() {
         @Override public void cacheValueClose(
           final @Nonnull KMaterialNormalLabel v)
           throws ConstraintError
@@ -637,7 +637,7 @@ final class KLabelDecider implements
         }
 
         @Override public KMaterialNormalLabel cacheValueLoad(
-          final @Nonnull KInstance instance)
+          final @Nonnull KInstanceType instance)
           throws ConstraintError
         {
           return KMaterialNormalLabel.fromInstance(instance);
@@ -684,13 +684,13 @@ final class KLabelDecider implements
   }
 
   private
-    LRUCacheTrivial<KInstanceRegular, KMaterialSpecularLabel, ConstraintError>
+    LRUCacheTrivial<KInstanceRegularType, KMaterialSpecularLabel, ConstraintError>
     newSpecularCache()
       throws ConstraintError
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoader<KInstanceRegular, KMaterialSpecularLabel, ConstraintError>() {
+        new JCacheLoader<KInstanceRegularType, KMaterialSpecularLabel, ConstraintError>() {
           @Override public void cacheValueClose(
             final @Nonnull KMaterialSpecularLabel v)
             throws ConstraintError
@@ -701,7 +701,7 @@ final class KLabelDecider implements
           @SuppressWarnings("synthetic-access") @Override public
             KMaterialSpecularLabel
             cacheValueLoad(
-              final @Nonnull KInstanceRegular instance)
+              final @Nonnull KInstanceRegularType instance)
               throws ConstraintError
           {
             try {

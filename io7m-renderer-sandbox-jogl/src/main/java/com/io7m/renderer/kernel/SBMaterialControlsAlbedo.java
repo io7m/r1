@@ -35,7 +35,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.types.RSpaceRGBA;
+import com.io7m.renderer.types.RSpaceRGBAType;
 import com.io7m.renderer.types.RVectorI4F;
 
 public final class SBMaterialControlsAlbedo implements
@@ -151,8 +151,8 @@ public final class SBMaterialControlsAlbedo implements
     throws SBExceptionInputError,
       ConstraintError
   {
-    final RVectorI4F<RSpaceRGBA> albedo_colour =
-      new RVectorI4F<RSpaceRGBA>(
+    final RVectorI4F<RSpaceRGBAType> albedo_colour =
+      new RVectorI4F<RSpaceRGBAType>(
         SBTextFieldUtilities.getFieldFloatOrError(this.r),
         SBTextFieldUtilities.getFieldFloatOrError(this.g),
         SBTextFieldUtilities.getFieldFloatOrError(this.b),

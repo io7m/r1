@@ -27,7 +27,7 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KLightDirectional;
-import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RSpaceWorldType;
 
 public final class SBLightControlsDirectional implements
   SBControlsDataType<SBLightDescriptionDirectional>,
@@ -68,7 +68,7 @@ public final class SBLightControlsDirectional implements
   }
 
   private final @Nonnull SBColourInput                colour;
-  private final @Nonnull SBVector3FInput<RSpaceWorld> direction;
+  private final @Nonnull SBVector3FInput<RSpaceWorldType> direction;
   private final @Nonnull RowGroup                     group;
   private final @Nonnull SBFloatHSlider               intensity;
   private final @Nonnull JFrame                       parent;

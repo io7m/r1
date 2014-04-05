@@ -106,11 +106,11 @@ final class KPostprocessorFog extends
   }
 
   private
-    <F extends KFramebufferRGBAUsable & KFramebufferDepthUsable>
+    <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
     void
     evaluateFog(
       final F input,
-      final KFramebufferRGBAUsable output)
+      final KFramebufferRGBAUsableType output)
       throws JCGLRuntimeException,
         ConstraintError,
         RException,
@@ -187,8 +187,8 @@ final class KPostprocessorFog extends
   }
 
   private void evaluateId(
-    final @Nonnull KFramebufferRGBAUsable input,
-    final @Nonnull KFramebufferRGBAUsable output)
+    final @Nonnull KFramebufferRGBAUsableType input,
+    final @Nonnull KFramebufferRGBAUsableType output)
     throws JCGLRuntimeException,
       ConstraintError,
       RException,
@@ -269,12 +269,12 @@ final class KPostprocessorFog extends
   }
 
   @Override public
-    <F extends KFramebufferRGBAUsable & KFramebufferDepthUsable>
+    <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
     void
     postprocessorEvaluateRGBAWithDepth(
       final @Nonnull Unit parameters,
       final @Nonnull F input,
-      final @Nonnull KFramebufferRGBAUsable output)
+      final @Nonnull KFramebufferRGBAUsableType output)
       throws ConstraintError,
         RException
   {

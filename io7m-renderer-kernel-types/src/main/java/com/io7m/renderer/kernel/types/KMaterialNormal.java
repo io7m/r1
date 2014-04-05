@@ -30,7 +30,7 @@ import com.io7m.jcanephora.Texture2DStatic;
  * Material properties related to surface normals.
  */
 
-@Immutable public final class KMaterialNormal implements KTexturesRequired
+@Immutable public final class KMaterialNormal implements KTexturesRequiredType
 {
   private static final @Nonnull KMaterialNormal EMPTY;
 

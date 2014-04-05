@@ -33,7 +33,7 @@ import com.io7m.jaux.AlmostEqualFloat.ContextRelative;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
 import com.io7m.renderer.types.RXMLException;
@@ -66,17 +66,17 @@ public class MeshTangentsTest
     final MeshBasic m = importer.newMeshFromColladaGeometry(cd, geom);
     final MeshTangents mt = MeshTangents.makeWithTangents(m);
 
-    final List<RVectorI3F<RSpaceObject>> normals = mt.normalsGet();
-    final List<RVectorI4F<RSpaceObject>> tangents = mt.tangentsGet();
-    final List<RVectorI3F<RSpaceObject>> bitangents = mt.bitangentsGet();
+    final List<RVectorI3F<RSpaceObjectType>> normals = mt.normalsGet();
+    final List<RVectorI4F<RSpaceObjectType>> tangents = mt.tangentsGet();
+    final List<RVectorI3F<RSpaceObjectType>> bitangents = mt.bitangentsGet();
 
     final ContextRelative context = new ContextRelative();
     context.setMaxAbsoluteDifference(0.0009f);
 
     for (int index = 0; index < normals.size(); ++index) {
-      final RVectorI3F<RSpaceObject> n = normals.get(index);
-      final RVectorI4F<RSpaceObject> t = tangents.get(index);
-      final RVectorI3F<RSpaceObject> b = bitangents.get(index);
+      final RVectorI3F<RSpaceObjectType> n = normals.get(index);
+      final RVectorI4F<RSpaceObjectType> t = tangents.get(index);
+      final RVectorI3F<RSpaceObjectType> b = bitangents.get(index);
 
       /**
        * Normals, tangents, and bitangents are all unit length.

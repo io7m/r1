@@ -88,7 +88,7 @@ import com.io7m.renderer.types.RException;
   }
 
   @Override public
-    <T, E extends Throwable, V extends KFramebufferDepthDescriptionTypeVisitor<T, E>>
+    <T, E extends Throwable, V extends KFramebufferDepthDescriptionVisitorType<T, E>>
     T
     depthDescriptionAccept(
       final @Nonnull V v)

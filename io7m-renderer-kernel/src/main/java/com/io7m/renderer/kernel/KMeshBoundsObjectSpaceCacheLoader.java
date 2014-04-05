@@ -24,10 +24,10 @@ import com.io7m.jcache.JCacheLoader;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RSpaceObjectType;
 
 final class KMeshBoundsObjectSpaceCacheLoader implements
-  JCacheLoader<KMesh, KMeshBounds<RSpaceObject>, RException>
+  JCacheLoader<KMesh, KMeshBounds<RSpaceObjectType>, RException>
 {
   public static @Nonnull KMeshBoundsObjectSpaceCacheLoader newLoader()
   {
@@ -40,13 +40,13 @@ final class KMeshBoundsObjectSpaceCacheLoader implements
   }
 
   @Override public void cacheValueClose(
-    final @Nonnull KMeshBounds<RSpaceObject> v)
+    final @Nonnull KMeshBounds<RSpaceObjectType> v)
     throws RException
   {
     // Nothing
   }
 
-  @Override public KMeshBounds<RSpaceObject> cacheValueLoad(
+  @Override public KMeshBounds<RSpaceObjectType> cacheValueLoad(
     final @Nonnull KMesh key)
     throws RException
   {
@@ -54,7 +54,7 @@ final class KMeshBoundsObjectSpaceCacheLoader implements
   }
 
   @Override public BigInteger cacheValueSizeOf(
-    final @Nonnull KMeshBounds<RSpaceObject> v)
+    final @Nonnull KMeshBounds<RSpaceObjectType> v)
   {
     return BigInteger.ONE;
   }

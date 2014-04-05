@@ -26,8 +26,8 @@ import nu.xom.Element;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceTexture;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.xml.normal.MeshBasic.Triangle;
@@ -123,9 +123,9 @@ public class MeshBasicRMXExporter
   {
     final String uri = RXMLConstants.MESHES_URI.toString();
     final List<Vertex> vertices = m.verticesGet();
-    final List<RVectorI3F<RSpaceObject>> positions = m.positionsGet();
-    final List<RVectorI3F<RSpaceObject>> normals = m.normalsGet();
-    final List<RVectorI2F<RSpaceTexture>> uvs = m.uvsGet();
+    final List<RVectorI3F<RSpaceObjectType>> positions = m.positionsGet();
+    final List<RVectorI3F<RSpaceObjectType>> normals = m.normalsGet();
+    final List<RVectorI2F<RSpaceTextureType>> uvs = m.uvsGet();
 
     final Element evs = new Element("m:vertices", uri);
     evs.addAttribute(MeshBasicRMXExporter.intAttribute(
@@ -136,14 +136,14 @@ public class MeshBasicRMXExporter
       final Element ev = new Element("m:v", uri);
 
       final Element ep = new Element("m:p", uri);
-      final RVectorI3F<RSpaceObject> p = positions.get(v.getPosition());
+      final RVectorI3F<RSpaceObjectType> p = positions.get(v.getPosition());
       ep.addAttribute(MeshBasicRMXExporter.floatAttribute("m:x", p.x));
       ep.addAttribute(MeshBasicRMXExporter.floatAttribute("m:y", p.y));
       ep.addAttribute(MeshBasicRMXExporter.floatAttribute("m:z", p.z));
       ev.appendChild(ep);
 
       final Element en = new Element("m:n", uri);
-      final RVectorI3F<RSpaceObject> n = normals.get(v.getNormal());
+      final RVectorI3F<RSpaceObjectType> n = normals.get(v.getNormal());
       en.addAttribute(MeshBasicRMXExporter.floatAttribute("m:x", n.x));
       en.addAttribute(MeshBasicRMXExporter.floatAttribute("m:y", n.y));
       en.addAttribute(MeshBasicRMXExporter.floatAttribute("m:z", n.z));
@@ -151,7 +151,7 @@ public class MeshBasicRMXExporter
 
       if (m.hasUV()) {
         final Element eu = new Element("m:u", uri);
-        final RVectorI2F<RSpaceTexture> u = uvs.get(v.getUV());
+        final RVectorI2F<RSpaceTextureType> u = uvs.get(v.getUV());
         eu.addAttribute(MeshBasicRMXExporter.floatAttribute("m:x", u.x));
         eu.addAttribute(MeshBasicRMXExporter.floatAttribute("m:y", u.y));
         ev.appendChild(eu);

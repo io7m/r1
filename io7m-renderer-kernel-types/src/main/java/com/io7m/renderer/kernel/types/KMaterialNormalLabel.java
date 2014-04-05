@@ -31,8 +31,8 @@ import com.io7m.renderer.types.RException;
 
 public enum KMaterialNormalLabel
   implements
-  KTexturesRequired,
-  KLabel
+  KTexturesRequiredType,
+  KLabelType
 {
   /**
    * Per-fragment normal mapping.
@@ -80,7 +80,7 @@ public enum KMaterialNormalLabel
   @SuppressWarnings("synthetic-access") public static @Nonnull
     KMaterialNormalLabel
     fromInstance(
-      final @Nonnull KInstance instance)
+      final @Nonnull KInstanceType instance)
       throws ConstraintError
   {
     Constraints.constrainNotNull(instance, "Instance");
@@ -90,12 +90,12 @@ public enum KMaterialNormalLabel
 
     try {
       return instance
-        .instanceVisitableAccept(new KInstanceVisitor<KMaterialNormalLabel, ConstraintError>() {
+        .instanceVisitableAccept(new KInstanceVisitorType<KMaterialNormalLabel, ConstraintError>() {
           @Override public KMaterialNormalLabel instanceVisitOpaqueRegular(
             final @Nonnull KInstanceOpaqueRegular i)
             throws ConstraintError
           {
-            final KMaterialOpaque material = i.instanceGetMaterial();
+            final KMaterialOpaqueType material = i.instanceGetMaterial();
             final KMaterialNormal normal = material.materialGetNormal();
             return KMaterialNormalLabel.fromInstanceData(a, normal);
           }
@@ -106,7 +106,7 @@ public enum KMaterialNormalLabel
               final @Nonnull KInstanceOpaqueAlphaDepth i)
               throws ConstraintError
           {
-            final KMaterialOpaque material = i.instanceGetMaterial();
+            final KMaterialOpaqueType material = i.instanceGetMaterial();
             final KMaterialNormal normal = material.materialGetNormal();
             return KMaterialNormalLabel.fromInstanceData(a, normal);
           }
@@ -117,7 +117,7 @@ public enum KMaterialNormalLabel
               final @Nonnull KInstanceTranslucentRefractive i)
               throws ConstraintError
           {
-            final KMaterialTranslucent material = i.instanceGetMaterial();
+            final KMaterialTranslucentType material = i.instanceGetMaterial();
             final KMaterialNormal normal = material.materialGetNormal();
             return KMaterialNormalLabel.fromInstanceData(a, normal);
           }
@@ -128,7 +128,7 @@ public enum KMaterialNormalLabel
               final @Nonnull KInstanceTranslucentRegular i)
               throws ConstraintError
           {
-            final KMaterialTranslucent material = i.instanceGetMaterial();
+            final KMaterialTranslucentType material = i.instanceGetMaterial();
             final KMaterialNormal normal = material.materialGetNormal();
             return KMaterialNormalLabel.fromInstanceData(a, normal);
           }

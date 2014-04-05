@@ -24,7 +24,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjection;
+import com.io7m.renderer.types.RTransformProjectionType;
 
 @Immutable public abstract class SBProjectionDescription
 {
@@ -152,7 +152,7 @@ import com.io7m.renderer.types.RTransformProjection;
       return result;
     }
 
-    @Override public RMatrixI4x4F<RTransformProjection> makeProjectionMatrix(
+    @Override public RMatrixI4x4F<RTransformProjectionType> makeProjectionMatrix(
       final @Nonnull MatrixM4x4F temporary)
       throws ConstraintError
     {
@@ -292,7 +292,7 @@ import com.io7m.renderer.types.RTransformProjection;
       return result;
     }
 
-    @Override public RMatrixI4x4F<RTransformProjection> makeProjectionMatrix(
+    @Override public RMatrixI4x4F<RTransformProjectionType> makeProjectionMatrix(
       final @Nonnull MatrixM4x4F temporary)
       throws ConstraintError
     {
@@ -404,7 +404,7 @@ import com.io7m.renderer.types.RTransformProjection;
       return result;
     }
 
-    @Override public RMatrixI4x4F<RTransformProjection> makeProjectionMatrix(
+    @Override public RMatrixI4x4F<RTransformProjectionType> makeProjectionMatrix(
       final @Nonnull MatrixM4x4F temporary)
       throws ConstraintError
     {
@@ -460,7 +460,7 @@ import com.io7m.renderer.types.RTransformProjection;
   }
 
   public abstract @Nonnull
-    RMatrixI4x4F<RTransformProjection>
+    RMatrixI4x4F<RTransformProjectionType>
     makeProjectionMatrix(
       final @Nonnull MatrixM4x4F temporary)
       throws ConstraintError;

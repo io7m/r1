@@ -41,12 +41,12 @@ import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererDebug;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverFunctionType;
 import com.io7m.renderer.kernel.types.KCamera;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KScene.KSceneOpaques;
@@ -70,7 +70,7 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
   private final @Nonnull VectorM4F          background;
   private final @Nonnull JCGLImplementation gl;
   private final @Nonnull Log                log;
-  private final @Nonnull KMutableMatrices   matrices;
+  private final @Nonnull KMutableMatricesType   matrices;
   private final @Nonnull KProgram           program;
   private final @Nonnull KTransformContext  transform_context;
 
@@ -90,7 +90,7 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
       final JCGLSLVersion version = in_gl.getGLCommon().metaGetSLVersion();
 
       this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-      this.matrices = KMutableMatrices.newMatrices();
+      this.matrices = KMutableMatricesType.newMatrices();
       this.transform_context = KTransformContext.newContext();
 
       this.program =
@@ -118,13 +118,13 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
     }
   }
 
-  @Override public @CheckForNull KRendererDebugging rendererDebug()
+  @Override public @CheckForNull KRendererDebuggingType rendererDebug()
   {
     return null;
   }
 
   @Override public void rendererDebugEvaluate(
-    final @Nonnull KFramebufferRGBAUsable framebuffer,
+    final @Nonnull KFramebufferRGBAUsableType framebuffer,
     final @Nonnull KScene scene)
     throws ConstraintError,
       RException
@@ -135,9 +135,9 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
       this.matrices.withObserver(
         camera.getViewMatrix(),
         camera.getProjectionMatrix(),
-        new MatricesObserverFunction<Unit, JCGLException>() {
+        new MatricesObserverFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final @Nonnull MatricesObserver o)
+            final @Nonnull MatricesObserverType o)
             throws RException,
               ConstraintError,
               JCGLException
@@ -161,9 +161,9 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
   }
 
   protected void renderWithObserver(
-    final @Nonnull KFramebufferRGBAUsable framebuffer,
+    final @Nonnull KFramebufferRGBAUsableType framebuffer,
     final @Nonnull KScene scene,
-    final @Nonnull MatricesObserver mo)
+    final @Nonnull MatricesObserverType mo)
     throws ConstraintError,
       JCGLException
   {
@@ -202,14 +202,14 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
             mo.getMatrixProjection());
 
           final KSceneOpaques opaques = scene.getOpaques();
-          for (final KInstanceTransformedOpaque o : opaques.getAll()) {
+          for (final KInstanceTransformedOpaqueType o : opaques.getAll()) {
             mo.withInstance(
               o,
-              new MatricesInstanceFunction<Unit, JCGLException>() {
+              new MatricesInstanceFunctionType<Unit, JCGLException>() {
                 @SuppressWarnings("synthetic-access") @Override public
                   Unit
                   run(
-                    final @Nonnull MatricesInstance mi)
+                    final @Nonnull MatricesInstanceType mi)
                     throws ConstraintError,
                       RException,
                       JCGLException
@@ -232,8 +232,8 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
   private static void renderInstanceOpaque(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull JCBProgram p,
-    final @Nonnull KInstanceTransformedOpaque o,
-    final @Nonnull MatricesInstance mi)
+    final @Nonnull KInstanceTransformedOpaqueType o,
+    final @Nonnull MatricesInstanceType mi)
     throws JCGLException,
       ConstraintError
   {

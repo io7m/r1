@@ -36,7 +36,7 @@ import com.io7m.jaux.functional.Unit;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RTransformTexture;
+import com.io7m.renderer.types.RTransformTextureType;
 
 public final class SBMaterialControls implements
   SBControlsDataType<SBMaterialDescription>
@@ -84,7 +84,7 @@ public final class SBMaterialControls implements
   private final @Nonnull SBMaterialControlsOpaqueRegular         controls_opaque_regular;
   private final @Nonnull SBMaterialControlsTranslucentRefractive controls_translucent_refractive;
   private final @Nonnull SBMaterialControlsTranslucentRegular    controls_translucent_regular;
-  private final @Nonnull SBMatrix3x3Controls<RTransformTexture>  controls_uv;
+  private final @Nonnull SBMatrix3x3Controls<RTransformTextureType>  controls_uv;
   private final @Nonnull RowGroup                                group;
   private final @Nonnull Integer                                 id;
   private final @Nonnull JTextField                              id_field;
@@ -106,7 +106,7 @@ public final class SBMaterialControls implements
     this.id_field.setEditable(false);
     this.name = new JTextField("");
     this.controls_uv =
-      new SBMatrix3x3Controls<RTransformTexture>("UV matrix");
+      new SBMatrix3x3Controls<RTransformTextureType>("UV matrix");
     this.controls_normal = new SBMaterialControlsNormal(controller, log);
 
     this.controls_opaque_regular =

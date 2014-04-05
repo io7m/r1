@@ -30,9 +30,9 @@ import com.io7m.jaux.UnreachableCodeException;
  */
 
 public final class KMaterialForwardTranslucentRefractiveLabel implements
-  KTexturesRequired,
-  KMaterialLabelImpliesUV,
-  KLabel
+  KTexturesRequiredType,
+  KMaterialLabelImpliesUVType,
+  KLabelType
 {
   /**
    * @return The set of all possible translucent refractive labels.

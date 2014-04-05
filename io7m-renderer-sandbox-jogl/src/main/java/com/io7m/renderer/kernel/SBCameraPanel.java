@@ -33,7 +33,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjection;
+import com.io7m.renderer.types.RTransformProjectionType;
 
 public final class SBCameraPanel extends JPanel
 {
@@ -119,7 +119,7 @@ public final class SBCameraPanel extends JPanel
   {
     try {
       final SBProjectionDescription m = this.controls.getDescription();
-      final RMatrixI4x4F<RTransformProjection> mat =
+      final RMatrixI4x4F<RTransformProjectionType> mat =
         m.makeProjectionMatrix(this.temporary);
       controller.rendererSetCustomProjection(mat);
       SBCameraPanel.this.unsetError();

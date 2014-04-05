@@ -54,7 +54,7 @@ abstract class KShadowMap implements KShadowMapType
     }
 
     @Override public
-      <A, E extends Throwable, V extends KShadowMapVisitor<A, E>>
+      <A, E extends Throwable, V extends KShadowMapVisitorType<A, E>>
       A
       kShadowMapAccept(
         final @Nonnull V v)
@@ -110,7 +110,7 @@ abstract class KShadowMap implements KShadowMapType
     }
 
     @Override public
-      <A, E extends Throwable, V extends KShadowMapVisitor<A, E>>
+      <A, E extends Throwable, V extends KShadowMapVisitorType<A, E>>
       A
       kShadowMapAccept(
         final @Nonnull V v)

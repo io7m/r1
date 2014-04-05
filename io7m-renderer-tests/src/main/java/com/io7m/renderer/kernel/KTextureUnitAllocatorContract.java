@@ -71,41 +71,41 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
     final AtomicInteger called = new AtomicInteger(0);
 
-    a.withContext(new KTextureUnitWith() {
+    a.withContext(new KTextureUnitWithType() {
       @Override public void run(
-        final @Nonnull KTextureUnitContext c0)
+        final @Nonnull KTextureUnitContextType c0)
         throws ConstraintError,
           JCGLException,
           RException
       {
         called.incrementAndGet();
-        c0.withContext(new KTextureUnitWith() {
+        c0.withContext(new KTextureUnitWithType() {
           @Override public void run(
-            final @Nonnull KTextureUnitContext c1)
+            final @Nonnull KTextureUnitContextType c1)
             throws ConstraintError,
               JCGLException,
               RException
           {
             called.incrementAndGet();
-            c1.withContext(new KTextureUnitWith() {
+            c1.withContext(new KTextureUnitWithType() {
               @Override public void run(
-                final @Nonnull KTextureUnitContext c2)
+                final @Nonnull KTextureUnitContextType c2)
                 throws ConstraintError,
                   JCGLException,
                   RException
               {
                 called.incrementAndGet();
-                c2.withContext(new KTextureUnitWith() {
+                c2.withContext(new KTextureUnitWithType() {
                   @Override public void run(
-                    final @Nonnull KTextureUnitContext c3)
+                    final @Nonnull KTextureUnitContextType c3)
                     throws ConstraintError,
                       JCGLException,
                       RException
                   {
                     called.incrementAndGet();
-                    c3.withContext(new KTextureUnitWith() {
+                    c3.withContext(new KTextureUnitWithType() {
                       @Override public void run(
-                        final @Nonnull KTextureUnitContext c4)
+                        final @Nonnull KTextureUnitContextType c4)
                         throws ConstraintError,
                           JCGLException,
                           RException
@@ -136,16 +136,16 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
     final JCGLImplementation g = tc.getGLImplementation();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
 
-    a.withContext(new KTextureUnitWith() {
+    a.withContext(new KTextureUnitWithType() {
       @Override public void run(
-        final KTextureUnitContext _)
+        final KTextureUnitContextType _)
         throws ConstraintError,
           JCGLException,
           RException
       {
-        a.withContext(new KTextureUnitWith() {
+        a.withContext(new KTextureUnitWithType() {
           @Override public void run(
-            final KTextureUnitContext __)
+            final KTextureUnitContextType __)
             throws ConstraintError,
               JCGLException,
               RException
@@ -166,23 +166,23 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
     final JCGLImplementation g = tc.getGLImplementation();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
 
-    a.withContext(new KTextureUnitWith() {
+    a.withContext(new KTextureUnitWithType() {
       @Override public void run(
-        final KTextureUnitContext c0)
+        final KTextureUnitContextType c0)
         throws ConstraintError,
           JCGLException,
           RException
       {
-        c0.withContext(new KTextureUnitWith() {
+        c0.withContext(new KTextureUnitWithType() {
           @Override public void run(
-            final KTextureUnitContext c1)
+            final KTextureUnitContextType c1)
             throws ConstraintError,
               JCGLException,
               RException
           {
-            c0.withContext(new KTextureUnitWith() {
+            c0.withContext(new KTextureUnitWithType() {
               @Override public void run(
-                final KTextureUnitContext c2)
+                final KTextureUnitContextType c2)
                 throws ConstraintError,
                   JCGLException,
                   RException
@@ -358,15 +358,15 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
     final Texture2DStaticUsable t =
       KTextureUnitAllocatorContract.makeTexture2D(tc.getGLImplementation());
 
-    final AtomicReference<KTextureUnitContextInitial> previous =
-      new AtomicReference<KTextureUnitContextInitial>(a);
+    final AtomicReference<KTextureUnitContextInitialType> previous =
+      new AtomicReference<KTextureUnitContextInitialType>(a);
 
     for (int index = 0; index < units.size(); ++index) {
       final int current = index;
-      final KTextureUnitContextInitial p = previous.get();
-      p.withContext(new KTextureUnitWith() {
+      final KTextureUnitContextInitialType p = previous.get();
+      p.withContext(new KTextureUnitWithType() {
         @SuppressWarnings("boxing") @Override public void run(
-          final KTextureUnitContext context)
+          final KTextureUnitContextType context)
           throws ConstraintError,
             JCGLException,
             RException
@@ -395,14 +395,14 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
     final Texture2DStaticUsable t =
       KTextureUnitAllocatorContract.makeTexture2D(tc.getGLImplementation());
 
-    final AtomicReference<KTextureUnitContextInitial> previous =
-      new AtomicReference<KTextureUnitContextInitial>(a);
+    final AtomicReference<KTextureUnitContextInitialType> previous =
+      new AtomicReference<KTextureUnitContextInitialType>(a);
 
     for (int index = 0; index < (units.size() + 2); ++index) {
-      final KTextureUnitContextInitial p = previous.get();
-      p.withContext(new KTextureUnitWith() {
+      final KTextureUnitContextInitialType p = previous.get();
+      p.withContext(new KTextureUnitWithType() {
         @Override public void run(
-          final KTextureUnitContext context)
+          final KTextureUnitContextType context)
           throws ConstraintError,
             JCGLException,
             RException
@@ -433,9 +433,9 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
 
     final AtomicBoolean caught = new AtomicBoolean(false);
 
-    a.withContext(new KTextureUnitWith() {
+    a.withContext(new KTextureUnitWithType() {
       @Override public void run(
-        final @Nonnull KTextureUnitContext c0)
+        final @Nonnull KTextureUnitContextType c0)
         throws ConstraintError,
           JCGLException,
           RException
@@ -449,9 +449,9 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
         Assert.assertEquals(2, c0.getTextureCountForContext());
         Assert.assertEquals(2, c0.getTextureCountTotal());
 
-        c0.withContext(new KTextureUnitWith() {
+        c0.withContext(new KTextureUnitWithType() {
           @Override public void run(
-            final @Nonnull KTextureUnitContext c1)
+            final @Nonnull KTextureUnitContextType c1)
             throws ConstraintError,
               JCGLException,
               RException
@@ -469,9 +469,9 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
             Assert.assertEquals(2, c1.getTextureCountForContext());
             Assert.assertEquals(4, c1.getTextureCountTotal());
 
-            c1.withContext(new KTextureUnitWith() {
+            c1.withContext(new KTextureUnitWithType() {
               @Override public void run(
-                final @Nonnull KTextureUnitContext c2)
+                final @Nonnull KTextureUnitContextType c2)
                 throws ConstraintError,
                   JCGLException,
                   RException
@@ -493,9 +493,9 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
                 Assert.assertEquals(2, c2.getTextureCountForContext());
                 Assert.assertEquals(6, c2.getTextureCountTotal());
 
-                c2.withContext(new KTextureUnitWith() {
+                c2.withContext(new KTextureUnitWithType() {
                   @Override public void run(
-                    final @Nonnull KTextureUnitContext c3)
+                    final @Nonnull KTextureUnitContextType c3)
                     throws ConstraintError,
                       JCGLException,
                       RException
@@ -519,9 +519,9 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
                     Assert.assertEquals(2, c3.getTextureCountForContext());
                     Assert.assertEquals(8, c3.getTextureCountTotal());
 
-                    c3.withContext(new KTextureUnitWith() {
+                    c3.withContext(new KTextureUnitWithType() {
                       @Override public void run(
-                        final @Nonnull KTextureUnitContext context)
+                        final @Nonnull KTextureUnitContextType context)
                         throws ConstraintError,
                           JCGLException,
                           RException
@@ -576,15 +576,15 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
     final TextureCubeStaticUsable t =
       KTextureUnitAllocatorContract.makeTextureCube(tc.getGLImplementation());
 
-    final AtomicReference<KTextureUnitContextInitial> previous =
-      new AtomicReference<KTextureUnitContextInitial>(a);
+    final AtomicReference<KTextureUnitContextInitialType> previous =
+      new AtomicReference<KTextureUnitContextInitialType>(a);
 
     for (int index = 0; index < units.size(); ++index) {
       final int current = index;
-      final KTextureUnitContextInitial p = previous.get();
-      p.withContext(new KTextureUnitWith() {
+      final KTextureUnitContextInitialType p = previous.get();
+      p.withContext(new KTextureUnitWithType() {
         @SuppressWarnings("boxing") @Override public void run(
-          final KTextureUnitContext context)
+          final KTextureUnitContextType context)
           throws ConstraintError,
             JCGLException,
             RException
@@ -613,14 +613,14 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
     final TextureCubeStaticUsable t =
       KTextureUnitAllocatorContract.makeTextureCube(tc.getGLImplementation());
 
-    final AtomicReference<KTextureUnitContextInitial> previous =
-      new AtomicReference<KTextureUnitContextInitial>(a);
+    final AtomicReference<KTextureUnitContextInitialType> previous =
+      new AtomicReference<KTextureUnitContextInitialType>(a);
 
     for (int index = 0; index < (units.size() + 2); ++index) {
-      final KTextureUnitContextInitial p = previous.get();
-      p.withContext(new KTextureUnitWith() {
+      final KTextureUnitContextInitialType p = previous.get();
+      p.withContext(new KTextureUnitWithType() {
         @Override public void run(
-          final KTextureUnitContext context)
+          final KTextureUnitContextType context)
           throws ConstraintError,
             JCGLException,
             RException
@@ -651,9 +651,9 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
 
     final AtomicBoolean caught = new AtomicBoolean(false);
 
-    a.withContext(new KTextureUnitWith() {
+    a.withContext(new KTextureUnitWithType() {
       @Override public void run(
-        final @Nonnull KTextureUnitContext c0)
+        final @Nonnull KTextureUnitContextType c0)
         throws ConstraintError,
           JCGLException,
           RException
@@ -667,9 +667,9 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
         Assert.assertEquals(2, c0.getTextureCountForContext());
         Assert.assertEquals(2, c0.getTextureCountTotal());
 
-        c0.withContext(new KTextureUnitWith() {
+        c0.withContext(new KTextureUnitWithType() {
           @Override public void run(
-            final @Nonnull KTextureUnitContext c1)
+            final @Nonnull KTextureUnitContextType c1)
             throws ConstraintError,
               JCGLException,
               RException
@@ -687,9 +687,9 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
             Assert.assertEquals(2, c1.getTextureCountForContext());
             Assert.assertEquals(4, c1.getTextureCountTotal());
 
-            c1.withContext(new KTextureUnitWith() {
+            c1.withContext(new KTextureUnitWithType() {
               @Override public void run(
-                final @Nonnull KTextureUnitContext c2)
+                final @Nonnull KTextureUnitContextType c2)
                 throws ConstraintError,
                   JCGLException,
                   RException
@@ -711,9 +711,9 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
                 Assert.assertEquals(2, c2.getTextureCountForContext());
                 Assert.assertEquals(6, c2.getTextureCountTotal());
 
-                c2.withContext(new KTextureUnitWith() {
+                c2.withContext(new KTextureUnitWithType() {
                   @Override public void run(
-                    final @Nonnull KTextureUnitContext c3)
+                    final @Nonnull KTextureUnitContextType c3)
                     throws ConstraintError,
                       JCGLException,
                       RException
@@ -737,9 +737,9 @@ public abstract class KTextureUnitAllocatorContract extends TestContract
                     Assert.assertEquals(2, c3.getTextureCountForContext());
                     Assert.assertEquals(8, c3.getTextureCountTotal());
 
-                    c3.withContext(new KTextureUnitWith() {
+                    c3.withContext(new KTextureUnitWithType() {
                       @Override public void run(
-                        final @Nonnull KTextureUnitContext context)
+                        final @Nonnull KTextureUnitContextType context)
                         throws ConstraintError,
                           JCGLException,
                           RException

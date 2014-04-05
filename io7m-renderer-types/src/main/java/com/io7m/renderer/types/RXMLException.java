@@ -297,7 +297,7 @@ public abstract class RXMLException extends RException
   }
 
   @Override public final <T, E extends Throwable> T exceptionAccept(
-    final @Nonnull RExceptionVisitor<T, E> v)
+    final @Nonnull RExceptionVisitorType<T, E> v)
     throws E
   {
     return v.exceptionVisitXMLException(this);

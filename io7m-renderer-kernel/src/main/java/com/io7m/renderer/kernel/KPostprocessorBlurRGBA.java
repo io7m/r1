@@ -135,9 +135,9 @@ final class KPostprocessorBlurRGBA extends
 
   private void onePass(
     final @Nonnull KBlurParameters parameters,
-    final @Nonnull KFramebufferRGBAUsable source,
-    final @Nonnull KFramebufferRGBAUsable temporary,
-    final @Nonnull KFramebufferRGBAUsable target)
+    final @Nonnull KFramebufferRGBAUsableType source,
+    final @Nonnull KFramebufferRGBAUsableType temporary,
+    final @Nonnull KFramebufferRGBAUsableType target)
     throws JCGLRuntimeException,
       RException,
       ConstraintError,
@@ -174,8 +174,8 @@ final class KPostprocessorBlurRGBA extends
 
   @Override public void postprocessorEvaluateRGBA(
     final @Nonnull KBlurParameters parameters,
-    final @Nonnull KFramebufferRGBAUsable input,
-    final @Nonnull KFramebufferRGBAUsable output)
+    final @Nonnull KFramebufferRGBAUsableType input,
+    final @Nonnull KFramebufferRGBAUsableType output)
     throws ConstraintError,
       RException
   {
@@ -223,9 +223,9 @@ final class KPostprocessorBlurRGBA extends
             receipt_b.getValue());
 
           for (int pass = 1; pass < passes; ++pass) {
-            final KFramebufferRGBAUsable source = receipt_b.getValue();
-            final KFramebufferRGBAUsable temporary = receipt_a.getValue();
-            final KFramebufferRGBAUsable target;
+            final KFramebufferRGBAUsableType source = receipt_b.getValue();
+            final KFramebufferRGBAUsableType temporary = receipt_a.getValue();
+            final KFramebufferRGBAUsableType target;
             if ((pass + 1) == passes) {
               target = output;
             } else {

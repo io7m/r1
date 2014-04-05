@@ -35,7 +35,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RSpaceWorldType;
 
 public final class SBLightControlsProjective implements
   SBControlsDataType<SBLightDescriptionProjective>,
@@ -91,7 +91,7 @@ public final class SBLightControlsProjective implements
   private final @Nonnull SBFloatHSlider               falloff;
   private final @Nonnull RowGroup                     group;
   private final @Nonnull SBOrientationInput           orientation;
-  private final @Nonnull SBVector3FInput<RSpaceWorld> position;
+  private final @Nonnull SBVector3FInput<RSpaceWorldType> position;
   private final @Nonnull JTextField                   texture;
   private final @Nonnull JButton                      texture_select;
   private final @Nonnull SBProjectionMatrixControls   projection;

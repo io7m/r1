@@ -36,8 +36,8 @@ import com.io7m.renderer.types.RException;
  */
 
 @Immutable public final class KInstanceOpaqueRegular implements
-  KInstanceWithMaterial<KMaterialOpaqueRegular>,
-  KInstanceOpaque
+  KInstanceWithMaterialType<KMaterialOpaqueRegular>,
+  KInstanceOpaqueType
 {
   /**
    * Create a new instance with an opaque material.
@@ -132,7 +132,7 @@ import com.io7m.renderer.types.RException;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KInstanceVisitor<A, E>>
+    <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
     instanceVisitableAccept(
       final @Nonnull V v)
