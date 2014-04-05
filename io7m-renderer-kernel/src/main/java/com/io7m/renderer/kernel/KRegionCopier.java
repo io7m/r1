@@ -177,10 +177,13 @@ import com.io7m.renderer.types.RTransformTexture;
         gc.framebufferBlit(
           source_area,
           target_area,
-          EnumSet.of(
-            FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_COLOR,
-            FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_DEPTH),
+          EnumSet.of(FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_COLOR),
           FramebufferBlitFilter.FRAMEBUFFER_BLIT_FILTER_LINEAR);
+        gc.framebufferBlit(
+          source_area,
+          target_area,
+          EnumSet.of(FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_DEPTH),
+          FramebufferBlitFilter.FRAMEBUFFER_BLIT_FILTER_NEAREST);
       } finally {
         gc.framebufferDrawUnbind();
       }

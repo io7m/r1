@@ -17,16 +17,13 @@
 package com.io7m.renderer.kernel;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.PartialFunction;
 import com.io7m.jaux.functional.Unit;
@@ -37,31 +34,20 @@ import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
-import com.io7m.jcanephora.FramebufferBlitBuffer;
-import com.io7m.jcanephora.FramebufferBlitFilter;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.JCBExecutionException;
 import com.io7m.jcanephora.JCBExecutorProcedure;
 import com.io7m.jcanephora.JCBProgram;
 import com.io7m.jcanephora.JCBProgramProcedure;
-import com.io7m.jcanephora.JCGLColorBuffer;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLFramebuffersGL3;
 import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLImplementationVisitor;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLInterfaceGL2;
-import com.io7m.jcanephora.JCGLInterfaceGL3;
-import com.io7m.jcanephora.JCGLInterfaceGLES2;
-import com.io7m.jcanephora.JCGLInterfaceGLES3;
 import com.io7m.jcanephora.JCGLRuntimeException;
-import com.io7m.jcanephora.JCGLScissor;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI4F;
-import com.io7m.jtensors.VectorM2I;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
@@ -91,18 +77,11 @@ import com.io7m.renderer.types.RVectorReadable3F;
 
 final class KRefractionRendererActual implements KRefractionRenderer
 {
-  private static final @Nonnull Set<FramebufferBlitBuffer> BLIT_BUFFERS;
-  private static final @Nonnull VectorReadable4F           WHITE;
-  private static final int                                 WINDOW_BOUNDS_PADDING;
+  private static final @Nonnull VectorReadable4F WHITE;
+  private static final int                       WINDOW_BOUNDS_PADDING;
 
   static {
-    BLIT_BUFFERS =
-      EnumSet.of(
-        FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_COLOR,
-        FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_DEPTH);
-
     WINDOW_BOUNDS_PADDING = 2;
-
     WHITE = new VectorI4F(1.0f, 1.0f, 1.0f, 1.0f);
   }
 
@@ -305,63 +284,6 @@ final class KRefractionRendererActual implements KRefractionRenderer
     window_bounds_upper.y += KRefractionRendererActual.WINDOW_BOUNDS_PADDING;
   }
 
-  private static
-    <G extends JCGLFramebuffersGL3 & JCGLColorBuffer & JCGLScissor>
-    void
-    copyFramebufferRegionGL3(
-      final @Nonnull G gc,
-      final @Nonnull KFramebufferRGBAUsable source,
-      final @Nonnull KFramebufferRGBAUsable target,
-      final @Nonnull RVectorReadable3F<RSpaceWindow> window_bounds_lower,
-      final @Nonnull RVectorReadable3F<RSpaceWindow> window_bounds_upper)
-      throws JCGLRuntimeException,
-        ConstraintError
-  {
-    final float lo_x = window_bounds_lower.getXF();
-    final float hi_x = window_bounds_upper.getXF();
-    final float lo_y = window_bounds_lower.getYF();
-    final float hi_y = window_bounds_upper.getYF();
-
-    final RangeInclusive range_x =
-      new RangeInclusive((long) lo_x, (long) hi_x);
-    final RangeInclusive range_y =
-      new RangeInclusive((long) lo_y, (long) hi_y);
-    final AreaInclusive area = new AreaInclusive(range_x, range_y);
-
-    gc.framebufferReadBind(source.kFramebufferGetColorFramebuffer());
-    try {
-      gc.framebufferDrawBind(target.kFramebufferGetColorFramebuffer());
-      try {
-        gc.framebufferBlit(
-          area,
-          area,
-          KRefractionRendererActual.BLIT_BUFFERS,
-          FramebufferBlitFilter.FRAMEBUFFER_BLIT_FILTER_NEAREST);
-      } finally {
-        gc.framebufferDrawUnbind();
-      }
-    } finally {
-      gc.framebufferReadUnbind();
-    }
-  }
-
-  private static void makeScissorRegion(
-    final @Nonnull RVectorReadable3F<RSpaceWindow> window_bounds_lower,
-    final @Nonnull RVectorReadable3F<RSpaceWindow> window_bounds_upper,
-    final @Nonnull VectorM2I position,
-    final @Nonnull VectorM2I size)
-  {
-    final float lo_x = window_bounds_lower.getXF();
-    final float hi_x = window_bounds_upper.getXF();
-    final float lo_y = window_bounds_lower.getYF();
-    final float hi_y = window_bounds_upper.getYF();
-
-    position.x = (int) lo_x;
-    position.y = (int) lo_y;
-    size.x = (int) (hi_x - lo_x);
-    size.y = (int) (hi_y - lo_y);
-  }
-
   public static @Nonnull
     KRefractionRendererActual
     newRenderer(
@@ -487,76 +409,6 @@ final class KRefractionRendererActual implements KRefractionRenderer
       context.withTexture2D(scene.kFramebufferGetRGBATexture()));
   }
 
-  @SuppressWarnings("synthetic-access") private static
-    void
-    rendererRefractionEvaluateCopyFramebufferRegion(
-      final @Nonnull JCGLImplementation g,
-      final @Nonnull KFramebufferRGBAUsable source,
-      final @Nonnull KFramebufferRGBAUsable target,
-      final @Nonnull RVectorReadable3F<RSpaceWindow> window_bounds_lower,
-      final @Nonnull RVectorReadable3F<RSpaceWindow> window_bounds_upper)
-      throws JCGLException,
-        ConstraintError,
-        RException
-  {
-    g.implementationAccept(new JCGLImplementationVisitor<Unit, RException>() {
-      @Override public Unit implementationIsGL2(
-        final @Nonnull JCGLInterfaceGL2 gl)
-        throws JCGLException,
-          ConstraintError,
-          RException
-      {
-        KRefractionRendererActual.copyFramebufferRegionGL3(
-          gl,
-          source,
-          target,
-          window_bounds_lower,
-          window_bounds_upper);
-        return Unit.unit();
-      }
-
-      @Override public Unit implementationIsGL3(
-        final @Nonnull JCGLInterfaceGL3 gl)
-        throws JCGLException,
-          ConstraintError,
-          RException
-      {
-        KRefractionRendererActual.copyFramebufferRegionGL3(
-          gl,
-          source,
-          target,
-          window_bounds_lower,
-          window_bounds_upper);
-        return Unit.unit();
-      }
-
-      @Override public Unit implementationIsGLES2(
-        final @Nonnull JCGLInterfaceGLES2 gl)
-        throws JCGLException,
-          ConstraintError,
-          RException
-      {
-        // TODO Auto-generated method stub
-        throw new UnimplementedCodeException();
-      }
-
-      @Override public Unit implementationIsGLES3(
-        final @Nonnull JCGLInterfaceGLES3 gl)
-        throws JCGLException,
-          ConstraintError,
-          RException
-      {
-        KRefractionRendererActual.copyFramebufferRegionGL3(
-          gl,
-          source,
-          target,
-          window_bounds_lower,
-          window_bounds_upper);
-        return Unit.unit();
-      }
-    });
-  }
-
   private static
     void
     rendererRefractionEvaluateForInstanceMasked(
@@ -564,13 +416,13 @@ final class KRefractionRendererActual implements KRefractionRenderer
       final @Nonnull BLUCache<KFramebufferForwardDescription, KFramebufferForwardType, RException> forward_cache,
       final @Nonnull LUCache<String, KProgram, RException> shader_cache,
       final @Nonnull KTextureUnitAllocator unit_allocator,
+      final @Nonnull KRegionCopierType copier,
       final @Nonnull KFramebufferForwardUsable scene,
       final @Nonnull KFramebufferForwardUsable temporary,
       final @Nonnull KInstanceTransformedTranslucentRefractive r,
       final @Nonnull KMaterialForwardTranslucentRefractiveLabel label,
       final @Nonnull KMutableMatrices.MatricesInstance mi,
-      final @Nonnull RVectorReadable3F<RSpaceWindow> window_bounds_lower,
-      final @Nonnull RVectorReadable3F<RSpaceWindow> window_bounds_upper)
+      final @Nonnull AreaInclusive window_bounds_area)
       throws RException,
         ConstraintError,
         JCacheException,
@@ -584,13 +436,11 @@ final class KRefractionRendererActual implements KRefractionRenderer
     try {
       final KFramebufferForwardType mask = scene_mask.getValue();
 
-      KRefractionRendererActual
-        .rendererRefractionEvaluateCopyFramebufferRegion(
-          g,
-          scene,
-          mask,
-          window_bounds_lower,
-          window_bounds_upper);
+      copier.copierCopyRGBAWithDepth(
+        scene,
+        window_bounds_area,
+        mask,
+        window_bounds_area);
 
       KRefractionRendererActual.rendererRefractionEvaluateRenderMask(
         g,
@@ -673,6 +523,8 @@ final class KRefractionRendererActual implements KRefractionRenderer
           program.programUniformPutVector4f(
             "f_ccolour",
             KRefractionRendererActual.WHITE);
+
+          gc.blendingDisable();
 
           final KInstanceTranslucentRefractive instance = r.getInstance();
           KRendererCommon.renderConfigureFaceCulling(
@@ -758,6 +610,8 @@ final class KRefractionRendererActual implements KRefractionRenderer
         try {
           gc.framebufferDrawBind(destination
             .kFramebufferGetColorFramebuffer());
+
+          gc.blendingDisable();
 
           KRendererCommon.renderConfigureFaceCulling(
             gc,
@@ -860,6 +714,8 @@ final class KRefractionRendererActual implements KRefractionRenderer
         try {
           gc.framebufferDrawBind(temporary.kFramebufferGetColorFramebuffer());
 
+          gc.blendingDisable();
+
           KRendererCommon.renderConfigureFaceCulling(
             gc,
             instance.instanceGetFaces());
@@ -923,6 +779,7 @@ final class KRefractionRendererActual implements KRefractionRenderer
   private final @Nonnull LUCache<KMesh, KMeshBounds<RSpaceObject>, RException>                              bounds_cache;
   private final @Nonnull LUCache<KMeshBounds<RSpaceObject>, KMeshBoundsTriangles<RSpaceObject>, RException> bounds_tri_cache;
   private final @Nonnull RVectorM4F<RSpaceClip>                                                             clip_tmp;
+  private final @Nonnull KRegionCopier                                                                      copier;
   private final @Nonnull BLUCache<KFramebufferForwardDescription, KFramebufferForwardType, RException>      forward_cache;
   private final @Nonnull JCGLImplementation                                                                 g;
   private final @Nonnull KMaterialForwardTranslucentRefractiveLabelCache                                    label_cache;
@@ -977,6 +834,7 @@ final class KRefractionRendererActual implements KRefractionRenderer
       this.ndc_bounds_lower = new RVectorM3F<RSpaceNDC>();
       this.ndc_bounds_upper = new RVectorM3F<RSpaceNDC>();
       this.matrix_context = new MatrixM4x4F.Context();
+      this.copier = new KRegionCopier(gl, in_log, in_shader_cache);
 
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
@@ -1062,13 +920,23 @@ final class KRefractionRendererActual implements KRefractionRenderer
           .kFramebufferGetForwardDescription());
 
       try {
-        KRefractionRendererActual
-          .rendererRefractionEvaluateCopyFramebufferRegion(
-            this.g,
-            scene,
-            temporary.getValue(),
-            this.window_bounds_lower,
-            this.window_bounds_upper);
+        final float lo_x = this.window_bounds_lower.getXF();
+        final float hi_x = this.window_bounds_upper.getXF();
+        final float lo_y = this.window_bounds_lower.getYF();
+        final float hi_y = this.window_bounds_upper.getYF();
+
+        final RangeInclusive range_x =
+          new RangeInclusive((long) lo_x, (long) hi_x);
+        final RangeInclusive range_y =
+          new RangeInclusive((long) lo_y, (long) hi_y);
+        final AreaInclusive window_bounds_area =
+          new AreaInclusive(range_x, range_y);
+
+        this.copier.copierCopyRGBAWithDepth(
+          scene,
+          window_bounds_area,
+          temporary.getValue(),
+          window_bounds_area);
 
         final KMaterialForwardTranslucentRefractiveLabel label =
           this.label_cache.getForwardLabelTranslucentRefractive(r
@@ -1083,13 +951,13 @@ final class KRefractionRendererActual implements KRefractionRenderer
                 this.forward_cache,
                 this.shader_cache,
                 this.texture_units,
+                this.copier,
                 scene,
                 temporary.getValue(),
                 r,
                 label,
                 mi,
-                this.window_bounds_lower,
-                this.window_bounds_upper);
+                window_bounds_area);
 
             break;
           }
@@ -1109,13 +977,11 @@ final class KRefractionRendererActual implements KRefractionRenderer
           }
         }
 
-        KRefractionRendererActual
-          .rendererRefractionEvaluateCopyFramebufferRegion(
-            this.g,
-            temporary.getValue(),
-            scene,
-            this.window_bounds_lower,
-            this.window_bounds_upper);
+        this.copier.copierCopyRGBAWithDepth(
+          temporary.getValue(),
+          window_bounds_area,
+          scene,
+          window_bounds_area);
 
       } finally {
         temporary.returnToCache();
