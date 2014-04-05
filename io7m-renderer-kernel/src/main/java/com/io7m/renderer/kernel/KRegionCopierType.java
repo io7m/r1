@@ -105,4 +105,40 @@ interface KRegionCopierType
     final @Nonnull AreaInclusive target_area)
     throws ConstraintError,
       RException;
+
+  /**
+   * <p>
+   * Copy the given <code>source_area</code> from the colour and depth buffers
+   * of <code>source</code> to the given <code>target_area</code> of the
+   * colour and depth buffers of <code>target</code>.
+   * </p>
+   * <p>
+   * If the sizes of the two areas differ, the region will be scaled to the
+   * correct size.
+   * </p>
+   * 
+   * @param source
+   *          The source framebuffer
+   * @param source_area
+   *          The source area
+   * @param target
+   *          The target framebuffer
+   * @param target_area
+   *          The target area
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>, or if
+   *           <code>source == target</code>
+   * @throws RException
+   *           If an error occurs
+   */
+
+    <F extends KFramebufferRGBAUsable & KFramebufferDepthUsable>
+    void
+    copierCopyRGBAWithDepth(
+      final @Nonnull F source,
+      final @Nonnull AreaInclusive source_area,
+      final @Nonnull F target,
+      final @Nonnull AreaInclusive target_area)
+      throws ConstraintError,
+        RException;
 }

@@ -122,25 +122,6 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
       this.description = in_description;
     }
 
-    @Override public
-      KFramebufferDepthDescription
-      kFramebufferGetDepthDescription()
-    {
-      return this.description;
-    }
-
-    @Override public
-      FramebufferReferenceUsable
-      kFramebufferGetDepthPassFramebuffer()
-    {
-      return this.framebuffer;
-    }
-
-    @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
-    {
-      return this.depth;
-    }
-
     @Override public void kFramebufferDelete(
       final @Nonnull JCGLImplementation g)
       throws ConstraintError,
@@ -155,6 +136,30 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
       } finally {
         super.setDeleted(true);
       }
+    }
+
+    @Override public
+      KFramebufferDepthDescription
+      kFramebufferGetDepthDescription()
+    {
+      return this.description;
+    }
+
+    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    {
+      return false;
+    }
+
+    @Override public
+      FramebufferReferenceUsable
+      kFramebufferGetDepthPassFramebuffer()
+    {
+      return this.framebuffer;
+    }
+
+    @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
+    {
+      return this.depth;
     }
   }
 
@@ -265,18 +270,6 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
       this.description = d;
     }
 
-    @Override public
-      FramebufferReferenceUsable
-      kFramebufferGetDepthPassFramebuffer()
-    {
-      return this.framebuffer;
-    }
-
-    @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
-    {
-      return this.depth;
-    }
-
     @Override public void kFramebufferDelete(
       final JCGLImplementation g)
       throws ConstraintError,
@@ -298,6 +291,23 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
       kFramebufferGetDepthDescription()
     {
       return this.description;
+    }
+
+    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    {
+      return false;
+    }
+
+    @Override public
+      FramebufferReferenceUsable
+      kFramebufferGetDepthPassFramebuffer()
+    {
+      return this.framebuffer;
+    }
+
+    @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
+    {
+      return this.depth;
     }
   }
 
@@ -367,18 +377,6 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
       this.description = in_description;
     }
 
-    @Override public
-      FramebufferReferenceUsable
-      kFramebufferGetDepthPassFramebuffer()
-    {
-      return this.framebuffer;
-    }
-
-    @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
-    {
-      return this.depth;
-    }
-
     @Override public void kFramebufferDelete(
       final JCGLImplementation g)
       throws ConstraintError,
@@ -400,6 +398,23 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
       kFramebufferGetDepthDescription()
     {
       return this.description;
+    }
+
+    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    {
+      return false;
+    }
+
+    @Override public
+      FramebufferReferenceUsable
+      kFramebufferGetDepthPassFramebuffer()
+    {
+      return this.framebuffer;
+    }
+
+    @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
+    {
+      return this.depth;
     }
   }
 
@@ -479,18 +494,6 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
       this.description = in_description;
     }
 
-    @Override public
-      FramebufferReferenceUsable
-      kFramebufferGetDepthPassFramebuffer()
-    {
-      return this.framebuffer;
-    }
-
-    @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
-    {
-      return this.depth;
-    }
-
     @Override public void kFramebufferDelete(
       final JCGLImplementation g)
       throws ConstraintError,
@@ -513,6 +516,23 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
       kFramebufferGetDepthDescription()
     {
       return this.description;
+    }
+
+    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    {
+      return true;
+    }
+
+    @Override public
+      FramebufferReferenceUsable
+      kFramebufferGetDepthPassFramebuffer()
+    {
+      return this.framebuffer;
+    }
+
+    @Override public Texture2DStaticUsable kFramebufferGetDepthTexture()
+    {
+      return this.depth;
     }
   }
 
@@ -576,9 +596,9 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
     }
   }
 
+  private final @Nonnull AreaInclusive area;
   private boolean                      deleted;
   private final long                   size;
-  private final @Nonnull AreaInclusive area;
 
   protected KFramebufferDepth(
     final @Nonnull AreaInclusive in_area,
@@ -599,14 +619,14 @@ abstract class KFramebufferDepth implements KFramebufferDepthType
     return this.size;
   }
 
+  @Override public final boolean resourceIsDeleted()
+  {
+    return this.deleted;
+  }
+
   protected void setDeleted(
     final boolean in_deleted)
   {
     this.deleted = in_deleted;
-  }
-
-  @Override public final boolean resourceIsDeleted()
-  {
-    return this.deleted;
   }
 }
