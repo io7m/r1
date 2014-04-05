@@ -40,6 +40,15 @@ public interface KFramebufferDepthUsable extends KFramebufferUsable
   @Nonnull KFramebufferDepthDescription kFramebufferGetDepthDescription();
 
   /**
+   * @return <code>true</code> if the samplable depth data is stored in a
+   *         packed colour texture. This is only true on implementations that
+   *         do not support depth textures (only certain implementations of
+   *         OpenGL ES2 lack them).
+   */
+
+  boolean kFramebufferGetDepthIsPackedColour();
+
+  /**
    * <p>
    * Retrieve a reference to the framebuffer to which the initial depth-pass
    * will be rendered.
@@ -49,6 +58,7 @@ public interface KFramebufferDepthUsable extends KFramebufferUsable
    * framebuffer, so rendering to one will typically affect the other.
    * </p>
    * 
+   * @see #kFramebufferGetDepthIsPackedColour()
    * @return A reference to the framebuffer
    */
 

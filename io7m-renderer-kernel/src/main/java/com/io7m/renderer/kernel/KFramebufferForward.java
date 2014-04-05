@@ -67,14 +67,15 @@ import com.io7m.renderer.types.RException;
  * <p>
  * Implementation note: On platforms that support depth textures, a single
  * framebuffer will be allocated with an RGBA texture color attachment, and a
- * depth texture depth attachment. In this case,
+ * depth-texture depth attachment. In this case,
  * {@link #kFramebufferGetColorFramebuffer()} ==
  * {@link #kFramebufferGetDepthPassFramebuffer()}. On platforms that do not
  * support depth textures, two framebuffers <tt>F0</tt> and <tt>F1</tt> will
  * be allocated. <tt>F0</tt> will consist of an RGBA texture color attachment
  * and a depth renderbuffer <tt>R</tt>, and <tt>F1</tt> will consist of an
  * RGBA texture to which packed depth values will be encoded, and the same
- * depth renderbuffer <tt>R</tt>.
+ * depth renderbuffer <tt>R</tt>. Consult
+ * {@link #kFramebufferGetDepthIsPackedColour()}.
  * </p>
  */
 
@@ -190,6 +191,11 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       kFramebufferGetDepthDescription()
     {
       return this.description.getDepthDescription();
+    }
+
+    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    {
+      return false;
     }
 
     @Override public @Nonnull
@@ -423,6 +429,11 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       return this.description.getDepthDescription();
     }
 
+    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    {
+      return false;
+    }
+
     @Override public @Nonnull
       FramebufferReferenceUsable
       kFramebufferGetDepthPassFramebuffer()
@@ -566,6 +577,11 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       kFramebufferGetDepthDescription()
     {
       return this.description.getDepthDescription();
+    }
+
+    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    {
+      return false;
     }
 
     @Override public @Nonnull
@@ -736,6 +752,11 @@ abstract class KFramebufferForward implements KFramebufferForwardType
       kFramebufferGetDepthDescription()
     {
       return this.description.getDepthDescription();
+    }
+
+    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    {
+      return true;
     }
 
     @Override public @Nonnull
