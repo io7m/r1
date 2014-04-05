@@ -22,7 +22,6 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Unit;
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
@@ -167,16 +166,22 @@ final class KRendererDebugNormalsVertexLocal extends KAbstractRendererDebug
 
     final FramebufferReferenceUsable output_buffer =
       framebuffer.kFramebufferGetColorFramebuffer();
-    final AreaInclusive area = framebuffer.kFramebufferGetArea();
 
     try {
       gc.framebufferDrawBind(output_buffer);
-      gc.viewportSet(framebuffer.kFramebufferGetArea());
 
+      gc.blendingDisable();
+
+      gc.colorBufferMask(true, true, true, true);
+      gc.colorBufferClearV4f(this.background);
+
+      gc.cullingDisable();
+
+      gc.depthBufferWriteEnable();
       gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
       gc.depthBufferClear(1.0f);
-      gc.colorBufferClearV4f(this.background);
-      gc.blendingDisable();
+
+      gc.viewportSet(framebuffer.kFramebufferGetArea());
 
       final JCBExecutionAPI e = this.program.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
@@ -244,7 +249,6 @@ final class KRendererDebugNormalsVertexLocal extends KAbstractRendererDebug
 
     KShadingProgramCommon.putMatrixProjectionReuse(p);
     KShadingProgramCommon.putMatrixModelView(p, mi.getMatrixModelView());
-    KShadingProgramCommon.putMatrixNormal(p, mi.getMatrixNormal());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -258,7 +262,7 @@ final class KRendererDebugNormalsVertexLocal extends KAbstractRendererDebug
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePosition(p, array);
-      KShadingProgramCommon.bindAttributeTangent4(p, array);
+      KShadingProgramCommon.bindAttributeNormal(p, array);
 
       p.programExecute(new JCBProgramProcedure() {
         @Override public void call()
