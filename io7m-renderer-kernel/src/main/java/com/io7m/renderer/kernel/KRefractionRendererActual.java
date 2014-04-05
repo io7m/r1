@@ -52,7 +52,6 @@ import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRefractiveLabel;
@@ -293,7 +292,6 @@ final class KRefractionRendererActual implements KRefractionRenderer
       final @Nonnull LUCache<KMesh, KMeshBounds<RSpaceObject>, RException> bounds_cache,
       final @Nonnull LUCache<KMeshBounds<RSpaceObject>, KMeshBoundsTriangles<RSpaceObject>, RException> bounds_tri_cache,
       final @Nonnull KMaterialForwardTranslucentRefractiveLabelCache label_cache,
-      final @Nonnull KGraphicsCapabilities caps,
       final @Nonnull Log log)
       throws ConstraintError,
         RException
@@ -305,7 +303,6 @@ final class KRefractionRendererActual implements KRefractionRenderer
       bounds_cache,
       bounds_tri_cache,
       label_cache,
-      caps,
       log);
   }
 
@@ -800,7 +797,6 @@ final class KRefractionRendererActual implements KRefractionRenderer
     final @Nonnull LUCache<KMesh, KMeshBounds<RSpaceObject>, RException> in_bounds_cache,
     final @Nonnull LUCache<KMeshBounds<RSpaceObject>, KMeshBoundsTriangles<RSpaceObject>, RException> in_bounds_tri_cache,
     final @Nonnull KMaterialForwardTranslucentRefractiveLabelCache in_label_cache,
-    final @Nonnull KGraphicsCapabilities caps,
     final @Nonnull Log in_log)
     throws ConstraintError,
       RException
