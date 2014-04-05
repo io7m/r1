@@ -174,12 +174,19 @@ final class KRendererDebugUVVertex extends KAbstractRendererDebug
 
     try {
       gc.framebufferDrawBind(output_buffer);
-      gc.viewportSet(framebuffer.kFramebufferGetArea());
 
+      gc.blendingDisable();
+
+      gc.colorBufferMask(true, true, true, true);
+      gc.colorBufferClearV4f(this.background);
+
+      gc.cullingDisable();
+
+      gc.depthBufferWriteEnable();
       gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
       gc.depthBufferClear(1.0f);
-      gc.colorBufferClearV4f(this.background);
-      gc.blendingDisable();
+
+      gc.viewportSet(framebuffer.kFramebufferGetArea());
 
       final JCBExecutionAPI e = this.program.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
