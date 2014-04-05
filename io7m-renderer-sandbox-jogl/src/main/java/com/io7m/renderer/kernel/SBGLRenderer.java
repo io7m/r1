@@ -1661,7 +1661,6 @@ final class SBGLRenderer implements GLEventListener
             this.bounds_cache,
             this.bounds_triangles_cache,
             this.label_cache,
-            this.capabilities,
             this.log),
           this.label_cache,
           this.shader_cache,
