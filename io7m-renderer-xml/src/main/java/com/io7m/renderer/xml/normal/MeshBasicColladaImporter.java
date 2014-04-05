@@ -26,8 +26,8 @@ import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceTexture;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.xml.collada.ColladaAxis;
@@ -161,7 +161,7 @@ public class MeshBasicColladaImporter
   {
     final List<VectorI2F> a = source.getArray2f();
     for (final VectorI2F v : a) {
-      m.uvAdd(new RVectorI2F<RSpaceTexture>(v.x, v.y));
+      m.uvAdd(new RVectorI2F<RSpaceTextureType>(v.x, v.y));
     }
   }
 
@@ -194,8 +194,8 @@ public class MeshBasicColladaImporter
 
     final List<VectorI3F> a = source.getArray3f();
     for (final VectorI3F v : a) {
-      final RVectorI3F<RSpaceObject> vec =
-        new RVectorI3F<RSpaceObject>(v.x, v.y, v.z);
+      final RVectorI3F<RSpaceObjectType> vec =
+        new RVectorI3F<RSpaceObjectType>(v.x, v.y, v.z);
 
       if (source_axis != ColladaAxis.COLLADA_AXIS_Y_UP) {
         m.normalAdd(ColladaAxis.convertAxes(
@@ -224,8 +224,8 @@ public class MeshBasicColladaImporter
 
     final List<VectorI3F> a = source.getArray3f();
     for (final VectorI3F v : a) {
-      final RVectorI3F<RSpaceObject> vec =
-        new RVectorI3F<RSpaceObject>(v.x, v.y, v.z);
+      final RVectorI3F<RSpaceObjectType> vec =
+        new RVectorI3F<RSpaceObjectType>(v.x, v.y, v.z);
 
       if (source_axis != ColladaAxis.COLLADA_AXIS_Y_UP) {
         m.positionAdd(ColladaAxis.convertAxes(

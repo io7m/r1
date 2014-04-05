@@ -41,7 +41,7 @@ interface KRegionCopierType
    * buffer of <code>target</code>. The colour buffer is expected to contain
    * depth-variance data, but the copying operation is functionally identical
    * to
-   * {@link #copierCopyRGBAOnly(KFramebufferRGBAUsable, AreaInclusive, KFramebufferRGBAUsable, AreaInclusive)}
+   * {@link #copierCopyRGBAOnly(KFramebufferRGBAUsableType, AreaInclusive, KFramebufferRGBAUsableType, AreaInclusive)}
    * .
    * </p>
    * <p>
@@ -65,9 +65,9 @@ interface KRegionCopierType
    */
 
   void copierCopyDepthVarianceOnly(
-    final @Nonnull KFramebufferDepthVarianceUsable source,
+    final @Nonnull KFramebufferDepthVarianceUsableType source,
     final @Nonnull AreaInclusive source_area,
-    final @Nonnull KFramebufferDepthVarianceUsable target,
+    final @Nonnull KFramebufferDepthVarianceUsableType target,
     final @Nonnull AreaInclusive target_area)
     throws ConstraintError,
       RException;
@@ -99,9 +99,9 @@ interface KRegionCopierType
    */
 
   void copierCopyRGBAOnly(
-    final @Nonnull KFramebufferRGBAUsable source,
+    final @Nonnull KFramebufferRGBAUsableType source,
     final @Nonnull AreaInclusive source_area,
-    final @Nonnull KFramebufferRGBAUsable target,
+    final @Nonnull KFramebufferRGBAUsableType target,
     final @Nonnull AreaInclusive target_area)
     throws ConstraintError,
       RException;
@@ -132,7 +132,7 @@ interface KRegionCopierType
    *           If an error occurs
    */
 
-    <F extends KFramebufferRGBAUsable & KFramebufferDepthUsable>
+    <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
     void
     copierCopyRGBAWithDepth(
       final @Nonnull F source,

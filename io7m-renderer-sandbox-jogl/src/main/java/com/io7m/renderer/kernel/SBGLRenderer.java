@@ -113,7 +113,7 @@ import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.kernel.KRendererDebugging.DebugShadowMapReceiver;
+import com.io7m.renderer.kernel.KRendererDebuggingType.DebugShadowMapReceiverType;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KCamera;
@@ -123,37 +123,37 @@ import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
-import com.io7m.renderer.kernel.types.KInstanceTransformed;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucent;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedVisitor;
-import com.io7m.renderer.kernel.types.KLight;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentType;
+import com.io7m.renderer.kernel.types.KInstanceTransformedType;
+import com.io7m.renderer.kernel.types.KInstanceTransformedVisitorType;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.kernel.types.KMeshBoundsTriangles;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
-import com.io7m.renderer.kernel.types.KSceneBuilder;
-import com.io7m.renderer.kernel.types.KShadow;
-import com.io7m.renderer.kernel.types.KShadowMapDescription;
+import com.io7m.renderer.kernel.types.KSceneBuilderType;
+import com.io7m.renderer.kernel.types.KShadowMapDescriptionType;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
-import com.io7m.renderer.kernel.types.KShadowVisitor;
+import com.io7m.renderer.kernel.types.KShadowType;
+import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RMatrixM4x4F;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceWorld;
-import com.io7m.renderer.types.RTransformModel;
-import com.io7m.renderer.types.RTransformModelView;
-import com.io7m.renderer.types.RTransformProjection;
-import com.io7m.renderer.types.RTransformView;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceWorldType;
+import com.io7m.renderer.types.RTransformModelType;
+import com.io7m.renderer.types.RTransformModelViewType;
+import com.io7m.renderer.types.RTransformProjectionType;
+import com.io7m.renderer.types.RTransformViewType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
@@ -246,8 +246,8 @@ final class SBGLRenderer implements GLEventListener
 
               final ArrayBuffer array = p.getArrayBuffer();
               final IndexBuffer index = p.getIndexBuffer();
-              final RVectorI3F<RSpaceObject> lower = p.getBoundsLower();
-              final RVectorI3F<RSpaceObject> upper = p.getBoundsUpper();
+              final RVectorI3F<RSpaceObjectType> lower = p.getBoundsLower();
+              final RVectorI3F<RSpaceObjectType> upper = p.getBoundsUpper();
               final KMesh km = KMesh.newMesh(array, index, lower, upper);
               final String name = p.getName();
 
@@ -661,8 +661,8 @@ final class SBGLRenderer implements GLEventListener
 
       final ArrayBuffer ab = p.getArrayBuffer();
       final IndexBuffer ib = p.getIndexBuffer();
-      final RVectorI3F<RSpaceObject> lower = p.getBoundsLower();
-      final RVectorI3F<RSpaceObject> upper = p.getBoundsUpper();
+      final RVectorI3F<RSpaceObjectType> lower = p.getBoundsLower();
+      final RVectorI3F<RSpaceObjectType> upper = p.getBoundsUpper();
       return new SBMesh(path, KMesh.newMesh(ab, ib, lower, upper));
     } finally {
       stream.close();
@@ -681,80 +681,80 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private @Nonnull SBVisibleAxes                                                                                axes;
-  private final @Nonnull AtomicBoolean                                                                          axes_show;
-  private final @Nonnull AtomicReference<VectorI3F>                                                             background_colour;
-  private @Nonnull LRUCacheTrivial<KMesh, KMeshBounds<RSpaceObject>, RException>                                bounds_cache;
-  private @Nonnull LRUCacheConfig                                                                               bounds_cache_config;
-  private @Nonnull LRUCacheTrivial<KMeshBounds<RSpaceObject>, KMeshBoundsTriangles<RSpaceObject>, RException>   bounds_triangles_cache;
-  private @Nonnull LRUCacheConfig                                                                               bounds_triangles_cache_config;
-  private final @Nonnull ConcurrentLinkedQueue<CacheStatisticsFuture>                                           cache_statistics_queue;
-  private final @Nonnull SBFirstPersonCamera                                                                    camera;
-  private @Nonnull SceneObserver                                                                                camera_current;
-  private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjection>>                                    camera_custom_projection;
-  private final @Nonnull KTransformContext                                                                      camera_transform_context;
-  private @Nonnull RMatrixI4x4F<RTransformView>                                                                 camera_view_matrix;
-  private final @Nonnull RMatrixM4x4F<RTransformView>                                                           camera_view_matrix_temporary;
-  private @Nonnull KGraphicsCapabilities                                                                        capabilities;
-  private final SandboxConfig                                                                                   config;
-  private final @Nonnull AtomicReference<SBSceneControllerRenderer>                                             controller;
-  private @Nonnull BLUCacheTrivial<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> depth_variance_cache;
-  private @Nonnull BLUCacheConfig                                                                               depth_variance_cache_config;
-  private @Nonnull JCacheLoader<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException>    depth_variance_cache_loader;
-  private final @Nonnull FSCapabilityAll                                                                        filesystem;
-  private boolean                                                                                               first;
-  private @Nonnull BLUCacheTrivial<KFramebufferForwardDescription, KFramebufferForwardType, RException>         forward_cache;
-  private @Nonnull BLUCacheConfig                                                                               forward_cache_config;
-  private @Nonnull JCacheLoader<KFramebufferForwardDescription, KFramebufferForwardType, RException>            forward_cache_loader;
-  private @CheckForNull KFramebufferForwardType                                                                 framebuffer;
-  private @CheckForNull JCGLImplementationJOGL                                                                  gi;
-  private @Nonnull SBVisibleGridPlane                                                                           grid;
-  private final @Nonnull AtomicBoolean                                                                          grid_show;
-  private final @Nonnull SBInputState                                                                           input_state;
-  private @Nonnull KLabelDecider                                                                                label_cache;
-  private final @Nonnull AtomicBoolean                                                                          lights_show;
-  private final @Nonnull AtomicBoolean                                                                          lights_show_surface;
-  private final @Nonnull Log                                                                                    log;
-  private final @Nonnull RMatrixM4x4F<RTransformModel>                                                          matrix_model;
-  private final @Nonnull RMatrixM4x4F<RTransformModel>                                                          matrix_model_temporary;
-  private final @Nonnull RMatrixM4x4F<RTransformModelView>                                                      matrix_modelview;
-  private final @Nonnull RMatrixM4x4F<RTransformProjection>                                                     matrix_projection;
-  private final @Nonnull RMatrixM4x4F<RTransformView>                                                           matrix_view;
-  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>                                                mesh_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                                                  mesh_load_queue;
-  private final @Nonnull HashMap<PathVirtual, KMesh>                                                            meshes;
-  private @CheckForNull SBKPostprocessor                                                                        postprocessor;
-  private final @Nonnull AtomicReference<SBKPostprocessor>                                                      postprocessor_new;
-  private @CheckForNull KProgram                                                                                program_ccolour;
-  private @CheckForNull KProgram                                                                                program_uv;
-  private @CheckForNull KProgram                                                                                program_vcolour;
-  private final @Nonnull Map<SBProjectionDescription, SBVisibleProjection>                                      projection_cache;
-  private final @Nonnull QuaternionM4F.Context                                                                  qm4f_context;
-  private @CheckForNull KRenderer                                                                               renderer;
-  private final @Nonnull AtomicReference<SBKRendererType>                                                       renderer_new;
-  private final @Nonnull SBSoftRestrictions                                                                     restrictions;
-  private @Nonnull BLUCacheTrivial<KFramebufferRGBADescription, KFramebufferRGBA, RException>                   rgba_cache;
-  private @Nonnull BLUCacheConfig                                                                               rgba_cache_config;
-  private @Nonnull JCacheLoader<KFramebufferRGBADescription, KFramebufferRGBA, RException>                      rgba_cache_loader;
-  private final @Nonnull AtomicReference<RunningState>                                                          running;
-  private Collection<SBLight>                                                                                   scene_lights;
-  private @CheckForNull SBQuad                                                                                  screen_quad;
-  private @Nonnull LRUCacheTrivial<String, KProgram, RException>                                                shader_cache;
-  private @Nonnull LRUCacheConfig                                                                               shader_cache_config;
-  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>                                                shader_load_queue;
-  private final @Nonnull HashMap<String, SBShader>                                                              shaders;
-  private @Nonnull PCache<KShadowMapDescription, KShadowMap, RException>                                        shadow_cache;
-  private @Nonnull PCacheConfig                                                                                 shadow_cache_config;
-  private @Nonnull HashMap<PathVirtual, KMesh>                                                                  sphere_meshes;
-  private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>                                         texture_cube_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>                                           texture_cube_load_queue;
-  private final @Nonnull TextureLoader                                                                          texture_loader;
-  private @CheckForNull List<TextureUnit>                                                                       texture_units;
-  private final @Nonnull ConcurrentLinkedQueue<Texture2DDeleteFuture>                                           texture2d_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<Texture2DLoadFuture>                                             texture2d_load_queue;
-  private final @Nonnull HashMap<PathVirtual, Texture2DStatic>                                                  textures_2d;
-  private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>                                                textures_cube;
-  private @Nonnull AreaInclusive                                                                                viewport;
+  private @Nonnull SBVisibleAxes                                                                                      axes;
+  private final @Nonnull AtomicBoolean                                                                                axes_show;
+  private final @Nonnull AtomicReference<VectorI3F>                                                                   background_colour;
+  private @Nonnull LRUCacheTrivial<KMesh, KMeshBounds<RSpaceObjectType>, RException>                                  bounds_cache;
+  private @Nonnull LRUCacheConfig                                                                                     bounds_cache_config;
+  private @Nonnull LRUCacheTrivial<KMeshBounds<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, RException> bounds_triangles_cache;
+  private @Nonnull LRUCacheConfig                                                                                     bounds_triangles_cache_config;
+  private final @Nonnull ConcurrentLinkedQueue<CacheStatisticsFuture>                                                 cache_statistics_queue;
+  private final @Nonnull SBFirstPersonCamera                                                                          camera;
+  private @Nonnull SceneObserver                                                                                      camera_current;
+  private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjectionType>>                                      camera_custom_projection;
+  private final @Nonnull KTransformContext                                                                            camera_transform_context;
+  private @Nonnull RMatrixI4x4F<RTransformViewType>                                                                   camera_view_matrix;
+  private final @Nonnull RMatrixM4x4F<RTransformViewType>                                                             camera_view_matrix_temporary;
+  private @Nonnull KGraphicsCapabilities                                                                              capabilities;
+  private final SandboxConfig                                                                                         config;
+  private final @Nonnull AtomicReference<SBSceneControllerRenderer>                                                   controller;
+  private @Nonnull BLUCacheTrivial<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException>       depth_variance_cache;
+  private @Nonnull BLUCacheConfig                                                                                     depth_variance_cache_config;
+  private @Nonnull JCacheLoader<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException>          depth_variance_cache_loader;
+  private final @Nonnull FSCapabilityAll                                                                              filesystem;
+  private boolean                                                                                                     first;
+  private @Nonnull BLUCacheTrivial<KFramebufferForwardDescription, KFramebufferForwardType, RException>               forward_cache;
+  private @Nonnull BLUCacheConfig                                                                                     forward_cache_config;
+  private @Nonnull JCacheLoader<KFramebufferForwardDescription, KFramebufferForwardType, RException>                  forward_cache_loader;
+  private @CheckForNull KFramebufferForwardType                                                                       framebuffer;
+  private @CheckForNull JCGLImplementationJOGL                                                                        gi;
+  private @Nonnull SBVisibleGridPlane                                                                                 grid;
+  private final @Nonnull AtomicBoolean                                                                                grid_show;
+  private final @Nonnull SBInputState                                                                                 input_state;
+  private @Nonnull KLabelDecider                                                                                      label_cache;
+  private final @Nonnull AtomicBoolean                                                                                lights_show;
+  private final @Nonnull AtomicBoolean                                                                                lights_show_surface;
+  private final @Nonnull Log                                                                                          log;
+  private final @Nonnull RMatrixM4x4F<RTransformModelType>                                                            matrix_model;
+  private final @Nonnull RMatrixM4x4F<RTransformModelType>                                                            matrix_model_temporary;
+  private final @Nonnull RMatrixM4x4F<RTransformModelViewType>                                                        matrix_modelview;
+  private final @Nonnull RMatrixM4x4F<RTransformProjectionType>                                                       matrix_projection;
+  private final @Nonnull RMatrixM4x4F<RTransformViewType>                                                             matrix_view;
+  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>                                                      mesh_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                                                        mesh_load_queue;
+  private final @Nonnull HashMap<PathVirtual, KMesh>                                                                  meshes;
+  private @CheckForNull SBKPostprocessor                                                                              postprocessor;
+  private final @Nonnull AtomicReference<SBKPostprocessor>                                                            postprocessor_new;
+  private @CheckForNull KProgram                                                                                      program_ccolour;
+  private @CheckForNull KProgram                                                                                      program_uv;
+  private @CheckForNull KProgram                                                                                      program_vcolour;
+  private final @Nonnull Map<SBProjectionDescription, SBVisibleProjection>                                            projection_cache;
+  private final @Nonnull QuaternionM4F.Context                                                                        qm4f_context;
+  private @CheckForNull KRendererType                                                                                 renderer;
+  private final @Nonnull AtomicReference<SBKRendererType>                                                             renderer_new;
+  private final @Nonnull SBSoftRestrictions                                                                           restrictions;
+  private @Nonnull BLUCacheTrivial<KFramebufferRGBADescription, KFramebufferRGBA, RException>                         rgba_cache;
+  private @Nonnull BLUCacheConfig                                                                                     rgba_cache_config;
+  private @Nonnull JCacheLoader<KFramebufferRGBADescription, KFramebufferRGBA, RException>                            rgba_cache_loader;
+  private final @Nonnull AtomicReference<RunningState>                                                                running;
+  private Collection<SBLight>                                                                                         scene_lights;
+  private @CheckForNull SBQuad                                                                                        screen_quad;
+  private @Nonnull LRUCacheTrivial<String, KProgram, RException>                                                      shader_cache;
+  private @Nonnull LRUCacheConfig                                                                                     shader_cache_config;
+  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>                                                      shader_load_queue;
+  private final @Nonnull HashMap<String, SBShader>                                                                    shaders;
+  private @Nonnull PCache<KShadowMapDescriptionType, KShadowMap, RException>                                          shadow_cache;
+  private @Nonnull PCacheConfig                                                                                       shadow_cache_config;
+  private @Nonnull HashMap<PathVirtual, KMesh>                                                                        sphere_meshes;
+  private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>                                               texture_cube_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>                                                 texture_cube_load_queue;
+  private final @Nonnull TextureLoader                                                                                texture_loader;
+  private @CheckForNull List<TextureUnit>                                                                             texture_units;
+  private final @Nonnull ConcurrentLinkedQueue<Texture2DDeleteFuture>                                                 texture2d_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<Texture2DLoadFuture>                                                   texture2d_load_queue;
+  private final @Nonnull HashMap<PathVirtual, Texture2DStatic>                                                        textures_2d;
+  private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>                                                      textures_cube;
+  private @Nonnull AreaInclusive                                                                                      viewport;
 
   public SBGLRenderer(
     final @Nonnull SandboxConfig in_config,
@@ -816,7 +816,9 @@ final class SBGLRenderer implements GLEventListener
     this.filesystem.mountClasspathArchive(
       SBGLRenderer.class,
       PathVirtual.ROOT);
-    this.filesystem.mountClasspathArchive(KRenderer.class, PathVirtual.ROOT);
+    this.filesystem.mountClasspathArchive(
+      KRendererType.class,
+      PathVirtual.ROOT);
     this.filesystem.mountArchiveFromAnywhere(
       in_config.getShaderArchiveDebugFile(),
       PathVirtual.ROOT);
@@ -833,17 +835,17 @@ final class SBGLRenderer implements GLEventListener
     this.background_colour =
       new AtomicReference<VectorI3F>(new VectorI3F(0.1f, 0.1f, 0.1f));
 
-    this.matrix_model = new RMatrixM4x4F<RTransformModel>();
-    this.matrix_view = new RMatrixM4x4F<RTransformView>();
-    this.matrix_modelview = new RMatrixM4x4F<RTransformModelView>();
-    this.matrix_projection = new RMatrixM4x4F<RTransformProjection>();
-    this.matrix_model_temporary = new RMatrixM4x4F<RTransformModel>();
+    this.matrix_model = new RMatrixM4x4F<RTransformModelType>();
+    this.matrix_view = new RMatrixM4x4F<RTransformViewType>();
+    this.matrix_modelview = new RMatrixM4x4F<RTransformModelViewType>();
+    this.matrix_projection = new RMatrixM4x4F<RTransformProjectionType>();
+    this.matrix_model_temporary = new RMatrixM4x4F<RTransformModelType>();
 
     this.projection_cache =
       new HashMap<SBProjectionDescription, SBVisibleProjection>();
 
     this.camera_custom_projection =
-      new AtomicReference<RMatrixI4x4F<RTransformProjection>>();
+      new AtomicReference<RMatrixI4x4F<RTransformProjectionType>>();
 
     this.axes_show = new AtomicBoolean(true);
     this.grid_show = new AtomicBoolean(true);
@@ -852,7 +854,8 @@ final class SBGLRenderer implements GLEventListener
 
     this.camera = new SBFirstPersonCamera(0.0f, 1.0f, 5.0f);
     this.camera_current = new SceneObserverCamera();
-    this.camera_view_matrix_temporary = new RMatrixM4x4F<RTransformView>();
+    this.camera_view_matrix_temporary =
+      new RMatrixM4x4F<RTransformViewType>();
     this.camera_transform_context = KTransformContext.newContext();
 
     this.input_state = new SBInputState();
@@ -1045,7 +1048,7 @@ final class SBGLRenderer implements GLEventListener
     switch (this.camera_current.getType()) {
       case OBSERVER_CAMERA:
       {
-        final RMatrixI4x4F<RTransformProjection> cp =
+        final RMatrixI4x4F<RTransformProjectionType> cp =
           this.camera_custom_projection.get();
 
         if (cp != null) {
@@ -1071,7 +1074,8 @@ final class SBGLRenderer implements GLEventListener
         final SceneObserverProjectiveLight observer =
           (SceneObserverProjectiveLight) this.camera_current;
         final KLightProjective actual = observer.getLight().getLight();
-        final RMatrixI4x4F<RTransformProjection> p = actual.getProjection();
+        final RMatrixI4x4F<RTransformProjectionType> p =
+          actual.getProjection();
         MatrixM4x4F.setIdentity(this.matrix_projection);
         p.makeMatrixM4x4F(this.matrix_projection);
         break;
@@ -1202,7 +1206,7 @@ final class SBGLRenderer implements GLEventListener
     return this.input_state;
   }
 
-  @Nonnull RMatrixI4x4F<RTransformProjection> getProjection()
+  @Nonnull RMatrixI4x4F<RTransformProjectionType> getProjection()
   {
     // XXX: Not thread safe! Something else may modify the matrix while it is
     // being read
@@ -1250,17 +1254,17 @@ final class SBGLRenderer implements GLEventListener
   private void handleShadowMapDumpRequest()
     throws ConstraintError
   {
-    final KRenderer r = this.renderer;
+    final KRendererType r = this.renderer;
     if (r != null) {
       if (this.input_state.wantShadowMapDump()) {
         this.log.debug("Dumping shadow maps");
-        final KRendererDebugging d = r.rendererDebug();
+        final KRendererDebuggingType d = r.rendererDebug();
         if (d != null) {
-          d.debugForEachShadowMap(new DebugShadowMapReceiver() {
+          d.debugForEachShadowMap(new DebugShadowMapReceiverType() {
             final StringBuilder name = new StringBuilder();
 
             @Override public void receive(
-              final @Nonnull KShadow shadow,
+              final @Nonnull KShadowType shadow,
               final @Nonnull KShadowMap map)
             {
               try {
@@ -1269,7 +1273,7 @@ final class SBGLRenderer implements GLEventListener
                 n.append("shadow-");
 
                 shadow
-                  .shadowAccept(new KShadowVisitor<Unit, ConstraintError>() {
+                  .shadowAccept(new KShadowVisitorType<Unit, ConstraintError>() {
                     @Override public Unit shadowVisitMappedBasic(
                       final @Nonnull KShadowMappedBasic s)
                       throws ConstraintError,
@@ -1296,7 +1300,7 @@ final class SBGLRenderer implements GLEventListener
                   });
 
                 map
-                  .kShadowMapAccept(new KShadowMapVisitor<Unit, ConstraintError>() {
+                  .kShadowMapAccept(new KShadowMapVisitorType<Unit, ConstraintError>() {
                     @SuppressWarnings("synthetic-access") @Override public
                       Unit
                       shadowMapVisitBasic(
@@ -1559,7 +1563,7 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private @Nonnull KRenderer initKernelRenderer(
+  private @Nonnull KRendererType initKernelRenderer(
     final @Nonnull SBKRendererType type)
     throws ConstraintError,
       RException
@@ -1697,7 +1701,7 @@ final class SBGLRenderer implements GLEventListener
   {
     final SBKRendererType rn = this.renderer_new.getAndSet(null);
     if (rn != null) {
-      final KRenderer old = this.renderer;
+      final KRendererType old = this.renderer;
 
       this.renderer = this.initKernelRenderer(rn);
       this.running.set(RunningState.STATE_RUNNING);
@@ -2362,18 +2366,18 @@ final class SBGLRenderer implements GLEventListener
 
       this.cameraMakePerspectiveProjection(size_x, size_y);
 
-      final RMatrixI4x4F<RTransformProjection> projection =
+      final RMatrixI4x4F<RTransformProjectionType> projection =
         RMatrixI4x4F.newFromReadable(this.matrix_projection);
 
       final KCamera kcamera =
         KCamera.newCamera(this.camera_view_matrix, projection);
 
-      final Pair<Collection<SBLight>, Collection<Pair<KInstanceTransformed, SBInstance>>> scene_things =
+      final Pair<Collection<SBLight>, Collection<Pair<KInstanceTransformedType, SBInstance>>> scene_things =
         c.rendererGetScene();
 
       this.scene_lights = scene_things.first;
 
-      final KSceneBuilder builder = KScene.newBuilder(kcamera);
+      final KSceneBuilderType builder = KScene.newBuilder(kcamera);
 
       /**
        * For each light, add instances. The adding of translucent objects is
@@ -2384,20 +2388,20 @@ final class SBGLRenderer implements GLEventListener
        * kernel).
        */
 
-      final ArrayList<Pair<KInstanceTransformedTranslucent, SBInstance>> translucents =
-        new ArrayList<Pair<KInstanceTransformedTranslucent, SBInstance>>();
+      final ArrayList<Pair<KInstanceTransformedTranslucentType, SBInstance>> translucents =
+        new ArrayList<Pair<KInstanceTransformedTranslucentType, SBInstance>>();
 
-      final HashSet<KLight> all_lights = new HashSet<KLight>();
+      final HashSet<KLightType> all_lights = new HashSet<KLightType>();
       for (final SBLight light : scene_things.first) {
         all_lights.add(light.getLight());
       }
 
       for (final SBLight light : scene_things.first) {
-        final KLight klight = light.getLight();
+        final KLightType klight = light.getLight();
 
-        for (final Pair<KInstanceTransformed, SBInstance> pair : scene_things.second) {
+        for (final Pair<KInstanceTransformedType, SBInstance> pair : scene_things.second) {
           pair.first
-            .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, RException>() {
+            .transformedVisitableAccept(new KInstanceTransformedVisitorType<Unit, RException>() {
               @Override public Unit transformedVisitOpaqueAlphaDepth(
                 final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
                 throws RException,
@@ -2435,8 +2439,8 @@ final class SBGLRenderer implements GLEventListener
                   RException,
                   JCGLException
               {
-                final Pair<KInstanceTransformedTranslucent, SBInstance> p =
-                  new Pair<KInstanceTransformedTranslucent, SBInstance>(
+                final Pair<KInstanceTransformedTranslucentType, SBInstance> p =
+                  new Pair<KInstanceTransformedTranslucentType, SBInstance>(
                     i,
                     pair.second);
                 translucents.add(p);
@@ -2450,8 +2454,8 @@ final class SBGLRenderer implements GLEventListener
                   RException,
                   JCGLException
               {
-                final Pair<KInstanceTransformedTranslucent, SBInstance> p =
-                  new Pair<KInstanceTransformedTranslucent, SBInstance>(
+                final Pair<KInstanceTransformedTranslucentType, SBInstance> p =
+                  new Pair<KInstanceTransformedTranslucentType, SBInstance>(
                     i,
                     pair.second);
                 translucents.add(p);
@@ -2468,24 +2472,27 @@ final class SBGLRenderer implements GLEventListener
        * perspective of the observer.
        */
 
-      Collections.sort(
-        translucents,
-        new Comparator<Pair<KInstanceTransformedTranslucent, SBInstance>>() {
-          @Override public
-            int
-            compare(
-              final @Nonnull Pair<KInstanceTransformedTranslucent, SBInstance> o1,
-              final @Nonnull Pair<KInstanceTransformedTranslucent, SBInstance> o2)
-          {
-            final RVectorI3F<RSpaceWorld> pos1 = o1.second.getPosition();
-            final RVectorI3F<RSpaceWorld> pos2 = o2.second.getPosition();
-            return Float.compare(pos1.getZF(), pos2.getZF());
-          }
-        });
+      Collections
+        .sort(
+          translucents,
+          new Comparator<Pair<KInstanceTransformedTranslucentType, SBInstance>>() {
+            @Override public
+              int
+              compare(
+                final @Nonnull Pair<KInstanceTransformedTranslucentType, SBInstance> o1,
+                final @Nonnull Pair<KInstanceTransformedTranslucentType, SBInstance> o2)
+            {
+              final RVectorI3F<RSpaceWorldType> pos1 =
+                o1.second.getPosition();
+              final RVectorI3F<RSpaceWorldType> pos2 =
+                o2.second.getPosition();
+              return Float.compare(pos1.getZF(), pos2.getZF());
+            }
+          });
 
-      for (final Pair<KInstanceTransformedTranslucent, SBInstance> pair : translucents) {
+      for (final Pair<KInstanceTransformedTranslucentType, SBInstance> pair : translucents) {
         pair.first
-          .transformedVisitableAccept(new KInstanceTransformedVisitor<Unit, RException>() {
+          .transformedVisitableAccept(new KInstanceTransformedVisitorType<Unit, RException>() {
             @Override public Unit transformedVisitOpaqueAlphaDepth(
               final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
               throws ConstraintError,
@@ -2539,9 +2546,9 @@ final class SBGLRenderer implements GLEventListener
 
         final KFramebufferForwardType fb = SBGLRenderer.this.framebuffer;
         this.renderer
-          .rendererVisitableAccept(new KRendererVisitor<Unit, RException>() {
+          .rendererVisitableAccept(new KRendererVisitorType<Unit, RException>() {
             @Override public Unit rendererVisitDebug(
-              final @Nonnull KRendererDebug r)
+              final @Nonnull KRendererDebugType r)
               throws ConstraintError,
                 RException
             {
@@ -2550,14 +2557,14 @@ final class SBGLRenderer implements GLEventListener
             }
 
             @Override public Unit rendererVisitDeferred(
-              final @Nonnull KRendererDeferred r)
+              final @Nonnull KRendererDeferredType r)
             {
               // TODO: No deferred renderers yet
               throw new UnimplementedCodeException();
             }
 
             @Override public Unit rendererVisitForward(
-              final @Nonnull KRendererForward r)
+              final @Nonnull KRendererForwardType r)
               throws ConstraintError,
                 RException
             {
@@ -2610,7 +2617,7 @@ final class SBGLRenderer implements GLEventListener
   }
 
   void setCustomProjection(
-    final @Nonnull RMatrixI4x4F<RTransformProjection> p)
+    final @Nonnull RMatrixI4x4F<RTransformProjectionType> p)
   {
     this.camera_custom_projection.set(p);
   }

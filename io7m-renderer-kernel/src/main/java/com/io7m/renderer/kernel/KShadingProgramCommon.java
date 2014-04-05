@@ -48,33 +48,33 @@ import com.io7m.renderer.kernel.types.KMaterialNormal;
 import com.io7m.renderer.kernel.types.KMaterialRefractive;
 import com.io7m.renderer.kernel.types.KMaterialSpecular;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
-import com.io7m.renderer.kernel.types.KShadow;
+import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
-import com.io7m.renderer.kernel.types.KShadowVisitor;
+import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixM3x3F;
-import com.io7m.renderer.types.RMatrixReadable3x3F;
-import com.io7m.renderer.types.RMatrixReadable4x4F;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceRGB;
-import com.io7m.renderer.types.RSpaceRGBA;
-import com.io7m.renderer.types.RSpaceTexture;
-import com.io7m.renderer.types.RSpaceWorld;
-import com.io7m.renderer.types.RTransformModel;
-import com.io7m.renderer.types.RTransformModelView;
-import com.io7m.renderer.types.RTransformNormal;
-import com.io7m.renderer.types.RTransformProjection;
-import com.io7m.renderer.types.RTransformProjectiveModelView;
-import com.io7m.renderer.types.RTransformProjectiveProjection;
-import com.io7m.renderer.types.RTransformTexture;
-import com.io7m.renderer.types.RTransformView;
-import com.io7m.renderer.types.RTransformViewInverse;
+import com.io7m.renderer.types.RMatrixReadable3x3FType;
+import com.io7m.renderer.types.RMatrixReadable4x4FType;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceRGBType;
+import com.io7m.renderer.types.RSpaceRGBAType;
+import com.io7m.renderer.types.RSpaceTextureType;
+import com.io7m.renderer.types.RSpaceWorldType;
+import com.io7m.renderer.types.RTransformModelType;
+import com.io7m.renderer.types.RTransformModelViewType;
+import com.io7m.renderer.types.RTransformNormalType;
+import com.io7m.renderer.types.RTransformProjectionType;
+import com.io7m.renderer.types.RTransformProjectiveModelViewType;
+import com.io7m.renderer.types.RTransformProjectiveProjectionType;
+import com.io7m.renderer.types.RTransformTextureType;
+import com.io7m.renderer.types.RTransformViewType;
+import com.io7m.renderer.types.RTransformViewInverseType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
-import com.io7m.renderer.types.RVectorReadable3F;
-import com.io7m.renderer.types.RVectorReadable4F;
+import com.io7m.renderer.types.RVectorReadable3FType;
+import com.io7m.renderer.types.RVectorReadable4FType;
 
 final class KShadingProgramCommon
 {
@@ -478,7 +478,7 @@ final class KShadingProgramCommon
 
   static void putAttributeNormal(
     final @Nonnull JCBProgram program,
-    final @Nonnull RVectorReadable3F<RSpaceObject> r)
+    final @Nonnull RVectorReadable3FType<RSpaceObjectType> r)
     throws JCGLException,
       ConstraintError
   {
@@ -487,7 +487,7 @@ final class KShadingProgramCommon
 
   static void putAttributeTangent4(
     final @Nonnull JCBProgram program,
-    final @Nonnull RVectorI4F<RSpaceObject> t)
+    final @Nonnull RVectorI4F<RSpaceObjectType> t)
     throws JCGLException,
       ConstraintError
   {
@@ -496,7 +496,7 @@ final class KShadingProgramCommon
 
   static void putAttributeUV(
     final @Nonnull JCBProgram program,
-    final @Nonnull RVectorI2F<RSpaceTexture> uv)
+    final @Nonnull RVectorI2F<RSpaceTextureType> uv)
     throws JCGLException,
       ConstraintError
   {
@@ -506,7 +506,7 @@ final class KShadingProgramCommon
   static void putLightDirectional(
     final @Nonnull JCBProgram e,
     final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4F<RTransformView> view,
+    final @Nonnull RMatrixReadable4x4FType<RTransformViewType> view,
     final @Nonnull KLightDirectional light)
     throws JCGLException,
       ConstraintError
@@ -525,7 +525,7 @@ final class KShadingProgramCommon
 
   static void putLightDirectionalColour(
     final @Nonnull JCBProgram e,
-    final @Nonnull RVectorReadable3F<RSpaceRGB> colour)
+    final @Nonnull RVectorReadable3FType<RSpaceRGBType> colour)
     throws ConstraintError,
       JCGLException
   {
@@ -543,8 +543,8 @@ final class KShadingProgramCommon
   static void putLightDirectionalDirection(
     final @Nonnull JCBProgram e,
     final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4F<RTransformView> view,
-    final @Nonnull RVectorReadable3F<RSpaceWorld> direction)
+    final @Nonnull RMatrixReadable4x4FType<RTransformViewType> view,
+    final @Nonnull RVectorReadable3FType<RSpaceWorldType> direction)
     throws ConstraintError,
       JCGLException
   {
@@ -601,7 +601,7 @@ final class KShadingProgramCommon
   static void putLightProjectiveColour(
 
     final @Nonnull JCBProgram e,
-    final @Nonnull RVectorReadable3F<RSpaceRGB> colour)
+    final @Nonnull RVectorReadable3FType<RSpaceRGBType> colour)
     throws ConstraintError,
       JCGLException
   {
@@ -655,8 +655,8 @@ final class KShadingProgramCommon
   static void putLightProjectivePosition(
     final @Nonnull JCBProgram program,
     final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4F<RTransformView> view,
-    final @Nonnull RVectorReadable3F<RSpaceWorld> position)
+    final @Nonnull RMatrixReadable4x4FType<RTransformViewType> view,
+    final @Nonnull RVectorReadable3FType<RSpaceWorldType> position)
     throws ConstraintError,
       JCGLException
   {
@@ -703,7 +703,7 @@ final class KShadingProgramCommon
   static void putLightProjectiveWithoutTextureProjection(
     final @Nonnull JCBProgram program,
     final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4F<RTransformView> view,
+    final @Nonnull RMatrixReadable4x4FType<RTransformViewType> view,
     final @Nonnull KLightProjective light)
     throws JCGLException,
       ConstraintError,
@@ -732,9 +732,9 @@ final class KShadingProgramCommon
       }
       case OPTION_SOME:
       {
-        final KShadow ks =
-          ((Option.Some<KShadow>) light.lightGetShadow()).value;
-        ks.shadowAccept(new KShadowVisitor<Unit, JCGLException>() {
+        final KShadowType ks =
+          ((Option.Some<KShadowType>) light.lightGetShadow()).value;
+        ks.shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
           @Override public Unit shadowVisitMappedBasic(
             final @Nonnull KShadowMappedBasic s)
             throws JCGLException,
@@ -782,9 +782,9 @@ final class KShadingProgramCommon
       }
       case OPTION_SOME:
       {
-        final KShadow ks =
-          ((Option.Some<KShadow>) light.lightGetShadow()).value;
-        ks.shadowAccept(new KShadowVisitor<Unit, JCGLException>() {
+        final KShadowType ks =
+          ((Option.Some<KShadowType>) light.lightGetShadow()).value;
+        ks.shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
           @Override public Unit shadowVisitMappedBasic(
             final @Nonnull KShadowMappedBasic s)
             throws JCGLException,
@@ -815,7 +815,7 @@ final class KShadingProgramCommon
   static void putLightSpherical(
     final @Nonnull JCBProgram program,
     final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4F<RTransformView> view,
+    final @Nonnull RMatrixReadable4x4FType<RTransformViewType> view,
     final @Nonnull KLightSphere light)
     throws JCGLException,
       ConstraintError
@@ -826,7 +826,7 @@ final class KShadingProgramCommon
       view,
       light.getPosition());
 
-    final RVectorI3F<RSpaceRGB> colour = light.lightGetColour();
+    final RVectorI3F<RSpaceRGBType> colour = light.lightGetColour();
     KShadingProgramCommon.putLightSphericalColour(program, colour);
     final float intensity = light.lightGetIntensity();
     KShadingProgramCommon.putLightSphericalIntensity(program, intensity);
@@ -838,7 +838,7 @@ final class KShadingProgramCommon
 
   static void putLightSphericalColour(
     final @Nonnull JCBProgram program,
-    final @Nonnull RVectorReadable3F<RSpaceRGB> colour)
+    final @Nonnull RVectorReadable3FType<RSpaceRGBType> colour)
     throws ConstraintError,
       JCGLException
   {
@@ -890,8 +890,8 @@ final class KShadingProgramCommon
   static void putLightSphericalPosition(
     final @Nonnull JCBProgram program,
     final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4F<RTransformView> view,
-    final @Nonnull RVectorReadable3F<RSpaceWorld> position)
+    final @Nonnull RMatrixReadable4x4FType<RTransformViewType> view,
+    final @Nonnull RVectorReadable3FType<RSpaceWorldType> position)
     throws ConstraintError,
       JCGLException
   {
@@ -960,7 +960,7 @@ final class KShadingProgramCommon
 
   static void putMaterialAlbedoColour(
     final @Nonnull JCBProgram program,
-    final @Nonnull RVectorReadable4F<RSpaceRGBA> rgba)
+    final @Nonnull RVectorReadable4FType<RSpaceRGBAType> rgba)
     throws ConstraintError,
       JCGLException
   {
@@ -1066,7 +1066,7 @@ final class KShadingProgramCommon
 
   static void putMaterialSpecularColour(
     final @Nonnull JCBProgram program,
-    final @Nonnull RVectorReadable3F<RSpaceRGB> colour)
+    final @Nonnull RVectorReadable3FType<RSpaceRGBType> colour)
     throws ConstraintError,
       JCGLException
   {
@@ -1084,7 +1084,7 @@ final class KShadingProgramCommon
 
   static void putMatrixInverseView(
     final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable4x4F<RTransformViewInverse> m)
+    final @Nonnull RMatrixReadable4x4FType<RTransformViewInverseType> m)
     throws JCGLException,
       ConstraintError
   {
@@ -1095,7 +1095,7 @@ final class KShadingProgramCommon
 
   static void putMatrixModel(
     final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable4x4F<RTransformModel> m)
+    final @Nonnull RMatrixReadable4x4FType<RTransformModelType> m)
     throws JCGLException,
       ConstraintError
   {
@@ -1106,7 +1106,7 @@ final class KShadingProgramCommon
 
   static void putMatrixModelView(
     final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable4x4F<RTransformModelView> m)
+    final @Nonnull RMatrixReadable4x4FType<RTransformModelViewType> m)
     throws JCGLException,
       ConstraintError
   {
@@ -1117,7 +1117,7 @@ final class KShadingProgramCommon
 
   static void putMatrixNormal(
     final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable3x3F<RTransformNormal> mn)
+    final @Nonnull RMatrixReadable3x3FType<RTransformNormalType> mn)
     throws JCGLException,
       ConstraintError
   {
@@ -1128,7 +1128,7 @@ final class KShadingProgramCommon
 
   static void putMatrixPosition(
     final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixM3x3F<RTransformModel> m)
+    final @Nonnull RMatrixM3x3F<RTransformModelType> m)
     throws JCGLRuntimeException,
       ConstraintError
   {
@@ -1139,7 +1139,7 @@ final class KShadingProgramCommon
 
   static void putMatrixProjection(
     final @Nonnull JCBProgram p,
-    final @Nonnull RMatrixReadable4x4F<RTransformProjection> m)
+    final @Nonnull RMatrixReadable4x4FType<RTransformProjectionType> m)
     throws JCGLException,
       ConstraintError
   {
@@ -1158,7 +1158,7 @@ final class KShadingProgramCommon
 
   static void putMatrixProjectiveModelView(
     final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable4x4F<RTransformProjectiveModelView> m)
+    final @Nonnull RMatrixReadable4x4FType<RTransformProjectiveModelViewType> m)
     throws JCGLException,
       ConstraintError
   {
@@ -1178,7 +1178,7 @@ final class KShadingProgramCommon
 
   static void putMatrixProjectiveProjection(
     final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable4x4F<RTransformProjectiveProjection> m)
+    final @Nonnull RMatrixReadable4x4FType<RTransformProjectiveProjectionType> m)
     throws JCGLException,
       ConstraintError
   {
@@ -1198,7 +1198,7 @@ final class KShadingProgramCommon
 
   static void putMatrixUV(
     final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable3x3F<RTransformTexture> m)
+    final @Nonnull RMatrixReadable3x3FType<RTransformTextureType> m)
     throws JCGLException,
       ConstraintError
   {

@@ -19,15 +19,15 @@ package com.io7m.renderer.types;
 import com.io7m.jtensors.MatrixM4x4F;
 
 /**
- * A mutable 4x4 matrix type indexed by the type {@link RTransform} the matrix
+ * A mutable 4x4 matrix type indexed by the type {@link RTransformType} the matrix
  * represents and backed by direct memory for passing to native code.
  * 
  * @param <T>
  *          A phantom type parameter describing the type of transform
  */
 
-public final class RMatrixM4x4F<T extends RTransform> extends MatrixM4x4F implements
-  RMatrixReadable4x4F<T>
+public final class RMatrixM4x4F<T extends RTransformType> extends MatrixM4x4F implements
+  RMatrixReadable4x4FType<T>
 {
   /**
    * Create a new identity matrix.

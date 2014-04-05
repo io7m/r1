@@ -30,7 +30,7 @@ import com.io7m.jcanephora.TextureCubeStatic;
  */
 
 @Immutable public final class KMaterialEnvironment implements
-  KTexturesRequired
+  KTexturesRequiredType
 {
   private static final @Nonnull KMaterialEnvironment EMPTY;
 

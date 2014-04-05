@@ -26,7 +26,7 @@ import com.io7m.jaux.UnreachableCodeException;
 
 public enum KMaterialAlphaOpacityType
   implements
-  KLabel
+  KLabelType
 {
   /**
    * Opacity is derived directly from the material's opacity.

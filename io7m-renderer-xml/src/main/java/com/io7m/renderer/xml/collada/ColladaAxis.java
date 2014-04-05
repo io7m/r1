@@ -22,9 +22,9 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM3F;
-import com.io7m.renderer.types.RSpace;
+import com.io7m.renderer.types.RSpaceType;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.types.RVectorReadable3F;
+import com.io7m.renderer.types.RVectorReadable3FType;
 
 /**
  * <p>
@@ -68,10 +68,10 @@ public enum ColladaAxis
    * </p>
    */
 
-  public static @Nonnull <R extends RSpace> RVectorI3F<R> convertAxes(
+  public static @Nonnull <R extends RSpaceType> RVectorI3F<R> convertAxes(
     final @Nonnull MatrixM3x3F matrix,
     final @Nonnull ColladaAxis source_axes,
-    final @Nonnull RVectorReadable3F<R> source,
+    final @Nonnull RVectorReadable3FType<R> source,
     final @Nonnull ColladaAxis dest_axes)
   {
     switch (source_axes) {

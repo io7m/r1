@@ -21,13 +21,13 @@ import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformModel;
+import com.io7m.renderer.types.RTransformModelType;
 
 /**
  * An object-space to world-space transformation consisting of a 4x4 matrix.
  */
 
-@Immutable public final class KTransformMatrix4x4 implements KTransform
+@Immutable public final class KTransformMatrix4x4 implements KTransformType
 {
   /**
    * Construct a new transformation with the given matrix.
@@ -37,16 +37,16 @@ import com.io7m.renderer.types.RTransformModel;
    * @return A new transformation
    */
 
-  public static @Nonnull KTransform newTransform(
-    final @Nonnull RMatrixI4x4F<RTransformModel> model)
+  public static @Nonnull KTransformType newTransform(
+    final @Nonnull RMatrixI4x4F<RTransformModelType> model)
   {
     return new KTransformMatrix4x4(model);
   }
 
-  private final @Nonnull RMatrixI4x4F<RTransformModel> model;
+  private final @Nonnull RMatrixI4x4F<RTransformModelType> model;
 
   KTransformMatrix4x4(
-    final @Nonnull RMatrixI4x4F<RTransformModel> in_model)
+    final @Nonnull RMatrixI4x4F<RTransformModelType> in_model)
   {
     this.model = in_model;
   }
@@ -55,7 +55,7 @@ import com.io7m.renderer.types.RTransformModel;
    * @return The given object-to-world matrix.
    */
 
-  public @Nonnull RMatrixI4x4F<RTransformModel> getModel()
+  public @Nonnull RMatrixI4x4F<RTransformModelType> getModel()
   {
     return this.model;
   }
@@ -68,7 +68,7 @@ import com.io7m.renderer.types.RTransformModel;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KTransformVisitor<A, E>>
+    <A, E extends Throwable, V extends KTransformVisitorType<A, E>>
     A
     transformVisitableAccept(
       final @Nonnull V v)

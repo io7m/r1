@@ -27,7 +27,7 @@ import com.io7m.renderer.types.RException;
  */
 
 public interface KFramebufferDepthDescriptionType extends
-  KFramebufferDescription
+  KFramebufferDescriptionType
 {
   /**
    * Be visited by the given generic visitor.
@@ -52,7 +52,7 @@ public interface KFramebufferDepthDescriptionType extends
    *          A specific visitor subtype
    */
 
-    <T, E extends Throwable, V extends KFramebufferDepthDescriptionTypeVisitor<T, E>>
+    <T, E extends Throwable, V extends KFramebufferDepthDescriptionVisitorType<T, E>>
     T
     depthDescriptionAccept(
       final @Nonnull V v)

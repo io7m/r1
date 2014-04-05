@@ -28,8 +28,8 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.OrthonormalizedI3F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceTexture;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
@@ -223,8 +223,8 @@ public final class MeshTangents
     Constraints.constrainNotNull(m, "Mesh");
 
     final MeshTangents mt = MeshTangents.copyMesh(m);
-    final RVectorM3F<RSpaceObject> tangent = new RVectorM3F<RSpaceObject>();
-    final RVectorM3F<RSpaceObject> bitangent = new RVectorM3F<RSpaceObject>();
+    final RVectorM3F<RSpaceObjectType> tangent = new RVectorM3F<RSpaceObjectType>();
+    final RVectorM3F<RSpaceObjectType> bitangent = new RVectorM3F<RSpaceObjectType>();
 
     /**
      * Generate tangents and bitangents, accumulating the resulting vectors.
@@ -235,24 +235,24 @@ public final class MeshTangents
       final Vertex v1 = mt.vertices.get(triangle.getV1());
       final Vertex v2 = mt.vertices.get(triangle.getV2());
 
-      final RVectorI3F<RSpaceObject> v0p = mt.positions.get(v0.getPosition());
-      final RVectorI3F<RSpaceObject> v1p = mt.positions.get(v1.getPosition());
-      final RVectorI3F<RSpaceObject> v2p = mt.positions.get(v2.getPosition());
+      final RVectorI3F<RSpaceObjectType> v0p = mt.positions.get(v0.getPosition());
+      final RVectorI3F<RSpaceObjectType> v1p = mt.positions.get(v1.getPosition());
+      final RVectorI3F<RSpaceObjectType> v2p = mt.positions.get(v2.getPosition());
 
-      final RVectorI4F<RSpaceObject> v0t = mt.tangents.get(v0.getTangent());
-      final RVectorI4F<RSpaceObject> v1t = mt.tangents.get(v1.getTangent());
-      final RVectorI4F<RSpaceObject> v2t = mt.tangents.get(v2.getTangent());
+      final RVectorI4F<RSpaceObjectType> v0t = mt.tangents.get(v0.getTangent());
+      final RVectorI4F<RSpaceObjectType> v1t = mt.tangents.get(v1.getTangent());
+      final RVectorI4F<RSpaceObjectType> v2t = mt.tangents.get(v2.getTangent());
 
-      final RVectorI3F<RSpaceObject> v0b =
+      final RVectorI3F<RSpaceObjectType> v0b =
         mt.bitangents.get(v0.getBitangent());
-      final RVectorI3F<RSpaceObject> v1b =
+      final RVectorI3F<RSpaceObjectType> v1b =
         mt.bitangents.get(v1.getBitangent());
-      final RVectorI3F<RSpaceObject> v2b =
+      final RVectorI3F<RSpaceObjectType> v2b =
         mt.bitangents.get(v2.getBitangent());
 
-      final RVectorI2F<RSpaceTexture> v0u = mt.uvs.get(v0.getUV());
-      final RVectorI2F<RSpaceTexture> v1u = mt.uvs.get(v1.getUV());
-      final RVectorI2F<RSpaceTexture> v2u = mt.uvs.get(v2.getUV());
+      final RVectorI2F<RSpaceTextureType> v0u = mt.uvs.get(v0.getUV());
+      final RVectorI2F<RSpaceTextureType> v1u = mt.uvs.get(v1.getUV());
+      final RVectorI2F<RSpaceTextureType> v2u = mt.uvs.get(v2.getUV());
 
       final double x1 = v1p.x - v0p.x;
       final double x2 = v2p.x - v0p.x;
@@ -284,20 +284,20 @@ public final class MeshTangents
       bitangent.y = (float) by;
       bitangent.z = (float) bz;
 
-      final RVectorI4F<RSpaceObject> v0t_acc =
-        new RVectorI4F<RSpaceObject>(
+      final RVectorI4F<RSpaceObjectType> v0t_acc =
+        new RVectorI4F<RSpaceObjectType>(
           v0t.x + tangent.x,
           v0t.y + tangent.y,
           v0t.z + tangent.z,
           1.0f);
-      final RVectorI4F<RSpaceObject> v1t_acc =
-        new RVectorI4F<RSpaceObject>(
+      final RVectorI4F<RSpaceObjectType> v1t_acc =
+        new RVectorI4F<RSpaceObjectType>(
           v1t.x + tangent.x,
           v1t.y + tangent.y,
           v1t.z + tangent.z,
           1.0f);
-      final RVectorI4F<RSpaceObject> v2t_acc =
-        new RVectorI4F<RSpaceObject>(
+      final RVectorI4F<RSpaceObjectType> v2t_acc =
+        new RVectorI4F<RSpaceObjectType>(
           v2t.x + tangent.x,
           v2t.y + tangent.y,
           v2t.z + tangent.z,
@@ -307,18 +307,18 @@ public final class MeshTangents
       mt.tangents.set(v1.getTangent(), v1t_acc);
       mt.tangents.set(v2.getTangent(), v2t_acc);
 
-      final RVectorI3F<RSpaceObject> v0b_acc =
-        new RVectorI3F<RSpaceObject>(
+      final RVectorI3F<RSpaceObjectType> v0b_acc =
+        new RVectorI3F<RSpaceObjectType>(
           v0b.x + bitangent.x,
           v0b.y + bitangent.y,
           v0b.z + bitangent.z);
-      final RVectorI3F<RSpaceObject> v1b_acc =
-        new RVectorI3F<RSpaceObject>(
+      final RVectorI3F<RSpaceObjectType> v1b_acc =
+        new RVectorI3F<RSpaceObjectType>(
           v1b.x + bitangent.x,
           v1b.y + bitangent.y,
           v1b.z + bitangent.z);
-      final RVectorI3F<RSpaceObject> v2b_acc =
-        new RVectorI3F<RSpaceObject>(
+      final RVectorI3F<RSpaceObjectType> v2b_acc =
+        new RVectorI3F<RSpaceObjectType>(
           v2b.x + bitangent.x,
           v2b.y + bitangent.y,
           v2b.z + bitangent.z);
@@ -343,9 +343,9 @@ public final class MeshTangents
      */
 
     for (int index = 0; index < mt.tangents.size(); ++index) {
-      final RVectorI4F<RSpaceObject> t = mt.tangents.get(index);
-      final RVectorI3F<RSpaceObject> b = mt.bitangents.get(index);
-      final RVectorI3F<RSpaceObject> n = mt.normals.get(index);
+      final RVectorI4F<RSpaceObjectType> t = mt.tangents.get(index);
+      final RVectorI3F<RSpaceObjectType> b = mt.bitangents.get(index);
+      final RVectorI3F<RSpaceObjectType> n = mt.normals.get(index);
 
       final OrthonormalizedI3F o = new OrthonormalizedI3F(n, t, b);
       final VectorI3F ot = o.getV1();
@@ -357,14 +357,14 @@ public final class MeshTangents
        * component of the tangent vector).
        */
 
-      RVectorI4F<RSpaceObject> rt;
-      RVectorI3F<RSpaceObject> rb;
+      RVectorI4F<RSpaceObjectType> rt;
+      RVectorI3F<RSpaceObjectType> rb;
       if (VectorI3F.dotProduct(VectorI3F.crossProduct(n, t), b) < 0.0f) {
-        rt = new RVectorI4F<RSpaceObject>(ot.x, ot.y, ot.z, -1.0f);
-        rb = new RVectorI3F<RSpaceObject>(-ob.x, -ob.y, -ob.z);
+        rt = new RVectorI4F<RSpaceObjectType>(ot.x, ot.y, ot.z, -1.0f);
+        rb = new RVectorI3F<RSpaceObjectType>(-ob.x, -ob.y, -ob.z);
       } else {
-        rt = new RVectorI4F<RSpaceObject>(ot.x, ot.y, ot.z, 1.0f);
-        rb = new RVectorI3F<RSpaceObject>(ob.x, ob.y, ob.z);
+        rt = new RVectorI4F<RSpaceObjectType>(ot.x, ot.y, ot.z, 1.0f);
+        rb = new RVectorI3F<RSpaceObjectType>(ob.x, ob.y, ob.z);
       }
 
       mt.tangents.set(index, rt);
@@ -374,49 +374,49 @@ public final class MeshTangents
     return mt;
   }
 
-  private final @Nonnull ArrayList<RVectorI3F<RSpaceObject>>  normals;
-  private final @Nonnull ArrayList<RVectorI4F<RSpaceObject>>  tangents;
-  private final @Nonnull ArrayList<RVectorI3F<RSpaceObject>>  bitangents;
-  private final @Nonnull ArrayList<RVectorI3F<RSpaceObject>>  positions;
-  private final @Nonnull ArrayList<RVectorI2F<RSpaceTexture>> uvs;
+  private final @Nonnull ArrayList<RVectorI3F<RSpaceObjectType>>  normals;
+  private final @Nonnull ArrayList<RVectorI4F<RSpaceObjectType>>  tangents;
+  private final @Nonnull ArrayList<RVectorI3F<RSpaceObjectType>>  bitangents;
+  private final @Nonnull ArrayList<RVectorI3F<RSpaceObjectType>>  positions;
+  private final @Nonnull ArrayList<RVectorI2F<RSpaceTextureType>> uvs;
   private final @Nonnull ArrayList<Vertex>                    vertices;
   private final @Nonnull HashMap<Vertex, Integer>             vertex_map;
   private final @Nonnull ArrayList<Triangle>                  triangles;
   private final @Nonnull String                               name;
 
   private MeshTangents(
-    final @Nonnull List<RVectorI3F<RSpaceObject>> in_normals,
-    final @Nonnull List<RVectorI3F<RSpaceObject>> in_positions,
-    final @Nonnull List<RVectorI2F<RSpaceTexture>> in_uvs,
+    final @Nonnull List<RVectorI3F<RSpaceObjectType>> in_normals,
+    final @Nonnull List<RVectorI3F<RSpaceObjectType>> in_positions,
+    final @Nonnull List<RVectorI2F<RSpaceTextureType>> in_uvs,
     final @Nonnull String in_name)
     throws ConstraintError
   {
     this.name = Constraints.constrainNotNull(in_name, "Name");
 
     this.normals =
-      new ArrayList<RVectorI3F<RSpaceObject>>(Constraints.constrainNotNull(
+      new ArrayList<RVectorI3F<RSpaceObjectType>>(Constraints.constrainNotNull(
         in_normals,
         "Normals"));
     this.positions =
-      new ArrayList<RVectorI3F<RSpaceObject>>(Constraints.constrainNotNull(
+      new ArrayList<RVectorI3F<RSpaceObjectType>>(Constraints.constrainNotNull(
         in_positions,
         "Positions"));
     this.uvs =
-      new ArrayList<RVectorI2F<RSpaceTexture>>(Constraints.constrainNotNull(
+      new ArrayList<RVectorI2F<RSpaceTextureType>>(Constraints.constrainNotNull(
         in_uvs,
         "UVs"));
 
     this.tangents =
-      new ArrayList<RVectorI4F<RSpaceObject>>(this.normals.size());
+      new ArrayList<RVectorI4F<RSpaceObjectType>>(this.normals.size());
     this.bitangents =
-      new ArrayList<RVectorI3F<RSpaceObject>>(this.normals.size());
+      new ArrayList<RVectorI3F<RSpaceObjectType>>(this.normals.size());
 
     for (int index = 0; index < this.normals.size(); ++index) {
-      this.tangents.add(new RVectorI4F<RSpaceObject>(0, 0, 0, 0));
+      this.tangents.add(new RVectorI4F<RSpaceObjectType>(0, 0, 0, 0));
     }
 
     for (int index = 0; index < this.normals.size(); ++index) {
-      this.bitangents.add(new RVectorI3F<RSpaceObject>(0, 0, 0));
+      this.bitangents.add(new RVectorI3F<RSpaceObjectType>(0, 0, 0));
     }
 
     this.vertices = new ArrayList<MeshTangents.Vertex>();
@@ -424,7 +424,7 @@ public final class MeshTangents
     this.triangles = new ArrayList<MeshTangents.Triangle>();
   }
 
-  public @Nonnull List<RVectorI3F<RSpaceObject>> bitangentsGet()
+  public @Nonnull List<RVectorI3F<RSpaceObjectType>> bitangentsGet()
   {
     return Collections.unmodifiableList(this.bitangents);
   }
@@ -434,17 +434,17 @@ public final class MeshTangents
     return this.name;
   }
 
-  public @Nonnull List<RVectorI3F<RSpaceObject>> normalsGet()
+  public @Nonnull List<RVectorI3F<RSpaceObjectType>> normalsGet()
   {
     return Collections.unmodifiableList(this.normals);
   }
 
-  public @Nonnull List<RVectorI3F<RSpaceObject>> positionsGet()
+  public @Nonnull List<RVectorI3F<RSpaceObjectType>> positionsGet()
   {
     return Collections.unmodifiableList(this.positions);
   }
 
-  public @Nonnull List<RVectorI4F<RSpaceObject>> tangentsGet()
+  public @Nonnull List<RVectorI4F<RSpaceObjectType>> tangentsGet()
   {
     return Collections.unmodifiableList(this.tangents);
   }
@@ -454,7 +454,7 @@ public final class MeshTangents
     return Collections.unmodifiableList(this.triangles);
   }
 
-  public @Nonnull List<RVectorI2F<RSpaceTexture>> uvsGet()
+  public @Nonnull List<RVectorI2F<RSpaceTextureType>> uvsGet()
   {
     return Collections.unmodifiableList(this.uvs);
   }

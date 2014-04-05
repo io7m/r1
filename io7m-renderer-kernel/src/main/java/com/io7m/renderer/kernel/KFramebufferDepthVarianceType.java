@@ -21,8 +21,8 @@ package com.io7m.renderer.kernel;
  */
 
 public interface KFramebufferDepthVarianceType extends
-  KFramebuffer,
-  KFramebufferDepthVarianceUsable
+  KFramebufferType,
+  KFramebufferDepthVarianceUsableType
 {
   // No extras
 }

@@ -21,7 +21,7 @@ import org.junit.Test;
 
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransform;
+import com.io7m.renderer.types.RTransformType;
 
 public class KMatrix4x4FTest
 {
@@ -38,7 +38,7 @@ public class KMatrix4x4FTest
       }
     }
 
-    final RMatrixI4x4F<RTransform> im = RMatrixI4x4F.newFromReadable(m0);
+    final RMatrixI4x4F<RTransformType> im = RMatrixI4x4F.newFromReadable(m0);
     Assert.assertEquals(m0.toString(), im.toString());
     im.makeMatrixM4x4F(m1);
     Assert.assertEquals(m1.toString(), m0.toString());
@@ -57,7 +57,7 @@ public class KMatrix4x4FTest
       }
     }
 
-    final RMatrixI4x4F<RTransform> im = RMatrixI4x4F.newFromReadable(m0);
+    final RMatrixI4x4F<RTransformType> im = RMatrixI4x4F.newFromReadable(m0);
     im.makeMatrixM4x4F(m1);
     Assert.assertEquals(m0, m1);
   }
@@ -74,8 +74,8 @@ public class KMatrix4x4FTest
       }
     }
 
-    final RMatrixI4x4F<RTransform> im0 = RMatrixI4x4F.newFromReadable(m0);
-    final RMatrixI4x4F<RTransform> im1 = RMatrixI4x4F.newFromReadable(m0);
+    final RMatrixI4x4F<RTransformType> im0 = RMatrixI4x4F.newFromReadable(m0);
+    final RMatrixI4x4F<RTransformType> im1 = RMatrixI4x4F.newFromReadable(m0);
 
     for (int row = 0; row < 4; ++row) {
       for (int col = 0; col < 4; ++col) {
@@ -100,7 +100,7 @@ public class KMatrix4x4FTest
       }
     }
 
-    final RMatrixI4x4F<RTransform> im2 = RMatrixI4x4F.newFromReadable(m0);
+    final RMatrixI4x4F<RTransformType> im2 = RMatrixI4x4F.newFromReadable(m0);
     Assert.assertFalse(im0.equals(im2));
   }
 }

@@ -28,10 +28,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorReadable4F;
-import com.io7m.renderer.types.RSpace;
+import com.io7m.renderer.types.RSpaceType;
 import com.io7m.renderer.types.RTriangle4F;
 import com.io7m.renderer.types.RVectorI4F;
-import com.io7m.renderer.types.RVectorReadable4F;
+import com.io7m.renderer.types.RVectorReadable4FType;
 
 /**
  * Functions for performing clipping on triangles.
@@ -117,7 +117,7 @@ public final class KTriangleClipping
    */
 
   public static @Nonnull
-    <S extends RSpace>
+    <S extends RSpaceType>
     List<RTriangle4F<S>>
     clipTrianglePlane(
       final @Nonnull RTriangle4F<S> triangle,
@@ -130,7 +130,7 @@ public final class KTriangleClipping
   }
 
   private static
-    <S extends RSpace>
+    <S extends RSpaceType>
     List<RTriangle4F<S>>
     clipTrianglePlaneInner(
       final @Nonnull RTriangle4F<S> triangle,
@@ -280,7 +280,7 @@ public final class KTriangleClipping
    */
 
   public static @Nonnull
-    <S extends RSpace>
+    <S extends RSpaceType>
     List<RTriangle4F<S>>
     clipTrianglePlanes(
       final @Nonnull RTriangle4F<S> triangle,
@@ -302,7 +302,7 @@ public final class KTriangleClipping
   }
 
   private static @Nonnull
-    <S extends RSpace>
+    <S extends RSpaceType>
     List<RTriangle4F<S>>
     clipTrianglesPlanesInner(
       final @Nonnull List<RTriangle4F<S>> triangles,
@@ -324,11 +324,11 @@ public final class KTriangleClipping
   }
 
   private static @Nonnull
-    <S extends RSpace>
+    <S extends RSpaceType>
     RVectorI4F<S>
     intersectLinePlane(
-      final @Nonnull RVectorReadable4F<S> p0,
-      final @Nonnull RVectorReadable4F<S> p1,
+      final @Nonnull RVectorReadable4FType<S> p0,
+      final @Nonnull RVectorReadable4FType<S> p1,
       final @Nonnull VectorReadable4F plane)
   {
     final VectorI4F slope = VectorI4F.subtract(p1, p0);
@@ -358,7 +358,7 @@ public final class KTriangleClipping
    *         plane.
    */
 
-  public static <S extends RSpace> boolean pointIsInside(
+  public static <S extends RSpaceType> boolean pointIsInside(
     final @Nonnull RVectorI4F<S> point,
     final @Nonnull VectorI4F plane)
   {

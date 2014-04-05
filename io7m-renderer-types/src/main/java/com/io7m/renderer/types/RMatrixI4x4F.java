@@ -26,14 +26,14 @@ import com.io7m.jtensors.MatrixReadable4x4F;
 import com.io7m.jtensors.VectorReadable4F;
 
 /**
- * An immutable 4x4 matrix type indexed by the type {@link RTransform} the
+ * An immutable 4x4 matrix type indexed by the type {@link RTransformType} the
  * matrix represents.
  * 
  * @param <T>
  *          A phantom type parameter describing the type of transform
  */
 
-@Immutable public final class RMatrixI4x4F<T extends RTransform>
+@Immutable public final class RMatrixI4x4F<T extends RTransformType>
 {
   private static final @Nonnull float[][] IDENTITY = RMatrixI4x4F
                                                      .makeIdentity();
@@ -63,7 +63,7 @@ import com.io7m.jtensors.VectorReadable4F;
    */
 
   @SuppressWarnings("unchecked") public static @Nonnull
-    <T extends RTransform>
+    <T extends RTransformType>
     RMatrixI4x4F<T>
     identity()
   {
@@ -92,7 +92,7 @@ import com.io7m.jtensors.VectorReadable4F;
    */
 
   public static @Nonnull
-    <T extends RTransform>
+    <T extends RTransformType>
     RMatrixI4x4F<T>
     newFromColumns(
       final @Nonnull VectorReadable4F column_0,
@@ -137,7 +137,7 @@ import com.io7m.jtensors.VectorReadable4F;
    */
 
   public static @Nonnull
-    <T extends RTransform>
+    <T extends RTransformType>
     RMatrixI4x4F<T>
     newFromReadable(
       final @Nonnull MatrixReadable4x4F m)

@@ -30,8 +30,8 @@ import org.junit.Test;
 import com.io7m.jaux.AlmostEqualFloat.ContextRelative;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceTexture;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
@@ -108,7 +108,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexNormal(
       final int index,
-      final RVectorI3F<RSpaceObject> normal)
+      final RVectorI3F<RSpaceObjectType> normal)
       throws Throwable,
         ConstraintError
     {
@@ -117,7 +117,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexPosition(
       final int index,
-      final RVectorI3F<RSpaceObject> position)
+      final RVectorI3F<RSpaceObjectType> position)
       throws Throwable,
         ConstraintError
     {
@@ -134,7 +134,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexTangent3f(
       final int index,
-      final RVectorI3F<RSpaceObject> tangent)
+      final RVectorI3F<RSpaceObjectType> tangent)
       throws Throwable,
         ConstraintError
     {
@@ -143,7 +143,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexTangent4f(
       final int index,
-      final RVectorI4F<RSpaceObject> tangent)
+      final RVectorI4F<RSpaceObjectType> tangent)
       throws Throwable,
         ConstraintError
     {
@@ -152,7 +152,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexBitangent(
       final int index,
-      final RVectorI3F<RSpaceObject> bitangent)
+      final RVectorI3F<RSpaceObjectType> bitangent)
       throws Throwable,
         ConstraintError
     {
@@ -161,7 +161,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexUV(
       final int index,
-      final RVectorI2F<RSpaceTexture> uv)
+      final RVectorI2F<RSpaceTextureType> uv)
       throws Throwable,
         ConstraintError
     {
@@ -169,8 +169,8 @@ public final class RXMLMeshParserTests
     }
 
     @Override public void eventMeshVerticesEnded(
-      final @Nonnull RVectorI3F<RSpaceObject> lower,
-      final @Nonnull RVectorI3F<RSpaceObject> upper)
+      final @Nonnull RVectorI3F<RSpaceObjectType> lower,
+      final @Nonnull RVectorI3F<RSpaceObjectType> upper)
       throws Throwable,
         ConstraintError
     {
@@ -261,8 +261,8 @@ public final class RXMLMeshParserTests
           expected_triangles,
           expected_type,
           expected_vertices,
-          new RVectorI3F<RSpaceObject>(-23.0f, -34.0f, -11.0f),
-          new RVectorI3F<RSpaceObject>(56.0f, 72.0f, 4.0f));
+          new RVectorI3F<RSpaceObjectType>(-23.0f, -34.0f, -11.0f),
+          new RVectorI3F<RSpaceObjectType>(56.0f, 72.0f, 4.0f));
 
       final InputStream s = this.getFile("bounds.rmx");
       final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
@@ -350,16 +350,16 @@ public final class RXMLMeshParserTests
     private final int                      expected_vertices;
     private int                            triangle = 0;
     private int                            vertices = 0;
-    private final RVectorI3F<RSpaceObject> expected_lower;
-    private final RVectorI3F<RSpaceObject> expected_upper;
+    private final RVectorI3F<RSpaceObjectType> expected_lower;
+    private final RVectorI3F<RSpaceObjectType> expected_upper;
 
     Checked(
       final @Nonnull String in_expected_name,
       final int in_expected_triangles,
       final @Nonnull RXMLMeshType in_expected_type,
       final int in_vertices_expected,
-      final @Nonnull RVectorI3F<RSpaceObject> in_expected_lower,
-      final @Nonnull RVectorI3F<RSpaceObject> in_expected_upper)
+      final @Nonnull RVectorI3F<RSpaceObjectType> in_expected_lower,
+      final @Nonnull RVectorI3F<RSpaceObjectType> in_expected_upper)
     {
       this.expected_name = in_expected_name;
       this.expected_triangles = in_expected_triangles;
@@ -440,7 +440,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexNormal(
       final int index,
-      final RVectorI3F<RSpaceObject> normal)
+      final RVectorI3F<RSpaceObjectType> normal)
       throws Throwable,
         ConstraintError
     {
@@ -449,7 +449,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexPosition(
       final int index,
-      final RVectorI3F<RSpaceObject> position)
+      final RVectorI3F<RSpaceObjectType> position)
       throws Throwable,
         ConstraintError
     {
@@ -467,7 +467,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexTangent3f(
       final int index,
-      final RVectorI3F<RSpaceObject> tangent)
+      final RVectorI3F<RSpaceObjectType> tangent)
       throws Throwable,
         ConstraintError
     {
@@ -476,7 +476,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexTangent4f(
       final int index,
-      final RVectorI4F<RSpaceObject> tangent)
+      final RVectorI4F<RSpaceObjectType> tangent)
       throws Throwable,
         ConstraintError
     {
@@ -485,7 +485,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexUV(
       final int index,
-      final RVectorI2F<RSpaceTexture> uv)
+      final RVectorI2F<RSpaceTextureType> uv)
       throws Throwable,
         ConstraintError
     {
@@ -493,8 +493,8 @@ public final class RXMLMeshParserTests
     }
 
     @Override public void eventMeshVerticesEnded(
-      final @Nonnull RVectorI3F<RSpaceObject> lower,
-      final @Nonnull RVectorI3F<RSpaceObject> upper)
+      final @Nonnull RVectorI3F<RSpaceObjectType> lower,
+      final @Nonnull RVectorI3F<RSpaceObjectType> upper)
       throws Throwable,
         ConstraintError
     {
@@ -537,7 +537,7 @@ public final class RXMLMeshParserTests
 
     @Override public void eventMeshVertexBitangent(
       final int index,
-      final RVectorI3F<RSpaceObject> bitangent)
+      final RVectorI3F<RSpaceObjectType> bitangent)
       throws Throwable,
         ConstraintError
     {
@@ -569,8 +569,8 @@ public final class RXMLMeshParserTests
           expected_triangles,
           expected_type,
           expected_vertices,
-          new RVectorI3F<RSpaceObject>(0.0f, 0.0f, 0.0f),
-          new RVectorI3F<RSpaceObject>(0.0f, 0.0f, 0.0f));
+          new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f),
+          new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f));
 
       final InputStream s = this.getFile("valid.rmx");
       final Document d = RXMLMeshDocument.parseFromStreamValidating(s);

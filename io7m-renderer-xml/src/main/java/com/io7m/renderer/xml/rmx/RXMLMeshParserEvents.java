@@ -19,8 +19,8 @@ package com.io7m.renderer.xml.rmx;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceTexture;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
@@ -80,7 +80,7 @@ public interface RXMLMeshParserEvents<E extends Throwable>
 
   public void eventMeshVertexBitangent(
     final int index,
-    final @Nonnull RVectorI3F<RSpaceObject> bitangent)
+    final @Nonnull RVectorI3F<RSpaceObjectType> bitangent)
     throws E,
       ConstraintError;
 
@@ -91,13 +91,13 @@ public interface RXMLMeshParserEvents<E extends Throwable>
 
   public void eventMeshVertexNormal(
     final int index,
-    final @Nonnull RVectorI3F<RSpaceObject> normal)
+    final @Nonnull RVectorI3F<RSpaceObjectType> normal)
     throws E,
       ConstraintError;
 
   public void eventMeshVertexPosition(
     final int index,
-    final @Nonnull RVectorI3F<RSpaceObject> position)
+    final @Nonnull RVectorI3F<RSpaceObjectType> position)
     throws E,
       ConstraintError;
 
@@ -108,25 +108,25 @@ public interface RXMLMeshParserEvents<E extends Throwable>
 
   public void eventMeshVertexTangent3f(
     final int index,
-    final @Nonnull RVectorI3F<RSpaceObject> tangent)
+    final @Nonnull RVectorI3F<RSpaceObjectType> tangent)
     throws E,
       ConstraintError;
 
   public void eventMeshVertexTangent4f(
     final int index,
-    final @Nonnull RVectorI4F<RSpaceObject> tangent)
+    final @Nonnull RVectorI4F<RSpaceObjectType> tangent)
     throws E,
       ConstraintError;
 
   public void eventMeshVertexUV(
     final int index,
-    final @Nonnull RVectorI2F<RSpaceTexture> uv)
+    final @Nonnull RVectorI2F<RSpaceTextureType> uv)
     throws E,
       ConstraintError;
 
   public void eventMeshVerticesEnded(
-    final @Nonnull RVectorI3F<RSpaceObject> bounds_lower,
-    final @Nonnull RVectorI3F<RSpaceObject> bounds_upper)
+    final @Nonnull RVectorI3F<RSpaceObjectType> bounds_lower,
+    final @Nonnull RVectorI3F<RSpaceObjectType> bounds_upper)
     throws E,
       ConstraintError;
 

@@ -23,14 +23,14 @@ import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
 
 /**
  * A transformation consisting of an orientation, a scale, and a translation.
  */
 
-@Immutable public final class KTransformOST implements KTransform
+@Immutable public final class KTransformOST implements KTransformType
 {
   /**
    * Construct a new transform.
@@ -44,22 +44,22 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return A new transform
    */
 
-  public static @Nonnull KTransform newTransform(
+  public static @Nonnull KTransformType newTransform(
     final @Nonnull QuaternionI4F orientation,
     final @Nonnull VectorI3F scale,
-    final @Nonnull RVectorI3F<RSpaceWorld> translation)
+    final @Nonnull RVectorI3F<RSpaceWorldType> translation)
   {
     return new KTransformOST(orientation, scale, translation);
   }
 
   private final @Nonnull QuaternionI4F           orientation;
   private final @Nonnull VectorI3F               scale;
-  private final @Nonnull RVectorI3F<RSpaceWorld> translation;
+  private final @Nonnull RVectorI3F<RSpaceWorldType> translation;
 
   KTransformOST(
     final @Nonnull QuaternionI4F in_orientation,
     final @Nonnull VectorI3F in_scale,
-    final @Nonnull RVectorI3F<RSpaceWorld> in_translation)
+    final @Nonnull RVectorI3F<RSpaceWorldType> in_translation)
   {
     this.translation = in_translation;
     this.scale = in_scale;
@@ -88,7 +88,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return A translation in world-space
    */
 
-  public @Nonnull RVectorI3F<RSpaceWorld> getTranslation()
+  public @Nonnull RVectorI3F<RSpaceWorldType> getTranslation()
   {
     return this.translation;
   }
@@ -110,7 +110,7 @@ import com.io7m.renderer.types.RVectorI3F;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KTransformVisitor<A, E>>
+    <A, E extends Throwable, V extends KTransformVisitorType<A, E>>
     A
     transformVisitableAccept(
       final @Nonnull V v)

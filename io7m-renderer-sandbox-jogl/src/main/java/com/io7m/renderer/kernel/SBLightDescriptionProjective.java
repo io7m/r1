@@ -25,37 +25,37 @@ import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KShadow;
+import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RSpaceRGB;
-import com.io7m.renderer.types.RSpaceWorld;
-import com.io7m.renderer.types.RTransformProjection;
+import com.io7m.renderer.types.RSpaceRGBType;
+import com.io7m.renderer.types.RSpaceWorldType;
+import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RVectorI3F;
 
 @Immutable final class SBLightDescriptionProjective implements
   SBLightDescription
 {
   private final @Nonnull QuaternionI4F                      orientation;
-  private final @Nonnull RVectorI3F<RSpaceWorld>            position;
+  private final @Nonnull RVectorI3F<RSpaceWorldType>            position;
   private final float                                       falloff;
   private final @Nonnull PathVirtual                        texture;
-  private final @Nonnull RVectorI3F<RSpaceRGB>              colour;
+  private final @Nonnull RVectorI3F<RSpaceRGBType>              colour;
   private final float                                       intensity;
   private final @Nonnull Integer                            id;
   private final @Nonnull SBProjectionDescription            projection;
-  private final @Nonnull RMatrixI4x4F<RTransformProjection> projection_matrix;
-  private final @Nonnull Option<KShadow>                    shadow;
+  private final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection_matrix;
+  private final @Nonnull Option<KShadowType>                    shadow;
 
   SBLightDescriptionProjective(
     final @Nonnull QuaternionI4F in_orientation,
-    final @Nonnull RVectorI3F<RSpaceWorld> in_position,
+    final @Nonnull RVectorI3F<RSpaceWorldType> in_position,
     final float in_falloff,
     final @Nonnull SBProjectionDescription in_projection,
     final @Nonnull PathVirtual in_texture,
-    final @Nonnull RVectorI3F<RSpaceRGB> in_colour,
+    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
     final float in_intensity,
-    final @Nonnull Option<KShadow> in_shadow,
+    final @Nonnull Option<KShadowType> in_shadow,
     final @Nonnull Integer in_id)
     throws ConstraintError
   {
@@ -154,12 +154,12 @@ import com.io7m.renderer.types.RVectorI3F;
     return true;
   }
 
-  public Option<KShadow> getShadow()
+  public Option<KShadowType> getShadow()
   {
     return this.shadow;
   }
 
-  public RVectorI3F<RSpaceRGB> getColour()
+  public RVectorI3F<RSpaceRGBType> getColour()
   {
     return this.colour;
   }
@@ -201,7 +201,7 @@ import com.io7m.renderer.types.RVectorI3F;
     return this.orientation;
   }
 
-  public RVectorI3F<RSpaceWorld> getPosition()
+  public RVectorI3F<RSpaceWorldType> getPosition()
   {
     return this.position;
   }
@@ -211,7 +211,7 @@ import com.io7m.renderer.types.RVectorI3F;
     return this.projection;
   }
 
-  public @Nonnull RMatrixI4x4F<RTransformProjection> getProjectionMatrix()
+  public @Nonnull RMatrixI4x4F<RTransformProjectionType> getProjectionMatrix()
   {
     return this.projection_matrix;
   }

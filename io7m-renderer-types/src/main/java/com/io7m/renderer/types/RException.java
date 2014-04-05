@@ -46,7 +46,7 @@ public abstract class RException extends Exception
    */
 
   abstract <T, E extends Throwable> T exceptionAccept(
-    final @Nonnull RExceptionVisitor<T, E> v)
+    final @Nonnull RExceptionVisitorType<T, E> v)
     throws E;
 
   /**
@@ -68,7 +68,7 @@ public abstract class RException extends Exception
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
-      final @Nonnull RExceptionVisitor<T, E> v)
+      final @Nonnull RExceptionVisitorType<T, E> v)
       throws E
     {
       return v.exceptionVisitFilesystemException((FilesystemError) this
@@ -94,7 +94,7 @@ public abstract class RException extends Exception
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
-      final @Nonnull RExceptionVisitor<T, E> v)
+      final @Nonnull RExceptionVisitorType<T, E> v)
       throws E
     {
       return v.exceptionVisitIOException((IOException) this.getCause());
@@ -121,7 +121,7 @@ public abstract class RException extends Exception
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
-      final @Nonnull RExceptionVisitor<T, E> v)
+      final @Nonnull RExceptionVisitorType<T, E> v)
       throws E
     {
       return v.exceptionVisitJCacheException((JCacheException) this
@@ -149,7 +149,7 @@ public abstract class RException extends Exception
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
-      final @Nonnull RExceptionVisitor<T, E> v)
+      final @Nonnull RExceptionVisitorType<T, E> v)
       throws E
     {
       return v.exceptionVisitJCGLException((JCGLException) this.getCause());
@@ -176,7 +176,7 @@ public abstract class RException extends Exception
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
-      final @Nonnull RExceptionVisitor<T, E> v)
+      final @Nonnull RExceptionVisitorType<T, E> v)
       throws E
     {
       return v.exceptionVisitNotSupportedException(this);
@@ -204,7 +204,7 @@ public abstract class RException extends Exception
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
-      final @Nonnull RExceptionVisitor<T, E> v)
+      final @Nonnull RExceptionVisitorType<T, E> v)
       throws E
     {
       return v.exceptionVisitResourceException(this);

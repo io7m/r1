@@ -23,16 +23,16 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RSpaceRGB;
-import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RSpaceRGBType;
+import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.types.RVectorReadable3F;
+import com.io7m.renderer.types.RVectorReadable3FType;
 
 /**
  * A directional light, from a conceptually infinite distance away.
  */
 
-@Immutable public final class KLightDirectional implements KLight
+@Immutable public final class KLightDirectional implements KLightType
 {
   /**
    * Create a new directional light.
@@ -53,33 +53,33 @@ import com.io7m.renderer.types.RVectorReadable3F;
 
   public static @Nonnull KLightDirectional newDirectional(
     final @Nonnull Integer id,
-    final @Nonnull RVectorReadable3F<RSpaceWorld> direction,
-    final @Nonnull RVectorReadable3F<RSpaceRGB> colour,
+    final @Nonnull RVectorReadable3FType<RSpaceWorldType> direction,
+    final @Nonnull RVectorReadable3FType<RSpaceRGBType> colour,
     final float intensity)
     throws ConstraintError
   {
     return new KLightDirectional(id, direction, colour, intensity);
   }
 
-  private final @Nonnull RVectorI3F<RSpaceRGB>                      colour;
-  private final @Nonnull RVectorReadable3F<RSpaceWorld>             direction;
+  private final @Nonnull RVectorI3F<RSpaceRGBType>                      colour;
+  private final @Nonnull RVectorReadable3FType<RSpaceWorldType>             direction;
   private final @Nonnull Integer                                    id;
   private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
 
   private KLightDirectional(
     final @Nonnull Integer in_id,
-    final @Nonnull RVectorReadable3F<RSpaceWorld> in_direction,
-    final @Nonnull RVectorReadable3F<RSpaceRGB> in_colour,
+    final @Nonnull RVectorReadable3FType<RSpaceWorldType> in_direction,
+    final @Nonnull RVectorReadable3FType<RSpaceRGBType> in_colour,
     final float in_intensity)
     throws ConstraintError
   {
     this.id = Constraints.constrainNotNull(in_id, "Identifier");
     this.colour =
-      new RVectorI3F<RSpaceRGB>(Constraints.constrainNotNull(
+      new RVectorI3F<RSpaceRGBType>(Constraints.constrainNotNull(
         in_colour,
         "Colour"));
     this.intensity = in_intensity;
-    this.direction = new RVectorI3F<RSpaceWorld>(in_direction);
+    this.direction = new RVectorI3F<RSpaceWorldType>(in_direction);
   }
 
   @Override public boolean equals(
@@ -105,7 +105,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
    * @return The direction in world space that the emitted light is travelling
    */
 
-  public @Nonnull RVectorReadable3F<RSpaceWorld> getDirection()
+  public @Nonnull RVectorReadable3FType<RSpaceWorldType> getDirection()
   {
     return this.direction;
   }
@@ -118,7 +118,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
     return result;
   }
 
-  @Override public @Nonnull RVectorI3F<RSpaceRGB> lightGetColour()
+  @Override public @Nonnull RVectorI3F<RSpaceRGBType> lightGetColour()
   {
     return this.colour;
   }
@@ -133,7 +133,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
     return this.intensity;
   }
 
-  @Override public Option<KShadow> lightGetShadow()
+  @Override public Option<KShadowType> lightGetShadow()
   {
     return Option.none();
   }
@@ -144,7 +144,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KLightVisitor<A, E>>
+    <A, E extends Throwable, V extends KLightVisitorType<A, E>>
     A
     lightVisitableAccept(
       final V v)

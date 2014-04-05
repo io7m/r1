@@ -21,8 +21,8 @@ package com.io7m.renderer.kernel;
  */
 
 public interface KFramebufferRGBAType extends
-  KFramebuffer,
-  KFramebufferRGBAUsable
+  KFramebufferType,
+  KFramebufferRGBAUsableType
 {
   // No extras.
 }

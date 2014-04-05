@@ -28,7 +28,7 @@ import com.io7m.renderer.types.RException;
  * A description of a basic mapped shadow.
  */
 
-@Immutable public final class KShadowMappedBasic implements KShadow
+@Immutable public final class KShadowMappedBasic implements KShadowType
 {
   /**
    * Construct a new basic mapped shadow.
@@ -130,7 +130,7 @@ import com.io7m.renderer.types.RException;
   }
 
   @Override public
-    <T, E extends Throwable, V extends KShadowVisitor<T, E>>
+    <T, E extends Throwable, V extends KShadowVisitorType<T, E>>
     T
     shadowAccept(
       final @Nonnull V v)

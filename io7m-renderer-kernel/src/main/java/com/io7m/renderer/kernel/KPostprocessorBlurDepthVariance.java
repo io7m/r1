@@ -138,9 +138,9 @@ final class KPostprocessorBlurDepthVariance extends
 
   private void onePass(
     final @Nonnull KBlurParameters parameters,
-    final @Nonnull KFramebufferDepthVarianceUsable source,
-    final @Nonnull KFramebufferDepthVarianceUsable temporary,
-    final @Nonnull KFramebufferDepthVarianceUsable target)
+    final @Nonnull KFramebufferDepthVarianceUsableType source,
+    final @Nonnull KFramebufferDepthVarianceUsableType temporary,
+    final @Nonnull KFramebufferDepthVarianceUsableType target)
     throws JCGLRuntimeException,
       RException,
       ConstraintError,
@@ -188,8 +188,8 @@ final class KPostprocessorBlurDepthVariance extends
 
   @Override public void postprocessorEvaluateDepthVariance(
     final @Nonnull KBlurParameters parameters,
-    final @Nonnull KFramebufferDepthVarianceUsable input,
-    final @Nonnull KFramebufferDepthVarianceUsable output)
+    final @Nonnull KFramebufferDepthVarianceUsableType input,
+    final @Nonnull KFramebufferDepthVarianceUsableType output)
     throws ConstraintError,
       RException
   {
@@ -240,11 +240,11 @@ final class KPostprocessorBlurDepthVariance extends
             receipt_b.getValue());
 
           for (int pass = 1; pass < passes; ++pass) {
-            final KFramebufferDepthVarianceUsable source =
+            final KFramebufferDepthVarianceUsableType source =
               receipt_b.getValue();
-            final KFramebufferDepthVarianceUsable temporary =
+            final KFramebufferDepthVarianceUsableType temporary =
               receipt_a.getValue();
-            final KFramebufferDepthVarianceUsable target;
+            final KFramebufferDepthVarianceUsableType target;
             if ((pass + 1) == passes) {
               target = output;
             } else {

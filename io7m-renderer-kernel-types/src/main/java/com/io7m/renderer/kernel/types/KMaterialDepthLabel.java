@@ -29,7 +29,7 @@ import com.io7m.renderer.types.RException;
 
 public enum KMaterialDepthLabel
   implements
-  KLabel
+  KLabelType
 {
   /**
    * Constant-depth materials.
@@ -63,7 +63,7 @@ public enum KMaterialDepthLabel
 
   public static KMaterialDepthLabel fromInstanceOpaque(
     final @Nonnull KMaterialAlbedoLabel albedo,
-    final @Nonnull KInstanceOpaque instance)
+    final @Nonnull KInstanceOpaqueType instance)
     throws ConstraintError
   {
     try {
@@ -71,7 +71,7 @@ public enum KMaterialDepthLabel
       Constraints.constrainNotNull(instance, "Instance");
 
       return instance.instanceGetMaterial().materialOpaqueVisitableAccept(
-        new KMaterialOpaqueVisitor<KMaterialDepthLabel, ConstraintError>() {
+        new KMaterialOpaqueVisitorType<KMaterialDepthLabel, ConstraintError>() {
           @Override public KMaterialDepthLabel materialVisitOpaqueAlphaDepth(
             final @Nonnull KMaterialOpaqueAlphaDepth m)
             throws ConstraintError

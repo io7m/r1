@@ -23,14 +23,14 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
-import com.io7m.renderer.types.RTransformTexture;
+import com.io7m.renderer.types.RTransformTextureType;
 
 /**
  * The type of translucent, refractive materials.
  */
 
 @Immutable public final class KMaterialTranslucentRefractive implements
-  KMaterialTranslucent
+  KMaterialTranslucentType
 {
   /**
    * Construct a new regular translucent material.
@@ -47,7 +47,7 @@ import com.io7m.renderer.types.RTransformTexture;
    */
 
   public static @Nonnull KMaterialTranslucentRefractive newMaterial(
-    final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix,
+    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final @Nonnull KMaterialNormal in_normal,
     final @Nonnull KMaterialRefractive in_refractive)
     throws ConstraintError
@@ -60,10 +60,10 @@ import com.io7m.renderer.types.RTransformTexture;
 
   private final @Nonnull KMaterialNormal                 normal;
   private final @Nonnull KMaterialRefractive             refractive;
-  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
+  private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KMaterialTranslucentRefractive(
-    final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix,
+    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final @Nonnull KMaterialNormal in_normal,
     final @Nonnull KMaterialRefractive in_refractive)
     throws ConstraintError
@@ -88,13 +88,13 @@ import com.io7m.renderer.types.RTransformTexture;
     return this.normal;
   }
 
-  @Override public RMatrixI3x3F<RTransformTexture> materialGetUVMatrix()
+  @Override public RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix()
   {
     return this.uv_matrix;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KMaterialTranslucentVisitor<A, E>>
+    <A, E extends Throwable, V extends KMaterialTranslucentVisitorType<A, E>>
     A
     materialTranslucentVisitableAccept(
       final @Nonnull V v)
@@ -106,7 +106,7 @@ import com.io7m.renderer.types.RTransformTexture;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KMaterialVisitor<A, E>>
+    <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
     A
     materialVisitableAccept(
       final @Nonnull V v)

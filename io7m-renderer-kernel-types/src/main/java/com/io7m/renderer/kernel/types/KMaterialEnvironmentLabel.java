@@ -28,8 +28,8 @@ import com.io7m.jaux.UnreachableCodeException;
 
 public enum KMaterialEnvironmentLabel
   implements
-  KTexturesRequired,
-  KLabel
+  KTexturesRequiredType,
+  KLabelType
 {
   /**
    * No environment mapping.
@@ -95,11 +95,11 @@ public enum KMaterialEnvironmentLabel
 
   public static @Nonnull KMaterialEnvironmentLabel fromInstanceRegular(
     final @Nonnull KMaterialNormalLabel n,
-    final @Nonnull KInstanceRegular instance)
+    final @Nonnull KInstanceRegularType instance)
     throws ConstraintError
   {
     Constraints.constrainNotNull(instance, "Instance");
-    final KMaterialRegular m = instance.instanceGetMaterial();
+    final KMaterialRegularType m = instance.instanceGetMaterial();
     final KMaterialSpecular s = m.materialGetSpecular();
     final KMaterialEnvironment e = m.materialGetEnvironment();
     return KMaterialEnvironmentLabel.fromInstanceData(n, s, e);

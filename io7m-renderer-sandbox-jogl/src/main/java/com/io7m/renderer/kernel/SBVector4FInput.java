@@ -30,14 +30,14 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.IRowCreator;
 
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.types.RSpace;
-import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.types.RSpaceType;
+import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI4F;
-import com.io7m.renderer.types.RVectorReadable4F;
+import com.io7m.renderer.types.RVectorReadable4FType;
 
-public final class SBVector4FInput<R extends RSpace>
+public final class SBVector4FInput<R extends RSpaceType>
 {
-  public static @Nonnull <R extends RSpace> SBVector4FInput<R> newInput(
+  public static @Nonnull <R extends RSpaceType> SBVector4FInput<R> newInput(
     final @Nonnull String text)
   {
     return new SBVector4FInput<R>(text);
@@ -70,7 +70,7 @@ public final class SBVector4FInput<R extends RSpace>
   }
 
   @SuppressWarnings("boxing") public void setVector(
-    final @Nonnull RVectorReadable4F<R> v)
+    final @Nonnull RVectorReadable4FType<R> v)
   {
     this.field_x.setText(String.format("%.6f", v.getXF()));
     this.field_y.setText(String.format("%.6f", v.getYF()));
@@ -101,7 +101,7 @@ public final class SBVector4FInput<R extends RSpace>
         final Container panel = frame.getContentPane();
         final DesignGridLayout layout = new DesignGridLayout(panel);
 
-        final SBVector4FInput<RSpaceWorld> input =
+        final SBVector4FInput<RSpaceWorldType> input =
           SBVector4FInput.newInput("World");
         input.addToLayout(layout.row());
 

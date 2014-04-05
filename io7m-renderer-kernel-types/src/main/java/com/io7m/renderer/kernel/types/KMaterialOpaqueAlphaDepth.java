@@ -23,7 +23,7 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
-import com.io7m.renderer.types.RTransformTexture;
+import com.io7m.renderer.types.RTransformTextureType;
 
 /**
  * The type of "partially opaque" materials. That is, materials that are
@@ -32,7 +32,7 @@ import com.io7m.renderer.types.RTransformTexture;
  */
 
 @Immutable public final class KMaterialOpaqueAlphaDepth implements
-  KMaterialOpaque
+  KMaterialOpaqueType
 {
   /**
    * Construct a new alpha-to-depth material.
@@ -57,7 +57,7 @@ import com.io7m.renderer.types.RTransformTexture;
    */
 
   public static @Nonnull KMaterialOpaqueAlphaDepth newMaterial(
-    final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix,
+    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final @Nonnull KMaterialNormal in_normal,
     final @Nonnull KMaterialAlbedo in_albedo,
     final @Nonnull KMaterialEmissive in_emissive,
@@ -83,10 +83,10 @@ import com.io7m.renderer.types.RTransformTexture;
   private final @Nonnull KMaterialSpecular               specular;
   private final int                                      textures_required;
 
-  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
+  private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   protected KMaterialOpaqueAlphaDepth(
-    final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix,
+    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final @Nonnull KMaterialNormal in_normal,
     final @Nonnull KMaterialAlbedo in_albedo,
     final @Nonnull KMaterialEmissive in_emissive,
@@ -196,14 +196,14 @@ import com.io7m.renderer.types.RTransformTexture;
   }
 
   @Override public @Nonnull
-    RMatrixI3x3F<RTransformTexture>
+    RMatrixI3x3F<RTransformTextureType>
     materialGetUVMatrix()
   {
     return this.uv_matrix;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KMaterialOpaqueVisitor<A, E>>
+    <A, E extends Throwable, V extends KMaterialOpaqueVisitorType<A, E>>
     A
     materialOpaqueVisitableAccept(
       final @Nonnull V v)
@@ -215,7 +215,7 @@ import com.io7m.renderer.types.RTransformTexture;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KMaterialVisitor<A, E>>
+    <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
     A
     materialVisitableAccept(
       final @Nonnull V v)

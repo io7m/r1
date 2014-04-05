@@ -31,10 +31,10 @@ import com.io7m.jaux.UnreachableCodeException;
  */
 
 @Immutable public final class KMaterialForwardTranslucentRegularLitLabel implements
-  KTexturesRequired,
-  KMaterialLabelRegular,
-  KMaterialLabelLit,
-  KMaterialLabelTranslucent
+  KTexturesRequiredType,
+  KMaterialLabelRegularType,
+  KMaterialLabelLitType,
+  KMaterialLabelTranslucentType
 {
   /**
    * @return The set of all possible lit translucent regular labels.
@@ -139,7 +139,7 @@ import com.io7m.jaux.UnreachableCodeException;
    * @return The regular label for this material.
    */
 
-  public @Nonnull KMaterialLabelRegular getRegular()
+  public @Nonnull KMaterialLabelRegularType getRegular()
   {
     return this.regular;
   }

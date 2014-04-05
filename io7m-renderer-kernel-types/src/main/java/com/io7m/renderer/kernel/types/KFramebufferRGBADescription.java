@@ -30,7 +30,7 @@ import com.io7m.jcanephora.TextureFilterMinification;
  */
 
 @Immutable public final class KFramebufferRGBADescription implements
-  KFramebufferDescription
+  KFramebufferDescriptionType
 {
   /**
    * Create a new description of an RGBA framebuffer.

@@ -29,8 +29,8 @@ import nu.xom.ValidityException;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.VectorM3F;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceTexture;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
@@ -192,7 +192,7 @@ public final class RXMLMeshParser<E extends Throwable>
     return new RXMLMeshType(attributes);
   }
 
-  private static RVectorI3F<RSpaceObject> parseVertexPosition(
+  private static RVectorI3F<RSpaceObjectType> parseVertexPosition(
     final @Nonnull Element v)
     throws RXMLException
   {
@@ -248,7 +248,7 @@ public final class RXMLMeshParser<E extends Throwable>
 
       events.eventMeshVertexStarted(index);
 
-      final RVectorI3F<RSpaceObject> position =
+      final RVectorI3F<RSpaceObjectType> position =
         RXMLMeshParser.parseVertexPosition(v);
 
       bounds_lower.x = Math.min(position.x, bounds_lower.x);
@@ -263,7 +263,7 @@ public final class RXMLMeshParser<E extends Throwable>
       if (type.hasNormal()) {
         final Element n =
           RXMLUtilities.getChild(v, "n", RXMLConstants.MESHES_URI);
-        final RVectorI3F<RSpaceObject> vn =
+        final RVectorI3F<RSpaceObjectType> vn =
           RXMLUtilities.getElementAttributesVector3f(
             n,
             RXMLConstants.MESHES_URI);
@@ -273,7 +273,7 @@ public final class RXMLMeshParser<E extends Throwable>
       if (type.hasTangent3f()) {
         final Element t =
           RXMLUtilities.getChild(v, "t3", RXMLConstants.MESHES_URI);
-        final RVectorI3F<RSpaceObject> vt =
+        final RVectorI3F<RSpaceObjectType> vt =
           RXMLUtilities.getElementAttributesVector3f(
             t,
             RXMLConstants.MESHES_URI);
@@ -283,7 +283,7 @@ public final class RXMLMeshParser<E extends Throwable>
       if (type.hasTangent4f()) {
         final Element t =
           RXMLUtilities.getChild(v, "t4", RXMLConstants.MESHES_URI);
-        final RVectorI4F<RSpaceObject> vt =
+        final RVectorI4F<RSpaceObjectType> vt =
           RXMLUtilities.getElementAttributesVector4f(
             t,
             RXMLConstants.MESHES_URI);
@@ -293,7 +293,7 @@ public final class RXMLMeshParser<E extends Throwable>
       if (type.hasBitangent()) {
         final Element t =
           RXMLUtilities.getChild(v, "b", RXMLConstants.MESHES_URI);
-        final RVectorI3F<RSpaceObject> vb =
+        final RVectorI3F<RSpaceObjectType> vb =
           RXMLUtilities.getElementAttributesVector3f(
             t,
             RXMLConstants.MESHES_URI);
@@ -303,7 +303,7 @@ public final class RXMLMeshParser<E extends Throwable>
       if (type.hasUV()) {
         final Element u =
           RXMLUtilities.getChild(v, "u", RXMLConstants.MESHES_URI);
-        final RVectorI2F<RSpaceTexture> vu =
+        final RVectorI2F<RSpaceTextureType> vu =
           RXMLUtilities.getElementAttributesVector2f(
             u,
             RXMLConstants.MESHES_URI);
@@ -313,10 +313,10 @@ public final class RXMLMeshParser<E extends Throwable>
       events.eventMeshVertexEnded(index);
     }
 
-    events.eventMeshVerticesEnded(new RVectorI3F<RSpaceObject>(
+    events.eventMeshVerticesEnded(new RVectorI3F<RSpaceObjectType>(
       bounds_lower.x,
       bounds_lower.y,
-      bounds_lower.z), new RVectorI3F<RSpaceObject>(
+      bounds_lower.z), new RVectorI3F<RSpaceObjectType>(
       bounds_upper.x,
       bounds_upper.y,
       bounds_upper.z));

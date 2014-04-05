@@ -28,8 +28,8 @@ import com.io7m.jtensors.VectorI2F;
  *          A phantom type parameter describing the coordinate space
  */
 
-public class RVectorI2F<T extends RSpace> extends VectorI2F implements
-  RVectorReadable2F<T>
+public class RVectorI2F<T extends RSpaceType> extends VectorI2F implements
+  RVectorReadable2FType<T>
 {
   /**
    * Construct a new vector.
@@ -55,7 +55,7 @@ public class RVectorI2F<T extends RSpace> extends VectorI2F implements
    */
 
   public RVectorI2F(
-    final @Nonnull RVectorReadable2F<T> v)
+    final @Nonnull RVectorReadable2FType<T> v)
   {
     super(v);
   }

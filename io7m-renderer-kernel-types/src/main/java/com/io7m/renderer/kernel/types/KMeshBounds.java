@@ -19,10 +19,10 @@ package com.io7m.renderer.kernel.types;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.renderer.types.RSpace;
-import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RSpaceType;
+import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.types.RVectorReadable3F;
+import com.io7m.renderer.types.RVectorReadable3FType;
 
 /**
  * A bounding box for a mesh.
@@ -31,7 +31,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
  *          The coordinate space for the bounding box
  */
 
-@Immutable public final class KMeshBounds<S extends RSpace>
+@Immutable public final class KMeshBounds<S extends RSpaceType>
 {
   /**
    * Construct an object-space bounding box for the given mesh.
@@ -41,11 +41,11 @@ import com.io7m.renderer.types.RVectorReadable3F;
    * @return The bounding box of the mesh
    */
 
-  public static @Nonnull KMeshBounds<RSpaceObject> fromMeshObjectSpace(
+  public static @Nonnull KMeshBounds<RSpaceObjectType> fromMeshObjectSpace(
     final @Nonnull KMesh mesh)
   {
-    final RVectorReadable3F<RSpaceObject> b_lower = mesh.getBoundsLower();
-    final RVectorReadable3F<RSpaceObject> b_upper = mesh.getBoundsUpper();
+    final RVectorReadable3FType<RSpaceObjectType> b_lower = mesh.getBoundsLower();
+    final RVectorReadable3FType<RSpaceObjectType> b_upper = mesh.getBoundsUpper();
 
     final float front = b_upper.getZF();
     final float left = b_lower.getXF();
@@ -54,25 +54,25 @@ import com.io7m.renderer.types.RVectorReadable3F;
     final float lower = b_lower.getYF();
     final float back = b_lower.getZF();
 
-    final RVectorI3F<RSpaceObject> in_upper_left_front =
-      new RVectorI3F<RSpaceObject>(left, upper, front);
-    final RVectorI3F<RSpaceObject> in_upper_left_back =
-      new RVectorI3F<RSpaceObject>(left, upper, back);
-    final RVectorI3F<RSpaceObject> in_lower_left_front =
-      new RVectorI3F<RSpaceObject>(left, lower, front);
-    final RVectorI3F<RSpaceObject> in_lower_left_back =
-      new RVectorI3F<RSpaceObject>(left, lower, back);
+    final RVectorI3F<RSpaceObjectType> in_upper_left_front =
+      new RVectorI3F<RSpaceObjectType>(left, upper, front);
+    final RVectorI3F<RSpaceObjectType> in_upper_left_back =
+      new RVectorI3F<RSpaceObjectType>(left, upper, back);
+    final RVectorI3F<RSpaceObjectType> in_lower_left_front =
+      new RVectorI3F<RSpaceObjectType>(left, lower, front);
+    final RVectorI3F<RSpaceObjectType> in_lower_left_back =
+      new RVectorI3F<RSpaceObjectType>(left, lower, back);
 
-    final RVectorI3F<RSpaceObject> in_upper_right_front =
-      new RVectorI3F<RSpaceObject>(right, upper, front);
-    final RVectorI3F<RSpaceObject> in_upper_right_back =
-      new RVectorI3F<RSpaceObject>(right, upper, back);
-    final RVectorI3F<RSpaceObject> in_lower_right_front =
-      new RVectorI3F<RSpaceObject>(right, lower, front);
-    final RVectorI3F<RSpaceObject> in_lower_right_back =
-      new RVectorI3F<RSpaceObject>(right, lower, back);
+    final RVectorI3F<RSpaceObjectType> in_upper_right_front =
+      new RVectorI3F<RSpaceObjectType>(right, upper, front);
+    final RVectorI3F<RSpaceObjectType> in_upper_right_back =
+      new RVectorI3F<RSpaceObjectType>(right, upper, back);
+    final RVectorI3F<RSpaceObjectType> in_lower_right_front =
+      new RVectorI3F<RSpaceObjectType>(right, lower, front);
+    final RVectorI3F<RSpaceObjectType> in_lower_right_back =
+      new RVectorI3F<RSpaceObjectType>(right, lower, back);
 
-    return new KMeshBounds<RSpaceObject>(
+    return new KMeshBounds<RSpaceObjectType>(
       in_upper_left_front,
       in_upper_left_back,
       in_lower_left_front,

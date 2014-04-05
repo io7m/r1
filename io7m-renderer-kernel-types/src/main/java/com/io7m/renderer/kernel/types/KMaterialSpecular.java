@@ -23,14 +23,14 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.renderer.types.RSpaceRGB;
+import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RVectorI3F;
 
 /**
  * Material properties related to surface specular highlights.
  */
 
-@Immutable public final class KMaterialSpecular implements KTexturesRequired
+@Immutable public final class KMaterialSpecular implements KTexturesRequiredType
 {
   /**
    * Construct new mapped specularity properties.
@@ -47,7 +47,7 @@ import com.io7m.renderer.types.RVectorI3F;
    */
 
   public static @Nonnull KMaterialSpecular newSpecularMapped(
-    final @Nonnull RVectorI3F<RSpaceRGB> in_colour,
+    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
     final float in_exponent,
     final @Nonnull Texture2DStatic in_texture)
     throws ConstraintError
@@ -71,7 +71,7 @@ import com.io7m.renderer.types.RVectorI3F;
    */
 
   public static @Nonnull KMaterialSpecular newSpecularUnmapped(
-    final @Nonnull RVectorI3F<RSpaceRGB> in_colour,
+    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
     final float in_exponent)
     throws ConstraintError
   {
@@ -79,13 +79,13 @@ import com.io7m.renderer.types.RVectorI3F;
     return new KMaterialSpecular(in_colour, in_exponent, none);
   }
 
-  private final @Nonnull RVectorI3F<RSpaceRGB>   colour;
+  private final @Nonnull RVectorI3F<RSpaceRGBType>   colour;
   private final float                            exponent;
   private final @Nonnull Option<Texture2DStatic> texture;
   private final int                              textures_required;
 
   private KMaterialSpecular(
-    final @Nonnull RVectorI3F<RSpaceRGB> in_colour,
+    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
     final float in_exponent,
     final @Nonnull Option<Texture2DStatic> in_texture)
     throws ConstraintError
@@ -126,7 +126,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The specular colour
    */
 
-  public @Nonnull RVectorI3F<RSpaceRGB> getColour()
+  public @Nonnull RVectorI3F<RSpaceRGBType> getColour()
   {
     return this.colour;
   }

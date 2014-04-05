@@ -26,14 +26,14 @@ import com.io7m.jtensors.MatrixReadable3x3F;
 import com.io7m.jtensors.VectorReadable3F;
 
 /**
- * An immutable 3x3 matrix type indexed by the type {@link RTransform} the
+ * An immutable 3x3 matrix type indexed by the type {@link RTransformType} the
  * matrix represents.
  * 
  * @param <T>
  *          A phantom type parameter describing the type of transform
  */
 
-@Immutable public final class RMatrixI3x3F<T extends RTransform>
+@Immutable public final class RMatrixI3x3F<T extends RTransformType>
 {
   private static final @Nonnull float[][] IDENTITY = RMatrixI3x3F
                                                      .makeIdentity();
@@ -63,13 +63,13 @@ import com.io7m.jtensors.VectorReadable3F;
    */
 
   @SuppressWarnings("unchecked") public static @Nonnull
-    <T extends RTransform>
+    <T extends RTransformType>
     RMatrixI3x3F<T>
     identity()
   {
     if (RMatrixI3x3F.IDENTITYM == null) {
       RMatrixI3x3F.IDENTITYM =
-        new RMatrixI3x3F<RTransform>(RMatrixI3x3F.IDENTITY);
+        new RMatrixI3x3F<RTransformType>(RMatrixI3x3F.IDENTITY);
     }
 
     return (RMatrixI3x3F<T>) RMatrixI3x3F.IDENTITYM;
@@ -91,7 +91,7 @@ import com.io7m.jtensors.VectorReadable3F;
    */
 
   public static @Nonnull
-    <T extends RTransform>
+    <T extends RTransformType>
     RMatrixI3x3F<T>
     newFromColumns(
       final @Nonnull VectorReadable3F column_0,
@@ -127,7 +127,7 @@ import com.io7m.jtensors.VectorReadable3F;
    */
 
   public static @Nonnull
-    <T extends RTransform>
+    <T extends RTransformType>
     RMatrixI3x3F<T>
     newFromReadable(
       final @Nonnull MatrixReadable3x3F m)

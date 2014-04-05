@@ -36,11 +36,11 @@ import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.types.RSpaceRGB;
+import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RVectorI3F;
 
 public final class SBColourInput implements
-  SBControlsDataType<RVectorI3F<RSpaceRGB>>
+  SBControlsDataType<RVectorI3F<RSpaceRGBType>>
 {
   public static void main(
     final String args[])
@@ -99,7 +99,7 @@ public final class SBColourInput implements
           JColorChooser.showDialog(parent, "Select colour...", Color.WHITE);
         if (c != null) {
           final float[] rgb = c.getRGBColorComponents(null);
-          SBColourInput.this.controlsLoadFrom(new RVectorI3F<RSpaceRGB>(
+          SBColourInput.this.controlsLoadFrom(new RVectorI3F<RSpaceRGBType>(
             rgb[0],
             rgb[1],
             rgb[2]));
@@ -107,7 +107,7 @@ public final class SBColourInput implements
       }
     });
 
-    final RVectorI3F<RSpaceRGB> rgb = RVectorI3F.zero();
+    final RVectorI3F<RSpaceRGBType> rgb = RVectorI3F.zero();
     this.controlsLoadFrom(rgb);
   }
 
@@ -130,7 +130,7 @@ public final class SBColourInput implements
   }
 
   @SuppressWarnings("boxing") @Override public void controlsLoadFrom(
-    final @Nonnull RVectorI3F<RSpaceRGB> v)
+    final @Nonnull RVectorI3F<RSpaceRGBType> v)
   {
     this.field_x.setText(String.format("%.6f", v.getXF()));
     this.field_y.setText(String.format("%.6f", v.getYF()));
@@ -139,11 +139,11 @@ public final class SBColourInput implements
     this.colour.setForeground(new Color(v.getXF(), v.getYF(), v.getZF()));
   }
 
-  @Override public RVectorI3F<RSpaceRGB> controlsSave()
+  @Override public RVectorI3F<RSpaceRGBType> controlsSave()
     throws SBExceptionInputError,
       ConstraintError
   {
-    return new RVectorI3F<RSpaceRGB>(
+    return new RVectorI3F<RSpaceRGBType>(
       SBTextFieldUtilities.getFieldFloatOrError(this.field_x),
       SBTextFieldUtilities.getFieldFloatOrError(this.field_y),
       SBTextFieldUtilities.getFieldFloatOrError(this.field_z));

@@ -21,13 +21,13 @@ import java.util.concurrent.Future;
 import javax.annotation.Nonnull;
 
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjection;
+import com.io7m.renderer.types.RTransformProjectionType;
 
 interface SBSceneControllerRendererControl
 {
   public @Nonnull Future<SBCacheStatistics> rendererGetCacheStatistics();
 
-  public @Nonnull RMatrixI4x4F<RTransformProjection> rendererGetProjection();
+  public @Nonnull RMatrixI4x4F<RTransformProjectionType> rendererGetProjection();
 
   public void rendererSetBackgroundColour(
     float r,
@@ -35,7 +35,7 @@ interface SBSceneControllerRendererControl
     float b);
 
   public void rendererSetCustomProjection(
-    final @Nonnull RMatrixI4x4F<RTransformProjection> p);
+    final @Nonnull RMatrixI4x4F<RTransformProjectionType> p);
 
   public void rendererSetType(
     final @Nonnull SBKRendererType type);

@@ -31,8 +31,8 @@ import com.io7m.jaux.UnreachableCodeException;
  */
 
 @Immutable public final class KMaterialForwardOpaqueUnlitLabel implements
-  KTexturesRequired,
-  KMaterialLabelRegular
+  KTexturesRequiredType,
+  KMaterialLabelRegularType
 {
   /**
    * @return The set of all possible unlit labels.

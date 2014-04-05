@@ -21,9 +21,9 @@ import net.java.quickcheck.Generator;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorReadable3F;
 import com.io7m.renderer.types.RMatrixI3x3F;
-import com.io7m.renderer.types.RTransform;
+import com.io7m.renderer.types.RTransformType;
 
-final class RMatrix3x3FGenerator<T extends RTransform> implements
+final class RMatrix3x3FGenerator<T extends RTransformType> implements
   Generator<RMatrixI3x3F<T>>
 {
   @Override public RMatrixI3x3F<T> next()

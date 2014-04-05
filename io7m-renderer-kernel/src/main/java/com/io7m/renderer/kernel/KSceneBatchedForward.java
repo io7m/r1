@@ -27,15 +27,15 @@ import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.kernel.types.KInstanceOpaque;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
-import com.io7m.renderer.kernel.types.KLight;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
+import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueLitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueUnlitLabel;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KScene.KSceneOpaques;
-import com.io7m.renderer.kernel.types.KTranslucent;
+import com.io7m.renderer.kernel.types.KTranslucentType;
 
 @Immutable final class KSceneBatchedForward
 {
@@ -45,39 +45,39 @@ import com.io7m.renderer.kernel.types.KTranslucent;
    */
 
   private static @Nonnull
-    Map<KLight, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>>>
+    Map<KLightType, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaqueType>>>
     makeOpaqueLitBatches(
-      final @Nonnull KMaterialForwardOpaqueLitLabelCache decider,
-      final @Nonnull KSceneBatchedDepth.Builder depth_builder,
-      final @Nonnull Map<KLight, List<KInstanceTransformedOpaque>> instances_by_light)
+      final @Nonnull KMaterialForwardOpaqueLitLabelCacheType decider,
+      final @Nonnull KSceneBatchedDepthType.BuilderType depth_builder,
+      final @Nonnull Map<KLightType, List<KInstanceTransformedOpaqueType>> instances_by_light)
       throws ConstraintError
   {
-    final Map<KLight, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>>> batches_opaque_lit =
-      new HashMap<KLight, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>>>();
+    final Map<KLightType, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaqueType>>> batches_opaque_lit =
+      new HashMap<KLightType, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaqueType>>>();
 
-    for (final KLight light : instances_by_light.keySet()) {
-      final List<KInstanceTransformedOpaque> instances =
+    for (final KLightType light : instances_by_light.keySet()) {
+      final List<KInstanceTransformedOpaqueType> instances =
         instances_by_light.get(light);
 
       for (int i = 0; i < instances.size(); ++i) {
-        final KInstanceTransformedOpaque instance = instances.get(i);
-        final KInstanceOpaque instance_i = instance.instanceGet();
+        final KInstanceTransformedOpaqueType instance = instances.get(i);
+        final KInstanceOpaqueType instance_i = instance.instanceGet();
         final KMaterialForwardOpaqueLitLabel label =
           decider.getForwardLabelOpaqueLit(light, instance_i);
 
-        Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>> by_material;
+        Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaqueType>> by_material;
         if (batches_opaque_lit.containsKey(light)) {
           by_material = batches_opaque_lit.get(light);
         } else {
           by_material =
-            new HashMap<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>>();
+            new HashMap<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaqueType>>();
         }
 
-        List<KInstanceTransformedOpaque> batch;
+        List<KInstanceTransformedOpaqueType> batch;
         if (by_material.containsKey(label)) {
           batch = by_material.get(label);
         } else {
-          batch = new ArrayList<KInstanceTransformedOpaque>();
+          batch = new ArrayList<KInstanceTransformedOpaqueType>();
         }
 
         batch.add(instance);
@@ -92,26 +92,26 @@ import com.io7m.renderer.kernel.types.KTranslucent;
   }
 
   private static @Nonnull
-    Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>>
+    Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaqueType>>
     makeOpaqueUnlitBatches(
-      final @Nonnull KMaterialForwardOpaqueUnlitLabelCache decider,
-      final @Nonnull KSceneBatchedDepth.Builder depth_builder,
-      final @Nonnull Set<KInstanceTransformedOpaque> instances)
+      final @Nonnull KMaterialForwardOpaqueUnlitLabelCacheType decider,
+      final @Nonnull KSceneBatchedDepthType.BuilderType depth_builder,
+      final @Nonnull Set<KInstanceTransformedOpaqueType> instances)
       throws ConstraintError
   {
-    final Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>> forward_map =
-      new HashMap<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>>();
+    final Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaqueType>> forward_map =
+      new HashMap<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaqueType>>();
 
-    for (final KInstanceTransformedOpaque instance : instances) {
-      final KInstanceOpaque i = instance.instanceGet();
+    for (final KInstanceTransformedOpaqueType instance : instances) {
+      final KInstanceOpaqueType i = instance.instanceGet();
       final KMaterialForwardOpaqueUnlitLabel label =
         decider.getForwardLabelOpaqueUnlit(i);
 
-      List<KInstanceTransformedOpaque> forward_batch;
+      List<KInstanceTransformedOpaqueType> forward_batch;
       if (forward_map.containsKey(label)) {
         forward_batch = forward_map.get(label);
       } else {
-        forward_batch = new ArrayList<KInstanceTransformedOpaque>();
+        forward_batch = new ArrayList<KInstanceTransformedOpaqueType>();
       }
       forward_batch.add(instance);
       forward_map.put(label, forward_batch);
@@ -123,10 +123,10 @@ import com.io7m.renderer.kernel.types.KTranslucent;
   }
 
   static @Nonnull
-    <C extends KMaterialForwardOpaqueLitLabelCache & KMaterialForwardOpaqueUnlitLabelCache>
+    <C extends KMaterialForwardOpaqueLitLabelCacheType & KMaterialForwardOpaqueUnlitLabelCacheType>
     KSceneBatchedForward
     newBatchedScene(
-      final @Nonnull KMaterialDepthLabelCache depth_labels,
+      final @Nonnull KMaterialDepthLabelCacheType depth_labels,
       final @Nonnull C forward_labels,
       final @Nonnull KScene scene)
       throws ConstraintError
@@ -136,16 +136,16 @@ import com.io7m.renderer.kernel.types.KTranslucent;
 
     final KSceneOpaques opaques = scene.getOpaques();
 
-    final KSceneBatchedDepth.Builder depth_builder =
-      KSceneBatchedDepth.newBuilder(depth_labels);
+    final KSceneBatchedDepthType.BuilderType depth_builder =
+      KSceneBatchedDepthType.newBuilder(depth_labels);
 
-    final Map<KLight, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>>> batches_opaque_lit =
+    final Map<KLightType, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaqueType>>> batches_opaque_lit =
       KSceneBatchedForward.makeOpaqueLitBatches(
         forward_labels,
         depth_builder,
         opaques.getLitInstances());
 
-    final Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>> batches_opaque_unlit =
+    final Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaqueType>> batches_opaque_unlit =
       KSceneBatchedForward.makeOpaqueUnlitBatches(
         forward_labels,
         depth_builder,
@@ -162,17 +162,17 @@ import com.io7m.renderer.kernel.types.KTranslucent;
       batched_shadow);
   }
 
-  private final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>                         batch_depth;
-  private final @Nonnull Map<KLight, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>>> batches_opaque_lit;
-  private final @Nonnull Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>>            batches_opaque_unlit;
+  private final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>                         batch_depth;
+  private final @Nonnull Map<KLightType, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaqueType>>> batches_opaque_lit;
+  private final @Nonnull Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaqueType>>            batches_opaque_unlit;
   private final @Nonnull KSceneBatchedShadow                                                                shadows;
-  private final @Nonnull List<KTranslucent>                                                                 translucents;
+  private final @Nonnull List<KTranslucentType>                                                                 translucents;
 
   private KSceneBatchedForward(
-    final @Nonnull Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>> in_batches_opaque_unlit,
-    final @Nonnull Map<KLight, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>>> in_batches_opaque_lit,
-    final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> in_batch_depth,
-    final @Nonnull List<KTranslucent> in_translucents,
+    final @Nonnull Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaqueType>> in_batches_opaque_unlit,
+    final @Nonnull Map<KLightType, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaqueType>>> in_batches_opaque_lit,
+    final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> in_batch_depth,
+    final @Nonnull List<KTranslucentType> in_translucents,
     final @Nonnull KSceneBatchedShadow in_shadows)
   {
     this.batches_opaque_unlit = in_batches_opaque_unlit;
@@ -188,27 +188,27 @@ import com.io7m.renderer.kernel.types.KTranslucent;
   }
 
   @Nonnull
-    Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>>
+    Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>
     getBatchesDepth()
   {
     return this.batch_depth;
   }
 
   @Nonnull
-    Map<KLight, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaque>>>
+    Map<KLightType, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaqueType>>>
     getBatchesOpaqueLit()
   {
     return this.batches_opaque_lit;
   }
 
   @Nonnull
-    Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaque>>
+    Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaqueType>>
     getBatchesOpaqueUnlit()
   {
     return this.batches_opaque_unlit;
   }
 
-  @Nonnull List<KTranslucent> getBatchesTranslucent()
+  @Nonnull List<KTranslucentType> getBatchesTranslucent()
   {
     return this.translucents;
   }

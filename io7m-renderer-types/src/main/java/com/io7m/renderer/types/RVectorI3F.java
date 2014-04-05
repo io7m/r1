@@ -28,13 +28,13 @@ import com.io7m.jtensors.VectorI3F;
  *          A phantom type parameter describing the coordinate space
  */
 
-public class RVectorI3F<T extends RSpace> extends VectorI3F implements
-  RVectorReadable3F<T>
+public class RVectorI3F<T extends RSpaceType> extends VectorI3F implements
+  RVectorReadable3FType<T>
 {
   private static final @Nonnull RVectorI3F<?> ZERO_FIELD;
 
   static {
-    ZERO_FIELD = new RVectorI3F<RSpace>(0.0f, 0.0f, 0.0f);
+    ZERO_FIELD = new RVectorI3F<RSpaceType>(0.0f, 0.0f, 0.0f);
   }
 
   /**
@@ -44,7 +44,7 @@ public class RVectorI3F<T extends RSpace> extends VectorI3F implements
    */
 
   @SuppressWarnings("unchecked") public static
-    <T extends RSpace>
+    <T extends RSpaceType>
     RVectorI3F<T>
     zero()
   {
@@ -78,7 +78,7 @@ public class RVectorI3F<T extends RSpace> extends VectorI3F implements
    */
 
   public RVectorI3F(
-    final @Nonnull RVectorReadable3F<T> v)
+    final @Nonnull RVectorReadable3FType<T> v)
   {
     super(v);
   }

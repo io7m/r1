@@ -27,8 +27,8 @@ import com.io7m.jtensors.VectorM4F;
  *          A phantom type parameter describing the coordinate space
  */
 
-public final class RVectorM4F<T extends RSpace> extends VectorM4F implements
-  RVectorReadable4F<T>
+public final class RVectorM4F<T extends RSpaceType> extends VectorM4F implements
+  RVectorReadable4FType<T>
 {
   /**
    * Construct a new vector, initialized to all zeroes.
@@ -69,7 +69,7 @@ public final class RVectorM4F<T extends RSpace> extends VectorM4F implements
    */
 
   public RVectorM4F(
-    final @Nonnull RVectorReadable4F<T> v)
+    final @Nonnull RVectorReadable4FType<T> v)
   {
     super(v);
   }

@@ -20,24 +20,24 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.types.RSpaceRGB;
+import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RVectorI3F;
 
 public final class SBMaterialSpecularDescription
 {
   public static @Nonnull SBMaterialSpecularDescription getDefault()
   {
-    final RVectorI3F<RSpaceRGB> rgb = RVectorI3F.zero();
+    final RVectorI3F<RSpaceRGBType> rgb = RVectorI3F.zero();
     return new SBMaterialSpecularDescription(null, rgb, 1.0f);
   }
 
   private final float                          exponent;
-  private final @Nonnull RVectorI3F<RSpaceRGB> colour;
+  private final @Nonnull RVectorI3F<RSpaceRGBType> colour;
   private final @CheckForNull PathVirtual      texture;
 
   SBMaterialSpecularDescription(
     final @CheckForNull PathVirtual in_texture,
-    final @Nonnull RVectorI3F<RSpaceRGB> in_colour,
+    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
     final float in_exponent)
   {
     this.texture = in_texture;
@@ -85,7 +85,7 @@ public final class SBMaterialSpecularDescription
     return this.exponent;
   }
 
-  public final RVectorI3F<RSpaceRGB> getColour()
+  public final RVectorI3F<RSpaceRGBType> getColour()
   {
     return this.colour;
   }

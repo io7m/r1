@@ -27,8 +27,8 @@ import com.io7m.jtensors.VectorM3F;
  *          A phantom type parameter describing the coordinate space
  */
 
-public final class RVectorM3F<T extends RSpace> extends VectorM3F implements
-  RVectorReadable3F<T>
+public final class RVectorM3F<T extends RSpaceType> extends VectorM3F implements
+  RVectorReadable3FType<T>
 {
   /**
    * Construct a new vector, initialized to all zeroes.
@@ -66,7 +66,7 @@ public final class RVectorM3F<T extends RSpace> extends VectorM3F implements
    */
 
   public RVectorM3F(
-    final @Nonnull RVectorReadable3F<T> v)
+    final @Nonnull RVectorReadable3FType<T> v)
   {
     super(v);
   }

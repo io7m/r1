@@ -25,9 +25,9 @@ import net.java.dev.designgridlayout.RowGroup;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RMatrixI3x3F;
-import com.io7m.renderer.types.RTransform;
+import com.io7m.renderer.types.RTransformType;
 
-public final class SBMatrix3x3Controls<R extends RTransform> implements
+public final class SBMatrix3x3Controls<R extends RTransformType> implements
   SBControlsDataType<RMatrixI3x3F<R>>
 {
   private final @Nonnull RowGroup               group;

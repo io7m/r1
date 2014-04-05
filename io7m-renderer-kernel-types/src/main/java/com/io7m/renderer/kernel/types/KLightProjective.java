@@ -26,11 +26,11 @@ import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RSpaceRGB;
-import com.io7m.renderer.types.RSpaceWorld;
-import com.io7m.renderer.types.RTransformProjection;
+import com.io7m.renderer.types.RSpaceRGBType;
+import com.io7m.renderer.types.RSpaceWorldType;
+import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.types.RVectorReadable3F;
+import com.io7m.renderer.types.RVectorReadable3FType;
 
 /**
  * A projective light "projects" a texture into a scene from a given position,
@@ -40,7 +40,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
  * of shadow mapping techniques, specified by the given shadow value.
  */
 
-@Immutable public final class KLightProjective implements KLight
+@Immutable public final class KLightProjective implements KLightType
 {
   /**
    * Construct a new projective light.
@@ -73,14 +73,14 @@ import com.io7m.renderer.types.RVectorReadable3F;
   public static @Nonnull KLightProjective newProjective(
     final @Nonnull Integer id,
     final @Nonnull Texture2DStaticUsable texture,
-    final @Nonnull RVectorReadable3F<RSpaceWorld> position,
+    final @Nonnull RVectorReadable3FType<RSpaceWorldType> position,
     final @Nonnull QuaternionI4F orientation,
-    final @Nonnull RVectorReadable3F<RSpaceRGB> colour,
+    final @Nonnull RVectorReadable3FType<RSpaceRGBType> colour,
     final float intensity,
     final float range,
     final float falloff,
-    final @Nonnull RMatrixI4x4F<RTransformProjection> projection,
-    final @Nonnull Option<KShadow> shadow)
+    final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection,
+    final @Nonnull Option<KShadowType> shadow)
     throws ConstraintError
   {
     return new KLightProjective(
@@ -96,34 +96,34 @@ import com.io7m.renderer.types.RVectorReadable3F;
       shadow);
   }
 
-  private final @Nonnull RVectorI3F<RSpaceRGB>              colour;
+  private final @Nonnull RVectorI3F<RSpaceRGBType>              colour;
   private final float                                       falloff;
   private final @Nonnull Integer                            id;
   private final float                                       intensity;
   private final @Nonnull QuaternionI4F                      orientation;
-  private final @Nonnull RVectorReadable3F<RSpaceWorld>     position;
-  private final @Nonnull RMatrixI4x4F<RTransformProjection> projection;
+  private final @Nonnull RVectorReadable3FType<RSpaceWorldType>     position;
+  private final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection;
   private final float                                       range;
-  private final @Nonnull Option<KShadow>                    shadow;
+  private final @Nonnull Option<KShadowType>                    shadow;
   private final @Nonnull Texture2DStaticUsable              texture;
 
   private KLightProjective(
     final @Nonnull Integer in_id,
     final @Nonnull Texture2DStaticUsable in_texture,
-    final @Nonnull RVectorReadable3F<RSpaceWorld> in_position,
+    final @Nonnull RVectorReadable3FType<RSpaceWorldType> in_position,
     final @Nonnull QuaternionI4F in_orientation,
-    final @Nonnull RVectorReadable3F<RSpaceRGB> in_colour,
+    final @Nonnull RVectorReadable3FType<RSpaceRGBType> in_colour,
     final float in_intensity,
     final float in_range,
     final float in_falloff,
-    final @Nonnull RMatrixI4x4F<RTransformProjection> in_projection,
-    final @Nonnull Option<KShadow> in_shadow)
+    final @Nonnull RMatrixI4x4F<RTransformProjectionType> in_projection,
+    final @Nonnull Option<KShadowType> in_shadow)
     throws ConstraintError
   {
     this.intensity = in_intensity;
     this.id = Constraints.constrainNotNull(in_id, "Identifier");
     this.colour =
-      new RVectorI3F<RSpaceRGB>(Constraints.constrainNotNull(
+      new RVectorI3F<RSpaceRGBType>(Constraints.constrainNotNull(
         in_colour,
         "Colour"));
     this.position = in_position;
@@ -182,7 +182,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
    * @return The position of the light
    */
 
-  public @Nonnull RVectorReadable3F<RSpaceWorld> getPosition()
+  public @Nonnull RVectorReadable3FType<RSpaceWorldType> getPosition()
   {
     return this.position;
   }
@@ -191,7 +191,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
    * @return The projection matrix for the light
    */
 
-  public @Nonnull RMatrixI4x4F<RTransformProjection> getProjection()
+  public @Nonnull RMatrixI4x4F<RTransformProjectionType> getProjection()
   {
     return this.projection;
   }
@@ -232,7 +232,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
    * @return The colour of the light
    */
 
-  @Override public @Nonnull RVectorI3F<RSpaceRGB> lightGetColour()
+  @Override public @Nonnull RVectorI3F<RSpaceRGBType> lightGetColour()
   {
     return this.colour;
   }
@@ -255,7 +255,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
     return this.intensity;
   }
 
-  @Override public @Nonnull Option<KShadow> lightGetShadow()
+  @Override public @Nonnull Option<KShadowType> lightGetShadow()
   {
     return this.shadow;
   }
@@ -266,7 +266,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KLightVisitor<A, E>>
+    <A, E extends Throwable, V extends KLightVisitorType<A, E>>
     A
     lightVisitableAccept(
       final V v)

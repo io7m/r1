@@ -23,19 +23,19 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.types.RSpaceRGBA;
+import com.io7m.renderer.types.RSpaceRGBAType;
 import com.io7m.renderer.types.RVectorI4F;
 
 public final class SBMaterialAlbedoDescription
 {
-  private final @Nonnull RVectorI4F<RSpaceRGBA> colour;
+  private final @Nonnull RVectorI4F<RSpaceRGBAType> colour;
   private final float                           mix;
   private final @CheckForNull PathVirtual       texture;
 
   public static @Nonnull SBMaterialAlbedoDescription getDefault()
   {
     try {
-      return new SBMaterialAlbedoDescription(new RVectorI4F<RSpaceRGBA>(
+      return new SBMaterialAlbedoDescription(new RVectorI4F<RSpaceRGBAType>(
         1.0f,
         1.0f,
         1.0f,
@@ -46,7 +46,7 @@ public final class SBMaterialAlbedoDescription
   }
 
   public SBMaterialAlbedoDescription(
-    final @Nonnull RVectorI4F<RSpaceRGBA> in_colour,
+    final @Nonnull RVectorI4F<RSpaceRGBAType> in_colour,
     final float in_mix,
     final @CheckForNull PathVirtual in_texture)
     throws ConstraintError
@@ -86,7 +86,7 @@ public final class SBMaterialAlbedoDescription
     return true;
   }
 
-  public @Nonnull RVectorI4F<RSpaceRGBA> getColour()
+  public @Nonnull RVectorI4F<RSpaceRGBAType> getColour()
   {
     return this.colour;
   }

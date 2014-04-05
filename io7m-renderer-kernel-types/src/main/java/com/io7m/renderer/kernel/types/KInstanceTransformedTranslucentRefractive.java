@@ -24,7 +24,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
-import com.io7m.renderer.types.RTransformTexture;
+import com.io7m.renderer.types.RTransformTextureType;
 
 /**
  * A refractive instance ({@link KInstanceTranslucentRefractive}) with a
@@ -32,8 +32,8 @@ import com.io7m.renderer.types.RTransformTexture;
  */
 
 @Immutable public final class KInstanceTransformedTranslucentRefractive implements
-  KInstanceTransformedTranslucent,
-  KTranslucent
+  KInstanceTransformedTranslucentType,
+  KTranslucentType
 {
   /**
    * Construct a new translucent regular instance.
@@ -53,8 +53,8 @@ import com.io7m.renderer.types.RTransformTexture;
     KInstanceTransformedTranslucentRefractive
     newInstance(
       final @Nonnull KInstanceTranslucentRefractive in_instance,
-      final @Nonnull KTransform in_transform,
-      final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix)
+      final @Nonnull KTransformType in_transform,
+      final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
       throws ConstraintError
   {
     return new KInstanceTransformedTranslucentRefractive(
@@ -64,13 +64,13 @@ import com.io7m.renderer.types.RTransformTexture;
   }
 
   private final @Nonnull KInstanceTranslucentRefractive  instance;
-  private final @Nonnull KTransform                      transform;
-  private final @Nonnull RMatrixI3x3F<RTransformTexture> uv_matrix;
+  private final @Nonnull KTransformType                      transform;
+  private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   KInstanceTransformedTranslucentRefractive(
     final @Nonnull KInstanceTranslucentRefractive in_instance,
-    final @Nonnull KTransform in_transform,
-    final @Nonnull RMatrixI3x3F<RTransformTexture> in_uv_matrix)
+    final @Nonnull KTransformType in_transform,
+    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
     throws ConstraintError
   {
     this.transform = Constraints.constrainNotNull(in_transform, "Transform");
@@ -126,18 +126,18 @@ import com.io7m.renderer.types.RTransformTexture;
     return this.instance.instanceGetMesh();
   }
 
-  @Override public KTransform instanceGetTransform()
+  @Override public KTransformType instanceGetTransform()
   {
     return this.transform;
   }
 
-  @Override public RMatrixI3x3F<RTransformTexture> instanceGetUVMatrix()
+  @Override public RMatrixI3x3F<RTransformTextureType> instanceGetUVMatrix()
   {
     return this.uv_matrix;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KInstanceVisitor<A, E>>
+    <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
     instanceVisitableAccept(
       final @Nonnull V v)
@@ -150,7 +150,7 @@ import com.io7m.renderer.types.RTransformTexture;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KInstanceTransformedVisitor<A, E>>
+    <A, E extends Throwable, V extends KInstanceTransformedVisitorType<A, E>>
     A
     transformedVisitableAccept(
       final @Nonnull V v)
@@ -163,7 +163,7 @@ import com.io7m.renderer.types.RTransformTexture;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KTranslucentVisitor<A, E>>
+    <A, E extends Throwable, V extends KTranslucentVisitorType<A, E>>
     A
     translucentAccept(
       final @Nonnull V v)

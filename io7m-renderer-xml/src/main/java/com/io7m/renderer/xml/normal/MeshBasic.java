@@ -26,8 +26,8 @@ import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceTexture;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
 
@@ -152,9 +152,9 @@ public final class MeshBasic
     return new MeshBasic(name);
   }
 
-  private final @Nonnull ArrayList<RVectorI3F<RSpaceObject>>  normals;
-  private final @Nonnull ArrayList<RVectorI3F<RSpaceObject>>  positions;
-  private final @Nonnull ArrayList<RVectorI2F<RSpaceTexture>> uvs;
+  private final @Nonnull ArrayList<RVectorI3F<RSpaceObjectType>>  normals;
+  private final @Nonnull ArrayList<RVectorI3F<RSpaceObjectType>>  positions;
+  private final @Nonnull ArrayList<RVectorI2F<RSpaceTextureType>> uvs;
   private final @Nonnull ArrayList<Vertex>                    vertices;
   private final @Nonnull HashMap<Vertex, Integer>             vertex_map;
   private final @Nonnull ArrayList<Triangle>                  triangles;
@@ -166,9 +166,9 @@ public final class MeshBasic
     throws ConstraintError
   {
     this.name = Constraints.constrainNotNull(in_name, "Mesh name");
-    this.normals = new ArrayList<RVectorI3F<RSpaceObject>>();
-    this.positions = new ArrayList<RVectorI3F<RSpaceObject>>();
-    this.uvs = new ArrayList<RVectorI2F<RSpaceTexture>>();
+    this.normals = new ArrayList<RVectorI3F<RSpaceObjectType>>();
+    this.positions = new ArrayList<RVectorI3F<RSpaceObjectType>>();
+    this.uvs = new ArrayList<RVectorI2F<RSpaceTextureType>>();
     this.vertices = new ArrayList<Vertex>();
     this.vertex_map = new HashMap<MeshBasic.Vertex, Integer>();
     this.triangles = new ArrayList<Triangle>();
@@ -186,7 +186,7 @@ public final class MeshBasic
   }
 
   public int normalAdd(
-    final @Nonnull RVectorI3F<RSpaceObject> normal)
+    final @Nonnull RVectorI3F<RSpaceObjectType> normal)
     throws ConstraintError
   {
     this.normals.add(Constraints.constrainNotNull(
@@ -195,20 +195,20 @@ public final class MeshBasic
     return this.normals.size() - 1;
   }
 
-  public @Nonnull List<RVectorI3F<RSpaceObject>> normalsGet()
+  public @Nonnull List<RVectorI3F<RSpaceObjectType>> normalsGet()
   {
     return Collections.unmodifiableList(this.normals);
   }
 
   public int positionAdd(
-    final @Nonnull RVectorI3F<RSpaceObject> position)
+    final @Nonnull RVectorI3F<RSpaceObjectType> position)
     throws ConstraintError
   {
     this.positions.add(Constraints.constrainNotNull(position, "Position"));
     return this.positions.size() - 1;
   }
 
-  public @Nonnull List<RVectorI3F<RSpaceObject>> positionsGet()
+  public @Nonnull List<RVectorI3F<RSpaceObjectType>> positionsGet()
   {
     return Collections.unmodifiableList(this.positions);
   }
@@ -251,7 +251,7 @@ public final class MeshBasic
   }
 
   public int uvAdd(
-    final @Nonnull RVectorI2F<RSpaceTexture> uv)
+    final @Nonnull RVectorI2F<RSpaceTextureType> uv)
     throws ConstraintError
   {
     Constraints.constrainArbitrary(
@@ -261,7 +261,7 @@ public final class MeshBasic
     return this.uvs.size() - 1;
   }
 
-  public @Nonnull List<RVectorI2F<RSpaceTexture>> uvsGet()
+  public @Nonnull List<RVectorI2F<RSpaceTextureType>> uvsGet()
   {
     return Collections.unmodifiableList(this.uvs);
   }

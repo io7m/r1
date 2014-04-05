@@ -162,8 +162,8 @@ public final class SBKPostprocessorBlur
     }
 
     @Override public void postprocessorRun(
-      final @Nonnull KFramebufferRGBAUsable input,
-      final @Nonnull KFramebufferRGBAUsable output)
+      final @Nonnull KFramebufferRGBAUsableType input,
+      final @Nonnull KFramebufferRGBAUsableType output)
       throws RException,
         ConstraintError
     {

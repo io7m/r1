@@ -44,24 +44,24 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverFunctionType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
-import com.io7m.renderer.kernel.types.KInstanceOpaque;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaque;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
+import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
-import com.io7m.renderer.kernel.types.KMaterialOpaque;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitor;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitorType;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjection;
-import com.io7m.renderer.types.RTransformView;
+import com.io7m.renderer.types.RTransformProjectionType;
+import com.io7m.renderer.types.RTransformViewType;
 
 @SuppressWarnings("synthetic-access") final class KDepthRenderer
 {
@@ -131,21 +131,21 @@ import com.io7m.renderer.types.RTransformView;
 
   private static void renderDepthPassBatch(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull MatricesObserver mwo,
+    final @Nonnull MatricesObserverType mwo,
     final @Nonnull JCBProgram jp,
     final @Nonnull InternalDepthLabel label,
-    final @Nonnull List<KInstanceTransformedOpaque> batch,
+    final @Nonnull List<KInstanceTransformedOpaqueType> batch,
     final @Nonnull Option<KFaceSelection> faces)
     throws ConstraintError,
       JCGLException,
       RException
   {
-    for (final KInstanceTransformedOpaque i : batch) {
+    for (final KInstanceTransformedOpaqueType i : batch) {
       mwo.withInstance(
         i,
-        new MatricesInstanceFunction<Unit, JCGLException>() {
+        new MatricesInstanceFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final @Nonnull MatricesInstance mwi)
+            final @Nonnull MatricesInstanceType mwi)
             throws JCGLException,
               ConstraintError,
               RException
@@ -165,16 +165,16 @@ import com.io7m.renderer.types.RTransformView;
 
   private static void renderDepthPassInstance(
     final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull MatricesInstance mwi,
+    final @Nonnull MatricesInstanceType mwi,
     final @Nonnull JCBProgram jp,
     final @Nonnull InternalDepthLabel label,
-    final @Nonnull KInstanceTransformedOpaque i,
+    final @Nonnull KInstanceTransformedOpaqueType i,
     final @Nonnull Option<KFaceSelection> faces)
     throws JCGLException,
       ConstraintError,
       RException
   {
-    final KMaterialOpaque material = i.instanceGet().instanceGetMaterial();
+    final KMaterialOpaqueType material = i.instanceGet().instanceGetMaterial();
     final List<TextureUnit> units = gc.textureGetUnits();
 
     /**
@@ -221,7 +221,7 @@ import com.io7m.renderer.types.RTransformView;
      */
 
     try {
-      final KInstanceOpaque actual = i.instanceGet();
+      final KInstanceOpaqueType actual = i.instanceGet();
       final KMesh mesh = actual.instanceGetMesh();
       final ArrayBuffer array = mesh.getArrayBuffer();
       final IndexBuffer indices = mesh.getIndexBuffer();
@@ -275,13 +275,13 @@ import com.io7m.renderer.types.RTransformView;
 
   private static void putMaterialAlphaDepth(
     final @Nonnull JCBProgram jp,
-    final @Nonnull KMaterialOpaque material)
+    final @Nonnull KMaterialOpaqueType material)
     throws RException,
       ConstraintError,
       JCGLException
   {
     material
-      .materialOpaqueVisitableAccept(new KMaterialOpaqueVisitor<Unit, JCGLException>() {
+      .materialOpaqueVisitableAccept(new KMaterialOpaqueVisitorType<Unit, JCGLException>() {
         @Override public Unit materialVisitOpaqueAlphaDepth(
           final @Nonnull KMaterialOpaqueAlphaDepth m)
           throws ConstraintError,
@@ -309,7 +309,7 @@ import com.io7m.renderer.types.RTransformView;
   private final @Nonnull KGraphicsCapabilities                 caps;
   private final @Nonnull JCGLImplementation                    g;
   private final @Nonnull Log                                   log;
-  private final @Nonnull KMutableMatrices                      matrices;
+  private final @Nonnull KMutableMatricesType                      matrices;
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
 
   private KDepthRenderer(
@@ -325,16 +325,16 @@ import com.io7m.renderer.types.RTransformView;
     this.shader_cache =
       Constraints.constrainNotNull(in_shader_cache, "Shader cache");
     this.caps = Constraints.constrainNotNull(in_caps, "Capabilities");
-    this.matrices = KMutableMatrices.newMatrices();
+    this.matrices = KMutableMatricesType.newMatrices();
   }
 
   public
     void
     depthRendererEvaluate(
-      final @Nonnull RMatrixI4x4F<RTransformView> view,
-      final @Nonnull RMatrixI4x4F<RTransformProjection> projection,
-      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> batches,
-      final @Nonnull KFramebufferDepthUsable framebuffer,
+      final @Nonnull RMatrixI4x4F<RTransformViewType> view,
+      final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection,
+      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final @Nonnull KFramebufferDepthUsableType framebuffer,
       final @Nonnull Option<KFaceSelection> faces)
       throws ConstraintError,
         RException
@@ -343,9 +343,9 @@ import com.io7m.renderer.types.RTransformView;
       this.matrices.withObserver(
         view,
         projection,
-        new MatricesObserverFunction<Unit, JCGLException>() {
+        new MatricesObserverFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final @Nonnull MatricesObserver mwo)
+            final @Nonnull MatricesObserverType mwo)
             throws ConstraintError,
               RException,
               JCGLException
@@ -374,9 +374,9 @@ import com.io7m.renderer.types.RTransformView;
   private
     void
     renderDepthPassBatches(
-      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> batches,
+      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
       final @Nonnull JCGLInterfaceCommon gc,
-      final @Nonnull MatricesObserver mwo,
+      final @Nonnull MatricesObserverType mwo,
       final @Nonnull Option<KFaceSelection> faces)
       throws ConstraintError,
         JCacheException,
@@ -387,7 +387,7 @@ import com.io7m.renderer.types.RTransformView;
       final InternalDepthLabel label =
         InternalDepthLabel.fromDepthLabel(this.caps, depth);
 
-      final List<KInstanceTransformedOpaque> batch = batches.get(depth);
+      final List<KInstanceTransformedOpaqueType> batch = batches.get(depth);
       final KProgram program = this.shader_cache.cacheGetLU(label.getName());
       final JCBExecutionAPI exec = program.getExecutable();
 
@@ -416,9 +416,9 @@ import com.io7m.renderer.types.RTransformView;
   private
     void
     renderScene(
-      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaque>> batches,
-      final @Nonnull KFramebufferDepthUsable framebuffer,
-      final @Nonnull MatricesObserver mwo,
+      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final @Nonnull KFramebufferDepthUsableType framebuffer,
+      final @Nonnull MatricesObserverType mwo,
       final @Nonnull Option<KFaceSelection> faces)
       throws JCGLException,
         ConstraintError,

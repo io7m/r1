@@ -19,15 +19,15 @@ package com.io7m.renderer.types;
 import com.io7m.jtensors.MatrixM3x3F;
 
 /**
- * A mutable 3x3 matrix type indexed by the type {@link RTransform} the matrix
+ * A mutable 3x3 matrix type indexed by the type {@link RTransformType} the matrix
  * represents and backed by direct memory for passing to native code.
  * 
  * @param <T>
  *          A phantom type parameter describing the type of transform
  */
 
-public final class RMatrixM3x3F<T extends RTransform> extends MatrixM3x3F implements
-  RMatrixReadable3x3F<T>
+public final class RMatrixM3x3F<T extends RTransformType> extends MatrixM3x3F implements
+  RMatrixReadable3x3FType<T>
 {
   /**
    * Create a new identity matrix.

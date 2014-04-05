@@ -23,9 +23,9 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.IndexBuffer;
-import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.types.RVectorReadable3F;
+import com.io7m.renderer.types.RVectorReadable3FType;
 
 /**
  * <p>
@@ -67,23 +67,23 @@ import com.io7m.renderer.types.RVectorReadable3F;
   public static @Nonnull KMesh newMesh(
     final @Nonnull ArrayBuffer in_array,
     final @Nonnull IndexBuffer in_indices,
-    final @Nonnull RVectorI3F<RSpaceObject> in_bounds_lower,
-    final @Nonnull RVectorI3F<RSpaceObject> in_bounds_upper)
+    final @Nonnull RVectorI3F<RSpaceObjectType> in_bounds_lower,
+    final @Nonnull RVectorI3F<RSpaceObjectType> in_bounds_upper)
     throws ConstraintError
   {
     return new KMesh(in_array, in_indices, in_bounds_lower, in_bounds_upper);
   }
 
   private final @Nonnull ArrayBuffer              array;
-  private final @Nonnull RVectorI3F<RSpaceObject> bounds_lower;
-  private final @Nonnull RVectorI3F<RSpaceObject> bounds_upper;
+  private final @Nonnull RVectorI3F<RSpaceObjectType> bounds_lower;
+  private final @Nonnull RVectorI3F<RSpaceObjectType> bounds_upper;
   private final @Nonnull IndexBuffer              indices;
 
   private KMesh(
     final @Nonnull ArrayBuffer in_array,
     final @Nonnull IndexBuffer in_indices,
-    final @Nonnull RVectorI3F<RSpaceObject> in_bounds_lower,
-    final @Nonnull RVectorI3F<RSpaceObject> in_bounds_upper)
+    final @Nonnull RVectorI3F<RSpaceObjectType> in_bounds_lower,
+    final @Nonnull RVectorI3F<RSpaceObjectType> in_bounds_upper)
     throws ConstraintError
   {
     this.array = Constraints.constrainNotNull(in_array, "Array");
@@ -108,7 +108,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
    *         mesh
    */
 
-  public @Nonnull RVectorReadable3F<RSpaceObject> getBoundsLower()
+  public @Nonnull RVectorReadable3FType<RSpaceObjectType> getBoundsLower()
   {
     return this.bounds_lower;
   }
@@ -118,7 +118,7 @@ import com.io7m.renderer.types.RVectorReadable3F;
    *         mesh
    */
 
-  public @Nonnull RVectorReadable3F<RSpaceObject> getBoundsUpper()
+  public @Nonnull RVectorReadable3FType<RSpaceObjectType> getBoundsUpper()
   {
     return this.bounds_upper;
   }

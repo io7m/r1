@@ -54,17 +54,17 @@ import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.renderer.TestContext;
 import com.io7m.renderer.TestContract;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstance;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunction;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceWithProjective;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceWithProjectiveFunction;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserver;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunction;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLight;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunction;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceWithProjectiveType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceWithProjectiveFunctionType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverFunctionType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesProjectiveLightType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesProjectiveLightFunctionType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformed;
+import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KMaterialAlbedo;
@@ -75,33 +75,33 @@ import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialSpecular;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
-import com.io7m.renderer.kernel.types.KShadow;
-import com.io7m.renderer.kernel.types.KTransform;
+import com.io7m.renderer.kernel.types.KShadowType;
+import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RMatrixM4x4F;
-import com.io7m.renderer.types.RMatrixReadable3x3F;
-import com.io7m.renderer.types.RMatrixReadable4x4F;
-import com.io7m.renderer.types.RSpaceObject;
-import com.io7m.renderer.types.RSpaceRGB;
-import com.io7m.renderer.types.RSpaceRGBA;
-import com.io7m.renderer.types.RSpaceWorld;
-import com.io7m.renderer.types.RTransformModel;
-import com.io7m.renderer.types.RTransformModelView;
-import com.io7m.renderer.types.RTransformNormal;
-import com.io7m.renderer.types.RTransformProjection;
-import com.io7m.renderer.types.RTransformProjectiveModelView;
-import com.io7m.renderer.types.RTransformProjectiveProjection;
-import com.io7m.renderer.types.RTransformProjectiveView;
-import com.io7m.renderer.types.RTransformTexture;
-import com.io7m.renderer.types.RTransformView;
-import com.io7m.renderer.types.RTransformViewInverse;
+import com.io7m.renderer.types.RMatrixReadable3x3FType;
+import com.io7m.renderer.types.RMatrixReadable4x4FType;
+import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceRGBType;
+import com.io7m.renderer.types.RSpaceRGBAType;
+import com.io7m.renderer.types.RSpaceWorldType;
+import com.io7m.renderer.types.RTransformModelType;
+import com.io7m.renderer.types.RTransformModelViewType;
+import com.io7m.renderer.types.RTransformNormalType;
+import com.io7m.renderer.types.RTransformProjectionType;
+import com.io7m.renderer.types.RTransformProjectiveModelViewType;
+import com.io7m.renderer.types.RTransformProjectiveProjectionType;
+import com.io7m.renderer.types.RTransformProjectiveViewType;
+import com.io7m.renderer.types.RTransformTextureType;
+import com.io7m.renderer.types.RTransformViewType;
+import com.io7m.renderer.types.RTransformViewInverseType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
-import com.io7m.renderer.types.RVectorReadable3F;
+import com.io7m.renderer.types.RVectorReadable3FType;
 
 public abstract class KMutableMatricesContract extends TestContract
 {
@@ -200,25 +200,25 @@ public abstract class KMutableMatricesContract extends TestContract
             }
           });
 
-      final RVectorReadable3F<RSpaceWorld> position =
-        new RVectorI3F<RSpaceWorld>(0, 0, 0);
+      final RVectorReadable3FType<RSpaceWorldType> position =
+        new RVectorI3F<RSpaceWorldType>(0, 0, 0);
       final QuaternionI4F orientation = new QuaternionI4F();
-      final RVectorReadable3F<RSpaceRGB> colour =
-        new RVectorI3F<RSpaceRGB>(0, 0, 0);
+      final RVectorReadable3FType<RSpaceRGBType> colour =
+        new RVectorI3F<RSpaceRGBType>(0, 0, 0);
       final float intensity = 0.0f;
       final float range = 0.0f;
       final float falloff = 0.0f;
 
-      final RMatrixM4x4F<RTransformProjection> m_projection =
-        new RMatrixM4x4F<RTransformProjection>();
+      final RMatrixM4x4F<RTransformProjectionType> m_projection =
+        new RMatrixM4x4F<RTransformProjectionType>();
       m_projection.set(0, 0, 7.0f);
       m_projection.set(1, 1, 7.0f);
       m_projection.set(2, 2, 7.0f);
       m_projection.set(3, 3, 7.0f);
-      final RMatrixI4x4F<RTransformProjection> projection =
+      final RMatrixI4x4F<RTransformProjectionType> projection =
         RMatrixI4x4F.newFromReadable(m_projection);
 
-      final Option<KShadow> shadow = Option.none();
+      final Option<KShadowType> shadow = Option.none();
       return KLightProjective.newProjective(
         Integer.valueOf(23),
         texture,
@@ -237,11 +237,11 @@ public abstract class KMutableMatricesContract extends TestContract
     }
   }
 
-  private static @Nonnull KInstanceTransformed makeMeshInstance(
+  private static @Nonnull KInstanceTransformedType makeMeshInstance(
     final JCGLImplementation g)
   {
     try {
-      final RMatrixI3x3F<RTransformTexture> uv_matrix =
+      final RMatrixI3x3F<RTransformTextureType> uv_matrix =
         RMatrixI3x3F.identity();
       final ArrayBuffer array =
         KMutableMatricesContract.makeArrayBuffer(g.getGLCommon());
@@ -249,13 +249,13 @@ public abstract class KMutableMatricesContract extends TestContract
         KMutableMatricesContract.makeIndexBuffer(g.getGLCommon());
 
       final KMesh mesh =
-        KMesh.newMesh(array, indices, new RVectorI3F<RSpaceObject>(
+        KMesh.newMesh(array, indices, new RVectorI3F<RSpaceObjectType>(
           0.0f,
           0.0f,
-          0.0f), new RVectorI3F<RSpaceObject>(0.0f, 0.0f, 0.0f));
+          0.0f), new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f));
 
-      final RVectorI4F<RSpaceRGBA> colour =
-        new RVectorI4F<RSpaceRGBA>(0.0f, 0.0f, 0.0f, 0.0f);
+      final RVectorI4F<RSpaceRGBAType> colour =
+        new RVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.0f);
       final KMaterialAlbedo albedo =
         KMaterialAlbedo.newAlbedoUntextured(colour);
       final KMaterialEmissive emissive = KMaterialEmissive.newEmissiveNone();
@@ -263,7 +263,7 @@ public abstract class KMutableMatricesContract extends TestContract
         KMaterialEnvironment.newEnvironmentUnmapped();
       final KMaterialNormal normal = KMaterialNormal.newNormalUnmapped();
 
-      final RVectorI3F<RSpaceRGB> rgb = RVectorI3F.zero();
+      final RVectorI3F<RSpaceRGBType> rgb = RVectorI3F.zero();
       final KMaterialSpecular specular =
         KMaterialSpecular.newSpecularUnmapped(rgb, 0.0f);
 
@@ -285,9 +285,9 @@ public abstract class KMutableMatricesContract extends TestContract
 
       final QuaternionI4F orientation = new QuaternionI4F();
       final VectorI3F scale = new VectorI3F(0, 0, 0);
-      final RVectorI3F<RSpaceWorld> translation =
-        new RVectorI3F<RSpaceWorld>(0.0f, 0.0f, 0.0f);
-      final KTransform trans =
+      final RVectorI3F<RSpaceWorldType> translation =
+        new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f);
+      final KTransformType trans =
         KTransformOST.newTransform(orientation, scale, translation);
 
       final KInstanceTransformedOpaqueRegular kmit =
@@ -301,24 +301,24 @@ public abstract class KMutableMatricesContract extends TestContract
     }
   }
 
-  private static AtomicReference<MatricesObserver> saveObserverDangerously(
-    final @Nonnull KMutableMatrices mm)
+  private static AtomicReference<MatricesObserverType> saveObserverDangerously(
+    final @Nonnull KMutableMatricesType mm)
     throws ConstraintError,
       RException
   {
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.identity();
-    final RMatrixI4x4F<RTransformView> view = RMatrixI4x4F.identity();
+    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
 
-    final AtomicReference<MatricesObserver> saved =
-      new AtomicReference<MatricesObserver>();
+    final AtomicReference<MatricesObserverType> saved =
+      new AtomicReference<MatricesObserverType>();
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
@@ -330,32 +330,32 @@ public abstract class KMutableMatricesContract extends TestContract
   }
 
   private static
-    AtomicReference<MatricesProjectiveLight>
+    AtomicReference<MatricesProjectiveLightType>
     saveProjectiveDangerously(
-      final @Nonnull KMutableMatrices mm,
+      final @Nonnull KMutableMatricesType mm,
       final @Nonnull JCGLImplementation gi,
-      final @Nonnull RMatrixI4x4F<RTransformProjection> projection,
-      final @Nonnull RMatrixI4x4F<RTransformView> view)
+      final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection,
+      final @Nonnull RMatrixI4x4F<RTransformViewType> view)
       throws ConstraintError,
         RException
   {
-    final AtomicReference<MatricesProjectiveLight> saved =
-      new AtomicReference<MatricesProjectiveLight>();
+    final AtomicReference<MatricesProjectiveLightType> saved =
+      new AtomicReference<MatricesProjectiveLightType>();
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @SuppressWarnings("synthetic-access") @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
           return o.withProjectiveLight(
             KMutableMatricesContract.makeKProjective(gi),
-            new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
+            new MatricesProjectiveLightFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final MatricesProjectiveLight p)
+                final MatricesProjectiveLightType p)
                 throws ConstraintError,
                   RException
               {
@@ -368,8 +368,8 @@ public abstract class KMutableMatricesContract extends TestContract
     return saved;
   }
 
-  private AtomicReference<MatricesInstance> saveInstanceDangerously(
-    final @Nonnull KMutableMatrices mm)
+  private AtomicReference<MatricesInstanceType> saveInstanceDangerously(
+    final @Nonnull KMutableMatricesType mm)
     throws JCGLException,
       JCGLUnsupportedException,
       ConstraintError,
@@ -378,33 +378,33 @@ public abstract class KMutableMatricesContract extends TestContract
     final TestContext tc = this.newTestContext(8);
     final JCGLImplementation g = tc.getGLImplementation();
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
-    final AtomicReference<MatricesInstance> saved =
-      new AtomicReference<MatricesInstance>();
+    final AtomicReference<MatricesInstanceType> saved =
+      new AtomicReference<MatricesInstanceType>();
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @SuppressWarnings("synthetic-access") @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
           return o.withInstance(
             KMutableMatricesContract.makeMeshInstance(g),
-            new MatricesInstanceFunction<Unit, ConstraintError>() {
+            new MatricesInstanceFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final MatricesInstance i)
+                final MatricesInstanceType i)
                 throws ConstraintError,
                   RException
               {
@@ -419,7 +419,7 @@ public abstract class KMutableMatricesContract extends TestContract
 
   @SuppressWarnings("static-method") @Test public void testInitial()
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
     Assert.assertNotNull(mm);
   }
 
@@ -429,8 +429,8 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException,
       JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<MatricesInstance> saved =
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
+    final AtomicReference<MatricesInstanceType> saved =
       this.saveInstanceDangerously(mm);
     saved.get().getMatrixModel();
   }
@@ -441,8 +441,8 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException,
       JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<MatricesInstance> saved =
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
+    final AtomicReference<MatricesInstanceType> saved =
       this.saveInstanceDangerously(mm);
     saved.get().getMatrixModelView();
   }
@@ -453,8 +453,8 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException,
       JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<MatricesInstance> saved =
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
+    final AtomicReference<MatricesInstanceType> saved =
       this.saveInstanceDangerously(mm);
     saved.get().getMatrixNormal();
   }
@@ -465,45 +465,45 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException,
       JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
     final TestContext tc = this.newTestContext(8);
     final JCGLImplementation g = tc.getGLImplementation();
     final AtomicBoolean instance_once = new AtomicBoolean();
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @SuppressWarnings("synthetic-access") @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
           return o.withInstance(
             KMutableMatricesContract.makeMeshInstance(g),
-            new MatricesInstanceFunction<Unit, ConstraintError>() {
+            new MatricesInstanceFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final MatricesInstance i)
+                final MatricesInstanceType i)
                 throws ConstraintError,
                   RException
               {
                 instance_once.set(true);
 
                 {
-                  final RMatrixReadable4x4F<RTransformModel> m =
+                  final RMatrixReadable4x4FType<RTransformModelType> m =
                     i.getMatrixModel();
-                  final RMatrixM4x4F<RTransformModel> mx =
-                    new RMatrixM4x4F<RTransformModel>();
+                  final RMatrixM4x4F<RTransformModelType> mx =
+                    new RMatrixM4x4F<RTransformModelType>();
                   mx.set(0, 0, 0.0f);
                   mx.set(1, 1, 0.0f);
                   mx.set(2, 2, 0.0f);
@@ -511,10 +511,10 @@ public abstract class KMutableMatricesContract extends TestContract
                 }
 
                 {
-                  final RMatrixReadable4x4F<RTransformModelView> m =
+                  final RMatrixReadable4x4FType<RTransformModelViewType> m =
                     i.getMatrixModelView();
-                  final RMatrixM4x4F<RTransformModelView> mx =
-                    new RMatrixM4x4F<RTransformModelView>();
+                  final RMatrixM4x4F<RTransformModelViewType> mx =
+                    new RMatrixM4x4F<RTransformModelViewType>();
                   mx.set(0, 0, 0.0f);
                   mx.set(1, 1, 0.0f);
                   mx.set(2, 2, 0.0f);
@@ -522,10 +522,10 @@ public abstract class KMutableMatricesContract extends TestContract
                 }
 
                 {
-                  final RMatrixReadable3x3F<RTransformNormal> m =
+                  final RMatrixReadable3x3FType<RTransformNormalType> m =
                     i.getMatrixNormal();
-                  final RMatrixM3x3F<RTransformNormal> mx =
-                    new RMatrixM3x3F<RTransformNormal>();
+                  final RMatrixM3x3F<RTransformNormalType> mx =
+                    new RMatrixM3x3F<RTransformNormalType>();
                   mx.set(0, 0, 0.0f);
                   mx.set(1, 1, 0.0f);
                   mx.set(2, 2, 0.0f);
@@ -533,10 +533,10 @@ public abstract class KMutableMatricesContract extends TestContract
                 }
 
                 {
-                  final RMatrixReadable3x3F<RTransformTexture> m =
+                  final RMatrixReadable3x3FType<RTransformTextureType> m =
                     i.getMatrixUV();
-                  final RMatrixM3x3F<RTransformTexture> mx =
-                    new RMatrixM3x3F<RTransformTexture>();
+                  final RMatrixM3x3F<RTransformTextureType> mx =
+                    new RMatrixM3x3F<RTransformTextureType>();
                   Assert.assertEquals(mx, m);
                 }
 
@@ -555,34 +555,34 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException,
       JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
     final TestContext tc = this.newTestContext(8);
     final JCGLImplementation g = tc.getGLImplementation();
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @SuppressWarnings("synthetic-access") @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
           o.withInstance(
             KMutableMatricesContract.makeMeshInstance(g),
-            new MatricesInstanceFunction<Unit, ConstraintError>() {
+            new MatricesInstanceFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final MatricesInstance i)
+                final MatricesInstanceType i)
                 throws ConstraintError,
                   RException
               {
@@ -592,9 +592,9 @@ public abstract class KMutableMatricesContract extends TestContract
 
           o.withInstance(
             KMutableMatricesContract.makeMeshInstance(g),
-            new MatricesInstanceFunction<Unit, ConstraintError>() {
+            new MatricesInstanceFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final MatricesInstance i)
+                final MatricesInstanceType i)
                 throws ConstraintError,
                   RException
               {
@@ -613,42 +613,42 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException,
       JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
     final TestContext tc = this.newTestContext(8);
     final JCGLImplementation g = tc.getGLImplementation();
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @SuppressWarnings("synthetic-access") @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
           return o.withInstance(
             KMutableMatricesContract.makeMeshInstance(g),
-            new MatricesInstanceFunction<Unit, ConstraintError>() {
+            new MatricesInstanceFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final MatricesInstance i)
+                final MatricesInstanceType i)
                 throws ConstraintError,
                   RException
               {
                 return o.withInstance(
                   KMutableMatricesContract.makeMeshInstance(g),
-                  new MatricesInstanceFunction<Unit, ConstraintError>() {
+                  new MatricesInstanceFunctionType<Unit, ConstraintError>() {
                     @Override public Unit run(
-                      final MatricesInstance _)
+                      final MatricesInstanceType _)
                       throws ConstraintError,
                         RException
                     {
@@ -667,8 +667,8 @@ public abstract class KMutableMatricesContract extends TestContract
       throws ConstraintError,
         RException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<MatricesObserver> saved =
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
+    final AtomicReference<MatricesObserverType> saved =
       KMutableMatricesContract.saveObserverDangerously(mm);
     saved.get().getMatrixContext();
   }
@@ -679,8 +679,8 @@ public abstract class KMutableMatricesContract extends TestContract
       throws ConstraintError,
         RException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<MatricesObserver> saved =
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
+    final AtomicReference<MatricesObserverType> saved =
       KMutableMatricesContract.saveObserverDangerously(mm);
     saved.get().getMatrixProjection();
   }
@@ -691,8 +691,8 @@ public abstract class KMutableMatricesContract extends TestContract
       throws ConstraintError,
         RException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<MatricesObserver> saved =
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
+    final AtomicReference<MatricesObserverType> saved =
       KMutableMatricesContract.saveObserverDangerously(mm);
     saved.get().getMatrixView();
   }
@@ -703,8 +703,8 @@ public abstract class KMutableMatricesContract extends TestContract
       throws ConstraintError,
         RException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<MatricesObserver> saved =
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
+    final AtomicReference<MatricesObserverType> saved =
       KMutableMatricesContract.saveObserverDangerously(mm);
     saved.get().getMatrixViewInverse();
   }
@@ -713,34 +713,34 @@ public abstract class KMutableMatricesContract extends TestContract
     throws ConstraintError,
       RException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
 
     final AtomicBoolean observer_once = new AtomicBoolean();
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
     m_projection.set(0, 0, 2.0f);
     m_projection.set(1, 1, 2.0f);
     m_projection.set(2, 2, 2.0f);
     m_projection.set(3, 3, 2.0f);
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
     m_view.set(0, 0, 3.0f);
     m_view.set(1, 1, 3.0f);
     m_view.set(2, 2, 3.0f);
     m_view.set(3, 3, 3.0f);
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
@@ -749,7 +749,7 @@ public abstract class KMutableMatricesContract extends TestContract
           Assert.assertNotNull(o.getMatrixContext());
 
           {
-            final RMatrixReadable4x4F<RTransformProjection> m =
+            final RMatrixReadable4x4FType<RTransformProjectionType> m =
               o.getMatrixProjection();
             Assert.assertEquals(2.0f, m.getRowColumnF(0, 0), 0.0f);
             Assert.assertEquals(2.0f, m.getRowColumnF(1, 1), 0.0f);
@@ -758,7 +758,7 @@ public abstract class KMutableMatricesContract extends TestContract
           }
 
           {
-            final RMatrixReadable4x4F<RTransformView> m = o.getMatrixView();
+            final RMatrixReadable4x4FType<RTransformViewType> m = o.getMatrixView();
             Assert.assertEquals(3.0f, m.getRowColumnF(0, 0), 0.0f);
             Assert.assertEquals(3.0f, m.getRowColumnF(1, 1), 0.0f);
             Assert.assertEquals(3.0f, m.getRowColumnF(2, 2), 0.0f);
@@ -766,7 +766,7 @@ public abstract class KMutableMatricesContract extends TestContract
           }
 
           {
-            final RMatrixReadable4x4F<RTransformViewInverse> m =
+            final RMatrixReadable4x4FType<RTransformViewInverseType> m =
               o.getMatrixViewInverse();
             Assert.assertEquals(1.0f / 3.0f, m.getRowColumnF(0, 0), 0.0f);
             Assert.assertEquals(1.0f / 3.0f, m.getRowColumnF(1, 1), 0.0f);
@@ -787,24 +787,24 @@ public abstract class KMutableMatricesContract extends TestContract
       throws ConstraintError,
         RException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
@@ -815,9 +815,9 @@ public abstract class KMutableMatricesContract extends TestContract
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
@@ -832,27 +832,27 @@ public abstract class KMutableMatricesContract extends TestContract
       throws ConstraintError,
         RException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
 
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.identity();
-    final RMatrixI4x4F<RTransformView> view = RMatrixI4x4F.identity();
+    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @Override public Unit run(
-          final MatricesObserver _)
+          final MatricesObserverType _)
           throws ConstraintError,
             RException
         {
           mm.withObserver(
             view,
             projection,
-            new MatricesObserverFunction<Unit, ConstraintError>() {
+            new MatricesObserverFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final MatricesObserver __)
+                final MatricesObserverType __)
                 throws ConstraintError,
                   RException
               {
@@ -873,20 +873,20 @@ public abstract class KMutableMatricesContract extends TestContract
         JCGLUnsupportedException,
         JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
     final TestContext tc = this.newTestContext(8);
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
-    final AtomicReference<MatricesProjectiveLight> saved =
+    final AtomicReference<MatricesProjectiveLightType> saved =
       KMutableMatricesContract.saveProjectiveDangerously(
         mm,
         tc.getGLImplementation(),
@@ -904,20 +904,20 @@ public abstract class KMutableMatricesContract extends TestContract
         JCGLUnsupportedException,
         JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
     final TestContext tc = this.newTestContext(8);
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
-    final AtomicReference<MatricesProjectiveLight> saved =
+    final AtomicReference<MatricesProjectiveLightType> saved =
       KMutableMatricesContract.saveProjectiveDangerously(
         mm,
         tc.getGLImplementation(),
@@ -933,17 +933,17 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException,
       JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
     final TestContext tc = this.newTestContext(8);
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
     final AtomicBoolean instance_once = new AtomicBoolean(false);
@@ -951,36 +951,36 @@ public abstract class KMutableMatricesContract extends TestContract
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @SuppressWarnings("synthetic-access") @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
           return o.withProjectiveLight(
             KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
-            new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
+            new MatricesProjectiveLightFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final @Nonnull MatricesProjectiveLight p)
+                final @Nonnull MatricesProjectiveLightType p)
                 throws ConstraintError,
                   RException
               {
                 return p.withInstance(
                   KMutableMatricesContract.makeMeshInstance(tc
                     .getGLImplementation()),
-                  new MatricesInstanceWithProjectiveFunction<Unit, ConstraintError>() {
+                  new MatricesInstanceWithProjectiveFunctionType<Unit, ConstraintError>() {
                     @Override public Unit run(
-                      final MatricesInstanceWithProjective i)
+                      final MatricesInstanceWithProjectiveType i)
                       throws ConstraintError,
                         RException
                     {
                       instance_once.set(true);
 
                       {
-                        final RMatrixReadable4x4F<RTransformProjectiveModelView> m =
+                        final RMatrixReadable4x4FType<RTransformProjectiveModelViewType> m =
                           i.getMatrixProjectiveModelView();
-                        final RMatrixM4x4F<RTransformProjectiveModelView> mx =
-                          new RMatrixM4x4F<RTransformProjectiveModelView>();
+                        final RMatrixM4x4F<RTransformProjectiveModelViewType> mx =
+                          new RMatrixM4x4F<RTransformProjectiveModelViewType>();
                         mx.set(0, 0, 0.0f);
                         mx.set(1, 1, 0.0f);
                         mx.set(2, 2, 0.0f);
@@ -988,10 +988,10 @@ public abstract class KMutableMatricesContract extends TestContract
                       }
 
                       {
-                        final RMatrixReadable4x4F<RTransformModel> m =
+                        final RMatrixReadable4x4FType<RTransformModelType> m =
                           i.getMatrixModel();
-                        final RMatrixM4x4F<RTransformModel> mx =
-                          new RMatrixM4x4F<RTransformModel>();
+                        final RMatrixM4x4F<RTransformModelType> mx =
+                          new RMatrixM4x4F<RTransformModelType>();
                         mx.set(0, 0, 0.0f);
                         mx.set(1, 1, 0.0f);
                         mx.set(2, 2, 0.0f);
@@ -999,10 +999,10 @@ public abstract class KMutableMatricesContract extends TestContract
                       }
 
                       {
-                        final RMatrixReadable4x4F<RTransformModelView> m =
+                        final RMatrixReadable4x4FType<RTransformModelViewType> m =
                           i.getMatrixModelView();
-                        final RMatrixM4x4F<RTransformModelView> mx =
-                          new RMatrixM4x4F<RTransformModelView>();
+                        final RMatrixM4x4F<RTransformModelViewType> mx =
+                          new RMatrixM4x4F<RTransformModelViewType>();
                         mx.set(0, 0, 0.0f);
                         mx.set(1, 1, 0.0f);
                         mx.set(2, 2, 0.0f);
@@ -1010,10 +1010,10 @@ public abstract class KMutableMatricesContract extends TestContract
                       }
 
                       {
-                        final RMatrixReadable3x3F<RTransformNormal> m =
+                        final RMatrixReadable3x3FType<RTransformNormalType> m =
                           i.getMatrixNormal();
-                        final RMatrixM3x3F<RTransformNormal> mx =
-                          new RMatrixM3x3F<RTransformNormal>();
+                        final RMatrixM3x3F<RTransformNormalType> mx =
+                          new RMatrixM3x3F<RTransformNormalType>();
                         mx.set(0, 0, 0.0f);
                         mx.set(1, 1, 0.0f);
                         mx.set(2, 2, 0.0f);
@@ -1021,10 +1021,10 @@ public abstract class KMutableMatricesContract extends TestContract
                       }
 
                       {
-                        final RMatrixReadable3x3F<RTransformTexture> m =
+                        final RMatrixReadable3x3FType<RTransformTextureType> m =
                           i.getMatrixUV();
-                        final RMatrixM3x3F<RTransformTexture> mx =
-                          new RMatrixM3x3F<RTransformTexture>();
+                        final RMatrixM3x3F<RTransformTextureType> mx =
+                          new RMatrixM3x3F<RTransformTextureType>();
                         Assert.assertEquals(mx, m);
                       }
 
@@ -1047,51 +1047,51 @@ public abstract class KMutableMatricesContract extends TestContract
         JCGLUnsupportedException,
         JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
     final TestContext tc = this.newTestContext(8);
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @SuppressWarnings("synthetic-access") @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
           return o.withProjectiveLight(
             KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
-            new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
+            new MatricesProjectiveLightFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final @Nonnull MatricesProjectiveLight p)
+                final @Nonnull MatricesProjectiveLightType p)
                 throws ConstraintError,
                   RException
               {
                 return p.withInstance(
                   KMutableMatricesContract.makeMeshInstance(tc
                     .getGLImplementation()),
-                  new MatricesInstanceWithProjectiveFunction<Unit, ConstraintError>() {
+                  new MatricesInstanceWithProjectiveFunctionType<Unit, ConstraintError>() {
                     @Override public Unit run(
-                      final MatricesInstanceWithProjective i)
+                      final MatricesInstanceWithProjectiveType i)
                       throws ConstraintError,
                         RException
                     {
                       return p.withInstance(
                         KMutableMatricesContract.makeMeshInstance(tc
                           .getGLImplementation()),
-                        new MatricesInstanceWithProjectiveFunction<Unit, ConstraintError>() {
+                        new MatricesInstanceWithProjectiveFunctionType<Unit, ConstraintError>() {
                           @Override public Unit run(
-                            final MatricesInstanceWithProjective i2)
+                            final MatricesInstanceWithProjectiveType i2)
                             throws ConstraintError,
                               RException
                           {
@@ -1112,42 +1112,42 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException,
       JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
     final TestContext tc = this.newTestContext(8);
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @SuppressWarnings("synthetic-access") @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
           return o.withProjectiveLight(
             KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
-            new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
+            new MatricesProjectiveLightFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final @Nonnull MatricesProjectiveLight p)
+                final @Nonnull MatricesProjectiveLightType p)
                 throws ConstraintError,
                   RException
               {
                 p.withInstance(
                   KMutableMatricesContract.makeMeshInstance(tc
                     .getGLImplementation()),
-                  new MatricesInstanceWithProjectiveFunction<Unit, ConstraintError>() {
+                  new MatricesInstanceWithProjectiveFunctionType<Unit, ConstraintError>() {
                     @Override public Unit run(
-                      final MatricesInstanceWithProjective i)
+                      final MatricesInstanceWithProjectiveType i)
                       throws ConstraintError,
                         RException
                     {
@@ -1158,9 +1158,9 @@ public abstract class KMutableMatricesContract extends TestContract
                 p.withInstance(
                   KMutableMatricesContract.makeMeshInstance(tc
                     .getGLImplementation()),
-                  new MatricesInstanceWithProjectiveFunction<Unit, ConstraintError>() {
+                  new MatricesInstanceWithProjectiveFunctionType<Unit, ConstraintError>() {
                     @Override public Unit run(
-                      final MatricesInstanceWithProjective i)
+                      final MatricesInstanceWithProjectiveType i)
                       throws ConstraintError,
                         RException
                     {
@@ -1181,52 +1181,52 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException,
       JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
     final TestContext tc = this.newTestContext(8);
     final AtomicBoolean projective_once = new AtomicBoolean();
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
     m_projection.set(0, 0, 2.0f);
     m_projection.set(1, 1, 2.0f);
     m_projection.set(2, 2, 2.0f);
     m_projection.set(3, 3, 2.0f);
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
     m_view.set(0, 0, 3.0f);
     m_view.set(1, 1, 3.0f);
     m_view.set(2, 2, 3.0f);
     m_view.set(3, 3, 3.0f);
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @SuppressWarnings("synthetic-access") @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
           return o.withProjectiveLight(
             KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
-            new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
+            new MatricesProjectiveLightFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final MatricesProjectiveLight p)
+                final MatricesProjectiveLightType p)
                 throws ConstraintError,
                   RException
               {
                 projective_once.set(true);
 
                 {
-                  final RMatrixM4x4F<RTransformProjectiveProjection> m =
+                  final RMatrixM4x4F<RTransformProjectiveProjectionType> m =
                     p.getMatrixProjectiveProjection();
-                  final RMatrixM4x4F<RTransformProjectiveProjection> r =
-                    new RMatrixM4x4F<RTransformProjectiveProjection>();
+                  final RMatrixM4x4F<RTransformProjectiveProjectionType> r =
+                    new RMatrixM4x4F<RTransformProjectiveProjectionType>();
                   r.set(0, 0, 7.0f);
                   r.set(1, 1, 7.0f);
                   r.set(2, 2, 7.0f);
@@ -1235,10 +1235,10 @@ public abstract class KMutableMatricesContract extends TestContract
                 }
 
                 {
-                  final RMatrixM4x4F<RTransformProjectiveView> m =
+                  final RMatrixM4x4F<RTransformProjectiveViewType> m =
                     p.getMatrixProjectiveView();
-                  final RMatrixM4x4F<RTransformProjectiveView> r =
-                    new RMatrixM4x4F<RTransformProjectiveView>();
+                  final RMatrixM4x4F<RTransformProjectiveViewType> r =
+                    new RMatrixM4x4F<RTransformProjectiveViewType>();
                   r.set(0, 0, 1.0f);
                   r.set(1, 1, 1.0f);
                   r.set(2, 2, 1.0f);
@@ -1261,33 +1261,33 @@ public abstract class KMutableMatricesContract extends TestContract
       JCGLUnsupportedException,
       JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
     final TestContext tc = this.newTestContext(8);
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @SuppressWarnings("synthetic-access") @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
           o.withProjectiveLight(
             KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
-            new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
+            new MatricesProjectiveLightFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final MatricesProjectiveLight p)
+                final MatricesProjectiveLightType p)
                 throws ConstraintError,
                   RException
               {
@@ -1297,9 +1297,9 @@ public abstract class KMutableMatricesContract extends TestContract
 
           o.withProjectiveLight(
             KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
-            new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
+            new MatricesProjectiveLightFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final MatricesProjectiveLight p)
+                final MatricesProjectiveLightType p)
                 throws ConstraintError,
                   RException
               {
@@ -1320,42 +1320,42 @@ public abstract class KMutableMatricesContract extends TestContract
         JCGLUnsupportedException,
         JCGLException
   {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final KMutableMatricesType mm = KMutableMatricesType.newMatrices();
     final TestContext tc = this.newTestContext(8);
 
-    final RMatrixM4x4F<RTransformProjection> m_projection =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformProjection> projection =
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.newFromReadable(m_projection);
 
-    final RMatrixM4x4F<RTransformProjection> m_view =
-      new RMatrixM4x4F<RTransformProjection>();
-    final RMatrixI4x4F<RTransformView> view =
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
 
     mm.withObserver(
       view,
       projection,
-      new MatricesObserverFunction<Unit, ConstraintError>() {
+      new MatricesObserverFunctionType<Unit, ConstraintError>() {
         @SuppressWarnings("synthetic-access") @Override public Unit run(
-          final MatricesObserver o)
+          final MatricesObserverType o)
           throws ConstraintError,
             RException
         {
           return o.withProjectiveLight(
             KMutableMatricesContract.makeKProjective(tc.getGLImplementation()),
-            new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
+            new MatricesProjectiveLightFunctionType<Unit, ConstraintError>() {
               @Override public Unit run(
-                final @Nonnull MatricesProjectiveLight _)
+                final @Nonnull MatricesProjectiveLightType _)
                 throws ConstraintError,
                   RException
               {
                 return o.withProjectiveLight(
                   KMutableMatricesContract.makeKProjective(tc
                     .getGLImplementation()),
-                  new MatricesProjectiveLightFunction<Unit, ConstraintError>() {
+                  new MatricesProjectiveLightFunctionType<Unit, ConstraintError>() {
                     @Override public Unit run(
-                      final @Nonnull MatricesProjectiveLight __)
+                      final @Nonnull MatricesProjectiveLightType __)
                       throws ConstraintError,
                         RException
                     {

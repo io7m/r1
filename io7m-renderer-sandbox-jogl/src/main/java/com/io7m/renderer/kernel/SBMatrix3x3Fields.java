@@ -22,9 +22,9 @@ import javax.swing.JTextField;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RMatrixI3x3F;
-import com.io7m.renderer.types.RTransform;
+import com.io7m.renderer.types.RTransformType;
 
-public final class SBMatrix3x3Fields<T extends RTransform>
+public final class SBMatrix3x3Fields<T extends RTransformType>
 {
   private final @Nonnull JTextField fields[][];
 

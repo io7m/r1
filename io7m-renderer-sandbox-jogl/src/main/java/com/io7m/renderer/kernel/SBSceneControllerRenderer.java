@@ -22,13 +22,13 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.functional.Pair;
-import com.io7m.renderer.kernel.types.KInstanceTransformed;
+import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.types.RException;
 
 interface SBSceneControllerRenderer
 {
   public @Nonnull
-    Pair<Collection<SBLight>, Collection<Pair<KInstanceTransformed, SBInstance>>>
+    Pair<Collection<SBLight>, Collection<Pair<KInstanceTransformedType, SBInstance>>>
     rendererGetScene()
       throws ConstraintError,
         RException;

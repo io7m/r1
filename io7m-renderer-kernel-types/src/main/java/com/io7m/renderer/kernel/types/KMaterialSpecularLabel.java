@@ -30,8 +30,8 @@ import com.io7m.renderer.types.RVectorI3F;
 
 public enum KMaterialSpecularLabel
   implements
-  KTexturesRequired,
-  KLabel
+  KTexturesRequiredType,
+  KLabelType
 {
   /**
    * Constant specular over an instance.
@@ -91,7 +91,7 @@ public enum KMaterialSpecularLabel
 
   public static @Nonnull KMaterialSpecularLabel fromInstanceRegular(
     final @Nonnull KMaterialNormalLabel n,
-    final @Nonnull KInstanceRegular instance)
+    final @Nonnull KInstanceRegularType instance)
     throws ConstraintError
   {
     Constraints.constrainNotNull(instance, "Instance");

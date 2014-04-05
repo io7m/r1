@@ -28,18 +28,18 @@ import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.kernel.types.KLightSphere;
-import com.io7m.renderer.kernel.types.KShadow;
-import com.io7m.renderer.types.RSpaceRGB;
-import com.io7m.renderer.types.RSpaceWorld;
+import com.io7m.renderer.kernel.types.KShadowType;
+import com.io7m.renderer.types.RSpaceRGBType;
+import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.types.RVectorReadable3F;
+import com.io7m.renderer.types.RVectorReadable3FType;
 
 public final class SBLightGenerator implements Generator<SBLightDescription>
 {
   private final @Nonnull IntegerGenerator                  index_gen;
   private @Nonnull Integer                                 id;
-  private final @Nonnull SBVectorI3FGenerator<RSpaceWorld> world_gen;
-  private final @Nonnull SBVectorI3FGenerator<RSpaceRGB>   colour_gen;
+  private final @Nonnull SBVectorI3FGenerator<RSpaceWorldType> world_gen;
+  private final @Nonnull SBVectorI3FGenerator<RSpaceRGBType>   colour_gen;
   private final @Nonnull PathVirtualGenerator              path_gen;
   private final @Nonnull QuaternionI4FGenerator            quat_gen;
   private final @Nonnull SBProjectionGenerator             projection_gen;
@@ -48,8 +48,8 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
   public SBLightGenerator()
   {
     this.index_gen = new IntegerGenerator(0, SBLightType.values().length - 1);
-    this.world_gen = new SBVectorI3FGenerator<RSpaceWorld>();
-    this.colour_gen = new SBVectorI3FGenerator<RSpaceRGB>();
+    this.world_gen = new SBVectorI3FGenerator<RSpaceWorldType>();
+    this.colour_gen = new SBVectorI3FGenerator<RSpaceRGBType>();
     this.path_gen = new PathVirtualGenerator();
     this.quat_gen = new QuaternionI4FGenerator();
     this.projection_gen = new SBProjectionGenerator();
@@ -65,9 +65,9 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
       switch (SBLightType.values()[this.index_gen.next().intValue()]) {
         case LIGHT_DIRECTIONAL:
         {
-          final RVectorReadable3F<RSpaceWorld> direction =
+          final RVectorReadable3FType<RSpaceWorldType> direction =
             this.world_gen.next();
-          final RVectorReadable3F<RSpaceRGB> colour = this.colour_gen.next();
+          final RVectorReadable3FType<RSpaceRGBType> colour = this.colour_gen.next();
           final float intensity = (float) Math.random();
 
           return new SBLightDescriptionDirectional(
@@ -79,15 +79,15 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
         }
         case LIGHT_PROJECTIVE:
         {
-          final RVectorI3F<RSpaceRGB> colour = this.colour_gen.next();
+          final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
           final float intensity = (float) Math.random();
           final float falloff = (float) Math.random() * 64.0f;
-          final RVectorI3F<RSpaceWorld> position = this.world_gen.next();
+          final RVectorI3F<RSpaceWorldType> position = this.world_gen.next();
           final SBProjectionDescription projection =
             this.projection_gen.next();
           final QuaternionI4F orientation = this.quat_gen.next();
           final PathVirtual texture = this.path_gen.next();
-          final Option<KShadow> shadow = Option.some(this.shad_gen.next());
+          final Option<KShadowType> shadow = Option.some(this.shad_gen.next());
 
           return new SBLightDescriptionProjective(
             orientation,
@@ -102,11 +102,11 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
         }
         case LIGHT_SPHERICAL:
         {
-          final RVectorI3F<RSpaceRGB> colour = this.colour_gen.next();
+          final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
           final float intensity = (float) Math.random();
           final float falloff = (float) Math.random() * 64.0f;
           final float radius = (float) Math.random() * 64.0f;
-          final RVectorI3F<RSpaceWorld> position = this.world_gen.next();
+          final RVectorI3F<RSpaceWorldType> position = this.world_gen.next();
 
           return new SBLightDescriptionSpherical(KLightSphere.newSpherical(
             this.id,

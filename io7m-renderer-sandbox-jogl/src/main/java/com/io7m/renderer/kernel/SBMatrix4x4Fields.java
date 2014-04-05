@@ -24,9 +24,9 @@ import net.java.dev.designgridlayout.IRowCreator;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransform;
+import com.io7m.renderer.types.RTransformType;
 
-public final class SBMatrix4x4Fields<T extends RTransform>
+public final class SBMatrix4x4Fields<T extends RTransformType>
 {
   private final @Nonnull JTextField fields[][];
 

@@ -26,10 +26,10 @@ import com.io7m.jcache.JCacheLoader;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.kernel.types.KMeshBoundsTriangles;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RSpaceObject;
+import com.io7m.renderer.types.RSpaceObjectType;
 
 final class KMeshBoundsTrianglesObjectSpaceCacheLoader implements
-  JCacheLoader<KMeshBounds<RSpaceObject>, KMeshBoundsTriangles<RSpaceObject>, RException>
+  JCacheLoader<KMeshBounds<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, RException>
 {
   public static @Nonnull
     KMeshBoundsTrianglesObjectSpaceCacheLoader
@@ -44,14 +44,14 @@ final class KMeshBoundsTrianglesObjectSpaceCacheLoader implements
   }
 
   @Override public void cacheValueClose(
-    final @Nonnull KMeshBoundsTriangles<RSpaceObject> v)
+    final @Nonnull KMeshBoundsTriangles<RSpaceObjectType> v)
     throws RException
   {
     // Nothing
   }
 
-  @Override public KMeshBoundsTriangles<RSpaceObject> cacheValueLoad(
-    final @Nonnull KMeshBounds<RSpaceObject> bounds)
+  @Override public KMeshBoundsTriangles<RSpaceObjectType> cacheValueLoad(
+    final @Nonnull KMeshBounds<RSpaceObjectType> bounds)
     throws RException
   {
     try {
@@ -62,7 +62,7 @@ final class KMeshBoundsTrianglesObjectSpaceCacheLoader implements
   }
 
   @Override public BigInteger cacheValueSizeOf(
-    final @Nonnull KMeshBoundsTriangles<RSpaceObject> v)
+    final @Nonnull KMeshBoundsTriangles<RSpaceObjectType> v)
   {
     return BigInteger.ONE;
   }
