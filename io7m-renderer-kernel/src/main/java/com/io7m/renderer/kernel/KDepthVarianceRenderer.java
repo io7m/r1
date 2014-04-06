@@ -295,10 +295,10 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  private boolean                                              closed;
-  private final @Nonnull JCGLImplementation                    g;
-  private final @Nonnull Log                                   log;
-  private final @Nonnull KMutableMatricesType                  matrices;
+  private boolean                                                  closed;
+  private final @Nonnull JCGLImplementation                        g;
+  private final @Nonnull Log                                       log;
+  private final @Nonnull KMutableMatricesType                      matrices;
   private final @Nonnull LUCacheType<String, KProgram, RException> shader_cache;
 
   private KDepthVarianceRenderer(
@@ -313,50 +313,6 @@ import com.io7m.renderer.types.RTransformViewType;
     this.shader_cache =
       Constraints.constrainNotNull(in_shader_cache, "Shader cache");
     this.matrices = KMutableMatricesType.newMatrices();
-  }
-
-  @Override public
-    void
-    depthVarianceRendererEvaluate(
-      final @Nonnull RMatrixI4x4F<RTransformViewType> view,
-      final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection,
-      final @Nonnull Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaqueType>> batches,
-      final @Nonnull KFramebufferDepthVarianceUsableType framebuffer,
-      final @Nonnull Option<KFaceSelection> faces)
-      throws ConstraintError,
-        RException
-  {
-    Constraints.constrainNotNull(view, "View matrix");
-    Constraints.constrainNotNull(projection, "Projection matrix");
-    Constraints.constrainNotNull(batches, "Batches");
-    Constraints.constrainNotNull(framebuffer, "Framebuffer");
-    Constraints.constrainNotNull(faces, "Faces");
-    Constraints.constrainArbitrary(
-      this.rendererIsClosed() == false,
-      "Renderer not closed");
-
-    try {
-      this.matrices.withObserver(
-        view,
-        projection,
-        new MatricesObserverFunctionType<Unit, JCGLException>() {
-          @Override public Unit run(
-            final @Nonnull MatricesObserverType mwo)
-            throws ConstraintError,
-              RException,
-              JCGLException
-          {
-            KDepthVarianceRenderer.this.renderScene(
-              batches,
-              framebuffer,
-              mwo,
-              faces);
-            return Unit.unit();
-          }
-        });
-    } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
-    }
   }
 
   private
@@ -416,6 +372,50 @@ import com.io7m.renderer.types.RTransformViewType;
 
     if (this.log.enabled(Level.LOG_DEBUG)) {
       this.log.debug("closed");
+    }
+  }
+
+  @Override public
+    void
+    rendererEvaluateDepthVariance(
+      final @Nonnull RMatrixI4x4F<RTransformViewType> view,
+      final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection,
+      final @Nonnull Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final @Nonnull KFramebufferDepthVarianceUsableType framebuffer,
+      final @Nonnull Option<KFaceSelection> faces)
+      throws ConstraintError,
+        RException
+  {
+    Constraints.constrainNotNull(view, "View matrix");
+    Constraints.constrainNotNull(projection, "Projection matrix");
+    Constraints.constrainNotNull(batches, "Batches");
+    Constraints.constrainNotNull(framebuffer, "Framebuffer");
+    Constraints.constrainNotNull(faces, "Faces");
+    Constraints.constrainArbitrary(
+      this.rendererIsClosed() == false,
+      "Renderer not closed");
+
+    try {
+      this.matrices.withObserver(
+        view,
+        projection,
+        new MatricesObserverFunctionType<Unit, JCGLException>() {
+          @Override public Unit run(
+            final @Nonnull MatricesObserverType mwo)
+            throws ConstraintError,
+              RException,
+              JCGLException
+          {
+            KDepthVarianceRenderer.this.renderScene(
+              batches,
+              framebuffer,
+              mwo,
+              faces);
+            return Unit.unit();
+          }
+        });
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
     }
   }
 

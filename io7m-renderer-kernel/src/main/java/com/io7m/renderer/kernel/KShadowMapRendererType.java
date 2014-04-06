@@ -53,7 +53,7 @@ public interface KShadowMapRendererType extends KRendererType
    *          The type of exceptions raised by the given function
    */
 
-  <A, E extends Throwable> A shadowMapRendererEvaluate(
+  <A, E extends Throwable> A rendererEvaluateShadowMaps(
     final @Nonnull KCamera camera,
     final @Nonnull KSceneBatchedShadow batches,
     final @Nonnull KShadowMapWithType<A, E> with)
