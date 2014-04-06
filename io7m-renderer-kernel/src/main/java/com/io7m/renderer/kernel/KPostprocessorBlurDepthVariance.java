@@ -21,22 +21,20 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
-import com.io7m.jcache.BLUCache;
-import com.io7m.jcache.BLUCacheReceipt;
+import com.io7m.jcache.BLUCacheReceiptType;
 import com.io7m.jcache.JCacheException;
-import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLRuntimeException;
+import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorDepthVariance;
 import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.types.RException;
 
-final class KPostprocessorBlurDepthVariance extends
-  KAbstractPostprocessorDepthVariance<KBlurParameters>
+final class KPostprocessorBlurDepthVariance implements
+  KPostprocessorBlurDepthVarianceType
 {
   private static final @Nonnull String NAME;
 
@@ -77,62 +75,61 @@ final class KPostprocessorBlurDepthVariance extends
   }
 
   public static @Nonnull
-    KPostprocessorBlurDepthVariance
+    KPostprocessorBlurDepthVarianceType
     postprocessorNew(
       final @Nonnull JCGLImplementation gi,
-      final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> rgba_cache,
-      final @Nonnull LUCache<String, KProgram, RException> shader_cache,
+      final @Nonnull KRegionCopierType in_copier,
+      final @Nonnull KFramebufferDepthVarianceCacheType depth_variance_cache,
+      final @Nonnull KShaderCacheType shader_cache,
+      final @Nonnull KUnitQuadUsableType in_quad,
       final @Nonnull Log log)
-      throws ConstraintError,
-        RException
+      throws ConstraintError
   {
     return new KPostprocessorBlurDepthVariance(
       gi,
-      rgba_cache,
+      in_copier,
+      depth_variance_cache,
       shader_cache,
+      in_quad,
       log);
   }
 
-  private final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> depth_variance_cache;
-  private final @Nonnull JCGLImplementation                                                                    gi;
-  private final @Nonnull Log                                                                                   log;
-  private final @Nonnull KUnitQuad                                                                             quad;
-  private final @Nonnull LUCache<String, KProgram, RException>                                                 shader_cache;
-  private final @Nonnull KRegionCopierType                                                                     copier;
+  private boolean                                           closed;
+  private final @Nonnull KRegionCopierType                  copier;
+  private final @Nonnull KFramebufferDepthVarianceCacheType depth_variance_cache;
+  private final @Nonnull JCGLImplementation                 gi;
+  private final @Nonnull Log                                log;
+  private final @Nonnull KUnitQuadUsableType                quad;
+  private final @Nonnull KShaderCacheType                   shader_cache;
 
   private KPostprocessorBlurDepthVariance(
     final @Nonnull JCGLImplementation in_gi,
-    final @Nonnull BLUCache<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException> rgba_cache,
-    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
+    final @Nonnull KRegionCopierType in_copier,
+    final @Nonnull KFramebufferDepthVarianceCacheType in_depth_variance_cache,
+    final @Nonnull KShaderCacheType in_shader_cache,
+    final @Nonnull KUnitQuadUsableType in_quad,
     final @Nonnull Log in_log)
-    throws ConstraintError,
-      RException
+    throws ConstraintError
   {
-    super(KPostprocessorBlurDepthVariance.NAME);
+    this.gi = Constraints.constrainNotNull(in_gi, "GL implementation");
+    this.log =
+      new Log(
+        Constraints.constrainNotNull(in_log, "Log"),
+        KPostprocessorBlurDepthVariance.NAME);
 
-    try {
-      this.gi = Constraints.constrainNotNull(in_gi, "GL implementation");
-      this.depth_variance_cache =
-        Constraints.constrainNotNull(
-          rgba_cache,
-          "DepthVariance framebuffer cache");
-      this.shader_cache =
-        Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+    this.depth_variance_cache =
+      Constraints.constrainNotNull(
+        in_depth_variance_cache,
+        "Framebuffer cache");
+    this.shader_cache =
+      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+    this.copier = Constraints.constrainNotNull(in_copier, "Copier");
 
-      final KRegionCopier c =
-        new KRegionCopier(in_gi, in_log, in_shader_cache);
-      c.copierSetBlittingEnabled(false);
-      this.copier = c;
+    this.quad = Constraints.constrainNotNull(in_quad, "Quad");
+    this.closed = false;
 
-      this.log =
-        new Log(
-          Constraints.constrainNotNull(in_log, "Log"),
-          KPostprocessorBlurDepthVariance.NAME);
-
-      this.quad = KUnitQuad.newQuad(in_gi.getGLCommon(), this.log);
-
-    } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+    if (this.log.enabled(Level.LOG_DEBUG)) {
+      this.log.debug("initialized");
     }
   }
 
@@ -178,11 +175,13 @@ final class KPostprocessorBlurDepthVariance extends
     throws RException,
       ConstraintError
   {
-    try {
-      this.quad.delete(this.gi.getGLCommon());
-      this.copier.copierClose();
-    } catch (final JCGLRuntimeException e) {
-      throw RException.fromJCGLException(e);
+    Constraints.constrainArbitrary(
+      this.postprocessorIsClosed() == false,
+      "Postprocessor not closed");
+
+    this.closed = true;
+    if (this.log.enabled(Level.LOG_DEBUG)) {
+      this.log.debug("closed");
     }
   }
 
@@ -220,7 +219,7 @@ final class KPostprocessorBlurDepthVariance extends
           parameters,
           desc);
 
-      final BLUCacheReceipt<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance> receipt_a =
+      final BLUCacheReceiptType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType> receipt_a =
         this.depth_variance_cache.bluCacheGet(new_desc);
 
       try {
@@ -229,7 +228,7 @@ final class KPostprocessorBlurDepthVariance extends
           return;
         }
 
-        final BLUCacheReceipt<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance> receipt_b =
+        final BLUCacheReceiptType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType> receipt_b =
           this.depth_variance_cache.bluCacheGet(new_desc);
 
         try {
@@ -266,5 +265,15 @@ final class KPostprocessorBlurDepthVariance extends
     } catch (final JCacheException e) {
       throw RException.fromJCacheException(e);
     }
+  }
+
+  @Override public String postprocessorGetName()
+  {
+    return KPostprocessorBlurDepthVariance.NAME;
+  }
+
+  @Override public boolean postprocessorIsClosed()
+  {
+    return this.closed;
   }
 }

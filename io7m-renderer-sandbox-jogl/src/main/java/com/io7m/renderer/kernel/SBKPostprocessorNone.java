@@ -26,11 +26,8 @@ import javax.swing.JFrame;
 import net.java.dev.designgridlayout.DesignGridLayout;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcache.BLUCache;
-import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
 public final class SBKPostprocessorNone
@@ -92,15 +89,13 @@ public final class SBKPostprocessorNone
       // Nothing
     }
 
-    @Override public
-      void
-      postprocessorInitialize(
-        final JCGLImplementation gi,
-        final BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
-        final LUCache<String, KProgram, RException> shader_cache,
-        final Log log)
-        throws RException,
-          ConstraintError
+    @Override public void postprocessorInitialize(
+      final JCGLImplementation gi,
+      final KFramebufferRGBACacheType rgba_cache,
+      final KShaderCacheType shader_cache,
+      final Log log)
+      throws RException,
+        ConstraintError
     {
       // Nothing
     }

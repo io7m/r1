@@ -20,19 +20,21 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcache.BLUCache;
-import com.io7m.jcache.BLUCacheReceipt;
+import com.io7m.jcache.BLUCacheReceiptType;
 import com.io7m.jcache.JCacheException;
-import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
-import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorRGBA;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
-final class KPostprocessorCopyRGBA extends
-  KAbstractPostprocessorRGBA<KCopyParameters>
+/**
+ * A postprocessor that copies the input RGBA data to the output.
+ */
+
+public final class KPostprocessorCopyRGBA implements
+  KPostprocessorRGBAType<KCopyParameters>
 {
   private static final @Nonnull String NAME;
 
@@ -40,35 +42,55 @@ final class KPostprocessorCopyRGBA extends
     NAME = "postprocessor-copy-rgba";
   }
 
-  public static @Nonnull
-    KPostprocessorCopyRGBA
-    postprocessorNew(
-      final @Nonnull JCGLImplementation gi,
-      final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
-      final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-      final @Nonnull Log log)
-      throws ConstraintError,
-        RException
+  /**
+   * Construct a new postprocessor.
+   * 
+   * @param gi
+   *          The OpenGL implementation
+   * @param copier
+   *          A region copier
+   * @param rgba_cache
+   *          A framebuffer cache
+   * @param shader_cache
+   *          A shader cache
+   * @param log
+   *          A log handle
+   * @return A new postprocessor
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public static @Nonnull KPostprocessorCopyRGBA postprocessorNew(
+    final @Nonnull JCGLImplementation gi,
+    final @Nonnull KRegionCopierType copier,
+    final @Nonnull KFramebufferRGBACacheType rgba_cache,
+    final @Nonnull KShaderCacheType shader_cache,
+    final @Nonnull Log log)
+    throws ConstraintError
   {
-    return new KPostprocessorCopyRGBA(gi, rgba_cache, shader_cache, log);
+    return new KPostprocessorCopyRGBA(
+      gi,
+      copier,
+      rgba_cache,
+      shader_cache,
+      log);
   }
 
-  private final @Nonnull JCGLImplementation                                                  gi;
-  private final @Nonnull Log                                                                 log;
-  private final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache;
-  private final @Nonnull LUCache<String, KProgram, RException>                               shader_cache;
-  private final @Nonnull KRegionCopier                                                    copier;
+  private boolean                                  closed;
+  private final @Nonnull KRegionCopierType         copier;
+  private final @Nonnull JCGLImplementation        gi;
+  private final @Nonnull Log                       log;
+  private final @Nonnull KFramebufferRGBACacheType rgba_cache;
+  private final @Nonnull KShaderCacheType          shader_cache;
 
   private KPostprocessorCopyRGBA(
     final @Nonnull JCGLImplementation in_gi,
-    final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> in_rgba_cache,
-    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
+    final @Nonnull KRegionCopierType in_copier,
+    final @Nonnull KFramebufferRGBACacheType in_rgba_cache,
+    final @Nonnull KShaderCacheType in_shader_cache,
     final @Nonnull Log in_log)
-    throws ConstraintError,
-      RException
+    throws ConstraintError
   {
-    super(KPostprocessorCopyRGBA.NAME);
-
     this.log =
       new Log(
         Constraints.constrainNotNull(in_log, "Log"),
@@ -78,14 +100,21 @@ final class KPostprocessorCopyRGBA extends
       Constraints.constrainNotNull(in_rgba_cache, "RGBA framebuffer cache");
     this.shader_cache =
       Constraints.constrainNotNull(in_shader_cache, "Shader cache");
-    this.copier = new KRegionCopier(in_gi, in_log, in_shader_cache);
+    this.copier = Constraints.constrainNotNull(in_copier, "Region copier");
   }
 
   @Override public void postprocessorClose()
     throws RException,
       ConstraintError
   {
-    this.copier.copierClose();
+    Constraints.constrainArbitrary(
+      this.postprocessorIsClosed() == false,
+      "Postprocessor not closed");
+
+    this.closed = true;
+    if (this.log.enabled(Level.LOG_DEBUG)) {
+      this.log.debug("closed");
+    }
   }
 
   @Override public void postprocessorEvaluateRGBA(
@@ -102,11 +131,11 @@ final class KPostprocessorCopyRGBA extends
       final AreaInclusive target_select = parameters.getTargetSelect();
 
       if (input == output) {
-        final BLUCacheReceipt<KFramebufferRGBADescription, KFramebufferRGBA> r =
+        final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAType> r =
           this.rgba_cache.bluCacheGet(input.kFramebufferGetRGBADescription());
 
         try {
-          final KFramebufferRGBA temp = r.getValue();
+          final KFramebufferRGBAType temp = r.getValue();
 
           /**
            * Copy the source region of the input to the temporary buffer. Note
@@ -141,5 +170,15 @@ final class KPostprocessorCopyRGBA extends
     } catch (final JCacheException e) {
       throw RException.fromJCacheException(e);
     }
+  }
+
+  @Override public String postprocessorGetName()
+  {
+    return KPostprocessorCopyRGBA.NAME;
+  }
+
+  @Override public boolean postprocessorIsClosed()
+  {
+    return this.closed;
   }
 }

@@ -29,10 +29,14 @@ interface KRegionCopierType
    * 
    * @throws RException
    *           If an error occurs
+   * @throws ConstraintError
+   *           If the copier is already closed
+   * @see #copierIsClosed()
    */
 
   void copierClose()
-    throws RException;
+    throws RException,
+      ConstraintError;
 
   /**
    * <p>
@@ -59,9 +63,10 @@ interface KRegionCopierType
    *          The target area
    * @throws ConstraintError
    *           If any parameter is <code>null</code>, or if
-   *           <code>source == target</code>
+   *           <code>source == target</code>, or the copier is closed
    * @throws RException
    *           If an error occurs
+   * @see #copierIsClosed()
    */
 
   void copierCopyDepthVarianceOnly(
@@ -93,9 +98,10 @@ interface KRegionCopierType
    *          The target area
    * @throws ConstraintError
    *           If any parameter is <code>null</code>, or if
-   *           <code>source == target</code>
+   *           <code>source == target</code>, or the copier is closed
    * @throws RException
    *           If an error occurs
+   * @see #copierIsClosed()
    */
 
   void copierCopyRGBAOnly(
@@ -127,9 +133,10 @@ interface KRegionCopierType
    *          The target area
    * @throws ConstraintError
    *           If any parameter is <code>null</code>, or if
-   *           <code>source == target</code>
+   *           <code>source == target</code>, or the copier is closed
    * @throws RException
    *           If an error occurs
+   * @see #copierIsClosed()
    */
 
     <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
@@ -141,4 +148,38 @@ interface KRegionCopierType
       final @Nonnull AreaInclusive target_area)
       throws ConstraintError,
         RException;
+
+  /**
+   * @return <code>true</code> if fast blitting is enabled
+   */
+
+  boolean copierIsBlittingEnabled();
+
+  /**
+   * @return <code>true</code> if the copier is closed
+   * @see #copierClose()
+   */
+
+  boolean copierIsClosed();
+
+  /**
+   * <p>
+   * Enable or disable blitting.
+   * </p>
+   * <p>
+   * Blitting allows the region copier implementation to copy data between
+   * framebuffers without drawing any geometry. It is not available on every
+   * OpenGL implementation. The default is to allow blitting.
+   * </p>
+   * <p>
+   * The region copier implementation is required to give near-identical
+   * results with or without blitting enabled, and is required to work
+   * correctly on implementations that do not support blitting. The ability to
+   * turn off blitting via the {@link KRegionCopierType} is really only
+   * provided to make testing of implementations somewhat easier.
+   * </p>
+   */
+
+  void copierSetBlittingEnabled(
+    final boolean b);
 }

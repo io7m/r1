@@ -54,12 +54,11 @@ import com.io7m.jaux.functional.Pair;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.BLUCacheConfig;
 import com.io7m.jcache.BLUCacheTrivial;
-import com.io7m.jcache.JCacheLoader;
+import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcache.LRUCacheTrivial;
-import com.io7m.jcache.PCache;
 import com.io7m.jcache.PCacheConfig;
-import com.io7m.jcache.PCacheConfig.Builder;
+import com.io7m.jcache.PCacheConfig.BuilderType;
 import com.io7m.jcache.PCacheTrivial;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
@@ -113,9 +112,6 @@ import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.kernel.KRendererDebuggingType.DebugShadowMapReceiverType;
-import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
-import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
@@ -134,16 +130,9 @@ import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMesh;
-import com.io7m.renderer.kernel.types.KMeshBounds;
-import com.io7m.renderer.kernel.types.KMeshBoundsTriangles;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBuilderType;
-import com.io7m.renderer.kernel.types.KShadowMapDescriptionType;
-import com.io7m.renderer.kernel.types.KShadowMappedBasic;
-import com.io7m.renderer.kernel.types.KShadowMappedVariance;
-import com.io7m.renderer.kernel.types.KShadowType;
-import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
@@ -681,80 +670,80 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private @Nonnull SBVisibleAxes                                                                                      axes;
-  private final @Nonnull AtomicBoolean                                                                                axes_show;
-  private final @Nonnull AtomicReference<VectorI3F>                                                                   background_colour;
-  private @Nonnull LRUCacheTrivial<KMesh, KMeshBounds<RSpaceObjectType>, RException>                                  bounds_cache;
-  private @Nonnull LRUCacheConfig                                                                                     bounds_cache_config;
-  private @Nonnull LRUCacheTrivial<KMeshBounds<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, RException> bounds_triangles_cache;
-  private @Nonnull LRUCacheConfig                                                                                     bounds_triangles_cache_config;
-  private final @Nonnull ConcurrentLinkedQueue<CacheStatisticsFuture>                                                 cache_statistics_queue;
-  private final @Nonnull SBFirstPersonCamera                                                                          camera;
-  private @Nonnull SceneObserver                                                                                      camera_current;
-  private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjectionType>>                                      camera_custom_projection;
-  private final @Nonnull KTransformContext                                                                            camera_transform_context;
-  private @Nonnull RMatrixI4x4F<RTransformViewType>                                                                   camera_view_matrix;
-  private final @Nonnull RMatrixM4x4F<RTransformViewType>                                                             camera_view_matrix_temporary;
-  private @Nonnull KGraphicsCapabilities                                                                              capabilities;
-  private final SandboxConfig                                                                                         config;
-  private final @Nonnull AtomicReference<SBSceneControllerRenderer>                                                   controller;
-  private @Nonnull BLUCacheTrivial<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException>       depth_variance_cache;
-  private @Nonnull BLUCacheConfig                                                                                     depth_variance_cache_config;
-  private @Nonnull JCacheLoader<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException>          depth_variance_cache_loader;
-  private final @Nonnull FSCapabilityAll                                                                              filesystem;
-  private boolean                                                                                                     first;
-  private @Nonnull BLUCacheTrivial<KFramebufferForwardDescription, KFramebufferForwardType, RException>               forward_cache;
-  private @Nonnull BLUCacheConfig                                                                                     forward_cache_config;
-  private @Nonnull JCacheLoader<KFramebufferForwardDescription, KFramebufferForwardType, RException>                  forward_cache_loader;
-  private @CheckForNull KFramebufferForwardType                                                                       framebuffer;
-  private @CheckForNull JCGLImplementationJOGL                                                                        gi;
-  private @Nonnull SBVisibleGridPlane                                                                                 grid;
-  private final @Nonnull AtomicBoolean                                                                                grid_show;
-  private final @Nonnull SBInputState                                                                                 input_state;
-  private @Nonnull KLabelDecider                                                                                      label_cache;
-  private final @Nonnull AtomicBoolean                                                                                lights_show;
-  private final @Nonnull AtomicBoolean                                                                                lights_show_surface;
-  private final @Nonnull Log                                                                                          log;
-  private final @Nonnull RMatrixM4x4F<RTransformModelType>                                                            matrix_model;
-  private final @Nonnull RMatrixM4x4F<RTransformModelType>                                                            matrix_model_temporary;
-  private final @Nonnull RMatrixM4x4F<RTransformModelViewType>                                                        matrix_modelview;
-  private final @Nonnull RMatrixM4x4F<RTransformProjectionType>                                                       matrix_projection;
-  private final @Nonnull RMatrixM4x4F<RTransformViewType>                                                             matrix_view;
-  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>                                                      mesh_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                                                        mesh_load_queue;
-  private final @Nonnull HashMap<PathVirtual, KMesh>                                                                  meshes;
-  private @CheckForNull SBKPostprocessor                                                                              postprocessor;
-  private final @Nonnull AtomicReference<SBKPostprocessor>                                                            postprocessor_new;
-  private @CheckForNull KProgram                                                                                      program_ccolour;
-  private @CheckForNull KProgram                                                                                      program_uv;
-  private @CheckForNull KProgram                                                                                      program_vcolour;
-  private final @Nonnull Map<SBProjectionDescription, SBVisibleProjection>                                            projection_cache;
-  private final @Nonnull QuaternionM4F.Context                                                                        qm4f_context;
-  private @CheckForNull KRendererType                                                                                 renderer;
-  private final @Nonnull AtomicReference<SBKRendererType>                                                             renderer_new;
-  private final @Nonnull SBSoftRestrictions                                                                           restrictions;
-  private @Nonnull BLUCacheTrivial<KFramebufferRGBADescription, KFramebufferRGBA, RException>                         rgba_cache;
-  private @Nonnull BLUCacheConfig                                                                                     rgba_cache_config;
-  private @Nonnull JCacheLoader<KFramebufferRGBADescription, KFramebufferRGBA, RException>                            rgba_cache_loader;
-  private final @Nonnull AtomicReference<RunningState>                                                                running;
-  private Collection<SBLight>                                                                                         scene_lights;
-  private @CheckForNull SBQuad                                                                                        screen_quad;
-  private @Nonnull LRUCacheTrivial<String, KProgram, RException>                                                      shader_cache;
-  private @Nonnull LRUCacheConfig                                                                                     shader_cache_config;
-  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>                                                      shader_load_queue;
-  private final @Nonnull HashMap<String, SBShader>                                                                    shaders;
-  private @Nonnull PCache<KShadowMapDescriptionType, KShadowMap, RException>                                          shadow_cache;
-  private @Nonnull PCacheConfig                                                                                       shadow_cache_config;
-  private @Nonnull HashMap<PathVirtual, KMesh>                                                                        sphere_meshes;
-  private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>                                               texture_cube_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>                                                 texture_cube_load_queue;
-  private final @Nonnull TextureLoader                                                                                texture_loader;
-  private @CheckForNull List<TextureUnit>                                                                             texture_units;
-  private final @Nonnull ConcurrentLinkedQueue<Texture2DDeleteFuture>                                                 texture2d_delete_queue;
-  private final @Nonnull ConcurrentLinkedQueue<Texture2DLoadFuture>                                                   texture2d_load_queue;
-  private final @Nonnull HashMap<PathVirtual, Texture2DStatic>                                                        textures_2d;
-  private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>                                                      textures_cube;
-  private @Nonnull AreaInclusive                                                                                      viewport;
+  private @Nonnull SBVisibleAxes                                                                                     axes;
+  private final @Nonnull AtomicBoolean                                                                               axes_show;
+  private final @Nonnull AtomicReference<VectorI3F>                                                                  background_colour;
+  private @Nonnull KMeshBoundsCacheType<RSpaceObjectType>                                                            bounds_cache;
+  private @Nonnull LRUCacheConfig                                                                                    bounds_cache_config;
+  private @Nonnull KMeshBoundsTrianglesCacheType<RSpaceObjectType>                                                   bounds_triangles_cache;
+  private @Nonnull LRUCacheConfig                                                                                    bounds_triangles_cache_config;
+  private final @Nonnull ConcurrentLinkedQueue<CacheStatisticsFuture>                                                cache_statistics_queue;
+  private final @Nonnull SBFirstPersonCamera                                                                         camera;
+  private @Nonnull SceneObserver                                                                                     camera_current;
+  private final @Nonnull AtomicReference<RMatrixI4x4F<RTransformProjectionType>>                                     camera_custom_projection;
+  private final @Nonnull KTransformContext                                                                           camera_transform_context;
+  private @Nonnull RMatrixI4x4F<RTransformViewType>                                                                  camera_view_matrix;
+  private final @Nonnull RMatrixM4x4F<RTransformViewType>                                                            camera_view_matrix_temporary;
+  private @Nonnull KGraphicsCapabilities                                                                             capabilities;
+  private final SandboxConfig                                                                                        config;
+  private final @Nonnull AtomicReference<SBSceneControllerRenderer>                                                  controller;
+  private @Nonnull KFramebufferDepthVarianceCacheType                                                                depth_variance_cache;
+  private @Nonnull BLUCacheConfig                                                                                    depth_variance_cache_config;
+  private @Nonnull JCacheLoaderType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType, RException> depth_variance_cache_loader;
+  private final @Nonnull FSCapabilityAll                                                                             filesystem;
+  private boolean                                                                                                    first;
+  private @Nonnull KFramebufferForwardCacheType                                                                      forward_cache;
+  private @Nonnull BLUCacheConfig                                                                                    forward_cache_config;
+  private @Nonnull JCacheLoaderType<KFramebufferForwardDescription, KFramebufferForwardType, RException>             forward_cache_loader;
+  private @CheckForNull KFramebufferForwardType                                                                      framebuffer;
+  private @CheckForNull JCGLImplementationJOGL                                                                       gi;
+  private @Nonnull SBVisibleGridPlane                                                                                grid;
+  private final @Nonnull AtomicBoolean                                                                               grid_show;
+  private final @Nonnull SBInputState                                                                                input_state;
+  private @Nonnull KForwardLabelDeciderType                                                                          label_cache;
+  private final @Nonnull AtomicBoolean                                                                               lights_show;
+  private final @Nonnull AtomicBoolean                                                                               lights_show_surface;
+  private final @Nonnull Log                                                                                         log;
+  private final @Nonnull RMatrixM4x4F<RTransformModelType>                                                           matrix_model;
+  private final @Nonnull RMatrixM4x4F<RTransformModelType>                                                           matrix_model_temporary;
+  private final @Nonnull RMatrixM4x4F<RTransformModelViewType>                                                       matrix_modelview;
+  private final @Nonnull RMatrixM4x4F<RTransformProjectionType>                                                      matrix_projection;
+  private final @Nonnull RMatrixM4x4F<RTransformViewType>                                                            matrix_view;
+  private final @Nonnull ConcurrentLinkedQueue<MeshDeleteFuture>                                                     mesh_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<MeshLoadFuture>                                                       mesh_load_queue;
+  private final @Nonnull HashMap<PathVirtual, KMesh>                                                                 meshes;
+  private @CheckForNull SBKPostprocessor                                                                             postprocessor;
+  private final @Nonnull AtomicReference<SBKPostprocessor>                                                           postprocessor_new;
+  private @CheckForNull KProgram                                                                                     program_ccolour;
+  private @CheckForNull KProgram                                                                                     program_uv;
+  private @CheckForNull KProgram                                                                                     program_vcolour;
+  private final @Nonnull Map<SBProjectionDescription, SBVisibleProjection>                                           projection_cache;
+  private final @Nonnull QuaternionM4F.Context                                                                       qm4f_context;
+  private @CheckForNull SBKRendererType                                                                              renderer;
+  private final @Nonnull AtomicReference<SBKRendererSelectionType>                                                   renderer_new;
+  private final @Nonnull SBSoftRestrictions                                                                          restrictions;
+  private @Nonnull KFramebufferRGBACacheType                                                                         rgba_cache;
+  private @Nonnull BLUCacheConfig                                                                                    rgba_cache_config;
+  private @Nonnull JCacheLoaderType<KFramebufferRGBADescription, KFramebufferRGBAType, RException>                   rgba_cache_loader;
+  private final @Nonnull AtomicReference<RunningState>                                                               running;
+  private Collection<SBLight>                                                                                        scene_lights;
+  private @CheckForNull SBQuad                                                                                       screen_quad;
+  private @Nonnull KShaderCacheType                                                                                  shader_cache;
+  private @Nonnull LRUCacheConfig                                                                                    shader_cache_config;
+  private final @Nonnull ConcurrentLinkedQueue<ShaderLoadFuture>                                                     shader_load_queue;
+  private final @Nonnull HashMap<String, SBShader>                                                                   shaders;
+  private @Nonnull KShadowMapCacheType                                                                               shadow_cache;
+  private @Nonnull PCacheConfig                                                                                      shadow_cache_config;
+  private @Nonnull HashMap<PathVirtual, KMesh>                                                                       sphere_meshes;
+  private final @Nonnull ConcurrentLinkedQueue<TextureCubeDeleteFuture>                                              texture_cube_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<TextureCubeLoadFuture>                                                texture_cube_load_queue;
+  private final @Nonnull TextureLoader                                                                               texture_loader;
+  private @CheckForNull List<TextureUnit>                                                                            texture_units;
+  private final @Nonnull ConcurrentLinkedQueue<Texture2DDeleteFuture>                                                texture2d_delete_queue;
+  private final @Nonnull ConcurrentLinkedQueue<Texture2DLoadFuture>                                                  texture2d_load_queue;
+  private final @Nonnull HashMap<PathVirtual, Texture2DStatic>                                                       textures_2d;
+  private final @Nonnull HashMap<PathVirtual, TextureCubeStatic>                                                     textures_cube;
+  private @Nonnull AreaInclusive                                                                                     viewport;
 
   public SBGLRenderer(
     final @Nonnull SandboxConfig in_config,
@@ -864,7 +853,7 @@ final class SBGLRenderer implements GLEventListener
 
     this.postprocessor_new = new AtomicReference<SBKPostprocessor>();
     this.postprocessor = null;
-    this.renderer_new = new AtomicReference<SBKRendererType>();
+    this.renderer_new = new AtomicReference<SBKRendererSelectionType>();
     this.renderer = null;
 
     this.first = true;
@@ -1252,117 +1241,117 @@ final class SBGLRenderer implements GLEventListener
   }
 
   private void handleShadowMapDumpRequest()
-    throws ConstraintError
   {
-    final KRendererType r = this.renderer;
+    final SBKRendererType r = this.renderer;
     if (r != null) {
-      if (this.input_state.wantShadowMapDump()) {
-        this.log.debug("Dumping shadow maps");
-        final KRendererDebuggingType d = r.rendererDebug();
-        if (d != null) {
-          d.debugForEachShadowMap(new DebugShadowMapReceiverType() {
-            final StringBuilder name = new StringBuilder();
-
-            @Override public void receive(
-              final @Nonnull KShadowType shadow,
-              final @Nonnull KShadowMap map)
-            {
-              try {
-                final StringBuilder n = this.name;
-                n.setLength(0);
-                n.append("shadow-");
-
-                shadow
-                  .shadowAccept(new KShadowVisitorType<Unit, ConstraintError>() {
-                    @Override public Unit shadowVisitMappedBasic(
-                      final @Nonnull KShadowMappedBasic s)
-                      throws ConstraintError,
-                        JCGLException,
-                        RException,
-                        ConstraintError
-                    {
-                      n.append("basic-");
-                      n.append(s.getDescription().mapGetLightID());
-                      return Unit.unit();
-                    }
-
-                    @Override public Unit shadowVisitMappedVariance(
-                      final @Nonnull KShadowMappedVariance s)
-                      throws ConstraintError,
-                        JCGLException,
-                        RException,
-                        ConstraintError
-                    {
-                      n.append("variance-");
-                      n.append(s.getDescription().mapGetLightID());
-                      return Unit.unit();
-                    }
-                  });
-
-                map
-                  .kShadowMapAccept(new KShadowMapVisitorType<Unit, ConstraintError>() {
-                    @SuppressWarnings("synthetic-access") @Override public
-                      Unit
-                      shadowMapVisitBasic(
-                        final KShadowMapBasic smb)
-                        throws ConstraintError,
-                          RException
-                    {
-                      try {
-                        SBTextureUtilities
-                          .textureDumpTimestampedTemporary2DStatic(
-                            SBGLRenderer.this.gi,
-                            smb
-                              .getFramebuffer()
-                              .kFramebufferGetDepthTexture(),
-                            n.toString(),
-                            SBGLRenderer.this.log);
-                      } catch (final FileNotFoundException e) {
-                        e.printStackTrace();
-                      } catch (final IOException e) {
-                        e.printStackTrace();
-                      } catch (final JCGLException e) {
-                        e.printStackTrace();
-                      }
-                      return Unit.unit();
-                    }
-
-                    @Override public Unit shadowMapVisitVariance(
-                      final @Nonnull KShadowMapVariance smv)
-                      throws ConstraintError,
-                        RException
-                    {
-                      try {
-                        SBTextureUtilities
-                          .textureDumpTimestampedTemporary2DStatic(
-                            SBGLRenderer.this.gi,
-                            smv
-                              .getFramebuffer()
-                              .kFramebufferGetDepthVarianceTexture(),
-                            n.toString(),
-                            SBGLRenderer.this.log);
-                      } catch (final FileNotFoundException e) {
-                        e.printStackTrace();
-                      } catch (final IOException e) {
-                        e.printStackTrace();
-                      } catch (final JCGLException e) {
-                        e.printStackTrace();
-                      }
-                      return Unit.unit();
-                    }
-                  });
-
-              } catch (final ConstraintError e) {
-                e.printStackTrace();
-              } catch (final RException e) {
-                e.printStackTrace();
-              } catch (final JCGLException e) {
-                e.printStackTrace();
-              }
-            }
-          });
-        }
-      }
+      // if (this.input_state.wantShadowMapDump()) {
+      // this.log.debug("Dumping shadow maps");
+      // final KRendererDebuggingType d = r.rendererDebug();
+      // if (d != null) {
+      // d.debugForEachShadowMap(new DebugShadowMapReceiverType() {
+      // final StringBuilder name = new StringBuilder();
+      //
+      // @Override public void receive(
+      // final @Nonnull KShadowType shadow,
+      // final @Nonnull KShadowMap map)
+      // {
+      // try {
+      // final StringBuilder n = this.name;
+      // n.setLength(0);
+      // n.append("shadow-");
+      //
+      // shadow
+      // .shadowAccept(new KShadowVisitorType<Unit, ConstraintError>() {
+      // @Override public Unit shadowVisitMappedBasic(
+      // final @Nonnull KShadowMappedBasic s)
+      // throws ConstraintError,
+      // JCGLException,
+      // RException,
+      // ConstraintError
+      // {
+      // n.append("basic-");
+      // n.append(s.getDescription().mapGetLightID());
+      // return Unit.unit();
+      // }
+      //
+      // @Override public Unit shadowVisitMappedVariance(
+      // final @Nonnull KShadowMappedVariance s)
+      // throws ConstraintError,
+      // JCGLException,
+      // RException,
+      // ConstraintError
+      // {
+      // n.append("variance-");
+      // n.append(s.getDescription().mapGetLightID());
+      // return Unit.unit();
+      // }
+      // });
+      //
+      // map
+      // .kShadowMapAccept(new KShadowMapVisitorType<Unit, ConstraintError>()
+      // {
+      // @SuppressWarnings("synthetic-access") @Override public
+      // Unit
+      // shadowMapVisitBasic(
+      // final KShadowMapBasic smb)
+      // throws ConstraintError,
+      // RException
+      // {
+      // try {
+      // SBTextureUtilities
+      // .textureDumpTimestampedTemporary2DStatic(
+      // SBGLRenderer.this.gi,
+      // smb
+      // .getFramebuffer()
+      // .kFramebufferGetDepthTexture(),
+      // n.toString(),
+      // SBGLRenderer.this.log);
+      // } catch (final FileNotFoundException e) {
+      // e.printStackTrace();
+      // } catch (final IOException e) {
+      // e.printStackTrace();
+      // } catch (final JCGLException e) {
+      // e.printStackTrace();
+      // }
+      // return Unit.unit();
+      // }
+      //
+      // @Override public Unit shadowMapVisitVariance(
+      // final @Nonnull KShadowMapVariance smv)
+      // throws ConstraintError,
+      // RException
+      // {
+      // try {
+      // SBTextureUtilities
+      // .textureDumpTimestampedTemporary2DStatic(
+      // SBGLRenderer.this.gi,
+      // smv
+      // .getFramebuffer()
+      // .kFramebufferGetDepthVarianceTexture(),
+      // n.toString(),
+      // SBGLRenderer.this.log);
+      // } catch (final FileNotFoundException e) {
+      // e.printStackTrace();
+      // } catch (final IOException e) {
+      // e.printStackTrace();
+      // } catch (final JCGLException e) {
+      // e.printStackTrace();
+      // }
+      // return Unit.unit();
+      // }
+      // });
+      //
+      // } catch (final ConstraintError e) {
+      // e.printStackTrace();
+      // } catch (final RException e) {
+      // e.printStackTrace();
+      // } catch (final JCGLException e) {
+      // e.printStackTrace();
+      // }
+      // }
+      // });
+      // }
+      // }
     }
   }
 
@@ -1443,57 +1432,66 @@ final class SBGLRenderer implements GLEventListener
           .empty()
           .withMaximumBorrowsPerKey(BigInteger.TEN)
           .withMaximumCapacity(BigInteger.valueOf(128L * 1024L * 1024L));
+
       this.rgba_cache_loader =
         KFramebufferRGBACacheLoader.newLoader(this.gi, this.log);
+
       this.rgba_cache =
-        BLUCacheTrivial.newCache(
+        KFramebufferRGBACache.wrap(BLUCacheTrivial.newCache(
           this.rgba_cache_loader,
-          this.rgba_cache_config);
+          this.rgba_cache_config));
 
       this.forward_cache_config =
         BLUCacheConfig
           .empty()
           .withMaximumBorrowsPerKey(BigInteger.TEN)
           .withMaximumCapacity(BigInteger.valueOf(128L * 1024L * 1024L));
+
       this.forward_cache_loader =
         KFramebufferForwardCacheLoader.newLoader(this.gi, this.log);
+
       this.forward_cache =
-        BLUCacheTrivial.newCache(
+        KFramebufferForwardCache.wrap(BLUCacheTrivial.newCache(
           this.forward_cache_loader,
-          this.forward_cache_config);
+          this.forward_cache_config));
 
       this.depth_variance_cache_config =
         BLUCacheConfig
           .empty()
           .withMaximumBorrowsPerKey(BigInteger.TEN)
           .withMaximumCapacity(BigInteger.valueOf(128L * 1024L * 1024L));
+
       this.depth_variance_cache_loader =
         KFramebufferDepthVarianceCacheLoader.newLoader(this.gi, this.log);
+
       this.depth_variance_cache =
-        BLUCacheTrivial.newCache(
+        KFramebufferDepthVarianceCache.wrap(BLUCacheTrivial.newCache(
           this.depth_variance_cache_loader,
-          this.depth_variance_cache_config);
+          this.depth_variance_cache_config));
 
       this.shader_cache_config =
         LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(1024));
+
       this.shader_cache =
-        LRUCacheTrivial.newCache(
+        KShaderCache.wrap(LRUCacheTrivial.newCache(
           KShaderCacheLoader.newLoader(this.gi, this.filesystem, this.log),
-          this.shader_cache_config);
+          this.shader_cache_config));
 
       this.bounds_cache_config =
         LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(8192));
+
       this.bounds_cache =
-        LRUCacheTrivial.newCache(
+        KMeshBoundsCache.wrap(LRUCacheTrivial.newCache(
           KMeshBoundsObjectSpaceCacheLoader.newLoader(),
-          this.bounds_cache_config);
+          this.bounds_cache_config));
 
       this.bounds_triangles_cache_config =
         LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(8192));
+
       this.bounds_triangles_cache =
-        LRUCacheTrivial.newCache(
+        KMeshBoundsTrianglesCache.wrap(LRUCacheTrivial.newCache(
           KMeshBoundsTrianglesObjectSpaceCacheLoader.newLoader(),
-          this.bounds_triangles_cache_config);
+          this.bounds_triangles_cache_config));
 
       this.capabilities = KGraphicsCapabilities.getCapabilities(this.gi);
 
@@ -1501,14 +1499,15 @@ final class SBGLRenderer implements GLEventListener
         KLabelDecider.newDecider(this.capabilities, BigInteger.valueOf(8192));
 
       {
-        final Builder b = PCacheConfig.newBuilder();
+        final BuilderType b = PCacheConfig.newBuilder();
         b.setNoMaximumSize();
         b.setMaximumAge(BigInteger.valueOf(60));
         this.shadow_cache_config = b.create();
+
         this.shadow_cache =
-          PCacheTrivial.newCache(
+          KShadowMapCache.wrap(PCacheTrivial.newCache(
             KShadowMapCacheLoader.newLoader(this.gi, this.log),
-            this.shadow_cache_config);
+            this.shadow_cache_config));
       }
 
       this.viewport = SBGLRenderer.drawableArea(drawable);
@@ -1563,132 +1562,161 @@ final class SBGLRenderer implements GLEventListener
     }
   }
 
-  private @Nonnull KRendererType initKernelRenderer(
-    final @Nonnull SBKRendererType type)
+  private @Nonnull SBKRendererType initKernelRenderer(
+    final @Nonnull SBKRendererSelectionType type)
     throws ConstraintError,
-      RException
+      RException,
+      JCGLException
   {
     switch (type) {
       case KRENDERER_DEBUG_BITANGENTS_EYE:
       {
-        return KRendererDebugBitangentsEye.rendererNew(
+        return new SBKRendererDebug(KRendererDebugBitangentsEye.rendererNew(
           this.gi,
-          this.filesystem,
-          this.log);
+          this.shader_cache,
+          this.log));
       }
       case KRENDERER_DEBUG_BITANGENTS_LOCAL:
       {
-        return KRendererDebugBitangentsLocal.rendererNew(
-          this.gi,
-          this.filesystem,
-          this.log);
+        return new SBKRendererDebug(
+          KRendererDebugBitangentsLocal.rendererNew(
+            this.gi,
+            this.shader_cache,
+            this.log));
       }
       case KRENDERER_DEBUG_DEPTH:
       {
-        return KRendererDebugDepth.rendererNew(
+        return new SBKRendererDebug(KRendererDebugDepth.rendererNew(
           this.gi,
           this.label_cache,
           this.shader_cache,
-          this.log);
+          this.log));
       }
       case KRENDERER_DEBUG_NORMALS_MAP_EYE:
       {
-        return KRendererDebugNormalsMapEye.rendererNew(
+        return new SBKRendererDebug(KRendererDebugNormalsMapEye.rendererNew(
           this.gi,
-          this.filesystem,
-          this.log);
+          this.shader_cache,
+          this.log));
       }
       case KRENDERER_DEBUG_NORMALS_MAP_LOCAL:
       {
-        return KRendererDebugNormalsMapLocal.rendererNew(
-          this.gi,
-          this.filesystem,
-          this.log);
+        return new SBKRendererDebug(
+          KRendererDebugNormalsMapLocal.rendererNew(
+            this.gi,
+            this.shader_cache,
+            this.log));
       }
       case KRENDERER_DEBUG_NORMALS_MAP_TANGENT:
       {
-        return KRendererDebugNormalsMapTangent.rendererNew(
-          this.gi,
-          this.filesystem,
-          this.log);
+        return new SBKRendererDebug(
+          KRendererDebugNormalsMapTangent.rendererNew(
+            this.gi,
+            this.shader_cache,
+            this.log));
       }
       case KRENDERER_DEBUG_NORMALS_VERTEX_EYE:
       {
-        return KRendererDebugNormalsVertexEye.rendererNew(
-          this.gi,
-          this.filesystem,
-          this.log);
+        return new SBKRendererDebug(
+          KRendererDebugNormalsVertexEye.rendererNew(
+            this.gi,
+            this.shader_cache,
+            this.log));
       }
       case KRENDERER_DEBUG_NORMALS_VERTEX_LOCAL:
       {
-        return KRendererDebugNormalsVertexLocal.rendererNew(
-          this.gi,
-          this.filesystem,
-          this.log);
+        return new SBKRendererDebug(
+          KRendererDebugNormalsVertexLocal.rendererNew(
+            this.gi,
+            this.shader_cache,
+            this.log));
       }
       case KRENDERER_DEBUG_TANGENTS_VERTEX_EYE:
       {
-        return KRendererDebugTangentsVertexEye.rendererNew(
-          this.gi,
-          this.filesystem,
-          this.log);
+        return new SBKRendererDebug(
+          KRendererDebugTangentsVertexEye.rendererNew(
+            this.gi,
+            this.shader_cache,
+            this.log));
       }
       case KRENDERER_DEBUG_TANGENTS_VERTEX_LOCAL:
       {
-        return KRendererDebugTangentsVertexLocal.rendererNew(
-          this.gi,
-          this.filesystem,
-          this.log);
+        return new SBKRendererDebug(
+          KRendererDebugTangentsVertexLocal.rendererNew(
+            this.gi,
+            this.shader_cache,
+            this.log));
       }
       case KRENDERER_DEBUG_UV_VERTEX:
       {
-        return KRendererDebugUVVertex.rendererNew(
+        return new SBKRendererDebug(KRendererDebugUVVertex.rendererNew(
           this.gi,
-          this.filesystem,
-          this.log);
+          this.shader_cache,
+          this.log));
       }
       case KRENDERER_FORWARD:
       {
-        return KRendererForwardActual.rendererNew(
-          this.gi,
-          KShadowMapRendererActual.newRenderer(
+        final KDepthRendererType depth_renderer =
+          KDepthRenderer.newRenderer(this.gi, this.shader_cache, this.log);
+
+        final KDepthVarianceRendererType depth_variance_renderer =
+          KDepthVarianceRenderer.newRenderer(
             this.gi,
             this.shader_cache,
-            this.shadow_cache,
-            this.depth_variance_cache,
-            this.capabilities,
-            this.log),
-          KRefractionRendererActual.newRenderer(
+            this.log);
+
+        final KUnitQuadUsableType quad =
+          KUnitQuad.newQuad(this.gi.getGLCommon(), this.log);
+
+        final KRegionCopierType copier =
+          KRegionCopier.newCopier(this.gi, this.log, this.shader_cache, quad);
+
+        final KPostprocessorBlurDepthVarianceType blur =
+          KPostprocessorBlurDepthVariance.postprocessorNew(
             this.gi,
+            copier,
+            this.depth_variance_cache,
+            this.shader_cache,
+            quad,
+            this.log);
+
+        final KShadowMapRenderer shadow_map_renderer =
+          KShadowMapRenderer.newRenderer(
+            this.gi,
+            depth_renderer,
+            depth_variance_renderer,
+            blur,
+            this.shader_cache,
+            this.shadow_cache,
+            this.log);
+
+        final KRefractionRendererType refraction_renderer =
+          KRefractionRenderer.newRenderer(
+            this.gi,
+            copier,
             this.shader_cache,
             this.forward_cache,
             this.bounds_cache,
             this.bounds_triangles_cache,
             this.label_cache,
-            this.log),
-          this.label_cache,
-          this.shader_cache,
-          this.capabilities,
-          this.log);
-      }
-      case KRENDERER_DEBUG_SHADOW_MAP:
-      {
-        return KRendererDebugShadowMap.rendererNew(
+            this.log);
+
+        return new SBKRendererForward(KRendererForward.newRenderer(
           this.gi,
+          depth_renderer,
+          shadow_map_renderer,
+          refraction_renderer,
           this.label_cache,
           this.shader_cache,
-          this.capabilities,
-          this.log,
-          this.shadow_cache,
-          this.depth_variance_cache);
+          this.log));
       }
       case KRENDERER_DEBUG_DEPTH_VARIANCE:
       {
-        return KRendererDebugDepthVariance.rendererNew(
+        return new SBKRendererDebug(KRendererDebugDepthVariance.rendererNew(
           this.gi,
           this.label_cache,
           this.shader_cache,
-          this.log);
+          this.log));
       }
     }
 
@@ -1697,17 +1725,18 @@ final class SBGLRenderer implements GLEventListener
 
   private void loadNewRendererIfNecessary()
     throws ConstraintError,
-      RException
+      RException,
+      JCGLException
   {
-    final SBKRendererType rn = this.renderer_new.getAndSet(null);
+    final SBKRendererSelectionType rn = this.renderer_new.getAndSet(null);
     if (rn != null) {
-      final KRendererType old = this.renderer;
+      final SBKRendererType old = this.renderer;
 
       this.renderer = this.initKernelRenderer(rn);
       this.running.set(RunningState.STATE_RUNNING);
 
       if (old != null) {
-        old.rendererClose();
+        old.close();
       }
     }
 
@@ -2538,40 +2567,37 @@ final class SBGLRenderer implements GLEventListener
       }
 
       if (this.renderer != null) {
-        this.renderer.rendererSetBackgroundRGBA(new VectorI4F(
-          0.0f,
-          0.0f,
-          0.0f,
-          0.0f));
-
         final KFramebufferForwardType fb = SBGLRenderer.this.framebuffer;
-        this.renderer
-          .rendererVisitableAccept(new KRendererVisitorType<Unit, RException>() {
-            @Override public Unit rendererVisitDebug(
-              final @Nonnull KRendererDebugType r)
-              throws ConstraintError,
-                RException
-            {
-              r.rendererDebugEvaluate(fb, builder.sceneCreate());
-              return Unit.unit();
-            }
 
-            @Override public Unit rendererVisitDeferred(
-              final @Nonnull KRendererDeferredType r)
-            {
-              // TODO: No deferred renderers yet
-              throw new UnimplementedCodeException();
-            }
+        this.renderer.accept(new SBKRendererVisitor() {
+          @Override public void visitForward(
+            final @Nonnull KRendererForwardType r)
+            throws RException,
+              ConstraintError
+          {
+            r.rendererForwardSetBackgroundRGBA(new VectorI4F(
+              0.0f,
+              0.0f,
+              0.0f,
+              0.0f));
+            r.rendererForwardEvaluate(fb, builder.sceneCreate());
+          }
 
-            @Override public Unit rendererVisitForward(
-              final @Nonnull KRendererForwardType r)
-              throws ConstraintError,
-                RException
-            {
-              r.rendererForwardEvaluate(fb, builder.sceneCreate());
-              return Unit.unit();
-            }
-          });
+          @Override public void visitDeferred(
+            final @Nonnull KRendererDeferredType r)
+          {
+            // TODO Auto-generated method stub
+            throw new UnimplementedCodeException();
+          }
+
+          @Override public void visitDebug(
+            final @Nonnull KRendererDebugType r)
+            throws RException,
+              ConstraintError
+          {
+            r.rendererDebugEvaluate(fb, builder.sceneCreate());
+          }
+        });
 
         if (this.postprocessor != null) {
           this.postprocessor.postprocessorRun(
@@ -2629,7 +2655,7 @@ final class SBGLRenderer implements GLEventListener
   }
 
   void setRenderer(
-    final @Nonnull SBKRendererType type)
+    final @Nonnull SBKRendererSelectionType type)
   {
     this.renderer_new.set(type);
   }

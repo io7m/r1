@@ -28,7 +28,8 @@ import com.io7m.renderer.types.RException;
  *          The type of renderer-specific configuration values
  */
 
-public interface KPostprocessorDepthVarianceType<C> extends KPostprocessorType
+public interface KPostprocessorDepthVarianceType<C> extends
+  KPostprocessorType
 {
   /**
    * <p>

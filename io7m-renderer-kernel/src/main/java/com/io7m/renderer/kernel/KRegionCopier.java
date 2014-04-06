@@ -26,7 +26,6 @@ import com.io7m.jaux.RangeInclusive;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
-import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsable;
 import com.io7m.jcanephora.FramebufferBlitBuffer;
@@ -51,13 +50,18 @@ import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureUnit;
+import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
 
-@SuppressWarnings("synthetic-access") final class KRegionCopier implements
+/**
+ * The default implementation of the {@link KRegionCopierType} interface.
+ */
+
+@SuppressWarnings("synthetic-access") public final class KRegionCopier implements
   KRegionCopierType
 {
   private static final @Nonnull String SHADER_COPY_DEPTH4444;
@@ -218,17 +222,49 @@ import com.io7m.renderer.types.RTransformTextureType;
     }
   }
 
-  private boolean                                              blit;
-  private final @Nonnull JCGLImplementation                    g;
-  private final @Nonnull RMatrixM3x3F<RTransformTextureType>       matrix_uv;
-  private final @Nonnull KUnitQuad                             quad;
-  private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
-  private final @Nonnull KTextureUnitAllocator                 texture_units;
+  /**
+   * Construct a new region copier.
+   * 
+   * @param g
+   *          The OpenGL implementation
+   * @param log
+   *          A log handle
+   * @param shader_cache
+   *          A shader cache
+   * @param quad
+   *          A unit quad
+   * @return A new region copier
+   * @throws RException
+   *           If an error occurs during initialization
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
 
-  KRegionCopier(
-    final @Nonnull JCGLImplementation in_g,
+  public static @Nonnull KRegionCopierType newCopier(
+    final @Nonnull JCGLImplementation g,
     final @Nonnull Log log,
-    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache)
+    final @Nonnull KShaderCacheType shader_cache,
+    final @Nonnull KUnitQuadUsableType quad)
+    throws RException,
+      ConstraintError
+  {
+    return new KRegionCopier(g, log, shader_cache, quad);
+  }
+
+  private boolean                                            blit;
+  private boolean                                            closed;
+  private final @Nonnull JCGLImplementation                  g;
+  private final @Nonnull Log                                 log;
+  private final @Nonnull RMatrixM3x3F<RTransformTextureType> matrix_uv;
+  private final @Nonnull KUnitQuadUsableType                 quad;
+  private final @Nonnull KShaderCacheType                    shader_cache;
+  private final @Nonnull KTextureUnitAllocator               texture_units;
+
+  private KRegionCopier(
+    final @Nonnull JCGLImplementation in_g,
+    final @Nonnull Log in_log,
+    final @Nonnull KShaderCacheType in_shader_cache,
+    final @Nonnull KUnitQuadUsableType in_quad)
     throws ConstraintError,
       RException
   {
@@ -236,25 +272,34 @@ import com.io7m.renderer.types.RTransformTextureType;
       this.g = Constraints.constrainNotNull(in_g, "GL implementation");
       this.shader_cache =
         Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+      this.quad = Constraints.constrainNotNull(in_quad, "Quad");
+      this.log =
+        new Log(Constraints.constrainNotNull(in_log, "Log"), "region-copier");
+
       this.matrix_uv = new RMatrixM3x3F<RTransformTextureType>();
       this.blit = true;
-      this.quad = KUnitQuad.newQuad(this.g.getGLCommon(), log);
       this.texture_units = KTextureUnitAllocator.newAllocator(this.g);
 
+      if (this.log.enabled(Level.LOG_DEBUG)) {
+        this.log.debug("initialized");
+      }
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
     }
   }
 
   @Override public void copierClose()
-    throws RException
+    throws RException,
+      ConstraintError
   {
-    try {
-      this.quad.delete(this.g.getGLCommon());
-    } catch (final JCGLRuntimeException e) {
-      throw RException.fromJCGLException(e);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
+    Constraints.constrainArbitrary(
+      this.copierIsClosed() == false,
+      "Copier not closed");
+
+    this.closed = true;
+
+    if (this.log.enabled(Level.LOG_DEBUG)) {
+      this.log.debug("closed");
     }
   }
 
@@ -271,6 +316,9 @@ import com.io7m.renderer.types.RTransformTextureType;
     Constraints.constrainNotNull(target, "Target");
     Constraints.constrainNotNull(target_area, "Target area");
     Constraints.constrainArbitrary(source != target, "Source != Target");
+    Constraints.constrainArbitrary(
+      this.copierIsClosed() == false,
+      "Copier not closed");
 
     try {
       this.g
@@ -365,6 +413,9 @@ import com.io7m.renderer.types.RTransformTextureType;
     Constraints.constrainNotNull(target, "Target");
     Constraints.constrainNotNull(target_area, "Target area");
     Constraints.constrainArbitrary(source != target, "Source != Target");
+    Constraints.constrainArbitrary(
+      this.copierIsClosed() == false,
+      "Copier not closed");
 
     try {
       this.g
@@ -462,6 +513,9 @@ import com.io7m.renderer.types.RTransformTextureType;
     Constraints.constrainNotNull(target, "Target");
     Constraints.constrainNotNull(target_area, "Target area");
     Constraints.constrainArbitrary(source != target, "Source != Target");
+    Constraints.constrainArbitrary(
+      this.copierIsClosed() == false,
+      "Copier not closed");
 
     try {
       this.g
@@ -531,12 +585,17 @@ import com.io7m.renderer.types.RTransformTextureType;
     }
   }
 
-  public boolean copierIsBlittingEnabled()
+  @Override public boolean copierIsBlittingEnabled()
   {
     return this.blit;
   }
 
-  public void copierSetBlittingEnabled(
+  @Override public boolean copierIsClosed()
+  {
+    return this.closed;
+  }
+
+  @Override public void copierSetBlittingEnabled(
     final boolean in_blit)
   {
     this.blit = in_blit;

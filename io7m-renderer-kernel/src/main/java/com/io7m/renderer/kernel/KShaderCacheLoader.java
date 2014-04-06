@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcache.JCacheLoader;
+import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
@@ -33,10 +33,10 @@ import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.renderer.types.RException;
 
 final class KShaderCacheLoader implements
-  JCacheLoader<String, KProgram, RException>
+  JCacheLoaderType<String, KProgram, RException>
 {
   public static @Nonnull
-    JCacheLoader<String, KProgram, RException>
+    JCacheLoaderType<String, KProgram, RException>
     newLoader(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull FSCapabilityRead fs,

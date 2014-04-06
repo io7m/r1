@@ -1432,7 +1432,7 @@ public final class SBSceneController implements
   }
 
   @Override public void rendererSetType(
-    final @Nonnull SBKRendererType type)
+    final @Nonnull SBKRendererSelectionType type)
   {
     this.renderer.setRenderer(type);
   }

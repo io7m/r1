@@ -24,7 +24,7 @@ import com.io7m.renderer.types.RException;
 
 interface KShadowMapContextType
 {
-  @Nonnull KShadowMap getShadowMap(
+  @Nonnull KShadowMapType getShadowMap(
     final @Nonnull KShadowType shadow)
     throws ConstraintError,
       RException;

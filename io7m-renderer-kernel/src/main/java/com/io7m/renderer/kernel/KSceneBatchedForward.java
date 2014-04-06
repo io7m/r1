@@ -162,11 +162,11 @@ import com.io7m.renderer.kernel.types.KTranslucentType;
       batched_shadow);
   }
 
-  private final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>                         batch_depth;
+  private final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>                             batch_depth;
   private final @Nonnull Map<KLightType, Map<KMaterialForwardOpaqueLitLabel, List<KInstanceTransformedOpaqueType>>> batches_opaque_lit;
-  private final @Nonnull Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaqueType>>            batches_opaque_unlit;
-  private final @Nonnull KSceneBatchedShadow                                                                shadows;
-  private final @Nonnull List<KTranslucentType>                                                                 translucents;
+  private final @Nonnull Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaqueType>>                batches_opaque_unlit;
+  private final @Nonnull KSceneBatchedShadow                                                                        shadows;
+  private final @Nonnull List<KTranslucentType>                                                                     translucents;
 
   private KSceneBatchedForward(
     final @Nonnull Map<KMaterialForwardOpaqueUnlitLabel, List<KInstanceTransformedOpaqueType>> in_batches_opaque_unlit,

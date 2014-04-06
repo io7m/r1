@@ -22,14 +22,14 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcache.JCacheLoader;
+import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.kernel.types.KMeshBoundsTriangles;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceObjectType;
 
 final class KMeshBoundsTrianglesObjectSpaceCacheLoader implements
-  JCacheLoader<KMeshBounds<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, RException>
+  JCacheLoaderType<KMeshBounds<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, RException>
 {
   public static @Nonnull
     KMeshBoundsTrianglesObjectSpaceCacheLoader

@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcache.JCacheLoader;
+import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Level;
@@ -37,10 +37,10 @@ import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
 import com.io7m.renderer.types.RException;
 
 final class KShadowMapCacheLoader implements
-  JCacheLoader<KShadowMapDescriptionType, KShadowMap, RException>
+  JCacheLoaderType<KShadowMapDescriptionType, KShadowMapType, RException>
 {
   public static @Nonnull
-    JCacheLoader<KShadowMapDescriptionType, KShadowMap, RException>
+    JCacheLoaderType<KShadowMapDescriptionType, KShadowMapType, RException>
     newLoader(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull Log log)
@@ -65,7 +65,7 @@ final class KShadowMapCacheLoader implements
   }
 
   @Override public void cacheValueClose(
-    final @Nonnull KShadowMap v)
+    final @Nonnull KShadowMapType v)
     throws RException
   {
     try {
@@ -129,7 +129,7 @@ final class KShadowMapCacheLoader implements
   }
 
   @Override public BigInteger cacheValueSizeOf(
-    final @Nonnull KShadowMap f)
+    final @Nonnull KShadowMapType f)
   {
     return BigInteger.valueOf(f.kShadowMapGetSizeBytes());
   }

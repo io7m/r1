@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcache.JCacheLoader;
+import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Log;
@@ -31,10 +31,10 @@ import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.types.RException;
 
 final class KFramebufferForwardCacheLoader implements
-  JCacheLoader<KFramebufferForwardDescription, KFramebufferForwardType, RException>
+  JCacheLoaderType<KFramebufferForwardDescription, KFramebufferForwardType, RException>
 {
   public static @Nonnull
-    JCacheLoader<KFramebufferForwardDescription, KFramebufferForwardType, RException>
+    JCacheLoaderType<KFramebufferForwardDescription, KFramebufferForwardType, RException>
     newLoader(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull Log log)

@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.types.RException;
 
@@ -37,9 +38,10 @@ public interface KRendererForwardType extends KRendererType
    * @param scene
    *          The scene
    * @throws ConstraintError
-   *           If any parameter is <code>null</code>
+   *           If any parameter is <code>null</code> or the renderer is closed
    * @throws RException
    *           If an error occurs
+   * @see #rendererIsClosed()
    */
 
   void rendererForwardEvaluate(
@@ -47,4 +49,19 @@ public interface KRendererForwardType extends KRendererType
     final @Nonnull KScene scene)
     throws ConstraintError,
       RException;
+
+  /**
+   * Set the background colour to which the renderer will clear the
+   * framebuffer prior to rendering.
+   * 
+   * @param rgba
+   *          The background colour
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code> or the renderer is closed
+   * @see #rendererIsClosed()
+   */
+
+  void rendererForwardSetBackgroundRGBA(
+    final @Nonnull VectorReadable4F rgba)
+    throws ConstraintError;
 }

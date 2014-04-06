@@ -18,13 +18,13 @@ package com.io7m.renderer.kernel;
 
 import java.util.Set;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 
+import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Unit;
+import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
@@ -37,17 +37,13 @@ import com.io7m.jcanephora.JCBProgramProcedure;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.Primitives;
+import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
-import com.io7m.jtensors.VectorM4F;
-import com.io7m.jtensors.VectorReadable4F;
-import com.io7m.jvvfs.FSCapabilityRead;
-import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererDebug;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverFunctionType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KMesh;
@@ -55,75 +51,60 @@ import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 
-@Immutable final class KRendererDebugBitangentsEye extends
-  KAbstractRendererDebug
+@SuppressWarnings("synthetic-access") final class KRendererDebugBitangentsEye implements
+  KRendererDebugType
 {
-  private static final @Nonnull String NAME = "debug-bitangents-eye";
+  private static final @Nonnull String NAME;
 
-  public static KRendererDebugBitangentsEye rendererNew(
-    final @Nonnull JCGLImplementation g,
-    final @Nonnull FSCapabilityRead fs,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      RException
-  {
-    return new KRendererDebugBitangentsEye(g, fs, log);
+  static {
+    NAME = "debug-bitangents-eye";
   }
 
-  private final @Nonnull VectorM4F          background;
-  private final @Nonnull JCGLImplementation gl;
-  private final @Nonnull Log                log;
-  private final @Nonnull KMutableMatricesType   matrices;
-  private final @Nonnull KProgram           program;
-  private final @Nonnull KTransformContext  transform_context;
+  public static KRendererDebugType rendererNew(
+    final @Nonnull JCGLImplementation g,
+    final @Nonnull KShaderCacheType shader_cache,
+    final @Nonnull Log log)
+    throws ConstraintError
+  {
+    return new KRendererDebugBitangentsEye(g, shader_cache, log);
+  }
+
+  private boolean                             closed;
+  private final @Nonnull JCGLImplementation   gl;
+  private final @Nonnull Log                  log;
+  private final @Nonnull KMutableMatricesType matrices;
+  private final @Nonnull KShaderCacheType     shader_cache;
+  private final @Nonnull KTransformContext    transform_context;
 
   private KRendererDebugBitangentsEye(
     final @Nonnull JCGLImplementation in_gl,
-    final @Nonnull FSCapabilityRead fs,
+    final @Nonnull KShaderCacheType in_shader_cache,
     final @Nonnull Log in_log)
-    throws ConstraintError,
-      RException
+    throws ConstraintError
   {
-    super(KRendererDebugBitangentsEye.NAME);
-
-    try {
-      this.log = new Log(in_log, KRendererDebugBitangentsEye.NAME);
-      this.gl = in_gl;
-
-      final JCGLSLVersion version = in_gl.getGLCommon().metaGetSLVersion();
-
-      this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-      this.matrices = KMutableMatricesType.newMatrices();
-      this.transform_context = KTransformContext.newContext();
-
-      this.program =
-        KProgram.newProgramFromFilesystem(
-          in_gl.getGLCommon(),
-          version.getNumber(),
-          version.getAPI(),
-          fs,
-          "debug_bitangents_vertex_eye",
-          in_log);
-    } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
-    }
+    this.log =
+      new Log(
+        Constraints.constrainNotNull(in_log, "Log"),
+        KRendererDebugBitangentsEye.NAME);
+    this.shader_cache =
+      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+    this.gl = Constraints.constrainNotNull(in_gl, "GL");
+    this.matrices = KMutableMatricesType.newMatrices();
+    this.transform_context = KTransformContext.newContext();
   }
 
   @Override public void rendererClose()
     throws ConstraintError,
       RException
   {
-    try {
-      final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-      gc.programDelete(this.program.getProgram());
-    } catch (final JCGLException x) {
-      throw RException.fromJCGLException(x);
-    }
-  }
+    Constraints.constrainArbitrary(
+      this.closed == false,
+      "Renderer is not closed");
+    this.closed = true;
 
-  @Override public @CheckForNull KRendererDebuggingType rendererDebug()
-  {
-    return null;
+    if (this.log.enabled(Level.LOG_DEBUG)) {
+      this.log.debug("closed");
+    }
   }
 
   @Override public void rendererDebugEvaluate(
@@ -132,6 +113,12 @@ import com.io7m.renderer.types.RException;
     throws ConstraintError,
       RException
   {
+    Constraints.constrainNotNull(framebuffer, "Framebuffer");
+    Constraints.constrainNotNull(scene, "Scene");
+    Constraints.constrainArbitrary(
+      this.rendererIsClosed() == false,
+      "Renderer is not closed");
+
     final KCamera camera = scene.getCamera();
 
     try {
@@ -145,11 +132,15 @@ import com.io7m.renderer.types.RException;
               ConstraintError,
               JCGLException
           {
-            KRendererDebugBitangentsEye.this.renderWithObserver(
-              framebuffer,
-              scene,
-              o);
-            return Unit.unit();
+            try {
+              KRendererDebugBitangentsEye.this.renderWithObserver(
+                framebuffer,
+                scene,
+                o);
+              return Unit.unit();
+            } catch (final JCacheException e) {
+              throw RException.fromJCacheException(e);
+            }
           }
         });
     } catch (final JCGLException e) {
@@ -157,81 +148,14 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  protected void renderWithObserver(
-    final @Nonnull KFramebufferRGBAUsableType framebuffer,
-    final @Nonnull KScene scene,
-    final @Nonnull MatricesObserverType mo)
-    throws ConstraintError,
-      JCGLException
+  @Override public String rendererGetName()
   {
-    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
-
-    final FramebufferReferenceUsable output_buffer =
-      framebuffer.kFramebufferGetColorFramebuffer();
-
-    try {
-      gc.framebufferDrawBind(output_buffer);
-
-      gc.blendingDisable();
-
-      gc.colorBufferMask(true, true, true, true);
-      gc.colorBufferClearV4f(this.background);
-
-      gc.cullingDisable();
-
-      gc.depthBufferWriteEnable();
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-      gc.depthBufferClear(1.0f);
-
-      gc.viewportSet(framebuffer.kFramebufferGetArea());
-
-      final JCBExecutionAPI e = this.program.getExecutable();
-      e.execRun(new JCBExecutorProcedure() {
-        @Override public void call(
-          final @Nonnull JCBProgram p)
-          throws ConstraintError,
-            JCGLException,
-            Exception,
-            RException
-        {
-          KShadingProgramCommon.putMatrixProjection(
-            p,
-            mo.getMatrixProjection());
-
-          final Set<KInstanceTransformedType> instances =
-            scene.getVisibleInstances();
-
-          for (final KInstanceTransformedType i : instances) {
-            mo.withInstance(
-              i,
-              new MatricesInstanceFunctionType<Unit, JCGLException>() {
-                @SuppressWarnings("synthetic-access") @Override public
-                  Unit
-                  run(
-                    final @Nonnull MatricesInstanceType mi)
-                    throws ConstraintError,
-                      RException,
-                      JCGLException
-                {
-                  KRendererDebugBitangentsEye.this.renderMesh(gc, p, i, mi);
-                  return Unit.unit();
-                }
-              });
-          }
-        }
-      });
-
-    } catch (final JCBExecutionException x) {
-      throw new UnreachableCodeException(x);
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
+    return KRendererDebugBitangentsEye.NAME;
   }
 
-  @Override public void rendererSetBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
+  @Override public boolean rendererIsClosed()
   {
-    VectorM4F.copy(rgba, this.background);
+    return this.closed;
   }
 
   @SuppressWarnings("static-method") private void renderMesh(
@@ -276,6 +200,79 @@ import com.io7m.renderer.types.RException;
       });
     } finally {
       gc.arrayBufferUnbind();
+    }
+  }
+
+  private void renderWithObserver(
+    final @Nonnull KFramebufferRGBAUsableType framebuffer,
+    final @Nonnull KScene scene,
+    final @Nonnull MatricesObserverType mo)
+    throws ConstraintError,
+      JCGLException,
+      RException,
+      JCacheException
+  {
+    final KProgram program =
+      this.shader_cache.cacheGetLU("debug_bitangents_vertex_eye");
+    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+
+    final FramebufferReferenceUsable output_buffer =
+      framebuffer.kFramebufferGetColorFramebuffer();
+
+    try {
+      gc.framebufferDrawBind(output_buffer);
+
+      gc.blendingDisable();
+
+      gc.colorBufferMask(true, true, true, true);
+      gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+
+      gc.cullingDisable();
+
+      gc.depthBufferWriteEnable();
+      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+      gc.depthBufferClear(1.0f);
+
+      gc.viewportSet(framebuffer.kFramebufferGetArea());
+
+      final JCBExecutionAPI e = program.getExecutable();
+      e.execRun(new JCBExecutorProcedure() {
+        @Override public void call(
+          final @Nonnull JCBProgram p)
+          throws ConstraintError,
+            JCGLException,
+            Exception,
+            RException
+        {
+          KShadingProgramCommon.putMatrixProjection(
+            p,
+            mo.getMatrixProjection());
+
+          final Set<KInstanceTransformedType> instances =
+            scene.getVisibleInstances();
+
+          for (final KInstanceTransformedType i : instances) {
+            mo.withInstance(
+              i,
+              new MatricesInstanceFunctionType<Unit, JCGLException>() {
+                @Override public Unit run(
+                  final @Nonnull MatricesInstanceType mi)
+                  throws ConstraintError,
+                    RException,
+                    JCGLException
+                {
+                  KRendererDebugBitangentsEye.this.renderMesh(gc, p, i, mi);
+                  return Unit.unit();
+                }
+              });
+          }
+        }
+      });
+
+    } catch (final JCBExecutionException x) {
+      throw new UnreachableCodeException(x);
+    } finally {
+      gc.framebufferDrawUnbind();
     }
   }
 }

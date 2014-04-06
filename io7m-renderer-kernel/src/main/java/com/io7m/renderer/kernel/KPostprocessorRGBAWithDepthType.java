@@ -28,7 +28,8 @@ import com.io7m.renderer.types.RException;
  *          The type of renderer-specific configuration values
  */
 
-public interface KPostprocessorRGBAWithDepthType<C> extends KPostprocessorType
+public interface KPostprocessorRGBAWithDepthType<C> extends
+  KPostprocessorType
 {
   /**
    * <p>
@@ -50,9 +51,11 @@ public interface KPostprocessorRGBAWithDepthType<C> extends KPostprocessorType
    * @param output
    *          The output framebuffer
    * @throws ConstraintError
-   *           If any parameter is <code>null</code>
+   *           If any parameter is <code>null</code> or the postprocessor is
+   *           closed
    * @throws RException
    *           If any error occurs
+   * @see #postprocessorIsClosed()
    */
 
     <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>

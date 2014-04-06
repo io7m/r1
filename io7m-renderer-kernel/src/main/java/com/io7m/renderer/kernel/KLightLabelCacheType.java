@@ -19,8 +19,8 @@ package com.io7m.renderer.kernel;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightLabel;
+import com.io7m.renderer.kernel.types.KLightType;
 
 /**
  * The type of light label caches.

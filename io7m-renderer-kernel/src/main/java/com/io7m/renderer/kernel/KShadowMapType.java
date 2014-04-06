@@ -27,7 +27,9 @@ import com.io7m.renderer.types.RException;
  * The type of shadow maps.
  */
 
-public interface KShadowMapType extends KShadowMapUsableType, JCGLResourceUsable
+public interface KShadowMapType extends
+  KShadowMapUsableType,
+  JCGLResourceUsable
 {
   /**
    * Accept a visitor.

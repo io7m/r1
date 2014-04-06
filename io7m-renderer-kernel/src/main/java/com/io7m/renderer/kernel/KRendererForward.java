@@ -30,7 +30,7 @@ import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
-import com.io7m.jcache.LUCache;
+import com.io7m.jcache.LUCacheType;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
@@ -48,10 +48,10 @@ import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.TextureCubeStatic;
 import com.io7m.jcanephora.TextureUnit;
+import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
-import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererForward;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceWithProjectiveFunctionType;
@@ -64,7 +64,6 @@ import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KFaceSelection;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
@@ -101,8 +100,8 @@ import com.io7m.renderer.types.RTransformViewType;
  * The primary forward renderer.
  */
 
-@SuppressWarnings("synthetic-access") final class KRendererForwardActual extends
-  KAbstractRendererForward
+@SuppressWarnings("synthetic-access") public final class KRendererForward implements
+  KRendererForwardType
 {
   private static final @Nonnull String NAME;
 
@@ -247,7 +246,7 @@ import com.io7m.renderer.types.RTransformViewType;
     throws JCGLException,
       ConstraintError
   {
-    KRendererForwardActual.putMaterialRegular(program, label, material);
+    KRendererForward.putMaterialRegular(program, label, material);
   }
 
   private static void putMaterialRegular(
@@ -314,7 +313,7 @@ import com.io7m.renderer.types.RTransformViewType;
     throws JCGLException,
       ConstraintError
   {
-    KRendererForwardActual.putMaterialRegular(program, label, material);
+    KRendererForward.putMaterialRegular(program, label, material);
     KShadingProgramCommon.putMaterialAlphaOpacity(program, material
       .materialGetAlpha()
       .getOpacity());
@@ -404,51 +403,6 @@ import com.io7m.renderer.types.RTransformViewType;
   }
 
   /**
-   * Construct a new forward renderer.
-   * 
-   * @param g
-   *          The OpenGL interface
-   * @param shadow_renderer
-   *          The shadow map renderer
-   * @param refraction_renderer
-   *          The refraction renderer
-   * @param decider
-   *          The label cache
-   * @param shader_cache
-   *          The shader cache
-   * @param caps
-   *          The capabilities of the current OpenGL implementation
-   * @param log
-   *          A log handle
-   * @return A new forward renderer
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
-   * @throws RException
-   *           If an error occurs
-   */
-
-  public static @Nonnull KRendererForwardActual rendererNew(
-    final @Nonnull JCGLImplementation g,
-    final @Nonnull KShadowMapRendererType shadow_renderer,
-    final @Nonnull KRefractionRendererType refraction_renderer,
-    final @Nonnull KLabelDecider decider,
-    final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-    final @Nonnull KGraphicsCapabilities caps,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      RException
-  {
-    return new KRendererForwardActual(
-      g,
-      shadow_renderer,
-      refraction_renderer,
-      decider,
-      shader_cache,
-      caps,
-      log);
-  }
-
-  /**
    * Render a specific opaque instance, assuming all program state for the
    * current light (if any) has been configured.
    */
@@ -481,13 +435,13 @@ import com.io7m.renderer.types.RTransformViewType;
           gc,
           actual.instanceGetFaces());
 
-        KRendererForwardActual.putInstanceMatrices(program, mwi, label);
-        KRendererForwardActual.putInstanceTextures(
+        KRendererForward.putInstanceMatrices(program, mwi, label);
+        KRendererForward.putInstanceTextures(
           context,
           label,
           program,
           material);
-        KRendererForwardActual.putMaterialOpaque(program, label, material);
+        KRendererForward.putMaterialOpaque(program, label, material);
 
         try {
           gc.arrayBufferBind(array);
@@ -565,13 +519,13 @@ import com.io7m.renderer.types.RTransformViewType;
         final KMaterialTranslucentRegular material =
           actual.instanceGetMaterial();
 
-        KRendererForwardActual.putInstanceMatrices(program, mwi, label);
-        KRendererForwardActual.putInstanceTextures(
+        KRendererForward.putInstanceMatrices(program, mwi, label);
+        KRendererForward.putInstanceTextures(
           context,
           label,
           program,
           material);
-        KRendererForwardActual.putMaterialTranslucentRegular(
+        KRendererForward.putMaterialTranslucentRegular(
           program,
           label,
           material);
@@ -642,15 +596,14 @@ import com.io7m.renderer.types.RTransformViewType;
           RException,
           JCGLException
       {
-        KRendererForwardActual
-          .renderInstanceTranslucentRegularLitDirectional(
-            gc,
-            texture_unit_ctx,
-            mwo,
-            label,
-            l,
-            program,
-            instance);
+        KRendererForward.renderInstanceTranslucentRegularLitDirectional(
+          gc,
+          texture_unit_ctx,
+          mwo,
+          label,
+          l,
+          program,
+          instance);
         return Unit.unit();
       }
 
@@ -669,16 +622,15 @@ import com.io7m.renderer.types.RTransformViewType;
                 ConstraintError,
                 RException
             {
-              KRendererForwardActual
-                .renderInstanceTranslucentRegularLitProjective(
-                  gc,
-                  shadow_context,
-                  texture_unit_ctx,
-                  mwp,
-                  label,
-                  l,
-                  program,
-                  instance);
+              KRendererForward.renderInstanceTranslucentRegularLitProjective(
+                gc,
+                shadow_context,
+                texture_unit_ctx,
+                mwp,
+                label,
+                l,
+                program,
+                instance);
               return Unit.unit();
             }
           });
@@ -690,7 +642,7 @@ import com.io7m.renderer.types.RTransformViewType;
           RException,
           JCGLException
       {
-        KRendererForwardActual.renderInstanceTranslucentRegularLitSpherical(
+        KRendererForward.renderInstanceTranslucentRegularLitSpherical(
           gc,
           texture_unit_ctx,
           mwo,
@@ -730,7 +682,7 @@ import com.io7m.renderer.types.RTransformViewType;
             ConstraintError,
             RException
         {
-          KRendererForwardActual.renderInstanceTranslucentRegular(
+          KRendererForward.renderInstanceTranslucentRegular(
             gc,
             texture_unit_ctx,
             mwi,
@@ -756,7 +708,7 @@ import com.io7m.renderer.types.RTransformViewType;
       ConstraintError
   {
     if (light.lightHasShadow()) {
-      KRendererForwardActual.putShadow(
+      KRendererForward.putShadow(
         shadow_context,
         texture_unit_ctx,
         program,
@@ -790,7 +742,7 @@ import com.io7m.renderer.types.RTransformViewType;
             program,
             mwi.getMatrixProjectiveModelView());
 
-          KRendererForwardActual.renderInstanceTranslucentRegular(
+          KRendererForward.renderInstanceTranslucentRegular(
             gc,
             texture_unit_ctx,
             mwi,
@@ -829,7 +781,7 @@ import com.io7m.renderer.types.RTransformViewType;
             ConstraintError,
             RException
         {
-          KRendererForwardActual.renderInstanceTranslucentRegular(
+          KRendererForward.renderInstanceTranslucentRegular(
             gc,
             texture_unit_ctx,
             mwi,
@@ -882,15 +834,14 @@ import com.io7m.renderer.types.RTransformViewType;
                 RException,
                 JCGLException
             {
-              KRendererForwardActual
-                .renderOpaqueLitBatchInstancesWithDirectional(
-                  gc,
-                  unit_context,
-                  mwo,
-                  label,
-                  instances,
-                  program,
-                  l);
+              KRendererForward.renderOpaqueLitBatchInstancesWithDirectional(
+                gc,
+                unit_context,
+                mwo,
+                label,
+                instances,
+                program,
+                l);
               return Unit.unit();
             }
 
@@ -914,7 +865,7 @@ import com.io7m.renderer.types.RTransformViewType;
                         ConstraintError,
                         RException
                     {
-                      KRendererForwardActual
+                      KRendererForward
                         .renderOpaqueLitBatchInstancesWithProjective(
                           gc,
                           shadow_context,
@@ -939,15 +890,14 @@ import com.io7m.renderer.types.RTransformViewType;
                 RException,
                 JCGLException
             {
-              KRendererForwardActual
-                .renderOpaqueLitBatchInstancesWithSpherical(
-                  gc,
-                  unit_context,
-                  mwo,
-                  label,
-                  instances,
-                  program,
-                  l);
+              KRendererForward.renderOpaqueLitBatchInstancesWithSpherical(
+                gc,
+                unit_context,
+                mwo,
+                label,
+                instances,
+                program,
+                l);
               return Unit.unit();
             }
           });
@@ -985,7 +935,7 @@ import com.io7m.renderer.types.RTransformViewType;
               ConstraintError,
               RException
           {
-            KRendererForwardActual.renderInstanceOpaque(
+            KRendererForward.renderInstanceOpaque(
               gc,
               unit_context,
               mwi,
@@ -1012,11 +962,8 @@ import com.io7m.renderer.types.RTransformViewType;
       ConstraintError
   {
     if (light.lightHasShadow()) {
-      KRendererForwardActual.putShadow(
-        shadow_context,
-        unit_context,
-        program,
-        light);
+      KRendererForward
+        .putShadow(shadow_context, unit_context, program, light);
     }
 
     KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
@@ -1042,7 +989,7 @@ import com.io7m.renderer.types.RTransformViewType;
       KShadingProgramCommon.putTextureProjectionReuse(program);
 
       if (light.lightHasShadow()) {
-        KRendererForwardActual.putShadowReuse(program, light);
+        KRendererForward.putShadowReuse(program, light);
       }
 
       mwp
@@ -1059,7 +1006,7 @@ import com.io7m.renderer.types.RTransformViewType;
                 program,
                 mwi.getMatrixProjectiveModelView());
 
-              KRendererForwardActual.renderInstanceOpaque(
+              KRendererForward.renderInstanceOpaque(
                 gc,
                 unit_context,
                 mwi,
@@ -1102,7 +1049,7 @@ import com.io7m.renderer.types.RTransformViewType;
               ConstraintError,
               RException
           {
-            KRendererForwardActual.renderInstanceOpaque(
+            KRendererForward.renderInstanceOpaque(
               gc,
               unit_context,
               mwi,
@@ -1147,7 +1094,7 @@ import com.io7m.renderer.types.RTransformViewType;
                   JCGLException,
                   RException
               {
-                KRendererForwardActual.renderInstanceOpaque(
+                KRendererForward.renderInstanceOpaque(
                   gc,
                   context,
                   mwi,
@@ -1162,53 +1109,100 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  private final @Nonnull VectorM4F                             background;
+  private final @Nonnull VectorM4F                                 background;
+  private boolean                                                  closed;
+  private final @Nonnull KForwardLabelDeciderType                  decider;
+  private final @Nonnull KDepthRendererType                        depth_renderer;
+  private final @Nonnull JCGLImplementation                        g;
+  private final @Nonnull Log                                       log;
+  private final @Nonnull KMutableMatricesType                      matrices;
+  private final @Nonnull KRefractionRendererType                   refraction_renderer;
+  private final @Nonnull LUCacheType<String, KProgram, RException> shader_cache;
+  private final @Nonnull KShadowMapRendererType                    shadow_renderer;
+  private final @Nonnull KTextureUnitAllocator                     texture_units;
 
-  private final @Nonnull KLabelDecider                         decider;
-  private final @Nonnull KDepthRenderer                        depth;
-  private final @Nonnull JCGLImplementation                    g;
-  private final @Nonnull Log                                   log;
-  private final @Nonnull KMutableMatricesType                  matrices;
-  private final @Nonnull KRefractionRendererType               refraction_renderer;
-  private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
-  private final @Nonnull KShadowMapRendererType                shadow_renderer;
-  private final @Nonnull KTextureUnitAllocator                 texture_units;
+  /**
+   * Construct a new forward renderer.
+   * 
+   * @param in_g
+   *          The OpenGL implementation
+   * @param in_depth_renderer
+   *          A depth renderer
+   * @param in_shadow_renderer
+   *          A shadow map renderer
+   * @param in_refraction_renderer
+   *          A refraction renderer
+   * @param in_decider
+   *          A label decider
+   * @param in_shader_cache
+   *          A shader cache
+   * @param in_log
+   *          A log handle
+   * @return A new renderer
+   * @throws RException
+   *           If an error occurs during initialization
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
 
-  private KRendererForwardActual(
+  public static @Nonnull KRendererForwardType newRenderer(
     final @Nonnull JCGLImplementation in_g,
+    final @Nonnull KDepthRendererType in_depth_renderer,
     final @Nonnull KShadowMapRendererType in_shadow_renderer,
     final @Nonnull KRefractionRendererType in_refraction_renderer,
-    final @Nonnull KLabelDecider in_decider,
-    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
-    final @Nonnull KGraphicsCapabilities caps,
+    final @Nonnull KForwardLabelDeciderType in_decider,
+    final @Nonnull KShaderCacheType in_shader_cache,
+    final @Nonnull Log in_log)
+    throws RException,
+      ConstraintError
+  {
+    return new KRendererForward(
+      in_g,
+      in_depth_renderer,
+      in_shadow_renderer,
+      in_refraction_renderer,
+      in_decider,
+      in_shader_cache,
+      in_log);
+  }
+
+  private KRendererForward(
+    final @Nonnull JCGLImplementation in_g,
+    final @Nonnull KDepthRendererType in_depth_renderer,
+    final @Nonnull KShadowMapRendererType in_shadow_renderer,
+    final @Nonnull KRefractionRendererType in_refraction_renderer,
+    final @Nonnull KForwardLabelDeciderType in_decider,
+    final @Nonnull KShaderCacheType in_shader_cache,
     final @Nonnull Log in_log)
     throws ConstraintError,
       RException
   {
-    super(KRendererForwardActual.NAME);
-
     try {
       this.log =
         new Log(
           Constraints.constrainNotNull(in_log, "Log"),
-          KRendererForwardActual.NAME);
+          KRendererForward.NAME);
       this.g = Constraints.constrainNotNull(in_g, "GL implementation");
       this.shader_cache =
         Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+      this.decider = Constraints.constrainNotNull(in_decider, "Decider");
+
+      this.depth_renderer =
+        Constraints.constrainNotNull(in_depth_renderer, "Depth renderer");
       this.shadow_renderer =
         Constraints.constrainNotNull(in_shadow_renderer, "Shadow renderer");
       this.refraction_renderer =
         Constraints.constrainNotNull(
           in_refraction_renderer,
           "Refraction renderer");
-      this.decider = Constraints.constrainNotNull(in_decider, "Decider");
+
       this.matrices = KMutableMatricesType.newMatrices();
-      this.depth =
-        KDepthRenderer.newDepthRenderer(in_g, in_shader_cache, caps, in_log);
       this.background = new VectorM4F();
       this.texture_units = KTextureUnitAllocator.newAllocator(in_g);
 
-      this.log.debug("initialized");
+      if (this.log.enabled(Level.LOG_DEBUG)) {
+        this.log.debug("initialized");
+      }
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
     }
@@ -1218,13 +1212,14 @@ import com.io7m.renderer.types.RTransformViewType;
     throws RException,
       ConstraintError
   {
-    // Nothing
-  }
+    Constraints.constrainArbitrary(
+      this.closed == false,
+      "Renderer is not closed");
+    this.closed = true;
 
-  @Override public KRendererDebuggingType rendererDebug()
-  {
-    // TODO: Implement debugging
-    return null;
+    if (this.log.enabled(Level.LOG_DEBUG)) {
+      this.log.debug("closed");
+    }
   }
 
   @Override public void rendererForwardEvaluate(
@@ -1233,6 +1228,12 @@ import com.io7m.renderer.types.RTransformViewType;
     throws ConstraintError,
       RException
   {
+    Constraints.constrainNotNull(framebuffer, "Framebuffer");
+    Constraints.constrainNotNull(scene, "Scene");
+    Constraints.constrainArbitrary(
+      this.rendererIsClosed() == false,
+      "Renderer not closed");
+
     final KSceneBatchedForward batched =
       KSceneBatchedForward.newBatchedScene(this.decider, this.decider, scene);
 
@@ -1249,7 +1250,7 @@ import com.io7m.renderer.types.RTransformViewType;
               RException
           {
             try {
-              KRendererForwardActual.this.renderScene(
+              KRendererForward.this.renderScene(
                 camera,
                 framebuffer,
                 batched,
@@ -1265,11 +1266,26 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  @Override public void rendererSetBackgroundRGBA(
+  @Override public void rendererForwardSetBackgroundRGBA(
     final @Nonnull VectorReadable4F rgba)
     throws ConstraintError
   {
+    Constraints.constrainNotNull(rgba, "Colour");
+    Constraints.constrainArbitrary(
+      this.rendererIsClosed() == false,
+      "Renderer not closed");
+
     VectorM4F.copy(rgba, this.background);
+  }
+
+  @Override public String rendererGetName()
+  {
+    return KRendererForward.NAME;
+  }
+
+  @Override public boolean rendererIsClosed()
+  {
+    return this.closed;
   }
 
   private void renderOpaques(
@@ -1325,7 +1341,7 @@ import com.io7m.renderer.types.RTransformViewType;
               JCGLException,
               RException
           {
-            KRendererForwardActual.renderOpaqueLitBatch(
+            KRendererForward.renderOpaqueLitBatch(
               gc,
               shadow_context,
               unit_allocator,
@@ -1365,7 +1381,7 @@ import com.io7m.renderer.types.RTransformViewType;
             JCGLException,
             RException
         {
-          KRendererForwardActual.renderOpaqueUnlitBatch(
+          KRendererForward.renderOpaqueUnlitBatch(
             gc,
             units,
             mwo,
@@ -1398,7 +1414,7 @@ import com.io7m.renderer.types.RTransformViewType;
      */
 
     final Option<KFaceSelection> none = Option.none();
-    this.depth.depthRendererEvaluate(
+    this.depth_renderer.depthRendererEvaluate(
       m_view,
       m_proj,
       batched.getBatchesDepth(),
@@ -1442,7 +1458,7 @@ import com.io7m.renderer.types.RTransformViewType;
               BlendFunction.BLEND_ONE);
 
             gc.colorBufferMask(true, true, true, true);
-            gc.colorBufferClearV4f(KRendererForwardActual.this.background);
+            gc.colorBufferClearV4f(KRendererForward.this.background);
 
             gc.cullingEnable(
               FaceSelection.FACE_BACK,
@@ -1451,7 +1467,7 @@ import com.io7m.renderer.types.RTransformViewType;
             gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
             gc.depthBufferWriteDisable();
 
-            KRendererForwardActual.this.renderOpaques(
+            KRendererForward.this.renderOpaques(
               gc,
               shadow_context,
               batched,
@@ -1472,7 +1488,7 @@ import com.io7m.renderer.types.RTransformViewType;
             gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
             gc.depthBufferWriteDisable();
 
-            KRendererForwardActual.this.renderTranslucents(
+            KRendererForward.this.renderTranslucents(
               gc,
               framebuffer,
               shadow_context,
@@ -1561,7 +1577,7 @@ import com.io7m.renderer.types.RTransformViewType;
                 JCGLException,
                 RException
             {
-              KRendererForwardActual.renderInstanceTranslucentRegularLit(
+              KRendererForward.renderInstanceTranslucentRegularLit(
                 gc,
                 shadow_context,
                 texture_unit_ctx,
@@ -1626,7 +1642,7 @@ import com.io7m.renderer.types.RTransformViewType;
                     program,
                     mwi.getMatrixProjection());
 
-                  KRendererForwardActual.renderInstanceTranslucentRegular(
+                  KRendererForward.renderInstanceTranslucentRegular(
                     gc,
                     texture_unit_ctx,
                     mwi,
@@ -1668,7 +1684,7 @@ import com.io7m.renderer.types.RTransformViewType;
               RException,
               ConstraintError
           {
-            KRendererForwardActual.this.renderTranslucentRefractive(
+            KRendererForward.this.renderTranslucentRefractive(
               framebuffer,
               t,
               mwo);
@@ -1687,7 +1703,7 @@ import com.io7m.renderer.types.RTransformViewType;
               .getInstance()
               .instanceGetFaces());
 
-            KRendererForwardActual.this.renderTranslucentRegularLit(
+            KRendererForward.this.renderTranslucentRegularLit(
               gc,
               shadow_context,
               t,
@@ -1706,10 +1722,7 @@ import com.io7m.renderer.types.RTransformViewType;
               .getInstance()
               .instanceGetFaces());
 
-            KRendererForwardActual.this.renderTranslucentRegularUnlit(
-              gc,
-              t,
-              mwo);
+            KRendererForward.this.renderTranslucentRegularUnlit(gc, t, mwo);
             return Unit.unit();
           }
         });
