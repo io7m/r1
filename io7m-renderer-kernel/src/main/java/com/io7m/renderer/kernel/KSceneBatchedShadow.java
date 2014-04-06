@@ -64,7 +64,8 @@ public final class KSceneBatchedShadow
     for (final KLightType light : casters.keySet()) {
       assert light.lightHasShadow();
 
-      final List<KInstanceTransformedOpaqueType> instances = casters.get(light);
+      final List<KInstanceTransformedOpaqueType> instances =
+        casters.get(light);
       final Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> by_label =
         new HashMap<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>();
 

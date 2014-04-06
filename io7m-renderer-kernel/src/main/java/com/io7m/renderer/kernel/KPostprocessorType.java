@@ -28,12 +28,13 @@ import com.io7m.renderer.types.RException;
 public interface KPostprocessorType
 {
   /**
-   * Delete all resources associated with this renderer.
+   * Delete all resources associated with this postprocessor.
    * 
    * @throws RException
    *           If an error occurs
    * @throws ConstraintError
-   *           If an internal constraint error occurs
+   *           If the postprocessor is already closed
+   * @see #postprocessorIsClosed()
    */
 
   void postprocessorClose()
@@ -47,31 +48,9 @@ public interface KPostprocessorType
   @Nonnull String postprocessorGetName();
 
   /**
-   * Accept a postprocessor visitor.
-   * 
-   * @param <A>
-   *          The type of values returned by the visitor
-   * @param <E>
-   *          The type of exceptions raised by the visitor
-   * @param <V>
-   *          The type of the visitor
-   * @param v
-   *          The visitor
-   * @return The value returned by the visitor
-   * @throws E
-   *           If the visitor raises <code>E</code>
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code> or the visitor raises
-   *           {@link ConstraintError}
-   * @throws RException
-   *           If the visitor raises {@link RException}
+   * @return <code>true</code> if the postprocessor has been closed.
+   * @see #postprocessorClose()
    */
 
-    <A, E extends Throwable, V extends KPostprocessorVisitorType<A, E>>
-    A
-    postprocessorVisitableAccept(
-      final @Nonnull V v)
-      throws E,
-        ConstraintError,
-        RException;
+  boolean postprocessorIsClosed();
 }

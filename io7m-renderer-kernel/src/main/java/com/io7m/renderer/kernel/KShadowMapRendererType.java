@@ -26,7 +26,7 @@ import com.io7m.renderer.types.RException;
  * The type of shadow map renderers.
  */
 
-public interface KShadowMapRendererType
+public interface KShadowMapRendererType extends KRendererType
 {
   /**
    * Render all shadow maps required to render the given batched scene and

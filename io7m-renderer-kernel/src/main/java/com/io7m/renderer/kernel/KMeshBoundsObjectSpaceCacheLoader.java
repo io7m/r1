@@ -20,14 +20,14 @@ import java.math.BigInteger;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jcache.JCacheLoader;
+import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceObjectType;
 
 final class KMeshBoundsObjectSpaceCacheLoader implements
-  JCacheLoader<KMesh, KMeshBounds<RSpaceObjectType>, RException>
+  JCacheLoaderType<KMesh, KMeshBounds<RSpaceObjectType>, RException>
 {
   public static @Nonnull KMeshBoundsObjectSpaceCacheLoader newLoader()
   {

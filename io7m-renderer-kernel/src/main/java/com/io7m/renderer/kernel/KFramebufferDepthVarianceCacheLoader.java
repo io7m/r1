@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcache.JCacheLoader;
+import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Log;
@@ -31,10 +31,10 @@ import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.types.RException;
 
 final class KFramebufferDepthVarianceCacheLoader implements
-  JCacheLoader<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException>
+  JCacheLoaderType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType, RException>
 {
   public static @Nonnull
-    JCacheLoader<KFramebufferDepthVarianceDescription, KFramebufferDepthVariance, RException>
+    JCacheLoaderType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType, RException>
     newLoader(
       final @Nonnull JCGLImplementation gi,
       final @Nonnull Log log)
@@ -59,7 +59,7 @@ final class KFramebufferDepthVarianceCacheLoader implements
   }
 
   @Override public void cacheValueClose(
-    final @Nonnull KFramebufferDepthVariance v)
+    final @Nonnull KFramebufferDepthVarianceType v)
     throws RException
   {
     try {
@@ -85,7 +85,7 @@ final class KFramebufferDepthVarianceCacheLoader implements
   }
 
   @Override public BigInteger cacheValueSizeOf(
-    final @Nonnull KFramebufferDepthVariance v)
+    final @Nonnull KFramebufferDepthVarianceType v)
   {
     return BigInteger.valueOf(v.kFramebufferGetSizeBytes());
   }

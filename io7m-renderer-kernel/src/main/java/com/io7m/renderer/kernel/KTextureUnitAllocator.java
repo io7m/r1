@@ -159,34 +159,6 @@ final class KTextureUnitAllocator implements KTextureUnitContextInitialType
     return this.allocated;
   }
 
-  protected @Nonnull TextureUnit texturesUnitGet(
-    final int index)
-    throws ConstraintError
-  {
-    Constraints.constrainArbitrary(
-      KTextureUnitAllocator.this.hasEnoughUnits(index + 1),
-      "Enough texture units available");
-
-    return this.units.get(index);
-  }
-
-  protected int texturesCurrent()
-  {
-    return this.allocated;
-  }
-
-  protected void texturesAdded(
-    final int x)
-  {
-    this.allocated += x;
-  }
-
-  protected void texturesRemoved(
-    final int x)
-  {
-    this.allocated -= x;
-  }
-
   public int getUnitCount()
   {
     return this.units.size();
@@ -196,6 +168,34 @@ final class KTextureUnitAllocator implements KTextureUnitContextInitialType
     final int requested)
   {
     return requested <= this.getUnitCount();
+  }
+
+  protected void texturesAdded(
+    final int x)
+  {
+    this.allocated += x;
+  }
+
+  protected int texturesCurrent()
+  {
+    return this.allocated;
+  }
+
+  protected void texturesRemoved(
+    final int x)
+  {
+    this.allocated -= x;
+  }
+
+  protected @Nonnull TextureUnit texturesUnitGet(
+    final int index)
+    throws ConstraintError
+  {
+    Constraints.constrainArbitrary(
+      KTextureUnitAllocator.this.hasEnoughUnits(index + 1),
+      "Enough texture units available");
+
+    return this.units.get(index);
   }
 
   @Override public void withContext(

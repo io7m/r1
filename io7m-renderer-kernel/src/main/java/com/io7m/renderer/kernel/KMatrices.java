@@ -71,6 +71,20 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * <code>orientation</code>.
    */
 
+  static void makeViewMatrix(
+    final @Nonnull KTransformContext context,
+    final @Nonnull RVectorReadable3FType<RSpaceWorldType> position,
+    final @Nonnull QuaternionReadable4F orientation,
+    final @Nonnull RMatrixM4x4F<RTransformViewType> view)
+  {
+    KMatrices.makeViewMatrixActual(context, position, orientation, view);
+  }
+
+  /**
+   * Produce a view matrix assuming a viewer at <code>position</code> facing
+   * <code>orientation</code>.
+   */
+
   private static void makeViewMatrixActual(
     final @Nonnull KTransformContext context,
     final @Nonnull RVectorReadable3FType<RSpaceWorldType> position,
@@ -89,20 +103,6 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     translate.y = -position.getYF();
     translate.z = -position.getZF();
     MatrixM4x4F.translateByVector3FInPlace(view, translate);
-  }
-
-  /**
-   * Produce a view matrix assuming a viewer at <code>position</code> facing
-   * <code>orientation</code>.
-   */
-
-  static void makeViewMatrix(
-    final @Nonnull KTransformContext context,
-    final @Nonnull RVectorReadable3FType<RSpaceWorldType> position,
-    final @Nonnull QuaternionReadable4F orientation,
-    final @Nonnull RMatrixM4x4F<RTransformViewType> view)
-  {
-    KMatrices.makeViewMatrixActual(context, position, orientation, view);
   }
 
   /**

@@ -24,9 +24,9 @@ import com.io7m.renderer.types.RException;
 
 interface KTextureUnitContextInitialType
 {
-  int getTextureCountTotal();
-
   int getTextureCountForContext();
+
+  int getTextureCountTotal();
 
   /**
    * Create a new context and execute <code>f</code> with the new context. Any

@@ -26,7 +26,8 @@ import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
  * The type of usable depth-variance framebuffers.
  */
 
-public interface KFramebufferDepthVarianceUsableType extends KFramebufferUsableType
+public interface KFramebufferDepthVarianceUsableType extends
+  KFramebufferUsableType
 {
   /**
    * <p>

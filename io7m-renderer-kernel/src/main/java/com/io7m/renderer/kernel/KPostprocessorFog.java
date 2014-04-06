@@ -23,11 +23,8 @@ import javax.annotation.Nonnull;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Unit;
-import com.io7m.jcache.BLUCache;
-import com.io7m.jcache.BLUCacheReceipt;
+import com.io7m.jcache.BLUCacheReceiptType;
 import com.io7m.jcache.JCacheException;
-import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.ArrayBufferUsable;
 import com.io7m.jcanephora.IndexBufferUsable;
 import com.io7m.jcanephora.JCBExecutionAPI;
@@ -41,14 +38,14 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
+import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorM3F;
-import com.io7m.renderer.kernel.KAbstractPostprocessor.KAbstractPostprocessorRGBAWithDepth;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
-final class KPostprocessorFog extends
-  KAbstractPostprocessorRGBAWithDepth<Unit>
+final class KPostprocessorFog implements
+  KPostprocessorRGBAWithDepthType<KFogParameters>
 {
   private static final @Nonnull String NAME;
 
@@ -56,53 +53,55 @@ final class KPostprocessorFog extends
     NAME = "postprocessor-fog";
   }
 
-  public static @Nonnull
-    KPostprocessorFog
-    postprocessorNew(
-      final @Nonnull JCGLImplementation gi,
-      final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
-      final @Nonnull LUCache<String, KProgram, RException> shader_cache,
-      final @Nonnull Log log)
-      throws ConstraintError,
-        RException
+  public static @Nonnull KPostprocessorFog postprocessorNew(
+    final @Nonnull JCGLImplementation gi,
+    final @Nonnull KRegionCopierType copier,
+    final @Nonnull KUnitQuadUsableType quad,
+    final @Nonnull KFramebufferRGBACacheType rgba_cache,
+    final @Nonnull KShaderCacheType shader_cache,
+    final @Nonnull Log log)
+    throws ConstraintError
   {
-    return new KPostprocessorFog(gi, rgba_cache, shader_cache, log);
+    return new KPostprocessorFog(
+      gi,
+      copier,
+      quad,
+      rgba_cache,
+      shader_cache,
+      log);
   }
 
-  private final @Nonnull VectorM3F                                                           fog_colour;
-  private final @Nonnull JCGLImplementation                                                  gi;
-  private final @Nonnull Log                                                                 log;
-  private final @Nonnull KUnitQuad                                                           quad;
-  private final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache;
-  private final @Nonnull LUCache<String, KProgram, RException>                               shader_cache;
+  private boolean                                  closed;
+  private final @Nonnull KRegionCopierType         copier;
+  private final @Nonnull VectorM3F                 fog_colour;
+  private final @Nonnull JCGLImplementation        gi;
+  private final @Nonnull Log                       log;
+  private final @Nonnull KUnitQuadUsableType       quad;
+  private final @Nonnull KFramebufferRGBACacheType rgba_cache;
+  private final @Nonnull KShaderCacheType          shader_cache;
 
   private KPostprocessorFog(
     final @Nonnull JCGLImplementation in_gi,
-    final @Nonnull BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> in_rgba_cache,
-    final @Nonnull LUCache<String, KProgram, RException> in_shader_cache,
+    final @Nonnull KRegionCopierType in_copier,
+    final @Nonnull KUnitQuadUsableType in_quad,
+    final @Nonnull KFramebufferRGBACacheType in_rgba_cache,
+    final @Nonnull KShaderCacheType in_shader_cache,
     final @Nonnull Log in_log)
-    throws ConstraintError,
-      RException
+    throws ConstraintError
   {
-    super(KPostprocessorFog.NAME);
+    this.log =
+      new Log(
+        Constraints.constrainNotNull(in_log, "Log"),
+        KPostprocessorFog.NAME);
 
-    try {
-      this.gi = Constraints.constrainNotNull(in_gi, "GL implementation");
-      this.rgba_cache =
-        Constraints.constrainNotNull(in_rgba_cache, "RGBA framebuffer cache");
-      this.shader_cache =
-        Constraints.constrainNotNull(in_shader_cache, "Shader cache");
-      this.log =
-        new Log(
-          Constraints.constrainNotNull(in_log, "Log"),
-          KPostprocessorFog.NAME);
-
-      this.quad = KUnitQuad.newQuad(in_gi.getGLCommon(), this.log);
-      this.fog_colour = new VectorM3F(0.1f, 0.1f, 0.1f);
-
-    } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
-    }
+    this.gi = Constraints.constrainNotNull(in_gi, "GL implementation");
+    this.copier = Constraints.constrainNotNull(in_copier, "Copier");
+    this.rgba_cache =
+      Constraints.constrainNotNull(in_rgba_cache, "RGBA framebuffer cache");
+    this.shader_cache =
+      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+    this.quad = Constraints.constrainNotNull(in_quad, "Quad");
+    this.fog_colour = new VectorM3F(0.1f, 0.1f, 0.1f);
   }
 
   private
@@ -123,10 +122,12 @@ final class KPostprocessorFog extends
 
     try {
       gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
-      gc.viewportSet(output.kFramebufferGetArea());
-      gc.colorBufferClearV3f(this.fog_colour);
+
       gc.blendingDisable();
+      gc.colorBufferMask(true, true, true, true);
+      gc.colorBufferClearV3f(this.fog_colour);
       gc.cullingDisable();
+      gc.viewportSet(output.kFramebufferGetArea());
 
       final JCBExecutionAPI e = fog.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
@@ -186,85 +187,17 @@ final class KPostprocessorFog extends
     }
   }
 
-  private void evaluateId(
-    final @Nonnull KFramebufferRGBAUsableType input,
-    final @Nonnull KFramebufferRGBAUsableType output)
-    throws JCGLRuntimeException,
-      ConstraintError,
-      RException,
-      JCacheException
-  {
-    final JCGLInterfaceCommon gc = this.gi.getGLCommon();
-    final List<TextureUnit> units = gc.textureGetUnits();
-
-    final KProgram id =
-      this.shader_cache.cacheGetLU("postprocessing_identity");
-
-    try {
-      gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
-      gc.viewportSet(output.kFramebufferGetArea());
-      gc.colorBufferClearV3f(this.fog_colour);
-      gc.blendingDisable();
-      gc.cullingDisable();
-
-      final JCBExecutionAPI e = id.getExecutable();
-      e.execRun(new JCBExecutorProcedure() {
-        @SuppressWarnings("synthetic-access") @Override public void call(
-          final @Nonnull JCBProgram p)
-          throws ConstraintError,
-            JCGLException,
-            Exception
-        {
-          try {
-            final ArrayBufferUsable array =
-              KPostprocessorFog.this.quad.getArray();
-            final IndexBufferUsable indices =
-              KPostprocessorFog.this.quad.getIndices();
-
-            gc.arrayBufferBind(array);
-            KShadingProgramCommon.bindAttributePosition(p, array);
-            KShadingProgramCommon.bindAttributeUV(p, array);
-
-            final TextureUnit image_unit = units.get(0);
-            gc.texture2DStaticBind(
-              image_unit,
-              input.kFramebufferGetRGBATexture());
-
-            p.programUniformPutTextureUnit("t_image", image_unit);
-            p.programExecute(new JCBProgramProcedure() {
-              @Override public void call()
-                throws ConstraintError,
-                  JCGLException,
-                  Exception
-              {
-                try {
-                  gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                } catch (final ConstraintError x) {
-                  throw new UnreachableCodeException(x);
-                }
-              }
-            });
-
-          } finally {
-            gc.arrayBufferUnbind();
-          }
-        }
-      });
-    } catch (final JCBExecutionException x) {
-      throw new UnreachableCodeException(x);
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
-  }
-
   @Override public void postprocessorClose()
     throws RException,
       ConstraintError
   {
-    try {
-      this.quad.delete(this.gi.getGLCommon());
-    } catch (final JCGLRuntimeException e) {
-      throw RException.fromJCGLException(e);
+    Constraints.constrainArbitrary(
+      this.postprocessorIsClosed() == false,
+      "Postprocessor not closed");
+
+    this.closed = true;
+    if (this.log.enabled(Level.LOG_DEBUG)) {
+      this.log.debug("closed");
     }
   }
 
@@ -272,20 +205,28 @@ final class KPostprocessorFog extends
     <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
     void
     postprocessorEvaluateRGBAWithDepth(
-      final @Nonnull Unit parameters,
+      final @Nonnull KFogParameters config,
       final @Nonnull F input,
       final @Nonnull KFramebufferRGBAUsableType output)
       throws ConstraintError,
         RException
   {
+    Constraints.constrainNotNull(config, "Configuration");
+    Constraints.constrainNotNull(input, "Input");
+    Constraints.constrainNotNull(output, "Output");
+
     try {
-      final BLUCacheReceipt<KFramebufferRGBADescription, KFramebufferRGBA> receipt =
+      final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAType> receipt =
         this.rgba_cache.bluCacheGet(input.kFramebufferGetRGBADescription());
 
       try {
-        final KFramebufferRGBA temp = receipt.getValue();
+        final KFramebufferRGBAType temp = receipt.getValue();
         this.evaluateFog(input, temp);
-        this.evaluateId(temp, output);
+        this.copier.copierCopyRGBAOnly(
+          temp,
+          temp.kFramebufferGetArea(),
+          output,
+          output.kFramebufferGetArea());
       } finally {
         receipt.returnToCache();
       }
@@ -295,5 +236,15 @@ final class KPostprocessorFog extends
     } catch (final JCacheException e) {
       throw RException.fromJCacheException(e);
     }
+  }
+
+  @Override public String postprocessorGetName()
+  {
+    return KPostprocessorFog.NAME;
+  }
+
+  @Override public boolean postprocessorIsClosed()
+  {
+    return this.closed;
   }
 }

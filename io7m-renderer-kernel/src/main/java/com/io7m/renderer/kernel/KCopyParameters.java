@@ -17,16 +17,35 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.AreaInclusive;
 
-final class KCopyParameters
+/**
+ * Parameters for copying framebuffers in postprocessors.
+ */
+
+@Immutable public final class KCopyParameters
 {
   private final boolean                blit;
   private final @Nonnull AreaInclusive source_select;
   private final @Nonnull AreaInclusive target_select;
+
+  /**
+   * Construct new parameters.
+   * 
+   * @param in_source_select
+   *          The inclusive area that will be copied from the source.
+   * @param in_target_select
+   *          The inclusive area that will contain the data copied on the
+   *          target.
+   * @param in_blit
+   *          If blitting should be used (may be ignored if not supported)
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
 
   public KCopyParameters(
     final @Nonnull AreaInclusive in_source_select,
@@ -41,15 +60,27 @@ final class KCopyParameters
     this.blit = in_blit;
   }
 
+  /**
+   * @return The source area
+   */
+
   public @Nonnull AreaInclusive getSourceSelect()
   {
     return this.source_select;
   }
 
+  /**
+   * @return The target area
+   */
+
   public @Nonnull AreaInclusive getTargetSelect()
   {
     return this.target_select;
   }
+
+  /**
+   * @return <code>true</code> if blitting is requested
+   */
 
   public boolean useBlitting()
   {

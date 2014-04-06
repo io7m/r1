@@ -41,15 +41,10 @@ import com.io7m.jcanephora.TextureUnit;
 
 final class KPostprocessorBlurCommon
 {
-  private KPostprocessorBlurCommon()
-  {
-    throw new UnreachableCodeException();
-  }
-
   static void evaluateBlurH(
     final @Nonnull JCGLImplementation gi,
     final float blur_size,
-    final @Nonnull KUnitQuad quad,
+    final @Nonnull KUnitQuadUsableType quad,
     final @Nonnull KProgram blur_h,
     final @Nonnull Texture2DStaticUsable input_texture,
     final @Nonnull AreaInclusive input_area,
@@ -65,14 +60,16 @@ final class KPostprocessorBlurCommon
     try {
       gc.framebufferDrawBind(output);
 
+      gc.blendingDisable();
+      gc.colorBufferMask(true, true, true, true);
+      gc.cullingDisable();
+
       if (has_depth) {
         gc.depthBufferTestDisable();
         gc.depthBufferWriteDisable();
       }
 
       gc.viewportSet(output_area);
-      gc.blendingDisable();
-      gc.cullingDisable();
 
       final JCBExecutionAPI e = blur_h.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
@@ -125,7 +122,7 @@ final class KPostprocessorBlurCommon
 
   static void evaluateBlurV(
     final @Nonnull JCGLImplementation gi,
-    final @Nonnull KUnitQuad quad,
+    final @Nonnull KUnitQuadUsableType quad,
     final float blur_size,
     final @Nonnull KProgram blur_v,
     final @Nonnull Texture2DStaticUsable input_texture,
@@ -141,15 +138,17 @@ final class KPostprocessorBlurCommon
 
     try {
       gc.framebufferDrawBind(output);
-      gc.viewportSet(output_area);
+
+      gc.blendingDisable();
+      gc.colorBufferMask(true, true, true, true);
+      gc.cullingDisable();
 
       if (has_depth) {
         gc.depthBufferTestDisable();
         gc.depthBufferWriteDisable();
       }
 
-      gc.blendingDisable();
-      gc.cullingDisable();
+      gc.viewportSet(output_area);
 
       final JCBExecutionAPI e = blur_v.getExecutable();
       e.execRun(new JCBExecutorProcedure() {
@@ -198,5 +197,10 @@ final class KPostprocessorBlurCommon
     } finally {
       gc.framebufferDrawUnbind();
     }
+  }
+
+  private KPostprocessorBlurCommon()
+  {
+    throw new UnreachableCodeException();
   }
 }

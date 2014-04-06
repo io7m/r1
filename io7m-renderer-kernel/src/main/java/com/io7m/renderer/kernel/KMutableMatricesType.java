@@ -28,19 +28,19 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.MatrixM4x4F.Context;
-import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedVisitorType;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
-import com.io7m.renderer.kernel.types.KMaterialTranslucentType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
-import com.io7m.renderer.kernel.types.KTransformType;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentType;
 import com.io7m.renderer.kernel.types.KTransformContext;
+import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RMatrixI4x4F;
@@ -56,8 +56,8 @@ import com.io7m.renderer.types.RTransformProjectiveModelViewType;
 import com.io7m.renderer.types.RTransformProjectiveProjectionType;
 import com.io7m.renderer.types.RTransformProjectiveViewType;
 import com.io7m.renderer.types.RTransformTextureType;
-import com.io7m.renderer.types.RTransformViewType;
 import com.io7m.renderer.types.RTransformViewInverseType;
+import com.io7m.renderer.types.RTransformViewType;
 
 final class KMutableMatricesType
 {
@@ -68,7 +68,7 @@ final class KMutableMatricesType
     private final @Nonnull RMatrixM3x3F<RTransformNormalType>    matrix_normal;
     private final @Nonnull RMatrixM3x3F<RTransformTextureType>   matrix_uv;
     private final @Nonnull RMatrixM3x3F<RTransformTextureType>   matrix_uv_temp;
-    private final @Nonnull ObserverSingleton                 parent;
+    private final @Nonnull ObserverSingleton                     parent;
 
     public InstanceSingleton(
       final @Nonnull ObserverSingleton in_parent)
@@ -136,8 +136,10 @@ final class KMutableMatricesType
       return this.matrix_uv;
     }
 
-    @Override public RMatrixReadable4x4FType<RTransformViewType> getMatrixView()
-      throws ConstraintError
+    @Override public
+      RMatrixReadable4x4FType<RTransformViewType>
+      getMatrixView()
+        throws ConstraintError
     {
       return this.parent.getMatrixView();
     }
@@ -255,7 +257,7 @@ final class KMutableMatricesType
     private final @Nonnull RMatrixM4x4F<RTransformProjectiveModelViewType> matrix_projective_modelview;
     private final @Nonnull RMatrixM3x3F<RTransformTextureType>             matrix_uv;
     private final @Nonnull RMatrixM3x3F<RTransformTextureType>             matrix_uv_temp;
-    private final @Nonnull ProjectiveLightSingleton                    parent;
+    private final @Nonnull ProjectiveLightSingleton                        parent;
 
     public InstanceWithProjectiveSingleton(
       final @Nonnull ProjectiveLightSingleton in_parent)
@@ -353,8 +355,10 @@ final class KMutableMatricesType
       return this.matrix_uv;
     }
 
-    @Override public RMatrixReadable4x4FType<RTransformViewType> getMatrixView()
-      throws ConstraintError
+    @Override public
+      RMatrixReadable4x4FType<RTransformViewType>
+      getMatrixView()
+        throws ConstraintError
     {
       return this.parent.getMatrixView();
     }
@@ -473,13 +477,24 @@ final class KMutableMatricesType
     }
   }
 
+  interface MatricesInstanceFunctionType<T, E extends Throwable>
+  {
+    T run(
+      final @Nonnull MatricesInstanceType o)
+      throws E,
+        ConstraintError,
+        RException;
+  }
+
   interface MatricesInstanceType extends MatricesObserverValuesType
   {
     @Nonnull RMatrixReadable4x4FType<RTransformModelType> getMatrixModel()
       throws ConstraintError;
 
-    @Nonnull RMatrixReadable4x4FType<RTransformModelViewType> getMatrixModelView()
-      throws ConstraintError;
+    @Nonnull
+      RMatrixReadable4x4FType<RTransformModelViewType>
+      getMatrixModelView()
+        throws ConstraintError;
 
     @Nonnull RMatrixReadable3x3FType<RTransformNormalType> getMatrixNormal()
       throws ConstraintError;
@@ -488,10 +503,10 @@ final class KMutableMatricesType
       throws ConstraintError;
   }
 
-  interface MatricesInstanceFunctionType<T, E extends Throwable>
+  interface MatricesInstanceWithProjectiveFunctionType<T, E extends Throwable>
   {
     T run(
-      final @Nonnull MatricesInstanceType o)
+      final @Nonnull MatricesInstanceWithProjectiveType o)
       throws E,
         ConstraintError,
         RException;
@@ -507,10 +522,10 @@ final class KMutableMatricesType
         throws ConstraintError;
   }
 
-  interface MatricesInstanceWithProjectiveFunctionType<T, E extends Throwable>
+  interface MatricesObserverFunctionType<T, E extends Throwable>
   {
     T run(
-      final @Nonnull MatricesInstanceWithProjectiveType o)
+      final @Nonnull MatricesObserverType o)
       throws E,
         ConstraintError,
         RException;
@@ -533,15 +548,6 @@ final class KMutableMatricesType
         ConstraintError;
   }
 
-  interface MatricesObserverFunctionType<T, E extends Throwable>
-  {
-    T run(
-      final @Nonnull MatricesObserverType o)
-      throws E,
-        ConstraintError,
-        RException;
-  }
-
   interface MatricesObserverValuesType
   {
     MatrixM4x4F.Context getMatrixContext()
@@ -557,16 +563,6 @@ final class KMutableMatricesType
       throws ConstraintError;
   }
 
-  interface MatricesProjectiveLightType extends MatricesProjectiveLightValuesType
-  {
-    <T, E extends Throwable> T withInstance(
-      final @Nonnull KInstanceTransformedType i,
-      final @Nonnull MatricesInstanceWithProjectiveFunctionType<T, E> f)
-      throws RException,
-        E,
-        ConstraintError;
-  }
-
   interface MatricesProjectiveLightFunctionType<T, E extends Throwable>
   {
     T run(
@@ -576,7 +572,19 @@ final class KMutableMatricesType
         RException;
   }
 
-  interface MatricesProjectiveLightValuesType extends MatricesObserverValuesType
+  interface MatricesProjectiveLightType extends
+    MatricesProjectiveLightValuesType
+  {
+    <T, E extends Throwable> T withInstance(
+      final @Nonnull KInstanceTransformedType i,
+      final @Nonnull MatricesInstanceWithProjectiveFunctionType<T, E> f)
+      throws RException,
+        E,
+        ConstraintError;
+  }
+
+  interface MatricesProjectiveLightValuesType extends
+    MatricesObserverValuesType
   {
       RMatrixM4x4F<RTransformProjectiveProjectionType>
       getMatrixProjectiveProjection()
@@ -595,7 +603,8 @@ final class KMutableMatricesType
     public ObserverSingleton()
     {
       this.matrix_view = new RMatrixM4x4F<RTransformViewType>();
-      this.matrix_view_inverse = new RMatrixM4x4F<RTransformViewInverseType>();
+      this.matrix_view_inverse =
+        new RMatrixM4x4F<RTransformViewInverseType>();
       this.matrix_projection = new RMatrixM4x4F<RTransformProjectionType>();
     }
 
@@ -711,11 +720,12 @@ final class KMutableMatricesType
     }
   }
 
-  private class ProjectiveLightSingleton implements MatricesProjectiveLightType
+  private class ProjectiveLightSingleton implements
+    MatricesProjectiveLightType
   {
     private final @Nonnull RMatrixM4x4F<RTransformProjectiveProjectionType> matrix_projective_projection;
     private final @Nonnull RMatrixM4x4F<RTransformProjectiveViewType>       matrix_projective_view;
-    private final @Nonnull ObserverSingleton                            parent;
+    private final @Nonnull ObserverSingleton                                parent;
 
     public ProjectiveLightSingleton(
       final @Nonnull ObserverSingleton in_observer)
@@ -762,8 +772,10 @@ final class KMutableMatricesType
       return this.matrix_projective_view;
     }
 
-    @Override public RMatrixReadable4x4FType<RTransformViewType> getMatrixView()
-      throws ConstraintError
+    @Override public
+      RMatrixReadable4x4FType<RTransformViewType>
+      getMatrixView()
+        throws ConstraintError
     {
       return this.parent.getMatrixView();
     }

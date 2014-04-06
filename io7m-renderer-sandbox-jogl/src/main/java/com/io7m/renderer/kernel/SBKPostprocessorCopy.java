@@ -32,13 +32,11 @@ import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
-import com.io7m.jcache.BLUCache;
-import com.io7m.jcache.LUCache;
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.SBException.SBExceptionInputError;
-import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
 public final class SBKPostprocessorCopy
@@ -265,6 +263,8 @@ public final class SBKPostprocessorCopy
   {
     private final @Nonnull AtomicReference<KCopyParameters> data;
     private @CheckForNull KPostprocessorCopyRGBA            proc;
+    private @CheckForNull KUnitQuad                         quad;
+    private @CheckForNull KRegionCopierType                 copier;
 
     public Postprocessor(
       final @Nonnull AtomicReference<KCopyParameters> in_data)
@@ -289,27 +289,36 @@ public final class SBKPostprocessorCopy
       }
     }
 
-    @Override public
-      void
-      postprocessorInitialize(
-        final JCGLImplementation gi,
-        final BLUCache<KFramebufferRGBADescription, KFramebufferRGBA, RException> rgba_cache,
-        final LUCache<String, KProgram, RException> shader_cache,
-        final Log log)
-        throws RException,
-          ConstraintError
+    @Override public void postprocessorInitialize(
+      final JCGLImplementation gi,
+      final KFramebufferRGBACacheType rgba_cache,
+      final KShaderCacheType shader_cache,
+      final Log log)
+      throws RException,
+        ConstraintError
     {
-      if (this.proc != null) {
-        this.proc.postprocessorClose();
-        this.proc = null;
-      }
+      try {
+        if (this.proc != null) {
+          this.proc.postprocessorClose();
+          this.proc = null;
+        }
 
-      this.proc =
-        KPostprocessorCopyRGBA.postprocessorNew(
-          gi,
-          rgba_cache,
-          shader_cache,
-          log);
+        this.quad = KUnitQuad.newQuad(gi.getGLCommon(), log);
+
+        this.copier =
+          KRegionCopier.newCopier(gi, log, shader_cache, this.quad);
+
+        this.proc =
+          KPostprocessorCopyRGBA.postprocessorNew(
+            gi,
+            this.copier,
+            rgba_cache,
+            shader_cache,
+            log);
+
+      } catch (final JCGLException e) {
+        throw RException.fromJCGLException(e);
+      }
     }
 
     @Override public void postprocessorRun(

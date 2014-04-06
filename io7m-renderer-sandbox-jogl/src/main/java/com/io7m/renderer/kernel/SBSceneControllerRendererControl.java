@@ -38,7 +38,7 @@ interface SBSceneControllerRendererControl
     final @Nonnull RMatrixI4x4F<RTransformProjectionType> p);
 
   public void rendererSetType(
-    final @Nonnull SBKRendererType type);
+    final @Nonnull SBKRendererSelectionType type);
 
   public void rendererPostprocessorSet(
     final @Nonnull SBKPostprocessor p);

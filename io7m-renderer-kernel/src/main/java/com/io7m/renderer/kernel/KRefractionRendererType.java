@@ -26,7 +26,7 @@ import com.io7m.renderer.types.RException;
  * The type of refraction renderers.
  */
 
-public interface KRefractionRendererType
+public interface KRefractionRendererType extends KRendererType
 {
   /**
    * Render the given refractive instance.

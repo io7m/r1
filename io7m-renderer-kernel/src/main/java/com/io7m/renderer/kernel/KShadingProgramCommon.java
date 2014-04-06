@@ -48,17 +48,17 @@ import com.io7m.renderer.kernel.types.KMaterialNormal;
 import com.io7m.renderer.kernel.types.KMaterialRefractive;
 import com.io7m.renderer.kernel.types.KMaterialSpecular;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
-import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
+import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RMatrixReadable3x3FType;
 import com.io7m.renderer.types.RMatrixReadable4x4FType;
 import com.io7m.renderer.types.RSpaceObjectType;
-import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceRGBAType;
+import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RTransformModelType;
@@ -68,8 +68,8 @@ import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformProjectiveModelViewType;
 import com.io7m.renderer.types.RTransformProjectiveProjectionType;
 import com.io7m.renderer.types.RTransformTextureType;
-import com.io7m.renderer.types.RTransformViewType;
 import com.io7m.renderer.types.RTransformViewInverseType;
+import com.io7m.renderer.types.RTransformViewType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
@@ -1156,11 +1156,13 @@ final class KShadingProgramCommon
     p.programUniformUseExisting(KShadingProgramCommon.MATRIX_NAME_PROJECTION);
   }
 
-  static void putMatrixProjectiveModelView(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable4x4FType<RTransformProjectiveModelViewType> m)
-    throws JCGLException,
-      ConstraintError
+  static
+    void
+    putMatrixProjectiveModelView(
+      final @Nonnull JCBProgram program,
+      final @Nonnull RMatrixReadable4x4FType<RTransformProjectiveModelViewType> m)
+      throws JCGLException,
+        ConstraintError
   {
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_PROJECTIVE_MODELVIEW,
@@ -1176,11 +1178,13 @@ final class KShadingProgramCommon
       .programUniformUseExisting(KShadingProgramCommon.MATRIX_NAME_PROJECTIVE_MODELVIEW);
   }
 
-  static void putMatrixProjectiveProjection(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable4x4FType<RTransformProjectiveProjectionType> m)
-    throws JCGLException,
-      ConstraintError
+  static
+    void
+    putMatrixProjectiveProjection(
+      final @Nonnull JCBProgram program,
+      final @Nonnull RMatrixReadable4x4FType<RTransformProjectiveProjectionType> m)
+      throws JCGLException,
+        ConstraintError
   {
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_PROJECTIVE_PROJECTION,

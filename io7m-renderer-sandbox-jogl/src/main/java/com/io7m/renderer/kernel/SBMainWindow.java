@@ -401,7 +401,7 @@ final class SBMainWindow extends JFrame
     final ButtonGroup renderer_group = new ButtonGroup();
     final JMenu menu = new JMenu("Renderer");
 
-    for (final SBKRendererType type : SBKRendererType.values()) {
+    for (final SBKRendererSelectionType type : SBKRendererSelectionType.values()) {
       final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
       b.addActionListener(new ActionListener() {
         @Override public void actionPerformed(

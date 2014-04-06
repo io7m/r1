@@ -38,8 +38,6 @@ import com.io7m.jcanephora.JCGLArrayBuffers;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLIndexBuffers;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLResourceSized;
-import com.io7m.jcanephora.JCGLResourceUsable;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jlog.Level;
@@ -47,10 +45,11 @@ import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
 
 /**
- * A unit quad, from <code>(-1, -1, 0)</code> to <code>(1, 1, 0)</code>.
+ * A unit quad, from <code>(-1, -1, -1)</code> to <code>(1, 1, -1)</code>,
+ * oriented towards <code>+Z</code>.
  */
 
-public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
+public final class KUnitQuad implements KUnitQuadUsableType
 {
   /**
    * Construct a new unit quad.
@@ -147,8 +146,8 @@ public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
   }
 
   private final @Nonnull ArrayBuffer array;
-  private final @Nonnull IndexBuffer indices;
   private boolean                    deleted;
+  private final @Nonnull IndexBuffer indices;
 
   private KUnitQuad(
     final @Nonnull ArrayBuffer in_array,
@@ -157,66 +156,6 @@ public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
     this.array = in_array;
     this.indices = in_indices;
     this.deleted = false;
-  }
-
-  @Override public boolean equals(
-    final Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KUnitQuad other = (KUnitQuad) obj;
-    if (!this.array.equals(other.array)) {
-      return false;
-    }
-    if (!this.indices.equals(other.indices)) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * @return The array buffer that backs the quad
-   */
-
-  public @Nonnull ArrayBufferUsable getArray()
-  {
-    return this.array;
-  }
-
-  /**
-   * @return The index buffer that backs the quad
-   */
-
-  public @Nonnull IndexBufferUsable getIndices()
-  {
-    return this.indices;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.array.hashCode();
-    result = (prime * result) + this.indices.hashCode();
-    return result;
-  }
-
-  @Override public String toString()
-  {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("[KUnitQuad ");
-    builder.append(this.array);
-    builder.append(" ");
-    builder.append(this.indices);
-    builder.append("]");
-    return builder.toString();
   }
 
   /**
@@ -245,6 +184,55 @@ public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
     }
   }
 
+  @Override public boolean equals(
+    final Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KUnitQuad other = (KUnitQuad) obj;
+    if (!this.array.equals(other.array)) {
+      return false;
+    }
+    if (!this.indices.equals(other.indices)) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @return The array buffer that backs the quad
+   */
+
+  @Override public @Nonnull ArrayBufferUsable getArray()
+  {
+    return this.array;
+  }
+
+  /**
+   * @return The index buffer that backs the quad
+   */
+
+  @Override public @Nonnull IndexBufferUsable getIndices()
+  {
+    return this.indices;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.array.hashCode();
+    result = (prime * result) + this.indices.hashCode();
+    return result;
+  }
+
   @Override public long resourceGetSizeBytes()
   {
     return this.array.resourceGetSizeBytes()
@@ -254,5 +242,16 @@ public final class KUnitQuad implements JCGLResourceUsable, JCGLResourceSized
   @Override public boolean resourceIsDeleted()
   {
     return this.deleted;
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder builder = new StringBuilder();
+    builder.append("[KUnitQuad ");
+    builder.append(this.array);
+    builder.append(" ");
+    builder.append(this.indices);
+    builder.append("]");
+    return builder.toString();
   }
 }

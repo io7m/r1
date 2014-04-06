@@ -46,7 +46,7 @@ final class KSceneBatchedDepthType
   {
     private final @Nonnull KMaterialDepthLabelCacheType                                   cache;
     private final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> in_progress;
-    private boolean                                                                   valid;
+    private boolean                                                                       valid;
 
     public KSceneBatchedDepthBuilder(
       final @Nonnull KMaterialDepthLabelCacheType in_cache)
