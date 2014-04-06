@@ -186,6 +186,75 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
+  @Override public <A, E extends Throwable> A rendererEvaluateShadowMaps(
+    final @Nonnull KCamera camera,
+    final @Nonnull KSceneBatchedShadow batches,
+    final @Nonnull KShadowMapWithType<A, E> with)
+    throws ConstraintError,
+      RException,
+      E
+  {
+    Constraints.constrainNotNull(camera, "Camera");
+    Constraints.constrainNotNull(batches, "Batches");
+    Constraints.constrainNotNull(with, "With");
+    Constraints.constrainArbitrary(
+      this.rendererIsClosed() == false,
+      "Renderer is not closed");
+
+    this.shadow_cache.cachePeriodStart();
+    try {
+      this.renderShadowMapsInitialize(batches.getShadowCasters().keySet());
+      this.renderShadowMapsPre(camera, batches);
+      return with.withMaps(new KShadowMapContextType() {
+        @Override public KShadowMapType getShadowMap(
+          final @Nonnull KShadowType shadow)
+          throws ConstraintError,
+            RException
+        {
+          try {
+            return shadow
+              .shadowAccept(new KShadowVisitorType<KShadowMapType, JCacheException>() {
+                @Override public KShadowMapType shadowVisitMappedBasic(
+                  final @Nonnull KShadowMappedBasic s)
+                  throws JCGLException,
+                    RException,
+                    ConstraintError,
+                    JCacheException
+                {
+                  return KShadowMapRenderer.this.shadow_cache
+                    .cacheGetPeriodic(s.getDescription());
+                }
+
+                @Override public KShadowMapType shadowVisitMappedVariance(
+                  final @Nonnull KShadowMappedVariance s)
+                  throws JCGLException,
+                    RException,
+                    ConstraintError,
+                    JCacheException
+                {
+                  return KShadowMapRenderer.this.shadow_cache
+                    .cacheGetPeriodic(s.getDescription());
+                }
+              });
+
+          } catch (final ConstraintError e) {
+            throw e;
+          } catch (final RException e) {
+            throw e;
+          } catch (final JCGLException e) {
+            throw RException.fromJCGLException(e);
+          } catch (final JCacheException e) {
+            throw new UnreachableCodeException(e);
+          }
+        }
+      });
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
+    } finally {
+      this.shadow_cache.cachePeriodEnd();
+    }
+  }
+
   @Override public String rendererGetName()
   {
     return KShadowMapRenderer.NAME;
@@ -215,7 +284,7 @@ import com.io7m.renderer.types.RTransformViewType;
      * rendered.
      */
 
-    this.depth_renderer.depthRendererEvaluate(
+    this.depth_renderer.rendererEvaluateDepth(
       view,
       proj,
       batches,
@@ -482,7 +551,7 @@ import com.io7m.renderer.types.RTransformViewType;
      */
 
     final Option<KFaceSelection> none = Option.none();
-    this.depth_variance_renderer.depthVarianceRendererEvaluate(
+    this.depth_variance_renderer.rendererEvaluateDepthVariance(
       view,
       proj,
       vbatch,
@@ -493,75 +562,6 @@ import com.io7m.renderer.types.RTransformViewType;
       shadow.getBlur(),
       smv.getFramebuffer(),
       smv.getFramebuffer());
-  }
-
-  @Override public <A, E extends Throwable> A shadowMapRendererEvaluate(
-    final @Nonnull KCamera camera,
-    final @Nonnull KSceneBatchedShadow batches,
-    final @Nonnull KShadowMapWithType<A, E> with)
-    throws ConstraintError,
-      RException,
-      E
-  {
-    Constraints.constrainNotNull(camera, "Camera");
-    Constraints.constrainNotNull(batches, "Batches");
-    Constraints.constrainNotNull(with, "With");
-    Constraints.constrainArbitrary(
-      this.rendererIsClosed() == false,
-      "Renderer is not closed");
-
-    this.shadow_cache.cachePeriodStart();
-    try {
-      this.renderShadowMapsInitialize(batches.getShadowCasters().keySet());
-      this.renderShadowMapsPre(camera, batches);
-      return with.withMaps(new KShadowMapContextType() {
-        @Override public KShadowMapType getShadowMap(
-          final @Nonnull KShadowType shadow)
-          throws ConstraintError,
-            RException
-        {
-          try {
-            return shadow
-              .shadowAccept(new KShadowVisitorType<KShadowMapType, JCacheException>() {
-                @Override public KShadowMapType shadowVisitMappedBasic(
-                  final @Nonnull KShadowMappedBasic s)
-                  throws JCGLException,
-                    RException,
-                    ConstraintError,
-                    JCacheException
-                {
-                  return KShadowMapRenderer.this.shadow_cache
-                    .cacheGetPeriodic(s.getDescription());
-                }
-
-                @Override public KShadowMapType shadowVisitMappedVariance(
-                  final @Nonnull KShadowMappedVariance s)
-                  throws JCGLException,
-                    RException,
-                    ConstraintError,
-                    JCacheException
-                {
-                  return KShadowMapRenderer.this.shadow_cache
-                    .cacheGetPeriodic(s.getDescription());
-                }
-              });
-
-          } catch (final ConstraintError e) {
-            throw e;
-          } catch (final RException e) {
-            throw e;
-          } catch (final JCGLException e) {
-            throw RException.fromJCGLException(e);
-          } catch (final JCacheException e) {
-            throw new UnreachableCodeException(e);
-          }
-        }
-      });
-    } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
-    } finally {
-      this.shadow_cache.cachePeriodEnd();
-    }
   }
 
 }

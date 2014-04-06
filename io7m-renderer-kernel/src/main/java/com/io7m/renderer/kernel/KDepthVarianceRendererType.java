@@ -58,7 +58,7 @@ public interface KDepthVarianceRendererType extends KRendererType
    */
 
     void
-    depthVarianceRendererEvaluate(
+    rendererEvaluateDepthVariance(
       final @Nonnull RMatrixI4x4F<RTransformViewType> view,
       final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection,
       final @Nonnull Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaqueType>> batches,

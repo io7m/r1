@@ -367,46 +367,6 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  @Override public
-    void
-    depthRendererEvaluate(
-      final @Nonnull RMatrixI4x4F<RTransformViewType> view,
-      final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection,
-      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
-      final @Nonnull KFramebufferDepthUsableType framebuffer,
-      final @Nonnull Option<KFaceSelection> faces)
-      throws ConstraintError,
-        RException
-  {
-    Constraints.constrainNotNull(view, "View matrix");
-    Constraints.constrainNotNull(projection, "Projection matrix");
-    Constraints.constrainNotNull(batches, "Batches");
-    Constraints.constrainNotNull(framebuffer, "Framebuffer");
-    Constraints.constrainNotNull(faces, "Faces");
-    Constraints.constrainArbitrary(
-      this.rendererIsClosed() == false,
-      "Renderer not closed");
-
-    try {
-      this.matrices.withObserver(
-        view,
-        projection,
-        new MatricesObserverFunctionType<Unit, JCGLException>() {
-          @Override public Unit run(
-            final @Nonnull MatricesObserverType mwo)
-            throws ConstraintError,
-              RException,
-              JCGLException
-          {
-            KDepthRenderer.this.renderScene(batches, framebuffer, mwo, faces);
-            return Unit.unit();
-          }
-        });
-    } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
-    }
-  }
-
   private void renderConfigureDepthColorMasks(
     final @Nonnull JCGLInterfaceCommon gc)
     throws ConstraintError,
@@ -472,6 +432,46 @@ import com.io7m.renderer.types.RTransformViewType;
 
     if (this.log.enabled(Level.LOG_DEBUG)) {
       this.log.debug("closed");
+    }
+  }
+
+  @Override public
+    void
+    rendererEvaluateDepth(
+      final @Nonnull RMatrixI4x4F<RTransformViewType> view,
+      final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection,
+      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final @Nonnull KFramebufferDepthUsableType framebuffer,
+      final @Nonnull Option<KFaceSelection> faces)
+      throws ConstraintError,
+        RException
+  {
+    Constraints.constrainNotNull(view, "View matrix");
+    Constraints.constrainNotNull(projection, "Projection matrix");
+    Constraints.constrainNotNull(batches, "Batches");
+    Constraints.constrainNotNull(framebuffer, "Framebuffer");
+    Constraints.constrainNotNull(faces, "Faces");
+    Constraints.constrainArbitrary(
+      this.rendererIsClosed() == false,
+      "Renderer not closed");
+
+    try {
+      this.matrices.withObserver(
+        view,
+        projection,
+        new MatricesObserverFunctionType<Unit, JCGLException>() {
+          @Override public Unit run(
+            final @Nonnull MatricesObserverType mwo)
+            throws ConstraintError,
+              RException,
+              JCGLException
+          {
+            KDepthRenderer.this.renderScene(batches, framebuffer, mwo, faces);
+            return Unit.unit();
+          }
+        });
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
     }
   }
 

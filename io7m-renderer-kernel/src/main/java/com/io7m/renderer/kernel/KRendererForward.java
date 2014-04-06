@@ -109,6 +109,51 @@ import com.io7m.renderer.types.RTransformViewType;
     NAME = "forward";
   }
 
+  /**
+   * Construct a new forward renderer.
+   * 
+   * @param in_g
+   *          The OpenGL implementation
+   * @param in_depth_renderer
+   *          A depth renderer
+   * @param in_shadow_renderer
+   *          A shadow map renderer
+   * @param in_refraction_renderer
+   *          A refraction renderer
+   * @param in_decider
+   *          A label decider
+   * @param in_shader_cache
+   *          A shader cache
+   * @param in_log
+   *          A log handle
+   * @return A new renderer
+   * @throws RException
+   *           If an error occurs during initialization
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public static @Nonnull KRendererForwardType newRenderer(
+    final @Nonnull JCGLImplementation in_g,
+    final @Nonnull KDepthRendererType in_depth_renderer,
+    final @Nonnull KShadowMapRendererType in_shadow_renderer,
+    final @Nonnull KRefractionRendererType in_refraction_renderer,
+    final @Nonnull KForwardLabelDeciderType in_decider,
+    final @Nonnull KShaderCacheType in_shader_cache,
+    final @Nonnull Log in_log)
+    throws RException,
+      ConstraintError
+  {
+    return new KRendererForward(
+      in_g,
+      in_depth_renderer,
+      in_shadow_renderer,
+      in_refraction_renderer,
+      in_decider,
+      in_shader_cache,
+      in_log);
+  }
+
   private static void putInstanceMatrices(
     final @Nonnull JCBProgram program,
     final @Nonnull MatricesInstanceType mwi,
@@ -1119,52 +1164,8 @@ import com.io7m.renderer.types.RTransformViewType;
   private final @Nonnull KRefractionRendererType                   refraction_renderer;
   private final @Nonnull LUCacheType<String, KProgram, RException> shader_cache;
   private final @Nonnull KShadowMapRendererType                    shadow_renderer;
+
   private final @Nonnull KTextureUnitAllocator                     texture_units;
-
-  /**
-   * Construct a new forward renderer.
-   * 
-   * @param in_g
-   *          The OpenGL implementation
-   * @param in_depth_renderer
-   *          A depth renderer
-   * @param in_shadow_renderer
-   *          A shadow map renderer
-   * @param in_refraction_renderer
-   *          A refraction renderer
-   * @param in_decider
-   *          A label decider
-   * @param in_shader_cache
-   *          A shader cache
-   * @param in_log
-   *          A log handle
-   * @return A new renderer
-   * @throws RException
-   *           If an error occurs during initialization
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
-   */
-
-  public static @Nonnull KRendererForwardType newRenderer(
-    final @Nonnull JCGLImplementation in_g,
-    final @Nonnull KDepthRendererType in_depth_renderer,
-    final @Nonnull KShadowMapRendererType in_shadow_renderer,
-    final @Nonnull KRefractionRendererType in_refraction_renderer,
-    final @Nonnull KForwardLabelDeciderType in_decider,
-    final @Nonnull KShaderCacheType in_shader_cache,
-    final @Nonnull Log in_log)
-    throws RException,
-      ConstraintError
-  {
-    return new KRendererForward(
-      in_g,
-      in_depth_renderer,
-      in_shadow_renderer,
-      in_refraction_renderer,
-      in_decider,
-      in_shader_cache,
-      in_log);
-  }
 
   private KRendererForward(
     final @Nonnull JCGLImplementation in_g,
@@ -1414,7 +1415,7 @@ import com.io7m.renderer.types.RTransformViewType;
      */
 
     final Option<KFaceSelection> none = Option.none();
-    this.depth_renderer.depthRendererEvaluate(
+    this.depth_renderer.rendererEvaluateDepth(
       m_view,
       m_proj,
       batched.getBatchesDepth(),
@@ -1425,7 +1426,7 @@ import com.io7m.renderer.types.RTransformViewType;
      * Render shadow maps.
      */
 
-    this.shadow_renderer.shadowMapRendererEvaluate(
+    this.shadow_renderer.rendererEvaluateShadowMaps(
       camera,
       batched.getBatchedShadow(),
       new KShadowMapWithType<Unit, JCacheException>() {

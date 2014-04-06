@@ -60,7 +60,7 @@ public interface KDepthRendererType extends KRendererType
    */
 
     void
-    depthRendererEvaluate(
+    rendererEvaluateDepth(
       final @Nonnull RMatrixI4x4F<RTransformViewType> view,
       final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection,
       final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
