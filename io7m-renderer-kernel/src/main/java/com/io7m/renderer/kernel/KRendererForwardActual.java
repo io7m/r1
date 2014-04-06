@@ -52,14 +52,14 @@ import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4F;
 import com.io7m.renderer.kernel.KAbstractRenderer.KAbstractRendererForward;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceWithProjectiveType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceWithProjectiveFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceWithProjectiveType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesProjectiveLightType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesProjectiveLightFunctionType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesProjectiveLightType;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KCamera;
@@ -70,10 +70,10 @@ import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
-import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueLitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueUnlitLabel;
@@ -85,12 +85,12 @@ import com.io7m.renderer.kernel.types.KMaterialRegularType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KScene;
-import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
+import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KShadowVisitorType;
-import com.io7m.renderer.kernel.types.KTranslucentType;
 import com.io7m.renderer.kernel.types.KTranslucentRegularLit;
+import com.io7m.renderer.kernel.types.KTranslucentType;
 import com.io7m.renderer.kernel.types.KTranslucentVisitorType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
@@ -101,7 +101,7 @@ import com.io7m.renderer.types.RTransformViewType;
  * The primary forward renderer.
  */
 
-@SuppressWarnings("synthetic-access") public final class KRendererForwardActual extends
+@SuppressWarnings("synthetic-access") final class KRendererForwardActual extends
   KAbstractRendererForward
 {
   private static final @Nonnull String NAME;
@@ -869,86 +869,88 @@ import com.io7m.renderer.types.RTransformViewType;
           JCGLException,
           RException
       {
-        light.lightVisitableAccept(new KLightVisitorType<Unit, JCGLException>() {
+        light
+          .lightVisitableAccept(new KLightVisitorType<Unit, JCGLException>() {
 
-          /**
-           * Render the batch with a directional light.
-           */
+            /**
+             * Render the batch with a directional light.
+             */
 
-          @Override public Unit lightVisitDirectional(
-            final @Nonnull KLightDirectional l)
-            throws ConstraintError,
-              RException,
-              JCGLException
-          {
-            KRendererForwardActual
-              .renderOpaqueLitBatchInstancesWithDirectional(
-                gc,
-                unit_context,
-                mwo,
-                label,
-                instances,
-                program,
-                l);
-            return Unit.unit();
-          }
+            @Override public Unit lightVisitDirectional(
+              final @Nonnull KLightDirectional l)
+              throws ConstraintError,
+                RException,
+                JCGLException
+            {
+              KRendererForwardActual
+                .renderOpaqueLitBatchInstancesWithDirectional(
+                  gc,
+                  unit_context,
+                  mwo,
+                  label,
+                  instances,
+                  program,
+                  l);
+              return Unit.unit();
+            }
 
-          /**
-           * Render the batch with a projective light.
-           */
+            /**
+             * Render the batch with a projective light.
+             */
 
-          @Override public Unit lightVisitProjective(
-            final @Nonnull KLightProjective projective)
-            throws ConstraintError,
-              RException,
-              JCGLException
-          {
-            return mwo.withProjectiveLight(
-              projective,
-              new MatricesProjectiveLightFunctionType<Unit, JCGLException>() {
-                @Override public Unit run(
-                  final @Nonnull MatricesProjectiveLightType mwp)
-                  throws JCGLException,
-                    ConstraintError,
-                    RException
-                {
-                  KRendererForwardActual
-                    .renderOpaqueLitBatchInstancesWithProjective(
-                      gc,
-                      shadow_context,
-                      unit_context,
-                      mwp,
-                      label,
-                      instances,
-                      program,
-                      projective);
-                  return Unit.unit();
-                }
-              });
-          }
+            @Override public Unit lightVisitProjective(
+              final @Nonnull KLightProjective projective)
+              throws ConstraintError,
+                RException,
+                JCGLException
+            {
+              return mwo
+                .withProjectiveLight(
+                  projective,
+                  new MatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+                    @Override public Unit run(
+                      final @Nonnull MatricesProjectiveLightType mwp)
+                      throws JCGLException,
+                        ConstraintError,
+                        RException
+                    {
+                      KRendererForwardActual
+                        .renderOpaqueLitBatchInstancesWithProjective(
+                          gc,
+                          shadow_context,
+                          unit_context,
+                          mwp,
+                          label,
+                          instances,
+                          program,
+                          projective);
+                      return Unit.unit();
+                    }
+                  });
+            }
 
-          /**
-           * Render the batch with a spherical light.
-           */
+            /**
+             * Render the batch with a spherical light.
+             */
 
-          @Override public Unit lightVisitSpherical(
-            final @Nonnull KLightSphere l)
-            throws ConstraintError,
-              RException,
-              JCGLException
-          {
-            KRendererForwardActual
-              .renderOpaqueLitBatchInstancesWithSpherical(
-                gc,
-                unit_context,
-                mwo,
-                label,
-                instances,
-                program,
-                l);
-            return Unit.unit();
-          }
-        });
+            @Override public Unit lightVisitSpherical(
+              final @Nonnull KLightSphere l)
+              throws ConstraintError,
+                RException,
+                JCGLException
+            {
+              KRendererForwardActual
+                .renderOpaqueLitBatchInstancesWithSpherical(
+                  gc,
+                  unit_context,
+                  mwo,
+                  label,
+                  instances,
+                  program,
+                  l);
+              return Unit.unit();
+            }
+          });
       }
     });
   }
@@ -1043,29 +1045,30 @@ import com.io7m.renderer.types.RTransformViewType;
         KRendererForwardActual.putShadowReuse(program, light);
       }
 
-      mwp.withInstance(
-        i,
-        new MatricesInstanceWithProjectiveFunctionType<Unit, JCGLException>() {
-          @Override public Unit run(
-            final @Nonnull MatricesInstanceWithProjectiveType mwi)
-            throws JCGLException,
-              ConstraintError,
-              RException
-          {
-            KShadingProgramCommon.putMatrixProjectiveModelView(
-              program,
-              mwi.getMatrixProjectiveModelView());
+      mwp
+        .withInstance(
+          i,
+          new MatricesInstanceWithProjectiveFunctionType<Unit, JCGLException>() {
+            @Override public Unit run(
+              final @Nonnull MatricesInstanceWithProjectiveType mwi)
+              throws JCGLException,
+                ConstraintError,
+                RException
+            {
+              KShadingProgramCommon.putMatrixProjectiveModelView(
+                program,
+                mwi.getMatrixProjectiveModelView());
 
-            KRendererForwardActual.renderInstanceOpaque(
-              gc,
-              unit_context,
-              mwi,
-              label,
-              program,
-              i);
-            return Unit.unit();
-          }
-        });
+              KRendererForwardActual.renderInstanceOpaque(
+                gc,
+                unit_context,
+                mwi,
+                label,
+                program,
+                i);
+              return Unit.unit();
+            }
+          });
     }
   }
 
@@ -1165,10 +1168,10 @@ import com.io7m.renderer.types.RTransformViewType;
   private final @Nonnull KDepthRenderer                        depth;
   private final @Nonnull JCGLImplementation                    g;
   private final @Nonnull Log                                   log;
-  private final @Nonnull KMutableMatricesType                      matrices;
-  private final @Nonnull KRefractionRendererType                   refraction_renderer;
+  private final @Nonnull KMutableMatricesType                  matrices;
+  private final @Nonnull KRefractionRendererType               refraction_renderer;
   private final @Nonnull LUCache<String, KProgram, RException> shader_cache;
-  private final @Nonnull KShadowMapRendererType                    shadow_renderer;
+  private final @Nonnull KShadowMapRendererType                shadow_renderer;
   private final @Nonnull KTextureUnitAllocator                 texture_units;
 
   private KRendererForwardActual(
@@ -1650,7 +1653,8 @@ import com.io7m.renderer.types.RTransformViewType;
       ConstraintError,
       JCacheException
   {
-    final List<KTranslucentType> translucents = batched.getBatchesTranslucent();
+    final List<KTranslucentType> translucents =
+      batched.getBatchesTranslucent();
 
     for (int index = 0; index < translucents.size(); ++index) {
       gc.cullingDisable();
