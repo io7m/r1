@@ -243,7 +243,7 @@ import com.io7m.renderer.types.RTransformViewType;
      */
 
     KShadingProgramCommon.putMatrixProjectionReuse(jp);
-    KShadingProgramCommon.putMatrixModelView(jp, mwi.getMatrixModelView());
+    KShadingProgramCommon.putMatrixModelViewUnchecked(jp, mwi.getMatrixModelView());
 
     switch (label) {
       case DEPTH_INTERNAL_CONSTANT:
@@ -288,7 +288,7 @@ import com.io7m.renderer.types.RTransformViewType;
       final IndexBuffer indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
-      KShadingProgramCommon.bindAttributePosition(jp, array);
+      KShadingProgramCommon.bindAttributePositionUnchecked(jp, array);
 
       switch (label) {
         case DEPTH_INTERNAL_CONSTANT:
@@ -301,7 +301,7 @@ import com.io7m.renderer.types.RTransformViewType;
         case DEPTH_INTERNAL_MAPPED:
         case DEPTH_INTERNAL_MAPPED_PACKED4444:
         {
-          KShadingProgramCommon.bindAttributeUV(jp, array);
+          KShadingProgramCommon.bindAttributeUVUnchecked(jp, array);
           break;
         }
       }
@@ -406,7 +406,7 @@ import com.io7m.renderer.types.RTransformViewType;
             JCGLException,
             RException
         {
-          KShadingProgramCommon.putMatrixProjection(
+          KShadingProgramCommon.putMatrixProjectionUnchecked(
             jp,
             mwo.getMatrixProjection());
           KDepthRenderer.renderDepthPassBatch(

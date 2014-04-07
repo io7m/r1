@@ -355,7 +355,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
       JCGLException,
       JCGLRuntimeException
   {
-    KShadingProgramCommon.bindAttributePosition(program, array);
+    KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
 
     switch (label.labelGetNormal()) {
       case NORMAL_MAPPED:
@@ -376,7 +376,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
     }
 
     if (label.labelImpliesUV()) {
-      KShadingProgramCommon.bindAttributeUV(program, array);
+      KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
     }
   }
 
@@ -387,7 +387,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
     throws JCGLException,
       ConstraintError
   {
-    KShadingProgramCommon.putMatrixModelView(
+    KShadingProgramCommon.putMatrixModelViewUnchecked(
       program,
       mwi.getMatrixModelView());
 
@@ -578,18 +578,18 @@ public final class KRefractionRenderer implements KRefractionRendererType
           gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
           gc.depthBufferWriteDisable();
 
-          KShadingProgramCommon.putMatrixProjection(
+          KShadingProgramCommon.putMatrixProjectionUnchecked(
             program,
             mi.getMatrixProjection());
 
-          KShadingProgramCommon.putMatrixModelView(
+          KShadingProgramCommon.putMatrixModelViewUnchecked(
             program,
             mi.getMatrixModelView());
 
           final ArrayBuffer array = mesh.getArrayBuffer();
           final IndexBuffer indices = mesh.getIndexBuffer();
           gc.arrayBufferBind(array);
-          KShadingProgramCommon.bindAttributePosition(program, array);
+          KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
 
           program.programExecute(new JCBProgramProcedure() {
             @Override public void call()
@@ -664,7 +664,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
                 JCGLException,
                 RException
             {
-              KShadingProgramCommon.putMatrixProjection(
+              KShadingProgramCommon.putMatrixProjectionUnchecked(
                 program,
                 mi.getMatrixProjection());
 
@@ -762,7 +762,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
                 JCGLException,
                 RException
             {
-              KShadingProgramCommon.putMatrixProjection(
+              KShadingProgramCommon.putMatrixProjectionUnchecked(
                 program,
                 mi.getMatrixProjection());
 

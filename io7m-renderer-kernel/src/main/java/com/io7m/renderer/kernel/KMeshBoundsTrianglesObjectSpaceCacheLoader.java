@@ -28,9 +28,20 @@ import com.io7m.renderer.kernel.types.KMeshBoundsTriangles;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceObjectType;
 
-final class KMeshBoundsTrianglesObjectSpaceCacheLoader implements
+/**
+ * A cache loader that caches the results of calculating the triangles that
+ * make up an object-space bounding box for the given mesh.
+ */
+
+public final class KMeshBoundsTrianglesObjectSpaceCacheLoader implements
   JCacheLoaderType<KMeshBounds<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, RException>
 {
+  /**
+   * Construct a new cache loader.
+   * 
+   * @return A new cache loader
+   */
+
   public static @Nonnull
     KMeshBoundsTrianglesObjectSpaceCacheLoader
     newLoader()

@@ -17,12 +17,10 @@
 package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.NotThreadSafe;
 
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.MatrixReadable4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.QuaternionReadable4F;
@@ -31,14 +29,25 @@ import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RMatrixM4x4F;
 import com.io7m.renderer.types.RMatrixReadable3x3FType;
+import com.io7m.renderer.types.RMatrixReadable4x4FType;
 import com.io7m.renderer.types.RSpaceWorldType;
+import com.io7m.renderer.types.RTransformModelViewType;
+import com.io7m.renderer.types.RTransformNormalType;
 import com.io7m.renderer.types.RTransformProjectiveViewType;
 import com.io7m.renderer.types.RTransformTextureType;
 import com.io7m.renderer.types.RTransformViewType;
 import com.io7m.renderer.types.RVectorReadable3FType;
 
-@NotThreadSafe final class KMatrices
+/**
+ * Miscellaneous matrix functions.
+ */
+
+public final class KMatrices
 {
+  /**
+   * The 3x3 identity matrix.
+   */
+
   public static final @Nonnull RMatrixReadable3x3FType<RTransformTextureType> IDENTITY_UV;
 
   static {
@@ -47,11 +56,16 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 
   /**
    * Produce a normal matrix for the given modelview matrix.
+   * 
+   * @param m
+   *          The model-view matrix
+   * @param mr
+   *          The resulting normal matrix
    */
 
-  static void makeNormalMatrix(
-    final @Nonnull MatrixReadable4x4F m,
-    final @Nonnull MatrixM3x3F mr)
+  public static void makeNormalMatrix(
+    final @Nonnull RMatrixReadable4x4FType<RTransformModelViewType> m,
+    final @Nonnull RMatrixM3x3F<RTransformNormalType> mr)
   {
     mr.set(0, 0, m.getRowColumnF(0, 0));
     mr.set(1, 0, m.getRowColumnF(1, 0));
@@ -69,9 +83,18 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   /**
    * Produce a view matrix assuming a viewer at <code>position</code> facing
    * <code>orientation</code>.
+   * 
+   * @param context
+   *          Preallocated storage
+   * @param position
+   *          The world position of the observer
+   * @param orientation
+   *          The orientation of the observer
+   * @param view
+   *          The resulting view matrix
    */
 
-  static void makeViewMatrix(
+  public static void makeViewMatrix(
     final @Nonnull KTransformContext context,
     final @Nonnull RVectorReadable3FType<RSpaceWorldType> position,
     final @Nonnull QuaternionReadable4F orientation,
@@ -115,9 +138,18 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * {@link #makeViewMatrix(com.io7m.renderer.kernel.KTransform.KTransformContext, RVectorReadable3FType, QuaternionReadable4F, RMatrixM4x4F)}
    * but with a different phantom type parameter on the view matrix type.
    * </p>
+   * 
+   * @param context
+   *          Preallocated storage
+   * @param position
+   *          The world position of the observer
+   * @param orientation
+   *          The orientation of the observer
+   * @param view
+   *          The resulting view matrix
    */
 
-  static void makeViewMatrixProjective(
+  public static void makeViewMatrixProjective(
     final @Nonnull KTransformContext context,
     final @Nonnull RVectorReadable3FType<RSpaceWorldType> position,
     final @Nonnull QuaternionReadable4F orientation,

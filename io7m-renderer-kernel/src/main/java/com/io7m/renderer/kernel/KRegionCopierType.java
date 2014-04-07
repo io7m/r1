@@ -22,7 +22,11 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.renderer.types.RException;
 
-interface KRegionCopierType
+/**
+ * The type of region copiers.
+ */
+
+public interface KRegionCopierType
 {
   /**
    * Close the copier, releasing any resources the copier has allocated.
@@ -123,6 +127,8 @@ interface KRegionCopierType
    * correct size.
    * </p>
    * 
+   * @param <F>
+   *          The type of framebuffers
    * @param source
    *          The source framebuffer
    * @param source_area
@@ -178,6 +184,7 @@ interface KRegionCopierType
    * turn off blitting via the {@link KRegionCopierType} is really only
    * provided to make testing of implementations somewhat easier.
    * </p>
+   * @param b <code>true</code> if blitting should be enabled
    */
 
   void copierSetBlittingEnabled(

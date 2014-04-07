@@ -24,7 +24,6 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.Unit;
-import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferAttribute;
 import com.io7m.jcanephora.ArrayBufferUsable;
 import com.io7m.jcanephora.JCBProgram;
@@ -76,7 +75,18 @@ import com.io7m.renderer.types.RVectorI4F;
 import com.io7m.renderer.types.RVectorReadable3FType;
 import com.io7m.renderer.types.RVectorReadable4FType;
 
-final class KShadingProgramCommon
+/**
+ * <p>
+ * Functions for communicating with shading programs that expose the standard
+ * interface.
+ * </p>
+ * <p>
+ * Users of the package are not expected to have to use these functions; they
+ * are provided to assist with the implementation of the sandbox program.
+ * </p>
+ */
+
+public final class KShadingProgramCommon
 {
   private static final String MATRIX_NAME_MODEL                  = "m_model";
   private static final String MATRIX_NAME_MODELVIEW              =
@@ -112,9 +122,34 @@ final class KShadingProgramCommon
   private static final String TEXTURE_NAME_SPECULAR              =
                                                                    "t_specular";
 
-  static void bindAttributeColour(
+  /**
+   * Bind the vertex colour attribute of the given array to the colour
+   * attribute of the given program.
+   * 
+   * @param program
+   *          The program
+   * @param array
+   *          The array
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   * @throws JCGLException
+   *           If an OpenGL error occurs
+   */
+
+  public static void bindAttributeColour(
     final @Nonnull JCBProgram program,
-    final @Nonnull ArrayBuffer array)
+    final @Nonnull ArrayBufferUsable array)
+    throws ConstraintError,
+      JCGLException
+  {
+    KShadingProgramCommon.bindAttributeColourUnchecked(
+      Constraints.constrainNotNull(program, "Program"),
+      Constraints.constrainNotNull(array, "Array"));
+  }
+
+  static void bindAttributeColourUnchecked(
+    final @Nonnull JCBProgram program,
+    final @Nonnull ArrayBufferUsable array)
     throws ConstraintError,
       JCGLException
   {
@@ -134,7 +169,32 @@ final class KShadingProgramCommon
     program.programAttributeBind("v_normal", a);
   }
 
-  static void bindAttributePosition(
+  /**
+   * Bind the position attribute of the given array to the position attribute
+   * of the given program.
+   * 
+   * @param program
+   *          The program
+   * @param array
+   *          The array
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   * @throws JCGLException
+   *           If an OpenGL error occurs
+   */
+
+  public static void bindAttributePosition(
+    final @Nonnull JCBProgram program,
+    final @Nonnull ArrayBufferUsable array)
+    throws ConstraintError,
+      JCGLException
+  {
+    KShadingProgramCommon.bindAttributePositionUnchecked(
+      Constraints.constrainNotNull(program, "Program"),
+      Constraints.constrainNotNull(array, "Array"));
+  }
+
+  static void bindAttributePositionUnchecked(
     final @Nonnull JCBProgram program,
     final @Nonnull ArrayBufferUsable array)
     throws ConstraintError,
@@ -156,7 +216,32 @@ final class KShadingProgramCommon
     program.programAttributeBind("v_tangent4", a);
   }
 
-  static void bindAttributeUV(
+  /**
+   * Bind the UV attribute of the given array to the UV attribute of the given
+   * program.
+   * 
+   * @param program
+   *          The program
+   * @param array
+   *          The array
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   * @throws JCGLException
+   *           If an OpenGL error occurs
+   */
+
+  public static void bindAttributeUV(
+    final @Nonnull JCBProgram program,
+    final @Nonnull ArrayBufferUsable array)
+    throws ConstraintError,
+      JCGLException
+  {
+    KShadingProgramCommon.bindAttributeUVUnchecked(
+      Constraints.constrainNotNull(program, "Program"),
+      Constraints.constrainNotNull(array, "Array"));
+  }
+
+  static void bindAttributeUVUnchecked(
     final @Nonnull JCBProgram program,
     final @Nonnull ArrayBufferUsable array)
     throws ConstraintError,
@@ -182,7 +267,7 @@ final class KShadingProgramCommon
     final Option<Texture2DStatic> opt = m.getTexture();
     final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
     gt.texture2DStaticBind(texture_unit, some.value);
-    KShadingProgramCommon.putTextureAlbedo(program, texture_unit);
+    KShadingProgramCommon.putTextureAlbedoUnchecked(program, texture_unit);
   }
 
   static void bindPutTextureEmissive(
@@ -1104,7 +1189,31 @@ final class KShadingProgramCommon
       m);
   }
 
-  static void putMatrixModelView(
+  /**
+   * Set the model-view matrix for the given program.
+   * 
+   * @param program
+   *          The program
+   * @param m
+   *          The matrix
+   * @throws JCGLException
+   *           If an OpenGL error occurs
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public static void putMatrixModelView(
+    final @Nonnull JCBProgram program,
+    final @Nonnull RMatrixReadable4x4FType<RTransformModelViewType> m)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMatrixModelViewUnchecked(
+      Constraints.constrainNotNull(program, "Program"),
+      Constraints.constrainNotNull(m, "Matrix"));
+  }
+
+  static void putMatrixModelViewUnchecked(
     final @Nonnull JCBProgram program,
     final @Nonnull RMatrixReadable4x4FType<RTransformModelViewType> m)
     throws JCGLException,
@@ -1137,15 +1246,28 @@ final class KShadingProgramCommon
       m);
   }
 
-  static void putMatrixProjection(
+  /**
+   * Set the projection matrix for the given program.
+   * 
+   * @param p
+   *          The program
+   * @param m
+   *          The matrix
+   * @throws JCGLException
+   *           If an OpenGL error occurs
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public static void putMatrixProjection(
     final @Nonnull JCBProgram p,
     final @Nonnull RMatrixReadable4x4FType<RTransformProjectionType> m)
     throws JCGLException,
       ConstraintError
   {
-    p.programUniformPutMatrix4x4f(
-      KShadingProgramCommon.MATRIX_NAME_PROJECTION,
-      m);
+    KShadingProgramCommon.putMatrixProjectionUnchecked(
+      Constraints.constrainNotNull(p, "Program"),
+      Constraints.constrainNotNull(m, "Matrix"));
   }
 
   static void putMatrixProjectionReuse(
@@ -1154,6 +1276,17 @@ final class KShadingProgramCommon
       ConstraintError
   {
     p.programUniformUseExisting(KShadingProgramCommon.MATRIX_NAME_PROJECTION);
+  }
+
+  static void putMatrixProjectionUnchecked(
+    final @Nonnull JCBProgram p,
+    final @Nonnull RMatrixReadable4x4FType<RTransformProjectionType> m)
+    throws JCGLException,
+      ConstraintError
+  {
+    p.programUniformPutMatrix4x4f(
+      KShadingProgramCommon.MATRIX_NAME_PROJECTION,
+      m);
   }
 
   static
@@ -1369,7 +1502,32 @@ final class KShadingProgramCommon
     KShadingProgramCommon.putShadowVarianceLightBleedReductionReuse(program);
   }
 
-  static void putTextureAlbedo(
+  /**
+   * Associate the given texture unit with the albedo texture parameter of the
+   * given program.
+   * 
+   * @param program
+   *          The program
+   * @param unit
+   *          The texture unit
+   * @throws JCGLException
+   *           If an OpenGL error occurs
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public static void putTextureAlbedo(
+    final @Nonnull JCBProgram program,
+    final @Nonnull TextureUnit unit)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putTextureAlbedoUnchecked(
+      Constraints.constrainNotNull(program, "Program"),
+      Constraints.constrainNotNull(unit, "Unit"));
+  }
+
+  static void putTextureAlbedoUnchecked(
     final @Nonnull JCBProgram program,
     final @Nonnull TextureUnit unit)
     throws JCGLException,

@@ -33,7 +33,11 @@ import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.types.RException;
 
-final class KPostprocessorBlurDepthVariance implements
+/**
+ * The default implementation of a depth-variance blur postprocessor.
+ */
+
+public final class KPostprocessorBlurDepthVariance implements
   KPostprocessorBlurDepthVarianceType
 {
   private static final @Nonnull String NAME;
@@ -74,23 +78,43 @@ final class KPostprocessorBlurDepthVariance implements
     return desc;
   }
 
+  /**
+   * Construct a new postprocessor.
+   * 
+   * @param gi
+   *          The OpenGL implementation
+   * @param copier
+   *          A region copier
+   * @param depth_variance_cache
+   *          A framebuffer cache
+   * @param shader_cache
+   *          A shader cache
+   * @param quad
+   *          A unit quad
+   * @param log
+   *          A log handle
+   * @return A new postprocessor
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
   public static @Nonnull
     KPostprocessorBlurDepthVarianceType
     postprocessorNew(
       final @Nonnull JCGLImplementation gi,
-      final @Nonnull KRegionCopierType in_copier,
+      final @Nonnull KRegionCopierType copier,
       final @Nonnull KFramebufferDepthVarianceCacheType depth_variance_cache,
       final @Nonnull KShaderCacheType shader_cache,
-      final @Nonnull KUnitQuadUsableType in_quad,
+      final @Nonnull KUnitQuadUsableType quad,
       final @Nonnull Log log)
       throws ConstraintError
   {
     return new KPostprocessorBlurDepthVariance(
       gi,
-      in_copier,
+      copier,
       depth_variance_cache,
       shader_cache,
-      in_quad,
+      quad,
       log);
   }
 

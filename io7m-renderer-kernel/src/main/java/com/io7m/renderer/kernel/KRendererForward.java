@@ -161,7 +161,7 @@ import com.io7m.renderer.types.RTransformViewType;
     throws JCGLException,
       ConstraintError
   {
-    KShadingProgramCommon.putMatrixModelView(
+    KShadingProgramCommon.putMatrixModelViewUnchecked(
       program,
       mwi.getMatrixModelView());
 
@@ -215,7 +215,7 @@ import com.io7m.renderer.types.RTransformViewType;
       {
         final Some<Texture2DStatic> some =
           (Some<Texture2DStatic>) material.materialGetAlbedo().getTexture();
-        KShadingProgramCommon.putTextureAlbedo(
+        KShadingProgramCommon.putTextureAlbedoUnchecked(
           program,
           units.withTexture2D(some.value));
         break;
@@ -490,7 +490,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
         try {
           gc.arrayBufferBind(array);
-          KShadingProgramCommon.bindAttributePosition(program, array);
+          KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
 
           switch (label.labelGetNormal()) {
             case NORMAL_MAPPED:
@@ -511,7 +511,7 @@ import com.io7m.renderer.types.RTransformViewType;
           }
 
           if (label.labelImpliesUV()) {
-            KShadingProgramCommon.bindAttributeUV(program, array);
+            KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
           }
 
           KRendererCommon.renderConfigureFaceCulling(
@@ -577,7 +577,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
         try {
           gc.arrayBufferBind(array);
-          KShadingProgramCommon.bindAttributePosition(program, array);
+          KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
 
           switch (label.labelGetNormal()) {
             case NORMAL_MAPPED:
@@ -598,7 +598,7 @@ import com.io7m.renderer.types.RTransformViewType;
           }
 
           if (label.labelImpliesUV()) {
-            KShadingProgramCommon.bindAttributeUV(program, array);
+            KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
           }
 
           program.programExecute(new JCBProgramProcedure() {
@@ -630,7 +630,7 @@ import com.io7m.renderer.types.RTransformViewType;
       ConstraintError,
       RException
   {
-    KShadingProgramCommon.putMatrixProjection(
+    KShadingProgramCommon.putMatrixProjectionUnchecked(
       program,
       mwo.getMatrixProjection());
 
@@ -851,7 +851,7 @@ import com.io7m.renderer.types.RTransformViewType;
       ConstraintError,
       RException
   {
-    KShadingProgramCommon.putMatrixProjection(
+    KShadingProgramCommon.putMatrixProjectionUnchecked(
       program,
       mwo.getMatrixProjection());
 
@@ -1118,7 +1118,7 @@ import com.io7m.renderer.types.RTransformViewType;
       ConstraintError,
       RException
   {
-    KShadingProgramCommon.putMatrixProjection(
+    KShadingProgramCommon.putMatrixProjectionUnchecked(
       program,
       mwo.getMatrixProjection());
 
@@ -1639,7 +1639,7 @@ import com.io7m.renderer.types.RTransformViewType;
                     ConstraintError,
                     RException
                 {
-                  KShadingProgramCommon.putMatrixProjection(
+                  KShadingProgramCommon.putMatrixProjectionUnchecked(
                     program,
                     mwi.getMatrixProjection());
 

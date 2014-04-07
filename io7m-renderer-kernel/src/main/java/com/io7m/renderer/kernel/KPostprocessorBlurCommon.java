@@ -84,8 +84,8 @@ final class KPostprocessorBlurCommon
             final IndexBufferUsable indices = quad.getIndices();
 
             gc.arrayBufferBind(array);
-            KShadingProgramCommon.bindAttributePosition(p, array);
-            KShadingProgramCommon.bindAttributeUV(p, array);
+            KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
+            KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
             KShadingProgramCommon.putMatrixUV(p, KMatrices.IDENTITY_UV);
 
             final int width = (int) input_area.getRangeX().getInterval();
@@ -163,8 +163,8 @@ final class KPostprocessorBlurCommon
             final IndexBufferUsable indices = quad.getIndices();
 
             gc.arrayBufferBind(array);
-            KShadingProgramCommon.bindAttributePosition(p, array);
-            KShadingProgramCommon.bindAttributeUV(p, array);
+            KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
+            KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
             KShadingProgramCommon.putMatrixUV(p, KMatrices.IDENTITY_UV);
 
             final int height = (int) input_area.getRangeY().getInterval();

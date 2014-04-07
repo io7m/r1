@@ -26,9 +26,20 @@ import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceObjectType;
 
-final class KMeshBoundsObjectSpaceCacheLoader implements
+/**
+ * A cache loader that caches the results of calculating the object-space
+ * bounds for a given mesh.
+ */
+
+public final class KMeshBoundsObjectSpaceCacheLoader implements
   JCacheLoaderType<KMesh, KMeshBounds<RSpaceObjectType>, RException>
 {
+  /**
+   * Construct a new cache loader.
+   * 
+   * @return A cache loader
+   */
+
   public static @Nonnull KMeshBoundsObjectSpaceCacheLoader newLoader()
   {
     return new KMeshBoundsObjectSpaceCacheLoader();

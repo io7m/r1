@@ -144,8 +144,8 @@ final class KPostprocessorFog implements
               KPostprocessorFog.this.quad.getIndices();
 
             gc.arrayBufferBind(array);
-            KShadingProgramCommon.bindAttributePosition(p, array);
-            KShadingProgramCommon.bindAttributeUV(p, array);
+            KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
+            KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
 
             final TextureUnit image_unit = units.get(0);
             final TextureUnit depth_unit = units.get(1);

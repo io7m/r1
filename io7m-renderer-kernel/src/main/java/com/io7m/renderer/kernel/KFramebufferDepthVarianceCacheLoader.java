@@ -30,9 +30,27 @@ import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.types.RException;
 
-final class KFramebufferDepthVarianceCacheLoader implements
+/**
+ * A cache loader that can construct depth-variance framebuffers of type
+ * {@link KFramebufferDepthVarianceType} based on the given
+ * {@link KFramebufferDepthVarianceDescription}.
+ */
+
+public final class KFramebufferDepthVarianceCacheLoader implements
   JCacheLoaderType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType, RException>
 {
+  /**
+   * Construct a new cache loader.
+   * 
+   * @param gi
+   *          The OpenGL implementation
+   * @param log
+   *          A log handle
+   * @return A new cache loader
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
   public static @Nonnull
     JCacheLoaderType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType, RException>
     newLoader(

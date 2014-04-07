@@ -56,18 +56,37 @@ import com.io7m.renderer.kernel.types.KScene.KSceneOpaques;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 
-@SuppressWarnings("synthetic-access") final class KRendererDebugNormalsMapTangent implements
+/**
+ * A debug renderer that displays the tangent-space normals (as sampled from
+ * the associated material's normal map, if any) for all meshes.
+ */
+
+@SuppressWarnings("synthetic-access") public final class KRendererDebugNormalsMapTangent implements
   KRendererDebugType
 {
   private static final @Nonnull String NAME = "debug-normals-map-tangent";
 
+  /**
+   * Construct a new renderer.
+   * 
+   * @param g
+   *          The OpenGL implementation
+   * @param shader_cache
+   *          A shader cache
+   * @param log
+   *          A log handle
+   * @return A new renderer
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
   public static KRendererDebugType rendererNew(
     final @Nonnull JCGLImplementation g,
-    final @Nonnull KShaderCacheType in_shader_cache,
+    final @Nonnull KShaderCacheType shader_cache,
     final @Nonnull Log log)
     throws ConstraintError
   {
-    return new KRendererDebugNormalsMapTangent(g, in_shader_cache, log);
+    return new KRendererDebugNormalsMapTangent(g, shader_cache, log);
   }
 
   private static void renderInstanceOpaque(
@@ -84,7 +103,7 @@ import com.io7m.renderer.types.RException;
      */
 
     KShadingProgramCommon.putMatrixProjectionReuse(p);
-    KShadingProgramCommon.putMatrixModelView(p, mi.getMatrixModelView());
+    KShadingProgramCommon.putMatrixModelViewUnchecked(p, mi.getMatrixModelView());
 
     /**
      * Upload matrices, set textures.
@@ -117,10 +136,10 @@ import com.io7m.renderer.types.RException;
       final IndexBuffer indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
-      KShadingProgramCommon.bindAttributePosition(p, array);
+      KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
       KShadingProgramCommon.bindAttributeNormal(p, array);
       KShadingProgramCommon.bindAttributeTangent4(p, array);
-      KShadingProgramCommon.bindAttributeUV(p, array);
+      KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
 
       p.programExecute(new JCBProgramProcedure() {
         @Override public void call()
@@ -145,7 +164,6 @@ import com.io7m.renderer.types.RException;
   private final @Nonnull Log                  log;
   private final @Nonnull KMutableMatricesType matrices;
   private final @Nonnull KShaderCacheType     shader_cache;
-
   private final @Nonnull KTransformContext    transform_context;
 
   private KRendererDebugNormalsMapTangent(
@@ -266,7 +284,7 @@ import com.io7m.renderer.types.RException;
             Exception,
             RException
         {
-          KShadingProgramCommon.putMatrixProjection(
+          KShadingProgramCommon.putMatrixProjectionUnchecked(
             p,
             mo.getMatrixProjection());
 

@@ -24,15 +24,32 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcache.JCacheLoaderType;
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.types.RException;
 
-final class KFramebufferForwardCacheLoader implements
+/**
+ * A cache loader that can construct forward-rendering framebuffers of type
+ * {@link KFramebufferForwardType} based on the given
+ * {@link KFramebufferForwardDescription}.
+ */
+
+public final class KFramebufferForwardCacheLoader implements
   JCacheLoaderType<KFramebufferForwardDescription, KFramebufferForwardType, RException>
 {
+  /**
+   * Construct a new cache loader.
+   * 
+   * @param gi
+   *          The OpenGL implementation
+   * @param log
+   *          A log handle
+   * @return A new cache loader
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
   public static @Nonnull
     JCacheLoaderType<KFramebufferForwardDescription, KFramebufferForwardType, RException>
     newLoader(
@@ -75,8 +92,6 @@ final class KFramebufferForwardCacheLoader implements
   {
     try {
       return KFramebufferForward.newFramebuffer(this.gi, key);
-    } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
     } catch (final ConstraintError e) {
       throw new UnreachableCodeException(e);
     }

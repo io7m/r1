@@ -1035,8 +1035,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     gc.arrayBufferBind(array);
 
     try {
-      KShadingProgramCommon.bindAttributePosition(p, array);
-      KShadingProgramCommon.bindAttributeUV(p, array);
+      KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
+      KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
       KShadingProgramCommon.putMatrixUV(p, KRegionCopier.this.matrix_uv);
 
       p.programExecute(new JCBProgramProcedure() {
