@@ -256,7 +256,7 @@ import com.io7m.renderer.types.RException;
       JCacheException
   {
     final KProgram program =
-      this.shader_cache.cacheGetLU("debug_normals_vertex_local");
+      this.shader_cache.cacheGetLU("debug_normals_map_local");
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
     final FramebufferReferenceUsable output_buffer =
