@@ -31,9 +31,9 @@ import com.io7m.jcache.BLUCacheReceiptType;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCacheType;
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.ArrayBuffer;
+import com.io7m.jcanephora.ArrayBufferUsable;
 import com.io7m.jcanephora.DepthFunction;
-import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.jcanephora.IndexBufferUsable;
 import com.io7m.jcanephora.JCBExecutionException;
 import com.io7m.jcanephora.JCBExecutorProcedure;
 import com.io7m.jcanephora.JCBProgram;
@@ -59,6 +59,7 @@ import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.kernel.types.KMeshBoundsTriangles;
+import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.types.RCoordinates;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixReadable4x4FType;
@@ -349,7 +350,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
 
   private static void putInstanceAttributes(
     final @Nonnull KMaterialForwardTranslucentRefractiveLabel label,
-    final @Nonnull ArrayBuffer array,
+    final @Nonnull ArrayBufferUsable array,
     final @Nonnull JCBProgram program)
     throws ConstraintError,
       JCGLException,
@@ -464,7 +465,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
       JCacheException,
       JCGLException
   {
-    final KMesh mesh = r.instanceGetMesh();
+    final KMeshReadableType mesh = r.instanceGetMesh();
 
     final BLUCacheReceiptType<KFramebufferForwardDescription, KFramebufferForwardType> scene_mask =
       forward_cache.bluCacheGet(scene.kFramebufferGetForwardDescription());
@@ -536,7 +537,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
     final @Nonnull KFramebufferRGBAUsableType scene_mask,
     final @Nonnull KInstanceTransformedTranslucentRefractive r,
     final @Nonnull MatricesInstanceType mi,
-    final @Nonnull KMesh mesh)
+    final @Nonnull KMeshReadableType mesh)
     throws ConstraintError,
       JCGLRuntimeException,
       RException,
@@ -586,10 +587,11 @@ public final class KRefractionRenderer implements KRefractionRendererType
             program,
             mi.getMatrixModelView());
 
-          final ArrayBuffer array = mesh.getArrayBuffer();
-          final IndexBuffer indices = mesh.getIndexBuffer();
+          final ArrayBufferUsable array = mesh.getArrayBuffer();
+          final IndexBufferUsable indices = mesh.getIndexBuffer();
           gc.arrayBufferBind(array);
-          KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+          KShadingProgramCommon
+            .bindAttributePositionUnchecked(program, array);
 
           program.programExecute(new JCBProgramProcedure() {
             @Override public void call()
@@ -620,7 +622,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
       final @Nonnull KInstanceTransformedTranslucentRefractive r,
       final @Nonnull KMaterialForwardTranslucentRefractiveLabel label,
       final @Nonnull MatricesInstanceType mi,
-      final @Nonnull KMesh mesh)
+      final @Nonnull KMeshReadableType mesh)
       throws ConstraintError,
         JCGLRuntimeException,
         RException,
@@ -632,8 +634,8 @@ public final class KRefractionRenderer implements KRefractionRendererType
       instance.instanceGetMaterial();
     final KProgram kprogram = shader_cache.cacheGetLU(label.labelGetCode());
 
-    final ArrayBuffer array = mesh.getArrayBuffer();
-    final IndexBuffer indices = mesh.getIndexBuffer();
+    final ArrayBufferUsable array = mesh.getArrayBuffer();
+    final IndexBufferUsable indices = mesh.getIndexBuffer();
 
     final JCGLInterfaceCommon gc = g.getGLCommon();
     kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
@@ -719,7 +721,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
       final @Nonnull KInstanceTransformedTranslucentRefractive r,
       final @Nonnull KMaterialForwardTranslucentRefractiveLabel label,
       final @Nonnull MatricesInstanceType mi,
-      final @Nonnull KMesh mesh)
+      final @Nonnull KMeshReadableType mesh)
       throws JCGLRuntimeException,
         JCBExecutionException,
         ConstraintError,
@@ -731,8 +733,8 @@ public final class KRefractionRenderer implements KRefractionRendererType
       instance.instanceGetMaterial();
     final KProgram kprogram = shader_cache.cacheGetLU(label.labelGetCode());
 
-    final ArrayBuffer array = mesh.getArrayBuffer();
-    final IndexBuffer indices = mesh.getIndexBuffer();
+    final ArrayBufferUsable array = mesh.getArrayBuffer();
+    final IndexBufferUsable indices = mesh.getIndexBuffer();
 
     final JCGLInterfaceCommon gc = g.getGLCommon();
     kprogram.getExecutable().execRun(new JCBExecutorProcedure() {

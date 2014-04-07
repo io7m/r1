@@ -42,7 +42,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    */
 
   public static @Nonnull KMeshBounds<RSpaceObjectType> fromMeshObjectSpace(
-    final @Nonnull KMesh mesh)
+    final @Nonnull KMeshReadableType mesh)
   {
     final RVectorReadable3FType<RSpaceObjectType> b_lower = mesh.getBoundsLower();
     final RVectorReadable3FType<RSpaceObjectType> b_upper = mesh.getBoundsUpper();

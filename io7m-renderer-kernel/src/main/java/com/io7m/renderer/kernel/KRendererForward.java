@@ -31,13 +31,13 @@ import com.io7m.jaux.functional.Option.Some;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LUCacheType;
-import com.io7m.jcanephora.ArrayBuffer;
+import com.io7m.jcanephora.ArrayBufferUsable;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.jcanephora.IndexBufferUsable;
 import com.io7m.jcanephora.JCBExecutorProcedure;
 import com.io7m.jcanephora.JCBProgram;
 import com.io7m.jcanephora.JCBProgramProcedure;
@@ -82,7 +82,7 @@ import com.io7m.renderer.kernel.types.KMaterialLabelRegularType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialRegularType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
-import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
@@ -470,9 +470,9 @@ import com.io7m.renderer.types.RTransformViewType;
           JCGLException,
           RException
       {
-        final KMesh mesh = instance.instanceGetMesh();
-        final ArrayBuffer array = mesh.getArrayBuffer();
-        final IndexBuffer indices = mesh.getIndexBuffer();
+        final KMeshReadableType mesh = instance.instanceGetMesh();
+        final ArrayBufferUsable array = mesh.getArrayBuffer();
+        final IndexBufferUsable indices = mesh.getIndexBuffer();
         final KInstanceOpaqueType actual = instance.instanceGet();
         final KMaterialOpaqueType material = actual.instanceGetMaterial();
 
@@ -490,7 +490,8 @@ import com.io7m.renderer.types.RTransformViewType;
 
         try {
           gc.arrayBufferBind(array);
-          KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+          KShadingProgramCommon
+            .bindAttributePositionUnchecked(program, array);
 
           switch (label.labelGetNormal()) {
             case NORMAL_MAPPED:
@@ -557,9 +558,9 @@ import com.io7m.renderer.types.RTransformViewType;
           JCGLException,
           RException
       {
-        final KMesh mesh = instance.instanceGetMesh();
-        final ArrayBuffer array = mesh.getArrayBuffer();
-        final IndexBuffer indices = mesh.getIndexBuffer();
+        final KMeshReadableType mesh = instance.instanceGetMesh();
+        final ArrayBufferUsable array = mesh.getArrayBuffer();
+        final IndexBufferUsable indices = mesh.getIndexBuffer();
         final KInstanceTranslucentRegular actual = instance.getInstance();
         final KMaterialTranslucentRegular material =
           actual.instanceGetMaterial();
@@ -577,7 +578,8 @@ import com.io7m.renderer.types.RTransformViewType;
 
         try {
           gc.arrayBufferBind(array);
-          KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+          KShadingProgramCommon
+            .bindAttributePositionUnchecked(program, array);
 
           switch (label.labelGetNormal()) {
             case NORMAL_MAPPED:

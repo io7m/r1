@@ -26,10 +26,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
-import com.io7m.jcanephora.ArrayBuffer;
+import com.io7m.jcanephora.ArrayBufferUsable;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.jcanephora.IndexBufferUsable;
 import com.io7m.jcanephora.JCBExecutionAPI;
 import com.io7m.jcanephora.JCBExecutorProcedure;
 import com.io7m.jcanephora.JCBProgram;
@@ -56,7 +56,7 @@ import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
-import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
@@ -210,7 +210,9 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
      */
 
     KShadingProgramCommon.putMatrixProjectionReuse(p);
-    KShadingProgramCommon.putMatrixModelViewUnchecked(p, mi.getMatrixModelView());
+    KShadingProgramCommon.putMatrixModelViewUnchecked(
+      p,
+      mi.getMatrixModelView());
 
     switch (label) {
       case DEPTH_CONSTANT:
@@ -240,9 +242,9 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
      */
 
     try {
-      final KMesh mesh = instance.instanceGet().instanceGetMesh();
-      final ArrayBuffer array = mesh.getArrayBuffer();
-      final IndexBuffer indices = mesh.getIndexBuffer();
+      final KMeshReadableType mesh = instance.instanceGet().instanceGetMesh();
+      final ArrayBufferUsable array = mesh.getArrayBuffer();
+      final IndexBufferUsable indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(p, array);

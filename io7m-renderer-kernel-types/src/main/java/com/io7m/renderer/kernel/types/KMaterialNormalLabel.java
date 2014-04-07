@@ -85,7 +85,7 @@ public enum KMaterialNormalLabel
   {
     Constraints.constrainNotNull(instance, "Instance");
 
-    final KMesh mesh = instance.instanceGetMesh();
+    final KMeshReadableType mesh = instance.instanceGetMesh();
     final ArrayBufferUsable a = mesh.getArrayBuffer();
 
     try {

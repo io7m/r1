@@ -70,5 +70,5 @@ public interface KInstanceType
    * @return The mesh used by the current instance
    */
 
-  @Nonnull KMesh instanceGetMesh();
+  @Nonnull KMeshReadableType instanceGetMesh();
 }

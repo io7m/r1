@@ -190,6 +190,7 @@ import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBuilderType;
@@ -250,8 +251,7 @@ final class SBGLRenderer implements GLEventListener
 
             try {
               final KMesh km = mesh.getMesh();
-              gl.arrayBufferDelete(km.getArrayBuffer());
-              gl.indexBufferDelete(km.getIndexBuffer());
+              km.delete(gl);
             } catch (final ConstraintError e) {
               throw new UnreachableCodeException();
             }
@@ -2130,7 +2130,7 @@ final class SBGLRenderer implements GLEventListener
           {
             final KLightProjective kp = l.getLight();
 
-            final KMesh mesh =
+            final KMeshReadableType mesh =
               SBGLRenderer.this.sphere_meshes
                 .get(SBGLRenderer.SPHERE_16_8_MESH);
 
@@ -2167,8 +2167,8 @@ final class SBGLRenderer implements GLEventListener
                       JCGLException,
                       JCBExecutionException
                 {
-                  final IndexBuffer indices = mesh.getIndexBuffer();
-                  final ArrayBuffer array = mesh.getArrayBuffer();
+                  final IndexBufferUsable indices = mesh.getIndexBuffer();
+                  final ArrayBufferUsable array = mesh.getArrayBuffer();
 
                   KShadingProgramCommon.putMatrixProjection(
                     program,
@@ -2297,7 +2297,7 @@ final class SBGLRenderer implements GLEventListener
           {
             final KLightSphere kp = l.getLight();
 
-            final KMesh mesh =
+            final KMeshReadableType mesh =
               SBGLRenderer.this.sphere_meshes
                 .get(SBGLRenderer.SPHERE_16_8_MESH);
 
@@ -2333,8 +2333,8 @@ final class SBGLRenderer implements GLEventListener
                     JCGLException,
                     JCBExecutionException
               {
-                final IndexBuffer indices = mesh.getIndexBuffer();
-                final ArrayBuffer array = mesh.getArrayBuffer();
+                final IndexBufferUsable indices = mesh.getIndexBuffer();
+                final ArrayBufferUsable array = mesh.getArrayBuffer();
 
                 KShadingProgramCommon.putMatrixProjection(
                   program,
@@ -2399,8 +2399,8 @@ final class SBGLRenderer implements GLEventListener
                       JCGLException,
                       JCBExecutionException
                 {
-                  final IndexBuffer indices = mesh.getIndexBuffer();
-                  final ArrayBuffer array = mesh.getArrayBuffer();
+                  final IndexBufferUsable indices = mesh.getIndexBuffer();
+                  final ArrayBufferUsable array = mesh.getArrayBuffer();
 
                   KShadingProgramCommon.putMatrixProjection(
                     program,

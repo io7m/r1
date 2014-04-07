@@ -119,7 +119,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     return this.instance.instanceGetID();
   }
 
-  @Override public @Nonnull KMesh instanceGetMesh()
+  @Override public @Nonnull KMeshReadableType instanceGetMesh()
   {
     return this.instance.instanceGetMesh();
   }

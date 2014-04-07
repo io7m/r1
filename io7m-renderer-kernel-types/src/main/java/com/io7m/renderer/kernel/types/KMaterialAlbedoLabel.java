@@ -75,7 +75,7 @@ public enum KMaterialAlbedoLabel
     throws ConstraintError
   {
     Constraints.constrainNotNull(instance, "Instance");
-    final KMesh mesh = instance.instanceGetMesh();
+    final KMeshReadableType mesh = instance.instanceGetMesh();
     final ArrayBufferUsable a = mesh.getArrayBuffer();
     final KMaterialRegularType material = instance.instanceGetMaterial();
     final KMaterialAlbedo albedo = material.materialGetAlbedo();

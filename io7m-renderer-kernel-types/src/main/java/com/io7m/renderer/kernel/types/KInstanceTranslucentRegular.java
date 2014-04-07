@@ -66,7 +66,7 @@ import com.io7m.renderer.types.RException;
   private final @Nonnull KFaceSelection              faces;
   private final @Nonnull Integer                     id;
   private final @Nonnull KMaterialTranslucentRegular material;
-  private final @Nonnull KMesh                       mesh;
+  private final @Nonnull KMeshReadableType                       mesh;
 
   protected KInstanceTranslucentRegular(
     final @Nonnull Integer in_id,
@@ -122,7 +122,7 @@ import com.io7m.renderer.types.RException;
     return this.material;
   }
 
-  @Override public @Nonnull KMesh instanceGetMesh()
+  @Override public @Nonnull KMeshReadableType instanceGetMesh()
   {
     return this.mesh;
   }

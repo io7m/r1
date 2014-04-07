@@ -22,7 +22,14 @@ import javax.annotation.concurrent.Immutable;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.ArrayBuffer;
+import com.io7m.jcanephora.ArrayBufferUsable;
 import com.io7m.jcanephora.IndexBuffer;
+import com.io7m.jcanephora.IndexBufferUsable;
+import com.io7m.jcanephora.JCGLArrayBuffers;
+import com.io7m.jcanephora.JCGLIndexBuffers;
+import com.io7m.jcanephora.JCGLResourceSized;
+import com.io7m.jcanephora.JCGLResourceUsable;
+import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorReadable3FType;
@@ -46,7 +53,10 @@ import com.io7m.renderer.types.RVectorReadable3FType;
  * <ul>
  */
 
-@Immutable public final class KMesh
+@Immutable public final class KMesh implements
+  KMeshReadableType,
+  JCGLResourceUsable,
+  JCGLResourceSized
 {
   /**
    * Construct a new mesh.
@@ -74,10 +84,11 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     return new KMesh(in_array, in_indices, in_bounds_lower, in_bounds_upper);
   }
 
-  private final @Nonnull ArrayBuffer              array;
+  private final @Nonnull ArrayBuffer                  array;
   private final @Nonnull RVectorI3F<RSpaceObjectType> bounds_lower;
   private final @Nonnull RVectorI3F<RSpaceObjectType> bounds_upper;
-  private final @Nonnull IndexBuffer              indices;
+  private boolean                                     deleted;
+  private final @Nonnull IndexBuffer                  indices;
 
   private KMesh(
     final @Nonnull ArrayBuffer in_array,
@@ -95,40 +106,65 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   }
 
   /**
-   * @return The array buffer that holds the mesh data
+   * Delete the mesh.
+   * 
+   * @param <G>
+   *          The OpenGL capabilities required
+   * @param gc
+   *          The OpenGL interface
+   * @throws JCGLRuntimeException
+   *           If an OpenGL error occurs
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull ArrayBuffer getArrayBuffer()
+  public <G extends JCGLArrayBuffers & JCGLIndexBuffers> void delete(
+    final @Nonnull G gc)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    Constraints.constrainNotNull(gc, "GL interface");
+
+    try {
+      gc.arrayBufferDelete(this.array);
+      gc.indexBufferDelete(this.indices);
+    } finally {
+      this.deleted = true;
+    }
+  }
+
+  @Override public @Nonnull ArrayBufferUsable getArrayBuffer()
   {
     return this.array;
   }
 
-  /**
-   * @return The lower bound, in object space, of all vertex positions in the
-   *         mesh
-   */
-
-  public @Nonnull RVectorReadable3FType<RSpaceObjectType> getBoundsLower()
+  @Override public @Nonnull
+    RVectorReadable3FType<RSpaceObjectType>
+    getBoundsLower()
   {
     return this.bounds_lower;
   }
 
-  /**
-   * @return The upper bound, in object space, of all vertex positions in the
-   *         mesh
-   */
-
-  public @Nonnull RVectorReadable3FType<RSpaceObjectType> getBoundsUpper()
+  @Override public @Nonnull
+    RVectorReadable3FType<RSpaceObjectType>
+    getBoundsUpper()
   {
     return this.bounds_upper;
   }
 
-  /**
-   * @return The index buffer describing primitives in the mesh data
-   */
-
-  public @Nonnull IndexBuffer getIndexBuffer()
+  @Override public @Nonnull IndexBufferUsable getIndexBuffer()
   {
     return this.indices;
+  }
+
+  @Override public long resourceGetSizeBytes()
+  {
+    return this.array.resourceGetSizeBytes()
+      + this.indices.resourceGetSizeBytes();
+  }
+
+  @Override public boolean resourceIsDeleted()
+  {
+    return this.deleted;
   }
 }
