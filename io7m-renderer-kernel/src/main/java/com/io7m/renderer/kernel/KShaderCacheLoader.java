@@ -32,9 +32,29 @@ import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FSCapabilityRead;
 import com.io7m.renderer.types.RException;
 
-final class KShaderCacheLoader implements
+/**
+ * A cache loader that can load and construct shading programs of type
+ * {@link KProgram} from a given {@link FSCapabilityRead} filesystem, based on
+ * the given program name.
+ */
+
+public final class KShaderCacheLoader implements
   JCacheLoaderType<String, KProgram, RException>
 {
+  /**
+   * Construct a new cache loader.
+   * 
+   * @param gi
+   *          The OpenGL implementation
+   * @param fs
+   *          The filesystem from which to read shaders
+   * @param log
+   *          A log handle
+   * @return A new cache loader
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
   public static @Nonnull
     JCacheLoaderType<String, KProgram, RException>
     newLoader(

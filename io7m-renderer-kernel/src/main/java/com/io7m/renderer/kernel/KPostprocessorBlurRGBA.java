@@ -33,8 +33,12 @@ import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
-final class KPostprocessorBlurRGBA implements
-  KPostprocessorRGBAType<KBlurParameters>
+/**
+ * The default implementation of an RGBA blur postprocessor.
+ */
+
+public final class KPostprocessorBlurRGBA implements
+  KPostprocessorBlurRGBAType
 {
   private static final @Nonnull String NAME;
 
@@ -71,7 +75,27 @@ final class KPostprocessorBlurRGBA implements
     return desc;
   }
 
-  public static @Nonnull KPostprocessorBlurRGBA postprocessorNew(
+  /**
+   * Construct a new postprocessor.
+   * 
+   * @param gi
+   *          The OpenGL implementation
+   * @param copier
+   *          A region copier
+   * @param rgba_cache
+   *          A framebuffer cache
+   * @param shader_cache
+   *          A shader cache
+   * @param quad
+   *          A unit quad
+   * @param log
+   *          A log handle
+   * @return A new postprocessor
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public static @Nonnull KPostprocessorBlurRGBAType postprocessorNew(
     final @Nonnull JCGLImplementation gi,
     final @Nonnull KRegionCopierType copier,
     final @Nonnull KFramebufferRGBACacheType rgba_cache,

@@ -36,9 +36,26 @@ import com.io7m.renderer.kernel.types.KShadowMapDescriptionVisitorType;
 import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
 import com.io7m.renderer.types.RException;
 
-final class KShadowMapCacheLoader implements
+/**
+ * A cache loader that constructs and caches shadow maps of type
+ * {@link KShadowMapType} from the given {@link KShadowMapDescriptionType}.
+ */
+
+public final class KShadowMapCacheLoader implements
   JCacheLoaderType<KShadowMapDescriptionType, KShadowMapType, RException>
 {
+  /**
+   * Construct a new cache loader.
+   * 
+   * @param gi
+   *          The OpenGL implementation
+   * @param log
+   *          A log handle
+   * @return A new cache loader
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
   public static @Nonnull
     JCacheLoaderType<KShadowMapDescriptionType, KShadowMapType, RException>
     newLoader(

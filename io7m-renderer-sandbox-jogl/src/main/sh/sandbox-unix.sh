@@ -12,4 +12,4 @@ do
   fi
 done
 
-exec java -cp "${JAR_PATH}" "com.io7m.renderer.kernel.Sandbox" $@
+exec java -cp "${JAR_PATH}" "com.io7m.renderer.kernel.sandbox.Sandbox" $@

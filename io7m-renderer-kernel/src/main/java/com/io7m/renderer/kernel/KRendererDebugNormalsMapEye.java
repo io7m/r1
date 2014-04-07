@@ -57,15 +57,36 @@ import com.io7m.renderer.kernel.types.KScene.KSceneOpaques;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 
-@SuppressWarnings("synthetic-access") final class KRendererDebugNormalsMapEye implements
+/**
+ * A debug renderer that displays the calculated eye-space normals (as
+ * calculated from the associated material's normal map, if any) for all
+ * meshes.
+ */
+
+@SuppressWarnings("synthetic-access") public final class KRendererDebugNormalsMapEye implements
   KRendererDebugType
 {
   private static final @Nonnull String NAME = "debug-normals-map-eye";
+
+  /**
+   * Construct a new renderer.
+   * 
+   * @param g
+   *          The OpenGL implementation
+   * @param shader_cache
+   *          A shader cache
+   * @param log
+   *          A log handle
+   * @return A new renderer
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
 
   public static KRendererDebugNormalsMapEye rendererNew(
     final @Nonnull JCGLImplementation g,
     final @Nonnull KShaderCacheType shader_cache,
     final @Nonnull Log log)
+    throws ConstraintError
   {
     return new KRendererDebugNormalsMapEye(g, shader_cache, log);
   }
@@ -84,7 +105,7 @@ import com.io7m.renderer.types.RException;
      */
 
     KShadingProgramCommon.putMatrixProjectionReuse(p);
-    KShadingProgramCommon.putMatrixModelView(p, mi.getMatrixModelView());
+    KShadingProgramCommon.putMatrixModelViewUnchecked(p, mi.getMatrixModelView());
     KShadingProgramCommon.putMatrixNormal(p, mi.getMatrixNormal());
 
     /**
@@ -119,10 +140,10 @@ import com.io7m.renderer.types.RException;
       final IndexBuffer indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
-      KShadingProgramCommon.bindAttributePosition(p, array);
+      KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
       KShadingProgramCommon.bindAttributeNormal(p, array);
       KShadingProgramCommon.bindAttributeTangent4(p, array);
-      KShadingProgramCommon.bindAttributeUV(p, array);
+      KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
 
       p.programExecute(new JCBProgramProcedure() {
         @Override public void call()
@@ -148,17 +169,21 @@ import com.io7m.renderer.types.RException;
   private final @Nonnull Log                  log;
   private final @Nonnull KMutableMatricesType matrices;
   private final @Nonnull KShaderCacheType     shader_cache;
-
   private final @Nonnull KTransformContext    transform_context;
 
   private KRendererDebugNormalsMapEye(
     final @Nonnull JCGLImplementation in_gl,
     final @Nonnull KShaderCacheType in_shader_cache,
     final @Nonnull Log in_log)
+    throws ConstraintError
   {
-    this.log = new Log(in_log, KRendererDebugNormalsMapEye.NAME);
-    this.gl = in_gl;
-    this.shader_cache = in_shader_cache;
+    this.log =
+      new Log(
+        Constraints.constrainNotNull(in_log, "Log"),
+        KRendererDebugNormalsMapEye.NAME);
+    this.shader_cache =
+      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+    this.gl = Constraints.constrainNotNull(in_gl, "GL");
     this.matrices = KMutableMatricesType.newMatrices();
     this.transform_context = KTransformContext.newContext();
   }
@@ -260,7 +285,7 @@ import com.io7m.renderer.types.RException;
             JCGLException,
             RException
         {
-          KShadingProgramCommon.putMatrixProjection(
+          KShadingProgramCommon.putMatrixProjectionUnchecked(
             p,
             mo.getMatrixProjection());
 

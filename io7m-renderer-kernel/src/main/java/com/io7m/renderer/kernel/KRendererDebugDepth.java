@@ -64,7 +64,11 @@ import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 
-@SuppressWarnings("synthetic-access") final class KRendererDebugDepth implements
+/**
+ * A debug renderer that displays the calculated depth for all meshes.
+ */
+
+@SuppressWarnings("synthetic-access") public final class KRendererDebugDepth implements
   KRendererDebugType
 {
   private static final @Nonnull String NAME = "debug-depth";
@@ -78,11 +82,28 @@ import com.io7m.renderer.types.RException;
     KShadingProgramCommon.putMaterialAlbedo(jp, material.materialGetAlbedo());
   }
 
+  /**
+   * Construct a new renderer.
+   * 
+   * @param g
+   *          The OpenGL implementation
+   * @param depth_labels
+   *          The depth label decider
+   * @param shader_cache
+   *          A shader cache
+   * @param log
+   *          A log handle
+   * @return A new renderer
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
   public static KRendererDebugDepth rendererNew(
     final @Nonnull JCGLImplementation g,
     final @Nonnull KMaterialDepthLabelCacheType depth_labels,
     final @Nonnull KShaderCacheType shader_cache,
     final @Nonnull Log log)
+    throws ConstraintError
   {
     return new KRendererDebugDepth(g, depth_labels, shader_cache, log);
   }
@@ -100,13 +121,20 @@ import com.io7m.renderer.types.RException;
     final @Nonnull KMaterialDepthLabelCacheType in_depth_labels,
     final @Nonnull KShaderCacheType in_shader_cache,
     final @Nonnull Log in_log)
+    throws ConstraintError
   {
-    this.log = new Log(in_log, KRendererDebugDepth.NAME);
-    this.gl = in_gl;
+    this.log =
+      new Log(
+        Constraints.constrainNotNull(in_log, "Log"),
+        KRendererDebugDepth.NAME);
+    this.gl = Constraints.constrainNotNull(in_gl, "GL");
+    this.depth_labels =
+      Constraints.constrainNotNull(in_depth_labels, "Depth labels");
+    this.shader_cache =
+      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+
     this.matrices = KMutableMatricesType.newMatrices();
     this.transform_context = KTransformContext.newContext();
-    this.depth_labels = in_depth_labels;
-    this.shader_cache = in_shader_cache;
     this.log.debug("initialized");
   }
 
@@ -182,7 +210,7 @@ import com.io7m.renderer.types.RException;
      */
 
     KShadingProgramCommon.putMatrixProjectionReuse(p);
-    KShadingProgramCommon.putMatrixModelView(p, mi.getMatrixModelView());
+    KShadingProgramCommon.putMatrixModelViewUnchecked(p, mi.getMatrixModelView());
 
     material
       .materialOpaqueVisitableAccept(new KMaterialOpaqueVisitorType<Unit, JCGLException>() {
@@ -269,7 +297,7 @@ import com.io7m.renderer.types.RException;
       final IndexBuffer indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
-      KShadingProgramCommon.bindAttributePosition(p, array);
+      KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
 
       switch (label) {
         case DEPTH_CONSTANT:
@@ -279,7 +307,7 @@ import com.io7m.renderer.types.RException;
         }
         case DEPTH_MAPPED:
         {
-          KShadingProgramCommon.bindAttributeUV(p, array);
+          KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
           break;
         }
       }
@@ -331,7 +359,7 @@ import com.io7m.renderer.types.RException;
             JCGLException,
             Exception
         {
-          KShadingProgramCommon.putMatrixProjection(
+          KShadingProgramCommon.putMatrixProjectionUnchecked(
             p,
             mo.getMatrixProjection());
 

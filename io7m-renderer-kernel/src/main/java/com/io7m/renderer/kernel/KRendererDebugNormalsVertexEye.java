@@ -51,7 +51,12 @@ import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 
-@SuppressWarnings("synthetic-access") final class KRendererDebugNormalsVertexEye implements
+/**
+ * A debug renderer that displays the calculated eye-space normals for all
+ * meshes.
+ */
+
+@SuppressWarnings("synthetic-access") public final class KRendererDebugNormalsVertexEye implements
   KRendererDebugType
 {
   private static final @Nonnull String NAME;
@@ -59,6 +64,20 @@ import com.io7m.renderer.types.RException;
   static {
     NAME = "debug-normals-vertex-local";
   }
+
+  /**
+   * Construct a new renderer.
+   * 
+   * @param g
+   *          The OpenGL implementation
+   * @param shader_cache
+   *          A shader cache
+   * @param log
+   *          A log handle
+   * @return A new renderer
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
 
   public static KRendererDebugType rendererNew(
     final @Nonnull JCGLImplementation g,
@@ -173,7 +192,7 @@ import com.io7m.renderer.types.RException;
      */
 
     KShadingProgramCommon.putMatrixProjectionReuse(p);
-    KShadingProgramCommon.putMatrixModelView(p, mi.getMatrixModelView());
+    KShadingProgramCommon.putMatrixModelViewUnchecked(p, mi.getMatrixModelView());
     KShadingProgramCommon.putMatrixNormal(p, mi.getMatrixNormal());
 
     /**
@@ -186,7 +205,7 @@ import com.io7m.renderer.types.RException;
       final IndexBuffer indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
-      KShadingProgramCommon.bindAttributePosition(p, array);
+      KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
       KShadingProgramCommon.bindAttributeNormal(p, array);
 
       p.programExecute(new JCBProgramProcedure() {
@@ -244,7 +263,7 @@ import com.io7m.renderer.types.RException;
             Exception,
             RException
         {
-          KShadingProgramCommon.putMatrixProjection(
+          KShadingProgramCommon.putMatrixProjectionUnchecked(
             p,
             mo.getMatrixProjection());
 

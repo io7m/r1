@@ -51,7 +51,11 @@ import com.io7m.renderer.kernel.types.KScene.KSceneOpaques;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 
-@SuppressWarnings("synthetic-access") final class KRendererDebugUVVertex implements
+/**
+ * A debug renderer that displays the UV coordinates for all meshes.
+ */
+
+@SuppressWarnings("synthetic-access") public final class KRendererDebugUVVertex implements
   KRendererDebugType
 {
   private static final @Nonnull String NAME;
@@ -59,6 +63,20 @@ import com.io7m.renderer.types.RException;
   static {
     NAME = "debug-uv-vertex";
   }
+
+  /**
+   * Construct a new renderer.
+   * 
+   * @param g
+   *          The OpenGL implementation
+   * @param shader_cache
+   *          A shader cache
+   * @param log
+   *          A log handle
+   * @return A new renderer
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
 
   public static KRendererDebugType rendererNew(
     final @Nonnull JCGLImplementation g,
@@ -82,7 +100,7 @@ import com.io7m.renderer.types.RException;
      */
 
     KShadingProgramCommon.putMatrixProjectionReuse(p);
-    KShadingProgramCommon.putMatrixModelView(p, mi.getMatrixModelView());
+    KShadingProgramCommon.putMatrixModelViewUnchecked(p, mi.getMatrixModelView());
 
     /**
      * Associate array attributes with program attributes, and draw mesh.
@@ -94,8 +112,8 @@ import com.io7m.renderer.types.RException;
       final IndexBuffer indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
-      KShadingProgramCommon.bindAttributePosition(p, array);
-      KShadingProgramCommon.bindAttributeUV(p, array);
+      KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
+      KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
 
       p.programExecute(new JCBProgramProcedure() {
         @Override public void call()
@@ -248,7 +266,7 @@ import com.io7m.renderer.types.RException;
             Exception,
             RException
         {
-          KShadingProgramCommon.putMatrixProjection(
+          KShadingProgramCommon.putMatrixProjectionUnchecked(
             p,
             mo.getMatrixProjection());
 

@@ -17,7 +17,24 @@
 package com.io7m.renderer.kernel;
 
 /**
- * The type of forward-rendering framebuffers.
+ * <p>
+ * The type of framebuffer configurations suitable for forward rendering, with
+ * a depth buffer that can be sampled (for shadow mapping and similar
+ * techniques).
+ * </p>
+ * <p>
+ * Implementation note: On platforms that support depth textures, a single
+ * framebuffer will be allocated with an RGBA texture color attachment, and a
+ * depth-texture depth attachment. In this case,
+ * {@link #kFramebufferGetColorFramebuffer()} ==
+ * {@link #kFramebufferGetDepthPassFramebuffer()}. On platforms that do not
+ * support depth textures, two framebuffers <tt>F0</tt> and <tt>F1</tt> will
+ * be allocated. <tt>F0</tt> will consist of an RGBA texture color attachment
+ * and a depth renderbuffer <tt>R</tt>, and <tt>F1</tt> will consist of an
+ * RGBA texture to which packed depth values will be encoded, and the same
+ * depth renderbuffer <tt>R</tt>. Consult
+ * {@link #kFramebufferGetDepthIsPackedColour()}.
+ * </p>
  */
 
 public interface KFramebufferForwardType extends

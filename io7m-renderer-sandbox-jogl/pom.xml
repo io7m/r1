@@ -353,7 +353,7 @@
               <errTitle>sandbox</errTitle>
               <cmdLine>sandbox.conf</cmdLine>
               <classPath>
-                <mainClass>com.io7m.renderer.kernel.Sandbox</mainClass>
+                <mainClass>com.io7m.renderer.kernel.sandbox.Sandbox</mainClass>
                 <jarLocation>lib/</jarLocation>
               </classPath>
               <jre>
@@ -379,7 +379,7 @@
               <errTitle>sandbox</errTitle>
               <cmdLine>sandbox.conf</cmdLine>
               <classPath>
-                <mainClass>com.io7m.renderer.kernel.Sandbox</mainClass>
+                <mainClass>com.io7m.renderer.kernel.sandbox.Sandbox</mainClass>
                 <jarLocation>lib/</jarLocation>
               </classPath>
               <jre>

@@ -24,15 +24,32 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcache.JCacheLoaderType;
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
-final class KFramebufferRGBACacheLoader implements
+/**
+ * A cache loader that can construct RGBA framebuffers of type
+ * {@link KFramebufferRGBAType} based on the given
+ * {@link KFramebufferRGBADescription}.
+ */
+
+public final class KFramebufferRGBACacheLoader implements
   JCacheLoaderType<KFramebufferRGBADescription, KFramebufferRGBAType, RException>
 {
+  /**
+   * Construct a new cache loader.
+   * 
+   * @param gi
+   *          The OpenGL implementation
+   * @param log
+   *          A log handle
+   * @return A new cache loader
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
   public static @Nonnull
     JCacheLoaderType<KFramebufferRGBADescription, KFramebufferRGBAType, RException>
     newLoader(
@@ -69,14 +86,12 @@ final class KFramebufferRGBACacheLoader implements
     }
   }
 
-  @Override public @Nonnull KFramebufferRGBA cacheValueLoad(
+  @Override public @Nonnull KFramebufferRGBAType cacheValueLoad(
     final @Nonnull KFramebufferRGBADescription key)
     throws RException
   {
     try {
-      return KFramebufferRGBA.newRGBA(this.gi, key);
-    } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      return KFramebufferRGBA.newFramebuffer(this.gi, key);
     } catch (final ConstraintError e) {
       throw new UnreachableCodeException(e);
     }
