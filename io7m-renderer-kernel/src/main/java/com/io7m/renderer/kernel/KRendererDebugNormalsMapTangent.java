@@ -139,8 +139,6 @@ import com.io7m.renderer.types.RException;
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
-      KShadingProgramCommon.bindAttributeNormal(p, array);
-      KShadingProgramCommon.bindAttributeTangent4(p, array);
       KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
 
       p.programExecute(new JCBProgramProcedure() {
@@ -255,7 +253,7 @@ import com.io7m.renderer.types.RException;
       JCacheException
   {
     final KProgram program =
-      this.shader_cache.cacheGetLU("debug_normals_vertex_tangent");
+      this.shader_cache.cacheGetLU("debug_normals_map_tangent");
     final JCGLInterfaceCommon gc = this.gl.getGLCommon();
 
     final FramebufferReferenceUsable output_buffer =
