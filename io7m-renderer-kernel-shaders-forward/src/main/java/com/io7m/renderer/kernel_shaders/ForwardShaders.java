@@ -899,25 +899,51 @@ public final class ForwardShaders
     final @Nonnull StringBuilder b,
     final @Nonnull KMaterialSpecularLabel specular)
   {
+    b.append("  -- Alpha\n");
+    b.append("  value alpha = F.multiply (surface [w], opacity);\n");
+    b.append("\n");
+
     b.append("  -- RGBA translucent lit\n");
-    b
-      .append("  value lit_d = V3.multiply (surface [x y z], light_diffuse);\n");
+    b.append("\n");
+    b.append("  -- Diffuse component\n");
+    b.append("  value lit_d = V3.multiply (\n");
+    b.append("    surface [x y z],\n");
+    b.append("    light_diffuse\n");
+    b.append("  );\n");
+    b.append("\n");
 
     switch (specular) {
       case SPECULAR_CONSTANT:
       case SPECULAR_MAPPED:
       {
-        b
-          .append("  value lit_s = new vector_4f (light_specular, VectorAux.average_3f (light_specular));\n");
-        b
-          .append("  value lit_a = V4.add (new vector_4f (lit_d, surface [w]), lit_s);\n");
-        b.append("  value rgba = V4.multiply_scalar (lit_a, opacity);\n");
+        /**
+         * The average intensity of the specular component is used as the
+         * opacity. This allows glass-like materials to "sparkle" with
+         * specular highlights whilst still being transparent in terms of the
+         * diffuse component.
+         */
+
+        b.append("  -- Specular component\n");
+        b.append("  value lit_s = new vector_4f (\n");
+        b.append("    light_specular,\n");
+        b.append("    VectorAux.average_3f (light_specular)\n");
+        b.append("  );\n");
+        b.append("\n");
+        b.append("  value lit_a = V4.add (\n");
+        b.append("    new vector_4f (lit_d, surface [w]),\n");
+        b.append("    lit_s\n");
+        b.append("  );\n");
+        b.append("\n");
+        b.append("  value rgba = V4.multiply_scalar (lit_a, alpha);\n");
         break;
       }
       case SPECULAR_NONE:
       {
-        b.append("  value a = F.multiply (surface [w], opacity);\n");
-        b.append("  value rgba = new vector_4f (lit_d, a);\n");
+        b.append("  value rgba =\n");
+        b.append("    new vector_4f (\n");
+        b.append("      V3.multiply_scalar (lit_d, alpha),\n");
+        b.append("      alpha\n");
+        b.append("    );\n");
         break;
       }
     }
