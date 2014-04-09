@@ -23,7 +23,7 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
-import com.io7m.jcanephora.TextureCubeStatic;
+import com.io7m.jcanephora.TextureCubeStaticUsable;
 
 /**
  * Material properties related to surface environment mapping.
@@ -35,7 +35,7 @@ import com.io7m.jcanephora.TextureCubeStatic;
   private static final @Nonnull KMaterialEnvironment EMPTY;
 
   static {
-    final Option<TextureCubeStatic> none = Option.none();
+    final Option<TextureCubeStaticUsable> none = Option.none();
     try {
       EMPTY = new KMaterialEnvironment(0.0f, none, false);
     } catch (final ConstraintError e) {
@@ -61,14 +61,12 @@ import com.io7m.jcanephora.TextureCubeStatic;
 
   public static @Nonnull KMaterialEnvironment newEnvironmentMapped(
     final float in_mix,
-    final @Nonnull TextureCubeStatic in_texture,
+    final @Nonnull TextureCubeStaticUsable in_texture,
     final boolean in_mix_mapped)
     throws ConstraintError
   {
-    return new KMaterialEnvironment(
-      in_mix,
-      Option.some(in_texture),
-      in_mix_mapped);
+    return new KMaterialEnvironment(in_mix, Option.some(Constraints
+      .constrainNotNull(in_texture, "Texture")), in_mix_mapped);
   }
 
   /**
@@ -81,14 +79,14 @@ import com.io7m.jcanephora.TextureCubeStatic;
     return KMaterialEnvironment.EMPTY;
   }
 
-  private final float                              mix;
-  private final boolean                            mix_mapped;
-  private final @Nonnull Option<TextureCubeStatic> texture;
-  private final int                                textures_required;
+  private final float                                    mix;
+  private final boolean                                  mix_mapped;
+  private final @Nonnull Option<TextureCubeStaticUsable> texture;
+  private final int                                      textures_required;
 
   private KMaterialEnvironment(
     final float in_mix,
-    final @Nonnull Option<TextureCubeStatic> in_texture,
+    final @Nonnull Option<TextureCubeStaticUsable> in_texture,
     final boolean in_mix_mapped)
     throws ConstraintError
   {
@@ -113,8 +111,7 @@ import com.io7m.jcanephora.TextureCubeStatic;
     final KMaterialEnvironment other = (KMaterialEnvironment) obj;
     return (Float.floatToIntBits(this.mix) == Float.floatToIntBits(other.mix))
       && (this.mix_mapped == other.mix_mapped)
-      && (this.texture.equals(other.texture))
-      && (this.textures_required == other.textures_required);
+      && (this.texture.equals(other.texture));
   }
 
   /**
@@ -143,7 +140,7 @@ import com.io7m.jcanephora.TextureCubeStatic;
    * @return The environment cube map texture, if any
    */
 
-  public @Nonnull Option<TextureCubeStatic> getTexture()
+  public @Nonnull Option<TextureCubeStaticUsable> getTexture()
   {
     return this.texture;
   }
@@ -155,7 +152,6 @@ import com.io7m.jcanephora.TextureCubeStatic;
     result = (prime * result) + Float.floatToIntBits(this.mix);
     result = (prime * result) + (this.mix_mapped ? 1234 : 4321);
     result = (prime * result) + (this.texture.hashCode());
-    result = (prime * result) + this.textures_required;
     return result;
   }
 
@@ -175,5 +171,94 @@ import com.io7m.jcanephora.TextureCubeStatic;
     builder.append(this.texture);
     builder.append("]");
     return builder.toString();
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param t
+   *          The new map
+   * @return The current material with <code>map == t</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialEnvironment withMap(
+    final @Nonnull TextureCubeStaticUsable t)
+    throws ConstraintError
+  {
+    return KMaterialEnvironment.newEnvironmentMapped(
+      this.mix,
+      t,
+      this.mix_mapped);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The new mix value
+   * @return The current material with <code>mix == m</code>.
+   */
+
+  public @Nonnull KMaterialEnvironment withMix(
+    final float m)
+  {
+    try {
+      return new KMaterialEnvironment(m, this.texture, this.mix_mapped);
+    } catch (final ConstraintError e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @return The current material with specular map sampling enabled
+   */
+
+  public @Nonnull KMaterialEnvironment withMixMapped()
+  {
+    try {
+      return new KMaterialEnvironment(this.mix, this.texture, true);
+    } catch (final ConstraintError e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @return The current material without a map
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  @SuppressWarnings("static-method") public @Nonnull
+    KMaterialEnvironment
+    withoutMap()
+      throws ConstraintError
+  {
+    return KMaterialEnvironment.newEnvironmentUnmapped();
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @return The current material without specular map sampling enabled
+   */
+
+  public @Nonnull KMaterialEnvironment withoutMixMapped()
+  {
+    try {
+      return new KMaterialEnvironment(this.mix, this.texture, false);
+    } catch (final ConstraintError e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 }

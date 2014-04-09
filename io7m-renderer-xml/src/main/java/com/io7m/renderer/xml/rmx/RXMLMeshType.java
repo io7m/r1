@@ -24,11 +24,11 @@ import javax.annotation.concurrent.Immutable;
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 
-@Immutable final class RXMLMeshType
+@Immutable public final class RXMLMeshType
 {
   private final @Nonnull EnumSet<RXMLMeshAttribute> attributes;
 
-  RXMLMeshType(
+  public RXMLMeshType(
     final @Nonnull EnumSet<RXMLMeshAttribute> in_attributes)
     throws ConstraintError
   {

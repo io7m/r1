@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.xml.rmx;
 
-enum RXMLMeshAttribute
+public enum RXMLMeshAttribute
 {
   NORMAL_3F,
   TANGENT_4F,

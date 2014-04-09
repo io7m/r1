@@ -31,9 +31,8 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.JCGLTextures2DStaticCommon;
 import com.io7m.jcanephora.JCGLTexturesCubeStaticCommon;
-import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.jcanephora.TextureCubeStatic;
+import com.io7m.jcanephora.TextureCubeStaticUsable;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorM4F;
@@ -264,8 +263,9 @@ public final class KShadingProgramCommon
       m.getTexture().isSome(),
       "Material contains albedo texture");
 
-    final Option<Texture2DStatic> opt = m.getTexture();
-    final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
+    final Option<Texture2DStaticUsable> opt = m.getTexture();
+    final Some<Texture2DStaticUsable> some =
+      (Option.Some<Texture2DStaticUsable>) opt;
     gt.texture2DStaticBind(texture_unit, some.value);
     KShadingProgramCommon.putTextureAlbedoUnchecked(program, texture_unit);
   }
@@ -282,8 +282,9 @@ public final class KShadingProgramCommon
       m.getTexture().isSome(),
       "Material contains an emissive texture");
 
-    final Option<Texture2DStatic> opt = m.getTexture();
-    final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
+    final Option<Texture2DStaticUsable> opt = m.getTexture();
+    final Some<Texture2DStaticUsable> some =
+      (Option.Some<Texture2DStaticUsable>) opt;
     gt.texture2DStaticBind(texture_unit, some.value);
     KShadingProgramCommon.putTextureEmissive(program, texture_unit);
   }
@@ -300,8 +301,9 @@ public final class KShadingProgramCommon
       m.getTexture().isSome(),
       "Material contains an environment texture");
 
-    final Option<TextureCubeStatic> opt = m.getTexture();
-    final Some<TextureCubeStatic> some = (Option.Some<TextureCubeStatic>) opt;
+    final Option<TextureCubeStaticUsable> opt = m.getTexture();
+    final Some<TextureCubeStaticUsable> some =
+      (Option.Some<TextureCubeStaticUsable>) opt;
     gt.textureCubeStaticBind(texture_unit, some.value);
     KShadingProgramCommon.putTextureEnvironment(program, texture_unit);
   }
@@ -318,8 +320,9 @@ public final class KShadingProgramCommon
       m.getTexture().isSome(),
       "Material contains a normal texture");
 
-    final Option<Texture2DStatic> opt = m.getTexture();
-    final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
+    final Option<Texture2DStaticUsable> opt = m.getTexture();
+    final Some<Texture2DStaticUsable> some =
+      (Option.Some<Texture2DStaticUsable>) opt;
     gt.texture2DStaticBind(texture_unit, some.value);
     KShadingProgramCommon.putTextureNormal(program, texture_unit);
   }
@@ -360,8 +363,9 @@ public final class KShadingProgramCommon
       m.getTexture().isSome(),
       "Material contains a specular texture");
 
-    final Option<Texture2DStatic> opt = m.getTexture();
-    final Some<Texture2DStatic> some = (Option.Some<Texture2DStatic>) opt;
+    final Option<Texture2DStaticUsable> opt = m.getTexture();
+    final Some<Texture2DStaticUsable> some =
+      (Option.Some<Texture2DStaticUsable>) opt;
     gt.texture2DStaticBind(texture_unit, some.value);
     KShadingProgramCommon.putTextureSpecular(program, texture_unit);
   }

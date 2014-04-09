@@ -22,9 +22,21 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
-interface KTextureUnitContextInitialType
+/**
+ * Access to the initial texture context.
+ */
+
+public interface KTextureUnitContextInitialType
 {
+  /**
+   * @return The number of textures allocated for the current context
+   */
+
   int getTextureCountForContext();
+
+  /**
+   * @return The number of textures allocated for all contexts
+   */
 
   int getTextureCountTotal();
 
@@ -33,6 +45,8 @@ interface KTextureUnitContextInitialType
    * texture units allocated by <code>f</code> will be released when
    * <code>f</code> returns.
    * 
+   * @param f
+   *          A function
    * @throws JCGLException
    *           Iff an OpenGL error occurs.
    * @throws RException

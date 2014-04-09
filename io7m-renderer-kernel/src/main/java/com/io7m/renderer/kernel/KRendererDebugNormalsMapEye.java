@@ -39,7 +39,7 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
@@ -119,12 +119,12 @@ import com.io7m.renderer.types.RException;
     final KMaterialOpaqueType material = instance.instanceGetMaterial();
 
     {
-      final Option<Texture2DStatic> normal_opt =
+      final Option<Texture2DStaticUsable> normal_opt =
         material.materialGetNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units.get(0),
-          ((Option.Some<Texture2DStatic>) normal_opt).value);
+          ((Option.Some<Texture2DStaticUsable>) normal_opt).value);
       } else {
         gc.texture2DStaticUnbind(texture_units.get(0));
       }

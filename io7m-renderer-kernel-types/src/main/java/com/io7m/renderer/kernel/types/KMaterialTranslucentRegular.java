@@ -75,13 +75,13 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_specular);
   }
 
-  private final @Nonnull KMaterialAlbedo                 albedo;
-  private final @Nonnull KMaterialAlpha                  alpha;
-  private final @Nonnull KMaterialEmissive               emissive;
-  private final @Nonnull KMaterialEnvironment            environment;
-  private final @Nonnull KMaterialNormal                 normal;
-  private final @Nonnull KMaterialSpecular               specular;
-  private final int                                      textures_required;
+  private final @Nonnull KMaterialAlbedo                     albedo;
+  private final @Nonnull KMaterialAlpha                      alpha;
+  private final @Nonnull KMaterialEmissive                   emissive;
+  private final @Nonnull KMaterialEnvironment                environment;
+  private final @Nonnull KMaterialNormal                     normal;
+  private final @Nonnull KMaterialSpecular                   specular;
+  private final int                                          textures_required;
   private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KMaterialTranslucentRegular(
@@ -220,5 +220,180 @@ import com.io7m.renderer.types.RTransformTextureType;
   @Override public int texturesGetRequired()
   {
     return this.textures_required;
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The albedo parameters
+   * @return The current material with <code>albedo == m</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialTranslucentRegular withAlbedo(
+    final @Nonnull KMaterialAlbedo m)
+    throws ConstraintError
+  {
+    return new KMaterialTranslucentRegular(
+      this.uv_matrix,
+      m,
+      this.alpha,
+      this.emissive,
+      this.environment,
+      this.normal,
+      this.specular);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The alpha parameters
+   * @return The current material with <code>alpha == m</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialTranslucentRegular withAlpha(
+    final @Nonnull KMaterialAlpha m)
+    throws ConstraintError
+  {
+    return new KMaterialTranslucentRegular(
+      this.uv_matrix,
+      this.albedo,
+      m,
+      this.emissive,
+      this.environment,
+      this.normal,
+      this.specular);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The emissive parameters
+   * @return The current material with <code>emissive == m</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialTranslucentRegular withEmissive(
+    final @Nonnull KMaterialEmissive m)
+    throws ConstraintError
+  {
+    return new KMaterialTranslucentRegular(
+      this.uv_matrix,
+      this.albedo,
+      this.alpha,
+      m,
+      this.environment,
+      this.normal,
+      this.specular);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param e
+   *          The environment parameters
+   * @return The current material with <code>environment == e</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialTranslucentRegular withEnvironment(
+    final @Nonnull KMaterialEnvironment e)
+    throws ConstraintError
+  {
+    return new KMaterialTranslucentRegular(
+      this.uv_matrix,
+      this.albedo,
+      this.alpha,
+      this.emissive,
+      e,
+      this.normal,
+      this.specular);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The normal mapping parameters
+   * @return The current material with <code>normal == m</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialTranslucentRegular withNormal(
+    final @Nonnull KMaterialNormal m)
+    throws ConstraintError
+  {
+    return new KMaterialTranslucentRegular(
+      this.uv_matrix,
+      this.albedo,
+      this.alpha,
+      this.emissive,
+      this.environment,
+      m,
+      this.specular);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param s
+   *          The specular parameters
+   * @return The current material with <code>specular == s</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialTranslucentRegular withSpecular(
+    final @Nonnull KMaterialSpecular s)
+    throws ConstraintError
+  {
+    return new KMaterialTranslucentRegular(
+      this.uv_matrix,
+      this.albedo,
+      this.alpha,
+      this.emissive,
+      this.environment,
+      this.normal,
+      s);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The UV matrix
+   * @return The current material with <code>uv_matrix == m</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialTranslucentRegular withUVMatrix(
+    final @Nonnull RMatrixI3x3F<RTransformTextureType> m)
+    throws ConstraintError
+  {
+    return new KMaterialTranslucentRegular(
+      m,
+      this.albedo,
+      this.alpha,
+      this.emissive,
+      this.environment,
+      this.normal,
+      this.specular);
   }
 }

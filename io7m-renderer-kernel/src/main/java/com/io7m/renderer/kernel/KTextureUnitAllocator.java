@@ -49,7 +49,8 @@ import com.io7m.renderer.types.RException;
  * </p>
  */
 
-final class KTextureUnitAllocator implements KTextureUnitContextInitialType
+public final class KTextureUnitAllocator implements
+  KTextureUnitContextInitialType
 {
   private final class Context implements KTextureUnitContextType
   {
@@ -127,6 +128,16 @@ final class KTextureUnitAllocator implements KTextureUnitContextInitialType
     }
   }
 
+  /**
+   * Construct a new texture unit allocator.
+   * 
+   * @param gi
+   *          The OpenGL interface
+   * @return A new allocator
+   * @throws JCGLException
+   *           If an OpenGL error occurs
+   */
+
   public static @Nonnull KTextureUnitAllocator newAllocator(
     final @Nonnull JCGLImplementation gi)
     throws JCGLException
@@ -159,10 +170,21 @@ final class KTextureUnitAllocator implements KTextureUnitContextInitialType
     return this.allocated;
   }
 
+  /**
+   * @return The maximum available number of texture units
+   */
+
   public int getUnitCount()
   {
     return this.units.size();
   }
+
+  /**
+   * @param requested
+   *          The number of units required
+   * @return <code>true</code> if there are at least <code>requested</code>
+   *         units available
+   */
 
   public boolean hasEnoughUnits(
     final int requested)

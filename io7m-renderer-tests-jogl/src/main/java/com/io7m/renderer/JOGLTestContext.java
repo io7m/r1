@@ -36,6 +36,7 @@ import com.io7m.jvvfs.FSCapabilityAll;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.tests.TestContext;
 import com.jogamp.common.util.VersionNumber;
 
 public final class JOGLTestContext

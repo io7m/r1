@@ -43,7 +43,7 @@ import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
@@ -426,8 +426,10 @@ public final class KRefractionRenderer implements KRefractionRendererType
     switch (label.labelGetNormal()) {
       case NORMAL_MAPPED:
       {
-        final Some<Texture2DStatic> some =
-          (Some<Texture2DStatic>) material.materialGetNormal().getTexture();
+        final Some<Texture2DStaticUsable> some =
+          (Some<Texture2DStaticUsable>) material
+            .materialGetNormal()
+            .getTexture();
         KShadingProgramCommon.putTextureNormal(
           program,
           context.withTexture2D(some.value));

@@ -24,12 +24,20 @@ import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureCubeStaticUsable;
 import com.io7m.jcanephora.TextureUnit;
 
-interface KTextureUnitContextType extends KTextureUnitContextInitialType
+/**
+ * Access to the current texture unit context.
+ */
+
+public interface KTextureUnitContextType extends
+  KTextureUnitContextInitialType
 {
   /**
    * Allocate a new texture unit and bind <code>t</code to it, returning the
    * new unit.
    * 
+   * @return A texture unit with the given texture bound
+   * @param t
+   *          The texture
    * @throws ConstraintError
    *           Iff no texture units are left.
    * @throws JCGLRuntimeException
@@ -45,6 +53,9 @@ interface KTextureUnitContextType extends KTextureUnitContextInitialType
    * Allocate a new texture unit and bind <code>t</code to it, returning the
    * new unit.
    * 
+   * @return A texture unit with the given texture bound
+   * @param t
+   *          The texture
    * @throws ConstraintError
    *           Iff no texture units are left.
    * @throws JCGLRuntimeException
