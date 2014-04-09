@@ -20,7 +20,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.renderer.JOGLTestContext;
-import com.io7m.renderer.TestContext;
+import com.io7m.renderer.tests.TestContext;
+import com.io7m.renderer.tests.kernel.KTextureUnitAllocatorContract;
 
 public final class KTextureUnitAllocatorTest extends
   KTextureUnitAllocatorContract

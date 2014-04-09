@@ -45,8 +45,8 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.jcanephora.TextureCubeStatic;
+import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.TextureCubeStaticUsable;
 import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
@@ -213,8 +213,10 @@ import com.io7m.renderer.types.RTransformViewType;
       }
       case ALBEDO_TEXTURED:
       {
-        final Some<Texture2DStatic> some =
-          (Some<Texture2DStatic>) material.materialGetAlbedo().getTexture();
+        final Some<Texture2DStaticUsable> some =
+          (Some<Texture2DStaticUsable>) material
+            .materialGetAlbedo()
+            .getTexture();
         KShadingProgramCommon.putTextureAlbedoUnchecked(
           program,
           units.withTexture2D(some.value));
@@ -225,8 +227,10 @@ import com.io7m.renderer.types.RTransformViewType;
     switch (label.labelGetNormal()) {
       case NORMAL_MAPPED:
       {
-        final Some<Texture2DStatic> some =
-          (Some<Texture2DStatic>) material.materialGetNormal().getTexture();
+        final Some<Texture2DStaticUsable> some =
+          (Some<Texture2DStaticUsable>) material
+            .materialGetNormal()
+            .getTexture();
         KShadingProgramCommon.putTextureNormal(
           program,
           units.withTexture2D(some.value));
@@ -242,8 +246,10 @@ import com.io7m.renderer.types.RTransformViewType;
     switch (label.labelGetEmissive()) {
       case EMISSIVE_MAPPED:
       {
-        final Some<Texture2DStatic> some =
-          (Some<Texture2DStatic>) material.materialGetEmissive().getTexture();
+        final Some<Texture2DStaticUsable> some =
+          (Some<Texture2DStaticUsable>) material
+            .materialGetEmissive()
+            .getTexture();
         KShadingProgramCommon.putTextureEmissive(
           program,
           units.withTexture2D(some.value));
@@ -257,8 +263,10 @@ import com.io7m.renderer.types.RTransformViewType;
     }
 
     if (label.labelImpliesSpecularMap()) {
-      final Some<Texture2DStatic> some =
-        (Some<Texture2DStatic>) material.materialGetSpecular().getTexture();
+      final Some<Texture2DStaticUsable> some =
+        (Some<Texture2DStaticUsable>) material
+          .materialGetSpecular()
+          .getTexture();
       KShadingProgramCommon.putTextureSpecular(
         program,
         units.withTexture2D(some.value));
@@ -272,8 +280,8 @@ import com.io7m.renderer.types.RTransformViewType;
       case ENVIRONMENT_REFLECTIVE:
       case ENVIRONMENT_REFLECTIVE_MAPPED:
       {
-        final Some<TextureCubeStatic> some =
-          (Some<TextureCubeStatic>) material
+        final Some<TextureCubeStaticUsable> some =
+          (Some<TextureCubeStaticUsable>) material
             .materialGetEnvironment()
             .getTexture();
         KShadingProgramCommon.putTextureEnvironment(

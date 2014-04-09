@@ -75,14 +75,14 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_specular,
       in_alpha_threshold);
   }
-  private final @Nonnull KMaterialAlbedo                 albedo;
-  private final float                                    alpha_threshold;
-  private final @Nonnull KMaterialEmissive               emissive;
-  private final @Nonnull KMaterialEnvironment            environment;
-  private final @Nonnull KMaterialNormal                 normal;
-  private final @Nonnull KMaterialSpecular               specular;
-  private final int                                      textures_required;
 
+  private final @Nonnull KMaterialAlbedo                     albedo;
+  private final float                                        alpha_threshold;
+  private final @Nonnull KMaterialEmissive                   emissive;
+  private final @Nonnull KMaterialEnvironment                environment;
+  private final @Nonnull KMaterialNormal                     normal;
+  private final @Nonnull KMaterialSpecular                   specular;
+  private final int                                          textures_required;
   private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   protected KMaterialOpaqueAlphaDepth(
@@ -229,5 +229,180 @@ import com.io7m.renderer.types.RTransformTextureType;
   @Override public int texturesGetRequired()
   {
     return this.textures_required;
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The albedo parameters
+   * @return The current material with <code>albedo == m</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialOpaqueAlphaDepth withAlbedo(
+    final @Nonnull KMaterialAlbedo m)
+    throws ConstraintError
+  {
+    return new KMaterialOpaqueAlphaDepth(
+      this.uv_matrix,
+      this.normal,
+      m,
+      this.emissive,
+      this.environment,
+      this.specular,
+      this.alpha_threshold);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param t
+   *          The alpha threshold parameter
+   * @return The current material with <code>alpha_threshold == t</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialOpaqueAlphaDepth withAlphaThreshold(
+    final float t)
+    throws ConstraintError
+  {
+    return new KMaterialOpaqueAlphaDepth(
+      this.uv_matrix,
+      this.normal,
+      this.albedo,
+      this.emissive,
+      this.environment,
+      this.specular,
+      t);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The emissive parameters
+   * @return The current material with <code>emissive == m</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialOpaqueAlphaDepth withEmissive(
+    final @Nonnull KMaterialEmissive m)
+    throws ConstraintError
+  {
+    return new KMaterialOpaqueAlphaDepth(
+      this.uv_matrix,
+      this.normal,
+      this.albedo,
+      m,
+      this.environment,
+      this.specular,
+      this.alpha_threshold);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param e
+   *          The environment parameters
+   * @return The current material with <code>environment == e</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialOpaqueAlphaDepth withEnvironment(
+    final @Nonnull KMaterialEnvironment e)
+    throws ConstraintError
+  {
+    return new KMaterialOpaqueAlphaDepth(
+      this.uv_matrix,
+      this.normal,
+      this.albedo,
+      this.emissive,
+      e,
+      this.specular,
+      this.alpha_threshold);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The normal mapping parameters
+   * @return The current material with <code>normal == m</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialOpaqueAlphaDepth withNormal(
+    final @Nonnull KMaterialNormal m)
+    throws ConstraintError
+  {
+    return new KMaterialOpaqueAlphaDepth(
+      this.uv_matrix,
+      m,
+      this.albedo,
+      this.emissive,
+      this.environment,
+      this.specular,
+      this.alpha_threshold);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param s
+   *          The specular parameters
+   * @return The current material with <code>specular == s</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialOpaqueAlphaDepth withSpecular(
+    final @Nonnull KMaterialSpecular s)
+    throws ConstraintError
+  {
+    return new KMaterialOpaqueAlphaDepth(
+      this.uv_matrix,
+      this.normal,
+      this.albedo,
+      this.emissive,
+      this.environment,
+      s,
+      this.alpha_threshold);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The UV matrix
+   * @return The current material with <code>uv_matrix == m</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialOpaqueAlphaDepth withUVMatrix(
+    final @Nonnull RMatrixI3x3F<RTransformTextureType> m)
+    throws ConstraintError
+  {
+    return new KMaterialOpaqueAlphaDepth(
+      m,
+      this.normal,
+      this.albedo,
+      this.emissive,
+      this.environment,
+      this.specular,
+      this.alpha_threshold);
   }
 }

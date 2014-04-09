@@ -23,18 +23,19 @@ import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
-import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 
 /**
  * Material properties related to surface emission.
  */
 
-@Immutable public final class KMaterialEmissive implements KTexturesRequiredType
+@Immutable public final class KMaterialEmissive implements
+  KTexturesRequiredType
 {
   private static final @Nonnull KMaterialEmissive NOT_EMISSIVE;
 
   static {
-    final Option<Texture2DStatic> none = Option.none();
+    final Option<Texture2DStaticUsable> none = Option.none();
     try {
       NOT_EMISSIVE = new KMaterialEmissive(0.0f, none);
     } catch (final ConstraintError e) {
@@ -47,7 +48,7 @@ import com.io7m.jcanephora.Texture2DStatic;
    * 
    * @param in_emission
    *          The minimum emission level
-   * @param in_texture
+   * @param in_map
    *          An emissive map
    * @return New emissive properties
    * @throws ConstraintError
@@ -56,10 +57,11 @@ import com.io7m.jcanephora.Texture2DStatic;
 
   public static @Nonnull KMaterialEmissive newEmissiveMapped(
     final float in_emission,
-    final @Nonnull Texture2DStatic in_texture)
+    final @Nonnull Texture2DStaticUsable in_map)
     throws ConstraintError
   {
-    return new KMaterialEmissive(in_emission, Option.some(in_texture));
+    return new KMaterialEmissive(in_emission, Option.some(Constraints
+      .constrainNotNull(in_map, "Map")));
   }
 
   /**
@@ -88,17 +90,17 @@ import com.io7m.jcanephora.Texture2DStatic;
     final float in_emission)
     throws ConstraintError
   {
-    final Option<Texture2DStatic> none = Option.none();
+    final Option<Texture2DStaticUsable> none = Option.none();
     return new KMaterialEmissive(in_emission, none);
   }
 
-  private final float                            emission;
-  private final @Nonnull Option<Texture2DStatic> texture;
-  private final int                              textures_required;
+  private final float                                  emission;
+  private final @Nonnull Option<Texture2DStaticUsable> texture;
+  private final int                                    textures_required;
 
   private KMaterialEmissive(
     final float in_emission,
-    final @Nonnull Option<Texture2DStatic> in_texture)
+    final @Nonnull Option<Texture2DStaticUsable> in_texture)
     throws ConstraintError
   {
     this.emission = in_emission;
@@ -142,7 +144,7 @@ import com.io7m.jcanephora.Texture2DStatic;
    * @return The texture from which to sample minimum emission values, if any
    */
 
-  public @Nonnull Option<Texture2DStatic> getTexture()
+  public @Nonnull Option<Texture2DStaticUsable> getTexture()
   {
     return this.texture;
   }
@@ -170,5 +172,57 @@ import com.io7m.jcanephora.Texture2DStatic;
     builder.append(this.texture);
     builder.append("]");
     return builder.toString();
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The new emission value
+   * @return The current material with <code>emission == m</code>.
+   */
+
+  public @Nonnull KMaterialEmissive withEmission(
+    final float m)
+  {
+    try {
+      return new KMaterialEmissive(m, this.texture);
+    } catch (final ConstraintError e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param t
+   *          The new map
+   * @return The current material with <code>map == t</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialEmissive withMap(
+    final @Nonnull Texture2DStaticUsable t)
+    throws ConstraintError
+  {
+    return KMaterialEmissive.newEmissiveMapped(this.emission, t);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @return The current material without a map
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialEmissive withoutMap()
+    throws ConstraintError
+  {
+    return KMaterialEmissive.newEmissiveUnmapped(this.emission);
   }
 }

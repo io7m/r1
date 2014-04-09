@@ -24,19 +24,20 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jaux.functional.Option.None;
-import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 
 /**
  * Material properties related to surface normals.
  */
 
-@Immutable public final class KMaterialNormal implements KTexturesRequiredType
+@Immutable public final class KMaterialNormal implements
+  KTexturesRequiredType
 {
   private static final @Nonnull KMaterialNormal EMPTY;
 
   static {
     try {
-      final None<Texture2DStatic> none = Option.none();
+      final None<Texture2DStaticUsable> none = Option.none();
       EMPTY = new KMaterialNormal(none);
     } catch (final ConstraintError e) {
       throw new UnreachableCodeException(e);
@@ -54,10 +55,12 @@ import com.io7m.jcanephora.Texture2DStatic;
    */
 
   public static @Nonnull KMaterialNormal newNormalMapped(
-    final @Nonnull Texture2DStatic in_texture)
+    final @Nonnull Texture2DStaticUsable in_texture)
     throws ConstraintError
   {
-    return new KMaterialNormal(Option.some(in_texture));
+    return new KMaterialNormal(Option.some(Constraints.constrainNotNull(
+      in_texture,
+      "Map")));
   }
 
   /**
@@ -75,11 +78,11 @@ import com.io7m.jcanephora.Texture2DStatic;
     return KMaterialNormal.EMPTY;
   }
 
-  private final @Nonnull Option<Texture2DStatic> texture;
-  private final int                              textures_required;
+  private final @Nonnull Option<Texture2DStaticUsable> texture;
+  private final int                                    textures_required;
 
   KMaterialNormal(
-    final @Nonnull Option<Texture2DStatic> in_texture)
+    final @Nonnull Option<Texture2DStaticUsable> in_texture)
     throws ConstraintError
   {
     this.texture = Constraints.constrainNotNull(in_texture, "Texture");
@@ -109,7 +112,7 @@ import com.io7m.jcanephora.Texture2DStatic;
    * @return The material's normal map, if any
    */
 
-  public @Nonnull Option<Texture2DStatic> getTexture()
+  public @Nonnull Option<Texture2DStaticUsable> getTexture()
   {
     return this.texture;
   }

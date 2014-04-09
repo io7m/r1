@@ -112,4 +112,34 @@ import javax.annotation.concurrent.Immutable;
     builder.append("]");
     return builder.toString();
   }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          <code>true</code> if masking should be enabled
+   * @return The current material with <code>masking == m</code>.
+   */
+
+  public @Nonnull KMaterialRefractive withMasked(
+    final boolean m)
+  {
+    return new KMaterialRefractive(this.scale, m);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param s
+   *          The new scale value
+   * @return The current material with <code>scale == s</code>.
+   */
+
+  public @Nonnull KMaterialRefractive withScale(
+    final float s)
+  {
+    return new KMaterialRefractive(s, this.masked);
+  }
 }

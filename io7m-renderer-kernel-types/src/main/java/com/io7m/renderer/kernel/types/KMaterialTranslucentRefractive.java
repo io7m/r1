@@ -58,8 +58,8 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_refractive);
   }
 
-  private final @Nonnull KMaterialNormal                 normal;
-  private final @Nonnull KMaterialRefractive             refractive;
+  private final @Nonnull KMaterialNormal                     normal;
+  private final @Nonnull KMaterialRefractive                 refractive;
   private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KMaterialTranslucentRefractive(
@@ -120,5 +120,62 @@ import com.io7m.renderer.types.RTransformTextureType;
   @Override public int texturesGetRequired()
   {
     return this.normal.texturesGetRequired();
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The normal mapping parameters
+   * @return The current material with <code>normal == m</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialTranslucentRefractive withNormal(
+    final @Nonnull KMaterialNormal m)
+    throws ConstraintError
+  {
+    return new KMaterialTranslucentRefractive(
+      this.uv_matrix,
+      m,
+      this.refractive);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The refraction parameters
+   * @return The current material with <code>refractive == m</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialTranslucentRefractive withRefractive(
+    final @Nonnull KMaterialRefractive m)
+    throws ConstraintError
+  {
+    return new KMaterialTranslucentRefractive(this.uv_matrix, this.normal, m);
+  }
+
+  /**
+   * Return a material representing the current material with the given
+   * modification.
+   * 
+   * @param m
+   *          The UV matrix
+   * @return The current material with <code>uv_matrix == m</code>.
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public @Nonnull KMaterialTranslucentRefractive withUVMatrix(
+    final @Nonnull RMatrixI3x3F<RTransformTextureType> m)
+    throws ConstraintError
+  {
+    return new KMaterialTranslucentRefractive(m, this.normal, this.refractive);
   }
 }

@@ -22,8 +22,25 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
-interface KTextureUnitWithType
+/**
+ * A function that can be evaluated with a given texture unit context.
+ */
+
+public interface KTextureUnitWithType
 {
+  /**
+   * Evaluate the function.
+   * 
+   * @param context
+   *          The current texture unit context
+   * @throws ConstraintError
+   *           If required
+   * @throws JCGLException
+   *           If required
+   * @throws RException
+   *           If required
+   */
+
   void run(
     final @Nonnull KTextureUnitContextType context)
     throws ConstraintError,
