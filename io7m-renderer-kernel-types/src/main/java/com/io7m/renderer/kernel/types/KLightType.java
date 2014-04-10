@@ -67,12 +67,6 @@ import com.io7m.renderer.types.RVectorI3F;
   @Nonnull RVectorI3F<RSpaceRGBType> lightGetColour();
 
   /**
-   * @return The identifier of the light
-   */
-
-  @Nonnull Integer lightGetID();
-
-  /**
    * @return The intensity of the light
    */
 

@@ -53,18 +53,18 @@ import com.io7m.jcanephora.UsageHint;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.renderer.kernel.KMutableMatricesType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceWithProjectiveType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceWithProjectiveFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceWithProjectiveType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesProjectiveLightType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesProjectiveLightFunctionType;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesProjectiveLightType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
+import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KMaterialAlbedo;
 import com.io7m.renderer.kernel.types.KMaterialEmissive;
@@ -75,8 +75,8 @@ import com.io7m.renderer.kernel.types.KMaterialSpecular;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
 import com.io7m.renderer.kernel.types.KShadowType;
-import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.kernel.types.KTransformOST;
+import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.tests.TestContext;
 import com.io7m.renderer.tests.TestContract;
 import com.io7m.renderer.types.RException;
@@ -87,8 +87,8 @@ import com.io7m.renderer.types.RMatrixM4x4F;
 import com.io7m.renderer.types.RMatrixReadable3x3FType;
 import com.io7m.renderer.types.RMatrixReadable4x4FType;
 import com.io7m.renderer.types.RSpaceObjectType;
-import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceRGBAType;
+import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RTransformModelType;
 import com.io7m.renderer.types.RTransformModelViewType;
@@ -98,11 +98,10 @@ import com.io7m.renderer.types.RTransformProjectiveModelViewType;
 import com.io7m.renderer.types.RTransformProjectiveProjectionType;
 import com.io7m.renderer.types.RTransformProjectiveViewType;
 import com.io7m.renderer.types.RTransformTextureType;
-import com.io7m.renderer.types.RTransformViewType;
 import com.io7m.renderer.types.RTransformViewInverseType;
+import com.io7m.renderer.types.RTransformViewType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
-import com.io7m.renderer.types.RVectorReadable3FType;
 
 public abstract class KMutableMatricesContract extends TestContract
 {
@@ -201,10 +200,10 @@ public abstract class KMutableMatricesContract extends TestContract
             }
           });
 
-      final RVectorReadable3FType<RSpaceWorldType> position =
+      final RVectorI3F<RSpaceWorldType> position =
         new RVectorI3F<RSpaceWorldType>(0, 0, 0);
       final QuaternionI4F orientation = new QuaternionI4F();
-      final RVectorReadable3FType<RSpaceRGBType> colour =
+      final RVectorI3F<RSpaceRGBType> colour =
         new RVectorI3F<RSpaceRGBType>(0, 0, 0);
       final float intensity = 0.0f;
       final float range = 0.0f;
@@ -302,10 +301,12 @@ public abstract class KMutableMatricesContract extends TestContract
     }
   }
 
-  private static AtomicReference<MatricesObserverType> saveObserverDangerously(
-    final @Nonnull KMutableMatricesType mm)
-    throws ConstraintError,
-      RException
+  private static
+    AtomicReference<MatricesObserverType>
+    saveObserverDangerously(
+      final @Nonnull KMutableMatricesType mm)
+      throws ConstraintError,
+        RException
   {
     final RMatrixI4x4F<RTransformProjectionType> projection =
       RMatrixI4x4F.identity();
@@ -759,7 +760,8 @@ public abstract class KMutableMatricesContract extends TestContract
           }
 
           {
-            final RMatrixReadable4x4FType<RTransformViewType> m = o.getMatrixView();
+            final RMatrixReadable4x4FType<RTransformViewType> m =
+              o.getMatrixView();
             Assert.assertEquals(3.0f, m.getRowColumnF(0, 0), 0.0f);
             Assert.assertEquals(3.0f, m.getRowColumnF(1, 1), 0.0f);
             Assert.assertEquals(3.0f, m.getRowColumnF(2, 2), 0.0f);
