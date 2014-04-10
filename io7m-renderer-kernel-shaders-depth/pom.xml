@@ -201,7 +201,7 @@
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>com.io7m.renderer.kernel_shaders.DepthMakeAll</mainClass>
+              <mainClass>com.io7m.renderer.kernel_shaders.depth.DepthMakeAll</mainClass>
               <arguments>
                 <argument>${project.build.directory}/parasol/batch-depth.txt</argument>
                 <argument>${project.build.directory}/parasol/source-list.txt</argument>
@@ -281,6 +281,7 @@
                   <Implementation-Vendor>io7m.com</Implementation-Vendor>
                   <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
                   <Built-By>io7m</Built-By>
+                  <Sealed>true</Sealed>
                 </manifestEntries>
               </archive>
             </configuration>

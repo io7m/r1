@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel_shaders;
+package com.io7m.renderer.kernel_shaders.debug;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -41,7 +41,7 @@ import com.io7m.jparasol.frontend.Frontend;
 import com.io7m.jparasol.xml.Batch;
 import com.io7m.jparasol.xml.PGLSLCompactor;
 
-public final class PostprocessingMakeAll
+public final class DebugMakeAll
 {
   public static void main(
     final String args[])
@@ -85,8 +85,8 @@ public final class PostprocessingMakeAll
       }
     }
 
-    PostprocessingMakeAll.makeSourcesList(out_parasol_dir, out_sources);
-    PostprocessingMakeAll.makeCompileSources(
+    DebugMakeAll.makeSourcesList(out_parasol_dir, out_sources);
+    DebugMakeAll.makeCompileSources(
       out_parasol_dir,
       out_sources,
       out_batch,
@@ -157,7 +157,7 @@ public final class PostprocessingMakeAll
         PGLSLCompactor.newCompactor(
           program_in,
           program_out,
-          PostprocessingMakeAll.getLog());
+          DebugMakeAll.getLog());
       }
     }
   }
