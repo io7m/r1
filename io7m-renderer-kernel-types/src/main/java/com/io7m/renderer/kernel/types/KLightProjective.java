@@ -30,7 +30,6 @@ import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.types.RVectorReadable3FType;
 
 /**
  * A projective light "projects" a texture into a scene from a given position,
@@ -73,9 +72,9 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   public static @Nonnull KLightProjective newProjective(
     final @Nonnull Integer id,
     final @Nonnull Texture2DStaticUsable texture,
-    final @Nonnull RVectorReadable3FType<RSpaceWorldType> position,
+    final @Nonnull RVectorI3F<RSpaceWorldType> position,
     final @Nonnull QuaternionI4F orientation,
-    final @Nonnull RVectorReadable3FType<RSpaceRGBType> colour,
+    final @Nonnull RVectorI3F<RSpaceRGBType> colour,
     final float intensity,
     final float range,
     final float falloff,
@@ -97,22 +96,22 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   }
 
   private final @Nonnull RVectorI3F<RSpaceRGBType>              colour;
-  private final float                                       falloff;
-  private final @Nonnull Integer                            id;
-  private final float                                       intensity;
-  private final @Nonnull QuaternionI4F                      orientation;
-  private final @Nonnull RVectorReadable3FType<RSpaceWorldType>     position;
+  private final float                                           falloff;
+  private final @Nonnull Integer                                id;
+  private final float                                           intensity;
+  private final @Nonnull QuaternionI4F                          orientation;
+  private final @Nonnull RVectorI3F<RSpaceWorldType>            position;
   private final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection;
-  private final float                                       range;
+  private final float                                           range;
   private final @Nonnull Option<KShadowType>                    shadow;
-  private final @Nonnull Texture2DStaticUsable              texture;
+  private final @Nonnull Texture2DStaticUsable                  texture;
 
   private KLightProjective(
     final @Nonnull Integer in_id,
     final @Nonnull Texture2DStaticUsable in_texture,
-    final @Nonnull RVectorReadable3FType<RSpaceWorldType> in_position,
+    final @Nonnull RVectorI3F<RSpaceWorldType> in_position,
     final @Nonnull QuaternionI4F in_orientation,
-    final @Nonnull RVectorReadable3FType<RSpaceRGBType> in_colour,
+    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
     final float in_intensity,
     final float in_range,
     final float in_falloff,
@@ -122,17 +121,16 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   {
     this.intensity = in_intensity;
     this.id = Constraints.constrainNotNull(in_id, "Identifier");
-    this.colour =
-      new RVectorI3F<RSpaceRGBType>(Constraints.constrainNotNull(
-        in_colour,
-        "Colour"));
-    this.position = in_position;
-    this.orientation = in_orientation;
+    this.colour = Constraints.constrainNotNull(in_colour, "Colour");
+    this.position = Constraints.constrainNotNull(in_position, "Position");
+    this.orientation =
+      Constraints.constrainNotNull(in_orientation, "Orientation");
     this.range = in_range;
     this.falloff = in_falloff;
-    this.projection = in_projection;
-    this.texture = in_texture;
-    this.shadow = in_shadow;
+    this.projection =
+      Constraints.constrainNotNull(in_projection, "Projection");
+    this.texture = Constraints.constrainNotNull(in_texture, "Texture");
+    this.shadow = Constraints.constrainNotNull(in_shadow, "Shadow");
   }
 
   @Override public boolean equals(
@@ -182,7 +180,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @return The position of the light
    */
 
-  public @Nonnull RVectorReadable3FType<RSpaceWorldType> getPosition()
+  public @Nonnull RVectorI3F<RSpaceWorldType> getPosition()
   {
     return this.position;
   }
@@ -228,27 +226,10 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     return result;
   }
 
-  /**
-   * @return The colour of the light
-   */
-
   @Override public @Nonnull RVectorI3F<RSpaceRGBType> lightGetColour()
   {
     return this.colour;
   }
-
-  /**
-   * @return The identifier of the light
-   */
-
-  @Override public @Nonnull Integer lightGetID()
-  {
-    return this.id;
-  }
-
-  /**
-   * @return The intensity of the light
-   */
 
   @Override public float lightGetIntensity()
   {
