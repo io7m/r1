@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel_shaders;
+package com.io7m.renderer.kernel_shaders.forward;
 
 import javax.annotation.Nonnull;
 

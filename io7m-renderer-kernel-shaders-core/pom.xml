@@ -189,6 +189,7 @@
                   <Implementation-Vendor>io7m.com</Implementation-Vendor>
                   <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
                   <Built-By>io7m</Built-By>
+                  <Sealed>true</Sealed>
                 </manifestEntries>
               </archive>
             </configuration>

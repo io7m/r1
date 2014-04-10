@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel_shaders;
+package com.io7m.renderer.kernel_shaders.postprocessing;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -41,30 +41,8 @@ import com.io7m.jparasol.frontend.Frontend;
 import com.io7m.jparasol.xml.Batch;
 import com.io7m.jparasol.xml.PGLSLCompactor;
 
-public final class DepthMakeAll
+public final class PostprocessingMakeAll
 {
-  private static void makeSourcesList(
-    final @Nonnull File out_parasol_dir,
-    final @Nonnull File out_sources)
-    throws IOException
-  {
-    final String[] sources = out_parasol_dir.list(new FilenameFilter() {
-      @Override public boolean accept(
-        final @Nonnull File dir,
-        final @Nonnull String name)
-      {
-        return name.endsWith(".p");
-      }
-    });
-
-    final FileWriter writer = new FileWriter(out_sources);
-    for (final String s : sources) {
-      writer.write(String.format("%s/%s\n", out_parasol_dir, s));
-    }
-    writer.flush();
-    writer.close();
-  }
-
   public static void main(
     final String args[])
     throws IOException,
@@ -107,13 +85,35 @@ public final class DepthMakeAll
       }
     }
 
-    DepthMakeAll.makeSourcesList(out_parasol_dir, out_sources);
-    DepthMakeAll.makeCompileSources(
+    PostprocessingMakeAll.makeSourcesList(out_parasol_dir, out_sources);
+    PostprocessingMakeAll.makeCompileSources(
       out_parasol_dir,
       out_sources,
       out_batch,
       out_glsl_dir,
       out_glsl_compact_dir);
+  }
+
+  private static void makeSourcesList(
+    final @Nonnull File out_parasol_dir,
+    final @Nonnull File out_sources)
+    throws IOException
+  {
+    final String[] sources = out_parasol_dir.list(new FilenameFilter() {
+      @Override public boolean accept(
+        final @Nonnull File dir,
+        final @Nonnull String name)
+      {
+        return name.endsWith(".p");
+      }
+    });
+
+    final FileWriter writer = new FileWriter(out_sources);
+    for (final String s : sources) {
+      writer.write(String.format("%s/%s\n", out_parasol_dir, s));
+    }
+    writer.flush();
+    writer.close();
   }
 
   private static void makeCompileSources(
@@ -157,7 +157,7 @@ public final class DepthMakeAll
         PGLSLCompactor.newCompactor(
           program_in,
           program_out,
-          DepthMakeAll.getLog());
+          PostprocessingMakeAll.getLog());
       }
     }
   }
