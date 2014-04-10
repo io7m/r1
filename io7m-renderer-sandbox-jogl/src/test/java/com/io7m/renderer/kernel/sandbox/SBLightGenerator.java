@@ -26,30 +26,23 @@ import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jaux.functional.Option;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.kernel.sandbox.SBLightDescription;
-import com.io7m.renderer.kernel.sandbox.SBLightDescriptionDirectional;
-import com.io7m.renderer.kernel.sandbox.SBLightDescriptionProjective;
-import com.io7m.renderer.kernel.sandbox.SBLightDescriptionSpherical;
-import com.io7m.renderer.kernel.sandbox.SBLightType;
-import com.io7m.renderer.kernel.sandbox.SBProjectionDescription;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.types.RVectorReadable3FType;
 
 public final class SBLightGenerator implements Generator<SBLightDescription>
 {
-  private final @Nonnull IntegerGenerator                  index_gen;
-  private @Nonnull Integer                                 id;
+  private final @Nonnull IntegerGenerator                      index_gen;
+  private @Nonnull Integer                                     id;
   private final @Nonnull SBVectorI3FGenerator<RSpaceWorldType> world_gen;
   private final @Nonnull SBVectorI3FGenerator<RSpaceRGBType>   colour_gen;
-  private final @Nonnull PathVirtualGenerator              path_gen;
-  private final @Nonnull QuaternionI4FGenerator            quat_gen;
-  private final @Nonnull SBProjectionGenerator             projection_gen;
-  private final @Nonnull SBLightShadowDescriptionGenerator shad_gen;
+  private final @Nonnull PathVirtualGenerator                  path_gen;
+  private final @Nonnull QuaternionI4FGenerator                quat_gen;
+  private final @Nonnull SBProjectionGenerator                 projection_gen;
+  private final @Nonnull SBLightShadowDescriptionGenerator     shad_gen;
 
   public SBLightGenerator()
   {
@@ -71,17 +64,13 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
       switch (SBLightType.values()[this.index_gen.next().intValue()]) {
         case LIGHT_DIRECTIONAL:
         {
-          final RVectorReadable3FType<RSpaceWorldType> direction =
-            this.world_gen.next();
-          final RVectorReadable3FType<RSpaceRGBType> colour = this.colour_gen.next();
+          final RVectorI3F<RSpaceWorldType> direction = this.world_gen.next();
+          final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
           final float intensity = (float) Math.random();
 
           return new SBLightDescriptionDirectional(
-            KLightDirectional.newDirectional(
-              this.id,
-              direction,
-              colour,
-              intensity));
+            this.id,
+            KLightDirectional.newDirectional(direction, colour, intensity));
         }
         case LIGHT_PROJECTIVE:
         {
@@ -93,7 +82,8 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
             this.projection_gen.next();
           final QuaternionI4F orientation = this.quat_gen.next();
           final PathVirtual texture = this.path_gen.next();
-          final Option<KShadowType> shadow = Option.some(this.shad_gen.next());
+          final Option<KShadowType> shadow =
+            Option.some(this.shad_gen.next());
 
           return new SBLightDescriptionProjective(
             orientation,
@@ -114,13 +104,14 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
           final float radius = (float) Math.random() * 64.0f;
           final RVectorI3F<RSpaceWorldType> position = this.world_gen.next();
 
-          return new SBLightDescriptionSpherical(KLightSphere.newSpherical(
+          return new SBLightDescriptionSpherical(
             this.id,
-            colour,
-            intensity,
-            position,
-            radius,
-            falloff));
+            KLightSphere.newSpherical(
+              colour,
+              intensity,
+              position,
+              radius,
+              falloff));
         }
       }
     } catch (final ConstraintError e) {

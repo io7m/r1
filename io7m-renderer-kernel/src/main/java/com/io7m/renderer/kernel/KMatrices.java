@@ -135,7 +135,7 @@ public final class KMatrices
    * </p>
    * <p>
    * Identical to
-   * {@link #makeViewMatrix(com.io7m.renderer.kernel.KTransform.KTransformContext, RVectorReadable3FType, QuaternionReadable4F, RMatrixM4x4F)}
+   * {@link #makeViewMatrix(KTransformContext, RVectorReadable3FType, QuaternionReadable4F, RMatrixM4x4F)}
    * but with a different phantom type parameter on the view matrix type.
    * </p>
    * 

@@ -26,11 +26,14 @@ import com.io7m.renderer.types.RException;
 @Immutable final class SBLightDescriptionSpherical implements
   SBLightDescription
 {
+  private final @Nonnull Integer      id;
   private final @Nonnull KLightSphere actual;
 
   SBLightDescriptionSpherical(
+    final @Nonnull Integer in_id,
     final @Nonnull KLightSphere in_actual)
   {
+    this.id = in_id;
     this.actual = in_actual;
   }
 
@@ -48,11 +51,10 @@ import com.io7m.renderer.types.RException;
     }
     final SBLightDescriptionSpherical other =
       (SBLightDescriptionSpherical) obj;
-    if (this.actual == null) {
-      if (other.actual != null) {
-        return false;
-      }
-    } else if (!this.actual.equals(other.actual)) {
+    if (!this.actual.equals(other.actual)) {
+      return false;
+    }
+    if (!this.id.equals(other.id)) {
       return false;
     }
     return true;
@@ -60,7 +62,7 @@ import com.io7m.renderer.types.RException;
 
   public Integer getID()
   {
-    return this.actual.lightGetID();
+    return this.id;
   }
 
   public KLightSphere getLight()
@@ -72,14 +74,14 @@ import com.io7m.renderer.types.RException;
   {
     final int prime = 31;
     int result = 1;
-    result =
-      (prime * result) + ((this.actual == null) ? 0 : this.actual.hashCode());
+    result = (prime * result) + this.actual.hashCode();
+    result = (prime * result) + this.id.hashCode();
     return result;
   }
 
   @Override public Integer lightGetID()
   {
-    return this.actual.lightGetID();
+    return this.id;
   }
 
   @Override public
@@ -97,7 +99,9 @@ import com.io7m.renderer.types.RException;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[SBLightDescriptionSpherical ");
+    builder.append("[SBLightDescriptionSpherical id=");
+    builder.append(this.id);
+    builder.append(" actual=");
     builder.append(this.actual);
     builder.append("]");
     return builder.toString();

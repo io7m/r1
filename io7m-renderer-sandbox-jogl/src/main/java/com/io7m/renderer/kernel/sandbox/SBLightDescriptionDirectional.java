@@ -26,11 +26,14 @@ import com.io7m.renderer.types.RException;
 @Immutable final class SBLightDescriptionDirectional implements
   SBLightDescription
 {
+  private final @Nonnull Integer           id;
   private final @Nonnull KLightDirectional actual;
 
   SBLightDescriptionDirectional(
+    final @Nonnull Integer in_id,
     final @Nonnull KLightDirectional in_actual)
   {
+    this.id = in_id;
     this.actual = in_actual;
   }
 
@@ -51,12 +54,15 @@ import com.io7m.renderer.types.RException;
     if (!this.actual.equals(other.actual)) {
       return false;
     }
+    if (!this.id.equals(other.id)) {
+      return false;
+    }
     return true;
   }
 
   public Integer getID()
   {
-    return this.actual.lightGetID();
+    return this.id;
   }
 
   public KLightDirectional getLight()
@@ -68,8 +74,8 @@ import com.io7m.renderer.types.RException;
   {
     final int prime = 31;
     int result = 1;
-    result =
-      (prime * result) + ((this.actual == null) ? 0 : this.actual.hashCode());
+    result = (prime * result) + this.actual.hashCode();
+    result = (prime * result) + this.id.hashCode();
     return result;
   }
 
@@ -96,6 +102,6 @@ import com.io7m.renderer.types.RException;
 
   @Override public Integer lightGetID()
   {
-    return this.actual.lightGetID();
+    return this.id;
   }
 }

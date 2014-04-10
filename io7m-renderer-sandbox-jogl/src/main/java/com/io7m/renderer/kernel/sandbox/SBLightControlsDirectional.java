@@ -67,12 +67,12 @@ public final class SBLightControlsDirectional implements
     return new SBLightControlsDirectional(parent, id);
   }
 
-  private final @Nonnull SBColourInput                colour;
+  private final @Nonnull SBColourInput                    colour;
   private final @Nonnull SBVector3FInput<RSpaceWorldType> direction;
-  private final @Nonnull RowGroup                     group;
-  private final @Nonnull SBFloatHSlider               intensity;
-  private final @Nonnull JFrame                       parent;
-  private final @Nonnull Integer                      id;
+  private final @Nonnull RowGroup                         group;
+  private final @Nonnull SBFloatHSlider                   intensity;
+  private final @Nonnull JFrame                           parent;
+  private final @Nonnull Integer                          id;
 
   private SBLightControlsDirectional(
     final @Nonnull JFrame in_parent,
@@ -126,8 +126,8 @@ public final class SBLightControlsDirectional implements
       ConstraintError
   {
     return new SBLightDescriptionDirectional(
+      this.id,
       KLightDirectional.newDirectional(
-        this.id,
         this.direction.getVector(),
         this.colour.controlsSave(),
         this.intensity.getCurrent()));

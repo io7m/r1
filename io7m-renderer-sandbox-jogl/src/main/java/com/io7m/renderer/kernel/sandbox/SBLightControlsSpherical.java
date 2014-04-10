@@ -62,13 +62,13 @@ public final class SBLightControlsSpherical implements
     return new SBLightControlsSpherical(parent, id);
   }
 
-  private final @Nonnull SBColourInput                colour;
-  private final @Nonnull SBFloatHSlider               falloff;
-  private final @Nonnull SBFloatHSlider               intensity;
-  private final @Nonnull JFrame                       parent;
+  private final @Nonnull SBColourInput                    colour;
+  private final @Nonnull SBFloatHSlider                   falloff;
+  private final @Nonnull SBFloatHSlider                   intensity;
+  private final @Nonnull JFrame                           parent;
   private final @Nonnull SBVector3FInput<RSpaceWorldType> position;
-  private final @Nonnull SBFloatHSlider               radius;
-  private final @Nonnull Integer                      id;
+  private final @Nonnull SBFloatHSlider                   radius;
+  private final @Nonnull Integer                          id;
 
   private SBLightControlsSpherical(
     final @Nonnull JFrame in_parent,
@@ -131,12 +131,13 @@ public final class SBLightControlsSpherical implements
     throws SBExceptionInputError,
       ConstraintError
   {
-    return new SBLightDescriptionSpherical(KLightSphere.newSpherical(
+    return new SBLightDescriptionSpherical(
       this.id,
-      this.colour.controlsSave(),
-      this.intensity.getCurrent(),
-      this.position.getVector(),
-      this.radius.getCurrent(),
-      this.falloff.getCurrent()));
+      KLightSphere.newSpherical(
+        this.colour.controlsSave(),
+        this.intensity.getCurrent(),
+        this.position.getVector(),
+        this.radius.getCurrent(),
+        this.falloff.getCurrent()));
   }
 }
