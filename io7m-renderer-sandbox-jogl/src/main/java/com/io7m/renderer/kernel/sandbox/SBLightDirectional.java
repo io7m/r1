@@ -42,7 +42,7 @@ import com.io7m.renderer.types.RException;
 
   @Override public Integer getID()
   {
-    return this.light.lightGetID();
+    return this.description.getID();
   }
 
   @Override public @Nonnull KLightDirectional getLight()
