@@ -18,9 +18,6 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.types.RException;
-
 /**
  * The type of postprocessors.
  */
@@ -28,29 +25,8 @@ import com.io7m.renderer.types.RException;
 public interface KPostprocessorType
 {
   /**
-   * Delete all resources associated with this postprocessor.
-   * 
-   * @throws RException
-   *           If an error occurs
-   * @throws ConstraintError
-   *           If the postprocessor is already closed
-   * @see #postprocessorIsClosed()
-   */
-
-  void postprocessorClose()
-    throws RException,
-      ConstraintError;
-
-  /**
    * @return The name of the postprocessor.
    */
 
   @Nonnull String postprocessorGetName();
-
-  /**
-   * @return <code>true</code> if the postprocessor has been closed.
-   * @see #postprocessorClose()
-   */
-
-  boolean postprocessorIsClosed();
 }

@@ -118,7 +118,6 @@ public final class KPostprocessorBlurDepthVariance implements
       log);
   }
 
-  private boolean                                           closed;
   private final @Nonnull KRegionCopierType                  copier;
   private final @Nonnull KFramebufferDepthVarianceCacheType depth_variance_cache;
   private final @Nonnull JCGLImplementation                 gi;
@@ -150,7 +149,6 @@ public final class KPostprocessorBlurDepthVariance implements
     this.copier = Constraints.constrainNotNull(in_copier, "Copier");
 
     this.quad = Constraints.constrainNotNull(in_quad, "Quad");
-    this.closed = false;
 
     if (this.log.enabled(Level.LOG_DEBUG)) {
       this.log.debug("initialized");
@@ -193,20 +191,6 @@ public final class KPostprocessorBlurDepthVariance implements
       target.kFramebufferGetDepthVariancePassFramebuffer(),
       target.kFramebufferGetArea(),
       true);
-  }
-
-  @Override public void postprocessorClose()
-    throws RException,
-      ConstraintError
-  {
-    Constraints.constrainArbitrary(
-      this.postprocessorIsClosed() == false,
-      "Postprocessor not closed");
-
-    this.closed = true;
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
   }
 
   @Override public void postprocessorEvaluateDepthVariance(
@@ -294,10 +278,5 @@ public final class KPostprocessorBlurDepthVariance implements
   @Override public String postprocessorGetName()
   {
     return KPostprocessorBlurDepthVariance.NAME;
-  }
-
-  @Override public boolean postprocessorIsClosed()
-  {
-    return this.closed;
   }
 }

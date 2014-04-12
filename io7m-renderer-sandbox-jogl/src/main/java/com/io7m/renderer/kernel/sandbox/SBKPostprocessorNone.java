@@ -87,11 +87,6 @@ public final class SBKPostprocessorNone
 
     }
 
-    @Override public void postprocessorClose()
-    {
-      // Nothing
-    }
-
     @Override public void postprocessorInitialize(
       final JCGLImplementation gi,
       final KFramebufferRGBACacheType rgba_cache,

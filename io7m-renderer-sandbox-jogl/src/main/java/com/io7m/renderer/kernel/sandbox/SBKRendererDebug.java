@@ -28,11 +28,4 @@ public final class SBKRendererDebug implements SBKRendererType
   {
     return this.actual;
   }
-
-  @Override public void close()
-    throws RException,
-      ConstraintError
-  {
-    this.actual.rendererClose();
-  }
 }

@@ -24,7 +24,6 @@ import com.io7m.jcache.BLUCacheReceiptType;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
@@ -76,7 +75,6 @@ public final class KPostprocessorCopyRGBA implements
       log);
   }
 
-  private boolean                                  closed;
   private final @Nonnull KRegionCopierType         copier;
   private final @Nonnull JCGLImplementation        gi;
   private final @Nonnull Log                       log;
@@ -101,20 +99,6 @@ public final class KPostprocessorCopyRGBA implements
     this.shader_cache =
       Constraints.constrainNotNull(in_shader_cache, "Shader cache");
     this.copier = Constraints.constrainNotNull(in_copier, "Region copier");
-  }
-
-  @Override public void postprocessorClose()
-    throws RException,
-      ConstraintError
-  {
-    Constraints.constrainArbitrary(
-      this.postprocessorIsClosed() == false,
-      "Postprocessor not closed");
-
-    this.closed = true;
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
   }
 
   @Override public void postprocessorEvaluateRGBA(
@@ -175,10 +159,5 @@ public final class KPostprocessorCopyRGBA implements
   @Override public String postprocessorGetName()
   {
     return KPostprocessorCopyRGBA.NAME;
-  }
-
-  @Override public boolean postprocessorIsClosed()
-  {
-    return this.closed;
   }
 }

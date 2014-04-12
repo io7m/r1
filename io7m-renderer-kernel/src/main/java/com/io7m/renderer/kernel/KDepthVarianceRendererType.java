@@ -51,10 +51,9 @@ public interface KDepthVarianceRendererType extends KRendererType
    *          The face selection override (to force all instances to render
    *          using front faces, back faces, or both, if specified)
    * @throws ConstraintError
-   *           If any parameter is <code>null</code> or the renderer is closed
+   *           If any parameter is <code>null</code>
    * @throws RException
    *           If an error occurs during rendering
-   * @see #rendererIsClosed()
    */
 
     void

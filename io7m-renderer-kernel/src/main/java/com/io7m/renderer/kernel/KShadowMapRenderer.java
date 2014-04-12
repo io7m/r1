@@ -120,7 +120,6 @@ import com.io7m.renderer.types.RTransformViewType;
   }
 
   private final @Nonnull KPostprocessorBlurDepthVarianceType blur;
-  private boolean                                            closed;
   private final @Nonnull KDepthRendererType                  depth_renderer;
   private final @Nonnull KDepthVarianceRendererType          depth_variance_renderer;
   private final @Nonnull JCGLImplementation                  g;
@@ -172,20 +171,6 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  @Override public void rendererClose()
-    throws RException,
-      ConstraintError
-  {
-    Constraints.constrainArbitrary(
-      this.closed == false,
-      "Renderer is not closed");
-    this.closed = true;
-
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
-  }
-
   @Override public <A, E extends Throwable> A rendererEvaluateShadowMaps(
     final @Nonnull KCamera camera,
     final @Nonnull KSceneBatchedShadow batches,
@@ -197,9 +182,6 @@ import com.io7m.renderer.types.RTransformViewType;
     Constraints.constrainNotNull(camera, "Camera");
     Constraints.constrainNotNull(batches, "Batches");
     Constraints.constrainNotNull(with, "With");
-    Constraints.constrainArbitrary(
-      this.rendererIsClosed() == false,
-      "Renderer is not closed");
 
     this.shadow_cache.cachePeriodStart();
     try {
@@ -258,11 +240,6 @@ import com.io7m.renderer.types.RTransformViewType;
   @Override public String rendererGetName()
   {
     return KShadowMapRenderer.NAME;
-  }
-
-  @Override public boolean rendererIsClosed()
-  {
-    return this.closed;
   }
 
   private

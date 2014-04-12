@@ -43,7 +43,6 @@ import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
-import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
@@ -184,7 +183,9 @@ import com.io7m.renderer.types.RTransformViewType;
             case DEPTH_VARIANCE_MAPPED:
             {
               KDepthVarianceRenderer.putMaterialOpaque(jp, material);
-              KShadingProgramCommon.putMatrixUVUnchecked(jp, mwi.getMatrixUV());
+              KShadingProgramCommon.putMatrixUVUnchecked(
+                jp,
+                mwi.getMatrixUV());
               KShadingProgramCommon.bindPutTextureAlbedo(
                 jp,
                 gc,
@@ -222,7 +223,9 @@ import com.io7m.renderer.types.RTransformViewType;
             case DEPTH_VARIANCE_MAPPED:
             {
               KDepthVarianceRenderer.putMaterialOpaque(jp, material);
-              KShadingProgramCommon.putMatrixUVUnchecked(jp, mwi.getMatrixUV());
+              KShadingProgramCommon.putMatrixUVUnchecked(
+                jp,
+                mwi.getMatrixUV());
               KShadingProgramCommon.bindPutTextureAlbedo(
                 jp,
                 gc,
@@ -297,7 +300,6 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  private boolean                                                  closed;
   private final @Nonnull JCGLImplementation                        g;
   private final @Nonnull Log                                       log;
   private final @Nonnull KMutableMatricesType                      matrices;
@@ -363,20 +365,6 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  @Override public void rendererClose()
-    throws RException,
-      ConstraintError
-  {
-    Constraints.constrainArbitrary(
-      this.closed == false,
-      "Renderer is not closed");
-    this.closed = true;
-
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
-  }
-
   @Override public
     void
     rendererEvaluateDepthVariance(
@@ -393,9 +381,6 @@ import com.io7m.renderer.types.RTransformViewType;
     Constraints.constrainNotNull(batches, "Batches");
     Constraints.constrainNotNull(framebuffer, "Framebuffer");
     Constraints.constrainNotNull(faces, "Faces");
-    Constraints.constrainArbitrary(
-      this.rendererIsClosed() == false,
-      "Renderer not closed");
 
     try {
       this.matrices.withObserver(
@@ -424,11 +409,6 @@ import com.io7m.renderer.types.RTransformViewType;
   @Override public String rendererGetName()
   {
     return KDepthVarianceRenderer.NAME;
-  }
-
-  @Override public boolean rendererIsClosed()
-  {
-    return this.closed;
   }
 
   private

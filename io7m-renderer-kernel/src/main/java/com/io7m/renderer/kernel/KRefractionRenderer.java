@@ -44,7 +44,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI4F;
@@ -809,7 +808,6 @@ public final class KRefractionRenderer implements KRefractionRendererType
   private final @Nonnull KMeshBoundsCacheType<RSpaceObjectType>              bounds_cache;
   private final @Nonnull KMeshBoundsTrianglesCacheType<RSpaceObjectType>     bounds_tri_cache;
   private final @Nonnull RVectorM4F<RSpaceClipType>                          clip_tmp;
-  private boolean                                                            closed;
   private final @Nonnull KRegionCopierType                                   copier;
   private final @Nonnull KFramebufferForwardCacheType                        forward_cache;
   private final @Nonnull JCGLImplementation                                  g;
@@ -872,28 +870,9 @@ public final class KRefractionRenderer implements KRefractionRendererType
     }
   }
 
-  @Override public void rendererClose()
-    throws RException,
-      ConstraintError
-  {
-    Constraints.constrainArbitrary(
-      this.closed == false,
-      "Renderer is not closed");
-    this.closed = true;
-
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
-  }
-
   @Override public String rendererGetName()
   {
     return KRefractionRenderer.NAME;
-  }
-
-  @Override public boolean rendererIsClosed()
-  {
-    return this.closed;
   }
 
   @Override public void rendererRefractionEvaluate(
@@ -906,9 +885,6 @@ public final class KRefractionRenderer implements KRefractionRendererType
     Constraints.constrainNotNull(scene, "Scene");
     Constraints.constrainNotNull(observer, "Observer");
     Constraints.constrainNotNull(r, "Refractive instance");
-    Constraints.constrainArbitrary(
-      this.rendererIsClosed() == false,
-      "Renderer is not closed");
 
     try {
       final JCGLInterfaceCommon gc = this.g.getGLCommon();

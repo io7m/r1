@@ -113,7 +113,6 @@ public final class KPostprocessorBlurRGBA implements
       log);
   }
 
-  private boolean                                  closed;
   private final @Nonnull KRegionCopierType         copier;
   private final @Nonnull JCGLImplementation        gi;
   private final @Nonnull Log                       log;
@@ -142,7 +141,6 @@ public final class KPostprocessorBlurRGBA implements
         KPostprocessorBlurRGBA.NAME);
 
     this.quad = Constraints.constrainNotNull(in_quad, "Quad");
-    this.closed = false;
 
     if (this.log.enabled(Level.LOG_DEBUG)) {
       this.log.debug("initialized");
@@ -188,20 +186,6 @@ public final class KPostprocessorBlurRGBA implements
         false);
   }
 
-  @Override public void postprocessorClose()
-    throws RException,
-      ConstraintError
-  {
-    Constraints.constrainArbitrary(
-      this.postprocessorIsClosed() == false,
-      "Postprocessor not closed");
-
-    this.closed = true;
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
-  }
-
   @Override public void postprocessorEvaluateRGBA(
     final @Nonnull KBlurParameters parameters,
     final @Nonnull KFramebufferRGBAUsableType input,
@@ -212,9 +196,6 @@ public final class KPostprocessorBlurRGBA implements
     Constraints.constrainNotNull(parameters, "Parameters");
     Constraints.constrainNotNull(input, "Input");
     Constraints.constrainNotNull(output, "Output");
-    Constraints.constrainArbitrary(
-      this.postprocessorIsClosed() == false,
-      "Postprocessor not closed");
 
     try {
       final KFramebufferRGBADescription desc =
@@ -289,10 +270,5 @@ public final class KPostprocessorBlurRGBA implements
   @Override public String postprocessorGetName()
   {
     return KPostprocessorBlurRGBA.NAME;
-  }
-
-  @Override public boolean postprocessorIsClosed()
-  {
-    return this.closed;
   }
 }

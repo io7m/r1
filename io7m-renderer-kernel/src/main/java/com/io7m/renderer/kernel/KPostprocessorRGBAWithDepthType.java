@@ -51,11 +51,9 @@ public interface KPostprocessorRGBAWithDepthType<C> extends
    * @param output
    *          The output framebuffer
    * @throws ConstraintError
-   *           If any parameter is <code>null</code> or the postprocessor is
-   *           closed
+   *           If any parameter is <code>null</code>
    * @throws RException
    *           If any error occurs
-   * @see #postprocessorIsClosed()
    */
 
     <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>

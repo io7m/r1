@@ -39,7 +39,6 @@ import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
-import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
@@ -105,7 +104,6 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
     return new KRendererDebugDepthVariance(g, depth_labels, shader_cache, log);
   }
 
-  private boolean                                     closed;
   private final @Nonnull KMaterialDepthLabelCacheType depth_labels;
   private final @Nonnull JCGLImplementation           gl;
   private final @Nonnull Log                          log;
@@ -133,20 +131,6 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
     this.matrices = KMutableMatricesType.newMatrices();
     this.transform_context = KTransformContext.newContext();
     this.log.debug("initialized");
-  }
-
-  @Override public void rendererClose()
-    throws ConstraintError,
-      RException
-  {
-    Constraints.constrainArbitrary(
-      this.closed == false,
-      "Renderer is not closed");
-    this.closed = true;
-
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
   }
 
   @Override public void rendererDebugEvaluate(
@@ -185,11 +169,6 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
   @Override public String rendererGetName()
   {
     return KRendererDebugDepthVariance.NAME;
-  }
-
-  @Override public boolean rendererIsClosed()
-  {
-    return this.closed;
   }
 
   @SuppressWarnings("static-method") private void renderInstance(

@@ -36,7 +36,6 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementation;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
@@ -137,7 +136,6 @@ import com.io7m.renderer.types.RException;
   }
 
   private final @Nonnull VectorM4F            background;
-  private boolean                             closed;
   private final @Nonnull JCGLImplementation   gl;
   private final @Nonnull Log                  log;
   private final @Nonnull KMutableMatricesType matrices;
@@ -163,20 +161,6 @@ import com.io7m.renderer.types.RException;
     this.transform_context = KTransformContext.newContext();
   }
 
-  @Override public void rendererClose()
-    throws ConstraintError,
-      RException
-  {
-    Constraints.constrainArbitrary(
-      this.closed == false,
-      "Renderer is not closed");
-    this.closed = true;
-
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
-  }
-
   @Override public void rendererDebugEvaluate(
     final @Nonnull KFramebufferRGBAUsableType framebuffer,
     final @Nonnull KScene scene)
@@ -185,9 +169,6 @@ import com.io7m.renderer.types.RException;
   {
     Constraints.constrainNotNull(framebuffer, "Framebuffer");
     Constraints.constrainNotNull(scene, "Scene");
-    Constraints.constrainArbitrary(
-      this.rendererIsClosed() == false,
-      "Renderer is not closed");
 
     final KCamera camera = scene.getCamera();
 
@@ -221,11 +202,6 @@ import com.io7m.renderer.types.RException;
   @Override public String rendererGetName()
   {
     return KRendererDebugUVVertex.NAME;
-  }
-
-  @Override public boolean rendererIsClosed()
-  {
-    return this.closed;
   }
 
   private void renderWithObserver(

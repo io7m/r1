@@ -337,11 +337,9 @@ import com.io7m.renderer.types.RTransformViewType;
   }
 
   private final @Nonnull KGraphicsCapabilities caps;
-  private boolean                              closed;
   private final @Nonnull JCGLImplementation    g;
   private final @Nonnull Log                   log;
   private final @Nonnull KMutableMatricesType  matrices;
-
   private final @Nonnull KShaderCacheType      shader_cache;
 
   private KDepthRenderer(
@@ -423,20 +421,6 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  @Override public void rendererClose()
-    throws RException,
-      ConstraintError
-  {
-    Constraints.constrainArbitrary(
-      this.closed == false,
-      "Renderer is not closed");
-    this.closed = true;
-
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
-  }
-
   @Override public
     void
     rendererEvaluateDepth(
@@ -453,9 +437,6 @@ import com.io7m.renderer.types.RTransformViewType;
     Constraints.constrainNotNull(batches, "Batches");
     Constraints.constrainNotNull(framebuffer, "Framebuffer");
     Constraints.constrainNotNull(faces, "Faces");
-    Constraints.constrainArbitrary(
-      this.rendererIsClosed() == false,
-      "Renderer not closed");
 
     try {
       this.matrices.withObserver(
@@ -480,11 +461,6 @@ import com.io7m.renderer.types.RTransformViewType;
   @Override public String rendererGetName()
   {
     return KDepthRenderer.NAME;
-  }
-
-  @Override public boolean rendererIsClosed()
-  {
-    return this.closed;
   }
 
   private

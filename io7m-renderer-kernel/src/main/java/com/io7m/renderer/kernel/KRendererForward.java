@@ -1165,7 +1165,6 @@ import com.io7m.renderer.types.RTransformViewType;
   }
 
   private final @Nonnull VectorM4F                                 background;
-  private boolean                                                  closed;
   private final @Nonnull KForwardLabelDeciderType                  decider;
   private final @Nonnull KDepthRendererType                        depth_renderer;
   private final @Nonnull JCGLImplementation                        g;
@@ -1219,20 +1218,6 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  @Override public void rendererClose()
-    throws RException,
-      ConstraintError
-  {
-    Constraints.constrainArbitrary(
-      this.closed == false,
-      "Renderer is not closed");
-    this.closed = true;
-
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
-  }
-
   @Override public void rendererForwardEvaluate(
     final @Nonnull KFramebufferForwardUsableType framebuffer,
     final @Nonnull KScene scene)
@@ -1241,9 +1226,6 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     Constraints.constrainNotNull(framebuffer, "Framebuffer");
     Constraints.constrainNotNull(scene, "Scene");
-    Constraints.constrainArbitrary(
-      this.rendererIsClosed() == false,
-      "Renderer not closed");
 
     final KSceneBatchedForward batched =
       KSceneBatchedForward.newBatchedScene(this.decider, this.decider, scene);
@@ -1282,9 +1264,6 @@ import com.io7m.renderer.types.RTransformViewType;
     throws ConstraintError
   {
     Constraints.constrainNotNull(rgba, "Colour");
-    Constraints.constrainArbitrary(
-      this.rendererIsClosed() == false,
-      "Renderer not closed");
 
     VectorM4F.copy(rgba, this.background);
   }
@@ -1292,11 +1271,6 @@ import com.io7m.renderer.types.RTransformViewType;
   @Override public String rendererGetName()
   {
     return KRendererForward.NAME;
-  }
-
-  @Override public boolean rendererIsClosed()
-  {
-    return this.closed;
   }
 
   private void renderOpaques(

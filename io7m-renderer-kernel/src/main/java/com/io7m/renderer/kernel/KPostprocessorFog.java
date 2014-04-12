@@ -38,7 +38,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnit;
-import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
@@ -71,7 +70,6 @@ final class KPostprocessorFog implements
       log);
   }
 
-  private boolean                                  closed;
   private final @Nonnull KRegionCopierType         copier;
   private final @Nonnull VectorM3F                 fog_colour;
   private final @Nonnull JCGLImplementation        gi;
@@ -187,20 +185,6 @@ final class KPostprocessorFog implements
     }
   }
 
-  @Override public void postprocessorClose()
-    throws RException,
-      ConstraintError
-  {
-    Constraints.constrainArbitrary(
-      this.postprocessorIsClosed() == false,
-      "Postprocessor not closed");
-
-    this.closed = true;
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
-  }
-
   @Override public
     <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
     void
@@ -241,10 +225,5 @@ final class KPostprocessorFog implements
   @Override public String postprocessorGetName()
   {
     return KPostprocessorFog.NAME;
-  }
-
-  @Override public boolean postprocessorIsClosed()
-  {
-    return this.closed;
   }
 }

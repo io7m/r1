@@ -252,7 +252,6 @@ import com.io7m.renderer.types.RTransformTextureType;
   }
 
   private boolean                                            blit;
-  private boolean                                            closed;
   private final @Nonnull JCGLImplementation                  g;
   private final @Nonnull Log                                 log;
   private final @Nonnull RMatrixM3x3F<RTransformTextureType> matrix_uv;
@@ -288,21 +287,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     }
   }
 
-  @Override public void copierClose()
-    throws RException,
-      ConstraintError
-  {
-    Constraints.constrainArbitrary(
-      this.copierIsClosed() == false,
-      "Copier not closed");
-
-    this.closed = true;
-
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
-  }
-
   @Override public void copierCopyDepthVarianceOnly(
     final @Nonnull KFramebufferDepthVarianceUsableType source,
     final @Nonnull AreaInclusive source_area,
@@ -316,9 +300,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     Constraints.constrainNotNull(target, "Target");
     Constraints.constrainNotNull(target_area, "Target area");
     Constraints.constrainArbitrary(source != target, "Source != Target");
-    Constraints.constrainArbitrary(
-      this.copierIsClosed() == false,
-      "Copier not closed");
 
     try {
       this.g
@@ -413,9 +394,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     Constraints.constrainNotNull(target, "Target");
     Constraints.constrainNotNull(target_area, "Target area");
     Constraints.constrainArbitrary(source != target, "Source != Target");
-    Constraints.constrainArbitrary(
-      this.copierIsClosed() == false,
-      "Copier not closed");
 
     try {
       this.g
@@ -513,9 +491,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     Constraints.constrainNotNull(target, "Target");
     Constraints.constrainNotNull(target_area, "Target area");
     Constraints.constrainArbitrary(source != target, "Source != Target");
-    Constraints.constrainArbitrary(
-      this.copierIsClosed() == false,
-      "Copier not closed");
 
     try {
       this.g
@@ -588,11 +563,6 @@ import com.io7m.renderer.types.RTransformTextureType;
   @Override public boolean copierIsBlittingEnabled()
   {
     return this.blit;
-  }
-
-  @Override public boolean copierIsClosed()
-  {
-    return this.closed;
   }
 
   @Override public void copierSetBlittingEnabled(
@@ -1037,7 +1007,9 @@ import com.io7m.renderer.types.RTransformTextureType;
     try {
       KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
       KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
-      KShadingProgramCommon.putMatrixUVUnchecked(p, KRegionCopier.this.matrix_uv);
+      KShadingProgramCommon.putMatrixUVUnchecked(
+        p,
+        KRegionCopier.this.matrix_uv);
 
       p.programExecute(new JCBProgramProcedure() {
         @Override public void call()

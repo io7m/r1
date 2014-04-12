@@ -38,10 +38,9 @@ public interface KRendererForwardType extends KRendererType
    * @param scene
    *          The scene
    * @throws ConstraintError
-   *           If any parameter is <code>null</code> or the renderer is closed
+   *           If any parameter is <code>null</code>
    * @throws RException
    *           If an error occurs
-   * @see #rendererIsClosed()
    */
 
   void rendererForwardEvaluate(
@@ -57,8 +56,7 @@ public interface KRendererForwardType extends KRendererType
    * @param rgba
    *          The background colour
    * @throws ConstraintError
-   *           If any parameter is <code>null</code> or the renderer is closed
-   * @see #rendererIsClosed()
+   *           If any parameter is <code>null</code>
    */
 
   void rendererForwardSetBackgroundRGBA(
