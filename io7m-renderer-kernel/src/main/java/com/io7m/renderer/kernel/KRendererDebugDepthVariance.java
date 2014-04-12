@@ -227,7 +227,7 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
       case DEPTH_MAPPED:
       {
         KRendererDebugDepthVariance.putMaterialOpaque(p, material);
-        KShadingProgramCommon.putMatrixUV(p, mi.getMatrixUV());
+        KShadingProgramCommon.putMatrixUVUnchecked(p, mi.getMatrixUV());
         KShadingProgramCommon.bindPutTextureAlbedo(
           p,
           gc,

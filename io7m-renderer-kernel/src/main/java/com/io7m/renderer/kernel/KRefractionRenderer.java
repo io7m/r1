@@ -393,7 +393,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
       mwi.getMatrixModelView());
 
     if (label.labelImpliesUV()) {
-      KShadingProgramCommon.putMatrixUV(program, mwi.getMatrixUV());
+      KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
     }
 
     switch (label.labelGetNormal()) {

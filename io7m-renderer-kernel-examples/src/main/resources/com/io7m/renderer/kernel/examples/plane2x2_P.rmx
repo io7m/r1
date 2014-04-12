@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<m:mesh m:version="1" m:name="plane2x2_P" xmlns:m="http://schemas.io7m.com/renderer/1.0.0/meshes">
+  <m:type>
+    <m:attribute-position-3f/>
+  </m:type>
+  <m:vertices m:count="6">
+    <m:v>
+      <m:p m:x="-2.00000000" m:y="-0.00000000" m:z="2.00000000"/>
+    </m:v>
+    <m:v>
+      <m:p m:x="2.00000000" m:y="-0.00000000" m:z="2.00000000"/>
+    </m:v>
+    <m:v>
+      <m:p m:x="-2.00000000" m:y="0.00000000" m:z="-2.00000000"/>
+    </m:v>
+    <m:v>
+      <m:p m:x="2.00000000" m:y="-0.00000000" m:z="2.00000000"/>
+    </m:v>
+    <m:v>
+      <m:p m:x="2.00000000" m:y="0.00000000" m:z="-2.00000000"/>
+    </m:v>
+    <m:v>
+      <m:p m:x="-2.00000000" m:y="0.00000000" m:z="-2.00000000"/>
+    </m:v>
+  </m:vertices>
+  <m:triangles m:count="2">
+    <m:tri m:v0="0" m:v1="1" m:v2="2"/>
+    <m:tri m:v0="3" m:v1="4" m:v2="5"/>
+  </m:triangles>
+</m:mesh>

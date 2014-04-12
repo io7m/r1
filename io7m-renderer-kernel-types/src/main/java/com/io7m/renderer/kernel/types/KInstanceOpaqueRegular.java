@@ -42,8 +42,6 @@ import com.io7m.renderer.types.RException;
   /**
    * Create a new instance with an opaque material.
    * 
-   * @param in_id
-   *          The identifier of the instance
    * @param in_material
    *          The material
    * @param in_mesh
@@ -56,28 +54,24 @@ import com.io7m.renderer.types.RException;
    */
 
   public static @Nonnull KInstanceOpaqueRegular newInstance(
-    final @Nonnull Integer in_id,
     final @Nonnull KMaterialOpaqueRegular in_material,
-    final @Nonnull KMesh in_mesh,
+    final @Nonnull KMeshReadableType in_mesh,
     final @Nonnull KFaceSelection in_faces)
     throws ConstraintError
   {
-    return new KInstanceOpaqueRegular(in_id, in_material, in_mesh, in_faces);
+    return new KInstanceOpaqueRegular(in_material, in_mesh, in_faces);
   }
 
   private final @Nonnull KFaceSelection         faces;
-  private final @Nonnull Integer                id;
   private final @Nonnull KMaterialOpaqueRegular material;
-  private final @Nonnull KMeshReadableType                  mesh;
+  private final @Nonnull KMeshReadableType      mesh;
 
   private KInstanceOpaqueRegular(
-    final @Nonnull Integer in_id,
     final @Nonnull KMaterialOpaqueRegular in_material,
-    final @Nonnull KMesh in_mesh,
+    final @Nonnull KMeshReadableType in_mesh,
     final @Nonnull KFaceSelection in_faces)
     throws ConstraintError
   {
-    this.id = Constraints.constrainNotNull(in_id, "ID");
     this.mesh = Constraints.constrainNotNull(in_mesh, "Mesh");
     this.material = Constraints.constrainNotNull(in_material, "Material");
     this.faces = Constraints.constrainNotNull(in_faces, "Faces");
@@ -96,8 +90,7 @@ import com.io7m.renderer.types.RException;
       return false;
     }
     final KInstanceOpaqueRegular other = (KInstanceOpaqueRegular) obj;
-    return this.id.equals(other.id)
-      && this.material.equals(other.material)
+    return this.material.equals(other.material)
       && this.mesh.equals(other.mesh);
   }
 
@@ -105,7 +98,6 @@ import com.io7m.renderer.types.RException;
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.id.hashCode();
     result = (prime * result) + this.material.hashCode();
     result = (prime * result) + this.mesh.hashCode();
     return result;
@@ -114,11 +106,6 @@ import com.io7m.renderer.types.RException;
   @Override public KFaceSelection instanceGetFaces()
   {
     return this.faces;
-  }
-
-  @Override public @Nonnull Integer instanceGetID()
-  {
-    return this.id;
   }
 
   @Override public KMaterialOpaqueRegular instanceGetMaterial()

@@ -60,7 +60,7 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_uv_matrix);
   }
 
-  private final @Nonnull KInstanceOpaqueAlphaDepth       instance;
+  private final @Nonnull KInstanceOpaqueAlphaDepth           instance;
   private final @Nonnull KTransformType                      transform;
   private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
@@ -111,11 +111,6 @@ import com.io7m.renderer.types.RTransformTextureType;
   @Override public @Nonnull KInstanceOpaqueAlphaDepth instanceGet()
   {
     return this.instance;
-  }
-
-  @Override public @Nonnull Integer instanceGetID()
-  {
-    return this.instance.instanceGetID();
   }
 
   @Override public @Nonnull KMeshReadableType instanceGetMesh()

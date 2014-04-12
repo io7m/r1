@@ -68,12 +68,9 @@ import com.io7m.jcanephora.Texture2DStaticUsable;
    * material.
    * 
    * @return New normal mapping properties
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>.
    */
 
   public static @Nonnull KMaterialNormal newNormalUnmapped()
-    throws ConstraintError
   {
     return KMaterialNormal.EMPTY;
   }

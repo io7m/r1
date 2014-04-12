@@ -63,11 +63,11 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_uv_matrix);
   }
 
-  private final @Nonnull KInstanceTranslucentRefractive  instance;
+  private final @Nonnull KInstanceTranslucentRefractive      instance;
   private final @Nonnull KTransformType                      transform;
   private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
-  KInstanceTransformedTranslucentRefractive(
+  private KInstanceTransformedTranslucentRefractive(
     final @Nonnull KInstanceTranslucentRefractive in_instance,
     final @Nonnull KTransformType in_transform,
     final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
@@ -114,11 +114,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     result = (prime * result) + this.transform.hashCode();
     result = (prime * result) + this.uv_matrix.hashCode();
     return result;
-  }
-
-  @Override public Integer instanceGetID()
-  {
-    return this.instance.instanceGetID();
   }
 
   @Override public KMesh instanceGetMesh()
