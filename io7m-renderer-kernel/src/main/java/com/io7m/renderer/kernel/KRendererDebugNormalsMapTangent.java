@@ -41,7 +41,6 @@ import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureUnit;
-import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
@@ -159,7 +158,6 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private boolean                             closed;
   private final @Nonnull JCGLImplementation   gl;
   private final @Nonnull Log                  log;
   private final @Nonnull KMutableMatricesType matrices;
@@ -182,20 +180,6 @@ import com.io7m.renderer.types.RException;
 
     this.matrices = KMutableMatricesType.newMatrices();
     this.transform_context = KTransformContext.newContext();
-  }
-
-  @Override public void rendererClose()
-    throws ConstraintError,
-      RException
-  {
-    Constraints.constrainArbitrary(
-      this.closed == false,
-      "Renderer is not closed");
-    this.closed = true;
-
-    if (this.log.enabled(Level.LOG_DEBUG)) {
-      this.log.debug("closed");
-    }
   }
 
   @Override public void rendererDebugEvaluate(
@@ -236,11 +220,6 @@ import com.io7m.renderer.types.RException;
   @Override public String rendererGetName()
   {
     return KRendererDebugNormalsMapTangent.NAME;
-  }
-
-  @Override public boolean rendererIsClosed()
-  {
-    return this.closed;
   }
 
   private void renderWithObserver(

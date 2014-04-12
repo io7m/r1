@@ -11,8 +11,4 @@ public interface SBKRendererType
     final @Nonnull SBKRendererVisitor v)
     throws RException,
       ConstraintError;
-
-  void close()
-    throws RException,
-      ConstraintError;
 }

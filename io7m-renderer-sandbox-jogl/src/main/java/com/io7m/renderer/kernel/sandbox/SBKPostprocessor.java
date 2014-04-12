@@ -41,6 +41,4 @@ public interface SBKPostprocessor
     final @Nonnull KFramebufferRGBAUsableType output)
     throws RException,
       ConstraintError;
-
-  void postprocessorClose();
 }

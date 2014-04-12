@@ -1795,10 +1795,6 @@ final class SBGLRenderer implements GLEventListener
 
       this.renderer = this.initKernelRenderer(rn);
       this.running.set(RunningState.STATE_RUNNING);
-
-      if (old != null) {
-        old.close();
-      }
     }
 
     final SBKPostprocessor rp = this.postprocessor_new.getAndSet(null);
@@ -1811,10 +1807,6 @@ final class SBGLRenderer implements GLEventListener
         this.shader_cache,
         this.log);
       this.postprocessor = rp;
-
-      if (old != null) {
-        old.postprocessorClose();
-      }
     }
   }
 

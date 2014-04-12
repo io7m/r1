@@ -18,9 +18,6 @@ package com.io7m.renderer.kernel;
 
 import javax.annotation.Nonnull;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.types.RException;
-
 /**
  * The type of renderers.
  */
@@ -28,30 +25,8 @@ import com.io7m.renderer.types.RException;
 public interface KRendererType
 {
   /**
-   * Close the renderer, freeing any resources that may have been allocated.
-   * 
-   * @throws RException
-   *           If an error occurs
-   * @throws ConstraintError
-   *           If the renderer is already closed
-   * 
-   * @see #rendererIsClosed()
-   */
-
-  void rendererClose()
-    throws RException,
-      ConstraintError;
-
-  /**
    * @return The name of the renderer
    */
 
   @Nonnull String rendererGetName();
-
-  /**
-   * @return <code>true</code> if the renderer has been closed.
-   * @see #rendererClose()
-   */
-
-  boolean rendererIsClosed();
 }

@@ -281,22 +281,6 @@ public final class SBKPostprocessorCopy
       this.data = in_data;
     }
 
-    @Override public void postprocessorClose()
-    {
-      try {
-        if (this.proc != null) {
-          this.proc.postprocessorClose();
-          this.proc = null;
-        }
-      } catch (final ConstraintError x) {
-        // TODO Auto-generated catch block
-        x.printStackTrace();
-      } catch (final RException x) {
-        // TODO Auto-generated catch block
-        x.printStackTrace();
-      }
-    }
-
     @Override public void postprocessorInitialize(
       final JCGLImplementation gi,
       final KFramebufferRGBACacheType rgba_cache,
@@ -306,11 +290,6 @@ public final class SBKPostprocessorCopy
         ConstraintError
     {
       try {
-        if (this.proc != null) {
-          this.proc.postprocessorClose();
-          this.proc = null;
-        }
-
         this.quad = KUnitQuad.newQuad(gi.getGLCommon(), log);
 
         this.copier =

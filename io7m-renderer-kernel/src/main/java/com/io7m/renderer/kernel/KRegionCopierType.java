@@ -29,20 +29,6 @@ import com.io7m.renderer.types.RException;
 public interface KRegionCopierType
 {
   /**
-   * Close the copier, releasing any resources the copier has allocated.
-   * 
-   * @throws RException
-   *           If an error occurs
-   * @throws ConstraintError
-   *           If the copier is already closed
-   * @see #copierIsClosed()
-   */
-
-  void copierClose()
-    throws RException,
-      ConstraintError;
-
-  /**
    * <p>
    * Copy the given <code>source_area</code> from the colour buffer of
    * <code>source</code> to the given <code>target_area</code> of the colour
@@ -67,10 +53,9 @@ public interface KRegionCopierType
    *          The target area
    * @throws ConstraintError
    *           If any parameter is <code>null</code>, or if
-   *           <code>source == target</code>, or the copier is closed
+   *           <code>source == target</code>
    * @throws RException
    *           If an error occurs
-   * @see #copierIsClosed()
    */
 
   void copierCopyDepthVarianceOnly(
@@ -102,10 +87,9 @@ public interface KRegionCopierType
    *          The target area
    * @throws ConstraintError
    *           If any parameter is <code>null</code>, or if
-   *           <code>source == target</code>, or the copier is closed
+   *           <code>source == target</code>
    * @throws RException
    *           If an error occurs
-   * @see #copierIsClosed()
    */
 
   void copierCopyRGBAOnly(
@@ -139,10 +123,9 @@ public interface KRegionCopierType
    *          The target area
    * @throws ConstraintError
    *           If any parameter is <code>null</code>, or if
-   *           <code>source == target</code>, or the copier is closed
+   *           <code>source == target</code>
    * @throws RException
    *           If an error occurs
-   * @see #copierIsClosed()
    */
 
     <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
@@ -162,13 +145,6 @@ public interface KRegionCopierType
   boolean copierIsBlittingEnabled();
 
   /**
-   * @return <code>true</code> if the copier is closed
-   * @see #copierClose()
-   */
-
-  boolean copierIsClosed();
-
-  /**
    * <p>
    * Enable or disable blitting.
    * </p>
@@ -184,7 +160,9 @@ public interface KRegionCopierType
    * turn off blitting via the {@link KRegionCopierType} is really only
    * provided to make testing of implementations somewhat easier.
    * </p>
-   * @param b <code>true</code> if blitting should be enabled
+   * 
+   * @param b
+   *          <code>true</code> if blitting should be enabled
    */
 
   void copierSetBlittingEnabled(
