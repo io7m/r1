@@ -184,7 +184,7 @@ import com.io7m.renderer.types.RTransformViewType;
             case DEPTH_VARIANCE_MAPPED:
             {
               KDepthVarianceRenderer.putMaterialOpaque(jp, material);
-              KShadingProgramCommon.putMatrixUV(jp, mwi.getMatrixUV());
+              KShadingProgramCommon.putMatrixUVUnchecked(jp, mwi.getMatrixUV());
               KShadingProgramCommon.bindPutTextureAlbedo(
                 jp,
                 gc,
@@ -222,7 +222,7 @@ import com.io7m.renderer.types.RTransformViewType;
             case DEPTH_VARIANCE_MAPPED:
             {
               KDepthVarianceRenderer.putMaterialOpaque(jp, material);
-              KShadingProgramCommon.putMatrixUV(jp, mwi.getMatrixUV());
+              KShadingProgramCommon.putMatrixUVUnchecked(jp, mwi.getMatrixUV());
               KShadingProgramCommon.bindPutTextureAlbedo(
                 jp,
                 gc,

@@ -73,34 +73,34 @@ import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KMaterialType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedo;
 import com.io7m.renderer.kernel.types.KMaterialAlpha;
 import com.io7m.renderer.kernel.types.KMaterialEmissive;
 import com.io7m.renderer.kernel.types.KMaterialEnvironment;
 import com.io7m.renderer.kernel.types.KMaterialNormal;
-import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialRefractive;
 import com.io7m.renderer.kernel.types.KMaterialSpecular;
-import com.io7m.renderer.kernel.types.KMaterialTranslucentType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentVisitorType;
+import com.io7m.renderer.kernel.types.KMaterialType;
 import com.io7m.renderer.kernel.types.KMaterialVisitorType;
 import com.io7m.renderer.kernel.types.KMesh;
-import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.kernel.types.KTransformOST;
+import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RTransformProjectionType;
@@ -341,10 +341,12 @@ public final class SBSceneController implements
         {
           return mt
             .materialTranslucentVisitableAccept(new SBMaterialTranslucentVisitor<KMaterialType, RException>() {
-              @Override public KMaterialType materialVisitTranslucentRefractive(
-                final @Nonnull SBMaterialTranslucentRefractive mtr)
-                throws ConstraintError,
-                  RException
+              @Override public
+                KMaterialType
+                materialVisitTranslucentRefractive(
+                  final @Nonnull SBMaterialTranslucentRefractive mtr)
+                  throws ConstraintError,
+                    RException
               {
                 final SBMaterialDescriptionTranslucentRefractive md =
                   mtr.materialGetDescription();
@@ -1275,7 +1277,9 @@ public final class SBSceneController implements
     return this.renderer.getCacheStatistics();
   }
 
-  @Override public RMatrixI4x4F<RTransformProjectionType> rendererGetProjection()
+  @Override public
+    RMatrixI4x4F<RTransformProjectionType>
+    rendererGetProjection()
   {
     return this.renderer.getProjection();
   }
@@ -1333,7 +1337,6 @@ public final class SBSceneController implements
                   {
                     final KInstanceOpaqueAlphaDepth ki =
                       KInstanceOpaqueAlphaDepth.newInstance(
-                        instance_id,
                         mo,
                         km,
                         i.getFaces());
@@ -1351,11 +1354,7 @@ public final class SBSceneController implements
                         RException
                   {
                     final KInstanceOpaqueRegular ki =
-                      KInstanceOpaqueRegular.newInstance(
-                        instance_id,
-                        mo,
-                        km,
-                        i.getFaces());
+                      KInstanceOpaqueRegular.newInstance(mo, km, i.getFaces());
                     return KInstanceTransformedOpaqueRegular.newInstance(
                       ki,
                       kt,
@@ -1364,10 +1363,12 @@ public final class SBSceneController implements
                 });
             }
 
-            @Override public KInstanceTransformedType materialVisitTranslucent(
-              final @Nonnull KMaterialTranslucentType m)
-              throws ConstraintError,
-                RException
+            @Override public
+              KInstanceTransformedType
+              materialVisitTranslucent(
+                final @Nonnull KMaterialTranslucentType m)
+                throws ConstraintError,
+                  RException
             {
               return m
                 .materialTranslucentVisitableAccept(new KMaterialTranslucentVisitorType<KInstanceTransformedType, RException>() {
@@ -1380,7 +1381,6 @@ public final class SBSceneController implements
                   {
                     final KInstanceTranslucentRefractive ki =
                       KInstanceTranslucentRefractive.newInstance(
-                        instance_id,
                         mtr,
                         km,
                         i.getFaces());
@@ -1397,7 +1397,6 @@ public final class SBSceneController implements
                   {
                     final KInstanceTranslucentRegular ki =
                       KInstanceTranslucentRegular.newInstance(
-                        instance_id,
                         mtr,
                         km,
                         i.getFaces());

@@ -166,7 +166,7 @@ import com.io7m.renderer.types.RTransformViewType;
       mwi.getMatrixModelView());
 
     if (label.labelImpliesUV()) {
-      KShadingProgramCommon.putMatrixUV(program, mwi.getMatrixUV());
+      KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
     }
 
     switch (label.labelGetNormal()) {

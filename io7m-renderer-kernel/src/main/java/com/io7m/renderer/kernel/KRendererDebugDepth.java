@@ -230,7 +230,7 @@ import com.io7m.renderer.types.RException;
             case DEPTH_MAPPED:
             {
               KRendererDebugDepth.putMaterialOpaque(p, m);
-              KShadingProgramCommon.putMatrixUV(p, mi.getMatrixUV());
+              KShadingProgramCommon.putMatrixUVUnchecked(p, mi.getMatrixUV());
               KShadingProgramCommon.bindPutTextureAlbedo(
                 p,
                 gc,
@@ -268,7 +268,7 @@ import com.io7m.renderer.types.RException;
             case DEPTH_MAPPED:
             {
               KRendererDebugDepth.putMaterialOpaque(p, m);
-              KShadingProgramCommon.putMatrixUV(p, mi.getMatrixUV());
+              KShadingProgramCommon.putMatrixUVUnchecked(p, mi.getMatrixUV());
               KShadingProgramCommon.bindPutTextureAlbedo(
                 p,
                 gc,

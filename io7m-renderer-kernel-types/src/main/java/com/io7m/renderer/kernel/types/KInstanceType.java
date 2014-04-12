@@ -61,12 +61,6 @@ public interface KInstanceType
         JCGLException;
 
   /**
-   * @return The unique identifier of the instance
-   */
-
-  @Nonnull Integer instanceGetID();
-
-  /**
    * @return The mesh used by the current instance
    */
 

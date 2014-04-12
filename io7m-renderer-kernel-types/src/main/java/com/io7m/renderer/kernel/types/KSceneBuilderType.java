@@ -94,7 +94,8 @@ public interface KSceneBuilderType
    *           <li>The material used for <code>instance</code> is translucent</li>
    *           </ul>
    * 
-   * @see #sceneAddInvisibleWithShadow(KLightType, KInstanceTransformedOpaqueType)
+   * @see #sceneAddInvisibleWithShadow(KLightType,
+   *      KInstanceTransformedOpaqueType)
    */
 
   void sceneAddOpaqueLitVisibleWithoutShadow(
@@ -129,7 +130,8 @@ public interface KSceneBuilderType
    *           <li>The material used for <code>instance</code> is translucent</li>
    *           </ul>
    * 
-   * @see #sceneAddInvisibleWithShadow(KLightType, KInstanceTransformedOpaqueType)
+   * @see #sceneAddInvisibleWithShadow(KLightType,
+   *      KInstanceTransformedOpaqueType)
    */
 
   void sceneAddOpaqueLitVisibleWithShadow(
@@ -170,7 +172,8 @@ public interface KSceneBuilderType
    * not cast a shadow, even if any <code>lights</code> are configured to
    * produce them. To make the instance cast shadows for a particular light,
    * it must also be added to the scene with
-   * {@link #sceneAddInvisibleWithShadow(KLightType, KInstanceTransformedOpaqueType)}.
+   * {@link #sceneAddInvisibleWithShadow(KLightType, KInstanceTransformedOpaqueType)}
+   * .
    * </p>
    * <p>
    * Translucent instances are rendered in the order that they are added to
@@ -194,7 +197,8 @@ public interface KSceneBuilderType
    *           <li><code>lights == null || instance == null</code></li>
    *           </ul>
    * 
-   * @see #sceneAddInvisibleWithShadow(KLightType, KInstanceTransformedOpaqueType)
+   * @see #sceneAddInvisibleWithShadow(KLightType,
+   *      KInstanceTransformedOpaqueType)
    */
 
   void sceneAddTranslucentLit(
@@ -220,12 +224,4 @@ public interface KSceneBuilderType
   void sceneAddTranslucentUnlit(
     final @Nonnull KInstanceTransformedTranslucentType instance)
     throws ConstraintError;
-
-  /**
-   * Construct a {@link KScene} from the currently added instances and lights.
-   * 
-   * @return A newly constructed scene
-   */
-
-  @Nonnull KScene sceneCreate();
 }

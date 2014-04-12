@@ -1337,7 +1337,31 @@ public final class KShadingProgramCommon
       .programUniformUseExisting(KShadingProgramCommon.MATRIX_NAME_PROJECTIVE_PROJECTION);
   }
 
-  static void putMatrixUV(
+  /**
+   * Assign the given UV matrix to the program's UV matrix parameter.
+   * 
+   * @param program
+   *          The program
+   * @param m
+   *          The matrix
+   * @throws JCGLException
+   *           If an OpenGL error occurs
+   * @throws ConstraintError
+   *           If any parameter is <code>null</code>
+   */
+
+  public static void putMatrixUV(
+    final @Nonnull JCBProgram program,
+    final @Nonnull RMatrixReadable3x3FType<RTransformTextureType> m)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMatrixUVUnchecked(
+      Constraints.constrainNotNull(program, "Program"),
+      Constraints.constrainNotNull(m, "Matrix"));
+  }
+
+  static void putMatrixUVUnchecked(
     final @Nonnull JCBProgram program,
     final @Nonnull RMatrixReadable3x3FType<RTransformTextureType> m)
     throws JCGLException,

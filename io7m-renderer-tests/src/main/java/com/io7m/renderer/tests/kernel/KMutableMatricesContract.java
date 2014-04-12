@@ -278,7 +278,6 @@ public abstract class KMutableMatricesContract extends TestContract
 
       final KInstanceOpaqueRegular kmi =
         KInstanceOpaqueRegular.newInstance(
-          Integer.valueOf(23),
           material,
           mesh,
           KFaceSelection.FACE_RENDER_FRONT);

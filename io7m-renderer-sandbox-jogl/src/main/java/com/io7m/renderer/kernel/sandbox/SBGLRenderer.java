@@ -193,7 +193,7 @@ import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
-import com.io7m.renderer.kernel.types.KSceneBuilderType;
+import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
@@ -287,6 +287,7 @@ final class SBGLRenderer implements GLEventListener
             try {
               final Document document =
                 RXMLMeshDocument.parseFromStreamValidating(stream);
+
               final RXMLMeshParserVBO<JCGLInterfaceCommon> p =
                 RXMLMeshParserVBO.parseFromDocument(
                   document,
@@ -2466,7 +2467,7 @@ final class SBGLRenderer implements GLEventListener
 
       this.scene_lights = scene_things.first;
 
-      final KSceneBuilderType builder = KScene.newBuilder(kcamera);
+      final KSceneBuilderWithCreateType builder = KScene.newBuilder(kcamera);
 
       /**
        * For each light, add instances. The adding of translucent objects is

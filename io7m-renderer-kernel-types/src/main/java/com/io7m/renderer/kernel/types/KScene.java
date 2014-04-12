@@ -67,9 +67,10 @@ import com.io7m.renderer.types.RException;
 
 @Immutable public final class KScene
 {
-  private static final class Builder implements KSceneBuilderType
+  private static final class Builder implements KSceneBuilderWithCreateType
   {
     private static final @Nonnull KInstanceTransformedVisitorType<KTranslucentType, ConstraintError> IDENTITY_TRANSLUCENT;
+
     static {
       IDENTITY_TRANSLUCENT =
         new KInstanceTransformedVisitorType<KTranslucentType, ConstraintError>() {
@@ -120,17 +121,17 @@ import com.io7m.renderer.types.RException;
         };
     }
 
-    private final @Nonnull KCamera                                                           camera;
-    private @Nonnull MapPSet<KLightType>                                                         lights_all;
-    private @Nonnull MapPSet<KInstanceTransformedType>                                           lit;
+    private final @Nonnull KCamera                                                                   camera;
+    private @Nonnull MapPSet<KLightType>                                                             lights_all;
+    private @Nonnull MapPSet<KInstanceTransformedType>                                               lit;
     private @Nonnull HashPMap<KLightType, List<KInstanceTransformedOpaqueType>>                      lit_opaque;
     private @Nonnull HashPMap<KLightType, List<KInstanceTransformedOpaqueType>>                      shadow_casters;
-    private @Nonnull MapPSet<KLightType>                                                         shadow_lights;
-    private @Nonnull MapPSet<KInstanceTransformedType>                                           unlit;
-    private @Nonnull MapPSet<KInstanceTransformedOpaqueType>                                     unlit_opaque;
-    private @Nonnull MapPSet<KInstanceTransformedType>                                           visible_instances;
-    private @Nonnull MapPSet<KInstanceTransformedOpaqueType>                                     visible_opaque;
-    private @Nonnull PVector<KTranslucentType>                                                   visible_translucent_ordered;
+    private @Nonnull MapPSet<KLightType>                                                             shadow_lights;
+    private @Nonnull MapPSet<KInstanceTransformedType>                                               unlit;
+    private @Nonnull MapPSet<KInstanceTransformedOpaqueType>                                         unlit_opaque;
+    private @Nonnull MapPSet<KInstanceTransformedType>                                               visible_instances;
+    private @Nonnull MapPSet<KInstanceTransformedOpaqueType>                                         visible_opaque;
+    private @Nonnull PVector<KTranslucentType>                                                       visible_translucent_ordered;
 
     protected Builder(
       final @Nonnull KCamera in_camera)
@@ -165,7 +166,8 @@ import com.io7m.renderer.types.RException;
       final PVector<KInstanceTransformedOpaqueType> instances;
       if (this.lit_opaque.containsKey(light)) {
         instances =
-          (PVector<KInstanceTransformedOpaqueType>) this.lit_opaque.get(light);
+          (PVector<KInstanceTransformedOpaqueType>) this.lit_opaque
+            .get(light);
       } else {
         instances = TreePVector.empty();
       }
@@ -321,9 +323,9 @@ import com.io7m.renderer.types.RException;
 
   @Immutable public static final class KSceneOpaques
   {
-    private final @Nonnull Set<KInstanceTransformedOpaqueType>               all;
+    private final @Nonnull Set<KInstanceTransformedOpaqueType>                   all;
     private final @Nonnull Map<KLightType, List<KInstanceTransformedOpaqueType>> lit;
-    private final @Nonnull Set<KInstanceTransformedOpaqueType>               unlit;
+    private final @Nonnull Set<KInstanceTransformedOpaqueType>                   unlit;
 
     private KSceneOpaques(
       final @Nonnull Map<KLightType, List<KInstanceTransformedOpaqueType>> in_lit,
@@ -393,8 +395,8 @@ import com.io7m.renderer.types.RException;
   }
 
   /**
-   * Retrieve a new {@link KSceneBuilderType} with which to construct a scene,
-   * rendered from the perspective of <code>camera</code>.
+   * Retrieve a new {@link KSceneBuilderWithCreateType} with which to
+   * construct a scene, rendered from the perspective of <code>camera</code>.
    * 
    * @param camera
    *          The observer of the scene
@@ -403,16 +405,16 @@ import com.io7m.renderer.types.RException;
    *           Iff <code>camera == null</code>.
    */
 
-  public static @Nonnull KSceneBuilderType newBuilder(
+  public static @Nonnull KSceneBuilderWithCreateType newBuilder(
     final @Nonnull KCamera camera)
     throws ConstraintError
   {
     return new Builder(camera);
   }
 
-  private final @Nonnull KCamera                   camera;
-  private final @Nonnull KSceneOpaques             opaques;
-  private final @Nonnull KSceneShadows             shadows;
+  private final @Nonnull KCamera                       camera;
+  private final @Nonnull KSceneOpaques                 opaques;
+  private final @Nonnull KSceneShadows                 shadows;
   private final @Nonnull List<KTranslucentType>        translucents;
   private final @Nonnull Set<KInstanceTransformedType> visible;
 
