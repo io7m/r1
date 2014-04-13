@@ -80,11 +80,15 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLImplementationJOGL;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLRuntimeException;
-import com.io7m.jcanephora.JCGLUnsupportedException;
 import com.io7m.jcanephora.Primitives;
+import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jcanephora.TextureLoaderImageIO;
 import com.io7m.jcanephora.TextureUnit;
+import com.io7m.jcanephora.TextureWrapS;
+import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jlog.Log;
 import com.io7m.jvvfs.FSCapabilityRead;
@@ -332,23 +336,25 @@ final class VExample implements Callable<Unit>
       }
     }
 
-    private final @Nonnull ViewerConfig                   config;
-    private final @Nonnull AtomicInteger                  current_view_index;
-    private final ExampleSceneType                        example;
-    private final @Nonnull FSCapabilityRead               filesystem;
-    private KFramebufferType                              framebuffer;
-    private JCGLImplementationJOGL                        gi;
-    private final @Nonnull Log                            glog;
-    private final @Nonnull Map<String, KMesh>             meshes;
-    private KUnitQuad                                     quad;
-    private ExampleRendererType                           renderer;
-    private final @Nonnull ExampleRendererConstructorType renderer_cons;
-    private final @Nonnull VExpectedImage                 results_panel;
-    private boolean                                       running;
-    private KShaderCacheType                              shader_cache;
-    private LRUCacheConfig                                shader_cache_config;
-    private final @Nonnull AtomicBoolean                  want_save;
-    private final @Nonnull JLabel                         renderer_label;
+    private final @Nonnull ViewerConfig                       config;
+    private final @Nonnull AtomicInteger                      current_view_index;
+    private final ExampleSceneType                            example;
+    private final @Nonnull FSCapabilityRead                   filesystem;
+    private KFramebufferType                                  framebuffer;
+    private JCGLImplementationJOGL                            gi;
+    private final @Nonnull Log                                glog;
+    private final @Nonnull Map<String, KMesh>                 meshes;
+    private final @Nonnull Map<String, Texture2DStaticUsable> textures;
+    private KUnitQuad                                         quad;
+    private ExampleRendererType                               renderer;
+    private final @Nonnull ExampleRendererConstructorType     renderer_cons;
+    private final @Nonnull VExpectedImage                     results_panel;
+    private boolean                                           running;
+    private KShaderCacheType                                  shader_cache;
+    private LRUCacheConfig                                    shader_cache_config;
+    private final @Nonnull AtomicBoolean                      want_save;
+    private final @Nonnull JLabel                             renderer_label;
+    private TextureLoaderImageIO                              texture_loader;
 
     public VExampleWindowGL(
       final @Nonnull Log in_log,
@@ -363,6 +369,7 @@ final class VExample implements Callable<Unit>
     {
       this.glog = new Log(in_log, "gl");
       this.meshes = new HashMap<String, KMesh>();
+      this.textures = new HashMap<String, Texture2DStaticUsable>();
       this.filesystem = in_filesystem;
       this.renderer_cons = in_renderer_cons;
       this.example = in_example;
@@ -449,6 +456,21 @@ final class VExample implements Callable<Unit>
           {
             scene_builder.sceneAddTranslucentUnlit(instance);
           }
+
+          @Override public Texture2DStaticUsable texture(
+            final @Nonnull String name)
+            throws RException
+          {
+            try {
+              return VExampleWindowGL.this.loadTexture(name);
+            } catch (final IOException e) {
+              throw RException.fromIOException(e);
+            } catch (final JCGLException e) {
+              throw RException.fromJCGLException(e);
+            } catch (final ConstraintError e) {
+              throw new UnreachableCodeException(e);
+            }
+          }
         });
 
         final JCGLInterfaceCommon gc = this.gi.getGLCommon();
@@ -484,12 +506,46 @@ final class VExample implements Callable<Unit>
           }
         });
 
-      } catch (final JCGLException e) {
+      } catch (final Throwable e) {
         this.failed(e);
-      } catch (final ConstraintError e) {
-        this.failed(e);
-      } catch (final RException e) {
-        this.failed(e);
+      }
+    }
+
+    private @Nonnull Texture2DStaticUsable loadTexture(
+      final @Nonnull String name)
+      throws IOException,
+        JCGLException,
+        ConstraintError
+    {
+      if (this.textures.containsKey(name)) {
+        return this.textures.get(name);
+      }
+
+      final StringBuilder message = new StringBuilder();
+      message.setLength(0);
+      message.append("Loading texture from ");
+      message.append(name);
+      this.glog.debug(message.toString());
+
+      final InputStream stream =
+        VExample.class.getResourceAsStream(String.format(
+          "/com/io7m/renderer/kernel/examples/%s",
+          name));
+
+      try {
+        final Texture2DStatic t =
+          this.texture_loader.load2DStaticInferred(
+            this.gi,
+            TextureWrapS.TEXTURE_WRAP_REPEAT,
+            TextureWrapT.TEXTURE_WRAP_REPEAT,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+            stream,
+            name);
+        this.textures.put(name, t);
+        return t;
+      } finally {
+        stream.close();
       }
     }
 
@@ -519,6 +575,10 @@ final class VExample implements Callable<Unit>
           JCGLImplementationJOGL.newImplementation(
             drawable.getContext(),
             this.glog);
+
+        this.texture_loader =
+          TextureLoaderImageIO
+            .newTextureLoaderWithAlphaPremultiplication(this.glog);
 
         this.shader_cache_config =
           LRUCacheConfig
@@ -591,15 +651,7 @@ final class VExample implements Callable<Unit>
 
         gc.colorBufferClear4f(0.0f, 0.0f, 1.0f, 1.0f);
 
-      } catch (final JCGLRuntimeException e) {
-        this.failed(e);
-      } catch (final JCGLUnsupportedException e) {
-        this.failed(e);
-      } catch (final ConstraintError e) {
-        this.failed(e);
-      } catch (final JCGLException e) {
-        this.failed(e);
-      } catch (final RException e) {
+      } catch (final Throwable e) {
         this.failed(e);
       }
     }

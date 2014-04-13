@@ -17,8 +17,8 @@
 package com.io7m.renderer.kernel.examples;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
 
@@ -33,16 +33,16 @@ public final class ExampleRenderers
    */
 
   public static @Nonnull
-    Map<String, ExampleRendererConstructorType>
+    SortedMap<String, ExampleRendererConstructorType>
     getRenderers()
   {
-    final Map<String, ExampleRendererConstructorType> r =
-      new HashMap<String, ExampleRendererConstructorType>();
+    final SortedMap<String, ExampleRendererConstructorType> r =
+      new TreeMap<String, ExampleRendererConstructorType>();
     r.put(
       ExampleRendererForwardDefault.class.getCanonicalName(),
       ExampleRendererForwardDefault.get());
 
-    return Collections.unmodifiableMap(r);
+    return Collections.unmodifiableSortedMap(r);
   }
 
   private ExampleRenderers()

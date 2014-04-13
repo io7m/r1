@@ -29,6 +29,8 @@ import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.types.RException;
@@ -36,16 +38,17 @@ import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
 
 /**
- * An empty example.
+ * A demonstration that normal mapping does not work without tangents and UV
+ * coordinates.
  */
 
-public final class SLEmpty1 implements ExampleSceneType
+public final class SLNormalNoMapping implements ExampleSceneType
 {
   /**
    * Construct the example.
    */
 
-  public SLEmpty1()
+  public SLNormalNoMapping()
   {
 
   }
@@ -58,19 +61,29 @@ public final class SLEmpty1 implements ExampleSceneType
     final KTransformType left =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
-        ExampleSceneUtilities.IDENTITY_SCALE,
-        new RVectorI3F<RSpaceWorldType>(-5.0f, 0.0f, 0.0f));
+        ExampleSceneUtilities.HALF_SCALE_XZ,
+        new RVectorI3F<RSpaceWorldType>(-2.5f, 0.0f, 0.0f));
+
+    final KTransformType center =
+      KTransformOST.newTransform(
+        QuaternionI4F.IDENTITY,
+        ExampleSceneUtilities.HALF_SCALE_XZ,
+        new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
 
     final KTransformType right =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
-        ExampleSceneUtilities.IDENTITY_SCALE,
-        new RVectorI3F<RSpaceWorldType>(5.0f, 0.0f, 0.0f));
+        ExampleSceneUtilities.HALF_SCALE_XZ,
+        new RVectorI3F<RSpaceWorldType>(2.5f, 0.0f, 0.0f));
+
+    final KMaterialOpaqueRegular material =
+      ExampleSceneUtilities.OPAQUE_MATTE_WHITE.withNormal(KMaterialNormal
+        .newNormalMapped(scene.texture("tiles_normal.png")));
 
     final KInstanceTransformedOpaqueRegular i0 =
       KInstanceTransformedOpaqueRegular.newInstance(
         KInstanceOpaqueRegular.newInstance(
-          ExampleSceneUtilities.OPAQUE_MATTE_BLUE,
+          material,
           scene.mesh("plane2x2_PN.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
         left,
@@ -79,17 +92,17 @@ public final class SLEmpty1 implements ExampleSceneType
     final KInstanceTransformedOpaqueRegular i1 =
       KInstanceTransformedOpaqueRegular.newInstance(
         KInstanceOpaqueRegular.newInstance(
-          ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
-          scene.mesh("plane2x2_PN.rmx"),
+          material,
+          scene.mesh("plane2x2_PNT.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
-        ExampleSceneUtilities.IDENTITY_TRANSFORM,
+        center,
         ExampleSceneUtilities.IDENTITY_UV);
 
     final KInstanceTransformedOpaqueRegular i2 =
       KInstanceTransformedOpaqueRegular.newInstance(
         KInstanceOpaqueRegular.newInstance(
-          ExampleSceneUtilities.OPAQUE_MATTE_RED,
-          scene.mesh("plane2x2_PN.rmx"),
+          material,
+          scene.mesh("plane2x2_PNU.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
         right,
         ExampleSceneUtilities.IDENTITY_UV);
@@ -107,7 +120,7 @@ public final class SLEmpty1 implements ExampleSceneType
 
   @Override public List<ExampleViewType> exampleViewpoints()
   {
-    return ExampleSceneUtilities.STANDARD_VIEWS_5;
+    return ExampleSceneUtilities.STANDARD_VIEWS_CLOSE_3;
   }
 
   @Override public String exampleGetName()

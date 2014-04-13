@@ -31,16 +31,16 @@ import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.types.RException;
 
 /**
- * An empty example.
+ * A demonstration that specular lighting looks correct.
  */
 
-public final class SLEmpty0 implements ExampleSceneType
+public final class SLSpecular0 implements ExampleSceneType
 {
   /**
    * Construct the example.
    */
 
-  public SLEmpty0()
+  public SLSpecular0()
   {
 
   }
@@ -53,7 +53,7 @@ public final class SLEmpty0 implements ExampleSceneType
     final KInstanceTransformedOpaqueRegular i =
       KInstanceTransformedOpaqueRegular.newInstance(
         KInstanceOpaqueRegular.newInstance(
-          ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+          ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_RED,
           scene.mesh("plane2x2_PN.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
@@ -67,7 +67,7 @@ public final class SLEmpty0 implements ExampleSceneType
 
   @Override public List<ExampleViewType> exampleViewpoints()
   {
-    return ExampleSceneUtilities.STANDARD_VIEWS_5;
+    return ExampleSceneUtilities.STANDARD_VIEWS_CLOSE_3;
   }
 
   @Override public String exampleGetName()

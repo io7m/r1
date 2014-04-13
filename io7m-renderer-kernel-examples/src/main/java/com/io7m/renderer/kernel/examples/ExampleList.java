@@ -18,10 +18,10 @@ package com.io7m.renderer.kernel.examples;
 
 import java.lang.reflect.Modifier;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
 
@@ -33,14 +33,14 @@ import org.reflections.Reflections;
 
 public final class ExampleList
 {
-  private static Map<String, Class<? extends ExampleSceneType>> EXAMPLES;
+  private static SortedMap<String, Class<? extends ExampleSceneType>> EXAMPLES;
 
   /**
    * @return A list of all of the available examples.
    */
 
   public static @Nonnull
-    Map<String, Class<? extends ExampleSceneType>>
+    SortedMap<String, Class<? extends ExampleSceneType>>
     getExamples()
   {
     if (ExampleList.EXAMPLES == null) {
@@ -50,7 +50,7 @@ public final class ExampleList
   }
 
   private static @Nonnull
-    Map<String, Class<? extends ExampleSceneType>>
+    SortedMap<String, Class<? extends ExampleSceneType>>
     makeExamples()
   {
     final Reflections ref =
@@ -58,8 +58,8 @@ public final class ExampleList
     final Set<Class<? extends ExampleSceneType>> s =
       ref.getSubTypesOf(ExampleSceneType.class);
 
-    final Map<String, Class<? extends ExampleSceneType>> examples =
-      new HashMap<String, Class<? extends ExampleSceneType>>();
+    final SortedMap<String, Class<? extends ExampleSceneType>> examples =
+      new TreeMap<String, Class<? extends ExampleSceneType>>();
 
     final Iterator<Class<? extends ExampleSceneType>> i = s.iterator();
     while (i.hasNext()) {
@@ -78,7 +78,7 @@ public final class ExampleList
       examples.put(c.getCanonicalName(), c);
     }
 
-    return Collections.unmodifiableMap(examples);
+    return Collections.unmodifiableSortedMap(examples);
   }
 
   private ExampleList()
