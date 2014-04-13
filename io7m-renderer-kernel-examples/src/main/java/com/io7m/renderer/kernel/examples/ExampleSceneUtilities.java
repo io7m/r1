@@ -58,6 +58,12 @@ public final class ExampleSceneUtilities
   public static final @Nonnull RVectorI3F<RSpaceWorldType>                    CENTER;
 
   /**
+   * A scale that halves the size on the X and Z axes.
+   */
+
+  public static final @Nonnull VectorI3F                                      HALF_SCALE_XZ;
+
+  /**
    * The identity scale.
    */
 
@@ -82,6 +88,12 @@ public final class ExampleSceneUtilities
   public static final @Nonnull RMatrixReadable3x3FType<RTransformTextureType> IDENTITY_UV_M;
 
   /**
+   * A large spherical white light and the center of the scene.
+   */
+
+  public static final @Nonnull KLightSphere                                   LIGHT_SPHERICAL_LARGE_WHITE;
+
+  /**
    * No surface emission.
    */
 
@@ -104,6 +116,18 @@ public final class ExampleSceneUtilities
    */
 
   public static final @Nonnull KMaterialSpecular                              NO_SPECULAR;
+
+  /**
+   * Opaque glossy "plastic" (white specular highlights) red material.
+   */
+
+  public static final KMaterialOpaqueRegular                                  OPAQUE_GLOSS_PLASTIC_RED;
+
+  /**
+   * Opaque glossy "plastic" (white specular highlights) white material.
+   */
+
+  public static final KMaterialOpaqueRegular                                  OPAQUE_GLOSS_PLASTIC_WHITE;
 
   /**
    * Opaque matte blue material.
@@ -148,16 +172,22 @@ public final class ExampleSceneUtilities
   public static final RVectorI3F<RSpaceRGBType>                               RGB_BLACK;
 
   /**
-   * RGB white.
+   * RGB blue.
    */
 
-  public static final @Nonnull RVectorI3F<RSpaceRGBType>                      RGB_WHITE;
+  public static final @Nonnull RVectorI3F<RSpaceRGBType>                      RGB_BLUE;
 
   /**
    * RGB red.
    */
 
   public static final @Nonnull RVectorI3F<RSpaceRGBType>                      RGB_RED;
+
+  /**
+   * RGB white.
+   */
+
+  public static final @Nonnull RVectorI3F<RSpaceRGBType>                      RGB_WHITE;
 
   /**
    * RGBA blue.
@@ -184,16 +214,16 @@ public final class ExampleSceneUtilities
   public static final @Nonnull List<ExampleViewType>                          STANDARD_VIEW_LEFT;
 
   /**
-   * The standard range of 5 views for a scene.
-   */
-
-  public static final @Nonnull List<ExampleViewType>                          STANDARD_VIEWS_5;
-
-  /**
    * The standard range of 3 views for a scene.
    */
 
   public static final @Nonnull List<ExampleViewType>                          STANDARD_VIEWS_3;
+
+  /**
+   * The standard range of 5 views for a scene.
+   */
+
+  public static final @Nonnull List<ExampleViewType>                          STANDARD_VIEWS_5;
 
   /**
    * The standard range of 3 close views for a scene.
@@ -201,27 +231,10 @@ public final class ExampleSceneUtilities
 
   public static final @Nonnull List<ExampleViewType>                          STANDARD_VIEWS_CLOSE_3;
 
-  /**
-   * A scale that halves the size on the X and Z axes.
-   */
-
-  public static final @Nonnull VectorI3F                                      HALF_SCALE_XZ;
-
-  /**
-   * A large spherical white light and the center of the scene.
-   */
-
-  public static final @Nonnull KLightSphere                                   LIGHT_SPHERICAL_LARGE_WHITE;
-
-  /**
-   * Opaque glossy "plastic" (white specular highlights) red material.
-   */
-
-  public static final KMaterialOpaqueRegular                                  OPAQUE_GLOSS_PLASTIC_RED;
-
   static {
     try {
       RGB_RED = new RVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f);
+      RGB_BLUE = new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f);
       RGB_WHITE = new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
       RGB_BLACK = new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
       RGBA_WHITE = new RVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f);
@@ -270,9 +283,12 @@ public final class ExampleSceneUtilities
           .withAlbedo(ExampleSceneUtilities.PLAIN_BLUE_ALBEDO);
 
       OPAQUE_GLOSS_PLASTIC_RED =
-        ExampleSceneUtilities.OPAQUE_MATTE_RED.withAlbedo(
-          ExampleSceneUtilities.PLAIN_RED_ALBEDO).withSpecular(
-          KMaterialSpecular.newSpecularUnmapped(
+        ExampleSceneUtilities.OPAQUE_MATTE_RED.withSpecular(KMaterialSpecular
+          .newSpecularUnmapped(ExampleSceneUtilities.RGB_WHITE, 64.0f));
+
+      OPAQUE_GLOSS_PLASTIC_WHITE =
+        ExampleSceneUtilities.OPAQUE_MATTE_WHITE
+          .withSpecular(KMaterialSpecular.newSpecularUnmapped(
             ExampleSceneUtilities.RGB_WHITE,
             64.0f));
 

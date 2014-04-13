@@ -30,6 +30,12 @@ import com.io7m.renderer.types.RException;
 public interface ExampleSceneType
 {
   /**
+   * @return The name of the example
+   */
+
+  @Nonnull String exampleGetName();
+
+  /**
    * Initialize the given scene.
    * 
    * @param scene
@@ -50,10 +56,4 @@ public interface ExampleSceneType
    */
 
   @Nonnull List<ExampleViewType> exampleViewpoints();
-
-  /**
-   * @return The name of the example
-   */
-
-  @Nonnull String exampleGetName();
 }

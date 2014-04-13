@@ -28,19 +28,24 @@ import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
+import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RSpaceWorldType;
+import com.io7m.renderer.types.RVectorI3F;
 
 /**
- * A demonstration that specular lighting looks correct.
+ * A demonstration that specular lighting with multiple lights looks correct.
  */
 
-public final class SLSpecular0 implements ExampleSceneType
+public final class SLSpecular2 implements ExampleSceneType
 {
   /**
    * Construct the example.
    */
 
-  public SLSpecular0()
+  public SLSpecular2()
   {
 
   }
@@ -55,19 +60,43 @@ public final class SLSpecular0 implements ExampleSceneType
     throws ConstraintError,
       RException
   {
+    final KMaterialOpaqueRegular material =
+      ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE
+        .withNormal(KMaterialNormal.newNormalMapped(scene
+          .texture("tiles_normal.png")));
+
     final KInstanceTransformedOpaqueRegular i =
       KInstanceTransformedOpaqueRegular.newInstance(
         KInstanceOpaqueRegular.newInstance(
-          ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_RED,
-          scene.mesh("plane2x2_PN.rmx"),
+          material,
+          scene.mesh("plane2x2_PNU.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
         ExampleSceneUtilities.IDENTITY_UV);
+
+    final KLightSphere l0 =
+      KLightSphere.newSpherical(
+        ExampleSceneUtilities.RGB_RED,
+        1.0f,
+        new RVectorI3F<RSpaceWorldType>(-0.5f, 1.0f, 1.0f),
+        2.0f,
+        1.0f);
+
+    final KLightSphere l1 =
+      KLightSphere.newSpherical(
+        ExampleSceneUtilities.RGB_BLUE,
+        1.0f,
+        new RVectorI3F<RSpaceWorldType>(0.5f, 1.0f, -1.0f),
+        2.0f,
+        1.0f);
 
     scene.sceneAddOpaqueLitVisibleWithShadow(
       ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE
         .withPosition(ExampleSceneUtilities.CENTER),
       i);
+
+    scene.sceneAddOpaqueLitVisibleWithShadow(l0, i);
+    scene.sceneAddOpaqueLitVisibleWithShadow(l1, i);
   }
 
   @Override public List<ExampleViewType> exampleViewpoints()
