@@ -57,7 +57,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
+import nu.xom.Builder;
 import nu.xom.Document;
+import nu.xom.ParsingException;
+import nu.xom.ValidityException;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.RangeInclusive;
@@ -69,6 +72,13 @@ import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBuffer;
 import com.io7m.jcanephora.ArrayBufferUsable;
+import com.io7m.jcanephora.CMFKNegativeX;
+import com.io7m.jcanephora.CMFKNegativeY;
+import com.io7m.jcanephora.CMFKNegativeZ;
+import com.io7m.jcanephora.CMFKPositiveX;
+import com.io7m.jcanephora.CMFKPositiveY;
+import com.io7m.jcanephora.CMFKPositiveZ;
+import com.io7m.jcanephora.CubeMapFaceInputStream;
 import com.io7m.jcanephora.IndexBuffer;
 import com.io7m.jcanephora.IndexBufferUsable;
 import com.io7m.jcanephora.JCBExecutionAPI;
@@ -83,10 +93,13 @@ import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStatic;
 import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.TextureCubeStatic;
+import com.io7m.jcanephora.TextureCubeStaticUsable;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureLoaderImageIO;
 import com.io7m.jcanephora.TextureUnit;
+import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.UsageHint;
@@ -128,6 +141,8 @@ import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorI3F;
+import com.io7m.renderer.types.RXMLException;
+import com.io7m.renderer.xml.cubemap.CubeMap;
 import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
 import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
 import com.jogamp.common.nio.Buffers;
@@ -336,25 +351,26 @@ final class VExample implements Callable<Unit>
       }
     }
 
-    private final @Nonnull ViewerConfig                       config;
-    private final @Nonnull AtomicInteger                      current_view_index;
-    private final ExampleSceneType                            example;
-    private final @Nonnull FSCapabilityRead                   filesystem;
-    private KFramebufferType                                  framebuffer;
-    private JCGLImplementationJOGL                            gi;
-    private final @Nonnull Log                                glog;
-    private final @Nonnull Map<String, KMesh>                 meshes;
-    private final @Nonnull Map<String, Texture2DStaticUsable> textures;
-    private KUnitQuad                                         quad;
-    private ExampleRendererType                               renderer;
-    private final @Nonnull ExampleRendererConstructorType     renderer_cons;
-    private final @Nonnull VExpectedImage                     results_panel;
-    private boolean                                           running;
-    private KShaderCacheType                                  shader_cache;
-    private LRUCacheConfig                                    shader_cache_config;
-    private final @Nonnull AtomicBoolean                      want_save;
-    private final @Nonnull JLabel                             renderer_label;
-    private TextureLoaderImageIO                              texture_loader;
+    private final @Nonnull ViewerConfig                         config;
+    private final @Nonnull AtomicInteger                        current_view_index;
+    private final ExampleSceneType                              example;
+    private final @Nonnull FSCapabilityRead                     filesystem;
+    private KFramebufferType                                    framebuffer;
+    private JCGLImplementationJOGL                              gi;
+    private final @Nonnull Log                                  glog;
+    private final @Nonnull Map<String, KMesh>                   meshes;
+    private final @Nonnull Map<String, Texture2DStaticUsable>   textures;
+    private final @Nonnull Map<String, TextureCubeStaticUsable> cube_textures;
+    private KUnitQuad                                           quad;
+    private ExampleRendererType                                 renderer;
+    private final @Nonnull ExampleRendererConstructorType       renderer_cons;
+    private final @Nonnull VExpectedImage                       results_panel;
+    private boolean                                             running;
+    private KShaderCacheType                                    shader_cache;
+    private LRUCacheConfig                                      shader_cache_config;
+    private final @Nonnull AtomicBoolean                        want_save;
+    private final @Nonnull JLabel                               renderer_label;
+    private TextureLoaderImageIO                                texture_loader;
 
     public VExampleWindowGL(
       final @Nonnull Log in_log,
@@ -370,6 +386,7 @@ final class VExample implements Callable<Unit>
       this.glog = new Log(in_log, "gl");
       this.meshes = new HashMap<String, KMesh>();
       this.textures = new HashMap<String, Texture2DStaticUsable>();
+      this.cube_textures = new HashMap<String, TextureCubeStaticUsable>();
       this.filesystem = in_filesystem;
       this.renderer_cons = in_renderer_cons;
       this.example = in_example;
@@ -457,9 +474,11 @@ final class VExample implements Callable<Unit>
             scene_builder.sceneAddTranslucentUnlit(instance);
           }
 
-          @Override public Texture2DStaticUsable texture(
-            final @Nonnull String name)
-            throws RException
+          @SuppressWarnings("synthetic-access") @Override public
+            Texture2DStaticUsable
+            texture(
+              final @Nonnull String name)
+              throws RException
           {
             try {
               return VExampleWindowGL.this.loadTexture(name);
@@ -467,6 +486,27 @@ final class VExample implements Callable<Unit>
               throw RException.fromIOException(e);
             } catch (final JCGLException e) {
               throw RException.fromJCGLException(e);
+            } catch (final ConstraintError e) {
+              throw new UnreachableCodeException(e);
+            }
+          }
+
+          @SuppressWarnings("synthetic-access") @Override public
+            TextureCubeStaticUsable
+            cubeTexture(
+              final @Nonnull String name)
+              throws RException
+          {
+            try {
+              return VExampleWindowGL.this.loadCube(name);
+            } catch (final ValidityException e) {
+              throw RXMLException.validityException(e);
+            } catch (final IOException e) {
+              throw RException.fromIOException(e);
+            } catch (final JCGLException e) {
+              throw RException.fromJCGLException(e);
+            } catch (final ParsingException e) {
+              throw RXMLException.parsingException(e);
             } catch (final ConstraintError e) {
               throw new UnreachableCodeException(e);
             }
@@ -543,6 +583,84 @@ final class VExample implements Callable<Unit>
             stream,
             name);
         this.textures.put(name, t);
+        return t;
+      } finally {
+        stream.close();
+      }
+    }
+
+    private @Nonnull TextureCubeStaticUsable loadCube(
+      final @Nonnull String name)
+      throws IOException,
+        JCGLException,
+        ConstraintError,
+        ValidityException,
+        ParsingException,
+        RXMLException
+    {
+      if (this.cube_textures.containsKey(name)) {
+        return this.cube_textures.get(name);
+      }
+
+      final StringBuilder message = new StringBuilder();
+      message.setLength(0);
+      message.append("Loading texture from ");
+      message.append(name);
+      this.glog.debug(message.toString());
+
+      final File file =
+        new File(String.format("/com/io7m/renderer/kernel/examples/%s", name));
+      final InputStream stream =
+        VExample.class.getResourceAsStream(file.toString());
+
+      try {
+        final Builder builder = new Builder();
+        final Document document = builder.build(stream);
+        final CubeMap cube = CubeMap.fromXML(document.getRootElement());
+
+        final File parent = file.getParentFile();
+
+        final CubeMapFaceInputStream<CMFKPositiveZ> positive_z =
+          new CubeMapFaceInputStream<CMFKPositiveZ>(
+            VExample.class.getResourceAsStream(new File(parent, cube
+              .getPositiveZ()).toString()));
+        final CubeMapFaceInputStream<CMFKPositiveY> positive_y =
+          new CubeMapFaceInputStream<CMFKPositiveY>(
+            VExample.class.getResourceAsStream(new File(parent, cube
+              .getPositiveY()).toString()));
+        final CubeMapFaceInputStream<CMFKPositiveX> positive_x =
+          new CubeMapFaceInputStream<CMFKPositiveX>(
+            VExample.class.getResourceAsStream(new File(parent, cube
+              .getPositiveX()).toString()));
+        final CubeMapFaceInputStream<CMFKNegativeZ> negative_z =
+          new CubeMapFaceInputStream<CMFKNegativeZ>(
+            VExample.class.getResourceAsStream(new File(parent, cube
+              .getNegativeZ()).toString()));
+        final CubeMapFaceInputStream<CMFKNegativeY> negative_y =
+          new CubeMapFaceInputStream<CMFKNegativeY>(
+            VExample.class.getResourceAsStream(new File(parent, cube
+              .getNegativeY()).toString()));
+        final CubeMapFaceInputStream<CMFKNegativeX> negative_x =
+          new CubeMapFaceInputStream<CMFKNegativeX>(
+            VExample.class.getResourceAsStream(new File(parent, cube
+              .getNegativeX()).toString()));
+
+        final TextureCubeStatic t =
+          this.texture_loader.loadCubeRHStaticInferred(
+            this.gi,
+            TextureWrapR.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+            positive_z,
+            negative_z,
+            positive_y,
+            negative_y,
+            positive_x,
+            negative_x,
+            name);
+        this.cube_textures.put(name, t);
         return t;
       } finally {
         stream.close();
