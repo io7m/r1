@@ -28,11 +28,14 @@ import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KMaterialAlbedo;
+import com.io7m.renderer.kernel.types.KMaterialAlpha;
+import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
 import com.io7m.renderer.kernel.types.KMaterialEmissive;
 import com.io7m.renderer.kernel.types.KMaterialEnvironment;
 import com.io7m.renderer.kernel.types.KMaterialNormal;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialSpecular;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.types.RMatrixI3x3F;
@@ -51,6 +54,12 @@ import com.io7m.renderer.types.RVectorI4F;
 
 public final class ExampleSceneUtilities
 {
+  /**
+   * Constant opacity, full opacity.
+   */
+
+  public static final @Nonnull KMaterialAlpha                                 ALPHA_CONSTANT_OPACITY_1;
+
   /**
    * The typical center of the scene, <code>(0, 1, 0)</code>.
    */
@@ -178,10 +187,22 @@ public final class ExampleSceneUtilities
   public static final @Nonnull RVectorI3F<RSpaceRGBType>                      RGB_BLUE;
 
   /**
+   * RGB green.
+   */
+
+  public static final @Nonnull RVectorI3F<RSpaceRGBType>                      RGB_GREEN;
+
+  /**
    * RGB red.
    */
 
   public static final @Nonnull RVectorI3F<RSpaceRGBType>                      RGB_RED;
+
+  /**
+   * RGB yellow.
+   */
+
+  public static final @Nonnull RVectorI3F<RSpaceRGBType>                      RGB_YELLOW;
 
   /**
    * RGB white.
@@ -231,9 +252,17 @@ public final class ExampleSceneUtilities
 
   public static final @Nonnull List<ExampleViewType>                          STANDARD_VIEWS_CLOSE_3;
 
+  /**
+   * Translucent matte white material.
+   */
+
+  public static final @Nonnull KMaterialTranslucentRegular                    TRANSLUCENT_MATTE_WHITE;
+
   static {
     try {
       RGB_RED = new RVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f);
+      RGB_GREEN = new RVectorI3F<RSpaceRGBType>(0.0f, 1.0f, 0.0f);
+      RGB_YELLOW = new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 0.0f);
       RGB_BLUE = new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f);
       RGB_WHITE = new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
       RGB_BLACK = new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
@@ -291,6 +320,21 @@ public final class ExampleSceneUtilities
           .withSpecular(KMaterialSpecular.newSpecularUnmapped(
             ExampleSceneUtilities.RGB_WHITE,
             64.0f));
+
+      ALPHA_CONSTANT_OPACITY_1 =
+        KMaterialAlpha.newAlpha(
+          KMaterialAlphaOpacityType.ALPHA_OPACITY_CONSTANT,
+          1.0f);
+
+      TRANSLUCENT_MATTE_WHITE =
+        KMaterialTranslucentRegular.newMaterial(
+          ExampleSceneUtilities.IDENTITY_UV,
+          ExampleSceneUtilities.PLAIN_WHITE_ALBEDO,
+          ExampleSceneUtilities.ALPHA_CONSTANT_OPACITY_1,
+          ExampleSceneUtilities.NO_EMISSIVE,
+          ExampleSceneUtilities.NO_ENVIRONMENT,
+          ExampleSceneUtilities.NO_NORMAL_MAP,
+          ExampleSceneUtilities.NO_SPECULAR);
 
       CENTER = new RVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f);
 
