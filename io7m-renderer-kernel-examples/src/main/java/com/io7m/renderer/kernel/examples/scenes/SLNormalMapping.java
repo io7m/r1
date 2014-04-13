@@ -28,19 +28,21 @@ import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.types.RException;
 
 /**
- * An empty example.
+ * A demonstration that normal mapping requires tangents and UV coordinates.
  */
 
-public final class SLEmpty0 implements ExampleSceneType
+public final class SLNormalMapping implements ExampleSceneType
 {
   /**
    * Construct the example.
    */
 
-  public SLEmpty0()
+  public SLNormalMapping()
   {
 
   }
@@ -50,24 +52,27 @@ public final class SLEmpty0 implements ExampleSceneType
     throws ConstraintError,
       RException
   {
+    final KMaterialOpaqueRegular material =
+      ExampleSceneUtilities.OPAQUE_MATTE_WHITE.withNormal(KMaterialNormal
+        .newNormalMapped(scene.texture("tiles_normal.png")));
+
     final KInstanceTransformedOpaqueRegular i =
       KInstanceTransformedOpaqueRegular.newInstance(
         KInstanceOpaqueRegular.newInstance(
-          ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
-          scene.mesh("plane2x2_PN.rmx"),
+          material,
+          scene.mesh("plane2x2_PNTU.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
         ExampleSceneUtilities.IDENTITY_UV);
 
     scene.sceneAddOpaqueLitVisibleWithShadow(
-      ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE
-        .withPosition(ExampleSceneUtilities.CENTER),
+      ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE,
       i);
   }
 
   @Override public List<ExampleViewType> exampleViewpoints()
   {
-    return ExampleSceneUtilities.STANDARD_VIEWS_5;
+    return ExampleSceneUtilities.STANDARD_VIEWS_CLOSE_3;
   }
 
   @Override public String exampleGetName()

@@ -26,6 +26,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KMaterialAlbedo;
 import com.io7m.renderer.kernel.types.KMaterialEmissive;
 import com.io7m.renderer.kernel.types.KMaterialEnvironment;
@@ -75,6 +76,12 @@ public final class ExampleSceneUtilities
   public static final @Nonnull RMatrixI3x3F<RTransformTextureType>            IDENTITY_UV;
 
   /**
+   * The identity matrix for UV coordinates.
+   */
+
+  public static final @Nonnull RMatrixReadable3x3FType<RTransformTextureType> IDENTITY_UV_M;
+
+  /**
    * No surface emission.
    */
 
@@ -99,10 +106,10 @@ public final class ExampleSceneUtilities
   public static final @Nonnull KMaterialSpecular                              NO_SPECULAR;
 
   /**
-   * Opaque matte white material.
+   * Opaque matte blue material.
    */
 
-  public static final @Nonnull KMaterialOpaqueRegular                         OPAQUE_MATTE_WHITE;
+  public static final @Nonnull KMaterialOpaqueRegular                         OPAQUE_MATTE_BLUE;
 
   /**
    * Opaque matte red material.
@@ -111,16 +118,16 @@ public final class ExampleSceneUtilities
   public static final @Nonnull KMaterialOpaqueRegular                         OPAQUE_MATTE_RED;
 
   /**
-   * Opaque matte blue material.
+   * Opaque matte white material.
    */
 
-  public static final @Nonnull KMaterialOpaqueRegular                         OPAQUE_MATTE_BLUE;
+  public static final @Nonnull KMaterialOpaqueRegular                         OPAQUE_MATTE_WHITE;
 
   /**
-   * Plain white untextured albedo.
+   * Plain blue untextured albedo.
    */
 
-  public static final @Nonnull KMaterialAlbedo                                PLAIN_WHITE_ALBEDO;
+  public static final @Nonnull KMaterialAlbedo                                PLAIN_BLUE_ALBEDO;
 
   /**
    * Plain red untextured albedo.
@@ -129,10 +136,10 @@ public final class ExampleSceneUtilities
   public static final @Nonnull KMaterialAlbedo                                PLAIN_RED_ALBEDO;
 
   /**
-   * Plain blue untextured albedo.
+   * Plain white untextured albedo.
    */
 
-  public static final @Nonnull KMaterialAlbedo                                PLAIN_BLUE_ALBEDO;
+  public static final @Nonnull KMaterialAlbedo                                PLAIN_WHITE_ALBEDO;
 
   /**
    * RGB black.
@@ -147,16 +154,10 @@ public final class ExampleSceneUtilities
   public static final @Nonnull RVectorI3F<RSpaceRGBType>                      RGB_WHITE;
 
   /**
-   * RGBA white.
+   * RGB red.
    */
 
-  public static final @Nonnull RVectorI4F<RSpaceRGBAType>                     RGBA_WHITE;
-
-  /**
-   * RGBA red.
-   */
-
-  public static final @Nonnull RVectorI4F<RSpaceRGBAType>                     RGBA_RED;
+  public static final @Nonnull RVectorI3F<RSpaceRGBType>                      RGB_RED;
 
   /**
    * RGBA blue.
@@ -165,19 +166,62 @@ public final class ExampleSceneUtilities
   public static final @Nonnull RVectorI4F<RSpaceRGBAType>                     RGBA_BLUE;
 
   /**
-   * The standard range of views for a scene.
+   * RGBA red.
    */
 
-  public static final @Nonnull List<ExampleViewType>                          STANDARD_VIEWS;
+  public static final @Nonnull RVectorI4F<RSpaceRGBAType>                     RGBA_RED;
 
   /**
-   * The identity matrix for UV coordinates.
+   * RGBA white.
    */
 
-  public static final @Nonnull RMatrixReadable3x3FType<RTransformTextureType> IDENTITY_UV_M;
+  public static final @Nonnull RVectorI4F<RSpaceRGBAType>                     RGBA_WHITE;
+
+  /**
+   * A standard view from the left.
+   */
+
+  public static final @Nonnull List<ExampleViewType>                          STANDARD_VIEW_LEFT;
+
+  /**
+   * The standard range of 5 views for a scene.
+   */
+
+  public static final @Nonnull List<ExampleViewType>                          STANDARD_VIEWS_5;
+
+  /**
+   * The standard range of 3 views for a scene.
+   */
+
+  public static final @Nonnull List<ExampleViewType>                          STANDARD_VIEWS_3;
+
+  /**
+   * The standard range of 3 close views for a scene.
+   */
+
+  public static final @Nonnull List<ExampleViewType>                          STANDARD_VIEWS_CLOSE_3;
+
+  /**
+   * A scale that halves the size on the X and Z axes.
+   */
+
+  public static final @Nonnull VectorI3F                                      HALF_SCALE_XZ;
+
+  /**
+   * A large spherical white light and the center of the scene.
+   */
+
+  public static final @Nonnull KLightSphere                                   LIGHT_SPHERICAL_LARGE_WHITE;
+
+  /**
+   * Opaque glossy "plastic" (white specular highlights) red material.
+   */
+
+  public static final KMaterialOpaqueRegular                                  OPAQUE_GLOSS_PLASTIC_RED;
 
   static {
     try {
+      RGB_RED = new RVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f);
       RGB_WHITE = new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
       RGB_BLACK = new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
       RGBA_WHITE = new RVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f);
@@ -187,6 +231,7 @@ public final class ExampleSceneUtilities
       IDENTITY_UV = RMatrixI3x3F.identity();
       IDENTITY_UV_M = new RMatrixM3x3F<RTransformTextureType>();
       IDENTITY_SCALE = new VectorI3F(1.0f, 1.0f, 1.0f);
+      HALF_SCALE_XZ = new VectorI3F(0.5f, 1.0f, 0.5f);
 
       IDENTITY_TRANSFORM =
         KTransformOST.newTransform(
@@ -224,31 +269,90 @@ public final class ExampleSceneUtilities
         ExampleSceneUtilities.OPAQUE_MATTE_WHITE
           .withAlbedo(ExampleSceneUtilities.PLAIN_BLUE_ALBEDO);
 
+      OPAQUE_GLOSS_PLASTIC_RED =
+        ExampleSceneUtilities.OPAQUE_MATTE_RED.withAlbedo(
+          ExampleSceneUtilities.PLAIN_RED_ALBEDO).withSpecular(
+          KMaterialSpecular.newSpecularUnmapped(
+            ExampleSceneUtilities.RGB_WHITE,
+            64.0f));
+
       CENTER = new RVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f);
 
-      final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
-      views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-        -4.0f,
-        2.0f,
-        4.0f), ExampleSceneUtilities.CENTER));
-      views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-        -2.0f,
-        2.0f,
-        4.0f), ExampleSceneUtilities.CENTER));
-      views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-        0.0f,
-        2.0f,
-        4.0f), ExampleSceneUtilities.CENTER));
-      views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-        2.0f,
-        2.0f,
-        4.0f), ExampleSceneUtilities.CENTER));
-      views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-        4.0f,
-        2.0f,
-        4.0f), ExampleSceneUtilities.CENTER));
+      {
+        final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          -4.0f,
+          2.0f,
+          4.0f), ExampleSceneUtilities.CENTER));
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          -2.0f,
+          2.0f,
+          4.0f), ExampleSceneUtilities.CENTER));
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          0.0f,
+          2.0f,
+          4.0f), ExampleSceneUtilities.CENTER));
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          2.0f,
+          2.0f,
+          4.0f), ExampleSceneUtilities.CENTER));
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          4.0f,
+          2.0f,
+          4.0f), ExampleSceneUtilities.CENTER));
+        STANDARD_VIEWS_5 = Collections.unmodifiableList(views);
+      }
 
-      STANDARD_VIEWS = Collections.unmodifiableList(views);
+      {
+        final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          -2.0f,
+          2.0f,
+          4.0f), ExampleSceneUtilities.CENTER));
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          0.0f,
+          2.0f,
+          4.0f), ExampleSceneUtilities.CENTER));
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          2.0f,
+          2.0f,
+          4.0f), ExampleSceneUtilities.CENTER));
+        STANDARD_VIEWS_3 = Collections.unmodifiableList(views);
+      }
+
+      {
+        final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          -2.0f,
+          2.0f,
+          2.0f), ExampleSceneUtilities.CENTER));
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          0.0f,
+          2.0f,
+          2.0f), ExampleSceneUtilities.CENTER));
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          2.0f,
+          2.0f,
+          2.0f), ExampleSceneUtilities.CENTER));
+        STANDARD_VIEWS_CLOSE_3 = Collections.unmodifiableList(views);
+      }
+
+      {
+        final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          -4.0f,
+          2.0f,
+          4.0f), ExampleSceneUtilities.CENTER));
+        STANDARD_VIEW_LEFT = Collections.unmodifiableList(views);
+      }
+
+      LIGHT_SPHERICAL_LARGE_WHITE =
+        KLightSphere.newSpherical(
+          ExampleSceneUtilities.RGB_WHITE,
+          1.0f,
+          new RVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f),
+          32.0f,
+          1.0f);
 
     } catch (final ConstraintError e) {
       throw new UnreachableCodeException(e);

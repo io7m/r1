@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel.examples;
 
 import javax.annotation.Nonnull;
 
+import com.io7m.jcanephora.Texture2DStaticUsable;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KSceneBuilderType;
 import com.io7m.renderer.types.RException;
@@ -39,6 +40,20 @@ public interface ExampleSceneBuilderType extends KSceneBuilderType
    */
 
   @Nonnull KMeshReadableType mesh(
+    final @Nonnull String name)
+    throws RException;
+
+  /**
+   * Load the texture with the given name.
+   * 
+   * @param name
+   *          The name
+   * @return An allocated texture
+   * @throws RException
+   *           If an error occurs
+   */
+
+  @Nonnull Texture2DStaticUsable texture(
     final @Nonnull String name)
     throws RException;
 }
