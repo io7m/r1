@@ -49,7 +49,7 @@ import com.io7m.renderer.types.RException;
 
   public static @Nonnull KInstanceTranslucentRegular newInstance(
     final @Nonnull KMaterialTranslucentRegular in_material,
-    final @Nonnull KMesh in_mesh,
+    final @Nonnull KMeshReadableType in_mesh,
     final @Nonnull KFaceSelection in_faces)
     throws ConstraintError
   {
@@ -62,7 +62,7 @@ import com.io7m.renderer.types.RException;
 
   private KInstanceTranslucentRegular(
     final @Nonnull KMaterialTranslucentRegular in_material,
-    final @Nonnull KMesh in_mesh,
+    final @Nonnull KMeshReadableType in_mesh,
     final @Nonnull KFaceSelection in_faces)
     throws ConstraintError
   {
