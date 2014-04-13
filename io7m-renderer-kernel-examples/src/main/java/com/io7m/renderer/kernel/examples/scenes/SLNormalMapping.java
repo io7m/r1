@@ -47,6 +47,11 @@ public final class SLNormalMapping implements ExampleSceneType
 
   }
 
+  @Override public String exampleGetName()
+  {
+    return this.getClass().getCanonicalName();
+  }
+
   @Override public void exampleScene(
     final @Nonnull ExampleSceneBuilderType scene)
     throws ConstraintError,
@@ -73,10 +78,5 @@ public final class SLNormalMapping implements ExampleSceneType
   @Override public List<ExampleViewType> exampleViewpoints()
   {
     return ExampleSceneUtilities.STANDARD_VIEWS_CLOSE_3;
-  }
-
-  @Override public String exampleGetName()
-  {
-    return this.getClass().getCanonicalName();
   }
 }
