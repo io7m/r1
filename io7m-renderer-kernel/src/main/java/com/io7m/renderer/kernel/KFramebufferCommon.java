@@ -24,11 +24,6 @@ import com.io7m.jcanephora.JCGLUnsupportedException;
 
 final class KFramebufferCommon
 {
-  private KFramebufferCommon()
-  {
-    throw new UnreachableCodeException();
-  }
-
   static void checkFramebufferStatus(
     final @Nonnull FramebufferStatus status)
     throws JCGLUnsupportedException
@@ -45,5 +40,10 @@ final class KFramebufferCommon
         throw new JCGLUnsupportedException(
           "Could not initialize framebuffer: " + status);
     }
+  }
+
+  private KFramebufferCommon()
+  {
+    throw new UnreachableCodeException();
   }
 }

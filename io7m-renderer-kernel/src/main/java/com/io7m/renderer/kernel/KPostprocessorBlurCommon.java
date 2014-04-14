@@ -86,7 +86,9 @@ final class KPostprocessorBlurCommon
             gc.arrayBufferBind(array);
             KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
             KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
-            KShadingProgramCommon.putMatrixUVUnchecked(p, KMatrices.IDENTITY_UV);
+            KShadingProgramCommon.putMatrixUVUnchecked(
+              p,
+              KMatrices.IDENTITY_UV);
 
             final int width = (int) input_area.getRangeX().getInterval();
             p.programUniformPutFloat("image_width", width / blur_size);
@@ -165,7 +167,9 @@ final class KPostprocessorBlurCommon
             gc.arrayBufferBind(array);
             KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
             KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
-            KShadingProgramCommon.putMatrixUVUnchecked(p, KMatrices.IDENTITY_UV);
+            KShadingProgramCommon.putMatrixUVUnchecked(
+              p,
+              KMatrices.IDENTITY_UV);
 
             final int height = (int) input_area.getRangeY().getInterval();
             p.programUniformPutFloat("image_height", height / blur_size);
