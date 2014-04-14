@@ -47,7 +47,7 @@ public interface KFramebufferDepthDescriptionVisitorType<T, E extends Throwable>
    *           If required
    */
 
-  @Nonnull T depthDescriptionVisit(
+  @Nonnull T depthDescription(
     final @Nonnull KFramebufferDepthDescription d)
     throws E,
       ConstraintError,
@@ -67,7 +67,7 @@ public interface KFramebufferDepthDescriptionVisitorType<T, E extends Throwable>
    *           If required
    */
 
-  @Nonnull T depthVarianceDescriptionVisit(
+  @Nonnull T depthVarianceDescription(
     final @Nonnull KFramebufferDepthVarianceDescription d)
     throws E,
       ConstraintError,

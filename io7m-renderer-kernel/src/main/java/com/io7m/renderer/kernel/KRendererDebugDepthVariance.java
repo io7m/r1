@@ -51,6 +51,7 @@ import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
@@ -338,8 +339,8 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
 
       for (final KInstanceTransformedType instance : instances) {
         instance
-          .transformedVisitableAccept(new KInstanceTransformedVisitorType<Unit, JCGLException>() {
-            @Override public Unit transformedVisitOpaqueAlphaDepth(
+          .transformedAccept(new KInstanceTransformedVisitorType<Unit, JCGLException>() {
+            @Override public Unit transformedOpaqueAlphaDepth(
               final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
               throws JCGLException,
                 RException,
@@ -366,7 +367,7 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
                 });
             }
 
-            @Override public Unit transformedVisitOpaqueRegular(
+            @Override public Unit transformedOpaqueRegular(
               final @Nonnull KInstanceTransformedOpaqueRegular i)
               throws JCGLException,
                 RException,
@@ -393,16 +394,26 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
                 });
             }
 
-            @Override public Unit transformedVisitTranslucentRefractive(
+            @Override public Unit transformedTranslucentRefractive(
               final @Nonnull KInstanceTransformedTranslucentRefractive i)
               throws JCGLException
             {
               return Unit.unit();
             }
 
-            @Override public Unit transformedVisitTranslucentRegular(
+            @Override public Unit transformedTranslucentRegular(
               final @Nonnull KInstanceTransformedTranslucentRegular i)
               throws JCGLException
+            {
+              return Unit.unit();
+            }
+
+            @Override public Unit transformedTranslucentSpecularOnly(
+              final @Nonnull KInstanceTransformedTranslucentSpecularOnly i)
+              throws JCGLException,
+                ConstraintError,
+                RException,
+                JCGLException
             {
               return Unit.unit();
             }

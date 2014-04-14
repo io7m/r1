@@ -110,10 +110,10 @@ public final class KShadowMapCacheLoader implements
     final JCGLImplementation gli = this.gi;
     try {
       return s
-        .kShadowMapDescriptionAccept(new KShadowMapDescriptionVisitorType<KShadowMap, JCGLException>() {
+        .mapDescriptionAccept(new KShadowMapDescriptionVisitorType<KShadowMap, JCGLException>() {
           @Override public @Nonnull
             KShadowMap
-            shadowMapDescriptionVisitBasic(
+            shadowMapDescriptionBasic(
               final @Nonnull KShadowMapBasicDescription sm)
               throws RException,
                 ConstraintError
@@ -125,7 +125,7 @@ public final class KShadowMapCacheLoader implements
 
           @Override public @Nonnull
             KShadowMap
-            shadowMapDescriptionVisitVariance(
+            shadowMapDescriptionVariance(
               final @Nonnull KShadowMapVarianceDescription sm)
               throws RException,
                 JCGLException,

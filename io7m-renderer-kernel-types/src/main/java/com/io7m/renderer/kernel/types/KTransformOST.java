@@ -112,10 +112,10 @@ import com.io7m.renderer.types.RVectorI3F;
   @Override public
     <A, E extends Throwable, V extends KTransformVisitorType<A, E>>
     A
-    transformVisitableAccept(
+    transformAccept(
       final @Nonnull V v)
       throws E
   {
-    return v.transformVisitOST(this);
+    return v.transformOST(this);
   }
 }

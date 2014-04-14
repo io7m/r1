@@ -86,8 +86,8 @@ public enum KLightLabel
   {
     try {
       return light
-        .lightVisitableAccept(new KLightVisitorType<KLightLabel, ConstraintError>() {
-          @Override public KLightLabel lightVisitDirectional(
+        .lightAccept(new KLightVisitorType<KLightLabel, ConstraintError>() {
+          @Override public KLightLabel lightDirectional(
             final @Nonnull KLightDirectional l)
             throws ConstraintError,
               RException,
@@ -96,7 +96,7 @@ public enum KLightLabel
             return LIGHT_LABEL_DIRECTIONAL;
           }
 
-          @Override public KLightLabel lightVisitProjective(
+          @Override public KLightLabel lightProjective(
             final @Nonnull KLightProjective l)
             throws ConstraintError,
               RException,
@@ -108,7 +108,7 @@ public enum KLightLabel
               try {
                 return shadow
                   .shadowAccept(new KShadowVisitorType<KLightLabel, ConstraintError>() {
-                    @Override public KLightLabel shadowVisitMappedBasic(
+                    @Override public KLightLabel shadowMappedBasic(
                       final @Nonnull KShadowMappedBasic s)
                       throws ConstraintError,
                         JCGLException,
@@ -121,7 +121,7 @@ public enum KLightLabel
                       return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444;
                     }
 
-                    @Override public KLightLabel shadowVisitMappedVariance(
+                    @Override public KLightLabel shadowMappedVariance(
                       final @Nonnull KShadowMappedVariance s)
                       throws ConstraintError,
                         JCGLException,
@@ -138,7 +138,7 @@ public enum KLightLabel
             return LIGHT_LABEL_PROJECTIVE;
           }
 
-          @Override public KLightLabel lightVisitSpherical(
+          @Override public KLightLabel lightSpherical(
             final @Nonnull KLightSphere l)
             throws ConstraintError,
               RException,

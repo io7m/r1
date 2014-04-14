@@ -60,7 +60,7 @@ public interface KTransformType
 
     <A, E extends Throwable, V extends KTransformVisitorType<A, E>>
     A
-    transformVisitableAccept(
+    transformAccept(
       final @Nonnull V v)
       throws E;
 }

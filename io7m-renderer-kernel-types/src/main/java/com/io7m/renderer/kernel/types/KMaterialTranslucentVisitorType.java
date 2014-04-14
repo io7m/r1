@@ -47,7 +47,7 @@ public interface KMaterialTranslucentVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A materialVisitTranslucentRefractive(
+  @Nonnull A translucentRefractive(
     final @Nonnull KMaterialTranslucentRefractive m)
     throws E,
       RException,
@@ -67,8 +67,28 @@ public interface KMaterialTranslucentVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A materialVisitTranslucentRegular(
+  @Nonnull A translucentRegular(
     final @Nonnull KMaterialTranslucentRegular m)
+    throws E,
+      RException,
+      ConstraintError;
+
+  /**
+   * Visit a specular-only translucent material.
+   * 
+   * @param m
+   *          The material
+   * @return A value of type <code>A</code>
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  @Nonnull A translucentSpecular(
+    final @Nonnull KMaterialTranslucentSpecularOnly m)
     throws E,
       RException,
       ConstraintError;

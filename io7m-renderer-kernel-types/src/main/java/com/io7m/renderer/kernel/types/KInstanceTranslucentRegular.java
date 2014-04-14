@@ -30,6 +30,8 @@ import com.io7m.renderer.types.RException;
 
 @Immutable public final class KInstanceTranslucentRegular implements
   KInstanceTranslucentType,
+  KInstanceTranslucentUnlitType,
+  KInstanceTranslucentLitType,
   KInstanceWithMaterialType<KMaterialTranslucentRegular>,
   KInstanceRegularType
 {
@@ -113,18 +115,31 @@ import com.io7m.renderer.types.RException;
   @Override public
     <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
-    instanceVisitableAccept(
+    instanceAccept(
       final @Nonnull V v)
       throws E,
         JCGLException,
         ConstraintError,
         RException
   {
-    return v.instanceVisitTranslucentRegular(this);
+    return v.instanceTranslucentRegular(this);
   }
 
   @Override public KFaceSelection instanceGetFaces()
   {
     return this.faces;
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KInstanceTranslucentLitVisitorType<A, E>>
+    A
+    translucentLitAccept(
+      final @Nonnull V v)
+      throws E,
+        RException,
+        JCGLException,
+        ConstraintError
+  {
+    return v.translucentLitRegular(this);
   }
 }

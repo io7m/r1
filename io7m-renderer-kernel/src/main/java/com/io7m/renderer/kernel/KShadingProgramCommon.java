@@ -824,7 +824,7 @@ public final class KShadingProgramCommon
         final KShadowType ks =
           ((Option.Some<KShadowType>) light.lightGetShadow()).value;
         ks.shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-          @Override public Unit shadowVisitMappedBasic(
+          @Override public Unit shadowMappedBasic(
             final @Nonnull KShadowMappedBasic s)
             throws JCGLException,
               JCGLException,
@@ -835,7 +835,7 @@ public final class KShadingProgramCommon
             return Unit.unit();
           }
 
-          @Override public Unit shadowVisitMappedVariance(
+          @Override public Unit shadowMappedVariance(
             final @Nonnull KShadowMappedVariance s)
             throws JCGLException,
               JCGLException,
@@ -874,7 +874,7 @@ public final class KShadingProgramCommon
         final KShadowType ks =
           ((Option.Some<KShadowType>) light.lightGetShadow()).value;
         ks.shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-          @Override public Unit shadowVisitMappedBasic(
+          @Override public Unit shadowMappedBasic(
             final @Nonnull KShadowMappedBasic s)
             throws JCGLException,
               JCGLException,
@@ -885,7 +885,7 @@ public final class KShadingProgramCommon
             return Unit.unit();
           }
 
-          @Override public Unit shadowVisitMappedVariance(
+          @Override public Unit shadowMappedVariance(
             final @Nonnull KShadowMappedVariance s)
             throws JCGLException,
               JCGLException,

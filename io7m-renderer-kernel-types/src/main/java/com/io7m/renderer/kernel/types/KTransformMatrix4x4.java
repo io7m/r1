@@ -70,10 +70,10 @@ import com.io7m.renderer.types.RTransformModelType;
   @Override public
     <A, E extends Throwable, V extends KTransformVisitorType<A, E>>
     A
-    transformVisitableAccept(
+    transformAccept(
       final @Nonnull V v)
       throws E
   {
-    return v.transformVisitMatrix4x4(this);
+    return v.transformMatrix4x4(this);
   }
 }

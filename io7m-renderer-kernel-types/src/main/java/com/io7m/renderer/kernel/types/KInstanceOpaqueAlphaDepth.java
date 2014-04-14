@@ -116,14 +116,14 @@ import com.io7m.renderer.types.RException;
   @Override public
     <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
-    instanceVisitableAccept(
+    instanceAccept(
       final @Nonnull V v)
       throws E,
         JCGLException,
         ConstraintError,
         RException
   {
-    return v.instanceVisitOpaqueAlphaDepth(this);
+    return v.instanceOpaqueAlphaDepth(this);
   }
 
   @Override public @Nonnull KFaceSelection instanceGetFaces()

@@ -109,7 +109,7 @@ import com.io7m.renderer.types.RException;
         RException,
         ConstraintError
   {
-    return v.depthVarianceDescriptionVisit(this);
+    return v.depthVarianceDescription(this);
   }
 
   @Override public boolean equals(

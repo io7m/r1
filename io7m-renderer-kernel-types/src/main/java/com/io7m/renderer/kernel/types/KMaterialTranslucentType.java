@@ -50,7 +50,7 @@ public interface KMaterialTranslucentType extends KMaterialType
 
     <A, E extends Throwable, V extends KMaterialTranslucentVisitorType<A, E>>
     A
-    materialTranslucentVisitableAccept(
+    materialTranslucentAccept(
       final @Nonnull V v)
       throws E,
         RException,

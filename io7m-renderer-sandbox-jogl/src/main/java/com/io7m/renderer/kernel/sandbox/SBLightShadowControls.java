@@ -227,7 +227,7 @@ public final class SBLightShadowControls implements SBControls
           try {
             return x
               .shadowAccept(new KShadowVisitorType<Unit, ConstraintError>() {
-                @Override public Unit shadowVisitMappedBasic(
+                @Override public Unit shadowMappedBasic(
                   final KShadowMappedBasic s)
                   throws ConstraintError,
                     JCGLException,
@@ -244,7 +244,7 @@ public final class SBLightShadowControls implements SBControls
                   return Unit.unit();
                 }
 
-                @Override public Unit shadowVisitMappedVariance(
+                @Override public Unit shadowMappedVariance(
                   final KShadowMappedVariance s)
                   throws ConstraintError,
                     JCGLException,

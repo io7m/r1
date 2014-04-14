@@ -47,7 +47,7 @@ public interface KMaterialVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A materialVisitOpaque(
+  @Nonnull A materialOpaque(
     final @Nonnull KMaterialOpaqueType m)
     throws ConstraintError,
       RException,
@@ -67,7 +67,7 @@ public interface KMaterialVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A materialVisitTranslucent(
+  @Nonnull A materialTranslucent(
     final @Nonnull KMaterialTranslucentType m)
     throws ConstraintError,
       RException,

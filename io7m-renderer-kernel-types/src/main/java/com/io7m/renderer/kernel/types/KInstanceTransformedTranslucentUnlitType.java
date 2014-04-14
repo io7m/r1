@@ -19,13 +19,16 @@ package com.io7m.renderer.kernel.types;
 import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
 /**
- * The type of shadow maps.
+ * The type of transformed translucent instances that can be rendered without
+ * lighting.
  */
 
-public interface KShadowMapDescriptionType
+public interface KInstanceTransformedTranslucentUnlitType extends
+  KInstanceTransformedTranslucentType
 {
   /**
    * Be visited by the given generic visitor.
@@ -35,10 +38,6 @@ public interface KShadowMapDescriptionType
    * @return The value returned by the visitor
    * @throws E
    *           Iff the visitor raises <code>E</code
-   * @throws ConstraintError
-   *           Iff the visitor raises {@link ConstraintError}
-   * @throws RException
-   *           Iff the visitor raises {@link RException}
    * 
    * @param <A>
    *          The return type of the visitor
@@ -46,27 +45,20 @@ public interface KShadowMapDescriptionType
    *          The type of exceptions raised by the visitor
    * @param <V>
    *          A specific visitor subtype
+   * @throws ConstraintError
+   *           If the visitor raises {@link ConstraintError}
+   * @throws RException
+   *           If the visitor raises {@link RException}
+   * @throws JCGLException
+   *           If the visitor raises {@link JCGLException}
    */
 
-    <A, E extends Throwable, V extends KShadowMapDescriptionVisitorType<A, E>>
+    <A, E extends Throwable, V extends KInstanceTransformedTranslucentUnlitVisitorType<A, E>>
     A
-    mapDescriptionAccept(
+    transformedTranslucentUnlitAccept(
       final @Nonnull V v)
       throws E,
         ConstraintError,
-        RException;
-
-  /**
-   * @return The identifier of the light associated with the map
-   */
-
-  @Nonnull Integer mapGetLightID();
-
-  /**
-   * @return The size exponent of the map, where the width and height of the
-   *         map will be <code>2 ^ {@link #mapGetSizeExponent()}</code>, where
-   *         {@link #mapGetSizeExponent()}<code> >= 1</code>.
-   */
-
-  int mapGetSizeExponent();
+        RException,
+        JCGLException;
 }

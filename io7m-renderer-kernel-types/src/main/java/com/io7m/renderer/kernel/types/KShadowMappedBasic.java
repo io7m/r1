@@ -139,7 +139,7 @@ import com.io7m.renderer.types.RException;
         RException,
         ConstraintError
   {
-    return v.shadowVisitMappedBasic(this);
+    return v.shadowMappedBasic(this);
   }
 
   @Override public String toString()

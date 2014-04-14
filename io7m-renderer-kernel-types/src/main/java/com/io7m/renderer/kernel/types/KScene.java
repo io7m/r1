@@ -76,7 +76,7 @@ import com.io7m.renderer.types.RException;
         new KInstanceTransformedVisitorType<KTranslucentType, ConstraintError>() {
           @Override public @Nonnull
             KTranslucentType
-            transformedVisitOpaqueAlphaDepth(
+            transformedOpaqueAlphaDepth(
               final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
               throws ConstraintError,
                 RException,
@@ -87,7 +87,7 @@ import com.io7m.renderer.types.RException;
 
           @Override public @Nonnull
             KTranslucentType
-            transformedVisitOpaqueRegular(
+            transformedOpaqueRegular(
               final @Nonnull KInstanceTransformedOpaqueRegular i)
               throws ConstraintError,
                 RException,
@@ -98,7 +98,7 @@ import com.io7m.renderer.types.RException;
 
           @Override public @Nonnull
             KTranslucentType
-            transformedVisitTranslucentRefractive(
+            transformedTranslucentRefractive(
               final @Nonnull KInstanceTransformedTranslucentRefractive i)
               throws ConstraintError,
                 ConstraintError,
@@ -110,13 +110,25 @@ import com.io7m.renderer.types.RException;
 
           @Override public @Nonnull
             KTranslucentType
-            transformedVisitTranslucentRegular(
+            transformedTranslucentRegular(
               final @Nonnull KInstanceTransformedTranslucentRegular i)
               throws ConstraintError,
                 RException,
                 JCGLException
           {
             return i;
+          }
+
+          @Override public
+            KTranslucentType
+            transformedTranslucentSpecularOnly(
+              final @Nonnull KInstanceTransformedTranslucentSpecularOnly i)
+              throws ConstraintError,
+                ConstraintError,
+                RException,
+                JCGLException
+          {
+            throw new UnreachableCodeException();
           }
         };
     }
@@ -264,21 +276,46 @@ import com.io7m.renderer.types.RException;
     }
 
     @Override public void sceneAddTranslucentLit(
-      final @Nonnull KInstanceTransformedTranslucentRegular instance,
+      final @Nonnull KInstanceTransformedTranslucentLitType instance,
       final @Nonnull Set<KLightType> lights)
       throws ConstraintError
     {
-      this.checkNotUnlit(instance);
+      try {
+        this.checkNotUnlit(instance);
 
-      this.visible_translucent_ordered =
-        this.visible_translucent_ordered.plus(new KTranslucentRegularLit(
-          instance,
-          lights));
-      this.visible_instances = this.visible_instances.plus(instance);
+        final KInstanceTransformedTranslucentLitVisitorType<KTranslucentType, ConstraintError> v =
+          new KInstanceTransformedTranslucentLitVisitorType<KTranslucentType, ConstraintError>() {
+            @Override public
+              KTranslucentType
+              transformedTranslucentLitRegular(
+                final @Nonnull KInstanceTransformedTranslucentRegular i)
+            {
+              return new KTranslucentRegularLit(i, lights);
+            }
+
+            @Override public
+              KTranslucentType
+              transformedTranslucentLitSpecularOnly(
+                final @Nonnull KInstanceTransformedTranslucentSpecularOnly i)
+            {
+              return new KTranslucentSpecularOnlyLit(i, lights);
+            }
+          };
+
+        this.visible_translucent_ordered =
+          this.visible_translucent_ordered.plus(instance
+            .transformedTranslucentLitAccept(v));
+        this.visible_instances = this.visible_instances.plus(instance);
+
+      } catch (final RException e) {
+        throw new UnreachableCodeException(e);
+      } catch (final JCGLException e) {
+        throw new UnreachableCodeException(e);
+      }
     }
 
     @Override public void sceneAddTranslucentUnlit(
-      final @Nonnull KInstanceTransformedTranslucentType instance)
+      final @Nonnull KInstanceTransformedTranslucentUnlitType instance)
       throws ConstraintError
     {
       try {
@@ -287,7 +324,7 @@ import com.io7m.renderer.types.RException;
 
         this.visible_translucent_ordered =
           this.visible_translucent_ordered.plus(instance
-            .transformedVisitableAccept(Builder.IDENTITY_TRANSLUCENT));
+            .transformedAccept(Builder.IDENTITY_TRANSLUCENT));
 
         this.visible_instances = this.visible_instances.plus(instance);
       } catch (final JCGLException e) {

@@ -161,7 +161,7 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     final Some<KShadowType> some = (Some<KShadowType>) light.lightGetShadow();
     some.value.shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-      @Override public Unit shadowVisitMappedBasic(
+      @Override public Unit shadowMappedBasic(
         final @Nonnull KShadowMappedBasic s)
         throws JCGLException,
           RException,
@@ -180,7 +180,7 @@ import com.io7m.renderer.types.RTransformViewType;
         return Unit.unit();
       }
 
-      @Override public Unit shadowVisitMappedVariance(
+      @Override public Unit shadowMappedVariance(
         final @Nonnull KShadowMappedVariance s)
         throws JCGLException,
           RException,
@@ -209,7 +209,7 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     final Some<KShadowType> some = (Some<KShadowType>) light.lightGetShadow();
     some.value.shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-      @Override public Unit shadowVisitMappedBasic(
+      @Override public Unit shadowMappedBasic(
         final @Nonnull KShadowMappedBasic s)
         throws JCGLException,
           RException,
@@ -220,7 +220,7 @@ import com.io7m.renderer.types.RTransformViewType;
         return Unit.unit();
       }
 
-      @Override public Unit shadowVisitMappedVariance(
+      @Override public Unit shadowMappedVariance(
         final @Nonnull KShadowMappedVariance s)
         throws JCGLException,
           RException,
@@ -347,13 +347,13 @@ import com.io7m.renderer.types.RTransformViewType;
           RException
       {
         light
-          .lightVisitableAccept(new KLightVisitorType<Unit, JCGLException>() {
+          .lightAccept(new KLightVisitorType<Unit, JCGLException>() {
 
             /**
              * Render the batch with a directional light.
              */
 
-            @Override public Unit lightVisitDirectional(
+            @Override public Unit lightDirectional(
               final @Nonnull KLightDirectional l)
               throws ConstraintError,
                 RException,
@@ -374,7 +374,7 @@ import com.io7m.renderer.types.RTransformViewType;
              * Render the batch with a projective light.
              */
 
-            @Override public Unit lightVisitProjective(
+            @Override public Unit lightProjective(
               final @Nonnull KLightProjective projective)
               throws ConstraintError,
                 RException,
@@ -409,7 +409,7 @@ import com.io7m.renderer.types.RTransformViewType;
              * Render the batch with a spherical light.
              */
 
-            @Override public Unit lightVisitSpherical(
+            @Override public Unit lightSpherical(
               final @Nonnull KLightSphere l)
               throws ConstraintError,
                 RException,

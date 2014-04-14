@@ -176,25 +176,25 @@ import com.io7m.renderer.types.RTransformTextureType;
   @Override public
     <A, E extends Throwable, V extends KMaterialOpaqueVisitorType<A, E>>
     A
-    materialOpaqueVisitableAccept(
+    materialOpaqueAccept(
       final @Nonnull V v)
       throws E,
         ConstraintError,
         RException
   {
-    return v.materialVisitOpaqueRegular(this);
+    return v.materialOpaqueRegular(this);
   }
 
   @Override public
     <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
     A
-    materialVisitableAccept(
+    materialAccept(
       final @Nonnull V v)
       throws E,
         RException,
         ConstraintError
   {
-    return v.materialVisitOpaque(this);
+    return v.materialOpaque(this);
   }
 
   @Override public int texturesGetRequired()

@@ -70,9 +70,9 @@ public enum KMaterialDepthLabel
       Constraints.constrainNotNull(albedo, "Albedo");
       Constraints.constrainNotNull(instance, "Instance");
 
-      return instance.instanceGetMaterial().materialOpaqueVisitableAccept(
+      return instance.instanceGetMaterial().materialOpaqueAccept(
         new KMaterialOpaqueVisitorType<KMaterialDepthLabel, ConstraintError>() {
-          @Override public KMaterialDepthLabel materialVisitOpaqueAlphaDepth(
+          @Override public KMaterialDepthLabel materialOpaqueAlphaDepth(
             final @Nonnull KMaterialOpaqueAlphaDepth m)
             throws ConstraintError
           {
@@ -90,7 +90,7 @@ public enum KMaterialDepthLabel
             throw new UnreachableCodeException();
           }
 
-          @Override public KMaterialDepthLabel materialVisitOpaqueRegular(
+          @Override public KMaterialDepthLabel materialOpaqueRegular(
             final @Nonnull KMaterialOpaqueRegular m)
             throws ConstraintError
           {

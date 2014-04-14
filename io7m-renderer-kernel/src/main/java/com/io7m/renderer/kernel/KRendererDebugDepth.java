@@ -51,6 +51,7 @@ import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
@@ -194,8 +195,8 @@ import com.io7m.renderer.types.RException;
       mi.getMatrixModelView());
 
     material
-      .materialOpaqueVisitableAccept(new KMaterialOpaqueVisitorType<Unit, JCGLException>() {
-        @Override public Unit materialVisitOpaqueAlphaDepth(
+      .materialOpaqueAccept(new KMaterialOpaqueVisitorType<Unit, JCGLException>() {
+        @Override public Unit materialOpaqueAlphaDepth(
           final @Nonnull KMaterialOpaqueAlphaDepth m)
           throws ConstraintError,
             RException,
@@ -233,7 +234,7 @@ import com.io7m.renderer.types.RException;
           return Unit.unit();
         }
 
-        @Override public Unit materialVisitOpaqueRegular(
+        @Override public Unit materialOpaqueRegular(
           final @Nonnull KMaterialOpaqueRegular m)
           throws ConstraintError,
             RException,
@@ -387,8 +388,8 @@ import com.io7m.renderer.types.RException;
 
       for (final KInstanceTransformedType instance : instances) {
         instance
-          .transformedVisitableAccept(new KInstanceTransformedVisitorType<Unit, JCGLException>() {
-            @Override public Unit transformedVisitOpaqueAlphaDepth(
+          .transformedAccept(new KInstanceTransformedVisitorType<Unit, JCGLException>() {
+            @Override public Unit transformedOpaqueAlphaDepth(
               final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
               throws JCGLException,
                 RException,
@@ -409,7 +410,7 @@ import com.io7m.renderer.types.RException;
                 });
             }
 
-            @Override public Unit transformedVisitOpaqueRegular(
+            @Override public Unit transformedOpaqueRegular(
               final @Nonnull KInstanceTransformedOpaqueRegular i)
               throws JCGLException,
                 RException,
@@ -430,16 +431,26 @@ import com.io7m.renderer.types.RException;
                 });
             }
 
-            @Override public Unit transformedVisitTranslucentRefractive(
+            @Override public Unit transformedTranslucentRefractive(
               final @Nonnull KInstanceTransformedTranslucentRefractive i)
               throws JCGLException
             {
               return Unit.unit();
             }
 
-            @Override public Unit transformedVisitTranslucentRegular(
+            @Override public Unit transformedTranslucentRegular(
               final @Nonnull KInstanceTransformedTranslucentRegular i)
               throws JCGLException
+            {
+              return Unit.unit();
+            }
+
+            @Override public Unit transformedTranslucentSpecularOnly(
+              final @Nonnull KInstanceTransformedTranslucentSpecularOnly i)
+              throws JCGLException,
+                ConstraintError,
+                RException,
+                JCGLException
             {
               return Unit.unit();
             }

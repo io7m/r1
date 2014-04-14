@@ -32,12 +32,14 @@ import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedVisitorType;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentType;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.kernel.types.KTransformType;
@@ -218,8 +220,8 @@ public final class KMutableMatricesType
 
       try {
         i
-          .transformedVisitableAccept(new KInstanceTransformedVisitorType<Unit, ConstraintError>() {
-            @Override public Unit transformedVisitOpaqueAlphaDepth(
+          .transformedAccept(new KInstanceTransformedVisitorType<Unit, ConstraintError>() {
+            @Override public Unit transformedOpaqueAlphaDepth(
               final @Nonnull KInstanceTransformedOpaqueAlphaDepth ito)
               throws ConstraintError
             {
@@ -231,7 +233,7 @@ public final class KMutableMatricesType
               return Unit.unit();
             }
 
-            @Override public Unit transformedVisitOpaqueRegular(
+            @Override public Unit transformedOpaqueRegular(
               final @Nonnull KInstanceTransformedOpaqueRegular ito)
               throws ConstraintError
             {
@@ -243,7 +245,7 @@ public final class KMutableMatricesType
               return Unit.unit();
             }
 
-            @Override public Unit transformedVisitTranslucentRefractive(
+            @Override public Unit transformedTranslucentRefractive(
               final KInstanceTransformedTranslucentRefractive itt)
               throws ConstraintError
             {
@@ -255,9 +257,24 @@ public final class KMutableMatricesType
               return Unit.unit();
             }
 
-            @Override public Unit transformedVisitTranslucentRegular(
+            @Override public Unit transformedTranslucentRegular(
               final @Nonnull KInstanceTransformedTranslucentRegular itt)
               throws ConstraintError
+            {
+              final KMaterialTranslucentType m =
+                itt.getInstance().instanceGetMaterial();
+              final RMatrixI3x3F<RTransformTextureType> material_uv_m =
+                m.materialGetUVMatrix();
+              material_uv_m.makeMatrixM3x3F(Instance.this.matrix_uv_temp);
+              return Unit.unit();
+            }
+
+            @Override public Unit transformedTranslucentSpecularOnly(
+              final @Nonnull KInstanceTransformedTranslucentSpecularOnly itt)
+              throws ConstraintError,
+                ConstraintError,
+                RException,
+                JCGLException
             {
               final KMaterialTranslucentType m =
                 itt.getInstance().instanceGetMaterial();
@@ -434,8 +451,8 @@ public final class KMutableMatricesType
 
       try {
         i
-          .transformedVisitableAccept(new KInstanceTransformedVisitorType<Unit, ConstraintError>() {
-            @Override public Unit transformedVisitOpaqueAlphaDepth(
+          .transformedAccept(new KInstanceTransformedVisitorType<Unit, ConstraintError>() {
+            @Override public Unit transformedOpaqueAlphaDepth(
               final @Nonnull KInstanceTransformedOpaqueAlphaDepth ito)
               throws ConstraintError
             {
@@ -448,7 +465,7 @@ public final class KMutableMatricesType
               return Unit.unit();
             }
 
-            @Override public Unit transformedVisitOpaqueRegular(
+            @Override public Unit transformedOpaqueRegular(
               final @Nonnull KInstanceTransformedOpaqueRegular ito)
               throws ConstraintError
             {
@@ -461,7 +478,7 @@ public final class KMutableMatricesType
               return Unit.unit();
             }
 
-            @Override public Unit transformedVisitTranslucentRefractive(
+            @Override public Unit transformedTranslucentRefractive(
               final @Nonnull KInstanceTransformedTranslucentRefractive itt)
               throws ConstraintError
             {
@@ -474,11 +491,27 @@ public final class KMutableMatricesType
               return Unit.unit();
             }
 
-            @Override public Unit transformedVisitTranslucentRegular(
+            @Override public Unit transformedTranslucentRegular(
               final @Nonnull KInstanceTransformedTranslucentRegular itt)
               throws ConstraintError
             {
               final KMaterialTranslucentRegular m =
+                itt.getInstance().instanceGetMaterial();
+              final RMatrixI3x3F<RTransformTextureType> material_uv_m =
+                m.materialGetUVMatrix();
+              material_uv_m
+                .makeMatrixM3x3F(InstanceWithProjective.this.matrix_uv_temp);
+              return Unit.unit();
+            }
+
+            @Override public Unit transformedTranslucentSpecularOnly(
+              final @Nonnull KInstanceTransformedTranslucentSpecularOnly itt)
+              throws ConstraintError,
+                ConstraintError,
+                RException,
+                JCGLException
+            {
+              final KMaterialTranslucentSpecularOnly m =
                 itt.getInstance().instanceGetMaterial();
               final RMatrixI3x3F<RTransformTextureType> material_uv_m =
                 m.materialGetUVMatrix();
