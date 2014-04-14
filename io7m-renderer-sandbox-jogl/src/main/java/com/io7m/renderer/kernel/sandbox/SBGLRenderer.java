@@ -170,6 +170,8 @@ import com.io7m.renderer.kernel.KShadowMapCache;
 import com.io7m.renderer.kernel.KShadowMapCacheLoader;
 import com.io7m.renderer.kernel.KShadowMapCacheType;
 import com.io7m.renderer.kernel.KShadowMapRenderer;
+import com.io7m.renderer.kernel.KTranslucentRenderer;
+import com.io7m.renderer.kernel.KTranslucentRendererType;
 import com.io7m.renderer.kernel.KUnitQuad;
 import com.io7m.renderer.kernel.KUnitQuadUsableType;
 import com.io7m.renderer.kernel.types.KCamera;
@@ -1762,11 +1764,19 @@ final class SBGLRenderer implements GLEventListener
             this.label_cache,
             this.log);
 
+        final KTranslucentRendererType translucent_renderer =
+          KTranslucentRenderer.newRenderer(
+            this.gi,
+            this.label_cache,
+            this.shader_cache,
+            refraction_renderer,
+            this.log);
+
         return new SBKRendererForward(KRendererForward.newRenderer(
           this.gi,
           depth_renderer,
           shadow_map_renderer,
-          refraction_renderer,
+          translucent_renderer,
           this.label_cache,
           this.shader_cache,
           this.log));

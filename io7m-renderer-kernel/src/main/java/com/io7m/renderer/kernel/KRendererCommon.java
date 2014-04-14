@@ -20,13 +20,32 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jaux.functional.Option.Some;
+import com.io7m.jaux.functional.Unit;
 import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.FaceWindingOrder;
+import com.io7m.jcanephora.JCBProgram;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLRuntimeException;
+import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.TextureCubeStaticUsable;
+import com.io7m.jcanephora.TextureUnit;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixReadable4x4F;
+import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KFaceSelection;
+import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KMaterialLabelRegularType;
+import com.io7m.renderer.kernel.types.KMaterialRegularType;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
+import com.io7m.renderer.kernel.types.KShadowMappedBasic;
+import com.io7m.renderer.kernel.types.KShadowMappedVariance;
+import com.io7m.renderer.kernel.types.KShadowType;
+import com.io7m.renderer.kernel.types.KShadowVisitorType;
+import com.io7m.renderer.types.RException;
 
 /**
  * Functions common to all renderers.
@@ -106,5 +125,296 @@ final class KRendererCommon
   private KRendererCommon()
   {
     throw new UnreachableCodeException();
+  }
+
+  static void putInstanceMatrices(
+    final @Nonnull JCBProgram program,
+    final @Nonnull MatricesInstanceType mwi,
+    final @Nonnull KMaterialLabelRegularType label)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMatrixModelViewUnchecked(
+      program,
+      mwi.getMatrixModelView());
+
+    if (label.labelImpliesUV()) {
+      KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
+    }
+
+    switch (label.labelGetNormal()) {
+      case NORMAL_MAPPED:
+      case NORMAL_VERTEX:
+      {
+        KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
+        break;
+      }
+      case NORMAL_NONE:
+      {
+        break;
+      }
+    }
+
+    switch (label.labelGetEnvironment()) {
+      case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_MAPPED:
+      {
+        KShadingProgramCommon.putMatrixInverseView(
+          program,
+          mwi.getMatrixViewInverse());
+        break;
+      }
+      case ENVIRONMENT_NONE:
+      {
+        break;
+      }
+    }
+  }
+
+  static void putInstanceTextures(
+    final @Nonnull KTextureUnitContextType units,
+    final @Nonnull KMaterialLabelRegularType label,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KMaterialRegularType material)
+    throws JCGLException,
+      ConstraintError
+  {
+    switch (label.labelGetAlbedo()) {
+      case ALBEDO_COLOURED:
+      {
+        break;
+      }
+      case ALBEDO_TEXTURED:
+      {
+        final Some<Texture2DStaticUsable> some =
+          (Some<Texture2DStaticUsable>) material
+            .materialGetAlbedo()
+            .getTexture();
+        KShadingProgramCommon.putTextureAlbedoUnchecked(
+          program,
+          units.withTexture2D(some.value));
+        break;
+      }
+    }
+
+    switch (label.labelGetNormal()) {
+      case NORMAL_MAPPED:
+      {
+        final Some<Texture2DStaticUsable> some =
+          (Some<Texture2DStaticUsable>) material
+            .materialGetNormal()
+            .getTexture();
+        KShadingProgramCommon.putTextureNormal(
+          program,
+          units.withTexture2D(some.value));
+        break;
+      }
+      case NORMAL_NONE:
+      case NORMAL_VERTEX:
+      {
+        break;
+      }
+    }
+
+    switch (label.labelGetEmissive()) {
+      case EMISSIVE_MAPPED:
+      {
+        final Some<Texture2DStaticUsable> some =
+          (Some<Texture2DStaticUsable>) material
+            .materialGetEmissive()
+            .getTexture();
+        KShadingProgramCommon.putTextureEmissive(
+          program,
+          units.withTexture2D(some.value));
+        break;
+      }
+      case EMISSIVE_CONSTANT:
+      case EMISSIVE_NONE:
+      {
+        break;
+      }
+    }
+
+    if (label.labelImpliesSpecularMap()) {
+      final Some<Texture2DStaticUsable> some =
+        (Some<Texture2DStaticUsable>) material
+          .materialGetSpecular()
+          .getTexture();
+      KShadingProgramCommon.putTextureSpecular(
+        program,
+        units.withTexture2D(some.value));
+    }
+
+    switch (label.labelGetEnvironment()) {
+      case ENVIRONMENT_NONE:
+      {
+        break;
+      }
+      case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_MAPPED:
+      {
+        final Some<TextureCubeStaticUsable> some =
+          (Some<TextureCubeStaticUsable>) material
+            .materialGetEnvironment()
+            .getTexture();
+        KShadingProgramCommon.putTextureEnvironment(
+          program,
+          units.withTextureCube(some.value));
+        break;
+      }
+    }
+  }
+
+  static void putMaterialRegular(
+    final @Nonnull JCBProgram program,
+    final @Nonnull KMaterialLabelRegularType label,
+    final @Nonnull KMaterialRegularType material)
+    throws ConstraintError,
+      JCGLException
+  {
+    KShadingProgramCommon.putMaterialAlbedo(
+      program,
+      material.materialGetAlbedo());
+
+    switch (label.labelGetEmissive()) {
+      case EMISSIVE_CONSTANT:
+      case EMISSIVE_MAPPED:
+      {
+        KShadingProgramCommon.putMaterialEmissive(
+          program,
+          material.materialGetEmissive());
+        break;
+      }
+      case EMISSIVE_NONE:
+      {
+        break;
+      }
+    }
+
+    switch (label.labelGetEnvironment()) {
+      case ENVIRONMENT_NONE:
+      {
+        break;
+      }
+      case ENVIRONMENT_REFLECTIVE:
+      case ENVIRONMENT_REFLECTIVE_MAPPED:
+      {
+        KShadingProgramCommon.putMaterialEnvironment(
+          program,
+          material.materialGetEnvironment());
+        break;
+      }
+    }
+
+    switch (label.labelGetSpecular()) {
+      case SPECULAR_CONSTANT:
+      case SPECULAR_MAPPED:
+      {
+        KShadingProgramCommon.putMaterialSpecular(
+          program,
+          material.materialGetSpecular());
+        break;
+      }
+      case SPECULAR_NONE:
+      {
+        break;
+      }
+    }
+  }
+
+  static void putMaterialTranslucentRegular(
+    final @Nonnull JCBProgram program,
+    final @Nonnull KMaterialLabelRegularType label,
+    final @Nonnull KMaterialTranslucentRegular material)
+    throws JCGLException,
+      ConstraintError
+  {
+    KRendererCommon.putMaterialRegular(program, label, material);
+    KShadingProgramCommon.putMaterialAlphaOpacity(program, material
+      .materialGetAlpha()
+      .getOpacity());
+  }
+
+  static void putShadow(
+    final @Nonnull KShadowMapContextType shadow_context,
+    final @Nonnull KTextureUnitContextType unit_context,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KLightProjective light)
+    throws JCGLException,
+      RException,
+      ConstraintError
+  {
+    final Some<KShadowType> some = (Some<KShadowType>) light.lightGetShadow();
+    some.value.shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
+      @Override public Unit shadowVisitMappedBasic(
+        final @Nonnull KShadowMappedBasic s)
+        throws JCGLException,
+          RException,
+          ConstraintError
+      {
+        final KShadowMapBasic map =
+          (KShadowMapBasic) shadow_context.getShadowMap(s);
+
+        final TextureUnit unit =
+          unit_context.withTexture2D(map
+            .getFramebuffer()
+            .kFramebufferGetDepthTexture());
+
+        KShadingProgramCommon.putShadowBasic(program, s);
+        KShadingProgramCommon.putTextureShadowMapBasic(program, unit);
+        return Unit.unit();
+      }
+
+      @Override public Unit shadowVisitMappedVariance(
+        final @Nonnull KShadowMappedVariance s)
+        throws JCGLException,
+          RException,
+          ConstraintError
+      {
+        final KShadowMapVariance map =
+          (KShadowMapVariance) shadow_context.getShadowMap(s);
+        final TextureUnit unit =
+          unit_context.withTexture2D(map
+            .getFramebuffer()
+            .kFramebufferGetDepthVarianceTexture());
+
+        KShadingProgramCommon.putShadowVariance(program, s);
+        KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
+        return Unit.unit();
+      }
+    });
+  }
+
+  static void putShadowReuse(
+    final @Nonnull JCBProgram program,
+    final @Nonnull KLightProjective light)
+    throws JCGLException,
+      RException,
+      ConstraintError
+  {
+    final Some<KShadowType> some = (Some<KShadowType>) light.lightGetShadow();
+    some.value.shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
+      @Override public Unit shadowVisitMappedBasic(
+        final @Nonnull KShadowMappedBasic s)
+        throws JCGLException,
+          RException,
+          ConstraintError
+      {
+        KShadingProgramCommon.putShadowBasicReuse(program);
+        KShadingProgramCommon.putTextureShadowMapBasicReuse(program);
+        return Unit.unit();
+      }
+
+      @Override public Unit shadowVisitMappedVariance(
+        final @Nonnull KShadowMappedVariance s)
+        throws JCGLException,
+          RException,
+          ConstraintError
+      {
+        KShadingProgramCommon.putShadowVarianceReuse(program);
+        KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
+        return Unit.unit();
+      }
+    });
   }
 }

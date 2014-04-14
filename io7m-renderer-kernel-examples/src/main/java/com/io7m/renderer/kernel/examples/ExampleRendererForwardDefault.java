@@ -63,6 +63,8 @@ import com.io7m.renderer.kernel.KShadowMapCacheLoader;
 import com.io7m.renderer.kernel.KShadowMapCacheType;
 import com.io7m.renderer.kernel.KShadowMapRenderer;
 import com.io7m.renderer.kernel.KShadowMapRendererType;
+import com.io7m.renderer.kernel.KTranslucentRenderer;
+import com.io7m.renderer.kernel.KTranslucentRendererType;
 import com.io7m.renderer.kernel.KUnitQuad;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.types.RException;
@@ -196,11 +198,19 @@ public final class ExampleRendererForwardDefault extends
         label_cache,
         log);
 
+    final KTranslucentRendererType translucent_renderer =
+      KTranslucentRenderer.newRenderer(
+        gi,
+        label_cache,
+        shader_cache,
+        refraction_renderer,
+        log);
+
     return new ExampleRendererForwardDefault(KRendererForward.newRenderer(
       gi,
       depth_renderer,
       shadow_renderer,
-      refraction_renderer,
+      translucent_renderer,
       label_cache,
       shader_cache,
       log), quad);
