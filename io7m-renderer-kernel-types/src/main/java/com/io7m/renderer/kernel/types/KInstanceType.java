@@ -53,7 +53,7 @@ public interface KInstanceType
 
     <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
-    instanceVisitableAccept(
+    instanceAccept(
       final @Nonnull V v)
       throws E,
         ConstraintError,

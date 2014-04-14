@@ -97,7 +97,7 @@ import com.io7m.renderer.types.RException;
         RException,
         ConstraintError
   {
-    return v.depthDescriptionVisit(this);
+    return v.depthDescription(this);
   }
 
   @Override public boolean equals(

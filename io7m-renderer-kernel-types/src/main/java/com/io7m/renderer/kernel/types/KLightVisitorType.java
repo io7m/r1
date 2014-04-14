@@ -47,7 +47,7 @@ public interface KLightVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A lightVisitDirectional(
+  A lightDirectional(
     final @Nonnull KLightDirectional l)
     throws ConstraintError,
       RException,
@@ -67,7 +67,7 @@ public interface KLightVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A lightVisitProjective(
+  A lightProjective(
     final @Nonnull KLightProjective l)
     throws ConstraintError,
       RException,
@@ -87,7 +87,7 @@ public interface KLightVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A lightVisitSpherical(
+  A lightSpherical(
     final @Nonnull KLightSphere l)
     throws ConstraintError,
       RException,

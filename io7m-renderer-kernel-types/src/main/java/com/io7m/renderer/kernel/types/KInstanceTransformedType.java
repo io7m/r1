@@ -67,7 +67,7 @@ public interface KInstanceTransformedType extends KInstanceType
 
     <A, E extends Throwable, V extends KInstanceTransformedVisitorType<A, E>>
     A
-    transformedVisitableAccept(
+    transformedAccept(
       final @Nonnull V v)
       throws E,
         ConstraintError,

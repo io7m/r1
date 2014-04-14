@@ -26,16 +26,17 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
 /**
- * A regular translucent instance lit by a set of lights.
+ * A specular-only translucent instance lit by a set of lights.
  */
 
-@Immutable public final class KTranslucentRegularLit implements KTranslucentType
+@Immutable public final class KTranslucentSpecularOnlyLit implements
+  KTranslucentType
 {
-  private final @Nonnull KInstanceTransformedTranslucentRegular instance;
-  private final @Nonnull Set<KLightType>                            lights;
+  private final @Nonnull KInstanceTransformedTranslucentSpecularOnly instance;
+  private final @Nonnull Set<KLightType>                             lights;
 
-  protected KTranslucentRegularLit(
-    final @Nonnull KInstanceTransformedTranslucentRegular in_instance,
+  protected KTranslucentSpecularOnlyLit(
+    final @Nonnull KInstanceTransformedTranslucentSpecularOnly in_instance,
     final @Nonnull Set<KLightType> in_lights)
   {
     this.instance = in_instance;
@@ -52,7 +53,7 @@ import com.io7m.renderer.types.RException;
         RException,
         ConstraintError
   {
-    return v.translucentRegularLit(this);
+    return v.translucentSpecularOnlyLit(this);
   }
 
   /**
@@ -60,7 +61,7 @@ import com.io7m.renderer.types.RException;
    */
 
   public @Nonnull
-    KInstanceTransformedTranslucentRegular
+    KInstanceTransformedTranslucentSpecularOnly
     translucentGetInstance()
   {
     return this.instance;

@@ -32,7 +32,8 @@ import com.io7m.renderer.types.RTransformTextureType;
  */
 
 @Immutable public final class KInstanceTransformedTranslucentRegular implements
-  KInstanceTransformedTranslucentType,
+  KInstanceTransformedTranslucentUnlitType,
+  KInstanceTransformedTranslucentLitType,
   KTranslucentType
 {
   /**
@@ -114,6 +115,19 @@ import com.io7m.renderer.types.RTransformTextureType;
     return result;
   }
 
+  @Override public
+    <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
+    A
+    instanceAccept(
+      final @Nonnull V v)
+      throws E,
+        ConstraintError,
+        RException,
+        JCGLException
+  {
+    return v.instanceTranslucentRegular(this.instance);
+  }
+
   @Override public @Nonnull KMeshReadableType instanceGetMesh()
   {
     return this.instance.instanceGetMesh();
@@ -132,29 +146,42 @@ import com.io7m.renderer.types.RTransformTextureType;
   }
 
   @Override public
-    <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
+    <A, E extends Throwable, V extends KInstanceTransformedVisitorType<A, E>>
     A
-    instanceVisitableAccept(
+    transformedAccept(
       final @Nonnull V v)
       throws E,
         ConstraintError,
         RException,
         JCGLException
   {
-    return v.instanceVisitTranslucentRegular(this.instance);
+    return v.transformedTranslucentRegular(this);
   }
 
   @Override public
-    <A, E extends Throwable, V extends KInstanceTransformedVisitorType<A, E>>
+    <A, E extends Throwable, V extends KInstanceTransformedTranslucentLitVisitorType<A, E>>
     A
-    transformedVisitableAccept(
+    transformedTranslucentLitAccept(
       final @Nonnull V v)
       throws E,
         ConstraintError,
         RException,
         JCGLException
   {
-    return v.transformedVisitTranslucentRegular(this);
+    return v.transformedTranslucentLitRegular(this);
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KInstanceTransformedTranslucentUnlitVisitorType<A, E>>
+    A
+    transformedTranslucentUnlitAccept(
+      final @Nonnull V v)
+      throws E,
+        ConstraintError,
+        RException,
+        JCGLException
+  {
+    return v.transformedTranslucentUnlitRegular(this);
   }
 
   @Override public
@@ -167,6 +194,6 @@ import com.io7m.renderer.types.RTransformTextureType;
         RException,
         ConstraintError
   {
-    return v.translucentVisitRegularUnlit(this);
+    return v.translucentRegularUnlit(this);
   }
 }

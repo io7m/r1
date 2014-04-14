@@ -202,7 +202,7 @@ public interface KSceneBuilderType
    */
 
   void sceneAddTranslucentLit(
-    final @Nonnull KInstanceTransformedTranslucentRegular instance,
+    final @Nonnull KInstanceTransformedTranslucentLitType instance,
     final @Nonnull Set<KLightType> lights)
     throws ConstraintError;
 
@@ -222,6 +222,6 @@ public interface KSceneBuilderType
    */
 
   void sceneAddTranslucentUnlit(
-    final @Nonnull KInstanceTransformedTranslucentType instance)
+    final @Nonnull KInstanceTransformedTranslucentUnlitType instance)
     throws ConstraintError;
 }

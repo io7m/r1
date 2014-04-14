@@ -122,13 +122,13 @@ import com.io7m.renderer.types.RException;
   @Override public
     <A, E extends Throwable, V extends KShadowMapDescriptionVisitorType<A, E>>
     A
-    kShadowMapDescriptionAccept(
+    mapDescriptionAccept(
       final @Nonnull V v)
       throws RException,
         ConstraintError,
         E
   {
-    return v.shadowMapDescriptionVisitBasic(this);
+    return v.shadowMapDescriptionBasic(this);
   }
 
   @Override public @Nonnull Integer mapGetLightID()

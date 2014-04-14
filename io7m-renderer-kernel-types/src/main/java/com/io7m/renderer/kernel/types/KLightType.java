@@ -54,7 +54,7 @@ import com.io7m.renderer.types.RVectorI3F;
 
     <A, E extends Throwable, V extends KLightVisitorType<A, E>>
     A
-    lightVisitableAccept(
+    lightAccept(
       final @Nonnull V v)
       throws ConstraintError,
         RException,

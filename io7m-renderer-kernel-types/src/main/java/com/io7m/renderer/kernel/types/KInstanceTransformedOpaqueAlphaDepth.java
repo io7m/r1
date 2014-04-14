@@ -133,26 +133,26 @@ import com.io7m.renderer.types.RTransformTextureType;
   @Override public
     <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
-    instanceVisitableAccept(
+    instanceAccept(
       final @Nonnull V v)
       throws E,
         ConstraintError,
         RException,
         JCGLException
   {
-    return v.instanceVisitOpaqueAlphaDepth(this.instance);
+    return v.instanceOpaqueAlphaDepth(this.instance);
   }
 
   @Override public
     <A, E extends Throwable, V extends KInstanceTransformedVisitorType<A, E>>
     A
-    transformedVisitableAccept(
+    transformedAccept(
       final @Nonnull V v)
       throws E,
         JCGLException,
         ConstraintError,
         RException
   {
-    return v.transformedVisitOpaqueAlphaDepth(this);
+    return v.transformedOpaqueAlphaDepth(this);
   }
 }

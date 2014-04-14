@@ -249,13 +249,13 @@ import com.io7m.renderer.types.RVectorI3F;
   @Override public
     <A, E extends Throwable, V extends KLightVisitorType<A, E>>
     A
-    lightVisitableAccept(
+    lightAccept(
       final V v)
       throws E,
         ConstraintError,
         RException
   {
-    return v.lightVisitProjective(this);
+    return v.lightProjective(this);
   }
 
   @Override public String toString()

@@ -35,29 +35,6 @@ import com.io7m.renderer.types.RException;
 public interface KInstanceVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit a regular opaque instance.
-   * 
-   * @param i
-   *          The instance
-   * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
-   * @throws RException
-   *           If required
-   * @throws JCGLException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  @Nonnull A instanceVisitOpaqueRegular(
-    final @Nonnull KInstanceOpaqueRegular i)
-    throws E,
-      ConstraintError,
-      RException,
-      JCGLException;
-
-  /**
    * Visit an opaque alpha-to-depth instance.
    * 
    * @param i
@@ -73,8 +50,31 @@ public interface KInstanceVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A instanceVisitOpaqueAlphaDepth(
+  @Nonnull A instanceOpaqueAlphaDepth(
     final @Nonnull KInstanceOpaqueAlphaDepth i)
+    throws E,
+      ConstraintError,
+      RException,
+      JCGLException;
+
+  /**
+   * Visit a regular opaque instance.
+   * 
+   * @param i
+   *          The instance
+   * @return A value of type <code>A</code>
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   * @throws JCGLException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  @Nonnull A instanceOpaqueRegular(
+    final @Nonnull KInstanceOpaqueRegular i)
     throws E,
       ConstraintError,
       RException,
@@ -96,7 +96,7 @@ public interface KInstanceVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A instanceVisitTranslucentRefractive(
+  @Nonnull A instanceTranslucentRefractive(
     final @Nonnull KInstanceTranslucentRefractive i)
     throws E,
       ConstraintError,
@@ -119,8 +119,31 @@ public interface KInstanceVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A instanceVisitTranslucentRegular(
+  @Nonnull A instanceTranslucentRegular(
     final @Nonnull KInstanceTranslucentRegular i)
+    throws E,
+      ConstraintError,
+      RException,
+      JCGLException;
+
+  /**
+   * Visit a specular-only instance.
+   * 
+   * @param i
+   *          The instance
+   * @return A value of type <code>A</code>
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   * @throws JCGLException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  @Nonnull A instanceTranslucentSpecularOnly(
+    final @Nonnull KInstanceTranslucentSpecularOnly i)
     throws E,
       ConstraintError,
       RException,

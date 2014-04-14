@@ -50,7 +50,7 @@ public interface KShadowVisitorType<T, E extends Throwable>
    *           If required
    */
 
-  T shadowVisitMappedBasic(
+  T shadowMappedBasic(
     final @Nonnull KShadowMappedBasic s)
     throws E,
       JCGLException,
@@ -73,7 +73,7 @@ public interface KShadowVisitorType<T, E extends Throwable>
    *           If required
    */
 
-  T shadowVisitMappedVariance(
+  T shadowMappedVariance(
     final @Nonnull KShadowMappedVariance s)
     throws E,
       JCGLException,

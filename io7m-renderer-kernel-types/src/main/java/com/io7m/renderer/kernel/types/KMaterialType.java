@@ -64,7 +64,7 @@ public interface KMaterialType extends KTexturesRequiredType
 
     <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
     A
-    materialVisitableAccept(
+    materialAccept(
       final @Nonnull V v)
       throws E,
         RException,

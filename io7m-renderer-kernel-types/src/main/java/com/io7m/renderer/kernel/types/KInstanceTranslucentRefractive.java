@@ -30,6 +30,7 @@ import com.io7m.renderer.types.RException;
 
 @Immutable public final class KInstanceTranslucentRefractive implements
   KInstanceTranslucentType,
+  KInstanceTranslucentUnlitType,
   KInstanceWithMaterialType<KMaterialTranslucentRefractive>
 {
   /**
@@ -117,13 +118,13 @@ import com.io7m.renderer.types.RException;
   @Override public
     <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
-    instanceVisitableAccept(
+    instanceAccept(
       final @Nonnull V v)
       throws E,
         JCGLException,
         ConstraintError,
         RException
   {
-    return v.instanceVisitTranslucentRefractive(this);
+    return v.instanceTranslucentRefractive(this);
   }
 }

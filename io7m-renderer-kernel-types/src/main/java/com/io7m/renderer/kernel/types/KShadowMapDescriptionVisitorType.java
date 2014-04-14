@@ -47,7 +47,7 @@ public interface KShadowMapDescriptionVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A shadowMapDescriptionVisitBasic(
+  A shadowMapDescriptionBasic(
     final @Nonnull KShadowMapBasicDescription sm)
     throws E,
       ConstraintError,
@@ -67,7 +67,7 @@ public interface KShadowMapDescriptionVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A shadowMapDescriptionVisitVariance(
+  A shadowMapDescriptionVariance(
     final @Nonnull KShadowMapVarianceDescription sm)
     throws E,
       ConstraintError,

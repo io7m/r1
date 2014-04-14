@@ -25,22 +25,16 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
 /**
- * <p>
- * An instance with an opaque material applied.
- * </p>
- * <p>
- * Opaque instances may be rendered in any order, and the depth buffer is used
- * to ensure that the instances appear at the correct perceived distance
- * onscreen.
- * </p>
+ * An instance with a refractive material applied.
  */
 
-@Immutable public final class KInstanceOpaqueRegular implements
-  KInstanceWithMaterialType<KMaterialOpaqueRegular>,
-  KInstanceOpaqueType
+@Immutable public final class KInstanceTranslucentSpecularOnly implements
+  KInstanceTranslucentType,
+  KInstanceTranslucentLitType,
+  KInstanceWithMaterialType<KMaterialTranslucentSpecularOnly>
 {
   /**
-   * Create a new instance with an opaque material.
+   * Create a new translucent instance.
    * 
    * @param in_material
    *          The material
@@ -53,21 +47,24 @@ import com.io7m.renderer.types.RException;
    *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KInstanceOpaqueRegular newInstance(
-    final @Nonnull KMaterialOpaqueRegular in_material,
+  public static @Nonnull KInstanceTranslucentSpecularOnly newInstance(
+    final @Nonnull KMaterialTranslucentSpecularOnly in_material,
     final @Nonnull KMeshReadableType in_mesh,
     final @Nonnull KFaceSelection in_faces)
     throws ConstraintError
   {
-    return new KInstanceOpaqueRegular(in_material, in_mesh, in_faces);
+    return new KInstanceTranslucentSpecularOnly(
+      in_material,
+      in_mesh,
+      in_faces);
   }
 
-  private final @Nonnull KFaceSelection         faces;
-  private final @Nonnull KMaterialOpaqueRegular material;
-  private final @Nonnull KMeshReadableType      mesh;
+  private final @Nonnull KFaceSelection                   faces;
+  private final @Nonnull KMaterialTranslucentSpecularOnly material;
+  private final @Nonnull KMeshReadableType                mesh;
 
-  private KInstanceOpaqueRegular(
-    final @Nonnull KMaterialOpaqueRegular in_material,
+  private KInstanceTranslucentSpecularOnly(
+    final @Nonnull KMaterialTranslucentSpecularOnly in_material,
     final @Nonnull KMeshReadableType in_mesh,
     final @Nonnull KFaceSelection in_faces)
     throws ConstraintError
@@ -89,7 +86,8 @@ import com.io7m.renderer.types.RException;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KInstanceOpaqueRegular other = (KInstanceOpaqueRegular) obj;
+    final KInstanceTranslucentSpecularOnly other =
+      (KInstanceTranslucentSpecularOnly) obj;
     return this.material.equals(other.material)
       && this.mesh.equals(other.mesh);
   }
@@ -108,7 +106,9 @@ import com.io7m.renderer.types.RException;
     return this.faces;
   }
 
-  @Override public KMaterialOpaqueRegular instanceGetMaterial()
+  @Override public @Nonnull
+    KMaterialTranslucentSpecularOnly
+    instanceGetMaterial()
   {
     return this.material;
   }
@@ -128,6 +128,19 @@ import com.io7m.renderer.types.RException;
         ConstraintError,
         RException
   {
-    return v.instanceOpaqueRegular(this);
+    return v.instanceTranslucentSpecularOnly(this);
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KInstanceTranslucentLitVisitorType<A, E>>
+    A
+    translucentLitAccept(
+      final @Nonnull V v)
+      throws E,
+        ConstraintError,
+        RException,
+        JCGLException
+  {
+    return v.translucentLitSpecularOnly(this);
   }
 }

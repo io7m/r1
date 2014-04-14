@@ -130,8 +130,8 @@ import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentType;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentLitType;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentUnlitType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
@@ -460,7 +460,7 @@ final class VExample implements Callable<Unit>
           }
 
           @Override public void sceneAddTranslucentLit(
-            final @Nonnull KInstanceTransformedTranslucentRegular instance,
+            final @Nonnull KInstanceTransformedTranslucentLitType instance,
             final @Nonnull Set<KLightType> lights)
             throws ConstraintError
           {
@@ -468,7 +468,7 @@ final class VExample implements Callable<Unit>
           }
 
           @Override public void sceneAddTranslucentUnlit(
-            final @Nonnull KInstanceTransformedTranslucentType instance)
+            final @Nonnull KInstanceTransformedTranslucentUnlitType instance)
             throws ConstraintError
           {
             scene_builder.sceneAddTranslucentUnlit(instance);

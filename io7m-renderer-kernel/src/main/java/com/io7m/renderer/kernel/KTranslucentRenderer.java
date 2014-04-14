@@ -24,6 +24,7 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.ArrayBufferUsable;
@@ -46,9 +47,12 @@ import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceWithProject
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesProjectiveLightFunctionType;
 import com.io7m.renderer.kernel.KMutableMatricesType.MatricesProjectiveLightType;
+import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
@@ -60,6 +64,7 @@ import com.io7m.renderer.kernel.types.KMaterialLabelRegularType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KTranslucentRegularLit;
+import com.io7m.renderer.kernel.types.KTranslucentSpecularOnlyLit;
 import com.io7m.renderer.kernel.types.KTranslucentType;
 import com.io7m.renderer.kernel.types.KTranslucentVisitorType;
 import com.io7m.renderer.types.RException;
@@ -212,8 +217,8 @@ import com.io7m.renderer.types.RException;
       program,
       mwo.getMatrixProjection());
 
-    light.lightVisitableAccept(new KLightVisitorType<Unit, JCGLException>() {
-      @Override public Unit lightVisitDirectional(
+    light.lightAccept(new KLightVisitorType<Unit, JCGLException>() {
+      @Override public Unit lightDirectional(
         final @Nonnull KLightDirectional l)
         throws ConstraintError,
           RException,
@@ -230,7 +235,7 @@ import com.io7m.renderer.types.RException;
         return Unit.unit();
       }
 
-      @Override public Unit lightVisitProjective(
+      @Override public Unit lightProjective(
         final @Nonnull KLightProjective l)
         throws ConstraintError,
           RException,
@@ -260,7 +265,7 @@ import com.io7m.renderer.types.RException;
           });
       }
 
-      @Override public Unit lightVisitSpherical(
+      @Override public Unit lightSpherical(
         final @Nonnull KLightSphere l)
         throws ConstraintError,
           RException,
@@ -418,15 +423,10 @@ import com.io7m.renderer.types.RException;
   }
 
   private final @Nonnull KForwardLabelDeciderType decider;
-
   private final @Nonnull JCGLImplementation       g;
-
   private final @Nonnull Log                      log;
-
   private final @Nonnull KRefractionRendererType  refraction_renderer;
-
   private final @Nonnull KShaderCacheType         shader_cache;
-
   private final @Nonnull KTextureUnitAllocator    texture_units;
 
   private KTranslucentRenderer(
@@ -493,7 +493,7 @@ import com.io7m.renderer.types.RException;
         final KTranslucentType translucent = translucents.get(index);
         translucent
           .translucentAccept(new KTranslucentVisitorType<Unit, JCacheException>() {
-            @Override public Unit translucentVisitRefractive(
+            @Override public Unit translucentRefractive(
               final @Nonnull KInstanceTransformedTranslucentRefractive t)
               throws JCGLException,
                 RException,
@@ -503,17 +503,19 @@ import com.io7m.renderer.types.RException;
               return Unit.unit();
             }
 
-            @Override public Unit translucentVisitRegularLit(
+            @Override public Unit translucentRegularLit(
               final @Nonnull KTranslucentRegularLit t)
               throws JCGLException,
                 RException,
                 ConstraintError,
                 JCacheException
             {
-              KRendererCommon.renderConfigureFaceCulling(gc, t
-                .translucentGetInstance()
-                .getInstance()
-                .instanceGetFaces());
+              final KInstanceTransformedTranslucentRegular trans_instance =
+                t.translucentGetInstance();
+              final KInstanceTranslucentRegular instance =
+                trans_instance.getInstance();
+              final KFaceSelection faces = instance.instanceGetFaces();
+              KRendererCommon.renderConfigureFaceCulling(gc, faces);
 
               KTranslucentRenderer.this.renderTranslucentRegularLit(
                 gc,
@@ -523,22 +525,46 @@ import com.io7m.renderer.types.RException;
               return Unit.unit();
             }
 
-            @Override public Unit translucentVisitRegularUnlit(
+            @Override public Unit translucentRegularUnlit(
               final @Nonnull KInstanceTransformedTranslucentRegular t)
               throws JCGLException,
                 RException,
                 ConstraintError,
                 JCacheException
             {
-              KRendererCommon.renderConfigureFaceCulling(gc, t
-                .getInstance()
-                .instanceGetFaces());
+              final KInstanceTranslucentRegular instance = t.getInstance();
+              final KFaceSelection faces = instance.instanceGetFaces();
+              KRendererCommon.renderConfigureFaceCulling(gc, faces);
 
               KTranslucentRenderer.this.renderTranslucentRegularUnlit(
                 gc,
                 mwo,
                 units,
                 t);
+              return Unit.unit();
+            }
+
+            @Override public Unit translucentSpecularOnlyLit(
+              final @Nonnull KTranslucentSpecularOnlyLit t)
+              throws JCacheException,
+                JCGLException,
+                RException,
+                ConstraintError
+            {
+              final KInstanceTransformedTranslucentSpecularOnly trans_instance =
+                t.translucentGetInstance();
+              final KInstanceTranslucentSpecularOnly instance =
+                trans_instance.getInstance();
+
+              KRendererCommon.renderConfigureFaceCulling(
+                gc,
+                instance.instanceGetFaces());
+
+              KTranslucentRenderer.this.renderTranslucentSpecularOnlyLit(
+                gc,
+                shadow_context,
+                t,
+                mwo);
               return Unit.unit();
             }
           });
@@ -549,6 +575,16 @@ import com.io7m.renderer.types.RException;
     } catch (final JCacheException e) {
       throw RException.fromJCacheException(e);
     }
+  }
+
+  private void renderTranslucentSpecularOnlyLit(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KShadowMapContextType shadow_context,
+    final @Nonnull KTranslucentSpecularOnlyLit t,
+    final @Nonnull MatricesObserverType mwo)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
   }
 
   private void renderTranslucentRegularLit(

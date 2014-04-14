@@ -185,7 +185,7 @@ import com.io7m.renderer.types.RException;
         RException,
         ConstraintError
   {
-    return v.shadowVisitMappedVariance(this);
+    return v.shadowMappedVariance(this);
   }
 
   @Override public String toString()

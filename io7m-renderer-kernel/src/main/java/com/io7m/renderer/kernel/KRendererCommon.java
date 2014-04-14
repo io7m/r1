@@ -301,7 +301,7 @@ final class KRendererCommon
   {
     final Some<KShadowType> some = (Some<KShadowType>) light.lightGetShadow();
     some.value.shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-      @Override public Unit shadowVisitMappedBasic(
+      @Override public Unit shadowMappedBasic(
         final @Nonnull KShadowMappedBasic s)
         throws JCGLException,
           RException,
@@ -320,7 +320,7 @@ final class KRendererCommon
         return Unit.unit();
       }
 
-      @Override public Unit shadowVisitMappedVariance(
+      @Override public Unit shadowMappedVariance(
         final @Nonnull KShadowMappedVariance s)
         throws JCGLException,
           RException,
@@ -349,7 +349,7 @@ final class KRendererCommon
   {
     final Some<KShadowType> some = (Some<KShadowType>) light.lightGetShadow();
     some.value.shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-      @Override public Unit shadowVisitMappedBasic(
+      @Override public Unit shadowMappedBasic(
         final @Nonnull KShadowMappedBasic s)
         throws JCGLException,
           RException,
@@ -360,7 +360,7 @@ final class KRendererCommon
         return Unit.unit();
       }
 
-      @Override public Unit shadowVisitMappedVariance(
+      @Override public Unit shadowMappedVariance(
         final @Nonnull KShadowMappedVariance s)
         throws JCGLException,
           RException,

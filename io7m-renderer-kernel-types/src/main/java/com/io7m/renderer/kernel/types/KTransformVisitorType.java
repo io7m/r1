@@ -40,7 +40,7 @@ public interface KTransformVisitorType<A, E extends Throwable>
    *           If desired
    */
 
-  A transformVisitMatrix4x4(
+  A transformMatrix4x4(
     final @Nonnull KTransformMatrix4x4 t)
     throws E;
 
@@ -54,7 +54,7 @@ public interface KTransformVisitorType<A, E extends Throwable>
    *           If desired
    */
 
-  A transformVisitOST(
+  A transformOST(
     final @Nonnull KTransformOST t)
     throws E;
 }

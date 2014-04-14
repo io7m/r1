@@ -122,13 +122,13 @@ public final class KShadowMapVarianceDescription implements
   @Override public
     <A, E extends Throwable, V extends KShadowMapDescriptionVisitorType<A, E>>
     A
-    kShadowMapDescriptionAccept(
+    mapDescriptionAccept(
       final @Nonnull V v)
       throws E,
         RException,
         ConstraintError
   {
-    return v.shadowMapDescriptionVisitVariance(this);
+    return v.shadowMapDescriptionVariance(this);
   }
 
   @Override public Integer mapGetLightID()

@@ -90,8 +90,19 @@ public enum KMaterialNormalLabel
 
     try {
       return instance
-        .instanceVisitableAccept(new KInstanceVisitorType<KMaterialNormalLabel, ConstraintError>() {
-          @Override public KMaterialNormalLabel instanceVisitOpaqueRegular(
+        .instanceAccept(new KInstanceVisitorType<KMaterialNormalLabel, ConstraintError>() {
+          @Override public
+            KMaterialNormalLabel
+            instanceOpaqueAlphaDepth(
+              final @Nonnull KInstanceOpaqueAlphaDepth i)
+              throws ConstraintError
+          {
+            final KMaterialOpaqueType material = i.instanceGetMaterial();
+            final KMaterialNormal normal = material.materialGetNormal();
+            return KMaterialNormalLabel.fromInstanceData(a, normal);
+          }
+
+          @Override public KMaterialNormalLabel instanceOpaqueRegular(
             final @Nonnull KInstanceOpaqueRegular i)
             throws ConstraintError
           {
@@ -102,18 +113,7 @@ public enum KMaterialNormalLabel
 
           @Override public
             KMaterialNormalLabel
-            instanceVisitOpaqueAlphaDepth(
-              final @Nonnull KInstanceOpaqueAlphaDepth i)
-              throws ConstraintError
-          {
-            final KMaterialOpaqueType material = i.instanceGetMaterial();
-            final KMaterialNormal normal = material.materialGetNormal();
-            return KMaterialNormalLabel.fromInstanceData(a, normal);
-          }
-
-          @Override public
-            KMaterialNormalLabel
-            instanceVisitTranslucentRefractive(
+            instanceTranslucentRefractive(
               final @Nonnull KInstanceTranslucentRefractive i)
               throws ConstraintError
           {
@@ -124,9 +124,23 @@ public enum KMaterialNormalLabel
 
           @Override public
             KMaterialNormalLabel
-            instanceVisitTranslucentRegular(
+            instanceTranslucentRegular(
               final @Nonnull KInstanceTranslucentRegular i)
               throws ConstraintError
+          {
+            final KMaterialTranslucentType material = i.instanceGetMaterial();
+            final KMaterialNormal normal = material.materialGetNormal();
+            return KMaterialNormalLabel.fromInstanceData(a, normal);
+          }
+
+          @Override public
+            KMaterialNormalLabel
+            instanceTranslucentSpecularOnly(
+              final @Nonnull KInstanceTranslucentSpecularOnly i)
+              throws ConstraintError,
+                ConstraintError,
+                RException,
+                JCGLException
           {
             final KMaterialTranslucentType material = i.instanceGetMaterial();
             final KMaterialNormal normal = material.materialGetNormal();

@@ -27,13 +27,12 @@ import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
 
 /**
- * A refractive instance ({@link KInstanceTranslucentRefractive}) with a
+ * A specular-only instance ({@link KInstanceTranslucentSpecularOnly}) with a
  * specific transform and texture matrix.
  */
 
-@Immutable public final class KInstanceTransformedTranslucentRefractive implements
-  KInstanceTransformedTranslucentUnlitType,
-  KTranslucentType
+@Immutable public final class KInstanceTransformedTranslucentSpecularOnly implements
+  KInstanceTransformedTranslucentLitType
 {
   /**
    * Construct a new translucent regular instance.
@@ -50,25 +49,25 @@ import com.io7m.renderer.types.RTransformTextureType;
    */
 
   public static @Nonnull
-    KInstanceTransformedTranslucentRefractive
+    KInstanceTransformedTranslucentSpecularOnly
     newInstance(
-      final @Nonnull KInstanceTranslucentRefractive in_instance,
+      final @Nonnull KInstanceTranslucentSpecularOnly in_instance,
       final @Nonnull KTransformType in_transform,
       final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
       throws ConstraintError
   {
-    return new KInstanceTransformedTranslucentRefractive(
+    return new KInstanceTransformedTranslucentSpecularOnly(
       in_instance,
       in_transform,
       in_uv_matrix);
   }
 
-  private final @Nonnull KInstanceTranslucentRefractive      instance;
+  private final @Nonnull KInstanceTranslucentSpecularOnly    instance;
   private final @Nonnull KTransformType                      transform;
   private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
-  private KInstanceTransformedTranslucentRefractive(
-    final @Nonnull KInstanceTranslucentRefractive in_instance,
+  private KInstanceTransformedTranslucentSpecularOnly(
+    final @Nonnull KInstanceTranslucentSpecularOnly in_instance,
     final @Nonnull KTransformType in_transform,
     final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
     throws ConstraintError
@@ -90,8 +89,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KInstanceTransformedTranslucentRefractive other =
-      (KInstanceTransformedTranslucentRefractive) obj;
+    final KInstanceTransformedTranslucentSpecularOnly other =
+      (KInstanceTransformedTranslucentSpecularOnly) obj;
     return this.instance.equals(other.instance)
       && this.transform.equals(other.transform)
       && this.uv_matrix.equals(other.uv_matrix);
@@ -101,7 +100,7 @@ import com.io7m.renderer.types.RTransformTextureType;
    * @return The actual instance
    */
 
-  public @Nonnull KInstanceTranslucentRefractive getInstance()
+  public @Nonnull KInstanceTranslucentSpecularOnly getInstance()
   {
     return this.instance;
   }
@@ -126,10 +125,10 @@ import com.io7m.renderer.types.RTransformTextureType;
         RException,
         JCGLException
   {
-    return v.instanceTranslucentRefractive(this.instance);
+    return v.instanceTranslucentSpecularOnly(this.instance);
   }
 
-  @Override public KMesh instanceGetMesh()
+  @Override public KMeshReadableType instanceGetMesh()
   {
     return this.instance.instanceGetMesh();
   }
@@ -154,32 +153,19 @@ import com.io7m.renderer.types.RTransformTextureType;
         RException,
         JCGLException
   {
-    return v.transformedTranslucentRefractive(this);
+    return v.transformedTranslucentSpecularOnly(this);
   }
 
   @Override public
-    <A, E extends Throwable, V extends KInstanceTransformedTranslucentUnlitVisitorType<A, E>>
+    <A, E extends Throwable, V extends KInstanceTransformedTranslucentLitVisitorType<A, E>>
     A
-    transformedTranslucentUnlitAccept(
+    transformedTranslucentLitAccept(
       final @Nonnull V v)
       throws E,
         ConstraintError,
         RException,
         JCGLException
   {
-    return v.transformedTranslucentUnlitRefractive(this);
-  }
-
-  @Override public
-    <A, E extends Throwable, V extends KTranslucentVisitorType<A, E>>
-    A
-    translucentAccept(
-      final @Nonnull V v)
-      throws E,
-        JCGLException,
-        RException,
-        ConstraintError
-  {
-    return v.translucentRefractive(this);
+    return v.transformedTranslucentLitSpecularOnly(this);
   }
 }

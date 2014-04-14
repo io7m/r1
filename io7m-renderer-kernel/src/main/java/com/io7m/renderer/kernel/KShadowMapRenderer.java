@@ -196,7 +196,7 @@ import com.io7m.renderer.types.RTransformViewType;
           try {
             return shadow
               .shadowAccept(new KShadowVisitorType<KShadowMapType, JCacheException>() {
-                @Override public KShadowMapType shadowVisitMappedBasic(
+                @Override public KShadowMapType shadowMappedBasic(
                   final @Nonnull KShadowMappedBasic s)
                   throws JCGLException,
                     RException,
@@ -207,7 +207,7 @@ import com.io7m.renderer.types.RTransformViewType;
                     .cacheGetPeriodic(s.getDescription());
                 }
 
-                @Override public KShadowMapType shadowVisitMappedVariance(
+                @Override public KShadowMapType shadowMappedVariance(
                   final @Nonnull KShadowMappedVariance s)
                   throws JCGLException,
                     RException,
@@ -288,8 +288,8 @@ import com.io7m.renderer.types.RTransformViewType;
         casters.get(light);
 
       light
-        .lightVisitableAccept(new KLightVisitorType<Unit, JCGLException>() {
-          @Override public Unit lightVisitDirectional(
+        .lightAccept(new KLightVisitorType<Unit, JCGLException>() {
+          @Override public Unit lightDirectional(
             final @Nonnull KLightDirectional l)
             throws ConstraintError,
               RException
@@ -297,7 +297,7 @@ import com.io7m.renderer.types.RTransformViewType;
             throw new UnreachableCodeException();
           }
 
-          @Override public Unit lightVisitProjective(
+          @Override public Unit lightProjective(
             final @Nonnull KLightProjective l)
             throws ConstraintError,
               RException,
@@ -318,7 +318,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
                     return shadow
                       .shadowAccept(new KShadowVisitorType<Unit, JCacheException>() {
-                        @Override public Unit shadowVisitMappedBasic(
+                        @Override public Unit shadowMappedBasic(
                           final @Nonnull KShadowMappedBasic s)
                           throws JCGLException,
                             RException,
@@ -335,7 +335,7 @@ import com.io7m.renderer.types.RTransformViewType;
                           return Unit.unit();
                         }
 
-                        @Override public Unit shadowVisitMappedVariance(
+                        @Override public Unit shadowMappedVariance(
                           final @Nonnull KShadowMappedVariance s)
                           throws JCGLException,
                             RException,
@@ -357,7 +357,7 @@ import com.io7m.renderer.types.RTransformViewType;
               });
           }
 
-          @Override public Unit lightVisitSpherical(
+          @Override public Unit lightSpherical(
             final @Nonnull KLightSphere l)
             throws ConstraintError,
               RException
@@ -380,8 +380,8 @@ import com.io7m.renderer.types.RTransformViewType;
       assert light.lightHasShadow();
 
       light
-        .lightVisitableAccept(new KLightVisitorType<Unit, JCGLException>() {
-          @Override public Unit lightVisitDirectional(
+        .lightAccept(new KLightVisitorType<Unit, JCGLException>() {
+          @Override public Unit lightDirectional(
             final @Nonnull KLightDirectional l)
             throws ConstraintError,
               RException
@@ -389,7 +389,7 @@ import com.io7m.renderer.types.RTransformViewType;
             return Unit.unit();
           }
 
-          @Override public Unit lightVisitProjective(
+          @Override public Unit lightProjective(
             final @Nonnull KLightProjective l)
             throws ConstraintError,
               RException,
@@ -403,7 +403,7 @@ import com.io7m.renderer.types.RTransformViewType;
             try {
               return shadow
                 .shadowAccept(new KShadowVisitorType<Unit, JCacheException>() {
-                  @Override public Unit shadowVisitMappedBasic(
+                  @Override public Unit shadowMappedBasic(
                     final @Nonnull KShadowMappedBasic s)
                     throws JCGLException,
                       RException,
@@ -429,7 +429,7 @@ import com.io7m.renderer.types.RTransformViewType;
                     return Unit.unit();
                   }
 
-                  @Override public Unit shadowVisitMappedVariance(
+                  @Override public Unit shadowMappedVariance(
                     final @Nonnull KShadowMappedVariance s)
                     throws JCGLException,
                       RException,
@@ -461,7 +461,7 @@ import com.io7m.renderer.types.RTransformViewType;
             }
           }
 
-          @Override public Unit lightVisitSpherical(
+          @Override public Unit lightSpherical(
             final @Nonnull KLightSphere l)
             throws ConstraintError,
               RException

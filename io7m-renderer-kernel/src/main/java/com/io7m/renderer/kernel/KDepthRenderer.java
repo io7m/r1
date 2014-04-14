@@ -164,8 +164,8 @@ import com.io7m.renderer.types.RTransformViewType;
       JCGLException
   {
     material
-      .materialOpaqueVisitableAccept(new KMaterialOpaqueVisitorType<Unit, JCGLException>() {
-        @Override public Unit materialVisitOpaqueAlphaDepth(
+      .materialOpaqueAccept(new KMaterialOpaqueVisitorType<Unit, JCGLException>() {
+        @Override public Unit materialOpaqueAlphaDepth(
           final @Nonnull KMaterialOpaqueAlphaDepth m)
           throws ConstraintError,
             RException,
@@ -177,7 +177,7 @@ import com.io7m.renderer.types.RTransformViewType;
           return Unit.unit();
         }
 
-        @Override public Unit materialVisitOpaqueRegular(
+        @Override public Unit materialOpaqueRegular(
           final @Nonnull KMaterialOpaqueRegular m)
           throws ConstraintError,
             RException,
