@@ -34,11 +34,6 @@ import com.io7m.renderer.types.RException;
 
 public final class KFramebufferForward
 {
-  private KFramebufferForward()
-  {
-    throw new UnreachableCodeException();
-  }
-
   /**
    * Construct a new framebuffer from the given description.
    * 
@@ -64,5 +59,10 @@ public final class KFramebufferForward
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
     }
+  }
+
+  private KFramebufferForward()
+  {
+    throw new UnreachableCodeException();
   }
 }

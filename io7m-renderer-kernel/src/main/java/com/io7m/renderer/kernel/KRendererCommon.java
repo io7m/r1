@@ -82,51 +82,6 @@ final class KRendererCommon
     MatrixM3x3F.transposeInPlace(mr);
   }
 
-  /**
-   * Configure culling such that <code>faces</code> will be rendered.
-   */
-
-  static void renderConfigureFaceCulling(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KFaceSelection faces)
-    throws JCGLRuntimeException,
-      ConstraintError
-  {
-    switch (faces) {
-      case FACE_RENDER_BACK:
-      {
-        gc.cullingEnable(
-          FaceSelection.FACE_FRONT,
-          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-        break;
-      }
-      case FACE_RENDER_FRONT:
-      {
-        gc.cullingEnable(
-          FaceSelection.FACE_BACK,
-          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-        break;
-      }
-      case FACE_RENDER_FRONT_AND_BACK:
-      {
-        gc.cullingDisable();
-        break;
-      }
-      case FACE_RENDER_NONE:
-      {
-        gc.cullingEnable(
-          FaceSelection.FACE_FRONT_AND_BACK,
-          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-        break;
-      }
-    }
-  }
-
-  private KRendererCommon()
-  {
-    throw new UnreachableCodeException();
-  }
-
   static void putInstanceMatrices(
     final @Nonnull JCBProgram program,
     final @Nonnull MatricesInstanceType mwi,
@@ -416,5 +371,50 @@ final class KRendererCommon
         return Unit.unit();
       }
     });
+  }
+
+  /**
+   * Configure culling such that <code>faces</code> will be rendered.
+   */
+
+  static void renderConfigureFaceCulling(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KFaceSelection faces)
+    throws JCGLRuntimeException,
+      ConstraintError
+  {
+    switch (faces) {
+      case FACE_RENDER_BACK:
+      {
+        gc.cullingEnable(
+          FaceSelection.FACE_FRONT,
+          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+        break;
+      }
+      case FACE_RENDER_FRONT:
+      {
+        gc.cullingEnable(
+          FaceSelection.FACE_BACK,
+          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+        break;
+      }
+      case FACE_RENDER_FRONT_AND_BACK:
+      {
+        gc.cullingDisable();
+        break;
+      }
+      case FACE_RENDER_NONE:
+      {
+        gc.cullingEnable(
+          FaceSelection.FACE_FRONT_AND_BACK,
+          FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+        break;
+      }
+    }
+  }
+
+  private KRendererCommon()
+  {
+    throw new UnreachableCodeException();
   }
 }
