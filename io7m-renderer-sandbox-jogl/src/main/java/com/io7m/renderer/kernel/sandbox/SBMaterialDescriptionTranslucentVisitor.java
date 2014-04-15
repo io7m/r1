@@ -54,6 +54,26 @@ public interface SBMaterialDescriptionTranslucentVisitor<A, E extends Throwable>
       E;
 
   /**
+   * Visit a specular-only translucent material.
+   * 
+   * @param m
+   *          The material
+   * @return A value of type <code>A</code>
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  @Nonnull A materialDescriptionVisitTranslucentSpecularOnly(
+    final @Nonnull SBMaterialDescriptionTranslucentSpecularOnly m)
+    throws ConstraintError,
+      RException,
+      E;
+
+  /**
    * Visit a refractive material.
    * 
    * @param m

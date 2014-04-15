@@ -34,7 +34,27 @@ import com.io7m.renderer.types.RException;
 public interface SBMaterialTranslucentVisitor<A, E extends Throwable>
 {
   /**
-   * Visit an opaque alpha-to-depth material.
+   * Visit a translucent refractive material.
+   * 
+   * @param m
+   *          The material
+   * @return A value of type <code>A</code>
+   * @throws ConstraintError
+   *           If required
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  @Nonnull A materialVisitTranslucentRefractive(
+    final @Nonnull SBMaterialTranslucentRefractive m)
+    throws ConstraintError,
+      RException,
+      E;
+
+  /**
+   * Visit an translucent regular material.
    * 
    * @param m
    *          The material
@@ -54,7 +74,7 @@ public interface SBMaterialTranslucentVisitor<A, E extends Throwable>
       E;
 
   /**
-   * Visit a regular opaque material.
+   * Visit an translucent specular-only material.
    * 
    * @param m
    *          The material
@@ -67,8 +87,8 @@ public interface SBMaterialTranslucentVisitor<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A materialVisitTranslucentRefractive(
-    final @Nonnull SBMaterialTranslucentRefractive m)
+  @Nonnull A materialVisitTranslucentSpecularOnly(
+    final @Nonnull SBMaterialTranslucentSpecularOnly m)
     throws ConstraintError,
       RException,
       E;

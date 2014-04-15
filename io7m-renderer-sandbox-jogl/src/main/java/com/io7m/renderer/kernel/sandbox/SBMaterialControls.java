@@ -79,18 +79,19 @@ public final class SBMaterialControls implements
     return new SBMaterialControls(parent, log, controller, id);
   }
 
-  private final @Nonnull SBMaterialControlsNormal                controls_normal;
-  private final @Nonnull SBMaterialControlsOpaqueAlphaToDepth    controls_opaque_alpha_depth;
-  private final @Nonnull SBMaterialControlsOpaqueRegular         controls_opaque_regular;
-  private final @Nonnull SBMaterialControlsTranslucentRefractive controls_translucent_refractive;
-  private final @Nonnull SBMaterialControlsTranslucentRegular    controls_translucent_regular;
-  private final @Nonnull SBMatrix3x3Controls<RTransformTextureType>  controls_uv;
-  private final @Nonnull RowGroup                                group;
-  private final @Nonnull Integer                                 id;
-  private final @Nonnull JTextField                              id_field;
-  private final @Nonnull JTextField                              name;
-  private final @Nonnull JFrame                                  parent;
-  private final @Nonnull SBMaterialTypeSelector                  selector;
+  private final @Nonnull SBMaterialControlsNormal                   controls_normal;
+  private final @Nonnull SBMaterialControlsOpaqueAlphaToDepth       controls_opaque_alpha_depth;
+  private final @Nonnull SBMaterialControlsOpaqueRegular            controls_opaque_regular;
+  private final @Nonnull SBMaterialControlsTranslucentRefractive    controls_translucent_refractive;
+  private final @Nonnull SBMaterialControlsTranslucentSpecularOnly  controls_translucent_specular_only;
+  private final @Nonnull SBMaterialControlsTranslucentRegular       controls_translucent_regular;
+  private final @Nonnull SBMatrix3x3Controls<RTransformTextureType> controls_uv;
+  private final @Nonnull RowGroup                                   group;
+  private final @Nonnull Integer                                    id;
+  private final @Nonnull JTextField                                 id_field;
+  private final @Nonnull JTextField                                 name;
+  private final @Nonnull JFrame                                     parent;
+  private final @Nonnull SBMaterialTypeSelector                     selector;
 
   private SBMaterialControls(
     final @Nonnull JFrame in_parent,
@@ -142,6 +143,13 @@ public final class SBMaterialControls implements
         this.name,
         this.controls_normal,
         this.controls_uv);
+    this.controls_translucent_specular_only =
+      new SBMaterialControlsTranslucentSpecularOnly(
+        this.name,
+        new SBMaterialControlsAlpha(),
+        this.controls_normal,
+        new SBMaterialControlsSpecular(in_parent, controller, log),
+        this.controls_uv);
 
     this.selector = new SBMaterialTypeSelector();
     this.selector.addActionListener(new ActionListener() {
@@ -174,6 +182,7 @@ public final class SBMaterialControls implements
     this.controls_opaque_regular.controlsAddToLayout(layout);
     this.controls_translucent_regular.controlsAddToLayout(layout);
     this.controls_translucent_refractive.controlsAddToLayout(layout);
+    this.controls_translucent_specular_only.controlsAddToLayout(layout);
     this.controlsShowForType(this.selector.getSelectedItem());
   }
 
@@ -186,6 +195,7 @@ public final class SBMaterialControls implements
     this.controls_opaque_regular.controlsHide();
     this.controls_translucent_regular.controlsHide();
     this.controls_translucent_refractive.controlsHide();
+    this.controls_translucent_specular_only.controlsHide();
   }
 
   @SuppressWarnings("synthetic-access") @Override public
@@ -273,6 +283,21 @@ public final class SBMaterialControls implements
                     .setSelectedItem(SBMaterialType.MATERIAL_TRANSLUCENT_REGULAR);
                   return Unit.unit();
                 }
+
+                @Override public
+                  Unit
+                  materialDescriptionVisitTranslucentSpecularOnly(
+                    final SBMaterialDescriptionTranslucentSpecularOnly mr)
+                    throws ConstraintError,
+                      RException,
+                      ConstraintError
+                {
+                  SBMaterialControls.this.controls_translucent_specular_only
+                    .controlsLoadFrom(mr);
+                  SBMaterialControls.this.selector
+                    .setSelectedItem(SBMaterialType.MATERIAL_TRANSLUCENT_SPECULAR_ONLY);
+                  return Unit.unit();
+                }
               });
           }
         });
@@ -304,6 +329,10 @@ public final class SBMaterialControls implements
       {
         return this.controls_translucent_regular.controlsSave();
       }
+      case MATERIAL_TRANSLUCENT_SPECULAR_ONLY:
+      {
+        return this.controls_translucent_specular_only.controlsSave();
+      }
     }
 
     throw new UnreachableCodeException();
@@ -326,6 +355,7 @@ public final class SBMaterialControls implements
         this.controls_opaque_regular.controlsHide();
         this.controls_translucent_regular.controlsHide();
         this.controls_translucent_refractive.controlsHide();
+        this.controls_translucent_specular_only.controlsHide();
         break;
       }
       case MATERIAL_OPAQUE_REGULAR:
@@ -334,6 +364,7 @@ public final class SBMaterialControls implements
         this.controls_opaque_regular.controlsShow();
         this.controls_translucent_regular.controlsHide();
         this.controls_translucent_refractive.controlsHide();
+        this.controls_translucent_specular_only.controlsHide();
         break;
       }
       case MATERIAL_TRANSLUCENT_REFRACTIVE:
@@ -342,6 +373,7 @@ public final class SBMaterialControls implements
         this.controls_opaque_regular.controlsHide();
         this.controls_translucent_regular.controlsHide();
         this.controls_translucent_refractive.controlsShow();
+        this.controls_translucent_specular_only.controlsHide();
         break;
       }
       case MATERIAL_TRANSLUCENT_REGULAR:
@@ -350,6 +382,16 @@ public final class SBMaterialControls implements
         this.controls_opaque_regular.controlsHide();
         this.controls_translucent_regular.controlsShow();
         this.controls_translucent_refractive.controlsHide();
+        this.controls_translucent_specular_only.controlsHide();
+        break;
+      }
+      case MATERIAL_TRANSLUCENT_SPECULAR_ONLY:
+      {
+        this.controls_opaque_alpha_depth.controlsHide();
+        this.controls_opaque_regular.controlsHide();
+        this.controls_translucent_regular.controlsHide();
+        this.controls_translucent_refractive.controlsHide();
+        this.controls_translucent_specular_only.controlsShow();
         break;
       }
     }

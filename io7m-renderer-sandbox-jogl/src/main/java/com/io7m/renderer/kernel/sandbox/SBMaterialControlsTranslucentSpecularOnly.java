@@ -16,94 +16,77 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import java.awt.Color;
-
 import javax.annotation.Nonnull;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
-import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RTransformTextureType;
 
-public final class SBMaterialControlsTranslucentRefractive implements
-  SBControlsDataType<SBMaterialDescriptionTranslucentRefractive>
+public final class SBMaterialControlsTranslucentSpecularOnly implements
+  SBControlsDataType<SBMaterialDescriptionTranslucentSpecularOnly>
 {
+  private final @Nonnull SBMaterialControlsAlpha                    controls_alpha;
   private final @Nonnull SBMaterialControlsNormal                   controls_normal;
+  private final @Nonnull SBMaterialControlsSpecular                 controls_specular;
   private final @Nonnull SBMatrix3x3Controls<RTransformTextureType> controls_uv;
   private final @Nonnull JTextField                                 name;
-  private final @Nonnull SBFloatHSlider                             scale;
-  private final @Nonnull JCheckBox                                  masked;
-  private final @Nonnull RowGroup                                   group;
 
-  public SBMaterialControlsTranslucentRefractive(
+  public SBMaterialControlsTranslucentSpecularOnly(
     final @Nonnull JTextField in_name,
+    final @Nonnull SBMaterialControlsAlpha in_controls_alpha,
     final @Nonnull SBMaterialControlsNormal in_controls_normal,
+    final @Nonnull SBMaterialControlsSpecular in_controls_specular,
     final @Nonnull SBMatrix3x3Controls<RTransformTextureType> in_controls_uv)
-    throws ConstraintError
   {
-    this.group = new RowGroup();
     this.name = in_name;
+    this.controls_alpha = in_controls_alpha;
     this.controls_normal = in_controls_normal;
+    this.controls_specular = in_controls_specular;
     this.controls_uv = in_controls_uv;
-    this.scale = new SBFloatHSlider("Scale", 0.0f, 1.0f);
-    this.masked = new JCheckBox();
   }
 
   @Override public void controlsAddToLayout(
     final @Nonnull DesignGridLayout layout)
   {
-    final JLabel label = new JLabel("Refraction");
-    label.setForeground(Color.BLUE);
-    layout.row().group(this.group).left().add(label, new JSeparator()).fill();
-
-    layout
-      .row()
-      .group(this.group)
-      .grid(this.scale.getLabel())
-      .add(this.scale.getSlider(), 4)
-      .add(this.scale.getField());
-
-    layout
-      .row()
-      .group(this.group)
-      .grid(new JLabel("Masked"))
-      .add(this.masked);
+    this.controls_alpha.controlsAddToLayout(layout);
+    this.controls_specular.controlsAddToLayout(layout);
   }
 
   @Override public void controlsHide()
   {
-    this.group.hide();
-  }
-
-  @Override public void controlsLoadFrom(
-    final @Nonnull SBMaterialDescriptionTranslucentRefractive desc)
-  {
-    this.controls_normal.controlsLoadFrom(desc.getNormal());
-    this.controls_uv.controlsLoadFrom(desc.getUVMatrix());
-    this.scale.setCurrent(desc.getRefractive().getScale());
-    this.masked.setSelected(desc.getRefractive().isMasked());
-  }
-
-  @Override public SBMaterialDescriptionTranslucentRefractive controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
-  {
-    return new SBMaterialDescriptionTranslucentRefractive(
-      this.name.getText(),
-      this.controls_normal.controlsSave(),
-      new SBMaterialRefractiveDescription(
-        this.scale.getCurrent(),
-        this.masked.isSelected()), this.controls_uv.controlsSave());
+    this.controls_alpha.controlsHide();
+    this.controls_specular.controlsHide();
   }
 
   @Override public void controlsShow()
   {
-    this.group.forceShow();
+    this.controls_alpha.controlsShow();
+    this.controls_specular.controlsShow();
+  }
+
+  @Override public void controlsLoadFrom(
+    final @Nonnull SBMaterialDescriptionTranslucentSpecularOnly desc)
+  {
+    this.controls_alpha.controlsLoadFrom(desc.getAlpha());
+    this.controls_normal.controlsLoadFrom(desc.getNormal());
+    this.controls_specular.controlsLoadFrom(desc.getSpecular());
+    this.controls_uv.controlsLoadFrom(desc.getUVMatrix());
+  }
+
+  @Override public
+    SBMaterialDescriptionTranslucentSpecularOnly
+    controlsSave()
+      throws SBExceptionInputError,
+        ConstraintError
+  {
+    return new SBMaterialDescriptionTranslucentSpecularOnly(
+      this.name.getText(),
+      this.controls_alpha.controlsSave(),
+      this.controls_specular.controlsSave(),
+      this.controls_normal.controlsSave(),
+      this.controls_uv.controlsSave());
   }
 }
