@@ -55,7 +55,6 @@ import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRefractiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
-import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.kernel.types.KMeshBoundsTriangles;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
@@ -108,7 +107,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
       final @Nonnull LUCacheType<KMeshBounds<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, RException> bounds_triangle_cache,
       final @Nonnull MatrixM4x4F.Context matrix_context,
       final @Nonnull KMutableMatricesType.MatricesInstanceType mi,
-      final @Nonnull KMesh mesh,
+      final @Nonnull KMeshReadableType mesh,
       final @Nonnull RVectorM3F<RSpaceNDCType> ndc_bounds_lower,
       final @Nonnull RVectorM3F<RSpaceNDCType> ndc_bounds_upper)
       throws ConstraintError,
@@ -932,7 +931,7 @@ public final class KRefractionRenderer implements KRefractionRendererType
       RException,
       JCacheException
   {
-    final KMesh mesh = r.instanceGetMesh();
+    final KMeshReadableType mesh = r.instanceGetMesh();
 
     final boolean visible =
       KRefractionRenderer.calculateNDCBounds(

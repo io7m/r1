@@ -129,7 +129,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     return v.instanceTranslucentRefractive(this.instance);
   }
 
-  @Override public KMesh instanceGetMesh()
+  @Override public KMeshReadableType instanceGetMesh()
   {
     return this.instance.instanceGetMesh();
   }

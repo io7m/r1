@@ -21,8 +21,8 @@ import java.math.BigInteger;
 import javax.annotation.Nonnull;
 
 import com.io7m.jcache.JCacheLoaderType;
-import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshBounds;
+import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceObjectType;
 
@@ -32,7 +32,7 @@ import com.io7m.renderer.types.RSpaceObjectType;
  */
 
 public final class KMeshBoundsObjectSpaceCacheLoader implements
-  JCacheLoaderType<KMesh, KMeshBounds<RSpaceObjectType>, RException>
+  JCacheLoaderType<KMeshReadableType, KMeshBounds<RSpaceObjectType>, RException>
 {
   /**
    * Construct a new cache loader.
@@ -58,7 +58,7 @@ public final class KMeshBoundsObjectSpaceCacheLoader implements
   }
 
   @Override public KMeshBounds<RSpaceObjectType> cacheValueLoad(
-    final @Nonnull KMesh key)
+    final @Nonnull KMeshReadableType key)
     throws RException
   {
     return KMeshBounds.fromMeshObjectSpace(key);

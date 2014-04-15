@@ -49,7 +49,7 @@ import com.io7m.renderer.types.RException;
 
   public static @Nonnull KInstanceTranslucentRefractive newInstance(
     final @Nonnull KMaterialTranslucentRefractive in_material,
-    final @Nonnull KMesh in_mesh,
+    final @Nonnull KMeshReadableType in_mesh,
     final @Nonnull KFaceSelection in_faces)
     throws ConstraintError
   {
@@ -58,11 +58,11 @@ import com.io7m.renderer.types.RException;
 
   private final @Nonnull KFaceSelection                 faces;
   private final @Nonnull KMaterialTranslucentRefractive material;
-  private final @Nonnull KMesh                          mesh;
+  private final @Nonnull KMeshReadableType              mesh;
 
   private KInstanceTranslucentRefractive(
     final @Nonnull KMaterialTranslucentRefractive in_material,
-    final @Nonnull KMesh in_mesh,
+    final @Nonnull KMeshReadableType in_mesh,
     final @Nonnull KFaceSelection in_faces)
     throws ConstraintError
   {
@@ -110,7 +110,7 @@ import com.io7m.renderer.types.RException;
     return this.material;
   }
 
-  @Override public @Nonnull KMesh instanceGetMesh()
+  @Override public @Nonnull KMeshReadableType instanceGetMesh()
   {
     return this.mesh;
   }

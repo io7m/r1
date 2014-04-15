@@ -22,8 +22,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcache.LRUCacheAbstract;
 import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcache.LRUCacheType;
-import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshBounds;
+import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceType;
 
@@ -35,7 +35,7 @@ import com.io7m.renderer.types.RSpaceType;
  */
 
 public final class KMeshBoundsCache<R extends RSpaceType> extends
-  LRUCacheAbstract<KMesh, KMeshBounds<R>, RException> implements
+  LRUCacheAbstract<KMeshReadableType, KMeshBounds<R>, RException> implements
   KMeshBoundsCacheType<R>
 {
   /**
@@ -50,15 +50,18 @@ public final class KMeshBoundsCache<R extends RSpaceType> extends
    *           If <code>c == null</code>
    */
 
-  public static <R extends RSpaceType> KMeshBoundsCacheType<R> wrap(
-    final @Nonnull LRUCacheTrivial<KMesh, KMeshBounds<R>, RException> c)
-    throws ConstraintError
+  public static
+    <R extends RSpaceType>
+    KMeshBoundsCacheType<R>
+    wrap(
+      final @Nonnull LRUCacheTrivial<KMeshReadableType, KMeshBounds<R>, RException> c)
+      throws ConstraintError
   {
     return new KMeshBoundsCache<R>(c);
   }
 
   private KMeshBoundsCache(
-    final @Nonnull LRUCacheType<KMesh, KMeshBounds<R>, RException> c)
+    final @Nonnull LRUCacheType<KMeshReadableType, KMeshBounds<R>, RException> c)
     throws ConstraintError
   {
     super(c);

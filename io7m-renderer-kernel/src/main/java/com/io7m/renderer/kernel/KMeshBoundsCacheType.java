@@ -17,8 +17,8 @@
 package com.io7m.renderer.kernel;
 
 import com.io7m.jcache.LUCacheType;
-import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshBounds;
+import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceType;
 
@@ -30,7 +30,7 @@ import com.io7m.renderer.types.RSpaceType;
  */
 
 public interface KMeshBoundsCacheType<R extends RSpaceType> extends
-  LUCacheType<KMesh, KMeshBounds<R>, RException>
+  LUCacheType<KMeshReadableType, KMeshBounds<R>, RException>
 {
   // No extra functions.
 }
