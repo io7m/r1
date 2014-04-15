@@ -87,7 +87,7 @@ public interface KMaterialTranslucentVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A translucentSpecular(
+  @Nonnull A translucentSpecularOnly(
     final @Nonnull KMaterialTranslucentSpecularOnly m)
     throws E,
       RException,

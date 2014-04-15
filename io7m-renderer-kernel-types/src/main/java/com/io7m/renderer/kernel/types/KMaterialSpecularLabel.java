@@ -102,6 +102,30 @@ public enum KMaterialSpecularLabel
     return KMaterialSpecularLabel.fromInstanceData(n, a, s);
   }
 
+  /**
+   * Derive a specular label for the given instance.
+   * 
+   * @param instance
+   *          The instance
+   * @param n
+   *          The normal-mapping label for the instance
+   * @return A specular label
+   * @throws ConstraintError
+   *           Iff the instance is <code>null</code>
+   */
+
+  public static @Nonnull KMaterialSpecularLabel fromInstanceSpecularOnly(
+    final @Nonnull KMaterialNormalLabel n,
+    final @Nonnull KInstanceTranslucentSpecularOnly instance)
+    throws ConstraintError
+  {
+    Constraints.constrainNotNull(instance, "Instance");
+    final KMeshReadableType mesh = instance.instanceGetMesh();
+    final ArrayBufferUsable a = mesh.getArrayBuffer();
+    final KMaterialSpecular s = instance.instanceGetMaterial().getSpecular();
+    return KMaterialSpecularLabel.fromInstanceData(n, a, s);
+  }
+
   private final @Nonnull String code;
   private int                   textures_required;
 

@@ -24,7 +24,6 @@ import javax.annotation.Nonnull;
 
 import com.io7m.jaux.Constraints;
 import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.ArrayBufferUsable;
@@ -60,8 +59,10 @@ import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularLitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularUnlitLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentSpecularOnlyLitLabel;
 import com.io7m.renderer.kernel.types.KMaterialLabelRegularType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KTranslucentRegularLit;
 import com.io7m.renderer.kernel.types.KTranslucentSpecularOnlyLit;
@@ -149,9 +150,12 @@ import com.io7m.renderer.types.RException;
         final KMaterialTranslucentRegular material =
           actual.instanceGetMaterial();
 
-        KRendererCommon.putInstanceMatrices(program, mwi, label);
-        KRendererCommon
-          .putInstanceTextures(context, label, program, material);
+        KRendererCommon.putInstanceMatricesRegular(program, mwi, label);
+        KRendererCommon.putInstanceTexturesRegular(
+          context,
+          label,
+          program,
+          material);
         KRendererCommon.putMaterialTranslucentRegular(
           program,
           label,
@@ -422,11 +426,315 @@ import com.io7m.renderer.types.RException;
       });
   }
 
+  private static void renderInstanceTranslucentSpecularOnly(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KTextureUnitContextType units,
+    final @Nonnull MatricesInstanceType mwi,
+    final @Nonnull KMaterialForwardTranslucentSpecularOnlyLitLabel label,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KInstanceTransformedTranslucentSpecularOnly instance)
+    throws JCGLException,
+      RException,
+      ConstraintError
+  {
+    units.withContext(new KTextureUnitWithType() {
+      @Override public void run(
+        final KTextureUnitContextType context)
+        throws ConstraintError,
+          JCGLException,
+          RException
+      {
+        final KMeshReadableType mesh = instance.instanceGetMesh();
+        final ArrayBufferUsable array = mesh.getArrayBuffer();
+        final IndexBufferUsable indices = mesh.getIndexBuffer();
+        final KInstanceTranslucentSpecularOnly actual =
+          instance.getInstance();
+        final KMaterialTranslucentSpecularOnly material =
+          actual.instanceGetMaterial();
+
+        KRendererCommon.putInstanceMatricesSpecularOnly(program, mwi, label);
+        KRendererCommon.putInstanceTexturesSpecularOnly(
+          context,
+          label,
+          program,
+          material);
+        KRendererCommon.putMaterialTranslucentSpecularOnly(
+          program,
+          label,
+          material);
+
+        try {
+          gc.arrayBufferBind(array);
+          KShadingProgramCommon
+            .bindAttributePositionUnchecked(program, array);
+
+          switch (label.labelGetNormal()) {
+            case NORMAL_MAPPED:
+            {
+              KShadingProgramCommon.bindAttributeTangent4(program, array);
+              KShadingProgramCommon.bindAttributeNormal(program, array);
+              break;
+            }
+            case NORMAL_VERTEX:
+            {
+              KShadingProgramCommon.bindAttributeNormal(program, array);
+              break;
+            }
+            case NORMAL_NONE:
+            {
+              break;
+            }
+          }
+
+          if (label.labelImpliesUV()) {
+            KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
+          }
+
+          program.programExecute(new JCBProgramProcedure() {
+            @Override public void call()
+              throws ConstraintError,
+                JCGLException
+            {
+              gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+            }
+          });
+
+        } finally {
+          gc.arrayBufferUnbind();
+        }
+      }
+    });
+  }
+  private static void renderInstanceTranslucentSpecularOnlyLit(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KShadowMapContextType shadow_context,
+    final @Nonnull KTextureUnitContextType texture_unit_ctx,
+    final @Nonnull MatricesObserverType mwo,
+    final @Nonnull KMaterialForwardTranslucentSpecularOnlyLitLabel label,
+    final @Nonnull KLightType light,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KInstanceTransformedTranslucentSpecularOnly instance)
+    throws JCGLException,
+      ConstraintError,
+      RException
+  {
+    KShadingProgramCommon.putMatrixProjectionUnchecked(
+      program,
+      mwo.getMatrixProjection());
+
+    light.lightAccept(new KLightVisitorType<Unit, JCGLException>() {
+      @Override public Unit lightDirectional(
+        final @Nonnull KLightDirectional l)
+        throws ConstraintError,
+          RException,
+          JCGLException
+      {
+        KTranslucentRenderer
+          .renderInstanceTranslucentSpecularOnlyLitDirectional(
+            gc,
+            texture_unit_ctx,
+            mwo,
+            label,
+            l,
+            program,
+            instance);
+        return Unit.unit();
+      }
+
+      @Override public Unit lightProjective(
+        final @Nonnull KLightProjective l)
+        throws ConstraintError,
+          RException,
+          JCGLException
+      {
+        return mwo.withProjectiveLight(
+          l,
+          new MatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+            @Override public Unit run(
+              final MatricesProjectiveLightType mwp)
+              throws JCGLException,
+                ConstraintError,
+                RException
+            {
+              KTranslucentRenderer
+                .renderInstanceTranslucentSpecularOnlyLitProjective(
+                  gc,
+                  shadow_context,
+                  texture_unit_ctx,
+                  mwp,
+                  label,
+                  l,
+                  program,
+                  instance);
+              return Unit.unit();
+            }
+          });
+      }
+
+      @Override public Unit lightSpherical(
+        final @Nonnull KLightSphere l)
+        throws ConstraintError,
+          RException,
+          JCGLException
+      {
+        KTranslucentRenderer
+          .renderInstanceTranslucentSpecularOnlyLitSpherical(
+            gc,
+            texture_unit_ctx,
+            mwo,
+            label,
+            l,
+            program,
+            instance);
+        return Unit.unit();
+      }
+    });
+  }
+  private static void renderInstanceTranslucentSpecularOnlyLitDirectional(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KTextureUnitContextType texture_unit_ctx,
+    final @Nonnull MatricesObserverType mwo,
+    final @Nonnull KMaterialForwardTranslucentSpecularOnlyLitLabel label,
+    final @Nonnull KLightDirectional l,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KInstanceTransformedTranslucentSpecularOnly instance)
+    throws JCGLException,
+      ConstraintError,
+      RException
+  {
+    KShadingProgramCommon.putLightDirectional(
+      program,
+      mwo.getMatrixContext(),
+      mwo.getMatrixView(),
+      l);
+
+    mwo.withInstance(
+      instance,
+      new MatricesInstanceFunctionType<Unit, JCGLException>() {
+        @Override public Unit run(
+          final @Nonnull MatricesInstanceType mwi)
+          throws JCGLException,
+            ConstraintError,
+            RException
+        {
+          KTranslucentRenderer.renderInstanceTranslucentSpecularOnly(
+            gc,
+            texture_unit_ctx,
+            mwi,
+            label,
+            program,
+            instance);
+          return Unit.unit();
+        }
+      });
+  }
+  private static void renderInstanceTranslucentSpecularOnlyLitProjective(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KShadowMapContextType shadow_context,
+    final @Nonnull KTextureUnitContextType texture_unit_ctx,
+    final @Nonnull MatricesProjectiveLightType mwp,
+    final @Nonnull KMaterialForwardTranslucentSpecularOnlyLitLabel label,
+    final @Nonnull KLightProjective light,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KInstanceTransformedTranslucentSpecularOnly instance)
+    throws JCGLException,
+      RException,
+      ConstraintError
+  {
+    if (light.lightHasShadow()) {
+      KRendererCommon.putShadow(
+        shadow_context,
+        texture_unit_ctx,
+        program,
+        light);
+    }
+
+    KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
+      program,
+      mwp.getMatrixContext(),
+      mwp.getMatrixView(),
+      light);
+
+    KShadingProgramCommon.putMatrixProjectiveProjection(
+      program,
+      mwp.getMatrixProjectiveProjection());
+
+    KShadingProgramCommon.putTextureProjection(
+      program,
+      texture_unit_ctx.withTexture2D(light.getTexture()));
+
+    mwp.withInstance(
+      instance,
+      new MatricesInstanceWithProjectiveFunctionType<Unit, JCGLException>() {
+        @Override public Unit run(
+          final @Nonnull MatricesInstanceWithProjectiveType mwi)
+          throws JCGLException,
+            ConstraintError,
+            RException
+        {
+          KShadingProgramCommon.putMatrixProjectiveModelView(
+            program,
+            mwi.getMatrixProjectiveModelView());
+
+          KTranslucentRenderer.renderInstanceTranslucentSpecularOnly(
+            gc,
+            texture_unit_ctx,
+            mwi,
+            label,
+            program,
+            instance);
+          return Unit.unit();
+        }
+      });
+  }
+  private static void renderInstanceTranslucentSpecularOnlyLitSpherical(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KTextureUnitContextType texture_unit_ctx,
+    final @Nonnull MatricesObserverType mwo,
+    final @Nonnull KMaterialForwardTranslucentSpecularOnlyLitLabel label,
+    final @Nonnull KLightSphere l,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KInstanceTransformedTranslucentSpecularOnly instance)
+    throws JCGLException,
+      ConstraintError,
+      RException
+  {
+    KShadingProgramCommon.putLightSpherical(
+      program,
+      mwo.getMatrixContext(),
+      mwo.getMatrixView(),
+      l);
+
+    mwo.withInstance(
+      instance,
+      new MatricesInstanceFunctionType<Unit, JCGLException>() {
+        @Override public Unit run(
+          final @Nonnull MatricesInstanceType mwi)
+          throws JCGLException,
+            ConstraintError,
+            RException
+        {
+          KTranslucentRenderer.renderInstanceTranslucentSpecularOnly(
+            gc,
+            texture_unit_ctx,
+            mwi,
+            label,
+            program,
+            instance);
+          return Unit.unit();
+        }
+      });
+  }
   private final @Nonnull KForwardLabelDeciderType decider;
+
   private final @Nonnull JCGLImplementation       g;
+
   private final @Nonnull Log                      log;
+
   private final @Nonnull KRefractionRendererType  refraction_renderer;
+
   private final @Nonnull KShaderCacheType         shader_cache;
+
   private final @Nonnull KTextureUnitAllocator    texture_units;
 
   private KTranslucentRenderer(
@@ -577,16 +885,6 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private void renderTranslucentSpecularOnlyLit(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull KShadowMapContextType shadow_context,
-    final @Nonnull KTranslucentSpecularOnlyLit t,
-    final @Nonnull MatricesObserverType mwo)
-  {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
-  }
-
   private void renderTranslucentRegularLit(
     final @Nonnull JCGLInterfaceCommon gc,
     final @Nonnull KShadowMapContextType shadow_context,
@@ -731,6 +1029,77 @@ import com.io7m.renderer.types.RException;
         });
       }
     });
+  }
+
+  private void renderTranslucentSpecularOnlyLit(
+    final @Nonnull JCGLInterfaceCommon gc,
+    final @Nonnull KShadowMapContextType shadow_context,
+    final @Nonnull KTranslucentSpecularOnlyLit t,
+    final @Nonnull MatricesObserverType mwo)
+    throws ConstraintError,
+      RException,
+      JCacheException,
+      JCGLException
+  {
+    final KTextureUnitAllocator unit_allocator = this.texture_units;
+    final Set<KLightType> lights = t.translucentGetLights();
+
+    /**
+     * Specular-only materials are always rendered in purely additive mode.
+     */
+
+    gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+
+    final Iterator<KLightType> iter = lights.iterator();
+    while (iter.hasNext()) {
+      final KLightType light = iter.next();
+      final KInstanceTransformedTranslucentSpecularOnly instance =
+        t.translucentGetInstance();
+
+      final KMaterialForwardTranslucentSpecularOnlyLitLabel label =
+        this.decider.getForwardLabelTranslucentSpecularOnlyLit(
+          light,
+          instance.getInstance());
+
+      final int required = label.texturesGetRequired();
+      if (unit_allocator.hasEnoughUnits(required) == false) {
+        throw RException.notEnoughTextureUnits(
+          label.labelGetCode(),
+          required,
+          unit_allocator.getUnitCount());
+      }
+
+      final KProgram kprogram =
+        this.shader_cache.cacheGetLU(label.labelGetCode());
+
+      kprogram.getExecutable().execRun(new JCBExecutorProcedure() {
+        @Override public void call(
+          final @Nonnull JCBProgram program)
+          throws ConstraintError,
+            JCGLException,
+            RException
+        {
+          unit_allocator.withContext(new KTextureUnitWithType() {
+            @Override public void run(
+              final @Nonnull KTextureUnitContextType texture_unit_ctx)
+              throws ConstraintError,
+                JCGLException,
+                RException
+            {
+              KTranslucentRenderer.renderInstanceTranslucentSpecularOnlyLit(
+                gc,
+                shadow_context,
+                texture_unit_ctx,
+                mwo,
+                label,
+                light,
+                program,
+                instance);
+            }
+          });
+        }
+      });
+    }
   }
 
 }

@@ -39,8 +39,10 @@ import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KMaterialLabelRegularType;
+import com.io7m.renderer.kernel.types.KMaterialLabelSpecularOnlyType;
 import com.io7m.renderer.kernel.types.KMaterialRegularType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 import com.io7m.renderer.kernel.types.KShadowType;
@@ -82,7 +84,36 @@ final class KRendererCommon
     MatrixM3x3F.transposeInPlace(mr);
   }
 
-  static void putInstanceMatrices(
+  static void putInstanceMatricesSpecularOnly(
+    final @Nonnull JCBProgram program,
+    final @Nonnull MatricesInstanceType mwi,
+    final @Nonnull KMaterialLabelSpecularOnlyType label)
+    throws JCGLException,
+      ConstraintError
+  {
+    KShadingProgramCommon.putMatrixModelViewUnchecked(
+      program,
+      mwi.getMatrixModelView());
+
+    if (label.labelImpliesUV()) {
+      KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
+    }
+
+    switch (label.labelGetNormal()) {
+      case NORMAL_MAPPED:
+      case NORMAL_VERTEX:
+      {
+        KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
+        break;
+      }
+      case NORMAL_NONE:
+      {
+        break;
+      }
+    }
+  }
+
+  static void putInstanceMatricesRegular(
     final @Nonnull JCBProgram program,
     final @Nonnull MatricesInstanceType mwi,
     final @Nonnull KMaterialLabelRegularType label)
@@ -126,7 +157,43 @@ final class KRendererCommon
     }
   }
 
-  static void putInstanceTextures(
+  static void putInstanceTexturesSpecularOnly(
+    final @Nonnull KTextureUnitContextType units,
+    final @Nonnull KMaterialLabelSpecularOnlyType label,
+    final @Nonnull JCBProgram program,
+    final @Nonnull KMaterialTranslucentSpecularOnly material)
+    throws JCGLException,
+      ConstraintError
+  {
+    switch (label.labelGetNormal()) {
+      case NORMAL_MAPPED:
+      {
+        final Some<Texture2DStaticUsable> some =
+          (Some<Texture2DStaticUsable>) material
+            .materialGetNormal()
+            .getTexture();
+        KShadingProgramCommon.putTextureNormal(
+          program,
+          units.withTexture2D(some.value));
+        break;
+      }
+      case NORMAL_NONE:
+      case NORMAL_VERTEX:
+      {
+        break;
+      }
+    }
+
+    if (label.labelImpliesSpecularMap()) {
+      final Some<Texture2DStaticUsable> some =
+        (Some<Texture2DStaticUsable>) material.getSpecular().getTexture();
+      KShadingProgramCommon.putTextureSpecular(
+        program,
+        units.withTexture2D(some.value));
+    }
+  }
+
+  static void putInstanceTexturesRegular(
     final @Nonnull KTextureUnitContextType units,
     final @Nonnull KMaterialLabelRegularType label,
     final @Nonnull JCBProgram program,
@@ -275,6 +342,33 @@ final class KRendererCommon
         break;
       }
     }
+  }
+
+  static void putMaterialTranslucentSpecularOnly(
+    final @Nonnull JCBProgram program,
+    final @Nonnull KMaterialLabelSpecularOnlyType label,
+    final @Nonnull KMaterialTranslucentSpecularOnly material)
+    throws JCGLException,
+      ConstraintError
+  {
+    switch (label.labelGetSpecular()) {
+      case SPECULAR_CONSTANT:
+      case SPECULAR_MAPPED:
+      {
+        KShadingProgramCommon.putMaterialSpecular(
+          program,
+          material.getSpecular());
+        break;
+      }
+      case SPECULAR_NONE:
+      {
+        break;
+      }
+    }
+
+    KShadingProgramCommon.putMaterialAlphaOpacity(program, material
+      .getAlpha()
+      .getOpacity());
   }
 
   static void putMaterialTranslucentRegular(

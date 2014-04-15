@@ -29,6 +29,7 @@ import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueUnlitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRefractiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularLitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularUnlitLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentSpecularOnlyLitLabel;
 import com.io7m.renderer.kernel.types.KMaterialLabelImpliesUVType;
 import com.io7m.renderer.kernel.types.KMaterialLabelLitType;
 import com.io7m.renderer.kernel.types.KMaterialLabelRegularType;
@@ -1402,26 +1403,7 @@ public final class ForwardShaders
     final KMaterialNormalLabel normal = label.labelGetNormal();
     final KLightLabel light = label.labelGetLight();
 
-    b.append("shader vertex v is\n");
-    ForwardShaders.vertexShaderStandardIO(b);
-    ForwardShaders.vertexShaderStandardParametersMatrices(b);
-    ForwardShaders.vertexShaderStandardAttributesUV(b, implies_uv);
-    ForwardShaders.vertexShaderStandardParametersUV(b, implies_uv);
-    ForwardShaders.vertexShaderStandardParametersLight(b, light);
-    ForwardShaders.vertexShaderStandardAttributesLight(b, light);
-    ForwardShaders.vertexShaderStandardAttributesNormal(b, normal);
-    ForwardShaders.vertexShaderStandardParametersNormal(b, normal);
-    b.append("with\n");
-    ForwardShaders.vertexShaderStandardValuesPositions(b);
-    ForwardShaders.vertexShaderStandardValuesNormals(b, normal);
-    ForwardShaders.vertexShaderStandardValuesLight(b, light);
-    ForwardShaders.vertexShaderStandardValuesUV(b, implies_uv);
-    b.append("as\n");
-    ForwardShaders.vertexShaderStandardWrites(b);
-    ForwardShaders.vertexShaderStandardWritesUV(b, implies_uv);
-    ForwardShaders.vertexShaderStandardWritesNormals(b, normal);
-    ForwardShaders.vertexShaderStandardWritesLight(b, light);
-    b.append("end;\n");
+    ForwardShaders.vertexShaderLit(b, implies_uv, normal, light);
   }
 
   private static void moduleVertexShaderRegularUnlit(
@@ -1742,5 +1724,389 @@ public final class ForwardShaders
     if (impliesUV) {
       b.append("  out f_uv = uv;\n");
     }
+  }
+
+  public static @Nonnull String moduleForwardTranslucentSpecularOnly(
+    final @Nonnull KMaterialForwardTranslucentSpecularOnlyLitLabel l)
+  {
+    final String module = TitleCase.toTitleCase(l.labelGetCode());
+    final StringBuilder b = new StringBuilder();
+    b.append("package com.io7m.renderer.kernel;\n");
+    ForwardShaders.moduleStart(b, module);
+    ForwardShaders.moduleVertexShaderTranslucentSpecularOnly(b, l);
+    b.append("\n");
+    ForwardShaders.moduleFragmentShaderTranslucentSpecularOnly(b, l);
+    b.append("\n");
+    ForwardShaders.moduleProgram(b);
+    b.append("\n");
+    ForwardShaders.moduleEnd(b);
+    return b.toString();
+  }
+
+  private static void moduleFragmentShaderTranslucentSpecularOnly(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialForwardTranslucentSpecularOnlyLitLabel l)
+  {
+    final boolean implies_uv = l.labelImpliesUV();
+    final KMaterialNormalLabel normal = l.labelGetNormal();
+    final KMaterialSpecularLabel specular = l.labelGetSpecular();
+    final KMaterialAlphaOpacityType alpha = l.labelGetAlphaType();
+    final KLightLabel light = l.labelGetLight();
+
+    b.append("shader fragment f is\n");
+    ForwardShaders.fragmentShaderStandardIO(b);
+    ForwardShaders.fragmentShaderStandardParametersLit(b, light);
+    ForwardShaders.fragmentShaderAttributesUV(b, implies_uv);
+    ForwardShaders.fragmentShaderParametersAlpha(b);
+    ForwardShaders.fragmentShaderAttributesLight(b, light);
+    ForwardShaders.fragmentShaderAttributesNormal(b, normal);
+    ForwardShaders.fragmentShaderParametersNormal(b, normal);
+    ForwardShaders.fragmentShaderParametersSpecularOnly(b, specular);
+    b.append("with\n");
+    ForwardShaders.fragmentShaderValuesNormal(b, normal);
+    ForwardShaders.fragmentShaderValuesAlpha(b, alpha);
+    ForwardShaders.fragmentShaderValuesSpecularOnly(b, specular);
+    ForwardShaders.fragmentShaderValuesLightSpecularOnly(b, light, specular);
+    ForwardShaders.fragmentShaderValuesRGBATranslucentLitSpecularOnly(
+      b,
+      specular);
+    b.append("as\n");
+    b.append("  out out_0 = rgba;\n");
+    b.append("end;\n");
+  }
+
+  private static void fragmentShaderValuesRGBATranslucentLitSpecularOnly(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialSpecularLabel specular)
+  {
+    switch (specular) {
+      case SPECULAR_CONSTANT:
+      case SPECULAR_MAPPED:
+      {
+        b.append("  -- Specular component\n");
+        b.append("  value rgba = new vector_4f (\n");
+        b.append("    light_specular,\n");
+        b.append("    VectorAux.average_3f (light_specular)\n");
+        b.append("  );\n");
+        break;
+      }
+      case SPECULAR_NONE:
+      {
+        b.append("  value rgba =\n");
+        b.append("    new vector_4f (0.0, 0.0, 0.0, 0.0);\n");
+        break;
+      }
+    }
+  }
+
+  private static void fragmentShaderValuesLightSpecularOnly(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KLightLabel light,
+    final @Nonnull KMaterialSpecularLabel specular)
+  {
+    switch (light) {
+      case LIGHT_LABEL_DIRECTIONAL:
+      {
+        ForwardShaders.fragmentShaderValuesLightDirectionalSpecularOnly(
+          b,
+          specular);
+        break;
+      }
+      case LIGHT_LABEL_PROJECTIVE:
+      case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC:
+      case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+      case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
+      {
+        ForwardShaders.fragmentShaderValuesLightProjectiveSpecularOnly(
+          b,
+          light,
+          specular);
+        break;
+      }
+      case LIGHT_LABEL_SPHERICAL:
+      {
+        ForwardShaders.fragmentShaderValuesLightSphericalSpecularOnly(
+          b,
+          specular);
+        break;
+      }
+    }
+  }
+
+  private static void fragmentShaderValuesLightSphericalSpecularOnly(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialSpecularLabel specular)
+  {
+    b.append("  -- Spherical light vectors/attenuation\n");
+    b.append("  value light_vectors =\n");
+    b.append("    Light.calculate (\n");
+    b.append("      light_spherical,\n");
+    b.append("      f_position_eye [x y z],\n");
+    b.append("      n\n");
+    b.append("    );\n");
+    b.append("\n");
+
+    switch (specular) {
+      case SPECULAR_NONE:
+      {
+        b.append("  -- Spherical (no) specular light term\n");
+        break;
+      }
+      case SPECULAR_CONSTANT:
+      case SPECULAR_MAPPED:
+      {
+        b.append("  -- Spherical specular light term\n");
+        b.append("  value light_specular_unattenuated : vector_3f =\n");
+        b.append("    SphericalLight.specular_colour (\n");
+        b.append("      light_spherical,\n");
+        b.append("      light_vectors.vectors,\n");
+        b.append("      p_specular\n");
+        b.append("    );\n");
+
+        b.append("  value light_specular : vector_3f =\n");
+        b.append("    V3.multiply_scalar (\n");
+        b.append("      light_specular_unattenuated,\n");
+        b.append("      light_vectors.attenuation\n");
+        b.append("    );\n");
+        break;
+      }
+    }
+
+    b.append("\n");
+  }
+
+  private static void fragmentShaderValuesLightProjectiveSpecularOnly(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KLightLabel light,
+    final @Nonnull KMaterialSpecularLabel specular)
+  {
+    b.append("  -- Projective light vectors/attenuation\n");
+    b.append("  value light_vectors =\n");
+    b.append("    Light.calculate (\n");
+    b.append("      light_projective,\n");
+    b.append("      f_position_eye [x y z],\n");
+    b.append("      n\n");
+    b.append("    );\n");
+    b.append("  value light_texel =\n");
+    b.append("    ProjectiveLight.light_texel (\n");
+    b.append("      t_projection,\n");
+    b.append("      f_position_light_clip\n");
+    b.append("    );\n");
+    b.append("  value light_colour =\n");
+    b.append("    V3.multiply (\n");
+    b.append("      light_texel [x y z],\n");
+    b.append("      light_projective.colour\n");
+    b.append("    );\n");
+
+    switch (light) {
+      case LIGHT_LABEL_PROJECTIVE:
+      {
+        b.append("  value light_attenuation = light_vectors.attenuation;\n");
+        break;
+      }
+      case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC:
+      {
+        b.append("  value light_shadow =\n");
+        b.append("    ShadowBasic.factor (\n");
+        b.append("      shadow_basic,\n");
+        b.append("      t_shadow_basic,\n");
+        b.append("      f_position_light_clip\n");
+        b.append("    );\n");
+        b.append("  value light_attenuation =\n");
+        b.append("    F.multiply (\n");
+        b.append("      light_shadow,\n");
+        b.append("      light_vectors.attenuation\n");
+        b.append("    );\n");
+        break;
+      }
+      case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC_PACKED4444:
+      {
+        b.append("  value light_shadow =\n");
+        b.append("    ShadowBasic.factor_packed4444 (\n");
+        b.append("      shadow_basic,\n");
+        b.append("      t_shadow_basic,\n");
+        b.append("      f_position_light_clip\n");
+        b.append("    );\n");
+        b.append("  value light_attenuation =\n");
+        b.append("    F.multiply (\n");
+        b.append("      light_shadow,\n");
+        b.append("      light_vectors.attenuation\n");
+        b.append("    );\n");
+        break;
+      }
+      case LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_VARIANCE:
+      {
+        b.append("  value light_shadow =\n");
+        b.append("    ShadowVariance.factor (\n");
+        b.append("      shadow_variance,\n");
+        b.append("      t_shadow_variance,\n");
+        b.append("      f_position_light_clip\n");
+        b.append("    );\n");
+        b.append("  value light_attenuation =\n");
+        b.append("    F.multiply (\n");
+        b.append("      light_shadow,\n");
+        b.append("      light_vectors.attenuation\n");
+        b.append("    );\n");
+        break;
+      }
+      case LIGHT_LABEL_DIRECTIONAL:
+      case LIGHT_LABEL_SPHERICAL:
+      {
+        throw new UnreachableCodeException();
+      }
+    }
+
+    b.append("\n");
+
+    switch (specular) {
+      case SPECULAR_NONE:
+      {
+        b.append("  -- Projective (no) specular light term\n");
+        break;
+      }
+      case SPECULAR_CONSTANT:
+      case SPECULAR_MAPPED:
+      {
+        b.append("  -- Projective specular light term\n");
+        b.append("  value light_specular_unattenuated : vector_3f =\n");
+        b.append("    ProjectiveLight.specular_colour (\n");
+        b.append("      light_projective,\n");
+        b.append("      light_vectors.vectors,\n");
+        b.append("      light_colour,\n");
+        b.append("      p_specular\n");
+        b.append("    );\n");
+        b.append("  value light_specular : vector_3f =\n");
+        b.append("    V3.multiply_scalar (\n");
+        b.append("      light_specular_unattenuated,\n");
+        b.append("      light_attenuation\n");
+        b.append("    );\n");
+        break;
+      }
+    }
+
+    b.append("\n");
+  }
+
+  private static void fragmentShaderValuesLightDirectionalSpecularOnly(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialSpecularLabel specular)
+  {
+    b.append("  -- Directional light vectors\n");
+    b.append("  value light_vectors =\n");
+    b.append("    DirectionalLight.vectors (\n");
+    b.append("      light_directional,\n");
+    b.append("      f_position_eye [x y z],\n");
+    b.append("      n\n");
+    b.append("    );\n");
+    b.append("\n");
+
+    switch (specular) {
+      case SPECULAR_NONE:
+      {
+        b.append("  -- Directional (no) specular light term\n");
+        break;
+      }
+      case SPECULAR_CONSTANT:
+      case SPECULAR_MAPPED:
+      {
+        b.append("  -- Directional specular light term\n");
+        b.append("  value light_specular : vector_3f =\n");
+        b.append("    DirectionalLight.specular_colour (\n");
+        b.append("      light_directional,\n");
+        b.append("      light_vectors,\n");
+        b.append("      p_specular\n");
+        b.append("    );\n");
+        break;
+      }
+    }
+
+    b.append("\n");
+  }
+
+  private static void fragmentShaderValuesSpecularOnly(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialSpecularLabel specular)
+  {
+    if (specular == KMaterialSpecularLabel.SPECULAR_MAPPED) {
+      b.append("  -- Mapped specular\n");
+      b
+        .append("  value specular_sample = S.texture (t_specular, f_uv) [x y z];\n");
+      b.append("  value p_specular = record Specular.t {\n");
+      b.append("    exponent = p_specular.exponent,\n");
+      b
+        .append("    colour = V3.multiply (p_specular.colour, specular_sample)\n");
+      b.append("  };\n");
+      b.append("\n");
+    }
+  }
+
+  private static void fragmentShaderParametersSpecularOnly(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialSpecularLabel specular)
+  {
+    boolean has_specular = false;
+    boolean has_map = false;
+
+    switch (specular) {
+      case SPECULAR_NONE:
+      {
+        break;
+      }
+      case SPECULAR_CONSTANT:
+      case SPECULAR_MAPPED:
+      {
+        has_specular = true;
+        has_map = true;
+        break;
+      }
+    }
+
+    if (has_map || has_specular) {
+      b.append("  -- Specular parameters\n");
+      if (has_specular) {
+        b.append("  parameter p_specular : Specular.t;\n");
+      }
+      if (has_map) {
+        b.append("  parameter t_specular : sampler_2d;\n");
+      }
+    }
+  }
+
+  private static void moduleVertexShaderTranslucentSpecularOnly(
+    final @Nonnull StringBuilder b,
+    final @Nonnull KMaterialForwardTranslucentSpecularOnlyLitLabel label)
+  {
+    final boolean implies_uv = label.labelImpliesUV();
+    final KMaterialNormalLabel normal = label.labelGetNormal();
+    final KLightLabel light = label.labelGetLight();
+    ForwardShaders.vertexShaderLit(b, implies_uv, normal, light);
+  }
+
+  private static void vertexShaderLit(
+    final @Nonnull StringBuilder b,
+    final boolean implies_uv,
+    final @Nonnull KMaterialNormalLabel normal,
+    final @Nonnull KLightLabel light)
+  {
+    b.append("shader vertex v is\n");
+    ForwardShaders.vertexShaderStandardIO(b);
+    ForwardShaders.vertexShaderStandardParametersMatrices(b);
+    ForwardShaders.vertexShaderStandardAttributesUV(b, implies_uv);
+    ForwardShaders.vertexShaderStandardParametersUV(b, implies_uv);
+    ForwardShaders.vertexShaderStandardParametersLight(b, light);
+    ForwardShaders.vertexShaderStandardAttributesLight(b, light);
+    ForwardShaders.vertexShaderStandardAttributesNormal(b, normal);
+    ForwardShaders.vertexShaderStandardParametersNormal(b, normal);
+    b.append("with\n");
+    ForwardShaders.vertexShaderStandardValuesPositions(b);
+    ForwardShaders.vertexShaderStandardValuesNormals(b, normal);
+    ForwardShaders.vertexShaderStandardValuesLight(b, light);
+    ForwardShaders.vertexShaderStandardValuesUV(b, implies_uv);
+    b.append("as\n");
+    ForwardShaders.vertexShaderStandardWrites(b);
+    ForwardShaders.vertexShaderStandardWritesUV(b, implies_uv);
+    ForwardShaders.vertexShaderStandardWritesNormals(b, normal);
+    ForwardShaders.vertexShaderStandardWritesLight(b, light);
+    b.append("end;\n");
   }
 }
