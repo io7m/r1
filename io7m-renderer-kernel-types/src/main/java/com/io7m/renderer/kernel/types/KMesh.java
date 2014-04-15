@@ -133,6 +133,26 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     }
   }
 
+  @Override public boolean equals(
+    final Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KMesh other = (KMesh) obj;
+    return this.array.equals(other.array)
+      && this.bounds_lower.equals(other.bounds_lower)
+      && this.bounds_upper.equals(other.bounds_upper)
+      && (this.deleted == other.deleted)
+      && this.indices.equals(other.indices);
+  }
+
   @Override public @Nonnull ArrayBufferUsable getArrayBuffer()
   {
     return this.array;
@@ -155,6 +175,18 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   @Override public @Nonnull IndexBufferUsable getIndexBuffer()
   {
     return this.indices;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.array.hashCode();
+    result = (prime * result) + this.bounds_lower.hashCode();
+    result = (prime * result) + this.bounds_upper.hashCode();
+    result = (prime * result) + (this.deleted ? 1231 : 1237);
+    result = (prime * result) + this.indices.hashCode();
+    return result;
   }
 
   @Override public long resourceGetSizeBytes()
