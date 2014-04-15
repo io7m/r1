@@ -50,6 +50,7 @@ import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueUnlitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRefractiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularLitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularUnlitLabel;
+import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentSpecularOnlyLitLabel;
 
 public final class ForwardMakeAll
 {
@@ -125,12 +126,19 @@ public final class ForwardMakeAll
       translucent_refractive,
       out_parasol_dir);
 
+    final Set<KMaterialForwardTranslucentSpecularOnlyLitLabel> translucent_specular =
+      KMaterialForwardTranslucentSpecularOnlyLitLabel.allLabels();
+    ForwardMakeAll.makeSourcesTranslucentSpecularOnly(
+      translucent_specular,
+      out_parasol_dir);
+
     ForwardMakeAll.makeBatch(
       opaque_unlit,
       opaque_lit,
       translucent_regular_unlit,
       translucent_regular_lit,
       translucent_refractive,
+      translucent_specular,
       out_batch);
 
     ForwardMakeAll.makeSourcesList(out_parasol_dir, out_sources);
@@ -139,6 +147,33 @@ public final class ForwardMakeAll
       out_batch,
       out_glsl_dir,
       out_glsl_compact_dir);
+  }
+
+  private static
+    void
+    makeSourcesTranslucentSpecularOnly(
+      final @Nonnull Set<KMaterialForwardTranslucentSpecularOnlyLitLabel> translucent_specular,
+      final @Nonnull File dir)
+      throws IOException
+  {
+    if (dir.isDirectory() == false) {
+      throw new IOException(dir + " is not a directory");
+    }
+
+    for (final KMaterialForwardTranslucentSpecularOnlyLitLabel l : translucent_specular) {
+      final String code = TitleCase.toTitleCase(l.labelGetCode());
+
+      final File file = new File(dir, code + ".p");
+      System.err.println("info: writing: " + file);
+
+      final FileWriter writer = new FileWriter(file);
+      try {
+        writer.append(ForwardShaders.moduleForwardTranslucentSpecularOnly(l));
+      } finally {
+        writer.flush();
+        writer.close();
+      }
+    }
   }
 
   private static void makeSourcesList(
@@ -166,11 +201,12 @@ public final class ForwardMakeAll
   public static
     void
     makeBatch(
-      final Set<KMaterialForwardOpaqueUnlitLabel> opaque_unlit,
-      final Set<KMaterialForwardOpaqueLitLabel> opaque_lit,
-      final Set<KMaterialForwardTranslucentRegularUnlitLabel> translucent_regular_unlit,
-      final Set<KMaterialForwardTranslucentRegularLitLabel> translucent_regular_lit,
-      final Set<KMaterialForwardTranslucentRefractiveLabel> translucent_refractive,
+      final @Nonnull Set<KMaterialForwardOpaqueUnlitLabel> opaque_unlit,
+      final @Nonnull Set<KMaterialForwardOpaqueLitLabel> opaque_lit,
+      final @Nonnull Set<KMaterialForwardTranslucentRegularUnlitLabel> translucent_regular_unlit,
+      final @Nonnull Set<KMaterialForwardTranslucentRegularLitLabel> translucent_regular_lit,
+      final @Nonnull Set<KMaterialForwardTranslucentRefractiveLabel> translucent_refractive,
+      final @Nonnull Set<KMaterialForwardTranslucentSpecularOnlyLitLabel> translucent_specular,
       final @Nonnull File file)
       throws IOException
   {
@@ -209,6 +245,14 @@ public final class ForwardMakeAll
     }
 
     for (final KMaterialForwardTranslucentRefractiveLabel l : translucent_refractive) {
+      final String code = l.labelGetCode();
+      final String module = TitleCase.toTitleCase(code);
+      writer.append(code);
+      writer.append(" : com.io7m.renderer.kernel." + module + ".p");
+      writer.append("\n");
+    }
+
+    for (final KMaterialForwardTranslucentSpecularOnlyLitLabel l : translucent_specular) {
       final String code = l.labelGetCode();
       final String module = TitleCase.toTitleCase(code);
       writer.append(code);

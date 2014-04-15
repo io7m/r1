@@ -53,7 +53,48 @@ public enum KMaterialAlphaOpacityType
    * @return An opacity type
    */
 
-  public static @Nonnull KMaterialAlphaOpacityType fromInstance(
+  public static @Nonnull KMaterialAlphaOpacityType fromInstanceSpecularOnly(
+    final @Nonnull KMaterialNormalLabel normal,
+    final @Nonnull KInstanceTranslucentSpecularOnly instance)
+  {
+    switch (normal) {
+      case NORMAL_NONE:
+      {
+        return KMaterialAlphaOpacityType.ALPHA_OPACITY_CONSTANT;
+      }
+      case NORMAL_MAPPED:
+      case NORMAL_VERTEX:
+      {
+        final KMaterialAlpha alpha =
+          instance.instanceGetMaterial().getAlpha();
+        switch (alpha.getType()) {
+          case ALPHA_OPACITY_CONSTANT:
+          {
+            return KMaterialAlphaOpacityType.ALPHA_OPACITY_CONSTANT;
+          }
+          case ALPHA_OPACITY_ONE_MINUS_DOT:
+          {
+            return KMaterialAlphaOpacityType.ALPHA_OPACITY_ONE_MINUS_DOT;
+          }
+        }
+      }
+    }
+
+    throw new UnreachableCodeException();
+  }
+
+  /**
+   * Derive an opacity type from the given instance, assuming the instance has
+   * the given normal label.
+   * 
+   * @param normal
+   *          The normal label for the instance
+   * @param instance
+   *          The instance
+   * @return An opacity type
+   */
+
+  public static @Nonnull KMaterialAlphaOpacityType fromInstanceRegular(
     final @Nonnull KMaterialNormalLabel normal,
     final @Nonnull KInstanceTranslucentRegular instance)
   {

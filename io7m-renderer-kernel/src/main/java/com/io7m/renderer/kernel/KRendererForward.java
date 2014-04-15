@@ -266,9 +266,9 @@ import com.io7m.renderer.types.RTransformViewType;
           gc,
           actual.instanceGetFaces());
 
-        KRendererCommon.putInstanceMatrices(program, mwi, label);
+        KRendererCommon.putInstanceMatricesRegular(program, mwi, label);
         KRendererCommon
-          .putInstanceTextures(context, label, program, material);
+          .putInstanceTexturesRegular(context, label, program, material);
         KRendererForward.putMaterialOpaque(program, label, material);
 
         try {

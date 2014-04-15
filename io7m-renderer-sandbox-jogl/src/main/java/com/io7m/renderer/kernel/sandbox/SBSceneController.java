@@ -1409,7 +1409,7 @@ public final class SBSceneController implements
 
                   @Override public
                     KInstanceTransformedType
-                    translucentSpecular(
+                    translucentSpecularOnly(
                       final @Nonnull KMaterialTranslucentSpecularOnly mts)
                       throws RException,
                         RException,

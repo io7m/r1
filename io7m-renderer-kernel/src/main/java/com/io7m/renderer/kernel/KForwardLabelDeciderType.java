@@ -39,7 +39,8 @@ public interface KForwardLabelDeciderType extends
   KMaterialForwardOpaqueLitLabelCacheType,
   KMaterialForwardTranslucentRegularLitLabelCacheType,
   KMaterialForwardTranslucentRegularUnlitLabelCacheType,
-  KMaterialForwardTranslucentRefractiveLabelCacheType
+  KMaterialForwardTranslucentRefractiveLabelCacheType,
+  KMaterialForwardTranslucentSpecularOnlyLitLabelCacheType
 {
   /**
    * @return The current size of the label cache (the number of currently

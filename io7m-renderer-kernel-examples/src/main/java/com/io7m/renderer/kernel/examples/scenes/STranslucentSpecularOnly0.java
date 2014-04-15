@@ -37,6 +37,8 @@ import com.io7m.renderer.kernel.types.KInstanceTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedo;
+import com.io7m.renderer.kernel.types.KMaterialAlpha;
+import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
 import com.io7m.renderer.kernel.types.KMaterialNormal;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialSpecular;
@@ -83,7 +85,7 @@ public final class STranslucentSpecularOnly0 implements ExampleSceneType
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         8.0f,
         1.0f,
-        8.0f), new RVectorI3F<RSpaceWorldType>(0.0f, -1.0f, 0.0f));
+        8.0f), new RVectorI3F<RSpaceWorldType>(0.0f, -4.0f, 0.0f));
 
     final KMaterialOpaqueRegular floor_mat =
       ExampleSceneUtilities.OPAQUE_MATTE_WHITE.withAlbedo(
@@ -116,6 +118,9 @@ public final class STranslucentSpecularOnly0 implements ExampleSceneType
     final KMaterialTranslucentSpecularOnly glass_mat =
       KMaterialTranslucentSpecularOnly.newMaterial(
         ExampleSceneUtilities.IDENTITY_UV,
+        KMaterialAlpha.newAlpha(
+          KMaterialAlphaOpacityType.ALPHA_OPACITY_CONSTANT,
+          1.0f),
         KMaterialNormal.newNormalMapped(scene
           .texture("tiles_normal_soft.png")),
         KMaterialSpecular.newSpecularUnmapped(
@@ -146,7 +151,7 @@ public final class STranslucentSpecularOnly0 implements ExampleSceneType
         ExampleSceneUtilities.RGB_WHITE,
         1.0f,
         new RVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f),
-        8.0f,
+        16.0f,
         1.0f);
 
     /**
