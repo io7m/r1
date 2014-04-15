@@ -417,6 +417,36 @@ public final class SBSceneController implements
                   in_normal,
                   in_specular);
               }
+
+              @Override public
+                KMaterialType
+                materialVisitTranslucentSpecularOnly(
+                  final @Nonnull SBMaterialTranslucentSpecularOnly mtr)
+                  throws ConstraintError,
+                    RException
+              {
+                final SBMaterialDescriptionTranslucentSpecularOnly md =
+                  mtr.materialGetDescription();
+
+                final KMaterialAlpha in_alpha =
+                  SBSceneController.makeKMaterialAlpha(md.getAlpha());
+
+                final KMaterialNormal in_normal =
+                  SBSceneController.makeKMaterialNormal(
+                    textures_2d,
+                    md.getNormal());
+
+                final KMaterialSpecular in_specular =
+                  SBSceneController.makeKMaterialSpecular(
+                    textures_2d,
+                    md.getSpecular());
+
+                return KMaterialTranslucentSpecularOnly.newMaterial(
+                  md.getUVMatrix(),
+                  in_alpha,
+                  in_normal,
+                  in_specular);
+              }
             });
         }
       });
@@ -696,6 +726,34 @@ public final class SBSceneController implements
                     map_diffuse,
                     map_emissive,
                     map_environment,
+                    map_normal,
+                    map_specular);
+                }
+
+                @Override public
+                  SBMaterial
+                  materialDescriptionVisitTranslucentSpecularOnly(
+                    final SBMaterialDescriptionTranslucentSpecularOnly mtr)
+                    throws ConstraintError,
+                      RException
+                {
+                  final SBMaterialNormalDescription normal = mtr.getNormal();
+                  final SBMaterialSpecularDescription specular =
+                    mtr.getSpecular();
+
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindNormal> map_normal =
+                    (SBTexture2D<SBTexture2DKindNormal>) (normal.getTexture() != null
+                      ? tx2.get(normal.getTexture())
+                      : null);
+                  @SuppressWarnings("unchecked") final SBTexture2D<SBTexture2DKindSpecular> map_specular =
+                    (SBTexture2D<SBTexture2DKindSpecular>) (specular
+                      .getTexture() != null
+                      ? tx2.get(specular.getTexture())
+                      : null);
+
+                  return new SBMaterialTranslucentSpecularOnly(
+                    id,
+                    mtr,
                     map_normal,
                     map_specular);
                 }
@@ -1366,12 +1424,10 @@ public final class SBSceneController implements
                 });
             }
 
-            @Override public
-              KInstanceTransformedType
-              materialTranslucent(
-                final @Nonnull KMaterialTranslucentType m)
-                throws ConstraintError,
-                  RException
+            @Override public KInstanceTransformedType materialTranslucent(
+              final @Nonnull KMaterialTranslucentType m)
+              throws ConstraintError,
+                RException
             {
               return m
                 .materialTranslucentAccept(new KMaterialTranslucentVisitorType<KInstanceTransformedType, RException>() {
