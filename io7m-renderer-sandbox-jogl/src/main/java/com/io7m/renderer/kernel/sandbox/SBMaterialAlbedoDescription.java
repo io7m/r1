@@ -16,48 +16,39 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.types.RSpaceRGBAType;
 import com.io7m.renderer.types.RVectorI4F;
 
 public final class SBMaterialAlbedoDescription
 {
-  private final @Nonnull RVectorI4F<RSpaceRGBAType> colour;
-  private final float                           mix;
-  private final @CheckForNull PathVirtual       texture;
+  private final RVectorI4F<RSpaceRGBAType> colour;
+  private final float                      mix;
+  private final @Nullable PathVirtual      texture;
 
-  public static @Nonnull SBMaterialAlbedoDescription getDefault()
+  public static SBMaterialAlbedoDescription getDefault()
   {
-    try {
-      return new SBMaterialAlbedoDescription(new RVectorI4F<RSpaceRGBAType>(
-        1.0f,
-        1.0f,
-        1.0f,
-        1.0f), 0.0f, null);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    return new SBMaterialAlbedoDescription(new RVectorI4F<RSpaceRGBAType>(
+      1.0f,
+      1.0f,
+      1.0f,
+      1.0f), 0.0f, null);
   }
 
   public SBMaterialAlbedoDescription(
-    final @Nonnull RVectorI4F<RSpaceRGBAType> in_colour,
+    final RVectorI4F<RSpaceRGBAType> in_colour,
     final float in_mix,
-    final @CheckForNull PathVirtual in_texture)
-    throws ConstraintError
+    final @Nullable PathVirtual in_texture)
   {
-    this.colour = Constraints.constrainNotNull(in_colour, "Colour");
+    this.colour = NullCheck.notNull(in_colour, "Colour");
     this.mix = in_mix;
     this.texture = in_texture;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -80,13 +71,18 @@ public final class SBMaterialAlbedoDescription
       if (other.texture != null) {
         return false;
       }
-    } else if (!this.texture.equals(other.texture)) {
-      return false;
+    } else {
+      final PathVirtual r = this.texture;
+      if (r != null) {
+        if (!r.equals(other.texture)) {
+          return false;
+        }
+      }
     }
     return true;
   }
 
-  public @Nonnull RVectorI4F<RSpaceRGBAType> getColour()
+  public RVectorI4F<RSpaceRGBAType> getColour()
   {
     return this.colour;
   }
@@ -96,7 +92,7 @@ public final class SBMaterialAlbedoDescription
     return this.mix;
   }
 
-  public @CheckForNull PathVirtual getTexture()
+  public @Nullable PathVirtual getTexture()
   {
     return this.texture;
   }
@@ -107,9 +103,10 @@ public final class SBMaterialAlbedoDescription
     int result = 1;
     result = (prime * result) + this.colour.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.mix);
-    result =
-      (prime * result)
-        + ((this.texture == null) ? 0 : this.texture.hashCode());
+    final PathVirtual t = this.texture;
+    if (t != null) {
+      result = (prime * result) + ((this.texture == null) ? 0 : t.hashCode());
+    }
     return result;
   }
 

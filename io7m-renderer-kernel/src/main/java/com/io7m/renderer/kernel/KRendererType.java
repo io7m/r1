@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
 /**
  * The type of renderers.
  */
@@ -28,5 +26,5 @@ public interface KRendererType
    * @return The name of the renderer
    */
 
-  @Nonnull String rendererGetName();
+  String rendererGetName();
 }

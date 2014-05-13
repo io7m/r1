@@ -25,9 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 import javax.xml.parsers.ParserConfigurationException;
 
 import nu.xom.ParsingException;
@@ -35,25 +32,29 @@ import nu.xom.ValidityException;
 
 import org.xml.sax.SAXException;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcanephora.FragmentShader;
-import com.io7m.jcanephora.JCBExecutionAPI;
-import com.io7m.jcanephora.JCBExecutor;
+import com.io7m.jcanephora.FragmentShaderType;
 import com.io7m.jcanephora.JCGLApi;
-import com.io7m.jcanephora.JCGLCompileException;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
+import com.io7m.jcanephora.JCGLExceptionAttributeMissing;
+import com.io7m.jcanephora.JCGLExceptionDeleted;
+import com.io7m.jcanephora.JCGLExceptionProgramCompileError;
+import com.io7m.jcanephora.JCGLExceptionProgramUniformMissing;
+import com.io7m.jcanephora.JCGLExceptionTypeError;
+import com.io7m.jcanephora.JCGLExceptionUnsupported;
 import com.io7m.jcanephora.JCGLSLVersionNumber;
-import com.io7m.jcanephora.JCGLShadersCommon;
 import com.io7m.jcanephora.JCGLType;
-import com.io7m.jcanephora.JCGLUnsupportedException;
-import com.io7m.jcanephora.ProgramReference;
-import com.io7m.jcanephora.ShaderUtilities;
-import com.io7m.jcanephora.VertexShader;
-import com.io7m.jlog.Level;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.ProgramType;
+import com.io7m.jcanephora.VertexShaderType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLShadersCommonType;
+import com.io7m.jcanephora.batchexec.JCBExecutor;
+import com.io7m.jcanephora.batchexec.JCBExecutorType;
+import com.io7m.jcanephora.utilities.ShaderUtilities;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.jparasol.xml.API;
 import com.io7m.jparasol.xml.CompactedShaders;
 import com.io7m.jparasol.xml.FragmentParameter;
@@ -61,7 +62,8 @@ import com.io7m.jparasol.xml.PGLSLMetaXML;
 import com.io7m.jparasol.xml.Version;
 import com.io7m.jparasol.xml.VertexInput;
 import com.io7m.jparasol.xml.VertexParameter;
-import com.io7m.jvvfs.FSCapabilityRead;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.jvvfs.FSCapabilityReadType;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.types.RException;
@@ -71,22 +73,14 @@ import com.io7m.renderer.types.RXMLException;
  * A kernel program.
  */
 
-@Immutable public final class KProgram
+@EqualityStructural public final class KProgram
 {
-  private static @Nonnull PathVirtual BASE;
-
-  static {
-    try {
-      KProgram.BASE = PathVirtual.ofString("/com/io7m/renderer/kernel");
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException();
-    }
-  }
+  private static final PathVirtual BASE = KProgram.makeBasePath();
 
   private static void checkSupport(
-    final @Nonnull Version v,
-    final @Nonnull PGLSLMetaXML m)
-    throws JCGLUnsupportedException
+    final Version v,
+    final PGLSLMetaXML m)
+    throws JCGLExceptionUnsupported
   {
     final Integer vn = Integer.valueOf(v.getVersion());
 
@@ -108,8 +102,17 @@ import com.io7m.renderer.types.RXMLException;
     }
   }
 
-  private static @Nonnull API getAPI(
-    final @Nonnull JCGLApi api)
+  private static PathVirtual makeBasePath()
+  {
+    try {
+      return PathVirtual.ofString("/com/io7m/renderer/kernel");
+    } catch (final FilesystemError e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
+  private static API getAPI(
+    final JCGLApi api)
   {
     switch (api) {
       case JCGL_ES:
@@ -121,14 +124,14 @@ import com.io7m.renderer.types.RXMLException;
     throw new UnreachableCodeException();
   }
 
-  private static Log getLog(
+  private static LogUsableType getLog(
     final JCGLSLVersionNumber version,
     final JCGLApi api,
     final String name,
-    final Log log)
+    final LogUsableType log)
   {
-    final Log logp = new Log(log, "kprogram");
-    if (logp.enabled(Level.LOG_DEBUG)) {
+    final LogUsableType logp = log.with("kprogram");
+    if (logp.wouldLog(LogLevel.LOG_DEBUG)) {
       final StringBuilder message = new StringBuilder();
       message.append("Loading ");
       message.append(name);
@@ -136,17 +139,18 @@ import com.io7m.renderer.types.RXMLException;
       message.append(version);
       message.append(" ");
       message.append(api);
-      logp.debug(message.toString());
+      final String r = message.toString();
+      assert r != null;
+      logp.debug(r);
     }
     return logp;
   }
 
-  private static @Nonnull PGLSLMetaXML getMeta(
-    final @Nonnull FSCapabilityRead fs,
-    final @Nonnull String name,
-    final @Nonnull Log log)
+  private static PGLSLMetaXML getMeta(
+    final FSCapabilityReadType fs,
+    final String name,
+    final LogUsableType log)
     throws IOException,
-      ConstraintError,
       FilesystemError,
       ValidityException,
       ParsingException,
@@ -163,13 +167,12 @@ import com.io7m.renderer.types.RXMLException;
   }
 
   private static PGLSLMetaXML getMetaFromDirectory(
-    final @Nonnull File directory,
-    final @Nonnull Log log)
+    final File directory,
+    final LogUsableType log)
     throws ParsingException,
       IOException,
       SAXException,
-      ParserConfigurationException,
-      ConstraintError
+      ParserConfigurationException
   {
     final File meta = new File(directory, "meta.xml");
     final InputStream mf = new FileInputStream(meta);
@@ -180,12 +183,12 @@ import com.io7m.renderer.types.RXMLException;
     }
   }
 
-  private static @Nonnull PathVirtual getShaderPath(
-    final @Nonnull JCGLSLVersionNumber version,
-    final @Nonnull JCGLApi api,
-    final @Nonnull String name)
-    throws ConstraintError,
-      JCGLUnsupportedException
+  private static PathVirtual getShaderPath(
+    final JCGLSLVersionNumber version,
+    final JCGLApi api,
+    final String name)
+    throws JCGLExceptionUnsupported,
+      FilesystemError
   {
     return KProgram.getShaderPathDirectory(name).appendName(
       KProgram.getShadingLanguageName(version, api));
@@ -198,15 +201,16 @@ import com.io7m.renderer.types.RXMLException;
    * @param name
    *          The name of the shader
    * @return The shader code path
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull PathVirtual getShaderPathDirectory(
-    final @Nonnull String name)
-    throws ConstraintError
+  public static PathVirtual getShaderPathDirectory(
+    final String name)
   {
-    return KProgram.BASE.appendName(name);
+    try {
+      return KProgram.BASE.appendName(name);
+    } catch (final FilesystemError e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 
   /**
@@ -215,21 +219,22 @@ import com.io7m.renderer.types.RXMLException;
    * @param name
    *          The name of the shader
    * @return The path to the metadata file for the shader
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull PathVirtual getShaderPathMeta(
-    final @Nonnull String name)
-    throws ConstraintError
+  public static PathVirtual getShaderPathMeta(
+    final String name)
   {
-    return KProgram.getShaderPathDirectory(name).appendName("meta.xml");
+    try {
+      return KProgram.getShaderPathDirectory(name).appendName("meta.xml");
+    } catch (final FilesystemError e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 
-  private static @Nonnull String getShadingLanguageName(
-    final @Nonnull JCGLSLVersionNumber version,
-    final @Nonnull JCGLApi api)
-    throws JCGLUnsupportedException
+  private static String getShadingLanguageName(
+    final JCGLSLVersionNumber version,
+    final JCGLApi api)
+    throws JCGLExceptionUnsupported
   {
     switch (api) {
       case JCGL_ES:
@@ -240,7 +245,7 @@ import com.io7m.renderer.types.RXMLException;
         if (version.getVersionMajor() == 3) {
           return "glsl-es-300";
         }
-        throw new JCGLUnsupportedException("Unsupported GLSL ES version: "
+        throw new JCGLExceptionUnsupported("Unsupported GLSL ES version: "
           + version);
       }
       case JCGL_FULL:
@@ -260,7 +265,7 @@ import com.io7m.renderer.types.RXMLException;
               case 50:
                 return "glsl-150";
             }
-            throw new JCGLUnsupportedException("Unsupported GLSL version: "
+            throw new JCGLExceptionUnsupported("Unsupported GLSL version: "
               + version);
           }
           case 3:
@@ -269,7 +274,7 @@ import com.io7m.renderer.types.RXMLException;
               case 30:
                 return "glsl-330";
             }
-            throw new JCGLUnsupportedException("Unsupported GLSL version: "
+            throw new JCGLExceptionUnsupported("Unsupported GLSL version: "
               + version);
           }
           case 4:
@@ -287,11 +292,11 @@ import com.io7m.renderer.types.RXMLException;
                 return "glsl-440";
             }
 
-            throw new JCGLUnsupportedException("Unsupported GLSL version: "
+            throw new JCGLExceptionUnsupported("Unsupported GLSL version: "
               + version);
           }
           default:
-            throw new JCGLUnsupportedException("Unsupported GLSL version: "
+            throw new JCGLExceptionUnsupported("Unsupported GLSL version: "
               + version);
         }
       }
@@ -301,22 +306,20 @@ import com.io7m.renderer.types.RXMLException;
   }
 
   private static int getVersion(
-    final @Nonnull JCGLSLVersionNumber version)
+    final JCGLSLVersionNumber version)
   {
     return (version.getVersionMajor() * 100) + version.getVersionMinor();
   }
 
-  private static @Nonnull KProgram loadCompacted(
-    final @Nonnull JCGLShadersCommon gl,
-    final @Nonnull FSCapabilityRead fs,
-    final @Nonnull Version v,
-    final @Nonnull String name,
-    final @Nonnull PGLSLMetaXML m,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      FilesystemError,
+  private static KProgram loadCompacted(
+    final JCGLShadersCommonType gl,
+    final FSCapabilityReadType fs,
+    final Version v,
+    final String name,
+    final PGLSLMetaXML m,
+    final LogUsableType log)
+    throws FilesystemError,
       IOException,
-      JCGLCompileException,
       JCGLException
   {
     final SortedMap<Version, CompactedShaders> mappings =
@@ -332,7 +335,7 @@ import com.io7m.renderer.types.RXMLException;
     try {
       final InputStream f_stream = fs.openFile(path_f);
       try {
-        final ProgramReference p =
+        final ProgramType p =
           KProgram.newProgramFromStreams(gl, name, v_stream, f_stream, v);
         return new KProgram(gl, m, p, log);
       } finally {
@@ -343,15 +346,13 @@ import com.io7m.renderer.types.RXMLException;
     }
   }
 
-  private static @Nonnull KProgram loadCompactedFromDirectory(
-    final @Nonnull JCGLShadersCommon gl,
-    final @Nonnull File directory,
-    final @Nonnull Version v,
-    final @Nonnull PGLSLMetaXML m,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      IOException,
-      JCGLCompileException,
+  private static KProgram loadCompactedFromDirectory(
+    final JCGLShadersCommonType gl,
+    final File directory,
+    final Version v,
+    final PGLSLMetaXML m,
+    final LogUsableType log)
+    throws IOException,
       JCGLException
   {
     final SortedMap<Version, CompactedShaders> mappings =
@@ -366,7 +367,7 @@ import com.io7m.renderer.types.RXMLException;
     try {
       final InputStream f_stream = new FileInputStream(path_f);
       try {
-        final ProgramReference p =
+        final ProgramType p =
           KProgram.newProgramFromStreams(
             gl,
             m.getName(),
@@ -382,19 +383,16 @@ import com.io7m.renderer.types.RXMLException;
     }
   }
 
-  private static @Nonnull KProgram loadUncompacted(
-    final @Nonnull JCGLShadersCommon gl,
-    final @Nonnull FSCapabilityRead fs,
-    final @Nonnull JCGLSLVersionNumber version,
-    final @Nonnull JCGLApi api,
-    final @Nonnull String name,
-    final @Nonnull PGLSLMetaXML m,
-    final @Nonnull Log log)
-    throws JCGLUnsupportedException,
-      ConstraintError,
-      FilesystemError,
+  private static KProgram loadUncompacted(
+    final JCGLShadersCommonType gl,
+    final FSCapabilityReadType fs,
+    final JCGLSLVersionNumber version,
+    final JCGLApi api,
+    final String name,
+    final PGLSLMetaXML m,
+    final LogUsableType log)
+    throws FilesystemError,
       IOException,
-      JCGLCompileException,
       JCGLException
   {
     final PathVirtual path = KProgram.getShaderPath(version, api, name);
@@ -405,7 +403,7 @@ import com.io7m.renderer.types.RXMLException;
     try {
       final InputStream f_stream = fs.openFile(path_f);
       try {
-        final ProgramReference p =
+        final ProgramType p =
           KProgram.newProgramFromStreams(gl, name, v_stream, f_stream, null);
         return new KProgram(gl, m, p, log);
       } finally {
@@ -416,18 +414,16 @@ import com.io7m.renderer.types.RXMLException;
     }
   }
 
-  private static @Nonnull KProgram loadUncompactedFromDirectory(
-    final @Nonnull JCGLShadersCommon gl,
-    final @Nonnull File directory,
-    final @Nonnull JCGLSLVersionNumber version,
-    final @Nonnull JCGLApi api,
-    final @Nonnull PGLSLMetaXML m,
-    final @Nonnull Log log)
-    throws JCGLUnsupportedException,
+  private static KProgram loadUncompactedFromDirectory(
+    final JCGLShadersCommonType gl,
+    final File directory,
+    final JCGLSLVersionNumber version,
+    final JCGLApi api,
+    final PGLSLMetaXML m,
+    final LogUsableType log)
+    throws JCGLExceptionUnsupported,
       IOException,
-      JCGLCompileException,
-      JCGLException,
-      ConstraintError
+      JCGLException
   {
     final String name_v =
       KProgram.getShadingLanguageName(version, api) + ".v";
@@ -441,7 +437,7 @@ import com.io7m.renderer.types.RXMLException;
     try {
       final InputStream f_stream = new FileInputStream(path_f);
       try {
-        final ProgramReference p =
+        final ProgramType p =
           KProgram.newProgramFromStreams(
             gl,
             m.getName(),
@@ -457,28 +453,27 @@ import com.io7m.renderer.types.RXMLException;
     }
   }
 
-  private static @Nonnull KProgram newProgramFromDirectory(
-    final @Nonnull JCGLShadersCommon gl,
-    final @Nonnull JCGLSLVersionNumber version,
-    final @Nonnull JCGLApi api,
-    final @Nonnull File directory,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      IOException,
-      JCGLUnsupportedException,
-      JCGLCompileException,
+  private static KProgram newProgramFromDirectory(
+    final JCGLShadersCommonType gl,
+    final JCGLSLVersionNumber version,
+    final JCGLApi api,
+    final File directory,
+    final LogUsableType log)
+    throws IOException,
       JCGLException,
       RXMLException
   {
     try {
-      Constraints.constrainNotNull(gl, "GL");
-      Constraints.constrainNotNull(version, "Version");
-      Constraints.constrainNotNull(api, "API");
-      Constraints.constrainNotNull(directory, "Directory");
-      Constraints.constrainNotNull(log, "Log");
+      NullCheck.notNull(gl, "GL");
+      NullCheck.notNull(version, "Version");
+      NullCheck.notNull(api, "API");
+      NullCheck.notNull(directory, "Directory");
+      NullCheck.notNull(log, "Log");
 
-      final Log logp =
-        KProgram.getLog(version, api, directory.toString(), log);
+      final String ds = directory.toString();
+      assert ds != null;
+
+      final LogUsableType logp = KProgram.getLog(version, api, ds, log);
       final Version v =
         Version
           .newVersion(KProgram.getVersion(version), KProgram.getAPI(api));
@@ -523,39 +518,37 @@ import com.io7m.renderer.types.RXMLException;
    * @param log
    *          A log handle
    * @return A new program
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
-   * @throws JCGLUnsupportedException
+   * @throws JCGLExceptionUnsupported
    *           If the shading program is not supported on the given API and
    *           version
    * @throws IOException
    *           If an I/O error occurs during loading
-   * @throws JCGLCompileException
+   * @throws JCGLExceptionProgramCompileError
    *           If the program is invalid
    * @throws JCGLException
    *           If an OpenGL error occurs
    */
 
-  public static @Nonnull KProgram newProgramFromDirectoryMeta(
-    final @Nonnull JCGLInterfaceCommon gl,
-    final @Nonnull JCGLSLVersionNumber version,
-    final @Nonnull JCGLApi api,
-    final @Nonnull File directory,
-    final @Nonnull PGLSLMetaXML meta,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      JCGLUnsupportedException,
-      IOException,
-      JCGLCompileException,
-      JCGLException
+  public static KProgram newProgramFromDirectoryMeta(
+    final JCGLInterfaceCommonType gl,
+    final JCGLSLVersionNumber version,
+    final JCGLApi api,
+    final File directory,
+    final PGLSLMetaXML meta,
+    final LogUsableType log)
+    throws IOException,
+      JCGLException,
+      JCGLExceptionUnsupported,
+      JCGLExceptionProgramCompileError
   {
-    Constraints.constrainNotNull(gl, "GL");
-    Constraints.constrainNotNull(version, "Version");
-    Constraints.constrainNotNull(api, "API");
-    Constraints.constrainNotNull(directory, "Filesystem");
-    Constraints.constrainNotNull(log, "Log");
+    NullCheck.notNull(gl, "GL");
+    NullCheck.notNull(version, "Version");
+    NullCheck.notNull(api, "API");
+    NullCheck.notNull(directory, "Filesystem");
+    NullCheck.notNull(log, "Log");
 
-    final Log logp = KProgram.getLog(version, api, meta.getName(), log);
+    final LogUsableType logp =
+      KProgram.getLog(version, api, meta.getName(), log);
 
     final Version v =
       Version.newVersion(KProgram.getVersion(version), KProgram.getAPI(api));
@@ -591,32 +584,30 @@ import com.io7m.renderer.types.RXMLException;
    * @param log
    *          A log handle
    * @return A new program
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
+   * 
    * @throws RException
    *           If an error occurs, such as an OpenGL error, or the program not
    *           being supported on the current version and API
    */
 
-  public static @Nonnull KProgram newProgramFromFilesystem(
-    final @Nonnull JCGLShadersCommon gl,
-    final @Nonnull JCGLSLVersionNumber version,
-    final @Nonnull JCGLApi api,
-    final @Nonnull FSCapabilityRead fs,
-    final @Nonnull String name,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      RException
+  public static KProgram newProgramFromFilesystem(
+    final JCGLShadersCommonType gl,
+    final JCGLSLVersionNumber version,
+    final JCGLApi api,
+    final FSCapabilityReadType fs,
+    final String name,
+    final LogUsableType log)
+    throws RException
   {
     try {
-      Constraints.constrainNotNull(gl, "GL");
-      Constraints.constrainNotNull(version, "Version");
-      Constraints.constrainNotNull(api, "API");
-      Constraints.constrainNotNull(fs, "Filesystem");
-      Constraints.constrainNotNull(name, "Name");
-      Constraints.constrainNotNull(log, "Log");
+      NullCheck.notNull(gl, "GL");
+      NullCheck.notNull(version, "Version");
+      NullCheck.notNull(api, "API");
+      NullCheck.notNull(fs, "Filesystem");
+      NullCheck.notNull(name, "Name");
+      NullCheck.notNull(log, "Log");
 
-      final Log logp = KProgram.getLog(version, api, name, log);
+      final LogUsableType logp = KProgram.getLog(version, api, name, log);
 
       final Version v =
         Version
@@ -647,24 +638,22 @@ import com.io7m.renderer.types.RXMLException;
     }
   }
 
-  private static @Nonnull ProgramReference newProgramFromStreams(
-    final @Nonnull JCGLShadersCommon gl,
-    final @Nonnull String name,
-    final @Nonnull InputStream v_stream,
-    final @Nonnull InputStream f_stream,
-    final @CheckForNull Version prepend)
+  private static ProgramType newProgramFromStreams(
+    final JCGLShadersCommonType gl,
+    final String name,
+    final InputStream v_stream,
+    final InputStream f_stream,
+    final @Nullable Version prepend)
     throws IOException,
-      ConstraintError,
-      JCGLCompileException,
       JCGLException
   {
-    Constraints.constrainNotNull(gl, "GL");
-    Constraints.constrainNotNull(name, "Name");
-    Constraints.constrainNotNull(v_stream, "Vertex shader stream");
-    Constraints.constrainNotNull(f_stream, "Fragment shader stream");
+    NullCheck.notNull(gl, "GL");
+    NullCheck.notNull(name, "Name");
+    NullCheck.notNull(v_stream, "Vertex shader stream");
+    NullCheck.notNull(f_stream, "Fragment shader stream");
 
-    VertexShader v = null;
-    FragmentShader f = null;
+    VertexShaderType v = null;
+    FragmentShaderType f = null;
 
     final List<String> v_lines = ShaderUtilities.readLines(v_stream);
     if (prepend != null) {
@@ -681,16 +670,16 @@ import com.io7m.renderer.types.RXMLException;
     assert v != null;
     assert f != null;
 
-    final ProgramReference p = gl.programCreateCommon(name, v, f);
+    final ProgramType p = gl.programCreateCommon(name, v, f);
     gl.vertexShaderDelete(v);
     gl.fragmentShaderDelete(f);
     return p;
   }
 
   private static void notSupported(
-    final @Nonnull Version v,
-    final @Nonnull PGLSLMetaXML m)
-    throws JCGLUnsupportedException
+    final Version v,
+    final PGLSLMetaXML m)
+    throws JCGLExceptionUnsupported
   {
     final StringBuilder message = new StringBuilder();
     message.append("GLSL version ");
@@ -710,12 +699,14 @@ import com.io7m.renderer.types.RXMLException;
       message.append(ver);
       message.append("\n");
     }
-    throw new JCGLUnsupportedException(message.toString());
+    final String r = message.toString();
+    assert r != null;
+    throw new JCGLExceptionUnsupported(r);
   }
 
   private static void prependVersion(
-    final @Nonnull List<String> lines,
-    final @Nonnull Version prepend)
+    final List<String> lines,
+    final Version prepend)
   {
     final StringBuilder directive = new StringBuilder();
     directive.append("#version ");
@@ -724,21 +715,24 @@ import com.io7m.renderer.types.RXMLException;
     lines.add(0, directive.toString());
   }
 
-  private final @Nonnull Map<String, JCGLType> declared_attributes;
-  private final @Nonnull Map<String, JCGLType> declared_uniforms;
-  private final @Nonnull JCBExecutionAPI       exec;
-  private final @Nonnull PGLSLMetaXML          meta;
-  private final @Nonnull ProgramReference      program;
+  private final Map<String, JCGLType> declared_attributes;
+  private final Map<String, JCGLType> declared_uniforms;
+  private final JCBExecutorType       exec;
+  private final PGLSLMetaXML          meta;
+  private final ProgramType           program;
 
   private KProgram(
-    final @Nonnull JCGLShadersCommon gl,
-    final @Nonnull PGLSLMetaXML in_meta,
-    final @Nonnull ProgramReference in_program,
-    final @Nonnull Log log)
-    throws ConstraintError
+    final JCGLShadersCommonType gl,
+    final PGLSLMetaXML in_meta,
+    final ProgramType in_program,
+    final LogUsableType log)
+    throws JCGLExceptionDeleted,
+      JCGLExceptionProgramUniformMissing,
+      JCGLExceptionTypeError,
+      JCGLExceptionAttributeMissing
   {
-    this.meta = Constraints.constrainNotNull(in_meta, "Meta");
-    this.program = Constraints.constrainNotNull(in_program, "Program");
+    this.meta = NullCheck.notNull(in_meta, "Meta");
+    this.program = NullCheck.notNull(in_program, "Program");
     this.declared_uniforms = new HashMap<String, JCGLType>();
     this.declared_attributes = new HashMap<String, JCGLType>();
 
@@ -764,11 +758,31 @@ import com.io7m.renderer.types.RXMLException;
         log);
   }
 
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KProgram other = (KProgram) obj;
+    return (this.declared_attributes.equals(other.declared_attributes))
+      && (this.declared_uniforms.equals(other.declared_uniforms))
+      && (this.exec.equals(other.exec))
+      && (this.meta.equals(other.meta))
+      && (this.program.equals(other.program));
+  }
+
   /**
    * @return A reference to the program's executable interface
    */
 
-  public @Nonnull JCBExecutionAPI getExecutable()
+  public JCBExecutorType getExecutable()
   {
     return this.exec;
   }
@@ -777,7 +791,7 @@ import com.io7m.renderer.types.RXMLException;
    * @return Information about the compiled program
    */
 
-  public @Nonnull PGLSLMetaXML getMeta()
+  public PGLSLMetaXML getMeta()
   {
     return this.meta;
   }
@@ -786,8 +800,20 @@ import com.io7m.renderer.types.RXMLException;
    * @return The compiled program
    */
 
-  public @Nonnull ProgramReference getProgram()
+  public ProgramType getProgram()
   {
     return this.program;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.declared_attributes.hashCode();
+    result = (prime * result) + this.declared_uniforms.hashCode();
+    result = (prime * result) + this.exec.hashCode();
+    result = (prime * result) + this.meta.hashCode();
+    result = (prime * result) + this.program.hashCode();
+    return result;
   }
 }

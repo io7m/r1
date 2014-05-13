@@ -18,29 +18,26 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.util.Collection;
 import java.util.Map;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import java.util.NoSuchElementException;
 
 import org.pcollections.HashTreePMap;
 import org.pcollections.PMap;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Pair;
+import com.io7m.jfunctional.Pair;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.jvvfs.PathVirtual;
 
-@Immutable final class SBScene
+final class SBScene
 {
-  private static @Nonnull Integer currentMaxID(
-    final @Nonnull Integer x,
-    final @Nonnull Integer y)
+  private static Integer currentMaxID(
+    final Integer x,
+    final Integer y)
   {
     return Integer.valueOf(Math.max(x.intValue(), y.intValue()));
   }
 
-  public static @Nonnull SBScene empty()
+  public static SBScene empty()
   {
     final PMap<PathVirtual, SBTexture2D<?>> textures2d = HashTreePMap.empty();
     final PMap<PathVirtual, SBTextureCube> textures_cube =
@@ -62,26 +59,26 @@ import com.io7m.jvvfs.PathVirtual;
       Integer.valueOf(0));
   }
 
-  private final @Nonnull Integer                           instance_id_pool;
-  private final @Nonnull PMap<Integer, SBInstance>         instances;
-  private final @Nonnull Integer                           light_id_pool;
-  private final @Nonnull PMap<Integer, SBLight>            lights;
-  private final @Nonnull Integer                           material_id_pool;
-  private final @Nonnull PMap<Integer, SBMaterial>         materials;
-  private final @Nonnull PMap<PathVirtual, SBMesh>         meshes;
-  private final @Nonnull PMap<PathVirtual, SBTextureCube>  textures_cube;
-  private final @Nonnull PMap<PathVirtual, SBTexture2D<?>> textures2d;
+  private final Integer                           instance_id_pool;
+  private final PMap<Integer, SBInstance>         instances;
+  private final Integer                           light_id_pool;
+  private final PMap<Integer, SBLight>            lights;
+  private final Integer                           material_id_pool;
+  private final PMap<Integer, SBMaterial>         materials;
+  private final PMap<PathVirtual, SBMesh>         meshes;
+  private final PMap<PathVirtual, SBTextureCube>  textures_cube;
+  private final PMap<PathVirtual, SBTexture2D<?>> textures2d;
 
   private SBScene(
-    final @Nonnull PMap<PathVirtual, SBTexture2D<?>> in_textures2d,
-    final @Nonnull PMap<PathVirtual, SBTextureCube> in_textures_cube,
-    final @Nonnull PMap<PathVirtual, SBMesh> in_meshes,
-    final @Nonnull PMap<Integer, SBMaterial> in_materials,
-    final @Nonnull Integer in_material_id_pool,
-    final @Nonnull PMap<Integer, SBLight> in_lights,
-    final @Nonnull Integer in_light_id_pool,
-    final @Nonnull PMap<Integer, SBInstance> in_instances,
-    final @Nonnull Integer in_instance_id_pool)
+    final PMap<PathVirtual, SBTexture2D<?>> in_textures2d,
+    final PMap<PathVirtual, SBTextureCube> in_textures_cube,
+    final PMap<PathVirtual, SBMesh> in_meshes,
+    final PMap<Integer, SBMaterial> in_materials,
+    final Integer in_material_id_pool,
+    final PMap<Integer, SBLight> in_lights,
+    final Integer in_light_id_pool,
+    final PMap<Integer, SBInstance> in_instances,
+    final Integer in_instance_id_pool)
   {
     this.textures2d = in_textures2d;
     this.textures_cube = in_textures_cube;
@@ -94,11 +91,11 @@ import com.io7m.jvvfs.PathVirtual;
     this.instance_id_pool = in_instance_id_pool;
   }
 
-  public @Nonnull SBScene instanceAdd(
-    final @Nonnull SBInstance instance)
-    throws ConstraintError
+  public SBScene instanceAdd(
+    final SBInstance instance)
+
   {
-    Constraints.constrainNotNull(instance, "Instance");
+    NullCheck.notNull(instance, "Instance");
 
     return new SBScene(
       this.textures2d,
@@ -113,18 +110,18 @@ import com.io7m.jvvfs.PathVirtual;
   }
 
   public boolean instanceExists(
-    final @Nonnull Integer id)
-    throws ConstraintError
+    final Integer id)
+
   {
-    Constraints.constrainNotNull(id, "Instance");
+    NullCheck.notNull(id, "Instance");
     return this.instances.containsKey(id);
   }
 
-  public @Nonnull Pair<SBScene, Integer> instanceFreshID()
+  public Pair<SBScene, Integer> instanceFreshID()
   {
     final Integer id = Integer.valueOf(this.instance_id_pool.intValue() + 1);
 
-    return new Pair<SBScene, Integer>(new SBScene(
+    return Pair.pair(new SBScene(
       this.textures2d,
       this.textures_cube,
       this.meshes,
@@ -136,24 +133,24 @@ import com.io7m.jvvfs.PathVirtual;
       id), id);
   }
 
-  public @Nonnull SBInstance instanceGet(
-    final @Nonnull Integer id)
-    throws ConstraintError
+  public SBInstance instanceGet(
+    final Integer id)
+
   {
-    Constraints.constrainNotNull(id, "Instance");
+    NullCheck.notNull(id, "Instance");
     return this.instances.get(id);
   }
 
-  public @Nonnull Collection<SBInstance> instancesGet()
+  public Collection<SBInstance> instancesGet()
   {
     return this.instances.values();
   }
 
-  public @Nonnull SBScene lightAdd(
-    final @Nonnull SBLight light)
-    throws ConstraintError
+  public SBScene lightAdd(
+    final SBLight light)
+
   {
-    Constraints.constrainNotNull(light, "Light");
+    NullCheck.notNull(light, "Light");
     return new SBScene(
       this.textures2d,
       this.textures_cube,
@@ -167,17 +164,17 @@ import com.io7m.jvvfs.PathVirtual;
   }
 
   public boolean lightExists(
-    final @Nonnull Integer id)
-    throws ConstraintError
+    final Integer id)
+
   {
-    Constraints.constrainNotNull(id, "Light");
+    NullCheck.notNull(id, "Light");
     return this.lights.containsKey(id);
   }
 
-  public @Nonnull Pair<SBScene, Integer> lightFreshID()
+  public Pair<SBScene, Integer> lightFreshID()
   {
     final Integer id = Integer.valueOf(this.light_id_pool.intValue() + 1);
-    return new Pair<SBScene, Integer>(new SBScene(
+    return Pair.pair(new SBScene(
       this.textures2d,
       this.textures_cube,
       this.meshes,
@@ -189,19 +186,19 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool), id);
   }
 
-  public @CheckForNull SBLight lightGet(
-    final @Nonnull Integer id)
-    throws ConstraintError
+  public @Nullable SBLight lightGet(
+    final Integer id)
+
   {
-    Constraints.constrainNotNull(id, "Light");
+    NullCheck.notNull(id, "Light");
     return this.lights.get(id);
   }
 
-  public @Nonnull SBScene lightRemove(
-    final @Nonnull Integer id)
-    throws ConstraintError
+  public SBScene lightRemove(
+    final Integer id)
+
   {
-    Constraints.constrainNotNull(id, "Light");
+    NullCheck.notNull(id, "Light");
     return new SBScene(
       this.textures2d,
       this.textures_cube,
@@ -214,12 +211,12 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool);
   }
 
-  public @Nonnull Collection<SBLight> lightsGet()
+  public Collection<SBLight> lightsGet()
   {
     return this.lights.values();
   }
 
-  public @Nonnull SBSceneDescription makeDescription()
+  public SBSceneDescription makeDescription()
   {
     SBSceneDescription desc = SBSceneDescription.empty();
 
@@ -254,17 +251,17 @@ import com.io7m.jvvfs.PathVirtual;
   }
 
   public boolean materialExists(
-    final @Nonnull Integer id)
-    throws ConstraintError
+    final Integer id)
+
   {
-    Constraints.constrainNotNull(id, "ID");
+    NullCheck.notNull(id, "ID");
     return this.materials.containsKey(id);
   }
 
-  public @Nonnull Pair<SBScene, Integer> materialFreshID()
+  public Pair<SBScene, Integer> materialFreshID()
   {
     final Integer id = Integer.valueOf(this.material_id_pool.intValue() + 1);
-    return new Pair<SBScene, Integer>(new SBScene(
+    return Pair.pair(new SBScene(
       this.textures2d,
       this.textures_cube,
       this.meshes,
@@ -276,22 +273,23 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool), id);
   }
 
-  public @Nonnull SBMaterial materialGet(
-    final @Nonnull Integer id)
-    throws ConstraintError
+  public SBMaterial materialGet(
+    final Integer id)
   {
-    Constraints.constrainNotNull(id, "ID");
-    Constraints.constrainArbitrary(
-      this.materials.containsKey(id),
-      "Material exists");
+    NullCheck.notNull(id, "ID");
+
+    if (this.materials.containsKey(id) == false) {
+      throw new NoSuchElementException("No such material for id " + id);
+    }
+
     return this.materials.get(id);
   }
 
-  public @Nonnull SBScene materialPut(
-    final @Nonnull SBMaterial material)
-    throws ConstraintError
+  public SBScene materialPut(
+    final SBMaterial material)
+
   {
-    Constraints.constrainNotNull(material, "Material");
+    NullCheck.notNull(material, "Material");
     final Integer id = material.materialGetID();
 
     return new SBScene(
@@ -306,16 +304,16 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool);
   }
 
-  public @Nonnull Collection<SBMaterial> materialsGet()
+  public Collection<SBMaterial> materialsGet()
   {
     return this.materials.values();
   }
 
-  public @Nonnull SBScene meshAdd(
-    final @Nonnull SBMesh mesh)
-    throws ConstraintError
+  public SBScene meshAdd(
+    final SBMesh mesh)
+
   {
-    Constraints.constrainNotNull(mesh, "Mesh");
+    NullCheck.notNull(mesh, "Mesh");
 
     return new SBScene(
       this.textures2d,
@@ -329,24 +327,24 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool);
   }
 
-  public @Nonnull Map<PathVirtual, SBMesh> meshesGet()
+  public Map<PathVirtual, SBMesh> meshesGet()
   {
     return this.meshes;
   }
 
-  public @CheckForNull SBMesh meshGet(
-    final @Nonnull PathVirtual name)
-    throws ConstraintError
+  public @Nullable SBMesh meshGet(
+    final PathVirtual name)
+
   {
-    Constraints.constrainNotNull(name, "Mesh");
+    NullCheck.notNull(name, "Mesh");
     return this.meshes.get(name);
   }
 
-  public @Nonnull SBScene removeInstance(
-    final @Nonnull Integer id)
-    throws ConstraintError
+  public SBScene removeInstance(
+    final Integer id)
+
   {
-    Constraints.constrainNotNull(id, "ID");
+    NullCheck.notNull(id, "ID");
 
     return new SBScene(
       this.textures2d,
@@ -360,11 +358,11 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool);
   }
 
-  public @Nonnull SBScene texture2DAdd(
-    final @Nonnull SBTexture2D<?> texture)
-    throws ConstraintError
+  public SBScene texture2DAdd(
+    final SBTexture2D<?> texture)
+
   {
-    Constraints.constrainNotNull(texture, "Texture");
+    NullCheck.notNull(texture, "Texture");
 
     return new SBScene(
       this.textures2d.plus(texture.getPath(), texture),
@@ -378,22 +376,20 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool);
   }
 
-  @SuppressWarnings("unchecked") public @CheckForNull
+  @SuppressWarnings("unchecked") public @Nullable
     <T extends SBTexture2DKind>
     SBTexture2D<T>
     texture2DGet(
-      final @Nonnull PathVirtual texture)
-      throws ConstraintError
+      final PathVirtual texture)
   {
-    Constraints.constrainNotNull(texture, "Texture");
+    NullCheck.notNull(texture, "Texture");
     return (SBTexture2D<T>) this.textures2d.get(texture);
   }
 
-  public @Nonnull SBScene textureCubeAdd(
-    final @Nonnull SBTextureCube texture)
-    throws ConstraintError
+  public SBScene textureCubeAdd(
+    final SBTextureCube texture)
   {
-    Constraints.constrainNotNull(texture, "Texture");
+    NullCheck.notNull(texture, "Texture");
     return new SBScene(
       this.textures2d,
       this.textures_cube.plus(texture.getPath(), texture),
@@ -406,20 +402,19 @@ import com.io7m.jvvfs.PathVirtual;
       this.instance_id_pool);
   }
 
-  public @CheckForNull SBTextureCube textureCubeGet(
-    final @Nonnull PathVirtual texture)
-    throws ConstraintError
+  public @Nullable SBTextureCube textureCubeGet(
+    final PathVirtual texture)
   {
-    Constraints.constrainNotNull(texture, "Texture");
+    NullCheck.notNull(texture, "Texture");
     return this.textures_cube.get(texture);
   }
 
-  public @Nonnull Map<PathVirtual, SBTexture2D<?>> textures2DGet()
+  public Map<PathVirtual, SBTexture2D<?>> textures2DGet()
   {
     return this.textures2d;
   }
 
-  public @Nonnull Map<PathVirtual, SBTextureCube> texturesCubeGet()
+  public Map<PathVirtual, SBTextureCube> texturesCubeGet()
   {
     return this.textures_cube;
   }

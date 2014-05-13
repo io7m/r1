@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -39,8 +36,7 @@ public interface SBLightVisitor<A, E extends Throwable>
    * @param l
    *          The directional light
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
@@ -48,9 +44,8 @@ public interface SBLightVisitor<A, E extends Throwable>
    */
 
   A lightVisitDirectional(
-    final @Nonnull SBLightDirectional l)
-    throws ConstraintError,
-      RException,
+    final SBLightDirectional l)
+    throws RException,
       E;
 
   /**
@@ -59,8 +54,7 @@ public interface SBLightVisitor<A, E extends Throwable>
    * @param l
    *          The projective light
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
@@ -68,9 +62,8 @@ public interface SBLightVisitor<A, E extends Throwable>
    */
 
   A lightVisitProjective(
-    final @Nonnull SBLightProjective l)
-    throws ConstraintError,
-      RException,
+    final SBLightProjective l)
+    throws RException,
       E;
 
   /**
@@ -79,8 +72,7 @@ public interface SBLightVisitor<A, E extends Throwable>
    * @param l
    *          The spherical light
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
@@ -88,8 +80,7 @@ public interface SBLightVisitor<A, E extends Throwable>
    */
 
   A lightVisitSpherical(
-    final @Nonnull SBLightSpherical l)
-    throws ConstraintError,
-      RException,
+    final SBLightSpherical l)
+    throws RException,
       E;
 }

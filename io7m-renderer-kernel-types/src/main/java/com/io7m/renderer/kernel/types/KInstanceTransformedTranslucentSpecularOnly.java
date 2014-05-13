@@ -16,12 +16,10 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
@@ -31,7 +29,7 @@ import com.io7m.renderer.types.RTransformTextureType;
  * specific transform and texture matrix.
  */
 
-@Immutable public final class KInstanceTransformedTranslucentSpecularOnly implements
+@EqualityStructural public final class KInstanceTransformedTranslucentSpecularOnly implements
   KInstanceTransformedTranslucentLitType
 {
   /**
@@ -44,17 +42,12 @@ import com.io7m.renderer.types.RTransformTextureType;
    * @param in_uv_matrix
    *          The per-instance UV matrix
    * @return A new instance
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull
-    KInstanceTransformedTranslucentSpecularOnly
-    newInstance(
-      final @Nonnull KInstanceTranslucentSpecularOnly in_instance,
-      final @Nonnull KTransformType in_transform,
-      final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
-      throws ConstraintError
+  public static KInstanceTransformedTranslucentSpecularOnly newInstance(
+    final KInstanceTranslucentSpecularOnly in_instance,
+    final KTransformType in_transform,
+    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
   {
     return new KInstanceTransformedTranslucentSpecularOnly(
       in_instance,
@@ -62,23 +55,22 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_uv_matrix);
   }
 
-  private final @Nonnull KInstanceTranslucentSpecularOnly    instance;
-  private final @Nonnull KTransformType                      transform;
-  private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
+  private final KInstanceTranslucentSpecularOnly    instance;
+  private final KTransformType                      transform;
+  private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KInstanceTransformedTranslucentSpecularOnly(
-    final @Nonnull KInstanceTranslucentSpecularOnly in_instance,
-    final @Nonnull KTransformType in_transform,
-    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
-    throws ConstraintError
+    final KInstanceTranslucentSpecularOnly in_instance,
+    final KTransformType in_transform,
+    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
   {
-    this.transform = Constraints.constrainNotNull(in_transform, "Transform");
-    this.uv_matrix = Constraints.constrainNotNull(in_uv_matrix, "UV matrix");
-    this.instance = Constraints.constrainNotNull(in_instance, "Instance");
+    this.transform = NullCheck.notNull(in_transform, "Transform");
+    this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
+    this.instance = NullCheck.notNull(in_instance, "Instance");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -100,7 +92,7 @@ import com.io7m.renderer.types.RTransformTextureType;
    * @return The actual instance
    */
 
-  public @Nonnull KInstanceTranslucentSpecularOnly getInstance()
+  public KInstanceTranslucentSpecularOnly getInstance()
   {
     return this.instance;
   }
@@ -119,9 +111,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
     instanceAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
-        ConstraintError,
         RException,
         JCGLException
   {
@@ -147,9 +138,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     <A, E extends Throwable, V extends KInstanceTransformedVisitorType<A, E>>
     A
     transformedAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
-        ConstraintError,
         RException,
         JCGLException
   {
@@ -160,9 +150,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     <A, E extends Throwable, V extends KInstanceTransformedTranslucentLitVisitorType<A, E>>
     A
     transformedTranslucentLitAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
-        ConstraintError,
         RException,
         JCGLException
   {

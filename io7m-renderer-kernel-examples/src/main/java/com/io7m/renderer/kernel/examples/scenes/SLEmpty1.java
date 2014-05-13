@@ -18,9 +18,6 @@ package com.io7m.renderer.kernel.examples.scenes;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.renderer.kernel.examples.ExampleSceneBuilderType;
 import com.io7m.renderer.kernel.examples.ExampleSceneType;
@@ -56,9 +53,8 @@ public final class SLEmpty1 implements ExampleSceneType
   }
 
   @Override public void exampleScene(
-    final @Nonnull ExampleSceneBuilderType scene)
-    throws ConstraintError,
-      RException
+    final ExampleSceneBuilderType scene)
+    throws RException
   {
     final KTransformType left =
       KTransformOST.newTransform(

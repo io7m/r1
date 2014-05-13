@@ -21,11 +21,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.jranges.RangeCheck;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
@@ -33,7 +32,7 @@ import com.io7m.renderer.types.RVectorI3F;
 
 public final class MeshBasic
 {
-  @Immutable public static final class Triangle
+  @EqualityStructural public static final class Triangle
   {
     private final int v0;
     private final int v1;
@@ -47,6 +46,24 @@ public final class MeshBasic
       this.v0 = in_v0;
       this.v1 = in_v1;
       this.v2 = in_v2;
+    }
+
+    @Override public boolean equals(
+      final @Nullable Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final Triangle other = (Triangle) obj;
+      return (this.v0 == other.v0)
+        && (this.v1 == other.v1)
+        && (this.v2 == other.v2);
     }
 
     public int getV0()
@@ -63,12 +80,22 @@ public final class MeshBasic
     {
       return this.v2;
     }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + this.v0;
+      result = (prime * result) + this.v1;
+      result = (prime * result) + this.v2;
+      return result;
+    }
   }
 
-  @Immutable public static final class Vertex
+  @EqualityStructural public static final class Vertex
   {
-    private final int position;
     private final int normal;
+    private final int position;
     private final int uv;
 
     public Vertex(
@@ -81,31 +108,8 @@ public final class MeshBasic
       this.uv = in_uv;
     }
 
-    @Override public String toString()
-    {
-      final StringBuilder builder = new StringBuilder();
-      builder.append("[Vertex [position ");
-      builder.append(this.position);
-      builder.append("] [normal ");
-      builder.append(this.normal);
-      builder.append("] [uv ");
-      builder.append(this.uv);
-      builder.append("]]");
-      return builder.toString();
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.normal;
-      result = (prime * result) + this.position;
-      result = (prime * result) + this.uv;
-      return result;
-    }
-
     @Override public boolean equals(
-      final Object obj)
+      final @Nullable Object obj)
     {
       if (this == obj) {
         return true;
@@ -143,29 +147,52 @@ public final class MeshBasic
     {
       return this.uv;
     }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + this.normal;
+      result = (prime * result) + this.position;
+      result = (prime * result) + this.uv;
+      return result;
+    }
+
+    @Override public String toString()
+    {
+      final StringBuilder builder = new StringBuilder();
+      builder.append("[Vertex [position ");
+      builder.append(this.position);
+      builder.append("] [normal ");
+      builder.append(this.normal);
+      builder.append("] [uv ");
+      builder.append(this.uv);
+      builder.append("]]");
+      final String r = builder.toString();
+      assert r != null;
+      return r;
+    }
   }
 
-  public static @Nonnull MeshBasic newMesh(
-    final @Nonnull String name)
-    throws ConstraintError
+  public static MeshBasic newMesh(
+    final String name)
   {
     return new MeshBasic(name);
   }
 
-  private final @Nonnull ArrayList<RVectorI3F<RSpaceObjectType>>  normals;
-  private final @Nonnull ArrayList<RVectorI3F<RSpaceObjectType>>  positions;
-  private final @Nonnull ArrayList<RVectorI2F<RSpaceTextureType>> uvs;
-  private final @Nonnull ArrayList<Vertex>                    vertices;
-  private final @Nonnull HashMap<Vertex, Integer>             vertex_map;
-  private final @Nonnull ArrayList<Triangle>                  triangles;
-  private final @Nonnull String                               name;
-  private boolean                                             has_uv;
+  private boolean                                        has_uv;
+  private final String                                   name;
+  private final ArrayList<RVectorI3F<RSpaceObjectType>>  normals;
+  private final ArrayList<RVectorI3F<RSpaceObjectType>>  positions;
+  private final ArrayList<Triangle>                      triangles;
+  private final ArrayList<RVectorI2F<RSpaceTextureType>> uvs;
+  private final HashMap<Vertex, Integer>                 vertex_map;
+  private final ArrayList<Vertex>                        vertices;
 
   private MeshBasic(
-    final @Nonnull String in_name)
-    throws ConstraintError
+    final String in_name)
   {
-    this.name = Constraints.constrainNotNull(in_name, "Mesh name");
+    this.name = NullCheck.notNull(in_name, "Mesh name");
     this.normals = new ArrayList<RVectorI3F<RSpaceObjectType>>();
     this.positions = new ArrayList<RVectorI3F<RSpaceObjectType>>();
     this.uvs = new ArrayList<RVectorI2F<RSpaceTextureType>>();
@@ -175,7 +202,35 @@ public final class MeshBasic
     this.has_uv = false;
   }
 
-  public @Nonnull String getName()
+  private Vertex createVertex(
+    final int position,
+    final int normal,
+    final int uv)
+  {
+    RangeCheck.checkLessEqual(
+      position,
+      "Position",
+      this.positions.size() - 1,
+      "Maximum position");
+    RangeCheck.checkLessEqual(
+      normal,
+      "Normal",
+      this.normals.size() - 1,
+      "Maximum normal");
+
+    if (this.hasUV()) {
+      RangeCheck.checkLessEqual(uv, "UV", this.uvs.size() - 1, "Maximum UV");
+    } else {
+      if (uv != -1) {
+        throw new IllegalStateException("Mesh must have UV attributes");
+      }
+    }
+
+    final Vertex v = new Vertex(position, normal, uv);
+    return v;
+  }
+
+  public String getName()
   {
     return this.name;
   }
@@ -186,31 +241,33 @@ public final class MeshBasic
   }
 
   public int normalAdd(
-    final @Nonnull RVectorI3F<RSpaceObjectType> normal)
-    throws ConstraintError
+    final RVectorI3F<RSpaceObjectType> normal)
   {
-    this.normals.add(Constraints.constrainNotNull(
-      normal,
-      "KMaterialNormalLabel"));
+    this.normals.add(NullCheck.notNull(normal, "KMaterialNormalLabel"));
     return this.normals.size() - 1;
   }
 
-  public @Nonnull List<RVectorI3F<RSpaceObjectType>> normalsGet()
+  public List<RVectorI3F<RSpaceObjectType>> normalsGet()
   {
-    return Collections.unmodifiableList(this.normals);
+    final List<RVectorI3F<RSpaceObjectType>> r =
+      Collections.unmodifiableList(this.normals);
+    assert r != null;
+    return r;
   }
 
   public int positionAdd(
-    final @Nonnull RVectorI3F<RSpaceObjectType> position)
-    throws ConstraintError
+    final RVectorI3F<RSpaceObjectType> position)
   {
-    this.positions.add(Constraints.constrainNotNull(position, "Position"));
+    this.positions.add(NullCheck.notNull(position, "Position"));
     return this.positions.size() - 1;
   }
 
-  public @Nonnull List<RVectorI3F<RSpaceObjectType>> positionsGet()
+  public List<RVectorI3F<RSpaceObjectType>> positionsGet()
   {
-    return Collections.unmodifiableList(this.positions);
+    final List<RVectorI3F<RSpaceObjectType>> r =
+      Collections.unmodifiableList(this.positions);
+    assert r != null;
+    return r;
   }
 
   public void setHasUV(
@@ -223,54 +280,57 @@ public final class MeshBasic
     final int v0,
     final int v1,
     final int v2)
-    throws ConstraintError
   {
-    Constraints.constrainRange(
+    RangeCheck.checkLessEqual(
       v0,
-      0,
+      "Vertex 0",
       this.vertices.size() - 1,
-      "Vertex 0 in range");
-    Constraints.constrainRange(
+      "Maximum vertex index");
+    RangeCheck.checkLessEqual(
       v1,
-      0,
+      "Vertex 1",
       this.vertices.size() - 1,
-      "Vertex 1 in range");
-    Constraints.constrainRange(
+      "Maximum vertex index");
+    RangeCheck.checkLessEqual(
       v2,
-      0,
+      "Vertex 2",
       this.vertices.size() - 1,
-      "Vertex 2 in range");
+      "Maximum vertex index");
 
     this.triangles.add(new Triangle(v0, v1, v2));
     return this.triangles.size() - 1;
   }
 
-  public @Nonnull List<Triangle> trianglesGet()
+  public List<Triangle> trianglesGet()
   {
-    return Collections.unmodifiableList(this.triangles);
+    final List<Triangle> r = Collections.unmodifiableList(this.triangles);
+    assert r != null;
+    return r;
   }
 
   public int uvAdd(
-    final @Nonnull RVectorI2F<RSpaceTextureType> uv)
-    throws ConstraintError
+    final RVectorI2F<RSpaceTextureType> uv)
   {
-    Constraints.constrainArbitrary(
-      this.hasUV(),
-      "Mesh should have UV attributes");
-    this.uvs.add(Constraints.constrainNotNull(uv, "UV"));
+    if (this.hasUV() == false) {
+      throw new IllegalArgumentException("Mesh does not have UV attributes");
+    }
+
+    this.uvs.add(NullCheck.notNull(uv, "UV"));
     return this.uvs.size() - 1;
   }
 
-  public @Nonnull List<RVectorI2F<RSpaceTextureType>> uvsGet()
+  public List<RVectorI2F<RSpaceTextureType>> uvsGet()
   {
-    return Collections.unmodifiableList(this.uvs);
+    final List<RVectorI2F<RSpaceTextureType>> r =
+      Collections.unmodifiableList(this.uvs);
+    assert r != null;
+    return r;
   }
 
   public int vertexAdd(
     final int position,
     final int normal,
     final int uv)
-    throws ConstraintError
   {
     final Vertex v = this.createVertex(position, normal, uv);
 
@@ -284,37 +344,10 @@ public final class MeshBasic
     return index;
   }
 
-  private @Nonnull Vertex createVertex(
-    final int position,
-    final int normal,
-    final int uv)
-    throws ConstraintError
+  public List<Vertex> verticesGet()
   {
-    Constraints.constrainRange(
-      position,
-      0,
-      this.positions.size() - 1,
-      "Position in range");
-    Constraints.constrainRange(
-      normal,
-      0,
-      this.normals.size() - 1,
-      "KMaterialNormalLabel in range");
-
-    if (this.hasUV()) {
-      Constraints.constrainRange(uv, 0, this.uvs.size() - 1, "UV in range");
-    } else {
-      if (uv != -1) {
-        Constraints.constrainArbitrary(false, "Mesh has UV attributes");
-      }
-    }
-
-    final Vertex v = new Vertex(position, normal, uv);
-    return v;
-  }
-
-  public @Nonnull List<Vertex> verticesGet()
-  {
-    return Collections.unmodifiableList(this.vertices);
+    final List<Vertex> r = Collections.unmodifiableList(this.vertices);
+    assert r != null;
+    return r;
   }
 }

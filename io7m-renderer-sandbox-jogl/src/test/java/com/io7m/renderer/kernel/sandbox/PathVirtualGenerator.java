@@ -16,31 +16,29 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
 import net.java.quickcheck.Generator;
 import net.java.quickcheck.generator.support.StringGenerator;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 
 public final class PathVirtualGenerator implements Generator<PathVirtual>
 {
-  private final @Nonnull StringGenerator gen = new StringGenerator('a', 'z');
+  private final StringGenerator gen = new StringGenerator('a', 'z');
 
   @Override public PathVirtual next()
   {
-    final int components = (int) Math.abs(Math.random() * 32);
-    PathVirtual path = PathVirtual.ROOT;
-    for (int index = 0; index < components; ++index) {
-      try {
+    try {
+      final int components = (int) Math.abs(Math.random() * 32);
+      PathVirtual path = PathVirtual.ROOT;
+      for (int index = 0; index < components; ++index) {
         final String comp = this.gen.next();
         path = path.appendName(comp.isEmpty() ? "z" : comp);
-      } catch (final ConstraintError e) {
-        throw new UnreachableCodeException();
       }
+      return path;
+    } catch (final FilesystemError e) {
+      throw new UnreachableCodeException(e);
     }
-    return path;
   }
 }

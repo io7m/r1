@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel.examples.viewer;
 
 import java.awt.event.WindowEvent;
 
-import javax.annotation.Nonnull;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
@@ -29,7 +28,7 @@ final class VWindowUtilities
    */
 
   static void closeDialog(
-    final @Nonnull JDialog dialog)
+    final JDialog dialog)
   {
     final WindowEvent ev =
       new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING);
@@ -41,7 +40,7 @@ final class VWindowUtilities
    */
 
   static void closeWindow(
-    final @Nonnull JFrame frame)
+    final JFrame frame)
   {
     final WindowEvent ev = new WindowEvent(frame, WindowEvent.WINDOW_CLOSING);
     frame.dispatchEvent(ev);

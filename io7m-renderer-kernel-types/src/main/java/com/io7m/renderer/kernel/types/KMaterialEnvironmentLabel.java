@@ -16,11 +16,8 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * Labels for environment mapping properties.
@@ -49,10 +46,10 @@ public enum KMaterialEnvironmentLabel
 
   ENVIRONMENT_REFLECTIVE_MAPPED("ELM", 1);
 
-  private static @Nonnull KMaterialEnvironmentLabel fromInstanceData(
-    final @Nonnull KMaterialNormalLabel normal,
-    final @Nonnull KMaterialSpecular specular,
-    final @Nonnull KMaterialEnvironment environment)
+  private static KMaterialEnvironmentLabel fromInstanceData(
+    final KMaterialNormalLabel normal,
+    final KMaterialSpecular specular,
+    final KMaterialEnvironment environment)
   {
     final boolean has_specular_map = specular.getTexture().isSome();
 
@@ -89,34 +86,31 @@ public enum KMaterialEnvironmentLabel
    * @param n
    *          The normal mapping label for the instance
    * @return An emissive label
-   * @throws ConstraintError
-   *           Iff the instance is <code>null</code>
    */
 
-  public static @Nonnull KMaterialEnvironmentLabel fromInstanceRegular(
-    final @Nonnull KMaterialNormalLabel n,
-    final @Nonnull KInstanceRegularType instance)
-    throws ConstraintError
+  public static KMaterialEnvironmentLabel fromInstanceRegular(
+    final KMaterialNormalLabel n,
+    final KInstanceRegularType instance)
   {
-    Constraints.constrainNotNull(instance, "Instance");
+    NullCheck.notNull(instance, "Instance");
     final KMaterialRegularType m = instance.instanceGetMaterial();
     final KMaterialSpecular s = m.materialGetSpecular();
     final KMaterialEnvironment e = m.materialGetEnvironment();
     return KMaterialEnvironmentLabel.fromInstanceData(n, s, e);
   }
 
-  private final @Nonnull String code;
-  private int                   textures_required;
+  private final String code;
+  private int          textures_required;
 
   private KMaterialEnvironmentLabel(
-    final @Nonnull String in_code,
+    final String in_code,
     final int in_textures_required)
   {
     this.code = in_code;
     this.textures_required = in_textures_required;
   }
 
-  @Override public @Nonnull String labelGetCode()
+  @Override public String labelGetCode()
   {
     return this.code;
   }

@@ -16,62 +16,63 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLImplementationVisitor;
-import com.io7m.jcanephora.JCGLInterfaceGL2;
-import com.io7m.jcanephora.JCGLInterfaceGL3;
-import com.io7m.jcanephora.JCGLInterfaceGLES2;
-import com.io7m.jcanephora.JCGLInterfaceGLES3;
+import com.io7m.jcanephora.api.JCGLExtensionESDepthTextureType;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
+import com.io7m.jcanephora.api.JCGLInterfaceGL2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGL3Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * The capabilities of the graphics system upon which the renderers are
  * currently executing.
  */
 
-public final class KGraphicsCapabilities
+@EqualityStructural public final class KGraphicsCapabilities implements
+  KGraphicsCapabilitiesType
 {
-  private static boolean decideDepthTextures(
-    final @Nonnull JCGLImplementation gi)
-    throws JCGLException,
-      ConstraintError
+  @SuppressWarnings("boxing") private static boolean decideDepthTextures(
+    final JCGLImplementationType gi)
+    throws JCGLException
   {
     return gi.implementationAccept(
-      new JCGLImplementationVisitor<Boolean, ConstraintError>() {
+      new JCGLImplementationVisitorType<Boolean, UnreachableCodeException>() {
         @Override public Boolean implementationIsGL2(
-          final @Nonnull JCGLInterfaceGL2 gl)
-          throws JCGLException,
-            ConstraintError
+          final JCGLInterfaceGL2Type gl)
+          throws JCGLException
         {
-          return Boolean.TRUE;
+          return true;
         }
 
         @Override public Boolean implementationIsGL3(
-          final @Nonnull JCGLInterfaceGL3 gl)
-          throws JCGLException,
-            ConstraintError
+          final JCGLInterfaceGL3Type gl)
+          throws JCGLException
         {
-          return Boolean.TRUE;
+          return true;
         }
 
         @Override public Boolean implementationIsGLES2(
-          final @Nonnull JCGLInterfaceGLES2 gl)
-          throws JCGLException,
-            ConstraintError
+          final JCGLInterfaceGLES2Type gl)
+          throws JCGLException
         {
-          return Boolean.valueOf(gl.extensionDepthTexture().isSome());
+          final OptionType<JCGLExtensionESDepthTextureType> ext =
+            gl.extensionDepthTexture();
+          final boolean r = ext.isSome();
+          return r;
         }
 
         @Override public Boolean implementationIsGLES3(
-          final @Nonnull JCGLInterfaceGLES3 gl)
-          throws JCGLException,
-            ConstraintError
+          final JCGLInterfaceGLES3Type gl)
+          throws JCGLException
         {
-          return Boolean.TRUE;
+          return true;
         }
       }).booleanValue();
   }
@@ -85,16 +86,13 @@ public final class KGraphicsCapabilities
    * @return The capabilities of the implementation
    * @throws JCGLException
    *           Iff an OpenGL error occurs
-   * @throws ConstraintError
-   *           Iff <code>gi == null</code>
    */
 
-  public static @Nonnull KGraphicsCapabilities getCapabilities(
-    final @Nonnull JCGLImplementation gi)
-    throws JCGLException,
-      ConstraintError
+  public static KGraphicsCapabilities getCapabilities(
+    final JCGLImplementationType gi)
+    throws JCGLException
   {
-    Constraints.constrainNotNull(gi, "OpenGL implementation");
+    NullCheck.notNull(gi, "OpenGL implementation");
 
     final int tu_count = gi.getGLCommon().textureGetUnits().size();
     final boolean depth_support =
@@ -114,37 +112,38 @@ public final class KGraphicsCapabilities
     this.depth_textures = in_depth_textures;
   }
 
-  /**
-   * <p>
-   * Return <code>true</code> if rendering to depth textures is supported.
-   * This is supported on all but a small number of OpenGL ES 2 and OpenGL 2.1
-   * implementations (and is in fact required by all subsequent OpenGL
-   * standards)
-   * </p>
-   * 
-   * @return <code>true</code> if rendering to depth textures is supported
-   */
-
-  public boolean getSupportsDepthTextures()
+  @Override public boolean getSupportsDepthTextures()
   {
     return this.depth_textures;
   }
 
-  /**
-   * <p>
-   * The number of available texture units is guaranteed to be at least:
-   * </p>
-   * <ul>
-   * <li>2 on OpenGL 2.1</li>
-   * <li>8 on OpenGL ES 2</li>
-   * <li>16 on OpenGL ES 3</li>
-   * <li>16 on OpenGL >= 3.0</li>
-   * </ul>
-   * 
-   * @return The number of available texture units
-   */
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + (this.depth_textures ? 1231 : 1237);
+    result = (prime * result) + this.texture_units;
+    return result;
+  }
 
-  public int getTextureUnits()
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KGraphicsCapabilities other = (KGraphicsCapabilities) obj;
+    return (this.depth_textures != other.depth_textures)
+      && (this.texture_units != other.texture_units);
+  }
+
+  @Override public int getTextureUnits()
   {
     return this.texture_units;
   }

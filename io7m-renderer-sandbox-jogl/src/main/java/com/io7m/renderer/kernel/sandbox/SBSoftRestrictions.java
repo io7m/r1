@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,32 +16,27 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
+import com.io7m.jnull.NullCheck;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLSoftRestrictions;
-
-public final class SBSoftRestrictions implements JCGLSoftRestrictions
+public final class SBSoftRestrictions implements JCGLSoftRestrictionsType
 {
-  public static @Nonnull SBSoftRestrictions newRestrictions(
-    final @Nonnull SandboxConfig config)
-    throws ConstraintError
+  public static SBSoftRestrictions newRestrictions(
+    final SandboxConfig config)
   {
     return new SBSoftRestrictions(config);
   }
 
-  private final @Nonnull SandboxConfig config;
+  private final SandboxConfig config;
 
   private SBSoftRestrictions(
-    final @Nonnull SandboxConfig in_config)
-    throws ConstraintError
+    final SandboxConfig in_config)
   {
-    this.config = Constraints.constrainNotNull(in_config, "Config");
+    this.config = NullCheck.notNull(in_config, "Config");
   }
 
   @Override public boolean restrictExtensionVisibility(
-    final @Nonnull String name)
+    final String name)
   {
     if (this.config.getOpenGLHideExtensions().contains(name)) {
       return false;

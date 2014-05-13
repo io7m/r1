@@ -16,17 +16,27 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.FramebufferStatus;
-import com.io7m.jcanephora.JCGLUnsupportedException;
+import com.io7m.jcanephora.JCGLExceptionUnsupported;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 
 final class KFramebufferCommon
 {
+  @Override public boolean equals(
+    final @Nullable Object other)
+  {
+    throw new UnreachableCodeException();
+  }
+
+  @Override public int hashCode()
+  {
+    throw new UnreachableCodeException();
+  }
+
   static void checkFramebufferStatus(
-    final @Nonnull FramebufferStatus status)
-    throws JCGLUnsupportedException
+    final FramebufferStatus status)
+    throws JCGLExceptionUnsupported
   {
     switch (status) {
       case FRAMEBUFFER_STATUS_COMPLETE:
@@ -37,7 +47,7 @@ final class KFramebufferCommon
       case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
       case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
       case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
-        throw new JCGLUnsupportedException(
+        throw new JCGLExceptionUnsupported(
           "Could not initialize framebuffer: " + status);
     }
   }

@@ -16,10 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -33,15 +30,12 @@ public interface KFramebufferType extends KFramebufferUsableType
    * 
    * @param g
    *          The OpenGL implementation
-   * @throws ConstraintError
-   *           Iff <code>g == null</code>, or an internal constraint error
-   *           occurs.
+   * 
    * @throws RException
    *           Iff an internal OpenGL error occurs.
    */
 
   void kFramebufferDelete(
-    final @Nonnull JCGLImplementation g)
-    throws ConstraintError,
-      RException;
+    final JCGLImplementationType g)
+    throws RException;
 }

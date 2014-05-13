@@ -20,6 +20,8 @@ import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,16 +32,18 @@ import java.util.Calendar;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import javax.annotation.Nonnull;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.PropertyUtils;
-import com.io7m.jaux.PropertyUtils.ValueIncorrectType;
-import com.io7m.jaux.PropertyUtils.ValueNotFound;
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogPolicyAllOn;
+import com.io7m.jlog.LogPolicyProperties;
+import com.io7m.jlog.LogPolicyType;
+import com.io7m.jlog.LogType;
+import com.io7m.jnull.Nullable;
+import com.io7m.jproperties.JPropertyException;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 
@@ -87,7 +91,11 @@ public final class Sandbox
     }
 
     try {
-      Sandbox.run(PropertyUtils.loadFromFile(args[0]));
+      final Properties p = new Properties();
+      final FileInputStream s = new FileInputStream(new File(args[0]));
+      p.load(s);
+      s.close();
+      Sandbox.run(p);
     } catch (final FileNotFoundException e) {
       Sandbox.showFatalErrorAndExit(
         Sandbox.makeEmptyLog(),
@@ -98,17 +106,7 @@ public final class Sandbox
         Sandbox.makeEmptyLog(),
         "Error reading config file",
         e);
-    } catch (final ConstraintError e) {
-      Sandbox.showFatalErrorAndExit(
-        Sandbox.makeEmptyLog(),
-        "Error reading config file",
-        e);
-    } catch (final ValueNotFound e) {
-      Sandbox.showFatalErrorAndExit(
-        Sandbox.makeEmptyLog(),
-        "Error reading config file",
-        e);
-    } catch (final ValueIncorrectType e) {
+    } catch (final JPropertyException e) {
       Sandbox.showFatalErrorAndExit(
         Sandbox.makeEmptyLog(),
         "Error reading config file",
@@ -125,24 +123,25 @@ public final class Sandbox
     System.err.println();
   }
 
-  private static Log makeEmptyLog()
+  private static LogType makeEmptyLog()
   {
-    return new Log(new Properties(), "com.io7m.renderer", "sandbox");
+    return Log
+      .newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "sandbox");
   }
 
   public static void run(
-    final @Nonnull Properties props)
-    throws ConstraintError,
-      ValueNotFound,
-      ValueIncorrectType
+    final Properties props)
+    throws JPropertyException
   {
-    final Log log = new Log(props, "com.io7m.renderer", "sandbox");
+    final LogPolicyType policy =
+      LogPolicyProperties.newPolicy(props, "com.io7m.renderer");
+    final LogType log = Log.newLog(policy, "sandbox");
     Sandbox.runWithConfig(SandboxConfig.fromProperties(props), log);
   }
 
   public static void runWithConfig(
-    final @Nonnull SandboxConfig config,
-    final @Nonnull Log log)
+    final SandboxConfig config,
+    final LogType log)
   {
     SwingUtilities.invokeLater(new Runnable() {
       @Override public void run()
@@ -166,28 +165,25 @@ public final class Sandbox
         } catch (final FilesystemError e) {
           SBErrorBox.showErrorWithTitleLater(log, "Filesystem error", e);
           e.printStackTrace();
-        } catch (final ConstraintError e) {
-          SBErrorBox.showErrorWithTitleLater(
-            log,
-            "Internal constraint error",
-            e);
-          e.printStackTrace();
-          System.exit(1);
         } catch (final IOException e) {
           SBErrorBox.showErrorWithTitleLater(log, "I/O error", e);
           e.printStackTrace();
         } catch (final SBExceptionInputError e) {
           SBErrorBox.showErrorWithTitleLater(log, "Input error", e);
           e.printStackTrace();
+        } catch (final Throwable e) {
+          SBErrorBox.showErrorWithTitleLater(log, "Bug", e);
+          e.printStackTrace();
+          System.exit(1);
         }
       }
     });
   }
 
   public static void showFatalErrorAndExit(
-    final @Nonnull Log log,
-    final @Nonnull String title,
-    final @Nonnull Throwable e)
+    final LogType log,
+    final String title,
+    final Throwable e)
   {
     if (Sandbox.hasConsole()) {
       System.err.println("fatal: "
@@ -214,7 +210,7 @@ public final class Sandbox
             SBErrorBox.showErrorWithTitle(log, m.toString(), e);
           r.addWindowListener(new WindowAdapter() {
             @Override public void windowClosing(
-              final WindowEvent _)
+              final @Nullable WindowEvent _)
             {
               System.exit(1);
             }
@@ -229,9 +225,9 @@ public final class Sandbox
   }
 
   public static void showFatalErrorAndExitWithoutException(
-    final @Nonnull Log log,
-    final @Nonnull String title,
-    final @Nonnull String message)
+    final LogType log,
+    final String title,
+    final String message)
   {
     if (Sandbox.hasConsole()) {
       System.err.println("fatal: " + title + ": " + message);
@@ -247,7 +243,7 @@ public final class Sandbox
 
           r.addWindowListener(new WindowAdapter() {
             @Override public void windowClosing(
-              final WindowEvent _)
+              final @Nullable WindowEvent _)
             {
               System.exit(1);
             }

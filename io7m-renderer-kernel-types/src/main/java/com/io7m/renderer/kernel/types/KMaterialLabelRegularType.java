@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * The type of labels for regular materials that can be lit.
@@ -30,19 +29,19 @@ public interface KMaterialLabelRegularType extends
    * @return The albedo label
    */
 
-  @Nonnull KMaterialAlbedoLabel labelGetAlbedo();
+   KMaterialAlbedoLabel labelGetAlbedo();
 
   /**
    * @return The environment label
    */
 
-  @Nonnull KMaterialEnvironmentLabel labelGetEnvironment();
+   KMaterialEnvironmentLabel labelGetEnvironment();
 
   /**
    * @return The normal-mapping label
    */
 
-  @Nonnull KMaterialNormalLabel labelGetNormal();
+   KMaterialNormalLabel labelGetNormal();
 
   /**
    * @return If the material implies a specular map
@@ -54,11 +53,11 @@ public interface KMaterialLabelRegularType extends
    * @return The emissive label
    */
 
-  @Nonnull KMaterialEmissiveLabel labelGetEmissive();
+   KMaterialEmissiveLabel labelGetEmissive();
 
   /**
    * @return The specular label
    */
 
-  @Nonnull KMaterialSpecularLabel labelGetSpecular();
+   KMaterialSpecularLabel labelGetSpecular();
 }

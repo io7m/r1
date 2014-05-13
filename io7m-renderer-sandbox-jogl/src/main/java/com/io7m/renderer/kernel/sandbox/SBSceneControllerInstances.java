@@ -18,31 +18,24 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.util.Collection;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.Nullable;
 
 interface SBSceneControllerInstances extends
   SBSceneChangeListenerRegistration
 {
   public void sceneInstancePut(
-    final @Nonnull SBInstance desc)
-    throws ConstraintError;
+    final SBInstance desc);
 
   public boolean sceneInstanceExists(
-    final @Nonnull Integer id)
-    throws ConstraintError;
+    final Integer id);
 
-  public @Nonnull Integer sceneInstanceFreshID();
+  public Integer sceneInstanceFreshID();
 
-  public @CheckForNull SBInstance sceneInstanceGet(
-    final @Nonnull Integer id)
-    throws ConstraintError;
+  public @Nullable SBInstance sceneInstanceGet(
+    final Integer id);
 
   public void sceneInstanceRemove(
-    final @Nonnull Integer id)
-    throws ConstraintError;
+    final Integer id);
 
-  public @Nonnull Collection<SBInstance> sceneInstancesGetAll();
+  public Collection<SBInstance> sceneInstancesGetAll();
 }

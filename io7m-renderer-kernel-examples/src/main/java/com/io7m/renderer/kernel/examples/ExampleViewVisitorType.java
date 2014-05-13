@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.kernel.examples;
 
-import javax.annotation.Nonnull;
-
 /**
  * The type of view visitors.
  */
@@ -32,5 +30,5 @@ public interface ExampleViewVisitorType
    */
 
   void visitLookAt(
-    final @Nonnull ExampleViewLookAtType v);
+    final ExampleViewLookAtType v);
 }

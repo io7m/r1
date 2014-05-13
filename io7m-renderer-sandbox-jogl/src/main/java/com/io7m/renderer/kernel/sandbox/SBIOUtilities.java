@@ -25,11 +25,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.SecureRandom;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jranges.RangeCheck;
 
 public final class SBIOUtilities
 {
@@ -38,8 +36,8 @@ public final class SBIOUtilities
    */
 
   static void copyFile(
-    final @Nonnull File in,
-    final @Nonnull File out)
+    final File in,
+    final File out)
     throws FileNotFoundException,
       IOException
   {
@@ -56,8 +54,8 @@ public final class SBIOUtilities
    */
 
   static void copyStreamOut(
-    final @Nonnull InputStream input,
-    final @Nonnull File out)
+    final InputStream input,
+    final File out)
     throws FileNotFoundException,
       IOException
   {
@@ -78,8 +76,8 @@ public final class SBIOUtilities
    */
 
   static void copyStreams(
-    final @Nonnull InputStream input,
-    final @Nonnull OutputStream output)
+    final InputStream input,
+    final OutputStream output)
     throws IOException
   {
     final byte buffer[] = new byte[8192];
@@ -99,8 +97,8 @@ public final class SBIOUtilities
    */
 
   static void deleteOnExit(
-    final @Nonnull Log log,
-    final @Nonnull File file)
+    final LogUsableType log,
+    final File file)
   {
     log.debug("Marking for deletion: " + file);
     file.deleteOnExit();
@@ -112,8 +110,7 @@ public final class SBIOUtilities
    * provide something better.
    */
 
-  static @Nonnull File getTemporaryDirectoryPath()
-    throws ConstraintError
+  static File getTemporaryDirectoryPath()
   {
     {
       final String tmpdir_name = System.getenv("XDG_CACHE_HOME");
@@ -124,7 +121,7 @@ public final class SBIOUtilities
 
     {
       final String tmpdir_name = System.getProperty("java.io.tmpdir");
-      Constraints.constrainNotNull(tmpdir_name, "Property java.io.tmpdir");
+      NullCheck.notNull(tmpdir_name, "Property java.io.tmpdir");
       return new File(tmpdir_name);
     }
   }
@@ -134,16 +131,15 @@ public final class SBIOUtilities
    * directory with an unpredictable name prefixed with <code>prefix</code>.
    */
 
-  static @Nonnull File makeTemporaryDirectory(
-    final @Nonnull Log log,
-    final @Nonnull String prefix,
+  static File makeTemporaryDirectory(
+    final LogUsableType log,
+    final String prefix,
     final int attempts)
-    throws IOException,
-      ConstraintError
+    throws IOException
   {
-    Constraints.constrainNotNull(log, "Log");
-    Constraints.constrainNotNull(prefix, "Prefix");
-    Constraints.constrainRange(attempts, 1, Integer.MAX_VALUE, "Attempts");
+    NullCheck.notNull(log, "Log");
+    NullCheck.notNull(prefix, "Prefix");
+    RangeCheck.checkGreater(attempts, "Attempts", 1, "Minimum attempts");
 
     final SecureRandom r = new SecureRandom();
     final byte[] bytes = new byte[16];

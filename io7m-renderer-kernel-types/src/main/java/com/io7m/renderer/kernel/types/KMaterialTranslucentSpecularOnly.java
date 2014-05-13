@@ -16,11 +16,9 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
@@ -29,7 +27,7 @@ import com.io7m.renderer.types.RTransformTextureType;
  * The type of translucent, specular-only materials.
  */
 
-@Immutable public final class KMaterialTranslucentSpecularOnly implements
+@EqualityStructural public final class KMaterialTranslucentSpecularOnly implements
   KMaterialTranslucentType
 {
   /**
@@ -44,16 +42,13 @@ import com.io7m.renderer.types.RTransformTextureType;
    * @param in_specular
    *          The specular parameters
    * @return A new material
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KMaterialTranslucentSpecularOnly newMaterial(
-    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
-    final @Nonnull KMaterialAlpha in_alpha,
-    final @Nonnull KMaterialNormal in_normal,
-    final @Nonnull KMaterialSpecular in_specular)
-    throws ConstraintError
+  public static KMaterialTranslucentSpecularOnly newMaterial(
+    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final KMaterialAlpha in_alpha,
+    final KMaterialNormal in_normal,
+    final KMaterialSpecular in_specular)
   {
     return new KMaterialTranslucentSpecularOnly(
       in_uv_matrix,
@@ -62,29 +57,48 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_specular);
   }
 
-  private final @Nonnull KMaterialAlpha                      alpha;
-  private final @Nonnull KMaterialNormal                     normal;
-  private final @Nonnull KMaterialSpecular                   specular;
-  private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
+  private final KMaterialAlpha                      alpha;
+  private final KMaterialNormal                     normal;
+  private final KMaterialSpecular                   specular;
+  private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KMaterialTranslucentSpecularOnly(
-    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
-    final @Nonnull KMaterialAlpha in_alpha,
-    final @Nonnull KMaterialNormal in_normal,
-    final @Nonnull KMaterialSpecular in_specular)
-    throws ConstraintError
+    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final KMaterialAlpha in_alpha,
+    final KMaterialNormal in_normal,
+    final KMaterialSpecular in_specular)
   {
-    this.uv_matrix = Constraints.constrainNotNull(in_uv_matrix, "UV matrix");
-    this.alpha = Constraints.constrainNotNull(in_alpha, "Alpha");
-    this.normal = Constraints.constrainNotNull(in_normal, "Normal");
-    this.specular = Constraints.constrainNotNull(in_specular, "Specular");
+    this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
+    this.alpha = NullCheck.notNull(in_alpha, "Alpha");
+    this.normal = NullCheck.notNull(in_normal, "Normal");
+    this.specular = NullCheck.notNull(in_specular, "Specular");
+  }
+
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KMaterialTranslucentSpecularOnly other =
+      (KMaterialTranslucentSpecularOnly) obj;
+    return this.alpha.equals(other.alpha)
+      && this.normal.equals(other.normal)
+      && this.specular.equals(other.specular)
+      && this.uv_matrix.equals(other.uv_matrix);
   }
 
   /**
    * @return The alpha properties for the material
    */
 
-  public @Nonnull KMaterialAlpha getAlpha()
+  public KMaterialAlpha getAlpha()
   {
     return this.alpha;
   }
@@ -93,19 +107,29 @@ import com.io7m.renderer.types.RTransformTextureType;
    * @return The specular parameters for the material
    */
 
-  public @Nonnull KMaterialSpecular getSpecular()
+  public KMaterialSpecular getSpecular()
   {
     return this.specular;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.alpha.hashCode();
+    result = (prime * result) + this.normal.hashCode();
+    result = (prime * result) + this.specular.hashCode();
+    result = (prime * result) + this.uv_matrix.hashCode();
+    return result;
   }
 
   @Override public
     <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
     A
     materialAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
-        RException,
-        ConstraintError
+        RException
   {
     return v.materialTranslucent(this);
   }
@@ -124,10 +148,9 @@ import com.io7m.renderer.types.RTransformTextureType;
     <A, E extends Throwable, V extends KMaterialTranslucentVisitorType<A, E>>
     A
     materialTranslucentAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
-        RException,
-        ConstraintError
+        RException
   {
     return v.translucentSpecularOnly(this);
   }
@@ -145,13 +168,10 @@ import com.io7m.renderer.types.RTransformTextureType;
    * @param m
    *          The alpha parameters
    * @return The current material with <code>alpha == m</code>.
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KMaterialTranslucentSpecularOnly withAlpha(
-    final @Nonnull KMaterialAlpha m)
-    throws ConstraintError
+  public KMaterialTranslucentSpecularOnly withAlpha(
+    final KMaterialAlpha m)
   {
     return new KMaterialTranslucentSpecularOnly(
       this.uv_matrix,
@@ -167,13 +187,10 @@ import com.io7m.renderer.types.RTransformTextureType;
    * @param m
    *          The normal mapping parameters
    * @return The current material with <code>normal == m</code>.
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KMaterialTranslucentSpecularOnly withNormal(
-    final @Nonnull KMaterialNormal m)
-    throws ConstraintError
+  public KMaterialTranslucentSpecularOnly withNormal(
+    final KMaterialNormal m)
   {
     return new KMaterialTranslucentSpecularOnly(
       this.uv_matrix,
@@ -189,13 +206,10 @@ import com.io7m.renderer.types.RTransformTextureType;
    * @param m
    *          The specular parameters
    * @return The current material with <code>specular == m</code>.
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KMaterialTranslucentSpecularOnly withSpecular(
-    final @Nonnull KMaterialSpecular m)
-    throws ConstraintError
+  public KMaterialTranslucentSpecularOnly withSpecular(
+    final KMaterialSpecular m)
   {
     return new KMaterialTranslucentSpecularOnly(
       this.uv_matrix,
@@ -211,13 +225,10 @@ import com.io7m.renderer.types.RTransformTextureType;
    * @param m
    *          The UV matrix
    * @return The current material with <code>uv_matrix == m</code>.
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KMaterialTranslucentSpecularOnly withUVMatrix(
-    final @Nonnull RMatrixI3x3F<RTransformTextureType> m)
-    throws ConstraintError
+  public KMaterialTranslucentSpecularOnly withUVMatrix(
+    final RMatrixI3x3F<RTransformTextureType> m)
   {
     return new KMaterialTranslucentSpecularOnly(
       m,

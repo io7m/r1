@@ -21,13 +21,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorI4F;
-import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.jtensors.VectorReadable4FType;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RSpaceType;
 import com.io7m.renderer.types.RTriangle4F;
 import com.io7m.renderer.types.RVectorI4F;
@@ -37,49 +35,49 @@ import com.io7m.renderer.types.RVectorReadable4FType;
  * Functions for performing clipping on triangles.
  */
 
-public final class KTriangleClipping
+@EqualityReference public final class KTriangleClipping
 {
   /**
    * The <code>-X</code> homogeneous clipping plane.
    */
 
-  public static final @Nonnull VectorI4F       PLANE_NEGATIVE_X;
+  public static final VectorI4F       PLANE_NEGATIVE_X;
 
   /**
    * The <code>-Y</code> homogeneous clipping plane.
    */
 
-  public static final @Nonnull VectorI4F       PLANE_NEGATIVE_Y;
+  public static final VectorI4F       PLANE_NEGATIVE_Y;
 
   /**
    * The <code>-Z</code> homogeneous clipping plane.
    */
 
-  public static final @Nonnull VectorI4F       PLANE_NEGATIVE_Z;
+  public static final VectorI4F       PLANE_NEGATIVE_Z;
 
   /**
    * The <code>+X</code> homogeneous clipping plane.
    */
 
-  public static final @Nonnull VectorI4F       PLANE_POSITIVE_X;
+  public static final VectorI4F       PLANE_POSITIVE_X;
 
   /**
    * The <code>+Y</code> homogeneous clipping plane.
    */
 
-  public static final @Nonnull VectorI4F       PLANE_POSITIVE_Y;
+  public static final VectorI4F       PLANE_POSITIVE_Y;
 
   /**
    * The <code>+Z</code> homogeneous clipping plane.
    */
 
-  public static final @Nonnull VectorI4F       PLANE_POSITIVE_Z;
+  public static final VectorI4F       PLANE_POSITIVE_Z;
 
   /**
    * A read-only list of the six homogeneous clipping plane.
    */
 
-  public static final @Nonnull List<VectorI4F> PLANES;
+  public static final List<VectorI4F> PLANES;
 
   static {
     PLANE_POSITIVE_X = new VectorI4F(1.0f, 0.0f, 0.0f, -1.0f);
@@ -112,20 +110,17 @@ public final class KTriangleClipping
    * @param <S>
    *          The type of coordinate space
    * @return A list of the resulting clipped triangles
-   * @throws ConstraintError
-   *           Iff any parameter is <code>null</code>
    */
 
-  public static @Nonnull
+  public static
     <S extends RSpaceType>
     List<RTriangle4F<S>>
     clipTrianglePlane(
-      final @Nonnull RTriangle4F<S> triangle,
-      final @Nonnull VectorI4F plane)
-      throws ConstraintError
+      final RTriangle4F<S> triangle,
+      final VectorI4F plane)
   {
-    Constraints.constrainNotNull(triangle, "Triangle");
-    Constraints.constrainNotNull(plane, "Plane");
+    NullCheck.notNull(triangle, "Triangle");
+    NullCheck.notNull(plane, "Plane");
     return KTriangleClipping.clipTrianglePlaneInner(triangle, plane);
   }
 
@@ -133,9 +128,8 @@ public final class KTriangleClipping
     <S extends RSpaceType>
     List<RTriangle4F<S>>
     clipTrianglePlaneInner(
-      final @Nonnull RTriangle4F<S> triangle,
-      final @Nonnull VectorI4F plane)
-      throws ConstraintError
+      final RTriangle4F<S> triangle,
+      final VectorI4F plane)
   {
     final RVectorI4F<S> p0 = triangle.getP0();
     final RVectorI4F<S> p1 = triangle.getP1();
@@ -275,20 +269,17 @@ public final class KTriangleClipping
    * @param <S>
    *          The type of coordinate space
    * @return A list of the resulting clipped triangles
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull
+  public static
     <S extends RSpaceType>
     List<RTriangle4F<S>>
     clipTrianglePlanes(
-      final @Nonnull RTriangle4F<S> triangle,
-      final @Nonnull List<VectorI4F> planes)
-      throws ConstraintError
+      final RTriangle4F<S> triangle,
+      final List<VectorI4F> planes)
   {
-    Constraints.constrainNotNull(triangle, "Triangle");
-    Constraints.constrainNotNull(planes, "Planes");
+    NullCheck.notNull(triangle, "Triangle");
+    NullCheck.notNull(planes, "Planes");
 
     final List<VectorI4F> in_planes = new LinkedList<VectorI4F>();
     in_planes.addAll(planes);
@@ -301,41 +292,40 @@ public final class KTriangleClipping
       .clipTrianglesPlanesInner(in_triangles, in_planes);
   }
 
-  private static @Nonnull
+  private static
     <S extends RSpaceType>
     List<RTriangle4F<S>>
     clipTrianglesPlanesInner(
-      final @Nonnull List<RTriangle4F<S>> triangles,
-      final @Nonnull List<VectorI4F> planes)
-      throws ConstraintError
+      final List<RTriangle4F<S>> triangles,
+      final List<VectorI4F> planes)
   {
     if (planes.size() == 0) {
       return triangles;
     }
 
     final VectorI4F plane = planes.remove(0);
+    assert plane != null;
+
     final List<RTriangle4F<S>> results = new LinkedList<RTriangle4F<S>>();
 
     for (final RTriangle4F<S> t : triangles) {
+      assert t != null;
       results.addAll(KTriangleClipping.clipTrianglePlane(t, plane));
     }
 
     return KTriangleClipping.clipTrianglesPlanesInner(results, planes);
   }
 
-  private static @Nonnull
-    <S extends RSpaceType>
-    RVectorI4F<S>
-    intersectLinePlane(
-      final @Nonnull RVectorReadable4FType<S> p0,
-      final @Nonnull RVectorReadable4FType<S> p1,
-      final @Nonnull VectorReadable4F plane)
+  private static <S extends RSpaceType> RVectorI4F<S> intersectLinePlane(
+    final RVectorReadable4FType<S> p0,
+    final RVectorReadable4FType<S> p1,
+    final VectorReadable4FType plane)
   {
     final VectorI4F slope = VectorI4F.subtract(p1, p0);
     final float p0_dot = VectorI4F.dotProduct(p0, plane);
     final float t = -p0_dot / VectorI4F.dotProduct(slope, plane);
     final VectorI4F s = VectorI4F.addScaled(p0, slope, t);
-    return new RVectorI4F<S>(s.x, s.y, s.z, s.w);
+    return new RVectorI4F<S>(s.getXF(), s.getYF(), s.getZF(), s.getWF());
   }
 
   private static boolean isInside(
@@ -359,8 +349,8 @@ public final class KTriangleClipping
    */
 
   public static <S extends RSpaceType> boolean pointIsInside(
-    final @Nonnull RVectorI4F<S> point,
-    final @Nonnull VectorI4F plane)
+    final RVectorI4F<S> point,
+    final VectorI4F plane)
   {
     return KTriangleClipping.isInside(VectorI4F.dotProduct(point, plane));
   }

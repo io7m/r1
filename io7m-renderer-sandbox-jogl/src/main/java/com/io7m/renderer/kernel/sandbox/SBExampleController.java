@@ -23,15 +23,15 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.types.RException;
 
@@ -48,24 +48,26 @@ final class SBExampleController implements
   SBSceneControllerMeshes,
   SBSceneControllerLights
 {
-  private final @Nonnull AtomicInteger                    instance_id_pool;
-  private final @Nonnull AtomicInteger                    light_id_pool;
-  private final @Nonnull AtomicInteger                    material_id_pool;
-  private final @Nonnull HashMap<PathVirtual, SBMesh>     mesh_map;
-  private final @Nonnull Map<PathVirtual, SBTexture2D<?>> textures;
+  private final AtomicInteger                    instance_id_pool;
+  private final AtomicInteger                    light_id_pool;
+  private final AtomicInteger                    material_id_pool;
+  private final HashMap<PathVirtual, SBMesh>     mesh_map;
+  private final Map<PathVirtual, SBTexture2D<?>> textures;
 
   public SBExampleController()
-    throws ConstraintError
   {
-    this.mesh_map = new HashMap<PathVirtual, SBMesh>();
-    this.mesh_map.put(PathVirtual.ofString("/meshes/x/r.rmx"), null);
-    this.mesh_map.put(PathVirtual.ofString("/meshes/z/q.rmb"), null);
-    this.mesh_map.put(PathVirtual.ofString("/meshes/w/w.rmx"), null);
-    this.instance_id_pool = new AtomicInteger(0);
-    this.material_id_pool = new AtomicInteger(0);
-    this.light_id_pool = new AtomicInteger(0);
-
-    this.textures = new HashMap<PathVirtual, SBTexture2D<?>>();
+    try {
+      this.mesh_map = new HashMap<PathVirtual, SBMesh>();
+      this.mesh_map.put(PathVirtual.ofString("/meshes/x/r.rmx"), null);
+      this.mesh_map.put(PathVirtual.ofString("/meshes/z/q.rmb"), null);
+      this.mesh_map.put(PathVirtual.ofString("/meshes/w/w.rmx"), null);
+      this.instance_id_pool = new AtomicInteger(0);
+      this.material_id_pool = new AtomicInteger(0);
+      this.light_id_pool = new AtomicInteger(0);
+      this.textures = new HashMap<PathVirtual, SBTexture2D<?>>();
+    } catch (final FilesystemError e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 
   @Override public void sceneChangeListenerAdd(
@@ -76,7 +78,6 @@ final class SBExampleController implements
 
   @Override public boolean sceneInstanceExists(
     final Integer id)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -87,9 +88,8 @@ final class SBExampleController implements
     return Integer.valueOf(this.instance_id_pool.incrementAndGet());
   }
 
-  @Override public SBInstance sceneInstanceGet(
+  @Override public @Nullable SBInstance sceneInstanceGet(
     final Integer id)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -97,7 +97,6 @@ final class SBExampleController implements
 
   @Override public void sceneInstancePut(
     final SBInstance desc)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -105,7 +104,6 @@ final class SBExampleController implements
 
   @Override public void sceneInstanceRemove(
     final Integer id)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -119,7 +117,6 @@ final class SBExampleController implements
 
   @Override public boolean sceneLightExists(
     final Integer id)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -130,9 +127,8 @@ final class SBExampleController implements
     return Integer.valueOf(this.light_id_pool.incrementAndGet());
   }
 
-  @Override public SBLight sceneLightGet(
+  @Override public @Nullable SBLight sceneLightGet(
     final Integer id)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -140,7 +136,6 @@ final class SBExampleController implements
 
   @Override public void sceneLightRemove(
     final Integer id)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -154,7 +149,6 @@ final class SBExampleController implements
 
   @Override public boolean sceneMaterialExists(
     final Integer id)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -165,9 +159,8 @@ final class SBExampleController implements
     return Integer.valueOf(this.material_id_pool.incrementAndGet());
   }
 
-  @Override public SBMaterial sceneMaterialGet(
+  @Override public @Nullable SBMaterial sceneMaterialGet(
     final Integer id)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -175,7 +168,6 @@ final class SBExampleController implements
 
   @Override public void sceneMaterialPut(
     final SBMaterial material)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -184,8 +176,7 @@ final class SBExampleController implements
   @Override public void sceneMaterialPutByDescription(
     final Integer id,
     final SBMaterialDescription desc)
-    throws ConstraintError,
-      RException
+    throws RException
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -193,7 +184,6 @@ final class SBExampleController implements
 
   @Override public void sceneMaterialRemove(
     final Integer id)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -212,7 +202,6 @@ final class SBExampleController implements
 
   @Override public Future<SBMesh> sceneMeshLoad(
     final File file)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -227,7 +216,6 @@ final class SBExampleController implements
       final TextureWrapT wrap_t,
       final TextureFilterMinification filter_min,
       final TextureFilterMagnification filter_mag)
-      throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -240,7 +228,6 @@ final class SBExampleController implements
     final TextureWrapT wrap_t,
     final TextureFilterMinification filter_min,
     final TextureFilterMagnification filter_mag)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -259,7 +246,6 @@ final class SBExampleController implements
 
   @Override public void sceneLightPut(
     final SBLightDescription d)
-    throws ConstraintError
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();

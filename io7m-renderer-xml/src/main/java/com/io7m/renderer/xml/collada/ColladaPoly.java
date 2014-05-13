@@ -19,25 +19,45 @@ package com.io7m.renderer.xml.collada;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-
-@Immutable public final class ColladaPoly
+@EqualityStructural public final class ColladaPoly
 {
-  private final @Nonnull List<ColladaVertex> vertices;
+  private final List<ColladaVertex> vertices;
 
   public ColladaPoly(
-    final @Nonnull List<ColladaVertex> in_vertices)
-    throws ConstraintError
+    final List<ColladaVertex> in_vertices)
   {
-    this.vertices = Constraints.constrainNotNull(in_vertices, "Vertices");
+    this.vertices = NullCheck.notNullAll(in_vertices, "Vertices");
   }
 
-  public @Nonnull List<ColladaVertex> getVertices()
+  @Override public boolean equals(
+    @Nullable final Object obj)
   {
-    return Collections.unmodifiableList(this.vertices);
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final ColladaPoly other = (ColladaPoly) obj;
+    return this.vertices.equals(other.vertices);
+  }
+
+  public List<ColladaVertex> getVertices()
+  {
+    final List<ColladaVertex> r = Collections.unmodifiableList(this.vertices);
+    assert r != null;
+    return r;
+  }
+
+  @Override public int hashCode()
+  {
+    return this.vertices.hashCode();
   }
 }

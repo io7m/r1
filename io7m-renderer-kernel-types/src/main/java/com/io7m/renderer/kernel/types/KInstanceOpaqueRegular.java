@@ -16,12 +16,10 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -35,7 +33,7 @@ import com.io7m.renderer.types.RException;
  * </p>
  */
 
-@Immutable public final class KInstanceOpaqueRegular implements
+@EqualityStructural public final class KInstanceOpaqueRegular implements
   KInstanceWithMaterialType<KMaterialOpaqueRegular>,
   KInstanceOpaqueType
 {
@@ -49,36 +47,32 @@ import com.io7m.renderer.types.RException;
    * @param in_faces
    *          The faces that will be rendered
    * @return A new instance
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KInstanceOpaqueRegular newInstance(
-    final @Nonnull KMaterialOpaqueRegular in_material,
-    final @Nonnull KMeshReadableType in_mesh,
-    final @Nonnull KFaceSelection in_faces)
-    throws ConstraintError
+  public static KInstanceOpaqueRegular newInstance(
+    final KMaterialOpaqueRegular in_material,
+    final KMeshReadableType in_mesh,
+    final KFaceSelection in_faces)
   {
     return new KInstanceOpaqueRegular(in_material, in_mesh, in_faces);
   }
 
-  private final @Nonnull KFaceSelection         faces;
-  private final @Nonnull KMaterialOpaqueRegular material;
-  private final @Nonnull KMeshReadableType      mesh;
+  private final KFaceSelection         faces;
+  private final KMaterialOpaqueRegular material;
+  private final KMeshReadableType      mesh;
 
   private KInstanceOpaqueRegular(
-    final @Nonnull KMaterialOpaqueRegular in_material,
-    final @Nonnull KMeshReadableType in_mesh,
-    final @Nonnull KFaceSelection in_faces)
-    throws ConstraintError
+    final KMaterialOpaqueRegular in_material,
+    final KMeshReadableType in_mesh,
+    final KFaceSelection in_faces)
   {
-    this.mesh = Constraints.constrainNotNull(in_mesh, "Mesh");
-    this.material = Constraints.constrainNotNull(in_material, "Material");
-    this.faces = Constraints.constrainNotNull(in_faces, "Faces");
+    this.mesh = NullCheck.notNull(in_mesh, "Mesh");
+    this.material = NullCheck.notNull(in_material, "Material");
+    this.faces = NullCheck.notNull(in_faces, "Faces");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -91,7 +85,8 @@ import com.io7m.renderer.types.RException;
     }
     final KInstanceOpaqueRegular other = (KInstanceOpaqueRegular) obj;
     return this.material.equals(other.material)
-      && this.mesh.equals(other.mesh);
+      && this.mesh.equals(other.mesh)
+      && this.faces.equals(other.faces);
   }
 
   @Override public int hashCode()
@@ -113,7 +108,7 @@ import com.io7m.renderer.types.RException;
     return this.material;
   }
 
-  @Override public @Nonnull KMeshReadableType instanceGetMesh()
+  @Override public KMeshReadableType instanceGetMesh()
   {
     return this.mesh;
   }
@@ -122,10 +117,9 @@ import com.io7m.renderer.types.RException;
     <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
     instanceAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
         JCGLException,
-        ConstraintError,
         RException
   {
     return v.instanceOpaqueRegular(this);

@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -47,16 +44,14 @@ public interface KPostprocessorRGBAType<C> extends KPostprocessorType
    *          The input framebuffer
    * @param output
    *          The output framebuffer
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
+   * 
    * @throws RException
    *           If any error occurs
    */
 
   void postprocessorEvaluateRGBA(
-    final @Nonnull C config,
-    final @Nonnull KFramebufferRGBAUsableType input,
-    final @Nonnull KFramebufferRGBAUsableType output)
-    throws ConstraintError,
-      RException;
+    final C config,
+    final KFramebufferRGBAUsableType input,
+    final KFramebufferRGBAUsableType output)
+    throws RException;
 }

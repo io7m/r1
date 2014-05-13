@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * The interface supported by instances that have associated materials.
@@ -31,5 +30,5 @@ public interface KInstanceWithMaterialType<T extends KMaterialType>
    * @return The material associated with the current instance
    */
 
-  @Nonnull T instanceGetMaterial();
+   T instanceGetMaterial();
 }

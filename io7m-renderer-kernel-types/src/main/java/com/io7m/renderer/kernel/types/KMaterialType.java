@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
@@ -33,13 +30,13 @@ public interface KMaterialType extends KTexturesRequiredType
    * @return The material values relating to surface normals.
    */
 
-  @Nonnull KMaterialNormal materialGetNormal();
+  KMaterialNormal materialGetNormal();
 
   /**
    * @return The material's UV texture matrix.
    */
 
-  @Nonnull RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix();
+  RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix();
 
   /**
    * Be visited by the given generic visitor.
@@ -47,8 +44,7 @@ public interface KMaterialType extends KTexturesRequiredType
    * @param v
    *          The visitor
    * @return The value returned by the visitor
-   * @throws ConstraintError
-   *           Iff the visitor raises {@link ConstraintError}
+   * 
    * @throws RException
    *           Iff the visitor raises {@link RException}
    * @throws E
@@ -65,8 +61,7 @@ public interface KMaterialType extends KTexturesRequiredType
     <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
     A
     materialAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
-        RException,
-        ConstraintError;
+        RException;
 }

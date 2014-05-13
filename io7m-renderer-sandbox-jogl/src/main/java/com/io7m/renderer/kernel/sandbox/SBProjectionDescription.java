@@ -16,19 +16,16 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.ProjectionMatrix;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RTransformProjectionType;
 
-@Immutable public abstract class SBProjectionDescription
+public abstract class SBProjectionDescription
 {
-  @Immutable public static final class SBProjectionFrustum extends
+  public static final class SBProjectionFrustum extends
     SBProjectionDescription
   {
     private final double left;
@@ -39,7 +36,6 @@ import com.io7m.renderer.types.RTransformProjectionType;
     private final double far;
 
     public SBProjectionFrustum()
-      throws ConstraintError
     {
       this(-5.0, 5.0, -5.0, 5.0, 1.0, 100.0);
     }
@@ -51,7 +47,6 @@ import com.io7m.renderer.types.RTransformProjectionType;
       final double in_top,
       final double in_near,
       final double in_far)
-      throws ConstraintError
     {
       super(Type.PROJECTION_FRUSTUM);
       this.left = in_left;
@@ -63,7 +58,7 @@ import com.io7m.renderer.types.RTransformProjectionType;
     }
 
     @Override public boolean equals(
-      final Object obj)
+      final @Nullable Object obj)
     {
       if (this == obj) {
         return true;
@@ -152,9 +147,10 @@ import com.io7m.renderer.types.RTransformProjectionType;
       return result;
     }
 
-    @Override public RMatrixI4x4F<RTransformProjectionType> makeProjectionMatrix(
-      final @Nonnull MatrixM4x4F temporary)
-      throws ConstraintError
+    @Override public
+      RMatrixI4x4F<RTransformProjectionType>
+      makeProjectionMatrix(
+        final MatrixM4x4F temporary)
     {
       ProjectionMatrix.makeFrustumProjection(
         temporary,
@@ -168,7 +164,7 @@ import com.io7m.renderer.types.RTransformProjectionType;
     }
   }
 
-  @Immutable public static final class SBProjectionOrthographic extends
+  public static final class SBProjectionOrthographic extends
     SBProjectionDescription
   {
     private final double left;
@@ -179,7 +175,6 @@ import com.io7m.renderer.types.RTransformProjectionType;
     private final double far;
 
     public SBProjectionOrthographic()
-      throws ConstraintError
     {
       this(-5.0, 5.0, -5.0, 5.0, 1.0, 100.0);
     }
@@ -191,7 +186,6 @@ import com.io7m.renderer.types.RTransformProjectionType;
       final double in_top,
       final double in_near,
       final double in_far)
-      throws ConstraintError
     {
       super(Type.PROJECTION_ORTHOGRAPHIC);
       this.left = in_left;
@@ -203,7 +197,7 @@ import com.io7m.renderer.types.RTransformProjectionType;
     }
 
     @Override public boolean equals(
-      final Object obj)
+      final @Nullable Object obj)
     {
       if (this == obj) {
         return true;
@@ -292,9 +286,10 @@ import com.io7m.renderer.types.RTransformProjectionType;
       return result;
     }
 
-    @Override public RMatrixI4x4F<RTransformProjectionType> makeProjectionMatrix(
-      final @Nonnull MatrixM4x4F temporary)
-      throws ConstraintError
+    @Override public
+      RMatrixI4x4F<RTransformProjectionType>
+      makeProjectionMatrix(
+        final MatrixM4x4F temporary)
     {
       ProjectionMatrix.makeOrthographicProjection(
         temporary,
@@ -308,7 +303,7 @@ import com.io7m.renderer.types.RTransformProjectionType;
     }
   }
 
-  @Immutable public static final class SBProjectionPerspective extends
+  public static final class SBProjectionPerspective extends
     SBProjectionDescription
   {
     private final double near;
@@ -317,7 +312,6 @@ import com.io7m.renderer.types.RTransformProjectionType;
     private final double horizontal_fov;
 
     public SBProjectionPerspective()
-      throws ConstraintError
     {
       this(1.0, 100.0, 1.333333, Math.toRadians(90));
     }
@@ -327,7 +321,6 @@ import com.io7m.renderer.types.RTransformProjectionType;
       final double in_far,
       final double in_aspect,
       final double in_horizontal_fov)
-      throws ConstraintError
     {
       super(Type.PROJECTION_PERSPECTIVE);
       this.near = in_near;
@@ -337,7 +330,7 @@ import com.io7m.renderer.types.RTransformProjectionType;
     }
 
     @Override public boolean equals(
-      final Object obj)
+      final @Nullable Object obj)
     {
       if (this == obj) {
         return true;
@@ -404,9 +397,10 @@ import com.io7m.renderer.types.RTransformProjectionType;
       return result;
     }
 
-    @Override public RMatrixI4x4F<RTransformProjectionType> makeProjectionMatrix(
-      final @Nonnull MatrixM4x4F temporary)
-      throws ConstraintError
+    @Override public
+      RMatrixI4x4F<RTransformProjectionType>
+      makeProjectionMatrix(
+        final MatrixM4x4F temporary)
     {
       ProjectionMatrix.makePerspectiveProjection(
         temporary,
@@ -424,44 +418,42 @@ import com.io7m.renderer.types.RTransformProjectionType;
     PROJECTION_PERSPECTIVE("Perspective"),
     PROJECTION_ORTHOGRAPHIC("Orthographic");
 
-    private final @Nonnull String name;
+    private final String name;
 
     private Type(
-      final @Nonnull String in_name)
+      final String in_name)
     {
       this.name = in_name;
     }
 
-    public @Nonnull String getName()
+    public String getName()
     {
       return this.name;
     }
 
-    @Override public @Nonnull String toString()
+    @Override public String toString()
     {
       return this.name;
     }
   }
 
-  private final @Nonnull Type type;
+  private final Type type;
 
   private SBProjectionDescription(
-    final @Nonnull Type in_type)
-    throws ConstraintError
+    final Type in_type)
   {
-    this.type = Constraints.constrainNotNull(in_type, "Type");
+    this.type = NullCheck.notNull(in_type, "Type");
   }
 
   public abstract double getFar();
 
-  public @Nonnull Type getType()
+  public Type getType()
   {
     return this.type;
   }
 
-  public abstract @Nonnull
+  public abstract
     RMatrixI4x4F<RTransformProjectionType>
     makeProjectionMatrix(
-      final @Nonnull MatrixM4x4F temporary)
-      throws ConstraintError;
+      final MatrixM4x4F temporary);
 }

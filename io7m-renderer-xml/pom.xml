@@ -5,13 +5,17 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.io7m.renderer.xml</groupId>
+  <parent>
+    <groupId>com.io7m.renderer</groupId>
+    <artifactId>io7m-renderer</artifactId>
+    <version>0.9.0</version>
+  </parent>
   <artifactId>io7m-renderer-xml</artifactId>
-  <version>0.8.0</version>
+
   <packaging>jar</packaging>
-  <name>io7m-renderer-xml</name>
   <description>3D renderer (XML functions)</description>
-  <url>http://mvn.io7m.com/renderer-xml/</url>
+  <url>http://mvn.io7m.com/${project.artifactId}/</url>
+  <name>${project.artifactId}</name>
 
   <licenses>
     <license>
@@ -44,9 +48,19 @@
     <site>
       <id>io7m</id>
       <name>io7m.com</name>
-      <url>http://mvn.io7m.com/renderer-xml/</url>
+      <url>${project.url}</url>
     </site>
   </distributionManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>io7m-renderer</name>
+      <subscribe>io7m-renderer-join@lists.io7m.com</subscribe>
+      <unsubscribe>io7m-renderer-leave@lists.io7m.com</unsubscribe>
+      <post>io7m-renderer@lists.io7m.com</post>
+      <archive>http://lists.io7m.com/io7m-renderer/archive</archive>
+    </mailingList>
+  </mailingLists>
 
   <prerequisites>
     <maven>2.2.1</maven>
@@ -63,46 +77,36 @@
       <artifactId>commons-cli</artifactId>
       <version>1.2</version>
     </dependency>
+
     <dependency>
       <groupId>com.io7m.jtensors</groupId>
-      <artifactId>io7m-jtensors</artifactId>
-      <version>[5.3.1, 6.0.0)</version>
+      <artifactId>io7m-jtensors-core</artifactId>
+      <version>${com.io7m.jtensors.versionRange}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.jvvfs.core</groupId>
+      <groupId>com.io7m.jvvfs</groupId>
       <artifactId>io7m-jvvfs-core</artifactId>
-      <version>[3.1.1, 4.0.0)</version>
+      <version>${com.io7m.jvvfs.versionRange}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.renderer.types</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-types</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.renderer.kernel.types</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-kernel-types</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.jcanephora.core</groupId>
+      <groupId>com.io7m.jcanephora</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
-      <version>0.28.0</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-      <version>4.11</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>2.0.2</version>
+      <version>${com.io7m.jcanephora.versionRange}</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.xom</groupId>
       <artifactId>xom</artifactId>
-      <version>1.2.10</version>
+      <version>${com.io7m.xom.versionRange}</version>
     </dependency>
   </dependencies>
 
@@ -246,6 +250,7 @@
               <goal>jar</goal>
             </goals>
             <configuration>
+              <bottom><![CDATA[Copyright &#169; {currentYear} &lt;code@io7m.com&gt; http://io7m.com]]></bottom>
               <archive>
                 <manifestEntries>
                   <Specification-Title>${project.name}</Specification-Title>

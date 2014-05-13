@@ -16,13 +16,11 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.JLabel;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformType;
@@ -30,12 +28,12 @@ import com.io7m.renderer.types.RTransformType;
 public final class SBMatrix3x3Controls<R extends RTransformType> implements
   SBControlsDataType<RMatrixI3x3F<R>>
 {
-  private final @Nonnull RowGroup               group;
-  protected final @Nonnull SBMatrix3x3Fields<R> matrix;
-  private final @Nonnull String                 label;
+  private final RowGroup               group;
+  protected final SBMatrix3x3Fields<R> matrix;
+  private final String                 label;
 
   SBMatrix3x3Controls(
-    final @Nonnull String in_label)
+    final String in_label)
   {
     this.label = in_label;
     this.group = new RowGroup();
@@ -78,8 +76,7 @@ public final class SBMatrix3x3Controls<R extends RTransformType> implements
   }
 
   @Override public RMatrixI3x3F<R> controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
     return this.matrix.getMatrix3x3f();
   }

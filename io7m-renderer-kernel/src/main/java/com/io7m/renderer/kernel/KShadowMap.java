@@ -16,48 +16,70 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
 import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
 import com.io7m.renderer.types.RException;
 
 abstract class KShadowMap implements KShadowMapType
 {
-  static final class KShadowMapBasic extends KShadowMap
+  @EqualityStructural static final class KShadowMapBasic extends KShadowMap
   {
-    private final @Nonnull KShadowMapBasicDescription description;
-    private final @Nonnull KFramebufferDepth          framebuffer;
+    private final KShadowMapBasicDescription description;
+    private final KFramebufferDepth          framebuffer;
 
     KShadowMapBasic(
-      final @Nonnull KShadowMapBasicDescription in_description,
-      final @Nonnull KFramebufferDepth in_framebuffer)
-      throws ConstraintError
+      final KShadowMapBasicDescription in_description,
+      final KFramebufferDepth in_framebuffer)
     {
-      this.description =
-        Constraints.constrainNotNull(in_description, "Description");
-      this.framebuffer =
-        Constraints.constrainNotNull(in_framebuffer, "Framebuffer");
+      this.description = NullCheck.notNull(in_description, "Description");
+      this.framebuffer = NullCheck.notNull(in_framebuffer, "Framebuffer");
     }
 
-    public @Nonnull KShadowMapBasicDescription getDescription()
+    @Override public boolean equals(
+      final @Nullable Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final KShadowMapBasic other = (KShadowMapBasic) obj;
+      return this.description.equals(other.description)
+        && this.framebuffer.equals(other.framebuffer);
+    }
+
+    public KShadowMapBasicDescription getDescription()
     {
       return this.description;
     }
 
-    public @Nonnull KFramebufferDepth getFramebuffer()
+    public KFramebufferDepth getFramebuffer()
     {
       return this.framebuffer;
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + this.description.hashCode();
+      result = (prime * result) + this.framebuffer.hashCode();
+      return result;
     }
 
     @Override public
       <A, E extends Throwable, V extends KShadowMapVisitorType<A, E>>
       A
       kShadowMapAccept(
-        final @Nonnull V v)
+        final V v)
         throws E,
           RException
     {
@@ -65,9 +87,8 @@ abstract class KShadowMap implements KShadowMapType
     }
 
     @Override public void kShadowMapDelete(
-      final @Nonnull JCGLImplementation g)
-      throws RException,
-        ConstraintError
+      final JCGLImplementationType g)
+      throws RException
     {
       this.framebuffer.kFramebufferDelete(g);
     }
@@ -83,37 +104,61 @@ abstract class KShadowMap implements KShadowMapType
     }
   }
 
-  static final class KShadowMapVariance extends KShadowMap
+  @EqualityStructural static final class KShadowMapVariance extends
+    KShadowMap
   {
-    private final @Nonnull KShadowMapVarianceDescription description;
-    private final @Nonnull KFramebufferDepthVariance     framebuffer;
+    private final KShadowMapVarianceDescription description;
+    private final KFramebufferDepthVariance     framebuffer;
 
     KShadowMapVariance(
-      final @Nonnull KShadowMapVarianceDescription in_description,
-      final @Nonnull KFramebufferDepthVariance in_framebuffer)
-      throws ConstraintError
+      final KShadowMapVarianceDescription in_description,
+      final KFramebufferDepthVariance in_framebuffer)
     {
-      this.description =
-        Constraints.constrainNotNull(in_description, "Description");
-      this.framebuffer =
-        Constraints.constrainNotNull(in_framebuffer, "Framebuffer");
+      this.description = NullCheck.notNull(in_description, "Description");
+      this.framebuffer = NullCheck.notNull(in_framebuffer, "Framebuffer");
     }
 
-    public @Nonnull KShadowMapVarianceDescription getDescription()
+    @Override public boolean equals(
+      final @Nullable Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final KShadowMapVariance other = (KShadowMapVariance) obj;
+      return this.description.equals(other.description)
+        && this.framebuffer.equals(other.framebuffer);
+    }
+
+    public KShadowMapVarianceDescription getDescription()
     {
       return this.description;
     }
 
-    public @Nonnull KFramebufferDepthVariance getFramebuffer()
+    public KFramebufferDepthVariance getFramebuffer()
     {
       return this.framebuffer;
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + this.description.hashCode();
+      result = (prime * result) + this.framebuffer.hashCode();
+      return result;
     }
 
     @Override public
       <A, E extends Throwable, V extends KShadowMapVisitorType<A, E>>
       A
       kShadowMapAccept(
-        final @Nonnull V v)
+        final V v)
         throws E,
           RException
     {
@@ -121,9 +166,8 @@ abstract class KShadowMap implements KShadowMapType
     }
 
     @Override public void kShadowMapDelete(
-      final @Nonnull JCGLImplementation g)
-      throws RException,
-        ConstraintError
+      final JCGLImplementationType g)
+      throws RException
     {
       this.framebuffer.kFramebufferDelete(g);
     }

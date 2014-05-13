@@ -14,5 +14,5 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel.examples.viewer;
+@com.io7m.jnull.NonNullByDefault package com.io7m.renderer.kernel.examples.viewer;
 

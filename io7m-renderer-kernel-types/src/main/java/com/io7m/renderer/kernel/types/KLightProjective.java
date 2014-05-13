@@ -16,13 +16,10 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Option;
-import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
@@ -39,7 +36,7 @@ import com.io7m.renderer.types.RVectorI3F;
  * of shadow mapping techniques, specified by the given shadow value.
  */
 
-@Immutable public final class KLightProjective implements KLightType
+@EqualityStructural public final class KLightProjective implements KLightType
 {
   /**
    * Construct a new projective light.
@@ -65,22 +62,19 @@ import com.io7m.renderer.types.RVectorI3F;
    * @param shadow
    *          A description of the shadows that will be cast, if any
    * @return A new projective light
-   * @throws ConstraintError
-   *           Iff any parameter is <code>null</code>
    */
 
-  public static @Nonnull KLightProjective newProjective(
-    final @Nonnull Integer id,
-    final @Nonnull Texture2DStaticUsable texture,
-    final @Nonnull RVectorI3F<RSpaceWorldType> position,
-    final @Nonnull QuaternionI4F orientation,
-    final @Nonnull RVectorI3F<RSpaceRGBType> colour,
+  public static KLightProjective newProjective(
+    final Integer id,
+    final Texture2DStaticUsableType texture,
+    final RVectorI3F<RSpaceWorldType> position,
+    final QuaternionI4F orientation,
+    final RVectorI3F<RSpaceRGBType> colour,
     final float intensity,
     final float range,
     final float falloff,
-    final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection,
-    final @Nonnull Option<KShadowType> shadow)
-    throws ConstraintError
+    final RMatrixI4x4F<RTransformProjectionType> projection,
+    final OptionType<KShadowType> shadow)
   {
     return new KLightProjective(
       id,
@@ -95,67 +89,39 @@ import com.io7m.renderer.types.RVectorI3F;
       shadow);
   }
 
-  private final @Nonnull RVectorI3F<RSpaceRGBType>              colour;
-  private final float                                           falloff;
-  private final @Nonnull Integer                                id;
-  private final float                                           intensity;
-  private final @Nonnull QuaternionI4F                          orientation;
-  private final @Nonnull RVectorI3F<RSpaceWorldType>            position;
-  private final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection;
-  private final float                                           range;
-  private final @Nonnull Option<KShadowType>                    shadow;
-  private final @Nonnull Texture2DStaticUsable                  texture;
+  private final RVectorI3F<RSpaceRGBType>              colour;
+  private final float                                  falloff;
+  private final Integer                                id;
+  private final float                                  intensity;
+  private final QuaternionI4F                          orientation;
+  private final RVectorI3F<RSpaceWorldType>            position;
+  private final RMatrixI4x4F<RTransformProjectionType> projection;
+  private final float                                  range;
+  private final OptionType<KShadowType>                shadow;
+  private final Texture2DStaticUsableType              texture;
 
   private KLightProjective(
-    final @Nonnull Integer in_id,
-    final @Nonnull Texture2DStaticUsable in_texture,
-    final @Nonnull RVectorI3F<RSpaceWorldType> in_position,
-    final @Nonnull QuaternionI4F in_orientation,
-    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
+    final Integer in_id,
+    final Texture2DStaticUsableType in_texture,
+    final RVectorI3F<RSpaceWorldType> in_position,
+    final QuaternionI4F in_orientation,
+    final RVectorI3F<RSpaceRGBType> in_colour,
     final float in_intensity,
     final float in_range,
     final float in_falloff,
-    final @Nonnull RMatrixI4x4F<RTransformProjectionType> in_projection,
-    final @Nonnull Option<KShadowType> in_shadow)
-    throws ConstraintError
+    final RMatrixI4x4F<RTransformProjectionType> in_projection,
+    final OptionType<KShadowType> in_shadow)
   {
     this.intensity = in_intensity;
-    this.id = Constraints.constrainNotNull(in_id, "Identifier");
-    this.colour = Constraints.constrainNotNull(in_colour, "Colour");
-    this.position = Constraints.constrainNotNull(in_position, "Position");
-    this.orientation =
-      Constraints.constrainNotNull(in_orientation, "Orientation");
+    this.id = NullCheck.notNull(in_id, "Identifier");
+    this.colour = NullCheck.notNull(in_colour, "Colour");
+    this.position = NullCheck.notNull(in_position, "Position");
+    this.orientation = NullCheck.notNull(in_orientation, "Orientation");
     this.range = in_range;
     this.falloff = in_falloff;
-    this.projection =
-      Constraints.constrainNotNull(in_projection, "Projection");
-    this.texture = Constraints.constrainNotNull(in_texture, "Texture");
-    this.shadow = Constraints.constrainNotNull(in_shadow, "Shadow");
-  }
-
-  @Override public boolean equals(
-    final Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (!super.equals(obj)) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KLightProjective other = (KLightProjective) obj;
-
-    return (Float.floatToIntBits(this.falloff) == Float
-      .floatToIntBits(other.falloff))
-      && this.orientation.equals(other.orientation)
-      && this.position.equals(other.position)
-      && this.projection.equals(other.projection)
-      && (Float.floatToIntBits(this.range) == Float
-        .floatToIntBits(other.range))
-      && this.shadow.equals(other.shadow)
-      && this.texture.equals(other.texture);
+    this.projection = NullCheck.notNull(in_projection, "Projection");
+    this.texture = NullCheck.notNull(in_texture, "Texture");
+    this.shadow = NullCheck.notNull(in_shadow, "Shadow");
   }
 
   /**
@@ -171,7 +137,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The orientation of the light
    */
 
-  public @Nonnull QuaternionI4F getOrientation()
+  public QuaternionI4F getOrientation()
   {
     return this.orientation;
   }
@@ -180,7 +146,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The position of the light
    */
 
-  public @Nonnull RVectorI3F<RSpaceWorldType> getPosition()
+  public RVectorI3F<RSpaceWorldType> getPosition()
   {
     return this.position;
   }
@@ -189,7 +155,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The projection matrix for the light
    */
 
-  public @Nonnull RMatrixI4x4F<RTransformProjectionType> getProjection()
+  public RMatrixI4x4F<RTransformProjectionType> getProjection()
   {
     return this.projection;
   }
@@ -207,7 +173,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The texture that will be projected into the scene
    */
 
-  public @Nonnull Texture2DStaticUsable getTexture()
+  public Texture2DStaticUsableType getTexture()
   {
     return this.texture;
   }
@@ -226,7 +192,7 @@ import com.io7m.renderer.types.RVectorI3F;
     return result;
   }
 
-  @Override public @Nonnull RVectorI3F<RSpaceRGBType> lightGetColour()
+  @Override public RVectorI3F<RSpaceRGBType> lightGetColour()
   {
     return this.colour;
   }
@@ -236,7 +202,7 @@ import com.io7m.renderer.types.RVectorI3F;
     return this.intensity;
   }
 
-  @Override public @Nonnull Option<KShadowType> lightGetShadow()
+  @Override public OptionType<KShadowType> lightGetShadow()
   {
     return this.shadow;
   }
@@ -252,7 +218,6 @@ import com.io7m.renderer.types.RVectorI3F;
     lightAccept(
       final V v)
       throws E,
-        ConstraintError,
         RException
   {
     return v.lightProjective(this);
@@ -278,6 +243,8 @@ import com.io7m.renderer.types.RVectorI3F;
     builder.append(" shadow=");
     builder.append(this.shadow);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -39,8 +36,7 @@ public interface KShadowMapDescriptionVisitorType<A, E extends Throwable>
    * @param sm
    *          The map description
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
@@ -48,9 +44,8 @@ public interface KShadowMapDescriptionVisitorType<A, E extends Throwable>
    */
 
   A shadowMapDescriptionBasic(
-    final @Nonnull KShadowMapBasicDescription sm)
+    final KShadowMapBasicDescription sm)
     throws E,
-      ConstraintError,
       RException;
 
   /**
@@ -59,8 +54,7 @@ public interface KShadowMapDescriptionVisitorType<A, E extends Throwable>
    * @param sm
    *          The map description
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
@@ -68,8 +62,7 @@ public interface KShadowMapDescriptionVisitorType<A, E extends Throwable>
    */
 
   A shadowMapDescriptionVariance(
-    final @Nonnull KShadowMapVarianceDescription sm)
+    final KShadowMapVarianceDescription sm)
     throws E,
-      ConstraintError,
       RException;
 }

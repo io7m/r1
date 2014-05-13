@@ -5,13 +5,17 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.io7m.renderer.kernel</groupId>
+  <parent>
+    <groupId>com.io7m.renderer</groupId>
+    <artifactId>io7m-renderer</artifactId>
+    <version>0.9.0</version>
+  </parent>
   <artifactId>io7m-renderer-kernel</artifactId>
-  <version>0.8.0</version>
+
   <packaging>jar</packaging>
-  <name>io7m-renderer-kernel</name>
-  <description>3D renderer (kernel API)</description>
-  <url>http://mvn.io7m.com/renderer-kernel/</url>
+  <description>3D renderer (Kernel)</description>
+  <url>http://mvn.io7m.com/${project.artifactId}/</url>
+  <name>${project.artifactId}</name>
 
   <licenses>
     <license>
@@ -44,9 +48,19 @@
     <site>
       <id>io7m</id>
       <name>io7m.com</name>
-      <url>http://mvn.io7m.com/renderer-kernel/</url>
+      <url>${project.url}</url>
     </site>
   </distributionManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>io7m-renderer</name>
+      <subscribe>io7m-renderer-join@lists.io7m.com</subscribe>
+      <unsubscribe>io7m-renderer-leave@lists.io7m.com</unsubscribe>
+      <post>io7m-renderer@lists.io7m.com</post>
+      <archive>http://lists.io7m.com/io7m-renderer/archive</archive>
+    </mailingList>
+  </mailingLists>
 
   <prerequisites>
     <maven>2.2.1</maven>
@@ -59,103 +73,94 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.io7m.renderer.kernel.types</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-kernel-types</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.renderer.kernel-shaders.debug</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-kernel-shaders-debug</artifactId>
       <version>${project.version}</version>
       <classifier>shaders</classifier>
       <type>zip</type>
       <exclusions>
         <exclusion>
-          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <groupId>com.io7m.jparasol</groupId>
           <artifactId>io7m-jparasol-compiler-frontend</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.io7m.renderer.kernel-shaders.depth</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-kernel-shaders-depth</artifactId>
       <version>${project.version}</version>
       <classifier>shaders</classifier>
       <type>zip</type>
       <exclusions>
         <exclusion>
-          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <groupId>com.io7m.jparasol</groupId>
           <artifactId>io7m-jparasol-compiler-frontend</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.io7m.renderer.kernel-shaders.forward</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-kernel-shaders-forward</artifactId>
       <version>${project.version}</version>
       <classifier>shaders</classifier>
       <type>zip</type>
       <exclusions>
         <exclusion>
-          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <groupId>com.io7m.jparasol</groupId>
           <artifactId>io7m-jparasol-compiler-frontend</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.io7m.renderer.kernel-shaders.postprocessing</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-kernel-shaders-postprocessing</artifactId>
       <version>${project.version}</version>
       <classifier>shaders</classifier>
       <type>zip</type>
       <exclusions>
         <exclusion>
-          <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+          <groupId>com.io7m.jparasol</groupId>
           <artifactId>io7m-jparasol-compiler-frontend</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
+
     <dependency>
-      <groupId>com.io7m.jparasol.xml</groupId>
+      <groupId>com.io7m.jparasol</groupId>
       <artifactId>io7m-jparasol-xml</artifactId>
-      <version>[0.4.0, 0.5.0)</version>
+      <version>${com.io7m.jparasol.versionRange}</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jtensors</groupId>
-      <artifactId>io7m-jtensors</artifactId>
-      <version>[5.3.1, 6.0.0)</version>
+      <artifactId>io7m-jtensors-core</artifactId>
+      <version>${com.io7m.jtensors.versionRange}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.jvvfs.core</groupId>
+      <groupId>com.io7m.jvvfs</groupId>
       <artifactId>io7m-jvvfs-core</artifactId>
-      <version>[3.1.1, 4.0.0)</version>
+      <version>${com.io7m.jvvfs.versionRange}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.jcanephora.core</groupId>
+      <groupId>com.io7m.jcanephora</groupId>
       <artifactId>io7m-jcanephora-core</artifactId>
-      <version>0.28.0</version>
+      <version>${com.io7m.jcanephora.versionRange}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.jcanephora.batchexec</groupId>
+      <groupId>com.io7m.jcanephora</groupId>
       <artifactId>io7m-jcanephora-batchexec</artifactId>
-      <version>0.28.0</version>
+      <version>${com.io7m.jcanephora.versionRange}</version>
     </dependency>
     <dependency>
       <groupId>com.io7m.jcache</groupId>
-      <artifactId>io7m-jcache</artifactId>
-      <version>[0.4.0, 0.5.0)</version>
+      <artifactId>io7m-jcache-core</artifactId>
+      <version>${com.io7m.jcache.versionRange}</version>
     </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-      <version>4.11</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>2.0.2</version>
-    </dependency>
+
     <dependency>
       <groupId>org.pcollections</groupId>
       <artifactId>pcollections</artifactId>
@@ -252,7 +257,7 @@
         <executions>
           <!-- Produce custom manifest in jar files -->
           <execution>
-            <id>code-jar</id>
+            <id>default-jar</id>
             <configuration>
               <archive>
                 <manifestEntries>
@@ -302,18 +307,6 @@
         </executions>
       </plugin>
 
-      <!-- Tell the surefire plugin to fork only once per set of unit tests, -->
-      <!-- and redirect test output -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.15</version>
-        <configuration>
-          <forkMode>once</forkMode>
-          <redirectTestOutputToFile>true</redirectTestOutputToFile>
-        </configuration>
-      </plugin>
-
       <!-- Create javadoc jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -327,6 +320,7 @@
               <goal>jar</goal>
             </goals>
             <configuration>
+              <bottom><![CDATA[Copyright &#169; {currentYear} &lt;code@io7m.com&gt; http://io7m.com]]></bottom>
               <archive>
                 <manifestEntries>
                   <Specification-Title>${project.name}</Specification-Title>
@@ -340,8 +334,20 @@
                 </manifestEntries>
               </archive>
             </configuration>
-         </execution>
+          </execution>
         </executions>
+      </plugin>
+
+      <!-- Tell the surefire plugin to fork only once per set of unit tests, -->
+      <!-- and redirect test output -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.15</version>
+        <configuration>
+          <forkMode>once</forkMode>
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+        </configuration>
       </plugin>
 
       <!-- Enable code coverage for unit tests -->

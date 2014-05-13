@@ -18,9 +18,7 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Properties;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -30,9 +28,15 @@ import javax.swing.SwingUtilities;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogPolicyAllOn;
+import com.io7m.jlog.LogType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RSpaceWorldType;
@@ -48,8 +52,8 @@ public final class SBLightControlsProjective implements
   public static void main(
     final String args[])
   {
-    final Properties properties = new Properties();
-    final Log jlog = new Log(properties, "", "");
+    final LogType jlog =
+      Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "test");
 
     SwingUtilities.invokeLater(new Runnable() {
       @SuppressWarnings("unused") @Override public void run()
@@ -59,7 +63,6 @@ public final class SBLightControlsProjective implements
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
             final SBExampleController controller = new SBExampleController();
             final SBLightControlsProjective controls =
@@ -75,44 +78,41 @@ public final class SBLightControlsProjective implements
     });
   }
 
-  public static @Nonnull
+  public static
     <C extends SBSceneControllerTextures>
     SBLightControlsProjective
     newControls(
-      final @Nonnull JFrame parent,
-      final @Nonnull C controller,
-      final @Nonnull Integer id,
-      final @Nonnull Log log)
-      throws ConstraintError
+      final JFrame parent,
+      final C controller,
+      final Integer id,
+      final LogUsableType log)
   {
     return new SBLightControlsProjective(parent, controller, id, log);
   }
 
-  private final @Nonnull SBFloatHSlider               falloff;
-  private final @Nonnull RowGroup                     group;
-  private final @Nonnull SBOrientationInput           orientation;
-  private final @Nonnull SBVector3FInput<RSpaceWorldType> position;
-  private final @Nonnull JTextField                   texture;
-  private final @Nonnull JButton                      texture_select;
-  private final @Nonnull SBProjectionMatrixControls   projection;
-  private final @Nonnull SBFloatHSlider               intensity;
-  private final @Nonnull SBColourInput                colour;
-  private final @Nonnull SBLightShadowControls        shadow;
-  private final @Nonnull SBSceneControllerTextures    texture_controller;
-  private final @Nonnull JFrame                       parent;
-  private final @Nonnull Integer                      id;
+  private final SBFloatHSlider                   falloff;
+  private final RowGroup                         group;
+  private final SBOrientationInput               orientation;
+  private final SBVector3FInput<RSpaceWorldType> position;
+  private final JTextField                       texture;
+  private final JButton                          texture_select;
+  private final SBProjectionMatrixControls       projection;
+  private final SBFloatHSlider                   intensity;
+  private final SBColourInput                    colour;
+  private final SBLightShadowControls            shadow;
+  private final SBSceneControllerTextures        texture_controller;
+  private final JFrame                           parent;
+  private final Integer                          id;
 
   private <C extends SBSceneControllerTextures> SBLightControlsProjective(
-    final @Nonnull JFrame in_parent,
-    final @Nonnull C controller,
-    final @Nonnull Integer in_id,
-    final @Nonnull Log log)
-    throws ConstraintError
+    final JFrame in_parent,
+    final C controller,
+    final Integer in_id,
+    final LogUsableType log)
   {
-    this.parent = Constraints.constrainNotNull(in_parent, "Parent");
-    this.texture_controller =
-      Constraints.constrainNotNull(controller, "Controller");
-    this.id = Constraints.constrainNotNull(in_id, "ID field");
+    this.parent = NullCheck.notNull(in_parent, "Parent");
+    this.texture_controller = NullCheck.notNull(controller, "Controller");
+    this.id = NullCheck.notNull(in_id, "ID field");
 
     this.group = new RowGroup();
     this.colour = SBColourInput.newInput(in_parent, "Colour");
@@ -130,7 +130,7 @@ public final class SBLightControlsProjective implements
       @SuppressWarnings("synthetic-access") @Override public
         void
         actionPerformed(
-          final ActionEvent e)
+          final @Nullable ActionEvent e)
       {
         final SBTextures2DWindow twindow =
           new SBTextures2DWindow(
@@ -147,7 +147,7 @@ public final class SBLightControlsProjective implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     this.intensity.controlsAddToLayout(layout);
     this.colour.controlsAddToLayout(layout);
@@ -167,7 +167,7 @@ public final class SBLightControlsProjective implements
   }
 
   public void setDescription(
-    final @Nonnull SBLightDescriptionProjective description)
+    final SBLightDescriptionProjective description)
   {
     this.intensity.setCurrent(description.getIntensity());
     this.colour.controlsLoadFrom(description.getColour());
@@ -217,22 +217,25 @@ public final class SBLightControlsProjective implements
   }
 
   @Override public SBLightDescriptionProjective controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
-    final PathVirtual path =
-      PathVirtual.ofString(SBTextFieldUtilities
-        .getFieldNonEmptyStringOrError(this.texture));
+    try {
+      final PathVirtual path =
+        PathVirtual.ofString(SBTextFieldUtilities
+          .getFieldNonEmptyStringOrError(this.texture));
 
-    return new SBLightDescriptionProjective(
-      this.orientation.getOrientation(),
-      this.position.getVector(),
-      this.falloff.getCurrent(),
-      this.projection.getDescription(),
-      path,
-      this.colour.controlsSave(),
-      this.intensity.getCurrent(),
-      this.shadow.getShadow(this.id),
-      this.id);
+      return new SBLightDescriptionProjective(
+        this.orientation.getOrientation(),
+        this.position.getVector(),
+        this.falloff.getCurrent(),
+        this.projection.getDescription(),
+        path,
+        this.colour.controlsSave(),
+        this.intensity.getCurrent(),
+        this.shadow.getShadow(this.id),
+        this.id);
+    } catch (final FilesystemError e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 }

@@ -7,11 +7,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.io7m.renderer</groupId>
   <artifactId>io7m-renderer</artifactId>
-  <version>0.8.0</version>
+  <version>0.9.0</version>
+
   <packaging>pom</packaging>
   <name>io7m-renderer</name>
   <description>3D renderer</description>
-  <url>http://mvn.io7m.com/renderer/</url>
+  <url>http://mvn.io7m.com/${project.artifactId}/</url>
 
   <modules>
     <module>io7m-renderer-kernel-shaders-core</module>
@@ -22,11 +23,34 @@
     <module>io7m-renderer-kernel-types</module>
     <module>io7m-renderer-kernel</module>
     <module>io7m-renderer-sandbox-jogl</module>
-    <module>io7m-renderer-tests-jogl</module>
     <module>io7m-renderer-tests</module>
     <module>io7m-renderer-types</module>
     <module>io7m-renderer-xml</module>
   </modules>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <siteReposDirectory>/com/io7m/renderer</siteReposDirectory>
+    <siteDocumentationDirectory>/com/io7m/renderer/io7m-renderer-documentation</siteDocumentationDirectory>
+
+    <com.io7m.ieee754b16.versionRange>[0.2.0, 0.3.0]</com.io7m.ieee754b16.versionRange>
+    <com.io7m.jcache.versionRange>[0.5.0, 0.6.0)</com.io7m.jcache.versionRange>
+    <com.io7m.jcanephora.versionRange>0.29.3</com.io7m.jcanephora.versionRange>
+    <com.io7m.jequality.versionRange>[0.3.0, 0.4.0)</com.io7m.jequality.versionRange>
+    <com.io7m.jfunctional.versionRange>[0.3.1, 0.4.0)</com.io7m.jfunctional.versionRange>
+    <com.io7m.jintegers.versionRange>[0.5.0, 0.6.0)</com.io7m.jintegers.versionRange>
+    <com.io7m.jlog.versionRange>[3.0.0, 4.0.0)</com.io7m.jlog.versionRange>
+    <com.io7m.jnull.versionRange>[0.3.1, 0.4.0)</com.io7m.jnull.versionRange>
+    <com.io7m.jparasol.versionRange>[0.5.0, 0.6.0)</com.io7m.jparasol.versionRange>
+    <com.io7m.jproperties.versionRange>[0.1.0, 0.2.0)</com.io7m.jproperties.versionRange>
+    <com.io7m.jranges.versionRange>[0.3.5, 0.4.0)</com.io7m.jranges.versionRange>
+    <com.io7m.jtensors.versionRange>[6.0.0, 7.0.0)</com.io7m.jtensors.versionRange>
+    <com.io7m.junreachable.versionRange>[0.3.0, 0.4.0)</com.io7m.junreachable.versionRange>
+    <com.io7m.jvvfs.versionRange>[4.0.0, 5.0.0)</com.io7m.jvvfs.versionRange>
+    <com.io7m.xom.versionRange>1.2.10</com.io7m.xom.versionRange>
+    <com.io7m.renderer.joglVersion>2.1.5-01</com.io7m.renderer.joglVersion>
+  </properties>
 
   <licenses>
     <license>
@@ -59,18 +83,23 @@
     <site>
       <id>io7m</id>
       <name>io7m.com</name>
-      <url>http://mvn.io7m.com/renderer/</url>
+      <url>http://mvn.io7m.com/${project.artifactId}/</url>
     </site>
   </distributionManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>io7m-renderer</name>
+      <subscribe>io7m-renderer-join@lists.io7m.com</subscribe>
+      <unsubscribe>io7m-renderer-leave@lists.io7m.com</unsubscribe>
+      <post>io7m-renderer@lists.io7m.com</post>
+      <archive>http://lists.io7m.com/io7m-renderer/archive</archive>
+    </mailingList>
+  </mailingLists>
 
   <prerequisites>
     <maven>2.2.1</maven>
   </prerequisites>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-  </properties>
 
   <reporting>
     <plugins>
@@ -117,70 +146,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <version>2.6</version>
-      </plugin>
-
-      <!-- Validate XML documentation -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>xml-maven-plugin</artifactId>
-        <version>1.0</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>validate</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <validationSets>
-            <validationSet>
-              <dir>src/main/xml</dir>
-            </validationSet>
-          </validationSets>
-        </configuration>
-      </plugin>
-
-      <!-- Transform XML documentation with Saxon -->
-      <plugin>
-        <groupId>com.io7m.saxon-plugin</groupId>
-        <artifactId>io7m-saxon-plugin</artifactId>
-        <version>1.1.0</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>transform</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <transformation>
-            <stylesheetFile>src/main/xsl/structural-1_0_0-standalone-x20.xsl</stylesheetFile>
-            <documentFile>src/main/xml/documentation.xml</documentFile>
-            <outputDirectory>${project.build.directory}/xhtml</outputDirectory>
-            <outputDirectoryParameterName>io7m.structural-1_0_0.output_directory</outputDirectoryParameterName>
-            <outputFile>out.txt</outputFile>
-          </transformation>
-        </configuration>
-      </plugin>
-
-      <!-- Produce documentation archive -->
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.4</version>
-        <configuration>
-          <descriptors>
-            <descriptor>assembly-doc.xml</descriptor>
-          </descriptors>
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
 

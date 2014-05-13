@@ -16,14 +16,12 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Option;
-import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RSpaceRGBAType;
 import com.io7m.renderer.types.RVectorI4F;
 
@@ -31,7 +29,7 @@ import com.io7m.renderer.types.RVectorI4F;
  * Material properties related to surface albedo.
  */
 
-@Immutable public final class KMaterialAlbedo implements
+@EqualityStructural public final class KMaterialAlbedo implements
   KTexturesRequiredType
 {
   /**
@@ -44,18 +42,15 @@ import com.io7m.renderer.types.RVectorI4F;
    * @param in_texture
    *          The texture, if any
    * @return Albedo properties
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KMaterialAlbedo newAlbedoTextured(
-    final @Nonnull RVectorI4F<RSpaceRGBAType> in_colour,
+  public static KMaterialAlbedo newAlbedoTextured(
+    final RVectorI4F<RSpaceRGBAType> in_colour,
     final float in_mix,
-    final @Nonnull Texture2DStaticUsable in_texture)
-    throws ConstraintError
+    final Texture2DStaticUsableType in_texture)
   {
-    return new KMaterialAlbedo(in_colour, in_mix, Option.some(Constraints
-      .constrainNotNull(in_texture, "Texture")));
+    return new KMaterialAlbedo(in_colour, in_mix, Option.some(NullCheck
+      .notNull(in_texture, "Texture")));
   }
 
   /**
@@ -64,37 +59,33 @@ import com.io7m.renderer.types.RVectorI4F;
    * @param in_colour
    *          The base colour
    * @return Albedo properties
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KMaterialAlbedo newAlbedoUntextured(
-    final @Nonnull RVectorI4F<RSpaceRGBAType> in_colour)
-    throws ConstraintError
+  public static KMaterialAlbedo newAlbedoUntextured(
+    final RVectorI4F<RSpaceRGBAType> in_colour)
   {
-    final Option<Texture2DStaticUsable> none = Option.none();
+    final OptionType<Texture2DStaticUsableType> none = Option.none();
     return new KMaterialAlbedo(in_colour, 0.0f, none);
   }
 
-  private final @Nonnull RVectorI4F<RSpaceRGBAType>    colour;
-  private final float                                  mix;
-  private final @Nonnull Option<Texture2DStaticUsable> texture;
-  private final int                                    textures_required;
+  private final RVectorI4F<RSpaceRGBAType>            colour;
+  private final float                                 mix;
+  private final OptionType<Texture2DStaticUsableType> texture;
+  private final int                                   textures_required;
 
   private KMaterialAlbedo(
-    final @Nonnull RVectorI4F<RSpaceRGBAType> in_colour,
+    final RVectorI4F<RSpaceRGBAType> in_colour,
     final float in_mix,
-    final @Nonnull Option<Texture2DStaticUsable> in_texture)
-    throws ConstraintError
+    final OptionType<Texture2DStaticUsableType> in_texture)
   {
-    this.colour = Constraints.constrainNotNull(in_colour, "Colour");
+    this.colour = NullCheck.notNull(in_colour, "Colour");
     this.mix = in_mix;
-    this.texture = Constraints.constrainNotNull(in_texture, "Texture");
+    this.texture = NullCheck.notNull(in_texture, "Texture");
     this.textures_required = this.texture.isSome() ? 1 : 0;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -115,7 +106,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The base colour of the surface albedo
    */
 
-  public @Nonnull RVectorI4F<RSpaceRGBAType> getColour()
+  public RVectorI4F<RSpaceRGBAType> getColour()
   {
     return this.colour;
   }
@@ -136,7 +127,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The texture used for the surface albedo, if any
    */
 
-  public @Nonnull Option<Texture2DStaticUsable> getTexture()
+  public OptionType<Texture2DStaticUsableType> getTexture()
   {
     return this.texture;
   }
@@ -166,7 +157,9 @@ import com.io7m.renderer.types.RVectorI4F;
     builder.append(" ");
     builder.append(this.texture);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 
   /**
@@ -176,13 +169,10 @@ import com.io7m.renderer.types.RVectorI4F;
    * @param c
    *          The new colour
    * @return The current material with <code>colour == c</code>.
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KMaterialAlbedo withColour(
-    final @Nonnull RVectorI4F<RSpaceRGBAType> c)
-    throws ConstraintError
+  public KMaterialAlbedo withColour(
+    final RVectorI4F<RSpaceRGBAType> c)
   {
     return new KMaterialAlbedo(c, this.mix, this.texture);
   }
@@ -196,14 +186,10 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The current material with <code>mix == m</code>.
    */
 
-  public @Nonnull KMaterialAlbedo withMix(
+  public KMaterialAlbedo withMix(
     final float m)
   {
-    try {
-      return new KMaterialAlbedo(this.colour, m, this.texture);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    return new KMaterialAlbedo(this.colour, m, this.texture);
   }
 
   /**
@@ -211,12 +197,9 @@ import com.io7m.renderer.types.RVectorI4F;
    * modification.
    * 
    * @return The current material without a texture
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KMaterialAlbedo withoutTexture()
-    throws ConstraintError
+  public KMaterialAlbedo withoutTexture()
   {
     return KMaterialAlbedo.newAlbedoUntextured(this.colour);
   }
@@ -228,13 +211,10 @@ import com.io7m.renderer.types.RVectorI4F;
    * @param t
    *          The new texture
    * @return The current material with <code>texture == t</code>.
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KMaterialAlbedo withTexture(
-    final @Nonnull Texture2DStaticUsable t)
-    throws ConstraintError
+  public KMaterialAlbedo withTexture(
+    final Texture2DStaticUsableType t)
   {
     return KMaterialAlbedo.newAlbedoTextured(this.colour, this.mix, t);
   }

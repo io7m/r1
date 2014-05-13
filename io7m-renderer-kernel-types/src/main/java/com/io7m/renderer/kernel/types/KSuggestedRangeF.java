@@ -19,14 +19,12 @@ package com.io7m.renderer.kernel.types;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import javax.annotation.meta.TypeQualifier;
-
 /**
  * An annotation denoting the suggested lower and upper bounds for a given
  * floating point value.
  */
 
-@Retention(RetentionPolicy.CLASS) @TypeQualifier public @interface KSuggestedRangeF
+@Retention(RetentionPolicy.CLASS) public @interface KSuggestedRangeF
 {
   /**
    * The suggested inclusive lower bound of the value.

@@ -16,11 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RVectorI3F;
@@ -29,7 +25,7 @@ import com.io7m.renderer.types.RVectorI3F;
  * The type of lights.
  */
 
-@Immutable public interface KLightType
+public interface KLightType
 {
   /**
    * Be visited by the given generic visitor.
@@ -37,8 +33,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @param v
    *          The visitor
    * @return The value returned by the visitor
-   * @throws ConstraintError
-   *           Iff the visitor raises {@link ConstraintError}
+   * 
    * @throws RException
    *           Iff the visitor raises {@link RException}
    * @throws E
@@ -52,19 +47,16 @@ import com.io7m.renderer.types.RVectorI3F;
    *          A specific visitor subtype
    */
 
-    <A, E extends Throwable, V extends KLightVisitorType<A, E>>
-    A
-    lightAccept(
-      final @Nonnull V v)
-      throws ConstraintError,
-        RException,
-        E;
+  <A, E extends Throwable, V extends KLightVisitorType<A, E>> A lightAccept(
+    final V v)
+    throws RException,
+      E;
 
   /**
    * @return The colour of the light
    */
 
-  @Nonnull RVectorI3F<RSpaceRGBType> lightGetColour();
+  RVectorI3F<RSpaceRGBType> lightGetColour();
 
   /**
    * @return The intensity of the light
@@ -77,7 +69,7 @@ import com.io7m.renderer.types.RVectorI3F;
    *         else <code>None</code>
    */
 
-  @Nonnull Option<KShadowType> lightGetShadow();
+  OptionType<KShadowType> lightGetShadow();
 
   /**
    * @return <code>true</code> iff the light has a shadow

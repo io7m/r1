@@ -16,10 +16,8 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jnull.NullCheckException;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
 
 public enum SBLightType
@@ -30,42 +28,34 @@ public enum SBLightType
 
   ;
 
-  public static @Nonnull SBLightType fromLight(
-    final @Nonnull SBLight l)
+  public static SBLightType fromLight(
+    final SBLight l)
   {
     try {
       return l
-        .lightVisitableAccept(new SBLightVisitor<SBLightType, ConstraintError>() {
+        .lightVisitableAccept(new SBLightVisitor<SBLightType, NullCheckException>() {
           @Override public SBLightType lightVisitDirectional(
             final SBLightDirectional _)
-            throws ConstraintError,
-              RException,
-              ConstraintError
+            throws RException
           {
             return SBLightType.LIGHT_DIRECTIONAL;
           }
 
           @Override public SBLightType lightVisitProjective(
             final SBLightProjective _)
-            throws ConstraintError,
-              RException,
-              ConstraintError
+            throws RException
           {
             return SBLightType.LIGHT_PROJECTIVE;
           }
 
           @Override public SBLightType lightVisitSpherical(
             final SBLightSpherical _)
-            throws ConstraintError,
-              RException,
-              ConstraintError
+            throws RException
           {
             return SBLightType.LIGHT_SPHERICAL;
           }
         });
     } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    } catch (final ConstraintError e) {
       throw new UnreachableCodeException(e);
     }
   }

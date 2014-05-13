@@ -32,19 +32,20 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.annotation.Nonnull;
-
 import org.apache.commons.cli.ParseException;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Pair;
-import com.io7m.jaux.functional.Unit;
+import com.io7m.jfunctional.Pair;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogPolicyProperties;
+import com.io7m.jlog.LogPolicyType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
 import com.io7m.jparasol.CompilerError;
 import com.io7m.jparasol.frontend.Frontend;
 import com.io7m.jparasol.xml.Batch;
 import com.io7m.jparasol.xml.PGLSLCompactor;
+import com.io7m.jproperties.JPropertyException;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueLitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueUnlitLabel;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRefractiveLabel;
@@ -54,17 +55,20 @@ import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentSpecularOnlyLit
 
 public final class ForwardMakeAll
 {
-  private static @Nonnull Log getLog()
+  private static LogUsableType getLog()
+    throws JPropertyException
   {
     final Properties props = new Properties();
+    props.setProperty("com.io7m.parasol.level", "LOG_INFO");
     props.setProperty("com.io7m.parasol.logs.compactor", "false");
-    return new Log(props, "com.io7m.parasol", "compactor");
+    final LogPolicyType policy =
+      LogPolicyProperties.newPolicy(props, "com.io7m.parasol");
+    return Log.newLog(policy, "compactor");
   }
 
   public static void main(
     final String args[])
     throws IOException,
-      ConstraintError,
       ParseException,
       CompilerError,
       InterruptedException,
@@ -152,8 +156,8 @@ public final class ForwardMakeAll
   private static
     void
     makeSourcesTranslucentSpecularOnly(
-      final @Nonnull Set<KMaterialForwardTranslucentSpecularOnlyLitLabel> translucent_specular,
-      final @Nonnull File dir)
+      final Set<KMaterialForwardTranslucentSpecularOnlyLitLabel> translucent_specular,
+      final File dir)
       throws IOException
   {
     if (dir.isDirectory() == false) {
@@ -177,15 +181,16 @@ public final class ForwardMakeAll
   }
 
   private static void makeSourcesList(
-    final @Nonnull File out_parasol_dir,
-    final @Nonnull File out_sources)
+    final File out_parasol_dir,
+    final File out_sources)
     throws IOException
   {
     final String[] sources = out_parasol_dir.list(new FilenameFilter() {
       @Override public boolean accept(
-        final @Nonnull File dir,
-        final @Nonnull String name)
+        final @Nullable File dir,
+        final @Nullable String name)
       {
+        assert name != null;
         return name.endsWith(".p");
       }
     });
@@ -201,13 +206,13 @@ public final class ForwardMakeAll
   public static
     void
     makeBatch(
-      final @Nonnull Set<KMaterialForwardOpaqueUnlitLabel> opaque_unlit,
-      final @Nonnull Set<KMaterialForwardOpaqueLitLabel> opaque_lit,
-      final @Nonnull Set<KMaterialForwardTranslucentRegularUnlitLabel> translucent_regular_unlit,
-      final @Nonnull Set<KMaterialForwardTranslucentRegularLitLabel> translucent_regular_lit,
-      final @Nonnull Set<KMaterialForwardTranslucentRefractiveLabel> translucent_refractive,
-      final @Nonnull Set<KMaterialForwardTranslucentSpecularOnlyLitLabel> translucent_specular,
-      final @Nonnull File file)
+      final Set<KMaterialForwardOpaqueUnlitLabel> opaque_unlit,
+      final Set<KMaterialForwardOpaqueLitLabel> opaque_lit,
+      final Set<KMaterialForwardTranslucentRegularUnlitLabel> translucent_regular_unlit,
+      final Set<KMaterialForwardTranslucentRegularLitLabel> translucent_regular_lit,
+      final Set<KMaterialForwardTranslucentRefractiveLabel> translucent_refractive,
+      final Set<KMaterialForwardTranslucentSpecularOnlyLitLabel> translucent_specular,
+      final File file)
       throws IOException
   {
     final FileWriter writer = new FileWriter(file);
@@ -269,12 +274,11 @@ public final class ForwardMakeAll
   }
 
   private static void makeCompileSources(
-    final @Nonnull File out_sources,
-    final @Nonnull File batch,
-    final @Nonnull File out_dir,
-    final @Nonnull File out_compact_dir)
+    final File out_sources,
+    final File batch,
+    final File out_dir,
+    final File out_compact_dir)
     throws IOException,
-      ConstraintError,
       ParseException,
       CompilerError,
       InterruptedException,
@@ -302,11 +306,10 @@ public final class ForwardMakeAll
   }
 
   private static void compactSources(
-    final @Nonnull File batch,
-    final @Nonnull File out_dir,
-    final @Nonnull File out_compact_dir)
+    final File batch,
+    final File out_dir,
+    final File out_compact_dir)
     throws IOException,
-      ConstraintError,
       InterruptedException,
       ExecutionException,
       TimeoutException
@@ -326,18 +329,14 @@ public final class ForwardMakeAll
           @SuppressWarnings("synthetic-access") @Override public Unit call()
             throws Exception
           {
-            try {
-              final File program_in = new File(out_dir, k.first);
-              final File program_out = new File(out_compact_dir, k.first);
-              System.out.println("info: compact " + program_in);
-              PGLSLCompactor.newCompactor(
-                program_in,
-                program_out,
-                ForwardMakeAll.getLog());
-              return Unit.unit();
-            } catch (final ConstraintError e) {
-              throw new UnreachableCodeException(e);
-            }
+            final File program_in = new File(out_dir, k.getLeft());
+            final File program_out = new File(out_compact_dir, k.getLeft());
+            System.out.println("info: compact " + program_in);
+            PGLSLCompactor.newCompactor(
+              program_in,
+              program_out,
+              ForwardMakeAll.getLog());
+            return Unit.unit();
           }
         }));
       }
@@ -354,8 +353,8 @@ public final class ForwardMakeAll
   }
 
   private static void makeSourcesOpaqueLit(
-    final @Nonnull Set<KMaterialForwardOpaqueLitLabel> opaque_lit,
-    final @Nonnull File dir)
+    final Set<KMaterialForwardOpaqueLitLabel> opaque_lit,
+    final File dir)
     throws IOException
   {
     if (dir.isDirectory() == false) {
@@ -379,8 +378,8 @@ public final class ForwardMakeAll
   }
 
   private static void makeSourcesOpaqueUnlit(
-    final @Nonnull Set<KMaterialForwardOpaqueUnlitLabel> opaque_unlit,
-    final @Nonnull File dir)
+    final Set<KMaterialForwardOpaqueUnlitLabel> opaque_unlit,
+    final File dir)
     throws IOException
   {
     if (dir.isDirectory() == false) {
@@ -403,12 +402,10 @@ public final class ForwardMakeAll
     }
   }
 
-  private static
-    void
-    makeSourcesTranslucentRefractive(
-      final @Nonnull Set<KMaterialForwardTranslucentRefractiveLabel> refractive,
-      final @Nonnull File dir)
-      throws IOException
+  private static void makeSourcesTranslucentRefractive(
+    final Set<KMaterialForwardTranslucentRefractiveLabel> refractive,
+    final File dir)
+    throws IOException
   {
     if (dir.isDirectory() == false) {
       throw new IOException(dir + " is not a directory");
@@ -430,12 +427,10 @@ public final class ForwardMakeAll
     }
   }
 
-  private static
-    void
-    makeSourcesTranslucentRegularLit(
-      final @Nonnull Set<KMaterialForwardTranslucentRegularLitLabel> translucent_lit,
-      final @Nonnull File dir)
-      throws IOException
+  private static void makeSourcesTranslucentRegularLit(
+    final Set<KMaterialForwardTranslucentRegularLitLabel> translucent_lit,
+    final File dir)
+    throws IOException
   {
     if (dir.isDirectory() == false) {
       throw new IOException(dir + " is not a directory");
@@ -460,8 +455,8 @@ public final class ForwardMakeAll
   private static
     void
     makeSourcesTranslucentRegularUnlit(
-      final @Nonnull Set<KMaterialForwardTranslucentRegularUnlitLabel> translucent_unlit,
-      final @Nonnull File dir)
+      final Set<KMaterialForwardTranslucentRegularUnlitLabel> translucent_unlit,
+      final File dir)
       throws IOException
   {
     if (dir.isDirectory() == false) {

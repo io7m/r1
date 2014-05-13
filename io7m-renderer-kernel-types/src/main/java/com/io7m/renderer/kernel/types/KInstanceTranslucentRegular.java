@@ -16,19 +16,17 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
 /**
  * An instance with a regular translucent material applied.
  */
 
-@Immutable public final class KInstanceTranslucentRegular implements
+@EqualityStructural public final class KInstanceTranslucentRegular implements
   KInstanceTranslucentType,
   KInstanceTranslucentUnlitType,
   KInstanceTranslucentLitType,
@@ -45,36 +43,32 @@ import com.io7m.renderer.types.RException;
    * @param in_faces
    *          The faces that will be rendered
    * @return A new instance
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KInstanceTranslucentRegular newInstance(
-    final @Nonnull KMaterialTranslucentRegular in_material,
-    final @Nonnull KMeshReadableType in_mesh,
-    final @Nonnull KFaceSelection in_faces)
-    throws ConstraintError
+  public static KInstanceTranslucentRegular newInstance(
+    final KMaterialTranslucentRegular in_material,
+    final KMeshReadableType in_mesh,
+    final KFaceSelection in_faces)
   {
     return new KInstanceTranslucentRegular(in_material, in_mesh, in_faces);
   }
 
-  private final @Nonnull KFaceSelection              faces;
-  private final @Nonnull KMaterialTranslucentRegular material;
-  private final @Nonnull KMeshReadableType           mesh;
+  private final KFaceSelection              faces;
+  private final KMaterialTranslucentRegular material;
+  private final KMeshReadableType           mesh;
 
   private KInstanceTranslucentRegular(
-    final @Nonnull KMaterialTranslucentRegular in_material,
-    final @Nonnull KMeshReadableType in_mesh,
-    final @Nonnull KFaceSelection in_faces)
-    throws ConstraintError
+    final KMaterialTranslucentRegular in_material,
+    final KMeshReadableType in_mesh,
+    final KFaceSelection in_faces)
   {
-    this.mesh = Constraints.constrainNotNull(in_mesh, "Mesh");
-    this.material = Constraints.constrainNotNull(in_material, "Material");
-    this.faces = Constraints.constrainNotNull(in_faces, "Faces");
+    this.mesh = NullCheck.notNull(in_mesh, "Mesh");
+    this.material = NullCheck.notNull(in_material, "Material");
+    this.faces = NullCheck.notNull(in_faces, "Faces");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -102,12 +96,12 @@ import com.io7m.renderer.types.RException;
     return result;
   }
 
-  @Override public @Nonnull KMaterialTranslucentRegular instanceGetMaterial()
+  @Override public KMaterialTranslucentRegular instanceGetMaterial()
   {
     return this.material;
   }
 
-  @Override public @Nonnull KMeshReadableType instanceGetMesh()
+  @Override public KMeshReadableType instanceGetMesh()
   {
     return this.mesh;
   }
@@ -116,10 +110,9 @@ import com.io7m.renderer.types.RException;
     <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
     instanceAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
         JCGLException,
-        ConstraintError,
         RException
   {
     return v.instanceTranslucentRegular(this);
@@ -134,11 +127,10 @@ import com.io7m.renderer.types.RException;
     <A, E extends Throwable, V extends KInstanceTranslucentLitVisitorType<A, E>>
     A
     translucentLitAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
         RException,
-        JCGLException,
-        ConstraintError
+        JCGLException
   {
     return v.translucentLitRegular(this);
   }

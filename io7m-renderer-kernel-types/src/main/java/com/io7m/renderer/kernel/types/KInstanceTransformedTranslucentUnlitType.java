@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
@@ -45,8 +42,7 @@ public interface KInstanceTransformedTranslucentUnlitType extends
    *          The type of exceptions raised by the visitor
    * @param <V>
    *          A specific visitor subtype
-   * @throws ConstraintError
-   *           If the visitor raises {@link ConstraintError}
+   * 
    * @throws RException
    *           If the visitor raises {@link RException}
    * @throws JCGLException
@@ -56,9 +52,8 @@ public interface KInstanceTransformedTranslucentUnlitType extends
     <A, E extends Throwable, V extends KInstanceTransformedTranslucentUnlitVisitorType<A, E>>
     A
     transformedTranslucentUnlitAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
-        ConstraintError,
         RException,
         JCGLException;
 }

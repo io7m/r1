@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.types;
 
-import com.io7m.jtensors.VectorReadable2I;
+import com.io7m.jtensors.VectorReadable2IType;
 
 /**
  * The type of readable 2D vectors indexed by their coordinate space
@@ -25,7 +25,8 @@ import com.io7m.jtensors.VectorReadable2I;
  *          A phantom type parameter describing the coordinate space
  */
 
-public interface RVectorReadable2IType<T extends RSpaceType> extends VectorReadable2I
+public interface RVectorReadable2IType<T extends RSpaceType> extends
+  VectorReadable2IType
 {
   // See super-interfaces.
 }

@@ -21,7 +21,6 @@ import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.Nonnull;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -30,25 +29,27 @@ import javax.swing.Timer;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
+import com.io7m.jnull.Nullable;
+
 final class SBStatisticsPanel extends JPanel
 {
-  private static final long         serialVersionUID;
+  private static final long serialVersionUID;
 
   static {
     serialVersionUID = -7319547005472170348L;
   }
 
-  private final @Nonnull JTextField labels;
-  private final @Nonnull JTextField shaders;
-  private final @Nonnull JTextField shadows;
-  private final @Nonnull JTextField shadows_bytes;
-  private final @Nonnull JTextField shadows_megabytes;
-  private final @Nonnull JTextField rgba_framebuffers;
-  private final @Nonnull JTextField rgba_framebuffers_bytes;
-  private final @Nonnull JTextField rgba_framebuffers_megabytes;
+  private final JTextField  labels;
+  private final JTextField  shaders;
+  private final JTextField  shadows;
+  private final JTextField  shadows_bytes;
+  private final JTextField  shadows_megabytes;
+  private final JTextField  rgba_framebuffers;
+  private final JTextField  rgba_framebuffers_bytes;
+  private final JTextField  rgba_framebuffers_megabytes;
 
   public SBStatisticsPanel(
-    final @Nonnull SBSceneControllerRendererControl controller)
+    final SBSceneControllerRendererControl controller)
   {
     this.labels = new JTextField("0");
     this.labels.setEditable(false);
@@ -91,7 +92,7 @@ final class SBStatisticsPanel extends JPanel
 
     final Timer timer = new Timer(1000, new ActionListener() {
       @Override public void actionPerformed(
-        final ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final SwingWorker<SBCacheStatistics, Void> worker =
           new SwingWorker<SBCacheStatistics, Void>() {
@@ -121,7 +122,7 @@ final class SBStatisticsPanel extends JPanel
   }
 
   protected void statsReceived(
-    final @Nonnull SBCacheStatistics stats)
+    final SBCacheStatistics stats)
   {
     this.labels.setText(stats.getCachedLabels().toString());
     this.shaders.setText(stats.getCachedShaders().toString());

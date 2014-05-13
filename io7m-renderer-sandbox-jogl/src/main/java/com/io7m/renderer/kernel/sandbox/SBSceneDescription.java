@@ -18,17 +18,15 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
 import org.pcollections.HashTreePMap;
 import org.pcollections.HashTreePSet;
 import org.pcollections.PMap;
 import org.pcollections.PSet;
 
+import com.io7m.jnull.Nullable;
 import com.io7m.jvvfs.PathVirtual;
 
-@Immutable final class SBSceneDescription
+final class SBSceneDescription
 {
   static final int SCENE_XML_VERSION;
 
@@ -36,7 +34,7 @@ import com.io7m.jvvfs.PathVirtual;
     SCENE_XML_VERSION = 15;
   }
 
-  public static @Nonnull SBSceneDescription empty()
+  public static SBSceneDescription empty()
   {
     final PSet<SBTexture2DDescription> textures_2d = HashTreePSet.empty();
     final PSet<SBTextureCubeDescription> textures_cube = HashTreePSet.empty();
@@ -56,22 +54,22 @@ import com.io7m.jvvfs.PathVirtual;
       instances);
   }
 
-  private final @Nonnull PSet<SBTexture2DDescription>         textures_2d;
-  private final @Nonnull PSet<SBTextureCubeDescription>       textures_cube;
-  private final @Nonnull PSet<PathVirtual>                    meshes;
-  private final @Nonnull PMap<Integer, SBMaterialDescription> materials;
-  private final @Nonnull PMap<Integer, SBLightDescription>    lights;
-  private final @Nonnull PMap<Integer, SBInstance>            instances;
-  private final int                                           schema_version;
+  private final PSet<SBTexture2DDescription>         textures_2d;
+  private final PSet<SBTextureCubeDescription>       textures_cube;
+  private final PSet<PathVirtual>                    meshes;
+  private final PMap<Integer, SBMaterialDescription> materials;
+  private final PMap<Integer, SBLightDescription>    lights;
+  private final PMap<Integer, SBInstance>            instances;
+  private final int                                  schema_version;
 
   private SBSceneDescription(
     final int in_schema_version,
-    final @Nonnull PSet<SBTexture2DDescription> in_textures_2d,
-    final @Nonnull PSet<SBTextureCubeDescription> in_textures_cube,
-    final @Nonnull PMap<Integer, SBMaterialDescription> in_materials,
-    final @Nonnull PSet<PathVirtual> in_meshes,
-    final @Nonnull PMap<Integer, SBLightDescription> in_lights,
-    final @Nonnull PMap<Integer, SBInstance> in_instances)
+    final PSet<SBTexture2DDescription> in_textures_2d,
+    final PSet<SBTextureCubeDescription> in_textures_cube,
+    final PMap<Integer, SBMaterialDescription> in_materials,
+    final PSet<PathVirtual> in_meshes,
+    final PMap<Integer, SBLightDescription> in_lights,
+    final PMap<Integer, SBInstance> in_instances)
   {
     this.schema_version = in_schema_version;
     this.textures_2d = in_textures_2d;
@@ -83,7 +81,7 @@ import com.io7m.jvvfs.PathVirtual;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -113,22 +111,22 @@ import com.io7m.jvvfs.PathVirtual;
     return true;
   }
 
-  public @Nonnull Collection<SBInstance> getInstances()
+  public Collection<SBInstance> getInstances()
   {
     return this.instances.values();
   }
 
-  public @Nonnull Collection<SBLightDescription> getLights()
+  public Collection<SBLightDescription> getLights()
   {
     return this.lights.values();
   }
 
-  public @Nonnull PMap<Integer, SBMaterialDescription> getMaterials()
+  public PMap<Integer, SBMaterialDescription> getMaterials()
   {
     return this.materials;
   }
 
-  public @Nonnull PSet<PathVirtual> getMeshes()
+  public PSet<PathVirtual> getMeshes()
   {
     return this.meshes;
   }
@@ -138,12 +136,12 @@ import com.io7m.jvvfs.PathVirtual;
     return this.schema_version;
   }
 
-  public @Nonnull PSet<SBTexture2DDescription> getTextures2D()
+  public PSet<SBTexture2DDescription> getTextures2D()
   {
     return this.textures_2d;
   }
 
-  public @Nonnull PSet<SBTextureCubeDescription> getTexturesCube()
+  public PSet<SBTextureCubeDescription> getTexturesCube()
   {
     return this.textures_cube;
   }
@@ -159,8 +157,8 @@ import com.io7m.jvvfs.PathVirtual;
     return result;
   }
 
-  public @Nonnull SBSceneDescription instanceAdd(
-    final @Nonnull SBInstance d)
+  public SBSceneDescription instanceAdd(
+    final SBInstance d)
   {
     return new SBSceneDescription(
       this.schema_version,
@@ -172,8 +170,8 @@ import com.io7m.jvvfs.PathVirtual;
       this.instances.plus(d.getID(), d));
   }
 
-  public @Nonnull SBSceneDescription lightAdd(
-    final @Nonnull SBLightDescription l)
+  public SBSceneDescription lightAdd(
+    final SBLightDescription l)
   {
     return new SBSceneDescription(
       this.schema_version,
@@ -185,8 +183,8 @@ import com.io7m.jvvfs.PathVirtual;
       this.instances);
   }
 
-  public @Nonnull SBSceneDescription meshAdd(
-    final @Nonnull PathVirtual d)
+  public SBSceneDescription meshAdd(
+    final PathVirtual d)
   {
     return new SBSceneDescription(
       this.schema_version,
@@ -198,8 +196,8 @@ import com.io7m.jvvfs.PathVirtual;
       this.instances);
   }
 
-  public @Nonnull SBSceneDescription texture2DAdd(
-    final @Nonnull SBTexture2DDescription t)
+  public SBSceneDescription texture2DAdd(
+    final SBTexture2DDescription t)
   {
     return new SBSceneDescription(
       this.schema_version,
@@ -211,9 +209,9 @@ import com.io7m.jvvfs.PathVirtual;
       this.instances);
   }
 
-  public @Nonnull SBSceneDescription materialAdd(
-    final @Nonnull Integer id,
-    final @Nonnull SBMaterialDescription t)
+  public SBSceneDescription materialAdd(
+    final Integer id,
+    final SBMaterialDescription t)
   {
     return new SBSceneDescription(
       this.schema_version,
@@ -225,8 +223,8 @@ import com.io7m.jvvfs.PathVirtual;
       this.instances);
   }
 
-  public @Nonnull SBSceneDescription textureCubeAdd(
-    final @Nonnull SBTextureCubeDescription t)
+  public SBSceneDescription textureCubeAdd(
+    final SBTextureCubeDescription t)
   {
     return new SBSceneDescription(
       this.schema_version,

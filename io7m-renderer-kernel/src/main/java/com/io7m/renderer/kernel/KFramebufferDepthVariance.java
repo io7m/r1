@@ -20,52 +20,138 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
-import com.io7m.jcanephora.FramebufferDrawBuffer;
-import com.io7m.jcanephora.FramebufferReference;
-import com.io7m.jcanephora.FramebufferReferenceUsable;
+import com.io7m.jcanephora.FramebufferColorAttachmentPointType;
+import com.io7m.jcanephora.FramebufferDrawBufferType;
 import com.io7m.jcanephora.FramebufferStatus;
+import com.io7m.jcanephora.FramebufferType;
+import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLFramebuffersGL3;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLImplementationVisitor;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLInterfaceGL2;
-import com.io7m.jcanephora.JCGLInterfaceGL3;
-import com.io7m.jcanephora.JCGLInterfaceGLES2;
-import com.io7m.jcanephora.JCGLInterfaceGLES3;
-import com.io7m.jcanephora.JCGLRenderbuffersGL3ES3;
-import com.io7m.jcanephora.JCGLRuntimeException;
-import com.io7m.jcanephora.JCGLTextures2DStaticGL3ES3;
-import com.io7m.jcanephora.JCGLUnsupportedException;
-import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.JCGLExceptionRuntime;
+import com.io7m.jcanephora.JCGLExceptionUnsupported;
+import com.io7m.jcanephora.Texture2DStaticType;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jcanephora.api.JCGLFramebuffersGL3Type;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLInterfaceGL2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGL3Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
+import com.io7m.jcanephora.api.JCGLRenderbuffersGL3ES3Type;
+import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.types.RException;
 
-abstract class KFramebufferDepthVariance implements
+@EqualityReference abstract class KFramebufferDepthVariance implements
   KFramebufferDepthVarianceType
 {
-  private static class KFramebufferDepthVarianceGL3ES3 extends
+  @EqualityReference private static class KFramebufferDepthVarianceGL3ES3 extends
     KFramebufferDepthVariance
   {
-    static @Nonnull
-      <G extends JCGLTextures2DStaticGL3ES3 & JCGLRenderbuffersGL3ES3 & JCGLFramebuffersGL3>
+    private static
+      <G extends JCGLTextures2DStaticGL3ES3Type & JCGLRenderbuffersGL3ES3Type & JCGLFramebuffersGL3Type>
+      Texture2DStaticType
+      allocateDepthTexture(
+        final G gl,
+        final KFramebufferDepthVarianceDescription description,
+        final int width,
+        final int height)
+        throws JCGLExceptionRuntime
+    {
+      switch (description.getDepthPrecision()) {
+        case DEPTH_PRECISION_16:
+        {
+          return gl.texture2DStaticAllocateDepth16(
+            "depth-16",
+            width,
+            height,
+            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            description.getFilterMinification(),
+            description.getFilterMagnification());
+        }
+        case DEPTH_PRECISION_24:
+        {
+          return gl.texture2DStaticAllocateDepth24(
+            "depth-24",
+            width,
+            height,
+            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            description.getFilterMinification(),
+            description.getFilterMagnification());
+        }
+        case DEPTH_PRECISION_32F:
+        {
+          return gl.texture2DStaticAllocateDepth32f(
+            "depth-32f",
+            width,
+            height,
+            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            description.getFilterMinification(),
+            description.getFilterMagnification());
+        }
+      }
+
+      throw new UnreachableCodeException();
+    }
+
+    private static
+      <G extends JCGLTextures2DStaticGL3ES3Type & JCGLRenderbuffersGL3ES3Type & JCGLFramebuffersGL3Type>
+      Texture2DStaticType
+      allocateVariance(
+        final G gl,
+        final KFramebufferDepthVarianceDescription description,
+        final int width,
+        final int height,
+        final int precision)
+        throws JCGLExceptionRuntime
+    {
+      switch (precision) {
+        case 16:
+        {
+          return gl.texture2DStaticAllocateRG16f(
+            "variance-rg16f",
+            width,
+            height,
+            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            description.getFilterMinification(),
+            description.getFilterMagnification());
+        }
+        case 32:
+        {
+          return gl.texture2DStaticAllocateRG32f(
+            "variance-rg32f",
+            width,
+            height,
+            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            description.getFilterMinification(),
+            description.getFilterMagnification());
+        }
+      }
+
+      throw new UnreachableCodeException();
+    }
+
+    static
+      <G extends JCGLTextures2DStaticGL3ES3Type & JCGLRenderbuffersGL3ES3Type & JCGLFramebuffersGL3Type>
       KFramebufferDepthVariance
       newDepthVarianceFramebuffer(
-        final @Nonnull G gl,
-        final @Nonnull KFramebufferDepthVarianceDescription description,
+        final G gl,
+        final KFramebufferDepthVarianceDescription description,
         final boolean allow_16f,
         final boolean allow_32f)
-        throws ConstraintError,
-          JCGLException
+        throws JCGLException
     {
       assert allow_16f || allow_32f;
 
@@ -73,48 +159,12 @@ abstract class KFramebufferDepthVariance implements
       final int width = (int) area.getRangeX().getInterval();
       final int height = (int) area.getRangeY().getInterval();
 
-      Texture2DStatic depth = null;
-      switch (description.getDepthPrecision()) {
-        case DEPTH_PRECISION_16:
-        {
-          depth =
-            gl.texture2DStaticAllocateDepth16(
-              "depth-16",
-              width,
-              height,
-              TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              description.getFilterMinification(),
-              description.getFilterMagnification());
-          break;
-        }
-        case DEPTH_PRECISION_24:
-        {
-          depth =
-            gl.texture2DStaticAllocateDepth24(
-              "depth-24",
-              width,
-              height,
-              TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              description.getFilterMinification(),
-              description.getFilterMagnification());
-          break;
-        }
-        case DEPTH_PRECISION_32F:
-        {
-          depth =
-            gl.texture2DStaticAllocateDepth32f(
-              "depth-32f",
-              width,
-              height,
-              TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              description.getFilterMinification(),
-              description.getFilterMagnification());
-          break;
-        }
-      }
+      final Texture2DStaticType depth =
+        KFramebufferDepthVarianceGL3ES3.allocateDepthTexture(
+          gl,
+          description,
+          width,
+          height);
 
       int precision = 16;
       switch (description.getDepthVariancePrecision()) {
@@ -138,46 +188,24 @@ abstract class KFramebufferDepthVariance implements
         }
       }
 
-      Texture2DStatic variance = null;
-      switch (precision) {
-        case 16:
-        {
-          variance =
-            gl.texture2DStaticAllocateRG16f(
-              "variance-rg16f",
-              width,
-              height,
-              TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              description.getFilterMinification(),
-              description.getFilterMagnification());
-          break;
-        }
-        case 32:
-        {
-          variance =
-            gl.texture2DStaticAllocateRG32f(
-              "variance-rg32f",
-              width,
-              height,
-              TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-              description.getFilterMinification(),
-              description.getFilterMagnification());
-          break;
-        }
-      }
+      final Texture2DStaticType variance =
+        KFramebufferDepthVarianceGL3ES3.allocateVariance(
+          gl,
+          description,
+          width,
+          height,
+          precision);
 
-      final List<FramebufferColorAttachmentPoint> points =
+      final List<FramebufferColorAttachmentPointType> points =
         gl.framebufferGetColorAttachmentPoints();
-      final List<FramebufferDrawBuffer> buffers =
+      final List<FramebufferDrawBufferType> buffers =
         gl.framebufferGetDrawBuffers();
 
-      final Map<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
-        new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
+      final Map<FramebufferDrawBufferType, FramebufferColorAttachmentPointType> mappings =
+        new HashMap<FramebufferDrawBufferType, FramebufferColorAttachmentPointType>();
       mappings.put(buffers.get(0), points.get(0));
 
-      final FramebufferReference fb = gl.framebufferAllocate();
+      final FramebufferType fb = gl.framebufferAllocate();
       gl.framebufferDrawBind(fb);
 
       try {
@@ -195,7 +223,7 @@ abstract class KFramebufferDepthVariance implements
           case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
           case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
           case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
-            throw new JCGLUnsupportedException(
+            throw new JCGLExceptionUnsupported(
               "Could not initialize framebuffer: " + status);
         }
 
@@ -210,19 +238,18 @@ abstract class KFramebufferDepthVariance implements
         description);
     }
 
-    private final @Nonnull Texture2DStatic                      depth;
-    private final @Nonnull KFramebufferDepthVarianceDescription description;
-    private final @Nonnull FramebufferReference                 framebuffer;
-    private final @Nonnull Texture2DStatic                      variance;
+    private final Texture2DStaticType                  depth;
+    private final KFramebufferDepthVarianceDescription description;
+    private final FramebufferType                      framebuffer;
+    private final Texture2DStaticType                  variance;
 
     public KFramebufferDepthVarianceGL3ES3(
-      final @Nonnull Texture2DStatic in_depth,
-      final @Nonnull Texture2DStatic in_variance,
-      final @Nonnull FramebufferReference fb,
-      final @Nonnull KFramebufferDepthVarianceDescription in_description)
-      throws ConstraintError
+      final Texture2DStaticType in_depth,
+      final Texture2DStaticType in_variance,
+      final FramebufferType fb,
+      final KFramebufferDepthVarianceDescription in_description)
     {
-      super(in_depth.getArea(), in_depth.resourceGetSizeBytes()
+      super(in_depth.textureGetArea(), in_depth.resourceGetSizeBytes()
         + in_variance.resourceGetSizeBytes());
       this.depth = in_depth;
       this.variance = in_variance;
@@ -231,16 +258,15 @@ abstract class KFramebufferDepthVariance implements
     }
 
     @Override public void kFramebufferDelete(
-      final @Nonnull JCGLImplementation g)
-      throws ConstraintError,
-        RException
+      final JCGLImplementationType g)
+      throws RException
     {
       try {
-        final JCGLInterfaceCommon gc = g.getGLCommon();
+        final JCGLInterfaceCommonType gc = g.getGLCommon();
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.depth);
         gc.texture2DStaticDelete(this.variance);
-      } catch (final JCGLRuntimeException e) {
+      } catch (final JCGLException e) {
         throw RException.fromJCGLException(e);
       } finally {
         this.setDeleted(true);
@@ -255,44 +281,39 @@ abstract class KFramebufferDepthVariance implements
     }
 
     @Override public
-      FramebufferReferenceUsable
+      FramebufferUsableType
       kFramebufferGetDepthVariancePassFramebuffer()
     {
       return this.framebuffer;
     }
 
     @Override public
-      Texture2DStaticUsable
+      Texture2DStaticUsableType
       kFramebufferGetDepthVarianceTexture()
     {
       return this.variance;
     }
   }
 
-  public static @Nonnull
-    KFramebufferDepthVariance
-    newDepthVarianceFramebuffer(
-      final @Nonnull JCGLImplementation gi,
-      final @Nonnull KFramebufferDepthVarianceDescription description)
-      throws RException,
-        ConstraintError,
-        JCGLException
+  public static KFramebufferDepthVariance newDepthVarianceFramebuffer(
+    final JCGLImplementationType gi,
+    final KFramebufferDepthVarianceDescription description)
+    throws RException,
+      JCGLException
   {
     return gi
-      .implementationAccept(new JCGLImplementationVisitor<KFramebufferDepthVariance, RException>() {
+      .implementationAccept(new JCGLImplementationVisitorType<KFramebufferDepthVariance, RException>() {
         @Override public KFramebufferDepthVariance implementationIsGL2(
-          final @Nonnull JCGLInterfaceGL2 gl)
+          final JCGLInterfaceGL2Type gl)
           throws JCGLException,
-            ConstraintError,
             RException
         {
           throw RException.varianceShadowMapsNotSupported();
         }
 
         @Override public KFramebufferDepthVariance implementationIsGL3(
-          final @Nonnull JCGLInterfaceGL3 gl)
+          final JCGLInterfaceGL3Type gl)
           throws JCGLException,
-            ConstraintError,
             RException
         {
           return KFramebufferDepthVarianceGL3ES3.newDepthVarianceFramebuffer(
@@ -303,27 +324,25 @@ abstract class KFramebufferDepthVariance implements
         }
 
         @Override public KFramebufferDepthVariance implementationIsGLES2(
-          final @Nonnull JCGLInterfaceGLES2 gl)
+          final JCGLInterfaceGLES2Type gl)
           throws JCGLException,
-            ConstraintError,
             RException
         {
           throw RException.varianceShadowMapsNotSupported();
         }
 
         @Override public KFramebufferDepthVariance implementationIsGLES3(
-          final @Nonnull JCGLInterfaceGLES3 gl)
+          final JCGLInterfaceGLES3Type gl)
           throws JCGLException,
-            ConstraintError,
             RException
         {
-          if (gl.hasColourBufferFloat() || gl.hasColourBufferHalfFloat()) {
+          if (gl.hasColorBufferFloat() || gl.hasColorBufferHalfFloat()) {
             return KFramebufferDepthVarianceGL3ES3
               .newDepthVarianceFramebuffer(
                 gl,
                 description,
-                gl.hasColourBufferHalfFloat(),
-                gl.hasColourBufferFloat());
+                gl.hasColorBufferHalfFloat(),
+                gl.hasColorBufferFloat());
           }
 
           throw RException.varianceShadowMapsNotSupported();
@@ -331,21 +350,20 @@ abstract class KFramebufferDepthVariance implements
       });
   }
 
-  private final @Nonnull AreaInclusive area;
-  private boolean                      deleted;
-  private final long                   size;
+  private final AreaInclusive area;
+  private boolean             deleted;
+  private final long          size;
 
   protected KFramebufferDepthVariance(
-    final @Nonnull AreaInclusive in_area,
+    final AreaInclusive in_area,
     final long in_size)
-    throws ConstraintError
   {
-    this.area = Constraints.constrainNotNull(in_area, "Area");
+    this.area = NullCheck.notNull(in_area, "Area");
     this.size = in_size;
     this.deleted = false;
   }
 
-  @Override public final @Nonnull AreaInclusive kFramebufferGetArea()
+  @Override public final AreaInclusive kFramebufferGetArea()
   {
     return this.area;
   }

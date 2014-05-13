@@ -16,13 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLRuntimeException;
-import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.jcanephora.TextureCubeStaticUsable;
-import com.io7m.jcanephora.TextureUnit;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jcanephora.TextureCubeStaticUsableType;
+import com.io7m.jcanephora.TextureUnitType;
+import com.io7m.renderer.types.RException;
 
 /**
  * Access to the current texture unit context.
@@ -38,16 +36,17 @@ public interface KTextureUnitContextType extends
    * @return A texture unit with the given texture bound
    * @param t
    *          The texture
-   * @throws ConstraintError
-   *           Iff no texture units are left.
-   * @throws JCGLRuntimeException
+   * 
+   * @throws JCGLException
    *           Iff an OpenGL error occurs.
+   * @throws RException
+   *           If another error occurs.
    */
 
-  @Nonnull TextureUnit withTexture2D(
-    final @Nonnull Texture2DStaticUsable t)
-    throws ConstraintError,
-      JCGLRuntimeException;
+  TextureUnitType withTexture2D(
+    final Texture2DStaticUsableType t)
+    throws JCGLException,
+      RException;
 
   /**
    * Allocate a new texture unit and bind <code>t</code to it, returning the
@@ -56,14 +55,15 @@ public interface KTextureUnitContextType extends
    * @return A texture unit with the given texture bound
    * @param t
    *          The texture
-   * @throws ConstraintError
-   *           Iff no texture units are left.
-   * @throws JCGLRuntimeException
+   * 
+   * @throws JCGLException
    *           Iff an OpenGL error occurs.
+   * @throws RException
+   *           If another error occurs.
    */
 
-  @Nonnull TextureUnit withTextureCube(
-    final @Nonnull TextureCubeStaticUsable t)
-    throws ConstraintError,
-      JCGLRuntimeException;
+  TextureUnitType withTextureCube(
+    final TextureCubeStaticUsableType t)
+    throws JCGLException,
+      RException;
 }

@@ -18,14 +18,11 @@ package com.io7m.renderer.xml.normal;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import nu.xom.Attribute;
 import nu.xom.Element;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
@@ -36,8 +33,8 @@ import com.io7m.renderer.xml.rmx.RXMLConstants;
 
 public class MeshBasicRMXExporter
 {
-  private static @Nonnull Attribute floatAttribute(
-    final @Nonnull String name,
+  private static Attribute floatAttribute(
+    final String name,
     final float x)
   {
     return new Attribute(
@@ -46,14 +43,16 @@ public class MeshBasicRMXExporter
       MeshBasicRMXExporter.floatString(x));
   }
 
-  @SuppressWarnings("boxing") private static @Nonnull String floatString(
+  @SuppressWarnings("boxing") private static String floatString(
     final float x)
   {
-    return String.format("%.8f", x);
+    final String r = String.format("%.8f", x);
+    assert r != null;
+    return r;
   }
 
-  private static @Nonnull Attribute intAttribute(
-    final @Nonnull String name,
+  private static Attribute intAttribute(
+    final String name,
     final int x)
   {
     return new Attribute(
@@ -62,15 +61,15 @@ public class MeshBasicRMXExporter
       Integer.toString(x));
   }
 
-  private static @Nonnull Attribute stringAttribute(
-    final @Nonnull String name,
-    final @Nonnull String x)
+  private static Attribute stringAttribute(
+    final String name,
+    final String x)
   {
     return new Attribute(name, RXMLConstants.MESHES_URI.toString(), x);
   }
 
-  private static @Nonnull Element toXMLRoot(
-    final @Nonnull MeshBasic m)
+  private static Element toXMLRoot(
+    final MeshBasic m)
   {
     final Element e =
       new Element("m:mesh", RXMLConstants.MESHES_URI.toString());
@@ -84,8 +83,8 @@ public class MeshBasicRMXExporter
     return e;
   }
 
-  private static @Nonnull Element toXMLTriangles(
-    final @Nonnull MeshBasic m)
+  private static Element toXMLTriangles(
+    final MeshBasic m)
   {
     final String uri = RXMLConstants.MESHES_URI.toString();
     final Element ets = new Element("m:triangles", uri);
@@ -105,8 +104,8 @@ public class MeshBasicRMXExporter
     return ets;
   }
 
-  private static @Nonnull Element toXMLType(
-    final @Nonnull MeshBasic m)
+  private static Element toXMLType(
+    final MeshBasic m)
   {
     final String uri = RXMLConstants.MESHES_URI.toString();
     final Element et = new Element("m:type", uri);
@@ -118,8 +117,8 @@ public class MeshBasicRMXExporter
     return et;
   }
 
-  private static @Nonnull Element toXMLVertices(
-    final @Nonnull MeshBasic m)
+  private static Element toXMLVertices(
+    final MeshBasic m)
   {
     final String uri = RXMLConstants.MESHES_URI.toString();
     final List<Vertex> vertices = m.verticesGet();
@@ -137,23 +136,25 @@ public class MeshBasicRMXExporter
 
       final Element ep = new Element("m:p", uri);
       final RVectorI3F<RSpaceObjectType> p = positions.get(v.getPosition());
-      ep.addAttribute(MeshBasicRMXExporter.floatAttribute("m:x", p.x));
-      ep.addAttribute(MeshBasicRMXExporter.floatAttribute("m:y", p.y));
-      ep.addAttribute(MeshBasicRMXExporter.floatAttribute("m:z", p.z));
+      ep.addAttribute(MeshBasicRMXExporter.floatAttribute("m:x", p.getXF()));
+      ep.addAttribute(MeshBasicRMXExporter.floatAttribute("m:y", p.getYF()));
+      ep.addAttribute(MeshBasicRMXExporter.floatAttribute("m:z", p.getZF()));
       ev.appendChild(ep);
 
       final Element en = new Element("m:n", uri);
       final RVectorI3F<RSpaceObjectType> n = normals.get(v.getNormal());
-      en.addAttribute(MeshBasicRMXExporter.floatAttribute("m:x", n.x));
-      en.addAttribute(MeshBasicRMXExporter.floatAttribute("m:y", n.y));
-      en.addAttribute(MeshBasicRMXExporter.floatAttribute("m:z", n.z));
+      en.addAttribute(MeshBasicRMXExporter.floatAttribute("m:x", n.getXF()));
+      en.addAttribute(MeshBasicRMXExporter.floatAttribute("m:y", n.getYF()));
+      en.addAttribute(MeshBasicRMXExporter.floatAttribute("m:z", n.getZF()));
       ev.appendChild(en);
 
       if (m.hasUV()) {
         final Element eu = new Element("m:u", uri);
         final RVectorI2F<RSpaceTextureType> u = uvs.get(v.getUV());
-        eu.addAttribute(MeshBasicRMXExporter.floatAttribute("m:x", u.x));
-        eu.addAttribute(MeshBasicRMXExporter.floatAttribute("m:y", u.y));
+        eu
+          .addAttribute(MeshBasicRMXExporter.floatAttribute("m:x", u.getXF()));
+        eu
+          .addAttribute(MeshBasicRMXExporter.floatAttribute("m:y", u.getYF()));
         ev.appendChild(eu);
       }
 
@@ -163,20 +164,18 @@ public class MeshBasicRMXExporter
     return evs;
   }
 
-  private final @Nonnull Log log;
+  private final LogUsableType log;
 
   public MeshBasicRMXExporter(
-    final @Nonnull Log in_log)
-    throws ConstraintError
+    final LogUsableType in_log)
   {
     this.log =
-      new Log(
-        Constraints.constrainNotNull(in_log, "Log interface"),
+      NullCheck.notNull(in_log, "Log interface").with(
         "mesh-basic-rmx-exporter");
   }
 
-  @SuppressWarnings("static-method") public @Nonnull Element toXML(
-    final @Nonnull MeshBasic m)
+  @SuppressWarnings("static-method") public Element toXML(
+    final MeshBasic m)
   {
     final Element e = MeshBasicRMXExporter.toXMLRoot(m);
     final Element et = MeshBasicRMXExporter.toXMLType(m);

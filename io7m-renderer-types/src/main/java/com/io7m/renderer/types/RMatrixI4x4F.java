@@ -18,12 +18,11 @@ package com.io7m.renderer.types;
 
 import java.util.Arrays;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.MatrixReadable4x4F;
-import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.jtensors.MatrixReadable4x4FType;
+import com.io7m.jtensors.VectorReadable4FType;
 
 /**
  * An immutable 4x4 matrix type indexed by the type {@link RTransformType} the
@@ -33,14 +32,12 @@ import com.io7m.jtensors.VectorReadable4F;
  *          A phantom type parameter describing the type of transform
  */
 
-@Immutable public final class RMatrixI4x4F<T extends RTransformType>
+@EqualityStructural public final class RMatrixI4x4F<T extends RTransformType>
 {
-  private static final @Nonnull float[][] IDENTITY = RMatrixI4x4F
-                                                     .makeIdentity();
+  private static final float[][] IDENTITY  = RMatrixI4x4F.makeIdentity();
+  private static RMatrixI4x4F<?> IDENTITYM = RMatrixI4x4F.makeIdentityM();
 
-  private static @Nonnull RMatrixI4x4F<?> IDENTITYM;
-
-  private static @Nonnull float[][] makeIdentity()
+  private static float[][] makeIdentity()
   {
     final float[][] m = new float[4][4];
     for (int row = 0; row < 4; ++row) {
@@ -55,6 +52,11 @@ import com.io7m.jtensors.VectorReadable4F;
     return m;
   }
 
+  private static RMatrixI4x4F<RTransformType> makeIdentityM()
+  {
+    return new RMatrixI4x4F<RTransformType>(RMatrixI4x4F.IDENTITY);
+  }
+
   /**
    * @return The identity matrix
    * @param <T>
@@ -62,15 +64,11 @@ import com.io7m.jtensors.VectorReadable4F;
    *          it being the identity transform)
    */
 
-  @SuppressWarnings("unchecked") public static @Nonnull
+  @SuppressWarnings("unchecked") public static
     <T extends RTransformType>
     RMatrixI4x4F<T>
     identity()
   {
-    if (RMatrixI4x4F.IDENTITYM == null) {
-      RMatrixI4x4F.IDENTITYM = new RMatrixI4x4F<T>(RMatrixI4x4F.IDENTITY);
-    }
-
     return (RMatrixI4x4F<T>) RMatrixI4x4F.IDENTITYM;
   }
 
@@ -91,14 +89,11 @@ import com.io7m.jtensors.VectorReadable4F;
    * @return A new 4x4 matrix
    */
 
-  public static @Nonnull
-    <T extends RTransformType>
-    RMatrixI4x4F<T>
-    newFromColumns(
-      final @Nonnull VectorReadable4F column_0,
-      final @Nonnull VectorReadable4F column_1,
-      final @Nonnull VectorReadable4F column_2,
-      final @Nonnull VectorReadable4F column_3)
+  public static <T extends RTransformType> RMatrixI4x4F<T> newFromColumns(
+    final VectorReadable4FType column_0,
+    final VectorReadable4FType column_1,
+    final VectorReadable4FType column_2,
+    final VectorReadable4FType column_3)
   {
     final float[][] e = new float[4][4];
 
@@ -136,11 +131,8 @@ import com.io7m.jtensors.VectorReadable4F;
    * @return A new 4x4 matrix
    */
 
-  public static @Nonnull
-    <T extends RTransformType>
-    RMatrixI4x4F<T>
-    newFromReadable(
-      final @Nonnull MatrixReadable4x4F m)
+  public static <T extends RTransformType> RMatrixI4x4F<T> newFromReadable(
+    final MatrixReadable4x4FType m)
   {
     final float[][] e = new float[4][4];
 
@@ -153,16 +145,16 @@ import com.io7m.jtensors.VectorReadable4F;
     return new RMatrixI4x4F<T>(e);
   }
 
-  private final @Nonnull float[][] elements;
+  private final float[][] elements;
 
   private RMatrixI4x4F(
-    final @Nonnull float[][] e)
+    final float[][] e)
   {
     this.elements = e;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -208,7 +200,7 @@ import com.io7m.jtensors.VectorReadable4F;
    */
 
   public void makeMatrixM4x4F(
-    final @Nonnull MatrixM4x4F m)
+    final MatrixM4x4F m)
   {
     for (int row = 0; row < 4; ++row) {
       for (int col = 0; col < 4; ++col) {
@@ -230,6 +222,8 @@ import com.io7m.jtensors.VectorReadable4F;
           Double.valueOf(this.elements[row][3]));
       builder.append(text);
     }
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

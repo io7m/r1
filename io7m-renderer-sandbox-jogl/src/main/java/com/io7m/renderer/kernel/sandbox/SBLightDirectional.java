@@ -16,20 +16,16 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.types.RException;
 
-@Immutable public final class SBLightDirectional implements SBLight
+public final class SBLightDirectional implements SBLight
 {
-  private final @Nonnull SBLightDescriptionDirectional description;
-  private final @Nonnull KLightDirectional             light;
+  private final SBLightDescriptionDirectional description;
+  private final KLightDirectional             light;
 
   SBLightDirectional(
-    final @Nonnull SBLightDescriptionDirectional d)
+    final SBLightDescriptionDirectional d)
   {
     this.description = d;
     this.light = d.getLight();
@@ -45,7 +41,7 @@ import com.io7m.renderer.types.RException;
     return this.description.getID();
   }
 
-  @Override public @Nonnull KLightDirectional getLight()
+  @Override public KLightDirectional getLight()
   {
     return this.light;
   }
@@ -55,8 +51,7 @@ import com.io7m.renderer.types.RException;
     A
     lightVisitableAccept(
       final V v)
-      throws ConstraintError,
-        RException,
+      throws RException,
         E
   {
     return v.lightVisitDirectional(this);

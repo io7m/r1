@@ -16,17 +16,13 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueLitLabel;
 
 interface KMaterialForwardOpaqueLitLabelCacheType
 {
-  @Nonnull KMaterialForwardOpaqueLitLabel getForwardLabelOpaqueLit(
-    final @Nonnull KLightType light,
-    final @Nonnull KInstanceOpaqueType instance)
-    throws ConstraintError;
+  KMaterialForwardOpaqueLitLabel getForwardLabelOpaqueLit(
+    final KLightType light,
+    final KInstanceOpaqueType instance);
 }

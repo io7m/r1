@@ -16,9 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.NotThreadSafe;
-
+import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionM4F;
@@ -28,24 +26,35 @@ import com.io7m.jtensors.QuaternionM4F;
  * allocating.
  */
 
-@NotThreadSafe public final class KTransformContext
+public final class KTransformContext
 {
+  @Override public boolean equals(
+    final @Nullable Object other)
+  {
+    return super.equals(other);
+  }
+
+  @Override public int hashCode()
+  {
+    return super.hashCode();
+  }
+
   /**
    * Construct a new transform context
    * 
    * @return A new transform context
    */
 
-  public static @Nonnull KTransformContext newContext()
+  public static KTransformContext newContext()
   {
     return new KTransformContext();
   }
 
-  private final @Nonnull MatrixM3x3F         t_matrix3x3;
-  private final @Nonnull MatrixM3x3F.Context t_matrix3x3_context;
-  private final @Nonnull MatrixM4x4F         t_matrix4x4;
-  private final @Nonnull MatrixM4x4F.Context t_matrix4x4_context;
-  private final @Nonnull QuaternionM4F       t_rotation;
+  private final MatrixM3x3F         t_matrix3x3;
+  private final MatrixM3x3F.Context t_matrix3x3_context;
+  private final MatrixM4x4F         t_matrix4x4;
+  private final MatrixM4x4F.Context t_matrix4x4_context;
+  private final QuaternionM4F       t_rotation;
 
   private KTransformContext()
   {
@@ -62,7 +71,7 @@ import com.io7m.jtensors.QuaternionM4F;
    *         shared between all callers of this function.
    */
 
-  public @Nonnull MatrixM3x3F getTemporaryMatrix3x3()
+  public MatrixM3x3F getTemporaryMatrix3x3()
   {
     return this.t_matrix3x3;
   }
@@ -73,7 +82,7 @@ import com.io7m.jtensors.QuaternionM4F;
    *         context is shared between all callers of this function.
    */
 
-  public @Nonnull MatrixM3x3F.Context getTemporaryMatrix3x3Context()
+  public MatrixM3x3F.Context getTemporaryMatrix3x3Context()
   {
     return this.t_matrix3x3_context;
   }
@@ -84,7 +93,7 @@ import com.io7m.jtensors.QuaternionM4F;
    *         shared between all callers of this function.
    */
 
-  public @Nonnull MatrixM4x4F getTemporaryMatrix4x4()
+  public MatrixM4x4F getTemporaryMatrix4x4()
   {
     return this.t_matrix4x4;
   }
@@ -95,7 +104,7 @@ import com.io7m.jtensors.QuaternionM4F;
    *         context is shared between all callers of this function.
    */
 
-  public @Nonnull MatrixM4x4F.Context getTemporaryMatrix4x4Context()
+  public MatrixM4x4F.Context getTemporaryMatrix4x4Context()
   {
     return this.t_matrix4x4_context;
   }
@@ -106,7 +115,7 @@ import com.io7m.jtensors.QuaternionM4F;
    *         quaternion is shared between all callers of this function.
    */
 
-  public @Nonnull QuaternionM4F getTemporaryRotation()
+  public QuaternionM4F getTemporaryRotation()
   {
     return this.t_rotation;
   }

@@ -19,7 +19,6 @@ package com.io7m.renderer.kernel.sandbox;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -28,8 +27,7 @@ import javax.swing.SwingUtilities;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.sandbox.SBProjectionDescription.SBProjectionFrustum;
 
@@ -47,7 +45,6 @@ public final class SBProjectionMatrixFrustumControls implements
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
             final SBProjectionMatrixFrustumControls controls =
               SBProjectionMatrixFrustumControls.newControls();
@@ -58,24 +55,22 @@ public final class SBProjectionMatrixFrustumControls implements
     });
   }
 
-  public static @Nonnull SBProjectionMatrixFrustumControls newControls()
-    throws ConstraintError
+  public static SBProjectionMatrixFrustumControls newControls()
   {
     return new SBProjectionMatrixFrustumControls();
   }
 
-  private final @Nonnull JTextField    bottom;
-  private @Nonnull SBProjectionFrustum current;
-  private final @Nonnull JButton       defaults;
-  private final @Nonnull JTextField    far;
-  private final @Nonnull RowGroup      group;
-  private final @Nonnull JTextField    left;
-  private final @Nonnull JTextField    near;
-  private final @Nonnull JTextField    right;
-  private final @Nonnull JTextField    top;
+  private final JTextField    bottom;
+  private SBProjectionFrustum current;
+  private final JButton       defaults;
+  private final JTextField    far;
+  private final RowGroup      group;
+  private final JTextField    left;
+  private final JTextField    near;
+  private final JTextField    right;
+  private final JTextField    top;
 
   private SBProjectionMatrixFrustumControls()
-    throws ConstraintError
   {
     this.group = new RowGroup();
 
@@ -86,21 +81,18 @@ public final class SBProjectionMatrixFrustumControls implements
     this.near = new JTextField();
     this.far = new JTextField();
 
-    this.set(new SBProjectionFrustum());
+    final SBProjectionFrustum p = new SBProjectionFrustum();
+    this.current = p;
+    this.set(p);
 
     this.defaults = new JButton("Defaults");
     this.defaults.addActionListener(new ActionListener() {
       @SuppressWarnings("synthetic-access") @Override public
         void
         actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
       {
-        try {
-          SBProjectionMatrixFrustumControls.this
-            .set(new SBProjectionFrustum());
-        } catch (final ConstraintError x) {
-          throw new UnreachableCodeException(x);
-        }
+        SBProjectionMatrixFrustumControls.this.set(p);
       }
     });
   }
@@ -135,9 +127,8 @@ public final class SBProjectionMatrixFrustumControls implements
     this.group.forceShow();
   }
 
-  @Override public @Nonnull SBProjectionDescription getDescription()
-    throws SBExceptionInputError,
-      ConstraintError
+  @Override public SBProjectionDescription getDescription()
+    throws SBExceptionInputError
   {
     this.current =
       new SBProjectionFrustum(
@@ -151,7 +142,7 @@ public final class SBProjectionMatrixFrustumControls implements
   }
 
   private void set(
-    final @Nonnull SBProjectionFrustum p)
+    final SBProjectionFrustum p)
   {
     this.current = p;
     this.left.setText(Double.toString(p.getLeft()));
@@ -163,7 +154,7 @@ public final class SBProjectionMatrixFrustumControls implements
   }
 
   public void setDescription(
-    final @Nonnull SBProjectionFrustum description)
+    final SBProjectionFrustum description)
   {
     this.set(description);
   }

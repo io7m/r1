@@ -16,13 +16,11 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Option;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
@@ -34,7 +32,7 @@ import com.io7m.renderer.types.RVectorI3F;
  * falloff value, and is maximally attenuated at the given radius value.
  */
 
-@Immutable public final class KLightSphere implements KLightType
+@EqualityStructural public final class KLightSphere implements KLightType
 {
   /**
    * Construct a new spherical light.
@@ -51,46 +49,42 @@ import com.io7m.renderer.types.RVectorI3F;
    *          The falloff exponent for the given light, where 1.0 is linear
    *          falloff
    * @return A new spherical light
-   * @throws ConstraintError
-   *           Iff any parameter is <code>null</code>
    */
 
-  public static @Nonnull
+  public static
     KLightSphere
     newSpherical(
-      final @Nonnull RVectorI3F<RSpaceRGBType> colour,
+      final RVectorI3F<RSpaceRGBType> colour,
       final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity,
-      final @Nonnull RVectorI3F<RSpaceWorldType> position,
+      final RVectorI3F<RSpaceWorldType> position,
       final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius,
       final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float falloff)
-      throws ConstraintError
   {
     return new KLightSphere(colour, intensity, position, radius, falloff);
   }
 
-  private final @Nonnull RVectorI3F<RSpaceRGBType>                             colour;
+  private final RVectorI3F<RSpaceRGBType>                                      colour;
   private final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float           falloff;
   private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float            intensity;
-  private final @Nonnull RVectorI3F<RSpaceWorldType>                           position;
+  private final RVectorI3F<RSpaceWorldType>                                    position;
   private final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius;
 
   private KLightSphere(
-    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
+    final RVectorI3F<RSpaceRGBType> in_colour,
     final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float in_intensity,
-    final @Nonnull RVectorI3F<RSpaceWorldType> in_position,
+    final RVectorI3F<RSpaceWorldType> in_position,
     final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float in_radius,
     final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float in_falloff)
-    throws ConstraintError
   {
-    this.colour = Constraints.constrainNotNull(in_colour, "Colour");
+    this.colour = NullCheck.notNull(in_colour, "Colour");
     this.intensity = in_intensity;
-    this.position = Constraints.constrainNotNull(in_position, "Position");
+    this.position = NullCheck.notNull(in_position, "Position");
     this.radius = in_radius;
     this.falloff = in_falloff;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -125,7 +119,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The world position of the light
    */
 
-  public @Nonnull RVectorI3F<RSpaceWorldType> getPosition()
+  public RVectorI3F<RSpaceWorldType> getPosition()
   {
     return this.position;
   }
@@ -151,7 +145,7 @@ import com.io7m.renderer.types.RVectorI3F;
     return result;
   }
 
-  @Override public @Nonnull RVectorI3F<RSpaceRGBType> lightGetColour()
+  @Override public RVectorI3F<RSpaceRGBType> lightGetColour()
   {
     return this.colour;
   }
@@ -161,7 +155,7 @@ import com.io7m.renderer.types.RVectorI3F;
     return this.intensity;
   }
 
-  @Override public @Nonnull Option<KShadowType> lightGetShadow()
+  @Override public OptionType<KShadowType> lightGetShadow()
   {
     return Option.none();
   }
@@ -177,7 +171,6 @@ import com.io7m.renderer.types.RVectorI3F;
     lightAccept(
       final V v)
       throws E,
-        ConstraintError,
         RException
   {
     return v.lightSpherical(this);
@@ -195,7 +188,9 @@ import com.io7m.renderer.types.RVectorI3F;
     builder.append(" falloff=");
     builder.append(this.falloff);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 
   /**
@@ -205,13 +200,10 @@ import com.io7m.renderer.types.RVectorI3F;
    * @param new_colour
    *          The new colour
    * @return The current material with <code>colour == new_colour</code>.
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KLightSphere withColour(
-    final @Nonnull RVectorI3F<RSpaceRGBType> new_colour)
-    throws ConstraintError
+  public KLightSphere withColour(
+    final RVectorI3F<RSpaceRGBType> new_colour)
   {
     return new KLightSphere(
       new_colour,
@@ -230,19 +222,15 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The current material with <code>falloff == new_falloff</code> .
    */
 
-  public @Nonnull KLightSphere withFalloff(
+  public KLightSphere withFalloff(
     final float new_falloff)
   {
-    try {
-      return new KLightSphere(
-        this.colour,
-        this.intensity,
-        this.position,
-        this.radius,
-        new_falloff);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    return new KLightSphere(
+      this.colour,
+      this.intensity,
+      this.position,
+      this.radius,
+      new_falloff);
   }
 
   /**
@@ -255,19 +243,15 @@ import com.io7m.renderer.types.RVectorI3F;
    *         .
    */
 
-  public @Nonnull KLightSphere withIntensity(
+  public KLightSphere withIntensity(
     final float new_intensity)
   {
-    try {
-      return new KLightSphere(
-        this.colour,
-        new_intensity,
-        this.position,
-        this.radius,
-        this.falloff);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    return new KLightSphere(
+      this.colour,
+      new_intensity,
+      this.position,
+      this.radius,
+      this.falloff);
   }
 
   /**
@@ -277,13 +261,10 @@ import com.io7m.renderer.types.RVectorI3F;
    * @param new_position
    *          The new position
    * @return The current material with <code>position == new_position</code>.
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KLightSphere withPosition(
-    final @Nonnull RVectorI3F<RSpaceWorldType> new_position)
-    throws ConstraintError
+  public KLightSphere withPosition(
+    final RVectorI3F<RSpaceWorldType> new_position)
   {
     return new KLightSphere(
       this.colour,
@@ -302,18 +283,14 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The current material with <code>radius == new_radius</code> .
    */
 
-  public @Nonnull KLightSphere withRadius(
+  public KLightSphere withRadius(
     final float new_radius)
   {
-    try {
-      return new KLightSphere(
-        this.colour,
-        this.intensity,
-        this.position,
-        new_radius,
-        this.falloff);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    return new KLightSphere(
+      this.colour,
+      this.intensity,
+      this.position,
+      new_radius,
+      this.falloff);
   }
 }

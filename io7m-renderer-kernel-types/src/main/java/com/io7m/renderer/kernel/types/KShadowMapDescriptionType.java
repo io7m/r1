@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -35,8 +32,6 @@ public interface KShadowMapDescriptionType
    * @return The value returned by the visitor
    * @throws E
    *           Iff the visitor raises <code>E</code
-   * @throws ConstraintError
-   *           Iff the visitor raises {@link ConstraintError}
    * @throws RException
    *           Iff the visitor raises {@link RException}
    * 
@@ -51,16 +46,15 @@ public interface KShadowMapDescriptionType
     <A, E extends Throwable, V extends KShadowMapDescriptionVisitorType<A, E>>
     A
     mapDescriptionAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
-        ConstraintError,
         RException;
 
   /**
    * @return The identifier of the light associated with the map
    */
 
-  @Nonnull Integer mapGetLightID();
+  Integer mapGetLightID();
 
   /**
    * @return The size exponent of the map, where the width and height of the

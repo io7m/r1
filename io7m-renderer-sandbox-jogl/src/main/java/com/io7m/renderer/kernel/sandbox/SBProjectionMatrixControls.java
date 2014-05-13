@@ -22,7 +22,6 @@ import java.util.EnumMap;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
@@ -30,7 +29,7 @@ import javax.swing.SwingUtilities;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.sandbox.SBProjectionDescription.Type;
 
@@ -51,7 +50,6 @@ public final class SBProjectionMatrixControls implements SBControls
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
             final SBProjectionMatrixControls controls =
               SBProjectionMatrixControls.newControls();
@@ -62,21 +60,19 @@ public final class SBProjectionMatrixControls implements SBControls
     });
   }
 
-  public static @Nonnull SBProjectionMatrixControls newControls()
-    throws ConstraintError
+  public static SBProjectionMatrixControls newControls()
   {
     return new SBProjectionMatrixControls();
   }
 
-  private final @Nonnull EnumMap<Type, SBProjectionMatrixDescriptionControls> controls;
-  private final @Nonnull SBProjectionMatrixFrustumControls                    frustum_controls;
-  private final @Nonnull SBProjectionMatrixOrthographicControls               ortho_controls;
-  private final @Nonnull SBProjectionMatrixPerspectiveControls                perspective_controls;
-  private final @Nonnull JComboBox<Type>                                      selector;
-  private final @Nonnull RowGroup                                             group;
+  private final EnumMap<Type, SBProjectionMatrixDescriptionControls> controls;
+  private final SBProjectionMatrixFrustumControls                    frustum_controls;
+  private final SBProjectionMatrixOrthographicControls               ortho_controls;
+  private final SBProjectionMatrixPerspectiveControls                perspective_controls;
+  private final JComboBox<Type>                                      selector;
+  private final RowGroup                                             group;
 
   private SBProjectionMatrixControls()
-    throws ConstraintError
   {
     this.group = new RowGroup();
 
@@ -110,7 +106,7 @@ public final class SBProjectionMatrixControls implements SBControls
       @SuppressWarnings("synthetic-access") @Override public
         void
         actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
       {
         final SBProjectionDescription.Type selected =
           (Type) SBProjectionMatrixControls.this.selector.getSelectedItem();
@@ -148,8 +144,7 @@ public final class SBProjectionMatrixControls implements SBControls
   }
 
   public SBProjectionDescription getDescription()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
     return this.controls
       .get(this.selector.getSelectedItem())
@@ -157,7 +152,7 @@ public final class SBProjectionMatrixControls implements SBControls
   }
 
   public void setDescription(
-    final @Nonnull SBProjectionDescription description)
+    final SBProjectionDescription description)
   {
     this.selector.setSelectedItem(description.getType());
 

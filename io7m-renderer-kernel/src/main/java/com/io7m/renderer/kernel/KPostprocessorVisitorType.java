@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -42,16 +39,14 @@ public interface KPostprocessorVisitorType<A, E extends Throwable>
    * @return A value of type <code>A</code>
    * @throws E
    *           If required
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    */
 
   <C> A postprocessorVisitDepth(
-    final @Nonnull KPostprocessorDepthType<C> r)
+    final KPostprocessorDepthType<C> r)
     throws E,
-      ConstraintError,
       RException;
 
   /**
@@ -64,16 +59,14 @@ public interface KPostprocessorVisitorType<A, E extends Throwable>
    * @return A value of type <code>A</code>
    * @throws E
    *           If required
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    */
 
   <C> A postprocessorVisitDepthVariance(
-    final @Nonnull KPostprocessorDepthVarianceType<C> r)
+    final KPostprocessorDepthVarianceType<C> r)
     throws E,
-      ConstraintError,
       RException;
 
   /**
@@ -86,16 +79,14 @@ public interface KPostprocessorVisitorType<A, E extends Throwable>
    * @return A value of type <code>A</code>
    * @throws E
    *           If required
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    */
 
   <C> A postprocessorVisitRGBA(
-    final @Nonnull KPostprocessorRGBAType<C> r)
+    final KPostprocessorRGBAType<C> r)
     throws E,
-      ConstraintError,
       RException;
 
   /**
@@ -108,15 +99,13 @@ public interface KPostprocessorVisitorType<A, E extends Throwable>
    * @return A value of type <code>A</code>
    * @throws E
    *           If required
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    */
 
   <C> A postprocessorVisitRGBAWithDepth(
-    final @Nonnull KPostprocessorRGBAWithDepthType<C> r)
+    final KPostprocessorRGBAWithDepthType<C> r)
     throws E,
-      ConstraintError,
       RException;
 }

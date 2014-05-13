@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.awt.Color;
 
-import javax.annotation.Nonnull;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
@@ -26,32 +25,30 @@ import javax.swing.JTextField;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RTransformTextureType;
 
 public final class SBMaterialControlsOpaqueAlphaToDepth implements
   SBControlsDataType<SBMaterialDescriptionOpaqueAlphaToDepth>
 {
-  private final @Nonnull SBMaterialControlsAlbedo               controls_albedo;
-  private final @Nonnull SBMaterialControlsEmissive             controls_emissive;
-  private final @Nonnull SBMaterialControlsEnvironment          controls_environment;
-  private final @Nonnull SBMaterialControlsNormal               controls_normal;
-  private final @Nonnull SBMaterialControlsSpecular             controls_specular;
-  private final @Nonnull SBMatrix3x3Controls<RTransformTextureType> controls_uv;
-  private final @Nonnull SBFloatHSlider                         controls_alpha_threshold;
-  private final @Nonnull RowGroup                               group;
-  private final @Nonnull JTextField                             name;
+  private final SBMaterialControlsAlbedo                   controls_albedo;
+  private final SBMaterialControlsEmissive                 controls_emissive;
+  private final SBMaterialControlsEnvironment              controls_environment;
+  private final SBMaterialControlsNormal                   controls_normal;
+  private final SBMaterialControlsSpecular                 controls_specular;
+  private final SBMatrix3x3Controls<RTransformTextureType> controls_uv;
+  private final SBFloatHSlider                             controls_alpha_threshold;
+  private final RowGroup                                   group;
+  private final JTextField                                 name;
 
   public SBMaterialControlsOpaqueAlphaToDepth(
-    final @Nonnull JTextField in_name,
-    final @Nonnull SBMaterialControlsAlbedo in_controls_albedo,
-    final @Nonnull SBMaterialControlsEmissive in_controls_emissive,
-    final @Nonnull SBMaterialControlsEnvironment in_controls_environment,
-    final @Nonnull SBMaterialControlsNormal in_controls_normal,
-    final @Nonnull SBMaterialControlsSpecular in_controls_specular,
-    final @Nonnull SBMatrix3x3Controls<RTransformTextureType> in_controls_uv)
-    throws ConstraintError
+    final JTextField in_name,
+    final SBMaterialControlsAlbedo in_controls_albedo,
+    final SBMaterialControlsEmissive in_controls_emissive,
+    final SBMaterialControlsEnvironment in_controls_environment,
+    final SBMaterialControlsNormal in_controls_normal,
+    final SBMaterialControlsSpecular in_controls_specular,
+    final SBMatrix3x3Controls<RTransformTextureType> in_controls_uv)
   {
     this.group = new RowGroup();
     this.name = in_name;
@@ -68,7 +65,7 @@ public final class SBMaterialControlsOpaqueAlphaToDepth implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     final JLabel label = new JLabel("Alpha");
     label.setForeground(Color.BLUE);
@@ -106,7 +103,7 @@ public final class SBMaterialControlsOpaqueAlphaToDepth implements
   }
 
   @Override public void controlsLoadFrom(
-    final @Nonnull SBMaterialDescriptionOpaqueAlphaToDepth desc)
+    final SBMaterialDescriptionOpaqueAlphaToDepth desc)
   {
     this.controls_alpha_threshold.setCurrent(desc.getAlphaThreshold());
     this.controls_albedo.controlsLoadFrom(desc.getAlbedo());
@@ -118,8 +115,7 @@ public final class SBMaterialControlsOpaqueAlphaToDepth implements
   }
 
   @Override public SBMaterialDescriptionOpaqueAlphaToDepth controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
     return new SBMaterialDescriptionOpaqueAlphaToDepth(
       this.name.getText(),

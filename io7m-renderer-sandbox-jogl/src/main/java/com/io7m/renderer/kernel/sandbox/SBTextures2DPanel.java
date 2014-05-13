@@ -22,13 +22,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -41,25 +38,25 @@ import javax.swing.SwingWorker;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
 import com.io7m.jvvfs.PathVirtual;
 
 final class SBTextures2DPanel extends JPanel
 {
   private static final class ImageDisplay extends JPanel
   {
-    private static final long           serialVersionUID;
+    private static final long       serialVersionUID;
 
     static {
       serialVersionUID = -5281965547772476438L;
     }
 
-    private @CheckForNull BufferedImage image;
+    private @Nullable BufferedImage image;
 
     ImageDisplay()
     {
@@ -67,8 +64,9 @@ final class SBTextures2DPanel extends JPanel
     }
 
     @Override protected void paintComponent(
-      final Graphics g)
+      final @Nullable Graphics g)
     {
+      assert g != null;
       super.paintComponent(g);
       if (this.image != null) {
         g.drawImage(this.image, 0, 0, null);
@@ -76,7 +74,7 @@ final class SBTextures2DPanel extends JPanel
     }
 
     protected void setImage(
-      final @Nonnull BufferedImage in_image)
+      final BufferedImage in_image)
     {
       this.image = in_image;
     }
@@ -84,16 +82,16 @@ final class SBTextures2DPanel extends JPanel
 
   private static final class TextureParameters extends JPanel
   {
-    private static final long                                    serialVersionUID;
+    private static final long                           serialVersionUID;
 
     static {
       serialVersionUID = 1094205333772042554L;
     }
 
-    private final @Nonnull JComboBox<TextureWrapS>               wrap_s;
-    private final @Nonnull JComboBox<TextureWrapT>               wrap_t;
-    private final @Nonnull JComboBox<TextureFilterMinification>  filter_min;
-    private final @Nonnull JComboBox<TextureFilterMagnification> filter_mag;
+    private final JComboBox<TextureWrapS>               wrap_s;
+    private final JComboBox<TextureWrapT>               wrap_t;
+    private final JComboBox<TextureFilterMinification>  filter_min;
+    private final JComboBox<TextureFilterMagnification> filter_mag;
 
     TextureParameters()
     {
@@ -153,28 +151,28 @@ final class SBTextures2DPanel extends JPanel
     }
   }
 
-  private static final long                           serialVersionUID;
+  private static final long                  serialVersionUID;
 
   static {
     serialVersionUID = -941448169051827275L;
   }
 
-  protected final @Nonnull Log                        log_textures;
-  protected final @Nonnull JComboBox<PathVirtual>     selector;
-  protected @Nonnull Map<PathVirtual, SBTexture2D<?>> images;
-  protected final @Nonnull ImageDisplay               image_display;
-  protected final @Nonnull JTextField                 t_filter_min;
-  protected final @Nonnull JTextField                 t_filter_mag;
-  protected final @Nonnull JTextField                 t_wrap_s;
-  protected final @Nonnull JTextField                 t_wrap_t;
+  protected final LogUsableType              log_textures;
+  protected final JComboBox<PathVirtual>     selector;
+  protected Map<PathVirtual, SBTexture2D<?>> images;
+  protected final ImageDisplay               image_display;
+  protected final JTextField                 t_filter_min;
+  protected final JTextField                 t_filter_mag;
+  protected final JTextField                 t_wrap_s;
+  protected final JTextField                 t_wrap_t;
 
   public SBTextures2DPanel(
-    final @Nonnull JFrame window,
-    final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull JTextField select_result,
-    final @Nonnull Log log)
+    final JFrame window,
+    final SBSceneControllerTextures controller,
+    final JTextField select_result,
+    final LogUsableType log)
   {
-    this.log_textures = new Log(log, "textures");
+    this.log_textures = log.with("textures");
     this.images = controller.sceneTextures2DGet();
 
     this.setPreferredSize(new Dimension(640, 480));
@@ -196,7 +194,7 @@ final class SBTextures2DPanel extends JPanel
     this.selector = new JComboBox<PathVirtual>();
     this.selector.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final PathVirtual name =
           (PathVirtual) SBTextures2DPanel.this.selector.getSelectedItem();
@@ -224,7 +222,7 @@ final class SBTextures2DPanel extends JPanel
     final JButton clear = new JButton("Clear");
     clear.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         SBTextures2DPanel.this.selector.setSelectedItem(null);
       }
@@ -233,7 +231,7 @@ final class SBTextures2DPanel extends JPanel
     final JButton open = new JButton("Open...");
     open.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final TextureParameters params = new TextureParameters();
         final JFileChooser chooser = new JFileChooser();
@@ -254,19 +252,15 @@ final class SBTextures2DPanel extends JPanel
 
             final SwingWorker<SBTexture2D<?>, Void> worker =
               new SwingWorker<SBTexture2D<?>, Void>() {
-                @Override protected @Nonnull SBTexture2D<?> doInBackground()
+                @Override protected SBTexture2D<?> doInBackground()
                   throws Exception
                 {
-                  try {
-                    return controller.sceneTexture2DLoad(
-                      file,
-                      wrap_s,
-                      wrap_t,
-                      filter_min,
-                      filter_mag).get();
-                  } catch (final ConstraintError x) {
-                    throw new IOException(x);
-                  }
+                  return controller.sceneTexture2DLoad(
+                    file,
+                    wrap_s,
+                    wrap_t,
+                    filter_min,
+                    filter_mag).get();
                 }
 
                 @Override protected void done()
@@ -308,7 +302,7 @@ final class SBTextures2DPanel extends JPanel
     final JButton select = new JButton("Select");
     select.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final PathVirtual name =
           (PathVirtual) SBTextures2DPanel.this.selector.getSelectedItem();
@@ -326,7 +320,7 @@ final class SBTextures2DPanel extends JPanel
     final JButton cancel = new JButton("Cancel");
     cancel.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         SBWindowUtilities.closeWindow(window);
       }

@@ -16,9 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 
 enum KMaterialDepthVarianceLabel
@@ -27,8 +25,8 @@ enum KMaterialDepthVarianceLabel
   DEPTH_VARIANCE_MAPPED("depth_variance_M"),
   DEPTH_VARIANCE_UNIFORM("depth_variance_U");
 
-  public static @Nonnull KMaterialDepthVarianceLabel fromDepthLabel(
-    final @Nonnull KMaterialDepthLabel k)
+  public static KMaterialDepthVarianceLabel fromDepthLabel(
+    final KMaterialDepthLabel k)
   {
     switch (k) {
       case DEPTH_CONSTANT:
@@ -42,15 +40,15 @@ enum KMaterialDepthVarianceLabel
     throw new UnreachableCodeException();
   }
 
-  private final @Nonnull String name;
+  private final String name;
 
   private KMaterialDepthVarianceLabel(
-    final @Nonnull String in_name)
+    final String in_name)
   {
     this.name = in_name;
   }
 
-  public @Nonnull String getName()
+  public String getName()
   {
     return this.name;
   }

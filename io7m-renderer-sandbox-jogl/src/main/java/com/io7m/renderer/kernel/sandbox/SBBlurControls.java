@@ -16,13 +16,11 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.SwingUtilities;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KBlurParameters.BuilderType;
@@ -41,7 +39,6 @@ public final class SBBlurControls implements
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
             final SBBlurControls c = new SBBlurControls();
             c.controlsAddToLayout(layout);
@@ -51,13 +48,12 @@ public final class SBBlurControls implements
     });
   }
 
-  private final @Nonnull SBFloatHSlider   blur_size;
-  private final @Nonnull RowGroup         group;
-  private final @Nonnull SBIntegerHSlider passes;
-  private final @Nonnull SBFloatHSlider   scale;
+  private final SBFloatHSlider   blur_size;
+  private final RowGroup         group;
+  private final SBIntegerHSlider passes;
+  private final SBFloatHSlider   scale;
 
   SBBlurControls()
-    throws ConstraintError
   {
     this.group = new RowGroup();
     this.blur_size = new SBFloatHSlider("Blur size", 0.0f, 16.0f);
@@ -102,8 +98,7 @@ public final class SBBlurControls implements
   }
 
   @Override public KBlurParameters controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
     final BuilderType b = KBlurParameters.newBuilder();
     b.setBlurSize(this.blur_size.getCurrent());

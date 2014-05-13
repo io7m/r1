@@ -20,8 +20,6 @@ import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.annotation.Nonnull;
-
 /**
  * The available example renderers.
  */
@@ -32,7 +30,7 @@ public final class ExampleRenderers
    * @return The available renderers
    */
 
-  public static @Nonnull
+  public static
     SortedMap<String, ExampleRendererConstructorType>
     getRenderers()
   {
@@ -42,7 +40,10 @@ public final class ExampleRenderers
       ExampleRendererForwardDefault.class.getCanonicalName(),
       ExampleRendererForwardDefault.get());
 
-    return Collections.unmodifiableSortedMap(r);
+    final SortedMap<String, ExampleRendererConstructorType> ur =
+      Collections.unmodifiableSortedMap(r);
+    assert ur != null;
+    return ur;
   }
 
   private ExampleRenderers()

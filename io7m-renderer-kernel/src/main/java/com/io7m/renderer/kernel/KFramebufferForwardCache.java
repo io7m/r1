@@ -16,11 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcache.BLUCacheAbstract;
 import com.io7m.jcache.BLUCacheType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.types.RException;
 
@@ -28,10 +26,11 @@ import com.io7m.renderer.types.RException;
  * Forward-rendering framebuffer caches.
  */
 
-public final class KFramebufferForwardCache extends
+@EqualityReference public final class KFramebufferForwardCache extends
   BLUCacheAbstract<KFramebufferForwardDescription, KFramebufferForwardType, RException> implements
   KFramebufferForwardCacheType
 {
+
   /**
    * Wrap the given cache and expose a {@link KFramebufferForwardCacheType}
    * interface.
@@ -39,22 +38,18 @@ public final class KFramebufferForwardCache extends
    * @param c
    *          The cache
    * @return A cache
-   * @throws ConstraintError
-   *           If <code>c == null</code>
    */
 
-  public static @Nonnull
+  public static
     KFramebufferForwardCacheType
     wrap(
-      final @Nonnull BLUCacheType<KFramebufferForwardDescription, KFramebufferForwardType, RException> c)
-      throws ConstraintError
+      final BLUCacheType<KFramebufferForwardDescription, KFramebufferForwardType, RException> c)
   {
     return new KFramebufferForwardCache(c);
   }
 
   private KFramebufferForwardCache(
-    final @Nonnull BLUCacheType<KFramebufferForwardDescription, KFramebufferForwardType, RException> c)
-    throws ConstraintError
+    final BLUCacheType<KFramebufferForwardDescription, KFramebufferForwardType, RException> c)
   {
     super(c);
   }

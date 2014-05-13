@@ -16,11 +16,11 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
+import java.util.Map;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.ArrayBufferUsable;
+import com.io7m.jcanephora.ArrayAttributeDescriptor;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jnull.NullCheck;
 
 /**
  * Labels for emission properties.
@@ -49,17 +49,21 @@ public enum KMaterialEmissiveLabel
 
   EMISSIVE_NONE("", 0);
 
-  private static @Nonnull KMaterialEmissiveLabel fromInstanceData(
-    final @Nonnull ArrayBufferUsable a,
-    final @Nonnull KMaterialEmissive emissive)
-    throws ConstraintError
+  private static KMaterialEmissiveLabel fromInstanceData(
+    final ArrayBufferUsableType a,
+    final KMaterialEmissive emissive)
   {
     if (emissive.getEmission() == 0.0) {
       return KMaterialEmissiveLabel.EMISSIVE_NONE;
     }
-    if (emissive.getTexture().isSome()
-      && a.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
-      return KMaterialEmissiveLabel.EMISSIVE_MAPPED;
+
+    final boolean has_texture = emissive.getTexture().isSome();
+    if (has_texture) {
+      final Map<String, ArrayAttributeDescriptor> ad =
+        a.arrayGetDescriptor().getAttributes();
+      if (ad.containsKey(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+        return KMaterialEmissiveLabel.EMISSIVE_MAPPED;
+      }
     }
 
     return KMaterialEmissiveLabel.EMISSIVE_CONSTANT;
@@ -71,34 +75,31 @@ public enum KMaterialEmissiveLabel
    * @param instance
    *          The instance
    * @return An emissive label
-   * @throws ConstraintError
-   *           Iff the instance is <code>null</code>
    */
 
-  public static @Nonnull KMaterialEmissiveLabel fromInstanceRegular(
-    final @Nonnull KInstanceRegularType instance)
-    throws ConstraintError
+  public static KMaterialEmissiveLabel fromInstanceRegular(
+    final KInstanceRegularType instance)
   {
-    Constraints.constrainNotNull(instance, "Instance");
+    NullCheck.notNull(instance, "Instance");
     final KMeshReadableType mesh = instance.instanceGetMesh();
-    final ArrayBufferUsable a = mesh.getArrayBuffer();
+    final ArrayBufferUsableType a = mesh.getArrayBuffer();
     final KMaterialEmissive emissive =
       instance.instanceGetMaterial().materialGetEmissive();
     return KMaterialEmissiveLabel.fromInstanceData(a, emissive);
   }
 
-  private final @Nonnull String code;
-  private int                   textures_required;
+  private final String code;
+  private int          textures_required;
 
   private KMaterialEmissiveLabel(
-    final @Nonnull String in_code,
+    final String in_code,
     final int in_textures_required)
   {
     this.code = in_code;
     this.textures_required = in_textures_required;
   }
 
-  @Override public @Nonnull String labelGetCode()
+  @Override public String labelGetCode()
   {
     return this.code;
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,44 +18,41 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.awt.image.BufferedImage;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jcanephora.Texture2DStatic;
+import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jvvfs.PathVirtual;
 
-@Immutable public final class SBTexture2D<K extends SBTexture2DKind>
+public final class SBTexture2D<K extends SBTexture2DKind>
 {
-  private final @Nonnull SBTexture2DDescription description;
-  private final @Nonnull Texture2DStatic        texture;
-  private final @Nonnull BufferedImage          image;
+  private final SBTexture2DDescription description;
+  private final Texture2DStaticType    texture;
+  private final BufferedImage          image;
 
   public SBTexture2D(
-    final @Nonnull SBTexture2DDescription in_description,
-    final @Nonnull Texture2DStatic in_texture,
-    final @Nonnull BufferedImage in_image)
+    final SBTexture2DDescription in_description,
+    final Texture2DStaticType in_texture,
+    final BufferedImage in_image)
   {
     this.description = in_description;
     this.texture = in_texture;
     this.image = in_image;
   }
 
-  public @Nonnull SBTexture2DDescription getDescription()
+  public SBTexture2DDescription getDescription()
   {
     return this.description;
   }
 
-  public @Nonnull BufferedImage getImage()
+  public BufferedImage getImage()
   {
     return this.image;
   }
 
-  public @Nonnull PathVirtual getPath()
+  public PathVirtual getPath()
   {
     return this.description.getPath();
   }
 
-  public @Nonnull Texture2DStatic getTexture()
+  public Texture2DStaticType getTexture()
   {
     return this.texture;
   }
@@ -66,6 +63,8 @@ import com.io7m.jvvfs.PathVirtual;
     builder.append("[SBTexture2D ");
     builder.append(this.texture);
     builder.append("]");
-    return builder.toString();
+    final String s = builder.toString();
+    assert s != null;
+    return s;
   }
 }

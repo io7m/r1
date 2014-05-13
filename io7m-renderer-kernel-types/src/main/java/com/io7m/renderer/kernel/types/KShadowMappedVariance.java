@@ -16,19 +16,18 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
 /**
  * A description of a variance-mapped shadow.
  */
 
-@Immutable public final class KShadowMappedVariance implements KShadowType
+@EqualityStructural public final class KShadowMappedVariance implements
+  KShadowType
 {
   /**
    * Construct a new variance mapped shadow.
@@ -48,19 +47,16 @@ import com.io7m.renderer.types.RException;
    * @param description
    *          The description of the shadow map
    * @return A new shadow
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull
+  public static
     KShadowMappedVariance
     newMappedVariance(
       final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float factor_min,
       final @KSuggestedRangeF(lower = 0.0f, upper = 0.0005f) float minimum_variance,
       final @KSuggestedRangeF(lower = 0.0f, upper = 0.6f) float light_bleed_reduction,
-      final @Nonnull KBlurParameters in_blur,
-      final @Nonnull KShadowMapVarianceDescription description)
-      throws ConstraintError
+      final KBlurParameters in_blur,
+      final KShadowMapVarianceDescription description)
   {
     return new KShadowMappedVariance(
       factor_min,
@@ -70,23 +66,21 @@ import com.io7m.renderer.types.RException;
       description);
   }
 
-  private final @Nonnull KBlurParameters               blur;
-  private final @Nonnull KShadowMapVarianceDescription description;
-  private final float                                  factor_min;
-  private final float                                  light_bleed_reduction;
-  private final float                                  minimum_variance;
+  private final KBlurParameters               blur;
+  private final KShadowMapVarianceDescription description;
+  private final float                         factor_min;
+  private final float                         light_bleed_reduction;
+  private final float                         minimum_variance;
 
   KShadowMappedVariance(
     final float in_factor_min,
     final float in_minimum_variance,
     final float in_light_bleed_reduction,
-    final @Nonnull KBlurParameters in_blur,
-    final @Nonnull KShadowMapVarianceDescription in_description)
-    throws ConstraintError
+    final KBlurParameters in_blur,
+    final KShadowMapVarianceDescription in_description)
   {
-    this.description =
-      Constraints.constrainNotNull(in_description, "Description");
-    this.blur = Constraints.constrainNotNull(in_blur, "Blur");
+    this.description = NullCheck.notNull(in_description, "Description");
+    this.blur = NullCheck.notNull(in_blur, "Blur");
 
     this.factor_min = in_factor_min;
     this.minimum_variance = in_minimum_variance;
@@ -94,7 +88,7 @@ import com.io7m.renderer.types.RException;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -121,7 +115,7 @@ import com.io7m.renderer.types.RException;
    * @return The parameters for the blur applied to the shadow map
    */
 
-  public @Nonnull KBlurParameters getBlur()
+  public KBlurParameters getBlur()
   {
     return this.blur;
   }
@@ -130,7 +124,7 @@ import com.io7m.renderer.types.RException;
    * @return The description of the shadow map
    */
 
-  public @Nonnull KShadowMapVarianceDescription getDescription()
+  public KShadowMapVarianceDescription getDescription()
   {
     return this.description;
   }
@@ -179,11 +173,10 @@ import com.io7m.renderer.types.RException;
     <T, E extends Throwable, V extends KShadowVisitorType<T, E>>
     T
     shadowAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
         JCGLException,
-        RException,
-        ConstraintError
+        RException
   {
     return v.shadowMappedVariance(this);
   }
@@ -202,6 +195,8 @@ import com.io7m.renderer.types.RException;
     builder.append(" minimum_variance=");
     builder.append(this.minimum_variance);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

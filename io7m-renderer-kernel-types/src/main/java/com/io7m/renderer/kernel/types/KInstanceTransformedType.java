@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
@@ -35,13 +32,13 @@ public interface KInstanceTransformedType extends KInstanceType
    * @return The transform associated with the instance
    */
 
-  @Nonnull KTransformType instanceGetTransform();
+  KTransformType instanceGetTransform();
 
   /**
    * @return The instance-specific texture transformation matrix
    */
 
-  @Nonnull RMatrixI3x3F<RTransformTextureType> instanceGetUVMatrix();
+  RMatrixI3x3F<RTransformTextureType> instanceGetUVMatrix();
 
   /**
    * Accept a visitor.
@@ -57,8 +54,7 @@ public interface KInstanceTransformedType extends KInstanceType
    * @return The value returned by the visitor
    * @throws E
    *           If the visitor raises <code>E</code>
-   * @throws ConstraintError
-   *           If the visitor raises {@link ConstraintError}
+   * 
    * @throws RException
    *           If the visitor raises {@link RException}
    * @throws JCGLException
@@ -68,9 +64,8 @@ public interface KInstanceTransformedType extends KInstanceType
     <A, E extends Throwable, V extends KInstanceTransformedVisitorType<A, E>>
     A
     transformedAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
-        ConstraintError,
         RException,
         JCGLException;
 }

@@ -19,15 +19,12 @@ package com.io7m.renderer.kernel.sandbox;
 import java.awt.Container;
 import java.awt.Dimension;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 
 abstract class SBExampleWindow extends JFrame
 {
@@ -38,7 +35,7 @@ abstract class SBExampleWindow extends JFrame
   }
 
   public SBExampleWindow(
-    final @Nonnull String title)
+    final String title)
   {
     super(title);
 
@@ -48,11 +45,7 @@ abstract class SBExampleWindow extends JFrame
     content.add(pane);
 
     final DesignGridLayout layout = new DesignGridLayout(inner);
-    try {
-      this.addToLayout(layout);
-    } catch (final ConstraintError e) {
-      e.printStackTrace();
-    }
+    this.addToLayout(layout);
     this.setMinimumSize(new Dimension(640, 480));
     this.pack();
     this.setVisible(true);
@@ -60,6 +53,5 @@ abstract class SBExampleWindow extends JFrame
   }
 
   public abstract void addToLayout(
-    final @Nonnull DesignGridLayout layout)
-    throws ConstraintError;
+    final DesignGridLayout layout);
 }

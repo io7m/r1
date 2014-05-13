@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.types;
 
-import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.jtensors.VectorReadable3FType;
 
 /**
  * The type of readable 3D vectors indexed by their coordinate space
@@ -25,7 +25,8 @@ import com.io7m.jtensors.VectorReadable3F;
  *          A phantom type parameter describing the coordinate space
  */
 
-public interface RVectorReadable3FType<T extends RSpaceType> extends VectorReadable3F
+public interface RVectorReadable3FType<T extends RSpaceType> extends
+  VectorReadable3FType
 {
   // See super-interfaces.
 }

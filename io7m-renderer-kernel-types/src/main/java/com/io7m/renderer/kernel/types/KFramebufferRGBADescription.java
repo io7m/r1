@@ -16,20 +16,18 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * A description of the RGBA part of a framebuffer.
  */
 
-@Immutable public final class KFramebufferRGBADescription implements
+@EqualityStructural public final class KFramebufferRGBADescription implements
   KFramebufferDescriptionType
 {
   /**
@@ -46,16 +44,13 @@ import com.io7m.jcanephora.TextureFilterMinification;
    * @param in_precision_rgba
    *          The desired precision of the framebuffer
    * @return A new description
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KFramebufferRGBADescription newDescription(
-    final @Nonnull AreaInclusive in_area,
-    final @Nonnull TextureFilterMagnification in_filter_mag,
-    final @Nonnull TextureFilterMinification in_filter_min,
-    final @Nonnull KRGBAPrecision in_precision_rgba)
-    throws ConstraintError
+  public static KFramebufferRGBADescription newDescription(
+    final AreaInclusive in_area,
+    final TextureFilterMagnification in_filter_mag,
+    final TextureFilterMinification in_filter_min,
+    final KRGBAPrecision in_precision_rgba)
   {
     return new KFramebufferRGBADescription(
       in_area,
@@ -64,30 +59,27 @@ import com.io7m.jcanephora.TextureFilterMinification;
       in_precision_rgba);
   }
 
-  private final @Nonnull AreaInclusive              area;
-  private final @Nonnull TextureFilterMagnification filter_mag;
-  private final @Nonnull TextureFilterMinification  filter_min;
-
-  private final @Nonnull KRGBAPrecision             precision_rgba;
+  private final AreaInclusive              area;
+  private final TextureFilterMagnification filter_mag;
+  private final TextureFilterMinification  filter_min;
+  private final KRGBAPrecision             precision_rgba;
 
   private KFramebufferRGBADescription(
-    final @Nonnull AreaInclusive in_area,
-    final @Nonnull TextureFilterMagnification in_filter_mag,
-    final @Nonnull TextureFilterMinification in_filter_min,
-    final @Nonnull KRGBAPrecision in_precision_rgba)
-    throws ConstraintError
+    final AreaInclusive in_area,
+    final TextureFilterMagnification in_filter_mag,
+    final TextureFilterMinification in_filter_min,
+    final KRGBAPrecision in_precision_rgba)
   {
-    this.area = Constraints.constrainNotNull(in_area, "Area");
+    this.area = NullCheck.notNull(in_area, "Area");
     this.filter_mag =
-      Constraints.constrainNotNull(in_filter_mag, "Magnification filter");
-    this.filter_min =
-      Constraints.constrainNotNull(in_filter_min, "Minification filter");
+      NullCheck.notNull(in_filter_mag, "Magnification filter");
+    this.filter_min = NullCheck.notNull(in_filter_min, "Minification filter");
     this.precision_rgba =
-      Constraints.constrainNotNull(in_precision_rgba, "RGBA precision");
+      NullCheck.notNull(in_precision_rgba, "RGBA precision");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -110,7 +102,7 @@ import com.io7m.jcanephora.TextureFilterMinification;
    * @return The inclusive area of the framebuffer
    */
 
-  public @Nonnull AreaInclusive getArea()
+  public AreaInclusive getArea()
   {
     return this.area;
   }
@@ -120,7 +112,7 @@ import com.io7m.jcanephora.TextureFilterMinification;
    *         framebuffer
    */
 
-  public @Nonnull TextureFilterMagnification getFilterMagnification()
+  public TextureFilterMagnification getFilterMagnification()
   {
     return this.filter_mag;
   }
@@ -130,7 +122,7 @@ import com.io7m.jcanephora.TextureFilterMinification;
    *         framebuffer
    */
 
-  public @Nonnull TextureFilterMinification getFilterMinification()
+  public TextureFilterMinification getFilterMinification()
   {
     return this.filter_min;
   }
@@ -139,7 +131,7 @@ import com.io7m.jcanephora.TextureFilterMinification;
    * @return The desired precision of the framebuffer
    */
 
-  public @Nonnull KRGBAPrecision getRGBAPrecision()
+  public KRGBAPrecision getRGBAPrecision()
   {
     return this.precision_rgba;
   }
@@ -167,6 +159,8 @@ import com.io7m.jcanephora.TextureFilterMinification;
     builder.append(" precision_rgba=");
     builder.append(this.precision_rgba);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

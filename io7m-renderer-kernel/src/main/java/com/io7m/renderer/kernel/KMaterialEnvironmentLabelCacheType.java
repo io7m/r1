@@ -16,15 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KInstanceRegularType;
 import com.io7m.renderer.kernel.types.KMaterialEnvironmentLabel;
 
 interface KMaterialEnvironmentLabelCacheType
 {
-  @Nonnull KMaterialEnvironmentLabel getEnvironmentLabelRegular(
-    final @Nonnull KInstanceRegularType instance)
-    throws ConstraintError;
+  KMaterialEnvironmentLabel getEnvironmentLabelRegular(
+    final KInstanceRegularType instance);
 }

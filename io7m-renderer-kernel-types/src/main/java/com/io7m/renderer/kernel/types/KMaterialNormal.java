@@ -16,32 +16,25 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Option;
-import com.io7m.jaux.functional.Option.None;
-import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * Material properties related to surface normals.
  */
 
-@Immutable public final class KMaterialNormal implements
+@EqualityStructural public final class KMaterialNormal implements
   KTexturesRequiredType
 {
-  private static final @Nonnull KMaterialNormal EMPTY;
+  private static final KMaterialNormal EMPTY;
 
   static {
-    try {
-      final None<Texture2DStaticUsable> none = Option.none();
-      EMPTY = new KMaterialNormal(none);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    final OptionType<Texture2DStaticUsableType> none = Option.none();
+    EMPTY = new KMaterialNormal(none);
   }
 
   /**
@@ -50,15 +43,12 @@ import com.io7m.jcanephora.Texture2DStaticUsable;
    * @param in_texture
    *          A normal map
    * @return New normal mapping properties
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>.
    */
 
-  public static @Nonnull KMaterialNormal newNormalMapped(
-    final @Nonnull Texture2DStaticUsable in_texture)
-    throws ConstraintError
+  public static KMaterialNormal newNormalMapped(
+    final Texture2DStaticUsableType in_texture)
   {
-    return new KMaterialNormal(Option.some(Constraints.constrainNotNull(
+    return new KMaterialNormal(Option.some(NullCheck.notNull(
       in_texture,
       "Map")));
   }
@@ -70,24 +60,23 @@ import com.io7m.jcanephora.Texture2DStaticUsable;
    * @return New normal mapping properties
    */
 
-  public static @Nonnull KMaterialNormal newNormalUnmapped()
+  public static KMaterialNormal newNormalUnmapped()
   {
     return KMaterialNormal.EMPTY;
   }
 
-  private final @Nonnull Option<Texture2DStaticUsable> texture;
-  private final int                                    textures_required;
+  private final OptionType<Texture2DStaticUsableType> texture;
+  private final int                                   textures_required;
 
   KMaterialNormal(
-    final @Nonnull Option<Texture2DStaticUsable> in_texture)
-    throws ConstraintError
+    final OptionType<Texture2DStaticUsableType> in_texture)
   {
-    this.texture = Constraints.constrainNotNull(in_texture, "Texture");
+    this.texture = NullCheck.notNull(in_texture, "Texture");
     this.textures_required = this.texture.isSome() ? 1 : 0;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -109,7 +98,7 @@ import com.io7m.jcanephora.Texture2DStaticUsable;
    * @return The material's normal map, if any
    */
 
-  public @Nonnull Option<Texture2DStaticUsable> getTexture()
+  public OptionType<Texture2DStaticUsableType> getTexture()
   {
     return this.texture;
   }
@@ -133,6 +122,8 @@ import com.io7m.jcanephora.Texture2DStaticUsable;
     builder.append("[KMaterialNormal ");
     builder.append(this.texture);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

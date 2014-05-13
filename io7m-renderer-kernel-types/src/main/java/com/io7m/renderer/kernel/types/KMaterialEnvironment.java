@@ -16,31 +16,25 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Option;
-import com.io7m.jcanephora.TextureCubeStaticUsable;
+import com.io7m.jcanephora.TextureCubeStaticUsableType;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * Material properties related to surface environment mapping.
  */
 
-@Immutable public final class KMaterialEnvironment implements
+@EqualityStructural public final class KMaterialEnvironment implements
   KTexturesRequiredType
 {
-  private static final @Nonnull KMaterialEnvironment EMPTY;
+  private static final KMaterialEnvironment EMPTY;
 
   static {
-    final Option<TextureCubeStaticUsable> none = Option.none();
-    try {
-      EMPTY = new KMaterialEnvironment(0.0f, none, false);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    final OptionType<TextureCubeStaticUsableType> none = Option.none();
+    EMPTY = new KMaterialEnvironment(0.0f, none, false);
   }
 
   /**
@@ -55,18 +49,17 @@ import com.io7m.jcanephora.TextureCubeStaticUsable;
    *          Whether or not to sample the environment intensity from the
    *          specular map
    * @return New environment mapping properties
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KMaterialEnvironment newEnvironmentMapped(
+  public static KMaterialEnvironment newEnvironmentMapped(
     final float in_mix,
-    final @Nonnull TextureCubeStaticUsable in_texture,
+    final TextureCubeStaticUsableType in_texture,
     final boolean in_mix_mapped)
-    throws ConstraintError
   {
-    return new KMaterialEnvironment(in_mix, Option.some(Constraints
-      .constrainNotNull(in_texture, "Texture")), in_mix_mapped);
+    return new KMaterialEnvironment(
+      in_mix,
+      Option.some(in_texture),
+      in_mix_mapped);
   }
 
   /**
@@ -74,30 +67,29 @@ import com.io7m.jcanephora.TextureCubeStaticUsable;
    *         environment mapping
    */
 
-  public static @Nonnull KMaterialEnvironment newEnvironmentUnmapped()
+  public static KMaterialEnvironment newEnvironmentUnmapped()
   {
     return KMaterialEnvironment.EMPTY;
   }
 
-  private final float                                    mix;
-  private final boolean                                  mix_mapped;
-  private final @Nonnull Option<TextureCubeStaticUsable> texture;
-  private final int                                      textures_required;
+  private final float                                   mix;
+  private final boolean                                 mix_mapped;
+  private final OptionType<TextureCubeStaticUsableType> texture;
+  private final int                                     textures_required;
 
   private KMaterialEnvironment(
     final float in_mix,
-    final @Nonnull Option<TextureCubeStaticUsable> in_texture,
+    final OptionType<TextureCubeStaticUsableType> in_texture,
     final boolean in_mix_mapped)
-    throws ConstraintError
   {
     this.mix = in_mix;
-    this.texture = Constraints.constrainNotNull(in_texture, "Texture");
+    this.texture = NullCheck.notNull(in_texture, "Texture");
     this.mix_mapped = in_mix_mapped;
     this.textures_required = this.texture.isSome() ? 1 : 0;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -140,7 +132,7 @@ import com.io7m.jcanephora.TextureCubeStaticUsable;
    * @return The environment cube map texture, if any
    */
 
-  public @Nonnull Option<TextureCubeStaticUsable> getTexture()
+  public OptionType<TextureCubeStaticUsableType> getTexture()
   {
     return this.texture;
   }
@@ -170,7 +162,9 @@ import com.io7m.jcanephora.TextureCubeStaticUsable;
     builder.append(" texture=");
     builder.append(this.texture);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 
   /**
@@ -180,13 +174,10 @@ import com.io7m.jcanephora.TextureCubeStaticUsable;
    * @param t
    *          The new map
    * @return The current material with <code>map == t</code>.
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KMaterialEnvironment withMap(
-    final @Nonnull TextureCubeStaticUsable t)
-    throws ConstraintError
+  public KMaterialEnvironment withMap(
+    final TextureCubeStaticUsableType t)
   {
     return KMaterialEnvironment.newEnvironmentMapped(
       this.mix,
@@ -203,14 +194,10 @@ import com.io7m.jcanephora.TextureCubeStaticUsable;
    * @return The current material with <code>mix == m</code>.
    */
 
-  public @Nonnull KMaterialEnvironment withMix(
+  public KMaterialEnvironment withMix(
     final float m)
   {
-    try {
-      return new KMaterialEnvironment(m, this.texture, this.mix_mapped);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    return new KMaterialEnvironment(m, this.texture, this.mix_mapped);
   }
 
   /**
@@ -220,13 +207,9 @@ import com.io7m.jcanephora.TextureCubeStaticUsable;
    * @return The current material with specular map sampling enabled
    */
 
-  public @Nonnull KMaterialEnvironment withMixMapped()
+  public KMaterialEnvironment withMixMapped()
   {
-    try {
-      return new KMaterialEnvironment(this.mix, this.texture, true);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    return new KMaterialEnvironment(this.mix, this.texture, true);
   }
 
   /**
@@ -234,14 +217,9 @@ import com.io7m.jcanephora.TextureCubeStaticUsable;
    * modification.
    * 
    * @return The current material without a map
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  @SuppressWarnings("static-method") public @Nonnull
-    KMaterialEnvironment
-    withoutMap()
-      throws ConstraintError
+  @SuppressWarnings("static-method") public KMaterialEnvironment withoutMap()
   {
     return KMaterialEnvironment.newEnvironmentUnmapped();
   }
@@ -253,12 +231,8 @@ import com.io7m.jcanephora.TextureCubeStaticUsable;
    * @return The current material without specular map sampling enabled
    */
 
-  public @Nonnull KMaterialEnvironment withoutMixMapped()
+  public KMaterialEnvironment withoutMixMapped()
   {
-    try {
-      return new KMaterialEnvironment(this.mix, this.texture, false);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    return new KMaterialEnvironment(this.mix, this.texture, false);
   }
 }

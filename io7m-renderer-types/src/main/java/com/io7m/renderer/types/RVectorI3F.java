@@ -16,8 +16,7 @@
 
 package com.io7m.renderer.types;
 
-import javax.annotation.Nonnull;
-
+import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jtensors.VectorI3F;
 
 /**
@@ -28,10 +27,10 @@ import com.io7m.jtensors.VectorI3F;
  *          A phantom type parameter describing the coordinate space
  */
 
-public class RVectorI3F<T extends RSpaceType> extends VectorI3F implements
-  RVectorReadable3FType<T>
+@EqualityStructural public class RVectorI3F<T extends RSpaceType> extends
+  VectorI3F implements RVectorReadable3FType<T>
 {
-  private static final @Nonnull RVectorI3F<?> ZERO_FIELD;
+  private static final RVectorI3F<?> ZERO_FIELD;
 
   static {
     ZERO_FIELD = new RVectorI3F<RSpaceType>(0.0f, 0.0f, 0.0f);
@@ -78,7 +77,7 @@ public class RVectorI3F<T extends RSpaceType> extends VectorI3F implements
    */
 
   public RVectorI3F(
-    final @Nonnull RVectorReadable3FType<T> v)
+    final RVectorReadable3FType<T> v)
   {
     super(v);
   }
@@ -88,8 +87,8 @@ public class RVectorI3F<T extends RSpaceType> extends VectorI3F implements
    *         <code>w == 1.0</code>).
    */
 
-  public final @Nonnull RVectorI4F<T> getHomogeneous()
+  public final RVectorI4F<T> getHomogeneous()
   {
-    return new RVectorI4F<T>(this.x, this.y, this.z, 1.0f);
+    return new RVectorI4F<T>(this.getXF(), this.getYF(), this.getZF(), 1.0f);
   }
 }

@@ -16,15 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 
 interface KMaterialDepthLabelCacheType
 {
-  @Nonnull KMaterialDepthLabel getDepthLabel(
-    final @Nonnull KInstanceOpaqueType instance)
-    throws ConstraintError;
+  KMaterialDepthLabel getDepthLabel(
+    final KInstanceOpaqueType instance);
 }

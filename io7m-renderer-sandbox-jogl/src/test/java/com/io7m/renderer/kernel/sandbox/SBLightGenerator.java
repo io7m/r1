@@ -16,15 +16,13 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
 import net.java.quickcheck.Generator;
 import net.java.quickcheck.generator.support.IntegerGenerator;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Option;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.kernel.types.KLightSphere;
@@ -35,14 +33,14 @@ import com.io7m.renderer.types.RVectorI3F;
 
 public final class SBLightGenerator implements Generator<SBLightDescription>
 {
-  private final @Nonnull IntegerGenerator                      index_gen;
-  private @Nonnull Integer                                     id;
-  private final @Nonnull SBVectorI3FGenerator<RSpaceWorldType> world_gen;
-  private final @Nonnull SBVectorI3FGenerator<RSpaceRGBType>   colour_gen;
-  private final @Nonnull PathVirtualGenerator                  path_gen;
-  private final @Nonnull QuaternionI4FGenerator                quat_gen;
-  private final @Nonnull SBProjectionGenerator                 projection_gen;
-  private final @Nonnull SBLightShadowDescriptionGenerator     shad_gen;
+  private final IntegerGenerator                      index_gen;
+  private Integer                                     id;
+  private final SBVectorI3FGenerator<RSpaceWorldType> world_gen;
+  private final SBVectorI3FGenerator<RSpaceRGBType>   colour_gen;
+  private final PathVirtualGenerator                  path_gen;
+  private final QuaternionI4FGenerator                quat_gen;
+  private final SBProjectionGenerator                 projection_gen;
+  private final SBLightShadowDescriptionGenerator     shad_gen;
 
   public SBLightGenerator()
   {
@@ -58,64 +56,59 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
 
   @Override public SBLightDescription next()
   {
-    try {
-      this.id = Integer.valueOf(this.id.intValue() + 1);
+    this.id = Integer.valueOf(this.id.intValue() + 1);
 
-      switch (SBLightType.values()[this.index_gen.next().intValue()]) {
-        case LIGHT_DIRECTIONAL:
-        {
-          final RVectorI3F<RSpaceWorldType> direction = this.world_gen.next();
-          final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
-          final float intensity = (float) Math.random();
+    switch (SBLightType.values()[this.index_gen.next().intValue()]) {
+      case LIGHT_DIRECTIONAL:
+      {
+        final RVectorI3F<RSpaceWorldType> direction = this.world_gen.next();
+        final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
+        final float intensity = (float) Math.random();
 
-          return new SBLightDescriptionDirectional(
-            this.id,
-            KLightDirectional.newDirectional(direction, colour, intensity));
-        }
-        case LIGHT_PROJECTIVE:
-        {
-          final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
-          final float intensity = (float) Math.random();
-          final float falloff = (float) Math.random() * 64.0f;
-          final RVectorI3F<RSpaceWorldType> position = this.world_gen.next();
-          final SBProjectionDescription projection =
-            this.projection_gen.next();
-          final QuaternionI4F orientation = this.quat_gen.next();
-          final PathVirtual texture = this.path_gen.next();
-          final Option<KShadowType> shadow =
-            Option.some(this.shad_gen.next());
+        return new SBLightDescriptionDirectional(
+          this.id,
+          KLightDirectional.newDirectional(direction, colour, intensity));
+      }
+      case LIGHT_PROJECTIVE:
+      {
+        final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
+        final float intensity = (float) Math.random();
+        final float falloff = (float) Math.random() * 64.0f;
+        final RVectorI3F<RSpaceWorldType> position = this.world_gen.next();
+        final SBProjectionDescription projection = this.projection_gen.next();
+        final QuaternionI4F orientation = this.quat_gen.next();
+        final PathVirtual texture = this.path_gen.next();
+        final OptionType<KShadowType> shadow =
+          Option.some(this.shad_gen.next());
 
-          return new SBLightDescriptionProjective(
-            orientation,
-            position,
-            falloff,
-            projection,
-            texture,
+        return new SBLightDescriptionProjective(
+          orientation,
+          position,
+          falloff,
+          projection,
+          texture,
+          colour,
+          intensity,
+          shadow,
+          this.id);
+      }
+      case LIGHT_SPHERICAL:
+      {
+        final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
+        final float intensity = (float) Math.random();
+        final float falloff = (float) Math.random() * 64.0f;
+        final float radius = (float) Math.random() * 64.0f;
+        final RVectorI3F<RSpaceWorldType> position = this.world_gen.next();
+
+        return new SBLightDescriptionSpherical(
+          this.id,
+          KLightSphere.newSpherical(
             colour,
             intensity,
-            shadow,
-            this.id);
-        }
-        case LIGHT_SPHERICAL:
-        {
-          final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
-          final float intensity = (float) Math.random();
-          final float falloff = (float) Math.random() * 64.0f;
-          final float radius = (float) Math.random() * 64.0f;
-          final RVectorI3F<RSpaceWorldType> position = this.world_gen.next();
-
-          return new SBLightDescriptionSpherical(
-            this.id,
-            KLightSphere.newSpherical(
-              colour,
-              intensity,
-              position,
-              radius,
-              falloff));
-        }
+            position,
+            radius,
+            falloff));
       }
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
     }
 
     throw new UnreachableCodeException();

@@ -16,16 +16,14 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.RangeInclusive;
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
@@ -33,19 +31,18 @@ import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 
 final class SBLightShadowMappedVarianceControls implements SBControls
 {
-  private final @Nonnull SBDepthPrecisionSelector         depth_precision;
-  private final @Nonnull SBDepthVariancePrecisionSelector depth_variance_precision;
-  private final @Nonnull SBFloatHSlider                   factor_minimum;
-  private final @Nonnull SBTextureMagFilterSelector       filter_mag;
-  private final @Nonnull SBTextureMinFilterSelector       filter_min;
-  private final @Nonnull SBFloatHSlider                   light_bleed_reduction;
-  private final @Nonnull SBFloatHSlider                   minimum_variance;
-  private final @Nonnull RowGroup                         row_group;
-  private final @Nonnull SBIntegerHSlider                 size;
-  private final @Nonnull SBBlurControls                   blur_controls;
+  private final SBDepthPrecisionSelector         depth_precision;
+  private final SBDepthVariancePrecisionSelector depth_variance_precision;
+  private final SBFloatHSlider                   factor_minimum;
+  private final SBTextureMagFilterSelector       filter_mag;
+  private final SBTextureMinFilterSelector       filter_min;
+  private final SBFloatHSlider                   light_bleed_reduction;
+  private final SBFloatHSlider                   minimum_variance;
+  private final RowGroup                         row_group;
+  private final SBIntegerHSlider                 size;
+  private final SBBlurControls                   blur_controls;
 
   SBLightShadowMappedVarianceControls()
-    throws ConstraintError
   {
     this.size = new SBIntegerHSlider("Size", 1, 10);
 
@@ -70,7 +67,7 @@ final class SBLightShadowMappedVarianceControls implements SBControls
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     layout
       .row()
@@ -139,19 +136,18 @@ final class SBLightShadowMappedVarianceControls implements SBControls
     this.blur_controls.controlsShow();
   }
 
-  public @Nonnull RowGroup getRowGroup()
+  public RowGroup getRowGroup()
   {
     return this.row_group;
   }
 
-  public @Nonnull KShadowMappedVariance getShadow(
-    final @Nonnull Integer light_id)
-    throws ConstraintError,
-      SBExceptionInputError
+  public KShadowMappedVariance getShadow(
+    final Integer light_id)
+    throws SBExceptionInputError
   {
     final int edge_size = ((int) Math.pow(2, this.size.getCurrent())) - 1;
-    final RangeInclusive range_x = new RangeInclusive(0, edge_size);
-    final RangeInclusive range_y = new RangeInclusive(0, edge_size);
+    final RangeInclusiveL range_x = new RangeInclusiveL(0, edge_size);
+    final RangeInclusiveL range_y = new RangeInclusiveL(0, edge_size);
     final AreaInclusive area = new AreaInclusive(range_x, range_y);
 
     final KFramebufferDepthVarianceDescription depth_description =

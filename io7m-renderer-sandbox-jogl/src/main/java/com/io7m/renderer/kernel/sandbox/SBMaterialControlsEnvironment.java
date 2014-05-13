@@ -20,7 +20,6 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -30,24 +29,25 @@ import javax.swing.JTextField;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 
 public final class SBMaterialControlsEnvironment implements
   SBControlsDataType<SBMaterialEnvironmentDescription>
 {
-  protected final @Nonnull JTextField     texture;
-  protected final @Nonnull JButton        texture_select;
-  protected final @Nonnull SBFloatHSlider mix;
-  protected final @Nonnull JCheckBox      mix_mapped;
-  private final @Nonnull RowGroup         group;
+  protected final JTextField     texture;
+  protected final JButton        texture_select;
+  protected final SBFloatHSlider mix;
+  protected final JCheckBox      mix_mapped;
+  private final RowGroup         group;
 
   public SBMaterialControlsEnvironment(
-    final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull Log log)
-    throws ConstraintError
+    final SBSceneControllerTextures controller,
+    final LogUsableType log)
   {
     this.group = new RowGroup();
 
@@ -56,7 +56,7 @@ public final class SBMaterialControlsEnvironment implements
     this.texture_select = new JButton("Select...");
     this.texture_select.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final SBTexturesCubeWindow twindow =
           new SBTexturesCubeWindow(
@@ -73,7 +73,7 @@ public final class SBMaterialControlsEnvironment implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout dg)
+    final DesignGridLayout dg)
   {
     final JLabel label = new JLabel("Environment mapping");
     label.setForeground(Color.BLUE);
@@ -102,7 +102,7 @@ public final class SBMaterialControlsEnvironment implements
   }
 
   @Override public void controlsLoadFrom(
-    final @Nonnull SBMaterialEnvironmentDescription mat_e)
+    final SBMaterialEnvironmentDescription mat_e)
   {
     final PathVirtual tt = mat_e.getTexture();
     this.texture.setText(tt == null ? "" : tt.toString());
@@ -110,21 +110,24 @@ public final class SBMaterialControlsEnvironment implements
     this.mix_mapped.setSelected(mat_e.getMixMapped());
   }
 
-  @Override public @Nonnull SBMaterialEnvironmentDescription controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+  @Override public SBMaterialEnvironmentDescription controlsSave()
+    throws SBExceptionInputError
   {
-    final String tt = this.texture.getText();
-    final PathVirtual environment_texture_value =
-      (tt.equals("")) ? null : PathVirtual.ofString(tt);
+    try {
+      final String tt = this.texture.getText();
+      final PathVirtual environment_texture_value =
+        (tt.equals("")) ? null : PathVirtual.ofString(tt);
 
-    final SBMaterialEnvironmentDescription environment =
-      new SBMaterialEnvironmentDescription(
-        environment_texture_value,
-        this.mix.getCurrent(),
-        this.mix_mapped.isSelected());
+      final SBMaterialEnvironmentDescription environment =
+        new SBMaterialEnvironmentDescription(
+          environment_texture_value,
+          this.mix.getCurrent(),
+          this.mix_mapped.isSelected());
 
-    return environment;
+      return environment;
+    } catch (final FilesystemError e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 
   @Override public void controlsHide()

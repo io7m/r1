@@ -16,26 +16,22 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.ArrayBufferAttributeDescriptor;
-import com.io7m.jcanephora.ArrayBufferTypeDescriptor;
-import com.io7m.jcanephora.ArrayBufferWritableData;
-import com.io7m.jcanephora.CursorWritable3f;
-import com.io7m.jcanephora.CursorWritable4f;
-import com.io7m.jcanephora.CursorWritableIndex;
-import com.io7m.jcanephora.IndexBuffer;
-import com.io7m.jcanephora.IndexBufferWritableData;
+import com.io7m.jcanephora.ArrayBufferType;
+import com.io7m.jcanephora.ArrayBufferUpdateUnmapped;
+import com.io7m.jcanephora.ArrayBufferUpdateUnmappedType;
+import com.io7m.jcanephora.ArrayDescriptor;
+import com.io7m.jcanephora.ArrayDescriptorBuilderType;
+import com.io7m.jcanephora.CursorWritable3fType;
+import com.io7m.jcanephora.CursorWritable4fType;
+import com.io7m.jcanephora.CursorWritableIndexType;
+import com.io7m.jcanephora.IndexBufferType;
+import com.io7m.jcanephora.IndexBufferUpdateUnmapped;
+import com.io7m.jcanephora.IndexBufferUpdateUnmappedType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.UsageHint;
-import com.io7m.jlog.Level;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogUsableType;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
 
 public final class SBVisibleGridPlane
@@ -58,19 +54,18 @@ public final class SBVisibleGridPlane
     return x_points + z_points;
   }
 
-  private final @Nonnull ArrayBuffer array;
-  private final @Nonnull IndexBuffer indices;
+  private final ArrayBufferType array;
+  private final IndexBufferType indices;
 
   SBVisibleGridPlane(
-    final @Nonnull JCGLInterfaceCommon gl,
+    final JCGLInterfaceCommonType gl,
     final int x,
     final int y,
     final int z,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      JCGLException
+    final LogUsableType log)
+    throws JCGLException
   {
-    if (log.enabled(Level.LOG_DEBUG)) {
+    if (log.wouldLog(LogLevel.LOG_DEBUG)) {
       final StringBuilder m = new StringBuilder();
       m.append("Allocate grid plane ");
       m.append(x);
@@ -78,31 +73,35 @@ public final class SBVisibleGridPlane
       m.append(y);
       m.append(" ");
       m.append(z);
-      log.debug(m.toString());
+      final String r = m.toString();
+      assert r != null;
+      log.debug(r);
     }
 
-    final List<ArrayBufferAttributeDescriptor> abs =
-      new ArrayList<ArrayBufferAttributeDescriptor>();
-    abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
-    abs.add(KMeshAttributes.ATTRIBUTE_COLOUR);
-    final ArrayBufferTypeDescriptor type = new ArrayBufferTypeDescriptor(abs);
+    final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
+    b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
+    b.addAttribute(KMeshAttributes.ATTRIBUTE_COLOUR);
+    final ArrayDescriptor type = b.build();
 
     final long elements = SBVisibleGridPlane.elementsRequired(x, z);
     this.array =
-      gl.arrayBufferAllocate(elements, type, UsageHint.USAGE_STATIC_READ);
+      gl.arrayBufferAllocate(elements, type, UsageHint.USAGE_STATIC_DRAW);
+    this.indices =
+      gl.indexBufferAllocate(
+        this.array,
+        (int) elements,
+        UsageHint.USAGE_STATIC_DRAW);
 
-    this.indices = gl.indexBufferAllocate(this.array, (int) elements);
+    final ArrayBufferUpdateUnmappedType array_map =
+      ArrayBufferUpdateUnmapped.newUpdateReplacingAll(this.array);
+    final IndexBufferUpdateUnmappedType index_map =
+      IndexBufferUpdateUnmapped.newReplacing(this.indices);
 
-    final ArrayBufferWritableData array_map =
-      new ArrayBufferWritableData(this.array);
-    final IndexBufferWritableData index_map =
-      new IndexBufferWritableData(this.indices);
-
-    final CursorWritable3f pc =
+    final CursorWritable3fType pc =
       array_map.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-    final CursorWritable4f cc =
+    final CursorWritable4fType cc =
       array_map.getCursor4f(KMeshAttributes.ATTRIBUTE_COLOUR.getName());
-    final CursorWritableIndex ic = index_map.getCursor();
+    final CursorWritableIndexType ic = index_map.getCursor();
 
     int index = 0;
     for (int cx = -x; cx <= x; ++cx) {
@@ -135,12 +134,12 @@ public final class SBVisibleGridPlane
     gl.indexBufferUpdate(index_map);
   }
 
-  @Nonnull ArrayBuffer getArrayBuffer()
+  ArrayBufferType getArrayBuffer()
   {
     return this.array;
   }
 
-  @Nonnull IndexBuffer getIndexBuffer()
+  IndexBufferType getIndexBuffer()
   {
     return this.indices;
   }

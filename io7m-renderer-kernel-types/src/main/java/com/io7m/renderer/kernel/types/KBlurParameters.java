@@ -16,17 +16,14 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.Nullable;
+import com.io7m.jranges.RangeCheck;
 
 /**
  * Parameters for blur effects.
  */
 
-@Immutable public final class KBlurParameters
+public final class KBlurParameters
 {
   /**
    * A mutable builder interface for constructing parameters.
@@ -39,7 +36,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
      *         given to the builder so far.
      */
 
-    @Nonnull KBlurParameters build();
+    KBlurParameters build();
 
     /**
      * <p>
@@ -69,13 +66,10 @@ import com.io7m.jaux.Constraints.ConstraintError;
      * 
      * @param passes
      *          The number of passes
-     * @throws ConstraintError
-     *           Iff <code>0 &lt;= passes == false</code>
      */
 
     void setPasses(
-      int passes)
-      throws ConstraintError;
+      int passes);
 
     /**
      * <p>
@@ -92,20 +86,17 @@ import com.io7m.jaux.Constraints.ConstraintError;
      * @param scale
      *          The coefficient by which to multiply the dimensions of the
      *          image
-     * @throws ConstraintError
-     *           Iff <code>0.0 &lt; scale &lt;= 1.0 == false</code>
      */
 
     void setScale(
-      final float scale)
-      throws ConstraintError;
+      final float scale);
   }
 
   /**
    * @return A new parameter builder
    */
 
-  public static @Nonnull BuilderType newBuilder()
+  public static BuilderType newBuilder()
   {
     return new BuilderType() {
       private float blur_size = 1.0f;
@@ -127,22 +118,29 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
       @Override public void setPasses(
         final int in_passes)
-        throws ConstraintError
       {
         this.passes =
-          Constraints.constrainRange(
+          (int) RangeCheck.checkIncludedIn(
             in_passes,
-            0,
-            Integer.MAX_VALUE,
-            "Passes");
+            "Passes",
+            RangeCheck.NATURAL_INTEGER,
+            "Valid number of passes");
       }
 
       @Override public void setScale(
         final float in_scale)
-        throws ConstraintError
       {
-        this.scale =
-          Constraints.constrainRange(in_scale, 0.0f, 1.0f, "Scale");
+        RangeCheck.checkGreaterEqualDouble(
+          in_scale,
+          "Scale",
+          0.0f,
+          "Minimum scale");
+        RangeCheck.checkLessEqualDouble(
+          in_scale,
+          "Scale",
+          1.0f,
+          "Maximum scale");
+        this.scale = in_scale;
       }
     };
   }
@@ -162,7 +160,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -234,6 +232,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
     s.append(" passes=");
     s.append(this.passes);
     s.append("]");
-    return s.toString();
+    final String r = s.toString();
+    assert r != null;
+    return r;
   }
 }

@@ -18,41 +18,37 @@ package com.io7m.renderer.kernel;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Option;
-import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
-import com.io7m.jcanephora.ArrayBufferUsable;
+import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.DepthFunction;
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.IndexBufferUsable;
-import com.io7m.jcanephora.JCBExecutionAPI;
-import com.io7m.jcanephora.JCBExecutionException;
-import com.io7m.jcanephora.JCBExecutorProcedure;
-import com.io7m.jcanephora.JCBProgram;
-import com.io7m.jcanephora.JCBProgramProcedure;
+import com.io7m.jcanephora.FramebufferUsableType;
+import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.jcanephora.TextureUnit;
-import com.io7m.jlog.Log;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jcanephora.TextureUnitType;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
+import com.io7m.jcanephora.batchexec.JCBExecutorType;
+import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
+import com.io7m.jcanephora.batchexec.JCBProgramType;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KScene;
-import com.io7m.renderer.kernel.types.KScene.KSceneOpaques;
+import com.io7m.renderer.kernel.types.KSceneOpaques;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 
@@ -65,7 +61,7 @@ import com.io7m.renderer.types.RException;
 @SuppressWarnings("synthetic-access") public final class KRendererDebugNormalsMapEye implements
   KRendererDebugType
 {
-  private static final @Nonnull String NAME = "debug-normals-map-eye";
+  private static final String NAME = "debug-normals-map-eye";
 
   /**
    * Construct a new renderer.
@@ -77,26 +73,22 @@ import com.io7m.renderer.types.RException;
    * @param log
    *          A log handle
    * @return A new renderer
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
   public static KRendererDebugNormalsMapEye rendererNew(
-    final @Nonnull JCGLImplementation g,
-    final @Nonnull KShaderCacheType shader_cache,
-    final @Nonnull Log log)
-    throws ConstraintError
+    final JCGLImplementationType g,
+    final KShaderCacheType shader_cache,
+    final LogUsableType log)
   {
     return new KRendererDebugNormalsMapEye(g, shader_cache, log);
   }
 
   private static void renderInstanceOpaque(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCBProgram p,
-    final @Nonnull MatricesInstanceType mi,
-    final @Nonnull KInstanceTransformedOpaqueType transformed)
-    throws ConstraintError,
-      JCGLException
+    final JCGLInterfaceCommonType gc,
+    final JCBProgramType p,
+    final MatricesInstanceType mi,
+    final KInstanceTransformedOpaqueType transformed)
+    throws JCGLException
   {
 
     /**
@@ -113,17 +105,17 @@ import com.io7m.renderer.types.RException;
      * Upload matrices, set textures.
      */
 
-    final List<TextureUnit> texture_units = gc.textureGetUnits();
+    final List<TextureUnitType> texture_units = gc.textureGetUnits();
     final KInstanceOpaqueType instance = transformed.instanceGet();
     final KMaterialOpaqueType material = instance.instanceGetMaterial();
 
     {
-      final Option<Texture2DStaticUsable> normal_opt =
+      final OptionType<Texture2DStaticUsableType> normal_opt =
         material.materialGetNormal().getTexture();
       if (normal_opt.isSome()) {
         gc.texture2DStaticBind(
           texture_units.get(0),
-          ((Option.Some<Texture2DStaticUsable>) normal_opt).value);
+          ((Some<Texture2DStaticUsableType>) normal_opt).get());
       } else {
         gc.texture2DStaticUnbind(texture_units.get(0));
       }
@@ -137,8 +129,8 @@ import com.io7m.renderer.types.RException;
 
     try {
       final KMeshReadableType mesh = instance.instanceGetMesh();
-      final ArrayBufferUsable array = mesh.getArrayBuffer();
-      final IndexBufferUsable indices = mesh.getIndexBuffer();
+      final ArrayBufferUsableType array = mesh.getArrayBuffer();
+      final IndexBufferUsableType indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
@@ -146,17 +138,11 @@ import com.io7m.renderer.types.RException;
       KShadingProgramCommon.bindAttributeTangent4(p, array);
       KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
 
-      p.programExecute(new JCBProgramProcedure() {
+      p.programExecute(new JCBProgramProcedureType<JCGLException>() {
         @Override public void call()
-          throws ConstraintError,
-            JCGLException,
-            Exception
+          throws JCGLException
         {
-          try {
-            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-          } catch (final ConstraintError x) {
-            throw new UnreachableCodeException(x);
-          }
+          gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
         }
       });
 
@@ -165,34 +151,29 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private final @Nonnull JCGLImplementation   gl;
-  private final @Nonnull Log                  log;
-  private final @Nonnull KMutableMatricesType matrices;
-  private final @Nonnull KShaderCacheType     shader_cache;
-  private final @Nonnull KTransformContext    transform_context;
+  private final JCGLImplementationType gl;
+  private final LogUsableType          log;
+  private final KMutableMatrices       matrices;
+  private final KShaderCacheType       shader_cache;
+  private final KTransformContext      transform_context;
 
   private KRendererDebugNormalsMapEye(
-    final @Nonnull JCGLImplementation in_gl,
-    final @Nonnull KShaderCacheType in_shader_cache,
-    final @Nonnull Log in_log)
-    throws ConstraintError
+    final JCGLImplementationType in_gl,
+    final KShaderCacheType in_shader_cache,
+    final LogUsableType in_log)
   {
     this.log =
-      new Log(
-        Constraints.constrainNotNull(in_log, "Log"),
-        KRendererDebugNormalsMapEye.NAME);
-    this.shader_cache =
-      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
-    this.gl = Constraints.constrainNotNull(in_gl, "GL");
-    this.matrices = KMutableMatricesType.newMatrices();
+      NullCheck.notNull(in_log, "Log").with(KRendererDebugNormalsMapEye.NAME);
+    this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
+    this.gl = NullCheck.notNull(in_gl, "GL");
+    this.matrices = KMutableMatrices.newMatrices();
     this.transform_context = KTransformContext.newContext();
   }
 
   @Override public void rendererDebugEvaluate(
-    final @Nonnull KFramebufferRGBAUsableType framebuffer,
-    final @Nonnull KScene scene)
-    throws ConstraintError,
-      RException
+    final KFramebufferRGBAUsableType framebuffer,
+    final KScene scene)
+    throws RException
   {
     final KCamera camera = scene.getCamera();
 
@@ -202,8 +183,7 @@ import com.io7m.renderer.types.RException;
       new MatricesObserverFunctionType<Unit, RException>() {
         @Override public Unit run(
           final MatricesObserverType o)
-          throws ConstraintError,
-            RException
+          throws RException
         {
           try {
             KRendererDebugNormalsMapEye.this.renderScene(
@@ -226,20 +206,19 @@ import com.io7m.renderer.types.RException;
   }
 
   private void renderScene(
-    final @Nonnull KFramebufferRGBAUsableType framebuffer,
-    final @Nonnull KScene scene,
-    final @Nonnull MatricesObserverType mo)
+    final KFramebufferRGBAUsableType framebuffer,
+    final KScene scene,
+    final MatricesObserverType mo)
     throws JCGLException,
-      ConstraintError,
       RException,
       JCacheException
   {
     final KProgram program =
       this.shader_cache.cacheGetLU("debug_normals_map_eye");
 
-    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+    final JCGLInterfaceCommonType gc = this.gl.getGLCommon();
 
-    final FramebufferReferenceUsable output_buffer =
+    final FramebufferUsableType output_buffer =
       framebuffer.kFramebufferGetColorFramebuffer();
 
     try {
@@ -258,12 +237,11 @@ import com.io7m.renderer.types.RException;
 
       gc.viewportSet(framebuffer.kFramebufferGetArea());
 
-      final JCBExecutionAPI e = program.getExecutable();
-      e.execRun(new JCBExecutorProcedure() {
+      final JCBExecutorType e = program.getExecutable();
+      e.execRun(new JCBExecutorProcedureType<RException>() {
         @Override public void call(
-          final @Nonnull JCBProgram p)
-          throws ConstraintError,
-            JCGLException,
+          final JCBProgramType p)
+          throws JCGLException,
             RException
         {
           KShadingProgramCommon.putMatrixProjectionUnchecked(
@@ -276,9 +254,8 @@ import com.io7m.renderer.types.RException;
               o,
               new MatricesInstanceFunctionType<Unit, JCGLException>() {
                 @Override public Unit run(
-                  final @Nonnull MatricesInstanceType mi)
-                  throws ConstraintError,
-                    RException,
+                  final MatricesInstanceType mi)
+                  throws RException,
                     JCGLException
                 {
                   KRendererDebugNormalsMapEye.renderInstanceOpaque(
@@ -292,8 +269,6 @@ import com.io7m.renderer.types.RException;
           }
         }
       });
-    } catch (final JCBExecutionException x) {
-      throw new UnreachableCodeException(x);
     } finally {
       gc.framebufferDrawUnbind();
     }

@@ -18,8 +18,6 @@ package com.io7m.renderer.kernel;
 
 import java.math.BigInteger;
 
-import javax.annotation.Nonnull;
-
 /**
  * The type of label deciders for forward rendering.
  */
@@ -47,5 +45,5 @@ public interface KForwardLabelDeciderType extends
    *         cached labels)
    */
 
-  @Nonnull BigInteger getSize();
+  BigInteger getSize();
 }

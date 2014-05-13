@@ -20,9 +20,6 @@ import java.io.File;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureWrapR;
@@ -32,27 +29,25 @@ import com.io7m.jvvfs.PathVirtual;
 
 interface SBSceneControllerTextures extends SBSceneChangeListenerRegistration
 {
-  public @Nonnull
+  public
     <T extends SBTexture2DKind>
     Future<SBTexture2D<T>>
     sceneTexture2DLoad(
-      final @Nonnull File file,
-      final @Nonnull TextureWrapS wrap_s,
-      final @Nonnull TextureWrapT wrap_t,
-      final @Nonnull TextureFilterMinification filter_min,
-      final @Nonnull TextureFilterMagnification filter_mag)
-      throws ConstraintError;
+      final File file,
+      final TextureWrapS wrap_s,
+      final TextureWrapT wrap_t,
+      final TextureFilterMinification filter_min,
+      final TextureFilterMagnification filter_mag);
 
-  public @Nonnull Future<SBTextureCube> sceneTextureCubeLoad(
-    final @Nonnull File file,
-    final @Nonnull TextureWrapR wrap_r,
-    final @Nonnull TextureWrapS wrap_s,
-    final @Nonnull TextureWrapT wrap_t,
-    final @Nonnull TextureFilterMinification filter_min,
-    final @Nonnull TextureFilterMagnification filter_mag)
-    throws ConstraintError;
+  public Future<SBTextureCube> sceneTextureCubeLoad(
+    final File file,
+    final TextureWrapR wrap_r,
+    final TextureWrapS wrap_s,
+    final TextureWrapT wrap_t,
+    final TextureFilterMinification filter_min,
+    final TextureFilterMagnification filter_mag);
 
-  public @Nonnull Map<PathVirtual, SBTexture2D<?>> sceneTextures2DGet();
+  public Map<PathVirtual, SBTexture2D<?>> sceneTextures2DGet();
 
-  public @Nonnull Map<PathVirtual, SBTextureCube> sceneTexturesCubeGet();
+  public Map<PathVirtual, SBTextureCube> sceneTexturesCubeGet();
 }

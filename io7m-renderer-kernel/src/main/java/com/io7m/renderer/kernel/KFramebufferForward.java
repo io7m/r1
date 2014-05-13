@@ -16,12 +16,10 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.types.RException;
 
@@ -32,7 +30,7 @@ import com.io7m.renderer.types.RException;
  * </p>
  */
 
-public final class KFramebufferForward
+@EqualityReference public final class KFramebufferForward
 {
   /**
    * Construct a new framebuffer from the given description.
@@ -42,17 +40,14 @@ public final class KFramebufferForward
    * @param description
    *          The framebuffer description
    * @return A new framebuffer
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    * @throws RException
    *           If an error occurs during creation
    */
 
-  public static @Nonnull KFramebufferForwardType newFramebuffer(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull KFramebufferForwardDescription description)
-    throws ConstraintError,
-      RException
+  public static KFramebufferForwardType newFramebuffer(
+    final JCGLImplementationType gi,
+    final KFramebufferForwardDescription description)
+    throws RException
   {
     try {
       return KFramebufferForwardAbstract.newFramebuffer(gi, description);

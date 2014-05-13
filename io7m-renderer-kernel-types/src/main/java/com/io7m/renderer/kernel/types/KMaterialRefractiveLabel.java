@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * Labels for refractive properties.
@@ -47,8 +46,8 @@ public enum KMaterialRefractiveLabel
    * @return A label for the given instance
    */
 
-  public static @Nonnull KMaterialRefractiveLabel fromInstance(
-    final @Nonnull KInstanceTranslucentRefractive instance)
+  public static  KMaterialRefractiveLabel fromInstance(
+    final  KInstanceTranslucentRefractive instance)
   {
     if (instance.instanceGetMaterial().getRefractive().isMasked()) {
       return REFRACTIVE_MASKED;
@@ -56,11 +55,11 @@ public enum KMaterialRefractiveLabel
     return REFRACTIVE_UNMASKED;
   }
 
-  private final @Nonnull String code;
+  private final  String code;
   private int                   textures_required;
 
   private KMaterialRefractiveLabel(
-    final @Nonnull String in_code,
+    final  String in_code,
     final int in_textures_required)
   {
     this.code = in_code;

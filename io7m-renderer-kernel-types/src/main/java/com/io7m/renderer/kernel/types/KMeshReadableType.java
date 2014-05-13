@@ -16,10 +16,8 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jcanephora.ArrayBufferUsable;
-import com.io7m.jcanephora.IndexBufferUsable;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorReadable3FType;
 
@@ -33,26 +31,26 @@ public interface KMeshReadableType
    * @return The array buffer that holds the mesh data
    */
 
-  @Nonnull ArrayBufferUsable getArrayBuffer();
+  ArrayBufferUsableType getArrayBuffer();
 
   /**
    * @return The lower bound, in object space, of all vertex positions in the
    *         mesh
    */
 
-  @Nonnull RVectorReadable3FType<RSpaceObjectType> getBoundsLower();
+  RVectorReadable3FType<RSpaceObjectType> getBoundsLower();
 
   /**
    * @return The upper bound, in object space, of all vertex positions in the
    *         mesh
    */
 
-  @Nonnull RVectorReadable3FType<RSpaceObjectType> getBoundsUpper();
+  RVectorReadable3FType<RSpaceObjectType> getBoundsUpper();
 
   /**
    * @return The index buffer describing primitives in the mesh data
    */
 
-  @Nonnull IndexBufferUsable getIndexBuffer();
+  IndexBufferUsableType getIndexBuffer();
 
 }

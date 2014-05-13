@@ -16,9 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
+import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RTransformModelType;
@@ -27,7 +25,7 @@ import com.io7m.renderer.types.RTransformModelType;
  * An object-space to world-space transformation consisting of a 4x4 matrix.
  */
 
-@Immutable public final class KTransformMatrix4x4 implements KTransformType
+public final class KTransformMatrix4x4 implements KTransformType
 {
   /**
    * Construct a new transformation with the given matrix.
@@ -37,43 +35,67 @@ import com.io7m.renderer.types.RTransformModelType;
    * @return A new transformation
    */
 
-  public static @Nonnull KTransformType newTransform(
-    final @Nonnull RMatrixI4x4F<RTransformModelType> model)
+  public static KTransformType newTransform(
+    final RMatrixI4x4F<RTransformModelType> model)
   {
     return new KTransformMatrix4x4(model);
   }
 
-  private final @Nonnull RMatrixI4x4F<RTransformModelType> model;
+  private final RMatrixI4x4F<RTransformModelType> model;
 
   KTransformMatrix4x4(
-    final @Nonnull RMatrixI4x4F<RTransformModelType> in_model)
+    final RMatrixI4x4F<RTransformModelType> in_model)
   {
     this.model = in_model;
+  }
+
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KTransformMatrix4x4 other = (KTransformMatrix4x4) obj;
+    return this.model.equals(other.model);
   }
 
   /**
    * @return The given object-to-world matrix.
    */
 
-  public @Nonnull RMatrixI4x4F<RTransformModelType> getModel()
+  public RMatrixI4x4F<RTransformModelType> getModel()
   {
     return this.model;
   }
 
-  @Override public void transformMakeMatrix4x4F(
-    final @Nonnull KTransformContext context,
-    final @Nonnull MatrixM4x4F m)
+  @Override public int hashCode()
   {
-    this.model.makeMatrixM4x4F(m);
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.model.hashCode();
+    return result;
   }
 
   @Override public
     <A, E extends Throwable, V extends KTransformVisitorType<A, E>>
     A
     transformAccept(
-      final @Nonnull V v)
+      final V v)
       throws E
   {
     return v.transformMatrix4x4(this);
+  }
+
+  @Override public void transformMakeMatrix4x4F(
+    final KTransformContext context,
+    final MatrixM4x4F m)
+  {
+    this.model.makeMatrixM4x4F(m);
   }
 }

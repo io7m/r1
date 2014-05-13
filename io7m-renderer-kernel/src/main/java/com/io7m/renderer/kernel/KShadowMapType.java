@@ -16,11 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLResourceUsable;
+import com.io7m.jcanephora.JCGLResourceUsableType;
+import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -29,7 +26,7 @@ import com.io7m.renderer.types.RException;
 
 public interface KShadowMapType extends
   KShadowMapUsableType,
-  JCGLResourceUsable
+  JCGLResourceUsableType
 {
   /**
    * Accept a visitor.
@@ -43,6 +40,7 @@ public interface KShadowMapType extends
    * @param v
    *          The visitor
    * @return The value returned by the visitor
+   * 
    * @throws E
    *           If the visitor raises <code>E</code>
    * @throws RException
@@ -52,7 +50,7 @@ public interface KShadowMapType extends
     <A, E extends Throwable, V extends KShadowMapVisitorType<A, E>>
     A
     kShadowMapAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
         RException;
 
@@ -63,12 +61,9 @@ public interface KShadowMapType extends
    *          The OpenGL interface
    * @throws RException
    *           If an error occurs
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
   void kShadowMapDelete(
-    @Nonnull JCGLImplementation g)
-    throws RException,
-      ConstraintError;
+    JCGLImplementationType g)
+    throws RException;
 }

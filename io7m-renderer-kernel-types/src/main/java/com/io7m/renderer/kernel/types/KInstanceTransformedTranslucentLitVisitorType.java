@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
@@ -40,8 +37,7 @@ public interface KInstanceTransformedTranslucentLitVisitorType<A, E extends Thro
    * @param i
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws JCGLException
@@ -50,10 +46,9 @@ public interface KInstanceTransformedTranslucentLitVisitorType<A, E extends Thro
    *           If required
    */
 
-  @Nonnull A transformedTranslucentLitRegular(
-    final @Nonnull KInstanceTransformedTranslucentRegular i)
+  A transformedTranslucentLitRegular(
+    final KInstanceTransformedTranslucentRegular i)
     throws E,
-      ConstraintError,
       RException,
       JCGLException;
 
@@ -63,8 +58,7 @@ public interface KInstanceTransformedTranslucentLitVisitorType<A, E extends Thro
    * @param i
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws JCGLException
@@ -73,10 +67,9 @@ public interface KInstanceTransformedTranslucentLitVisitorType<A, E extends Thro
    *           If required
    */
 
-  @Nonnull A transformedTranslucentLitSpecularOnly(
-    final @Nonnull KInstanceTransformedTranslucentSpecularOnly i)
+  A transformedTranslucentLitSpecularOnly(
+    final KInstanceTransformedTranslucentSpecularOnly i)
     throws E,
-      ConstraintError,
       RException,
       JCGLException;
 }

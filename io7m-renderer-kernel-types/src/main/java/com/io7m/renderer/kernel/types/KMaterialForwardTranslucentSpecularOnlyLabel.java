@@ -19,18 +19,15 @@ package com.io7m.renderer.kernel.types;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * Labels for forward-rendering of specular-only objects.
  */
 
-@Immutable public final class KMaterialForwardTranslucentSpecularOnlyLabel implements
+@EqualityStructural public final class KMaterialForwardTranslucentSpecularOnlyLabel implements
   KTexturesRequiredType,
   KMaterialLabelSpecularOnlyType
 {
@@ -38,37 +35,37 @@ import com.io7m.jaux.UnreachableCodeException;
    * @return The set of all possible specular-only labels.
    */
 
-  public static @Nonnull Set<KMaterialForwardTranslucentSpecularOnlyLabel> allLabels()
+  public static Set<KMaterialForwardTranslucentSpecularOnlyLabel> allLabels()
   {
-    try {
-      final Set<KMaterialForwardTranslucentSpecularOnlyLabel> s =
-        new HashSet<KMaterialForwardTranslucentSpecularOnlyLabel>();
+    final Set<KMaterialForwardTranslucentSpecularOnlyLabel> s =
+      new HashSet<KMaterialForwardTranslucentSpecularOnlyLabel>();
 
-      for (final KMaterialNormalLabel normal : KMaterialNormalLabel.values()) {
-        if (normal == KMaterialNormalLabel.NORMAL_NONE) {
-          continue;
-        }
-        for (final KMaterialSpecularLabel specular : KMaterialSpecularLabel
-          .values()) {
-          s.add(KMaterialForwardTranslucentSpecularOnlyLabel.newLabel(normal, specular));
-        }
+    for (final KMaterialNormalLabel normal : KMaterialNormalLabel.values()) {
+      assert normal != null;
+      if (normal == KMaterialNormalLabel.NORMAL_NONE) {
+        continue;
       }
-
-      return s;
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
+      for (final KMaterialSpecularLabel specular : KMaterialSpecularLabel
+        .values()) {
+        assert specular != null;
+        s.add(KMaterialForwardTranslucentSpecularOnlyLabel.newLabel(
+          normal,
+          specular));
+      }
     }
+
+    return s;
   }
 
   private static boolean makeImpliesSpecularMap(
-    final @Nonnull KMaterialSpecularLabel specular)
+    final KMaterialSpecularLabel specular)
   {
     return specular == KMaterialSpecularLabel.SPECULAR_MAPPED;
   }
 
   private static boolean makeImpliesUV(
-    final @Nonnull KMaterialNormalLabel normal,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final KMaterialNormalLabel normal,
+    final KMaterialSpecularLabel specular)
   {
     switch (normal) {
       case NORMAL_MAPPED:
@@ -88,9 +85,9 @@ import com.io7m.jaux.UnreachableCodeException;
     return false;
   }
 
-  private static @Nonnull String makeLabelCode(
-    final @Nonnull KMaterialNormalLabel normal,
-    final @Nonnull KMaterialSpecularLabel specular)
+  private static String makeLabelCode(
+    final KMaterialNormalLabel normal,
+    final KMaterialSpecularLabel specular)
   {
     final StringBuilder buffer = new StringBuilder();
     buffer.append(normal.labelGetCode());
@@ -98,7 +95,9 @@ import com.io7m.jaux.UnreachableCodeException;
       buffer.append("_");
       buffer.append(specular.labelGetCode());
     }
-    return buffer.toString();
+    final String r = buffer.toString();
+    assert r != null;
+    return r;
   }
 
   /**
@@ -109,41 +108,44 @@ import com.io7m.jaux.UnreachableCodeException;
    * @param in_specular
    *          The specular label
    * @return A new label
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KMaterialForwardTranslucentSpecularOnlyLabel newLabel(
-    final @Nonnull KMaterialNormalLabel in_normal,
-    final @Nonnull KMaterialSpecularLabel in_specular)
-    throws ConstraintError
+  public static KMaterialForwardTranslucentSpecularOnlyLabel newLabel(
+    final KMaterialNormalLabel in_normal,
+    final KMaterialSpecularLabel in_specular)
   {
-    return new KMaterialForwardTranslucentSpecularOnlyLabel(in_normal, in_specular);
+    return new KMaterialForwardTranslucentSpecularOnlyLabel(
+      in_normal,
+      in_specular);
   }
 
-  private final @Nonnull String                 code;
-  private final boolean                         implies_specular_map;
-  private final boolean                         implies_uv;
-  private final @Nonnull KMaterialNormalLabel   normal;
-  private final @Nonnull KMaterialSpecularLabel specular;
-  private final int                             texture_units_required;
+  private final String                 code;
+  private final boolean                implies_specular_map;
+  private final boolean                implies_uv;
+  private final KMaterialNormalLabel   normal;
+  private final KMaterialSpecularLabel specular;
+  private final int                    texture_units_required;
 
   private KMaterialForwardTranslucentSpecularOnlyLabel(
-    final @Nonnull KMaterialNormalLabel in_normal,
-    final @Nonnull KMaterialSpecularLabel in_specular)
-    throws ConstraintError
+    final KMaterialNormalLabel in_normal,
+    final KMaterialSpecularLabel in_specular)
   {
-    this.normal = Constraints.constrainNotNull(in_normal, "Normal");
-    this.specular = Constraints.constrainNotNull(in_specular, "Specular");
+    this.normal = NullCheck.notNull(in_normal, "Normal");
+    this.specular = NullCheck.notNull(in_specular, "Specular");
 
     this.code =
-      KMaterialForwardTranslucentSpecularOnlyLabel.makeLabelCode(in_normal, in_specular);
+      KMaterialForwardTranslucentSpecularOnlyLabel.makeLabelCode(
+        in_normal,
+        in_specular);
 
     this.implies_uv =
-      KMaterialForwardTranslucentSpecularOnlyLabel.makeImpliesUV(in_normal, in_specular);
+      KMaterialForwardTranslucentSpecularOnlyLabel.makeImpliesUV(
+        in_normal,
+        in_specular);
 
     this.implies_specular_map =
-      KMaterialForwardTranslucentSpecularOnlyLabel.makeImpliesSpecularMap(in_specular);
+      KMaterialForwardTranslucentSpecularOnlyLabel
+        .makeImpliesSpecularMap(in_specular);
 
     int req = 0;
     req += in_normal.texturesGetRequired();
@@ -151,17 +153,52 @@ import com.io7m.jaux.UnreachableCodeException;
     this.texture_units_required = req;
   }
 
-  @Override public @Nonnull String labelGetCode()
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KMaterialForwardTranslucentSpecularOnlyLabel other =
+      (KMaterialForwardTranslucentSpecularOnlyLabel) obj;
+    return this.code.equals(other.code)
+      && (this.implies_specular_map == other.implies_specular_map)
+      && (this.implies_uv == other.implies_uv)
+      && (this.normal == other.normal)
+      && (this.specular == other.specular)
+      && (this.texture_units_required == other.texture_units_required);
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.code.hashCode();
+    result = (prime * result) + (this.implies_specular_map ? 1231 : 1237);
+    result = (prime * result) + (this.implies_uv ? 1231 : 1237);
+    result = (prime * result) + this.normal.hashCode();
+    result = (prime * result) + this.specular.hashCode();
+    result = (prime * result) + this.texture_units_required;
+    return result;
+  }
+
+  @Override public String labelGetCode()
   {
     return this.code;
   }
 
-  @Override public @Nonnull KMaterialNormalLabel labelGetNormal()
+  @Override public KMaterialNormalLabel labelGetNormal()
   {
     return this.normal;
   }
 
-  @Override public @Nonnull KMaterialSpecularLabel labelGetSpecular()
+  @Override public KMaterialSpecularLabel labelGetSpecular()
   {
     return this.specular;
   }

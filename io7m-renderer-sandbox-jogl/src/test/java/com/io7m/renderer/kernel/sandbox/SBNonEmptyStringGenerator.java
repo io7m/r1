@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,16 +16,14 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
 import net.java.quickcheck.Generator;
 import net.java.quickcheck.generator.support.CharacterGenerator;
 import net.java.quickcheck.generator.support.StringGenerator;
 
 final class SBNonEmptyStringGenerator implements Generator<String>
 {
-  private final @Nonnull StringGenerator    string_gen;
-  private final @Nonnull CharacterGenerator char_gen;
+  private final StringGenerator    string_gen;
+  private final CharacterGenerator char_gen;
 
   public SBNonEmptyStringGenerator()
   {

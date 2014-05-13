@@ -16,10 +16,8 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * Material properties related to alpha translucency.
@@ -35,32 +33,28 @@ public final class KMaterialAlpha
    * @param opacity
    *          The maximum opacity
    * @return Alpha material properties
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KMaterialAlpha newAlpha(
-    final @Nonnull KMaterialAlphaOpacityType type,
+  public static KMaterialAlpha newAlpha(
+    final KMaterialAlphaOpacityType type,
     final float opacity)
-    throws ConstraintError
   {
     return new KMaterialAlpha(type, opacity);
   }
 
-  private final float                              opacity;
-  private final @Nonnull KMaterialAlphaOpacityType type;
+  private final float                     opacity;
+  private final KMaterialAlphaOpacityType type;
 
   private KMaterialAlpha(
-    final @Nonnull KMaterialAlphaOpacityType in_type,
+    final KMaterialAlphaOpacityType in_type,
     final float in_opacity)
-    throws ConstraintError
   {
-    this.type = Constraints.constrainNotNull(in_type, "Type");
+    this.type = NullCheck.notNull(in_type, "Type");
     this.opacity = in_opacity;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -95,7 +89,7 @@ public final class KMaterialAlpha
    * @return The alpha opacity type
    */
 
-  public @Nonnull KMaterialAlphaOpacityType getType()
+  public KMaterialAlphaOpacityType getType()
   {
     return this.type;
   }
@@ -117,6 +111,8 @@ public final class KMaterialAlpha
     builder.append(", opacity=");
     builder.append(this.opacity);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

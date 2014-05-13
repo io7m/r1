@@ -20,7 +20,6 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JFrame;
@@ -31,8 +30,10 @@ import javax.swing.JTextField;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RSpaceRGBAType;
@@ -41,21 +42,20 @@ import com.io7m.renderer.types.RVectorI4F;
 public final class SBMaterialControlsAlbedo implements
   SBControlsDataType<SBMaterialAlbedoDescription>
 {
-  private final @Nonnull RowGroup         group;
-  protected final @Nonnull JTextField     r;
-  protected final @Nonnull JTextField     g;
-  protected final @Nonnull JTextField     b;
-  protected final @Nonnull JTextField     a;
-  protected final @Nonnull JButton        colour_select;
-  protected final @Nonnull JTextField     texture;
-  protected final @Nonnull JButton        texture_select;
-  protected final @Nonnull SBFloatHSlider texture_mix;
+  private final RowGroup         group;
+  protected final JTextField     r;
+  protected final JTextField     g;
+  protected final JTextField     b;
+  protected final JTextField     a;
+  protected final JButton        colour_select;
+  protected final JTextField     texture;
+  protected final JButton        texture_select;
+  protected final SBFloatHSlider texture_mix;
 
   SBMaterialControlsAlbedo(
-    final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull JFrame parent,
-    final @Nonnull Log log)
-    throws ConstraintError
+    final SBSceneControllerTextures controller,
+    final JFrame parent,
+    final LogUsableType log)
   {
     this.group = new RowGroup();
 
@@ -66,7 +66,7 @@ public final class SBMaterialControlsAlbedo implements
     this.colour_select = new JButton("Select...");
     this.colour_select.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final Color c =
           JColorChooser.showDialog(parent, "Select colour...", Color.WHITE);
@@ -84,7 +84,7 @@ public final class SBMaterialControlsAlbedo implements
     this.texture_select = new JButton("Select...");
     this.texture_select.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final SBTextures2DWindow twindow =
           new SBTextures2DWindow(
@@ -100,7 +100,7 @@ public final class SBMaterialControlsAlbedo implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout dg)
+    final DesignGridLayout dg)
   {
     final JLabel label = new JLabel("Albedo");
     label.setForeground(Color.BLUE);
@@ -132,12 +132,12 @@ public final class SBMaterialControlsAlbedo implements
   }
 
   @Override public void controlsLoadFrom(
-    final @Nonnull SBMaterialAlbedoDescription mat_d)
+    final SBMaterialAlbedoDescription mat_d)
   {
-    this.r.setText(Float.toString(mat_d.getColour().x));
-    this.g.setText(Float.toString(mat_d.getColour().y));
-    this.b.setText(Float.toString(mat_d.getColour().z));
-    this.a.setText(Float.toString(mat_d.getColour().w));
+    this.r.setText(Float.toString(mat_d.getColour().getXF()));
+    this.g.setText(Float.toString(mat_d.getColour().getYF()));
+    this.b.setText(Float.toString(mat_d.getColour().getZF()));
+    this.a.setText(Float.toString(mat_d.getColour().getWF()));
 
     final PathVirtual t = mat_d.getTexture();
     if (t != null) {
@@ -147,29 +147,32 @@ public final class SBMaterialControlsAlbedo implements
     this.texture_mix.setCurrent(mat_d.getMix());
   }
 
-  @Override public @Nonnull SBMaterialAlbedoDescription controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+  @Override public SBMaterialAlbedoDescription controlsSave()
+    throws SBExceptionInputError
   {
-    final RVectorI4F<RSpaceRGBAType> albedo_colour =
-      new RVectorI4F<RSpaceRGBAType>(
-        SBTextFieldUtilities.getFieldFloatOrError(this.r),
-        SBTextFieldUtilities.getFieldFloatOrError(this.g),
-        SBTextFieldUtilities.getFieldFloatOrError(this.b),
-        SBTextFieldUtilities.getFieldFloatOrError(this.a));
+    try {
+      final RVectorI4F<RSpaceRGBAType> albedo_colour =
+        new RVectorI4F<RSpaceRGBAType>(
+          SBTextFieldUtilities.getFieldFloatOrError(this.r),
+          SBTextFieldUtilities.getFieldFloatOrError(this.g),
+          SBTextFieldUtilities.getFieldFloatOrError(this.b),
+          SBTextFieldUtilities.getFieldFloatOrError(this.a));
 
-    final String tt = this.texture.getText();
+      final String tt = this.texture.getText();
 
-    final PathVirtual albedo_texture_value =
-      (tt.equals("")) ? null : PathVirtual.ofString(tt);
+      final PathVirtual albedo_texture_value =
+        (tt.equals("")) ? null : PathVirtual.ofString(tt);
 
-    final SBMaterialAlbedoDescription albedo =
-      new SBMaterialAlbedoDescription(
-        albedo_colour,
-        this.texture_mix.getCurrent(),
-        albedo_texture_value);
+      final SBMaterialAlbedoDescription albedo =
+        new SBMaterialAlbedoDescription(
+          albedo_colour,
+          this.texture_mix.getCurrent(),
+          albedo_texture_value);
 
-    return albedo;
+      return albedo;
+    } catch (final FilesystemError e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 
   @Override public void controlsHide()

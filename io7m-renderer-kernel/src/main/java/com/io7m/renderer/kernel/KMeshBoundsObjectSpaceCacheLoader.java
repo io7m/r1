@@ -18,9 +18,8 @@ package com.io7m.renderer.kernel;
 
 import java.math.BigInteger;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.jcache.JCacheLoaderType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.types.RException;
@@ -31,7 +30,7 @@ import com.io7m.renderer.types.RSpaceObjectType;
  * bounds for a given mesh.
  */
 
-public final class KMeshBoundsObjectSpaceCacheLoader implements
+@EqualityReference public final class KMeshBoundsObjectSpaceCacheLoader implements
   JCacheLoaderType<KMeshReadableType, KMeshBounds<RSpaceObjectType>, RException>
 {
   /**
@@ -40,7 +39,7 @@ public final class KMeshBoundsObjectSpaceCacheLoader implements
    * @return A cache loader
    */
 
-  public static @Nonnull KMeshBoundsObjectSpaceCacheLoader newLoader()
+  public static KMeshBoundsObjectSpaceCacheLoader newLoader()
   {
     return new KMeshBoundsObjectSpaceCacheLoader();
   }
@@ -51,21 +50,21 @@ public final class KMeshBoundsObjectSpaceCacheLoader implements
   }
 
   @Override public void cacheValueClose(
-    final @Nonnull KMeshBounds<RSpaceObjectType> v)
+    final KMeshBounds<RSpaceObjectType> v)
     throws RException
   {
     // Nothing
   }
 
   @Override public KMeshBounds<RSpaceObjectType> cacheValueLoad(
-    final @Nonnull KMeshReadableType key)
+    final KMeshReadableType key)
     throws RException
   {
     return KMeshBounds.fromMeshObjectSpace(key);
   }
 
   @Override public BigInteger cacheValueSizeOf(
-    final @Nonnull KMeshBounds<RSpaceObjectType> v)
+    final KMeshBounds<RSpaceObjectType> v)
   {
     return BigInteger.ONE;
   }

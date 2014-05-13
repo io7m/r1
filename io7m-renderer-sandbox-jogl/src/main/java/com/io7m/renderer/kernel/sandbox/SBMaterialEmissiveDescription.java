@@ -16,31 +16,29 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
+import com.io7m.jnull.Nullable;
 import com.io7m.jvvfs.PathVirtual;
 
 public final class SBMaterialEmissiveDescription
 {
-  public static @Nonnull SBMaterialEmissiveDescription getDefault()
+  public static SBMaterialEmissiveDescription getDefault()
   {
     return new SBMaterialEmissiveDescription(0.0f, null);
   }
 
-  private final float                     emission;
-  private final @CheckForNull PathVirtual texture;
+  private final float                 emission;
+  private final @Nullable PathVirtual texture;
 
   public SBMaterialEmissiveDescription(
     final float in_emission,
-    final @CheckForNull PathVirtual in_texture)
+    final @Nullable PathVirtual in_texture)
   {
     this.emission = in_emission;
     this.texture = in_texture;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -61,8 +59,13 @@ public final class SBMaterialEmissiveDescription
       if (other.texture != null) {
         return false;
       }
-    } else if (!this.texture.equals(other.texture)) {
-      return false;
+    } else {
+      final PathVirtual t = this.texture;
+      if (t != null) {
+        if (!t.equals(other.texture)) {
+          return false;
+        }
+      }
     }
     return true;
   }
@@ -72,7 +75,7 @@ public final class SBMaterialEmissiveDescription
     return this.emission;
   }
 
-  public @CheckForNull PathVirtual getTexture()
+  public @Nullable PathVirtual getTexture()
   {
     return this.texture;
   }
@@ -82,9 +85,10 @@ public final class SBMaterialEmissiveDescription
     final int prime = 31;
     int result = 1;
     result = (prime * result) + Float.floatToIntBits(this.emission);
-    result =
-      (prime * result)
-        + ((this.texture == null) ? 0 : this.texture.hashCode());
+    final PathVirtual t = this.texture;
+    if (t != null) {
+      result = (prime * result) + t.hashCode();
+    }
     return result;
   }
 

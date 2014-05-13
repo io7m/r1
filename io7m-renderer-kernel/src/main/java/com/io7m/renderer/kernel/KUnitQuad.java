@@ -16,32 +16,30 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.ArrayBufferAttributeDescriptor;
-import com.io7m.jcanephora.ArrayBufferTypeDescriptor;
-import com.io7m.jcanephora.ArrayBufferUsable;
-import com.io7m.jcanephora.ArrayBufferWritableData;
-import com.io7m.jcanephora.CursorWritable2f;
-import com.io7m.jcanephora.CursorWritable3f;
-import com.io7m.jcanephora.CursorWritableIndex;
-import com.io7m.jcanephora.IndexBuffer;
-import com.io7m.jcanephora.IndexBufferUsable;
-import com.io7m.jcanephora.IndexBufferWritableData;
-import com.io7m.jcanephora.JCGLArrayBuffers;
+import com.io7m.jcanephora.ArrayBufferType;
+import com.io7m.jcanephora.ArrayBufferUpdateUnmapped;
+import com.io7m.jcanephora.ArrayBufferUpdateUnmappedType;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.ArrayDescriptor;
+import com.io7m.jcanephora.ArrayDescriptorBuilderType;
+import com.io7m.jcanephora.CursorWritable2fType;
+import com.io7m.jcanephora.CursorWritable3fType;
+import com.io7m.jcanephora.CursorWritableIndexType;
+import com.io7m.jcanephora.IndexBufferType;
+import com.io7m.jcanephora.IndexBufferUpdateUnmapped;
+import com.io7m.jcanephora.IndexBufferUpdateUnmappedType;
+import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLIndexBuffers;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLRuntimeException;
+import com.io7m.jcanephora.ResourceCheck;
 import com.io7m.jcanephora.UsageHint;
-import com.io7m.jlog.Level;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLArrayBuffersType;
+import com.io7m.jcanephora.api.JCGLIndexBuffersType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
 
 /**
@@ -49,7 +47,8 @@ import com.io7m.renderer.kernel.types.KMeshAttributes;
  * oriented towards <code>+Z</code>.
  */
 
-public final class KUnitQuad implements KUnitQuadUsableType
+@EqualityStructural public final class KUnitQuad implements
+  KUnitQuadUsableType
 {
   /**
    * Construct a new unit quad.
@@ -61,48 +60,43 @@ public final class KUnitQuad implements KUnitQuadUsableType
    * @param <G>
    *          The type of OpenGL interface
    * @return A new unit quad
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    * @throws JCGLException
    *           If an OpenGL error occurs
    */
 
-  public static @Nonnull
-    <G extends JCGLArrayBuffers & JCGLIndexBuffers>
+  public static
+    <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
     KUnitQuad
     newQuad(
-      final @Nonnull G gl,
-      final @Nonnull Log log)
-      throws ConstraintError,
-        JCGLException
+      final G gl,
+      final LogUsableType log)
+      throws JCGLException
   {
-    Constraints.constrainNotNull(gl, "OpenGL interface");
-    Constraints.constrainNotNull(log, "Log handle");
+    NullCheck.notNull(gl, "OpenGL interface");
+    NullCheck.notNull(log, "Log handle");
 
-    if (log.enabled(Level.LOG_DEBUG)) {
+    if (log.wouldLog(LogLevel.LOG_DEBUG)) {
       log.debug("Allocate unit quad");
     }
 
-    final List<ArrayBufferAttributeDescriptor> abs =
-      new ArrayList<ArrayBufferAttributeDescriptor>();
-    abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
-    abs.add(KMeshAttributes.ATTRIBUTE_NORMAL);
-    abs.add(KMeshAttributes.ATTRIBUTE_UV);
-    final ArrayBufferTypeDescriptor array_type =
-      new ArrayBufferTypeDescriptor(abs);
+    final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
+    b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
+    b.addAttribute(KMeshAttributes.ATTRIBUTE_NORMAL);
+    b.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
+    final ArrayDescriptor array_type = b.build();
 
-    final ArrayBuffer array =
+    final ArrayBufferType array =
       gl.arrayBufferAllocate(4, array_type, UsageHint.USAGE_STATIC_DRAW);
 
-    final ArrayBufferWritableData array_data =
-      new ArrayBufferWritableData(array);
+    final ArrayBufferUpdateUnmappedType array_data =
+      ArrayBufferUpdateUnmapped.newUpdateReplacingAll(array);
 
     {
-      final CursorWritable3f pos_cursor =
+      final CursorWritable3fType pos_cursor =
         array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final CursorWritable3f norm_cursor =
+      final CursorWritable3fType norm_cursor =
         array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
-      final CursorWritable2f uv_cursor =
+      final CursorWritable2fType uv_cursor =
         array_data.getCursor2f(KMeshAttributes.ATTRIBUTE_UV.getName());
 
       pos_cursor.put3f(-1, 1, -1);
@@ -124,12 +118,13 @@ public final class KUnitQuad implements KUnitQuadUsableType
     gl.arrayBufferBind(array);
     gl.arrayBufferUpdate(array_data);
 
-    final IndexBuffer indices = gl.indexBufferAllocate(array, 6);
-    final IndexBufferWritableData indices_data =
-      new IndexBufferWritableData(indices);
+    final IndexBufferType indices =
+      gl.indexBufferAllocate(array, 6, UsageHint.USAGE_STATIC_DRAW);
+    final IndexBufferUpdateUnmappedType indices_data =
+      IndexBufferUpdateUnmapped.newReplacing(indices);
 
     {
-      final CursorWritableIndex ind_cursor = indices_data.getCursor();
+      final CursorWritableIndexType ind_cursor = indices_data.getCursor();
       ind_cursor.putIndex(0);
       ind_cursor.putIndex(1);
       ind_cursor.putIndex(2);
@@ -145,13 +140,13 @@ public final class KUnitQuad implements KUnitQuadUsableType
     return new KUnitQuad(array, indices);
   }
 
-  private final @Nonnull ArrayBuffer array;
-  private boolean                    deleted;
-  private final @Nonnull IndexBuffer indices;
+  private final ArrayBufferType array;
+  private boolean               deleted;
+  private final IndexBufferType indices;
 
   private KUnitQuad(
-    final @Nonnull ArrayBuffer in_array,
-    final @Nonnull IndexBuffer in_indices)
+    final ArrayBufferType in_array,
+    final IndexBufferType in_indices)
   {
     this.array = in_array;
     this.indices = in_indices;
@@ -163,18 +158,15 @@ public final class KUnitQuad implements KUnitQuadUsableType
    * 
    * @param gc
    *          The OpenGL interface
-   * @throws ConstraintError
-   *           If the quad is already deleted
-   * @throws JCGLRuntimeException
-   *           If an OpenGL error occurs
+   * @throws JCGLException
+   *           If an error occurs
    */
 
   public void delete(
-    final @Nonnull JCGLInterfaceCommon gc)
-    throws ConstraintError,
-      JCGLRuntimeException
+    final JCGLInterfaceCommonType gc)
+    throws JCGLException
   {
-    Constraints.constrainArbitrary(this.deleted == false, "Not deleted");
+    ResourceCheck.notDeleted(this);
 
     try {
       gc.arrayBufferDelete(this.array);
@@ -185,7 +177,7 @@ public final class KUnitQuad implements KUnitQuadUsableType
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -210,7 +202,7 @@ public final class KUnitQuad implements KUnitQuadUsableType
    * @return The array buffer that backs the quad
    */
 
-  @Override public @Nonnull ArrayBufferUsable getArray()
+  @Override public ArrayBufferUsableType getArray()
   {
     return this.array;
   }
@@ -219,7 +211,7 @@ public final class KUnitQuad implements KUnitQuadUsableType
    * @return The index buffer that backs the quad
    */
 
-  @Override public @Nonnull IndexBufferUsable getIndices()
+  @Override public IndexBufferUsableType getIndices()
   {
     return this.indices;
   }
@@ -252,6 +244,8 @@ public final class KUnitQuad implements KUnitQuadUsableType
     builder.append(" ");
     builder.append(this.indices);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

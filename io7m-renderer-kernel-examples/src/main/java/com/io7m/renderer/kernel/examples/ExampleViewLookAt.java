@@ -16,16 +16,13 @@
 
 package com.io7m.renderer.kernel.examples;
 
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jcanephora.ViewMatrix;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceWorldType;
@@ -40,7 +37,7 @@ import com.io7m.renderer.types.RVectorI3F;
 @Immutable public final class ExampleViewLookAt implements
   ExampleViewLookAtType
 {
-  private static final @Nonnull VectorReadable3F Y_AXIS;
+  private static final VectorReadable3FType Y_AXIS;
 
   static {
     Y_AXIS = new VectorI3F(0.0f, 1.0f, 0.0f);
@@ -56,50 +53,46 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The resulting view
    */
 
-  public static @Nonnull ExampleViewLookAtType lookAt(
-    final @Nonnull RVectorI3F<RSpaceWorldType> in_source,
-    final @Nonnull RVectorI3F<RSpaceWorldType> in_target)
+  public static ExampleViewLookAtType lookAt(
+    final RVectorI3F<RSpaceWorldType> in_source,
+    final RVectorI3F<RSpaceWorldType> in_target)
   {
     return new ExampleViewLookAt(in_source, in_target);
   }
 
-  private final @Nonnull KCamera                     camera;
-  private final @Nonnull RVectorI3F<RSpaceWorldType> source;
-  private final @Nonnull RVectorI3F<RSpaceWorldType> target;
+  private final KCamera                     camera;
+  private final RVectorI3F<RSpaceWorldType> source;
+  private final RVectorI3F<RSpaceWorldType> target;
 
   private ExampleViewLookAt(
-    final @Nonnull RVectorI3F<RSpaceWorldType> in_source,
-    final @Nonnull RVectorI3F<RSpaceWorldType> in_target)
+    final RVectorI3F<RSpaceWorldType> in_source,
+    final RVectorI3F<RSpaceWorldType> in_target)
   {
-    try {
-      this.source = in_source;
-      this.target = in_target;
+    this.source = in_source;
+    this.target = in_target;
 
-      final MatrixM4x4F temp = new MatrixM4x4F();
+    final MatrixM4x4F temp = new MatrixM4x4F();
 
-      ViewMatrix.lookAt(
-        temp,
-        this.source,
-        this.target,
-        ExampleViewLookAt.Y_AXIS);
+    ViewMatrix.lookAt(
+      temp,
+      this.source,
+      this.target,
+      ExampleViewLookAt.Y_AXIS);
 
-      final RMatrixI4x4F<RTransformViewType> view =
-        RMatrixI4x4F.newFromReadable(temp);
+    final RMatrixI4x4F<RTransformViewType> view =
+      RMatrixI4x4F.newFromReadable(temp);
 
-      ProjectionMatrix.makePerspectiveProjection(
-        temp,
-        0.1f,
-        100.0f,
-        640.0 / 480.0,
-        Math.toRadians(90.0));
+    ProjectionMatrix.makePerspectiveProjection(
+      temp,
+      0.1f,
+      100.0f,
+      640.0 / 480.0,
+      Math.toRadians(90.0));
 
-      final RMatrixI4x4F<RTransformProjectionType> projection =
-        RMatrixI4x4F.newFromReadable(temp);
+    final RMatrixI4x4F<RTransformProjectionType> projection =
+      RMatrixI4x4F.newFromReadable(temp);
 
-      this.camera = KCamera.newCamera(view, projection);
-    } catch (final ConstraintError x) {
-      throw new UnreachableCodeException(x);
-    }
+    this.camera = KCamera.newCamera(view, projection);
   }
 
   @Override public KCamera getCamera()
@@ -107,12 +100,12 @@ import com.io7m.renderer.types.RVectorI3F;
     return this.camera;
   }
 
-  @Override public @Nonnull RVectorI3F<RSpaceWorldType> viewGetSource()
+  @Override public RVectorI3F<RSpaceWorldType> viewGetSource()
   {
     return this.source;
   }
 
-  @Override public @Nonnull RVectorI3F<RSpaceWorldType> viewGetTarget()
+  @Override public RVectorI3F<RSpaceWorldType> viewGetTarget()
   {
     return this.target;
   }

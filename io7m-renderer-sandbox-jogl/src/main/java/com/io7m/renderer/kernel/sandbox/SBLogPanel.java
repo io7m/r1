@@ -19,7 +19,6 @@ package com.io7m.renderer.kernel.sandbox;
 import java.awt.Dimension;
 import java.awt.Font;
 
-import javax.annotation.Nonnull;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -34,7 +33,7 @@ final class SBLogPanel extends JPanel
     serialVersionUID = -7319547005472170348L;
   }
 
-  private final @Nonnull JTextArea log_area;
+  private final  JTextArea log_area;
 
   public SBLogPanel()
   {
@@ -50,7 +49,7 @@ final class SBLogPanel extends JPanel
   }
 
   void addText(
-    final @Nonnull String text)
+    final  String text)
   {
     this.log_area.append(text);
   }

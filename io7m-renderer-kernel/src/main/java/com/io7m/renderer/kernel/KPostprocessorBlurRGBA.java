@@ -16,19 +16,16 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.RangeInclusive;
 import com.io7m.jcache.BLUCacheReceiptType;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLRuntimeException;
-import com.io7m.jlog.Level;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
@@ -37,19 +34,18 @@ import com.io7m.renderer.types.RException;
  * The default implementation of an RGBA blur postprocessor.
  */
 
-public final class KPostprocessorBlurRGBA implements
+@EqualityReference public final class KPostprocessorBlurRGBA implements
   KPostprocessorBlurRGBAType
 {
-  private static final @Nonnull String NAME;
+  private static final String NAME;
 
   static {
     NAME = "postprocessor-blur-rgba";
   }
 
-  private static @Nonnull KFramebufferRGBADescription makeScaledDescription(
-    final @Nonnull KBlurParameters parameters,
-    final @Nonnull KFramebufferRGBADescription desc)
-    throws ConstraintError
+  private static KFramebufferRGBADescription makeScaledDescription(
+    final KBlurParameters parameters,
+    final KFramebufferRGBADescription desc)
   {
     if (parameters.getScale() != 1.0f) {
       final AreaInclusive orig_area = desc.getArea();
@@ -62,8 +58,8 @@ public final class KPostprocessorBlurRGBA implements
       final long scaled_height =
         Math.max(2, (long) (height * parameters.getScale()));
 
-      final RangeInclusive range_x = new RangeInclusive(0, scaled_width);
-      final RangeInclusive range_y = new RangeInclusive(0, scaled_height);
+      final RangeInclusiveL range_x = new RangeInclusiveL(0, scaled_width);
+      final RangeInclusiveL range_y = new RangeInclusiveL(0, scaled_height);
       final AreaInclusive area = new AreaInclusive(range_x, range_y);
 
       return KFramebufferRGBADescription.newDescription(
@@ -91,18 +87,15 @@ public final class KPostprocessorBlurRGBA implements
    * @param log
    *          A log handle
    * @return A new postprocessor
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KPostprocessorBlurRGBAType postprocessorNew(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull KRegionCopierType copier,
-    final @Nonnull KFramebufferRGBACacheType rgba_cache,
-    final @Nonnull KShaderCacheType shader_cache,
-    final @Nonnull KUnitQuadUsableType quad,
-    final @Nonnull Log log)
-    throws ConstraintError
+  public static KPostprocessorBlurRGBAType postprocessorNew(
+    final JCGLImplementationType gi,
+    final KRegionCopierType copier,
+    final KFramebufferRGBACacheType rgba_cache,
+    final KShaderCacheType shader_cache,
+    final KUnitQuadUsableType quad,
+    final LogUsableType log)
   {
     return new KPostprocessorBlurRGBA(
       gi,
@@ -113,48 +106,43 @@ public final class KPostprocessorBlurRGBA implements
       log);
   }
 
-  private final @Nonnull KRegionCopierType         copier;
-  private final @Nonnull JCGLImplementation        gi;
-  private final @Nonnull Log                       log;
-  private final @Nonnull KUnitQuadUsableType       quad;
-  private final @Nonnull KFramebufferRGBACacheType rgba_cache;
-  private final @Nonnull KShaderCacheType          shader_cache;
+  private final KRegionCopierType         copier;
+  private final JCGLImplementationType    gi;
+  private final LogUsableType             log;
+  private final KUnitQuadUsableType       quad;
+  private final KFramebufferRGBACacheType rgba_cache;
+  private final KShaderCacheType          shader_cache;
 
   private KPostprocessorBlurRGBA(
-    final @Nonnull JCGLImplementation in_gi,
-    final @Nonnull KRegionCopierType in_copier,
-    final @Nonnull KFramebufferRGBACacheType in_rgba_cache,
-    final @Nonnull KShaderCacheType in_shader_cache,
-    final @Nonnull KUnitQuadUsableType in_quad,
-    final @Nonnull Log in_log)
-    throws ConstraintError
+    final JCGLImplementationType in_gi,
+    final KRegionCopierType in_copier,
+    final KFramebufferRGBACacheType in_rgba_cache,
+    final KShaderCacheType in_shader_cache,
+    final KUnitQuadUsableType in_quad,
+    final LogUsableType in_log)
   {
-    this.gi = Constraints.constrainNotNull(in_gi, "GL implementation");
+    this.gi = NullCheck.notNull(in_gi, "GL implementation");
     this.rgba_cache =
-      Constraints.constrainNotNull(in_rgba_cache, "RGBA framebuffer cache");
-    this.shader_cache =
-      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
-    this.copier = Constraints.constrainNotNull(in_copier, "Copier");
+      NullCheck.notNull(in_rgba_cache, "RGBA framebuffer cache");
+    this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
+    this.copier = NullCheck.notNull(in_copier, "Copier");
     this.log =
-      new Log(
-        Constraints.constrainNotNull(in_log, "Log"),
-        KPostprocessorBlurRGBA.NAME);
+      NullCheck.notNull(in_log, "Log").with(KPostprocessorBlurRGBA.NAME);
 
-    this.quad = Constraints.constrainNotNull(in_quad, "Quad");
+    this.quad = NullCheck.notNull(in_quad, "Quad");
 
-    if (this.log.enabled(Level.LOG_DEBUG)) {
+    if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
       this.log.debug("initialized");
     }
   }
 
   private void onePass(
-    final @Nonnull KBlurParameters parameters,
-    final @Nonnull KFramebufferRGBAUsableType source,
-    final @Nonnull KFramebufferRGBAUsableType temporary,
-    final @Nonnull KFramebufferRGBAUsableType target)
-    throws JCGLRuntimeException,
+    final KBlurParameters parameters,
+    final KFramebufferRGBAUsableType source,
+    final KFramebufferRGBAUsableType temporary,
+    final KFramebufferRGBAUsableType target)
+    throws JCGLException,
       RException,
-      ConstraintError,
       JCacheException
   {
     assert source != temporary;
@@ -187,15 +175,14 @@ public final class KPostprocessorBlurRGBA implements
   }
 
   @Override public void postprocessorEvaluateRGBA(
-    final @Nonnull KBlurParameters parameters,
-    final @Nonnull KFramebufferRGBAUsableType input,
-    final @Nonnull KFramebufferRGBAUsableType output)
-    throws ConstraintError,
-      RException
+    final KBlurParameters parameters,
+    final KFramebufferRGBAUsableType input,
+    final KFramebufferRGBAUsableType output)
+    throws RException
   {
-    Constraints.constrainNotNull(parameters, "Parameters");
-    Constraints.constrainNotNull(input, "Input");
-    Constraints.constrainNotNull(output, "Output");
+    NullCheck.notNull(parameters, "Parameters");
+    NullCheck.notNull(input, "Input");
+    NullCheck.notNull(output, "Output");
 
     try {
       final KFramebufferRGBADescription desc =
@@ -250,6 +237,7 @@ public final class KPostprocessorBlurRGBA implements
               target = receipt_b.getValue();
             }
 
+            assert target != null;
             this.onePass(parameters, source, temporary, target);
           }
 

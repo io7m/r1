@@ -20,33 +20,52 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-
-@Immutable public final class ColladaPolylist
+@EqualityStructural public final class ColladaPolylist
 {
-  private final @Nonnull List<ColladaInput> inputs;
-  private final @Nonnull List<ColladaPoly>  polygons;
+  private final List<ColladaInput> inputs;
+  private final List<ColladaPoly>  polygons;
 
   public ColladaPolylist(
-    final @Nonnull List<ColladaInput> in_inputs,
-    final @Nonnull List<ColladaPoly> in_polygons)
-    throws ConstraintError
+    final List<ColladaInput> in_inputs,
+    final List<ColladaPoly> in_polygons)
   {
-    this.inputs = Constraints.constrainNotNull(in_inputs, "Inputs");
-    this.polygons = Constraints.constrainNotNull(in_polygons, "Indices");
+    this.inputs = NullCheck.notNullAll(in_inputs, "Inputs");
+    this.polygons = NullCheck.notNullAll(in_polygons, "Indices");
 
     Collections.sort(in_inputs, new Comparator<ColladaInput>() {
       @Override public int compare(
-        final @Nonnull ColladaInput o1,
-        final @Nonnull ColladaInput o2)
+        final ColladaInput o1,
+        final ColladaInput o2)
       {
         return Integer.compare(o1.getOffset(), o2.getOffset());
       }
     });
+  }
+
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final ColladaPolylist other = (ColladaPolylist) obj;
+    if (!this.inputs.equals(other.inputs)) {
+      return false;
+    }
+    if (!this.polygons.equals(other.polygons)) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -55,14 +74,27 @@ import com.io7m.jaux.Constraints.ConstraintError;
    * with offset 0 will be at the head of the list.
    */
 
-  public @Nonnull List<ColladaInput> getInputs()
+  public List<ColladaInput> getInputs()
   {
-    return Collections.unmodifiableList(this.inputs);
+    final List<ColladaInput> r = Collections.unmodifiableList(this.inputs);
+    assert r != null;
+    return r;
   }
 
-  public @Nonnull List<ColladaPoly> getPolygons()
+  public List<ColladaPoly> getPolygons()
   {
-    return Collections.unmodifiableList(this.polygons);
+    final List<ColladaPoly> r = Collections.unmodifiableList(this.polygons);
+    assert r != null;
+    return r;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.inputs.hashCode();
+    result = (prime * result) + this.polygons.hashCode();
+    return result;
   }
 
   @Override public String toString()
@@ -73,7 +105,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
     builder.append(" (");
     builder.append(this.polygons.size());
     builder.append(" polygons)]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
-
 }

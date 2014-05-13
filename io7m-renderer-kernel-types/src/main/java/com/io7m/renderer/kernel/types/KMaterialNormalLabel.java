@@ -16,13 +16,14 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
+import java.util.Map;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcanephora.ArrayBufferUsable;
+import com.io7m.jcanephora.ArrayAttributeDescriptor;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -53,12 +54,14 @@ public enum KMaterialNormalLabel
   NORMAL_VERTEX("NV", 0);
 
   private static boolean canNormalMap(
-    final @Nonnull ArrayBufferUsable a,
-    final @Nonnull KMaterialNormal normal)
-    throws ConstraintError
+    final ArrayBufferUsableType a,
+    final KMaterialNormal normal)
   {
-    if (a.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
-      if (a.hasAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4.getName())) {
+    final ArrayDescriptor d = a.arrayGetDescriptor();
+    final Map<String, ArrayAttributeDescriptor> da = d.getAttributes();
+
+    if (da.containsKey(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+      if (da.containsKey(KMeshAttributes.ATTRIBUTE_TANGENT4.getName())) {
         if (normal.getTexture().isSome()) {
           return true;
         }
@@ -73,29 +76,23 @@ public enum KMaterialNormalLabel
    * @param instance
    *          The instance
    * @return A normal label
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>.
    */
 
-  @SuppressWarnings("synthetic-access") public static @Nonnull
+  @SuppressWarnings("synthetic-access") public static
     KMaterialNormalLabel
     fromInstance(
-      final @Nonnull KInstanceType instance)
-      throws ConstraintError
+      final KInstanceType instance)
   {
-    Constraints.constrainNotNull(instance, "Instance");
+    NullCheck.notNull(instance, "Instance");
 
     final KMeshReadableType mesh = instance.instanceGetMesh();
-    final ArrayBufferUsable a = mesh.getArrayBuffer();
+    final ArrayBufferUsableType a = mesh.getArrayBuffer();
 
     try {
       return instance
-        .instanceAccept(new KInstanceVisitorType<KMaterialNormalLabel, ConstraintError>() {
-          @Override public
-            KMaterialNormalLabel
-            instanceOpaqueAlphaDepth(
-              final @Nonnull KInstanceOpaqueAlphaDepth i)
-              throws ConstraintError
+        .instanceAccept(new KInstanceVisitorType<KMaterialNormalLabel, UnreachableCodeException>() {
+          @Override public KMaterialNormalLabel instanceOpaqueAlphaDepth(
+            final KInstanceOpaqueAlphaDepth i)
           {
             final KMaterialOpaqueType material = i.instanceGetMaterial();
             final KMaterialNormal normal = material.materialGetNormal();
@@ -103,8 +100,7 @@ public enum KMaterialNormalLabel
           }
 
           @Override public KMaterialNormalLabel instanceOpaqueRegular(
-            final @Nonnull KInstanceOpaqueRegular i)
-            throws ConstraintError
+            final KInstanceOpaqueRegular i)
           {
             final KMaterialOpaqueType material = i.instanceGetMaterial();
             final KMaterialNormal normal = material.materialGetNormal();
@@ -114,19 +110,15 @@ public enum KMaterialNormalLabel
           @Override public
             KMaterialNormalLabel
             instanceTranslucentRefractive(
-              final @Nonnull KInstanceTranslucentRefractive i)
-              throws ConstraintError
+              final KInstanceTranslucentRefractive i)
           {
             final KMaterialTranslucentType material = i.instanceGetMaterial();
             final KMaterialNormal normal = material.materialGetNormal();
             return KMaterialNormalLabel.fromInstanceData(a, normal);
           }
 
-          @Override public
-            KMaterialNormalLabel
-            instanceTranslucentRegular(
-              final @Nonnull KInstanceTranslucentRegular i)
-              throws ConstraintError
+          @Override public KMaterialNormalLabel instanceTranslucentRegular(
+            final KInstanceTranslucentRegular i)
           {
             final KMaterialTranslucentType material = i.instanceGetMaterial();
             final KMaterialNormal normal = material.materialGetNormal();
@@ -136,10 +128,8 @@ public enum KMaterialNormalLabel
           @Override public
             KMaterialNormalLabel
             instanceTranslucentSpecularOnly(
-              final @Nonnull KInstanceTranslucentSpecularOnly i)
-              throws ConstraintError,
-                ConstraintError,
-                RException,
+              final KInstanceTranslucentSpecularOnly i)
+              throws RException,
                 JCGLException
           {
             final KMaterialTranslucentType material = i.instanceGetMaterial();
@@ -154,12 +144,14 @@ public enum KMaterialNormalLabel
     }
   }
 
-  private static @Nonnull KMaterialNormalLabel fromInstanceData(
-    final @Nonnull ArrayBufferUsable a,
-    final @Nonnull KMaterialNormal normal)
-    throws ConstraintError
+  private static KMaterialNormalLabel fromInstanceData(
+    final ArrayBufferUsableType a,
+    final KMaterialNormal normal)
   {
-    if (a.hasAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
+    final ArrayDescriptor d = a.arrayGetDescriptor();
+    final Map<String, ArrayAttributeDescriptor> da = d.getAttributes();
+
+    if (da.containsKey(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
       if (KMaterialNormalLabel.canNormalMap(a, normal)) {
         return KMaterialNormalLabel.NORMAL_MAPPED;
       }
@@ -168,18 +160,18 @@ public enum KMaterialNormalLabel
     return KMaterialNormalLabel.NORMAL_NONE;
   }
 
-  private final @Nonnull String code;
-  private int                   textures_required;
+  private final String code;
+  private int          textures_required;
 
   private KMaterialNormalLabel(
-    final @Nonnull String in_code,
+    final String in_code,
     final int in_textures_required)
   {
     this.code = in_code;
     this.textures_required = in_textures_required;
   }
 
-  @Override public @Nonnull String labelGetCode()
+  @Override public String labelGetCode()
   {
     return this.code;
   }

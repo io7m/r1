@@ -18,25 +18,23 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.Nonnull;
-
 final class SBInputState
 {
-  private final @Nonnull AtomicBoolean moving_forward;
-  private final @Nonnull AtomicBoolean moving_backward;
-  private final @Nonnull AtomicBoolean moving_left;
-  private final @Nonnull AtomicBoolean moving_right;
-  private final @Nonnull AtomicBoolean moving_up;
-  private final @Nonnull AtomicBoolean moving_down;
-  private final @Nonnull AtomicBoolean rotating_left;
-  private final @Nonnull AtomicBoolean rotating_right;
-  private final @Nonnull AtomicBoolean rotating_up;
-  private final @Nonnull AtomicBoolean rotating_down;
-  private final @Nonnull AtomicBoolean want_next_camera;
-  private final @Nonnull AtomicBoolean want_pause_toggle;
-  private final @Nonnull AtomicBoolean want_step_one;
-  private final @Nonnull AtomicBoolean want_framebuffer_snapshot;
-  private final @Nonnull AtomicBoolean want_dump_shadow_maps;
+  private final  AtomicBoolean moving_forward;
+  private final  AtomicBoolean moving_backward;
+  private final  AtomicBoolean moving_left;
+  private final  AtomicBoolean moving_right;
+  private final  AtomicBoolean moving_up;
+  private final  AtomicBoolean moving_down;
+  private final  AtomicBoolean rotating_left;
+  private final  AtomicBoolean rotating_right;
+  private final  AtomicBoolean rotating_up;
+  private final  AtomicBoolean rotating_down;
+  private final  AtomicBoolean want_next_camera;
+  private final  AtomicBoolean want_pause_toggle;
+  private final  AtomicBoolean want_step_one;
+  private final  AtomicBoolean want_framebuffer_snapshot;
+  private final  AtomicBoolean want_dump_shadow_maps;
 
   public SBInputState()
   {

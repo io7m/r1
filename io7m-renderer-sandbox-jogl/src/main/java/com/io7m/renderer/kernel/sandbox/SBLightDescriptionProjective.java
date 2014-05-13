@@ -16,11 +16,8 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
@@ -33,31 +30,29 @@ import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RVectorI3F;
 
-@Immutable final class SBLightDescriptionProjective implements
-  SBLightDescription
+final class SBLightDescriptionProjective implements SBLightDescription
 {
-  private final @Nonnull QuaternionI4F                      orientation;
-  private final @Nonnull RVectorI3F<RSpaceWorldType>            position;
-  private final float                                       falloff;
-  private final @Nonnull PathVirtual                        texture;
-  private final @Nonnull RVectorI3F<RSpaceRGBType>              colour;
-  private final float                                       intensity;
-  private final @Nonnull Integer                            id;
-  private final @Nonnull SBProjectionDescription            projection;
-  private final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection_matrix;
-  private final @Nonnull Option<KShadowType>                    shadow;
+  private final QuaternionI4F                          orientation;
+  private final RVectorI3F<RSpaceWorldType>            position;
+  private final float                                  falloff;
+  private final PathVirtual                            texture;
+  private final RVectorI3F<RSpaceRGBType>              colour;
+  private final float                                  intensity;
+  private final Integer                                id;
+  private final SBProjectionDescription                projection;
+  private final RMatrixI4x4F<RTransformProjectionType> projection_matrix;
+  private final OptionType<KShadowType>                shadow;
 
   SBLightDescriptionProjective(
-    final @Nonnull QuaternionI4F in_orientation,
-    final @Nonnull RVectorI3F<RSpaceWorldType> in_position,
+    final QuaternionI4F in_orientation,
+    final RVectorI3F<RSpaceWorldType> in_position,
     final float in_falloff,
-    final @Nonnull SBProjectionDescription in_projection,
-    final @Nonnull PathVirtual in_texture,
-    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
+    final SBProjectionDescription in_projection,
+    final PathVirtual in_texture,
+    final RVectorI3F<RSpaceRGBType> in_colour,
     final float in_intensity,
-    final @Nonnull Option<KShadowType> in_shadow,
-    final @Nonnull Integer in_id)
-    throws ConstraintError
+    final OptionType<KShadowType> in_shadow,
+    final Integer in_id)
   {
     this.orientation = in_orientation;
     this.position = in_position;
@@ -74,7 +69,7 @@ import com.io7m.renderer.types.RVectorI3F;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -87,74 +82,42 @@ import com.io7m.renderer.types.RVectorI3F;
     }
     final SBLightDescriptionProjective other =
       (SBLightDescriptionProjective) obj;
-    if (this.colour == null) {
-      if (other.colour != null) {
-        return false;
-      }
-    } else if (!this.colour.equals(other.colour)) {
+    if (!this.colour.equals(other.colour)) {
       return false;
     }
     if (Float.floatToIntBits(this.falloff) != Float
       .floatToIntBits(other.falloff)) {
       return false;
     }
-    if (this.id == null) {
-      if (other.id != null) {
-        return false;
-      }
-    } else if (!this.id.equals(other.id)) {
+    if (!this.id.equals(other.id)) {
       return false;
     }
     if (Float.floatToIntBits(this.intensity) != Float
       .floatToIntBits(other.intensity)) {
       return false;
     }
-    if (this.orientation == null) {
-      if (other.orientation != null) {
-        return false;
-      }
-    } else if (!this.orientation.equals(other.orientation)) {
+    if (!this.orientation.equals(other.orientation)) {
       return false;
     }
-    if (this.position == null) {
-      if (other.position != null) {
-        return false;
-      }
-    } else if (!this.position.equals(other.position)) {
+    if (!this.position.equals(other.position)) {
       return false;
     }
-    if (this.projection == null) {
-      if (other.projection != null) {
-        return false;
-      }
-    } else if (!this.projection.equals(other.projection)) {
+    if (!this.projection.equals(other.projection)) {
       return false;
     }
-    if (this.projection_matrix == null) {
-      if (other.projection_matrix != null) {
-        return false;
-      }
-    } else if (!this.projection_matrix.equals(other.projection_matrix)) {
+    if (!this.projection_matrix.equals(other.projection_matrix)) {
       return false;
     }
-    if (this.shadow == null) {
-      if (other.shadow != null) {
-        return false;
-      }
-    } else if (!this.shadow.equals(other.shadow)) {
+    if (!this.shadow.equals(other.shadow)) {
       return false;
     }
-    if (this.texture == null) {
-      if (other.texture != null) {
-        return false;
-      }
-    } else if (!this.texture.equals(other.texture)) {
+    if (!this.texture.equals(other.texture)) {
       return false;
     }
     return true;
   }
 
-  public Option<KShadowType> getShadow()
+  public OptionType<KShadowType> getShadow()
   {
     return this.shadow;
   }
@@ -180,8 +143,7 @@ import com.io7m.renderer.types.RVectorI3F;
   }
 
   KLightProjective getLight(
-    final @Nonnull SBTexture2D<SBTexture2DKindAlbedo> t)
-    throws ConstraintError
+    final SBTexture2D<SBTexture2DKindAlbedo> t)
   {
     return KLightProjective.newProjective(
       this.id,
@@ -206,17 +168,17 @@ import com.io7m.renderer.types.RVectorI3F;
     return this.position;
   }
 
-  public @Nonnull SBProjectionDescription getProjection()
+  public SBProjectionDescription getProjection()
   {
     return this.projection;
   }
 
-  public @Nonnull RMatrixI4x4F<RTransformProjectionType> getProjectionMatrix()
+  public RMatrixI4x4F<RTransformProjectionType> getProjectionMatrix()
   {
     return this.projection_matrix;
   }
 
-  @Nonnull PathVirtual getTexture()
+  PathVirtual getTexture()
   {
     return this.texture;
   }
@@ -225,29 +187,16 @@ import com.io7m.renderer.types.RVectorI3F;
   {
     final int prime = 31;
     int result = 1;
-    result =
-      (prime * result) + ((this.colour == null) ? 0 : this.colour.hashCode());
+    result = (prime * result) + this.colour.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.falloff);
-    result = (prime * result) + ((this.id == null) ? 0 : this.id.hashCode());
+    result = (prime * result) + this.id.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.intensity);
-    result =
-      (prime * result)
-        + ((this.orientation == null) ? 0 : this.orientation.hashCode());
-    result =
-      (prime * result)
-        + ((this.position == null) ? 0 : this.position.hashCode());
-    result =
-      (prime * result)
-        + ((this.projection == null) ? 0 : this.projection.hashCode());
-    result =
-      (prime * result)
-        + ((this.projection_matrix == null) ? 0 : this.projection_matrix
-          .hashCode());
-    result =
-      (prime * result) + ((this.shadow == null) ? 0 : this.shadow.hashCode());
-    result =
-      (prime * result)
-        + ((this.texture == null) ? 0 : this.texture.hashCode());
+    result = (prime * result) + this.orientation.hashCode();
+    result = (prime * result) + this.position.hashCode();
+    result = (prime * result) + this.projection.hashCode();
+    result = (prime * result) + this.projection_matrix.hashCode();
+    result = (prime * result) + this.shadow.hashCode();
+    result = (prime * result) + this.texture.hashCode();
     return result;
   }
 
@@ -275,7 +224,9 @@ import com.io7m.renderer.types.RVectorI3F;
     builder.append(", shadow=");
     builder.append(this.shadow);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 
   @Override public
@@ -283,8 +234,7 @@ import com.io7m.renderer.types.RVectorI3F;
     A
     lightDescriptionVisitableAccept(
       final V v)
-      throws ConstraintError,
-        RException,
+      throws RException,
         E
   {
     return v.lightVisitProjective(this);

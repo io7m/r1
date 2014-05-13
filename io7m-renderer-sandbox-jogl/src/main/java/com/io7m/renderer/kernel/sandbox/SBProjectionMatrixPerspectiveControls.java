@@ -19,7 +19,6 @@ package com.io7m.renderer.kernel.sandbox;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -28,8 +27,7 @@ import javax.swing.SwingUtilities;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.sandbox.SBProjectionDescription.SBProjectionPerspective;
 
@@ -47,7 +45,6 @@ public final class SBProjectionMatrixPerspectiveControls implements
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
             final SBProjectionMatrixPerspectiveControls controls =
               SBProjectionMatrixPerspectiveControls.newControls();
@@ -58,22 +55,20 @@ public final class SBProjectionMatrixPerspectiveControls implements
     });
   }
 
-  public static @Nonnull SBProjectionMatrixPerspectiveControls newControls()
-    throws ConstraintError
+  public static SBProjectionMatrixPerspectiveControls newControls()
   {
     return new SBProjectionMatrixPerspectiveControls();
   }
 
-  private final @Nonnull JTextField        aspect;
-  private @Nonnull SBProjectionPerspective current;
-  private final @Nonnull JButton           defaults;
-  private final @Nonnull JTextField        far;
-  private final @Nonnull JTextField        fov;
-  private final @Nonnull RowGroup          group;
-  private final @Nonnull JTextField        near;
+  private final JTextField        aspect;
+  private SBProjectionPerspective current;
+  private final JButton           defaults;
+  private final JTextField        far;
+  private final JTextField        fov;
+  private final RowGroup          group;
+  private final JTextField        near;
 
   private SBProjectionMatrixPerspectiveControls()
-    throws ConstraintError
   {
     this.group = new RowGroup();
 
@@ -82,21 +77,18 @@ public final class SBProjectionMatrixPerspectiveControls implements
     this.aspect = new JTextField();
     this.fov = new JTextField();
 
-    this.set(new SBProjectionPerspective());
+    final SBProjectionPerspective p = new SBProjectionPerspective();
+    this.current = p;
+    this.set(p);
 
     this.defaults = new JButton("Defaults");
     this.defaults.addActionListener(new ActionListener() {
       @SuppressWarnings("synthetic-access") @Override public
         void
         actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
       {
-        try {
-          SBProjectionMatrixPerspectiveControls.this
-            .set(new SBProjectionPerspective());
-        } catch (final ConstraintError x) {
-          throw new UnreachableCodeException(x);
-        }
+        SBProjectionMatrixPerspectiveControls.this.set(p);
       }
     });
   }
@@ -125,9 +117,8 @@ public final class SBProjectionMatrixPerspectiveControls implements
     this.group.forceShow();
   }
 
-  @Override public @Nonnull SBProjectionDescription getDescription()
-    throws SBExceptionInputError,
-      ConstraintError
+  @Override public SBProjectionDescription getDescription()
+    throws SBExceptionInputError
   {
     this.current =
       new SBProjectionPerspective(
@@ -139,7 +130,7 @@ public final class SBProjectionMatrixPerspectiveControls implements
   }
 
   private void set(
-    final @Nonnull SBProjectionPerspective p)
+    final SBProjectionPerspective p)
   {
     this.current = p;
     this.aspect.setText(Double.toString(p.getAspect()));
@@ -149,7 +140,7 @@ public final class SBProjectionMatrixPerspectiveControls implements
   }
 
   public void setDescription(
-    final @Nonnull SBProjectionPerspective description)
+    final SBProjectionPerspective description)
   {
     this.set(description);
   }

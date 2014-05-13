@@ -24,10 +24,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Properties;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -39,6 +36,11 @@ import javax.swing.SwingUtilities;
 import net.java.dev.designgridlayout.DesignGridLayout;
 
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogPolicyAllOn;
+import com.io7m.jlog.LogType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
 
 final class VErrorBox
 {
@@ -48,7 +50,8 @@ final class VErrorBox
     SwingUtilities.invokeLater(new Runnable() {
       @Override public void run()
       {
-        final Log log = new Log(new Properties(), "x", "y");
+        final LogType log =
+          Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "test");
 
         try {
           final StringBuilder m = new StringBuilder();
@@ -63,7 +66,7 @@ final class VErrorBox
           final JDialog d = VErrorBox.showError(log, x);
           d.addWindowListener(new WindowAdapter() {
             @Override public void windowClosing(
-              final WindowEvent e)
+              final @Nullable WindowEvent e)
             {
               System.exit(0);
             }
@@ -73,10 +76,10 @@ final class VErrorBox
     });
   }
 
-  private static @Nonnull JDialog showActualErrorBox(
-    final @Nonnull String title,
-    final @Nonnull String message,
-    final @CheckForNull JTextArea backtrace)
+  private static JDialog showActualErrorBox(
+    final String title,
+    final String message,
+    final @Nullable JTextArea backtrace)
   {
     final JDialog d = new JDialog();
     d.setTitle(title);
@@ -85,7 +88,7 @@ final class VErrorBox
     final JButton ok = new JButton("OK");
     ok.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final ActionEvent _)
+        final @Nullable ActionEvent _)
       {
         VWindowUtilities.closeDialog(d);
       }
@@ -100,14 +103,10 @@ final class VErrorBox
 
     final int max_length = 120;
     final String truncated;
-    if (message != null) {
-      if (message.length() > max_length) {
-        truncated = message.substring(0, max_length - 1) + "...";
-      } else {
-        truncated = message;
-      }
+    if (message.length() > max_length) {
+      truncated = message.substring(0, max_length - 1) + "...";
     } else {
-      truncated = "";
+      truncated = message;
     }
 
     final JPanel main = new JPanel();
@@ -138,10 +137,10 @@ final class VErrorBox
     return d;
   }
 
-  private static @Nonnull JDialog showActualErrorWithException(
-    final @Nonnull String title,
-    final @Nonnull String message,
-    final @Nonnull Throwable e)
+  private static JDialog showActualErrorWithException(
+    final String title,
+    final String message,
+    final Throwable e)
   {
     e.printStackTrace();
     final JTextArea text = new JTextArea();
@@ -151,9 +150,9 @@ final class VErrorBox
     return VErrorBox.showActualErrorBox(title, message, text);
   }
 
-  public static @Nonnull JDialog showError(
-    final @Nonnull Log log,
-    final @Nonnull Throwable e)
+  public static JDialog showError(
+    final LogUsableType log,
+    final Throwable e)
   {
     final String title = e.getClass().getCanonicalName();
     log.error(VErrorBox.showStackTraceText(e));
@@ -161,8 +160,8 @@ final class VErrorBox
   }
 
   public static void showErrorLater(
-    final @Nonnull Log log,
-    final @Nonnull Throwable e)
+    final LogUsableType log,
+    final Throwable e)
   {
     SwingUtilities.invokeLater(new Runnable() {
       @Override public void run()
@@ -172,19 +171,19 @@ final class VErrorBox
     });
   }
 
-  public static @Nonnull JDialog showErrorWithoutException(
-    final @Nonnull Log log,
-    final @Nonnull String title,
-    final @Nonnull String message)
+  public static JDialog showErrorWithoutException(
+    final LogUsableType log,
+    final String title,
+    final String message)
   {
     log.error(title + ": " + message);
     return VErrorBox.showActualErrorBox(title, message, null);
   }
 
   public static void showErrorWithoutExceptionLater(
-    final @Nonnull Log log,
-    final @Nonnull String title,
-    final @Nonnull String message)
+    final LogUsableType log,
+    final String title,
+    final String message)
   {
     log.error(title + ": " + message);
 
@@ -199,19 +198,19 @@ final class VErrorBox
     });
   }
 
-  public static @Nonnull JDialog showErrorWithTitle(
-    final @Nonnull Log log,
-    final @Nonnull String title,
-    final @Nonnull Throwable e)
+  public static JDialog showErrorWithTitle(
+    final LogUsableType log,
+    final String title,
+    final Throwable e)
   {
     log.error(VErrorBox.showStackTraceText(e));
     return VErrorBox.showActualErrorWithException(title, e.getMessage(), e);
   }
 
   public static void showErrorWithTitleLater(
-    final @Nonnull Log log,
-    final @Nonnull String title,
-    final @Nonnull Throwable e)
+    final LogUsableType log,
+    final String title,
+    final Throwable e)
   {
     SwingUtilities.invokeLater(new Runnable() {
       @Override public void run()
@@ -221,8 +220,8 @@ final class VErrorBox
     });
   }
 
-  private static @Nonnull String showStackTraceText(
-    final @Nonnull Throwable e)
+  private static String showStackTraceText(
+    final Throwable e)
   {
     final StringWriter writer = new StringWriter();
     writer.append(e.getMessage());

@@ -16,18 +16,16 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM3F;
-import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RTransformViewType;
 
 final class SBFirstPersonCamera
 {
-  private static final @Nonnull VectorI3F UP;
+  private static final VectorI3F UP;
 
   static {
     UP = new VectorI3F(0, 1, 0);
@@ -36,31 +34,30 @@ final class SBFirstPersonCamera
   static void makePitchYawVector(
     final double pitch,
     final double yaw,
-    final @Nonnull VectorM3F out)
+    final VectorM3F out)
   {
-    out.x = (float) ((-Math.cos(pitch)) * -Math.sin(yaw));
-    out.y = (float) Math.sin(pitch);
-    out.z = (float) (Math.cos(pitch) * -Math.cos(yaw));
+    out.set3F(
+      (float) ((-Math.cos(pitch)) * -Math.sin(yaw)),
+      (float) Math.sin(pitch),
+      (float) (Math.cos(pitch) * -Math.cos(yaw)));
   }
 
   static void makeYawVector(
     final double yaw,
-    final @Nonnull VectorM3F out)
+    final VectorM3F out)
   {
-    out.x = (float) Math.sin(yaw);
-    out.y = 0.0f;
-    out.z = (float) -Math.cos(yaw);
+    out.set3F((float) Math.sin(yaw), 0.0f, (float) -Math.cos(yaw));
   }
 
-  private double                             input_yaw;
-  private double                             input_pitch;
-  private final @Nonnull VectorM3F           input_position;
+  private double                    input_yaw;
+  private double                    input_pitch;
+  private final VectorM3F           input_position;
 
-  private final @Nonnull VectorM3F           derived_target;
-  private final @Nonnull VectorM3F           derived_forward;
-  private final @Nonnull VectorM3F           derived_right;
-  private final @Nonnull MatrixM4x4F         derived_matrix;
-  private final @Nonnull MatrixM4x4F.Context context;
+  private final VectorM3F           derived_target;
+  private final VectorM3F           derived_forward;
+  private final VectorM3F           derived_right;
+  private final MatrixM4x4F         derived_matrix;
+  private final MatrixM4x4F.Context context;
 
   SBFirstPersonCamera(
     final float x,
@@ -78,12 +75,12 @@ final class SBFirstPersonCamera
     this.context = new MatrixM4x4F.Context();
   }
 
-  @Nonnull VectorReadable3F getPosition()
+  VectorReadable3FType getPosition()
   {
     return this.input_position;
   }
 
-  @Nonnull RMatrixI4x4F<RTransformViewType> makeViewMatrix()
+  RMatrixI4x4F<RTransformViewType> makeViewMatrix()
   {
     SBFirstPersonCamera.makePitchYawVector(
       this.input_pitch,
@@ -113,7 +110,7 @@ final class SBFirstPersonCamera
   void moveDown(
     final double r)
   {
-    this.input_position.y -= r;
+    this.input_position.setYF((float) (this.input_position.getYF() - r));
   }
 
   void moveForward(
@@ -178,11 +175,11 @@ final class SBFirstPersonCamera
   void moveUp(
     final double r)
   {
-    this.input_position.y += r;
+    this.input_position.setYF((float) (this.input_position.getYF() + r));
   }
 
   void setPosition(
-    final @Nonnull VectorReadable3F position)
+    final VectorReadable3FType position)
   {
     VectorM3F.copy(position, this.input_position);
   }

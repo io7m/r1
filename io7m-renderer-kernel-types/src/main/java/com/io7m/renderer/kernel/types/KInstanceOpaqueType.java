@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * <p>
@@ -34,11 +33,11 @@ public interface KInstanceOpaqueType extends KInstanceRegularType
    * @return The regular material of this instance
    */
 
-  @Override @Nonnull KMaterialOpaqueType instanceGetMaterial();
+  @Override  KMaterialOpaqueType instanceGetMaterial();
 
   /**
    * @return The faces that will be rendered
    */
 
-  @Nonnull KFaceSelection instanceGetFaces();
+   KFaceSelection instanceGetFaces();
 }

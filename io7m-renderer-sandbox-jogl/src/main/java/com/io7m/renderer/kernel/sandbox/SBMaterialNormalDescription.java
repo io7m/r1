@@ -16,28 +16,26 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
+import com.io7m.jnull.Nullable;
 import com.io7m.jvvfs.PathVirtual;
 
 public final class SBMaterialNormalDescription
 {
-  public static @Nonnull SBMaterialNormalDescription getDefault()
+  public static SBMaterialNormalDescription getDefault()
   {
     return new SBMaterialNormalDescription(null);
   }
 
-  private final @CheckForNull PathVirtual texture;
+  private final @Nullable PathVirtual texture;
 
   public SBMaterialNormalDescription(
-    final @CheckForNull PathVirtual in_texture)
+    final @Nullable PathVirtual in_texture)
   {
     this.texture = in_texture;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -54,13 +52,18 @@ public final class SBMaterialNormalDescription
       if (other.texture != null) {
         return false;
       }
-    } else if (!this.texture.equals(other.texture)) {
-      return false;
+    } else {
+      final PathVirtual t = this.texture;
+      if (t != null) {
+        if (!t.equals(other.texture)) {
+          return false;
+        }
+      }
     }
     return true;
   }
 
-  public @CheckForNull PathVirtual getTexture()
+  public @Nullable PathVirtual getTexture()
   {
     return this.texture;
   }
@@ -69,9 +72,10 @@ public final class SBMaterialNormalDescription
   {
     final int prime = 31;
     int result = 1;
-    result =
-      (prime * result)
-        + ((this.texture == null) ? 0 : this.texture.hashCode());
+    final PathVirtual t = this.texture;
+    if (t != null) {
+      result = (prime * result) + t.hashCode();
+    }
     return result;
   }
 

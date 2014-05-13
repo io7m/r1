@@ -18,9 +18,10 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Properties;
+import java.io.File;
+import java.util.Map;
+import java.util.concurrent.Future;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -29,11 +30,23 @@ import javax.swing.SwingUtilities;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Unit;
+import com.io7m.jcanephora.TextureFilterMagnification;
+import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jcanephora.TextureWrapR;
+import com.io7m.jcanephora.TextureWrapS;
+import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogPolicyAllOn;
+import com.io7m.jlog.LogType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.NullCheckException;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RTransformTextureType;
@@ -52,16 +65,66 @@ public final class SBMaterialControls implements
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
-            final Log log =
-              new Log(new Properties(), "com.io7m.renderer", "sandbox");
+            final LogType log =
+              Log.newLog(
+                LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG),
+                "sandbox");
+
+            final SBSceneControllerTextures t =
+              new SBSceneControllerTextures() {
+                @Override public void sceneChangeListenerAdd(
+                  final SBSceneChangeListener listener)
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
+
+                @Override public
+                  Map<PathVirtual, SBTextureCube>
+                  sceneTexturesCubeGet()
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
+
+                @Override public
+                  Map<PathVirtual, SBTexture2D<?>>
+                  sceneTextures2DGet()
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
+
+                @Override public Future<SBTextureCube> sceneTextureCubeLoad(
+                  final File file,
+                  final TextureWrapR wrap_r,
+                  final TextureWrapS wrap_s,
+                  final TextureWrapT wrap_t,
+                  final TextureFilterMinification filter_min,
+                  final TextureFilterMagnification filter_mag)
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
+
+                @Override public
+                  <T extends SBTexture2DKind>
+                  Future<SBTexture2D<T>>
+                  sceneTexture2DLoad(
+                    final File file,
+                    final TextureWrapS wrap_s,
+                    final TextureWrapT wrap_t,
+                    final TextureFilterMinification filter_min,
+                    final TextureFilterMagnification filter_mag)
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
+              };
+
             final SBMaterialControls controls =
-              SBMaterialControls.newControls(
-                this,
-                log,
-                null,
-                Integer.valueOf(0));
+              SBMaterialControls.newControls(this, log, t, Integer.valueOf(0));
             controls.controlsAddToLayout(layout);
           }
         };
@@ -69,39 +132,37 @@ public final class SBMaterialControls implements
     });
   }
 
-  public static @Nonnull SBMaterialControls newControls(
-    final @Nonnull JFrame parent,
-    final @Nonnull Log log,
-    final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull Integer id)
-    throws ConstraintError
+  public static SBMaterialControls newControls(
+    final JFrame parent,
+    final LogUsableType log,
+    final SBSceneControllerTextures controller,
+    final Integer id)
   {
     return new SBMaterialControls(parent, log, controller, id);
   }
 
-  private final @Nonnull SBMaterialControlsNormal                   controls_normal;
-  private final @Nonnull SBMaterialControlsOpaqueAlphaToDepth       controls_opaque_alpha_depth;
-  private final @Nonnull SBMaterialControlsOpaqueRegular            controls_opaque_regular;
-  private final @Nonnull SBMaterialControlsTranslucentRefractive    controls_translucent_refractive;
-  private final @Nonnull SBMaterialControlsTranslucentSpecularOnly  controls_translucent_specular_only;
-  private final @Nonnull SBMaterialControlsTranslucentRegular       controls_translucent_regular;
-  private final @Nonnull SBMatrix3x3Controls<RTransformTextureType> controls_uv;
-  private final @Nonnull RowGroup                                   group;
-  private final @Nonnull Integer                                    id;
-  private final @Nonnull JTextField                                 id_field;
-  private final @Nonnull JTextField                                 name;
-  private final @Nonnull JFrame                                     parent;
-  private final @Nonnull SBMaterialTypeSelector                     selector;
+  private final SBMaterialControlsNormal                   controls_normal;
+  private final SBMaterialControlsOpaqueAlphaToDepth       controls_opaque_alpha_depth;
+  private final SBMaterialControlsOpaqueRegular            controls_opaque_regular;
+  private final SBMaterialControlsTranslucentRefractive    controls_translucent_refractive;
+  private final SBMaterialControlsTranslucentSpecularOnly  controls_translucent_specular_only;
+  private final SBMaterialControlsTranslucentRegular       controls_translucent_regular;
+  private final SBMatrix3x3Controls<RTransformTextureType> controls_uv;
+  private final RowGroup                                   group;
+  private final Integer                                    id;
+  private final JTextField                                 id_field;
+  private final JTextField                                 name;
+  private final JFrame                                     parent;
+  private final SBMaterialTypeSelector                     selector;
 
   private SBMaterialControls(
-    final @Nonnull JFrame in_parent,
-    final @Nonnull Log log,
-    final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull Integer in_id)
-    throws ConstraintError
+    final JFrame in_parent,
+    final LogUsableType log,
+    final SBSceneControllerTextures controller,
+    final Integer in_id)
   {
-    this.parent = Constraints.constrainNotNull(in_parent, "Parent");
-    this.id = Constraints.constrainNotNull(in_id, "ID");
+    this.parent = NullCheck.notNull(in_parent, "Parent");
+    this.id = NullCheck.notNull(in_id, "ID");
     this.group = new RowGroup();
     this.id_field = new JTextField(in_id.toString());
     this.id_field.setEditable(false);
@@ -156,7 +217,7 @@ public final class SBMaterialControls implements
       @SuppressWarnings("synthetic-access") @Override public
         void
         actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
       {
         final SBMaterialType type =
           SBMaterialControls.this.selector.getSelectedItem();
@@ -166,7 +227,7 @@ public final class SBMaterialControls implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     layout.row().group(this.group).grid(new JLabel("ID")).add(this.id_field);
     layout.row().group(this.group).grid(new JLabel("Name")).add(this.name);
@@ -201,28 +262,24 @@ public final class SBMaterialControls implements
   @SuppressWarnings("synthetic-access") @Override public
     void
     controlsLoadFrom(
-      final @Nonnull SBMaterialDescription t)
+      final SBMaterialDescription t)
   {
     try {
       this.name.setText(t.materialDescriptionGetName());
 
       t
-        .materialDescriptionVisitableAccept(new SBMaterialDescriptionVisitor<Unit, ConstraintError>() {
+        .materialDescriptionVisitableAccept(new SBMaterialDescriptionVisitor<Unit, NullCheckException>() {
           @Override public Unit materialDescriptionVisitOpaque(
-            final @Nonnull SBMaterialDescriptionOpaque m)
-            throws ConstraintError,
-              RException,
-              ConstraintError
+            final SBMaterialDescriptionOpaque m)
+            throws RException
           {
             return m
-              .materialDescriptionOpaqueVisitableAccept(new SBMaterialDescriptionOpaqueVisitor<Unit, ConstraintError>() {
+              .materialDescriptionOpaqueVisitableAccept(new SBMaterialDescriptionOpaqueVisitor<Unit, NullCheckException>() {
                 @Override public
                   Unit
                   materialDescriptionVisitOpaqueAlphaDepth(
-                    final @Nonnull SBMaterialDescriptionOpaqueAlphaToDepth ma)
-                    throws ConstraintError,
-                      RException,
-                      ConstraintError
+                    final SBMaterialDescriptionOpaqueAlphaToDepth ma)
+                    throws RException
                 {
                   SBMaterialControls.this.controls_opaque_alpha_depth
                     .controlsLoadFrom(ma);
@@ -232,10 +289,8 @@ public final class SBMaterialControls implements
                 }
 
                 @Override public Unit materialDescriptionVisitOpaqueRegular(
-                  final @Nonnull SBMaterialDescriptionOpaqueRegular mr)
-                  throws ConstraintError,
-                    RException,
-                    ConstraintError
+                  final SBMaterialDescriptionOpaqueRegular mr)
+                  throws RException
                 {
                   SBMaterialControls.this.controls_opaque_regular
                     .controlsLoadFrom(mr);
@@ -247,20 +302,16 @@ public final class SBMaterialControls implements
           }
 
           @Override public Unit materialDescriptionVisitTranslucent(
-            final @Nonnull SBMaterialDescriptionTranslucent m)
-            throws ConstraintError,
-              RException,
-              ConstraintError
+            final SBMaterialDescriptionTranslucent m)
+            throws RException
           {
             return m
-              .materialDescriptionTranslucentVisitableAccept(new SBMaterialDescriptionTranslucentVisitor<Unit, ConstraintError>() {
+              .materialDescriptionTranslucentVisitableAccept(new SBMaterialDescriptionTranslucentVisitor<Unit, NullCheckException>() {
                 @Override public
                   Unit
                   materialDescriptionVisitTranslucentRefractive(
-                    final @Nonnull SBMaterialDescriptionTranslucentRefractive mr)
-                    throws ConstraintError,
-                      RException,
-                      ConstraintError
+                    final SBMaterialDescriptionTranslucentRefractive mr)
+                    throws RException
                 {
                   SBMaterialControls.this.controls_translucent_refractive
                     .controlsLoadFrom(mr);
@@ -272,10 +323,8 @@ public final class SBMaterialControls implements
                 @Override public
                   Unit
                   materialDescriptionVisitTranslucentRegular(
-                    final @Nonnull SBMaterialDescriptionTranslucentRegular mr)
-                    throws ConstraintError,
-                      RException,
-                      ConstraintError
+                    final SBMaterialDescriptionTranslucentRegular mr)
+                    throws RException
                 {
                   SBMaterialControls.this.controls_translucent_regular
                     .controlsLoadFrom(mr);
@@ -288,9 +337,7 @@ public final class SBMaterialControls implements
                   Unit
                   materialDescriptionVisitTranslucentSpecularOnly(
                     final SBMaterialDescriptionTranslucentSpecularOnly mr)
-                    throws ConstraintError,
-                      RException,
-                      ConstraintError
+                    throws RException
                 {
                   SBMaterialControls.this.controls_translucent_specular_only
                     .controlsLoadFrom(mr);
@@ -303,14 +350,11 @@ public final class SBMaterialControls implements
         });
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
     }
   }
 
   @Override public SBMaterialDescription controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
     switch (this.selector.getSelectedItem()) {
       case MATERIAL_OPAQUE_ALPHA_DEPTH:
@@ -346,7 +390,7 @@ public final class SBMaterialControls implements
   }
 
   protected void controlsShowForType(
-    final @Nonnull SBMaterialType type)
+    final SBMaterialType type)
   {
     switch (type) {
       case MATERIAL_OPAQUE_ALPHA_DEPTH:
@@ -397,12 +441,12 @@ public final class SBMaterialControls implements
     }
   }
 
-  public @Nonnull Integer getID()
+  public Integer getID()
   {
     return this.id;
   }
 
-  public @Nonnull String getName()
+  public String getName()
   {
     return this.name.getText();
   }

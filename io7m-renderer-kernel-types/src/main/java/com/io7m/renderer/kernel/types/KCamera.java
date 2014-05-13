@@ -16,11 +16,9 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformViewType;
@@ -29,7 +27,7 @@ import com.io7m.renderer.types.RTransformViewType;
  * An orientable "camera" with a specific projection.
  */
 
-@Immutable public final class KCamera
+@EqualityStructural public final class KCamera
 {
   /**
    * Construct a new camera with the given view and projection.
@@ -39,33 +37,30 @@ import com.io7m.renderer.types.RTransformViewType;
    * @param projection
    *          The eye-to-clip matrix.
    * @return A new camera
-   * @throws ConstraintError
-   *           If any parameters are <code>null</code>
    */
 
-  public static @Nonnull KCamera newCamera(
-    final @Nonnull RMatrixI4x4F<RTransformViewType> view,
-    final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection)
-    throws ConstraintError
+  public static KCamera newCamera(
+    final RMatrixI4x4F<RTransformViewType> view,
+    final RMatrixI4x4F<RTransformProjectionType> projection)
   {
     return new KCamera(
-      Constraints.constrainNotNull(view, "View matrix"),
-      Constraints.constrainNotNull(projection, "Projection matrix"));
+      NullCheck.notNull(view, "View matrix"),
+      NullCheck.notNull(projection, "Projection matrix"));
   }
 
-  private final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection;
-  private final @Nonnull RMatrixI4x4F<RTransformViewType>       view;
+  private final RMatrixI4x4F<RTransformProjectionType> projection;
+  private final RMatrixI4x4F<RTransformViewType>       view;
 
   private KCamera(
-    final @Nonnull RMatrixI4x4F<RTransformViewType> in_view,
-    final @Nonnull RMatrixI4x4F<RTransformProjectionType> in_projection)
+    final RMatrixI4x4F<RTransformViewType> in_view,
+    final RMatrixI4x4F<RTransformProjectionType> in_projection)
   {
     this.view = in_view;
     this.projection = in_projection;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -90,7 +85,7 @@ import com.io7m.renderer.types.RTransformViewType;
    * @return The eye-to-clip projection matrix
    */
 
-  public @Nonnull RMatrixI4x4F<RTransformProjectionType> getProjectionMatrix()
+  public RMatrixI4x4F<RTransformProjectionType> getProjectionMatrix()
   {
     return this.projection;
   }
@@ -99,7 +94,7 @@ import com.io7m.renderer.types.RTransformViewType;
    * @return The world-to-eye view matrix
    */
 
-  public @Nonnull RMatrixI4x4F<RTransformViewType> getViewMatrix()
+  public RMatrixI4x4F<RTransformViewType> getViewMatrix()
   {
     return this.view;
   }
@@ -121,6 +116,8 @@ import com.io7m.renderer.types.RTransformViewType;
     builder.append("] [projection ");
     builder.append(this.projection);
     builder.append("]]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

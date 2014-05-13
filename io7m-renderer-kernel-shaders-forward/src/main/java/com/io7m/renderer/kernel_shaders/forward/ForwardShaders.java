@@ -16,9 +16,7 @@
 
 package com.io7m.renderer.kernel_shaders.forward;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KLightLabel;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoLabel;
 import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
@@ -40,8 +38,8 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
 public final class ForwardShaders
 {
   private static void fragmentShaderAttributesLight(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KLightLabel light)
+    final StringBuilder b,
+    final KLightLabel light)
   {
     switch (light) {
       case LIGHT_LABEL_DIRECTIONAL:
@@ -70,8 +68,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderAttributesNormal(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialNormalLabel normal)
+    final StringBuilder b,
+    final KMaterialNormalLabel normal)
   {
     switch (normal) {
       case NORMAL_MAPPED:
@@ -98,7 +96,7 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderAttributesUV(
-    final @Nonnull StringBuilder b,
+    final StringBuilder b,
     final boolean implies_uv)
   {
     if (implies_uv) {
@@ -108,8 +106,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderParametersAlbedo(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialAlbedoLabel albedo)
+    final StringBuilder b,
+    final KMaterialAlbedoLabel albedo)
   {
     b.append("  -- Albedo parameters\n");
     b.append("  parameter p_albedo : Albedo.t;\n");
@@ -130,7 +128,7 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderParametersAlpha(
-    final @Nonnull StringBuilder b)
+    final StringBuilder b)
   {
     b.append("  -- Alpha parameters\n");
     b.append("  parameter p_opacity : float;\n");
@@ -138,8 +136,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderParametersEmissive(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialEmissiveLabel emissive)
+    final StringBuilder b,
+    final KMaterialEmissiveLabel emissive)
   {
     switch (emissive) {
       case EMISSIVE_NONE:
@@ -159,8 +157,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderParametersEnvironment(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialEnvironmentLabel env)
+    final StringBuilder b,
+    final KMaterialEnvironmentLabel env)
   {
     switch (env) {
       case ENVIRONMENT_NONE:
@@ -181,8 +179,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderParametersNormal(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialNormalLabel normal)
+    final StringBuilder b,
+    final KMaterialNormalLabel normal)
   {
     switch (normal) {
       case NORMAL_MAPPED:
@@ -205,8 +203,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderParametersRefractive(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialRefractiveLabel refractive)
+    final StringBuilder b,
+    final KMaterialRefractiveLabel refractive)
   {
     b.append("  -- Refraction parameters\n");
     b.append("  parameter p_refraction            : Refraction.t;\n");
@@ -228,9 +226,9 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderParametersSpecular(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialEnvironmentLabel env,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KMaterialEnvironmentLabel env,
+    final KMaterialSpecularLabel specular)
   {
     boolean has_specular = false;
     boolean has_map = false;
@@ -275,7 +273,7 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderStandardIO(
-    final @Nonnull StringBuilder b)
+    final StringBuilder b)
   {
     b.append("  in f_position_eye  : vector_4f;\n");
     b.append("  in f_position_clip : vector_4f;\n");
@@ -284,8 +282,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderStandardParametersLit(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KLightLabel light)
+    final StringBuilder b,
+    final KLightLabel light)
   {
     switch (light) {
       case LIGHT_LABEL_DIRECTIONAL:
@@ -331,8 +329,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesAlbedoOpaque(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialAlbedoLabel albedo)
+    final StringBuilder b,
+    final KMaterialAlbedoLabel albedo)
   {
     switch (albedo) {
       case ALBEDO_COLOURED:
@@ -355,8 +353,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesAlbedoTranslucent(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialAlbedoLabel albedo)
+    final StringBuilder b,
+    final KMaterialAlbedoLabel albedo)
   {
     switch (albedo) {
       case ALBEDO_COLOURED:
@@ -383,8 +381,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesAlpha(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialAlphaOpacityType alpha)
+    final StringBuilder b,
+    final KMaterialAlphaOpacityType alpha)
   {
     switch (alpha) {
       case ALPHA_OPACITY_CONSTANT:
@@ -430,8 +428,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesEnvironment(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialEnvironmentLabel env)
+    final StringBuilder b,
+    final KMaterialEnvironmentLabel env)
   {
     switch (env) {
       case ENVIRONMENT_NONE:
@@ -456,10 +454,10 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesLight(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KLightLabel light,
-    final @Nonnull KMaterialEmissiveLabel emissive,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KLightLabel light,
+    final KMaterialEmissiveLabel emissive,
+    final KMaterialSpecularLabel specular)
   {
     switch (light) {
       case LIGHT_LABEL_DIRECTIONAL:
@@ -494,9 +492,9 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesLightDirectional(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialEmissiveLabel emissive,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KMaterialEmissiveLabel emissive,
+    final KMaterialSpecularLabel specular)
   {
     b.append("  -- Directional light vectors\n");
     b.append("  value light_vectors =\n");
@@ -559,10 +557,10 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesLightProjective(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KLightLabel light,
-    final @Nonnull KMaterialEmissiveLabel emissive,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KLightLabel light,
+    final KMaterialEmissiveLabel emissive,
+    final KMaterialSpecularLabel specular)
   {
     b.append("  -- Projective light vectors/attenuation\n");
     b.append("  value light_vectors =\n");
@@ -706,9 +704,9 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesLightSpherical(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialEmissiveLabel emissive,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KMaterialEmissiveLabel emissive,
+    final KMaterialSpecularLabel specular)
   {
     b.append("  -- Spherical light vectors/attenuation\n");
     b.append("  value light_vectors =\n");
@@ -782,8 +780,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesNormal(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialNormalLabel normal)
+    final StringBuilder b,
+    final KMaterialNormalLabel normal)
   {
     switch (normal) {
       case NORMAL_MAPPED:
@@ -815,9 +813,9 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesRefractionRGBA(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialNormalLabel normal,
-    final @Nonnull KMaterialRefractiveLabel refractive)
+    final StringBuilder b,
+    final KMaterialNormalLabel normal,
+    final KMaterialRefractiveLabel refractive)
   {
     switch (normal) {
       case NORMAL_MAPPED:
@@ -866,8 +864,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesRGBAOpaqueLit(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KMaterialSpecularLabel specular)
   {
     b.append("  -- RGBA opaque lit\n");
     b
@@ -890,15 +888,15 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesRGBAOpaqueUnlit(
-    final @Nonnull StringBuilder b)
+    final StringBuilder b)
   {
     b.append("  -- RGBA opaque unlit\n");
     b.append("  value rgba = new vector_4f (surface [x y z], 1.0);\n");
   }
 
   private static void fragmentShaderValuesRGBATranslucentLit(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KMaterialSpecularLabel specular)
   {
     b.append("  -- Alpha\n");
     b.append("  value alpha = F.multiply (surface [w], opacity);\n");
@@ -951,7 +949,7 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesRGBATranslucentUnlit(
-    final @Nonnull StringBuilder b)
+    final StringBuilder b)
   {
     b.append("  -- RGBA translucent unlit\n");
     b.append("  value a = F.multiply (surface [w], opacity);\n");
@@ -959,9 +957,9 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesSpecular(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialSpecularLabel specular,
-    final @Nonnull KMaterialEnvironmentLabel environment)
+    final StringBuilder b,
+    final KMaterialSpecularLabel specular,
+    final KMaterialEnvironmentLabel environment)
   {
     boolean sample_specular = false;
 
@@ -1005,8 +1003,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesSurfaceOpaque(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialEnvironmentLabel env)
+    final StringBuilder b,
+    final KMaterialEnvironmentLabel env)
   {
     switch (env) {
       case ENVIRONMENT_NONE:
@@ -1050,8 +1048,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesSurfaceTranslucent(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialEnvironmentLabel env)
+    final StringBuilder b,
+    final KMaterialEnvironmentLabel env)
   {
     switch (env) {
       case ENVIRONMENT_NONE:
@@ -1089,13 +1087,13 @@ public final class ForwardShaders
   }
 
   private static void moduleEnd(
-    final @Nonnull StringBuilder b)
+    final StringBuilder b)
   {
     b.append("end;\n");
   }
 
-  public static @Nonnull String moduleForwardOpaqueLit(
-    final @Nonnull KMaterialForwardOpaqueLitLabel label)
+  public static String moduleForwardOpaqueLit(
+    final KMaterialForwardOpaqueLitLabel label)
   {
     final String module = TitleCase.toTitleCase(label.labelGetCode());
     final StringBuilder b = new StringBuilder();
@@ -1108,11 +1106,13 @@ public final class ForwardShaders
     ForwardShaders.moduleProgram(b);
     b.append("\n");
     ForwardShaders.moduleEnd(b);
-    return b.toString();
+    final String r = b.toString();
+    assert r != null;
+    return r;
   }
 
-  public static @Nonnull String moduleForwardOpaqueUnlit(
-    final @Nonnull KMaterialForwardOpaqueUnlitLabel l)
+  public static String moduleForwardOpaqueUnlit(
+    final KMaterialForwardOpaqueUnlitLabel l)
   {
     final String module = TitleCase.toTitleCase(l.labelGetCode());
     final StringBuilder b = new StringBuilder();
@@ -1125,11 +1125,13 @@ public final class ForwardShaders
     ForwardShaders.moduleProgram(b);
     b.append("\n");
     ForwardShaders.moduleEnd(b);
-    return b.toString();
+    final String r = b.toString();
+    assert r != null;
+    return r;
   }
 
   public static String moduleForwardTranslucentRefractive(
-    final @Nonnull KMaterialForwardTranslucentRefractiveLabel l)
+    final KMaterialForwardTranslucentRefractiveLabel l)
   {
     final String module = TitleCase.toTitleCase(l.labelGetCode());
     final StringBuilder b = new StringBuilder();
@@ -1142,11 +1144,13 @@ public final class ForwardShaders
     ForwardShaders.moduleProgram(b);
     b.append("\n");
     ForwardShaders.moduleEnd(b);
-    return b.toString();
+    final String r = b.toString();
+    assert r != null;
+    return r;
   }
 
   public static String moduleForwardTranslucentRegularLit(
-    final @Nonnull KMaterialForwardTranslucentRegularLitLabel l)
+    final KMaterialForwardTranslucentRegularLitLabel l)
   {
     final String module = TitleCase.toTitleCase(l.labelGetCode());
     final StringBuilder b = new StringBuilder();
@@ -1159,11 +1163,13 @@ public final class ForwardShaders
     ForwardShaders.moduleProgram(b);
     b.append("\n");
     ForwardShaders.moduleEnd(b);
-    return b.toString();
+    final String r = b.toString();
+    assert r != null;
+    return r;
   }
 
   public static String moduleForwardTranslucentRegularUnlit(
-    final @Nonnull KMaterialForwardTranslucentRegularUnlitLabel l)
+    final KMaterialForwardTranslucentRegularUnlitLabel l)
   {
     final String module = TitleCase.toTitleCase(l.labelGetCode());
     final StringBuilder b = new StringBuilder();
@@ -1176,12 +1182,14 @@ public final class ForwardShaders
     ForwardShaders.moduleProgram(b);
     b.append("\n");
     ForwardShaders.moduleEnd(b);
-    return b.toString();
+    final String r = b.toString();
+    assert r != null;
+    return r;
   }
 
   private static void moduleFragmentShaderOpaqueLit(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialForwardOpaqueLitLabel label)
+    final StringBuilder b,
+    final KMaterialForwardOpaqueLitLabel label)
   {
     final KMaterialLabelRegularType reg = label.getRegular();
     final boolean implies_uv = reg.labelImpliesUV();
@@ -1218,8 +1226,8 @@ public final class ForwardShaders
   }
 
   private static void moduleFragmentShaderOpaqueUnlit(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialForwardOpaqueUnlitLabel label)
+    final StringBuilder b,
+    final KMaterialForwardOpaqueUnlitLabel label)
   {
     final boolean implies_uv = label.labelImpliesUV();
     final KMaterialNormalLabel normal = label.labelGetNormal();
@@ -1253,8 +1261,8 @@ public final class ForwardShaders
   }
 
   private static void moduleFragmentShaderTranslucentRefractive(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialForwardTranslucentRefractiveLabel l)
+    final StringBuilder b,
+    final KMaterialForwardTranslucentRefractiveLabel l)
   {
     final boolean implies_uv = l.labelImpliesUV();
     final KMaterialNormalLabel normal = l.labelGetNormal();
@@ -1274,8 +1282,8 @@ public final class ForwardShaders
   }
 
   private static void moduleFragmentShaderTranslucentRegularLit(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialForwardTranslucentRegularLitLabel l)
+    final StringBuilder b,
+    final KMaterialForwardTranslucentRegularLitLabel l)
   {
     final boolean implies_uv = l.labelImpliesUV();
     final KMaterialNormalLabel normal = l.labelGetNormal();
@@ -1314,8 +1322,8 @@ public final class ForwardShaders
   }
 
   private static void moduleFragmentShaderTranslucentRegularUnlit(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialForwardTranslucentRegularUnlitLabel l)
+    final StringBuilder b,
+    final KMaterialForwardTranslucentRegularUnlitLabel l)
   {
     final boolean implies_uv = l.labelImpliesUV();
     final KMaterialNormalLabel normal = l.labelGetNormal();
@@ -1352,7 +1360,7 @@ public final class ForwardShaders
   }
 
   private static void moduleProgram(
-    final @Nonnull StringBuilder b)
+    final StringBuilder b)
   {
     b.append("shader program p is\n");
     b.append("  vertex   v;\n");
@@ -1361,8 +1369,8 @@ public final class ForwardShaders
   }
 
   private static void moduleStart(
-    final @Nonnull StringBuilder b,
-    final @Nonnull String name)
+    final StringBuilder b,
+    final String name)
   {
     b.append("module ");
     b.append(name);
@@ -1396,8 +1404,8 @@ public final class ForwardShaders
     <L extends KMaterialLabelRegularType & KMaterialLabelLitType>
     void
     moduleVertexShaderRegularLit(
-      final @Nonnull StringBuilder b,
-      final @Nonnull L label)
+      final StringBuilder b,
+      final L label)
   {
     final boolean implies_uv = label.labelImpliesUV();
     final KMaterialNormalLabel normal = label.labelGetNormal();
@@ -1407,9 +1415,9 @@ public final class ForwardShaders
   }
 
   private static void moduleVertexShaderRegularUnlit(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialNormalLabel normal,
-    final @Nonnull KMaterialLabelImpliesUVType uv)
+    final StringBuilder b,
+    final KMaterialNormalLabel normal,
+    final KMaterialLabelImpliesUVType uv)
   {
     final boolean implies_uv = uv.labelImpliesUV();
 
@@ -1432,8 +1440,8 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardAttributesLight(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KLightLabel label)
+    final StringBuilder b,
+    final KLightLabel label)
   {
     switch (label) {
       case LIGHT_LABEL_DIRECTIONAL:
@@ -1465,8 +1473,8 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardAttributesNormal(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialNormalLabel normal)
+    final StringBuilder b,
+    final KMaterialNormalLabel normal)
   {
     switch (normal) {
       case NORMAL_MAPPED:
@@ -1496,7 +1504,7 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardAttributesUV(
-    final @Nonnull StringBuilder b,
+    final StringBuilder b,
     final boolean implies_uv)
   {
     if (implies_uv) {
@@ -1506,7 +1514,7 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardIO(
-    final @Nonnull StringBuilder b)
+    final StringBuilder b)
   {
     b.append("  in v_position              : vector_3f;\n");
     b.append("  out f_position_eye         : vector_4f;\n");
@@ -1514,8 +1522,8 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardParametersLight(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KLightLabel label)
+    final StringBuilder b,
+    final KLightLabel label)
   {
     switch (label) {
       case LIGHT_LABEL_DIRECTIONAL:
@@ -1538,15 +1546,15 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardParametersMatrices(
-    final @Nonnull StringBuilder b)
+    final StringBuilder b)
   {
     b.append("  parameter m_modelview  : matrix_4x4f;\n");
     b.append("  parameter m_projection : matrix_4x4f;\n");
   }
 
   private static void vertexShaderStandardParametersNormal(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialNormalLabel normal)
+    final StringBuilder b,
+    final KMaterialNormalLabel normal)
   {
     switch (normal) {
       case NORMAL_MAPPED:
@@ -1565,7 +1573,7 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardParametersUV(
-    final @Nonnull StringBuilder b,
+    final StringBuilder b,
     final boolean implies_uv)
   {
     if (implies_uv) {
@@ -1574,8 +1582,8 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardValuesLight(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KLightLabel label)
+    final StringBuilder b,
+    final KLightLabel label)
   {
     switch (label) {
       case LIGHT_LABEL_DIRECTIONAL:
@@ -1607,8 +1615,8 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardValuesNormals(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialNormalLabel normal)
+    final StringBuilder b,
+    final KMaterialNormalLabel normal)
   {
     switch (normal) {
       case NORMAL_MAPPED:
@@ -1633,7 +1641,7 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardValuesPositions(
-    final @Nonnull StringBuilder b)
+    final StringBuilder b)
   {
     b.append("  value position_eye =\n");
     b.append("    M4.multiply_vector (\n");
@@ -1648,7 +1656,7 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardValuesUV(
-    final @Nonnull StringBuilder b,
+    final StringBuilder b,
     final boolean implies_uv)
   {
     if (implies_uv) {
@@ -1658,15 +1666,15 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardWrites(
-    final @Nonnull StringBuilder b)
+    final StringBuilder b)
   {
     b.append("  out f_position_clip = position_clip;\n");
     b.append("  out f_position_eye  = position_eye;\n");
   }
 
   private static void vertexShaderStandardWritesLight(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KLightLabel label)
+    final StringBuilder b,
+    final KLightLabel label)
   {
     switch (label) {
       case LIGHT_LABEL_DIRECTIONAL:
@@ -1694,8 +1702,8 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardWritesNormals(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialNormalLabel normal)
+    final StringBuilder b,
+    final KMaterialNormalLabel normal)
   {
     switch (normal) {
       case NORMAL_MAPPED:
@@ -1718,7 +1726,7 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderStandardWritesUV(
-    final @Nonnull StringBuilder b,
+    final StringBuilder b,
     final boolean impliesUV)
   {
     if (impliesUV) {
@@ -1726,8 +1734,8 @@ public final class ForwardShaders
     }
   }
 
-  public static @Nonnull String moduleForwardTranslucentSpecularOnly(
-    final @Nonnull KMaterialForwardTranslucentSpecularOnlyLitLabel l)
+  public static String moduleForwardTranslucentSpecularOnly(
+    final KMaterialForwardTranslucentSpecularOnlyLitLabel l)
   {
     final String module = TitleCase.toTitleCase(l.labelGetCode());
     final StringBuilder b = new StringBuilder();
@@ -1740,12 +1748,14 @@ public final class ForwardShaders
     ForwardShaders.moduleProgram(b);
     b.append("\n");
     ForwardShaders.moduleEnd(b);
-    return b.toString();
+    final String r = b.toString();
+    assert r != null;
+    return r;
   }
 
   private static void moduleFragmentShaderTranslucentSpecularOnly(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialForwardTranslucentSpecularOnlyLitLabel l)
+    final StringBuilder b,
+    final KMaterialForwardTranslucentSpecularOnlyLitLabel l)
   {
     final boolean implies_uv = l.labelImpliesUV();
     final KMaterialNormalLabel normal = l.labelGetNormal();
@@ -1776,8 +1786,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesRGBATranslucentLitSpecularOnly(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KMaterialSpecularLabel specular)
   {
     switch (specular) {
       case SPECULAR_CONSTANT:
@@ -1800,9 +1810,9 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesLightSpecularOnly(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KLightLabel light,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KLightLabel light,
+    final KMaterialSpecularLabel specular)
   {
     switch (light) {
       case LIGHT_LABEL_DIRECTIONAL:
@@ -1834,8 +1844,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesLightSphericalSpecularOnly(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KMaterialSpecularLabel specular)
   {
     b.append("  -- Spherical light vectors/attenuation\n");
     b.append("  value light_vectors =\n");
@@ -1876,9 +1886,9 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesLightProjectiveSpecularOnly(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KLightLabel light,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KLightLabel light,
+    final KMaterialSpecularLabel specular)
   {
     b.append("  -- Projective light vectors/attenuation\n");
     b.append("  value light_vectors =\n");
@@ -1988,8 +1998,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesLightDirectionalSpecularOnly(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KMaterialSpecularLabel specular)
   {
     b.append("  -- Directional light vectors\n");
     b.append("  value light_vectors =\n");
@@ -2024,8 +2034,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderValuesSpecularOnly(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KMaterialSpecularLabel specular)
   {
     if (specular == KMaterialSpecularLabel.SPECULAR_MAPPED) {
       b.append("  -- Mapped specular\n");
@@ -2041,8 +2051,8 @@ public final class ForwardShaders
   }
 
   private static void fragmentShaderParametersSpecularOnly(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialSpecularLabel specular)
+    final StringBuilder b,
+    final KMaterialSpecularLabel specular)
   {
     boolean has_specular = false;
     boolean has_map = false;
@@ -2073,8 +2083,8 @@ public final class ForwardShaders
   }
 
   private static void moduleVertexShaderTranslucentSpecularOnly(
-    final @Nonnull StringBuilder b,
-    final @Nonnull KMaterialForwardTranslucentSpecularOnlyLitLabel label)
+    final StringBuilder b,
+    final KMaterialForwardTranslucentSpecularOnlyLitLabel label)
   {
     final boolean implies_uv = label.labelImpliesUV();
     final KMaterialNormalLabel normal = label.labelGetNormal();
@@ -2083,10 +2093,10 @@ public final class ForwardShaders
   }
 
   private static void vertexShaderLit(
-    final @Nonnull StringBuilder b,
+    final StringBuilder b,
     final boolean implies_uv,
-    final @Nonnull KMaterialNormalLabel normal,
-    final @Nonnull KLightLabel light)
+    final KMaterialNormalLabel normal,
+    final KLightLabel light)
   {
     b.append("shader vertex v is\n");
     ForwardShaders.vertexShaderStandardIO(b);

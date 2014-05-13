@@ -16,15 +16,14 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
-import com.io7m.jtensors.QuaternionReadable4F;
+import com.io7m.jtensors.QuaternionReadable4FType;
 import com.io7m.jtensors.VectorM3F;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RMatrixM4x4F;
@@ -42,13 +41,13 @@ import com.io7m.renderer.types.RVectorReadable3FType;
  * Miscellaneous matrix functions.
  */
 
-public final class KMatrices
+@EqualityReference public final class KMatrices
 {
   /**
    * The 3x3 identity matrix.
    */
 
-  public static final @Nonnull RMatrixReadable3x3FType<RTransformTextureType> IDENTITY_UV;
+  public static final RMatrixReadable3x3FType<RTransformTextureType> IDENTITY_UV;
 
   static {
     IDENTITY_UV = new RMatrixM3x3F<RTransformTextureType>();
@@ -64,8 +63,8 @@ public final class KMatrices
    */
 
   public static void makeNormalMatrix(
-    final @Nonnull RMatrixReadable4x4FType<RTransformModelViewType> m,
-    final @Nonnull RMatrixM3x3F<RTransformNormalType> mr)
+    final RMatrixReadable4x4FType<RTransformModelViewType> m,
+    final RMatrixM3x3F<RTransformNormalType> mr)
   {
     mr.set(0, 0, m.getRowColumnF(0, 0));
     mr.set(1, 0, m.getRowColumnF(1, 0));
@@ -95,10 +94,10 @@ public final class KMatrices
    */
 
   public static void makeViewMatrix(
-    final @Nonnull KTransformContext context,
-    final @Nonnull RVectorReadable3FType<RSpaceWorldType> position,
-    final @Nonnull QuaternionReadable4F orientation,
-    final @Nonnull RMatrixM4x4F<RTransformViewType> view)
+    final KTransformContext context,
+    final RVectorReadable3FType<RSpaceWorldType> position,
+    final QuaternionReadable4FType orientation,
+    final RMatrixM4x4F<RTransformViewType> view)
   {
     KMatrices.makeViewMatrixActual(context, position, orientation, view);
   }
@@ -109,10 +108,10 @@ public final class KMatrices
    */
 
   private static void makeViewMatrixActual(
-    final @Nonnull KTransformContext context,
-    final @Nonnull RVectorReadable3FType<RSpaceWorldType> position,
-    final @Nonnull QuaternionReadable4F orientation,
-    final @Nonnull RMatrixM4x4F<?> view)
+    final KTransformContext context,
+    final RVectorReadable3FType<RSpaceWorldType> position,
+    final QuaternionReadable4FType orientation,
+    final RMatrixM4x4F<?> view)
   {
     MatrixM4x4F.setIdentity(view);
 
@@ -122,9 +121,8 @@ public final class KMatrices
     MatrixM4x4F.multiplyInPlace(view, m4x4);
 
     final VectorM3F translate = new VectorM3F();
-    translate.x = -position.getXF();
-    translate.y = -position.getYF();
-    translate.z = -position.getZF();
+    translate.set3F(-position.getXF(), -position.getYF(), -position.getZF());
+
     MatrixM4x4F.translateByVector3FInPlace(view, translate);
   }
 
@@ -150,10 +148,10 @@ public final class KMatrices
    */
 
   public static void makeViewMatrixProjective(
-    final @Nonnull KTransformContext context,
-    final @Nonnull RVectorReadable3FType<RSpaceWorldType> position,
-    final @Nonnull QuaternionReadable4F orientation,
-    final @Nonnull RMatrixM4x4F<RTransformProjectiveViewType> view)
+    final KTransformContext context,
+    final RVectorReadable3FType<RSpaceWorldType> position,
+    final QuaternionReadable4FType orientation,
+    final RMatrixM4x4F<RTransformProjectiveViewType> view)
   {
     KMatrices.makeViewMatrixActual(context, position, orientation, view);
   }

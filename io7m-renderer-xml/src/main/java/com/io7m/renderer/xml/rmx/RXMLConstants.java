@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,14 +19,12 @@ package com.io7m.renderer.xml.rmx;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
 
 public final class RXMLConstants
 {
-  public static final @Nonnull URI MESHES_URI;
-  public static final int          MESHES_VERSION;
+  public static final URI MESHES_URI;
+  public static final int MESHES_VERSION;
 
   static {
     try {

@@ -16,8 +16,7 @@
 
 package com.io7m.renderer.types;
 
-import javax.annotation.Nonnull;
-
+import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jtensors.VectorM2I;
 
 /**
@@ -27,8 +26,8 @@ import com.io7m.jtensors.VectorM2I;
  *          A phantom type parameter describing the coordinate space
  */
 
-public final class RVectorM2I<T extends RSpaceType> extends VectorM2I implements
-  RVectorReadable2IType<T>
+@EqualityStructural public final class RVectorM2I<T extends RSpaceType> extends
+  VectorM2I implements RVectorReadable2IType<T>
 {
   /**
    * Construct a new vector, initialized to all zeroes.
@@ -63,7 +62,7 @@ public final class RVectorM2I<T extends RSpaceType> extends VectorM2I implements
    */
 
   public RVectorM2I(
-    final @Nonnull RVectorReadable2IType<T> v)
+    final RVectorReadable2IType<T> v)
   {
     super(v);
   }

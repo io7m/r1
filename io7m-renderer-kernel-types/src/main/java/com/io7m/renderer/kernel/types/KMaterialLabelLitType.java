@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * The type of labels for lit materials.
@@ -28,5 +27,5 @@ public interface KMaterialLabelLitType extends KLabelType, KMaterialLabelImplies
    * @return The label of the current light for this material.
    */
 
-  @Nonnull KLightLabel labelGetLight();
+   KLightLabel labelGetLight();
 }

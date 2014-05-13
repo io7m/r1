@@ -19,37 +19,36 @@ package com.io7m.renderer.kernel;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Option;
-import com.io7m.jaux.functional.Option.Some;
-import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.ArrayBufferUsable;
+import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.DepthFunction;
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.IndexBufferUsable;
-import com.io7m.jcanephora.JCBExecutionAPI;
-import com.io7m.jcanephora.JCBExecutorProcedure;
-import com.io7m.jcanephora.JCBProgram;
-import com.io7m.jcanephora.JCBProgramProcedure;
+import com.io7m.jcanephora.FramebufferUsableType;
+import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.TextureUnit;
-import com.io7m.jlog.Level;
-import com.io7m.jlog.Log;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
+import com.io7m.jcanephora.TextureUnitType;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
+import com.io7m.jcanephora.batchexec.JCBExecutorType;
+import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
+import com.io7m.jcanephora.batchexec.JCBProgramType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
+import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
@@ -67,7 +66,7 @@ import com.io7m.renderer.types.RTransformViewType;
  * The default depth renderer implementation.
  */
 
-@SuppressWarnings("synthetic-access") public final class KDepthRenderer implements
+@SuppressWarnings("synthetic-access") @EqualityReference public final class KDepthRenderer implements
   KDepthRendererType
 {
   private static enum InternalDepthLabel
@@ -79,9 +78,9 @@ import com.io7m.renderer.types.RTransformViewType;
     DEPTH_INTERNAL_UNIFORM("depth_U"),
     DEPTH_INTERNAL_UNIFORM_PACKED4444("depth_UP4");
 
-    static @Nonnull InternalDepthLabel fromDepthLabel(
-      final @Nonnull KGraphicsCapabilities caps,
-      final @Nonnull KMaterialDepthLabel label)
+    static InternalDepthLabel fromDepthLabel(
+      final KGraphicsCapabilitiesType caps,
+      final KMaterialDepthLabel label)
     {
       switch (label) {
         case DEPTH_CONSTANT:
@@ -110,21 +109,21 @@ import com.io7m.renderer.types.RTransformViewType;
       throw new UnreachableCodeException();
     }
 
-    private final @Nonnull String name;
+    private final String name;
 
     private InternalDepthLabel(
-      final @Nonnull String in_name)
+      final String in_name)
     {
       this.name = in_name;
     }
 
-    public @Nonnull String getName()
+    public String getName()
     {
       return this.name;
     }
   }
 
-  private static final @Nonnull String NAME;
+  private static final String NAME;
 
   static {
     NAME = "depth";
@@ -140,35 +139,31 @@ import com.io7m.renderer.types.RTransformViewType;
    * @param log
    *          A log handle
    * @return A new depth renderer
+   * 
    * @throws RException
    *           If an error occurs during initialization
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KDepthRendererType newRenderer(
-    final @Nonnull JCGLImplementation g,
-    final @Nonnull KShaderCacheType shader_cache,
-    final @Nonnull Log log)
-    throws RException,
-      ConstraintError
+  public static KDepthRendererType newRenderer(
+    final JCGLImplementationType g,
+    final KShaderCacheType shader_cache,
+    final LogUsableType log)
+    throws RException
   {
     return new KDepthRenderer(g, shader_cache, log);
   }
 
   private static void putMaterialAlphaDepth(
-    final @Nonnull JCBProgram jp,
-    final @Nonnull KMaterialOpaqueType material)
+    final JCBProgramType jp,
+    final KMaterialOpaqueType material)
     throws RException,
-      ConstraintError,
       JCGLException
   {
     material
       .materialOpaqueAccept(new KMaterialOpaqueVisitorType<Unit, JCGLException>() {
         @Override public Unit materialOpaqueAlphaDepth(
-          final @Nonnull KMaterialOpaqueAlphaDepth m)
-          throws ConstraintError,
-            RException,
+          final KMaterialOpaqueAlphaDepth m)
+          throws RException,
             JCGLException
         {
           KShadingProgramCommon.putMaterialAlphaDepthThreshold(
@@ -178,9 +173,8 @@ import com.io7m.renderer.types.RTransformViewType;
         }
 
         @Override public Unit materialOpaqueRegular(
-          final @Nonnull KMaterialOpaqueRegular m)
-          throws ConstraintError,
-            RException,
+          final KMaterialOpaqueRegular m)
+          throws RException,
             JCGLException
         {
           KShadingProgramCommon.putMaterialAlphaDepthThreshold(jp, 0.0f);
@@ -190,14 +184,13 @@ import com.io7m.renderer.types.RTransformViewType;
   }
 
   private static void renderDepthPassBatch(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull MatricesObserverType mwo,
-    final @Nonnull JCBProgram jp,
-    final @Nonnull InternalDepthLabel label,
-    final @Nonnull List<KInstanceTransformedOpaqueType> batch,
-    final @Nonnull Option<KFaceSelection> faces)
-    throws ConstraintError,
-      JCGLException,
+    final JCGLInterfaceCommonType gc,
+    final MatricesObserverType mwo,
+    final JCBProgramType jp,
+    final InternalDepthLabel label,
+    final List<KInstanceTransformedOpaqueType> batch,
+    final OptionType<KFaceSelection> faces)
+    throws JCGLException,
       RException
   {
     for (final KInstanceTransformedOpaqueType i : batch) {
@@ -205,9 +198,8 @@ import com.io7m.renderer.types.RTransformViewType;
         i,
         new MatricesInstanceFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final @Nonnull MatricesInstanceType mwi)
+            final MatricesInstanceType mwi)
             throws JCGLException,
-              ConstraintError,
               RException
           {
             KDepthRenderer.renderDepthPassInstance(
@@ -224,19 +216,18 @@ import com.io7m.renderer.types.RTransformViewType;
   }
 
   private static void renderDepthPassInstance(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull MatricesInstanceType mwi,
-    final @Nonnull JCBProgram jp,
-    final @Nonnull InternalDepthLabel label,
-    final @Nonnull KInstanceTransformedOpaqueType i,
-    final @Nonnull Option<KFaceSelection> faces)
+    final JCGLInterfaceCommonType gc,
+    final MatricesInstanceType mwi,
+    final JCBProgramType jp,
+    final InternalDepthLabel label,
+    final KInstanceTransformedOpaqueType i,
+    final OptionType<KFaceSelection> faces)
     throws JCGLException,
-      ConstraintError,
       RException
   {
     final KMaterialOpaqueType material =
       i.instanceGet().instanceGetMaterial();
-    final List<TextureUnit> units = gc.textureGetUnits();
+    final List<TextureUnitType> units = gc.textureGetUnits();
 
     /**
      * Upload matrices.
@@ -286,8 +277,8 @@ import com.io7m.renderer.types.RTransformViewType;
     try {
       final KInstanceOpaqueType actual = i.instanceGet();
       final KMeshReadableType mesh = actual.instanceGetMesh();
-      final ArrayBufferUsable array = mesh.getArrayBuffer();
-      final IndexBufferUsable indices = mesh.getIndexBuffer();
+      final ArrayBufferUsableType array = mesh.getArrayBuffer();
+      final IndexBufferUsableType indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(jp, array);
@@ -318,14 +309,13 @@ import com.io7m.renderer.types.RTransformViewType;
           gc,
           actual.instanceGetFaces());
       } else {
-        final Some<KFaceSelection> some = (Option.Some<KFaceSelection>) faces;
-        KRendererCommon.renderConfigureFaceCulling(gc, some.value);
+        final Some<KFaceSelection> some = (Some<KFaceSelection>) faces;
+        KRendererCommon.renderConfigureFaceCulling(gc, some.get());
       }
 
-      jp.programExecute(new JCBProgramProcedure() {
+      jp.programExecute(new JCBProgramProcedureType<JCGLException>() {
         @Override public void call()
-          throws ConstraintError,
-            JCGLException
+          throws JCGLException
         {
           gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
         }
@@ -336,30 +326,27 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  private final @Nonnull KGraphicsCapabilities caps;
-  private final @Nonnull JCGLImplementation    g;
-  private final @Nonnull Log                   log;
-  private final @Nonnull KMutableMatricesType  matrices;
-  private final @Nonnull KShaderCacheType      shader_cache;
+  private final KGraphicsCapabilitiesType caps;
+  private final JCGLImplementationType    g;
+  private final LogUsableType             log;
+  private final KMutableMatrices          matrices;
+  private final KShaderCacheType          shader_cache;
 
   private KDepthRenderer(
-    final @Nonnull JCGLImplementation gl,
-    final @Nonnull KShaderCacheType in_shader_cache,
-    final @Nonnull Log in_log)
-    throws ConstraintError,
-      RException
+    final JCGLImplementationType gl,
+    final KShaderCacheType in_shader_cache,
+    final LogUsableType in_log)
+    throws RException
   {
     try {
-      this.log =
-        new Log(Constraints.constrainNotNull(in_log, "log"), "depth-renderer");
-      this.g = Constraints.constrainNotNull(gl, "OpenGL implementation");
-      this.shader_cache =
-        Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+      this.log = NullCheck.notNull(in_log, "log").with("depth-renderer");
+      this.g = NullCheck.notNull(gl, "OpenGL implementation");
+      this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
 
       this.caps = KGraphicsCapabilities.getCapabilities(gl);
-      this.matrices = KMutableMatricesType.newMatrices();
+      this.matrices = KMutableMatrices.newMatrices();
 
-      if (this.log.enabled(Level.LOG_DEBUG)) {
+      if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
         this.log.debug("initialized");
       }
     } catch (final JCGLException e) {
@@ -368,9 +355,8 @@ import com.io7m.renderer.types.RTransformViewType;
   }
 
   private void renderConfigureDepthColorMasks(
-    final @Nonnull JCGLInterfaceCommon gc)
-    throws ConstraintError,
-      JCGLException
+    final JCGLInterfaceCommonType gc)
+    throws JCGLException
   {
     if (this.caps.getSupportsDepthTextures()) {
       gc.colorBufferMask(false, false, false, false);
@@ -382,12 +368,11 @@ import com.io7m.renderer.types.RTransformViewType;
   private
     void
     renderDepthPassBatches(
-      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
-      final @Nonnull JCGLInterfaceCommon gc,
-      final @Nonnull MatricesObserverType mwo,
-      final @Nonnull Option<KFaceSelection> faces)
-      throws ConstraintError,
-        JCacheException,
+      final Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final JCGLInterfaceCommonType gc,
+      final MatricesObserverType mwo,
+      final OptionType<KFaceSelection> faces)
+      throws JCacheException,
         JCGLException,
         RException
   {
@@ -397,13 +382,12 @@ import com.io7m.renderer.types.RTransformViewType;
 
       final List<KInstanceTransformedOpaqueType> batch = batches.get(depth);
       final KProgram program = this.shader_cache.cacheGetLU(label.getName());
-      final JCBExecutionAPI exec = program.getExecutable();
+      final JCBExecutorType exec = program.getExecutable();
 
-      exec.execRun(new JCBExecutorProcedure() {
+      exec.execRun(new JCBExecutorProcedureType<RException>() {
         @Override public void call(
-          final @Nonnull JCBProgram jp)
-          throws ConstraintError,
-            JCGLException,
+          final JCBProgramType jp)
+          throws JCGLException,
             RException
         {
           KShadingProgramCommon.putMatrixProjectionUnchecked(
@@ -424,19 +408,18 @@ import com.io7m.renderer.types.RTransformViewType;
   @Override public
     void
     rendererEvaluateDepth(
-      final @Nonnull RMatrixI4x4F<RTransformViewType> view,
-      final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection,
-      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
-      final @Nonnull KFramebufferDepthUsableType framebuffer,
-      final @Nonnull Option<KFaceSelection> faces)
-      throws ConstraintError,
-        RException
+      final RMatrixI4x4F<RTransformViewType> view,
+      final RMatrixI4x4F<RTransformProjectionType> projection,
+      final Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final KFramebufferDepthUsableType framebuffer,
+      final OptionType<KFaceSelection> faces)
+      throws RException
   {
-    Constraints.constrainNotNull(view, "View matrix");
-    Constraints.constrainNotNull(projection, "Projection matrix");
-    Constraints.constrainNotNull(batches, "Batches");
-    Constraints.constrainNotNull(framebuffer, "Framebuffer");
-    Constraints.constrainNotNull(faces, "Faces");
+    NullCheck.notNull(view, "View matrix");
+    NullCheck.notNull(projection, "Projection matrix");
+    NullCheck.notNull(batches, "Batches");
+    NullCheck.notNull(framebuffer, "Framebuffer");
+    NullCheck.notNull(faces, "Faces");
 
     try {
       this.matrices.withObserver(
@@ -444,9 +427,8 @@ import com.io7m.renderer.types.RTransformViewType;
         projection,
         new MatricesObserverFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final @Nonnull MatricesObserverType mwo)
-            throws ConstraintError,
-              RException,
+            final MatricesObserverType mwo)
+            throws RException,
               JCGLException
           {
             KDepthRenderer.this.renderScene(batches, framebuffer, mwo, faces);
@@ -466,17 +448,16 @@ import com.io7m.renderer.types.RTransformViewType;
   private
     void
     renderScene(
-      final @Nonnull Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
-      final @Nonnull KFramebufferDepthUsableType framebuffer,
-      final @Nonnull MatricesObserverType mwo,
-      final @Nonnull Option<KFaceSelection> faces)
+      final Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final KFramebufferDepthUsableType framebuffer,
+      final MatricesObserverType mwo,
+      final OptionType<KFaceSelection> faces)
       throws JCGLException,
-        ConstraintError,
         RException
   {
-    final JCGLInterfaceCommon gc = this.g.getGLCommon();
+    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
 
-    final FramebufferReferenceUsable fb =
+    final FramebufferUsableType fb =
       framebuffer.kFramebufferGetDepthPassFramebuffer();
 
     gc.framebufferDrawBind(fb);

@@ -18,38 +18,30 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.util.Collection;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
 interface SBSceneControllerMaterials extends
   SBSceneChangeListenerRegistration
 {
   public void sceneMaterialPut(
-    final @Nonnull SBMaterial material)
-    throws ConstraintError;
+    final SBMaterial material);
 
   public boolean sceneMaterialExists(
-    final @Nonnull Integer id)
-    throws ConstraintError;
+    final Integer id);
 
-  public @Nonnull Integer sceneMaterialFreshID();
+  public Integer sceneMaterialFreshID();
 
-  public @CheckForNull SBMaterial sceneMaterialGet(
-    final @Nonnull Integer id)
-    throws ConstraintError;
+  public @Nullable SBMaterial sceneMaterialGet(
+    final Integer id);
 
   public void sceneMaterialRemove(
-    final @Nonnull Integer id)
-    throws ConstraintError;
+    final Integer id);
 
-  public @Nonnull Collection<SBMaterial> sceneMaterialsGetAll();
+  public Collection<SBMaterial> sceneMaterialsGetAll();
 
   void sceneMaterialPutByDescription(
-    final @Nonnull Integer id,
-    final @Nonnull SBMaterialDescription desc)
-    throws ConstraintError,
-      RException;
+    final Integer id,
+    final SBMaterialDescription desc)
+    throws RException;
 }

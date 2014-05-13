@@ -16,10 +16,6 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-
 public enum SBOpenGLProfile
 {
   OPENGL_PROFILE_DEFAULT("default"),
@@ -29,9 +25,8 @@ public enum SBOpenGLProfile
   OPENGL_PROFILE_GLES2("GLES2"),
   OPENGL_PROFILE_GLES3("GLES3");
 
-  public static @Nonnull SBOpenGLProfile fromString(
-    final @Nonnull String name)
-    throws ConstraintError
+  public static SBOpenGLProfile fromString(
+    final String name)
   {
     for (final SBOpenGLProfile v : SBOpenGLProfile.values()) {
       if (v.name.equals(name)) {
@@ -39,18 +34,20 @@ public enum SBOpenGLProfile
       }
     }
 
-    throw new ConstraintError("Unknown OpenGL profile '" + name + "'");
+    throw new IllegalArgumentException("Unknown OpenGL profile '"
+      + name
+      + "'");
   }
 
-  private final @Nonnull String name;
+  private final String name;
 
   private SBOpenGLProfile(
-    final @Nonnull String in_name)
+    final String in_name)
   {
     this.name = in_name;
   }
 
-  @Override public @Nonnull String toString()
+  @Override public String toString()
   {
     return this.name;
   }

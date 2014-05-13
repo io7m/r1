@@ -16,18 +16,17 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.jranges.RangeCheck;
 import com.io7m.renderer.types.RException;
 
 /**
  * A description of a map suitable for basic shadow mapping.
  */
 
-@Immutable public final class KShadowMapBasicDescription implements
+@EqualityStructural public final class KShadowMapBasicDescription implements
   KShadowMapDescriptionType
 {
   /**
@@ -40,16 +39,12 @@ import com.io7m.renderer.types.RException;
    * @param in_size_exponent
    *          The size exponent of the shadow map
    * @return A new shadow map description
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code> or
-   *           <code>in_size_exponent &lt; 1</code>.
    */
 
-  public static @Nonnull KShadowMapBasicDescription newDescription(
-    final @Nonnull Integer in_light_id,
-    final @Nonnull KFramebufferDepthDescription in_description,
+  public static KShadowMapBasicDescription newDescription(
+    final Integer in_light_id,
+    final KFramebufferDepthDescription in_description,
     final int in_size_exponent)
-    throws ConstraintError
   {
     return new KShadowMapBasicDescription(
       in_light_id,
@@ -57,26 +52,27 @@ import com.io7m.renderer.types.RException;
       in_size_exponent);
   }
 
-  private final @Nonnull KFramebufferDepthDescription description;
-  private final @Nonnull Integer                      light_id;
-  private final int                                   size_exponent;
+  private final KFramebufferDepthDescription description;
+  private final Integer                      light_id;
+  private final int                          size_exponent;
 
   private KShadowMapBasicDescription(
-    final @Nonnull Integer in_light_id,
-    final @Nonnull KFramebufferDepthDescription in_description,
+    final Integer in_light_id,
+    final KFramebufferDepthDescription in_description,
     final int in_size_exponent)
-    throws ConstraintError
   {
-    this.light_id = Constraints.constrainNotNull(in_light_id, "Light ID");
+    this.light_id = NullCheck.notNull(in_light_id, "Light ID");
     this.size_exponent =
-      (int) Constraints
-        .constrainRange(in_size_exponent, 1, Integer.MAX_VALUE);
-    this.description =
-      Constraints.constrainNotNull(in_description, "Description");
+      (int) RangeCheck.checkIncludedIn(
+        in_size_exponent,
+        "Exponent",
+        RangeCheck.POSITIVE_INTEGER,
+        "Valid exponents");
+    this.description = NullCheck.notNull(in_description, "Description");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -104,7 +100,7 @@ import com.io7m.renderer.types.RException;
    * @return A description of the depth buffer
    */
 
-  public @Nonnull KFramebufferDepthDescription getDescription()
+  public KFramebufferDepthDescription getDescription()
   {
     return this.description;
   }
@@ -123,15 +119,14 @@ import com.io7m.renderer.types.RException;
     <A, E extends Throwable, V extends KShadowMapDescriptionVisitorType<A, E>>
     A
     mapDescriptionAccept(
-      final @Nonnull V v)
+      final V v)
       throws RException,
-        ConstraintError,
         E
   {
     return v.shadowMapDescriptionBasic(this);
   }
 
-  @Override public @Nonnull Integer mapGetLightID()
+  @Override public Integer mapGetLightID()
   {
     return this.light_id;
   }

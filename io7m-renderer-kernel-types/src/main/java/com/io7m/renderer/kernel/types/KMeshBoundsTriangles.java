@@ -16,12 +16,10 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.PartialFunction;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jfunctional.PartialFunctionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RSpaceType;
 import com.io7m.renderer.types.RTriangle4F;
 import com.io7m.renderer.types.RVectorI4F;
@@ -33,7 +31,7 @@ import com.io7m.renderer.types.RVectorI4F;
  *          The coordinate space for the bounding box
  */
 
-@Immutable public final class KMeshBoundsTriangles<S extends RSpaceType>
+@EqualityStructural public final class KMeshBoundsTriangles<S extends RSpaceType>
 {
   /**
    * Calculate the triangles that make up the faces of the bounding box
@@ -44,18 +42,15 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return A set of triangles.
    * @param <S>
    *          The coordinate space of the bounds
-   * @throws ConstraintError
-   *           Iff any parameter is <code>null</code>
    */
 
-  public static @Nonnull
+  public static
     <S extends RSpaceType>
     KMeshBoundsTriangles<S>
     newBoundsTriangles(
-      final @Nonnull KMeshBounds<S> in_bounds)
-      throws ConstraintError
+      final KMeshBounds<S> in_bounds)
   {
-    Constraints.constrainNotNull(in_bounds, "Bounds");
+    NullCheck.notNull(in_bounds, "Bounds");
 
     final RVectorI4F<S> ulf = in_bounds.getUpperLeftFront().getHomogeneous();
     final RVectorI4F<S> ulb = in_bounds.getUpperLeftBack().getHomogeneous();
@@ -95,32 +90,32 @@ import com.io7m.renderer.types.RVectorI4F;
       in_bottom_1);
   }
 
-  private final @Nonnull RTriangle4F<S> back_0;
-  private final @Nonnull RTriangle4F<S> back_1;
-  private final @Nonnull RTriangle4F<S> bottom_0;
-  private final @Nonnull RTriangle4F<S> bottom_1;
-  private final @Nonnull RTriangle4F<S> front_0;
-  private final @Nonnull RTriangle4F<S> front_1;
-  private final @Nonnull RTriangle4F<S> left_0;
-  private final @Nonnull RTriangle4F<S> left_1;
-  private final @Nonnull RTriangle4F<S> right_0;
-  private final @Nonnull RTriangle4F<S> right_1;
-  private final @Nonnull RTriangle4F<S> top_0;
-  private final @Nonnull RTriangle4F<S> top_1;
+  private final RTriangle4F<S> back_0;
+  private final RTriangle4F<S> back_1;
+  private final RTriangle4F<S> bottom_0;
+  private final RTriangle4F<S> bottom_1;
+  private final RTriangle4F<S> front_0;
+  private final RTriangle4F<S> front_1;
+  private final RTriangle4F<S> left_0;
+  private final RTriangle4F<S> left_1;
+  private final RTriangle4F<S> right_0;
+  private final RTriangle4F<S> right_1;
+  private final RTriangle4F<S> top_0;
+  private final RTriangle4F<S> top_1;
 
   private KMeshBoundsTriangles(
-    final @Nonnull RTriangle4F<S> in_front_0,
-    final @Nonnull RTriangle4F<S> in_front_1,
-    final @Nonnull RTriangle4F<S> in_back_0,
-    final @Nonnull RTriangle4F<S> in_back_1,
-    final @Nonnull RTriangle4F<S> in_left_0,
-    final @Nonnull RTriangle4F<S> in_left_1,
-    final @Nonnull RTriangle4F<S> in_right_0,
-    final @Nonnull RTriangle4F<S> in_right_1,
-    final @Nonnull RTriangle4F<S> in_top_0,
-    final @Nonnull RTriangle4F<S> in_top_1,
-    final @Nonnull RTriangle4F<S> in_bottom_0,
-    final @Nonnull RTriangle4F<S> in_bottom_1)
+    final RTriangle4F<S> in_front_0,
+    final RTriangle4F<S> in_front_1,
+    final RTriangle4F<S> in_back_0,
+    final RTriangle4F<S> in_back_1,
+    final RTriangle4F<S> in_left_0,
+    final RTriangle4F<S> in_left_1,
+    final RTriangle4F<S> in_right_0,
+    final RTriangle4F<S> in_right_1,
+    final RTriangle4F<S> in_top_0,
+    final RTriangle4F<S> in_top_1,
+    final RTriangle4F<S> in_bottom_0,
+    final RTriangle4F<S> in_bottom_1)
   {
     this.front_0 = in_front_0;
     this.front_1 = in_front_1;
@@ -137,7 +132,7 @@ import com.io7m.renderer.types.RVectorI4F;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -167,7 +162,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The first back triangle
    */
 
-  public @Nonnull RTriangle4F<S> getBack0()
+  public RTriangle4F<S> getBack0()
   {
     return this.back_0;
   }
@@ -176,7 +171,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The second back triangle
    */
 
-  public @Nonnull RTriangle4F<S> getBack1()
+  public RTriangle4F<S> getBack1()
   {
     return this.back_1;
   }
@@ -185,7 +180,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The first bottom triangle
    */
 
-  public @Nonnull RTriangle4F<S> getBottom0()
+  public RTriangle4F<S> getBottom0()
   {
     return this.bottom_0;
   }
@@ -194,7 +189,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The second bottom triangle
    */
 
-  public @Nonnull RTriangle4F<S> getBottom1()
+  public RTriangle4F<S> getBottom1()
   {
     return this.bottom_1;
   }
@@ -203,7 +198,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The first front triangle
    */
 
-  public @Nonnull RTriangle4F<S> getFront0()
+  public RTriangle4F<S> getFront0()
   {
     return this.front_0;
   }
@@ -212,7 +207,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The second front triangle
    */
 
-  public @Nonnull RTriangle4F<S> getFront1()
+  public RTriangle4F<S> getFront1()
   {
     return this.front_1;
   }
@@ -221,7 +216,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The first left triangle
    */
 
-  public @Nonnull RTriangle4F<S> getLeft0()
+  public RTriangle4F<S> getLeft0()
   {
     return this.left_0;
   }
@@ -230,7 +225,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The second left triangle
    */
 
-  public @Nonnull RTriangle4F<S> getLeft1()
+  public RTriangle4F<S> getLeft1()
   {
     return this.left_1;
   }
@@ -239,7 +234,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The first right triangle
    */
 
-  public @Nonnull RTriangle4F<S> getRight0()
+  public RTriangle4F<S> getRight0()
   {
     return this.right_0;
   }
@@ -248,7 +243,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The second right triangle
    */
 
-  public @Nonnull RTriangle4F<S> getRight1()
+  public RTriangle4F<S> getRight1()
   {
     return this.right_1;
   }
@@ -257,7 +252,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The first top triangle
    */
 
-  public @Nonnull RTriangle4F<S> getTop0()
+  public RTriangle4F<S> getTop0()
   {
     return this.top_0;
   }
@@ -266,7 +261,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * @return The second top triangle
    */
 
-  public @Nonnull RTriangle4F<S> getTop1()
+  public RTriangle4F<S> getTop1()
   {
     return this.top_1;
   }
@@ -318,31 +313,34 @@ import com.io7m.renderer.types.RVectorI4F;
     builder.append(" bottom_1=");
     builder.append(this.bottom_1);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 
   /**
    * Transform the current bounds in space <code>S</code> to space
    * <code>T</code> using the given transform function.
    * 
+   * @param <E>
+   *          The type of thrown exceptions
    * @param <T>
    *          The target coordinate space
    * @param transform
    *          The transform function
    * @return The same bounds in space <code>T</code>
-   * @throws ConstraintError
-   *           Iff any parameter is <code>null</code> or
-   *           <code>transform</code> raises <code>ConstraintError</code>
+   * @throws E
+   *           If the transform function throws <code>E</code>
    */
 
-  public @Nonnull
-    <T extends RSpaceType>
+  public
+    <T extends RSpaceType, E extends Throwable>
     KMeshBoundsTriangles<T>
     transform(
-      final @Nonnull PartialFunction<RTriangle4F<S>, RTriangle4F<T>, ConstraintError> transform)
-      throws ConstraintError
+      final PartialFunctionType<RTriangle4F<S>, RTriangle4F<T>, E> transform)
+      throws E
   {
-    Constraints.constrainNotNull(transform, "Transform");
+    NullCheck.notNull(transform, "Transform");
     return new KMeshBoundsTriangles<T>(
       transform.call(this.front_0),
       transform.call(this.front_1),

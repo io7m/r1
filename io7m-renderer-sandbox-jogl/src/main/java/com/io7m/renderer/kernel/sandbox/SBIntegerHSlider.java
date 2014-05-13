@@ -19,7 +19,6 @@ package com.io7m.renderer.kernel.sandbox;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -27,25 +26,24 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 
 public final class SBIntegerHSlider
 {
-  private final int                 minimum;
-  private final int                 maximum;
-  private final @Nonnull JTextField field;
-  private final @Nonnull JSlider    slider;
-  private final @Nonnull JLabel     label;
+  private final int        minimum;
+  private final int        maximum;
+  private final JTextField field;
+  private final JSlider    slider;
+  private final JLabel     label;
 
   public SBIntegerHSlider(
-    final @Nonnull String in_label,
+    final String in_label,
     final int in_minimum,
     final int in_maximum)
-    throws ConstraintError
   {
-    this.label = new JLabel(Constraints.constrainNotNull(in_label, "Label"));
+    this.label = new JLabel(NullCheck.notNull(in_label, "Label"));
     this.maximum = in_maximum;
     this.minimum = in_minimum;
 
@@ -59,7 +57,7 @@ public final class SBIntegerHSlider
       @SuppressWarnings({ "synthetic-access" }) @Override public
         void
         stateChanged(
-          final @Nonnull ChangeEvent ev)
+          final @Nullable ChangeEvent ev)
       {
         SBIntegerHSlider.this.refreshText();
       }
@@ -69,7 +67,7 @@ public final class SBIntegerHSlider
       @SuppressWarnings("synthetic-access") @Override public
         void
         actionPerformed(
-          final ActionEvent e)
+          final @Nullable ActionEvent e)
       {
         try {
           final int actual =
@@ -88,12 +86,12 @@ public final class SBIntegerHSlider
     return this.slider.getValue();
   }
 
-  public @Nonnull JTextField getField()
+  public JTextField getField()
   {
     return this.field;
   }
 
-  public @Nonnull JLabel getLabel()
+  public JLabel getLabel()
   {
     return this.label;
   }
@@ -108,7 +106,7 @@ public final class SBIntegerHSlider
     return this.minimum;
   }
 
-  public @Nonnull JSlider getSlider()
+  public JSlider getSlider()
   {
     return this.slider;
   }

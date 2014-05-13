@@ -19,56 +19,85 @@ package com.io7m.renderer.kernel.types;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * Labels for forward-rendering lit opaque objects.
  */
 
-@Immutable public final class KMaterialForwardOpaqueLitLabel implements
+@EqualityStructural public final class KMaterialForwardOpaqueLitLabel implements
   KTexturesRequiredType,
   KMaterialLabelLitType,
   KMaterialLabelRegularType
 {
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.code.hashCode();
+    result = (prime * result) + this.light.hashCode();
+    result = (prime * result) + this.regular.hashCode();
+    result = (prime * result) + this.textures;
+    return result;
+  }
+
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KMaterialForwardOpaqueLitLabel other =
+      (KMaterialForwardOpaqueLitLabel) obj;
+    return this.code.equals(other.code)
+      && (this.light == other.light)
+      && (this.regular.equals(other.regular))
+      && (this.textures == other.textures);
+  }
+
   /**
    * @return The set of all possible lit opaque labels.
    */
 
-  public static @Nonnull Set<KMaterialForwardOpaqueLitLabel> allLabels()
+  public static Set<KMaterialForwardOpaqueLitLabel> allLabels()
   {
-    try {
-      final Set<KMaterialForwardOpaqueLitLabel> s =
-        new HashSet<KMaterialForwardOpaqueLitLabel>();
-      final Set<KMaterialForwardRegularLabel> o =
-        KMaterialForwardRegularLabel.allLabels();
+    final Set<KMaterialForwardOpaqueLitLabel> s =
+      new HashSet<KMaterialForwardOpaqueLitLabel>();
+    final Set<KMaterialForwardRegularLabel> o =
+      KMaterialForwardRegularLabel.allLabels();
 
-      for (final KMaterialForwardRegularLabel r : o) {
-        if (r.labelGetNormal() != KMaterialNormalLabel.NORMAL_NONE) {
-          for (final KLightLabel l : KLightLabel.values()) {
-            s.add(new KMaterialForwardOpaqueLitLabel(l, r));
-          }
+    for (final KMaterialForwardRegularLabel r : o) {
+      if (r.labelGetNormal() != KMaterialNormalLabel.NORMAL_NONE) {
+        for (final KLightLabel l : KLightLabel.values()) {
+          assert l != null;
+          s.add(new KMaterialForwardOpaqueLitLabel(l, r));
         }
       }
-
-      return s;
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
     }
+
+    return s;
   }
 
-  private static @Nonnull String makeLabelCode(
-    final @Nonnull KLightLabel in_light,
-    final @Nonnull KMaterialForwardRegularLabel in_opaque)
+  private static String makeLabelCode(
+    final KLightLabel in_light,
+    final KMaterialForwardRegularLabel in_opaque)
   {
-    return String.format(
-      "fwd_%s_O_%s",
-      in_light.labelGetCode(),
-      in_opaque.labelGetCode());
+    final String s =
+      String.format(
+        "fwd_%s_O_%s",
+        in_light.labelGetCode(),
+        in_opaque.labelGetCode());
+    assert s != null;
+    return s;
   }
 
   /**
@@ -79,35 +108,31 @@ import com.io7m.jaux.UnreachableCodeException;
    * @param in_regular
    *          The regular label
    * @return A new label
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KMaterialForwardOpaqueLitLabel newLabel(
-    final @Nonnull KLightLabel in_light,
-    final @Nonnull KMaterialForwardRegularLabel in_regular)
-    throws ConstraintError
+  public static KMaterialForwardOpaqueLitLabel newLabel(
+    final KLightLabel in_light,
+    final KMaterialForwardRegularLabel in_regular)
   {
     return new KMaterialForwardOpaqueLitLabel(in_light, in_regular);
   }
 
-  private final @Nonnull String                       code;
-  private final @Nonnull KLightLabel                  light;
-  private final @Nonnull KMaterialForwardRegularLabel regular;
-  private final int                                   textures;
+  private final String                       code;
+  private final KLightLabel                  light;
+  private final KMaterialForwardRegularLabel regular;
+  private final int                          textures;
 
   private KMaterialForwardOpaqueLitLabel(
-    final @Nonnull KLightLabel in_light,
-    final @Nonnull KMaterialForwardRegularLabel in_regular)
-    throws ConstraintError
+    final KLightLabel in_light,
+    final KMaterialForwardRegularLabel in_regular)
   {
-    this.regular = Constraints.constrainNotNull(in_regular, "Regular");
+    this.regular = NullCheck.notNull(in_regular, "Regular");
 
-    Constraints.constrainArbitrary(
-      in_regular.labelGetNormal() != KMaterialNormalLabel.NORMAL_NONE,
-      "Normal vectors available");
+    if (in_regular.labelGetNormal() == KMaterialNormalLabel.NORMAL_NONE) {
+      throw new IllegalArgumentException("No normal vectors available");
+    }
 
-    this.light = Constraints.constrainNotNull(in_light, "Light");
+    this.light = NullCheck.notNull(in_light, "Light");
     this.code =
       KMaterialForwardOpaqueLitLabel.makeLabelCode(in_light, in_regular);
 
@@ -119,7 +144,7 @@ import com.io7m.jaux.UnreachableCodeException;
    * @return The label of the current light for this material.
    */
 
-  public @Nonnull KLightLabel getLight()
+  public KLightLabel getLight()
   {
     return this.light;
   }
@@ -128,7 +153,7 @@ import com.io7m.jaux.UnreachableCodeException;
    * @return The regular label for this material.
    */
 
-  public @Nonnull KMaterialLabelRegularType getRegular()
+  public KMaterialLabelRegularType getRegular()
   {
     return this.regular;
   }
@@ -138,7 +163,7 @@ import com.io7m.jaux.UnreachableCodeException;
     return this.regular.labelGetAlbedo();
   }
 
-  @Override public @Nonnull String labelGetCode()
+  @Override public String labelGetCode()
   {
     return this.code;
   }
@@ -153,7 +178,7 @@ import com.io7m.jaux.UnreachableCodeException;
     return this.regular.labelGetEnvironment();
   }
 
-  @Override public @Nonnull KLightLabel labelGetLight()
+  @Override public KLightLabel labelGetLight()
   {
     return this.light;
   }

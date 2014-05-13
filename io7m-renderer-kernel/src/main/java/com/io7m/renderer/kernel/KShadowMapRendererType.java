@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.types.RException;
 
@@ -39,9 +36,7 @@ public interface KShadowMapRendererType extends KRendererType
    * @param with
    *          The function to evaluate with the renderered maps
    * @return The value returned by the given function
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code> or the given function
-   *           raises {@link ConstraintError}
+   * 
    * @throws E
    *           If the given function raises <code>E</code>
    * @throws RException
@@ -54,10 +49,9 @@ public interface KShadowMapRendererType extends KRendererType
    */
 
   <A, E extends Throwable> A rendererEvaluateShadowMaps(
-    final @Nonnull KCamera camera,
-    final @Nonnull KSceneBatchedShadow batches,
-    final @Nonnull KShadowMapWithType<A, E> with)
-    throws ConstraintError,
-      E,
+    final KCamera camera,
+    final KSceneBatchedShadow batches,
+    final KShadowMapWithType<A, E> with)
+    throws E,
       RException;
 }

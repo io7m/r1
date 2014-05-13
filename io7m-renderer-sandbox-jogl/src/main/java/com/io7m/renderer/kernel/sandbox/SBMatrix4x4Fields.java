@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.JTextField;
 
 import net.java.dev.designgridlayout.IRowCreator;
@@ -28,7 +27,7 @@ import com.io7m.renderer.types.RTransformType;
 
 public final class SBMatrix4x4Fields<T extends RTransformType>
 {
-  private final @Nonnull JTextField fields[][];
+  private final  JTextField fields[][];
 
   public SBMatrix4x4Fields()
   {
@@ -47,7 +46,7 @@ public final class SBMatrix4x4Fields<T extends RTransformType>
     }
   }
 
-  public @Nonnull RMatrixI4x4F<T> getMatrix4x4f()
+  public  RMatrixI4x4F<T> getMatrix4x4f()
     throws SBExceptionInputError
   {
     final VectorI4F column_0 =
@@ -98,7 +97,7 @@ public final class SBMatrix4x4Fields<T extends RTransformType>
       .newFromColumns(column_0, column_1, column_2, column_3);
   }
 
-  public @Nonnull JTextField getRowColumnField(
+  public  JTextField getRowColumnField(
     final int row,
     final int column)
   {
@@ -106,7 +105,7 @@ public final class SBMatrix4x4Fields<T extends RTransformType>
   }
 
   public void groupLayout(
-    final @Nonnull IRowCreator group)
+    final  IRowCreator group)
   {
     for (int r = 0; r < 4; ++r) {
       final JTextField f0 = this.fields[r][0];
@@ -118,7 +117,7 @@ public final class SBMatrix4x4Fields<T extends RTransformType>
   }
 
   @SuppressWarnings("boxing") public void setMatrix(
-    final @Nonnull RMatrixI4x4F<T> m)
+    final  RMatrixI4x4F<T> m)
   {
     for (int c = 0; c < 4; ++c) {
       for (int r = 0; r < 4; ++r) {

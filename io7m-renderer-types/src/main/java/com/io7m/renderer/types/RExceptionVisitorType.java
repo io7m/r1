@@ -18,11 +18,11 @@ package com.io7m.renderer.types;
 
 import java.io.IOException;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.renderer.types.RException.RExceptionAPIMisuse;
+import com.io7m.renderer.types.RException.RInternalAssertionException;
 import com.io7m.renderer.types.RException.RNotSupportedException;
 import com.io7m.renderer.types.RException.RResourceException;
 
@@ -49,7 +49,7 @@ public interface RExceptionVisitorType<T, E extends Throwable>
    */
 
   T exceptionVisitFilesystemException(
-    final @Nonnull FilesystemError e)
+    final FilesystemError e)
     throws E;
 
   /**
@@ -63,7 +63,7 @@ public interface RExceptionVisitorType<T, E extends Throwable>
    */
 
   T exceptionVisitIOException(
-    final @Nonnull IOException e)
+    final IOException e)
     throws E;
 
   /**
@@ -77,7 +77,7 @@ public interface RExceptionVisitorType<T, E extends Throwable>
    */
 
   T exceptionVisitJCacheException(
-    final @Nonnull JCacheException e)
+    final JCacheException e)
     throws E;
 
   /**
@@ -91,7 +91,7 @@ public interface RExceptionVisitorType<T, E extends Throwable>
    */
 
   T exceptionVisitJCGLException(
-    final @Nonnull JCGLException e)
+    final JCGLException e)
     throws E;
 
   /**
@@ -105,7 +105,21 @@ public interface RExceptionVisitorType<T, E extends Throwable>
    */
 
   T exceptionVisitNotSupportedException(
-    final @Nonnull RNotSupportedException e)
+    final RNotSupportedException e)
+    throws E;
+
+  /**
+   * Visit the given exception type.
+   * 
+   * @param e
+   *          The exception
+   * @return T value of type <code>T</code>
+   * @throws E
+   *           If required
+   */
+
+  T exceptionVisitProgrammingErrorException(
+    RExceptionAPIMisuse e)
     throws E;
 
   /**
@@ -119,7 +133,7 @@ public interface RExceptionVisitorType<T, E extends Throwable>
    */
 
   T exceptionVisitResourceException(
-    final @Nonnull RResourceException e)
+    final RResourceException e)
     throws E;
 
   /**
@@ -133,6 +147,20 @@ public interface RExceptionVisitorType<T, E extends Throwable>
    */
 
   T exceptionVisitXMLException(
-    final @Nonnull RXMLException e)
+    final RXMLException e)
+    throws E;
+
+  /**
+   * Visit the given exception type.
+   * 
+   * @param e
+   *          The exception
+   * @return T value of type <code>T</code>
+   * @throws E
+   *           If required
+   */
+
+  T exceptionVisitInternalAssertionException(
+    final RInternalAssertionException e)
     throws E;
 }

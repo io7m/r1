@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
 /**
  * The type of postprocessors.
  */
@@ -28,5 +26,5 @@ public interface KPostprocessorType
    * @return The name of the postprocessor.
    */
 
-  @Nonnull String postprocessorGetName();
+  String postprocessorGetName();
 }

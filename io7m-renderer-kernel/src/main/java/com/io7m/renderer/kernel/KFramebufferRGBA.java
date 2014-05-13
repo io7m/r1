@@ -16,12 +16,10 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
@@ -30,7 +28,7 @@ import com.io7m.renderer.types.RException;
  * attachments.
  */
 
-public final class KFramebufferRGBA
+@EqualityReference public final class KFramebufferRGBA
 {
   /**
    * Construct a new framebuffer from the given description.
@@ -40,17 +38,15 @@ public final class KFramebufferRGBA
    * @param description
    *          The framebuffer description
    * @return A new framebuffer
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
+   * 
    * @throws RException
    *           If an error occurs during creation
    */
 
-  public static @Nonnull KFramebufferRGBAType newFramebuffer(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull KFramebufferRGBADescription description)
-    throws ConstraintError,
-      RException
+  public static KFramebufferRGBAType newFramebuffer(
+    final JCGLImplementationType gi,
+    final KFramebufferRGBADescription description)
+    throws RException
   {
     try {
       return KFramebufferRGBAAbstract.newRGBA(gi, description);

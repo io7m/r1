@@ -18,16 +18,14 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.util.concurrent.Future;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RTransformProjectionType;
 
 interface SBSceneControllerRendererControl
 {
-  public @Nonnull Future<SBCacheStatistics> rendererGetCacheStatistics();
+  public  Future<SBCacheStatistics> rendererGetCacheStatistics();
 
-  public @Nonnull RMatrixI4x4F<RTransformProjectionType> rendererGetProjection();
+  public  RMatrixI4x4F<RTransformProjectionType> rendererGetProjection();
 
   public void rendererSetBackgroundColour(
     float r,
@@ -35,13 +33,13 @@ interface SBSceneControllerRendererControl
     float b);
 
   public void rendererSetCustomProjection(
-    final @Nonnull RMatrixI4x4F<RTransformProjectionType> p);
+    final  RMatrixI4x4F<RTransformProjectionType> p);
 
   public void rendererSetType(
-    final @Nonnull SBKRendererSelectionType type);
+    final  SBKRendererSelectionType type);
 
   public void rendererPostprocessorSet(
-    final @Nonnull SBKPostprocessor p);
+    final  SBKPostprocessor p);
 
   public void rendererShowAxes(
     final boolean enabled);

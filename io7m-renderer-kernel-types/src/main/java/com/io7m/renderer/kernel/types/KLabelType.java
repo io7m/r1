@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * The type of labels.
@@ -28,5 +27,5 @@ public interface KLabelType
    * @return The code for this label
    */
 
-  @Nonnull String labelGetCode();
+   String labelGetCode();
 }

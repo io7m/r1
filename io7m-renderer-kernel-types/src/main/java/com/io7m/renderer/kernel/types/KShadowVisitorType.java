@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
@@ -40,8 +37,7 @@ public interface KShadowVisitorType<T, E extends Throwable>
    * @param s
    *          The mapped shadow
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws JCGLException
    *           If required
    * @throws RException
@@ -51,11 +47,10 @@ public interface KShadowVisitorType<T, E extends Throwable>
    */
 
   T shadowMappedBasic(
-    final @Nonnull KShadowMappedBasic s)
+    final KShadowMappedBasic s)
     throws E,
       JCGLException,
-      RException,
-      ConstraintError;
+      RException;
 
   /**
    * Visit a variance mapped shadow.
@@ -63,8 +58,7 @@ public interface KShadowVisitorType<T, E extends Throwable>
    * @param s
    *          The mapped shadow
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws JCGLException
    *           If required
    * @throws RException
@@ -74,9 +68,8 @@ public interface KShadowVisitorType<T, E extends Throwable>
    */
 
   T shadowMappedVariance(
-    final @Nonnull KShadowMappedVariance s)
+    final KShadowMappedVariance s)
     throws E,
       JCGLException,
-      RException,
-      ConstraintError;
+      RException;
 }

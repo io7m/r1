@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * The type of regular materials (opaque, or translucent non-refractive).
@@ -28,24 +27,24 @@ public interface KMaterialRegularType extends KMaterialType
    * @return The material albedo properties
    */
 
-  @Nonnull KMaterialAlbedo materialGetAlbedo();
+   KMaterialAlbedo materialGetAlbedo();
 
   /**
    * @return The material emissive properties
    */
 
-  @Nonnull KMaterialEmissive materialGetEmissive();
+   KMaterialEmissive materialGetEmissive();
 
   /**
    * @return The material environment mapping properties
    */
 
-  @Nonnull KMaterialEnvironment materialGetEnvironment();
+   KMaterialEnvironment materialGetEnvironment();
 
   /**
    * @return The material specularity properties
    */
 
-  @Nonnull KMaterialSpecular materialGetSpecular();
+   KMaterialSpecular materialGetSpecular();
 
 }

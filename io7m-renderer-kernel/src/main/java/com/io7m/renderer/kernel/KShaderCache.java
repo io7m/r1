@@ -16,18 +16,16 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcache.LRUCacheAbstract;
 import com.io7m.jcache.LRUCacheType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.types.RException;
 
 /**
  * Shader caches.
  */
 
-public final class KShaderCache extends
+@EqualityReference public final class KShaderCache extends
   LRUCacheAbstract<String, KProgram, RException> implements KShaderCacheType
 {
   /**
@@ -36,20 +34,16 @@ public final class KShaderCache extends
    * @param c
    *          The cache
    * @return A cache
-   * @throws ConstraintError
-   *           If <code>c == null</code>
    */
 
-  public static @Nonnull KShaderCacheType wrap(
-    final @Nonnull LRUCacheType<String, KProgram, RException> c)
-    throws ConstraintError
+  public static KShaderCacheType wrap(
+    final LRUCacheType<String, KProgram, RException> c)
   {
     return new KShaderCache(c);
   }
 
   private KShaderCache(
-    final @Nonnull LRUCacheType<String, KProgram, RException> c)
-    throws ConstraintError
+    final LRUCacheType<String, KProgram, RException> c)
   {
     super(c);
   }

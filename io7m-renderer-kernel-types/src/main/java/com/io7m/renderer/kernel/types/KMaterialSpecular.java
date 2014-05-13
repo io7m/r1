@@ -16,14 +16,12 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Option;
-import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RVectorI3F;
 
@@ -31,7 +29,7 @@ import com.io7m.renderer.types.RVectorI3F;
  * Material properties related to surface specular highlights.
  */
 
-@Immutable public final class KMaterialSpecular implements
+@EqualityStructural public final class KMaterialSpecular implements
   KTexturesRequiredType
 {
   /**
@@ -44,20 +42,17 @@ import com.io7m.renderer.types.RVectorI3F;
    * @param in_texture
    *          The specular map, if any
    * @return New specularity properties
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KMaterialSpecular newSpecularMapped(
-    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
+  public static KMaterialSpecular newSpecularMapped(
+    final RVectorI3F<RSpaceRGBType> in_colour,
     final float in_exponent,
-    final @Nonnull Texture2DStaticUsable in_texture)
-    throws ConstraintError
+    final Texture2DStaticUsableType in_texture)
   {
     return new KMaterialSpecular(
       in_colour,
       in_exponent,
-      Option.some(Constraints.constrainNotNull(in_texture, "Texture")));
+      Option.some(NullCheck.notNull(in_texture, "Texture")));
   }
 
   /**
@@ -68,38 +63,34 @@ import com.io7m.renderer.types.RVectorI3F;
    * @param in_exponent
    *          The specular exponent
    * @return New specularity properties
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KMaterialSpecular newSpecularUnmapped(
-    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
+  public static KMaterialSpecular newSpecularUnmapped(
+    final RVectorI3F<RSpaceRGBType> in_colour,
     final float in_exponent)
-    throws ConstraintError
   {
-    final Option<Texture2DStaticUsable> none = Option.none();
+    final OptionType<Texture2DStaticUsableType> none = Option.none();
     return new KMaterialSpecular(in_colour, in_exponent, none);
   }
 
-  private final @Nonnull RVectorI3F<RSpaceRGBType>     colour;
-  private final float                                  exponent;
-  private final @Nonnull Option<Texture2DStaticUsable> texture;
-  private final int                                    textures_required;
+  private final RVectorI3F<RSpaceRGBType>             colour;
+  private final float                                 exponent;
+  private final OptionType<Texture2DStaticUsableType> texture;
+  private final int                                   textures_required;
 
   private KMaterialSpecular(
-    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
+    final RVectorI3F<RSpaceRGBType> in_colour,
     final float in_exponent,
-    final @Nonnull Option<Texture2DStaticUsable> in_texture)
-    throws ConstraintError
+    final OptionType<Texture2DStaticUsableType> in_texture)
   {
-    this.texture = Constraints.constrainNotNull(in_texture, "Texture");
-    this.colour = Constraints.constrainNotNull(in_colour, "Colour");
+    this.texture = NullCheck.notNull(in_texture, "Texture");
+    this.colour = NullCheck.notNull(in_colour, "Colour");
     this.exponent = in_exponent;
     this.textures_required = this.texture.isSome() ? 1 : 0;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -128,7 +119,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The specular colour
    */
 
-  public @Nonnull RVectorI3F<RSpaceRGBType> getColour()
+  public RVectorI3F<RSpaceRGBType> getColour()
   {
     return this.colour;
   }
@@ -146,7 +137,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The specular map, if any
    */
 
-  public @Nonnull Option<Texture2DStaticUsable> getTexture()
+  public OptionType<Texture2DStaticUsableType> getTexture()
   {
     return this.texture;
   }
@@ -176,7 +167,9 @@ import com.io7m.renderer.types.RVectorI3F;
     builder.append(" ");
     builder.append(this.exponent);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 
   /**
@@ -186,13 +179,10 @@ import com.io7m.renderer.types.RVectorI3F;
    * @param c
    *          The new colour
    * @return The current material with <code>colour == c</code>.
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KMaterialSpecular withColour(
-    final @Nonnull RVectorI3F<RSpaceRGBType> c)
-    throws ConstraintError
+  public KMaterialSpecular withColour(
+    final RVectorI3F<RSpaceRGBType> c)
   {
     return new KMaterialSpecular(c, this.exponent, this.texture);
   }
@@ -206,14 +196,10 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The current material with <code>exponent == e</code>.
    */
 
-  public @Nonnull KMaterialSpecular withExponent(
+  public KMaterialSpecular withExponent(
     final float e)
   {
-    try {
-      return new KMaterialSpecular(this.colour, e, this.texture);
-    } catch (final ConstraintError x) {
-      throw new UnreachableCodeException(x);
-    }
+    return new KMaterialSpecular(this.colour, e, this.texture);
   }
 
   /**
@@ -221,12 +207,9 @@ import com.io7m.renderer.types.RVectorI3F;
    * modification.
    * 
    * @return The current material without a texture
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KMaterialSpecular withoutTexture()
-    throws ConstraintError
+  public KMaterialSpecular withoutTexture()
   {
     return KMaterialSpecular.newSpecularUnmapped(this.colour, this.exponent);
   }
@@ -238,13 +221,10 @@ import com.io7m.renderer.types.RVectorI3F;
    * @param t
    *          The new texture
    * @return The current material with <code>texture == t</code>.
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public @Nonnull KMaterialSpecular withTexture(
-    final @Nonnull Texture2DStaticUsable t)
-    throws ConstraintError
+  public KMaterialSpecular withTexture(
+    final Texture2DStaticUsableType t)
   {
     return KMaterialSpecular.newSpecularMapped(this.colour, this.exponent, t);
   }

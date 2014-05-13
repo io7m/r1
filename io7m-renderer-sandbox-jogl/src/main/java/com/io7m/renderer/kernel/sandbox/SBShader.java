@@ -18,32 +18,29 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.io.File;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.jparasol.xml.PGLSLMetaXML;
 import com.io7m.renderer.kernel.KProgram;
 
 public final class SBShader
 {
-  private final @Nonnull KProgram     program;
-  private final @Nonnull File         file;
-  private final @Nonnull PGLSLMetaXML meta;
+  private final KProgram     program;
+  private final File         file;
+  private final PGLSLMetaXML meta;
 
   SBShader(
-    final @Nonnull KProgram in_program,
-    final @Nonnull File in_file,
-    final @Nonnull PGLSLMetaXML in_meta)
-    throws ConstraintError
+    final KProgram in_program,
+    final File in_file,
+    final PGLSLMetaXML in_meta)
   {
-    this.program = Constraints.constrainNotNull(in_program, "Program");
-    this.file = Constraints.constrainNotNull(in_file, "File");
-    this.meta = Constraints.constrainNotNull(in_meta, "Meta");
+    this.program = NullCheck.notNull(in_program, "Program");
+    this.file = NullCheck.notNull(in_file, "File");
+    this.meta = NullCheck.notNull(in_meta, "Meta");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -67,22 +64,22 @@ public final class SBShader
     return true;
   }
 
-  public @Nonnull File getFile()
+  public File getFile()
   {
     return this.file;
   }
 
-  public @Nonnull PGLSLMetaXML getMeta()
+  public PGLSLMetaXML getMeta()
   {
     return this.meta;
   }
 
-  public @Nonnull String getName()
+  public String getName()
   {
     return this.meta.getName();
   }
 
-  public @Nonnull KProgram getProgram()
+  public KProgram getProgram()
   {
     return this.program;
   }
@@ -107,6 +104,8 @@ public final class SBShader
     builder.append(" ");
     builder.append(this.meta);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

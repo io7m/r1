@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.types.RException;
@@ -46,7 +44,7 @@ public interface KShadowMapVisitorType<A, E extends Throwable>
    */
 
   A shadowMapVisitBasic(
-    final @Nonnull KShadowMapBasic sm)
+    final KShadowMapBasic sm)
     throws E,
       RException;
 
@@ -63,7 +61,7 @@ public interface KShadowMapVisitorType<A, E extends Throwable>
    */
 
   A shadowMapVisitVariance(
-    final @Nonnull KShadowMapVariance sm)
+    final KShadowMapVariance sm)
     throws E,
       RException;
 }

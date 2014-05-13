@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.awt.Color;
 
-import javax.annotation.Nonnull;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
@@ -27,25 +26,23 @@ import javax.swing.JTextField;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RTransformTextureType;
 
 public final class SBMaterialControlsTranslucentRefractive implements
   SBControlsDataType<SBMaterialDescriptionTranslucentRefractive>
 {
-  private final @Nonnull SBMaterialControlsNormal                   controls_normal;
-  private final @Nonnull SBMatrix3x3Controls<RTransformTextureType> controls_uv;
-  private final @Nonnull JTextField                                 name;
-  private final @Nonnull SBFloatHSlider                             scale;
-  private final @Nonnull JCheckBox                                  masked;
-  private final @Nonnull RowGroup                                   group;
+  private final SBMaterialControlsNormal                   controls_normal;
+  private final SBMatrix3x3Controls<RTransformTextureType> controls_uv;
+  private final JTextField                                 name;
+  private final SBFloatHSlider                             scale;
+  private final JCheckBox                                  masked;
+  private final RowGroup                                   group;
 
   public SBMaterialControlsTranslucentRefractive(
-    final @Nonnull JTextField in_name,
-    final @Nonnull SBMaterialControlsNormal in_controls_normal,
-    final @Nonnull SBMatrix3x3Controls<RTransformTextureType> in_controls_uv)
-    throws ConstraintError
+    final JTextField in_name,
+    final SBMaterialControlsNormal in_controls_normal,
+    final SBMatrix3x3Controls<RTransformTextureType> in_controls_uv)
   {
     this.group = new RowGroup();
     this.name = in_name;
@@ -56,7 +53,7 @@ public final class SBMaterialControlsTranslucentRefractive implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     final JLabel label = new JLabel("Refraction");
     label.setForeground(Color.BLUE);
@@ -82,7 +79,7 @@ public final class SBMaterialControlsTranslucentRefractive implements
   }
 
   @Override public void controlsLoadFrom(
-    final @Nonnull SBMaterialDescriptionTranslucentRefractive desc)
+    final SBMaterialDescriptionTranslucentRefractive desc)
   {
     this.controls_normal.controlsLoadFrom(desc.getNormal());
     this.controls_uv.controlsLoadFrom(desc.getUVMatrix());
@@ -91,8 +88,7 @@ public final class SBMaterialControlsTranslucentRefractive implements
   }
 
   @Override public SBMaterialDescriptionTranslucentRefractive controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
     return new SBMaterialDescriptionTranslucentRefractive(
       this.name.getText(),

@@ -18,10 +18,8 @@ package com.io7m.renderer.kernel.examples;
 
 import java.io.InputStream;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * Functions for retrieving example data.
@@ -39,9 +37,9 @@ public final class ExampleData
    * @return The path to the results directory
    */
 
-  public static @Nonnull String getDataPath(
-    final @Nonnull ExampleRendererType renderer,
-    final @Nonnull ExampleSceneType scene)
+  public static String getDataPath(
+    final ExampleRendererType renderer,
+    final ExampleSceneType scene)
   {
     final StringBuilder name = new StringBuilder();
     final String scene_name = scene.exampleGetName();
@@ -51,7 +49,9 @@ public final class ExampleData
     name.append(scene_name);
     name.append("/");
     name.append(render_name);
-    return name.toString();
+    final String r = name.toString();
+    assert r != null;
+    return r;
   }
 
   /**
@@ -67,15 +67,18 @@ public final class ExampleData
    * @return The name of the image file, or <code>null</code> if nonexistent
    */
 
-  @SuppressWarnings("boxing") public static @Nonnull String getResultFile(
-    final @Nonnull ExampleRendererType renderer,
-    final @Nonnull ExampleSceneType scene,
+  @SuppressWarnings("boxing") public static String getResultFile(
+    final ExampleRendererType renderer,
+    final ExampleSceneType scene,
     final int view)
   {
-    return String.format(
-      "%s/%d.png",
-      ExampleData.getDataPath(renderer, scene),
-      view);
+    final String r =
+      String.format(
+        "%s/%d.png",
+        ExampleData.getDataPath(renderer, scene),
+        view);
+    assert r != null;
+    return r;
   }
 
   /**
@@ -91,9 +94,9 @@ public final class ExampleData
    * @return An image stream, or <code>null</code> if nonexistent
    */
 
-  public static @CheckForNull InputStream getResultImageStream(
-    final @Nonnull ExampleRendererType renderer,
-    final @Nonnull ExampleSceneType scene,
+  public static @Nullable InputStream getResultImageStream(
+    final ExampleRendererType renderer,
+    final ExampleSceneType scene,
     final int view)
   {
     return ExampleData.class.getResourceAsStream(ExampleData.getResultFile(

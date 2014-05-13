@@ -18,10 +18,7 @@ package com.io7m.renderer.kernel;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KTranslucentType;
 import com.io7m.renderer.types.RException;
 
@@ -42,17 +39,15 @@ public interface KTranslucentRendererType
    *          The current observer matrices
    * @param translucents
    *          The list of translucents
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
+   * 
    * @throws RException
    *           If an error occurs.
    */
 
   void rendererEvaluateTranslucents(
-    final @Nonnull KFramebufferForwardUsableType framebuffer,
-    final @Nonnull KShadowMapContextType shadow_context,
-    final @Nonnull MatricesObserverType mwo,
-    final @Nonnull List<KTranslucentType> translucents)
-    throws ConstraintError,
-      RException;
+    final KFramebufferForwardUsableType framebuffer,
+    final KShadowMapContextType shadow_context,
+    final MatricesObserverType mwo,
+    final List<KTranslucentType> translucents)
+    throws RException;
 }

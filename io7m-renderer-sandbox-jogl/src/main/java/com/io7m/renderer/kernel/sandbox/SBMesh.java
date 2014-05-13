@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,43 +16,38 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.types.KMesh;
 
-@Immutable final class SBMesh implements Comparable<SBMesh>
+final class SBMesh implements Comparable<SBMesh>
 {
-  private final @Nonnull PathVirtual path;
-  private final @Nonnull KMesh       mesh;
+  private final PathVirtual path;
+  private final KMesh       mesh;
 
   SBMesh(
-    final @Nonnull PathVirtual in_path,
-    final @Nonnull KMesh in_mesh)
-    throws ConstraintError
+    final PathVirtual in_path,
+    final KMesh in_mesh)
   {
-    Constraints.constrainNotNull(in_path, "Path");
-    Constraints.constrainNotNull(in_mesh, "Mesh");
+    NullCheck.notNull(in_path, "Path");
+    NullCheck.notNull(in_mesh, "Mesh");
 
     this.path = in_path;
     this.mesh = in_mesh;
   }
 
   @Override public int compareTo(
-    final @Nonnull SBMesh o)
+    final SBMesh o)
   {
     return this.path.compareTo(this.path);
   }
 
-  public @Nonnull KMesh getMesh()
+  public KMesh getMesh()
   {
     return this.mesh;
   }
 
-  public @Nonnull PathVirtual getPath()
+  public PathVirtual getPath()
   {
     return this.path;
   }

@@ -16,10 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.FramebufferUsableType;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 
 /**
@@ -36,7 +34,7 @@ public interface KFramebufferRGBAUsableType extends KFramebufferUsableType
    * @return A reference to the color framebuffer
    */
 
-  @Nonnull FramebufferReferenceUsable kFramebufferGetColorFramebuffer();
+  FramebufferUsableType kFramebufferGetColorFramebuffer();
 
   /**
    * <p>
@@ -47,7 +45,7 @@ public interface KFramebufferRGBAUsableType extends KFramebufferUsableType
    *         other framebuffers with the same configuration
    */
 
-  @Nonnull KFramebufferRGBADescription kFramebufferGetRGBADescription();
+  KFramebufferRGBADescription kFramebufferGetRGBADescription();
 
   /**
    * <p>
@@ -57,5 +55,5 @@ public interface KFramebufferRGBAUsableType extends KFramebufferUsableType
    * @return A reference to the texture that backs the color buffer
    */
 
-  @Nonnull Texture2DStaticUsable kFramebufferGetRGBATexture();
+  Texture2DStaticUsableType kFramebufferGetRGBATexture();
 }

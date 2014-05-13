@@ -16,19 +16,18 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
 /**
  * A description of a basic mapped shadow.
  */
 
-@Immutable public final class KShadowMappedBasic implements KShadowType
+@EqualityStructural public final class KShadowMappedBasic implements
+  KShadowType
 {
   /**
    * Construct a new basic mapped shadow.
@@ -42,37 +41,32 @@ import com.io7m.renderer.types.RException;
    * @param description
    *          The description of the shadow map
    * @return A new shadow
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KShadowMappedBasic newMappedBasic(
+  public static KShadowMappedBasic newMappedBasic(
     final float depth_bias,
     final float factor_min,
-    final @Nonnull KShadowMapBasicDescription description)
-    throws ConstraintError
+    final KShadowMapBasicDescription description)
   {
     return new KShadowMappedBasic(depth_bias, factor_min, description);
   }
 
-  private final float                               depth_bias;
-  private final @Nonnull KShadowMapBasicDescription description;
-  private final float                               factor_min;
+  private final float                      depth_bias;
+  private final KShadowMapBasicDescription description;
+  private final float                      factor_min;
 
   KShadowMappedBasic(
     final float in_depth_bias,
     final float in_factor_min,
-    final @Nonnull KShadowMapBasicDescription in_description)
-    throws ConstraintError
+    final KShadowMapBasicDescription in_description)
   {
-    this.description =
-      Constraints.constrainNotNull(in_description, "Description");
+    this.description = NullCheck.notNull(in_description, "Description");
     this.depth_bias = in_depth_bias;
     this.factor_min = in_factor_min;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -105,7 +99,7 @@ import com.io7m.renderer.types.RException;
    * @return The description of the shadow map
    */
 
-  public @Nonnull KShadowMapBasicDescription getDescription()
+  public KShadowMapBasicDescription getDescription()
   {
     return this.description;
   }
@@ -133,11 +127,10 @@ import com.io7m.renderer.types.RException;
     <T, E extends Throwable, V extends KShadowVisitorType<T, E>>
     T
     shadowAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
         JCGLException,
-        RException,
-        ConstraintError
+        RException
   {
     return v.shadowMappedBasic(this);
   }
@@ -152,6 +145,8 @@ import com.io7m.renderer.types.RException;
     builder.append(" factor_min=");
     builder.append(this.factor_min);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

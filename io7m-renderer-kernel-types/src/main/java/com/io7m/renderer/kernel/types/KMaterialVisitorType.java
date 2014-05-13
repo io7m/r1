@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -39,18 +36,16 @@ public interface KMaterialVisitorType<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A materialOpaque(
-    final @Nonnull KMaterialOpaqueType m)
-    throws ConstraintError,
-      RException,
+  A materialOpaque(
+    final KMaterialOpaqueType m)
+    throws RException,
       E;
 
   /**
@@ -59,17 +54,15 @@ public interface KMaterialVisitorType<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A materialTranslucent(
-    final @Nonnull KMaterialTranslucentType m)
-    throws ConstraintError,
-      RException,
+  A materialTranslucent(
+    final KMaterialTranslucentType m)
+    throws RException,
       E;
 }

@@ -26,11 +26,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jlog.Level;
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogPolicyProperties;
+import com.io7m.jlog.LogType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jproperties.JPropertyException;
 
 final class SBZipUtilities
 {
@@ -40,9 +41,9 @@ final class SBZipUtilities
    */
 
   private static void copyZipStreamUnpack(
-    final @Nonnull Log log,
-    final @Nonnull ZipInputStream zip_stream,
-    final @Nonnull File outdir)
+    final LogUsableType log,
+    final ZipInputStream zip_stream,
+    final File outdir)
     throws IOException
   {
     for (;;) {
@@ -107,7 +108,8 @@ final class SBZipUtilities
 
   public static void main(
     final String args[])
-    throws IOException
+    throws IOException,
+      JPropertyException
   {
     if (args.length != 2) {
       System.err.println("usage: output.zip file");
@@ -117,7 +119,10 @@ final class SBZipUtilities
     final Properties props = new Properties();
     props.setProperty("com.io7m.renderer.logs.sandbox", "true");
     props.setProperty("com.io7m.renderer.sandbox.level", "LOG_DEBUG");
-    final Log log = new Log(props, "com.io7m.renderer", "sandbox");
+    final LogType log =
+      Log.newLog(
+        LogPolicyProperties.newPolicy(props, "com.io7m.renderer"),
+        "sandbox");
 
     final File file = new File(args[0]);
     final File root = new File(args[1]);
@@ -138,13 +143,13 @@ final class SBZipUtilities
    */
 
   static void unzip(
-    final @Nonnull Log log,
-    final @Nonnull File file,
-    final @Nonnull File output)
+    final LogUsableType log,
+    final File file,
+    final File output)
     throws FileNotFoundException,
       IOException
   {
-    final Log zlog = new Log(log, "unzip");
+    final LogUsableType zlog = log.with("unzip");
     final ZipInputStream stream =
       new ZipInputStream(new FileInputStream(file));
     try {
@@ -154,13 +159,12 @@ final class SBZipUtilities
     }
   }
 
-  static @Nonnull File unzipToTemporary(
-    final @Nonnull Log log,
-    final @Nonnull File file,
-    final @Nonnull String prefix,
+  static File unzipToTemporary(
+    final LogUsableType log,
+    final File file,
+    final String prefix,
     final int attempts)
-    throws IOException,
-      ConstraintError
+    throws IOException
   {
     final File output =
       SBIOUtilities.makeTemporaryDirectory(log, prefix, attempts);
@@ -169,9 +173,9 @@ final class SBZipUtilities
   }
 
   static void zipToStream(
-    final @Nonnull Log log,
-    final @Nonnull ZipOutputStream fo,
-    final @Nonnull File root)
+    final LogUsableType log,
+    final ZipOutputStream fo,
+    final File root)
     throws IOException
   {
     final byte[] buffer = new byte[8192];
@@ -179,14 +183,14 @@ final class SBZipUtilities
   }
 
   private static void zipToStreamRecursive(
-    final @Nonnull Log log,
-    final @Nonnull ZipOutputStream fo,
-    final @Nonnull byte[] buffer,
-    final @Nonnull String path,
-    final @Nonnull File actual)
+    final LogUsableType log,
+    final ZipOutputStream fo,
+    final byte[] buffer,
+    final String path,
+    final File actual)
     throws IOException
   {
-    if (log.enabled(Level.LOG_DEBUG)) {
+    if (log.wouldLog(LogLevel.LOG_DEBUG)) {
       final StringBuilder s = new StringBuilder();
       s.append("zip ");
       s.append(path);

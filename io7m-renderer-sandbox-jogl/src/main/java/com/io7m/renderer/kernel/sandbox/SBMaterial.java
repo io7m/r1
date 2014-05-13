@@ -16,13 +16,12 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 
 interface SBMaterial extends SBMaterialVisitable
 {
-  @Nonnull Integer materialGetID();
+   Integer materialGetID();
 
-  @Nonnull String materialGetName();
+   String materialGetName();
 
-  @Nonnull SBMaterialDescription materialGetDescription();
+   SBMaterialDescription materialGetDescription();
 }

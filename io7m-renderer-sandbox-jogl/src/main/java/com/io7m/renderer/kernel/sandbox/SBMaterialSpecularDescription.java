@@ -16,28 +16,26 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
+import com.io7m.jnull.Nullable;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RVectorI3F;
 
 public final class SBMaterialSpecularDescription
 {
-  public static @Nonnull SBMaterialSpecularDescription getDefault()
+  public static SBMaterialSpecularDescription getDefault()
   {
     final RVectorI3F<RSpaceRGBType> rgb = RVectorI3F.zero();
     return new SBMaterialSpecularDescription(null, rgb, 1.0f);
   }
 
-  private final float                          exponent;
-  private final @Nonnull RVectorI3F<RSpaceRGBType> colour;
-  private final @CheckForNull PathVirtual      texture;
+  private final float                     exponent;
+  private final RVectorI3F<RSpaceRGBType> colour;
+  private final @Nullable PathVirtual     texture;
 
   SBMaterialSpecularDescription(
-    final @CheckForNull PathVirtual in_texture,
-    final @Nonnull RVectorI3F<RSpaceRGBType> in_colour,
+    final @Nullable PathVirtual in_texture,
+    final RVectorI3F<RSpaceRGBType> in_colour,
     final float in_exponent)
   {
     this.texture = in_texture;
@@ -46,7 +44,7 @@ public final class SBMaterialSpecularDescription
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -59,11 +57,7 @@ public final class SBMaterialSpecularDescription
     }
     final SBMaterialSpecularDescription other =
       (SBMaterialSpecularDescription) obj;
-    if (this.colour == null) {
-      if (other.colour != null) {
-        return false;
-      }
-    } else if (!this.colour.equals(other.colour)) {
+    if (!this.colour.equals(other.colour)) {
       return false;
     }
     if (Float.floatToIntBits(this.exponent) != Float
@@ -74,8 +68,13 @@ public final class SBMaterialSpecularDescription
       if (other.texture != null) {
         return false;
       }
-    } else if (!this.texture.equals(other.texture)) {
-      return false;
+    } else {
+      final PathVirtual t = this.texture;
+      if (t != null) {
+        if (!t.equals(other.texture)) {
+          return false;
+        }
+      }
     }
     return true;
   }
@@ -90,7 +89,7 @@ public final class SBMaterialSpecularDescription
     return this.colour;
   }
 
-  public @CheckForNull PathVirtual getTexture()
+  public @Nullable PathVirtual getTexture()
   {
     return this.texture;
   }
@@ -99,12 +98,12 @@ public final class SBMaterialSpecularDescription
   {
     final int prime = 31;
     int result = 1;
-    result =
-      (prime * result) + ((this.colour == null) ? 0 : this.colour.hashCode());
+    result = (prime * result) + this.colour.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.exponent);
-    result =
-      (prime * result)
-        + ((this.texture == null) ? 0 : this.texture.hashCode());
+    final PathVirtual t = this.texture;
+    if (t != null) {
+      result = (prime * result) + t.hashCode();
+    }
     return result;
   }
 
@@ -118,6 +117,8 @@ public final class SBMaterialSpecularDescription
     builder.append(", texture=");
     builder.append(this.texture);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

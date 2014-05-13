@@ -16,10 +16,8 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
@@ -27,39 +25,37 @@ import com.io7m.renderer.types.RTransformTextureType;
 public final class SBMaterialDescriptionTranslucentRegular implements
   SBMaterialDescriptionTranslucent
 {
-  private final @Nonnull SBMaterialAlbedoDescription      albedo;
-  private final @Nonnull SBMaterialAlphaDescription       alpha;
-  private final @Nonnull SBMaterialEmissiveDescription    emissive;
-  private final @Nonnull SBMaterialEnvironmentDescription environment;
-  private final @Nonnull String                           name;
-  private final @Nonnull SBMaterialNormalDescription      normal;
-  private final @Nonnull SBMaterialSpecularDescription    specular;
-  private final @Nonnull RMatrixI3x3F<RTransformTextureType>  uv_matrix;
+  private final SBMaterialAlbedoDescription         albedo;
+  private final SBMaterialAlphaDescription          alpha;
+  private final SBMaterialEmissiveDescription       emissive;
+  private final SBMaterialEnvironmentDescription    environment;
+  private final String                              name;
+  private final SBMaterialNormalDescription         normal;
+  private final SBMaterialSpecularDescription       specular;
+  private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   SBMaterialDescriptionTranslucentRegular(
-    final @Nonnull String in_name,
-    final @Nonnull SBMaterialAlphaDescription in_alpha,
-    final @Nonnull SBMaterialAlbedoDescription in_albedo,
-    final @Nonnull SBMaterialEmissiveDescription in_emissive,
-    final @Nonnull SBMaterialSpecularDescription in_specular,
-    final @Nonnull SBMaterialEnvironmentDescription in_environment,
-    final @Nonnull SBMaterialNormalDescription in_normal,
-    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
-    throws ConstraintError
+    final String in_name,
+    final SBMaterialAlphaDescription in_alpha,
+    final SBMaterialAlbedoDescription in_albedo,
+    final SBMaterialEmissiveDescription in_emissive,
+    final SBMaterialSpecularDescription in_specular,
+    final SBMaterialEnvironmentDescription in_environment,
+    final SBMaterialNormalDescription in_normal,
+    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
   {
-    this.name = Constraints.constrainNotNull(in_name, "Name");
-    this.alpha = Constraints.constrainNotNull(in_alpha, "Alpha");
-    this.albedo = Constraints.constrainNotNull(in_albedo, "Albedo");
-    this.emissive = Constraints.constrainNotNull(in_emissive, "Emissive");
-    this.specular = Constraints.constrainNotNull(in_specular, "Specular");
-    this.environment =
-      Constraints.constrainNotNull(in_environment, "Environment");
-    this.normal = Constraints.constrainNotNull(in_normal, "Normal");
-    this.uv_matrix = Constraints.constrainNotNull(in_uv_matrix, "UV matrix");
+    this.name = NullCheck.notNull(in_name, "Name");
+    this.alpha = NullCheck.notNull(in_alpha, "Alpha");
+    this.albedo = NullCheck.notNull(in_albedo, "Albedo");
+    this.emissive = NullCheck.notNull(in_emissive, "Emissive");
+    this.specular = NullCheck.notNull(in_specular, "Specular");
+    this.environment = NullCheck.notNull(in_environment, "Environment");
+    this.normal = NullCheck.notNull(in_normal, "Normal");
+    this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -81,37 +77,37 @@ public final class SBMaterialDescriptionTranslucentRegular implements
       && this.uv_matrix.equals(other.uv_matrix);
   }
 
-  public @Nonnull SBMaterialAlbedoDescription getAlbedo()
+  public SBMaterialAlbedoDescription getAlbedo()
   {
     return this.albedo;
   }
 
-  public @Nonnull SBMaterialAlphaDescription getAlpha()
+  public SBMaterialAlphaDescription getAlpha()
   {
     return this.alpha;
   }
 
-  public @Nonnull SBMaterialEmissiveDescription getEmissive()
+  public SBMaterialEmissiveDescription getEmissive()
   {
     return this.emissive;
   }
 
-  public @Nonnull SBMaterialEnvironmentDescription getEnvironment()
+  public SBMaterialEnvironmentDescription getEnvironment()
   {
     return this.environment;
   }
 
-  public @Nonnull SBMaterialNormalDescription getNormal()
+  public SBMaterialNormalDescription getNormal()
   {
     return this.normal;
   }
 
-  public @Nonnull SBMaterialSpecularDescription getSpecular()
+  public SBMaterialSpecularDescription getSpecular()
   {
     return this.specular;
   }
 
-  public @Nonnull RMatrixI3x3F<RTransformTextureType> getUVMatrix()
+  public RMatrixI3x3F<RTransformTextureType> getUVMatrix()
   {
     return this.uv_matrix;
   }
@@ -130,7 +126,7 @@ public final class SBMaterialDescriptionTranslucentRegular implements
     return result;
   }
 
-  @Override public @Nonnull String materialDescriptionGetName()
+  @Override public String materialDescriptionGetName()
   {
     return this.name;
   }
@@ -141,8 +137,7 @@ public final class SBMaterialDescriptionTranslucentRegular implements
     materialDescriptionTranslucentVisitableAccept(
       final V v)
       throws E,
-        RException,
-        ConstraintError
+        RException
   {
     return v.materialDescriptionVisitTranslucentRegular(this);
   }
@@ -153,8 +148,7 @@ public final class SBMaterialDescriptionTranslucentRegular implements
     materialDescriptionVisitableAccept(
       final V v)
       throws E,
-        RException,
-        ConstraintError
+        RException
   {
     return v.materialDescriptionVisitTranslucent(this);
   }

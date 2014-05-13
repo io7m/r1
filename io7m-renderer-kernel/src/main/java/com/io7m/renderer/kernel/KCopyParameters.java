@@ -16,22 +16,20 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * Parameters for copying framebuffers in postprocessors.
  */
 
-@Immutable public final class KCopyParameters
+@EqualityStructural public final class KCopyParameters
 {
-  private final boolean                blit;
-  private final @Nonnull AreaInclusive source_select;
-  private final @Nonnull AreaInclusive target_select;
+  private final boolean       blit;
+  private final AreaInclusive source_select;
+  private final AreaInclusive target_select;
 
   /**
    * Construct new parameters.
@@ -43,28 +41,43 @@ import com.io7m.jcanephora.AreaInclusive;
    *          target.
    * @param in_blit
    *          If blitting should be used (may be ignored if not supported)
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
   public KCopyParameters(
-    final @Nonnull AreaInclusive in_source_select,
-    final @Nonnull AreaInclusive in_target_select,
+    final AreaInclusive in_source_select,
+    final AreaInclusive in_target_select,
     final boolean in_blit)
-    throws ConstraintError
   {
     this.source_select =
-      Constraints.constrainNotNull(in_source_select, "Source selection");
+      NullCheck.notNull(in_source_select, "Source selection");
     this.target_select =
-      Constraints.constrainNotNull(in_target_select, "Target selection");
+      NullCheck.notNull(in_target_select, "Target selection");
     this.blit = in_blit;
+  }
+
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KCopyParameters other = (KCopyParameters) obj;
+    return (this.blit == other.blit)
+      && (this.source_select.equals(other.source_select))
+      && (this.target_select.equals(other.target_select));
   }
 
   /**
    * @return The source area
    */
 
-  public @Nonnull AreaInclusive getSourceSelect()
+  public AreaInclusive getSourceSelect()
   {
     return this.source_select;
   }
@@ -73,9 +86,19 @@ import com.io7m.jcanephora.AreaInclusive;
    * @return The target area
    */
 
-  public @Nonnull AreaInclusive getTargetSelect()
+  public AreaInclusive getTargetSelect()
   {
     return this.target_select;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + (this.blit ? 1231 : 1237);
+    result = (prime * result) + this.source_select.hashCode();
+    result = (prime * result) + this.target_select.hashCode();
+    return result;
   }
 
   /**

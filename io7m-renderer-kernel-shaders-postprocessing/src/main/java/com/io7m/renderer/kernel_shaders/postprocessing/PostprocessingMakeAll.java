@@ -24,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import javax.annotation.Nonnull;
 import javax.xml.parsers.ParserConfigurationException;
 
 import nu.xom.ParsingException;
@@ -33,13 +32,17 @@ import nu.xom.ValidityException;
 import org.apache.commons.cli.ParseException;
 import org.xml.sax.SAXException;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Pair;
+import com.io7m.jfunctional.Pair;
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogPolicyProperties;
+import com.io7m.jlog.LogPolicyType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
 import com.io7m.jparasol.CompilerError;
 import com.io7m.jparasol.frontend.Frontend;
 import com.io7m.jparasol.xml.Batch;
 import com.io7m.jparasol.xml.PGLSLCompactor;
+import com.io7m.jproperties.JPropertyException;
 
 public final class PostprocessingMakeAll
 {
@@ -51,10 +54,10 @@ public final class PostprocessingMakeAll
       ParsingException,
       SAXException,
       ParserConfigurationException,
-      ConstraintError,
       ParseException,
       CompilerError,
-      InterruptedException
+      InterruptedException,
+      JPropertyException
   {
     if (args.length != 5) {
       final String message =
@@ -95,15 +98,16 @@ public final class PostprocessingMakeAll
   }
 
   private static void makeSourcesList(
-    final @Nonnull File out_parasol_dir,
-    final @Nonnull File out_sources)
+    final File out_parasol_dir,
+    final File out_sources)
     throws IOException
   {
     final String[] sources = out_parasol_dir.list(new FilenameFilter() {
       @Override public boolean accept(
-        final @Nonnull File dir,
-        final @Nonnull String name)
+        final @Nullable File dir,
+        final @Nullable String name)
       {
+        assert name != null;
         return name.endsWith(".p");
       }
     });
@@ -117,21 +121,21 @@ public final class PostprocessingMakeAll
   }
 
   private static void makeCompileSources(
-    final @Nonnull File source_dir,
-    final @Nonnull File out_sources,
-    final @Nonnull File batch,
-    final @Nonnull File out_dir,
-    final @Nonnull File out_compact_dir)
+    @SuppressWarnings("unused") final File source_dir,
+    final File out_sources,
+    final File batch,
+    final File out_dir,
+    final File out_compact_dir)
     throws ValidityException,
       NoSuchAlgorithmException,
       ParsingException,
       IOException,
       SAXException,
       ParserConfigurationException,
-      ConstraintError,
       ParseException,
       CompilerError,
-      InterruptedException
+      InterruptedException,
+      JPropertyException
   {
     final ArrayList<String> argslist = new ArrayList<String>();
 
@@ -151,9 +155,9 @@ public final class PostprocessingMakeAll
     {
       final Batch b = Batch.fromFile(out_dir, batch);
       for (final Pair<String, String> k : b.getTargets()) {
-        final File program_in = new File(out_dir, k.first);
+        final File program_in = new File(out_dir, k.getLeft());
         System.out.println("info: compact " + program_in);
-        final File program_out = new File(out_compact_dir, k.first);
+        final File program_out = new File(out_compact_dir, k.getLeft());
         PGLSLCompactor.newCompactor(
           program_in,
           program_out,
@@ -162,10 +166,14 @@ public final class PostprocessingMakeAll
     }
   }
 
-  private static @Nonnull Log getLog()
+  private static LogUsableType getLog()
+    throws JPropertyException
   {
     final Properties props = new Properties();
+    props.setProperty("com.io7m.parasol.level", "LOG_INFO");
     props.setProperty("com.io7m.parasol.logs.compactor", "false");
-    return new Log(props, "com.io7m.parasol", "compactor");
+    final LogPolicyType policy =
+      LogPolicyProperties.newPolicy(props, "com.io7m.parasol");
+    return Log.newLog(policy, "compactor");
   }
 }

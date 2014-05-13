@@ -16,12 +16,9 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Option;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jfunctional.Some;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -80,40 +77,35 @@ public enum KLightLabel
    * @return A label
    */
 
-  public static @Nonnull KLightLabel fromLight(
-    final @Nonnull KGraphicsCapabilities caps,
-    final @Nonnull KLightType light)
+  public static KLightLabel fromLight(
+    final KGraphicsCapabilitiesType caps,
+    final KLightType light)
   {
     try {
       return light
-        .lightAccept(new KLightVisitorType<KLightLabel, ConstraintError>() {
+        .lightAccept(new KLightVisitorType<KLightLabel, UnreachableCodeException>() {
           @Override public KLightLabel lightDirectional(
-            final @Nonnull KLightDirectional l)
-            throws ConstraintError,
-              RException,
-              ConstraintError
+            final KLightDirectional l)
+            throws RException
           {
             return LIGHT_LABEL_DIRECTIONAL;
           }
 
           @Override public KLightLabel lightProjective(
-            final @Nonnull KLightProjective l)
-            throws ConstraintError,
-              RException,
-              ConstraintError
+            final KLightProjective l)
+            throws RException
           {
             if (l.lightHasShadow()) {
               final KShadowType shadow =
-                ((Option.Some<KShadowType>) l.lightGetShadow()).value;
+                ((Some<KShadowType>) l.lightGetShadow()).get();
+
               try {
                 return shadow
-                  .shadowAccept(new KShadowVisitorType<KLightLabel, ConstraintError>() {
+                  .shadowAccept(new KShadowVisitorType<KLightLabel, UnreachableCodeException>() {
                     @Override public KLightLabel shadowMappedBasic(
-                      final @Nonnull KShadowMappedBasic s)
-                      throws ConstraintError,
-                        JCGLException,
-                        RException,
-                        ConstraintError
+                      final KShadowMappedBasic s)
+                      throws JCGLException,
+                        RException
                     {
                       if (caps.getSupportsDepthTextures()) {
                         return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_BASIC;
@@ -122,11 +114,9 @@ public enum KLightLabel
                     }
 
                     @Override public KLightLabel shadowMappedVariance(
-                      final @Nonnull KShadowMappedVariance s)
-                      throws ConstraintError,
-                        JCGLException,
-                        RException,
-                        ConstraintError
+                      final KShadowMappedVariance s)
+                      throws JCGLException,
+                        RException
                     {
                       return LIGHT_LABEL_PROJECTIVE_SHADOW_MAPPED_VARIANCE;
                     }
@@ -139,26 +129,22 @@ public enum KLightLabel
           }
 
           @Override public KLightLabel lightSpherical(
-            final @Nonnull KLightSphere l)
-            throws ConstraintError,
-              RException,
-              ConstraintError
+            final KLightSphere l)
+            throws RException
           {
             return LIGHT_LABEL_SPHERICAL;
           }
         });
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
     }
   }
 
-  private final @Nonnull String code;
-  private final int             textures_required;
+  private final String code;
+  private final int    textures_required;
 
   private KLightLabel(
-    final @Nonnull String in_code,
+    final String in_code,
     final int in_textures_required)
   {
     this.code = in_code;

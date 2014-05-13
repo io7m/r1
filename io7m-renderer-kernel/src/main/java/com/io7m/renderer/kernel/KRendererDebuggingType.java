@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KShadowType;
 
 /**
@@ -34,8 +31,8 @@ public interface KRendererDebuggingType
   interface DebugShadowMapReceiverType
   {
     void receive(
-      final @Nonnull KShadowType shadow,
-      final @Nonnull KShadowMap map);
+      final KShadowType shadow,
+      final KShadowMap map);
   }
 
   /**
@@ -44,11 +41,8 @@ public interface KRendererDebuggingType
    * 
    * @param receiver
    *          The receiver
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
   void debugForEachShadowMap(
-    final @Nonnull DebugShadowMapReceiverType receiver)
-    throws ConstraintError;
+    final DebugShadowMapReceiverType receiver);
 }

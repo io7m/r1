@@ -16,12 +16,10 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
 import net.java.dev.designgridlayout.DesignGridLayout;
 
 public interface SBControls extends SBHideable
 {
   void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout);
+    final  DesignGridLayout layout);
 }

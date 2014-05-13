@@ -18,39 +18,61 @@ package com.io7m.renderer.kernel.types;
 
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
 /**
  * A regular translucent instance lit by a set of lights.
  */
 
-@Immutable public final class KTranslucentRegularLit implements KTranslucentType
+public final class KTranslucentRegularLit implements KTranslucentType
 {
-  private final @Nonnull KInstanceTransformedTranslucentRegular instance;
-  private final @Nonnull Set<KLightType>                            lights;
+  private final KInstanceTransformedTranslucentRegular instance;
+  private final Set<KLightType>                        lights;
 
   protected KTranslucentRegularLit(
-    final @Nonnull KInstanceTransformedTranslucentRegular in_instance,
-    final @Nonnull Set<KLightType> in_lights)
+    final KInstanceTransformedTranslucentRegular in_instance,
+    final Set<KLightType> in_lights)
   {
     this.instance = in_instance;
     this.lights = in_lights;
+  }
+
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KTranslucentRegularLit other = (KTranslucentRegularLit) obj;
+    return this.instance.equals(other.instance)
+      && this.lights.equals(other.lights);
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.instance.hashCode();
+    result = (prime * result) + this.lights.hashCode();
+    return result;
   }
 
   @Override public
     <A, E extends Throwable, V extends KTranslucentVisitorType<A, E>>
     A
     translucentAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
         JCGLException,
-        RException,
-        ConstraintError
+        RException
   {
     return v.translucentRegularLit(this);
   }
@@ -59,9 +81,7 @@ import com.io7m.renderer.types.RException;
    * @return The instance
    */
 
-  public @Nonnull
-    KInstanceTransformedTranslucentRegular
-    translucentGetInstance()
+  public KInstanceTransformedTranslucentRegular translucentGetInstance()
   {
     return this.instance;
   }
@@ -70,7 +90,7 @@ import com.io7m.renderer.types.RException;
    * @return The lights
    */
 
-  public @Nonnull Set<KLightType> translucentGetLights()
+  public Set<KLightType> translucentGetLights()
   {
     return this.lights;
   }

@@ -16,15 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
 
 interface KMaterialAlphaLabelCacheType
 {
-  @Nonnull KMaterialAlphaOpacityType getAlphaLabelTranslucentRegular(
-    final @Nonnull KInstanceTranslucentRegular instance)
-    throws ConstraintError;
+  KMaterialAlphaOpacityType getAlphaLabelTranslucentRegular(
+    final KInstanceTranslucentRegular instance);
 }

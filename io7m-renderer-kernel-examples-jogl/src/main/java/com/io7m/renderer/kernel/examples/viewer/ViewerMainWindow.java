@@ -21,14 +21,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.OutputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
@@ -48,13 +46,14 @@ import javax.swing.event.ListSelectionListener;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Unit;
-import com.io7m.jlog.Callbacks;
-import com.io7m.jlog.Level;
-import com.io7m.jlog.Log;
-import com.io7m.jvvfs.FSCapabilityRead;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jlog.LogCallbackType;
+import com.io7m.jlog.LogConfigReadableType;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.jvvfs.FSCapabilityReadType;
 import com.io7m.renderer.kernel.examples.ExampleList;
 import com.io7m.renderer.kernel.examples.ExampleRendererConstructorType;
 import com.io7m.renderer.kernel.examples.ExampleRenderers;
@@ -72,8 +71,8 @@ final class ViewerMainWindow extends JFrame
     serialVersionUID = 7107630770143778672L;
   }
 
-  private static @Nonnull JMenu makeDebugMenu(
-    final @Nonnull VLogsWindow log_window)
+  private static JMenu makeDebugMenu(
+    final VLogsWindow log_window)
   {
     final JCheckBoxMenuItem log_cb =
       ViewerMainWindow.makeWindowCheckbox("Log...", log_window);
@@ -83,12 +82,12 @@ final class ViewerMainWindow extends JFrame
     return debug_menu;
   }
 
-  private static @Nonnull JMenu makeFileMenu()
+  private static JMenu makeFileMenu()
   {
     final JMenuItem quit = new JMenuItem("Quit");
     quit.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         System.exit(0);
       }
@@ -99,14 +98,14 @@ final class ViewerMainWindow extends JFrame
     return file_menu;
   }
 
-  private static @Nonnull JCheckBoxMenuItem makeWindowCheckbox(
-    final @Nonnull String text,
-    final @Nonnull JFrame window)
+  private static JCheckBoxMenuItem makeWindowCheckbox(
+    final String text,
+    final JFrame window)
   {
     final JCheckBoxMenuItem cb = new JCheckBoxMenuItem(text);
     cb.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         if (window.isShowing()) {
           VWindowUtilities.closeWindow(window);
@@ -118,13 +117,13 @@ final class ViewerMainWindow extends JFrame
 
     final WindowAdapter listener = new WindowAdapter() {
       @Override public void windowClosing(
-        final WindowEvent e)
+        final @Nullable WindowEvent e)
       {
         cb.setSelected(false);
       }
 
       @Override public void windowOpened(
-        final WindowEvent e)
+        final @Nullable WindowEvent e)
       {
         cb.setSelected(true);
       }
@@ -134,12 +133,12 @@ final class ViewerMainWindow extends JFrame
     return cb;
   }
 
-  private final @Nonnull JList<String>                                  example_list;
-  private final @Nonnull Map<String, Class<? extends ExampleSceneType>> examples;
-  private final @Nonnull Log                                            logx;
-  private final @Nonnull JMenuBar                                       menu_bar;
-  private final @Nonnull JComboBox<String>                              renderer_list;
-  private final @Nonnull Map<String, ExampleRendererConstructorType>    renderers;
+  private final JList<String>                                  example_list;
+  private final Map<String, Class<? extends ExampleSceneType>> examples;
+  private final LogType                                        logx;
+  private final JMenuBar                                       menu_bar;
+  private final JComboBox<String>                              renderer_list;
+  private final Map<String, ExampleRendererConstructorType>    renderers;
 
   /**
    * Construct a new menu window.
@@ -153,25 +152,23 @@ final class ViewerMainWindow extends JFrame
    */
 
   public ViewerMainWindow(
-    final @Nonnull ViewerConfig config,
-    final @Nonnull Log in_log,
-    final @Nonnull FSCapabilityRead fs)
-    throws ConstraintError
+    final ViewerConfig config,
+    final LogType in_log,
+    final FSCapabilityReadType fs)
   {
     super("Viewer");
     this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-    this.logx = Constraints.constrainNotNull(in_log, "Log");
+    this.logx = NullCheck.notNull(in_log, "Log");
     final VLogsWindow logs_window = new VLogsWindow();
 
-    this.logx.setCallback(new Callbacks() {
-      private final @Nonnull StringBuilder builder = new StringBuilder();
+    this.logx.setCallback(new LogCallbackType() {
+      private final StringBuilder builder = new StringBuilder();
 
-      @SuppressWarnings("boxing") @Override public void call(
-        final @Nonnull OutputStream out,
-        final @Nonnull String destination,
-        final @Nonnull Level level,
-        final @Nonnull String message)
+      @Override public void call(
+        final LogConfigReadableType log,
+        final LogLevel level,
+        final String message)
       {
         final Calendar cal = Calendar.getInstance();
         final String timestamp =
@@ -185,13 +182,14 @@ final class ViewerMainWindow extends JFrame
         this.builder.append(timestamp);
         this.builder.append(level);
         this.builder.append(": ");
-        this.builder.append(destination);
+        this.builder.append(log.getAbsoluteDestination());
         this.builder.append(": ");
         this.builder.append(message);
         this.builder.append("\n");
+        final String text = this.builder.toString();
+        assert text != null;
 
-        logs_window.addText(this.builder.toString());
-        System.err.print(this.builder.toString());
+        logs_window.addText(text);
       }
     });
 
@@ -199,9 +197,10 @@ final class ViewerMainWindow extends JFrame
       @SuppressWarnings("synthetic-access") @Override public
         void
         uncaughtException(
-          final Thread t,
-          final Throwable e)
+          final @Nullable Thread t,
+          final @Nullable Throwable e)
       {
+        assert e != null;
         VErrorBox.showErrorLater(ViewerMainWindow.this.logx, e);
       }
     });
@@ -226,7 +225,7 @@ final class ViewerMainWindow extends JFrame
       @SuppressWarnings("synthetic-access") @Override public
         void
         actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
       {
         final JComboBox<String> rlist = ViewerMainWindow.this.renderer_list;
         final JList<String> elist = ViewerMainWindow.this.example_list;
@@ -266,7 +265,7 @@ final class ViewerMainWindow extends JFrame
       @SuppressWarnings("synthetic-access") @Override public
         void
         valueChanged(
-          final @Nonnull ListSelectionEvent e)
+          final @Nullable ListSelectionEvent e)
       {
         final int index =
           ViewerMainWindow.this.example_list.getSelectedIndex();

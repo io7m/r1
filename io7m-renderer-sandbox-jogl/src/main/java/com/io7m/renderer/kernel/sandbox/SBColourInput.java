@@ -22,7 +22,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JFrame;
@@ -34,7 +33,7 @@ import javax.swing.WindowConstants;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RVectorI3F;
@@ -64,23 +63,23 @@ public final class SBColourInput implements
     });
   }
 
-  public static @Nonnull SBColourInput newInput(
-    final @Nonnull JFrame parent,
-    final @Nonnull String text)
+  public static SBColourInput newInput(
+    final JFrame parent,
+    final String text)
   {
     return new SBColourInput(parent, text);
   }
 
-  private final @Nonnull JButton    colour;
-  private final @Nonnull JTextField field_x;
-  private final @Nonnull JTextField field_y;
-  private final @Nonnull JTextField field_z;
-  private final @Nonnull RowGroup   group;
-  private final @Nonnull JLabel     label;
+  private final JButton    colour;
+  private final JTextField field_x;
+  private final JTextField field_y;
+  private final JTextField field_z;
+  private final RowGroup   group;
+  private final JLabel     label;
 
   private SBColourInput(
-    final @Nonnull JFrame parent,
-    final @Nonnull String text)
+    final JFrame parent,
+    final String text)
   {
     this.label = new JLabel(text);
     this.group = new RowGroup();
@@ -93,7 +92,7 @@ public final class SBColourInput implements
     this.colour.setToolTipText("Click to select a colour");
     this.colour.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final Color c =
           JColorChooser.showDialog(parent, "Select colour...", Color.WHITE);
@@ -130,7 +129,7 @@ public final class SBColourInput implements
   }
 
   @SuppressWarnings("boxing") @Override public void controlsLoadFrom(
-    final @Nonnull RVectorI3F<RSpaceRGBType> v)
+    final RVectorI3F<RSpaceRGBType> v)
   {
     this.field_x.setText(String.format("%.6f", v.getXF()));
     this.field_y.setText(String.format("%.6f", v.getYF()));
@@ -140,8 +139,7 @@ public final class SBColourInput implements
   }
 
   @Override public RVectorI3F<RSpaceRGBType> controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
     return new RVectorI3F<RSpaceRGBType>(
       SBTextFieldUtilities.getFieldFloatOrError(this.field_x),

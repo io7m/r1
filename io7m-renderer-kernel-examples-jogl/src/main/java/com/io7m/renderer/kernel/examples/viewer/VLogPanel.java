@@ -19,7 +19,6 @@ package com.io7m.renderer.kernel.examples.viewer;
 import java.awt.Dimension;
 import java.awt.Font;
 
-import javax.annotation.Nonnull;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -28,13 +27,13 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 
 final class VLogPanel extends JPanel
 {
-  private static final long        serialVersionUID;
+  private static final long serialVersionUID;
 
   static {
     serialVersionUID = -7319547005472170348L;
   }
 
-  private final @Nonnull JTextArea log_area;
+  private final JTextArea   log_area;
 
   public VLogPanel()
   {
@@ -50,7 +49,7 @@ final class VLogPanel extends JPanel
   }
 
   void addText(
-    final @Nonnull String text)
+    final String text)
   {
     this.log_area.append(text);
   }

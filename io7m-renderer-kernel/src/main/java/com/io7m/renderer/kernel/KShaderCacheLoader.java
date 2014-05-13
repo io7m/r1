@@ -18,18 +18,15 @@ package com.io7m.renderer.kernel;
 
 import java.math.BigInteger;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.JCGLSLVersion;
-import com.io7m.jlog.Log;
-import com.io7m.jvvfs.FSCapabilityRead;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jvvfs.FSCapabilityReadType;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -38,7 +35,7 @@ import com.io7m.renderer.types.RException;
  * the given program name.
  */
 
-public final class KShaderCacheLoader implements
+@EqualityReference public final class KShaderCacheLoader implements
   JCacheLoaderType<String, KProgram, RException>
 {
   /**
@@ -51,79 +48,64 @@ public final class KShaderCacheLoader implements
    * @param log
    *          A log handle
    * @return A new cache loader
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull
-    JCacheLoaderType<String, KProgram, RException>
-    newLoader(
-      final @Nonnull JCGLImplementation gi,
-      final @Nonnull FSCapabilityRead fs,
-      final @Nonnull Log log)
-      throws ConstraintError
+  public static JCacheLoaderType<String, KProgram, RException> newLoader(
+    final JCGLImplementationType gi,
+    final FSCapabilityReadType fs,
+    final LogUsableType log)
   {
     return new KShaderCacheLoader(gi, fs, log);
   }
 
-  private final @Nonnull FSCapabilityRead   fs;
-  private final @Nonnull JCGLImplementation gi;
-  private final @Nonnull Log                log;
+  private final FSCapabilityReadType   fs;
+  private final JCGLImplementationType gi;
+  private final LogUsableType          log;
 
   private KShaderCacheLoader(
-    final @Nonnull JCGLImplementation in_gi,
-    final @Nonnull FSCapabilityRead in_fs,
-    final @Nonnull Log in_log)
-    throws ConstraintError
+    final JCGLImplementationType in_gi,
+    final FSCapabilityReadType in_fs,
+    final LogUsableType in_log)
   {
-    this.log =
-      new Log(Constraints.constrainNotNull(in_log, "Log"), "shader-cache");
-    this.gi = Constraints.constrainNotNull(in_gi, "OpenGL implementation");
-    this.fs = Constraints.constrainNotNull(in_fs, "Filesystem");
+    this.log = NullCheck.notNull(in_log, "Log").with("shader-cache");
+    this.gi = NullCheck.notNull(in_gi, "OpenGL implementation");
+    this.fs = NullCheck.notNull(in_fs, "Filesystem");
   }
 
   @Override public void cacheValueClose(
-    final @Nonnull KProgram v)
+    final KProgram v)
     throws RException
   {
-    final JCGLInterfaceCommon gc = this.gi.getGLCommon();
+    final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
 
     try {
-      try {
-        gc.programDelete(v.getProgram());
-      } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
-      }
-    } catch (final ConstraintError x) {
-      throw new UnreachableCodeException(x);
+      gc.programDelete(v.getProgram());
+    } catch (final JCGLException e) {
+      throw RException.fromJCGLException(e);
     }
   }
 
-  @Override public @Nonnull KProgram cacheValueLoad(
-    final @Nonnull String name)
+  @Override public KProgram cacheValueLoad(
+    final String name)
     throws RException
   {
     try {
-      try {
-        final JCGLInterfaceCommon gc = this.gi.getGLCommon();
-        final JCGLSLVersion version = gc.metaGetSLVersion();
-        return KProgram.newProgramFromFilesystem(
-          this.gi.getGLCommon(),
-          version.getNumber(),
-          version.getAPI(),
-          this.fs,
-          name,
-          this.log);
-      } catch (final JCGLException x) {
-        throw RException.fromJCGLException(x);
-      }
-    } catch (final ConstraintError x) {
-      throw new UnreachableCodeException(x);
+      final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
+      final JCGLSLVersion version = gc.metaGetSLVersion();
+      return KProgram.newProgramFromFilesystem(
+        this.gi.getGLCommon(),
+        version.getNumber(),
+        version.getAPI(),
+        this.fs,
+        name,
+        this.log);
+    } catch (final JCGLException x) {
+      throw RException.fromJCGLException(x);
     }
   }
 
-  @Override public @Nonnull BigInteger cacheValueSizeOf(
-    final @Nonnull KProgram v)
+  @Override public BigInteger cacheValueSizeOf(
+    final KProgram v)
   {
     return BigInteger.ONE;
   }

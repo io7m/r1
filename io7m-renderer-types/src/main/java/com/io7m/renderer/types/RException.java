@@ -18,42 +18,25 @@ package com.io7m.renderer.types;
 
 import java.io.IOException;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jvvfs.FilesystemError;
 
 /**
  * The root exception type for the renderer package.
  */
 
-public abstract class RException extends Exception
+@EqualityReference @SuppressWarnings("synthetic-access") public abstract class RException extends
+  Exception
 {
-  /**
-   * Be visited by the given generic visitor.
-   * 
-   * @param v
-   *          The visitor
-   * @return The value returned by the visitor
-   * @throws E
-   *           Iff the visitor raises <code>E</code
-   * 
-   * @param <T>
-   *          The return type of the visitor
-   * @param <E>
-   *          The type of exceptions raised by the visitor
-   */
-
-  abstract <T, E extends Throwable> T exceptionAccept(
-    final @Nonnull RExceptionVisitorType<T, E> v)
-    throws E;
-
   /**
    * An exception raised by <code>jvvfs</code> filesystem errors.
    */
 
-  public static final class RFilesystemException extends RException
+  @EqualityReference public static final class RFilesystemException extends
+    RException
   {
     private static final long serialVersionUID;
 
@@ -62,17 +45,18 @@ public abstract class RException extends Exception
     }
 
     private RFilesystemException(
-      final @Nonnull FilesystemError e)
+      final FilesystemError e)
     {
-      super(e);
+      super(NullCheck.notNull(e, "Exception"));
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
-      final @Nonnull RExceptionVisitorType<T, E> v)
+      final RExceptionVisitorType<T, E> v)
       throws E
     {
-      return v.exceptionVisitFilesystemException((FilesystemError) this
-        .getCause());
+      final FilesystemError x = (FilesystemError) this.getCause();
+      assert x != null;
+      return v.exceptionVisitFilesystemException(x);
     }
   }
 
@@ -80,7 +64,8 @@ public abstract class RException extends Exception
    * An exception raised system I/O exceptions.
    */
 
-  public static final class RIOException extends RException
+  @EqualityReference public static final class RIOException extends
+    RException
   {
     private static final long serialVersionUID;
     static {
@@ -88,16 +73,18 @@ public abstract class RException extends Exception
     }
 
     private RIOException(
-      final @Nonnull IOException e)
+      final IOException e)
     {
-      super(e);
+      super(NullCheck.notNull(e, "Exception"));
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
-      final @Nonnull RExceptionVisitorType<T, E> v)
+      final RExceptionVisitorType<T, E> v)
       throws E
     {
-      return v.exceptionVisitIOException((IOException) this.getCause());
+      final IOException x = (IOException) this.getCause();
+      assert x != null;
+      return v.exceptionVisitIOException(x);
     }
   }
 
@@ -106,7 +93,8 @@ public abstract class RException extends Exception
    * indicative of programming errors.
    */
 
-  public static final class RJCacheException extends RException
+  @EqualityReference public static final class RJCacheException extends
+    RException
   {
     private static final long serialVersionUID;
 
@@ -115,17 +103,18 @@ public abstract class RException extends Exception
     }
 
     private RJCacheException(
-      final @Nonnull JCacheException e)
+      final JCacheException e)
     {
-      super(e);
+      super(NullCheck.notNull(e, "Exception"));
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
-      final @Nonnull RExceptionVisitorType<T, E> v)
+      final RExceptionVisitorType<T, E> v)
       throws E
     {
-      return v.exceptionVisitJCacheException((JCacheException) this
-        .getCause());
+      final JCacheException x = (JCacheException) this.getCause();
+      assert x != null;
+      return v.exceptionVisitJCacheException(x);
     }
   }
 
@@ -134,7 +123,8 @@ public abstract class RException extends Exception
    * typically caused by run-time errors in the current OpenGL implementation.
    */
 
-  public static final class RJCGLException extends RException
+  @EqualityReference public static final class RJCGLException extends
+    RException
   {
     private static final long serialVersionUID;
 
@@ -143,16 +133,18 @@ public abstract class RException extends Exception
     }
 
     private RJCGLException(
-      final @Nonnull JCGLException e)
+      final JCGLException e)
     {
-      super(e);
+      super(NullCheck.notNull(e, "Exception"));
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
-      final @Nonnull RExceptionVisitorType<T, E> v)
+      final RExceptionVisitorType<T, E> v)
       throws E
     {
-      return v.exceptionVisitJCGLException((JCGLException) this.getCause());
+      final JCGLException x = (JCGLException) this.getCause();
+      assert x != null;
+      return v.exceptionVisitJCGLException(x);
     }
   }
 
@@ -161,7 +153,8 @@ public abstract class RException extends Exception
    * current OpenGL implementation.
    */
 
-  public static final class RNotSupportedException extends RException
+  @EqualityReference public static final class RNotSupportedException extends
+    RException
   {
     private static final long serialVersionUID;
 
@@ -170,16 +163,70 @@ public abstract class RException extends Exception
     }
 
     private RNotSupportedException(
-      final @Nonnull String message)
+      final String message)
     {
       super(message);
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
-      final @Nonnull RExceptionVisitorType<T, E> v)
+      final RExceptionVisitorType<T, E> v)
       throws E
     {
       return v.exceptionVisitNotSupportedException(this);
+    }
+  }
+
+  /**
+   * An exception raised by programmer mistakes.
+   */
+
+  @EqualityReference public static final class RExceptionAPIMisuse extends
+    RException
+  {
+    private static final long serialVersionUID;
+
+    static {
+      serialVersionUID = -1746473558734990131L;
+    }
+
+    private RExceptionAPIMisuse(
+      final String message)
+    {
+      super(NullCheck.notNull(message, "Message"));
+    }
+
+    @Override <T, E extends Throwable> T exceptionAccept(
+      final RExceptionVisitorType<T, E> v)
+      throws E
+    {
+      return v.exceptionVisitProgrammingErrorException(this);
+    }
+  }
+
+  /**
+   * An exception raised by bugs in the renderer.
+   */
+
+  @EqualityReference public static final class RInternalAssertionException extends
+    RException
+  {
+    private static final long serialVersionUID;
+
+    static {
+      serialVersionUID = -4912708249227280442L;
+    }
+
+    private RInternalAssertionException(
+      final String message)
+    {
+      super(NullCheck.notNull(message, "Message"));
+    }
+
+    @Override <T, E extends Throwable> T exceptionAccept(
+      final RExceptionVisitorType<T, E> v)
+      throws E
+    {
+      return v.exceptionVisitInternalAssertionException(this);
     }
   }
 
@@ -189,7 +236,8 @@ public abstract class RException extends Exception
    * of texture units than the current OpenGL implementation provides.
    */
 
-  public static final class RResourceException extends RException
+  @EqualityReference public static final class RResourceException extends
+    RException
   {
     private static final long serialVersionUID;
 
@@ -198,13 +246,13 @@ public abstract class RException extends Exception
     }
 
     private RResourceException(
-      final @Nonnull String message)
+      final String message)
     {
       super(message);
     }
 
     @Override public <T, E extends Throwable> T exceptionAccept(
-      final @Nonnull RExceptionVisitorType<T, E> v)
+      final RExceptionVisitorType<T, E> v)
       throws E
     {
       return v.exceptionVisitResourceException(this);
@@ -226,10 +274,8 @@ public abstract class RException extends Exception
    * @return A new exception
    */
 
-  @SuppressWarnings("synthetic-access") public static
-    RException
-    fromFilesystemException(
-      final @Nonnull FilesystemError e)
+  public static RException fromFilesystemException(
+    final FilesystemError e)
   {
     return new RFilesystemException(e);
   }
@@ -243,10 +289,8 @@ public abstract class RException extends Exception
    * @return A new exception
    */
 
-  @SuppressWarnings("synthetic-access") public static
-    RException
-    fromIOException(
-      final @Nonnull IOException x)
+  public static RException fromIOException(
+    final IOException x)
   {
     return new RIOException(x);
   }
@@ -260,10 +304,8 @@ public abstract class RException extends Exception
    * @return A new exception
    */
 
-  @SuppressWarnings("synthetic-access") public static
-    RException
-    fromJCacheException(
-      final @Nonnull JCacheException e)
+  public static RException fromJCacheException(
+    final JCacheException e)
   {
     return new RJCacheException(e);
   }
@@ -277,12 +319,24 @@ public abstract class RException extends Exception
    * @return A new exception
    */
 
-  @SuppressWarnings("synthetic-access") public static @Nonnull
-    RException
-    fromJCGLException(
-      final @Nonnull JCGLException e)
+  public static RException fromJCGLException(
+    final JCGLException e)
   {
     return new RJCGLException(e);
+  }
+
+  /**
+   * Construct an {@link RException} representing a programming mistake.
+   * 
+   * @param message
+   *          The message
+   * @return A new exception
+   */
+
+  public static RException fromAPIMisuse(
+    final String message)
+  {
+    return new RExceptionAPIMisuse(message);
   }
 
   /**
@@ -298,20 +352,44 @@ public abstract class RException extends Exception
    * @return A new exception
    */
 
-  @SuppressWarnings("synthetic-access") public static
-    RException
-    notEnoughTextureUnits(
-      final @Nonnull String shader_name,
-      final int required,
-      final int have)
+  public static RException notEnoughTextureUnitsForShader(
+    final String shader_name,
+    final int required,
+    final int have)
   {
-    return new RResourceException(
+    final String s =
       String
         .format(
           "Not enough texture units available to render material %s: Needs %d, but %d are available",
           shader_name,
           Integer.valueOf(required),
-          Integer.valueOf(have)));
+          Integer.valueOf(have));
+    assert s != null;
+    return new RResourceException(s);
+  }
+
+  /**
+   * Construct an {@link RException} assuming that the implementation has run
+   * out of texture units.
+   * 
+   * @param required
+   *          The number of required texture units
+   * @param have
+   *          The number of texture units available
+   * @return A new exception
+   */
+
+  public static RException notEnoughTextureUnits(
+    final int required,
+    final int have)
+  {
+    final String s =
+      String.format(
+        "Not enough texture units available: Needs %d, but %d are available",
+        Integer.valueOf(required),
+        Integer.valueOf(have));
+    assert s != null;
+    return new RResourceException(s);
   }
 
   /**
@@ -321,9 +399,7 @@ public abstract class RException extends Exception
    * @return A new exception
    */
 
-  @SuppressWarnings("synthetic-access") public static
-    RNotSupportedException
-    varianceShadowMapsNotSupported()
+  public static RNotSupportedException varianceShadowMapsNotSupported()
   {
     final StringBuilder m = new StringBuilder();
     m.append("Variance shadow maps are not supported on this platform.\n");
@@ -331,25 +407,46 @@ public abstract class RException extends Exception
     m.append("  OpenGL >= 3.0 or\n");
     m.append("  OpenGL ES >= 3.0 with GL_EXT_color_buffer_float or\n");
     m.append("  OpenGL ES >= 3.0 with GL_EXT_color_buffer_half_float\n");
-    return new RNotSupportedException(m.toString());
+    final String s = m.toString();
+    assert s != null;
+    return new RNotSupportedException(s);
   }
 
   protected RException(
-    final @Nonnull String message)
+    final String message)
   {
     super(message);
   }
 
   protected RException(
-    final @Nonnull Throwable e)
+    final Throwable e)
   {
-    super(e);
+    super(NullCheck.notNull(e, "Exception"));
   }
 
   protected RException(
-    final @Nonnull Throwable x,
-    final @Nonnull String message)
+    final Throwable x,
+    final String message)
   {
     super(message, x);
   }
+
+  /**
+   * Be visited by the given generic visitor.
+   * 
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   * 
+   * @param <T>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   */
+
+  abstract <T, E extends Throwable> T exceptionAccept(
+    final RExceptionVisitorType<T, E> v)
+    throws E;
 }
