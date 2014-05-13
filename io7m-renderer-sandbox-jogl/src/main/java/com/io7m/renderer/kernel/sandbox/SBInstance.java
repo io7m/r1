@@ -16,9 +16,7 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
+import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.types.KFaceSelection;
@@ -28,27 +26,27 @@ import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RTransformTextureType;
 import com.io7m.renderer.types.RVectorI3F;
 
-@Immutable final class SBInstance
+final class SBInstance
 {
-  private final @Nonnull KFaceSelection                  faces;
-  private final @Nonnull Integer                         id;
-  private final boolean                                  lit;
-  private final @Nonnull Integer                         material;
-  private final @Nonnull PathVirtual                     mesh;
-  private final @Nonnull QuaternionI4F                   orientation;
-  private final @Nonnull RVectorI3F<RSpaceWorldType>         position;
-  private final @Nonnull RVectorI3F<RSpaceObjectType>        scale;
-  private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
+  private final KFaceSelection                      faces;
+  private final Integer                             id;
+  private final boolean                             lit;
+  private final Integer                             material;
+  private final PathVirtual                         mesh;
+  private final QuaternionI4F                       orientation;
+  private final RVectorI3F<RSpaceWorldType>         position;
+  private final RVectorI3F<RSpaceObjectType>        scale;
+  private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   public SBInstance(
-    final @Nonnull Integer in_id,
-    final @Nonnull RVectorI3F<RSpaceWorldType> in_position,
-    final @Nonnull RVectorI3F<RSpaceObjectType> in_scale,
-    final @Nonnull QuaternionI4F in_orientation,
-    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
-    final @Nonnull PathVirtual in_mesh,
-    final @Nonnull Integer in_material,
-    final @Nonnull KFaceSelection in_faces,
+    final Integer in_id,
+    final RVectorI3F<RSpaceWorldType> in_position,
+    final RVectorI3F<RSpaceObjectType> in_scale,
+    final QuaternionI4F in_orientation,
+    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final PathVirtual in_mesh,
+    final Integer in_material,
+    final KFaceSelection in_faces,
     final boolean in_lit)
   {
     this.id = in_id;
@@ -63,7 +61,7 @@ import com.io7m.renderer.types.RVectorI3F;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -105,42 +103,42 @@ import com.io7m.renderer.types.RVectorI3F;
     return true;
   }
 
-  public @Nonnull KFaceSelection getFaces()
+  public KFaceSelection getFaces()
   {
     return this.faces;
   }
 
-  public @Nonnull Integer getID()
+  public Integer getID()
   {
     return this.id;
   }
 
-  public @Nonnull Integer getMaterial()
+  public Integer getMaterial()
   {
     return this.material;
   }
 
-  public @Nonnull PathVirtual getMesh()
+  public PathVirtual getMesh()
   {
     return this.mesh;
   }
 
-  public @Nonnull QuaternionI4F getOrientation()
+  public QuaternionI4F getOrientation()
   {
     return this.orientation;
   }
 
-  public @Nonnull RVectorI3F<RSpaceWorldType> getPosition()
+  public RVectorI3F<RSpaceWorldType> getPosition()
   {
     return this.position;
   }
 
-  public @Nonnull RVectorI3F<RSpaceObjectType> getScale()
+  public RVectorI3F<RSpaceObjectType> getScale()
   {
     return this.scale;
   }
 
-  public @Nonnull RMatrixI3x3F<RTransformTextureType> getUVMatrix()
+  public RMatrixI3x3F<RTransformTextureType> getUVMatrix()
   {
     return this.uv_matrix;
   }

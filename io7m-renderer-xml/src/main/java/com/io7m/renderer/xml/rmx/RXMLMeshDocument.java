@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 
-import javax.annotation.Nonnull;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -37,8 +36,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RXMLException;
 
 public final class RXMLMeshDocument
@@ -57,12 +56,11 @@ public final class RXMLMeshDocument
    */
 
   public static Document parseFromStreamValidating(
-    final @Nonnull InputStream s)
-    throws ConstraintError,
-      IOException,
+    final InputStream s)
+    throws IOException,
       RXMLException
   {
-    Constraints.constrainNotNull(s, "Stream");
+    NullCheck.notNull(s, "Stream");
 
     try {
       final URL schema_url =
@@ -83,21 +81,21 @@ public final class RXMLMeshDocument
       final XMLReader xr = sp.getXMLReader();
       xr.setErrorHandler(new ErrorHandler() {
         @Override public void error(
-          final SAXParseException exception)
+          final @Nullable SAXParseException exception)
           throws SAXException
         {
           exceptions.add(exception);
         }
 
         @Override public void fatalError(
-          final SAXParseException exception)
+          final @Nullable SAXParseException exception)
           throws SAXException
         {
           exceptions.add(exception);
         }
 
         @Override public void warning(
-          final SAXParseException exception)
+          final @Nullable SAXParseException exception)
           throws SAXException
         {
           exceptions.add(exception);
@@ -111,6 +109,7 @@ public final class RXMLMeshDocument
         throw RXMLException.saxExceptions(exceptions);
       }
 
+      assert d != null;
       return d;
     } catch (final SAXException e) {
       final ArrayList<SAXException> es = new ArrayList<SAXException>();

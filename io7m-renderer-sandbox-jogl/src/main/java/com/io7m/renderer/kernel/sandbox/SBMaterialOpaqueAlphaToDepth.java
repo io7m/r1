@@ -16,30 +16,27 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
 public final class SBMaterialOpaqueAlphaToDepth implements SBMaterialOpaque
 {
-  private final @Nonnull SBMaterialDescriptionOpaqueAlphaToDepth   description;
-  private final @Nonnull Integer                                   id;
-  private final @CheckForNull SBTexture2D<SBTexture2DKindAlbedo>   map_diffuse;
-  private final @CheckForNull SBTexture2D<SBTexture2DKindEmissive> map_emissive;
-  private final @CheckForNull SBTextureCube                        map_environment;
-  private final @CheckForNull SBTexture2D<SBTexture2DKindNormal>   map_normal;
-  private final @CheckForNull SBTexture2D<SBTexture2DKindSpecular> map_specular;
+  private final SBMaterialDescriptionOpaqueAlphaToDepth        description;
+  private final Integer                                        id;
+  private final @Nullable SBTexture2D<SBTexture2DKindAlbedo>   map_diffuse;
+  private final @Nullable SBTexture2D<SBTexture2DKindEmissive> map_emissive;
+  private final @Nullable SBTextureCube                        map_environment;
+  private final @Nullable SBTexture2D<SBTexture2DKindNormal>   map_normal;
+  private final @Nullable SBTexture2D<SBTexture2DKindSpecular> map_specular;
 
   public SBMaterialOpaqueAlphaToDepth(
-    final @Nonnull Integer in_id,
-    final @Nonnull SBMaterialDescriptionOpaqueAlphaToDepth in_description,
-    final @CheckForNull SBTexture2D<SBTexture2DKindAlbedo> in_map_diffuse,
-    final @CheckForNull SBTexture2D<SBTexture2DKindEmissive> in_map_emissive,
-    final @CheckForNull SBTextureCube in_map_environment,
-    final @CheckForNull SBTexture2D<SBTexture2DKindNormal> in_map_normal,
-    final @CheckForNull SBTexture2D<SBTexture2DKindSpecular> in_map_specular)
+    final Integer in_id,
+    final SBMaterialDescriptionOpaqueAlphaToDepth in_description,
+    final @Nullable SBTexture2D<SBTexture2DKindAlbedo> in_map_diffuse,
+    final @Nullable SBTexture2D<SBTexture2DKindEmissive> in_map_emissive,
+    final @Nullable SBTextureCube in_map_environment,
+    final @Nullable SBTexture2D<SBTexture2DKindNormal> in_map_normal,
+    final @Nullable SBTexture2D<SBTexture2DKindSpecular> in_map_specular)
   {
     this.id = in_id;
     this.description = in_description;
@@ -57,12 +54,12 @@ public final class SBMaterialOpaqueAlphaToDepth implements SBMaterialOpaque
     return this.description;
   }
 
-  @Override public @Nonnull Integer materialGetID()
+  @Override public Integer materialGetID()
   {
     return this.id;
   }
 
-  @Override public @Nonnull String materialGetName()
+  @Override public String materialGetName()
   {
     return this.description.materialDescriptionGetName();
   }
@@ -73,8 +70,7 @@ public final class SBMaterialOpaqueAlphaToDepth implements SBMaterialOpaque
     materialOpaqueVisitableAccept(
       final V v)
       throws E,
-        RException,
-        ConstraintError
+        RException
   {
     return v.materialVisitOpaqueAlphaDepth(this);
   }
@@ -85,8 +81,7 @@ public final class SBMaterialOpaqueAlphaToDepth implements SBMaterialOpaque
     materialVisitableAccept(
       final V v)
       throws E,
-        RException,
-        ConstraintError
+        RException
   {
     return v.materialVisitOpaque(this);
   }

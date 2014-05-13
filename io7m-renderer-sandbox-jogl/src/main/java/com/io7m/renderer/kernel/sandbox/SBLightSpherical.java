@@ -16,20 +16,16 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.types.RException;
 
-@Immutable public final class SBLightSpherical implements SBLight
+public final class SBLightSpherical implements SBLight
 {
-  private final @Nonnull SBLightDescriptionSpherical description;
-  private final @Nonnull KLightSphere                light;
+  private final SBLightDescriptionSpherical description;
+  private final KLightSphere                light;
 
   SBLightSpherical(
-    final @Nonnull SBLightDescriptionSpherical d)
+    final SBLightDescriptionSpherical d)
   {
     this.description = d;
     this.light = d.getLight();
@@ -45,7 +41,7 @@ import com.io7m.renderer.types.RException;
     return this.description.getID();
   }
 
-  @Override public @Nonnull KLightSphere getLight()
+  @Override public KLightSphere getLight()
   {
     return this.light;
   }
@@ -55,8 +51,7 @@ import com.io7m.renderer.types.RException;
     A
     lightVisitableAccept(
       final V v)
-      throws ConstraintError,
-        RException,
+      throws RException,
         E
   {
     return v.lightVisitSpherical(this);

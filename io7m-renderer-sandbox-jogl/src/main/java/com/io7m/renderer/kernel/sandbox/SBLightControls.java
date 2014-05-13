@@ -20,10 +20,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.EnumMap;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,11 +31,16 @@ import javax.swing.SwingUtilities;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Unit;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogPolicyAllOn;
+import com.io7m.jlog.LogType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.NullCheckException;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RException;
 
@@ -47,8 +50,8 @@ public final class SBLightControls implements
   public static void main(
     final String args[])
   {
-    final Properties properties = new Properties();
-    final Log jlog = new Log(properties, "", "");
+    final LogType jlog =
+      Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "test");
 
     SwingUtilities.invokeLater(new Runnable() {
       @SuppressWarnings("unused") @Override public void run()
@@ -58,7 +61,6 @@ public final class SBLightControls implements
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
             final SBExampleController controller = new SBExampleController();
             final SBLightControls controls =
@@ -72,7 +74,7 @@ public final class SBLightControls implements
             final JButton hide = new JButton("Hide");
             hide.addActionListener(new ActionListener() {
               @Override public void actionPerformed(
-                final ActionEvent e)
+                final @Nullable ActionEvent e)
               {
                 controls.controlsHide();
               }
@@ -80,7 +82,7 @@ public final class SBLightControls implements
             final JButton show = new JButton("Show");
             show.addActionListener(new ActionListener() {
               @Override public void actionPerformed(
-                final ActionEvent e)
+                final @Nullable ActionEvent e)
               {
                 controls.controlsShow();
               }
@@ -92,37 +94,35 @@ public final class SBLightControls implements
     });
   }
 
-  public static @Nonnull
+  public static
     <C extends SBSceneControllerLights & SBSceneControllerTextures>
     SBLightControls
     newControls(
-      final @Nonnull JFrame parent,
-      final @Nonnull C controller,
-      final @Nonnull Integer id,
-      final @Nonnull Log log)
-      throws ConstraintError
+      final JFrame parent,
+      final C controller,
+      final Integer id,
+      final LogUsableType log)
   {
     return new SBLightControls(parent, controller, id, log);
   }
 
-  private final @Nonnull EnumMap<SBLightType, SBLightControlsType> controls;
-  private final @Nonnull SBLightControlsDirectional                directional_controls;
-  private final @Nonnull RowGroup                                  group;
-  private @Nonnull Integer                                         id;
-  private final @Nonnull JTextField                                id_field;
-  private final @Nonnull JFrame                                    parent;
-  private final @Nonnull SBLightControlsProjective                 projective_controls;
-  private final @Nonnull SBLightTypeSelector                       selector;
-  private final @Nonnull SBLightControlsSpherical                  spherical_controls;
+  private final EnumMap<SBLightType, SBLightControlsType> controls;
+  private final SBLightControlsDirectional                directional_controls;
+  private final RowGroup                                  group;
+  private Integer                                         id;
+  private final JTextField                                id_field;
+  private final JFrame                                    parent;
+  private final SBLightControlsProjective                 projective_controls;
+  private final SBLightTypeSelector                       selector;
+  private final SBLightControlsSpherical                  spherical_controls;
 
   private <C extends SBSceneControllerLights & SBSceneControllerTextures> SBLightControls(
-    final @Nonnull JFrame in_parent,
-    final @Nonnull C controller,
-    final @Nonnull Integer in_id,
-    final @Nonnull Log log)
-    throws ConstraintError
+    final JFrame in_parent,
+    final C controller,
+    final Integer in_id,
+    final LogUsableType log)
   {
-    this.parent = Constraints.constrainNotNull(in_parent, "Parent");
+    this.parent = NullCheck.notNull(in_parent, "Parent");
 
     this.group = new RowGroup();
     this.id_field = new JTextField(in_id.toString());
@@ -150,7 +150,7 @@ public final class SBLightControls implements
       @SuppressWarnings("synthetic-access") @Override public
         void
         actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
       {
         final SBLightType selected =
           SBLightControls.this.selector.getSelectedItem();
@@ -160,7 +160,7 @@ public final class SBLightControls implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     layout.row().group(this.group).grid(new JLabel("ID")).add(this.id_field);
     layout
@@ -190,19 +190,17 @@ public final class SBLightControls implements
   @Override @SuppressWarnings("synthetic-access") public
     void
     controlsLoadFrom(
-      final @Nonnull SBLightDescription d)
+      final SBLightDescription d)
   {
     this.id = d.lightGetID();
     this.id_field.setText(this.id.toString());
 
     try {
       d
-        .lightDescriptionVisitableAccept(new SBLightDescriptionVisitor<Unit, ConstraintError>() {
+        .lightDescriptionVisitableAccept(new SBLightDescriptionVisitor<Unit, NullCheckException>() {
           @Override public Unit lightVisitDirectional(
-            final @Nonnull SBLightDescriptionDirectional l)
-            throws ConstraintError,
-              RException,
-              ConstraintError
+            final SBLightDescriptionDirectional l)
+            throws RException
           {
             SBLightControls.this.selector
               .setSelectedItem(SBLightType.LIGHT_DIRECTIONAL);
@@ -211,10 +209,8 @@ public final class SBLightControls implements
           }
 
           @Override public Unit lightVisitProjective(
-            final @Nonnull SBLightDescriptionProjective l)
-            throws ConstraintError,
-              RException,
-              ConstraintError
+            final SBLightDescriptionProjective l)
+            throws RException
           {
             SBLightControls.this.selector
               .setSelectedItem(SBLightType.LIGHT_PROJECTIVE);
@@ -223,10 +219,8 @@ public final class SBLightControls implements
           }
 
           @Override public Unit lightVisitSpherical(
-            final @Nonnull SBLightDescriptionSpherical l)
-            throws ConstraintError,
-              RException,
-              ConstraintError
+            final SBLightDescriptionSpherical l)
+            throws RException
           {
             SBLightControls.this.selector
               .setSelectedItem(SBLightType.LIGHT_SPHERICAL);
@@ -236,14 +230,11 @@ public final class SBLightControls implements
         });
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
     }
   }
 
   @Override public SBLightDescription controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
     switch (this.selector.getSelectedItem()) {
       case LIGHT_DIRECTIONAL:
@@ -264,7 +255,7 @@ public final class SBLightControls implements
   }
 
   protected void controlsShowHide(
-    final @Nonnull SBLightType selected)
+    final SBLightType selected)
   {
     final Set<Entry<SBLightType, SBLightControlsType>> entries =
       this.controls.entrySet();

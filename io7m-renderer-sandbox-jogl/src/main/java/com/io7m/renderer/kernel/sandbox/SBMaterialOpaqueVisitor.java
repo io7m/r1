@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -39,18 +36,16 @@ public interface SBMaterialOpaqueVisitor<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A materialVisitOpaqueAlphaDepth(
-    final @Nonnull SBMaterialOpaqueAlphaToDepth m)
-    throws ConstraintError,
-      RException,
+  A materialVisitOpaqueAlphaDepth(
+    final SBMaterialOpaqueAlphaToDepth m)
+    throws RException,
       E;
 
   /**
@@ -59,17 +54,15 @@ public interface SBMaterialOpaqueVisitor<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A materialVisitOpaqueRegular(
-    final @Nonnull SBMaterialOpaqueRegular m)
-    throws ConstraintError,
-      RException,
+  A materialVisitOpaqueRegular(
+    final SBMaterialOpaqueRegular m)
+    throws RException,
       E;
 }

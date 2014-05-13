@@ -13,6 +13,8 @@ import java.util.Map;
 
 import javax.swing.Timer;
 
+import com.io7m.jnull.Nullable;
+
 /**
  * This {@link AWTEventListener} tries to work around a 12 yo bug in the Linux
  * KeyEvent handling for keyboard repeat. Linux apparently implements
@@ -66,8 +68,8 @@ public class SBRepeatingReleasedEventsFixer implements AWTEventListener
   private class ReleasedAction implements ActionListener
   {
 
-    private final KeyEvent _originalKeyEvent;
-    private Timer          _timer;
+    private final KeyEvent  _originalKeyEvent;
+    private @Nullable Timer _timer;
 
     ReleasedAction(
       final KeyEvent originalReleased,
@@ -78,7 +80,7 @@ public class SBRepeatingReleasedEventsFixer implements AWTEventListener
     }
 
     @Override public void actionPerformed(
-      final ActionEvent e)
+      final @Nullable ActionEvent e)
     {
       assert SBRepeatingReleasedEventsFixer.assertEDT();
       // ?: Are we already cancelled?
@@ -110,6 +112,7 @@ public class SBRepeatingReleasedEventsFixer implements AWTEventListener
     void cancel()
     {
       assert SBRepeatingReleasedEventsFixer.assertEDT();
+      assert this._timer != null;
       this._timer.stop();
       this._timer = null;
       SBRepeatingReleasedEventsFixer.this._map.remove(Integer
@@ -168,7 +171,7 @@ public class SBRepeatingReleasedEventsFixer implements AWTEventListener
                                             new HashMap<Integer, ReleasedAction>();
 
   @Override public void eventDispatched(
-    final AWTEvent event)
+    final @Nullable AWTEvent event)
   {
     assert event instanceof KeyEvent : "Shall only listen to KeyEvents, so no other events shall come here";
     assert SBRepeatingReleasedEventsFixer.assertEDT(); // REMEMBER THAT THIS

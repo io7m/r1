@@ -18,11 +18,8 @@ package com.io7m.renderer.kernel;
 
 import java.math.BigInteger;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcache.JCacheLoaderType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.kernel.types.KMeshBoundsTriangles;
 import com.io7m.renderer.types.RException;
@@ -33,7 +30,7 @@ import com.io7m.renderer.types.RSpaceObjectType;
  * make up an object-space bounding box for the given mesh.
  */
 
-public final class KMeshBoundsTrianglesObjectSpaceCacheLoader implements
+@EqualityReference public final class KMeshBoundsTrianglesObjectSpaceCacheLoader implements
   JCacheLoaderType<KMeshBounds<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, RException>
 {
   /**
@@ -42,9 +39,7 @@ public final class KMeshBoundsTrianglesObjectSpaceCacheLoader implements
    * @return A new cache loader
    */
 
-  public static @Nonnull
-    KMeshBoundsTrianglesObjectSpaceCacheLoader
-    newLoader()
+  public static KMeshBoundsTrianglesObjectSpaceCacheLoader newLoader()
   {
     return new KMeshBoundsTrianglesObjectSpaceCacheLoader();
   }
@@ -55,25 +50,21 @@ public final class KMeshBoundsTrianglesObjectSpaceCacheLoader implements
   }
 
   @Override public void cacheValueClose(
-    final @Nonnull KMeshBoundsTriangles<RSpaceObjectType> v)
+    final KMeshBoundsTriangles<RSpaceObjectType> v)
     throws RException
   {
     // Nothing
   }
 
   @Override public KMeshBoundsTriangles<RSpaceObjectType> cacheValueLoad(
-    final @Nonnull KMeshBounds<RSpaceObjectType> bounds)
+    final KMeshBounds<RSpaceObjectType> bounds)
     throws RException
   {
-    try {
-      return KMeshBoundsTriangles.newBoundsTriangles(bounds);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException();
-    }
+    return KMeshBoundsTriangles.newBoundsTriangles(bounds);
   }
 
   @Override public BigInteger cacheValueSizeOf(
-    final @Nonnull KMeshBoundsTriangles<RSpaceObjectType> v)
+    final KMeshBoundsTriangles<RSpaceObjectType> v)
   {
     return BigInteger.ONE;
   }

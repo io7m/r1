@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 
 enum SBKRendererSelectionType
 {
@@ -36,15 +35,15 @@ enum SBKRendererSelectionType
 
   ;
 
-  private final @Nonnull String name;
+  private final  String name;
 
   private SBKRendererSelectionType(
-    final @Nonnull String in_name)
+    final  String in_name)
   {
     this.name = in_name;
   }
 
-  @Nonnull String getName()
+   String getName()
   {
     return this.name;
   }

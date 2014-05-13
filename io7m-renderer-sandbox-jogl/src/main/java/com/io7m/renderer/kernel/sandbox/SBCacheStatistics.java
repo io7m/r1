@@ -18,24 +18,22 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.math.BigInteger;
 
-import javax.annotation.Nonnull;
-
 public final class SBCacheStatistics
 {
-  private final @Nonnull BigInteger cached_labels;
-  private final @Nonnull BigInteger cached_rgba_framebuffers;
-  private final @Nonnull BigInteger cached_rgba_framebuffers_bytes;
-  private final @Nonnull BigInteger cached_shaders;
-  private final @Nonnull BigInteger cached_shadow_maps;
-  private final @Nonnull BigInteger cached_shadow_maps_bytes;
+  private final  BigInteger cached_labels;
+  private final  BigInteger cached_rgba_framebuffers;
+  private final  BigInteger cached_rgba_framebuffers_bytes;
+  private final  BigInteger cached_shaders;
+  private final  BigInteger cached_shadow_maps;
+  private final  BigInteger cached_shadow_maps_bytes;
 
   public SBCacheStatistics(
-    final @Nonnull BigInteger in_cached_labels,
-    final @Nonnull BigInteger in_cached_shaders,
-    final @Nonnull BigInteger in_cached_shadow_maps,
-    final @Nonnull BigInteger in_cached_shadow_maps_bytes,
-    final @Nonnull BigInteger in_cached_rgba_framebuffers,
-    final @Nonnull BigInteger in_cached_rgba_framebuffers_bytes)
+    final  BigInteger in_cached_labels,
+    final  BigInteger in_cached_shaders,
+    final  BigInteger in_cached_shadow_maps,
+    final  BigInteger in_cached_shadow_maps_bytes,
+    final  BigInteger in_cached_rgba_framebuffers,
+    final  BigInteger in_cached_rgba_framebuffers_bytes)
   {
     this.cached_labels = in_cached_labels;
     this.cached_shaders = in_cached_shaders;
@@ -45,32 +43,32 @@ public final class SBCacheStatistics
     this.cached_rgba_framebuffers_bytes = in_cached_rgba_framebuffers_bytes;
   }
 
-  public @Nonnull BigInteger getCachedLabels()
+  public  BigInteger getCachedLabels()
   {
     return this.cached_labels;
   }
 
-  public @Nonnull BigInteger getCachedRGBAFramebuffers()
+  public  BigInteger getCachedRGBAFramebuffers()
   {
     return this.cached_rgba_framebuffers;
   }
 
-  public @Nonnull BigInteger getCachedRGBAFramebuffersBytes()
+  public  BigInteger getCachedRGBAFramebuffersBytes()
   {
     return this.cached_rgba_framebuffers_bytes;
   }
 
-  public @Nonnull BigInteger getCachedShaders()
+  public  BigInteger getCachedShaders()
   {
     return this.cached_shaders;
   }
 
-  public @Nonnull BigInteger getCachedShadowMaps()
+  public  BigInteger getCachedShadowMaps()
   {
     return this.cached_shadow_maps;
   }
 
-  public @Nonnull BigInteger getCachedShadowMapsBytes()
+  public  BigInteger getCachedShadowMapsBytes()
   {
     return this.cached_shadow_maps_bytes;
   }

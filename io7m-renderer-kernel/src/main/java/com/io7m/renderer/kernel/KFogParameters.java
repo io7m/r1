@@ -16,16 +16,29 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.concurrent.Immutable;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
 
 /**
  * Fog parameters.
  */
 
-@Immutable public final class KFogParameters
+@EqualityStructural public final class KFogParameters
 {
+  @Override public boolean equals(
+    final @Nullable Object other)
+  {
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public int hashCode()
+  {
+    throw new UnimplementedCodeException();
+  }
+
   private KFogParameters()
   {
-
+    throw new UnimplementedCodeException();
   }
 }

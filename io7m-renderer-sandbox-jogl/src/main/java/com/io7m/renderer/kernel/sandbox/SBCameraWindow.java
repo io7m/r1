@@ -16,31 +16,24 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import java.io.IOException;
-
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
 
 public final class SBCameraWindow extends JFrame
 {
   private static final long serialVersionUID = 2315544411385252421L;
 
   public SBCameraWindow(
-    final @Nonnull SBSceneControllerRendererControl controller,
-    final @Nonnull Log log)
+    final SBSceneControllerRendererControl controller,
+    final LogUsableType log)
   {
     super("Camera");
 
     try {
       this.getContentPane().add(new SBCameraPanel(this, controller));
       this.pack();
-    } catch (final IOException x) {
-      log.critical("Unable to open camera window: " + x.getMessage());
-      x.printStackTrace();
-    } catch (final ConstraintError x) {
+    } catch (final Throwable x) {
       log.critical("Unable to open camera window: " + x.getMessage());
       x.printStackTrace();
     }

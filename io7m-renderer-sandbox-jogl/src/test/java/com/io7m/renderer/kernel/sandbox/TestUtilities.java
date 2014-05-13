@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,19 +18,29 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.util.Properties;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogPolicyProperties;
+import com.io7m.jlog.LogPolicyType;
+import com.io7m.jlog.LogType;
+import com.io7m.jproperties.JPropertyException;
+import com.io7m.junreachable.UnreachableCodeException;
 
 public final class TestUtilities
 {
-  static @Nonnull Log getLog()
+  static LogType getLog()
   {
-    final Properties props = new Properties();
-    props.setProperty("com.io7m.renderer.logs.sandbox", "true");
-    props.setProperty("com.io7m.renderer.logs.sandbox.filesystem", "false");
-    props.setProperty("com.io7m.renderer.sandbox.level", "LOG_DEBUG");
-    final Log log = new Log(props, "com.io7m.renderer", "sandbox");
-    return log;
+    try {
+      final Properties props = new Properties();
+      props.setProperty("com.io7m.renderer.logs.sandbox", "true");
+      props.setProperty("com.io7m.renderer.logs.sandbox.filesystem", "false");
+      props.setProperty("com.io7m.renderer.sandbox.level", "LOG_DEBUG");
+      final LogPolicyType policy =
+        LogPolicyProperties.newPolicy(props, "com.io7m.renderer");
+
+      final LogType log = Log.newLog(policy, "sandbox");
+      return log;
+    } catch (final JPropertyException e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 }

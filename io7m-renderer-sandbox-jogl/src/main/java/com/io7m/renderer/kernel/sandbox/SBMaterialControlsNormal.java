@@ -20,7 +20,6 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
@@ -29,21 +28,23 @@ import javax.swing.JTextField;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 
 public final class SBMaterialControlsNormal implements
   SBControlsDataType<SBMaterialNormalDescription>
 {
-  private final @Nonnull RowGroup     group;
-  protected final @Nonnull JTextField texture;
-  protected final @Nonnull JButton    texture_select;
+  private final RowGroup     group;
+  protected final JTextField texture;
+  protected final JButton    texture_select;
 
   public SBMaterialControlsNormal(
-    final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull Log log)
+    final SBSceneControllerTextures controller,
+    final LogUsableType log)
   {
     this.group = new RowGroup();
 
@@ -52,7 +53,7 @@ public final class SBMaterialControlsNormal implements
     this.texture_select = new JButton("Select...");
     this.texture_select.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final SBTextures2DWindow twindow =
           new SBTextures2DWindow(
@@ -66,7 +67,7 @@ public final class SBMaterialControlsNormal implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout dg)
+    final DesignGridLayout dg)
   {
     final JLabel label = new JLabel("Normal mapping");
     label.setForeground(Color.BLUE);
@@ -86,21 +87,24 @@ public final class SBMaterialControlsNormal implements
   }
 
   @Override public void controlsLoadFrom(
-    final @Nonnull SBMaterialNormalDescription mat_n)
+    final SBMaterialNormalDescription mat_n)
   {
     final PathVirtual tt = mat_n.getTexture();
     this.texture.setText(tt == null ? "" : tt.toString());
   }
 
-  @Override public @Nonnull SBMaterialNormalDescription controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+  @Override public SBMaterialNormalDescription controlsSave()
+    throws SBExceptionInputError
   {
-    final String tt = this.texture.getText();
-    final PathVirtual texture_normal =
-      (tt.equals("")) ? null : PathVirtual.ofString(tt);
+    try {
+      final String tt = this.texture.getText();
+      final PathVirtual texture_normal =
+        (tt.equals("")) ? null : PathVirtual.ofString(tt);
 
-    return new SBMaterialNormalDescription(texture_normal);
+      return new SBMaterialNormalDescription(texture_normal);
+    } catch (final FilesystemError e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 
   @Override public void controlsShow()

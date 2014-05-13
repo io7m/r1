@@ -18,7 +18,6 @@ package com.io7m.renderer.types;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.xml.parsers.ParserConfigurationException;
 
 import nu.xom.ParsingException;
@@ -26,23 +25,27 @@ import nu.xom.ValidityException;
 
 import org.xml.sax.SAXException;
 
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jnull.NullCheck;
+
 /**
  * The root type of exceptions raised by XML parsers and validators.
  */
 
-public abstract class RXMLException extends RException
+@SuppressWarnings("synthetic-access") @EqualityReference public abstract class RXMLException extends
+  RException
 {
   /**
    * An exception caused by a {@link NumberFormatException}.
    */
 
-  public static final class RXMLExceptionNumberFormatError extends
+  @EqualityReference public static final class RXMLExceptionNumberFormatError extends
     RXMLException
   {
     private static final long serialVersionUID = 1690230411468954145L;
 
     protected RXMLExceptionNumberFormatError(
-      final @Nonnull NumberFormatException x)
+      final NumberFormatException x)
     {
       super(x);
     }
@@ -57,8 +60,8 @@ public abstract class RXMLException extends RException
      */
 
     public RXMLExceptionNumberFormatError(
-      final @Nonnull NumberFormatException x,
-      final @Nonnull String message)
+      final NumberFormatException x,
+      final String message)
     {
       super(message, x);
     }
@@ -67,9 +70,11 @@ public abstract class RXMLException extends RException
      * @return The cause of this exception as a specific type.
      */
 
-    public @Nonnull NumberFormatException getNumberFormatException()
+    public NumberFormatException getNumberFormatException()
     {
-      return (NumberFormatException) this.getCause();
+      final NumberFormatException x = (NumberFormatException) this.getCause();
+      assert x != null;
+      return x;
     }
   }
 
@@ -77,13 +82,13 @@ public abstract class RXMLException extends RException
    * An exception caused by a {@link ParserConfigurationException}.
    */
 
-  public static final class RXMLParserConfigurationException extends
+  @EqualityReference public static final class RXMLParserConfigurationException extends
     RXMLException
   {
     private static final long serialVersionUID = -5385921436341180278L;
 
     private RXMLParserConfigurationException(
-      final @Nonnull ParserConfigurationException x)
+      final ParserConfigurationException x)
     {
       super(x);
     }
@@ -92,11 +97,12 @@ public abstract class RXMLException extends RException
      * @return The cause of this exception as a specific type.
      */
 
-    public @Nonnull
-      ParserConfigurationException
-      getParserConfigurationException()
+    public ParserConfigurationException getParserConfigurationException()
     {
-      return (ParserConfigurationException) this.getCause();
+      final ParserConfigurationException x =
+        (ParserConfigurationException) this.getCause();
+      assert x != null;
+      return x;
     }
   }
 
@@ -104,12 +110,13 @@ public abstract class RXMLException extends RException
    * An exception caused by a {@link ParsingException}.
    */
 
-  public static final class RXMLParsingException extends RXMLException
+  @EqualityReference public static final class RXMLParsingException extends
+    RXMLException
   {
     private static final long serialVersionUID = 3538612428621468503L;
 
     private RXMLParsingException(
-      final @Nonnull ParsingException x)
+      final ParsingException x)
     {
       super(x);
     }
@@ -118,9 +125,11 @@ public abstract class RXMLException extends RException
      * @return The cause of this exception as a specific type.
      */
 
-    public @Nonnull ParsingException getParsingException()
+    public ParsingException getParsingException()
     {
-      return (ParsingException) this.getCause();
+      final ParsingException x = (ParsingException) this.getCause();
+      assert x != null;
+      return x;
     }
   }
 
@@ -128,12 +137,13 @@ public abstract class RXMLException extends RException
    * An exception caused by a {@link SAXException}.
    */
 
-  public static final class RXMLSaxException extends RXMLException
+  @EqualityReference public static final class RXMLSaxException extends
+    RXMLException
   {
     private static final long serialVersionUID = -94265091031652878L;
 
     private RXMLSaxException(
-      final @Nonnull SAXException x)
+      final SAXException x)
     {
       super(x);
     }
@@ -142,9 +152,11 @@ public abstract class RXMLException extends RException
      * @return The cause of this exception as a specific type.
      */
 
-    public @Nonnull SAXException getSAXException()
+    public SAXException getSAXException()
     {
-      return (SAXException) this.getCause();
+      final SAXException x = (SAXException) this.getCause();
+      assert x != null;
+      return x;
     }
   }
 
@@ -152,16 +164,16 @@ public abstract class RXMLException extends RException
    * An exception caused by list of {@link SAXException}.
    */
 
-  public static final class RXMLSaxExceptions extends RXMLException
+  @EqualityReference public static final class RXMLSaxExceptions extends
+    RXMLException
   {
-    private static final long                 serialVersionUID =
-                                                                 -94265091031652878L;
-    private final @Nonnull List<SAXException> exceptions;
+    private static final long        serialVersionUID = -94265091031652878L;
+    private final List<SAXException> exceptions;
 
     private RXMLSaxExceptions(
-      final @Nonnull List<SAXException> x)
+      final List<SAXException> x)
     {
-      super(x.get(0));
+      super(NullCheck.notNull(NullCheck.notNullAll(x, "Exceptions").get(0)));
       this.exceptions = x;
     }
 
@@ -170,7 +182,7 @@ public abstract class RXMLException extends RException
      *         guaranteed to be non-empty.
      */
 
-    public @Nonnull List<SAXException> getExceptions()
+    public List<SAXException> getExceptions()
     {
       return this.exceptions;
     }
@@ -180,12 +192,13 @@ public abstract class RXMLException extends RException
    * An exception caused by a {@link ValidityException}.
    */
 
-  public static final class RXMLValidityException extends RXMLException
+  @EqualityReference public static final class RXMLValidityException extends
+    RXMLException
   {
     private static final long serialVersionUID = -7586780514130613772L;
 
     private RXMLValidityException(
-      final @Nonnull ValidityException x)
+      final ValidityException x)
     {
       super(x);
     }
@@ -194,9 +207,11 @@ public abstract class RXMLException extends RException
      * @return The cause of this exception as a specific type.
      */
 
-    public @Nonnull ValidityException getValidityException()
+    public ValidityException getValidityException()
     {
-      return (ValidityException) this.getCause();
+      final ValidityException x = (ValidityException) this.getCause();
+      assert x != null;
+      return x;
     }
   }
 
@@ -210,10 +225,8 @@ public abstract class RXMLException extends RException
    * @return A new exception
    */
 
-  @SuppressWarnings("synthetic-access") public static @Nonnull
-    RXMLException
-    parserConfigurationException(
-      final @Nonnull ParserConfigurationException x)
+  public static RXMLException parserConfigurationException(
+    final ParserConfigurationException x)
   {
     return new RXMLParserConfigurationException(x);
   }
@@ -226,10 +239,8 @@ public abstract class RXMLException extends RException
    * @return A new exception
    */
 
-  @SuppressWarnings("synthetic-access") public static @Nonnull
-    RXMLException
-    parsingException(
-      final @Nonnull ParsingException x)
+  public static RXMLException parsingException(
+    final ParsingException x)
   {
     return new RXMLParsingException(x);
   }
@@ -242,10 +253,8 @@ public abstract class RXMLException extends RException
    * @return A new exception
    */
 
-  @SuppressWarnings("synthetic-access") public static @Nonnull
-    RXMLException
-    saxException(
-      final @Nonnull SAXException x)
+  public static RXMLException saxException(
+    final SAXException x)
   {
     return new RXMLSaxException(x);
   }
@@ -258,10 +267,8 @@ public abstract class RXMLException extends RException
    * @return A new exception
    */
 
-  @SuppressWarnings("synthetic-access") public static @Nonnull
-    RXMLException
-    saxExceptions(
-      final @Nonnull List<SAXException> xs)
+  public static RXMLException saxExceptions(
+    final List<SAXException> xs)
   {
     assert xs.isEmpty() == false;
     return new RXMLSaxExceptions(xs);
@@ -275,29 +282,27 @@ public abstract class RXMLException extends RException
    * @return A new exception
    */
 
-  @SuppressWarnings("synthetic-access") public static @Nonnull
-    RXMLException
-    validityException(
-      final @Nonnull ValidityException x)
+  public static RXMLException validityException(
+    final ValidityException x)
   {
     return new RXMLValidityException(x);
   }
 
   protected RXMLException(
-    final @Nonnull String message,
-    final @Nonnull Throwable x)
+    final String message,
+    final Throwable x)
   {
     super(x, message);
   }
 
   protected RXMLException(
-    final @Nonnull Throwable x)
+    final Throwable x)
   {
     super(x);
   }
 
   @Override public final <T, E extends Throwable> T exceptionAccept(
-    final @Nonnull RExceptionVisitorType<T, E> v)
+    final RExceptionVisitorType<T, E> v)
     throws E
   {
     return v.exceptionVisitXMLException(this);

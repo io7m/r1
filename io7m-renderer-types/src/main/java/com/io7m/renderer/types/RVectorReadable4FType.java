@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.types;
 
-import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.jtensors.VectorReadable4FType;
 
 /**
  * The type of readable 4D vectors indexed by their coordinate space
@@ -25,7 +25,8 @@ import com.io7m.jtensors.VectorReadable4F;
  *          A phantom type parameter describing the coordinate space
  */
 
-public interface RVectorReadable4FType<T extends RSpaceType> extends VectorReadable4F
+public interface RVectorReadable4FType<T extends RSpaceType> extends
+  VectorReadable4FType
 {
   // See super-interfaces.
 }

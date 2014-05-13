@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -39,18 +36,16 @@ public interface SBMaterialDescriptionTranslucentVisitor<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A materialDescriptionVisitTranslucentRegular(
-    final @Nonnull SBMaterialDescriptionTranslucentRegular m)
-    throws ConstraintError,
-      RException,
+  A materialDescriptionVisitTranslucentRegular(
+    final SBMaterialDescriptionTranslucentRegular m)
+    throws RException,
       E;
 
   /**
@@ -59,18 +54,16 @@ public interface SBMaterialDescriptionTranslucentVisitor<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A materialDescriptionVisitTranslucentSpecularOnly(
-    final @Nonnull SBMaterialDescriptionTranslucentSpecularOnly m)
-    throws ConstraintError,
-      RException,
+  A materialDescriptionVisitTranslucentSpecularOnly(
+    final SBMaterialDescriptionTranslucentSpecularOnly m)
+    throws RException,
       E;
 
   /**
@@ -79,17 +72,15 @@ public interface SBMaterialDescriptionTranslucentVisitor<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A materialDescriptionVisitTranslucentRefractive(
-    final @Nonnull SBMaterialDescriptionTranslucentRefractive m)
-    throws ConstraintError,
-      RException,
+  A materialDescriptionVisitTranslucentRefractive(
+    final SBMaterialDescriptionTranslucentRefractive m)
+    throws RException,
       E;
 }

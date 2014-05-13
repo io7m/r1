@@ -16,46 +16,40 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.jvvfs.PathVirtual;
 
-@Immutable public final class SBTexture2DDescription
+public final class SBTexture2DDescription
 {
-  private final @Nonnull PathVirtual                path;
-  private final @Nonnull TextureWrapS               wrap_mode_s;
-  private final @Nonnull TextureWrapT               wrap_mode_t;
-  private final @Nonnull TextureFilterMinification  texture_min;
-  private final @Nonnull TextureFilterMagnification texture_mag;
+  private final PathVirtual                path;
+  private final TextureWrapS               wrap_mode_s;
+  private final TextureWrapT               wrap_mode_t;
+  private final TextureFilterMinification  texture_min;
+  private final TextureFilterMagnification texture_mag;
 
   SBTexture2DDescription(
-    final @Nonnull PathVirtual in_path,
-    final @Nonnull TextureWrapS in_wrap_mode_s,
-    final @Nonnull TextureWrapT in_wrap_mode_t,
-    final @Nonnull TextureFilterMinification in_texture_min,
-    final @Nonnull TextureFilterMagnification in_texture_mag)
-    throws ConstraintError
+    final PathVirtual in_path,
+    final TextureWrapS in_wrap_mode_s,
+    final TextureWrapT in_wrap_mode_t,
+    final TextureFilterMinification in_texture_min,
+    final TextureFilterMagnification in_texture_mag)
   {
-    this.path = Constraints.constrainNotNull(in_path, "Path");
-    this.wrap_mode_s =
-      Constraints.constrainNotNull(in_wrap_mode_s, "Wrap S mode");
-    this.wrap_mode_t =
-      Constraints.constrainNotNull(in_wrap_mode_t, "Wrap T mode");
+    this.path = NullCheck.notNull(in_path, "Path");
+    this.wrap_mode_s = NullCheck.notNull(in_wrap_mode_s, "Wrap S mode");
+    this.wrap_mode_t = NullCheck.notNull(in_wrap_mode_t, "Wrap T mode");
     this.texture_min =
-      Constraints.constrainNotNull(in_texture_min, "Texture minification");
+      NullCheck.notNull(in_texture_min, "Texture minification");
     this.texture_mag =
-      Constraints.constrainNotNull(in_texture_mag, "Texture magnification");
+      NullCheck.notNull(in_texture_mag, "Texture magnification");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -67,11 +61,7 @@ import com.io7m.jvvfs.PathVirtual;
       return false;
     }
     final SBTexture2DDescription other = (SBTexture2DDescription) obj;
-    if (this.path == null) {
-      if (other.path != null) {
-        return false;
-      }
-    } else if (!this.path.equals(other.path)) {
+    if (!this.path.equals(other.path)) {
       return false;
     }
     if (this.texture_mag != other.texture_mag) {
@@ -140,6 +130,8 @@ import com.io7m.jvvfs.PathVirtual;
     builder.append(", texture_mag=");
     builder.append(this.texture_mag);
     builder.append("]");
-    return builder.toString();
+    final String s = builder.toString();
+    assert s != null;
+    return s;
   }
 }

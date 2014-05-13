@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -39,8 +36,7 @@ public interface KLightVisitorType<A, E extends Throwable>
    * @param l
    *          The directional light
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
@@ -48,9 +44,8 @@ public interface KLightVisitorType<A, E extends Throwable>
    */
 
   A lightDirectional(
-    final @Nonnull KLightDirectional l)
-    throws ConstraintError,
-      RException,
+    final KLightDirectional l)
+    throws RException,
       E;
 
   /**
@@ -59,8 +54,7 @@ public interface KLightVisitorType<A, E extends Throwable>
    * @param l
    *          The projective light
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
@@ -68,9 +62,8 @@ public interface KLightVisitorType<A, E extends Throwable>
    */
 
   A lightProjective(
-    final @Nonnull KLightProjective l)
-    throws ConstraintError,
-      RException,
+    final KLightProjective l)
+    throws RException,
       E;
 
   /**
@@ -79,8 +72,7 @@ public interface KLightVisitorType<A, E extends Throwable>
    * @param l
    *          The spherical light
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
@@ -88,8 +80,7 @@ public interface KLightVisitorType<A, E extends Throwable>
    */
 
   A lightSpherical(
-    final @Nonnull KLightSphere l)
-    throws ConstraintError,
-      RException,
+    final KLightSphere l)
+    throws RException,
       E;
 }

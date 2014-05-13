@@ -16,12 +16,10 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcache.LRUCacheAbstract;
 import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcache.LRUCacheType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.types.RException;
@@ -34,7 +32,7 @@ import com.io7m.renderer.types.RSpaceType;
  *          The type of coordinate space
  */
 
-public final class KMeshBoundsCache<R extends RSpaceType> extends
+@EqualityReference public final class KMeshBoundsCache<R extends RSpaceType> extends
   LRUCacheAbstract<KMeshReadableType, KMeshBounds<R>, RException> implements
   KMeshBoundsCacheType<R>
 {
@@ -46,23 +44,16 @@ public final class KMeshBoundsCache<R extends RSpaceType> extends
    * @param c
    *          The cache
    * @return A cache
-   * @throws ConstraintError
-   *           If <code>c == null</code>
    */
 
-  public static
-    <R extends RSpaceType>
-    KMeshBoundsCacheType<R>
-    wrap(
-      final @Nonnull LRUCacheTrivial<KMeshReadableType, KMeshBounds<R>, RException> c)
-      throws ConstraintError
+  public static <R extends RSpaceType> KMeshBoundsCacheType<R> wrap(
+    final LRUCacheTrivial<KMeshReadableType, KMeshBounds<R>, RException> c)
   {
     return new KMeshBoundsCache<R>(c);
   }
 
   private KMeshBoundsCache(
-    final @Nonnull LRUCacheType<KMeshReadableType, KMeshBounds<R>, RException> c)
-    throws ConstraintError
+    final LRUCacheType<KMeshReadableType, KMeshBounds<R>, RException> c)
   {
     super(c);
   }

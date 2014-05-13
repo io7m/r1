@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
@@ -39,8 +36,7 @@ public interface KShadowMapWithType<A, E extends Throwable>
    * @param context
    *          The context containing shadow maps
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws JCGLException
    *           If required
    * @throws RException
@@ -50,9 +46,8 @@ public interface KShadowMapWithType<A, E extends Throwable>
    */
 
   A withMaps(
-    final @Nonnull KShadowMapContextType context)
-    throws ConstraintError,
-      JCGLException,
+    final KShadowMapContextType context)
+    throws JCGLException,
       RException,
       E;
 }

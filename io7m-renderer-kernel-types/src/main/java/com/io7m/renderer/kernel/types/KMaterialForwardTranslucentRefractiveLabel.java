@@ -19,17 +19,18 @@ package com.io7m.renderer.kernel.types;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
+import nu.xom.IllegalAddException;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * Labels for forward-rendering refractive translucent objects.
  */
 
-public final class KMaterialForwardTranslucentRefractiveLabel implements
+@EqualityStructural public final class KMaterialForwardTranslucentRefractiveLabel implements
   KTexturesRequiredType,
   KMaterialLabelImpliesUVType,
   KLabelType
@@ -38,39 +39,34 @@ public final class KMaterialForwardTranslucentRefractiveLabel implements
    * @return The set of all possible translucent refractive labels.
    */
 
-  public static @Nonnull
-    Set<KMaterialForwardTranslucentRefractiveLabel>
-    allLabels()
+  public static Set<KMaterialForwardTranslucentRefractiveLabel> allLabels()
   {
-    try {
-      final Set<KMaterialForwardTranslucentRefractiveLabel> s =
-        new HashSet<KMaterialForwardTranslucentRefractiveLabel>();
+    final Set<KMaterialForwardTranslucentRefractiveLabel> s =
+      new HashSet<KMaterialForwardTranslucentRefractiveLabel>();
 
-      for (final KMaterialRefractiveLabel r : KMaterialRefractiveLabel
-        .values()) {
-        for (final KMaterialNormalLabel n : KMaterialNormalLabel.values()) {
-          switch (n) {
-            case NORMAL_NONE:
-              break;
-            case NORMAL_MAPPED:
-            case NORMAL_VERTEX:
-              s
-                .add(KMaterialForwardTranslucentRefractiveLabel
-                  .newLabel(r, n));
-              break;
-          }
+    for (final KMaterialRefractiveLabel r : KMaterialRefractiveLabel.values()) {
+      assert r != null;
+
+      for (final KMaterialNormalLabel n : KMaterialNormalLabel.values()) {
+        assert n != null;
+
+        switch (n) {
+          case NORMAL_NONE:
+            break;
+          case NORMAL_MAPPED:
+          case NORMAL_VERTEX:
+            s.add(KMaterialForwardTranslucentRefractiveLabel.newLabel(r, n));
+            break;
         }
       }
-
-      return s;
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
     }
+
+    return s;
   }
 
-  private static @Nonnull String makeLabelCode(
-    final @Nonnull KMaterialRefractiveLabel refractive,
-    final @Nonnull KMaterialNormalLabel normal)
+  private static String makeLabelCode(
+    final KMaterialRefractiveLabel refractive,
+    final KMaterialNormalLabel normal)
   {
     switch (normal) {
       case NORMAL_NONE:
@@ -80,10 +76,13 @@ public final class KMaterialForwardTranslucentRefractiveLabel implements
       case NORMAL_MAPPED:
       case NORMAL_VERTEX:
       {
-        return String.format(
-          "fwd_U_%s_%s",
-          refractive.labelGetCode(),
-          normal.labelGetCode());
+        final String r =
+          String.format(
+            "fwd_U_%s_%s",
+            refractive.labelGetCode(),
+            normal.labelGetCode());
+        assert r != null;
+        return r;
       }
     }
 
@@ -98,36 +97,31 @@ public final class KMaterialForwardTranslucentRefractiveLabel implements
    * @param in_normal
    *          The normal label
    * @return A new label
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KMaterialForwardTranslucentRefractiveLabel newLabel(
-    final @Nonnull KMaterialRefractiveLabel in_refractive,
-    final @Nonnull KMaterialNormalLabel in_normal)
-    throws ConstraintError
+  public static KMaterialForwardTranslucentRefractiveLabel newLabel(
+    final KMaterialRefractiveLabel in_refractive,
+    final KMaterialNormalLabel in_normal)
   {
     return new KMaterialForwardTranslucentRefractiveLabel(
       in_refractive,
       in_normal);
   }
 
-  private final @Nonnull String                   code;
-  private final @Nonnull KMaterialNormalLabel     normal;
-  private final @Nonnull KMaterialRefractiveLabel refractive;
+  private final String                   code;
+  private final KMaterialNormalLabel     normal;
+  private final KMaterialRefractiveLabel refractive;
 
   private KMaterialForwardTranslucentRefractiveLabel(
-    final @Nonnull KMaterialRefractiveLabel in_refractive,
-    final @Nonnull KMaterialNormalLabel in_normal)
-    throws ConstraintError
+    final KMaterialRefractiveLabel in_refractive,
+    final KMaterialNormalLabel in_normal)
   {
-    this.refractive =
-      Constraints.constrainNotNull(in_refractive, "Refractive");
-    this.normal = Constraints.constrainNotNull(in_normal, "Normal");
+    this.refractive = NullCheck.notNull(in_refractive, "Refractive");
+    this.normal = NullCheck.notNull(in_normal, "Normal");
 
-    Constraints.constrainArbitrary(
-      this.normal != KMaterialNormalLabel.NORMAL_NONE,
-      "Normal vectors provided");
+    if (this.normal == KMaterialNormalLabel.NORMAL_NONE) {
+      throw new IllegalAddException("No normal vectors provided");
+    }
 
     this.code =
       KMaterialForwardTranslucentRefractiveLabel.makeLabelCode(
@@ -139,7 +133,7 @@ public final class KMaterialForwardTranslucentRefractiveLabel implements
    * @return The refractive label
    */
 
-  public @Nonnull KMaterialRefractiveLabel getRefractive()
+  public KMaterialRefractiveLabel getRefractive()
   {
     return this.refractive;
   }
@@ -153,9 +147,38 @@ public final class KMaterialForwardTranslucentRefractiveLabel implements
    * @return The normal-mapping label
    */
 
-  public @Nonnull KMaterialNormalLabel labelGetNormal()
+  public KMaterialNormalLabel labelGetNormal()
   {
     return this.normal;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.code.hashCode();
+    result = (prime * result) + this.normal.hashCode();
+    result = (prime * result) + this.refractive.hashCode();
+    return result;
+  }
+
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KMaterialForwardTranslucentRefractiveLabel other =
+      (KMaterialForwardTranslucentRefractiveLabel) obj;
+    return this.code.equals(other.code)
+      && (this.normal == other.normal)
+      && (this.refractive == other.refractive);
   }
 
   @Override public boolean labelImpliesUV()

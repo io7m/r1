@@ -18,17 +18,15 @@ package com.io7m.renderer.kernel;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLRuntimeException;
-import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.jcanephora.TextureCubeStaticUsable;
-import com.io7m.jcanephora.TextureUnit;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jcanephora.TextureCubeStaticUsableType;
+import com.io7m.jcanephora.TextureUnitType;
+import com.io7m.jcanephora.api.JCGLTextureUnitsType;
+import com.io7m.jcanephora.api.JCGLTextures2DStaticCommonType;
+import com.io7m.jcanephora.api.JCGLTexturesCubeStaticCommonType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -49,10 +47,11 @@ import com.io7m.renderer.types.RException;
  * </p>
  */
 
-public final class KTextureUnitAllocator implements
+@EqualityReference @SuppressWarnings("synthetic-access") public final class KTextureUnitAllocator implements
   KTextureUnitContextInitialType
 {
-  private final class Context implements KTextureUnitContextType
+  @EqualityReference private final class Context implements
+    KTextureUnitContextType
   {
     private int       count;
     private final int first;
@@ -79,12 +78,11 @@ public final class KTextureUnitAllocator implements
     @Override public void withContext(
       final KTextureUnitWithType f)
       throws JCGLException,
-        ConstraintError,
         RException
     {
-      Constraints.constrainArbitrary(
-        this.has_child == false,
-        "Context has no child");
+      if (this.has_child) {
+        throw RException.fromAPIMisuse("Context already has a child");
+      }
 
       try {
         this.has_child = true;
@@ -97,33 +95,31 @@ public final class KTextureUnitAllocator implements
       }
     }
 
-    @SuppressWarnings("synthetic-access") @Override public
-      TextureUnit
-      withTexture2D(
-        final @Nonnull Texture2DStaticUsable t)
-        throws ConstraintError,
-          JCGLRuntimeException
+    @Override public TextureUnitType withTexture2D(
+      final Texture2DStaticUsableType t)
+      throws JCGLException,
+        RException
     {
-      final TextureUnit unit =
+      final TextureUnitType unit =
         KTextureUnitAllocator.this.texturesUnitGet(this.first + this.count);
       KTextureUnitAllocator.this.texturesAdded(1);
       ++this.count;
-      KTextureUnitAllocator.this.gc.texture2DStaticBind(unit, t);
+      KTextureUnitAllocator.this.gc_textures2d.texture2DStaticBind(unit, t);
       return unit;
     }
 
-    @SuppressWarnings("synthetic-access") @Override public
-      TextureUnit
-      withTextureCube(
-        final @Nonnull TextureCubeStaticUsable t)
-        throws ConstraintError,
-          JCGLRuntimeException
+    @Override public TextureUnitType withTextureCube(
+      final TextureCubeStaticUsableType t)
+      throws JCGLException,
+        RException
     {
-      final TextureUnit unit =
+      final TextureUnitType unit =
         KTextureUnitAllocator.this.texturesUnitGet(this.first + this.count);
       KTextureUnitAllocator.this.texturesAdded(1);
       ++this.count;
-      KTextureUnitAllocator.this.gc.textureCubeStaticBind(unit, t);
+      KTextureUnitAllocator.this.gc_textures_cube.textureCubeStaticBind(
+        unit,
+        t);
       return unit;
     }
   }
@@ -131,6 +127,8 @@ public final class KTextureUnitAllocator implements
   /**
    * Construct a new texture unit allocator.
    * 
+   * @param <G>
+   *          The type of GL interfaces
    * @param gi
    *          The OpenGL interface
    * @return A new allocator
@@ -138,24 +136,30 @@ public final class KTextureUnitAllocator implements
    *           If an OpenGL error occurs
    */
 
-  public static @Nonnull KTextureUnitAllocator newAllocator(
-    final @Nonnull JCGLImplementation gi)
-    throws JCGLException
+  public static
+    <G extends JCGLTextures2DStaticCommonType & JCGLTexturesCubeStaticCommonType & JCGLTextureUnitsType>
+    KTextureUnitAllocator
+    newAllocator(
+      final G gi)
+      throws JCGLException
   {
     return new KTextureUnitAllocator(gi);
   }
 
-  private int                                allocated;
-  private final @Nonnull JCGLInterfaceCommon gc;
-  private boolean                            in_use;
-  private final @Nonnull List<TextureUnit>   units;
+  private int                                    allocated;
+  private final JCGLTexturesCubeStaticCommonType gc_textures_cube;
+  private final JCGLTextures2DStaticCommonType   gc_textures2d;
+  private boolean                                in_use;
+  private final List<TextureUnitType>            units;
 
-  private KTextureUnitAllocator(
-    final @Nonnull JCGLImplementation gi)
+  private <G extends JCGLTextures2DStaticCommonType & JCGLTexturesCubeStaticCommonType & JCGLTextureUnitsType> KTextureUnitAllocator(
+    final G in_gc)
     throws JCGLException
   {
-    this.gc = gi.getGLCommon();
-    this.units = this.gc.textureGetUnits();
+    NullCheck.notNull(in_gc, "GL interface");
+    this.gc_textures_cube = in_gc;
+    this.gc_textures2d = in_gc;
+    this.units = in_gc.textureGetUnits();
     this.allocated = 0;
     this.in_use = false;
   }
@@ -209,26 +213,27 @@ public final class KTextureUnitAllocator implements
     this.allocated -= x;
   }
 
-  protected @Nonnull TextureUnit texturesUnitGet(
+  protected TextureUnitType texturesUnitGet(
     final int index)
-    throws ConstraintError
+    throws RException
   {
-    Constraints.constrainArbitrary(
-      KTextureUnitAllocator.this.hasEnoughUnits(index + 1),
-      "Enough texture units available");
+    if (KTextureUnitAllocator.this.hasEnoughUnits(index + 1) == false) {
+      throw RException.notEnoughTextureUnits(index + 1, this.units.size());
+    }
 
-    return this.units.get(index);
+    final TextureUnitType r = this.units.get(index);
+    assert r != null;
+    return r;
   }
 
   @Override public void withContext(
-    final @Nonnull KTextureUnitWithType f)
+    final KTextureUnitWithType f)
     throws JCGLException,
-      ConstraintError,
       RException
   {
-    Constraints.constrainArbitrary(
-      this.in_use == false,
-      "Allocator not already in use");
+    if (this.in_use) {
+      throw RException.fromAPIMisuse("Allocator is already in use");
+    }
 
     try {
       this.in_use = true;

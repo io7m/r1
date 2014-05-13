@@ -18,9 +18,6 @@ package com.io7m.renderer.kernel.examples.scenes;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.examples.ExampleSceneBuilderType;
 import com.io7m.renderer.kernel.examples.ExampleSceneType;
 import com.io7m.renderer.kernel.examples.ExampleSceneUtilities;
@@ -56,9 +53,8 @@ public final class SLSpecular2 implements ExampleSceneType
   }
 
   @Override public void exampleScene(
-    final @Nonnull ExampleSceneBuilderType scene)
-    throws ConstraintError,
-      RException
+    final ExampleSceneBuilderType scene)
+    throws RException
   {
     final KMaterialOpaqueRegular material =
       ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE

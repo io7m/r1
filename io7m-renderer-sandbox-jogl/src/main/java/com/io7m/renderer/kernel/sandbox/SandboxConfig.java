@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,32 +17,27 @@
 package com.io7m.renderer.kernel.sandbox;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.PropertyUtils;
-import com.io7m.jaux.PropertyUtils.ValueIncorrectType;
-import com.io7m.jaux.PropertyUtils.ValueNotFound;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jproperties.JProperties;
+import com.io7m.jproperties.JPropertyException;
 
 public final class SandboxConfig
 {
-  public static @Nonnull SandboxConfig fromProperties(
-    final @Nonnull Properties props)
-    throws ConstraintError,
-      ValueNotFound,
-      ValueIncorrectType
+  public static SandboxConfig fromProperties(
+    final Properties props)
+    throws JPropertyException
   {
     return new SandboxConfig(props);
   }
 
   private static Set<String> split(
-    final @Nonnull String text)
+    final String text)
   {
     final HashSet<String> names = new HashSet<String>();
     final String[] segments = text.split("\\s+");
@@ -52,74 +47,72 @@ public final class SandboxConfig
     return names;
   }
 
-  private final @Nonnull Set<String>     hide_extensions;
-  private final boolean                  opengl_debug;
-  private final boolean                  opengl_trace;
-  private final @Nonnull SBOpenGLProfile profile;
-  private final @Nonnull Properties      props;
-  private final long                     restrict_units;
-  private final @Nonnull File            shader_archive_debug_file;
-  private final @Nonnull File            shader_archive_depth_file;
-  private final @Nonnull File            shader_archive_forward_file;
-  private final @Nonnull File            shader_archive_postprocessing_file;
+  private final Set<String>     hide_extensions;
+  private final boolean         opengl_debug;
+  private final boolean         opengl_trace;
+  private final SBOpenGLProfile profile;
+  private final Properties      props;
+  private final long            restrict_units;
+  private final File            shader_archive_debug_file;
+  private final File            shader_archive_depth_file;
+  private final File            shader_archive_forward_file;
+  private final File            shader_archive_postprocessing_file;
 
   public SandboxConfig(
-    final @Nonnull Properties in_props)
-    throws ConstraintError,
-      ValueNotFound,
-      ValueIncorrectType
+    final Properties in_props)
+    throws JPropertyException
   {
-    this.props = Constraints.constrainNotNull(in_props, "Properties");
+    this.props = NullCheck.notNull(in_props, "Properties");
 
     this.shader_archive_debug_file =
-      new File(PropertyUtils.getString(
+      new File(JProperties.getString(
         in_props,
         "com.io7m.renderer.sandbox.shaders.debug"));
     this.shader_archive_depth_file =
-      new File(PropertyUtils.getString(
+      new File(JProperties.getString(
         in_props,
         "com.io7m.renderer.sandbox.shaders.depth"));
     this.shader_archive_forward_file =
-      new File(PropertyUtils.getString(
+      new File(JProperties.getString(
         in_props,
         "com.io7m.renderer.sandbox.shaders.forward"));
     this.shader_archive_postprocessing_file =
-      new File(PropertyUtils.getString(
+      new File(JProperties.getString(
         in_props,
         "com.io7m.renderer.sandbox.shaders.postprocessing"));
 
     this.opengl_debug =
-      PropertyUtils.getOptionalBoolean(
+      JProperties.getBooleanOptional(
         in_props,
         "com.io7m.renderer.sandbox.opengl.debug",
         true);
     this.opengl_trace =
-      PropertyUtils.getOptionalBoolean(
+      JProperties.getBooleanOptional(
         in_props,
         "com.io7m.renderer.sandbox.opengl.trace",
         false);
     this.hide_extensions =
-      SandboxConfig.split(PropertyUtils.getOptionalString(
+      SandboxConfig.split(JProperties.getStringOptional(
         in_props,
         "com.io7m.renderer.sandbox.opengl.hide_extensions",
         ""));
     this.restrict_units =
-      PropertyUtils.getOptionalInteger(
+      JProperties.getBigIntegerOptional(
         in_props,
         "com.io7m.renderer.sandbox.opengl.texture_units",
-        -1);
+        BigInteger.valueOf(-1)).intValue();
     this.profile =
-      SBOpenGLProfile.fromString(PropertyUtils.getString(
+      SBOpenGLProfile.fromString(JProperties.getString(
         in_props,
         "com.io7m.renderer.sandbox.opengl.profile"));
   }
 
-  public @Nonnull Set<String> getOpenGLHideExtensions()
+  public Set<String> getOpenGLHideExtensions()
   {
     return Collections.unmodifiableSet(this.hide_extensions);
   }
 
-  public @Nonnull SBOpenGLProfile getOpenGLProfile()
+  public SBOpenGLProfile getOpenGLProfile()
   {
     return this.profile;
   }
@@ -129,22 +122,22 @@ public final class SandboxConfig
     return this.restrict_units;
   }
 
-  public @Nonnull File getShaderArchiveDebugFile()
+  public File getShaderArchiveDebugFile()
   {
     return this.shader_archive_debug_file;
   }
 
-  public @Nonnull File getShaderArchiveDepthFile()
+  public File getShaderArchiveDepthFile()
   {
     return this.shader_archive_depth_file;
   }
 
-  public @Nonnull File getShaderArchiveForwardFile()
+  public File getShaderArchiveForwardFile()
   {
     return this.shader_archive_forward_file;
   }
 
-  public @Nonnull File getShaderArchivePostprocessingFile()
+  public File getShaderArchivePostprocessingFile()
   {
     return this.shader_archive_postprocessing_file;
   }

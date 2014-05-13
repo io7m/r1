@@ -22,11 +22,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.SortedSet;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 import nu.xom.Builder;
 import nu.xom.Document;
@@ -43,8 +41,12 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogPolicyProperties;
+import com.io7m.jlog.LogPolicyType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
+import com.io7m.jproperties.JPropertyException;
 import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.collada.ColladaDocument;
 import com.io7m.renderer.xml.collada.ColladaGeometry;
@@ -52,17 +54,17 @@ import com.io7m.renderer.xml.collada.ColladaGeometryID;
 
 public final class ColladaToRMX
 {
-  private static final @Nonnull String PROGRAM = "collada-to-rmx";
+  private static final String PROGRAM = "collada-to-rmx";
 
   private static class ExportConfig
   {
     public ExportConfig(
-      final @Nonnull File in_input,
-      final @CheckForNull File in_output,
-      final @Nonnull String in_mesh_name,
+      final File in_input,
+      final @Nullable File in_output,
+      final String in_mesh_name,
       final boolean in_tangents,
       final boolean in_bitangents,
-      final @CheckForNull String in_output_mesh_name)
+      final @Nullable String in_output_mesh_name)
     {
       this.input = in_input;
       this.output = in_output;
@@ -72,23 +74,24 @@ public final class ColladaToRMX
       this.output_mesh_name = in_output_mesh_name;
     }
 
-    final @Nonnull File        input;
-    final @CheckForNull File   output;
-    final @Nonnull String      mesh_name;
-    final boolean              tangents;
-    final boolean              bitangents;
-    final @CheckForNull String output_mesh_name;
+    final File             input;
+    final @Nullable File   output;
+    final String           mesh_name;
+    final boolean          tangents;
+    final boolean          bitangents;
+    final @Nullable String output_mesh_name;
   }
 
   public static void main(
     final String args[])
+    throws JPropertyException
   {
     final Options o = ColladaToRMX.makeOptions();
 
     try {
       final PosixParser parser = new PosixParser();
       final CommandLine line = parser.parse(o, args);
-      final Log log = ColladaToRMX.getLog(line.hasOption("debug"));
+      final LogUsableType log = ColladaToRMX.getLog(line.hasOption("debug"));
 
       if (line.hasOption("help")) {
         ColladaToRMX.showHelp(o);
@@ -112,6 +115,7 @@ public final class ColladaToRMX
         final boolean tangents = line.hasOption("tangents");
         final boolean bitangents = line.hasOption("bitangents");
 
+        assert mesh_name != null;
         final ExportConfig config =
           new ExportConfig(
             input,
@@ -135,20 +139,16 @@ public final class ColladaToRMX
       System.err.println("fatal: i/o error: " + e.getMessage());
     } catch (final RXMLException e) {
       System.err.println("fatal: XML validity error: " + e.getMessage());
-    } catch (final ConstraintError e) {
-      e.printStackTrace();
-      System.err.println("fatal: constraint error: " + e.getMessage());
     }
   }
 
   private static void commandExportFile(
-    final @Nonnull Log log,
-    final @Nonnull ExportConfig config)
+    final LogUsableType log,
+    final ExportConfig config)
     throws ValidityException,
       ParsingException,
       IOException,
-      RXMLException,
-      ConstraintError
+      RXMLException
   {
     final Document doc = ColladaToRMX.getDocument(config.input);
     doc.setBaseURI(config.input.toURI().toString());
@@ -158,20 +158,17 @@ public final class ColladaToRMX
     final ColladaGeometry geo = cdoc.getGeometry(gid);
 
     if (geo == null) {
-      throw new ConstraintError("Mesh '" + gid + "' does not exist");
+      throw new NoSuchElementException("Mesh '" + gid + "' does not exist");
     }
 
     final MeshBasicColladaImporter importer =
       new MeshBasicColladaImporter(log);
 
     MeshBasic basic = null;
-    if (config.output_mesh_name != null) {
-      log.debug("Using mesh name '" + config.output_mesh_name + "'");
-      basic =
-        importer.newMeshFromColladaGeometryWithName(
-          cdoc,
-          geo,
-          config.output_mesh_name);
+    final String m_name = config.output_mesh_name;
+    if (m_name != null) {
+      log.debug("Using mesh name '" + m_name + "'");
+      basic = importer.newMeshFromColladaGeometryWithName(cdoc, geo, m_name);
     } else {
       basic = importer.newMeshFromColladaGeometry(cdoc, geo);
     }
@@ -211,13 +208,12 @@ public final class ColladaToRMX
   }
 
   private static void commandListFile(
-    final @Nonnull Log log,
-    final @Nonnull File input)
+    final LogUsableType log,
+    final File input)
     throws ValidityException,
       ParsingException,
       IOException,
-      RXMLException,
-      ConstraintError
+      RXMLException
   {
     final Document doc = ColladaToRMX.getDocument(input);
     doc.setBaseURI(input.toURI().toString());
@@ -230,7 +226,7 @@ public final class ColladaToRMX
   }
 
   private static Document getDocument(
-    final @Nonnull File input)
+    final File input)
     throws ValidityException,
       ParsingException,
       IOException
@@ -238,22 +234,27 @@ public final class ColladaToRMX
     final FileInputStream stream = new FileInputStream(input);
     final Builder b = new Builder();
     final Document doc = b.build(stream);
+    assert doc != null;
     stream.close();
     return doc;
   }
 
-  public static @Nonnull Log getLog(
+  public static LogUsableType getLog(
     final boolean debug)
+    throws JPropertyException
   {
     final Properties p = new Properties();
     p.setProperty("com.io7m.renderer.level.collada-to-rmx", "LOG_DEBUG");
     p.setProperty(
       "com.io7m.renderer.logs.collada-to-rmx",
       Boolean.toString(debug));
-    return new Log(p, "com.io7m.renderer", "collada-to-rmx");
+
+    final LogPolicyType policy =
+      LogPolicyProperties.newPolicy(p, "com.io7m.renderer");
+    return Log.newLog(policy, "collada-to-rmx");
   }
 
-  private static @Nonnull Options makeOptions()
+  private static Options makeOptions()
   {
     final Options os = new Options();
     os.addOption("h", "help", false, "Show this message");
@@ -331,7 +332,7 @@ public final class ColladaToRMX
   }
 
   private static void showHelp(
-    final @Nonnull Options o)
+    final Options o)
   {
     final HelpFormatter formatter = new HelpFormatter();
     final PrintWriter pw = new PrintWriter(System.err);

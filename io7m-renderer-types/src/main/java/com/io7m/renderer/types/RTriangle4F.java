@@ -16,11 +16,11 @@
 
 package com.io7m.renderer.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.PartialFunction;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jfunctional.PartialFunctionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.NullCheckException;
+import com.io7m.jnull.Nullable;
 
 /**
  * An immutable triangle with four-dimensional (likely homogeneous) points
@@ -30,7 +30,7 @@ import com.io7m.jaux.functional.PartialFunction;
  *          The coordinate space in which the points exist
  */
 
-public final class RTriangle4F<S extends RSpaceType>
+@EqualityStructural public final class RTriangle4F<S extends RSpaceType>
 {
   /**
    * Construct a new triangle with the given points.
@@ -44,36 +44,32 @@ public final class RTriangle4F<S extends RSpaceType>
    * @return A new triangle
    * @param <S>
    *          The coordinate space in which the given points exist
-   * @throws ConstraintError
-   *           Iff any parameter is <code>null</code>
    */
 
-  public static @Nonnull <S extends RSpaceType> RTriangle4F<S> newTriangle(
-    final @Nonnull RVectorI4F<S> in_p0,
-    final @Nonnull RVectorI4F<S> in_p1,
-    final @Nonnull RVectorI4F<S> in_p2)
-    throws ConstraintError
+  public static <S extends RSpaceType> RTriangle4F<S> newTriangle(
+    final RVectorI4F<S> in_p0,
+    final RVectorI4F<S> in_p1,
+    final RVectorI4F<S> in_p2)
   {
     return new RTriangle4F<S>(in_p0, in_p1, in_p2);
   }
 
-  private final @Nonnull RVectorI4F<S> p0;
-  private final @Nonnull RVectorI4F<S> p1;
-  private final @Nonnull RVectorI4F<S> p2;
+  private final RVectorI4F<S> p0;
+  private final RVectorI4F<S> p1;
+  private final RVectorI4F<S> p2;
 
   private RTriangle4F(
-    final @Nonnull RVectorI4F<S> in_p0,
-    final @Nonnull RVectorI4F<S> in_p1,
-    final @Nonnull RVectorI4F<S> in_p2)
-    throws ConstraintError
+    final RVectorI4F<S> in_p0,
+    final RVectorI4F<S> in_p1,
+    final RVectorI4F<S> in_p2)
   {
-    this.p0 = Constraints.constrainNotNull(in_p0, "Point 0");
-    this.p1 = Constraints.constrainNotNull(in_p1, "Point 1");
-    this.p2 = Constraints.constrainNotNull(in_p2, "Point 2");
+    this.p0 = NullCheck.notNull(in_p0, "Point 0");
+    this.p1 = NullCheck.notNull(in_p1, "Point 1");
+    this.p2 = NullCheck.notNull(in_p2, "Point 2");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -94,7 +90,7 @@ public final class RTriangle4F<S extends RSpaceType>
    * @return Point 0 of the triangle
    */
 
-  public @Nonnull RVectorI4F<S> getP0()
+  public RVectorI4F<S> getP0()
   {
     return this.p0;
   }
@@ -103,7 +99,7 @@ public final class RTriangle4F<S extends RSpaceType>
    * @return Point 1 of the triangle
    */
 
-  public @Nonnull RVectorI4F<S> getP1()
+  public RVectorI4F<S> getP1()
   {
     return this.p1;
   }
@@ -112,7 +108,7 @@ public final class RTriangle4F<S extends RSpaceType>
    * @return Point 2 of the triangle
    */
 
-  public @Nonnull RVectorI4F<S> getP2()
+  public RVectorI4F<S> getP2()
   {
     return this.p2;
   }
@@ -137,7 +133,9 @@ public final class RTriangle4F<S extends RSpaceType>
     builder.append(" ");
     builder.append(this.p2);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 
   /**
@@ -149,19 +147,15 @@ public final class RTriangle4F<S extends RSpaceType>
    * @param transform
    *          The transform function
    * @return A triangle in space <code>T</code>
-   * @throws ConstraintError
-   *           Iff any parameter is <code>null</code> or
-   *           <code>transform</code> raises <code>ConstraintError</code>
    */
 
-  public @Nonnull
+  public
     <T extends RSpaceType>
     RTriangle4F<T>
     transform(
-      final @Nonnull PartialFunction<RVectorI4F<S>, RVectorI4F<T>, ConstraintError> transform)
-      throws ConstraintError
+      final PartialFunctionType<RVectorI4F<S>, RVectorI4F<T>, NullCheckException> transform)
   {
-    Constraints.constrainNotNull(transform, "Transform");
+    NullCheck.notNull(transform, "Transform");
     return new RTriangle4F<T>(
       transform.call(this.p0),
       transform.call(this.p1),

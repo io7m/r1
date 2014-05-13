@@ -20,8 +20,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -30,12 +28,12 @@ import javax.swing.JLabel;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.RangeInclusive;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.renderer.kernel.KCopyParameters;
 import com.io7m.renderer.kernel.KFramebufferRGBACacheType;
 import com.io7m.renderer.kernel.KFramebufferRGBAUsableType;
@@ -52,19 +50,18 @@ public final class SBKPostprocessorCopy
   private static final class AreaControls implements
     SBControlsDataType<KCopyParameters>
   {
-    private final @Nonnull SBIntegerHSlider source_x0;
-    private final @Nonnull SBIntegerHSlider source_y0;
-    private final @Nonnull SBIntegerHSlider source_x1;
-    private final @Nonnull SBIntegerHSlider source_y1;
-    private final @Nonnull SBIntegerHSlider target_x0;
-    private final @Nonnull SBIntegerHSlider target_y0;
-    private final @Nonnull SBIntegerHSlider target_x1;
-    private final @Nonnull SBIntegerHSlider target_y1;
-    private final @Nonnull JCheckBox        blit;
-    private final @Nonnull RowGroup         group;
+    private final SBIntegerHSlider source_x0;
+    private final SBIntegerHSlider source_y0;
+    private final SBIntegerHSlider source_x1;
+    private final SBIntegerHSlider source_y1;
+    private final SBIntegerHSlider target_x0;
+    private final SBIntegerHSlider target_y0;
+    private final SBIntegerHSlider target_x1;
+    private final SBIntegerHSlider target_y1;
+    private final JCheckBox        blit;
+    private final RowGroup         group;
 
     public AreaControls()
-      throws ConstraintError
     {
       this.group = new RowGroup();
       this.source_x0 = new SBIntegerHSlider("Source X0", 0, 1000);
@@ -89,7 +86,7 @@ public final class SBKPostprocessorCopy
     }
 
     @Override public void controlsAddToLayout(
-      final @Nonnull DesignGridLayout layout)
+      final DesignGridLayout layout)
     {
       layout
         .row()
@@ -155,7 +152,7 @@ public final class SBKPostprocessorCopy
     }
 
     @Override public void controlsLoadFrom(
-      final @Nonnull KCopyParameters t)
+      final KCopyParameters t)
     {
       final AreaInclusive ss = t.getSourceSelect();
       final AreaInclusive ts = t.getTargetSelect();
@@ -174,20 +171,19 @@ public final class SBKPostprocessorCopy
     }
 
     @Override public KCopyParameters controlsSave()
-      throws SBExceptionInputError,
-        ConstraintError
+      throws SBExceptionInputError
     {
       final AreaInclusive ss =
-        new AreaInclusive(new RangeInclusive(
+        new AreaInclusive(new RangeInclusiveL(
           this.source_x0.getCurrent(),
-          this.source_x1.getCurrent()), new RangeInclusive(
+          this.source_x1.getCurrent()), new RangeInclusiveL(
           this.source_y0.getCurrent(),
           this.source_y1.getCurrent()));
 
       final AreaInclusive ts =
-        new AreaInclusive(new RangeInclusive(
+        new AreaInclusive(new RangeInclusiveL(
           this.target_x0.getCurrent(),
-          this.target_x1.getCurrent()), new RangeInclusive(
+          this.target_x1.getCurrent()), new RangeInclusiveL(
           this.target_y0.getCurrent(),
           this.target_y1.getCurrent()));
 
@@ -198,19 +194,18 @@ public final class SBKPostprocessorCopy
   @SuppressWarnings("synthetic-access") private static final class ControlWindow extends
     JFrame
   {
-    private static final long                               serialVersionUID =
-                                                                               5947463765253062623L;
-    private final @Nonnull JButton                          apply;
-    private final @Nonnull SBSceneControllerRendererControl controller;
-    private final @Nonnull AreaControls                     controls;
-    private final @Nonnull JButton                          ok;
+    private static final long                      serialVersionUID =
+                                                                      5947463765253062623L;
+    private final JButton                          apply;
+    private final SBSceneControllerRendererControl controller;
+    private final AreaControls                     controls;
+    private final JButton                          ok;
 
     ControlWindow(
-      final @Nonnull SBSceneControllerRendererControl in_controller,
-      final @Nonnull Postprocessor proc,
-      final @Nonnull AtomicReference<KCopyParameters> data)
-      throws ConstraintError,
-        SBExceptionInputError
+      final SBSceneControllerRendererControl in_controller,
+      final Postprocessor proc,
+      final AtomicReference<KCopyParameters> data)
+      throws SBExceptionInputError
     {
       this.controller = in_controller;
       this.controls = new AreaControls();
@@ -219,15 +214,12 @@ public final class SBKPostprocessorCopy
       this.apply = new JButton("Apply");
       this.apply.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           try {
             data.set(ControlWindow.this.controls.controlsSave());
             ControlWindow.this.sendPostprocessor(proc);
           } catch (final SBExceptionInputError x) {
-            // TODO Auto-generated catch block
-            x.printStackTrace();
-          } catch (final ConstraintError x) {
             // TODO Auto-generated catch block
             x.printStackTrace();
           }
@@ -237,16 +229,13 @@ public final class SBKPostprocessorCopy
       this.ok = new JButton("OK");
       this.ok.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           try {
             data.set(ControlWindow.this.controls.controlsSave());
             ControlWindow.this.sendPostprocessor(proc);
             SBWindowUtilities.closeWindow(ControlWindow.this);
           } catch (final SBExceptionInputError x) {
-            // TODO Auto-generated catch block
-            x.printStackTrace();
-          } catch (final ConstraintError x) {
             // TODO Auto-generated catch block
             x.printStackTrace();
           }
@@ -269,25 +258,24 @@ public final class SBKPostprocessorCopy
 
   private static final class Postprocessor implements SBKPostprocessor
   {
-    private final @Nonnull AtomicReference<KCopyParameters> data;
-    private @CheckForNull KPostprocessorCopyRGBA            proc;
-    private @CheckForNull KUnitQuad                         quad;
-    private @CheckForNull KRegionCopierType                 copier;
+    private final AtomicReference<KCopyParameters> data;
+    private @Nullable KPostprocessorCopyRGBA       proc;
+    private @Nullable KUnitQuad                    quad;
+    private @Nullable KRegionCopierType            copier;
 
     public Postprocessor(
-      final @Nonnull AtomicReference<KCopyParameters> in_data)
+      final AtomicReference<KCopyParameters> in_data)
     {
       this.proc = null;
       this.data = in_data;
     }
 
     @Override public void postprocessorInitialize(
-      final JCGLImplementation gi,
+      final JCGLImplementationType gi,
       final KFramebufferRGBACacheType rgba_cache,
       final KShaderCacheType shader_cache,
-      final Log log)
-      throws RException,
-        ConstraintError
+      final LogUsableType log)
+      throws RException
     {
       try {
         this.quad = KUnitQuad.newQuad(gi.getGLCommon(), log);
@@ -309,38 +297,31 @@ public final class SBKPostprocessorCopy
     }
 
     @Override public void postprocessorRun(
-      final @Nonnull KFramebufferRGBAUsableType input,
-      final @Nonnull KFramebufferRGBAUsableType output)
-      throws RException,
-        ConstraintError
+      final KFramebufferRGBAUsableType input,
+      final KFramebufferRGBAUsableType output)
+      throws RException
     {
-      try {
-        final KCopyParameters params = this.data.get();
-        if (this.proc != null) {
-          this.proc.postprocessorEvaluateRGBA(params, input, output);
-        }
-      } catch (final ConstraintError e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      final KCopyParameters params = this.data.get();
+      if (this.proc != null) {
+        this.proc.postprocessorEvaluateRGBA(params, input, output);
       }
     }
   }
 
-  private final @Nonnull AtomicReference<KCopyParameters> data;
-  private final @Nonnull Postprocessor                    postprocessor;
-  private final @Nonnull ControlWindow                    window;
+  private final AtomicReference<KCopyParameters> data;
+  private final Postprocessor                    postprocessor;
+  private final ControlWindow                    window;
 
   public SBKPostprocessorCopy(
-    final @Nonnull SBSceneControllerRendererControl control)
-    throws ConstraintError,
-      SBExceptionInputError
+    final SBSceneControllerRendererControl control)
+    throws SBExceptionInputError
   {
     this.data = new AtomicReference<KCopyParameters>(null);
     this.postprocessor = new Postprocessor(this.data);
     this.window = new ControlWindow(control, this.postprocessor, this.data);
   }
 
-  public @Nonnull JFrame getWindow()
+  public JFrame getWindow()
   {
     return this.window;
   }

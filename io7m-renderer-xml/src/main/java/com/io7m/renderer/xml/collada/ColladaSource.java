@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,33 +20,29 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI3F;
 
-@Immutable public abstract class ColladaSource
+public abstract class ColladaSource
 {
-  @Immutable public static final class ColladaSourceArray2F extends
-    ColladaSource
+  public static final class ColladaSourceArray2F extends ColladaSource
   {
-    private final @Nonnull ArrayList<VectorI2F> array_2f;
+    private final ArrayList<VectorI2F> array_2f;
 
     @SuppressWarnings("synthetic-access") public ColladaSourceArray2F(
-      final @Nonnull ColladaSourceID id,
-      final @Nonnull ColladaAxis axis)
-      throws ConstraintError
+      final ColladaSourceID id,
+      final ColladaAxis axis)
     {
       super(Type.SOURCE_TYPE_VECTOR_2F, id, axis);
       this.array_2f = new ArrayList<VectorI2F>();
     }
 
-    public @Nonnull List<VectorI2F> getArray2f()
+    public List<VectorI2F> getArray2f()
     {
-      return Collections.unmodifiableList(this.array_2f);
+      final List<VectorI2F> r = Collections.unmodifiableList(this.array_2f);
+      assert r != null;
+      return r;
     }
 
     public void put2f(
@@ -62,23 +58,23 @@ import com.io7m.jtensors.VectorI3F;
     }
   }
 
-  @Immutable public static final class ColladaSourceArray3F extends
-    ColladaSource
+  public static final class ColladaSourceArray3F extends ColladaSource
   {
-    private final @Nonnull ArrayList<VectorI3F> array_3f;
+    private final ArrayList<VectorI3F> array_3f;
 
     @SuppressWarnings("synthetic-access") public ColladaSourceArray3F(
-      final @Nonnull ColladaSourceID id,
-      final @Nonnull ColladaAxis axis)
-      throws ConstraintError
+      final ColladaSourceID id,
+      final ColladaAxis axis)
     {
       super(Type.SOURCE_TYPE_VECTOR_3F, id, axis);
       this.array_3f = new ArrayList<VectorI3F>();
     }
 
-    public @Nonnull List<VectorI3F> getArray3f()
+    public List<VectorI3F> getArray3f()
     {
-      return Collections.unmodifiableList(this.array_3f);
+      final List<VectorI3F> r = Collections.unmodifiableList(this.array_3f);
+      assert r != null;
+      return r;
     }
 
     public void put3f(
@@ -100,23 +96,24 @@ import com.io7m.jtensors.VectorI3F;
    * uses it as a "source" throughout.
    */
 
-  @Immutable public static final class ColladaVertices extends ColladaSource
+  public static final class ColladaVertices extends ColladaSource
   {
-    private final @Nonnull List<ColladaInput> inputs;
+    private final List<ColladaInput> inputs;
 
     @SuppressWarnings("synthetic-access") public ColladaVertices(
-      final @Nonnull ColladaSourceID id,
-      final @Nonnull List<ColladaInput> in_inputs,
-      final @Nonnull ColladaAxis axis)
-      throws ConstraintError
+      final ColladaSourceID id,
+      final List<ColladaInput> in_inputs,
+      final ColladaAxis axis)
     {
       super(Type.SOURCE_VERTICES, id, axis);
-      this.inputs = Constraints.constrainNotNull(in_inputs, "Inputs");
+      this.inputs = NullCheck.notNullAll(in_inputs, "Inputs");
     }
 
-    public @Nonnull List<ColladaInput> getInputs()
+    public List<ColladaInput> getInputs()
     {
-      return Collections.unmodifiableList(this.inputs);
+      final List<ColladaInput> r = Collections.unmodifiableList(this.inputs);
+      assert r != null;
+      return r;
     }
 
     @Override public String toString()
@@ -125,7 +122,9 @@ import com.io7m.jtensors.VectorI3F;
       builder.append("[ColladaVertices ");
       builder.append(this.inputs);
       builder.append("]");
-      return builder.toString();
+      final String r = builder.toString();
+      assert r != null;
+      return r;
     }
   }
 
@@ -136,32 +135,31 @@ import com.io7m.jtensors.VectorI3F;
     SOURCE_VERTICES,
   }
 
-  private final @Nonnull ColladaSourceID id;
-  private final @Nonnull Type            type;
-  private final @Nonnull ColladaAxis     axis;
+  private final ColladaSourceID id;
+  private final Type            type;
+  private final ColladaAxis     axis;
 
   private ColladaSource(
-    final @Nonnull Type in_type,
-    final @Nonnull ColladaSourceID in_id,
-    final @Nonnull ColladaAxis in_axis)
-    throws ConstraintError
+    final Type in_type,
+    final ColladaSourceID in_id,
+    final ColladaAxis in_axis)
   {
-    this.id = Constraints.constrainNotNull(in_id, "ID");
-    this.type = Constraints.constrainNotNull(in_type, "Type");
-    this.axis = Constraints.constrainNotNull(in_axis, "Axis");
+    this.id = NullCheck.notNull(in_id, "ID");
+    this.type = NullCheck.notNull(in_type, "Type");
+    this.axis = NullCheck.notNull(in_axis, "Axis");
   }
 
-  public @Nonnull ColladaAxis getAxis()
+  public ColladaAxis getAxis()
   {
     return this.axis;
   }
 
-  public final @Nonnull ColladaSourceID getID()
+  public final ColladaSourceID getID()
   {
     return this.id;
   }
 
-  public final @Nonnull Type getType()
+  public final Type getType()
   {
     return this.type;
   }

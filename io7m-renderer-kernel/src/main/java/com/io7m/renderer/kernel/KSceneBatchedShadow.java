@@ -21,14 +21,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
-import com.io7m.renderer.kernel.types.KScene;
+import com.io7m.renderer.kernel.types.KSceneShadows;
 
 /**
  * A scene with the instances batched for shadow map rendering.
@@ -36,6 +34,7 @@ import com.io7m.renderer.kernel.types.KScene;
 
 public final class KSceneBatchedShadow
 {
+
   /**
    * Batch all of the given shadow-casting instances by material label.
    * 
@@ -44,17 +43,14 @@ public final class KSceneBatchedShadow
    * @param depth_labels
    *          The label cache
    * @return Batched instances
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KSceneBatchedShadow newBatchedScene(
-    final @Nonnull KScene.KSceneShadows shadows,
-    final @Nonnull KMaterialDepthLabelCacheType depth_labels)
-    throws ConstraintError
+  public static KSceneBatchedShadow newBatchedScene(
+    final KSceneShadows shadows,
+    final KMaterialDepthLabelCacheType depth_labels)
   {
-    Constraints.constrainNotNull(shadows, "Shadows");
-    Constraints.constrainNotNull(depth_labels, "Depth label cache");
+    NullCheck.notNull(shadows, "Shadows");
+    NullCheck.notNull(depth_labels, "Depth label cache");
 
     final Map<KLightType, List<KInstanceTransformedOpaqueType>> casters =
       shadows.getShadowCasters();
@@ -91,12 +87,28 @@ public final class KSceneBatchedShadow
     return new KSceneBatchedShadow(batched_casters);
   }
 
-  private final @Nonnull Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>> shadow_casters;
+  private final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>> shadow_casters;
 
   private KSceneBatchedShadow(
-    final @Nonnull Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>> in_shadow_casters)
+    final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>> in_shadow_casters)
   {
     this.shadow_casters = in_shadow_casters;
+  }
+
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KSceneBatchedShadow other = (KSceneBatchedShadow) obj;
+    return (this.shadow_casters.equals(other.shadow_casters));
   }
 
   /**
@@ -104,10 +116,18 @@ public final class KSceneBatchedShadow
    *         for each light
    */
 
-  public @Nonnull
+  public
     Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>>
     getShadowCasters()
   {
     return this.shadow_casters;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.shadow_casters.hashCode();
+    return result;
   }
 }

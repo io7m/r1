@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -39,18 +36,16 @@ public interface KFramebufferDepthDescriptionVisitorType<T, E extends Throwable>
    * @param d
    *          The description
    * @return T value of type <code>T</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull T depthDescription(
-    final @Nonnull KFramebufferDepthDescription d)
+  T depthDescription(
+    final KFramebufferDepthDescription d)
     throws E,
-      ConstraintError,
       RException;
 
   /**
@@ -59,17 +54,15 @@ public interface KFramebufferDepthDescriptionVisitorType<T, E extends Throwable>
    * @param d
    *          The description
    * @return T value of type <code>T</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull T depthVarianceDescription(
-    final @Nonnull KFramebufferDepthVarianceDescription d)
+  T depthVarianceDescription(
+    final KFramebufferDepthVarianceDescription d)
     throws E,
-      ConstraintError,
       RException;
 }

@@ -16,15 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueUnlitLabel;
 
 interface KMaterialForwardOpaqueUnlitLabelCacheType
 {
-  @Nonnull KMaterialForwardOpaqueUnlitLabel getForwardLabelOpaqueUnlit(
-    final @Nonnull KInstanceOpaqueType instance)
-    throws ConstraintError;
+  KMaterialForwardOpaqueUnlitLabel getForwardLabelOpaqueUnlit(
+    final KInstanceOpaqueType instance);
 }

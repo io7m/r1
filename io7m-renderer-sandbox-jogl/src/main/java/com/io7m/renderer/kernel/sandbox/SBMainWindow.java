@@ -25,15 +25,12 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 
-import javax.annotation.Nonnull;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLException;
 import javax.media.opengl.GLProfile;
@@ -51,19 +48,22 @@ import javax.swing.JSeparator;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileFilter;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jlog.Callbacks;
-import com.io7m.jlog.Level;
-import com.io7m.jlog.Log;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jlog.LogCallbackType;
+import com.io7m.jlog.LogConfigReadableType;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.jogamp.opengl.util.Animator;
 
 final class SBMainWindow extends JFrame
 {
-  protected final static @Nonnull FileFilter SCENE_FILTER;
+  protected final static FileFilter SCENE_FILTER;
 
-  private static final long                  serialVersionUID;
+  private static final long         serialVersionUID;
 
   static {
     serialVersionUID = -4478810823021843490L;
@@ -72,8 +72,9 @@ final class SBMainWindow extends JFrame
   static {
     SCENE_FILTER = new FileFilter() {
       @Override public boolean accept(
-        final File f)
+        final @Nullable File f)
       {
+        assert f != null;
         return f.isDirectory() || f.toString().endsWith(".zs");
       }
 
@@ -84,8 +85,8 @@ final class SBMainWindow extends JFrame
     };
   }
 
-  private static @Nonnull GLProfile getGLProfile(
-    final @Nonnull SandboxConfig config)
+  private static GLProfile getGLProfile(
+    final SandboxConfig config)
   {
     switch (config.getOpenGLProfile()) {
       case OPENGL_PROFILE_DEFAULT:
@@ -105,21 +106,20 @@ final class SBMainWindow extends JFrame
     throw new UnreachableCodeException();
   }
 
-  private static @Nonnull
+  private static
     <C extends SBSceneControllerRendererControl & SBSceneControllerIO & SBSceneControllerShaders>
     JMenuBar
     makeMenuBar(
-      final @Nonnull C controller,
-      final @Nonnull SBMainWindow window,
-      final @Nonnull SBCameraWindow camera_window,
-      final @Nonnull SBLightsWindow lights_window,
-      final @Nonnull SBLogsWindow logs_window,
-      final @Nonnull SBStatisticsWindow stats_window,
-      final @Nonnull SBMaterialsWindow materials_window,
-      final @Nonnull SBInstancesWindow instances_window,
-      final @Nonnull Log log)
-      throws ConstraintError,
-        SBExceptionInputError
+      final C controller,
+      final SBMainWindow window,
+      final SBCameraWindow camera_window,
+      final SBLightsWindow lights_window,
+      final SBLogsWindow logs_window,
+      final SBStatisticsWindow stats_window,
+      final SBMaterialsWindow materials_window,
+      final SBInstancesWindow instances_window,
+      final LogUsableType log)
+      throws SBExceptionInputError
   {
     final JMenuBar bar = new JMenuBar();
     bar.add(SBMainWindow.makeMenuFile(controller, window, log));
@@ -134,9 +134,9 @@ final class SBMainWindow extends JFrame
     return bar;
   }
 
-  private static @Nonnull JMenu makeMenuDebug(
-    final @Nonnull SBLogsWindow log_window,
-    final @Nonnull SBStatisticsWindow stats_window)
+  private static JMenu makeMenuDebug(
+    final SBLogsWindow log_window,
+    final SBStatisticsWindow stats_window)
   {
     final JMenu menu = new JMenu("Debug");
 
@@ -151,21 +151,21 @@ final class SBMainWindow extends JFrame
   }
 
   private static JCheckBoxMenuItem makeMenuDebugLogsMenuItem(
-    final @Nonnull SBLogsWindow log_window)
+    final SBLogsWindow log_window)
   {
     return SBMainWindow.makeWindowCheckbox("Logs...", log_window);
   }
 
   private static JCheckBoxMenuItem makeMenuDebugStatisticsMenuItem(
-    final @Nonnull SBStatisticsWindow stats_window)
+    final SBStatisticsWindow stats_window)
   {
     return SBMainWindow.makeWindowCheckbox("Statistics...", stats_window);
   }
 
-  private static @Nonnull JMenu makeMenuEdit(
-    final @Nonnull SBLightsWindow lights_window,
-    final @Nonnull SBMaterialsWindow materials_window,
-    final @Nonnull SBInstancesWindow instances_window)
+  private static JMenu makeMenuEdit(
+    final SBLightsWindow lights_window,
+    final SBMaterialsWindow materials_window,
+    final SBInstancesWindow instances_window)
   {
     final JMenu menu = new JMenu("Edit");
 
@@ -182,36 +182,36 @@ final class SBMainWindow extends JFrame
     return menu;
   }
 
-  private static @Nonnull JCheckBoxMenuItem makeMenuEditLightsMenuItem(
-    final @Nonnull SBLightsWindow lights_window)
+  private static JCheckBoxMenuItem makeMenuEditLightsMenuItem(
+    final SBLightsWindow lights_window)
   {
     return SBMainWindow.makeWindowCheckbox("Lights...", lights_window);
   }
 
-  private static @Nonnull JCheckBoxMenuItem makeMenuEditInstancesMenuItem(
-    final @Nonnull SBInstancesWindow instances_window)
+  private static JCheckBoxMenuItem makeMenuEditInstancesMenuItem(
+    final SBInstancesWindow instances_window)
   {
     return SBMainWindow.makeWindowCheckbox("Instances...", instances_window);
   }
 
-  private static @Nonnull JCheckBoxMenuItem makeMenuEditMaterialsMenuItem(
-    final @Nonnull SBMaterialsWindow materials_window)
+  private static JCheckBoxMenuItem makeMenuEditMaterialsMenuItem(
+    final SBMaterialsWindow materials_window)
   {
     return SBMainWindow.makeWindowCheckbox("Materials...", materials_window);
   }
 
-  private static @Nonnull JCheckBoxMenuItem makeMenuEditShadersMenuItem(
-    final @Nonnull SBShadersWindow shaders_window)
+  private static JCheckBoxMenuItem makeMenuEditShadersMenuItem(
+    final SBShadersWindow shaders_window)
   {
     return SBMainWindow.makeWindowCheckbox(
       "ForwardShaders...",
       shaders_window);
   }
 
-  private static @Nonnull JMenu makeMenuFile(
-    final @Nonnull SBSceneControllerIO controller,
-    final @Nonnull SBMainWindow window,
-    final @Nonnull Log log)
+  private static JMenu makeMenuFile(
+    final SBSceneControllerIO controller,
+    final SBMainWindow window,
+    final LogUsableType log)
   {
     final JMenu menu = new JMenu("File");
 
@@ -221,7 +221,7 @@ final class SBMainWindow extends JFrame
     final JMenuItem open = new JMenuItem("Open...", KeyEvent.VK_O);
     open.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final JFileChooser chooser = new JFileChooser();
         chooser.setFileFilter(SBMainWindow.SCENE_FILTER);
@@ -231,16 +231,12 @@ final class SBMainWindow extends JFrame
         switch (r) {
           case JFileChooser.APPROVE_OPTION:
           {
-            final SwingWorker<Void, Void> worker =
-              new SwingWorker<Void, Void>() {
-                @Override protected Void doInBackground()
+            final SwingWorker<Unit, Unit> worker =
+              new SwingWorker<Unit, Unit>() {
+                @Override protected Unit doInBackground()
                   throws Exception
                 {
-                  try {
-                    return controller.ioLoadScene(selected).get();
-                  } catch (final ConstraintError x) {
-                    throw new IOException(x);
-                  }
+                  return controller.ioLoadScene(selected).get();
                 }
 
                 @SuppressWarnings("synthetic-access") @Override protected
@@ -283,7 +279,7 @@ final class SBMainWindow extends JFrame
     final JMenuItem save = new JMenuItem("Save...", KeyEvent.VK_S);
     save.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final JFileChooser chooser = new JFileChooser();
         chooser.setFileFilter(SBMainWindow.SCENE_FILTER);
@@ -292,18 +288,14 @@ final class SBMainWindow extends JFrame
         switch (r) {
           case JFileChooser.APPROVE_OPTION:
           {
-            final SwingWorker<Void, Void> worker =
-              new SwingWorker<Void, Void>() {
-                @Override protected Void doInBackground()
+            final SwingWorker<Unit, Unit> worker =
+              new SwingWorker<Unit, Unit>() {
+                @Override protected Unit doInBackground()
                   throws Exception
                 {
-                  try {
-                    return controller
-                      .ioSaveScene(chooser.getSelectedFile())
-                      .get();
-                  } catch (final ConstraintError x) {
-                    throw new IOException(x);
-                  }
+                  return controller
+                    .ioSaveScene(chooser.getSelectedFile())
+                    .get();
                 }
 
                 @Override protected void done()
@@ -339,7 +331,7 @@ final class SBMainWindow extends JFrame
     final JMenuItem quit = new JMenuItem("Quit");
     quit.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         SBWindowUtilities.closeWindow(window);
       }
@@ -354,13 +346,12 @@ final class SBMainWindow extends JFrame
     return menu;
   }
 
-  private static @Nonnull
+  private static
     <C extends SBSceneControllerRendererControl & SBSceneControllerShaders>
     JMenu
     makeMenuPostprocessor(
-      final @Nonnull C controller)
-      throws ConstraintError,
-        SBExceptionInputError
+      final C controller)
+      throws SBExceptionInputError
   {
     final ButtonGroup renderer_group = new ButtonGroup();
     final JMenu menu = new JMenu("Postprocessor");
@@ -392,20 +383,21 @@ final class SBMainWindow extends JFrame
     return menu;
   }
 
-  private static @Nonnull
+  private static
     <C extends SBSceneControllerRendererControl & SBSceneControllerShaders>
     JMenu
     makeMenuRenderer(
-      final @Nonnull C controller)
+      final C controller)
   {
     final ButtonGroup renderer_group = new ButtonGroup();
     final JMenu menu = new JMenu("Renderer");
 
-    for (final SBKRendererSelectionType type : SBKRendererSelectionType.values()) {
+    for (final SBKRendererSelectionType type : SBKRendererSelectionType
+      .values()) {
       final JRadioButtonMenuItem b = new JRadioButtonMenuItem(type.getName());
       b.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           controller.rendererSetType(type);
         }
@@ -418,16 +410,16 @@ final class SBMainWindow extends JFrame
     return menu;
   }
 
-  private static @Nonnull JMenu makeMenuView(
-    final @Nonnull SBCameraWindow camera_window,
-    final @Nonnull SBSceneControllerRendererControl controller)
+  private static JMenu makeMenuView(
+    final SBCameraWindow camera_window,
+    final SBSceneControllerRendererControl controller)
   {
     final JMenu menu = new JMenu("View");
 
     final JMenuItem bg_colour = new JMenuItem("Background colour...");
     bg_colour.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final Color c =
           JColorChooser
@@ -441,7 +433,7 @@ final class SBMainWindow extends JFrame
     axes.setSelected(true);
     axes.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         controller.rendererShowAxes(axes.isSelected());
       }
@@ -451,7 +443,7 @@ final class SBMainWindow extends JFrame
     grid.setSelected(true);
     grid.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         controller.rendererShowGrid(grid.isSelected());
       }
@@ -463,7 +455,7 @@ final class SBMainWindow extends JFrame
     lights.setSelected(true);
     lights.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         controller.rendererShowLights(lights.isSelected());
         lights_radii.setEnabled(lights.isSelected());
@@ -471,7 +463,7 @@ final class SBMainWindow extends JFrame
     });
     lights_radii.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         controller.rendererShowLightRadii(lights_radii.isSelected());
       }
@@ -491,9 +483,9 @@ final class SBMainWindow extends JFrame
   }
 
   private static void makeOpenRecentMenu(
-    final @Nonnull SBSceneControllerIO controller,
-    final @Nonnull Log log,
-    final @Nonnull JMenu open_recent)
+    final SBSceneControllerIO controller,
+    final LogUsableType log,
+    final JMenu open_recent)
   {
     final List<File> recent_items = SBMainWindow.recentlyUsedLoad();
     open_recent.removeAll();
@@ -502,18 +494,14 @@ final class SBMainWindow extends JFrame
       final JMenuItem item = new JMenuItem(file.toString());
       item.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
-          final SwingWorker<Void, Void> worker =
-            new SwingWorker<Void, Void>() {
-              @Override protected Void doInBackground()
+          final SwingWorker<Unit, Unit> worker =
+            new SwingWorker<Unit, Unit>() {
+              @Override protected Unit doInBackground()
                 throws Exception
               {
-                try {
-                  return controller.ioLoadScene(file).get();
-                } catch (final ConstraintError x) {
-                  throw new IOException(x);
-                }
+                return controller.ioLoadScene(file).get();
               }
 
               @Override protected void done()
@@ -540,14 +528,14 @@ final class SBMainWindow extends JFrame
     open_recent.setEnabled(recent_items.size() > 0);
   }
 
-  private static @Nonnull JCheckBoxMenuItem makeWindowCheckbox(
-    final @Nonnull String text,
-    final @Nonnull JFrame window)
+  private static JCheckBoxMenuItem makeWindowCheckbox(
+    final String text,
+    final JFrame window)
   {
     final JCheckBoxMenuItem cb = new JCheckBoxMenuItem(text);
     cb.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         if (window.isShowing()) {
           SBWindowUtilities.closeWindow(window);
@@ -559,13 +547,13 @@ final class SBMainWindow extends JFrame
 
     final WindowAdapter listener = new WindowAdapter() {
       @Override public void windowClosing(
-        final WindowEvent e)
+        final @Nullable WindowEvent e)
       {
         cb.setSelected(false);
       }
 
       @Override public void windowOpened(
-        final WindowEvent e)
+        final @Nullable WindowEvent e)
       {
         cb.setSelected(true);
       }
@@ -575,7 +563,7 @@ final class SBMainWindow extends JFrame
     return cb;
   }
 
-  protected static @Nonnull List<File> recentlyUsedLoad()
+  protected static List<File> recentlyUsedLoad()
   {
     final Preferences p =
       Preferences.userRoot().node("/com/io7m/renderer/kernel/sandbox");
@@ -593,7 +581,7 @@ final class SBMainWindow extends JFrame
   }
 
   protected static void recentlyUsedSave(
-    final @Nonnull File file)
+    final File file)
   {
     final StringBuilder b = new StringBuilder();
 
@@ -613,15 +601,14 @@ final class SBMainWindow extends JFrame
     p.put("recently-used", b.toString());
   }
 
-  protected final @Nonnull SBGLRenderer renderer;
+  protected final SBGLRenderer renderer;
 
   public SBMainWindow(
-    final @Nonnull SandboxConfig config,
-    final @Nonnull SBSceneController controller,
-    final @Nonnull SBGLRenderer in_renderer,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      SBExceptionInputError
+    final SandboxConfig config,
+    final SBSceneController controller,
+    final SBGLRenderer in_renderer,
+    final LogType log)
+    throws SBExceptionInputError
   {
     this.renderer = in_renderer;
 
@@ -635,14 +622,13 @@ final class SBMainWindow extends JFrame
     final SBStatisticsWindow stats_window =
       new SBStatisticsWindow(controller);
 
-    log.setCallback(new Callbacks() {
-      private final @Nonnull StringBuilder builder = new StringBuilder();
+    log.setCallback(new LogCallbackType() {
+      private final StringBuilder builder = new StringBuilder();
 
-      @SuppressWarnings("boxing") @Override public void call(
-        final @Nonnull OutputStream out,
-        final @Nonnull String destination,
-        final @Nonnull Level level,
-        final @Nonnull String message)
+      @Override public void call(
+        final LogConfigReadableType rlog,
+        final LogLevel level,
+        final String message)
       {
         final Calendar cal = Calendar.getInstance();
         final String timestamp =
@@ -656,13 +642,15 @@ final class SBMainWindow extends JFrame
         this.builder.append(timestamp);
         this.builder.append(level);
         this.builder.append(": ");
-        this.builder.append(destination);
+        this.builder.append(rlog.getAbsoluteDestination());
         this.builder.append(": ");
         this.builder.append(message);
         this.builder.append("\n");
+        final String text = this.builder.toString();
+        assert text != null;
 
-        logs_window.addText(this.builder.toString());
-        System.err.print(this.builder.toString());
+        logs_window.addText(text);
+        System.err.print(text);
       }
     });
 
@@ -674,13 +662,13 @@ final class SBMainWindow extends JFrame
       final GLCanvas canvas = new GLCanvas(caps);
       canvas.addGLEventListener(this.renderer);
       canvas.addKeyListener(new KeyListener() {
-        private final @Nonnull SBInputState input =
-                                                    SBMainWindow.this.renderer
-                                                      .getInputState();
+        private final SBInputState input = SBMainWindow.this.renderer
+                                           .getInputState();
 
         @Override public void keyPressed(
-          final @Nonnull KeyEvent e)
+          final @Nullable KeyEvent e)
         {
+          assert e != null;
           switch (e.getKeyChar()) {
             case 'a':
               this.input.setMovingLeft(true);
@@ -720,8 +708,9 @@ final class SBMainWindow extends JFrame
         }
 
         @Override public void keyReleased(
-          final @Nonnull KeyEvent e)
+          final @Nullable KeyEvent e)
         {
+          assert e != null;
           switch (e.getKeyChar()) {
             case 'a':
               this.input.setMovingLeft(false);
@@ -777,7 +766,7 @@ final class SBMainWindow extends JFrame
         }
 
         @Override public void keyTyped(
-          final @Nonnull KeyEvent e)
+          final @Nullable KeyEvent e)
         {
           // Nothing
         }
@@ -791,7 +780,7 @@ final class SBMainWindow extends JFrame
 
       this.addWindowFocusListener(new WindowAdapter() {
         @Override public void windowGainedFocus(
-          final WindowEvent e)
+          final @Nullable WindowEvent e)
         {
           canvas.requestFocusInWindow();
         }

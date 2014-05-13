@@ -16,30 +16,28 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.JTextField;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RTransformTextureType;
 
 public final class SBMaterialControlsTranslucentSpecularOnly implements
   SBControlsDataType<SBMaterialDescriptionTranslucentSpecularOnly>
 {
-  private final @Nonnull SBMaterialControlsAlpha                    controls_alpha;
-  private final @Nonnull SBMaterialControlsNormal                   controls_normal;
-  private final @Nonnull SBMaterialControlsSpecular                 controls_specular;
-  private final @Nonnull SBMatrix3x3Controls<RTransformTextureType> controls_uv;
-  private final @Nonnull JTextField                                 name;
+  private final SBMaterialControlsAlpha                    controls_alpha;
+  private final SBMaterialControlsNormal                   controls_normal;
+  private final SBMaterialControlsSpecular                 controls_specular;
+  private final SBMatrix3x3Controls<RTransformTextureType> controls_uv;
+  private final JTextField                                 name;
 
   public SBMaterialControlsTranslucentSpecularOnly(
-    final @Nonnull JTextField in_name,
-    final @Nonnull SBMaterialControlsAlpha in_controls_alpha,
-    final @Nonnull SBMaterialControlsNormal in_controls_normal,
-    final @Nonnull SBMaterialControlsSpecular in_controls_specular,
-    final @Nonnull SBMatrix3x3Controls<RTransformTextureType> in_controls_uv)
+    final JTextField in_name,
+    final SBMaterialControlsAlpha in_controls_alpha,
+    final SBMaterialControlsNormal in_controls_normal,
+    final SBMaterialControlsSpecular in_controls_specular,
+    final SBMatrix3x3Controls<RTransformTextureType> in_controls_uv)
   {
     this.name = in_name;
     this.controls_alpha = in_controls_alpha;
@@ -49,7 +47,7 @@ public final class SBMaterialControlsTranslucentSpecularOnly implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     this.controls_alpha.controlsAddToLayout(layout);
     this.controls_specular.controlsAddToLayout(layout);
@@ -68,7 +66,7 @@ public final class SBMaterialControlsTranslucentSpecularOnly implements
   }
 
   @Override public void controlsLoadFrom(
-    final @Nonnull SBMaterialDescriptionTranslucentSpecularOnly desc)
+    final SBMaterialDescriptionTranslucentSpecularOnly desc)
   {
     this.controls_alpha.controlsLoadFrom(desc.getAlpha());
     this.controls_normal.controlsLoadFrom(desc.getNormal());
@@ -79,8 +77,7 @@ public final class SBMaterialControlsTranslucentSpecularOnly implements
   @Override public
     SBMaterialDescriptionTranslucentSpecularOnly
     controlsSave()
-      throws SBExceptionInputError,
-        ConstraintError
+      throws SBExceptionInputError
   {
     return new SBMaterialDescriptionTranslucentSpecularOnly(
       this.name.getText(),

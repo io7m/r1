@@ -16,18 +16,18 @@
 
 package com.io7m.renderer.types;
 
-import com.io7m.jtensors.MatrixReadable3x3F;
+import com.io7m.jtensors.MatrixReadable3x3FType;
 
 /**
- * A readable interface to 3x3 matrices indexed by the type {@link RTransformType}
- * the matrix represents.
+ * A readable interface to 3x3 matrices indexed by the type
+ * {@link RTransformType} the matrix represents.
  * 
  * @param <T>
  *          A phantom type parameter describing the type of transform
  */
 
 public interface RMatrixReadable3x3FType<T extends RTransformType> extends
-  MatrixReadable3x3F
+  MatrixReadable3x3FType
 {
   // No extra functions.
 }

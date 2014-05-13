@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,25 +19,45 @@ package com.io7m.renderer.xml.collada;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-
-@Immutable public final class ColladaVertex
+@EqualityStructural public final class ColladaVertex
 {
-  private final @Nonnull List<Integer> indices;
+  private final List<Integer> indices;
 
   public ColladaVertex(
-    final @Nonnull List<Integer> in_indices)
-    throws ConstraintError
+    final List<Integer> in_indices)
   {
-    this.indices = Constraints.constrainNotNull(in_indices, "Indices");
+    this.indices = NullCheck.notNullAll(in_indices, "Indices");
   }
 
-  public @Nonnull List<Integer> getIndices()
+  @Override public int hashCode()
   {
-    return Collections.unmodifiableList(this.indices);
+    return this.indices.hashCode();
+  }
+
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final ColladaVertex other = (ColladaVertex) obj;
+    return this.indices.equals(other.indices);
+  }
+
+  public List<Integer> getIndices()
+  {
+    final List<Integer> r = Collections.unmodifiableList(this.indices);
+    assert r != null;
+    return r;
   }
 }

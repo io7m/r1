@@ -16,22 +16,20 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
 /**
  * A description of a depth-only framebuffer.
  */
 
-@Immutable public final class KFramebufferDepthDescription implements
+@EqualityStructural public final class KFramebufferDepthDescription implements
   KFramebufferDepthDescriptionType
 {
   /**
@@ -48,16 +46,13 @@ import com.io7m.renderer.types.RException;
    * @param in_precision_depth
    *          The desired precision of the depth portion of the framebuffer
    * @return A new description
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KFramebufferDepthDescription newDescription(
-    final @Nonnull AreaInclusive in_area,
-    final @Nonnull TextureFilterMagnification in_filter_mag,
-    final @Nonnull TextureFilterMinification in_filter_min,
-    final @Nonnull KDepthPrecision in_precision_depth)
-    throws ConstraintError
+  public static KFramebufferDepthDescription newDescription(
+    final AreaInclusive in_area,
+    final TextureFilterMagnification in_filter_mag,
+    final TextureFilterMinification in_filter_min,
+    final KDepthPrecision in_precision_depth)
   {
     return new KFramebufferDepthDescription(
       in_area,
@@ -66,42 +61,39 @@ import com.io7m.renderer.types.RException;
       in_precision_depth);
   }
 
-  private final @Nonnull AreaInclusive              area;
-  private final @Nonnull TextureFilterMagnification filter_mag;
-  private final @Nonnull TextureFilterMinification  filter_min;
-  private final @Nonnull KDepthPrecision            precision_depth;
+  private final AreaInclusive              area;
+  private final TextureFilterMagnification filter_mag;
+  private final TextureFilterMinification  filter_min;
+  private final KDepthPrecision            precision_depth;
 
   private KFramebufferDepthDescription(
-    final @Nonnull AreaInclusive in_area,
-    final @Nonnull TextureFilterMagnification in_filter_mag,
-    final @Nonnull TextureFilterMinification in_filter_min,
-    final @Nonnull KDepthPrecision in_precision_depth)
-    throws ConstraintError
+    final AreaInclusive in_area,
+    final TextureFilterMagnification in_filter_mag,
+    final TextureFilterMinification in_filter_min,
+    final KDepthPrecision in_precision_depth)
   {
-    this.area = Constraints.constrainNotNull(in_area, "Area");
+    this.area = NullCheck.notNull(in_area, "Area");
     this.filter_mag =
-      Constraints.constrainNotNull(in_filter_mag, "Magnification filter");
-    this.filter_min =
-      Constraints.constrainNotNull(in_filter_min, "Minification filter");
+      NullCheck.notNull(in_filter_mag, "Magnification filter");
+    this.filter_min = NullCheck.notNull(in_filter_min, "Minification filter");
     this.precision_depth =
-      Constraints.constrainNotNull(in_precision_depth, "Depth precision");
+      NullCheck.notNull(in_precision_depth, "Depth precision");
   }
 
   @Override public
     <T, E extends Throwable, V extends KFramebufferDepthDescriptionVisitorType<T, E>>
     T
     depthDescriptionAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
         JCGLException,
-        RException,
-        ConstraintError
+        RException
   {
     return v.depthDescription(this);
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -124,7 +116,7 @@ import com.io7m.renderer.types.RException;
    * @return The inclusive area of the framebuffer
    */
 
-  public @Nonnull AreaInclusive getArea()
+  public AreaInclusive getArea()
   {
     return this.area;
   }
@@ -133,7 +125,7 @@ import com.io7m.renderer.types.RException;
    * @return The desired precision of the depth portion of the framebuffer
    */
 
-  public @Nonnull KDepthPrecision getDepthPrecision()
+  public KDepthPrecision getDepthPrecision()
   {
     return this.precision_depth;
   }
@@ -143,7 +135,7 @@ import com.io7m.renderer.types.RException;
    *         framebuffer
    */
 
-  public @Nonnull TextureFilterMagnification getFilterMagnification()
+  public TextureFilterMagnification getFilterMagnification()
   {
     return this.filter_mag;
   }
@@ -153,7 +145,7 @@ import com.io7m.renderer.types.RException;
    *         framebuffer
    */
 
-  public @Nonnull TextureFilterMinification getFilterMinification()
+  public TextureFilterMinification getFilterMinification()
   {
     return this.filter_min;
   }
@@ -181,6 +173,8 @@ import com.io7m.renderer.types.RException;
     builder.append(" precision_depth=");
     builder.append(this.precision_depth);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

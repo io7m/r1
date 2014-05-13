@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.examples;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -36,14 +33,12 @@ public interface ExampleRendererVisitorType<T>
    * @param r
    *          The renderer
    * @return A value of type <code>T</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    */
 
   T visitForward(
-    final @Nonnull ExampleRendererForwardType r)
-    throws ConstraintError,
-      RException;
+    final ExampleRendererForwardType r)
+    throws RException;
 }

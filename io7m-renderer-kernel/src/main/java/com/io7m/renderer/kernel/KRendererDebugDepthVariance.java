@@ -19,31 +19,29 @@ package com.io7m.renderer.kernel;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
-import com.io7m.jcanephora.ArrayBufferUsable;
+import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.DepthFunction;
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.IndexBufferUsable;
-import com.io7m.jcanephora.JCBExecutionAPI;
-import com.io7m.jcanephora.JCBExecutorProcedure;
-import com.io7m.jcanephora.JCBProgram;
-import com.io7m.jcanephora.JCBProgramProcedure;
+import com.io7m.jcanephora.FramebufferUsableType;
+import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.TextureUnit;
-import com.io7m.jlog.Log;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
+import com.io7m.jcanephora.TextureUnitType;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
+import com.io7m.jcanephora.batchexec.JCBExecutorType;
+import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
+import com.io7m.jcanephora.batchexec.JCBProgramType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
@@ -66,15 +64,15 @@ import com.io7m.renderer.types.RException;
  * meshes.
  */
 
-public final class KRendererDebugDepthVariance implements KRendererDebugType
+@SuppressWarnings("synthetic-access") @EqualityReference public final class KRendererDebugDepthVariance implements
+  KRendererDebugType
 {
-  private static final @Nonnull String NAME = "debug-depth-variance";
+  private static final String NAME = "debug-depth-variance";
 
   private static void putMaterialOpaque(
-    final @Nonnull JCBProgram jp,
-    final @Nonnull KMaterialOpaqueType material)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType jp,
+    final KMaterialOpaqueType material)
+    throws JCGLException
   {
     KShadingProgramCommon.putMaterialAlbedo(jp, material.materialGetAlbedo());
   }
@@ -91,56 +89,47 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
    * @param log
    *          A log handle
    * @return A new renderer
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
   public static KRendererDebugDepthVariance rendererNew(
-    final @Nonnull JCGLImplementation g,
-    final @Nonnull KMaterialDepthLabelCacheType depth_labels,
-    final @Nonnull KShaderCacheType shader_cache,
-    final @Nonnull Log log)
-    throws ConstraintError
+    final JCGLImplementationType g,
+    final KMaterialDepthLabelCacheType depth_labels,
+    final KShaderCacheType shader_cache,
+    final LogUsableType log)
   {
     return new KRendererDebugDepthVariance(g, depth_labels, shader_cache, log);
   }
 
-  private final @Nonnull KMaterialDepthLabelCacheType depth_labels;
-  private final @Nonnull JCGLImplementation           gl;
-  private final @Nonnull Log                          log;
-  private final @Nonnull KMutableMatricesType         matrices;
-  private final @Nonnull KShaderCacheType             shader_cache;
-  private final @Nonnull KTransformContext            transform_context;
+  private final KMaterialDepthLabelCacheType depth_labels;
+  private final JCGLImplementationType       gl;
+  private final LogUsableType                log;
+  private final KMutableMatrices             matrices;
+  private final KShaderCacheType             shader_cache;
+  private final KTransformContext            transform_context;
 
   private KRendererDebugDepthVariance(
-    final @Nonnull JCGLImplementation in_gl,
-    final @Nonnull KMaterialDepthLabelCacheType in_depth_labels,
-    final @Nonnull KShaderCacheType in_shader_cache,
-    final @Nonnull Log in_log)
-    throws ConstraintError
+    final JCGLImplementationType in_gl,
+    final KMaterialDepthLabelCacheType in_depth_labels,
+    final KShaderCacheType in_shader_cache,
+    final LogUsableType in_log)
   {
     this.log =
-      new Log(
-        Constraints.constrainNotNull(in_log, "Log"),
-        KRendererDebugDepthVariance.NAME);
-    this.gl = Constraints.constrainNotNull(in_gl, "GL");
-    this.depth_labels =
-      Constraints.constrainNotNull(in_depth_labels, "Depth labels");
-    this.shader_cache =
-      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
+      NullCheck.notNull(in_log, "Log").with(KRendererDebugDepthVariance.NAME);
+    this.gl = NullCheck.notNull(in_gl, "GL");
+    this.depth_labels = NullCheck.notNull(in_depth_labels, "Depth labels");
+    this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
 
-    this.matrices = KMutableMatricesType.newMatrices();
+    this.matrices = KMutableMatrices.newMatrices();
     this.transform_context = KTransformContext.newContext();
     this.log.debug("initialized");
   }
 
   @Override public void rendererDebugEvaluate(
-    final @Nonnull KFramebufferRGBAUsableType framebuffer,
-    final @Nonnull KScene scene)
-    throws ConstraintError,
-      RException
+    final KFramebufferRGBAUsableType framebuffer,
+    final KScene scene)
+    throws RException
   {
-    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+    final JCGLInterfaceCommonType gc = this.gl.getGLCommon();
     final KCamera camera = scene.getCamera();
 
     try {
@@ -148,10 +137,9 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
         camera.getViewMatrix(),
         camera.getProjectionMatrix(),
         new MatricesObserverFunctionType<Unit, JCGLException>() {
-          @SuppressWarnings("synthetic-access") @Override public Unit run(
+          @Override public Unit run(
             final MatricesObserverType mo)
             throws JCGLException,
-              ConstraintError,
               RException
           {
             KRendererDebugDepthVariance.this.renderScene(
@@ -172,18 +160,17 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
     return KRendererDebugDepthVariance.NAME;
   }
 
-  @SuppressWarnings("static-method") private void renderInstance(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCBProgram p,
-    final @Nonnull MatricesInstanceType mi,
-    final @Nonnull KInstanceTransformedOpaqueType instance,
-    final @Nonnull KMaterialDepthLabel label)
-    throws ConstraintError,
-      JCGLException
+  private static void renderInstance(
+    final JCGLInterfaceCommonType gc,
+    final JCBProgramType p,
+    final MatricesInstanceType mi,
+    final KInstanceTransformedOpaqueType instance,
+    final KMaterialDepthLabel label)
+    throws JCGLException
   {
     final KMaterialOpaqueType material =
       instance.instanceGet().instanceGetMaterial();
-    final List<TextureUnit> units = gc.textureGetUnits();
+    final List<TextureUnitType> units = gc.textureGetUnits();
 
     /**
      * Upload matrices.
@@ -208,11 +195,13 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
       {
         KRendererDebugDepthVariance.putMaterialOpaque(p, material);
         KShadingProgramCommon.putMatrixUVUnchecked(p, mi.getMatrixUV());
+        final TextureUnitType u = units.get(0);
+        assert u != null;
         KShadingProgramCommon.bindPutTextureAlbedo(
           p,
           gc,
           material.materialGetAlbedo(),
-          units.get(0));
+          u);
         break;
       }
     }
@@ -223,8 +212,8 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
 
     try {
       final KMeshReadableType mesh = instance.instanceGet().instanceGetMesh();
-      final ArrayBufferUsable array = mesh.getArrayBuffer();
-      final IndexBufferUsable indices = mesh.getIndexBuffer();
+      final ArrayBufferUsableType array = mesh.getArrayBuffer();
+      final IndexBufferUsableType indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
@@ -242,17 +231,11 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
         }
       }
 
-      p.programExecute(new JCBProgramProcedure() {
+      p.programExecute(new JCBProgramProcedureType<JCGLException>() {
         @Override public void call()
-          throws ConstraintError,
-            JCGLException,
-            Exception
+          throws JCGLException
         {
-          try {
-            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-          } catch (final ConstraintError x) {
-            throw new UnreachableCodeException(x);
-          }
+          gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
         }
       });
 
@@ -262,12 +245,11 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
   }
 
   private void renderInstancePre(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull MatricesObserverType mo,
-    final @Nonnull KInstanceTransformedOpaqueType instance,
-    final @Nonnull MatricesInstanceType mi)
-    throws ConstraintError,
-      JCGLException,
+    final JCGLInterfaceCommonType gc,
+    final MatricesObserverType mo,
+    final KInstanceTransformedOpaqueType instance,
+    final MatricesInstanceType mi)
+    throws JCGLException,
       RException
   {
     try {
@@ -277,23 +259,23 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
         KRendererDebugDepthVariance.this.depth_labels.getDepthLabel(ii);
       final String program_name =
         String.format("depth_variance_%s", label.labelGetCode());
+      assert program_name != null;
       final KProgram kp =
         KRendererDebugDepthVariance.this.shader_cache
           .cacheGetLU(program_name);
 
-      final JCBExecutionAPI e = kp.getExecutable();
-      e.execRun(new JCBExecutorProcedure() {
-        @SuppressWarnings("synthetic-access") @Override public void call(
-          final @Nonnull JCBProgram p)
-          throws ConstraintError,
-            JCGLException,
-            Exception
+      final JCBExecutorType e = kp.getExecutable();
+      e.execRun(new JCBExecutorProcedureType<RException>() {
+        @Override public void call(
+          final JCBProgramType p)
+          throws JCGLException,
+            RException
         {
           KShadingProgramCommon.putMatrixProjectionUnchecked(
             p,
             mo.getMatrixProjection());
 
-          KRendererDebugDepthVariance.this.renderInstance(
+          KRendererDebugDepthVariance.renderInstance(
             gc,
             p,
             mi,
@@ -308,15 +290,14 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
   }
 
   private void renderScene(
-    final @Nonnull KFramebufferRGBAUsableType framebuffer,
-    final @Nonnull KScene scene,
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull MatricesObserverType mo)
-    throws ConstraintError,
-      JCGLException,
+    final KFramebufferRGBAUsableType framebuffer,
+    final KScene scene,
+    final JCGLInterfaceCommonType gc,
+    final MatricesObserverType mo)
+    throws JCGLException,
       RException
   {
-    final FramebufferReferenceUsable output_buffer =
+    final FramebufferUsableType output_buffer =
       framebuffer.kFramebufferGetColorFramebuffer();
 
     gc.framebufferDrawBind(output_buffer);
@@ -341,21 +322,17 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
         instance
           .transformedAccept(new KInstanceTransformedVisitorType<Unit, JCGLException>() {
             @Override public Unit transformedOpaqueAlphaDepth(
-              final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
+              final KInstanceTransformedOpaqueAlphaDepth i)
               throws JCGLException,
-                RException,
-                ConstraintError
+                RException
             {
               return mo.withInstance(
                 instance,
                 new MatricesInstanceFunctionType<Unit, JCGLException>() {
-                  @SuppressWarnings("synthetic-access") @Override public
-                    Unit
-                    run(
-                      final @Nonnull MatricesInstanceType mi)
-                      throws JCGLException,
-                        ConstraintError,
-                        RException
+                  @Override public Unit run(
+                    final MatricesInstanceType mi)
+                    throws JCGLException,
+                      RException
                   {
                     KRendererDebugDepthVariance.this.renderInstancePre(
                       gc,
@@ -368,21 +345,17 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
             }
 
             @Override public Unit transformedOpaqueRegular(
-              final @Nonnull KInstanceTransformedOpaqueRegular i)
+              final KInstanceTransformedOpaqueRegular i)
               throws JCGLException,
-                RException,
-                ConstraintError
+                RException
             {
               return mo.withInstance(
                 instance,
                 new MatricesInstanceFunctionType<Unit, JCGLException>() {
-                  @SuppressWarnings("synthetic-access") @Override public
-                    Unit
-                    run(
-                      final @Nonnull MatricesInstanceType mi)
-                      throws JCGLException,
-                        ConstraintError,
-                        RException
+                  @Override public Unit run(
+                    final MatricesInstanceType mi)
+                    throws JCGLException,
+                      RException
                   {
                     KRendererDebugDepthVariance.this.renderInstancePre(
                       gc,
@@ -395,24 +368,22 @@ public final class KRendererDebugDepthVariance implements KRendererDebugType
             }
 
             @Override public Unit transformedTranslucentRefractive(
-              final @Nonnull KInstanceTransformedTranslucentRefractive i)
+              final KInstanceTransformedTranslucentRefractive i)
               throws JCGLException
             {
               return Unit.unit();
             }
 
             @Override public Unit transformedTranslucentRegular(
-              final @Nonnull KInstanceTransformedTranslucentRegular i)
+              final KInstanceTransformedTranslucentRegular i)
               throws JCGLException
             {
               return Unit.unit();
             }
 
             @Override public Unit transformedTranslucentSpecularOnly(
-              final @Nonnull KInstanceTransformedTranslucentSpecularOnly i)
-              throws JCGLException,
-                ConstraintError,
-                RException,
+              final KInstanceTransformedTranslucentSpecularOnly i)
+              throws RException,
                 JCGLException
             {
               return Unit.unit();

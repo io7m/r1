@@ -22,10 +22,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Properties;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -42,9 +39,13 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 import net.java.dev.designgridlayout.Tag;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogPolicyAllOn;
+import com.io7m.jlog.LogType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
 
 public final class SBInstancesControls implements
   SBSceneChangeListener,
@@ -52,19 +53,19 @@ public final class SBInstancesControls implements
 {
   private static class InstanceEditDialog extends JFrame
   {
-    private static final long           serialVersionUID;
+    private static final long  serialVersionUID;
 
     static {
       serialVersionUID = -443107596466630590L;
     }
 
-    private final @Nonnull SBErrorField error;
+    private final SBErrorField error;
 
     public <C extends SBSceneControllerInstances & SBSceneControllerTextures & SBSceneControllerMeshes & SBSceneControllerMaterials> InstanceEditDialog(
-      final @Nonnull Log log,
-      final @Nonnull C controller,
-      final @Nonnull Integer id,
-      final @CheckForNull SBInstance instance)
+      final LogUsableType log,
+      final C controller,
+      final Integer id,
+      final @Nullable SBInstance instance)
       throws IOException
     {
       final Container content = this.getContentPane();
@@ -90,7 +91,7 @@ public final class SBInstancesControls implements
         @SuppressWarnings("synthetic-access") @Override public
           void
           actionPerformed(
-            final @Nonnull ActionEvent e)
+            final @Nullable ActionEvent e)
         {
           try {
             final SBInstance i = controls.controlsSave();
@@ -108,7 +109,7 @@ public final class SBInstancesControls implements
         @SuppressWarnings("synthetic-access") @Override public
           void
           actionPerformed(
-            final @Nonnull ActionEvent e)
+            final @Nullable ActionEvent e)
         {
           try {
             final SBInstance i = controls.controlsSave();
@@ -123,7 +124,7 @@ public final class SBInstancesControls implements
       final JButton cancel = new JButton("Cancel");
       cancel.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           SBWindowUtilities.closeWindow(InstanceEditDialog.this);
         }
@@ -140,13 +141,13 @@ public final class SBInstancesControls implements
 
   private static class InstancesTable extends JTable
   {
-    private static final long                  serialVersionUID;
+    private static final long         serialVersionUID;
 
     static {
       serialVersionUID = -3198912965434164747L;
     }
 
-    private final @Nonnull InstancesTableModel model;
+    private final InstancesTableModel model;
 
     public InstancesTable(
       final InstancesTableModel in_model)
@@ -169,21 +170,22 @@ public final class SBInstancesControls implements
 
   private static class InstancesTableModel extends AbstractTableModel
   {
-    private static final long                           serialVersionUID;
+    private static final long                  serialVersionUID;
+
     static {
       serialVersionUID = 6499860137289000995L;
     }
-    private final @Nonnull String[]                     column_names;
-    private final @Nonnull SBSceneControllerInstances   controller;
-    private final @Nonnull ArrayList<ArrayList<String>> data;
 
-    private final @Nonnull Log                          log;
+    private final String[]                     column_names;
+    private final SBSceneControllerInstances   controller;
+    private final ArrayList<ArrayList<String>> data;
+    private final LogUsableType                log;
 
     public InstancesTableModel(
-      final @Nonnull SBSceneControllerInstances in_controller,
-      final @Nonnull Log in_log)
+      final SBSceneControllerInstances in_controller,
+      final LogUsableType in_log)
     {
-      this.log = new Log(in_log, "instance-table");
+      this.log = in_log.with("instance-table");
       this.column_names = new String[] { "ID", "Mesh" };
       this.data = new ArrayList<ArrayList<String>>();
       this.controller = in_controller;
@@ -200,16 +202,17 @@ public final class SBInstancesControls implements
       return this.column_names[column];
     }
 
-    protected @Nonnull SBInstance getInstanceAt(
+    protected SBInstance getInstanceAt(
       final int row)
-      throws ConstraintError
     {
       final ArrayList<String> row_data = this.data.get(row);
       assert row_data != null;
       final String id_text = row_data.get(0);
       final Integer id = Integer.valueOf(id_text);
       assert this.controller.sceneInstanceExists(id);
-      return this.controller.sceneInstanceGet(id);
+      final SBInstance r = this.controller.sceneInstanceGet(id);
+      assert r != null;
+      return r;
     }
 
     @Override public int getRowCount()
@@ -252,19 +255,21 @@ public final class SBInstancesControls implements
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
-            final Log log =
-              new Log(new Properties(), "com.io7m.renderer", "sandbox");
+            final LogType jlog =
+              Log.newLog(
+                LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG),
+                "sandbox");
+
             final SBExampleController controller = new SBExampleController();
             final SBInstancesControls controls =
-              new SBInstancesControls(controller, log);
+              new SBInstancesControls(controller, jlog);
             controls.controlsAddToLayout(layout);
 
             final JButton hide = new JButton("Hide");
             hide.addActionListener(new ActionListener() {
               @Override public void actionPerformed(
-                final ActionEvent e)
+                final @Nullable ActionEvent e)
               {
                 controls.controlsHide();
               }
@@ -272,7 +277,7 @@ public final class SBInstancesControls implements
             final JButton show = new JButton("Show");
             show.addActionListener(new ActionListener() {
               @Override public void actionPerformed(
-                final ActionEvent e)
+                final @Nullable ActionEvent e)
               {
                 controls.controlsShow();
               }
@@ -284,17 +289,17 @@ public final class SBInstancesControls implements
     });
   }
 
-  private final @Nonnull JButton               add;
-  private final @Nonnull JButton               edit;
-  private final @Nonnull RowGroup              group;
-  protected final @Nonnull InstancesTable      instances;
-  protected final @Nonnull InstancesTableModel instances_model;
-  private final @Nonnull JButton               remove;
-  private final @Nonnull JScrollPane           scroller;
+  private final JButton               add;
+  private final JButton               edit;
+  private final RowGroup              group;
+  protected final InstancesTable      instances;
+  protected final InstancesTableModel instances_model;
+  private final JButton               remove;
+  private final JScrollPane           scroller;
 
   public <C extends SBSceneControllerInstances & SBSceneControllerTextures & SBSceneControllerMeshes & SBSceneControllerMaterials> SBInstancesControls(
-    final @Nonnull C controller,
-    final @Nonnull Log log)
+    final C controller,
+    final LogUsableType log)
   {
     this.group = new RowGroup();
     this.instances_model = new InstancesTableModel(controller, log);
@@ -304,7 +309,7 @@ public final class SBInstancesControls implements
     this.add = new JButton("Add...");
     this.add.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         try {
           final Integer id = controller.sceneInstanceFreshID();
@@ -322,7 +327,7 @@ public final class SBInstancesControls implements
     this.edit.setEnabled(false);
     this.edit.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         try {
           final int view_row =
@@ -349,7 +354,7 @@ public final class SBInstancesControls implements
     this.remove.setEnabled(false);
     this.remove.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         throw new UnimplementedCodeException();
       }
@@ -360,7 +365,7 @@ public final class SBInstancesControls implements
         @SuppressWarnings("synthetic-access") @Override public
           void
           valueChanged(
-            final @Nonnull ListSelectionEvent e)
+            final @Nullable ListSelectionEvent e)
         {
           if (SBInstancesControls.this.instances.getSelectedRow() == -1) {
             SBInstancesControls.this.edit.setEnabled(false);
@@ -376,7 +381,7 @@ public final class SBInstancesControls implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     layout.row().group(this.group).grid().add(this.scroller);
     layout

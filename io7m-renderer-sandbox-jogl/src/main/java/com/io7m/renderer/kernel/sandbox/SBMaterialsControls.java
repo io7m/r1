@@ -21,9 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Properties;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -39,9 +37,13 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 import net.java.dev.designgridlayout.Tag;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogPolicyAllOn;
+import com.io7m.jlog.LogType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
 
 public final class SBMaterialsControls implements
   SBSceneChangeListener,
@@ -56,11 +58,10 @@ public final class SBMaterialsControls implements
     }
 
     public <C extends SBSceneControllerMaterials & SBSceneControllerTextures> MaterialEditDialog(
-      final @Nonnull Log log,
-      final @Nonnull C controller,
-      final @Nonnull Integer id,
-      final @Nonnull SBMaterialDescription material)
-      throws ConstraintError
+      final LogUsableType log,
+      final C controller,
+      final Integer id,
+      final SBMaterialDescription material)
     {
       final Container content = this.getContentPane();
       final JPanel inner = new JPanel();
@@ -76,7 +77,7 @@ public final class SBMaterialsControls implements
       final JButton ok = new JButton("OK");
       ok.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           try {
             final SBMaterialDescription desc = controls.controlsSave();
@@ -93,7 +94,7 @@ public final class SBMaterialsControls implements
       final JButton apply = new JButton("Apply");
       apply.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           try {
             final SBMaterialDescription desc = controls.controlsSave();
@@ -109,7 +110,7 @@ public final class SBMaterialsControls implements
       final JButton cancel = new JButton("Cancel");
       cancel.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           SBWindowUtilities.closeWindow(MaterialEditDialog.this);
         }
@@ -126,13 +127,13 @@ public final class SBMaterialsControls implements
 
   private static class MaterialsTable extends JTable
   {
-    private static final long                  serialVersionUID;
+    private static final long         serialVersionUID;
 
     static {
       serialVersionUID = -3198912965434164747L;
     }
 
-    private final @Nonnull MaterialsTableModel model;
+    private final MaterialsTableModel model;
 
     public MaterialsTable(
       final MaterialsTableModel in_model)
@@ -155,21 +156,21 @@ public final class SBMaterialsControls implements
 
   private static class MaterialsTableModel extends AbstractTableModel
   {
-    private static final long                           serialVersionUID;
+    private static final long                  serialVersionUID;
     static {
       serialVersionUID = 6499860137289000995L;
     }
-    private final @Nonnull String[]                     column_names;
-    private final @Nonnull SBSceneControllerMaterials   controller;
-    private final @Nonnull ArrayList<ArrayList<String>> data;
 
-    private final @Nonnull Log                          log;
+    private final String[]                     column_names;
+    private final SBSceneControllerMaterials   controller;
+    private final ArrayList<ArrayList<String>> data;
+    private final LogUsableType                log;
 
     public MaterialsTableModel(
-      final @Nonnull SBSceneControllerMaterials in_controller,
-      final @Nonnull Log in_log)
+      final SBSceneControllerMaterials in_controller,
+      final LogUsableType in_log)
     {
-      this.log = new Log(in_log, "material-table");
+      this.log = in_log.with("material-table");
       this.column_names = new String[] { "ID", "Name" };
       this.data = new ArrayList<ArrayList<String>>();
       this.controller = in_controller;
@@ -186,16 +187,17 @@ public final class SBMaterialsControls implements
       return this.column_names[column];
     }
 
-    protected @Nonnull SBMaterial getMaterialAt(
+    protected SBMaterial getMaterialAt(
       final int row)
-      throws ConstraintError
     {
       final ArrayList<String> row_data = this.data.get(row);
       assert row_data != null;
       final String id_text = row_data.get(0);
       final Integer id = Integer.valueOf(id_text);
       assert this.controller.sceneMaterialExists(id);
-      return this.controller.sceneMaterialGet(id);
+      final SBMaterial r = this.controller.sceneMaterialGet(id);
+      assert r != null;
+      return r;
     }
 
     @Override public int getRowCount()
@@ -238,10 +240,11 @@ public final class SBMaterialsControls implements
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
-            final Log log =
-              new Log(new Properties(), "com.io7m.renderer", "sandbox");
+            final LogType log =
+              Log.newLog(
+                LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG),
+                "sandbox");
             final SBExampleController controller = new SBExampleController();
             final SBMaterialsControls controls =
               new SBMaterialsControls(controller, log);
@@ -252,17 +255,17 @@ public final class SBMaterialsControls implements
     });
   }
 
-  private final @Nonnull JButton               add;
-  private final @Nonnull JButton               edit;
-  private final @Nonnull RowGroup              group;
-  protected final @Nonnull MaterialsTable      materials;
-  protected final @Nonnull MaterialsTableModel materials_model;
-  private final @Nonnull JButton               remove;
-  private final @Nonnull JScrollPane           scroller;
+  private final JButton               add;
+  private final JButton               edit;
+  private final RowGroup              group;
+  protected final MaterialsTable      materials;
+  protected final MaterialsTableModel materials_model;
+  private final JButton               remove;
+  private final JScrollPane           scroller;
 
   public <C extends SBSceneControllerMaterials & SBSceneControllerTextures> SBMaterialsControls(
-    final @Nonnull C controller,
-    final @Nonnull Log log)
+    final C controller,
+    final LogUsableType log)
   {
     this.group = new RowGroup();
     this.materials_model = new MaterialsTableModel(controller, log);
@@ -272,19 +275,15 @@ public final class SBMaterialsControls implements
     this.add = new JButton("Add...");
     this.add.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
-        try {
-          final Integer id = controller.sceneMaterialFreshID();
-          final SBMaterialDescriptionOpaqueRegular base =
-            SBMaterialDescriptionOpaqueRegular.getDefault();
-          final MaterialEditDialog dialog =
-            new MaterialEditDialog(log, controller, id, base);
-          dialog.pack();
-          dialog.setVisible(true);
-        } catch (final ConstraintError x) {
-          log.critical("Unable to open edit dialog: " + x.getMessage());
-        }
+        final Integer id = controller.sceneMaterialFreshID();
+        final SBMaterialDescriptionOpaqueRegular base =
+          SBMaterialDescriptionOpaqueRegular.getDefault();
+        final MaterialEditDialog dialog =
+          new MaterialEditDialog(log, controller, id, base);
+        dialog.pack();
+        dialog.setVisible(true);
       }
     });
 
@@ -292,22 +291,18 @@ public final class SBMaterialsControls implements
     this.edit.setEnabled(false);
     this.edit.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
-        try {
-          final SBMaterial material =
-            SBMaterialsControls.this.getSelectedMaterial();
-          assert material != null;
+        final SBMaterial material =
+          SBMaterialsControls.this.getSelectedMaterial();
+        assert material != null;
 
-          final Integer id = material.materialGetID();
-          final MaterialEditDialog dialog =
-            new MaterialEditDialog(log, controller, id, material
-              .materialGetDescription());
-          dialog.pack();
-          dialog.setVisible(true);
-        } catch (final ConstraintError x) {
-          log.critical("Unable to open edit dialog: " + x.getMessage());
-        }
+        final Integer id = material.materialGetID();
+        final MaterialEditDialog dialog =
+          new MaterialEditDialog(log, controller, id, material
+            .materialGetDescription());
+        dialog.pack();
+        dialog.setVisible(true);
       }
     });
 
@@ -315,7 +310,7 @@ public final class SBMaterialsControls implements
     this.remove.setEnabled(false);
     this.remove.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         // TODO
         throw new UnimplementedCodeException();
@@ -327,7 +322,7 @@ public final class SBMaterialsControls implements
         @SuppressWarnings("synthetic-access") @Override public
           void
           valueChanged(
-            final @Nonnull ListSelectionEvent e)
+            final @Nullable ListSelectionEvent e)
         {
           if (SBMaterialsControls.this.materials.getSelectedRow() == -1) {
             SBMaterialsControls.this.edit.setEnabled(false);
@@ -344,7 +339,7 @@ public final class SBMaterialsControls implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     layout.row().group(this.group).grid().add(this.scroller);
     layout
@@ -366,13 +361,12 @@ public final class SBMaterialsControls implements
     this.group.forceShow();
   }
 
-  public @Nonnull JTable getMaterialTable()
+  public JTable getMaterialTable()
   {
     return this.materials;
   }
 
-  public @Nonnull SBMaterial getSelectedMaterial()
-    throws ConstraintError
+  public SBMaterial getSelectedMaterial()
   {
     final int view_row = SBMaterialsControls.this.materials.getSelectedRow();
     assert view_row != -1;

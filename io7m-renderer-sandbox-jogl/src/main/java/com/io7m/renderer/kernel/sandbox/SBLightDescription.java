@@ -16,9 +16,8 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 
 interface SBLightDescription extends SBLightDescriptionVisitable
 {
-  @Nonnull Integer lightGetID();
+   Integer lightGetID();
 }

@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * The type of labels for translucent materials.
@@ -28,5 +27,5 @@ public interface KMaterialLabelTranslucentType extends KMaterialLabelImpliesUVTy
    * @return The alpha opacity type for the material
    */
 
-  @Nonnull KMaterialAlphaOpacityType labelGetAlphaType();
+   KMaterialAlphaOpacityType labelGetAlphaType();
 }

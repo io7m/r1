@@ -20,30 +20,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.FramebufferColorAttachmentPoint;
-import com.io7m.jcanephora.FramebufferDrawBuffer;
-import com.io7m.jcanephora.FramebufferReference;
-import com.io7m.jcanephora.FramebufferReferenceUsable;
+import com.io7m.jcanephora.FramebufferColorAttachmentPointType;
+import com.io7m.jcanephora.FramebufferDrawBufferType;
 import com.io7m.jcanephora.FramebufferStatus;
+import com.io7m.jcanephora.FramebufferType;
+import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLFramebuffersGL3;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLImplementationVisitor;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLInterfaceGL2;
-import com.io7m.jcanephora.JCGLInterfaceGL3;
-import com.io7m.jcanephora.JCGLInterfaceGLES2;
-import com.io7m.jcanephora.JCGLInterfaceGLES3;
-import com.io7m.jcanephora.JCGLRuntimeException;
-import com.io7m.jcanephora.JCGLTextures2DStaticGL3ES3;
-import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.Texture2DStaticType;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jcanephora.api.JCGLFramebuffersGL3Type;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLInterfaceGL2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGL3Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
+import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
@@ -53,16 +51,15 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
     KFramebufferRGBAAbstract
   {
     public static KFramebufferRGBAAbstract newRGBA(
-      final @Nonnull JCGLInterfaceGL2 gl,
-      final @Nonnull KFramebufferRGBADescription desc)
-      throws JCGLException,
-        ConstraintError
+      final JCGLInterfaceGL2Type gl,
+      final KFramebufferRGBADescription desc)
+      throws JCGLException
     {
       final AreaInclusive area = desc.getArea();
       final int width = (int) area.getRangeX().getInterval();
       final int height = (int) area.getRangeY().getInterval();
 
-      final Texture2DStatic c =
+      final Texture2DStaticType c =
         gl.texture2DStaticAllocateRGBA8(
           "color-8",
           width,
@@ -72,16 +69,16 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
           desc.getFilterMinification(),
           desc.getFilterMagnification());
 
-      final List<FramebufferColorAttachmentPoint> points =
+      final List<FramebufferColorAttachmentPointType> points =
         gl.framebufferGetColorAttachmentPoints();
-      final List<FramebufferDrawBuffer> buffers =
+      final List<FramebufferDrawBufferType> buffers =
         gl.framebufferGetDrawBuffers();
 
-      final Map<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
-        new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
+      final Map<FramebufferDrawBufferType, FramebufferColorAttachmentPointType> mappings =
+        new HashMap<FramebufferDrawBufferType, FramebufferColorAttachmentPointType>();
       mappings.put(buffers.get(0), points.get(0));
 
-      final FramebufferReference fb = gl.framebufferAllocate();
+      final FramebufferType fb = gl.framebufferAllocate();
       gl.framebufferDrawBind(fb);
       try {
         gl.framebufferDrawAttachColorTexture2D(fb, c);
@@ -94,14 +91,14 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
       return new KFramebufferRGBA_GL2(c, fb, desc);
     }
 
-    private final @Nonnull Texture2DStatic             color;
-    private final @Nonnull KFramebufferRGBADescription description;
-    private final @Nonnull FramebufferReference        framebuffer;
+    private final Texture2DStaticType         color;
+    private final KFramebufferRGBADescription description;
+    private final FramebufferType             framebuffer;
 
     private KFramebufferRGBA_GL2(
-      final @Nonnull Texture2DStatic c,
-      final @Nonnull FramebufferReference fb,
-      final @Nonnull KFramebufferRGBADescription desc)
+      final Texture2DStaticType c,
+      final FramebufferType fb,
+      final KFramebufferRGBADescription desc)
     {
       super(desc.getArea(), c.resourceGetSizeBytes());
       this.color = c;
@@ -109,25 +106,50 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
       this.description = desc;
     }
 
+    @Override public boolean equals(
+      final @Nullable Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final KFramebufferRGBA_GL2 other = (KFramebufferRGBA_GL2) obj;
+      return this.color.equals(other.color)
+        && this.description.equals(other.description)
+        && this.framebuffer.equals(other.framebuffer);
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + this.color.hashCode();
+      result = (prime * result) + this.description.hashCode();
+      result = (prime * result) + this.framebuffer.hashCode();
+      return result;
+    }
+
     @Override public void kFramebufferDelete(
-      final @Nonnull JCGLImplementation g)
-      throws ConstraintError,
-        RException
+      final JCGLImplementationType g)
+      throws RException
     {
       try {
-        final JCGLInterfaceCommon gc = g.getGLCommon();
+        final JCGLInterfaceCommonType gc = g.getGLCommon();
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.color);
-      } catch (final JCGLRuntimeException e) {
+      } catch (final JCGLException e) {
         throw RException.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
     }
 
-    @Override public
-      FramebufferReferenceUsable
-      kFramebufferGetColorFramebuffer()
+    @Override public FramebufferUsableType kFramebufferGetColorFramebuffer()
     {
       return this.framebuffer;
     }
@@ -139,7 +161,7 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
       return this.description;
     }
 
-    @Override public Texture2DStaticUsable kFramebufferGetRGBATexture()
+    @Override public Texture2DStaticUsableType kFramebufferGetRGBATexture()
     {
       return this.color;
     }
@@ -148,20 +170,20 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
   private static final class KFramebufferRGBA_GL3ES3 extends
     KFramebufferRGBAAbstract
   {
+
     public static
-      <G extends JCGLTextures2DStaticGL3ES3 & JCGLFramebuffersGL3>
+      <G extends JCGLTextures2DStaticGL3ES3Type & JCGLFramebuffersGL3Type>
       KFramebufferRGBAAbstract
       newRGBA(
-        final @Nonnull G gl,
-        final @Nonnull KFramebufferRGBADescription desc)
-        throws JCGLException,
-          ConstraintError
+        final G gl,
+        final KFramebufferRGBADescription desc)
+        throws JCGLException
     {
       final AreaInclusive area = desc.getArea();
       final int width = (int) area.getRangeX().getInterval();
       final int height = (int) area.getRangeY().getInterval();
 
-      Texture2DStatic c = null;
+      Texture2DStaticType c = null;
       switch (desc.getRGBAPrecision()) {
         case RGBA_PRECISION_16F:
         {
@@ -206,16 +228,16 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
 
       assert c != null;
 
-      final List<FramebufferColorAttachmentPoint> points =
+      final List<FramebufferColorAttachmentPointType> points =
         gl.framebufferGetColorAttachmentPoints();
-      final List<FramebufferDrawBuffer> buffers =
+      final List<FramebufferDrawBufferType> buffers =
         gl.framebufferGetDrawBuffers();
 
-      final Map<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
-        new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
+      final Map<FramebufferDrawBufferType, FramebufferColorAttachmentPointType> mappings =
+        new HashMap<FramebufferDrawBufferType, FramebufferColorAttachmentPointType>();
       mappings.put(buffers.get(0), points.get(0));
 
-      final FramebufferReference fb = gl.framebufferAllocate();
+      final FramebufferType fb = gl.framebufferAllocate();
       gl.framebufferDrawBind(fb);
       try {
         gl.framebufferDrawAttachColorTexture2D(fb, c);
@@ -228,14 +250,14 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
       return new KFramebufferRGBA_GL3ES3(c, fb, desc);
     }
 
-    private final @Nonnull Texture2DStatic             color;
-    private final @Nonnull KFramebufferRGBADescription description;
-    private final @Nonnull FramebufferReference        framebuffer;
+    private final Texture2DStaticType         color;
+    private final KFramebufferRGBADescription description;
+    private final FramebufferType             framebuffer;
 
     private KFramebufferRGBA_GL3ES3(
-      final @Nonnull Texture2DStatic c,
-      final @Nonnull FramebufferReference fb,
-      final @Nonnull KFramebufferRGBADescription desc)
+      final Texture2DStaticType c,
+      final FramebufferType fb,
+      final KFramebufferRGBADescription desc)
     {
       super(desc.getArea(), c.resourceGetSizeBytes());
       this.color = c;
@@ -243,25 +265,50 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
       this.description = desc;
     }
 
+    @Override public boolean equals(
+      final @Nullable Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final KFramebufferRGBA_GL3ES3 other = (KFramebufferRGBA_GL3ES3) obj;
+      return this.color.equals(other.color)
+        && this.description.equals(other.description)
+        && this.framebuffer.equals(other.framebuffer);
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + this.color.hashCode();
+      result = (prime * result) + this.description.hashCode();
+      result = (prime * result) + this.framebuffer.hashCode();
+      return result;
+    }
+
     @Override public void kFramebufferDelete(
-      final @Nonnull JCGLImplementation g)
-      throws ConstraintError,
-        RException
+      final JCGLImplementationType g)
+      throws RException
     {
       try {
-        final JCGLInterfaceCommon gc = g.getGLCommon();
+        final JCGLInterfaceCommonType gc = g.getGLCommon();
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.color);
-      } catch (final JCGLRuntimeException e) {
+      } catch (final JCGLException e) {
         throw RException.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
     }
 
-    @Override public
-      FramebufferReferenceUsable
-      kFramebufferGetColorFramebuffer()
+    @Override public FramebufferUsableType kFramebufferGetColorFramebuffer()
     {
       return this.framebuffer;
     }
@@ -273,7 +320,7 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
       return this.description;
     }
 
-    @Override public Texture2DStaticUsable kFramebufferGetRGBATexture()
+    @Override public Texture2DStaticUsableType kFramebufferGetRGBATexture()
     {
       return this.color;
     }
@@ -282,17 +329,17 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
   private static final class KFramebufferRGBA_GLES2 extends
     KFramebufferRGBAAbstract
   {
+
     public static KFramebufferRGBA_GLES2 newRGBA(
-      final @Nonnull JCGLInterfaceGLES2 gl,
-      final @Nonnull KFramebufferRGBADescription desc)
-      throws JCGLException,
-        ConstraintError
+      final JCGLInterfaceGLES2Type gl,
+      final KFramebufferRGBADescription desc)
+      throws JCGLException
     {
       final AreaInclusive area = desc.getArea();
       final int width = (int) area.getRangeX().getInterval();
       final int height = (int) area.getRangeY().getInterval();
 
-      final Texture2DStatic c =
+      final Texture2DStaticType c =
         gl.texture2DStaticAllocateRGBA4444(
           "color-4444",
           width,
@@ -302,16 +349,16 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
           desc.getFilterMinification(),
           desc.getFilterMagnification());
 
-      final List<FramebufferColorAttachmentPoint> points =
+      final List<FramebufferColorAttachmentPointType> points =
         gl.framebufferGetColorAttachmentPoints();
-      final List<FramebufferDrawBuffer> buffers =
+      final List<FramebufferDrawBufferType> buffers =
         gl.framebufferGetDrawBuffers();
 
-      final Map<FramebufferDrawBuffer, FramebufferColorAttachmentPoint> mappings =
-        new HashMap<FramebufferDrawBuffer, FramebufferColorAttachmentPoint>();
+      final Map<FramebufferDrawBufferType, FramebufferColorAttachmentPointType> mappings =
+        new HashMap<FramebufferDrawBufferType, FramebufferColorAttachmentPointType>();
       mappings.put(buffers.get(0), points.get(0));
 
-      final FramebufferReference fb = gl.framebufferAllocate();
+      final FramebufferType fb = gl.framebufferAllocate();
       gl.framebufferDrawBind(fb);
       try {
         gl.framebufferDrawAttachColorTexture2D(fb, c);
@@ -324,14 +371,14 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
       return new KFramebufferRGBA_GLES2(c, fb, desc);
     }
 
-    private final @Nonnull Texture2DStatic             color;
-    private final @Nonnull KFramebufferRGBADescription description;
-    private final @Nonnull FramebufferReference        framebuffer;
+    private final Texture2DStaticType         color;
+    private final KFramebufferRGBADescription description;
+    private final FramebufferType             framebuffer;
 
     private KFramebufferRGBA_GLES2(
-      final @Nonnull Texture2DStatic c,
-      final @Nonnull FramebufferReference fb,
-      final @Nonnull KFramebufferRGBADescription desc)
+      final Texture2DStaticType c,
+      final FramebufferType fb,
+      final KFramebufferRGBADescription desc)
     {
       super(desc.getArea(), c.resourceGetSizeBytes());
       this.color = c;
@@ -339,25 +386,50 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
       this.description = desc;
     }
 
+    @Override public boolean equals(
+      final @Nullable Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final KFramebufferRGBA_GLES2 other = (KFramebufferRGBA_GLES2) obj;
+      return this.color.equals(other.color)
+        && this.description.equals(other.description)
+        && this.framebuffer.equals(other.framebuffer);
+    }
+
+    @Override public int hashCode()
+    {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + this.color.hashCode();
+      result = (prime * result) + this.description.hashCode();
+      result = (prime * result) + this.framebuffer.hashCode();
+      return result;
+    }
+
     @Override public void kFramebufferDelete(
-      final @Nonnull JCGLImplementation g)
-      throws ConstraintError,
-        RException
+      final JCGLImplementationType g)
+      throws RException
     {
       try {
-        final JCGLInterfaceCommon gc = g.getGLCommon();
+        final JCGLInterfaceCommonType gc = g.getGLCommon();
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.color);
-      } catch (final JCGLRuntimeException e) {
+      } catch (final JCGLException e) {
         throw RException.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
     }
 
-    @Override public
-      FramebufferReferenceUsable
-      kFramebufferGetColorFramebuffer()
+    @Override public FramebufferUsableType kFramebufferGetColorFramebuffer()
     {
       return this.framebuffer;
     }
@@ -369,60 +441,55 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
       return this.description;
     }
 
-    @Override public Texture2DStaticUsable kFramebufferGetRGBATexture()
+    @Override public Texture2DStaticUsableType kFramebufferGetRGBATexture()
     {
       return this.color;
     }
   }
 
-  static @Nonnull KFramebufferRGBAAbstract newRGBA(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull KFramebufferRGBADescription desc)
-    throws JCGLException,
-      ConstraintError
+  static KFramebufferRGBAAbstract newRGBA(
+    final JCGLImplementationType gi,
+    final KFramebufferRGBADescription desc)
+    throws JCGLException
   {
     return gi
-      .implementationAccept(new JCGLImplementationVisitor<KFramebufferRGBAAbstract, ConstraintError>() {
+      .implementationAccept(new JCGLImplementationVisitorType<KFramebufferRGBAAbstract, UnreachableCodeException>() {
         @Override public KFramebufferRGBAAbstract implementationIsGL2(
-          final @Nonnull JCGLInterfaceGL2 gl)
-          throws JCGLException,
-            ConstraintError
+          final JCGLInterfaceGL2Type gl)
+          throws JCGLException
         {
           return KFramebufferRGBA_GL2.newRGBA(gl, desc);
         }
 
         @Override public KFramebufferRGBAAbstract implementationIsGL3(
-          final @Nonnull JCGLInterfaceGL3 gl)
-          throws JCGLException,
-            ConstraintError
+          final JCGLInterfaceGL3Type gl)
+          throws JCGLException
         {
           return KFramebufferRGBA_GL3ES3.newRGBA(gl, desc);
         }
 
         @Override public KFramebufferRGBAAbstract implementationIsGLES2(
-          final @Nonnull JCGLInterfaceGLES2 gl)
-          throws JCGLException,
-            ConstraintError
+          final JCGLInterfaceGLES2Type gl)
+          throws JCGLException
         {
           return KFramebufferRGBA_GLES2.newRGBA(gl, desc);
         }
 
         @Override public KFramebufferRGBAAbstract implementationIsGLES3(
-          final @Nonnull JCGLInterfaceGLES3 gl)
-          throws JCGLException,
-            ConstraintError
+          final JCGLInterfaceGLES3Type gl)
+          throws JCGLException
         {
           return KFramebufferRGBA_GL3ES3.newRGBA(gl, desc);
         }
       });
   }
 
-  private final @Nonnull AreaInclusive area;
-  private boolean                      deleted;
-  private final long                   size;
+  private final AreaInclusive area;
+  private boolean             deleted;
+  private final long          size;
 
   protected KFramebufferRGBAAbstract(
-    final @Nonnull AreaInclusive in_area,
+    final AreaInclusive in_area,
     final long in_size)
   {
     this.area = in_area;
@@ -430,7 +497,7 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
     this.deleted = false;
   }
 
-  @Override public final @Nonnull AreaInclusive kFramebufferGetArea()
+  @Override public final AreaInclusive kFramebufferGetArea()
   {
     return this.area;
   }

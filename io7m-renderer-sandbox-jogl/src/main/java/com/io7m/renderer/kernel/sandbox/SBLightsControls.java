@@ -22,10 +22,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Properties;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -42,9 +39,12 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 import net.java.dev.designgridlayout.Tag;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogPolicyAllOn;
+import com.io7m.jlog.LogType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
 
 final class SBLightsControls implements SBSceneChangeListener, SBControls
 {
@@ -59,19 +59,18 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
-            final Log log =
-              new Log(new Properties(), "com.io7m.renderer", "sandbox");
+            final LogType jlog =
+              Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "test");
             final SBExampleController controller = new SBExampleController();
             final SBLightsControls controls =
-              new SBLightsControls(controller, log);
+              new SBLightsControls(controller, jlog);
             controls.controlsAddToLayout(layout);
 
             final JButton hide = new JButton("Hide");
             hide.addActionListener(new ActionListener() {
               @Override public void actionPerformed(
-                final ActionEvent e)
+                final @Nullable ActionEvent e)
               {
                 controls.controlsHide();
               }
@@ -79,7 +78,7 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
             final JButton show = new JButton("Show");
             show.addActionListener(new ActionListener() {
               @Override public void actionPerformed(
-                final ActionEvent e)
+                final @Nullable ActionEvent e)
               {
                 controls.controlsShow();
               }
@@ -93,21 +92,20 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
 
   private static class LightEditDialog extends JFrame
   {
-    private static final long           serialVersionUID;
+    private static final long  serialVersionUID;
 
     static {
       serialVersionUID = -443107596466630590L;
     }
 
-    private final @Nonnull SBErrorField error;
+    private final SBErrorField error;
 
     public <C extends SBSceneControllerLights & SBSceneControllerTextures> LightEditDialog(
-      final @Nonnull Log log,
-      final @Nonnull C controller,
-      final @Nonnull Integer id,
-      final @CheckForNull SBLightDescription instance)
-      throws ConstraintError,
-        IOException
+      final LogUsableType log,
+      final C controller,
+      final Integer id,
+      final @Nullable SBLightDescription instance)
+      throws IOException
     {
       final Container content = this.getContentPane();
       final JPanel inner = new JPanel();
@@ -132,7 +130,7 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
         @SuppressWarnings("synthetic-access") @Override public
           void
           actionPerformed(
-            final @Nonnull ActionEvent e)
+            final @Nullable ActionEvent e)
         {
           try {
             final SBLightDescription i = controls.controlsSave();
@@ -151,7 +149,7 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
         @SuppressWarnings("synthetic-access") @Override public
           void
           actionPerformed(
-            final @Nonnull ActionEvent e)
+            final @Nullable ActionEvent e)
         {
           try {
             final SBLightDescription i = controls.controlsSave();
@@ -167,7 +165,7 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
       final JButton cancel = new JButton("Cancel");
       cancel.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           LightEditDialog.this.dispose();
         }
@@ -184,13 +182,13 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
 
   private static class LightsTable extends JTable
   {
-    private static final long               serialVersionUID;
+    private static final long      serialVersionUID;
 
     static {
       serialVersionUID = -3198912965434164747L;
     }
 
-    private final @Nonnull LightsTableModel model;
+    private final LightsTableModel model;
 
     public LightsTable(
       final LightsTableModel in_model)
@@ -213,22 +211,22 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
 
   private static class LightsTableModel extends AbstractTableModel
   {
-    private static final long                           serialVersionUID;
+    private static final long                  serialVersionUID;
 
     static {
       serialVersionUID = 6499860137289000995L;
     }
 
-    private final @Nonnull String[]                     column_names;
-    private final @Nonnull SBSceneControllerLights      controller;
-    private final @Nonnull ArrayList<ArrayList<String>> data;
-    private final @Nonnull Log                          log;
+    private final String[]                     column_names;
+    private final SBSceneControllerLights      controller;
+    private final ArrayList<ArrayList<String>> data;
+    private final LogUsableType                log;
 
     public LightsTableModel(
-      final @Nonnull SBSceneControllerLights in_controller,
-      final @Nonnull Log in_log)
+      final SBSceneControllerLights in_controller,
+      final LogUsableType in_log)
     {
-      this.log = new Log(in_log, "light-table");
+      this.log = in_log.with("light-table");
       this.column_names = new String[] { "ID", "Type" };
       this.data = new ArrayList<ArrayList<String>>();
       this.controller = in_controller;
@@ -245,16 +243,17 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
       return this.column_names[column];
     }
 
-    protected @Nonnull SBLight getLightAt(
+    protected SBLight getLightAt(
       final int row)
-      throws ConstraintError
     {
       final ArrayList<String> row_data = this.data.get(row);
       assert row_data != null;
       final String id_text = row_data.get(0);
       final Integer id = Integer.valueOf(id_text);
       assert this.controller.sceneLightExists(id);
-      return this.controller.sceneLightGet(id);
+      final SBLight r = this.controller.sceneLightGet(id);
+      assert r != null;
+      return r;
     }
 
     @Override public int getRowCount()
@@ -285,17 +284,17 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
     }
   }
 
-  private final @Nonnull JButton            add;
-  private final @Nonnull JButton            edit;
-  private final @Nonnull RowGroup           group;
-  protected final @Nonnull LightsTable      lights;
-  protected final @Nonnull LightsTableModel lights_model;
-  private final @Nonnull JButton            remove;
-  protected final @Nonnull JScrollPane      scroller;
+  private final JButton            add;
+  private final JButton            edit;
+  private final RowGroup           group;
+  protected final LightsTable      lights;
+  protected final LightsTableModel lights_model;
+  private final JButton            remove;
+  protected final JScrollPane      scroller;
 
   public <C extends SBSceneControllerTextures & SBSceneControllerLights> SBLightsControls(
-    final @Nonnull C controller,
-    final @Nonnull Log log)
+    final C controller,
+    final LogUsableType log)
   {
     this.group = new RowGroup();
     this.lights_model = new LightsTableModel(controller, log);
@@ -305,7 +304,7 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
     this.add = new JButton("Add...");
     this.add.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         try {
           final Integer id = controller.sceneLightFreshID();
@@ -313,8 +312,6 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
             new LightEditDialog(log, controller, id, null);
           dialog.pack();
           dialog.setVisible(true);
-        } catch (final ConstraintError x) {
-          throw new UnreachableCodeException();
         } catch (final IOException x) {
           x.printStackTrace();
         }
@@ -325,19 +322,14 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
     this.edit.setEnabled(false);
     this.edit.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final int view_row = SBLightsControls.this.lights.getSelectedRow();
         assert view_row != -1;
         final int model_row =
           SBLightsControls.this.lights.convertRowIndexToModel(view_row);
-        SBLight light;
-
-        try {
-          light = SBLightsControls.this.lights_model.getLightAt(model_row);
-        } catch (final ConstraintError x) {
-          throw new UnreachableCodeException();
-        }
+        final SBLight light =
+          SBLightsControls.this.lights_model.getLightAt(model_row);
         assert light != null;
 
         try {
@@ -346,8 +338,6 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
               .getDescription());
           dialog.pack();
           dialog.setVisible(true);
-        } catch (final ConstraintError x) {
-          throw new UnreachableCodeException();
         } catch (final IOException x) {
           x.printStackTrace();
         }
@@ -358,23 +348,19 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
     this.remove.setEnabled(false);
     this.remove.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
-        try {
-          final int view_row = SBLightsControls.this.lights.getSelectedRow();
-          assert view_row != -1;
-          final int model_row =
-            SBLightsControls.this.lights.convertRowIndexToModel(view_row);
-          SBLight light;
+        final int view_row = SBLightsControls.this.lights.getSelectedRow();
+        assert view_row != -1;
+        final int model_row =
+          SBLightsControls.this.lights.convertRowIndexToModel(view_row);
+        SBLight light;
 
-          light = SBLightsControls.this.lights_model.getLightAt(model_row);
-          assert light != null;
-          controller.sceneLightRemove(light.getID());
+        light = SBLightsControls.this.lights_model.getLightAt(model_row);
+        assert light != null;
+        controller.sceneLightRemove(light.getID());
 
-          SBLightsControls.this.lights_model.refreshLights();
-        } catch (final ConstraintError x) {
-          throw new UnreachableCodeException();
-        }
+        SBLightsControls.this.lights_model.refreshLights();
       }
     });
 
@@ -383,7 +369,7 @@ final class SBLightsControls implements SBSceneChangeListener, SBControls
         @SuppressWarnings("synthetic-access") @Override public
           void
           valueChanged(
-            final @Nonnull ListSelectionEvent e)
+            final @Nullable ListSelectionEvent e)
         {
           if (SBLightsControls.this.lights.getSelectedRow() == -1) {
             SBLightsControls.this.edit.setEnabled(false);

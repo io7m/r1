@@ -18,32 +18,25 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.util.Collection;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
 interface SBSceneControllerLights extends SBSceneChangeListenerRegistration
 {
   public boolean sceneLightExists(
-    final @Nonnull Integer id)
-    throws ConstraintError;
+    final Integer id);
 
-  public @Nonnull Integer sceneLightFreshID();
+  public Integer sceneLightFreshID();
 
-  public @CheckForNull SBLight sceneLightGet(
-    final @Nonnull Integer id)
-    throws ConstraintError;
+  public @Nullable SBLight sceneLightGet(
+    final Integer id);
 
   public void sceneLightPut(
-    final @Nonnull SBLightDescription d)
-    throws ConstraintError,
-      RException;
+    final SBLightDescription d)
+    throws RException;
 
   public void sceneLightRemove(
-    final @Nonnull Integer id)
-    throws ConstraintError;
+    final Integer id);
 
-  public @Nonnull Collection<SBLight> sceneLightsGetAll();
+  public Collection<SBLight> sceneLightsGetAll();
 }

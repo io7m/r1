@@ -16,10 +16,8 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
@@ -27,27 +25,25 @@ import com.io7m.renderer.types.RTransformTextureType;
 public final class SBMaterialDescriptionTranslucentRefractive implements
   SBMaterialDescriptionTranslucent
 {
-  private final @Nonnull String                          name;
-  private final @Nonnull SBMaterialNormalDescription     normal;
-  private final @Nonnull SBMaterialRefractiveDescription refractive;
-  private final @Nonnull RMatrixI3x3F<RTransformTextureType> uv_matrix;
+  private final String                              name;
+  private final SBMaterialNormalDescription         normal;
+  private final SBMaterialRefractiveDescription     refractive;
+  private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   SBMaterialDescriptionTranslucentRefractive(
-    final @Nonnull String in_name,
-    final @Nonnull SBMaterialNormalDescription in_normal,
-    final @Nonnull SBMaterialRefractiveDescription in_refractive,
-    final @Nonnull RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
-    throws ConstraintError
+    final String in_name,
+    final SBMaterialNormalDescription in_normal,
+    final SBMaterialRefractiveDescription in_refractive,
+    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
   {
-    this.name = Constraints.constrainNotNull(in_name, "Name");
-    this.normal = Constraints.constrainNotNull(in_normal, "Normal");
-    this.refractive =
-      Constraints.constrainNotNull(in_refractive, "Refractive");
-    this.uv_matrix = Constraints.constrainNotNull(in_uv_matrix, "UV matrix");
+    this.name = NullCheck.notNull(in_name, "Name");
+    this.normal = NullCheck.notNull(in_normal, "Normal");
+    this.refractive = NullCheck.notNull(in_refractive, "Refractive");
+    this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -65,17 +61,17 @@ public final class SBMaterialDescriptionTranslucentRefractive implements
       && this.uv_matrix.equals(other.uv_matrix);
   }
 
-  public @Nonnull SBMaterialNormalDescription getNormal()
+  public SBMaterialNormalDescription getNormal()
   {
     return this.normal;
   }
 
-  public @Nonnull SBMaterialRefractiveDescription getRefractive()
+  public SBMaterialRefractiveDescription getRefractive()
   {
     return this.refractive;
   }
 
-  public @Nonnull RMatrixI3x3F<RTransformTextureType> getUVMatrix()
+  public RMatrixI3x3F<RTransformTextureType> getUVMatrix()
   {
     return this.uv_matrix;
   }
@@ -90,7 +86,7 @@ public final class SBMaterialDescriptionTranslucentRefractive implements
     return result;
   }
 
-  @Override public @Nonnull String materialDescriptionGetName()
+  @Override public String materialDescriptionGetName()
   {
     return this.name;
   }
@@ -101,8 +97,7 @@ public final class SBMaterialDescriptionTranslucentRefractive implements
     materialDescriptionTranslucentVisitableAccept(
       final V v)
       throws E,
-        RException,
-        ConstraintError
+        RException
   {
     return v.materialDescriptionVisitTranslucentRefractive(this);
   }
@@ -113,8 +108,7 @@ public final class SBMaterialDescriptionTranslucentRefractive implements
     materialDescriptionVisitableAccept(
       final V v)
       throws E,
-        RException,
-        ConstraintError
+        RException
   {
     return v.materialDescriptionVisitTranslucent(this);
   }

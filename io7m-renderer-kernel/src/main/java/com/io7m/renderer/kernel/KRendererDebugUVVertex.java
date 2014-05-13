@@ -16,37 +16,33 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Unit;
 import com.io7m.jcache.JCacheException;
-import com.io7m.jcanephora.ArrayBufferUsable;
+import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.DepthFunction;
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.IndexBufferUsable;
-import com.io7m.jcanephora.JCBExecutionAPI;
-import com.io7m.jcanephora.JCBExecutionException;
-import com.io7m.jcanephora.JCBExecutorProcedure;
-import com.io7m.jcanephora.JCBProgram;
-import com.io7m.jcanephora.JCBProgramProcedure;
+import com.io7m.jcanephora.FramebufferUsableType;
+import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
+import com.io7m.jcanephora.batchexec.JCBExecutorType;
+import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
+import com.io7m.jcanephora.batchexec.JCBProgramType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM4F;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesInstanceType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverFunctionType;
-import com.io7m.renderer.kernel.KMutableMatricesType.MatricesObserverType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
+import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KScene;
-import com.io7m.renderer.kernel.types.KScene.KSceneOpaques;
+import com.io7m.renderer.kernel.types.KSceneOpaques;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 
@@ -54,10 +50,10 @@ import com.io7m.renderer.types.RException;
  * A debug renderer that displays the UV coordinates for all meshes.
  */
 
-@SuppressWarnings("synthetic-access") public final class KRendererDebugUVVertex implements
+@SuppressWarnings("synthetic-access") @EqualityReference public final class KRendererDebugUVVertex implements
   KRendererDebugType
 {
-  private static final @Nonnull String NAME;
+  private static final String NAME;
 
   static {
     NAME = "debug-uv-vertex";
@@ -73,26 +69,22 @@ import com.io7m.renderer.types.RException;
    * @param log
    *          A log handle
    * @return A new renderer
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
   public static KRendererDebugType rendererNew(
-    final @Nonnull JCGLImplementation g,
-    final @Nonnull KShaderCacheType shader_cache,
-    final @Nonnull Log log)
-    throws ConstraintError
+    final JCGLImplementationType g,
+    final KShaderCacheType shader_cache,
+    final LogUsableType log)
   {
     return new KRendererDebugUVVertex(g, shader_cache, log);
   }
 
   private static void renderInstanceOpaque(
-    final @Nonnull JCGLInterfaceCommon gc,
-    final @Nonnull JCBProgram p,
-    final @Nonnull KInstanceTransformedOpaqueType o,
-    final @Nonnull MatricesInstanceType mi)
-    throws JCGLException,
-      ConstraintError
+    final JCGLInterfaceCommonType gc,
+    final JCBProgramType p,
+    final KInstanceTransformedOpaqueType o,
+    final MatricesInstanceType mi)
+    throws JCGLException
   {
     /**
      * Upload matrices.
@@ -109,24 +101,18 @@ import com.io7m.renderer.types.RException;
 
     try {
       final KMeshReadableType mesh = o.instanceGetMesh();
-      final ArrayBufferUsable array = mesh.getArrayBuffer();
-      final IndexBufferUsable indices = mesh.getIndexBuffer();
+      final ArrayBufferUsableType array = mesh.getArrayBuffer();
+      final IndexBufferUsableType indices = mesh.getIndexBuffer();
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
       KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
 
-      p.programExecute(new JCBProgramProcedure() {
+      p.programExecute(new JCBProgramProcedureType<JCGLException>() {
         @Override public void call()
-          throws ConstraintError,
-            JCGLException,
-            Exception
+          throws JCGLException
         {
-          try {
-            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-          } catch (final ConstraintError x) {
-            throw new UnreachableCodeException(x);
-          }
+          gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
         }
       });
 
@@ -135,40 +121,35 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private final @Nonnull VectorM4F            background;
-  private final @Nonnull JCGLImplementation   gl;
-  private final @Nonnull Log                  log;
-  private final @Nonnull KMutableMatricesType matrices;
-  private final @Nonnull KShaderCacheType     shader_cache;
-  private final @Nonnull KTransformContext    transform_context;
+  private final VectorM4F              background;
+  private final JCGLImplementationType gl;
+  private final LogUsableType          log;
+  private final KMutableMatrices       matrices;
+  private final KShaderCacheType       shader_cache;
+  private final KTransformContext      transform_context;
 
   private KRendererDebugUVVertex(
-    final @Nonnull JCGLImplementation in_gl,
-    final @Nonnull KShaderCacheType in_shader_cache,
-    final @Nonnull Log in_log)
-    throws ConstraintError
+    final JCGLImplementationType in_gl,
+    final KShaderCacheType in_shader_cache,
+    final LogUsableType in_log)
   {
     this.log =
-      new Log(
-        Constraints.constrainNotNull(in_log, "Log"),
-        KRendererDebugUVVertex.NAME);
-    this.shader_cache =
-      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
-    this.gl = Constraints.constrainNotNull(in_gl, "GL");
+      NullCheck.notNull(in_log, "Log").with(KRendererDebugUVVertex.NAME);
+    this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
+    this.gl = NullCheck.notNull(in_gl, "GL");
 
     this.background = new VectorM4F(0.0f, 0.0f, 0.0f, 0.0f);
-    this.matrices = KMutableMatricesType.newMatrices();
+    this.matrices = KMutableMatrices.newMatrices();
     this.transform_context = KTransformContext.newContext();
   }
 
   @Override public void rendererDebugEvaluate(
-    final @Nonnull KFramebufferRGBAUsableType framebuffer,
-    final @Nonnull KScene scene)
-    throws ConstraintError,
-      RException
+    final KFramebufferRGBAUsableType framebuffer,
+    final KScene scene)
+    throws RException
   {
-    Constraints.constrainNotNull(framebuffer, "Framebuffer");
-    Constraints.constrainNotNull(scene, "Scene");
+    NullCheck.notNull(framebuffer, "Framebuffer");
+    NullCheck.notNull(scene, "Scene");
 
     final KCamera camera = scene.getCamera();
 
@@ -178,9 +159,8 @@ import com.io7m.renderer.types.RException;
         camera.getProjectionMatrix(),
         new MatricesObserverFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final @Nonnull MatricesObserverType o)
+            final MatricesObserverType o)
             throws RException,
-              ConstraintError,
               JCGLException
           {
             try {
@@ -205,18 +185,17 @@ import com.io7m.renderer.types.RException;
   }
 
   private void renderWithObserver(
-    final @Nonnull KFramebufferRGBAUsableType framebuffer,
-    final @Nonnull KScene scene,
-    final @Nonnull MatricesObserverType mo)
-    throws ConstraintError,
-      JCGLException,
+    final KFramebufferRGBAUsableType framebuffer,
+    final KScene scene,
+    final MatricesObserverType mo)
+    throws JCGLException,
       RException,
       JCacheException
   {
     final KProgram program = this.shader_cache.cacheGetLU("debug_uv");
-    final JCGLInterfaceCommon gc = this.gl.getGLCommon();
+    final JCGLInterfaceCommonType gc = this.gl.getGLCommon();
 
-    final FramebufferReferenceUsable output_buffer =
+    final FramebufferUsableType output_buffer =
       framebuffer.kFramebufferGetColorFramebuffer();
 
     try {
@@ -235,13 +214,11 @@ import com.io7m.renderer.types.RException;
 
       gc.viewportSet(framebuffer.kFramebufferGetArea());
 
-      final JCBExecutionAPI e = program.getExecutable();
-      e.execRun(new JCBExecutorProcedure() {
+      final JCBExecutorType e = program.getExecutable();
+      e.execRun(new JCBExecutorProcedureType<RException>() {
         @Override public void call(
-          final @Nonnull JCBProgram p)
-          throws ConstraintError,
-            JCGLException,
-            Exception,
+          final JCBProgramType p)
+          throws JCGLException,
             RException
         {
           KShadingProgramCommon.putMatrixProjectionUnchecked(
@@ -250,13 +227,14 @@ import com.io7m.renderer.types.RException;
 
           final KSceneOpaques opaques = scene.getOpaques();
           for (final KInstanceTransformedOpaqueType o : opaques.getAll()) {
+            assert o != null;
+
             mo.withInstance(
               o,
               new MatricesInstanceFunctionType<Unit, JCGLException>() {
                 @Override public Unit run(
-                  final @Nonnull MatricesInstanceType mi)
-                  throws ConstraintError,
-                    RException,
+                  final MatricesInstanceType mi)
+                  throws RException,
                     JCGLException
                 {
                   KRendererDebugUVVertex.renderInstanceOpaque(gc, p, o, mi);
@@ -266,9 +244,6 @@ import com.io7m.renderer.types.RException;
           }
         }
       });
-
-    } catch (final JCBExecutionException x) {
-      throw new UnreachableCodeException(x);
     } finally {
       gc.framebufferDrawUnbind();
     }

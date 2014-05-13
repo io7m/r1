@@ -18,9 +18,6 @@ package com.io7m.renderer.kernel.examples;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -33,27 +30,25 @@ public interface ExampleSceneType
    * @return The name of the example
    */
 
-  @Nonnull String exampleGetName();
+  String exampleGetName();
 
   /**
    * Initialize the given scene.
    * 
    * @param scene
    *          The scene
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    */
 
   void exampleScene(
-    final @Nonnull ExampleSceneBuilderType scene)
-    throws ConstraintError,
-      RException;
+    final ExampleSceneBuilderType scene)
+    throws RException;
 
   /**
    * @return The list of viewpoints for the scene
    */
 
-  @Nonnull List<ExampleViewType> exampleViewpoints();
+  List<ExampleViewType> exampleViewpoints();
 }

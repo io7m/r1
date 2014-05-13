@@ -20,12 +20,10 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -46,9 +44,12 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 import net.java.dev.designgridlayout.Tag;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jlog.Log;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogPolicyAllOn;
+import com.io7m.jlog.LogType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RSpaceObjectType;
@@ -67,10 +68,10 @@ public final class SBInstanceControls implements
     }
 
     public <C extends SBSceneControllerMaterials & SBSceneControllerTextures> MaterialSelectDialog(
-      final @Nonnull JTextField material_id,
-      final @Nonnull JTextField material_name,
-      final @Nonnull C controller,
-      final @Nonnull Log log)
+      final JTextField material_id,
+      final JTextField material_name,
+      final C controller,
+      final LogUsableType log)
     {
       final Container content = this.getContentPane();
       final JPanel inner = new JPanel();
@@ -93,23 +94,19 @@ public final class SBInstanceControls implements
       ok.setEnabled(false);
       ok.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
-          try {
-            final SBMaterial m = controls.getSelectedMaterial();
-            material_id.setText(m.materialGetID().toString());
-            material_name.setText(m.materialGetName());
-            SBWindowUtilities.closeWindow(MaterialSelectDialog.this);
-          } catch (final ConstraintError x) {
-            throw new UnreachableCodeException(x);
-          }
+          final SBMaterial m = controls.getSelectedMaterial();
+          material_id.setText(m.materialGetID().toString());
+          material_name.setText(m.materialGetName());
+          SBWindowUtilities.closeWindow(MaterialSelectDialog.this);
         }
       });
 
       materials.getSelectionModel().addListSelectionListener(
         new ListSelectionListener() {
           @Override public void valueChanged(
-            final @Nonnull ListSelectionEvent e)
+            final @Nullable ListSelectionEvent e)
           {
             if (materials.getSelectedRow() == -1) {
               ok.setEnabled(false);
@@ -122,7 +119,7 @@ public final class SBInstanceControls implements
       final JButton cancel = new JButton("Cancel");
       cancel.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           SBWindowUtilities.closeWindow(MaterialSelectDialog.this);
         }
@@ -132,14 +129,15 @@ public final class SBInstanceControls implements
     }
   }
 
-  protected final static @Nonnull FileFilter MESH_RMB_FILE_FILTER;
-  protected final static @Nonnull FileFilter MESH_RXML_FILE_FILTER;
+  protected final static FileFilter MESH_RMB_FILE_FILTER;
+  protected final static FileFilter MESH_RXML_FILE_FILTER;
 
   static {
     MESH_RXML_FILE_FILTER = new FileFilter() {
       @Override public boolean accept(
-        final File f)
+        final @Nullable File f)
       {
+        assert f != null;
         return f.isDirectory() || f.toString().endsWith(".rmx");
       }
 
@@ -151,8 +149,9 @@ public final class SBInstanceControls implements
 
     MESH_RMB_FILE_FILTER = new FileFilter() {
       @Override public boolean accept(
-        final File f)
+        final @Nullable File f)
       {
+        assert f != null;
         return f.isDirectory() || f.toString().endsWith(".rmb");
       }
 
@@ -174,10 +173,11 @@ public final class SBInstanceControls implements
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
-            final Log log =
-              new Log(new Properties(), "com.io7m.renderer", "sandbox");
+            final LogType log =
+              Log.newLog(
+                LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG),
+                "sandbox");
             final SBExampleController controller = new SBExampleController();
             final SBInstanceControls controls =
               SBInstanceControls.newControls(
@@ -190,7 +190,7 @@ public final class SBInstanceControls implements
             final JButton hide = new JButton("Hide");
             hide.addActionListener(new ActionListener() {
               @Override public void actionPerformed(
-                final ActionEvent e)
+                final @Nullable ActionEvent e)
               {
                 controls.controlsHide();
               }
@@ -198,7 +198,7 @@ public final class SBInstanceControls implements
             final JButton show = new JButton("Show");
             show.addActionListener(new ActionListener() {
               @Override public void actionPerformed(
-                final ActionEvent e)
+                final @Nullable ActionEvent e)
               {
                 controls.controlsShow();
               }
@@ -210,39 +210,39 @@ public final class SBInstanceControls implements
     });
   }
 
-  public static @Nonnull
+  public static
     <C extends SBSceneControllerTextures & SBSceneControllerMaterials & SBSceneControllerMeshes>
     SBInstanceControls
     newControls(
-      final @Nonnull JFrame parent,
-      final @Nonnull Log log,
-      final @Nonnull C controller,
-      final @Nonnull Integer id)
+      final JFrame parent,
+      final LogUsableType log,
+      final C controller,
+      final Integer id)
   {
     return new SBInstanceControls(parent, log, controller, id);
   }
 
-  private final @Nonnull SBFaceSelectionTypeSelector            faces;
-  private final @Nonnull RowGroup                               group;
-  private final @Nonnull Integer                                id;
-  private final @Nonnull JTextField                             id_field;
-  private final @Nonnull JCheckBox                              lit;
-  private final @Nonnull JTextField                             material_id;
-  private final @Nonnull JTextField                             material_name;
-  private final @Nonnull JButton                                material_select;
-  private final @Nonnull SBMatrix3x3Controls<RTransformTextureType> matrix_uv;
-  private final @Nonnull JButton                                mesh_load;
-  private final @Nonnull JComboBox<PathVirtual>                 mesh_selector;
-  private @Nonnull Map<PathVirtual, SBMesh>                     meshes;
-  private final @Nonnull SBOrientationInput                     orientation;
-  private final @Nonnull SBVector3FInput<RSpaceWorldType>           position;
-  private final @Nonnull SBVector3FInput<RSpaceObjectType>          scale;
+  private final SBFaceSelectionTypeSelector                faces;
+  private final RowGroup                                   group;
+  private final Integer                                    id;
+  private final JTextField                                 id_field;
+  private final JCheckBox                                  lit;
+  private final JTextField                                 material_id;
+  private final JTextField                                 material_name;
+  private final JButton                                    material_select;
+  private final SBMatrix3x3Controls<RTransformTextureType> matrix_uv;
+  private final JButton                                    mesh_load;
+  private final JComboBox<PathVirtual>                     mesh_selector;
+  private Map<PathVirtual, SBMesh>                         meshes;
+  private final SBOrientationInput                         orientation;
+  private final SBVector3FInput<RSpaceWorldType>           position;
+  private final SBVector3FInput<RSpaceObjectType>          scale;
 
   public <C extends SBSceneControllerTextures & SBSceneControllerMaterials & SBSceneControllerMeshes> SBInstanceControls(
-    final @Nonnull JFrame parent,
-    final @Nonnull Log log,
-    final @Nonnull C controller,
-    final @Nonnull Integer in_id)
+    final JFrame parent,
+    final LogUsableType log,
+    final C controller,
+    final Integer in_id)
   {
     this.id = in_id;
     this.id_field = new JTextField(in_id.toString());
@@ -251,12 +251,14 @@ public final class SBInstanceControls implements
     this.position = SBVector3FInput.newInput("Position");
     this.scale = SBVector3FInput.newInput("Scale");
     this.orientation = SBOrientationInput.newInput();
-    this.matrix_uv = new SBMatrix3x3Controls<RTransformTextureType>("UV matrix");
+    this.matrix_uv =
+      new SBMatrix3x3Controls<RTransformTextureType>("UV matrix");
     this.lit = new JCheckBox();
     this.lit.setSelected(true);
     this.faces = new SBFaceSelectionTypeSelector();
     this.group = new RowGroup();
 
+    this.meshes = new HashMap<PathVirtual, SBMesh>();
     this.material_id = new JTextField("");
     this.material_id.setEditable(false);
     this.material_name = new JTextField("");
@@ -267,7 +269,7 @@ public final class SBInstanceControls implements
       @SuppressWarnings("synthetic-access") @Override public
         void
         actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
       {
         final MaterialSelectDialog dialog =
           new MaterialSelectDialog(
@@ -286,7 +288,7 @@ public final class SBInstanceControls implements
     this.mesh_load = new JButton("Open...");
     this.mesh_load.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final JFileChooser chooser = new JFileChooser();
         chooser.setMultiSelectionEnabled(false);
@@ -306,11 +308,7 @@ public final class SBInstanceControls implements
                 @Override protected SBMesh doInBackground()
                   throws Exception
                 {
-                  try {
-                    return controller.sceneMeshLoad(file).get();
-                  } catch (final ConstraintError x) {
-                    throw new IOException(x);
-                  }
+                  return controller.sceneMeshLoad(file).get();
                 }
 
                 @Override protected void done()
@@ -348,7 +346,7 @@ public final class SBInstanceControls implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     layout.row().group(this.group).grid(new JLabel("ID")).add(this.id_field);
 
@@ -400,8 +398,7 @@ public final class SBInstanceControls implements
   }
 
   @SuppressWarnings("boxing") @Override public SBInstance controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
     return new SBInstance(
       this.id,
@@ -425,7 +422,7 @@ public final class SBInstanceControls implements
   }
 
   protected void meshesRefresh(
-    final @Nonnull SBSceneControllerMeshes controller)
+    final SBSceneControllerMeshes controller)
   {
     this.meshes = controller.sceneMeshesGet();
 

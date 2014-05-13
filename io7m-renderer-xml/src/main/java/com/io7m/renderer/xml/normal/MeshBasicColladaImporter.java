@@ -18,11 +18,10 @@ package com.io7m.renderer.xml.normal;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jranges.RangeCheck;
+import com.io7m.jranges.RangeCheckException;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI3F;
@@ -49,7 +48,7 @@ public class MeshBasicColladaImporter
   static class Offsets
   {
     private static int getNormalOffset(
-      final @Nonnull List<ColladaInput> inputs)
+      final List<ColladaInput> inputs)
     {
       for (int index = 0; index < inputs.size(); ++index) {
         if (inputs.get(index).getSemantic() == ColladaSemantic.SEMANTIC_NORMAL) {
@@ -60,7 +59,7 @@ public class MeshBasicColladaImporter
     }
 
     private static int getPositionOffset(
-      final @Nonnull List<ColladaInput> inputs)
+      final List<ColladaInput> inputs)
     {
       for (int index = 0; index < inputs.size(); ++index) {
         if (inputs.get(index).getSemantic() == ColladaSemantic.SEMANTIC_VERTEX) {
@@ -71,7 +70,7 @@ public class MeshBasicColladaImporter
     }
 
     private static int getUVOffset(
-      final @Nonnull List<ColladaInput> inputs)
+      final List<ColladaInput> inputs)
     {
       for (int index = 0; index < inputs.size(); ++index) {
         if (inputs.get(index).getSemantic() == ColladaSemantic.SEMANTIC_TEXCOORD) {
@@ -86,36 +85,38 @@ public class MeshBasicColladaImporter
     final int texture_index;
 
     Offsets(
-      final @Nonnull List<ColladaInput> inputs)
-      throws ConstraintError
+      final List<ColladaInput> inputs)
     {
       this.position_index = Offsets.getPositionOffset(inputs);
-      Constraints.constrainRange(
+      RangeCheck.checkGreater(
         this.position_index,
+        "Position",
         0,
-        Integer.MAX_VALUE,
-        "Mesh has position attribute");
+        "Mesh position attribute");
+
       this.normal_index = Offsets.getNormalOffset(inputs);
-      Constraints.constrainRange(
+      RangeCheck.checkGreater(
         this.normal_index,
+        "Normal",
         0,
-        Integer.MAX_VALUE,
-        "Mesh has normal attribute");
+        "Mesh normal attribute");
+
       this.texture_index = Offsets.getUVOffset(inputs);
     }
   }
 
   private static void loadColladaPolygons(
-    final @Nonnull MeshBasic m,
-    final @Nonnull Offsets offsets,
-    final @Nonnull List<ColladaPoly> polygons,
-    final @Nonnull Log log)
-    throws ConstraintError
+    final MeshBasic m,
+    final Offsets offsets,
+    final List<ColladaPoly> polygons,
+    final LogUsableType log)
   {
     for (final ColladaPoly poly : polygons) {
       final List<ColladaVertex> vertices = poly.getVertices();
-      Constraints
-        .constrainRange(vertices.size(), 3, 3, "Polygon is triangle");
+
+      if (vertices.size() != 3) {
+        throw new RangeCheckException("Polygons must have three vertices");
+      }
 
       final ColladaVertex v0 = vertices.get(0);
       final ColladaVertex v1 = vertices.get(1);
@@ -155,34 +156,30 @@ public class MeshBasicColladaImporter
   }
 
   private static void loadColladaTexCoords(
-    final @Nonnull MeshBasic m,
-    final @Nonnull ColladaSourceArray2F source)
-    throws ConstraintError
+    final MeshBasic m,
+    final ColladaSourceArray2F source)
   {
     final List<VectorI2F> a = source.getArray2f();
     for (final VectorI2F v : a) {
-      m.uvAdd(new RVectorI2F<RSpaceTextureType>(v.x, v.y));
+      m.uvAdd(new RVectorI2F<RSpaceTextureType>(v.getXF(), v.getYF()));
     }
   }
 
-  private final @Nonnull Log         log;
-  private final @Nonnull MatrixM3x3F matrix;
+  private final LogUsableType log;
+  private final MatrixM3x3F   matrix;
 
   public MeshBasicColladaImporter(
-    final @Nonnull Log in_log)
-    throws ConstraintError
+    final LogUsableType in_log)
   {
     this.log =
-      new Log(
-        Constraints.constrainNotNull(in_log, "Log interface"),
+      NullCheck.notNull(in_log, "Log interface").with(
         "mesh-basic-collada-importer");
     this.matrix = new MatrixM3x3F();
   }
 
   private void loadColladaNormals(
-    final @Nonnull MeshBasic m,
-    final @Nonnull ColladaSourceArray3F source)
-    throws ConstraintError
+    final MeshBasic m,
+    final ColladaSourceArray3F source)
   {
     final ColladaAxis source_axis = source.getAxis();
     if (source_axis != ColladaAxis.COLLADA_AXIS_Y_UP) {
@@ -195,7 +192,7 @@ public class MeshBasicColladaImporter
     final List<VectorI3F> a = source.getArray3f();
     for (final VectorI3F v : a) {
       final RVectorI3F<RSpaceObjectType> vec =
-        new RVectorI3F<RSpaceObjectType>(v.x, v.y, v.z);
+        new RVectorI3F<RSpaceObjectType>(v.getXF(), v.getYF(), v.getZF());
 
       if (source_axis != ColladaAxis.COLLADA_AXIS_Y_UP) {
         m.normalAdd(ColladaAxis.convertAxes(
@@ -210,9 +207,8 @@ public class MeshBasicColladaImporter
   }
 
   private void loadColladaPositions(
-    final @Nonnull MeshBasic m,
-    final @Nonnull ColladaSourceArray3F source)
-    throws ConstraintError
+    final MeshBasic m,
+    final ColladaSourceArray3F source)
   {
     final ColladaAxis source_axis = source.getAxis();
     if (source_axis != ColladaAxis.COLLADA_AXIS_Y_UP) {
@@ -225,7 +221,7 @@ public class MeshBasicColladaImporter
     final List<VectorI3F> a = source.getArray3f();
     for (final VectorI3F v : a) {
       final RVectorI3F<RSpaceObjectType> vec =
-        new RVectorI3F<RSpaceObjectType>(v.x, v.y, v.z);
+        new RVectorI3F<RSpaceObjectType>(v.getXF(), v.getYF(), v.getZF());
 
       if (source_axis != ColladaAxis.COLLADA_AXIS_Y_UP) {
         m.positionAdd(ColladaAxis.convertAxes(
@@ -240,10 +236,9 @@ public class MeshBasicColladaImporter
   }
 
   private void loadColladaSources(
-    final @Nonnull ColladaDocument doc,
-    final @Nonnull MeshBasic m,
-    final @Nonnull List<ColladaInput> inputs)
-    throws ConstraintError
+    final ColladaDocument doc,
+    final MeshBasic m,
+    final List<ColladaInput> inputs)
   {
     for (final ColladaInput input : inputs) {
       switch (input.getSemantic()) {
@@ -251,6 +246,7 @@ public class MeshBasicColladaImporter
         {
           final ColladaVertices vertices =
             (ColladaSource.ColladaVertices) doc.getSource(input.getSource());
+          assert vertices != null;
 
           boolean got_position = false;
           for (final ColladaInput vertex_input : vertices.getInputs()) {
@@ -259,14 +255,16 @@ public class MeshBasicColladaImporter
               final ColladaSourceArray3F source =
                 (ColladaSource.ColladaSourceArray3F) doc
                   .getSource(vertex_input.getSource());
+              assert source != null;
 
               this.loadColladaPositions(m, source);
             }
           }
 
-          Constraints.constrainArbitrary(
-            got_position,
-            "Source had POSITION input");
+          if (got_position == false) {
+            throw new IllegalArgumentException(
+              "Source does not have POSITION input");
+          }
 
           this.log.debug("Loaded " + m.positionsGet().size() + " positions");
           break;
@@ -276,9 +274,8 @@ public class MeshBasicColladaImporter
           final ColladaSourceArray3F source =
             (ColladaSource.ColladaSourceArray3F) doc.getSource(input
               .getSource());
-
+          assert source != null;
           this.loadColladaNormals(m, source);
-
           this.log.debug("Loaded " + m.normalsGet().size() + " normals");
           break;
         }
@@ -287,7 +284,7 @@ public class MeshBasicColladaImporter
           final ColladaSourceArray2F source =
             (ColladaSource.ColladaSourceArray2F) doc.getSource(input
               .getSource());
-
+          assert source != null;
           MeshBasicColladaImporter.loadColladaTexCoords(m, source);
 
           this.log.debug("Loaded "
@@ -322,30 +319,30 @@ public class MeshBasicColladaImporter
     }
   }
 
-  public @Nonnull MeshBasic newMeshFromColladaGeometry(
-    final @Nonnull ColladaDocument doc,
-    final @Nonnull ColladaGeometry geom)
-    throws ConstraintError
+  public MeshBasic newMeshFromColladaGeometry(
+    final ColladaDocument doc,
+    final ColladaGeometry geom)
   {
-    Constraints.constrainNotNull(doc, "Document");
-    Constraints.constrainNotNull(geom, "Geometry");
+    NullCheck.notNull(doc, "Document");
+    NullCheck.notNull(geom, "Geometry");
     return this.newMeshFromColladaGeometryWithName(doc, geom, geom
       .getID()
       .getActual());
   }
 
-  public @Nonnull MeshBasic newMeshFromColladaGeometryWithName(
-    final @Nonnull ColladaDocument doc,
-    final @Nonnull ColladaGeometry geom,
-    final @Nonnull String name)
-    throws ConstraintError
+  public MeshBasic newMeshFromColladaGeometryWithName(
+    final ColladaDocument doc,
+    final ColladaGeometry geom,
+    final String name)
   {
-    Constraints.constrainNotNull(doc, "Document");
-    Constraints.constrainNotNull(geom, "Geometry");
-    Constraints.constrainNotNull(name, "Name");
-    Constraints.constrainArbitrary(
-      geom.getDocument() == doc,
-      "Geometry came from the given document");
+    NullCheck.notNull(doc, "Document");
+    NullCheck.notNull(geom, "Geometry");
+    NullCheck.notNull(name, "Name");
+
+    if (geom.getDocument() != doc) {
+      throw new IllegalArgumentException(
+        "Geometry did not come from the given document");
+    }
 
     final MeshBasic m = MeshBasic.newMesh(name);
     switch (geom.getType()) {

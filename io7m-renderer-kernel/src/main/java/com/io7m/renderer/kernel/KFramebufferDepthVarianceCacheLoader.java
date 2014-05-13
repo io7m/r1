@@ -18,15 +18,11 @@ package com.io7m.renderer.kernel;
 
 import java.math.BigInteger;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.types.RException;
 
@@ -47,48 +43,39 @@ public final class KFramebufferDepthVarianceCacheLoader implements
    * @param log
    *          A log handle
    * @return A new cache loader
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull
+  public static
     JCacheLoaderType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType, RException>
     newLoader(
-      final @Nonnull JCGLImplementation gi,
-      final @Nonnull Log log)
-      throws ConstraintError
+      final JCGLImplementationType gi,
+      final LogUsableType log)
   {
     return new KFramebufferDepthVarianceCacheLoader(gi, log);
   }
 
-  private final @Nonnull JCGLImplementation gi;
-  private final @Nonnull Log                log;
+  private final JCGLImplementationType gi;
+  private final LogUsableType          log;
 
   private KFramebufferDepthVarianceCacheLoader(
-    final @Nonnull JCGLImplementation in_gi,
-    final @Nonnull Log in_log)
-    throws ConstraintError
+    final JCGLImplementationType in_gi,
+    final LogUsableType in_log)
   {
     this.log =
-      new Log(
-        Constraints.constrainNotNull(in_log, "Log"),
+      NullCheck.notNull(in_log, "LogUsableType").with(
         "framebuffer-rgba-cache");
-    this.gi = Constraints.constrainNotNull(in_gi, "OpenGL implementation");
+    this.gi = NullCheck.notNull(in_gi, "OpenGL implementation");
   }
 
   @Override public void cacheValueClose(
-    final @Nonnull KFramebufferDepthVarianceType v)
+    final KFramebufferDepthVarianceType v)
     throws RException
   {
-    try {
-      v.kFramebufferDelete(this.gi);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    v.kFramebufferDelete(this.gi);
   }
 
-  @Override public @Nonnull KFramebufferDepthVariance cacheValueLoad(
-    final @Nonnull KFramebufferDepthVarianceDescription key)
+  @Override public KFramebufferDepthVariance cacheValueLoad(
+    final KFramebufferDepthVarianceDescription key)
     throws RException
   {
     try {
@@ -97,13 +84,11 @@ public final class KFramebufferDepthVarianceCacheLoader implements
         key);
     } catch (final JCGLException e) {
       throw RException.fromJCGLException(e);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
     }
   }
 
   @Override public BigInteger cacheValueSizeOf(
-    final @Nonnull KFramebufferDepthVarianceType v)
+    final KFramebufferDepthVarianceType v)
   {
     return BigInteger.valueOf(v.kFramebufferGetSizeBytes());
   }

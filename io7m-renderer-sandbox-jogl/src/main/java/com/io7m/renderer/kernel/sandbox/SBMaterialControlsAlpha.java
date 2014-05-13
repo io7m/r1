@@ -18,25 +18,22 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.awt.Color;
 
-import javax.annotation.Nonnull;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 
 public final class SBMaterialControlsAlpha implements
   SBControlsDataType<SBMaterialAlphaDescription>
 {
-  private final @Nonnull RowGroup                   group;
-  private final @Nonnull SBFloatHSlider             opacity;
-  private final @Nonnull SBAlphaOpacityTypeSelector type;
+  private final RowGroup                   group;
+  private final SBFloatHSlider             opacity;
+  private final SBAlphaOpacityTypeSelector type;
 
   SBMaterialControlsAlpha()
-    throws ConstraintError
   {
     this.group = new RowGroup();
     this.type = new SBAlphaOpacityTypeSelector();
@@ -44,7 +41,7 @@ public final class SBMaterialControlsAlpha implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout dg)
+    final DesignGridLayout dg)
   {
     final JLabel label = new JLabel("Alpha");
     label.setForeground(Color.BLUE);
@@ -59,14 +56,13 @@ public final class SBMaterialControlsAlpha implements
   }
 
   @Override public void controlsLoadFrom(
-    final @Nonnull SBMaterialAlphaDescription mat_d)
+    final SBMaterialAlphaDescription mat_d)
   {
     this.opacity.setCurrent(mat_d.getOpacity());
   }
 
-  @Override public @Nonnull SBMaterialAlphaDescription controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+  @Override public SBMaterialAlphaDescription controlsSave()
+    throws SBExceptionInputError
   {
     return new SBMaterialAlphaDescription(
       this.type.getSelectedItem(),

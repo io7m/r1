@@ -16,31 +16,28 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.JLabel;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.RangeInclusive;
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 
 final class SBLightShadowMappedBasicControls implements SBControls
 {
-  private final @Nonnull SBFloatHSlider             depth_bias;
-  private final @Nonnull SBDepthPrecisionSelector   depth_precision;
-  private final @Nonnull SBFloatHSlider             factor_minimum;
-  private final @Nonnull SBTextureMagFilterSelector filter_mag;
-  private final @Nonnull SBTextureMinFilterSelector filter_min;
-  private final @Nonnull RowGroup                   row_group;
-  private final @Nonnull SBIntegerHSlider           size;
+  private final SBFloatHSlider             depth_bias;
+  private final SBDepthPrecisionSelector   depth_precision;
+  private final SBFloatHSlider             factor_minimum;
+  private final SBTextureMagFilterSelector filter_mag;
+  private final SBTextureMinFilterSelector filter_min;
+  private final RowGroup                   row_group;
+  private final SBIntegerHSlider           size;
 
   SBLightShadowMappedBasicControls()
-    throws ConstraintError
   {
     this.size = new SBIntegerHSlider("Size", 1, 10);
     this.depth_bias = new SBFloatHSlider("Depth bias", 0.0f, 0.001f);
@@ -56,7 +53,7 @@ final class SBLightShadowMappedBasicControls implements SBControls
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     layout
       .row()
@@ -103,13 +100,12 @@ final class SBLightShadowMappedBasicControls implements SBControls
     this.row_group.forceShow();
   }
 
-  public @Nonnull KShadowMappedBasic getShadow(
-    final @Nonnull Integer light_id)
-    throws ConstraintError
+  public KShadowMappedBasic getShadow(
+    final Integer light_id)
   {
     final int edge_size = ((int) Math.pow(2, this.size.getCurrent())) - 1;
-    final RangeInclusive range_x = new RangeInclusive(0, edge_size);
-    final RangeInclusive range_y = new RangeInclusive(0, edge_size);
+    final RangeInclusiveL range_x = new RangeInclusiveL(0, edge_size);
+    final RangeInclusiveL range_y = new RangeInclusiveL(0, edge_size);
     final AreaInclusive area = new AreaInclusive(range_x, range_y);
 
     final KFramebufferDepthDescription depth_description =
@@ -132,7 +128,7 @@ final class SBLightShadowMappedBasicControls implements SBControls
   }
 
   public void setDescription(
-    final @Nonnull KShadowMappedBasic smb)
+    final KShadowMappedBasic smb)
   {
     final KFramebufferDepthDescription fbd =
       smb.getDescription().getDescription();

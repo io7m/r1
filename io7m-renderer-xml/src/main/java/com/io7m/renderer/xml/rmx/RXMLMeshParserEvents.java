@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.xml.rmx;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
@@ -29,9 +26,8 @@ import com.io7m.renderer.types.RXMLException;
 public interface RXMLMeshParserEvents<E extends Throwable>
 {
   public void eventError(
-    final @Nonnull RXMLException e)
-    throws E,
-      ConstraintError;
+    final RXMLException e)
+    throws E;
 
   /**
    * Called when parsing of the mesh finishes. This function is called
@@ -39,13 +35,11 @@ public interface RXMLMeshParserEvents<E extends Throwable>
    */
 
   public void eventMeshEnded()
-    throws E,
-      ConstraintError;
+    throws E;
 
   public void eventMeshName(
-    final @Nonnull String name)
-    throws E,
-      ConstraintError;
+    final String name)
+    throws E;
 
   /**
    * Called when parsing of the mesh starts. This function is called
@@ -53,85 +47,70 @@ public interface RXMLMeshParserEvents<E extends Throwable>
    */
 
   public void eventMeshStarted()
-    throws E,
-      ConstraintError;
+    throws E;
 
   public void eventMeshTriangle(
     final int index,
     final int v0,
     final int v1,
     final int v2)
-    throws E,
-      ConstraintError;
+    throws E;
 
   public void eventMeshTrianglesEnded()
-    throws E,
-      ConstraintError;
+    throws E;
 
   public void eventMeshTrianglesStarted(
     final int count)
-    throws E,
-      ConstraintError;
+    throws E;
 
   public void eventMeshType(
-    final @Nonnull RXMLMeshType mt)
-    throws E,
-      ConstraintError;
+    final RXMLMeshType mt)
+    throws E;
 
   public void eventMeshVertexBitangent(
     final int index,
-    final @Nonnull RVectorI3F<RSpaceObjectType> bitangent)
-    throws E,
-      ConstraintError;
+    final RVectorI3F<RSpaceObjectType> bitangent)
+    throws E;
 
   public void eventMeshVertexEnded(
     final int index)
-    throws E,
-      ConstraintError;
+    throws E;
 
   public void eventMeshVertexNormal(
     final int index,
-    final @Nonnull RVectorI3F<RSpaceObjectType> normal)
-    throws E,
-      ConstraintError;
+    final RVectorI3F<RSpaceObjectType> normal)
+    throws E;
 
   public void eventMeshVertexPosition(
     final int index,
-    final @Nonnull RVectorI3F<RSpaceObjectType> position)
-    throws E,
-      ConstraintError;
+    final RVectorI3F<RSpaceObjectType> position)
+    throws E;
 
   public void eventMeshVertexStarted(
     final int index)
-    throws E,
-      ConstraintError;
+    throws E;
 
   public void eventMeshVertexTangent3f(
     final int index,
-    final @Nonnull RVectorI3F<RSpaceObjectType> tangent)
-    throws E,
-      ConstraintError;
+    final RVectorI3F<RSpaceObjectType> tangent)
+    throws E;
 
   public void eventMeshVertexTangent4f(
     final int index,
-    final @Nonnull RVectorI4F<RSpaceObjectType> tangent)
-    throws E,
-      ConstraintError;
+    final RVectorI4F<RSpaceObjectType> tangent)
+    throws E;
 
   public void eventMeshVertexUV(
     final int index,
-    final @Nonnull RVectorI2F<RSpaceTextureType> uv)
-    throws E,
-      ConstraintError;
+    final RVectorI2F<RSpaceTextureType> uv)
+    throws E;
 
   public void eventMeshVerticesEnded(
-    final @Nonnull RVectorI3F<RSpaceObjectType> bounds_lower,
-    final @Nonnull RVectorI3F<RSpaceObjectType> bounds_upper)
-    throws E,
-      ConstraintError;
+    final RVectorI3F<RSpaceObjectType> bounds_lower,
+    final RVectorI3F<RSpaceObjectType> bounds_upper)
+    throws E;
 
   public void eventMeshVerticesStarted(
     final int count)
-    throws E,
-      ConstraintError;
+    throws E;
 }

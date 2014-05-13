@@ -16,18 +16,16 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * A description of a framebuffer suitable for forward rendering and sampling
  * of the depth buffer.
  */
 
-@Immutable public final class KFramebufferForwardDescription implements
+@EqualityStructural public final class KFramebufferForwardDescription implements
   KFramebufferDescriptionType
 {
   /**
@@ -38,36 +36,32 @@ import com.io7m.jaux.Constraints.ConstraintError;
    * @param in_depth_description
    *          The description of the depth buffer
    * @return A new description of a forward-rendering framebuffer
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KFramebufferForwardDescription newDescription(
-    final @Nonnull KFramebufferRGBADescription in_rgba_description,
-    final @Nonnull KFramebufferDepthDescription in_depth_description)
-    throws ConstraintError
+  public static KFramebufferForwardDescription newDescription(
+    final KFramebufferRGBADescription in_rgba_description,
+    final KFramebufferDepthDescription in_depth_description)
   {
     return new KFramebufferForwardDescription(
       in_rgba_description,
       in_depth_description);
   }
 
-  private final @Nonnull KFramebufferDepthDescription depth_description;
-  private final @Nonnull KFramebufferRGBADescription  rgba_description;
+  private final KFramebufferDepthDescription depth_description;
+  private final KFramebufferRGBADescription  rgba_description;
 
   private KFramebufferForwardDescription(
-    final @Nonnull KFramebufferRGBADescription in_rgba_description,
-    final @Nonnull KFramebufferDepthDescription in_depth_description)
-    throws ConstraintError
+    final KFramebufferRGBADescription in_rgba_description,
+    final KFramebufferDepthDescription in_depth_description)
   {
     this.rgba_description =
-      Constraints.constrainNotNull(in_rgba_description, "RGBA description");
+      NullCheck.notNull(in_rgba_description, "RGBA description");
     this.depth_description =
-      Constraints.constrainNotNull(in_depth_description, "Depth description");
+      NullCheck.notNull(in_depth_description, "Depth description");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -93,7 +87,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
    * @return The description of the depth buffer
    */
 
-  public @Nonnull KFramebufferDepthDescription getDepthDescription()
+  public KFramebufferDepthDescription getDepthDescription()
   {
     return this.depth_description;
   }
@@ -102,7 +96,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
    * @return The description of the colour buffer
    */
 
-  public @Nonnull KFramebufferRGBADescription getRGBADescription()
+  public KFramebufferRGBADescription getRGBADescription()
   {
     return this.rgba_description;
   }
@@ -124,6 +118,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
     builder.append(" rgba_description=");
     builder.append(this.rgba_description);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

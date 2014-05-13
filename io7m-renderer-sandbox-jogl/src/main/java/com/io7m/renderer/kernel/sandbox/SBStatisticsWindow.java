@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.awt.Dimension;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 
 final class SBStatisticsWindow extends JFrame
@@ -29,10 +28,10 @@ final class SBStatisticsWindow extends JFrame
     serialVersionUID = 4283712509235461406L;
   }
 
-  private final @Nonnull SBStatisticsPanel panel;
+  private final  SBStatisticsPanel panel;
 
   public SBStatisticsWindow(
-    final @Nonnull SBSceneControllerRendererControl controller)
+    final  SBSceneControllerRendererControl controller)
   {
     super("Statistics");
     this.panel = new SBStatisticsPanel(controller);

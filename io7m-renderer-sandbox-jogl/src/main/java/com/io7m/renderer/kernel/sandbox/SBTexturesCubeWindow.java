@@ -16,11 +16,10 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
 
 final class SBTexturesCubeWindow extends JFrame
 {
@@ -31,9 +30,9 @@ final class SBTexturesCubeWindow extends JFrame
   }
 
   public SBTexturesCubeWindow(
-    final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull JTextField result,
-    final @Nonnull Log log)
+    final SBSceneControllerTextures controller,
+    final JTextField result,
+    final LogUsableType log)
   {
     super("Cube textures");
     this.getContentPane().add(

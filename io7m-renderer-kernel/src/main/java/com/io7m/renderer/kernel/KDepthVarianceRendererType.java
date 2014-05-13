@@ -19,10 +19,7 @@ package com.io7m.renderer.kernel;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.functional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
 import com.io7m.renderer.types.RException;
@@ -50,19 +47,17 @@ public interface KDepthVarianceRendererType extends KRendererType
    * @param faces
    *          The face selection override (to force all instances to render
    *          using front faces, back faces, or both, if specified)
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
+   * 
    * @throws RException
    *           If an error occurs during rendering
    */
 
     void
     rendererEvaluateDepthVariance(
-      final @Nonnull RMatrixI4x4F<RTransformViewType> view,
-      final @Nonnull RMatrixI4x4F<RTransformProjectionType> projection,
-      final @Nonnull Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaqueType>> batches,
-      final @Nonnull KFramebufferDepthVarianceUsableType framebuffer,
-      final @Nonnull Option<KFaceSelection> faces)
-      throws ConstraintError,
-        RException;
+      final RMatrixI4x4F<RTransformViewType> view,
+      final RMatrixI4x4F<RTransformProjectionType> projection,
+      final Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final KFramebufferDepthVarianceUsableType framebuffer,
+      final OptionType<KFaceSelection> faces)
+      throws RException;
 }

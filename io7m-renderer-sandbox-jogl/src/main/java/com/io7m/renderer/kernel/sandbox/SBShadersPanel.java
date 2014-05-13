@@ -20,14 +20,11 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -43,11 +40,11 @@ import javax.swing.table.AbstractTableModel;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.ProgramAttribute;
-import com.io7m.jcanephora.ProgramReference;
-import com.io7m.jcanephora.ProgramUniform;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.ProgramAttributeType;
+import com.io7m.jcanephora.ProgramType;
+import com.io7m.jcanephora.ProgramUniformType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
 import com.io7m.jparasol.xml.FragmentOutput;
 import com.io7m.jparasol.xml.PGLSLMetaXML;
 import com.io7m.renderer.kernel.KProgram;
@@ -56,13 +53,13 @@ final class SBShadersPanel extends JPanel
 {
   private static class InputsTable extends JTable
   {
-    private static final long               serialVersionUID;
+    private static final long      serialVersionUID;
 
     static {
       serialVersionUID = -3198912965434164747L;
     }
 
-    private final @Nonnull InputsTableModel model;
+    private final InputsTableModel model;
 
     public InputsTable(
       final InputsTableModel in_model)
@@ -82,19 +79,19 @@ final class SBShadersPanel extends JPanel
 
   private static class InputsTableModel extends AbstractTableModel
   {
-    private static final long                           serialVersionUID;
-    private final @Nonnull String[]                     column_names;
-    private final @Nonnull ArrayList<ArrayList<String>> data;
-    private final @Nonnull Log                          log;
+    private static final long                  serialVersionUID;
+    private final String[]                     column_names;
+    private final ArrayList<ArrayList<String>> data;
+    private final LogUsableType                log;
 
     static {
       serialVersionUID = 6499860137289000995L;
     }
 
     public InputsTableModel(
-      final @Nonnull Log in_log)
+      final LogUsableType in_log)
     {
-      this.log = new Log(in_log, "shader-uniform-table");
+      this.log = in_log.with("shader-uniform-table");
       this.column_names = new String[] { "Name", "Type" };
       this.data = new ArrayList<ArrayList<String>>();
     }
@@ -123,21 +120,21 @@ final class SBShadersPanel extends JPanel
     }
 
     void showShader(
-      final @Nonnull SBShader shader)
+      final SBShader shader)
     {
       this.data.clear();
 
       final KProgram kp = shader.getProgram();
-      final ProgramReference p = kp.getProgram();
-      for (final Entry<String, ProgramAttribute> e : p
-        .getAttributes()
+      final ProgramType p = kp.getProgram();
+      for (final Entry<String, ProgramAttributeType> e : p
+        .programGetAttributes()
         .entrySet()) {
         final String n = e.getKey();
-        final ProgramAttribute a = e.getValue();
+        final ProgramAttributeType a = e.getValue();
         final ArrayList<String> row = new ArrayList<String>();
         row.add(n);
-        row.add(Integer.toString(a.getLocation()));
-        row.add(a.getType().getName());
+        row.add(Integer.toString(a.attributeGetLocation()));
+        row.add(a.attributeGetType().getName());
         this.data.add(row);
       }
 
@@ -147,13 +144,13 @@ final class SBShadersPanel extends JPanel
 
   private static class OutputsTable extends JTable
   {
-    private static final long                serialVersionUID;
+    private static final long       serialVersionUID;
 
     static {
       serialVersionUID = -3198912965434164747L;
     }
 
-    private final @Nonnull OutputsTableModel model;
+    private final OutputsTableModel model;
 
     public OutputsTable(
       final OutputsTableModel in_model)
@@ -173,19 +170,19 @@ final class SBShadersPanel extends JPanel
 
   private static class OutputsTableModel extends AbstractTableModel
   {
-    private static final long                           serialVersionUID;
-    private final @Nonnull String[]                     column_names;
-    private final @Nonnull ArrayList<ArrayList<String>> data;
-    private final @Nonnull Log                          log;
+    private static final long                  serialVersionUID;
+    private final String[]                     column_names;
+    private final ArrayList<ArrayList<String>> data;
+    private final LogUsableType                log;
 
     static {
       serialVersionUID = 6499860137289000995L;
     }
 
     public OutputsTableModel(
-      final @Nonnull Log in_log)
+      final LogUsableType in_log)
     {
-      this.log = new Log(in_log, "shader-uniform-table");
+      this.log = in_log.with("shader-uniform-table");
       this.column_names = new String[] { "Name", "Index", "Type" };
       this.data = new ArrayList<ArrayList<String>>();
     }
@@ -214,7 +211,7 @@ final class SBShadersPanel extends JPanel
     }
 
     @SuppressWarnings("boxing") void showShader(
-      final @Nonnull SBShader shader)
+      final SBShader shader)
     {
       this.data.clear();
 
@@ -236,13 +233,13 @@ final class SBShadersPanel extends JPanel
 
   private static class UniformsTable extends JTable
   {
-    private static final long                 serialVersionUID;
+    private static final long        serialVersionUID;
 
     static {
       serialVersionUID = -3198912965434164747L;
     }
 
-    private final @Nonnull UniformsTableModel model;
+    private final UniformsTableModel model;
 
     public UniformsTable(
       final UniformsTableModel in_model)
@@ -262,19 +259,19 @@ final class SBShadersPanel extends JPanel
 
   private static class UniformsTableModel extends AbstractTableModel
   {
-    private static final long                           serialVersionUID;
-    private final @Nonnull String[]                     column_names;
-    private final @Nonnull ArrayList<ArrayList<String>> data;
-    private final @Nonnull Log                          log;
+    private static final long                  serialVersionUID;
+    private final String[]                     column_names;
+    private final ArrayList<ArrayList<String>> data;
+    private final LogUsableType                log;
 
     static {
       serialVersionUID = 6499860137289000995L;
     }
 
     public UniformsTableModel(
-      final @Nonnull Log in_log)
+      final LogUsableType in_log)
     {
-      this.log = new Log(in_log, "shader-uniform-table");
+      this.log = in_log.with("shader-uniform-table");
       this.column_names = new String[] { "Name", "Location", "Type" };
       this.data = new ArrayList<ArrayList<String>>();
     }
@@ -303,19 +300,21 @@ final class SBShadersPanel extends JPanel
     }
 
     void showShader(
-      final @Nonnull SBShader shader)
+      final SBShader shader)
     {
       this.data.clear();
 
       final KProgram kp = shader.getProgram();
-      final ProgramReference p = kp.getProgram();
-      for (final Entry<String, ProgramUniform> e : p.getUniforms().entrySet()) {
+      final ProgramType p = kp.getProgram();
+      for (final Entry<String, ProgramUniformType> e : p
+        .programGetUniforms()
+        .entrySet()) {
         final String n = e.getKey();
-        final ProgramUniform u = e.getValue();
+        final ProgramUniformType u = e.getValue();
         final ArrayList<String> row = new ArrayList<String>();
         row.add(n);
-        row.add(Integer.toString(u.getLocation()));
-        row.add(u.getType().getName());
+        row.add(Integer.toString(u.uniformGetLocation()));
+        row.add(u.uniformGetType().getName());
         this.data.add(row);
       }
 
@@ -323,16 +322,17 @@ final class SBShadersPanel extends JPanel
     }
   }
 
-  private static final long                  serialVersionUID;
+  private static final long         serialVersionUID;
 
-  protected static final @Nonnull FileFilter META_XML_FILTER;
+  protected static final FileFilter META_XML_FILTER;
   static {
     serialVersionUID = -941448169051827275L;
 
     META_XML_FILTER = new FileFilter() {
       @Override public boolean accept(
-        final File f)
+        final @Nullable File f)
       {
+        assert f != null;
         return (f.isDirectory() || f.getName().equals("meta.xml"));
       }
 
@@ -343,34 +343,34 @@ final class SBShadersPanel extends JPanel
     };
   }
 
-  private final @Nonnull JComboBox<String>   selector;
-  private final @Nonnull JButton             open;
-  private final @Nonnull Log                 jlog;
-  private @Nonnull Map<String, SBShader>     shaders;
-  private final @Nonnull UniformsTableModel  uniforms_model;
-  private final @Nonnull UniformsTable       uniforms_table;
-  private final @Nonnull JScrollPane         uniforms_scroller;
-  private final @Nonnull InputsTableModel    inputs_model;
-  private final @Nonnull InputsTable         inputs_table;
-  private final @Nonnull JScrollPane         inputs_scroller;
-  private final @Nonnull OutputsTableModel   outputs_model;
-  private final @Nonnull OutputsTable        outputs_table;
-  private final @Nonnull JScrollPane         outputs_scroller;
-  private final @Nonnull JFrame              window;
+  private final JComboBox<String>   selector;
+  private final JButton             open;
+  private final LogUsableType       jlog;
+  private Map<String, SBShader>     shaders;
+  private final UniformsTableModel  uniforms_model;
+  private final UniformsTable       uniforms_table;
+  private final JScrollPane         uniforms_scroller;
+  private final InputsTableModel    inputs_model;
+  private final InputsTable         inputs_table;
+  private final JScrollPane         inputs_scroller;
+  private final OutputsTableModel   outputs_model;
+  private final OutputsTable        outputs_table;
+  private final JScrollPane         outputs_scroller;
+  private final JFrame              window;
 
   public SBShadersPanel(
-    final @Nonnull JFrame in_window,
-    final @Nonnull SBSceneControllerShaders controller,
-    final @Nonnull Log log)
+    final JFrame in_window,
+    final SBSceneControllerShaders controller,
+    final LogUsableType log)
   {
     this.window = in_window;
-    this.jlog = new Log(log, "ForwardShaders");
+    this.jlog = log.with("ForwardShaders");
     this.shaders = controller.shadersGet();
 
     this.selector = new JComboBox<String>();
     this.selector.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         SBShadersPanel.this.selectorShowSelected();
       }
@@ -379,7 +379,7 @@ final class SBShadersPanel extends JPanel
     this.open = new JButton("Open...");
     this.open.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final JFileChooser chooser = new JFileChooser();
         chooser.setMultiSelectionEnabled(false);
@@ -394,14 +394,10 @@ final class SBShadersPanel extends JPanel
 
             final SwingWorker<SBShader, Void> worker =
               new SwingWorker<SBShader, Void>() {
-                @Override protected @Nonnull SBShader doInBackground()
+                @Override protected SBShader doInBackground()
                   throws Exception
                 {
-                  try {
-                    return controller.shaderLoad(file).get();
-                  } catch (final ConstraintError x) {
-                    throw new IOException(x);
-                  }
+                  return controller.shaderLoad(file).get();
                 }
 
                 @SuppressWarnings("synthetic-access") @Override protected
@@ -470,7 +466,7 @@ final class SBShadersPanel extends JPanel
     this.shadersUpdated();
   }
 
-  public @CheckForNull SBShader getSelectedShader()
+  public @Nullable SBShader getSelectedShader()
   {
     final String sname = (String) this.selector.getSelectedItem();
     if (sname != null) {
@@ -481,7 +477,7 @@ final class SBShadersPanel extends JPanel
   }
 
   private void selectorRefresh(
-    final @Nonnull JComboBox<String> box)
+    final JComboBox<String> box)
   {
     box.removeAllItems();
     for (final Entry<String, SBShader> e : this.shaders.entrySet()) {

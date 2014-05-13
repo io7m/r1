@@ -19,6 +19,8 @@ package com.io7m.renderer.kernel.examples.viewer;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,17 +31,20 @@ import java.util.Calendar;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import javax.annotation.Nonnull;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.PropertyUtils;
-import com.io7m.jaux.PropertyUtils.ValueNotFound;
 import com.io7m.jlog.Log;
-import com.io7m.jvvfs.FSCapabilityAll;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogPolicyAllOn;
+import com.io7m.jlog.LogPolicyProperties;
+import com.io7m.jlog.LogPolicyType;
+import com.io7m.jlog.LogType;
+import com.io7m.jnull.Nullable;
+import com.io7m.jproperties.JPropertyException;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.jvvfs.FilesystemType;
 import com.io7m.jvvfs.PathVirtual;
 
 final class Viewer
@@ -96,7 +101,11 @@ final class Viewer
     }
 
     try {
-      Viewer.run(PropertyUtils.loadFromFile(args[0]));
+      final Properties p = new Properties();
+      final FileInputStream s = new FileInputStream(new File(args[0]));
+      p.load(s);
+      s.close();
+      Viewer.run(p);
     } catch (final FileNotFoundException e) {
       Viewer.showFatalErrorAndExit(
         Viewer.makeEmptyLog(),
@@ -107,12 +116,7 @@ final class Viewer
         Viewer.makeEmptyLog(),
         "Error reading config file",
         e);
-    } catch (final ConstraintError e) {
-      Viewer.showFatalErrorAndExit(
-        Viewer.makeEmptyLog(),
-        "Error reading config file",
-        e);
-    } catch (final ValueNotFound e) {
+    } catch (final JPropertyException e) {
       Viewer.showFatalErrorAndExit(
         Viewer.makeEmptyLog(),
         "Error reading config file",
@@ -120,27 +124,26 @@ final class Viewer
     }
   }
 
-  private static Log makeEmptyLog()
+  private static LogType makeEmptyLog()
   {
-    return new Log(
-      new Properties(),
-      "com.io7m.renderer.kernel.examples",
-      "viewer");
+    return Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "viewer");
   }
 
   public static void run(
-    final @Nonnull Properties props)
-    throws ConstraintError,
-      ValueNotFound
+    final Properties props)
+    throws JPropertyException
   {
-    final Log log =
-      new Log(props, "com.io7m.renderer.kernel.examples", "viewer");
+    final LogPolicyType policy =
+      LogPolicyProperties.newPolicy(
+        props,
+        "com.io7m.renderer.kernel.examples");
+    final LogType log = Log.newLog(policy, "viewer");
     Viewer.runWithConfig(ViewerConfig.fromProperties(props), log);
   }
 
   public static void runWithConfig(
-    final @Nonnull ViewerConfig config,
-    final @Nonnull Log log)
+    final ViewerConfig config,
+    final LogType log)
   {
     SwingUtilities.invokeLater(new Runnable() {
       @Override public void run()
@@ -148,7 +151,7 @@ final class Viewer
         log.debug("starting");
 
         try {
-          final FSCapabilityAll fs =
+          final FilesystemType fs =
             Filesystem.makeWithoutArchiveDirectory(log);
           fs.mountArchiveFromAnywhere(
             config.getShaderArchiveDebugFile(),
@@ -166,13 +169,6 @@ final class Viewer
           final ViewerMainWindow vmw = new ViewerMainWindow(config, log, fs);
           vmw.pack();
           vmw.setVisible(true);
-        } catch (final ConstraintError e) {
-          VErrorBox.showErrorWithTitleLater(
-            log,
-            "Internal constraint error",
-            e);
-          e.printStackTrace();
-          System.exit(1);
         } catch (final FilesystemError e) {
           VErrorBox.showErrorWithTitleLater(log, "Filesystem error", e);
           e.printStackTrace();
@@ -183,9 +179,9 @@ final class Viewer
   }
 
   public static void showFatalErrorAndExit(
-    final @Nonnull Log log,
-    final @Nonnull String title,
-    final @Nonnull Throwable e)
+    final LogType log,
+    final String title,
+    final Throwable e)
   {
     if (Viewer.hasConsole()) {
       System.err.println("fatal: "
@@ -207,12 +203,13 @@ final class Viewer
           m.append(" (");
           m.append(e.getClass().getName());
           m.append(")");
+          final String s = m.toString();
+          assert s != null;
 
-          final JDialog r =
-            VErrorBox.showErrorWithTitle(log, m.toString(), e);
+          final JDialog r = VErrorBox.showErrorWithTitle(log, s, e);
           r.addWindowListener(new WindowAdapter() {
             @Override public void windowClosing(
-              final WindowEvent _)
+              final @Nullable WindowEvent _)
             {
               System.exit(1);
             }
@@ -227,9 +224,9 @@ final class Viewer
   }
 
   public static void showFatalErrorAndExitWithoutException(
-    final @Nonnull Log log,
-    final @Nonnull String title,
-    final @Nonnull String message)
+    final LogType log,
+    final String title,
+    final String message)
   {
     if (Viewer.hasConsole()) {
       System.err.println("fatal: " + title + ": " + message);
@@ -245,7 +242,7 @@ final class Viewer
 
           r.addWindowListener(new WindowAdapter() {
             @Override public void windowClosing(
-              final WindowEvent _)
+              final @Nullable WindowEvent _)
             {
               System.exit(1);
             }

@@ -16,19 +16,15 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
 import net.java.quickcheck.Generator;
 import net.java.quickcheck.generator.support.IntegerGenerator;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.renderer.kernel.sandbox.SBProjectionDescription;
+import com.io7m.junreachable.UnreachableCodeException;
 
 public final class SBProjectionGenerator implements
   Generator<SBProjectionDescription>
 {
-  private final @Nonnull IntegerGenerator index_gen;
+  private final IntegerGenerator index_gen;
 
   public SBProjectionGenerator()
   {
@@ -40,57 +36,53 @@ public final class SBProjectionGenerator implements
 
   @Override public SBProjectionDescription next()
   {
-    try {
-      switch (SBProjectionDescription.Type.values()[this.index_gen
-        .next()
-        .intValue()]) {
-        case PROJECTION_FRUSTUM:
-        {
-          final double left = Math.random() * -100.0;
-          final double right = Math.random() * 100.0;
-          final double bottom = Math.random() * -100.0;
-          final double top = Math.random() * 100.0;
-          final double near = Math.random();
-          final double far = (Math.random() * 100.0) + near;
-          return new SBProjectionDescription.SBProjectionFrustum(
-            left,
-            right,
-            bottom,
-            top,
-            near,
-            far);
-        }
-        case PROJECTION_ORTHOGRAPHIC:
-        {
-          final double left = Math.random() * -100.0;
-          final double right = Math.random() * 100.0;
-          final double bottom = Math.random() * -100.0;
-          final double top = Math.random() * 100.0;
-          final double near = Math.random();
-          final double far = (Math.random() * 100.0) + near;
-          return new SBProjectionDescription.SBProjectionOrthographic(
-            left,
-            right,
-            bottom,
-            top,
-            near,
-            far);
-        }
-        case PROJECTION_PERSPECTIVE:
-        {
-          final double near = Math.random();
-          final double far = (Math.random() * 100.0) + near;
-          final double aspect = Math.random() * 2.0;
-          final double horizontal_fov = Math.random() * (Math.PI * 2);
-          return new SBProjectionDescription.SBProjectionPerspective(
-            near,
-            far,
-            aspect,
-            horizontal_fov);
-        }
+    switch (SBProjectionDescription.Type.values()[this.index_gen
+      .next()
+      .intValue()]) {
+      case PROJECTION_FRUSTUM:
+      {
+        final double left = Math.random() * -100.0;
+        final double right = Math.random() * 100.0;
+        final double bottom = Math.random() * -100.0;
+        final double top = Math.random() * 100.0;
+        final double near = Math.random();
+        final double far = (Math.random() * 100.0) + near;
+        return new SBProjectionDescription.SBProjectionFrustum(
+          left,
+          right,
+          bottom,
+          top,
+          near,
+          far);
       }
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
+      case PROJECTION_ORTHOGRAPHIC:
+      {
+        final double left = Math.random() * -100.0;
+        final double right = Math.random() * 100.0;
+        final double bottom = Math.random() * -100.0;
+        final double top = Math.random() * 100.0;
+        final double near = Math.random();
+        final double far = (Math.random() * 100.0) + near;
+        return new SBProjectionDescription.SBProjectionOrthographic(
+          left,
+          right,
+          bottom,
+          top,
+          near,
+          far);
+      }
+      case PROJECTION_PERSPECTIVE:
+      {
+        final double near = Math.random();
+        final double far = (Math.random() * 100.0) + near;
+        final double aspect = Math.random() * 2.0;
+        final double horizontal_fov = Math.random() * (Math.PI * 2);
+        return new SBProjectionDescription.SBProjectionPerspective(
+          near,
+          far,
+          aspect,
+          horizontal_fov);
+      }
     }
 
     throw new UnreachableCodeException();

@@ -19,64 +19,64 @@ package com.io7m.renderer.kernel.types;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import nu.xom.IllegalAddException;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * Labels for forward-rendering lit regular translucent objects.
  */
 
-@Immutable public final class KMaterialForwardTranslucentRegularLitLabel implements
+@EqualityStructural public final class KMaterialForwardTranslucentRegularLitLabel implements
   KTexturesRequiredType,
   KMaterialLabelRegularType,
   KMaterialLabelLitType,
   KMaterialLabelTranslucentType
 {
+
   /**
    * @return The set of all possible lit translucent regular labels.
    */
 
-  public static @Nonnull
-    Set<KMaterialForwardTranslucentRegularLitLabel>
-    allLabels()
+  public static Set<KMaterialForwardTranslucentRegularLitLabel> allLabels()
   {
-    try {
-      final Set<KMaterialForwardTranslucentRegularLitLabel> s =
-        new HashSet<KMaterialForwardTranslucentRegularLitLabel>();
-      final Set<KMaterialForwardRegularLabel> o =
-        KMaterialForwardRegularLabel.allLabels();
+    final Set<KMaterialForwardTranslucentRegularLitLabel> s =
+      new HashSet<KMaterialForwardTranslucentRegularLitLabel>();
+    final Set<KMaterialForwardRegularLabel> o =
+      KMaterialForwardRegularLabel.allLabels();
 
-      for (final KMaterialForwardRegularLabel r : o) {
-        if (r.labelGetNormal() != KMaterialNormalLabel.NORMAL_NONE) {
-          for (final KLightLabel l : KLightLabel.values()) {
-            for (final KMaterialAlphaOpacityType a : KMaterialAlphaOpacityType
-              .values()) {
-              s.add(new KMaterialForwardTranslucentRegularLitLabel(l, r, a));
-            }
+    for (final KMaterialForwardRegularLabel r : o) {
+      assert r != null;
+      if (r.labelGetNormal() != KMaterialNormalLabel.NORMAL_NONE) {
+        for (final KLightLabel l : KLightLabel.values()) {
+          assert l != null;
+          for (final KMaterialAlphaOpacityType a : KMaterialAlphaOpacityType
+            .values()) {
+            assert a != null;
+            s.add(new KMaterialForwardTranslucentRegularLitLabel(l, r, a));
           }
         }
       }
-
-      return s;
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
     }
+
+    return s;
   }
 
-  private static @Nonnull String makeLabelCode(
-    final @Nonnull KLightLabel in_light,
-    final @Nonnull KMaterialForwardRegularLabel in_opaque,
-    final @Nonnull KMaterialAlphaOpacityType in_alpha)
+  private static String makeLabelCode(
+    final KLightLabel in_light,
+    final KMaterialForwardRegularLabel in_opaque,
+    final KMaterialAlphaOpacityType in_alpha)
   {
-    return String.format(
-      "fwd_%s_%s_%s",
-      in_light.labelGetCode(),
-      in_alpha.labelGetCode(),
-      in_opaque.labelGetCode());
+    final String r =
+      String.format(
+        "fwd_%s_%s_%s",
+        in_light.labelGetCode(),
+        in_alpha.labelGetCode(),
+        in_opaque.labelGetCode());
+    assert r != null;
+    return r;
   }
 
   /**
@@ -89,15 +89,12 @@ import com.io7m.jaux.UnreachableCodeException;
    * @param in_alpha
    *          The alpha label
    * @return A new label
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KMaterialForwardTranslucentRegularLitLabel newLabel(
-    final @Nonnull KLightLabel in_light,
-    final @Nonnull KMaterialForwardRegularLabel in_regular,
-    final @Nonnull KMaterialAlphaOpacityType in_alpha)
-    throws ConstraintError
+  public static KMaterialForwardTranslucentRegularLitLabel newLabel(
+    final KLightLabel in_light,
+    final KMaterialForwardRegularLabel in_regular,
+    final KMaterialAlphaOpacityType in_alpha)
   {
     return new KMaterialForwardTranslucentRegularLitLabel(
       in_light,
@@ -105,26 +102,25 @@ import com.io7m.jaux.UnreachableCodeException;
       in_alpha);
   }
 
-  private final @Nonnull String                       code;
-  private final @Nonnull KLightLabel                  light;
-  private final @Nonnull KMaterialForwardRegularLabel regular;
-  private final int                                   textures;
-  private final @Nonnull KMaterialAlphaOpacityType    alpha;
+  private final KMaterialAlphaOpacityType    alpha;
+  private final String                       code;
+  private final KLightLabel                  light;
+  private final KMaterialForwardRegularLabel regular;
+  private final int                          textures;
 
   private KMaterialForwardTranslucentRegularLitLabel(
-    final @Nonnull KLightLabel in_light,
-    final @Nonnull KMaterialForwardRegularLabel in_regular,
-    final @Nonnull KMaterialAlphaOpacityType in_alpha)
-    throws ConstraintError
+    final KLightLabel in_light,
+    final KMaterialForwardRegularLabel in_regular,
+    final KMaterialAlphaOpacityType in_alpha)
   {
-    this.alpha = Constraints.constrainNotNull(in_alpha, "Alpha");
-    this.regular = Constraints.constrainNotNull(in_regular, "Regular");
+    this.alpha = NullCheck.notNull(in_alpha, "Alpha");
+    this.regular = NullCheck.notNull(in_regular, "Regular");
 
-    Constraints.constrainArbitrary(
-      in_regular.labelGetNormal() != KMaterialNormalLabel.NORMAL_NONE,
-      "Normal vectors available");
+    if (in_regular.labelGetNormal() == KMaterialNormalLabel.NORMAL_NONE) {
+      throw new IllegalAddException("No normal vectors provided");
+    }
 
-    this.light = Constraints.constrainNotNull(in_light, "Light");
+    this.light = NullCheck.notNull(in_light, "Light");
     this.code =
       KMaterialForwardTranslucentRegularLitLabel.makeLabelCode(
         in_light,
@@ -135,13 +131,46 @@ import com.io7m.jaux.UnreachableCodeException;
       this.light.texturesGetRequired() + this.regular.texturesGetRequired();
   }
 
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KMaterialForwardTranslucentRegularLitLabel other =
+      (KMaterialForwardTranslucentRegularLitLabel) obj;
+    return (this.alpha == other.alpha)
+      && (this.code.equals(other.code))
+      && (this.light == other.light)
+      && (this.regular.equals(other.regular))
+      && (this.textures == other.textures);
+  }
+
   /**
    * @return The regular label for this material.
    */
 
-  public @Nonnull KMaterialLabelRegularType getRegular()
+  public KMaterialLabelRegularType getRegular()
   {
     return this.regular;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.alpha.hashCode();
+    result = (prime * result) + this.code.hashCode();
+    result = (prime * result) + this.light.hashCode();
+    result = (prime * result) + this.regular.hashCode();
+    result = (prime * result) + this.textures;
+    return result;
   }
 
   @Override public KMaterialAlbedoLabel labelGetAlbedo()
@@ -149,7 +178,12 @@ import com.io7m.jaux.UnreachableCodeException;
     return this.regular.labelGetAlbedo();
   }
 
-  @Override public @Nonnull String labelGetCode()
+  @Override public KMaterialAlphaOpacityType labelGetAlphaType()
+  {
+    return this.alpha;
+  }
+
+  @Override public String labelGetCode()
   {
     return this.code;
   }
@@ -164,7 +198,7 @@ import com.io7m.jaux.UnreachableCodeException;
     return this.regular.labelGetEnvironment();
   }
 
-  @Override public @Nonnull KLightLabel labelGetLight()
+  @Override public KLightLabel labelGetLight()
   {
     return this.light;
   }
@@ -192,10 +226,5 @@ import com.io7m.jaux.UnreachableCodeException;
   @Override public int texturesGetRequired()
   {
     return this.textures;
-  }
-
-  @Override public @Nonnull KMaterialAlphaOpacityType labelGetAlphaType()
-  {
-    return this.alpha;
   }
 }

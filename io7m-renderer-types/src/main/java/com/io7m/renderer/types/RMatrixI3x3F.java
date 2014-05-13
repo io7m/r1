@@ -18,12 +18,11 @@ package com.io7m.renderer.types;
 
 import java.util.Arrays;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM3x3F;
-import com.io7m.jtensors.MatrixReadable3x3F;
-import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.jtensors.MatrixReadable3x3FType;
+import com.io7m.jtensors.VectorReadable3FType;
 
 /**
  * An immutable 3x3 matrix type indexed by the type {@link RTransformType} the
@@ -33,14 +32,12 @@ import com.io7m.jtensors.VectorReadable3F;
  *          A phantom type parameter describing the type of transform
  */
 
-@Immutable public final class RMatrixI3x3F<T extends RTransformType>
+@EqualityStructural public final class RMatrixI3x3F<T extends RTransformType>
 {
-  private static final @Nonnull float[][] IDENTITY = RMatrixI3x3F
-                                                     .makeIdentity();
+  private static final float[][] IDENTITY  = RMatrixI3x3F.makeIdentity();
+  private static RMatrixI3x3F<?> IDENTITYM = RMatrixI3x3F.makeIdentityM();
 
-  private static @Nonnull RMatrixI3x3F<?> IDENTITYM;
-
-  private static @Nonnull float[][] makeIdentity()
+  private static float[][] makeIdentity()
   {
     final float[][] m = new float[3][3];
     for (int row = 0; row < 3; ++row) {
@@ -55,6 +52,11 @@ import com.io7m.jtensors.VectorReadable3F;
     return m;
   }
 
+  private static RMatrixI3x3F<?> makeIdentityM()
+  {
+    return new RMatrixI3x3F<RTransformType>(RMatrixI3x3F.IDENTITY);
+  }
+
   /**
    * @return The identity matrix
    * @param <T>
@@ -62,16 +64,11 @@ import com.io7m.jtensors.VectorReadable3F;
    *          it being the identity transform)
    */
 
-  @SuppressWarnings("unchecked") public static @Nonnull
+  @SuppressWarnings("unchecked") public static
     <T extends RTransformType>
     RMatrixI3x3F<T>
     identity()
   {
-    if (RMatrixI3x3F.IDENTITYM == null) {
-      RMatrixI3x3F.IDENTITYM =
-        new RMatrixI3x3F<RTransformType>(RMatrixI3x3F.IDENTITY);
-    }
-
     return (RMatrixI3x3F<T>) RMatrixI3x3F.IDENTITYM;
   }
 
@@ -90,13 +87,10 @@ import com.io7m.jtensors.VectorReadable3F;
    * @return A new 3x3 matrix
    */
 
-  public static @Nonnull
-    <T extends RTransformType>
-    RMatrixI3x3F<T>
-    newFromColumns(
-      final @Nonnull VectorReadable3F column_0,
-      final @Nonnull VectorReadable3F column_1,
-      final @Nonnull VectorReadable3F column_2)
+  public static <T extends RTransformType> RMatrixI3x3F<T> newFromColumns(
+    final VectorReadable3FType column_0,
+    final VectorReadable3FType column_1,
+    final VectorReadable3FType column_2)
   {
     final float[][] e = new float[3][3];
 
@@ -126,11 +120,8 @@ import com.io7m.jtensors.VectorReadable3F;
    * @return A new 3x3 matrix
    */
 
-  public static @Nonnull
-    <T extends RTransformType>
-    RMatrixI3x3F<T>
-    newFromReadable(
-      final @Nonnull MatrixReadable3x3F m)
+  public static <T extends RTransformType> RMatrixI3x3F<T> newFromReadable(
+    final MatrixReadable3x3FType m)
   {
     final float[][] e = new float[3][3];
 
@@ -143,16 +134,16 @@ import com.io7m.jtensors.VectorReadable3F;
     return new RMatrixI3x3F<T>(e);
   }
 
-  private final @Nonnull float[][] elements;
+  private final float[][] elements;
 
   private RMatrixI3x3F(
-    final @Nonnull float[][] e)
+    final float[][] e)
   {
     this.elements = e;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -198,7 +189,7 @@ import com.io7m.jtensors.VectorReadable3F;
    */
 
   public void makeMatrixM3x3F(
-    final @Nonnull MatrixM3x3F m)
+    final MatrixM3x3F m)
   {
     for (int row = 0; row < 3; ++row) {
       for (int col = 0; col < 3; ++col) {
@@ -219,6 +210,8 @@ import com.io7m.jtensors.VectorReadable3F;
           Double.valueOf(this.elements[row][2]));
       builder.append(text);
     }
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

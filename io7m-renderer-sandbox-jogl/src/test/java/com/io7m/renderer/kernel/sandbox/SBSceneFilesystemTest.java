@@ -27,26 +27,21 @@ import nu.xom.ValidityException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogType;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.kernel.sandbox.SBIOUtilities;
-import com.io7m.renderer.kernel.sandbox.SBSceneDescription;
-import com.io7m.renderer.kernel.sandbox.SBSceneFilesystem;
 import com.io7m.renderer.types.RXMLException;
 
-public class SBSceneFilesystemTest
+@SuppressWarnings("static-method") public class SBSceneFilesystemTest
 {
-  @SuppressWarnings("static-method") @Test public void testCopying()
+  @Test public void testCopying()
     throws FilesystemError,
-      ConstraintError,
       IOException,
       ValidityException,
       ParsingException,
       RXMLException
   {
-    final Log log = TestUtilities.getLog();
+    final LogType log = TestUtilities.getLog();
 
     final SBSceneFilesystem s = SBSceneFilesystem.filesystemEmpty(log);
 
@@ -90,7 +85,8 @@ public class SBSceneFilesystemTest
     s.filesystemCopyInTextureCube(cx);
 
     final InputStream mfs =
-      s.filesystemOpenFile(PathVirtual.ofString("/meshes/sphere_16_8_mesh.rmx"));
+      s.filesystemOpenFile(PathVirtual
+        .ofString("/meshes/sphere_16_8_mesh.rmx"));
     mfs.close();
 
     {

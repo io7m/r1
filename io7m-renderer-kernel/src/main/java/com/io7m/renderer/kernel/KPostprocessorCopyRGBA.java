@@ -16,15 +16,13 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcache.BLUCacheReceiptType;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
@@ -32,10 +30,10 @@ import com.io7m.renderer.types.RException;
  * A postprocessor that copies the input RGBA data to the output.
  */
 
-public final class KPostprocessorCopyRGBA implements
+@EqualityReference public final class KPostprocessorCopyRGBA implements
   KPostprocessorRGBAType<KCopyParameters>
 {
-  private static final @Nonnull String NAME;
+  private static final String NAME;
 
   static {
     NAME = "postprocessor-copy-rgba";
@@ -55,17 +53,14 @@ public final class KPostprocessorCopyRGBA implements
    * @param log
    *          A log handle
    * @return A new postprocessor
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KPostprocessorCopyRGBA postprocessorNew(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull KRegionCopierType copier,
-    final @Nonnull KFramebufferRGBACacheType rgba_cache,
-    final @Nonnull KShaderCacheType shader_cache,
-    final @Nonnull Log log)
-    throws ConstraintError
+  public static KPostprocessorCopyRGBA postprocessorNew(
+    final JCGLImplementationType gi,
+    final KRegionCopierType copier,
+    final KFramebufferRGBACacheType rgba_cache,
+    final KShaderCacheType shader_cache,
+    final LogUsableType log)
   {
     return new KPostprocessorCopyRGBA(
       gi,
@@ -75,38 +70,33 @@ public final class KPostprocessorCopyRGBA implements
       log);
   }
 
-  private final @Nonnull KRegionCopierType         copier;
-  private final @Nonnull JCGLImplementation        gi;
-  private final @Nonnull Log                       log;
-  private final @Nonnull KFramebufferRGBACacheType rgba_cache;
-  private final @Nonnull KShaderCacheType          shader_cache;
+  private final KRegionCopierType         copier;
+  private final JCGLImplementationType    gi;
+  private final LogUsableType             log;
+  private final KFramebufferRGBACacheType rgba_cache;
+  private final KShaderCacheType          shader_cache;
 
   private KPostprocessorCopyRGBA(
-    final @Nonnull JCGLImplementation in_gi,
-    final @Nonnull KRegionCopierType in_copier,
-    final @Nonnull KFramebufferRGBACacheType in_rgba_cache,
-    final @Nonnull KShaderCacheType in_shader_cache,
-    final @Nonnull Log in_log)
-    throws ConstraintError
+    final JCGLImplementationType in_gi,
+    final KRegionCopierType in_copier,
+    final KFramebufferRGBACacheType in_rgba_cache,
+    final KShaderCacheType in_shader_cache,
+    final LogUsableType in_log)
   {
     this.log =
-      new Log(
-        Constraints.constrainNotNull(in_log, "Log"),
-        KPostprocessorCopyRGBA.NAME);
-    this.gi = Constraints.constrainNotNull(in_gi, "GL implementation");
+      NullCheck.notNull(in_log, "Log").with(KPostprocessorCopyRGBA.NAME);
+    this.gi = NullCheck.notNull(in_gi, "GL implementation");
     this.rgba_cache =
-      Constraints.constrainNotNull(in_rgba_cache, "RGBA framebuffer cache");
-    this.shader_cache =
-      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
-    this.copier = Constraints.constrainNotNull(in_copier, "Region copier");
+      NullCheck.notNull(in_rgba_cache, "RGBA framebuffer cache");
+    this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
+    this.copier = NullCheck.notNull(in_copier, "Region copier");
   }
 
   @Override public void postprocessorEvaluateRGBA(
-    final @Nonnull KCopyParameters parameters,
-    final @Nonnull KFramebufferRGBAUsableType input,
-    final @Nonnull KFramebufferRGBAUsableType output)
-    throws ConstraintError,
-      RException
+    final KCopyParameters parameters,
+    final KFramebufferRGBAUsableType input,
+    final KFramebufferRGBAUsableType output)
+    throws RException
   {
     try {
       this.copier.copierSetBlittingEnabled(parameters.useBlitting());

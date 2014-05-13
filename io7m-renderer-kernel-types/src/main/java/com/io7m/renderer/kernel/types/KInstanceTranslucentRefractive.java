@@ -16,19 +16,17 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
 /**
  * An instance with a refractive material applied.
  */
 
-@Immutable public final class KInstanceTranslucentRefractive implements
+@EqualityStructural public final class KInstanceTranslucentRefractive implements
   KInstanceTranslucentType,
   KInstanceTranslucentUnlitType,
   KInstanceWithMaterialType<KMaterialTranslucentRefractive>
@@ -43,36 +41,32 @@ import com.io7m.renderer.types.RException;
    * @param in_faces
    *          The faces that will be rendered
    * @return A new instance
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KInstanceTranslucentRefractive newInstance(
-    final @Nonnull KMaterialTranslucentRefractive in_material,
-    final @Nonnull KMeshReadableType in_mesh,
-    final @Nonnull KFaceSelection in_faces)
-    throws ConstraintError
+  public static KInstanceTranslucentRefractive newInstance(
+    final KMaterialTranslucentRefractive in_material,
+    final KMeshReadableType in_mesh,
+    final KFaceSelection in_faces)
   {
     return new KInstanceTranslucentRefractive(in_material, in_mesh, in_faces);
   }
 
-  private final @Nonnull KFaceSelection                 faces;
-  private final @Nonnull KMaterialTranslucentRefractive material;
-  private final @Nonnull KMeshReadableType              mesh;
+  private final KFaceSelection                 faces;
+  private final KMaterialTranslucentRefractive material;
+  private final KMeshReadableType              mesh;
 
   private KInstanceTranslucentRefractive(
-    final @Nonnull KMaterialTranslucentRefractive in_material,
-    final @Nonnull KMeshReadableType in_mesh,
-    final @Nonnull KFaceSelection in_faces)
-    throws ConstraintError
+    final KMaterialTranslucentRefractive in_material,
+    final KMeshReadableType in_mesh,
+    final KFaceSelection in_faces)
   {
-    this.mesh = Constraints.constrainNotNull(in_mesh, "Mesh");
-    this.material = Constraints.constrainNotNull(in_material, "Material");
-    this.faces = Constraints.constrainNotNull(in_faces, "Faces");
+    this.mesh = NullCheck.notNull(in_mesh, "Mesh");
+    this.material = NullCheck.notNull(in_material, "Material");
+    this.faces = NullCheck.notNull(in_faces, "Faces");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -86,13 +80,15 @@ import com.io7m.renderer.types.RException;
     final KInstanceTranslucentRefractive other =
       (KInstanceTranslucentRefractive) obj;
     return this.material.equals(other.material)
-      && this.mesh.equals(other.mesh);
+      && this.mesh.equals(other.mesh)
+      && this.faces.equals(other.faces);
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + this.faces.hashCode();
     result = (prime * result) + this.material.hashCode();
     result = (prime * result) + this.mesh.hashCode();
     return result;
@@ -103,14 +99,12 @@ import com.io7m.renderer.types.RException;
     return this.faces;
   }
 
-  @Override public @Nonnull
-    KMaterialTranslucentRefractive
-    instanceGetMaterial()
+  @Override public KMaterialTranslucentRefractive instanceGetMaterial()
   {
     return this.material;
   }
 
-  @Override public @Nonnull KMeshReadableType instanceGetMesh()
+  @Override public KMeshReadableType instanceGetMesh()
   {
     return this.mesh;
   }
@@ -119,10 +113,9 @@ import com.io7m.renderer.types.RException;
     <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
     instanceAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
         JCGLException,
-        ConstraintError,
         RException
   {
     return v.instanceTranslucentRefractive(this);

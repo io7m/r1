@@ -19,15 +19,14 @@ package com.io7m.renderer.kernel.sandbox;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.KFramebufferRGBACacheType;
 import com.io7m.renderer.kernel.KFramebufferRGBAUsableType;
 import com.io7m.renderer.kernel.KShaderCacheType;
@@ -37,21 +36,21 @@ public final class SBKPostprocessorNone
 {
   private static class ControlWindow extends JFrame
   {
-    private static final long                               serialVersionUID =
-                                                                               5947463765253062623L;
-    private final @Nonnull JButton                          apply;
-    private final @Nonnull SBSceneControllerRendererControl controller;
-    private final @Nonnull JButton                          ok;
+    private static final long                      serialVersionUID =
+                                                                      5947463765253062623L;
+    private final JButton                          apply;
+    private final SBSceneControllerRendererControl controller;
+    private final JButton                          ok;
 
     ControlWindow(
-      final @Nonnull SBSceneControllerRendererControl in_controller,
-      final @Nonnull Postprocessor proc)
+      final SBSceneControllerRendererControl in_controller,
+      final Postprocessor proc)
     {
       this.controller = in_controller;
       this.apply = new JButton("Apply");
       this.apply.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           ControlWindow.this.sendPostprocessor(proc);
         }
@@ -60,7 +59,7 @@ public final class SBKPostprocessorNone
       this.ok = new JButton("OK");
       this.ok.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           ControlWindow.this.sendPostprocessor(proc);
           SBWindowUtilities.closeWindow(ControlWindow.this);
@@ -88,37 +87,35 @@ public final class SBKPostprocessorNone
     }
 
     @Override public void postprocessorInitialize(
-      final JCGLImplementation gi,
+      final JCGLImplementationType gi,
       final KFramebufferRGBACacheType rgba_cache,
       final KShaderCacheType shader_cache,
-      final Log log)
-      throws RException,
-        ConstraintError
+      final LogUsableType log)
+      throws RException
     {
       // Nothing
     }
 
     @Override public void postprocessorRun(
-      final @Nonnull KFramebufferRGBAUsableType input,
-      final @Nonnull KFramebufferRGBAUsableType output)
-      throws RException,
-        ConstraintError
+      final KFramebufferRGBAUsableType input,
+      final KFramebufferRGBAUsableType output)
+      throws RException
     {
       // Nothing
     }
   }
 
-  private final @Nonnull Postprocessor postprocessor;
-  private final @Nonnull ControlWindow window;
+  private final Postprocessor postprocessor;
+  private final ControlWindow window;
 
   public SBKPostprocessorNone(
-    final @Nonnull SBSceneControllerRendererControl control)
+    final SBSceneControllerRendererControl control)
   {
     this.postprocessor = new Postprocessor();
     this.window = new ControlWindow(control, this.postprocessor);
   }
 
-  public @Nonnull JFrame getWindow()
+  public JFrame getWindow()
   {
     return this.window;
   }

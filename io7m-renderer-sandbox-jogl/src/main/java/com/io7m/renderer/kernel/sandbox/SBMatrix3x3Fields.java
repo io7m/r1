@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.JTextField;
 
 import com.io7m.jtensors.VectorI3F;
@@ -26,7 +25,7 @@ import com.io7m.renderer.types.RTransformType;
 
 public final class SBMatrix3x3Fields<T extends RTransformType>
 {
-  private final @Nonnull JTextField fields[][];
+  private final  JTextField fields[][];
 
   public SBMatrix3x3Fields()
   {
@@ -45,7 +44,7 @@ public final class SBMatrix3x3Fields<T extends RTransformType>
     }
   }
 
-  public @Nonnull RMatrixI3x3F<T> getMatrix3x3f()
+  public  RMatrixI3x3F<T> getMatrix3x3f()
     throws SBExceptionInputError
   {
     final VectorI3F column_0 =
@@ -78,7 +77,7 @@ public final class SBMatrix3x3Fields<T extends RTransformType>
     return RMatrixI3x3F.newFromColumns(column_0, column_1, column_2);
   }
 
-  public @Nonnull JTextField getRowColumnField(
+  public  JTextField getRowColumnField(
     final int row,
     final int column)
   {
@@ -86,7 +85,7 @@ public final class SBMatrix3x3Fields<T extends RTransformType>
   }
 
   @SuppressWarnings("boxing") public void setMatrix(
-    final @Nonnull RMatrixI3x3F<T> m)
+    final  RMatrixI3x3F<T> m)
   {
     for (int c = 0; c < 3; ++c) {
       for (int r = 0; r < 3; ++r) {

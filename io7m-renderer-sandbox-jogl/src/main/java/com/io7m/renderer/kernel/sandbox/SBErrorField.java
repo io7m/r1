@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.io.IOException;
 
-import javax.annotation.Nonnull;
 import javax.swing.JLabel;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
@@ -26,9 +25,9 @@ import net.java.dev.designgridlayout.RowGroup;
 
 public final class SBErrorField implements SBControls
 {
-  private final @Nonnull JLabel   error_text;
-  private final @Nonnull JLabel   error_icon;
-  private final @Nonnull RowGroup group;
+  private final  JLabel   error_text;
+  private final  JLabel   error_icon;
+  private final  RowGroup group;
 
   public SBErrorField()
     throws IOException
@@ -41,7 +40,7 @@ public final class SBErrorField implements SBControls
   }
 
   public void errorSet(
-    final @Nonnull String message)
+    final  String message)
   {
     this.error_text.setText(message);
     this.error_text.setVisible(true);

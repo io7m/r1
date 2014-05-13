@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -48,16 +45,14 @@ public interface KPostprocessorDepthVarianceType<C> extends
    *          The input framebuffer
    * @param output
    *          The output framebuffer
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
+   * 
    * @throws RException
    *           If any error occurs
    */
 
   void postprocessorEvaluateDepthVariance(
-    final @Nonnull C config,
-    final @Nonnull KFramebufferDepthVarianceUsableType input,
-    final @Nonnull KFramebufferDepthVarianceUsableType output)
-    throws ConstraintError,
-      RException;
+    final C config,
+    final KFramebufferDepthVarianceUsableType input,
+    final KFramebufferDepthVarianceUsableType output)
+    throws RException;
 }

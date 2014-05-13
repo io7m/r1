@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -39,19 +36,17 @@ public interface KMaterialTranslucentVisitorType<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A translucentRefractive(
-    final @Nonnull KMaterialTranslucentRefractive m)
+  A translucentRefractive(
+    final KMaterialTranslucentRefractive m)
     throws E,
-      RException,
-      ConstraintError;
+      RException;
 
   /**
    * Visit a regular translucent material.
@@ -59,19 +54,17 @@ public interface KMaterialTranslucentVisitorType<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A translucentRegular(
-    final @Nonnull KMaterialTranslucentRegular m)
+  A translucentRegular(
+    final KMaterialTranslucentRegular m)
     throws E,
-      RException,
-      ConstraintError;
+      RException;
 
   /**
    * Visit a specular-only translucent material.
@@ -79,17 +72,15 @@ public interface KMaterialTranslucentVisitorType<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A translucentSpecularOnly(
-    final @Nonnull KMaterialTranslucentSpecularOnly m)
+  A translucentSpecularOnly(
+    final KMaterialTranslucentSpecularOnly m)
     throws E,
-      RException,
-      ConstraintError;
+      RException;
 }

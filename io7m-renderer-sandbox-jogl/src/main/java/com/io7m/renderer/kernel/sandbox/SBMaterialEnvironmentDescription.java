@@ -16,24 +16,22 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
+import com.io7m.jnull.Nullable;
 import com.io7m.jvvfs.PathVirtual;
 
 public final class SBMaterialEnvironmentDescription
 {
-  public static @Nonnull SBMaterialEnvironmentDescription getDefault()
+  public static SBMaterialEnvironmentDescription getDefault()
   {
     return new SBMaterialEnvironmentDescription(null, 0.0f, false);
   }
 
-  private final float                     mix;
-  private final boolean                   mix_mapped;
-  private final @CheckForNull PathVirtual texture;
+  private final float                 mix;
+  private final boolean               mix_mapped;
+  private final @Nullable PathVirtual texture;
 
   SBMaterialEnvironmentDescription(
-    final @CheckForNull PathVirtual in_texture,
+    final @Nullable PathVirtual in_texture,
     final float in_mix,
     final boolean in_mix_mapped)
   {
@@ -43,7 +41,7 @@ public final class SBMaterialEnvironmentDescription
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -62,8 +60,11 @@ public final class SBMaterialEnvironmentDescription
     if (this.mix_mapped != other.mix_mapped) {
       return false;
     }
-    if (!this.texture.equals(other.texture)) {
-      return false;
+    final PathVirtual t = this.texture;
+    if (t != null) {
+      if (!t.equals(other.texture)) {
+        return false;
+      }
     }
     return true;
   }
@@ -78,7 +79,7 @@ public final class SBMaterialEnvironmentDescription
     return this.mix_mapped;
   }
 
-  public @CheckForNull PathVirtual getTexture()
+  public @Nullable PathVirtual getTexture()
   {
     return this.texture;
   }
@@ -89,7 +90,10 @@ public final class SBMaterialEnvironmentDescription
     int result = 1;
     result = (prime * result) + Float.floatToIntBits(this.mix);
     result = (prime * result) + (this.mix_mapped ? 1234 : 4321);
-    result = (prime * result) + this.texture.hashCode();
+    final PathVirtual t = this.texture;
+    if (t != null) {
+      result = (prime * result) + t.hashCode();
+    }
     return result;
   }
 

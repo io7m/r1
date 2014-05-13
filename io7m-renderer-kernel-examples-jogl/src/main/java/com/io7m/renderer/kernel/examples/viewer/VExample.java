@@ -34,14 +34,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
-import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
+import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
@@ -62,49 +65,50 @@ import nu.xom.Document;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.RangeInclusive;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Unit;
+import com.google.common.util.concurrent.AtomicDouble;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.ArrayBufferUsable;
-import com.io7m.jcanephora.CMFKNegativeX;
-import com.io7m.jcanephora.CMFKNegativeY;
-import com.io7m.jcanephora.CMFKNegativeZ;
-import com.io7m.jcanephora.CMFKPositiveX;
-import com.io7m.jcanephora.CMFKPositiveY;
-import com.io7m.jcanephora.CMFKPositiveZ;
+import com.io7m.jcanephora.ArrayBufferType;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.CMFNegativeXKind;
+import com.io7m.jcanephora.CMFNegativeYKind;
+import com.io7m.jcanephora.CMFNegativeZKind;
+import com.io7m.jcanephora.CMFPositiveXKind;
+import com.io7m.jcanephora.CMFPositiveYKind;
+import com.io7m.jcanephora.CMFPositiveZKind;
 import com.io7m.jcanephora.CubeMapFaceInputStream;
-import com.io7m.jcanephora.IndexBuffer;
-import com.io7m.jcanephora.IndexBufferUsable;
-import com.io7m.jcanephora.JCBExecutionAPI;
-import com.io7m.jcanephora.JCBExecutionException;
-import com.io7m.jcanephora.JCBExecutorProcedure;
-import com.io7m.jcanephora.JCBProgram;
-import com.io7m.jcanephora.JCBProgramProcedure;
+import com.io7m.jcanephora.IndexBufferType;
+import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementationJOGL;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Texture2DStatic;
-import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.jcanephora.TextureCubeStatic;
-import com.io7m.jcanephora.TextureCubeStaticUsable;
+import com.io7m.jcanephora.Texture2DStaticType;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jcanephora.TextureCubeStaticType;
+import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
-import com.io7m.jcanephora.TextureLoaderImageIO;
-import com.io7m.jcanephora.TextureUnit;
+import com.io7m.jcanephora.TextureLoaderType;
+import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.UsageHint;
-import com.io7m.jlog.Log;
-import com.io7m.jvvfs.FSCapabilityRead;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
+import com.io7m.jcanephora.batchexec.JCBExecutorType;
+import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
+import com.io7m.jcanephora.batchexec.JCBProgramType;
+import com.io7m.jcanephora.jogl.JCGLImplementationJOGL;
+import com.io7m.jcanephora.texload.imageio.TextureLoaderImageIO;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jvvfs.FSCapabilityReadType;
 import com.io7m.renderer.kernel.KFramebufferForward;
 import com.io7m.renderer.kernel.KFramebufferForwardType;
 import com.io7m.renderer.kernel.KFramebufferType;
@@ -146,49 +150,43 @@ import com.io7m.renderer.xml.cubemap.CubeMap;
 import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
 import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
 import com.jogamp.common.nio.Buffers;
-import com.jogamp.opengl.util.Animator;
+import com.jogamp.opengl.util.FPSAnimator;
 
-final class VExample implements Callable<Unit>
+@SuppressWarnings("synthetic-access") final class VExample implements
+  Callable<Unit>
 {
   private static final class VExampleWindow extends JFrame
   {
-    @SuppressWarnings({ "static-method", "boxing" }) private @Nonnull
-      String
-      getViewText(
-        final int view_index,
-        final int max_views)
-    {
-      return String.format("%d of %d", view_index + 1, max_views);
-    }
-
-    private static final long               serialVersionUID;
+    private static final long      serialVersionUID;
 
     static {
       serialVersionUID = 2157518454345881373L;
     }
 
-    private final @Nonnull GLJPanel         canvas;
-    private final @Nonnull ViewerConfig     config;
-    private final @Nonnull AtomicInteger    current_view_index;
-    private final ExampleSceneType          example;
-    private final @Nonnull VExampleWindowGL gl_events;
-    private final @Nonnull JLabel           label_example;
-    private final @Nonnull JLabel           label_renderer;
-    private final @Nonnull JLabel           label_view;
-    private final @Nonnull Log              log;
-    private final @Nonnull VExpectedImage   expected;
-    private final @Nonnull AtomicBoolean    want_save;
-    private final JLabel                    expected_label;
-    private final JLabel                    canvas_label;
+    private final GLJPanel         canvas;
+    private final JLabel           canvas_label;
+    private final ViewerConfig     config;
+    private final AtomicInteger    current_view_index;
+    private final ExampleSceneType example;
+    private final VExpectedImage   expected;
+    private final JLabel           expected_label;
+    private final VExampleWindowGL gl_events;
+    private final JLabel           label_example;
+    private final JLabel           label_fps;
+    private final JLabel           label_renderer;
+    private final JLabel           label_view;
+    private final LogUsableType    log;
+    private final AtomicBoolean    want_save;
+    private final Timer            fps_update_timer;
 
-    @SuppressWarnings("synthetic-access") public VExampleWindow(
-      final @Nonnull Log in_log,
-      final @Nonnull ViewerConfig in_config,
-      final @Nonnull FSCapabilityRead in_filesystem,
-      final @Nonnull ExampleRendererConstructorType in_renderer_cons,
-      final @Nonnull ExampleSceneType in_example)
+    public VExampleWindow(
+      final LogUsableType in_log,
+      final ViewerConfig in_config,
+      final FSCapabilityReadType in_filesystem,
+      final ExampleRendererConstructorType in_renderer_cons,
+      final ExampleSceneType in_example)
     {
-      this.log = new Log(in_log, "window");
+      this.log = in_log.with("window");
       this.config = in_config;
       this.example = in_example;
       this.current_view_index = new AtomicInteger(0);
@@ -201,6 +199,7 @@ final class VExample implements Callable<Unit>
           .size()));
 
       this.label_example = new JLabel(in_example.exampleGetName());
+      this.label_fps = new JLabel("");
 
       this.expected =
         new VExpectedImage(in_log, this.example, this.current_view_index);
@@ -242,7 +241,7 @@ final class VExample implements Callable<Unit>
       final JButton previous = new JButton("Previous view");
       previous.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           VExampleWindow.this.log.debug("Previous view requested");
           VExampleWindow.this.exampleViewPrevious();
@@ -252,7 +251,7 @@ final class VExample implements Callable<Unit>
       final JButton next = new JButton("Next view");
       next.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           VExampleWindow.this.log.debug("Next view requested");
           VExampleWindow.this.exampleViewNext();
@@ -262,7 +261,7 @@ final class VExample implements Callable<Unit>
       final JButton save = new JButton("Save view");
       save.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           VExampleWindow.this.log.debug("Save requested");
           VExampleWindow.this.want_save.set(true);
@@ -282,14 +281,34 @@ final class VExample implements Callable<Unit>
         .grid(new JLabel("Example"))
         .add(this.label_example);
       controls_layout.row().grid(new JLabel("View")).add(this.label_view);
+      controls_layout
+        .row()
+        .grid(new JLabel("Estimated FPS"))
+        .add(this.label_fps);
 
       final Container pane = this.getContentPane();
       pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
       pane.add(top_panel);
       pane.add(controls);
 
-      final Animator animator = new Animator(this.canvas);
+      final GLAnimatorControl animator = new FPSAnimator(this.canvas, 60);
       animator.start();
+
+      this.fps_update_timer = new Timer();
+      this.fps_update_timer.scheduleAtFixedRate(new TimerTask() {
+        @Override public void run()
+        {
+          SwingUtilities.invokeLater(new Runnable() {
+            @Override public void run()
+            {
+              final double x = VExampleWindow.this.gl_events.getFPSEstimate();
+              VExampleWindow.this.label_fps.setText(Double.toString(x));
+            }
+          });
+        }
+      },
+        1000,
+        1000);
     }
 
     private void exampleViewNext()
@@ -311,21 +330,31 @@ final class VExample implements Callable<Unit>
       this.expected.viewChanged();
       this.label_view.setText(this.getViewText(next, max));
     }
+
+    @SuppressWarnings({ "static-method", "boxing" }) private
+      String
+      getViewText(
+        final int view_index,
+        final int max_views)
+    {
+      final String text =
+        String.format("%d of %d", view_index + 1, max_views);
+      assert text != null;
+      return text;
+    }
   }
 
   private static final class VExampleWindowGL implements GLEventListener
   {
     private static void drawQuad(
-      final @Nonnull JCGLInterfaceCommon gc,
-      final @Nonnull KUnitQuadUsableType quad,
-      final @Nonnull JCBProgram p)
-      throws JCGLRuntimeException,
-        ConstraintError,
-        JCGLException,
-        JCBExecutionException
+      final JCGLInterfaceCommonType gc,
+      final KUnitQuadUsableType quad,
+      final JCBProgramType p)
+      throws JCGLException,
+        JCGLException
     {
-      final ArrayBufferUsable array = quad.getArray();
-      final IndexBufferUsable indices = quad.getIndices();
+      final ArrayBufferUsableType array = quad.getArray();
+      final IndexBufferUsableType indices = quad.getIndices();
 
       gc.arrayBufferBind(array);
 
@@ -336,11 +365,9 @@ final class VExample implements Callable<Unit>
           p,
           ExampleSceneUtilities.IDENTITY_UV_M);
 
-        p.programExecute(new JCBProgramProcedure() {
+        p.programExecute(new JCBProgramProcedureType<JCGLException>() {
           @Override public void call()
-            throws ConstraintError,
-              JCGLException,
-              Exception
+            throws JCGLException
           {
             gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
           }
@@ -351,42 +378,43 @@ final class VExample implements Callable<Unit>
       }
     }
 
-    private final @Nonnull ViewerConfig                         config;
-    private final @Nonnull AtomicInteger                        current_view_index;
-    private final ExampleSceneType                              example;
-    private final @Nonnull FSCapabilityRead                     filesystem;
-    private KFramebufferType                                    framebuffer;
-    private JCGLImplementationJOGL                              gi;
-    private final @Nonnull Log                                  glog;
-    private final @Nonnull Map<String, KMesh>                   meshes;
-    private final @Nonnull Map<String, Texture2DStaticUsable>   textures;
-    private final @Nonnull Map<String, TextureCubeStaticUsable> cube_textures;
-    private KUnitQuad                                           quad;
-    private ExampleRendererType                                 renderer;
-    private final @Nonnull ExampleRendererConstructorType       renderer_cons;
-    private final @Nonnull VExpectedImage                       results_panel;
-    private boolean                                             running;
-    private KShaderCacheType                                    shader_cache;
-    private LRUCacheConfig                                      shader_cache_config;
-    private final @Nonnull AtomicBoolean                        want_save;
-    private final @Nonnull JLabel                               renderer_label;
-    private TextureLoaderImageIO                                texture_loader;
+    private final ViewerConfig                             config;
+    private final Map<String, TextureCubeStaticUsableType> cube_textures;
+    private final AtomicInteger                            current_view_index;
+    private final ExampleSceneType                         example;
+    private final FSCapabilityReadType                     filesystem;
+    private @Nullable KFramebufferType                     framebuffer;
+    private @Nullable JCGLImplementationType               gi;
+    private final LogUsableType                            glog;
+    private final Map<String, KMesh>                       meshes;
+    private @Nullable KUnitQuad                            quad;
+    private @Nullable ExampleRendererType                  renderer;
+    private final ExampleRendererConstructorType           renderer_cons;
+    private final JLabel                                   renderer_label;
+    private final VExpectedImage                           results_panel;
+    private boolean                                        running;
+    private @Nullable KShaderCacheType                     shader_cache;
+    private @Nullable TextureLoaderType                    texture_loader;
+    private final Map<String, Texture2DStaticUsableType>   textures;
+    private final AtomicDouble                             time_fps_estimate;
+    private final AtomicLong                               time_last;
+    private final AtomicBoolean                            want_save;
 
     public VExampleWindowGL(
-      final @Nonnull Log in_log,
-      final @Nonnull ViewerConfig in_config,
-      final @Nonnull AtomicInteger in_view_id,
-      final @Nonnull AtomicBoolean in_want_save,
-      final @Nonnull FSCapabilityRead in_filesystem,
-      final @Nonnull ExampleSceneType in_example,
-      final @Nonnull ExampleRendererConstructorType in_renderer_cons,
-      final @Nonnull VExpectedImage in_results_panel,
-      final @Nonnull JLabel in_renderer_label)
+      final LogUsableType in_log,
+      final ViewerConfig in_config,
+      final AtomicInteger in_view_id,
+      final AtomicBoolean in_want_save,
+      final FSCapabilityReadType in_filesystem,
+      final ExampleSceneType in_example,
+      final ExampleRendererConstructorType in_renderer_cons,
+      final VExpectedImage in_results_panel,
+      final JLabel in_renderer_label)
     {
-      this.glog = new Log(in_log, "gl");
+      this.glog = in_log.with("gl");
       this.meshes = new HashMap<String, KMesh>();
-      this.textures = new HashMap<String, Texture2DStaticUsable>();
-      this.cube_textures = new HashMap<String, TextureCubeStaticUsable>();
+      this.textures = new HashMap<String, Texture2DStaticUsableType>();
+      this.cube_textures = new HashMap<String, TextureCubeStaticUsableType>();
       this.filesystem = in_filesystem;
       this.renderer_cons = in_renderer_cons;
       this.example = in_example;
@@ -395,15 +423,20 @@ final class VExample implements Callable<Unit>
       this.want_save = in_want_save;
       this.results_panel = in_results_panel;
       this.renderer_label = in_renderer_label;
+      this.time_last = new AtomicLong(0);
+      this.time_fps_estimate = new AtomicDouble(0.0);
     }
 
     @Override public void display(
-      final GLAutoDrawable drawable)
+      final @Nullable GLAutoDrawable drawable)
     {
       try {
         if (this.running == false) {
           return;
         }
+
+        assert drawable != null;
+        this.estimateFPS();
 
         final List<ExampleViewType> views = this.example.exampleViewpoints();
         assert views != null;
@@ -417,85 +450,9 @@ final class VExample implements Callable<Unit>
           KScene.newBuilder(view.getCamera());
 
         this.example.exampleScene(new ExampleSceneBuilderType() {
-          @SuppressWarnings("synthetic-access") @Override public
-            KMeshReadableType
-            mesh(
-              final @Nonnull String name)
-              throws RException
-          {
-            return VExampleWindowGL.this.loadMesh(name);
-          }
-
-          @Override public void sceneAddInvisibleWithShadow(
-            final @Nonnull KLightType light,
-            final @Nonnull KInstanceTransformedOpaqueType instance)
-            throws ConstraintError
-          {
-            scene_builder.sceneAddInvisibleWithShadow(light, instance);
-          }
-
-          @Override public void sceneAddOpaqueLitVisibleWithoutShadow(
-            final @Nonnull KLightType light,
-            final @Nonnull KInstanceTransformedOpaqueType instance)
-            throws ConstraintError
-          {
-            scene_builder.sceneAddOpaqueLitVisibleWithoutShadow(
-              light,
-              instance);
-          }
-
-          @Override public void sceneAddOpaqueLitVisibleWithShadow(
-            final @Nonnull KLightType light,
-            final @Nonnull KInstanceTransformedOpaqueType instance)
-            throws ConstraintError
-          {
-            scene_builder.sceneAddOpaqueLitVisibleWithShadow(light, instance);
-          }
-
-          @Override public void sceneAddOpaqueUnlit(
-            final @Nonnull KInstanceTransformedOpaqueType instance)
-            throws ConstraintError
-          {
-            scene_builder.sceneAddOpaqueUnlit(instance);
-          }
-
-          @Override public void sceneAddTranslucentLit(
-            final @Nonnull KInstanceTransformedTranslucentLitType instance,
-            final @Nonnull Set<KLightType> lights)
-            throws ConstraintError
-          {
-            scene_builder.sceneAddTranslucentLit(instance, lights);
-          }
-
-          @Override public void sceneAddTranslucentUnlit(
-            final @Nonnull KInstanceTransformedTranslucentUnlitType instance)
-            throws ConstraintError
-          {
-            scene_builder.sceneAddTranslucentUnlit(instance);
-          }
-
-          @SuppressWarnings("synthetic-access") @Override public
-            Texture2DStaticUsable
-            texture(
-              final @Nonnull String name)
-              throws RException
-          {
-            try {
-              return VExampleWindowGL.this.loadTexture(name);
-            } catch (final IOException e) {
-              throw RException.fromIOException(e);
-            } catch (final JCGLException e) {
-              throw RException.fromJCGLException(e);
-            } catch (final ConstraintError e) {
-              throw new UnreachableCodeException(e);
-            }
-          }
-
-          @SuppressWarnings("synthetic-access") @Override public
-            TextureCubeStaticUsable
-            cubeTexture(
-              final @Nonnull String name)
-              throws RException
+          @Override public TextureCubeStaticUsableType cubeTexture(
+            final String name)
+            throws RException
           {
             try {
               return VExampleWindowGL.this.loadCube(name);
@@ -507,27 +464,91 @@ final class VExample implements Callable<Unit>
               throw RException.fromJCGLException(e);
             } catch (final ParsingException e) {
               throw RXMLException.parsingException(e);
-            } catch (final ConstraintError e) {
-              throw new UnreachableCodeException(e);
+            }
+          }
+
+          @Override public KMeshReadableType mesh(
+            final String name)
+            throws RException
+          {
+            return VExampleWindowGL.this.loadMesh(name);
+          }
+
+          @Override public void sceneAddInvisibleWithShadow(
+            final KLightType light,
+            final KInstanceTransformedOpaqueType instance)
+          {
+            scene_builder.sceneAddInvisibleWithShadow(light, instance);
+          }
+
+          @Override public void sceneAddOpaqueLitVisibleWithoutShadow(
+            final KLightType light,
+            final KInstanceTransformedOpaqueType instance)
+          {
+            scene_builder.sceneAddOpaqueLitVisibleWithoutShadow(
+              light,
+              instance);
+          }
+
+          @Override public void sceneAddOpaqueLitVisibleWithShadow(
+            final KLightType light,
+            final KInstanceTransformedOpaqueType instance)
+          {
+            scene_builder.sceneAddOpaqueLitVisibleWithShadow(light, instance);
+          }
+
+          @Override public void sceneAddOpaqueUnlit(
+            final KInstanceTransformedOpaqueType instance)
+          {
+            scene_builder.sceneAddOpaqueUnlit(instance);
+          }
+
+          @Override public void sceneAddTranslucentLit(
+            final KInstanceTransformedTranslucentLitType instance,
+            final Set<KLightType> lights)
+          {
+            scene_builder.sceneAddTranslucentLit(instance, lights);
+          }
+
+          @Override public void sceneAddTranslucentUnlit(
+            final KInstanceTransformedTranslucentUnlitType instance)
+          {
+            scene_builder.sceneAddTranslucentUnlit(instance);
+          }
+
+          @Override public Texture2DStaticUsableType texture(
+            final String name)
+            throws RException
+          {
+            try {
+              return VExampleWindowGL.this.loadTexture(name);
+            } catch (final IOException e) {
+              throw RException.fromIOException(e);
+            } catch (final JCGLException e) {
+              throw RException.fromJCGLException(e);
             }
           }
         });
 
-        final JCGLInterfaceCommon gc = this.gi.getGLCommon();
+        final JCGLImplementationType g = this.gi;
+        assert g != null;
+
+        final JCGLInterfaceCommonType gc = g.getGLCommon();
         gc.colorBufferClear4f(0.0f, 0.0f, 1.0f, 1.0f);
 
-        this.renderer.rendererAccept(new ExampleRendererVisitorType<Unit>() {
-          @SuppressWarnings("synthetic-access") @Override public
-            Unit
-            visitForward(
-              final @Nonnull ExampleRendererForwardType r)
-              throws RException,
-                ConstraintError
+        final ExampleRendererType r = this.renderer;
+        assert r != null;
+
+        r.rendererAccept(new ExampleRendererVisitorType<Unit>() {
+          @Override public Unit visitForward(
+            final ExampleRendererForwardType rf)
+            throws RException
           {
             try {
-              final KRendererForwardType fr = r.rendererGetForward();
+              final KRendererForwardType fr = rf.rendererGetForward();
               final KFramebufferForwardType fb =
                 (KFramebufferForwardType) VExampleWindowGL.this.framebuffer;
+              assert fb != null;
 
               fr.rendererForwardEvaluate(fb, scene_builder.sceneCreate());
               VExampleWindowGL.this.renderSceneResults(fb);
@@ -540,7 +561,7 @@ final class VExample implements Callable<Unit>
               return Unit.unit();
             } catch (final JCacheException e) {
               throw RException.fromJCacheException(e);
-            } catch (final JCGLRuntimeException e) {
+            } catch (final JCGLException e) {
               throw RException.fromJCGLException(e);
             }
           }
@@ -551,49 +572,144 @@ final class VExample implements Callable<Unit>
       }
     }
 
-    private @Nonnull Texture2DStaticUsable loadTexture(
-      final @Nonnull String name)
-      throws IOException,
-        JCGLException,
-        ConstraintError
+    @Override public void dispose(
+      final @Nullable GLAutoDrawable drawable)
     {
-      if (this.textures.containsKey(name)) {
-        return this.textures.get(name);
-      }
+      this.glog.debug("dispose");
+    }
 
-      final StringBuilder message = new StringBuilder();
-      message.setLength(0);
-      message.append("Loading texture from ");
-      message.append(name);
-      this.glog.debug(message.toString());
+    private void estimateFPS()
+    {
+      final long prev = this.time_last.get();
+      final long now = System.nanoTime();
+      this.time_last.set(now);
 
-      final InputStream stream =
-        VExample.class.getResourceAsStream(String.format(
-          "/com/io7m/renderer/kernel/examples/%s",
-          name));
+      /**
+       * The time taken since the start of the previous frame, in
+       * milliseconds.
+       */
 
+      final double diff = now - prev;
+      final double diff_mili = diff / 1000000.0;
+
+      /**
+       * The number of frames that would be rendered per second if all frames
+       * took that long.
+       */
+
+      this.time_fps_estimate.set(1000.0 / diff_mili);
+    }
+
+    private void failed(
+      final Throwable e)
+    {
+      VErrorBox.showErrorLater(this.glog, e);
+      this.running = false;
+    }
+
+    public double getFPSEstimate()
+    {
+      return this.time_fps_estimate.get();
+    }
+
+    @Override public void init(
+      final @Nullable GLAutoDrawable drawable)
+    {
       try {
-        final Texture2DStatic t =
-          this.texture_loader.load2DStaticInferred(
-            this.gi,
-            TextureWrapS.TEXTURE_WRAP_REPEAT,
-            TextureWrapT.TEXTURE_WRAP_REPEAT,
-            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-            TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-            stream,
-            name);
-        this.textures.put(name, t);
-        return t;
-      } finally {
-        stream.close();
+        this.glog.debug("init");
+
+        this.running = true;
+
+        assert drawable != null;
+        drawable.getContext().setSwapInterval(1);
+
+        final JCGLImplementationType g =
+          JCGLImplementationJOGL.newImplementation(
+            drawable.getContext(),
+            this.glog);
+        assert g != null;
+        this.gi = g;
+
+        this.texture_loader =
+          TextureLoaderImageIO
+            .newTextureLoaderWithAlphaPremultiplication(this.glog);
+
+        final LRUCacheConfig scc =
+          LRUCacheConfig
+            .empty()
+            .withMaximumCapacity(BigInteger.valueOf(1024));
+
+        final KShaderCacheType sc =
+          KShaderCache.wrap(LRUCacheTrivial.newCache(
+            KShaderCacheLoader.newLoader(g, this.filesystem, this.glog),
+            scc));
+        assert sc != null;
+        this.shader_cache = sc;
+
+        final JCGLInterfaceCommonType gc = g.getGLCommon();
+        this.quad = KUnitQuad.newQuad(gc, this.glog);
+
+        final ExampleRendererType r =
+          this.renderer_cons.newRenderer(this.glog, sc, g);
+        assert r != null;
+        this.renderer = r;
+
+        SwingUtilities.invokeLater(new Runnable() {
+          @Override public void run()
+          {
+            VExampleWindowGL.this.renderer_label.setText(r.rendererGetName());
+          }
+        });
+
+        this.results_panel.loadImages(r);
+
+        this.framebuffer =
+          r
+            .rendererAccept(new ExampleRendererVisitorType<KFramebufferType>() {
+              @Override public KFramebufferType visitForward(
+                final ExampleRendererForwardType rf)
+                throws RException
+              {
+                final RangeInclusiveL range_x =
+                  new RangeInclusiveL(0, drawable.getWidth() - 1);
+                final RangeInclusiveL range_y =
+                  new RangeInclusiveL(0, drawable.getHeight() - 1);
+                final AreaInclusive area =
+                  new AreaInclusive(range_x, range_y);
+
+                final KFramebufferRGBADescription rgba_description =
+                  KFramebufferRGBADescription.newDescription(
+                    area,
+                    TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+                    TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+                    KRGBAPrecision.RGBA_PRECISION_8);
+
+                final KFramebufferDepthDescription depth_description =
+                  KFramebufferDepthDescription.newDescription(
+                    area,
+                    TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
+                    TextureFilterMinification.TEXTURE_FILTER_NEAREST,
+                    KDepthPrecision.DEPTH_PRECISION_24);
+
+                return KFramebufferForward.newFramebuffer(
+                  g,
+                  KFramebufferForwardDescription.newDescription(
+                    rgba_description,
+                    depth_description));
+              }
+            });
+
+        gc.colorBufferClear4f(0.0f, 0.0f, 1.0f, 1.0f);
+
+      } catch (final Throwable e) {
+        this.failed(e);
       }
     }
 
-    private @Nonnull TextureCubeStaticUsable loadCube(
-      final @Nonnull String name)
+    private TextureCubeStaticUsableType loadCube(
+      final String name)
       throws IOException,
         JCGLException,
-        ConstraintError,
         ValidityException,
         ParsingException,
         RXMLException
@@ -620,34 +736,39 @@ final class VExample implements Callable<Unit>
 
         final File parent = file.getParentFile();
 
-        final CubeMapFaceInputStream<CMFKPositiveZ> positive_z =
-          new CubeMapFaceInputStream<CMFKPositiveZ>(
+        final CubeMapFaceInputStream<CMFPositiveZKind> positive_z =
+          new CubeMapFaceInputStream<CMFPositiveZKind>(
             VExample.class.getResourceAsStream(new File(parent, cube
               .getPositiveZ()).toString()));
-        final CubeMapFaceInputStream<CMFKPositiveY> positive_y =
-          new CubeMapFaceInputStream<CMFKPositiveY>(
+        final CubeMapFaceInputStream<CMFPositiveYKind> positive_y =
+          new CubeMapFaceInputStream<CMFPositiveYKind>(
             VExample.class.getResourceAsStream(new File(parent, cube
               .getPositiveY()).toString()));
-        final CubeMapFaceInputStream<CMFKPositiveX> positive_x =
-          new CubeMapFaceInputStream<CMFKPositiveX>(
+        final CubeMapFaceInputStream<CMFPositiveXKind> positive_x =
+          new CubeMapFaceInputStream<CMFPositiveXKind>(
             VExample.class.getResourceAsStream(new File(parent, cube
               .getPositiveX()).toString()));
-        final CubeMapFaceInputStream<CMFKNegativeZ> negative_z =
-          new CubeMapFaceInputStream<CMFKNegativeZ>(
+        final CubeMapFaceInputStream<CMFNegativeZKind> negative_z =
+          new CubeMapFaceInputStream<CMFNegativeZKind>(
             VExample.class.getResourceAsStream(new File(parent, cube
               .getNegativeZ()).toString()));
-        final CubeMapFaceInputStream<CMFKNegativeY> negative_y =
-          new CubeMapFaceInputStream<CMFKNegativeY>(
+        final CubeMapFaceInputStream<CMFNegativeYKind> negative_y =
+          new CubeMapFaceInputStream<CMFNegativeYKind>(
             VExample.class.getResourceAsStream(new File(parent, cube
               .getNegativeY()).toString()));
-        final CubeMapFaceInputStream<CMFKNegativeX> negative_x =
-          new CubeMapFaceInputStream<CMFKNegativeX>(
+        final CubeMapFaceInputStream<CMFNegativeXKind> negative_x =
+          new CubeMapFaceInputStream<CMFNegativeXKind>(
             VExample.class.getResourceAsStream(new File(parent, cube
               .getNegativeX()).toString()));
 
-        final TextureCubeStatic t =
-          this.texture_loader.loadCubeRHStaticInferred(
-            this.gi,
+        final TextureLoaderType tl = this.texture_loader;
+        assert tl != null;
+        final JCGLImplementationType g = this.gi;
+        assert g != null;
+
+        final TextureCubeStaticType t =
+          tl.loadCubeRHStaticInferred(
+            g,
             TextureWrapR.TEXTURE_WRAP_CLAMP_TO_EDGE,
             TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
             TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
@@ -667,115 +788,8 @@ final class VExample implements Callable<Unit>
       }
     }
 
-    @Override public void dispose(
-      final GLAutoDrawable drawable)
-    {
-      this.glog.debug("dispose");
-    }
-
-    private void failed(
-      final Throwable e)
-    {
-      VErrorBox.showErrorLater(this.glog, e);
-      this.running = false;
-    }
-
-    @Override public void init(
-      final GLAutoDrawable drawable)
-    {
-      try {
-        this.glog.debug("init");
-
-        this.running = true;
-        drawable.getContext().setSwapInterval(1);
-
-        this.gi =
-          JCGLImplementationJOGL.newImplementation(
-            drawable.getContext(),
-            this.glog);
-
-        this.texture_loader =
-          TextureLoaderImageIO
-            .newTextureLoaderWithAlphaPremultiplication(this.glog);
-
-        this.shader_cache_config =
-          LRUCacheConfig
-            .empty()
-            .withMaximumCapacity(BigInteger.valueOf(1024));
-        this.shader_cache =
-          KShaderCache
-            .wrap(LRUCacheTrivial.newCache(KShaderCacheLoader.newLoader(
-              this.gi,
-              this.filesystem,
-              this.glog), this.shader_cache_config));
-
-        final JCGLInterfaceCommon gc = this.gi.getGLCommon();
-        this.quad = KUnitQuad.newQuad(gc, this.glog);
-
-        this.renderer =
-          this.renderer_cons.newRenderer(
-            this.glog,
-            this.shader_cache,
-            this.gi);
-
-        SwingUtilities.invokeLater(new Runnable() {
-          @SuppressWarnings("synthetic-access") @Override public void run()
-          {
-            VExampleWindowGL.this.renderer_label
-              .setText(VExampleWindowGL.this.renderer.rendererGetName());
-          }
-        });
-
-        this.results_panel.loadImages(this.renderer);
-
-        this.framebuffer =
-          this.renderer
-            .rendererAccept(new ExampleRendererVisitorType<KFramebufferType>() {
-              @SuppressWarnings("synthetic-access") @Override public
-                KFramebufferType
-                visitForward(
-                  final ExampleRendererForwardType r)
-                  throws ConstraintError,
-                    RException
-              {
-                final RangeInclusive range_x =
-                  new RangeInclusive(0, drawable.getWidth() - 1);
-                final RangeInclusive range_y =
-                  new RangeInclusive(0, drawable.getHeight() - 1);
-                final AreaInclusive area =
-                  new AreaInclusive(range_x, range_y);
-
-                final KFramebufferRGBADescription rgba_description =
-                  KFramebufferRGBADescription.newDescription(
-                    area,
-                    TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-                    TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-                    KRGBAPrecision.RGBA_PRECISION_8);
-
-                final KFramebufferDepthDescription depth_description =
-                  KFramebufferDepthDescription.newDescription(
-                    area,
-                    TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
-                    TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-                    KDepthPrecision.DEPTH_PRECISION_24);
-
-                return KFramebufferForward.newFramebuffer(
-                  VExampleWindowGL.this.gi,
-                  KFramebufferForwardDescription.newDescription(
-                    rgba_description,
-                    depth_description));
-              }
-            });
-
-        gc.colorBufferClear4f(0.0f, 0.0f, 1.0f, 1.0f);
-
-      } catch (final Throwable e) {
-        this.failed(e);
-      }
-    }
-
-    private @Nonnull KMesh loadMesh(
-      final @Nonnull String name)
+    private KMesh loadMesh(
+      final String name)
       throws RException
     {
       if (this.meshes.containsKey(name)) {
@@ -793,20 +807,22 @@ final class VExample implements Callable<Unit>
           "/com/io7m/renderer/kernel/examples/%s",
           name));
 
-      final JCGLInterfaceCommon gl = this.gi.getGLCommon();
+      final JCGLImplementationType g = this.gi;
+      assert g != null;
+      final JCGLInterfaceCommonType gl = g.getGLCommon();
 
       try {
         final Document document =
           RXMLMeshDocument.parseFromStreamValidating(stream);
 
-        final RXMLMeshParserVBO<JCGLInterfaceCommon> p =
+        final RXMLMeshParserVBO<JCGLInterfaceCommonType> p =
           RXMLMeshParserVBO.parseFromDocument(
             document,
             gl,
             UsageHint.USAGE_STATIC_DRAW);
 
-        final ArrayBuffer array = p.getArrayBuffer();
-        final IndexBuffer index = p.getIndexBuffer();
+        final ArrayBufferType array = p.getArrayBuffer();
+        final IndexBufferType index = p.getIndexBuffer();
         final RVectorI3F<RSpaceObjectType> lower = p.getBoundsLower();
         final RVectorI3F<RSpaceObjectType> upper = p.getBoundsUpper();
         final KMesh km = KMesh.newMesh(array, index, lower, upper);
@@ -828,8 +844,6 @@ final class VExample implements Callable<Unit>
         this.glog.debug(message.toString());
 
         return km;
-      } catch (final ConstraintError e) {
-        throw new UnreachableCodeException();
       } catch (final JCGLException e) {
         throw RException.fromJCGLException(e);
       } catch (final IOException e) {
@@ -843,17 +857,62 @@ final class VExample implements Callable<Unit>
       }
     }
 
+    private Texture2DStaticUsableType loadTexture(
+      final String name)
+      throws IOException,
+        JCGLException
+    {
+      if (this.textures.containsKey(name)) {
+        return this.textures.get(name);
+      }
+
+      final StringBuilder message = new StringBuilder();
+      message.setLength(0);
+      message.append("Loading texture from ");
+      message.append(name);
+      this.glog.debug(message.toString());
+
+      final InputStream stream =
+        VExample.class.getResourceAsStream(String.format(
+          "/com/io7m/renderer/kernel/examples/%s",
+          name));
+
+      try {
+        final TextureLoaderType tl = this.texture_loader;
+        assert tl != null;
+
+        final JCGLImplementationType g = this.gi;
+        assert g != null;
+
+        final Texture2DStaticType t =
+          tl.load2DStaticInferred(
+            g,
+            TextureWrapS.TEXTURE_WRAP_REPEAT,
+            TextureWrapT.TEXTURE_WRAP_REPEAT,
+            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+            TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+            stream,
+            name);
+        this.textures.put(name, t);
+        return t;
+      } finally {
+        stream.close();
+      }
+    }
+
     private void renderSceneResults(
-      final @Nonnull KFramebufferForwardType fb)
-      throws JCGLRuntimeException,
+      final KFramebufferForwardType fb)
+      throws JCGLException,
         RException,
-        ConstraintError,
         JCacheException
     {
-      final JCGLInterfaceCommon gc = this.gi.getGLCommon();
+      final JCGLImplementationType g = this.gi;
+      assert g != null;
+      final JCGLInterfaceCommonType gc = g.getGLCommon();
 
-      final KProgram kp =
-        this.shader_cache.cacheGetLU("postprocessing_copy_rgba");
+      final KShaderCacheType sc = this.shader_cache;
+      assert sc != null;
+      final KProgram kp = sc.cacheGetLU("postprocessing_copy_rgba");
       gc.framebufferDrawUnbind();
 
       try {
@@ -868,32 +927,30 @@ final class VExample implements Callable<Unit>
 
         gc.viewportSet(fb.kFramebufferGetArea());
 
-        final JCBExecutionAPI e = kp.getExecutable();
-        e.execRun(new JCBExecutorProcedure() {
-          @SuppressWarnings("synthetic-access") @Override public void call(
-            final @Nonnull JCBProgram p)
-            throws ConstraintError,
-              JCGLException,
-              Exception
+        final JCBExecutorType e = kp.getExecutable();
+        e.execRun(new JCBExecutorProcedureType<JCGLException>() {
+          @Override public void call(
+            final JCBProgramType p)
+            throws JCGLException
           {
-            final List<TextureUnit> units = gc.textureGetUnits();
-            final TextureUnit unit = units.get(0);
+            final List<TextureUnitType> units = gc.textureGetUnits();
+            final TextureUnitType unit = units.get(0);
 
             gc.texture2DStaticBind(unit, fb.kFramebufferGetRGBATexture());
             p.programUniformPutTextureUnit("t_image", unit);
-            VExampleWindowGL.drawQuad(gc, VExampleWindowGL.this.quad, p);
+            final KUnitQuad q = VExampleWindowGL.this.quad;
+            assert q != null;
+            VExampleWindowGL.drawQuad(gc, q, p);
           }
         });
 
-      } catch (final JCBExecutionException x) {
-        throw new UnreachableCodeException(x);
       } finally {
         gc.framebufferDrawUnbind();
       }
     }
 
     @SuppressWarnings("boxing") @Override public void reshape(
-      final GLAutoDrawable drawable,
+      final @Nullable GLAutoDrawable drawable,
       final int x,
       final int y,
       final int width,
@@ -907,8 +964,8 @@ final class VExample implements Callable<Unit>
         height));
     }
 
-    @SuppressWarnings("synthetic-access") private void saveImage(
-      final @Nonnull GLAutoDrawable drawable,
+    private void saveImage(
+      final GLAutoDrawable drawable,
       final int view_index)
     {
       this.glog.debug("downloading framebuffer image");
@@ -930,12 +987,11 @@ final class VExample implements Callable<Unit>
         GL.GL_UNSIGNED_BYTE,
         pixels);
 
+      final ExampleRendererType er = this.renderer;
+      assert er != null;
       final File out =
-        VExample.getOutputImageName(
-          this.config,
-          this.example,
-          this.renderer,
-          view_index);
+        VExample
+          .getOutputImageName(this.config, this.example, er, view_index);
 
       final SwingWorker<Unit, Unit> worker = new SwingWorker<Unit, Unit>() {
         @Override protected Unit doInBackground()
@@ -980,9 +1036,10 @@ final class VExample implements Callable<Unit>
         {
           try {
             this.get();
-            VExampleWindowGL.this.glog.debug(String.format(
-              "image %s written successfully",
-              out));
+            final String m =
+              String.format("image %s written successfully", out);
+            assert m != null;
+            VExampleWindowGL.this.glog.debug(m);
           } catch (final InterruptedException e) {
             VErrorBox.showErrorLater(VExampleWindowGL.this.glog, e);
           } catch (final ExecutionException e) {
@@ -997,35 +1054,24 @@ final class VExample implements Callable<Unit>
 
   private static final class VExpectedImage extends JLabel
   {
-    private static final long              serialVersionUID =
-                                                              1636894751686016138L;
+    private static final long      serialVersionUID;
 
-    private final @Nonnull AtomicInteger   current_view_index;
-    private final @Nonnull List<ImageIcon> images;
-    private volatile boolean               images_loaded;
-    private final @Nonnull Log             rlog;
-    private final ExampleSceneType         scene;
-
-    void viewChanged()
-    {
-      final int view_index = this.current_view_index.get();
-      if (this.images_loaded) {
-        this.setText("");
-        if (view_index < this.images.size()) {
-          final ImageIcon icon = this.images.get(view_index);
-          if (icon != null) {
-            this.setIcon(icon);
-          }
-        }
-      }
+    static {
+      serialVersionUID = 1636894751686016138L;
     }
 
+    private final AtomicInteger    current_view_index;
+    private final List<ImageIcon>  images;
+    private volatile boolean       images_loaded;
+    private final LogUsableType    rlog;
+    private final ExampleSceneType scene;
+
     public VExpectedImage(
-      final @Nonnull Log in_log,
-      final @Nonnull ExampleSceneType in_scene,
-      final @Nonnull AtomicInteger in_current_view_index)
+      final LogUsableType in_log,
+      final ExampleSceneType in_scene,
+      final AtomicInteger in_current_view_index)
     {
-      this.rlog = new Log(in_log, "results");
+      this.rlog = in_log.with("results");
       this.scene = in_scene;
       this.current_view_index = in_current_view_index;
 
@@ -1041,15 +1087,13 @@ final class VExample implements Callable<Unit>
     }
 
     void loadImages(
-      final @Nonnull ExampleRendererType actual_renderer)
+      final ExampleRendererType actual_renderer)
     {
       final List<ExampleViewType> views = this.scene.exampleViewpoints();
 
       final SwingWorker<Unit, Unit> worker = new SwingWorker<Unit, Unit>() {
-        @SuppressWarnings("synthetic-access") @Override protected
-          Unit
-          doInBackground()
-            throws Exception
+        @Override protected Unit doInBackground()
+          throws Exception
         {
           for (int index = 0; index < views.size(); ++index) {
             final String file =
@@ -1094,7 +1138,7 @@ final class VExample implements Callable<Unit>
           return Unit.unit();
         }
 
-        @SuppressWarnings("synthetic-access") @Override protected void done()
+        @Override protected void done()
         {
           try {
             this.get();
@@ -1111,6 +1155,20 @@ final class VExample implements Callable<Unit>
 
       worker.execute();
     }
+
+    void viewChanged()
+    {
+      final int view_index = this.current_view_index.get();
+      if (this.images_loaded) {
+        this.setText("");
+        if (view_index < this.images.size()) {
+          final ImageIcon icon = this.images.get(view_index);
+          if (icon != null) {
+            this.setIcon(icon);
+          }
+        }
+      }
+    }
   }
 
   private static final int EXAMPLE_RESULT_IMAGE_HEIGHT;
@@ -1121,13 +1179,11 @@ final class VExample implements Callable<Unit>
     EXAMPLE_RESULT_IMAGE_WIDTH = 640;
   }
 
-  @SuppressWarnings("boxing") private static @Nonnull
-    File
-    getOutputImageName(
-      final @Nonnull ViewerConfig config,
-      final @Nonnull ExampleSceneType example,
-      final @Nonnull ExampleRendererType renderer,
-      final int view_index)
+  @SuppressWarnings("boxing") private static File getOutputImageName(
+    final ViewerConfig config,
+    final ExampleSceneType example,
+    final ExampleRendererType renderer,
+    final int view_index)
   {
     final File f0 = config.getReplacementResultsDirectory();
     final File f1 = new File(f0, example.exampleGetName());
@@ -1136,22 +1192,22 @@ final class VExample implements Callable<Unit>
     return f3;
   }
 
-  private final @Nonnull ViewerConfig                      config;
-  private ExampleSceneType                                 example;
-  private final @Nonnull Class<? extends ExampleSceneType> example_type;
-  private final @Nonnull FSCapabilityRead                  filesystem;
-  private final @Nonnull Log                               log;
-  private final @Nonnull ExampleRendererConstructorType    renderer_cons;
-  private @Nonnull VExampleWindow                          window;
+  private final ViewerConfig                      config;
+  private @Nullable ExampleSceneType              example;
+  private final Class<? extends ExampleSceneType> example_type;
+  private final FSCapabilityReadType              filesystem;
+  private final LogUsableType                     log;
+  private final ExampleRendererConstructorType    renderer_cons;
+  private @Nullable VExampleWindow                window;
 
   VExample(
-    final @Nonnull Log in_log,
-    final @Nonnull ViewerConfig in_config,
-    final @Nonnull FSCapabilityRead in_filesystem,
-    final @Nonnull ExampleRendererConstructorType in_renderer_cons,
-    final @Nonnull Class<? extends ExampleSceneType> in_example_type)
+    final LogUsableType in_log,
+    final ViewerConfig in_config,
+    final FSCapabilityReadType in_filesystem,
+    final ExampleRendererConstructorType in_renderer_cons,
+    final Class<? extends ExampleSceneType> in_example_type)
   {
-    this.log = new Log(in_log, "example");
+    this.log = NullCheck.notNull(in_log, "Log");
     this.example_type = in_example_type;
     this.renderer_cons = in_renderer_cons;
     this.config = in_config;
@@ -1161,21 +1217,26 @@ final class VExample implements Callable<Unit>
   @Override public Unit call()
     throws Exception
   {
-    this.log.info(String.format(
-      "Running %s",
-      this.example_type.getCanonicalName()));
+    final String message =
+      String.format("Running %s", this.example_type.getCanonicalName());
+    assert message != null;
+    this.log.info(message);
 
-    this.example = this.example_type.newInstance();
+    this.example =
+      NullCheck.notNull(this.example_type.newInstance(), "New instance");
 
-    this.window =
+    final VExampleWindow w =
       new VExampleWindow(
         this.log,
         this.config,
         this.filesystem,
         this.renderer_cons,
         this.example);
-    this.window.pack();
-    this.window.setVisible(true);
+    assert w != null;
+
+    w.pack();
+    w.setVisible(true);
+    this.window = w;
 
     return Unit.unit();
   }

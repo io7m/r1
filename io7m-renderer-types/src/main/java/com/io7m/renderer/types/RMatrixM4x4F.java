@@ -16,18 +16,19 @@
 
 package com.io7m.renderer.types;
 
+import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jtensors.MatrixM4x4F;
 
 /**
- * A mutable 4x4 matrix type indexed by the type {@link RTransformType} the matrix
- * represents and backed by direct memory for passing to native code.
+ * A mutable 4x4 matrix type indexed by the type {@link RTransformType} the
+ * matrix represents and backed by direct memory for passing to native code.
  * 
  * @param <T>
  *          A phantom type parameter describing the type of transform
  */
 
-public final class RMatrixM4x4F<T extends RTransformType> extends MatrixM4x4F implements
-  RMatrixReadable4x4FType<T>
+@EqualityStructural public final class RMatrixM4x4F<T extends RTransformType> extends
+  MatrixM4x4F implements RMatrixReadable4x4FType<T>
 {
   /**
    * Create a new identity matrix.

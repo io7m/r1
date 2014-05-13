@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,11 +16,10 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
 
 final class SBTextures2DWindow extends JFrame
 {
@@ -31,9 +30,9 @@ final class SBTextures2DWindow extends JFrame
   }
 
   public SBTextures2DWindow(
-    final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull JTextField result,
-    final @Nonnull Log log)
+    final SBSceneControllerTextures controller,
+    final JTextField result,
+    final LogUsableType log)
   {
     super("Textures");
     this.getContentPane().add(

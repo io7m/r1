@@ -20,16 +20,12 @@ import java.io.File;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jvvfs.PathVirtual;
 
 interface SBSceneControllerMeshes extends SBSceneChangeListenerRegistration
 {
-  public @Nonnull Map<PathVirtual, SBMesh> sceneMeshesGet();
+  public Map<PathVirtual, SBMesh> sceneMeshesGet();
 
-  public @Nonnull Future<SBMesh> sceneMeshLoad(
-    final @Nonnull File file)
-    throws ConstraintError;
+  public Future<SBMesh> sceneMeshLoad(
+    final File file);
 }

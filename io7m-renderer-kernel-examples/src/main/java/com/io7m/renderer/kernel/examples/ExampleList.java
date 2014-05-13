@@ -23,8 +23,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.annotation.Nonnull;
-
 import org.reflections.Reflections;
 
 /**
@@ -33,23 +31,22 @@ import org.reflections.Reflections;
 
 public final class ExampleList
 {
-  private static SortedMap<String, Class<? extends ExampleSceneType>> EXAMPLES;
+  private static final SortedMap<String, Class<? extends ExampleSceneType>> EXAMPLES =
+                                                                                       ExampleList
+                                                                                         .makeExamples();
 
   /**
    * @return A list of all of the available examples.
    */
 
-  public static @Nonnull
+  public static
     SortedMap<String, Class<? extends ExampleSceneType>>
     getExamples()
   {
-    if (ExampleList.EXAMPLES == null) {
-      ExampleList.EXAMPLES = ExampleList.makeExamples();
-    }
     return ExampleList.EXAMPLES;
   }
 
-  private static @Nonnull
+  private static
     SortedMap<String, Class<? extends ExampleSceneType>>
     makeExamples()
   {
@@ -78,7 +75,10 @@ public final class ExampleList
       examples.put(c.getCanonicalName(), c);
     }
 
-    return Collections.unmodifiableSortedMap(examples);
+    final SortedMap<String, Class<? extends ExampleSceneType>> r =
+      Collections.unmodifiableSortedMap(examples);
+    assert r != null;
+    return r;
   }
 
   private ExampleList()

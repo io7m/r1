@@ -16,11 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcache.BLUCacheAbstract;
 import com.io7m.jcache.BLUCacheType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
@@ -28,7 +26,7 @@ import com.io7m.renderer.types.RException;
  * RGBA framebuffer caches.
  */
 
-public final class KFramebufferRGBACache extends
+@EqualityReference public final class KFramebufferRGBACache extends
   BLUCacheAbstract<KFramebufferRGBADescription, KFramebufferRGBAType, RException> implements
   KFramebufferRGBACacheType
 {
@@ -39,22 +37,18 @@ public final class KFramebufferRGBACache extends
    * @param c
    *          The cache
    * @return A cache
-   * @throws ConstraintError
-   *           If <code>c == null</code>
    */
 
-  public static @Nonnull
+  public static
     KFramebufferRGBACacheType
     wrap(
-      final @Nonnull BLUCacheType<KFramebufferRGBADescription, KFramebufferRGBAType, RException> c)
-      throws ConstraintError
+      final BLUCacheType<KFramebufferRGBADescription, KFramebufferRGBAType, RException> c)
   {
     return new KFramebufferRGBACache(c);
   }
 
   private KFramebufferRGBACache(
-    final @Nonnull BLUCacheType<KFramebufferRGBADescription, KFramebufferRGBAType, RException> c)
-    throws ConstraintError
+    final BLUCacheType<KFramebufferRGBADescription, KFramebufferRGBAType, RException> c)
   {
     super(c);
   }

@@ -16,11 +16,10 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.renderer.types.RSpaceType;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RSpaceObjectType;
+import com.io7m.renderer.types.RSpaceType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorReadable3FType;
 
@@ -31,7 +30,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
  *          The coordinate space for the bounding box
  */
 
-@Immutable public final class KMeshBounds<S extends RSpaceType>
+@EqualityStructural public final class KMeshBounds<S extends RSpaceType>
 {
   /**
    * Construct an object-space bounding box for the given mesh.
@@ -41,11 +40,13 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @return The bounding box of the mesh
    */
 
-  public static @Nonnull KMeshBounds<RSpaceObjectType> fromMeshObjectSpace(
-    final @Nonnull KMeshReadableType mesh)
+  public static KMeshBounds<RSpaceObjectType> fromMeshObjectSpace(
+    final KMeshReadableType mesh)
   {
-    final RVectorReadable3FType<RSpaceObjectType> b_lower = mesh.getBoundsLower();
-    final RVectorReadable3FType<RSpaceObjectType> b_upper = mesh.getBoundsUpper();
+    final RVectorReadable3FType<RSpaceObjectType> b_lower =
+      mesh.getBoundsLower();
+    final RVectorReadable3FType<RSpaceObjectType> b_upper =
+      mesh.getBoundsUpper();
 
     final float front = b_upper.getZF();
     final float left = b_lower.getXF();
@@ -83,24 +84,24 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       in_lower_right_back);
   }
 
-  private final @Nonnull RVectorI3F<S> lower_left_back;
-  private final @Nonnull RVectorI3F<S> lower_left_front;
-  private final @Nonnull RVectorI3F<S> lower_right_back;
-  private final @Nonnull RVectorI3F<S> lower_right_front;
-  private final @Nonnull RVectorI3F<S> upper_left_back;
-  private final @Nonnull RVectorI3F<S> upper_left_front;
-  private final @Nonnull RVectorI3F<S> upper_right_back;
-  private final @Nonnull RVectorI3F<S> upper_right_front;
+  private final RVectorI3F<S> lower_left_back;
+  private final RVectorI3F<S> lower_left_front;
+  private final RVectorI3F<S> lower_right_back;
+  private final RVectorI3F<S> lower_right_front;
+  private final RVectorI3F<S> upper_left_back;
+  private final RVectorI3F<S> upper_left_front;
+  private final RVectorI3F<S> upper_right_back;
+  private final RVectorI3F<S> upper_right_front;
 
   private KMeshBounds(
-    final @Nonnull RVectorI3F<S> in_upper_left_front,
-    final @Nonnull RVectorI3F<S> in_upper_left_back,
-    final @Nonnull RVectorI3F<S> in_lower_left_front,
-    final @Nonnull RVectorI3F<S> in_lower_left_back,
-    final @Nonnull RVectorI3F<S> in_upper_right_front,
-    final @Nonnull RVectorI3F<S> in_upper_right_back,
-    final @Nonnull RVectorI3F<S> in_lower_right_front,
-    final @Nonnull RVectorI3F<S> in_lower_right_back)
+    final RVectorI3F<S> in_upper_left_front,
+    final RVectorI3F<S> in_upper_left_back,
+    final RVectorI3F<S> in_lower_left_front,
+    final RVectorI3F<S> in_lower_left_back,
+    final RVectorI3F<S> in_upper_right_front,
+    final RVectorI3F<S> in_upper_right_back,
+    final RVectorI3F<S> in_lower_right_front,
+    final RVectorI3F<S> in_lower_right_back)
   {
     this.upper_left_front = in_upper_left_front;
     this.upper_left_back = in_upper_left_back;
@@ -113,7 +114,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -139,7 +140,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @return The lower left back corner
    */
 
-  public @Nonnull RVectorI3F<S> getLowerLeftBack()
+  public RVectorI3F<S> getLowerLeftBack()
   {
     return this.lower_left_back;
   }
@@ -148,7 +149,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @return The lower left front corner
    */
 
-  public @Nonnull RVectorI3F<S> getLowerLeftFront()
+  public RVectorI3F<S> getLowerLeftFront()
   {
     return this.lower_left_front;
   }
@@ -157,7 +158,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @return The lower right back corner
    */
 
-  public @Nonnull RVectorI3F<S> getLowerRightBack()
+  public RVectorI3F<S> getLowerRightBack()
   {
     return this.lower_right_back;
   }
@@ -166,7 +167,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @return The lower right front corner
    */
 
-  public @Nonnull RVectorI3F<S> getLowerRightFront()
+  public RVectorI3F<S> getLowerRightFront()
   {
     return this.lower_right_front;
   }
@@ -175,7 +176,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @return The upper left back corner
    */
 
-  public @Nonnull RVectorI3F<S> getUpperLeftBack()
+  public RVectorI3F<S> getUpperLeftBack()
   {
     return this.upper_left_back;
   }
@@ -184,7 +185,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @return The upper left front corner
    */
 
-  public @Nonnull RVectorI3F<S> getUpperLeftFront()
+  public RVectorI3F<S> getUpperLeftFront()
   {
     return this.upper_left_front;
   }
@@ -193,7 +194,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @return The upper right back corner
    */
 
-  public @Nonnull RVectorI3F<S> getUpperRightBack()
+  public RVectorI3F<S> getUpperRightBack()
   {
     return this.upper_right_back;
   }
@@ -202,7 +203,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @return The upper right front corner
    */
 
-  public @Nonnull RVectorI3F<S> getUpperRightFront()
+  public RVectorI3F<S> getUpperRightFront()
   {
     return this.upper_right_front;
   }
@@ -242,6 +243,8 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     builder.append(", upper_right_front=");
     builder.append(this.upper_right_front);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

@@ -18,14 +18,11 @@ package com.io7m.renderer.kernel;
 
 import java.math.BigInteger;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcache.JCacheLoaderType;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 
@@ -35,7 +32,7 @@ import com.io7m.renderer.types.RException;
  * {@link KFramebufferRGBADescription}.
  */
 
-public final class KFramebufferRGBACacheLoader implements
+@EqualityReference public final class KFramebufferRGBACacheLoader implements
   JCacheLoaderType<KFramebufferRGBADescription, KFramebufferRGBAType, RException>
 {
   /**
@@ -46,60 +43,48 @@ public final class KFramebufferRGBACacheLoader implements
    * @param log
    *          A log handle
    * @return A new cache loader
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull
+  public static
     JCacheLoaderType<KFramebufferRGBADescription, KFramebufferRGBAType, RException>
     newLoader(
-      final @Nonnull JCGLImplementation gi,
-      final @Nonnull Log log)
-      throws ConstraintError
+      final JCGLImplementationType gi,
+      final LogUsableType log)
   {
     return new KFramebufferRGBACacheLoader(gi, log);
   }
 
-  private final @Nonnull JCGLImplementation gi;
-  private final @Nonnull Log                log;
+  private final JCGLImplementationType gi;
+  private final LogUsableType          log;
 
   private KFramebufferRGBACacheLoader(
-    final @Nonnull JCGLImplementation in_gi,
-    final @Nonnull Log in_log)
-    throws ConstraintError
+    final JCGLImplementationType in_gi,
+    final LogUsableType in_log)
   {
     this.log =
-      new Log(
-        Constraints.constrainNotNull(in_log, "Log"),
-        "framebuffer-rgba-cache");
-    this.gi = Constraints.constrainNotNull(in_gi, "OpenGL implementation");
+      NullCheck.notNull(in_log, "Log").with("framebuffer-rgba-cache");
+    this.gi = NullCheck.notNull(in_gi, "OpenGL implementation");
   }
 
   @Override public void cacheValueClose(
-    final @Nonnull KFramebufferRGBAType v)
+    final KFramebufferRGBAType v)
     throws RException
   {
-    try {
-      v.kFramebufferDelete(this.gi);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    v.kFramebufferDelete(this.gi);
   }
 
-  @Override public @Nonnull KFramebufferRGBAType cacheValueLoad(
-    final @Nonnull KFramebufferRGBADescription key)
+  @Override public KFramebufferRGBAType cacheValueLoad(
+    final KFramebufferRGBADescription key)
     throws RException
   {
-    try {
-      return KFramebufferRGBA.newFramebuffer(this.gi, key);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    return KFramebufferRGBA.newFramebuffer(this.gi, key);
   }
 
   @Override public BigInteger cacheValueSizeOf(
-    final @Nonnull KFramebufferRGBAType v)
+    final KFramebufferRGBAType v)
   {
-    return BigInteger.valueOf(v.kFramebufferGetSizeBytes());
+    final BigInteger r = BigInteger.valueOf(v.kFramebufferGetSizeBytes());
+    assert r != null;
+    return r;
   }
 }

@@ -20,7 +20,6 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -30,25 +29,26 @@ import javax.swing.JTextField;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 
 public final class SBMaterialControlsSpecular implements
   SBControlsDataType<SBMaterialSpecularDescription>
 {
-  protected final @Nonnull JTextField     texture;
-  protected final @Nonnull JButton        texture_select;
-  protected final @Nonnull SBFloatHSlider exponent;
-  private final @Nonnull RowGroup         group;
-  private final @Nonnull SBColourInput    colour;
+  protected final JTextField     texture;
+  protected final JButton        texture_select;
+  protected final SBFloatHSlider exponent;
+  private final RowGroup         group;
+  private final SBColourInput    colour;
 
   public SBMaterialControlsSpecular(
-    final @Nonnull JFrame parent,
-    final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull Log log)
-    throws ConstraintError
+    final JFrame parent,
+    final SBSceneControllerTextures controller,
+    final LogUsableType log)
   {
     this.group = new RowGroup();
 
@@ -57,7 +57,7 @@ public final class SBMaterialControlsSpecular implements
     this.texture_select = new JButton("Select...");
     this.texture_select.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final SBTextures2DWindow twindow =
           new SBTextures2DWindow(
@@ -98,7 +98,7 @@ public final class SBMaterialControlsSpecular implements
   }
 
   @Override public void controlsLoadFrom(
-    final @Nonnull SBMaterialSpecularDescription mat_s)
+    final SBMaterialSpecularDescription mat_s)
   {
     final PathVirtual tt = mat_s.getTexture();
     this.texture.setText(tt == null ? "" : tt.toString());
@@ -107,20 +107,23 @@ public final class SBMaterialControlsSpecular implements
   }
 
   @Override public SBMaterialSpecularDescription controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
-    final String tt = this.texture.getText();
-    final PathVirtual specular_texture_value =
-      (tt.equals("")) ? null : PathVirtual.ofString(tt);
+    try {
+      final String tt = this.texture.getText();
+      final PathVirtual specular_texture_value =
+        (tt.equals("")) ? null : PathVirtual.ofString(tt);
 
-    final SBMaterialSpecularDescription specular =
-      new SBMaterialSpecularDescription(
-        specular_texture_value,
-        this.colour.controlsSave(),
-        this.exponent.getCurrent());
+      final SBMaterialSpecularDescription specular =
+        new SBMaterialSpecularDescription(
+          specular_texture_value,
+          this.colour.controlsSave(),
+          this.exponent.getCurrent());
 
-    return specular;
+      return specular;
+    } catch (final FilesystemError x) {
+      throw new UnreachableCodeException(x);
+    }
   }
 
   @Override public void controlsHide()

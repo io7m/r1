@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
@@ -51,13 +48,10 @@ public interface KTextureUnitContextInitialType
    *           Iff an OpenGL error occurs.
    * @throws RException
    *           Iff <code>f</code> throws <code>RException</code>.
-   * @throws ConstraintError
-   *           Iff <code>f</code> attempts to allocate too many texture units.
    */
 
   void withContext(
-    final @Nonnull KTextureUnitWithType f)
+    final KTextureUnitWithType f)
     throws JCGLException,
-      ConstraintError,
       RException;
 }

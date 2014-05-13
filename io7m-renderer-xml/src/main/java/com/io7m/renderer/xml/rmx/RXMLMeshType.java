@@ -18,40 +18,38 @@ package com.io7m.renderer.xml.rmx;
 
 import java.util.EnumSet;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-
-@Immutable public final class RXMLMeshType
+@EqualityStructural public final class RXMLMeshType
 {
-  private final @Nonnull EnumSet<RXMLMeshAttribute> attributes;
+  private final EnumSet<RXMLMeshAttribute> attributes;
 
   public RXMLMeshType(
-    final @Nonnull EnumSet<RXMLMeshAttribute> in_attributes)
-    throws ConstraintError
+    final EnumSet<RXMLMeshAttribute> in_attributes)
   {
-    Constraints.constrainNotNull(in_attributes, "Attributes");
+    NullCheck.notNull(in_attributes, "Attributes");
 
     if (in_attributes.contains(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F)) {
-      Constraints.constrainArbitrary(
-        in_attributes.contains(RXMLMeshAttribute.TANGENT_4F) == false,
-        "Mesh does not contain both 3D and 4D tangents");
+      if (in_attributes.contains(RXMLMeshAttribute.TANGENT_4F)) {
+        throw new IllegalArgumentException(
+          "Mesh cannot contain both 3D and 4D tangents");
+      }
     }
 
     if (in_attributes.contains(RXMLMeshAttribute.TANGENT_4F)) {
-      Constraints
-        .constrainArbitrary(
-          in_attributes.contains(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F) == false,
-          "Mesh does not contain both 3D and 4D tangents");
+      if (in_attributes.contains(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F)) {
+        throw new IllegalArgumentException(
+          "Mesh cannot contain both 3D and 4D tangents");
+      }
     }
 
     this.attributes = in_attributes;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -77,12 +75,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
 
   @Override public int hashCode()
   {
-    final int prime = 31;
-    int result = 1;
-    result =
-      (prime * result)
-        + ((this.attributes == null) ? 0 : this.attributes.hashCode());
-    return result;
+    return this.attributes.hashCode();
   }
 
   public boolean hasNormal()
@@ -112,6 +105,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
     builder.append("[RXMLMeshType ");
     builder.append(this.attributes);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

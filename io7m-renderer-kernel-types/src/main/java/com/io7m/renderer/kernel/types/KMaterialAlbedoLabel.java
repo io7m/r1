@@ -16,11 +16,11 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
+import java.util.Map;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.ArrayBufferUsable;
+import com.io7m.jcanephora.ArrayAttributeDescriptor;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jnull.NullCheck;
 
 /**
  * Labels for albedo properties.
@@ -43,12 +43,14 @@ public enum KMaterialAlbedoLabel
 
   ALBEDO_TEXTURED("BT", 1);
 
-  private static @Nonnull KMaterialAlbedoLabel fromInstanceData(
-    final @Nonnull ArrayBufferUsable a,
-    final @Nonnull KMaterialAlbedo albedo)
-    throws ConstraintError
+  private static KMaterialAlbedoLabel fromInstanceData(
+    final ArrayBufferUsableType a,
+    final KMaterialAlbedo albedo)
   {
-    if (a.hasAttribute(KMeshAttributes.ATTRIBUTE_UV.getName())) {
+    final Map<String, ArrayAttributeDescriptor> ad =
+      a.arrayGetDescriptor().getAttributes();
+
+    if (ad.containsKey(KMeshAttributes.ATTRIBUTE_UV.getName())) {
       if (albedo.getTexture().isSome()) {
         if (albedo.getMix() == 0.0) {
           return KMaterialAlbedoLabel.ALBEDO_COLOURED;
@@ -66,34 +68,31 @@ public enum KMaterialAlbedoLabel
    * @param instance
    *          The instance
    * @return An albedo label
-   * @throws ConstraintError
-   *           Iff the instance is <code>null</code>
    */
 
-  public static @Nonnull KMaterialAlbedoLabel fromInstanceRegular(
-    final @Nonnull KInstanceRegularType instance)
-    throws ConstraintError
+  public static KMaterialAlbedoLabel fromInstanceRegular(
+    final KInstanceRegularType instance)
   {
-    Constraints.constrainNotNull(instance, "Instance");
+    NullCheck.notNull(instance, "Instance");
     final KMeshReadableType mesh = instance.instanceGetMesh();
-    final ArrayBufferUsable a = mesh.getArrayBuffer();
+    final ArrayBufferUsableType a = mesh.getArrayBuffer();
     final KMaterialRegularType material = instance.instanceGetMaterial();
     final KMaterialAlbedo albedo = material.materialGetAlbedo();
     return KMaterialAlbedoLabel.fromInstanceData(a, albedo);
   }
 
-  private final @Nonnull String code;
-  private final int             textures_required;
+  private final String code;
+  private final int    textures_required;
 
   private KMaterialAlbedoLabel(
-    final @Nonnull String in_code,
+    final String in_code,
     final int in_textures_required)
   {
     this.code = in_code;
     this.textures_required = in_textures_required;
   }
 
-  @Override public @Nonnull String labelGetCode()
+  @Override public String labelGetCode()
   {
     return this.code;
   }

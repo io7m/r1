@@ -21,7 +21,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -30,21 +29,20 @@ import javax.swing.JTextField;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 
 public final class SBOrientationInput implements SBControls
 {
   static final class RotationDialog extends JFrame
   {
-    private static final VectorReadable3F AXIS_X;
-    private static final VectorReadable3F AXIS_Y;
-    private static final VectorReadable3F AXIS_Z;
-    private static final long             serialVersionUID;
+    private static final VectorReadable3FType AXIS_X;
+    private static final VectorReadable3FType AXIS_Y;
+    private static final VectorReadable3FType AXIS_Z;
+    private static final long                 serialVersionUID;
 
     static {
       serialVersionUID = 5132901751477130242L;
@@ -53,15 +51,14 @@ public final class SBOrientationInput implements SBControls
       AXIS_Z = new VectorI3F(0.0f, 0.0f, 1.0f);
     }
 
-    private final @Nonnull JButton        cancel;
-    private final @Nonnull JButton        ok;
-    private boolean                       selected = false;
-    private final @Nonnull SBFloatHSlider slider_x;
-    private final @Nonnull SBFloatHSlider slider_y;
-    private final @Nonnull SBFloatHSlider slider_z;
+    private final JButton                     cancel;
+    private final JButton                     ok;
+    private boolean                           selected = false;
+    private final SBFloatHSlider              slider_x;
+    private final SBFloatHSlider              slider_y;
+    private final SBFloatHSlider              slider_z;
 
     RotationDialog()
-      throws ConstraintError
     {
       this.slider_x = new SBFloatHSlider("X", -360.0f, 360.0f);
       this.slider_y = new SBFloatHSlider("Y", -360.0f, 360.0f);
@@ -74,7 +71,7 @@ public final class SBOrientationInput implements SBControls
       this.cancel = new JButton("Cancel");
       this.cancel.addActionListener(new ActionListener() {
         @Override public void actionPerformed(
-          final ActionEvent e)
+          final @Nullable ActionEvent e)
         {
           SBWindowUtilities.closeWindow(RotationDialog.this);
         }
@@ -85,7 +82,7 @@ public final class SBOrientationInput implements SBControls
         @SuppressWarnings("synthetic-access") @Override public
           void
           actionPerformed(
-            final ActionEvent e)
+            final @Nullable ActionEvent e)
         {
           RotationDialog.this.selected = true;
           SBWindowUtilities.closeWindow(RotationDialog.this);
@@ -99,7 +96,7 @@ public final class SBOrientationInput implements SBControls
       dg.row().right().add(this.cancel).add(this.ok);
     }
 
-    @Nonnull QuaternionI4F getQuaternion()
+    QuaternionI4F getQuaternion()
     {
       final QuaternionI4F qx =
         QuaternionI4F.makeFromAxisAngle(
@@ -123,18 +120,18 @@ public final class SBOrientationInput implements SBControls
     }
   }
 
-  public static @Nonnull SBOrientationInput newInput()
+  public static SBOrientationInput newInput()
   {
     return new SBOrientationInput();
   }
 
-  private final @Nonnull RowGroup   group;
-  private final @Nonnull JLabel     label;
-  private final @Nonnull JTextField orientation_w;
-  private final @Nonnull JTextField orientation_x;
-  private final @Nonnull JTextField orientation_y;
-  private final @Nonnull JTextField orientation_z;
-  private final @Nonnull JButton    select;
+  private final RowGroup   group;
+  private final JLabel     label;
+  private final JTextField orientation_w;
+  private final JTextField orientation_x;
+  private final JTextField orientation_y;
+  private final JTextField orientation_z;
+  private final JButton    select;
 
   private SBOrientationInput()
   {
@@ -148,40 +145,36 @@ public final class SBOrientationInput implements SBControls
     this.select = new JButton("Select...");
     this.select.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
-        try {
-          final RotationDialog d = new RotationDialog();
-          d.pack();
-          d.setVisible(true);
-          d.addWindowListener(new WindowAdapter() {
-            @SuppressWarnings("synthetic-access") @Override public
-              void
-              windowClosing(
-                final WindowEvent _)
-            {
-              if (d.isSelected()) {
-                final QuaternionI4F o = d.getQuaternion();
-                SBOrientationInput.this.orientation_x.setText(Float
-                  .toString(o.getXF()));
-                SBOrientationInput.this.orientation_y.setText(Float
-                  .toString(o.getYF()));
-                SBOrientationInput.this.orientation_z.setText(Float
-                  .toString(o.getZF()));
-                SBOrientationInput.this.orientation_w.setText(Float
-                  .toString(o.getWF()));
-              }
+        final RotationDialog d = new RotationDialog();
+        d.pack();
+        d.setVisible(true);
+        d.addWindowListener(new WindowAdapter() {
+          @SuppressWarnings("synthetic-access") @Override public
+            void
+            windowClosing(
+              final @Nullable WindowEvent _)
+          {
+            if (d.isSelected()) {
+              final QuaternionI4F o = d.getQuaternion();
+              SBOrientationInput.this.orientation_x.setText(Float.toString(o
+                .getXF()));
+              SBOrientationInput.this.orientation_y.setText(Float.toString(o
+                .getYF()));
+              SBOrientationInput.this.orientation_z.setText(Float.toString(o
+                .getZF()));
+              SBOrientationInput.this.orientation_w.setText(Float.toString(o
+                .getWF()));
             }
-          });
-        } catch (final ConstraintError x) {
-          throw new UnreachableCodeException(x);
-        }
+          }
+        });
       }
     });
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     layout
       .row()
@@ -204,12 +197,12 @@ public final class SBOrientationInput implements SBControls
     this.group.forceShow();
   }
 
-  public @Nonnull JLabel getLabel()
+  public JLabel getLabel()
   {
     return this.label;
   }
 
-  @Nonnull QuaternionI4F getOrientation()
+  QuaternionI4F getOrientation()
     throws SBExceptionInputError
   {
     return new QuaternionI4F(
@@ -219,33 +212,33 @@ public final class SBOrientationInput implements SBControls
       SBTextFieldUtilities.getFieldFloatOrError(this.orientation_w));
   }
 
-  public @Nonnull JTextField getOrientationW()
+  public JTextField getOrientationW()
   {
     return this.orientation_w;
   }
 
-  public @Nonnull JTextField getOrientationX()
+  public JTextField getOrientationX()
   {
     return this.orientation_x;
   }
 
-  public @Nonnull JTextField getOrientationY()
+  public JTextField getOrientationY()
   {
     return this.orientation_y;
   }
 
-  public @Nonnull JTextField getOrientationZ()
+  public JTextField getOrientationZ()
   {
     return this.orientation_z;
   }
 
-  public @Nonnull JButton getSelect()
+  public JButton getSelect()
   {
     return this.select;
   }
 
   void setOrientation(
-    final @Nonnull QuaternionI4F q)
+    final QuaternionI4F q)
   {
     this.orientation_x.setText(Float.toString(q.getXF()));
     this.orientation_y.setText(Float.toString(q.getYF()));

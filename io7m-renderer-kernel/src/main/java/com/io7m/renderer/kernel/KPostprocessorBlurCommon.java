@@ -18,44 +18,39 @@ package com.io7m.renderer.kernel;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.ArrayBufferUsable;
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.IndexBufferUsable;
-import com.io7m.jcanephora.JCBExecutionAPI;
-import com.io7m.jcanephora.JCBExecutionException;
-import com.io7m.jcanephora.JCBExecutorProcedure;
-import com.io7m.jcanephora.JCBProgram;
-import com.io7m.jcanephora.JCBProgramProcedure;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.FramebufferUsableType;
+import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLInterfaceCommon;
-import com.io7m.jcanephora.JCGLRuntimeException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.jcanephora.TextureUnit;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jcanephora.TextureUnitType;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
+import com.io7m.jcanephora.batchexec.JCBExecutorType;
+import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
+import com.io7m.jcanephora.batchexec.JCBProgramType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.junreachable.UnreachableCodeException;
 
-final class KPostprocessorBlurCommon
+@EqualityReference final class KPostprocessorBlurCommon
 {
   static void evaluateBlurH(
-    final @Nonnull JCGLImplementation gi,
+    final JCGLImplementationType gi,
     final float blur_size,
-    final @Nonnull KUnitQuadUsableType quad,
-    final @Nonnull KProgram blur_h,
-    final @Nonnull Texture2DStaticUsable input_texture,
-    final @Nonnull AreaInclusive input_area,
-    final @Nonnull FramebufferReferenceUsable output,
-    final @Nonnull AreaInclusive output_area,
+    final KUnitQuadUsableType quad,
+    final KProgram blur_h,
+    final Texture2DStaticUsableType input_texture,
+    final AreaInclusive input_area,
+    final FramebufferUsableType output,
+    final AreaInclusive output_area,
     final boolean has_depth)
-    throws JCGLRuntimeException,
-      ConstraintError
+    throws JCGLException
   {
-    final JCGLInterfaceCommon gc = gi.getGLCommon();
-    final List<TextureUnit> units = gc.textureGetUnits();
+    final JCGLInterfaceCommonType gc = gi.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
 
     try {
       gc.framebufferDrawBind(output);
@@ -71,17 +66,15 @@ final class KPostprocessorBlurCommon
 
       gc.viewportSet(output_area);
 
-      final JCBExecutionAPI e = blur_h.getExecutable();
-      e.execRun(new JCBExecutorProcedure() {
+      final JCBExecutorType e = blur_h.getExecutable();
+      e.execRun(new JCBExecutorProcedureType<JCGLException>() {
         @Override public void call(
-          final @Nonnull JCBProgram p)
-          throws ConstraintError,
-            JCGLException,
-            Exception
+          final JCBProgramType p)
+          throws JCGLException
         {
           try {
-            final ArrayBufferUsable array = quad.getArray();
-            final IndexBufferUsable indices = quad.getIndices();
+            final ArrayBufferUsableType array = quad.getArray();
+            final IndexBufferUsableType indices = quad.getIndices();
 
             gc.arrayBufferBind(array);
             KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
@@ -93,20 +86,15 @@ final class KPostprocessorBlurCommon
             final int width = (int) input_area.getRangeX().getInterval();
             p.programUniformPutFloat("image_width", width / blur_size);
 
-            final TextureUnit unit = units.get(0);
+            final TextureUnitType unit = units.get(0);
+            assert unit != null;
             gc.texture2DStaticBind(unit, input_texture);
             p.programUniformPutTextureUnit("t_image", unit);
-            p.programExecute(new JCBProgramProcedure() {
+            p.programExecute(new JCBProgramProcedureType<JCGLException>() {
               @Override public void call()
-                throws ConstraintError,
-                  JCGLException,
-                  Exception
+                throws JCGLException
               {
-                try {
-                  gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                } catch (final ConstraintError x) {
-                  throw new UnreachableCodeException(x);
-                }
+                gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
               }
             });
 
@@ -115,28 +103,25 @@ final class KPostprocessorBlurCommon
           }
         }
       });
-    } catch (final JCBExecutionException x) {
-      throw new UnreachableCodeException(x);
     } finally {
       gc.framebufferDrawUnbind();
     }
   }
 
   static void evaluateBlurV(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull KUnitQuadUsableType quad,
+    final JCGLImplementationType gi,
+    final KUnitQuadUsableType quad,
     final float blur_size,
-    final @Nonnull KProgram blur_v,
-    final @Nonnull Texture2DStaticUsable input_texture,
-    final @Nonnull AreaInclusive input_area,
-    final @Nonnull FramebufferReferenceUsable output,
-    final @Nonnull AreaInclusive output_area,
+    final KProgram blur_v,
+    final Texture2DStaticUsableType input_texture,
+    final AreaInclusive input_area,
+    final FramebufferUsableType output,
+    final AreaInclusive output_area,
     final boolean has_depth)
-    throws JCGLRuntimeException,
-      ConstraintError
+    throws JCGLException
   {
-    final JCGLInterfaceCommon gc = gi.getGLCommon();
-    final List<TextureUnit> units = gc.textureGetUnits();
+    final JCGLInterfaceCommonType gc = gi.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
 
     try {
       gc.framebufferDrawBind(output);
@@ -152,17 +137,15 @@ final class KPostprocessorBlurCommon
 
       gc.viewportSet(output_area);
 
-      final JCBExecutionAPI e = blur_v.getExecutable();
-      e.execRun(new JCBExecutorProcedure() {
+      final JCBExecutorType e = blur_v.getExecutable();
+      e.execRun(new JCBExecutorProcedureType<JCGLException>() {
         @Override public void call(
-          final @Nonnull JCBProgram p)
-          throws ConstraintError,
-            JCGLException,
-            Exception
+          final JCBProgramType p)
+          throws JCGLException
         {
           try {
-            final ArrayBufferUsable array = quad.getArray();
-            final IndexBufferUsable indices = quad.getIndices();
+            final ArrayBufferUsableType array = quad.getArray();
+            final IndexBufferUsableType indices = quad.getIndices();
 
             gc.arrayBufferBind(array);
             KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
@@ -174,20 +157,15 @@ final class KPostprocessorBlurCommon
             final int height = (int) input_area.getRangeY().getInterval();
             p.programUniformPutFloat("image_height", height / blur_size);
 
-            final TextureUnit unit = units.get(0);
+            final TextureUnitType unit = units.get(0);
+            assert unit != null;
             gc.texture2DStaticBind(unit, input_texture);
             p.programUniformPutTextureUnit("t_image", unit);
-            p.programExecute(new JCBProgramProcedure() {
+            p.programExecute(new JCBProgramProcedureType<JCGLException>() {
               @Override public void call()
-                throws ConstraintError,
-                  JCGLException,
-                  Exception
+                throws JCGLException
               {
-                try {
-                  gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                } catch (final ConstraintError x) {
-                  throw new UnreachableCodeException(x);
-                }
+                gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
               }
             });
 
@@ -196,8 +174,6 @@ final class KPostprocessorBlurCommon
           }
         }
       });
-    } catch (final JCBExecutionException x) {
-      throw new UnreachableCodeException(x);
     } finally {
       gc.framebufferDrawUnbind();
     }

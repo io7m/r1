@@ -16,10 +16,9 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
 
 final class SBShadersWindow extends JFrame
 {
@@ -30,8 +29,8 @@ final class SBShadersWindow extends JFrame
   }
 
   public <C extends SBSceneControllerShaders> SBShadersWindow(
-    final @Nonnull C controller,
-    final @Nonnull Log log)
+    final C controller,
+    final LogUsableType log)
   {
     super("ForwardShaders");
     this.getContentPane().add(new SBShadersPanel(this, controller, log));

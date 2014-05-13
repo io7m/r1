@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
@@ -33,8 +30,7 @@ public interface KTextureUnitWithType
    * 
    * @param context
    *          The current texture unit context
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws JCGLException
    *           If required
    * @throws RException
@@ -42,8 +38,7 @@ public interface KTextureUnitWithType
    */
 
   void run(
-    final @Nonnull KTextureUnitContextType context)
-    throws ConstraintError,
-      JCGLException,
+    final KTextureUnitContextType context)
+    throws JCGLException,
       RException;
 }

@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.renderer.types.RException;
 
@@ -51,20 +48,17 @@ public interface KRegionCopierType
    *          The target framebuffer
    * @param target_area
    *          The target area
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>, or if
-   *           <code>source == target</code>
+   * 
    * @throws RException
    *           If an error occurs
    */
 
   void copierCopyDepthVarianceOnly(
-    final @Nonnull KFramebufferDepthVarianceUsableType source,
-    final @Nonnull AreaInclusive source_area,
-    final @Nonnull KFramebufferDepthVarianceUsableType target,
-    final @Nonnull AreaInclusive target_area)
-    throws ConstraintError,
-      RException;
+    final KFramebufferDepthVarianceUsableType source,
+    final AreaInclusive source_area,
+    final KFramebufferDepthVarianceUsableType target,
+    final AreaInclusive target_area)
+    throws RException;
 
   /**
    * <p>
@@ -85,20 +79,17 @@ public interface KRegionCopierType
    *          The target framebuffer
    * @param target_area
    *          The target area
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>, or if
-   *           <code>source == target</code>
+   * 
    * @throws RException
    *           If an error occurs
    */
 
   void copierCopyRGBAOnly(
-    final @Nonnull KFramebufferRGBAUsableType source,
-    final @Nonnull AreaInclusive source_area,
-    final @Nonnull KFramebufferRGBAUsableType target,
-    final @Nonnull AreaInclusive target_area)
-    throws ConstraintError,
-      RException;
+    final KFramebufferRGBAUsableType source,
+    final AreaInclusive source_area,
+    final KFramebufferRGBAUsableType target,
+    final AreaInclusive target_area)
+    throws RException;
 
   /**
    * <p>
@@ -121,9 +112,7 @@ public interface KRegionCopierType
    *          The target framebuffer
    * @param target_area
    *          The target area
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>, or if
-   *           <code>source == target</code>
+   * 
    * @throws RException
    *           If an error occurs
    */
@@ -131,12 +120,11 @@ public interface KRegionCopierType
     <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
     void
     copierCopyRGBAWithDepth(
-      final @Nonnull F source,
-      final @Nonnull AreaInclusive source_area,
-      final @Nonnull F target,
-      final @Nonnull AreaInclusive target_area)
-      throws ConstraintError,
-        RException;
+      final F source,
+      final AreaInclusive source_area,
+      final F target,
+      final AreaInclusive target_area)
+      throws RException;
 
   /**
    * @return <code>true</code> if fast blitting is enabled

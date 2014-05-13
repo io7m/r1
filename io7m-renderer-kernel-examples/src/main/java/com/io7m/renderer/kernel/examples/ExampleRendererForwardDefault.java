@@ -18,10 +18,6 @@ package com.io7m.renderer.kernel.examples;
 
 import java.math.BigInteger;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcache.BLUCacheConfig;
 import com.io7m.jcache.BLUCacheTrivial;
 import com.io7m.jcache.LRUCacheConfig;
@@ -30,8 +26,9 @@ import com.io7m.jcache.PCacheConfig;
 import com.io7m.jcache.PCacheConfig.BuilderType;
 import com.io7m.jcache.PCacheTrivial;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.KDepthRenderer;
 import com.io7m.renderer.kernel.KDepthRendererType;
 import com.io7m.renderer.kernel.KDepthVarianceRenderer;
@@ -81,17 +78,16 @@ public final class ExampleRendererForwardDefault extends
    * @return A renderer constructor.
    */
 
-  public static @Nonnull ExampleRendererConstructorType get()
+  public static ExampleRendererConstructorType get()
   {
     return new ExampleRendererConstructorType() {
       @SuppressWarnings("synthetic-access") @Override public
         ExampleRendererType
         newRenderer(
-          final @Nonnull Log log,
-          final @Nonnull KShaderCacheType shader_cache,
-          final @Nonnull JCGLImplementation gi)
-          throws ConstraintError,
-            JCGLException,
+          final LogUsableType log,
+          final KShaderCacheType shader_cache,
+          final JCGLImplementationType gi)
+          throws JCGLException,
             RException
       {
         return ExampleRendererForwardDefault.make(log, shader_cache, gi);
@@ -99,15 +95,14 @@ public final class ExampleRendererForwardDefault extends
     };
   }
 
-  private static @Nonnull ExampleRendererForwardType make(
-    final @Nonnull Log log,
-    final @Nonnull KShaderCacheType shader_cache,
-    final @Nonnull JCGLImplementation gi)
-    throws ConstraintError,
-      JCGLException,
+  @SuppressWarnings("null") private static ExampleRendererForwardType make(
+    final LogUsableType log,
+    final KShaderCacheType shader_cache,
+    final JCGLImplementationType gi)
+    throws JCGLException,
       RException
   {
-    Constraints.constrainNotNull(gi, "GL");
+    NullCheck.notNull(gi, "GL");
 
     final KUnitQuad quad = KUnitQuad.newQuad(gi.getGLCommon(), log);
 
@@ -195,8 +190,7 @@ public final class ExampleRendererForwardDefault extends
         forward_cache,
         bounds_cache,
         bounds_tri_cache,
-        label_cache,
-        log);
+        label_cache);
 
     final KTranslucentRendererType translucent_renderer =
       KTranslucentRenderer.newRenderer(
@@ -216,23 +210,21 @@ public final class ExampleRendererForwardDefault extends
       log), quad);
   }
 
-  private final @Nonnull KRendererForwardType actual;
-  private final @Nonnull KUnitQuad            quad;
+  private final KRendererForwardType actual;
+  private final KUnitQuad            quad;
 
   private ExampleRendererForwardDefault(
-    final @Nonnull KRendererForwardType r,
-    final @Nonnull KUnitQuad q)
-    throws ConstraintError
+    final KRendererForwardType r,
+    final KUnitQuad q)
   {
     super(r);
-    this.quad = Constraints.constrainNotNull(q, "Quad");
+    this.quad = NullCheck.notNull(q, "Quad");
     this.actual = r;
   }
 
   @Override public <T> T rendererAccept(
-    final @Nonnull ExampleRendererVisitorType<T> v)
-    throws RException,
-      ConstraintError
+    final ExampleRendererVisitorType<T> v)
+    throws RException
   {
     return v.visitForward(this);
   }

@@ -16,12 +16,9 @@
 
 package com.io7m.renderer.kernel.examples;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jlog.LogUsableType;
 import com.io7m.renderer.kernel.KShaderCacheType;
 import com.io7m.renderer.types.RException;
 
@@ -41,8 +38,7 @@ public interface ExampleRendererConstructorType
    * @param gi
    *          A GL implementation
    * @return A new renderer
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
+   * 
    * @throws JCGLException
    *           If an OpenGL error occurs
    * @throws RException
@@ -50,10 +46,9 @@ public interface ExampleRendererConstructorType
    */
 
   ExampleRendererType newRenderer(
-    final @Nonnull Log log,
-    final @Nonnull KShaderCacheType shader_cache,
-    final @Nonnull JCGLImplementation gi)
-    throws ConstraintError,
-      JCGLException,
+    final LogUsableType log,
+    final KShaderCacheType shader_cache,
+    final JCGLImplementationType gi)
+    throws JCGLException,
       RException;
 }

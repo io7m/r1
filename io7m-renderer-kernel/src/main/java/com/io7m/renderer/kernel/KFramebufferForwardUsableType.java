@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 
 /**
@@ -35,5 +33,5 @@ public interface KFramebufferForwardUsableType extends
    *         other framebuffers with the same configuration
    */
 
-  @Nonnull KFramebufferForwardDescription kFramebufferGetForwardDescription();
+  KFramebufferForwardDescription kFramebufferGetForwardDescription();
 }

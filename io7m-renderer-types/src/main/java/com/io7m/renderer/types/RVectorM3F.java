@@ -16,8 +16,7 @@
 
 package com.io7m.renderer.types;
 
-import javax.annotation.Nonnull;
-
+import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jtensors.VectorM3F;
 
 /**
@@ -27,8 +26,8 @@ import com.io7m.jtensors.VectorM3F;
  *          A phantom type parameter describing the coordinate space
  */
 
-public final class RVectorM3F<T extends RSpaceType> extends VectorM3F implements
-  RVectorReadable3FType<T>
+@EqualityStructural public final class RVectorM3F<T extends RSpaceType> extends
+  VectorM3F implements RVectorReadable3FType<T>
 {
   /**
    * Construct a new vector, initialized to all zeroes.
@@ -66,7 +65,7 @@ public final class RVectorM3F<T extends RSpaceType> extends VectorM3F implements
    */
 
   public RVectorM3F(
-    final @Nonnull RVectorReadable3FType<T> v)
+    final RVectorReadable3FType<T> v)
   {
     super(v);
   }

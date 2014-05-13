@@ -5,13 +5,17 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.io7m.renderer.kernel-shaders.forward</groupId>
+  <parent>
+    <groupId>com.io7m.renderer</groupId>
+    <artifactId>io7m-renderer</artifactId>
+    <version>0.9.0</version>
+  </parent>
   <artifactId>io7m-renderer-kernel-shaders-forward</artifactId>
-  <version>0.8.0</version>
+
   <packaging>jar</packaging>
-  <name>io7m-renderer-kernel-shaders-forward</name>
-  <description>3D renderer (Forward rendering shaders)</description>
-  <url>http://mvn.io7m.com/renderer-kernel-shaders-forward/</url>
+  <description>3D renderer (Forward-rendering kernel shaders)</description>
+  <url>http://mvn.io7m.com/${project.artifactId}/</url>
+  <name>${project.artifactId}</name>
 
   <licenses>
     <license>
@@ -44,9 +48,19 @@
     <site>
       <id>io7m</id>
       <name>io7m.com</name>
-      <url>http://mvn.io7m.com/renderer-kernel-shaders-forward/</url>
+      <url>${project.url}</url>
     </site>
   </distributionManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>io7m-renderer</name>
+      <subscribe>io7m-renderer-join@lists.io7m.com</subscribe>
+      <unsubscribe>io7m-renderer-leave@lists.io7m.com</unsubscribe>
+      <post>io7m-renderer@lists.io7m.com</post>
+      <archive>http://lists.io7m.com/io7m-renderer/archive</archive>
+    </mailingList>
+  </mailingLists>
 
   <prerequisites>
     <maven>2.2.1</maven>
@@ -59,42 +73,26 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.io7m.renderer.kernel-shaders.core</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-kernel-shaders-core</artifactId>
       <version>${project.version}</version>
       <classifier>shader-sources</classifier>
       <type>zip</type>
     </dependency>
     <dependency>
-      <groupId>com.io7m.renderer.kernel.types</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-kernel-types</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.jparasol.compiler.frontend</groupId>
+      <groupId>com.io7m.jparasol</groupId>
       <artifactId>io7m-jparasol-compiler-frontend</artifactId>
-      <version>[0.4.0, 0.5.0)</version>
+      <version>${com.io7m.jparasol.versionRange}</version>
     </dependency>
     <dependency>
-      <groupId>com.io7m.jparasol.xml</groupId>
+      <groupId>com.io7m.jparasol</groupId>
       <artifactId>io7m-jparasol-xml</artifactId>
-      <version>[0.4.0, 0.5.0)</version>
-    </dependency>
-    <dependency>
-      <groupId>com.io7m.jaux</groupId>
-      <artifactId>io7m-jaux</artifactId>
-      <version>[3.0.0, 4.0.0)</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-      <version>4.11</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>2.0.2</version>
+      <version>${com.io7m.jparasol.versionRange}</version>
     </dependency>
   </dependencies>
 
@@ -159,7 +157,8 @@
               <goal>unpack-dependencies</goal>
             </goals>
             <configuration>
-              <includeGroupIds>com.io7m.renderer.kernel-shaders.core</includeGroupIds>
+              <includeGroupIds>${project.groupId}</includeGroupIds>
+              <includeArtifactIds>io7m-renderer-kernel-shaders-core</includeArtifactIds>
               <includeClassifiers>shader-sources</includeClassifiers>
               <includeTypes>zip</includeTypes>
               <outputDirectory>${project.build.directory}/parasol</outputDirectory>

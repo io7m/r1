@@ -19,7 +19,6 @@ package com.io7m.renderer.kernel.sandbox;
 import java.awt.Container;
 import java.awt.Dimension;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -37,20 +36,20 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 
 public final class SBVector3FInput<R extends RSpaceType> implements SBControls
 {
-  public static @Nonnull <R extends RSpaceType> SBVector3FInput<R> newInput(
-    final @Nonnull String text)
+  public static  <R extends RSpaceType> SBVector3FInput<R> newInput(
+    final  String text)
   {
     return new SBVector3FInput<R>(text);
   }
 
-  private final @Nonnull JLabel     label;
-  private final @Nonnull JTextField field_x;
-  private final @Nonnull JTextField field_y;
-  private final @Nonnull JTextField field_z;
-  private final @Nonnull RowGroup   group;
+  private final  JLabel     label;
+  private final  JTextField field_x;
+  private final  JTextField field_y;
+  private final  JTextField field_z;
+  private final  RowGroup   group;
 
   private SBVector3FInput(
-    final @Nonnull String text)
+    final  String text)
   {
     this.label = new JLabel(text);
     this.field_x = new JTextField("0.0");
@@ -59,7 +58,7 @@ public final class SBVector3FInput<R extends RSpaceType> implements SBControls
     this.group = new RowGroup();
   }
 
-  public @Nonnull RVectorI3F<R> getVector()
+  public  RVectorI3F<R> getVector()
     throws SBExceptionInputError
   {
     return new RVectorI3F<R>(
@@ -69,7 +68,7 @@ public final class SBVector3FInput<R extends RSpaceType> implements SBControls
   }
 
   @SuppressWarnings("boxing") public void setVector(
-    final @Nonnull RVectorReadable3FType<R> v)
+    final  RVectorReadable3FType<R> v)
   {
     this.field_x.setText(String.format("%.6f", v.getXF()));
     this.field_y.setText(String.format("%.6f", v.getYF()));
@@ -110,7 +109,7 @@ public final class SBVector3FInput<R extends RSpaceType> implements SBControls
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final  DesignGridLayout layout)
   {
     layout
       .row()

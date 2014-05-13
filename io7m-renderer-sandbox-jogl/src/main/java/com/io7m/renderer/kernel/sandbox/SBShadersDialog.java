@@ -20,37 +20,36 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
 
 public final class SBShadersDialog extends JDialog
 {
-  private static final long             serialVersionUID;
+  private static final long    serialVersionUID;
 
   static {
     serialVersionUID = 4894778262966895041L;
   }
 
-  private final @Nonnull SBShadersPanel panel;
+  private final SBShadersPanel panel;
 
   public SBShadersDialog(
-    final @Nonnull JFrame owner,
-    final @Nonnull Log log,
-    final @Nonnull SBSceneControllerShaders controller)
+    final JFrame owner,
+    final LogUsableType log,
+    final SBSceneControllerShaders controller)
   {
     this.panel = new SBShadersPanel(owner, controller, log);
 
     final JButton cancel = new JButton("Cancel");
     cancel.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         SBWindowUtilities.closeDialog(SBShadersDialog.this);
       }
@@ -59,7 +58,7 @@ public final class SBShadersDialog extends JDialog
     final JButton ok = new JButton("OK");
     ok.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         SBWindowUtilities.closeDialog(SBShadersDialog.this);
       }
@@ -73,7 +72,7 @@ public final class SBShadersDialog extends JDialog
     this.pack();
   }
 
-  public @CheckForNull SBShader getSelectedShader()
+  public @Nullable SBShader getSelectedShader()
   {
     return this.panel.getSelectedShader();
   }

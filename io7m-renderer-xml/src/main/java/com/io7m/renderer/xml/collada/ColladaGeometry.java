@@ -19,41 +19,38 @@ package com.io7m.renderer.xml.collada;
 import java.util.Collections;
 import java.util.SortedSet;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import com.io7m.jnull.NullCheck;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-
-@Immutable public abstract class ColladaGeometry
+public abstract class ColladaGeometry
 {
-  @Immutable public static final class ColladaMesh extends ColladaGeometry
+  public static final class ColladaMesh extends ColladaGeometry
   {
-    private final @Nonnull ColladaPolylist            polylist;
-    private final @Nonnull SortedSet<ColladaSourceID> source_ids;
+    private final ColladaPolylist            polylist;
+    private final SortedSet<ColladaSourceID> source_ids;
 
     @SuppressWarnings("synthetic-access") public ColladaMesh(
-      final @Nonnull ColladaGeometryID id,
-      final @Nonnull ColladaDocument document,
-      final @Nonnull SortedSet<ColladaSourceID> in_source_ids,
-      final @Nonnull ColladaPolylist p,
-      final @Nonnull ColladaAxis axis)
-      throws ConstraintError
+      final ColladaGeometryID id,
+      final ColladaDocument document,
+      final SortedSet<ColladaSourceID> in_source_ids,
+      final ColladaPolylist p,
+      final ColladaAxis axis)
     {
       super(Type.GEOMETRY_MESH, document, id, axis);
-      this.source_ids =
-        Constraints.constrainNotNull(in_source_ids, "Source IDs");
-      this.polylist = Constraints.constrainNotNull(p, "Polylist");
+      this.source_ids = NullCheck.notNull(in_source_ids, "Source IDs");
+      this.polylist = NullCheck.notNull(p, "Polylist");
     }
 
-    public @Nonnull ColladaPolylist getPolylist()
+    public ColladaPolylist getPolylist()
     {
       return this.polylist;
     }
 
-    public @Nonnull SortedSet<ColladaSourceID> getSourceIDs()
+    public SortedSet<ColladaSourceID> getSourceIDs()
     {
-      return Collections.unmodifiableSortedSet(this.source_ids);
+      final SortedSet<ColladaSourceID> r =
+        Collections.unmodifiableSortedSet(this.source_ids);
+      assert r != null;
+      return r;
     }
 
     @Override public String toString()
@@ -66,7 +63,9 @@ import com.io7m.jaux.Constraints.ConstraintError;
       builder.append(" ");
       builder.append(this.polylist);
       builder.append("]");
-      return builder.toString();
+      final String r = builder.toString();
+      assert r != null;
+      return r;
     }
   }
 
@@ -75,40 +74,39 @@ import com.io7m.jaux.Constraints.ConstraintError;
     GEOMETRY_MESH
   }
 
-  private final @Nonnull ColladaGeometryID id;
-  private final @Nonnull Type              type;
-  private final @Nonnull ColladaAxis       axis;
-  private final @Nonnull ColladaDocument   document;
+  private final ColladaGeometryID id;
+  private final Type              type;
+  private final ColladaAxis       axis;
+  private final ColladaDocument   document;
 
   private ColladaGeometry(
-    final @Nonnull Type in_type,
-    final @Nonnull ColladaDocument in_document,
-    final @Nonnull ColladaGeometryID in_id,
-    final @Nonnull ColladaAxis in_axis)
-    throws ConstraintError
+    final Type in_type,
+    final ColladaDocument in_document,
+    final ColladaGeometryID in_id,
+    final ColladaAxis in_axis)
   {
-    this.document = Constraints.constrainNotNull(in_document, "Document");
-    this.type = Constraints.constrainNotNull(in_type, "Type");
-    this.id = Constraints.constrainNotNull(in_id, "ID");
-    this.axis = Constraints.constrainNotNull(in_axis, "Axis");
+    this.document = NullCheck.notNull(in_document, "Document");
+    this.type = NullCheck.notNull(in_type, "Type");
+    this.id = NullCheck.notNull(in_id, "ID");
+    this.axis = NullCheck.notNull(in_axis, "Axis");
   }
 
-  public @Nonnull ColladaAxis getAxis()
+  public ColladaAxis getAxis()
   {
     return this.axis;
   }
 
-  public @Nonnull ColladaDocument getDocument()
+  public ColladaDocument getDocument()
   {
     return this.document;
   }
 
-  public @Nonnull ColladaGeometryID getID()
+  public ColladaGeometryID getID()
   {
     return this.id;
   }
 
-  public @Nonnull Type getType()
+  public Type getType()
   {
     return this.type;
   }

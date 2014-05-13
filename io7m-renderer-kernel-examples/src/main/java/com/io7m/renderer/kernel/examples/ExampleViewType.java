@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.kernel.examples;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.renderer.kernel.types.KCamera;
 
 /**
@@ -30,5 +28,5 @@ public interface ExampleViewType
    * @return A camera for the view
    */
 
-  @Nonnull KCamera getCamera();
+  KCamera getCamera();
 }

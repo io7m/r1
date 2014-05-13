@@ -16,6 +16,8 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
+import com.io7m.jnull.Nullable;
+
 public final class SBMaterialRefractiveDescription
 {
   private final boolean masked;
@@ -30,7 +32,7 @@ public final class SBMaterialRefractiveDescription
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;

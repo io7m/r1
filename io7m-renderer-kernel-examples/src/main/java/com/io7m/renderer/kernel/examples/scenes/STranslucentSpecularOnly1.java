@@ -20,9 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.renderer.kernel.examples.ExampleSceneBuilderType;
@@ -77,9 +74,8 @@ public final class STranslucentSpecularOnly1 implements ExampleSceneType
   }
 
   @Override public void exampleScene(
-    final @Nonnull ExampleSceneBuilderType scene)
-    throws ConstraintError,
-      RException
+    final ExampleSceneBuilderType scene)
+    throws RException
   {
     /**
      * The opaque floor piece.

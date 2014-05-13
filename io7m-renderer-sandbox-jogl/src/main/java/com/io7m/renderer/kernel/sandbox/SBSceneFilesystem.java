@@ -24,21 +24,19 @@ import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.zip.ZipOutputStream;
 
-import javax.annotation.Nonnull;
-
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Pair;
-import com.io7m.jlog.Level;
-import com.io7m.jlog.Log;
+import com.io7m.jfunctional.Pair;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.jvvfs.FilesystemType;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.cubemap.CubeMap;
@@ -46,20 +44,20 @@ import com.thoughtworks.xstream.XStream;
 
 public final class SBSceneFilesystem
 {
-  public static final @Nonnull String       CUBE_MAP_POSITIVE_Z;
-  public static final @Nonnull String       CUBE_MAP_POSITIVE_Y;
-  public static final @Nonnull String       CUBE_MAP_POSITIVE_X;
-  public static final @Nonnull String       CUBE_MAP_NEGATIVE_Z;
-  public static final @Nonnull String       CUBE_MAP_NEGATIVE_Y;
-  public static final @Nonnull String       CUBE_MAP_NEGATIVE_X;
+  public static final String       CUBE_MAP_POSITIVE_Z;
+  public static final String       CUBE_MAP_POSITIVE_Y;
+  public static final String       CUBE_MAP_POSITIVE_X;
+  public static final String       CUBE_MAP_NEGATIVE_Z;
+  public static final String       CUBE_MAP_NEGATIVE_Y;
+  public static final String       CUBE_MAP_NEGATIVE_X;
 
-  private static final @Nonnull PathVirtual PATH_TEXTURES_2D;
-  private static final @Nonnull String      NAME_TEXTURES_2D;
-  private static final @Nonnull String      NAME_TEXTURES_CUBE;
-  private static final @Nonnull PathVirtual PATH_TEXTURES_CUBE;
-  private static final @Nonnull String      NAME_MESHES;
-  private static final @Nonnull PathVirtual PATH_MESHES;
-  private static final int                  MAX_UNIQUE_NAME_TRIES = 1000;
+  private static final PathVirtual PATH_TEXTURES_2D;
+  private static final String      NAME_TEXTURES_2D;
+  private static final String      NAME_TEXTURES_CUBE;
+  private static final PathVirtual PATH_TEXTURES_CUBE;
+  private static final String      NAME_MESHES;
+  private static final PathVirtual PATH_MESHES;
+  private static final int         MAX_UNIQUE_NAME_TRIES = 1000;
 
   static {
     try {
@@ -81,7 +79,7 @@ public final class SBSceneFilesystem
       CUBE_MAP_NEGATIVE_Y = "negative-y";
       CUBE_MAP_NEGATIVE_X = "negative-x";
 
-    } catch (final ConstraintError e) {
+    } catch (final FilesystemError e) {
       throw new UnreachableCodeException();
     }
   }
@@ -90,10 +88,9 @@ public final class SBSceneFilesystem
    * Create a new empty scene.
    */
 
-  public static @Nonnull SBSceneFilesystem filesystemEmpty(
-    final @Nonnull Log log)
-    throws ConstraintError,
-      FilesystemError,
+  public static SBSceneFilesystem filesystemEmpty(
+    final LogUsableType log)
+    throws FilesystemError,
       IOException
   {
     final File td =
@@ -103,7 +100,7 @@ public final class SBSceneFilesystem
         SBSceneFilesystem.MAX_UNIQUE_NAME_TRIES);
 
     SBSceneFilesystem.initDirectories(td);
-    final Filesystem fs = Filesystem.makeWithoutArchiveDirectory(log);
+    final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
     fs.mountArchiveFromAnywhere(td, PathVirtual.ROOT);
     return new SBSceneFilesystem(log, td, fs);
   }
@@ -112,11 +109,10 @@ public final class SBSceneFilesystem
    * Load a scene from <code>file</code>.
    */
 
-  public static @Nonnull SBSceneFilesystem filesystemLoadScene(
-    final @Nonnull Log log,
-    final @Nonnull File file)
-    throws ConstraintError,
-      FilesystemError,
+  public static SBSceneFilesystem filesystemLoadScene(
+    final LogUsableType log,
+    final File file)
+    throws FilesystemError,
       FileNotFoundException,
       IOException
   {
@@ -126,22 +122,22 @@ public final class SBSceneFilesystem
         file,
         "sandbox/scene-",
         SBSceneFilesystem.MAX_UNIQUE_NAME_TRIES);
-    final Filesystem fs = Filesystem.makeWithoutArchiveDirectory(log);
+    final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
     fs.mountArchiveFromAnywhere(td, PathVirtual.ROOT);
     return new SBSceneFilesystem(log, td, fs);
   }
 
   private static void initDirectories(
-    final @Nonnull File td)
+    final File td)
   {
     new File(td, SBSceneFilesystem.NAME_TEXTURES_2D).mkdirs();
     new File(td, SBSceneFilesystem.NAME_TEXTURES_CUBE).mkdirs();
     new File(td, SBSceneFilesystem.NAME_MESHES).mkdirs();
   }
 
-  private static @Nonnull String insertRandomBytesIntoName(
-    final @Nonnull byte[] bytes,
-    final @Nonnull String name)
+  private static String insertRandomBytesIntoName(
+    final byte[] bytes,
+    final String name)
   {
     final StringBuilder b = new StringBuilder();
     if (name.contains(".")) {
@@ -161,26 +157,24 @@ public final class SBSceneFilesystem
     return b.toString();
   }
 
-  private final @Nonnull Filesystem filesystem;
-
-  private final @Nonnull Log        log;
-  private final @Nonnull File       root;
+  private final FilesystemType filesystem;
+  private final LogUsableType  log;
+  private final File           root;
 
   private SBSceneFilesystem(
-    final @Nonnull Log in_log,
-    final @Nonnull File actual_root,
-    final @Nonnull Filesystem initial)
+    final LogUsableType in_log,
+    final File actual_root,
+    final FilesystemType fs)
   {
-    this.log = new Log(in_log, "scene-filesystem");
-    this.filesystem = initial;
+    this.log = in_log.with("scene-filesystem");
+    this.filesystem = fs;
     this.root = actual_root;
   }
 
-  private @Nonnull PathVirtual copyFileIn(
-    final @Nonnull PathVirtual base,
-    final @Nonnull File file)
-    throws ConstraintError,
-      FilesystemError,
+  private PathVirtual copyFileIn(
+    final PathVirtual base,
+    final File file)
+    throws FilesystemError,
       FileNotFoundException,
       IOException
   {
@@ -188,9 +182,9 @@ public final class SBSceneFilesystem
     final Pair<PathVirtual, String> result =
       this.getUniqueName(base, name, SBSceneFilesystem.MAX_UNIQUE_NAME_TRIES);
 
-    final File target = new File(this.root, result.first.toString());
+    final File target = new File(this.root, result.getLeft().toString());
 
-    if (this.log.enabled(Level.LOG_DEBUG)) {
+    if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
       final StringBuilder m = new StringBuilder();
       m.append("copy ");
       m.append(file);
@@ -200,66 +194,67 @@ public final class SBSceneFilesystem
     }
 
     SBIOUtilities.copyFile(file, target);
-    return result.first;
+    return result.getLeft();
   }
 
   public void filesystemClose()
-    throws FilesystemError,
-      ConstraintError
+    throws FilesystemError
   {
     this.filesystem.close();
   }
 
-  public @Nonnull PathVirtual filesystemCopyInMesh(
-    final @Nonnull File file)
-    throws ConstraintError,
-      FileNotFoundException,
+  public PathVirtual filesystemCopyInMesh(
+    final File file)
+    throws FileNotFoundException,
       FilesystemError,
       IOException
   {
-    Constraints.constrainNotNull(file, "File");
-    Constraints.constrainArbitrary(
-      file.getName().isEmpty() == false,
-      "File name not empty");
+    NullCheck.notNull(file, "File");
+
+    if (file.getName().isEmpty()) {
+      throw new IllegalArgumentException("File name is empty");
+    }
 
     return this.copyFileIn(SBSceneFilesystem.PATH_MESHES, file);
   }
 
-  public @Nonnull PathVirtual filesystemCopyInTexture2D(
-    final @Nonnull File file)
-    throws ConstraintError,
-      FileNotFoundException,
+  public PathVirtual filesystemCopyInTexture2D(
+    final File file)
+    throws FileNotFoundException,
       FilesystemError,
       IOException
   {
-    Constraints.constrainNotNull(file, "File");
-    Constraints.constrainArbitrary(
-      file.getName().isEmpty() == false,
-      "File name not empty");
+    NullCheck.notNull(file, "File");
+
+    if (file.getName().isEmpty()) {
+      throw new IllegalArgumentException("File name is empty");
+    }
 
     return this.copyFileIn(SBSceneFilesystem.PATH_TEXTURES_2D, file);
   }
 
-  public @Nonnull PathVirtual filesystemCopyInTextureCube(
-    final @Nonnull File file)
-    throws ConstraintError,
-      ValidityException,
+  public PathVirtual filesystemCopyInTextureCube(
+    final File file)
+    throws ValidityException,
       ParsingException,
       IOException,
       RXMLException,
       FilesystemError
   {
-    Constraints.constrainNotNull(file, "File");
+    NullCheck.notNull(file, "File");
 
     final Builder b = new Builder();
     final Document document = b.build(file);
     final CubeMap map = CubeMap.fromXML(document.getRootElement());
 
     final File file_parent = file.getParentFile();
-    Constraints.constrainNotNull(file_parent, "File parent");
-    Constraints.constrainArbitrary(
-      file_parent.isDirectory(),
-      "Parent of file is directory");
+    NullCheck.notNull(file_parent, "File parent");
+
+    if (file_parent.isDirectory() == false) {
+      throw new IllegalArgumentException("Parent of "
+        + file
+        + " is not a directory");
+    }
 
     /**
      * Create a new directory in the cube maps directory with a unique name
@@ -275,7 +270,7 @@ public final class SBSceneFilesystem
     final File cube_map_directory_real =
       new File(
         new File(this.root, SBSceneFilesystem.NAME_TEXTURES_CUBE),
-        cube_map_directory.second);
+        cube_map_directory.getRight());
 
     if (cube_map_directory_real.mkdirs() == false) {
       throw new IOException("Could not create directory: "
@@ -311,13 +306,12 @@ public final class SBSceneFilesystem
         cube_map_directory_real,
         SBSceneFilesystem.CUBE_MAP_NEGATIVE_X));
 
-    return cube_map_directory.first;
+    return cube_map_directory.getLeft();
   }
 
-  public @Nonnull InputStream filesystemOpenFile(
-    final @Nonnull PathVirtual path)
-    throws FilesystemError,
-      ConstraintError
+  public InputStream filesystemOpenFile(
+    final PathVirtual path)
+    throws FilesystemError
   {
     return this.filesystem.openFile(path);
   }
@@ -327,8 +321,8 @@ public final class SBSceneFilesystem
    */
 
   public void filesystemSave(
-    final @Nonnull SBSceneDescription description,
-    final @Nonnull File file)
+    final SBSceneDescription description,
+    final File file)
     throws IOException
   {
     final ZipOutputStream fo =
@@ -343,12 +337,11 @@ public final class SBSceneFilesystem
     fo.close();
   }
 
-  private @Nonnull Pair<PathVirtual, String> getUniqueName(
-    final @Nonnull PathVirtual base,
-    final @Nonnull String name,
+  private Pair<PathVirtual, String> getUniqueName(
+    final PathVirtual base,
+    final String name,
     final int tries)
-    throws ConstraintError,
-      FilesystemError,
+    throws FilesystemError,
       IOException
   {
     final SecureRandom r = new SecureRandom();
@@ -368,20 +361,20 @@ public final class SBSceneFilesystem
       } else {
         final String new_name = name_buffer.toString();
         final PathVirtual path = base.appendName(new_name);
-        return new Pair<PathVirtual, String>(path, new_name);
+        return Pair.pair(path, new_name);
       }
     }
 
     throw new IOException("Could not create unique filename for " + name);
   }
 
-  @Nonnull File root()
+  File root()
   {
     return this.root;
   }
 
   private void sceneSaveSerializeXML(
-    final @Nonnull SBSceneDescription description)
+    final SBSceneDescription description)
     throws IOException
   {
     final FileOutputStream out =

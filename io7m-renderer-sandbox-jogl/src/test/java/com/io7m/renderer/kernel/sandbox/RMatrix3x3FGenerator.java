@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,7 @@ package com.io7m.renderer.kernel.sandbox;
 import net.java.quickcheck.Generator;
 
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.jtensors.VectorReadable3F;
+import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformType;
 
@@ -28,17 +28,17 @@ final class RMatrix3x3FGenerator<T extends RTransformType> implements
 {
   @Override public RMatrixI3x3F<T> next()
   {
-    final VectorReadable3F column_0 =
+    final VectorReadable3FType column_0 =
       new VectorI3F(
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f);
-    final VectorReadable3F column_1 =
+    final VectorReadable3FType column_1 =
       new VectorI3F(
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f);
-    final VectorReadable3F column_2 =
+    final VectorReadable3FType column_2 =
       new VectorI3F(
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f,

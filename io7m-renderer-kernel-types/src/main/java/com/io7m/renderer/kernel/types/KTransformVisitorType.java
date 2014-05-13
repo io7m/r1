@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * A generic transform visitor, returning values of type <code>A</code> and
@@ -41,7 +40,7 @@ public interface KTransformVisitorType<A, E extends Throwable>
    */
 
   A transformMatrix4x4(
-    final @Nonnull KTransformMatrix4x4 t)
+    final  KTransformMatrix4x4 t)
     throws E;
 
   /**
@@ -55,6 +54,6 @@ public interface KTransformVisitorType<A, E extends Throwable>
    */
 
   A transformOST(
-    final @Nonnull KTransformOST t)
+    final  KTransformOST t)
     throws E;
 }

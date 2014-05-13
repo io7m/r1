@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.awt.Color;
 
-import javax.annotation.Nonnull;
 import javax.swing.BorderFactory;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
@@ -51,7 +50,7 @@ final class SBTextFieldUtilities
   }
 
   static float getFieldFloatOrError(
-    final @Nonnull JTextField field)
+    final  JTextField field)
     throws SBExceptionInputError
   {
     try {
@@ -66,7 +65,7 @@ final class SBTextFieldUtilities
   }
 
   public static int getFieldIntegerOrError(
-    final @Nonnull JTextField field)
+    final  JTextField field)
     throws SBExceptionInputError
   {
     try {
@@ -79,8 +78,8 @@ final class SBTextFieldUtilities
     }
   }
 
-  static @Nonnull String getFieldNonEmptyStringOrError(
-    final @Nonnull JTextField field)
+  static  String getFieldNonEmptyStringOrError(
+    final  JTextField field)
     throws SBExceptionInputError
   {
     final String s = field.getText();

@@ -19,14 +19,13 @@ package com.io7m.renderer.kernel.sandbox;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.io7m.jaux.AlmostEqualDouble;
-import com.io7m.jaux.AlmostEqualDouble.ContextRelative;
+import com.io7m.jequality.AlmostEqualDouble;
+import com.io7m.jequality.AlmostEqualDouble.ContextRelative;
 import com.io7m.jtensors.VectorM3F;
-import com.io7m.renderer.kernel.sandbox.SBFirstPersonCamera;
 
-public class SBFirstPersonCameraTest
+@SuppressWarnings("static-method") public class SBFirstPersonCameraTest
 {
-  @SuppressWarnings("static-method") @Test public void testYawVector()
+  @Test public void testYawVector()
   {
     double yaw;
     final VectorM3F v = new VectorM3F();
@@ -38,39 +37,41 @@ public class SBFirstPersonCameraTest
     System.out.println("Yaw    : " + yaw);
     System.out.println("Result : " + v);
     System.out.println();
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.x, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.y, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.z, -1.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getXF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getYF(), 0.0));
+    Assert
+      .assertTrue(AlmostEqualDouble.almostEqual(context, v.getZF(), -1.0));
 
     yaw = Math.PI;
     SBFirstPersonCamera.makeYawVector(yaw, v);
     System.out.println("Yaw    : " + yaw);
     System.out.println("Result : " + v);
     System.out.println();
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.x, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.y, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.z, 1.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getXF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getYF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getZF(), 1.0));
 
     yaw = Math.PI / 2.0;
     SBFirstPersonCamera.makeYawVector(yaw, v);
     System.out.println("Yaw    : " + yaw);
     System.out.println("Result : " + v);
     System.out.println();
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.x, 1.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.y, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.z, 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getXF(), 1.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getYF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getZF(), 0.0));
 
     yaw = -(Math.PI / 2.0);
     SBFirstPersonCamera.makeYawVector(yaw, v);
     System.out.println("Yaw    : " + yaw);
     System.out.println("Result : " + v);
     System.out.println();
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.x, -1.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.y, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.z, 0.0));
+    Assert
+      .assertTrue(AlmostEqualDouble.almostEqual(context, v.getXF(), -1.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getYF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getZF(), 0.0));
   }
 
-  @SuppressWarnings("static-method") @Test public void testPitchYawVector()
+  @Test public void testPitchYawVector()
   {
     double pitch;
     double yaw;
@@ -85,9 +86,10 @@ public class SBFirstPersonCameraTest
     System.out.println("Yaw    : " + yaw);
     System.out.println("Result : " + v);
     System.out.println();
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.x, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.y, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.z, -1.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getXF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getYF(), 0.0));
+    Assert
+      .assertTrue(AlmostEqualDouble.almostEqual(context, v.getZF(), -1.0));
 
     pitch = 0.0;
     yaw = Math.PI;
@@ -96,9 +98,9 @@ public class SBFirstPersonCameraTest
     System.out.println("Yaw    : " + yaw);
     System.out.println("Result : " + v);
     System.out.println();
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.x, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.y, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.z, 1.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getXF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getYF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getZF(), 1.0));
 
     pitch = 0.0;
     yaw = Math.PI / 2.0;
@@ -107,9 +109,9 @@ public class SBFirstPersonCameraTest
     System.out.println("Yaw    : " + yaw);
     System.out.println("Result : " + v);
     System.out.println();
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.x, 1.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.y, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.z, 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getXF(), 1.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getYF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getZF(), 0.0));
 
     pitch = 0.0;
     yaw = -(Math.PI / 2.0);
@@ -118,9 +120,10 @@ public class SBFirstPersonCameraTest
     System.out.println("Yaw    : " + yaw);
     System.out.println("Result : " + v);
     System.out.println();
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.x, -1.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.y, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.z, 0.0));
+    Assert
+      .assertTrue(AlmostEqualDouble.almostEqual(context, v.getXF(), -1.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getYF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getZF(), 0.0));
 
     pitch = Math.PI;
     yaw = 0.0;
@@ -129,9 +132,9 @@ public class SBFirstPersonCameraTest
     System.out.println("Yaw    : " + yaw);
     System.out.println("Result : " + v);
     System.out.println();
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.x, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.y, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.z, 1.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getXF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getYF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getZF(), 1.0));
 
     pitch = Math.PI / 2.0;
     yaw = 0.0;
@@ -140,9 +143,9 @@ public class SBFirstPersonCameraTest
     System.out.println("Yaw    : " + yaw);
     System.out.println("Result : " + v);
     System.out.println();
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.x, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.y, 1.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.z, 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getXF(), 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getYF(), 1.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getZF(), 0.0));
 
     pitch = -(Math.PI / 2.0);
     yaw = 0.0;
@@ -151,8 +154,9 @@ public class SBFirstPersonCameraTest
     System.out.println("Yaw    : " + yaw);
     System.out.println("Result : " + v);
     System.out.println();
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.x, 0.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.y, -1.0));
-    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.z, 0.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getXF(), 0.0));
+    Assert
+      .assertTrue(AlmostEqualDouble.almostEqual(context, v.getYF(), -1.0));
+    Assert.assertTrue(AlmostEqualDouble.almostEqual(context, v.getZF(), 0.0));
   }
 }

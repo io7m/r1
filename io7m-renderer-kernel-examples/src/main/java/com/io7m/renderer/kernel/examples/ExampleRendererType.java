@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.examples;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -35,20 +32,18 @@ public interface ExampleRendererType
    * @param <T>
    *          The type of values returned by the visitor
    * @return The value returned by the visitor
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    */
 
   <T> T rendererAccept(
-    final @Nonnull ExampleRendererVisitorType<T> v)
-    throws RException,
-      ConstraintError;
+    final ExampleRendererVisitorType<T> v)
+    throws RException;
 
   /**
    * @return The name of the renderer
    */
 
-  @Nonnull String rendererGetName();
+  String rendererGetName();
 }

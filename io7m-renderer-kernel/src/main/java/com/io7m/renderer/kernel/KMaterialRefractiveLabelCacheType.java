@@ -16,15 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialRefractiveLabel;
 
 interface KMaterialRefractiveLabelCacheType
 {
-  @Nonnull KMaterialRefractiveLabel getRefractiveLabel(
-    final @Nonnull KInstanceTranslucentRefractive instance)
-    throws ConstraintError;
+  KMaterialRefractiveLabel getRefractiveLabel(
+    final KInstanceTranslucentRefractive instance);
 }

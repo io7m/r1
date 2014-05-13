@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -33,8 +30,7 @@ public interface SBLightDescriptionVisitable
    * @param v
    *          The visitor
    * @return The value returned by the visitor
-   * @throws ConstraintError
-   *           Iff the visitor raises {@link ConstraintError}
+   * 
    * @throws RException
    *           Iff the visitor raises {@link RException}
    * @throws E
@@ -51,8 +47,7 @@ public interface SBLightDescriptionVisitable
     <A, E extends Throwable, V extends SBLightDescriptionVisitor<A, E>>
     A
     lightDescriptionVisitableAccept(
-      final @Nonnull V v)
-      throws ConstraintError,
-        RException,
+      final V v)
+      throws RException,
         E;
 }

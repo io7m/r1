@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * An extension of the {@link KSceneBuilderType} interface that allows for
@@ -31,5 +30,5 @@ public interface KSceneBuilderWithCreateType extends KSceneBuilderType
    * @return A newly constructed scene
    */
 
-  @Nonnull KScene sceneCreate();
+   KScene sceneCreate();
 }

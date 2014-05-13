@@ -16,10 +16,8 @@
 
 package com.io7m.renderer.kernel.examples;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.jcanephora.TextureCubeStaticUsable;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KSceneBuilderType;
 import com.io7m.renderer.types.RException;
@@ -40,8 +38,8 @@ public interface ExampleSceneBuilderType extends KSceneBuilderType
    *           If an error occurs
    */
 
-  @Nonnull KMeshReadableType mesh(
-    final @Nonnull String name)
+  KMeshReadableType mesh(
+    final String name)
     throws RException;
 
   /**
@@ -54,8 +52,8 @@ public interface ExampleSceneBuilderType extends KSceneBuilderType
    *           If an error occurs
    */
 
-  @Nonnull Texture2DStaticUsable texture(
-    final @Nonnull String name)
+  Texture2DStaticUsableType texture(
+    final String name)
     throws RException;
 
   /**
@@ -68,7 +66,7 @@ public interface ExampleSceneBuilderType extends KSceneBuilderType
    *           If an error occurs
    */
 
-  @Nonnull TextureCubeStaticUsable cubeTexture(
-    final @Nonnull String name)
+  TextureCubeStaticUsableType cubeTexture(
+    final String name)
     throws RException;
 }

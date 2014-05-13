@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.kernel.examples;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.renderer.kernel.KRendererForwardType;
 
 /**
@@ -30,5 +28,5 @@ public interface ExampleRendererForwardType extends ExampleRendererType
    * @return The actual forward renderer
    */
 
-  @Nonnull KRendererForwardType rendererGetForward();
+  KRendererForwardType rendererGetForward();
 }

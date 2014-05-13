@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * The type of labels for specular-only materials.
@@ -31,7 +30,7 @@ public interface KMaterialLabelSpecularOnlyType extends
    * @return The normal-mapping label
    */
 
-  @Nonnull KMaterialNormalLabel labelGetNormal();
+   KMaterialNormalLabel labelGetNormal();
 
   /**
    * @return If the material implies a specular map
@@ -43,5 +42,5 @@ public interface KMaterialLabelSpecularOnlyType extends
    * @return The specular label
    */
 
-  @Nonnull KMaterialSpecularLabel labelGetSpecular();
+   KMaterialSpecularLabel labelGetSpecular();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,32 +16,34 @@
 
 package com.io7m.renderer.xml.collada;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.jranges.RangeCheck;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-
-@Immutable public final class ColladaInput
+@EqualityStructural public final class ColladaInput
 {
-  private final @Nonnull ColladaSourceID source;
-  private final @Nonnull ColladaSemantic semantic;
-  private final int                      offset;
+  private final ColladaSourceID source;
+  private final ColladaSemantic semantic;
+  private final int             offset;
 
   public ColladaInput(
-    final @Nonnull ColladaSourceID in_source,
-    final @Nonnull ColladaSemantic in_semantic,
+    final ColladaSourceID in_source,
+    final ColladaSemantic in_semantic,
     final int in_offset)
-    throws ConstraintError
   {
-    this.source = Constraints.constrainNotNull(in_source, "Source");
-    this.semantic = Constraints.constrainNotNull(in_semantic, "Semantic");
+    this.source = NullCheck.notNull(in_source, "Source");
+    this.semantic = NullCheck.notNull(in_semantic, "Semantic");
     this.offset =
-      Constraints.constrainRange(in_offset, 0, Integer.MAX_VALUE, "Offset");
+      (int) RangeCheck.checkGreaterEqual(
+        in_offset,
+        "Offset",
+        0,
+        "Minimum offset");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -70,12 +72,12 @@ import com.io7m.jaux.Constraints.ConstraintError;
     return this.offset;
   }
 
-  public @Nonnull ColladaSemantic getSemantic()
+  public ColladaSemantic getSemantic()
   {
     return this.semantic;
   }
 
-  public @Nonnull ColladaSourceID getSource()
+  public ColladaSourceID getSource()
   {
     return this.source;
   }
@@ -100,6 +102,8 @@ import com.io7m.jaux.Constraints.ConstraintError;
     builder.append(" ");
     builder.append(this.offset);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 }

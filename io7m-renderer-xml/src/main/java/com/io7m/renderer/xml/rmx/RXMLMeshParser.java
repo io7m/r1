@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,16 +18,13 @@ package com.io7m.renderer.xml.rmx;
 
 import java.util.EnumSet;
 
-import javax.annotation.Nonnull;
-
 import nu.xom.Attribute;
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
 import nu.xom.ValidityException;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
@@ -40,7 +37,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
 public final class RXMLMeshParser<E extends Throwable>
 {
   private static void checkVersion(
-    final @Nonnull Element e)
+    final Element e)
     throws RXMLException
   {
     final Attribute a =
@@ -58,32 +55,32 @@ public final class RXMLMeshParser<E extends Throwable>
   }
 
   public static <E extends Throwable> RXMLMeshParser<E> parseFromDocument(
-    final @Nonnull Document d,
-    final @Nonnull RXMLMeshParserEvents<E> events)
-    throws ConstraintError,
-      E,
+    final Document d,
+    final RXMLMeshParserEvents<E> events)
+    throws E,
       RXMLException
   {
-    Constraints.constrainNotNull(d, "Document");
-    return new RXMLMeshParser<E>(d.getRootElement(), events);
+    NullCheck.notNull(d, "Document");
+    final Element r = d.getRootElement();
+    assert r != null;
+    return new RXMLMeshParser<E>(r, events);
   }
 
   public static <E extends Throwable> RXMLMeshParser<E> parseFromElement(
-    final @Nonnull Element e,
-    final @Nonnull RXMLMeshParserEvents<E> events)
-    throws ConstraintError,
-      E,
+    final Element e,
+    final RXMLMeshParserEvents<E> events)
+    throws E,
       RXMLException
   {
-    Constraints.constrainNotNull(e, "Element");
+    NullCheck.notNull(e, "Element");
     return new RXMLMeshParser<E>(e, events);
   }
 
   private static <E extends Throwable> void parseTriangles(
-    final @Nonnull Element e,
-    final @Nonnull RXMLMeshParserEvents<E> events)
+    final Element e,
+    final RXMLMeshParserEvents<E> events)
     throws E,
-      ConstraintError,
+
       RXMLException
   {
     assert e.getLocalName().equals("triangles");
@@ -113,6 +110,8 @@ public final class RXMLMeshParser<E extends Throwable>
 
     for (int index = 0; index < size; ++index) {
       final Element t = ets.get(index);
+      assert t != null;
+
       final int v0 =
         RXMLUtilities.getAttributeInteger(RXMLUtilities.getAttribute(
           t,
@@ -135,14 +134,14 @@ public final class RXMLMeshParser<E extends Throwable>
     events.eventMeshTrianglesEnded();
   }
 
-  private static @Nonnull RXMLMeshType parseType(
-    final @Nonnull Element e)
-    throws ConstraintError
+  private static RXMLMeshType parseType(
+    final Element e)
   {
     assert e.getLocalName().equals("type");
 
     final EnumSet<RXMLMeshAttribute> attributes =
       EnumSet.noneOf(RXMLMeshAttribute.class);
+    assert attributes != null;
 
     final Element en =
       RXMLUtilities.getOptionalChild(
@@ -193,7 +192,7 @@ public final class RXMLMeshParser<E extends Throwable>
   }
 
   private static RVectorI3F<RSpaceObjectType> parseVertexPosition(
-    final @Nonnull Element v)
+    final Element v)
     throws RXMLException
   {
     assert v.getLocalName().equals("v");
@@ -206,11 +205,11 @@ public final class RXMLMeshParser<E extends Throwable>
   }
 
   private static <E extends Throwable> void parseVertices(
-    final @Nonnull Element ev,
-    final @Nonnull RXMLMeshType type,
-    final @Nonnull RXMLMeshParserEvents<E> events)
+    final Element ev,
+    final RXMLMeshType type,
+    final RXMLMeshParserEvents<E> events)
     throws E,
-      ConstraintError,
+
       RXMLException
   {
     assert ev.getLocalName().equals("vertices");
@@ -245,18 +244,22 @@ public final class RXMLMeshParser<E extends Throwable>
 
     for (int index = 0; index < size; ++index) {
       final Element v = evs.get(index);
+      assert v != null;
 
       events.eventMeshVertexStarted(index);
 
       final RVectorI3F<RSpaceObjectType> position =
         RXMLMeshParser.parseVertexPosition(v);
 
-      bounds_lower.x = Math.min(position.x, bounds_lower.x);
-      bounds_lower.y = Math.min(position.y, bounds_lower.y);
-      bounds_lower.z = Math.min(position.z, bounds_lower.z);
-      bounds_upper.x = Math.max(position.x, bounds_upper.x);
-      bounds_upper.y = Math.max(position.y, bounds_upper.y);
-      bounds_upper.z = Math.max(position.z, bounds_upper.z);
+      bounds_lower.set3F(
+        Math.min(position.getXF(), bounds_lower.getXF()),
+        Math.min(position.getYF(), bounds_lower.getYF()),
+        Math.min(position.getZF(), bounds_lower.getZF()));
+
+      bounds_upper.set3F(
+        Math.max(position.getXF(), bounds_upper.getXF()),
+        Math.max(position.getYF(), bounds_upper.getYF()),
+        Math.max(position.getZF(), bounds_upper.getZF()));
 
       events.eventMeshVertexPosition(index, position);
 
@@ -313,25 +316,22 @@ public final class RXMLMeshParser<E extends Throwable>
       events.eventMeshVertexEnded(index);
     }
 
-    events.eventMeshVerticesEnded(new RVectorI3F<RSpaceObjectType>(
-      bounds_lower.x,
-      bounds_lower.y,
-      bounds_lower.z), new RVectorI3F<RSpaceObjectType>(
-      bounds_upper.x,
-      bounds_upper.y,
-      bounds_upper.z));
+    events.eventMeshVerticesEnded(
+      new RVectorI3F<RSpaceObjectType>(bounds_lower.getXF(), bounds_lower
+        .getYF(), bounds_lower.getZF()),
+      new RVectorI3F<RSpaceObjectType>(bounds_upper.getXF(), bounds_upper
+        .getYF(), bounds_upper.getZF()));
   }
 
-  private final @Nonnull RXMLMeshParserEvents<E> events;
+  private final RXMLMeshParserEvents<E> events;
 
   private RXMLMeshParser(
-    final @Nonnull Element e,
-    final @Nonnull RXMLMeshParserEvents<E> in_events)
-    throws ConstraintError,
-      E,
+    final Element e,
+    final RXMLMeshParserEvents<E> in_events)
+    throws E,
       RXMLException
   {
-    this.events = Constraints.constrainNotNull(in_events, "Parser events");
+    this.events = NullCheck.notNull(in_events, "Parser events");
 
     try {
       this.events.eventMeshStarted();
@@ -341,7 +341,9 @@ public final class RXMLMeshParser<E extends Throwable>
 
       final Attribute na =
         RXMLUtilities.getAttribute(e, "name", RXMLConstants.MESHES_URI);
-      in_events.eventMeshName(na.getValue());
+      final String nav = na.getValue();
+      assert nav != null;
+      in_events.eventMeshName(nav);
 
       final Element et =
         RXMLUtilities.getChild(e, "type", RXMLConstants.MESHES_URI);

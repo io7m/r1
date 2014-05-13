@@ -16,30 +16,26 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.ArrayBufferAttributeDescriptor;
-import com.io7m.jcanephora.ArrayBufferTypeDescriptor;
-import com.io7m.jcanephora.ArrayBufferUsable;
-import com.io7m.jcanephora.ArrayBufferWritableData;
-import com.io7m.jcanephora.CursorWritable3f;
-import com.io7m.jcanephora.CursorWritableIndex;
-import com.io7m.jcanephora.IndexBuffer;
-import com.io7m.jcanephora.IndexBufferUsable;
-import com.io7m.jcanephora.IndexBufferWritableData;
-import com.io7m.jcanephora.JCGLArrayBuffers;
+import com.io7m.jcanephora.ArrayBufferType;
+import com.io7m.jcanephora.ArrayBufferUpdateUnmapped;
+import com.io7m.jcanephora.ArrayBufferUpdateUnmappedType;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.ArrayDescriptor;
+import com.io7m.jcanephora.ArrayDescriptorBuilderType;
+import com.io7m.jcanephora.CursorWritable3fType;
+import com.io7m.jcanephora.CursorWritableIndexType;
+import com.io7m.jcanephora.IndexBufferType;
+import com.io7m.jcanephora.IndexBufferUpdateUnmapped;
+import com.io7m.jcanephora.IndexBufferUpdateUnmappedType;
+import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLIndexBuffers;
 import com.io7m.jcanephora.UsageHint;
-import com.io7m.jlog.Level;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLArrayBuffersType;
+import com.io7m.jcanephora.api.JCGLIndexBuffersType;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.sandbox.SBProjectionDescription.SBProjectionFrustum;
 import com.io7m.renderer.kernel.sandbox.SBProjectionDescription.SBProjectionOrthographic;
 import com.io7m.renderer.kernel.sandbox.SBProjectionDescription.SBProjectionPerspective;
@@ -49,43 +45,43 @@ public abstract class SBVisibleProjection
 {
   private static class SBVisibleProjectionFrustum extends SBVisibleProjection
   {
-    private final @Nonnull ArrayBuffer array;
-    private final @Nonnull IndexBuffer indices;
+    private final ArrayBufferType array;
+    private final IndexBufferType indices;
 
-    @SuppressWarnings("synthetic-access") <G extends JCGLArrayBuffers & JCGLIndexBuffers> SBVisibleProjectionFrustum(
-      final @Nonnull G g,
-      final @Nonnull SBProjectionFrustum p,
-      final @Nonnull Log log)
-      throws ConstraintError,
-        JCGLException
+    @SuppressWarnings("synthetic-access") <G extends JCGLArrayBuffersType & JCGLIndexBuffersType> SBVisibleProjectionFrustum(
+      final G g,
+      final SBProjectionFrustum p,
+      final LogUsableType log)
+      throws JCGLException
     {
       super(SBProjectionDescription.Type.PROJECTION_FRUSTUM);
 
-      if (log.enabled(Level.LOG_DEBUG)) {
+      if (log.wouldLog(LogLevel.LOG_DEBUG)) {
         final StringBuilder m = new StringBuilder();
         m.append("Allocate visible frustum ");
         m.append(p);
-        log.debug(m.toString());
+        final String r = m.toString();
+        assert r != null;
+        log.debug(r);
       }
 
-      final List<ArrayBufferAttributeDescriptor> abs =
-        new ArrayList<ArrayBufferAttributeDescriptor>();
-      abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
-      final ArrayBufferTypeDescriptor type =
-        new ArrayBufferTypeDescriptor(abs);
+      final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
+      b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
+      final ArrayDescriptor type = b.build();
 
       this.array =
-        g.arrayBufferAllocate(10, type, UsageHint.USAGE_STATIC_READ);
-      this.indices = g.indexBufferAllocate(this.array, 34);
+        g.arrayBufferAllocate(10, type, UsageHint.USAGE_STATIC_DRAW);
+      this.indices =
+        g.indexBufferAllocate(this.array, 34, UsageHint.USAGE_STATIC_DRAW);
 
-      final ArrayBufferWritableData array_map =
-        new ArrayBufferWritableData(this.array);
-      final IndexBufferWritableData index_map =
-        new IndexBufferWritableData(this.indices);
+      final ArrayBufferUpdateUnmappedType array_map =
+        ArrayBufferUpdateUnmapped.newUpdateReplacingAll(this.array);
+      final IndexBufferUpdateUnmappedType index_map =
+        IndexBufferUpdateUnmapped.newReplacing(this.indices);
 
-      final CursorWritable3f pc =
+      final CursorWritable3fType pc =
         array_map.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final CursorWritableIndex ic = index_map.getCursor();
+      final CursorWritableIndexType ic = index_map.getCursor();
 
       final float near_z = (float) p.getNear();
       final float near_x_min = (float) p.getLeft();
@@ -191,23 +187,22 @@ public abstract class SBVisibleProjection
     }
 
     @Override public
-      <G extends JCGLArrayBuffers & JCGLIndexBuffers>
+      <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
       void
       delete(
-        final @Nonnull G g)
-        throws JCGLException,
-          ConstraintError
+        final G g)
+        throws JCGLException
     {
       g.arrayBufferDelete(this.array);
       g.indexBufferDelete(this.indices);
     }
 
-    @Override public @Nonnull ArrayBufferUsable getArrayBuffer()
+    @Override public ArrayBufferUsableType getArrayBuffer()
     {
       return this.array;
     }
 
-    @Override public @Nonnull IndexBufferUsable getIndexBuffer()
+    @Override public IndexBufferUsableType getIndexBuffer()
     {
       return this.indices;
     }
@@ -216,43 +211,43 @@ public abstract class SBVisibleProjection
   private static class SBVisibleProjectionOrthographic extends
     SBVisibleProjection
   {
-    private final @Nonnull ArrayBuffer array;
-    private final @Nonnull IndexBuffer indices;
+    private final ArrayBufferType array;
+    private final IndexBufferType indices;
 
-    @SuppressWarnings("synthetic-access") <G extends JCGLArrayBuffers & JCGLIndexBuffers> SBVisibleProjectionOrthographic(
-      final @Nonnull G g,
-      final @Nonnull SBProjectionOrthographic p,
-      final @Nonnull Log log)
-      throws ConstraintError,
-        JCGLException
+    @SuppressWarnings("synthetic-access") <G extends JCGLArrayBuffersType & JCGLIndexBuffersType> SBVisibleProjectionOrthographic(
+      final G g,
+      final SBProjectionOrthographic p,
+      final LogUsableType log)
+      throws JCGLException
     {
       super(SBProjectionDescription.Type.PROJECTION_ORTHOGRAPHIC);
 
-      if (log.enabled(Level.LOG_DEBUG)) {
+      if (log.wouldLog(LogLevel.LOG_DEBUG)) {
         final StringBuilder m = new StringBuilder();
         m.append("Allocate visible orthographic ");
         m.append(p);
-        log.debug(m.toString());
+        final String r = m.toString();
+        assert r != null;
+        log.debug(r);
       }
 
-      final List<ArrayBufferAttributeDescriptor> abs =
-        new ArrayList<ArrayBufferAttributeDescriptor>();
-      abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
-      final ArrayBufferTypeDescriptor type =
-        new ArrayBufferTypeDescriptor(abs);
+      final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
+      b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
+      final ArrayDescriptor type = b.build();
 
       this.array =
-        g.arrayBufferAllocate(10, type, UsageHint.USAGE_STATIC_READ);
-      this.indices = g.indexBufferAllocate(this.array, 34);
+        g.arrayBufferAllocate(10, type, UsageHint.USAGE_STATIC_DRAW);
+      this.indices =
+        g.indexBufferAllocate(this.array, 34, UsageHint.USAGE_STATIC_DRAW);
 
-      final ArrayBufferWritableData array_map =
-        new ArrayBufferWritableData(this.array);
-      final IndexBufferWritableData index_map =
-        new IndexBufferWritableData(this.indices);
+      final ArrayBufferUpdateUnmappedType array_map =
+        ArrayBufferUpdateUnmapped.newUpdateReplacingAll(this.array);
+      final IndexBufferUpdateUnmappedType index_map =
+        IndexBufferUpdateUnmapped.newReplacing(this.indices);
 
-      final CursorWritable3f pc =
+      final CursorWritable3fType pc =
         array_map.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final CursorWritableIndex ic = index_map.getCursor();
+      final CursorWritableIndexType ic = index_map.getCursor();
 
       final float near_x_min = (float) p.getLeft();
       final float near_x_max = (float) p.getRight();
@@ -357,23 +352,22 @@ public abstract class SBVisibleProjection
     }
 
     @Override public
-      <G extends JCGLArrayBuffers & JCGLIndexBuffers>
+      <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
       void
       delete(
-        final @Nonnull G g)
-        throws JCGLException,
-          ConstraintError
+        final G g)
+        throws JCGLException
     {
       g.arrayBufferDelete(this.array);
       g.indexBufferDelete(this.indices);
     }
 
-    @Override public @Nonnull ArrayBufferUsable getArrayBuffer()
+    @Override public ArrayBufferUsableType getArrayBuffer()
     {
       return this.array;
     }
 
-    @Override public @Nonnull IndexBufferUsable getIndexBuffer()
+    @Override public IndexBufferUsableType getIndexBuffer()
     {
       return this.indices;
     }
@@ -382,23 +376,24 @@ public abstract class SBVisibleProjection
   private static class SBVisibleProjectionPerspective extends
     SBVisibleProjection
   {
-    private final @Nonnull ArrayBuffer array;
-    private final @Nonnull IndexBuffer indices;
+    private final ArrayBufferType array;
+    private final IndexBufferType indices;
 
-    @SuppressWarnings("synthetic-access") <G extends JCGLArrayBuffers & JCGLIndexBuffers> SBVisibleProjectionPerspective(
-      final @Nonnull G g,
-      final @Nonnull SBProjectionPerspective p,
-      final @Nonnull Log log)
-      throws ConstraintError,
-        JCGLException
+    @SuppressWarnings("synthetic-access") <G extends JCGLArrayBuffersType & JCGLIndexBuffersType> SBVisibleProjectionPerspective(
+      final G g,
+      final SBProjectionPerspective p,
+      final LogUsableType log)
+      throws JCGLException
     {
       super(SBProjectionDescription.Type.PROJECTION_PERSPECTIVE);
 
-      if (log.enabled(Level.LOG_DEBUG)) {
+      if (log.wouldLog(LogLevel.LOG_DEBUG)) {
         final StringBuilder m = new StringBuilder();
         m.append("Allocate visible perspective ");
         m.append(p);
-        log.debug(m.toString());
+        final String r = m.toString();
+        assert r != null;
+        log.debug(r);
       }
 
       final float near_z = (float) p.getNear();
@@ -411,24 +406,23 @@ public abstract class SBVisibleProjection
         (float) (far_z * Math.tan(p.getHorizontalFOV() / 2.0f));
       final float far_y = (float) (far_x / p.getAspect());
 
-      final List<ArrayBufferAttributeDescriptor> abs =
-        new ArrayList<ArrayBufferAttributeDescriptor>();
-      abs.add(KMeshAttributes.ATTRIBUTE_POSITION);
-      final ArrayBufferTypeDescriptor type =
-        new ArrayBufferTypeDescriptor(abs);
+      final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
+      b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
+      final ArrayDescriptor type = b.build();
 
       this.array =
-        g.arrayBufferAllocate(10, type, UsageHint.USAGE_STATIC_READ);
-      this.indices = g.indexBufferAllocate(this.array, 34);
+        g.arrayBufferAllocate(10, type, UsageHint.USAGE_STATIC_DRAW);
+      this.indices =
+        g.indexBufferAllocate(this.array, 34, UsageHint.USAGE_STATIC_DRAW);
 
-      final ArrayBufferWritableData array_map =
-        new ArrayBufferWritableData(this.array);
-      final IndexBufferWritableData index_map =
-        new IndexBufferWritableData(this.indices);
+      final ArrayBufferUpdateUnmappedType array_map =
+        ArrayBufferUpdateUnmapped.newUpdateReplacingAll(this.array);
+      final IndexBufferUpdateUnmappedType index_map =
+        IndexBufferUpdateUnmapped.newReplacing(this.indices);
 
-      final CursorWritable3f pc =
+      final CursorWritable3fType pc =
         array_map.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION.getName());
-      final CursorWritableIndex ic = index_map.getCursor();
+      final CursorWritableIndexType ic = index_map.getCursor();
 
       pc.put3f(0.0f, 0.0f, 0.0f);
       pc.put3f(-near_x, -near_y, -near_z);
@@ -522,37 +516,35 @@ public abstract class SBVisibleProjection
     }
 
     @Override public
-      <G extends JCGLArrayBuffers & JCGLIndexBuffers>
+      <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
       void
       delete(
-        final @Nonnull G g)
-        throws JCGLException,
-          ConstraintError
+        final G g)
+        throws JCGLException
     {
       g.arrayBufferDelete(this.array);
       g.indexBufferDelete(this.indices);
     }
 
-    @Override public @Nonnull ArrayBufferUsable getArrayBuffer()
+    @Override public ArrayBufferUsableType getArrayBuffer()
     {
       return this.array;
     }
 
-    @Override public @Nonnull IndexBufferUsable getIndexBuffer()
+    @Override public IndexBufferUsableType getIndexBuffer()
     {
       return this.indices;
     }
   }
 
-  public static @Nonnull
-    <G extends JCGLArrayBuffers & JCGLIndexBuffers>
+  public static
+    <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
     SBVisibleProjection
     make(
-      final @Nonnull G g,
-      final @Nonnull SBProjectionDescription p,
-      final @Nonnull Log log)
-      throws ConstraintError,
-        JCGLException
+      final G g,
+      final SBProjectionDescription p,
+      final LogUsableType log)
+      throws JCGLException
   {
     switch (p.getType()) {
       case PROJECTION_FRUSTUM:
@@ -578,28 +570,26 @@ public abstract class SBVisibleProjection
     throw new UnreachableCodeException();
   }
 
-  private final @Nonnull SBProjectionDescription.Type type;
+  private final SBProjectionDescription.Type type;
 
   private SBVisibleProjection(
-    final @Nonnull SBProjectionDescription.Type in_type)
-    throws ConstraintError
+    final SBProjectionDescription.Type in_type)
   {
-    this.type = Constraints.constrainNotNull(in_type, "Type");
+    this.type = NullCheck.notNull(in_type, "Type");
   }
 
   public abstract
-    <G extends JCGLArrayBuffers & JCGLIndexBuffers>
+    <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
     void
     delete(
-      final @Nonnull G g)
-      throws JCGLException,
-        ConstraintError;
+      final G g)
+      throws JCGLException;
 
-  public abstract @Nonnull ArrayBufferUsable getArrayBuffer();
+  public abstract ArrayBufferUsableType getArrayBuffer();
 
-  public abstract @Nonnull IndexBufferUsable getIndexBuffer();
+  public abstract IndexBufferUsableType getIndexBuffer();
 
-  public @Nonnull SBProjectionDescription.Type getType()
+  public SBProjectionDescription.Type getType()
   {
     return this.type;
   }

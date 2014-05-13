@@ -16,9 +16,8 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 
 interface SBMaterialDescription extends SBMaterialDescriptionVisitable
 {
-  @Nonnull String materialDescriptionGetName();
+   String materialDescriptionGetName();
 }

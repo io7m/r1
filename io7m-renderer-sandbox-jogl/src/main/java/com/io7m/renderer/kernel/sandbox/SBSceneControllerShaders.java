@@ -20,15 +20,10 @@ import java.io.File;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-
 interface SBSceneControllerShaders
 {
-  public @Nonnull Future<SBShader> shaderLoad(
-    final @Nonnull File file)
-    throws ConstraintError;
+  public Future<SBShader> shaderLoad(
+    final File file);
 
-  public @Nonnull Map<String, SBShader> shadersGet();
+  public Map<String, SBShader> shadersGet();
 }

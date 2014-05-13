@@ -16,10 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jcanephora.FramebufferReferenceUsable;
-import com.io7m.jcanephora.Texture2DStaticUsable;
+import com.io7m.jcanephora.FramebufferUsableType;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 
 /**
@@ -38,7 +36,6 @@ public interface KFramebufferDepthVarianceUsableType extends
    *         other framebuffers with the same configuration
    */
 
-  @Nonnull
     KFramebufferDepthVarianceDescription
     kFramebufferGetDepthVarianceDescription();
 
@@ -51,9 +48,7 @@ public interface KFramebufferDepthVarianceUsableType extends
    * @return A reference to the framebuffer
    */
 
-  @Nonnull
-    FramebufferReferenceUsable
-    kFramebufferGetDepthVariancePassFramebuffer();
+  FramebufferUsableType kFramebufferGetDepthVariancePassFramebuffer();
 
   /**
    * <p>
@@ -63,5 +58,5 @@ public interface KFramebufferDepthVarianceUsableType extends
    * @return A reference to the texture that backs the depth-variance buffer
    */
 
-  @Nonnull Texture2DStaticUsable kFramebufferGetDepthVarianceTexture();
+  Texture2DStaticUsableType kFramebufferGetDepthVarianceTexture();
 }

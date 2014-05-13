@@ -16,10 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.types.RException;
 
@@ -37,17 +34,15 @@ public interface KRendererForwardType extends KRendererType
    *          The framebuffer
    * @param scene
    *          The scene
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
+   * 
    * @throws RException
    *           If an error occurs
    */
 
   void rendererForwardEvaluate(
-    final @Nonnull KFramebufferForwardUsableType framebuffer,
-    final @Nonnull KScene scene)
-    throws ConstraintError,
-      RException;
+    final KFramebufferForwardUsableType framebuffer,
+    final KScene scene)
+    throws RException;
 
   /**
    * Set the background colour to which the renderer will clear the
@@ -55,11 +50,8 @@ public interface KRendererForwardType extends KRendererType
    * 
    * @param rgba
    *          The background colour
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
   void rendererForwardSetBackgroundRGBA(
-    final @Nonnull VectorReadable4F rgba)
-    throws ConstraintError;
+    final VectorReadable4FType rgba);
 }

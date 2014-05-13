@@ -16,15 +16,13 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.types.RSpaceWorldType;
@@ -48,7 +46,6 @@ public final class SBLightControlsDirectional implements
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
             final SBLightControlsDirectional controls =
               SBLightControlsDirectional.newControls(this, Integer.valueOf(0));
@@ -59,27 +56,25 @@ public final class SBLightControlsDirectional implements
     });
   }
 
-  public static @Nonnull SBLightControlsDirectional newControls(
-    final @Nonnull JFrame parent,
-    final @Nonnull Integer id)
-    throws ConstraintError
+  public static SBLightControlsDirectional newControls(
+    final JFrame parent,
+    final Integer id)
   {
     return new SBLightControlsDirectional(parent, id);
   }
 
-  private final @Nonnull SBColourInput                    colour;
-  private final @Nonnull SBVector3FInput<RSpaceWorldType> direction;
-  private final @Nonnull RowGroup                         group;
-  private final @Nonnull SBFloatHSlider                   intensity;
-  private final @Nonnull JFrame                           parent;
-  private final @Nonnull Integer                          id;
+  private final SBColourInput                    colour;
+  private final SBVector3FInput<RSpaceWorldType> direction;
+  private final RowGroup                         group;
+  private final SBFloatHSlider                   intensity;
+  private final JFrame                           parent;
+  private final Integer                          id;
 
   private SBLightControlsDirectional(
-    final @Nonnull JFrame in_parent,
-    final @Nonnull Integer in_id)
-    throws ConstraintError
+    final JFrame in_parent,
+    final Integer in_id)
   {
-    this.parent = Constraints.constrainNotNull(in_parent, "Parent");
+    this.parent = NullCheck.notNull(in_parent, "Parent");
     this.group = new RowGroup();
     this.colour = SBColourInput.newInput(in_parent, "Colour");
     this.direction = SBVector3FInput.newInput("Direction");
@@ -89,7 +84,7 @@ public final class SBLightControlsDirectional implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     this.intensity.controlsAddToLayout(layout);
     this.colour.controlsAddToLayout(layout);
@@ -122,8 +117,7 @@ public final class SBLightControlsDirectional implements
   }
 
   @Override public SBLightDescriptionDirectional controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
     return new SBLightDescriptionDirectional(
       this.id,

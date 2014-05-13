@@ -16,22 +16,20 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.JCGLResourceUsable;
+import com.io7m.jcanephora.JCGLResourceUsableType;
 
 /**
  * The type of usable framebuffers.
  */
 
-public interface KFramebufferUsableType extends JCGLResourceUsable
+public interface KFramebufferUsableType extends JCGLResourceUsableType
 {
   /**
    * @return The size of the area to which rendering will occur
    */
 
-  @Nonnull AreaInclusive kFramebufferGetArea();
+  AreaInclusive kFramebufferGetArea();
 
   /**
    * @return The size in bytes of all the resources that make up the

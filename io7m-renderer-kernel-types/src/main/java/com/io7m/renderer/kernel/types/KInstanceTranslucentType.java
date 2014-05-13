@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * <p>
@@ -36,5 +35,5 @@ public interface KInstanceTranslucentType extends KInstanceType
    * @return The faces that will be rendered
    */
 
-  @Nonnull KFaceSelection instanceGetFaces();
+   KFaceSelection instanceGetFaces();
 }

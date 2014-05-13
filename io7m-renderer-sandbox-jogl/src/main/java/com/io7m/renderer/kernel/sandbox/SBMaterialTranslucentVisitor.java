@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -39,18 +36,16 @@ public interface SBMaterialTranslucentVisitor<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A materialVisitTranslucentRefractive(
-    final @Nonnull SBMaterialTranslucentRefractive m)
-    throws ConstraintError,
-      RException,
+  A materialVisitTranslucentRefractive(
+    final SBMaterialTranslucentRefractive m)
+    throws RException,
       E;
 
   /**
@@ -59,18 +54,16 @@ public interface SBMaterialTranslucentVisitor<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A materialVisitTranslucentRegular(
-    final @Nonnull SBMaterialTranslucentRegular m)
-    throws ConstraintError,
-      RException,
+  A materialVisitTranslucentRegular(
+    final SBMaterialTranslucentRegular m)
+    throws RException,
       E;
 
   /**
@@ -79,17 +72,15 @@ public interface SBMaterialTranslucentVisitor<A, E extends Throwable>
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  @Nonnull A materialVisitTranslucentSpecularOnly(
-    final @Nonnull SBMaterialTranslucentSpecularOnly m)
-    throws ConstraintError,
-      RException,
+  A materialVisitTranslucentSpecularOnly(
+    final SBMaterialTranslucentSpecularOnly m)
+    throws RException,
       E;
 }

@@ -16,12 +16,11 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
 
 final class SBLightsWindow extends JFrame
 {
@@ -32,8 +31,8 @@ final class SBLightsWindow extends JFrame
   }
 
   public <C extends SBSceneControllerLights & SBSceneControllerTextures> SBLightsWindow(
-    final @Nonnull C controller,
-    final @Nonnull Log log)
+    final C controller,
+    final LogUsableType log)
   {
     super("Lights");
     final SBLightsControls controls = new SBLightsControls(controller, log);

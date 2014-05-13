@@ -16,20 +16,18 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.ArrayBuffer;
-import com.io7m.jcanephora.ArrayBufferUsable;
-import com.io7m.jcanephora.IndexBuffer;
-import com.io7m.jcanephora.IndexBufferUsable;
-import com.io7m.jcanephora.JCGLArrayBuffers;
-import com.io7m.jcanephora.JCGLIndexBuffers;
-import com.io7m.jcanephora.JCGLResourceSized;
-import com.io7m.jcanephora.JCGLResourceUsable;
-import com.io7m.jcanephora.JCGLRuntimeException;
+import com.io7m.jcanephora.ArrayBufferType;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.IndexBufferType;
+import com.io7m.jcanephora.IndexBufferUsableType;
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLResourceSizedType;
+import com.io7m.jcanephora.JCGLResourceUsableType;
+import com.io7m.jcanephora.api.JCGLArrayBuffersType;
+import com.io7m.jcanephora.api.JCGLIndexBuffersType;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorReadable3FType;
@@ -53,10 +51,10 @@ import com.io7m.renderer.types.RVectorReadable3FType;
  * <ul>
  */
 
-@Immutable public final class KMesh implements
+@EqualityStructural public final class KMesh implements
   KMeshReadableType,
-  JCGLResourceUsable,
-  JCGLResourceSized
+  JCGLResourceUsableType,
+  JCGLResourceSizedType
 {
   /**
    * Construct a new mesh.
@@ -70,39 +68,33 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @param in_bounds_upper
    *          The object-space upper bound
    * @return A new mesh
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull KMesh newMesh(
-    final @Nonnull ArrayBuffer in_array,
-    final @Nonnull IndexBuffer in_indices,
-    final @Nonnull RVectorI3F<RSpaceObjectType> in_bounds_lower,
-    final @Nonnull RVectorI3F<RSpaceObjectType> in_bounds_upper)
-    throws ConstraintError
+  public static KMesh newMesh(
+    final ArrayBufferType in_array,
+    final IndexBufferType in_indices,
+    final RVectorI3F<RSpaceObjectType> in_bounds_lower,
+    final RVectorI3F<RSpaceObjectType> in_bounds_upper)
   {
     return new KMesh(in_array, in_indices, in_bounds_lower, in_bounds_upper);
   }
 
-  private final @Nonnull ArrayBuffer                  array;
-  private final @Nonnull RVectorI3F<RSpaceObjectType> bounds_lower;
-  private final @Nonnull RVectorI3F<RSpaceObjectType> bounds_upper;
-  private boolean                                     deleted;
-  private final @Nonnull IndexBuffer                  indices;
+  private final ArrayBufferType              array;
+  private final RVectorI3F<RSpaceObjectType> bounds_lower;
+  private final RVectorI3F<RSpaceObjectType> bounds_upper;
+  private boolean                            deleted;
+  private final IndexBufferType              indices;
 
   private KMesh(
-    final @Nonnull ArrayBuffer in_array,
-    final @Nonnull IndexBuffer in_indices,
-    final @Nonnull RVectorI3F<RSpaceObjectType> in_bounds_lower,
-    final @Nonnull RVectorI3F<RSpaceObjectType> in_bounds_upper)
-    throws ConstraintError
+    final ArrayBufferType in_array,
+    final IndexBufferType in_indices,
+    final RVectorI3F<RSpaceObjectType> in_bounds_lower,
+    final RVectorI3F<RSpaceObjectType> in_bounds_upper)
   {
-    this.array = Constraints.constrainNotNull(in_array, "Array");
-    this.indices = Constraints.constrainNotNull(in_indices, "Indices");
-    this.bounds_lower =
-      Constraints.constrainNotNull(in_bounds_lower, "Lower bounds");
-    this.bounds_upper =
-      Constraints.constrainNotNull(in_bounds_upper, "Upper bounds");
+    this.array = NullCheck.notNull(in_array, "Array");
+    this.indices = NullCheck.notNull(in_indices, "Indices");
+    this.bounds_lower = NullCheck.notNull(in_bounds_lower, "Lower bounds");
+    this.bounds_upper = NullCheck.notNull(in_bounds_upper, "Upper bounds");
   }
 
   /**
@@ -112,18 +104,15 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    *          The OpenGL capabilities required
    * @param gc
    *          The OpenGL interface
-   * @throws JCGLRuntimeException
+   * @throws JCGLException
    *           If an OpenGL error occurs
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public <G extends JCGLArrayBuffers & JCGLIndexBuffers> void delete(
-    final @Nonnull G gc)
-    throws JCGLRuntimeException,
-      ConstraintError
+  public <G extends JCGLArrayBuffersType & JCGLIndexBuffersType> void delete(
+    final G gc)
+    throws JCGLException
   {
-    Constraints.constrainNotNull(gc, "GL interface");
+    NullCheck.notNull(gc, "GL interface");
 
     try {
       gc.arrayBufferDelete(this.array);
@@ -134,7 +123,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -153,26 +142,22 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       && this.indices.equals(other.indices);
   }
 
-  @Override public @Nonnull ArrayBufferUsable getArrayBuffer()
+  @Override public ArrayBufferUsableType getArrayBuffer()
   {
     return this.array;
   }
 
-  @Override public @Nonnull
-    RVectorReadable3FType<RSpaceObjectType>
-    getBoundsLower()
+  @Override public RVectorReadable3FType<RSpaceObjectType> getBoundsLower()
   {
     return this.bounds_lower;
   }
 
-  @Override public @Nonnull
-    RVectorReadable3FType<RSpaceObjectType>
-    getBoundsUpper()
+  @Override public RVectorReadable3FType<RSpaceObjectType> getBoundsUpper()
   {
     return this.bounds_upper;
   }
 
-  @Override public @Nonnull IndexBufferUsable getIndexBuffer()
+  @Override public IndexBufferUsableType getIndexBuffer()
   {
     return this.indices;
   }

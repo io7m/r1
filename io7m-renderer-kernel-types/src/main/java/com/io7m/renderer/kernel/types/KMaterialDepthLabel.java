@@ -16,11 +16,8 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -57,60 +54,57 @@ public enum KMaterialDepthLabel
    * @param instance
    *          The opaque instance
    * @return A depth label
-   * @throws ConstraintError
-   *           Iff any parameter is <code>null</code>
    */
 
   public static KMaterialDepthLabel fromInstanceOpaque(
-    final @Nonnull KMaterialAlbedoLabel albedo,
-    final @Nonnull KInstanceOpaqueType instance)
-    throws ConstraintError
+    final KMaterialAlbedoLabel albedo,
+    final KInstanceOpaqueType instance)
   {
     try {
-      Constraints.constrainNotNull(albedo, "Albedo");
-      Constraints.constrainNotNull(instance, "Instance");
+      NullCheck.notNull(albedo, "Albedo");
+      NullCheck.notNull(instance, "Instance");
 
-      return instance.instanceGetMaterial().materialOpaqueAccept(
-        new KMaterialOpaqueVisitorType<KMaterialDepthLabel, ConstraintError>() {
-          @Override public KMaterialDepthLabel materialOpaqueAlphaDepth(
-            final @Nonnull KMaterialOpaqueAlphaDepth m)
-            throws ConstraintError
-          {
-            switch (albedo) {
-              case ALBEDO_COLOURED:
-              {
-                return KMaterialDepthLabel.DEPTH_UNIFORM;
+      return instance
+        .instanceGetMaterial()
+        .materialOpaqueAccept(
+          new KMaterialOpaqueVisitorType<KMaterialDepthLabel, UnreachableCodeException>() {
+            @Override public KMaterialDepthLabel materialOpaqueAlphaDepth(
+              final KMaterialOpaqueAlphaDepth m)
+            {
+              switch (albedo) {
+                case ALBEDO_COLOURED:
+                {
+                  return KMaterialDepthLabel.DEPTH_UNIFORM;
+                }
+                case ALBEDO_TEXTURED:
+                {
+                  return KMaterialDepthLabel.DEPTH_MAPPED;
+                }
               }
-              case ALBEDO_TEXTURED:
-              {
-                return KMaterialDepthLabel.DEPTH_MAPPED;
-              }
+
+              throw new UnreachableCodeException();
             }
 
-            throw new UnreachableCodeException();
-          }
-
-          @Override public KMaterialDepthLabel materialOpaqueRegular(
-            final @Nonnull KMaterialOpaqueRegular m)
-            throws ConstraintError
-          {
-            return KMaterialDepthLabel.DEPTH_CONSTANT;
-          }
-        });
+            @Override public KMaterialDepthLabel materialOpaqueRegular(
+              final KMaterialOpaqueRegular m)
+            {
+              return KMaterialDepthLabel.DEPTH_CONSTANT;
+            }
+          });
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
     }
   }
 
-  private final @Nonnull String code;
+  private final String code;
 
   private KMaterialDepthLabel(
-    final @Nonnull String in_code)
+    final String in_code)
   {
     this.code = in_code;
   }
 
-  @Override public @Nonnull String labelGetCode()
+  @Override public String labelGetCode()
   {
     return this.code;
   }

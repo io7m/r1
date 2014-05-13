@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.types.RException;
 
@@ -35,15 +32,12 @@ public interface KRendererDebugType extends KRendererType
    *          The output framebuffer
    * @param scene
    *          The scene
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    * @throws RException
    *           If any error occurs
    */
 
   void rendererDebugEvaluate(
-    final @Nonnull KFramebufferRGBAUsableType framebuffer,
-    final @Nonnull KScene scene)
-    throws ConstraintError,
-      RException;
+    final KFramebufferRGBAUsableType framebuffer,
+    final KScene scene)
+    throws RException;
 }

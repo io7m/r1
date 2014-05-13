@@ -16,14 +16,12 @@
 
 package com.io7m.renderer.kernel_shaders.forward;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
 
 final class TitleCase
 {
-  static @Nonnull String toTitleCase(
-    final @Nonnull String name)
+  static String toTitleCase(
+    final String name)
   {
     if (name.isEmpty() == false) {
       final char ch = name.charAt(0);

@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * An opaque instance with a specific transform and texture matrix.
@@ -28,5 +27,5 @@ public interface KInstanceTransformedOpaqueType extends KInstanceTransformedType
    * @return The actual opaque instance
    */
 
-  @Nonnull KInstanceOpaqueType instanceGet();
+   KInstanceOpaqueType instanceGet();
 }

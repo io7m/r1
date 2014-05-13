@@ -16,10 +16,7 @@
 
 package com.io7m.renderer.kernel.examples;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.KRendererForwardType;
 
 /**
@@ -29,12 +26,11 @@ import com.io7m.renderer.kernel.KRendererForwardType;
 abstract class AbstractExampleForwardRenderer implements
   ExampleRendererForwardType
 {
-  private final @Nonnull KRendererForwardType renderer;
+  private final KRendererForwardType renderer;
 
   protected AbstractExampleForwardRenderer(
-    final @Nonnull KRendererForwardType in_renderer)
-    throws ConstraintError
+    final KRendererForwardType in_renderer)
   {
-    this.renderer = Constraints.constrainNotNull(in_renderer, "Renderer");
+    this.renderer = NullCheck.notNull(in_renderer, "Renderer");
   }
 }

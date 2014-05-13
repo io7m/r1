@@ -16,12 +16,10 @@
 
 package com.io7m.renderer.xml.collada;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM3F;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RSpaceType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorReadable3FType;
@@ -50,9 +48,9 @@ public enum ColladaAxis
   COLLADA_AXIS_Y_UP,
   COLLADA_AXIS_Z_UP;
 
-  private static final @Nonnull VectorI3F AXIS_X;
-  private static final @Nonnull VectorI3F AXIS_Y;
-  private static final @Nonnull VectorI3F AXIS_Z;
+  private static final VectorI3F AXIS_X;
+  private static final VectorI3F AXIS_Y;
+  private static final VectorI3F AXIS_Z;
 
   static {
     AXIS_X = new VectorI3F(1, 0, 0);
@@ -68,11 +66,11 @@ public enum ColladaAxis
    * </p>
    */
 
-  public static @Nonnull <R extends RSpaceType> RVectorI3F<R> convertAxes(
-    final @Nonnull MatrixM3x3F matrix,
-    final @Nonnull ColladaAxis source_axes,
-    final @Nonnull RVectorReadable3FType<R> source,
-    final @Nonnull ColladaAxis dest_axes)
+  public static <R extends RSpaceType> RVectorI3F<R> convertAxes(
+    final MatrixM3x3F matrix,
+    final ColladaAxis source_axes,
+    final RVectorReadable3FType<R> source,
+    final ColladaAxis dest_axes)
   {
     switch (source_axes) {
       case COLLADA_AXIS_X_UP:
@@ -93,7 +91,7 @@ public enum ColladaAxis
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
-            return new RVectorI3F<R>(out.x, out.y, out.z);
+            return new RVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
           }
           case COLLADA_AXIS_Z_UP:
           {
@@ -106,7 +104,7 @@ public enum ColladaAxis
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
-            return new RVectorI3F<R>(out.x, out.y, out.z);
+            return new RVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
           }
         }
         throw new UnreachableCodeException();
@@ -125,7 +123,7 @@ public enum ColladaAxis
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
-            return new RVectorI3F<R>(out.x, out.y, out.z);
+            return new RVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
           }
           case COLLADA_AXIS_Y_UP:
           {
@@ -142,7 +140,7 @@ public enum ColladaAxis
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
-            return new RVectorI3F<R>(out.x, out.y, out.z);
+            return new RVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
           }
         }
         throw new UnreachableCodeException();
@@ -161,7 +159,7 @@ public enum ColladaAxis
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
-            return new RVectorI3F<R>(out.x, out.y, out.z);
+            return new RVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
           }
           case COLLADA_AXIS_Y_UP:
           {
@@ -174,7 +172,7 @@ public enum ColladaAxis
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
-            return new RVectorI3F<R>(out.x, out.y, out.z);
+            return new RVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
           }
           case COLLADA_AXIS_Z_UP:
           {

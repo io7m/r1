@@ -19,17 +19,13 @@ package com.io7m.renderer.kernel.sandbox;
 import java.io.File;
 import java.util.concurrent.Future;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jfunctional.Unit;
 
 interface SBSceneControllerIO
 {
-  public @Nonnull Future<Void> ioLoadScene(
-    final @Nonnull File file)
-    throws ConstraintError;
+  public Future<Unit> ioLoadScene(
+    final File file);
 
-  public @Nonnull Future<Void> ioSaveScene(
-    final @Nonnull File file)
-    throws ConstraintError;
+  public Future<Unit> ioSaveScene(
+    final File file);
 }

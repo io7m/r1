@@ -16,17 +16,15 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
 
 final class SBMaterialAlphaDescription
 {
   private final float                              opacity;
-  private final @Nonnull KMaterialAlphaOpacityType type;
+  private final  KMaterialAlphaOpacityType type;
 
   public SBMaterialAlphaDescription(
-    final @Nonnull KMaterialAlphaOpacityType in_type,
+    final  KMaterialAlphaOpacityType in_type,
     final float in_opacity)
   {
     this.type = in_type;
@@ -38,7 +36,7 @@ final class SBMaterialAlphaDescription
     return this.opacity;
   }
 
-  public @Nonnull KMaterialAlphaOpacityType getType()
+  public  KMaterialAlphaOpacityType getType()
   {
     return this.type;
   }

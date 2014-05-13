@@ -20,14 +20,13 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
 final class VIcons
 {
-  static @Nonnull JLabel makeErrorIcon()
+  static JLabel makeErrorIcon()
     throws IOException
   {
     final InputStream stream =

@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
@@ -40,8 +37,6 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    * @param t
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
    * @throws JCGLException
    *           If required
    * @throws RException
@@ -51,11 +46,10 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    */
 
   A translucentRefractive(
-    final @Nonnull KInstanceTransformedTranslucentRefractive t)
+    final KInstanceTransformedTranslucentRefractive t)
     throws E,
       JCGLException,
-      RException,
-      ConstraintError;
+      RException;
 
   /**
    * Visit a lit regular translucent instance.
@@ -63,8 +57,6 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    * @param t
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
    * @throws JCGLException
    *           If required
    * @throws RException
@@ -74,11 +66,10 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    */
 
   A translucentRegularLit(
-    final @Nonnull KTranslucentRegularLit t)
+    final KTranslucentRegularLit t)
     throws E,
       JCGLException,
-      RException,
-      ConstraintError;
+      RException;
 
   /**
    * Visit an unlit regular translucent instance.
@@ -86,8 +77,6 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    * @param t
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
    * @throws JCGLException
    *           If required
    * @throws RException
@@ -97,11 +86,10 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    */
 
   A translucentRegularUnlit(
-    final @Nonnull KInstanceTransformedTranslucentRegular t)
+    final KInstanceTransformedTranslucentRegular t)
     throws E,
       JCGLException,
-      RException,
-      ConstraintError;
+      RException;
 
   /**
    * Visit a lit specular-only instance.
@@ -109,8 +97,6 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    * @param t
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
    * @throws JCGLException
    *           If required
    * @throws RException
@@ -120,9 +106,8 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    */
 
   A translucentSpecularOnlyLit(
-    final @Nonnull KTranslucentSpecularOnlyLit t)
+    final KTranslucentSpecularOnlyLit t)
     throws E,
       JCGLException,
-      RException,
-      ConstraintError;
+      RException;
 }

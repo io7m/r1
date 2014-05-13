@@ -18,23 +18,17 @@ package com.io7m.renderer.kernel.sandbox;
 
 import net.java.quickcheck.Generator;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.RangeInclusive;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jranges.RangeInclusiveL;
 
 public final class AreaGenerator implements Generator<AreaInclusive>
 {
   @Override public AreaInclusive next()
   {
-    try {
-      final RangeInclusive range_x =
-        new RangeInclusive(0, (long) Math.abs(Math.random() * 100000));
-      final RangeInclusive range_y =
-        new RangeInclusive(0, (long) Math.abs(Math.random() * 100000));
-      return new AreaInclusive(range_x, range_y);
-    } catch (final ConstraintError x) {
-      throw new UnreachableCodeException(x);
-    }
+    final RangeInclusiveL range_x =
+      new RangeInclusiveL(0, (long) Math.abs(Math.random() * 100000));
+    final RangeInclusiveL range_y =
+      new RangeInclusiveL(0, (long) Math.abs(Math.random() * 100000));
+    return new AreaInclusive(range_x, range_y);
   }
 }

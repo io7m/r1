@@ -16,9 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.UnreachableCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * A description of how opacity is derived.
@@ -53,9 +51,9 @@ public enum KMaterialAlphaOpacityType
    * @return An opacity type
    */
 
-  public static @Nonnull KMaterialAlphaOpacityType fromInstanceSpecularOnly(
-    final @Nonnull KMaterialNormalLabel normal,
-    final @Nonnull KInstanceTranslucentSpecularOnly instance)
+  public static  KMaterialAlphaOpacityType fromInstanceSpecularOnly(
+    final  KMaterialNormalLabel normal,
+    final  KInstanceTranslucentSpecularOnly instance)
   {
     switch (normal) {
       case NORMAL_NONE:
@@ -94,9 +92,9 @@ public enum KMaterialAlphaOpacityType
    * @return An opacity type
    */
 
-  public static @Nonnull KMaterialAlphaOpacityType fromInstanceRegular(
-    final @Nonnull KMaterialNormalLabel normal,
-    final @Nonnull KInstanceTranslucentRegular instance)
+  public static  KMaterialAlphaOpacityType fromInstanceRegular(
+    final  KMaterialNormalLabel normal,
+    final  KInstanceTranslucentRegular instance)
   {
     switch (normal) {
       case NORMAL_NONE:
@@ -124,10 +122,10 @@ public enum KMaterialAlphaOpacityType
     throw new UnreachableCodeException();
   }
 
-  private final @Nonnull String code;
+  private final  String code;
 
   private KMaterialAlphaOpacityType(
-    final @Nonnull String in_code)
+    final  String in_code)
   {
     this.code = in_code;
   }

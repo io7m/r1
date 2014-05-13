@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
@@ -35,8 +32,7 @@ public interface KFramebufferDepthDescriptionType extends
    * @param v
    *          The visitor
    * @return The value returned by the visitor
-   * @throws ConstraintError
-   *           Iff the visitor raises {@link ConstraintError}
+   * 
    * @throws JCGLException
    *           Iff the visitor raises {@link JCGLException}
    * @throws RException
@@ -55,9 +51,8 @@ public interface KFramebufferDepthDescriptionType extends
     <T, E extends Throwable, V extends KFramebufferDepthDescriptionVisitorType<T, E>>
     T
     depthDescriptionAccept(
-      final @Nonnull V v)
+      final V v)
       throws E,
         JCGLException,
-        RException,
-        ConstraintError;
+        RException;
 }

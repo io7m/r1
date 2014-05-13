@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * The type of objects that can be transformed.
@@ -24,5 +23,5 @@ import javax.annotation.Nonnull;
 
 interface KTransformableType
 {
-  @Nonnull KTransformType getTransform();
+   KTransformType getTransform();
 }

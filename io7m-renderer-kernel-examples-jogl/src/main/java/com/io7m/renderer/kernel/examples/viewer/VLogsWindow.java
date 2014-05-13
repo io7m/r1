@@ -18,18 +18,17 @@ package com.io7m.renderer.kernel.examples.viewer;
 
 import java.awt.Dimension;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 
 final class VLogsWindow extends JFrame
 {
-  private static final long        serialVersionUID;
+  private static final long serialVersionUID;
 
   static {
     serialVersionUID = 4283712509235461406L;
   }
 
-  private final @Nonnull VLogPanel log_panel;
+  private final VLogPanel   log_panel;
 
   public VLogsWindow()
   {
@@ -42,7 +41,7 @@ final class VLogsWindow extends JFrame
   }
 
   void addText(
-    final @Nonnull String text)
+    final String text)
   {
     this.log_panel.addText(text);
   }

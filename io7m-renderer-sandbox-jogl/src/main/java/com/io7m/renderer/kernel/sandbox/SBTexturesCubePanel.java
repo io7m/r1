@@ -22,13 +22,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -43,32 +40,31 @@ import javax.swing.filechooser.FileFilter;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
 import com.io7m.jvvfs.PathVirtual;
 
 final class SBTexturesCubePanel extends JPanel
 {
   private static final class ImageDisplay extends JPanel
   {
-    private static final long           serialVersionUID;
+    private static final long       serialVersionUID;
 
     static {
       serialVersionUID = -5281965547772476438L;
     }
 
-    private @CheckForNull BufferedImage positive_z;
-
-    private @CheckForNull BufferedImage negative_z;
-    private @CheckForNull BufferedImage positive_y;
-    private @CheckForNull BufferedImage negative_y;
-    private @CheckForNull BufferedImage positive_x;
-    private @CheckForNull BufferedImage negative_x;
+    private @Nullable BufferedImage positive_z;
+    private @Nullable BufferedImage negative_z;
+    private @Nullable BufferedImage positive_y;
+    private @Nullable BufferedImage negative_y;
+    private @Nullable BufferedImage positive_x;
+    private @Nullable BufferedImage negative_x;
 
     ImageDisplay()
     {
@@ -85,8 +81,9 @@ final class SBTexturesCubePanel extends JPanel
     }
 
     @Override protected void paintComponent(
-      final Graphics g)
+      final @Nullable Graphics g)
     {
+      assert g != null;
       super.paintComponent(g);
 
       if (this.positive_z != null) {
@@ -102,7 +99,7 @@ final class SBTexturesCubePanel extends JPanel
     }
 
     public void setImages(
-      final @Nonnull SBTextureCube t)
+      final SBTextureCube t)
     {
       this.positive_z = t.getPositiveZ();
       this.positive_y = t.getPositiveY();
@@ -115,17 +112,17 @@ final class SBTexturesCubePanel extends JPanel
 
   private static final class TextureParameters extends JPanel
   {
-    private static final long                                    serialVersionUID;
+    private static final long                           serialVersionUID;
 
     static {
       serialVersionUID = 1094205333772042554L;
     }
 
-    private final @Nonnull JComboBox<TextureWrapR>               wrap_r;
-    private final @Nonnull JComboBox<TextureWrapS>               wrap_s;
-    private final @Nonnull JComboBox<TextureWrapT>               wrap_t;
-    private final @Nonnull JComboBox<TextureFilterMinification>  filter_min;
-    private final @Nonnull JComboBox<TextureFilterMagnification> filter_mag;
+    private final JComboBox<TextureWrapR>               wrap_r;
+    private final JComboBox<TextureWrapS>               wrap_s;
+    private final JComboBox<TextureWrapT>               wrap_t;
+    private final JComboBox<TextureFilterMinification>  filter_min;
+    private final JComboBox<TextureFilterMagnification> filter_mag;
 
     TextureParameters()
     {
@@ -197,13 +194,14 @@ final class SBTexturesCubePanel extends JPanel
     }
   }
 
-  static final @Nonnull FileFilter                   CUBE_MAP_FILTER;
+  static final FileFilter                   CUBE_MAP_FILTER;
 
   static {
     CUBE_MAP_FILTER = new FileFilter() {
       @Override public boolean accept(
-        final File f)
+        final @Nullable File f)
       {
+        assert f != null;
         return f.isDirectory() || f.toString().endsWith(".rxc");
       }
 
@@ -214,28 +212,28 @@ final class SBTexturesCubePanel extends JPanel
     };
   }
 
-  private static final long                          serialVersionUID;
+  private static final long                 serialVersionUID;
 
   static {
     serialVersionUID = -941448169051827275L;
   }
-  protected final @Nonnull Log                       log_textures;
-  protected final @Nonnull JComboBox<PathVirtual>    selector;
-  protected @Nonnull Map<PathVirtual, SBTextureCube> images;
-  protected @Nonnull ImageDisplay                    image_display;
-  private final @Nonnull JTextField                  t_filter_mag;
-  private final @Nonnull JTextField                  t_filter_min;
-  private final @Nonnull JTextField                  t_wrap_r;
-  private final @Nonnull JTextField                  t_wrap_s;
-  private final @Nonnull JTextField                  t_wrap_t;
+  protected final LogUsableType             log_textures;
+  protected final JComboBox<PathVirtual>    selector;
+  protected Map<PathVirtual, SBTextureCube> images;
+  protected ImageDisplay                    image_display;
+  private final JTextField                  t_filter_mag;
+  private final JTextField                  t_filter_min;
+  private final JTextField                  t_wrap_r;
+  private final JTextField                  t_wrap_s;
+  private final JTextField                  t_wrap_t;
 
   public SBTexturesCubePanel(
-    final @Nonnull JFrame window,
-    final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull JTextField select_result,
-    final @Nonnull Log log)
+    final JFrame window,
+    final SBSceneControllerTextures controller,
+    final JTextField select_result,
+    final LogUsableType log)
   {
-    this.log_textures = new Log(log, "textures-cube");
+    this.log_textures = log.with("textures-cube");
     this.images = controller.sceneTexturesCubeGet();
 
     this.setPreferredSize(new Dimension(640, 480));
@@ -265,7 +263,7 @@ final class SBTexturesCubePanel extends JPanel
       @SuppressWarnings("synthetic-access") @Override public
         void
         actionPerformed(
-          final @Nonnull ActionEvent e)
+          final @Nullable ActionEvent e)
       {
         final PathVirtual name =
           (PathVirtual) SBTexturesCubePanel.this.selector.getSelectedItem();
@@ -300,7 +298,7 @@ final class SBTexturesCubePanel extends JPanel
     open.addActionListener(new ActionListener() {
 
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final TextureParameters params = new TextureParameters();
         final JFileChooser chooser = new JFileChooser();
@@ -323,20 +321,16 @@ final class SBTexturesCubePanel extends JPanel
 
             final SwingWorker<SBTextureCube, Void> worker =
               new SwingWorker<SBTextureCube, Void>() {
-                @Override protected @Nonnull SBTextureCube doInBackground()
+                @Override protected SBTextureCube doInBackground()
                   throws Exception
                 {
-                  try {
-                    return controller.sceneTextureCubeLoad(
-                      file,
-                      wrap_r,
-                      wrap_s,
-                      wrap_t,
-                      filter_min,
-                      filter_mag).get();
-                  } catch (final ConstraintError x) {
-                    throw new IOException(x);
-                  }
+                  return controller.sceneTextureCubeLoad(
+                    file,
+                    wrap_r,
+                    wrap_s,
+                    wrap_t,
+                    filter_min,
+                    filter_mag).get();
                 }
 
                 @Override protected void done()
@@ -378,7 +372,7 @@ final class SBTexturesCubePanel extends JPanel
     final JButton clear = new JButton("Clear");
     clear.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         SBTexturesCubePanel.this.selector.setSelectedItem(null);
       }
@@ -387,7 +381,7 @@ final class SBTexturesCubePanel extends JPanel
     final JButton select = new JButton("Select");
     select.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final PathVirtual name =
           (PathVirtual) SBTexturesCubePanel.this.selector.getSelectedItem();
@@ -404,7 +398,7 @@ final class SBTexturesCubePanel extends JPanel
     final JButton cancel = new JButton("Cancel");
     cancel.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         SBWindowUtilities.closeWindow(window);
       }

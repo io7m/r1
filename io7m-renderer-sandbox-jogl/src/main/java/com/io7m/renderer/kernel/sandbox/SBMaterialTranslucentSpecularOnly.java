@@ -16,25 +16,22 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
 public final class SBMaterialTranslucentSpecularOnly implements
   SBMaterialTranslucent
 {
-  private final @Nonnull SBMaterialDescriptionTranslucentSpecularOnly description;
-  private final @Nonnull Integer                                      id;
-  private final @CheckForNull SBTexture2D<SBTexture2DKindNormal>      map_normal;
-  private final @CheckForNull SBTexture2D<SBTexture2DKindSpecular>    map_specular;
+  private final SBMaterialDescriptionTranslucentSpecularOnly   description;
+  private final Integer                                        id;
+  private final @Nullable SBTexture2D<SBTexture2DKindNormal>   map_normal;
+  private final @Nullable SBTexture2D<SBTexture2DKindSpecular> map_specular;
 
   public SBMaterialTranslucentSpecularOnly(
-    final @Nonnull Integer in_id,
-    final @Nonnull SBMaterialDescriptionTranslucentSpecularOnly in_description,
-    final @CheckForNull SBTexture2D<SBTexture2DKindNormal> in_map_normal,
-    final @CheckForNull SBTexture2D<SBTexture2DKindSpecular> in_map_specular)
+    final Integer in_id,
+    final SBMaterialDescriptionTranslucentSpecularOnly in_description,
+    final @Nullable SBTexture2D<SBTexture2DKindNormal> in_map_normal,
+    final @Nullable SBTexture2D<SBTexture2DKindSpecular> in_map_specular)
   {
     this.id = in_id;
     this.description = in_description;
@@ -49,12 +46,12 @@ public final class SBMaterialTranslucentSpecularOnly implements
     return this.description;
   }
 
-  @Override public @Nonnull Integer materialGetID()
+  @Override public Integer materialGetID()
   {
     return this.id;
   }
 
-  @Override public @Nonnull String materialGetName()
+  @Override public String materialGetName()
   {
     return this.description.materialDescriptionGetName();
   }
@@ -65,8 +62,7 @@ public final class SBMaterialTranslucentSpecularOnly implements
     materialTranslucentVisitableAccept(
       final V v)
       throws E,
-        RException,
-        ConstraintError
+        RException
   {
     return v.materialVisitTranslucentSpecularOnly(this);
   }
@@ -77,8 +73,7 @@ public final class SBMaterialTranslucentSpecularOnly implements
     materialVisitableAccept(
       final V v)
       throws E,
-        RException,
-        ConstraintError
+        RException
   {
     return v.materialVisitTranslucent(this);
   }

@@ -16,19 +16,16 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.RangeInclusive;
 import com.io7m.jcache.BLUCacheReceiptType;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jcanephora.JCGLRuntimeException;
-import com.io7m.jlog.Level;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.types.RException;
@@ -37,21 +34,18 @@ import com.io7m.renderer.types.RException;
  * The default implementation of a depth-variance blur postprocessor.
  */
 
-public final class KPostprocessorBlurDepthVariance implements
+@EqualityReference public final class KPostprocessorBlurDepthVariance implements
   KPostprocessorBlurDepthVarianceType
 {
-  private static final @Nonnull String NAME;
+  private static final String NAME;
 
   static {
     NAME = "postprocessor-blur-depth-variance";
   }
 
-  private static @Nonnull
-    KFramebufferDepthVarianceDescription
-    makeScaledDescription(
-      final @Nonnull KBlurParameters parameters,
-      final @Nonnull KFramebufferDepthVarianceDescription desc)
-      throws ConstraintError
+  private static KFramebufferDepthVarianceDescription makeScaledDescription(
+    final KBlurParameters parameters,
+    final KFramebufferDepthVarianceDescription desc)
   {
     if (parameters.getScale() != 1.0f) {
       final AreaInclusive orig_area = desc.getArea();
@@ -64,8 +58,8 @@ public final class KPostprocessorBlurDepthVariance implements
       final long scaled_height =
         Math.max(2, (long) (height * parameters.getScale()));
 
-      final RangeInclusive range_x = new RangeInclusive(0, scaled_width);
-      final RangeInclusive range_y = new RangeInclusive(0, scaled_height);
+      final RangeInclusiveL range_x = new RangeInclusiveL(0, scaled_width);
+      final RangeInclusiveL range_y = new RangeInclusiveL(0, scaled_height);
       final AreaInclusive area = new AreaInclusive(range_x, range_y);
 
       return KFramebufferDepthVarianceDescription.newDescription(
@@ -94,20 +88,15 @@ public final class KPostprocessorBlurDepthVariance implements
    * @param log
    *          A log handle
    * @return A new postprocessor
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull
-    KPostprocessorBlurDepthVarianceType
-    postprocessorNew(
-      final @Nonnull JCGLImplementation gi,
-      final @Nonnull KRegionCopierType copier,
-      final @Nonnull KFramebufferDepthVarianceCacheType depth_variance_cache,
-      final @Nonnull KShaderCacheType shader_cache,
-      final @Nonnull KUnitQuadUsableType quad,
-      final @Nonnull Log log)
-      throws ConstraintError
+  public static KPostprocessorBlurDepthVarianceType postprocessorNew(
+    final JCGLImplementationType gi,
+    final KRegionCopierType copier,
+    final KFramebufferDepthVarianceCacheType depth_variance_cache,
+    final KShaderCacheType shader_cache,
+    final KUnitQuadUsableType quad,
+    final LogUsableType log)
   {
     return new KPostprocessorBlurDepthVariance(
       gi,
@@ -118,51 +107,45 @@ public final class KPostprocessorBlurDepthVariance implements
       log);
   }
 
-  private final @Nonnull KRegionCopierType                  copier;
-  private final @Nonnull KFramebufferDepthVarianceCacheType depth_variance_cache;
-  private final @Nonnull JCGLImplementation                 gi;
-  private final @Nonnull Log                                log;
-  private final @Nonnull KUnitQuadUsableType                quad;
-  private final @Nonnull KShaderCacheType                   shader_cache;
+  private final KRegionCopierType                  copier;
+  private final KFramebufferDepthVarianceCacheType depth_variance_cache;
+  private final JCGLImplementationType             gi;
+  private final LogUsableType                      log;
+  private final KUnitQuadUsableType                quad;
+  private final KShaderCacheType                   shader_cache;
 
   private KPostprocessorBlurDepthVariance(
-    final @Nonnull JCGLImplementation in_gi,
-    final @Nonnull KRegionCopierType in_copier,
-    final @Nonnull KFramebufferDepthVarianceCacheType in_depth_variance_cache,
-    final @Nonnull KShaderCacheType in_shader_cache,
-    final @Nonnull KUnitQuadUsableType in_quad,
-    final @Nonnull Log in_log)
-    throws ConstraintError
+    final JCGLImplementationType in_gi,
+    final KRegionCopierType in_copier,
+    final KFramebufferDepthVarianceCacheType in_depth_variance_cache,
+    final KShaderCacheType in_shader_cache,
+    final KUnitQuadUsableType in_quad,
+    final LogUsableType in_log)
   {
-    this.gi = Constraints.constrainNotNull(in_gi, "GL implementation");
+    this.gi = NullCheck.notNull(in_gi, "GL implementation");
     this.log =
-      new Log(
-        Constraints.constrainNotNull(in_log, "Log"),
+      NullCheck.notNull(in_log, "Log").with(
         KPostprocessorBlurDepthVariance.NAME);
 
     this.depth_variance_cache =
-      Constraints.constrainNotNull(
-        in_depth_variance_cache,
-        "Framebuffer cache");
-    this.shader_cache =
-      Constraints.constrainNotNull(in_shader_cache, "Shader cache");
-    this.copier = Constraints.constrainNotNull(in_copier, "Copier");
+      NullCheck.notNull(in_depth_variance_cache, "Framebuffer cache");
+    this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
+    this.copier = NullCheck.notNull(in_copier, "Copier");
 
-    this.quad = Constraints.constrainNotNull(in_quad, "Quad");
+    this.quad = NullCheck.notNull(in_quad, "Quad");
 
-    if (this.log.enabled(Level.LOG_DEBUG)) {
+    if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
       this.log.debug("initialized");
     }
   }
 
   private void onePass(
-    final @Nonnull KBlurParameters parameters,
-    final @Nonnull KFramebufferDepthVarianceUsableType source,
-    final @Nonnull KFramebufferDepthVarianceUsableType temporary,
-    final @Nonnull KFramebufferDepthVarianceUsableType target)
-    throws JCGLRuntimeException,
+    final KBlurParameters parameters,
+    final KFramebufferDepthVarianceUsableType source,
+    final KFramebufferDepthVarianceUsableType temporary,
+    final KFramebufferDepthVarianceUsableType target)
+    throws JCGLException,
       RException,
-      ConstraintError,
       JCacheException
   {
     assert source != temporary;
@@ -194,11 +177,10 @@ public final class KPostprocessorBlurDepthVariance implements
   }
 
   @Override public void postprocessorEvaluateDepthVariance(
-    final @Nonnull KBlurParameters parameters,
-    final @Nonnull KFramebufferDepthVarianceUsableType input,
-    final @Nonnull KFramebufferDepthVarianceUsableType output)
-    throws ConstraintError,
-      RException
+    final KBlurParameters parameters,
+    final KFramebufferDepthVarianceUsableType input,
+    final KFramebufferDepthVarianceUsableType output)
+    throws RException
   {
     try {
 
@@ -258,6 +240,7 @@ public final class KPostprocessorBlurDepthVariance implements
               target = receipt_b.getValue();
             }
 
+            assert target != null;
             this.onePass(parameters, source, temporary, target);
           }
 

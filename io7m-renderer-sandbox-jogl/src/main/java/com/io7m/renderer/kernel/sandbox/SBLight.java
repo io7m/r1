@@ -16,15 +16,13 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.renderer.kernel.types.KLightType;
 
 interface SBLight extends SBLightVisitable
 {
-  @Nonnull Integer getID();
+   Integer getID();
 
-  @Nonnull SBLightDescription getDescription();
+   SBLightDescription getDescription();
 
-  @Nonnull KLightType getLight();
+   KLightType getLight();
 }

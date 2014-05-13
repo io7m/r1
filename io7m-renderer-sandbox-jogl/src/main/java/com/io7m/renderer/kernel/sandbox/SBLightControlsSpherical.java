@@ -16,14 +16,12 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.types.RSpaceWorldType;
@@ -43,7 +41,6 @@ public final class SBLightControlsSpherical implements
 
           @Override public void addToLayout(
             final DesignGridLayout layout)
-            throws ConstraintError
           {
             final SBLightControlsSpherical controls =
               SBLightControlsSpherical.newControls(this, Integer.valueOf(23));
@@ -54,29 +51,27 @@ public final class SBLightControlsSpherical implements
     });
   }
 
-  public static @Nonnull SBLightControlsSpherical newControls(
-    final @Nonnull JFrame parent,
-    final @Nonnull Integer id)
-    throws ConstraintError
+  public static SBLightControlsSpherical newControls(
+    final JFrame parent,
+    final Integer id)
   {
     return new SBLightControlsSpherical(parent, id);
   }
 
-  private final @Nonnull SBColourInput                    colour;
-  private final @Nonnull SBFloatHSlider                   falloff;
-  private final @Nonnull SBFloatHSlider                   intensity;
-  private final @Nonnull JFrame                           parent;
-  private final @Nonnull SBVector3FInput<RSpaceWorldType> position;
-  private final @Nonnull SBFloatHSlider                   radius;
-  private final @Nonnull Integer                          id;
+  private final SBColourInput                    colour;
+  private final SBFloatHSlider                   falloff;
+  private final SBFloatHSlider                   intensity;
+  private final JFrame                           parent;
+  private final SBVector3FInput<RSpaceWorldType> position;
+  private final SBFloatHSlider                   radius;
+  private final Integer                          id;
 
   private SBLightControlsSpherical(
-    final @Nonnull JFrame in_parent,
-    final @Nonnull Integer in_id)
-    throws ConstraintError
+    final JFrame in_parent,
+    final Integer in_id)
   {
-    this.parent = Constraints.constrainNotNull(in_parent, "Parent");
-    this.id = Constraints.constrainNotNull(in_id, "ID");
+    this.parent = NullCheck.notNull(in_parent, "Parent");
+    this.id = NullCheck.notNull(in_id, "ID");
     this.colour = SBColourInput.newInput(in_parent, "Colour");
     this.intensity = new SBFloatHSlider("Intensity", 0.0f, 2.0f);
     this.position = SBVector3FInput.newInput("Position");
@@ -89,7 +84,7 @@ public final class SBLightControlsSpherical implements
   }
 
   @Override public void controlsAddToLayout(
-    final @Nonnull DesignGridLayout layout)
+    final DesignGridLayout layout)
   {
     this.intensity.controlsAddToLayout(layout);
     this.colour.controlsAddToLayout(layout);
@@ -117,7 +112,7 @@ public final class SBLightControlsSpherical implements
   }
 
   @Override public void controlsLoadFrom(
-    final @Nonnull SBLightDescriptionSpherical d)
+    final SBLightDescriptionSpherical d)
   {
     final KLightSphere l = d.getLight();
     this.intensity.setCurrent(l.lightGetIntensity());
@@ -127,9 +122,8 @@ public final class SBLightControlsSpherical implements
     this.radius.setCurrent(l.getRadius());
   }
 
-  @Override public @Nonnull SBLightDescriptionSpherical controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+  @Override public SBLightDescriptionSpherical controlsSave()
+    throws SBExceptionInputError
   {
     return new SBLightDescriptionSpherical(
       this.id,

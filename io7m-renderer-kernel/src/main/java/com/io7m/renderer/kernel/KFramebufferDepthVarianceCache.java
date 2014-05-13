@@ -16,11 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcache.BLUCacheAbstract;
 import com.io7m.jcache.BLUCacheType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.types.RException;
 
@@ -28,7 +26,7 @@ import com.io7m.renderer.types.RException;
  * Depth-variance framebuffer caches.
  */
 
-public final class KFramebufferDepthVarianceCache extends
+@EqualityReference public final class KFramebufferDepthVarianceCache extends
   BLUCacheAbstract<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType, RException> implements
   KFramebufferDepthVarianceCacheType
 {
@@ -39,22 +37,18 @@ public final class KFramebufferDepthVarianceCache extends
    * @param c
    *          The cache
    * @return A cache
-   * @throws ConstraintError
-   *           If <code>c == null</code>
    */
 
-  public static @Nonnull
+  public static
     KFramebufferDepthVarianceCacheType
     wrap(
-      final @Nonnull BLUCacheType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType, RException> c)
-      throws ConstraintError
+      final BLUCacheType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType, RException> c)
   {
     return new KFramebufferDepthVarianceCache(c);
   }
 
   private KFramebufferDepthVarianceCache(
-    final @Nonnull BLUCacheType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType, RException> c)
-    throws ConstraintError
+    final BLUCacheType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType, RException> c)
   {
     super(c);
   }

@@ -16,13 +16,11 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.jtensors.MatrixM4x4F;
 
 /**
- * The type of transforms, applied to instances ({@link KInstanceTransformedType}
- * ).
+ * The type of transforms, applied to instances (
+ * {@link KInstanceTransformedType} ).
  */
 
 public interface KTransformType
@@ -38,8 +36,8 @@ public interface KTransformType
    */
 
   void transformMakeMatrix4x4F(
-    final @Nonnull KTransformContext context,
-    final @Nonnull MatrixM4x4F m);
+    final KTransformContext context,
+    final MatrixM4x4F m);
 
   /**
    * Be visited by the given generic visitor.
@@ -61,6 +59,6 @@ public interface KTransformType
     <A, E extends Throwable, V extends KTransformVisitorType<A, E>>
     A
     transformAccept(
-      final @Nonnull V v)
+      final V v)
       throws E;
 }

@@ -19,7 +19,6 @@ package com.io7m.renderer.kernel.sandbox;
 import java.awt.Container;
 import java.awt.Dimension;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -37,20 +36,20 @@ import com.io7m.renderer.types.RVectorReadable4FType;
 
 public final class SBVector4FInput<R extends RSpaceType>
 {
-  public static @Nonnull <R extends RSpaceType> SBVector4FInput<R> newInput(
-    final @Nonnull String text)
+  public static  <R extends RSpaceType> SBVector4FInput<R> newInput(
+    final  String text)
   {
     return new SBVector4FInput<R>(text);
   }
 
-  private final @Nonnull JLabel     label;
-  private final @Nonnull JTextField field_w;
-  private final @Nonnull JTextField field_x;
-  private final @Nonnull JTextField field_y;
-  private final @Nonnull JTextField field_z;
+  private final  JLabel     label;
+  private final  JTextField field_w;
+  private final  JTextField field_x;
+  private final  JTextField field_y;
+  private final  JTextField field_z;
 
   private SBVector4FInput(
-    final @Nonnull String text)
+    final  String text)
   {
     this.label = new JLabel(text);
     this.field_x = new JTextField("0.0");
@@ -59,7 +58,7 @@ public final class SBVector4FInput<R extends RSpaceType>
     this.field_w = new JTextField("0.0");
   }
 
-  public @Nonnull RVectorI4F<R> getVector()
+  public  RVectorI4F<R> getVector()
     throws SBExceptionInputError
   {
     return new RVectorI4F<R>(
@@ -70,7 +69,7 @@ public final class SBVector4FInput<R extends RSpaceType>
   }
 
   @SuppressWarnings("boxing") public void setVector(
-    final @Nonnull RVectorReadable4FType<R> v)
+    final  RVectorReadable4FType<R> v)
   {
     this.field_x.setText(String.format("%.6f", v.getXF()));
     this.field_y.setText(String.format("%.6f", v.getYF()));
@@ -79,7 +78,7 @@ public final class SBVector4FInput<R extends RSpaceType>
   }
 
   public void addToLayout(
-    final @Nonnull IRowCreator row)
+    final  IRowCreator row)
   {
     row
       .grid()

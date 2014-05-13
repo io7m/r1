@@ -23,9 +23,6 @@ import java.util.HashMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
 import nu.xom.Attribute;
 import nu.xom.Document;
 import nu.xom.Element;
@@ -33,11 +30,12 @@ import nu.xom.Elements;
 import nu.xom.Nodes;
 import nu.xom.XPathContext;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnimplementedCodeException;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.jranges.RangeCheckException;
+import com.io7m.junreachable.UnimplementedCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.RXMLUtilities;
 import com.io7m.renderer.xml.collada.ColladaSource.ColladaSourceArray2F;
@@ -47,7 +45,7 @@ import com.io7m.renderer.xml.collada.ColladaSource.Type;
 
 public final class ColladaDocument
 {
-  public static final @Nonnull URI COLLADA_URI;
+  public static final URI COLLADA_URI;
 
   static {
     try {
@@ -57,10 +55,9 @@ public final class ColladaDocument
     }
   }
 
-  private static @Nonnull SortedSet<ColladaSourceID> geometryLoadSourceIDs(
-    final @Nonnull Elements e)
-    throws ConstraintError,
-      RXMLException
+  private static SortedSet<ColladaSourceID> geometryLoadSourceIDs(
+    final Elements e)
+    throws RXMLException
   {
     final TreeSet<ColladaSourceID> source_ids =
       new TreeSet<ColladaSourceID>();
@@ -77,12 +74,11 @@ public final class ColladaDocument
     return source_ids;
   }
 
-  private static @Nonnull ColladaVertices geometryLoadVertices(
-    final @Nonnull Element e,
-    final @Nonnull Log log,
-    final @Nonnull XPathContext xpc)
-    throws RXMLException,
-      ConstraintError
+  private static ColladaVertices geometryLoadVertices(
+    final Element e,
+    final LogUsableType log,
+    final XPathContext xpc)
+    throws RXMLException
   {
     RXMLUtilities.checkIsElement(e, "vertices", ColladaDocument.COLLADA_URI);
 
@@ -106,10 +102,10 @@ public final class ColladaDocument
     return new ColladaVertices(si, inputs, axis);
   }
 
-  private static @Nonnull ColladaAxis getNearestAxis(
-    final @Nonnull Element e,
-    final @Nonnull Log log,
-    final @Nonnull XPathContext xpc)
+  private static ColladaAxis getNearestAxis(
+    final Element e,
+    final LogUsableType log,
+    final XPathContext xpc)
   {
     final Nodes nodes = e.query("ancestor::node()/c:asset/c:up_axis", xpc);
     final String name = nodes.get(0).getValue();
@@ -125,8 +121,8 @@ public final class ColladaDocument
     return ColladaAxis.COLLADA_AXIS_Z_UP;
   }
 
-  private static @Nonnull Element getVerticesElementForGeometry(
-    final @Nonnull Element eg)
+  private static Element getVerticesElementForGeometry(
+    final Element eg)
     throws RXMLException
   {
     final Element em =
@@ -136,19 +132,17 @@ public final class ColladaDocument
     return ev;
   }
 
-  public static @Nonnull ColladaDocument newDocument(
-    final @Nonnull Document document,
-    final @Nonnull Log log)
-    throws ConstraintError,
-      RXMLException
+  public static ColladaDocument newDocument(
+    final Document document,
+    final LogUsableType log)
+    throws RXMLException
   {
     return new ColladaDocument(document, log);
   }
 
-  private static @Nonnull ColladaInput parseInput(
-    final @Nonnull Element ie)
-    throws RXMLException,
-      ConstraintError
+  private static ColladaInput parseInput(
+    final Element ie)
+    throws RXMLException
   {
     RXMLUtilities.checkIsElement(ie, "input", ColladaDocument.COLLADA_URI);
 
@@ -169,10 +163,9 @@ public final class ColladaDocument
     return new ColladaInput(source, s, offset);
   }
 
-  private static @Nonnull ArrayList<ColladaInput> parseInputs(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
+  private static ArrayList<ColladaInput> parseInputs(
+    final Element e)
+    throws RXMLException
   {
     final ArrayList<ColladaInput> inputs = new ArrayList<ColladaInput>();
     final Elements eis =
@@ -185,12 +178,11 @@ public final class ColladaDocument
     return inputs;
   }
 
-  private static @Nonnull ColladaSource sourceLoadFloatArray2f(
-    final @Nonnull ColladaSourceID id,
-    final @Nonnull Element ef,
+  private static ColladaSource sourceLoadFloatArray2f(
+    final ColladaSourceID id,
+    final Element ef,
     final int element_count,
-    final @Nonnull ColladaAxis axis)
-    throws ConstraintError
+    final ColladaAxis axis)
   {
     final String[] efs = ef.getValue().split("\\s+");
     final ColladaSourceArray2F source =
@@ -201,19 +193,24 @@ public final class ColladaDocument
       source.put2f(x, y);
     }
 
-    Constraints.constrainArbitrary(element_count == source
-      .getArray2f()
-      .size(), "Correct number of source elements read");
+    if (element_count == source.getArray2f().size() == false) {
+      @SuppressWarnings("boxing") final String r =
+        String.format(
+          "Expected %d elements but got %d",
+          element_count,
+          source.getArray2f().size());
+      assert r != null;
+      throw new RangeCheckException(r);
+    }
 
     return source;
   }
 
-  private static @Nonnull ColladaSource sourceLoadFloatArray3f(
-    final @Nonnull ColladaSourceID id,
-    final @Nonnull Element ef,
-    final @Nonnull ColladaAxis axis,
+  private static ColladaSource sourceLoadFloatArray3f(
+    final ColladaSourceID id,
+    final Element ef,
+    final ColladaAxis axis,
     final int element_count)
-    throws ConstraintError
   {
     final String[] efs = ef.getValue().split("\\s+");
     final ColladaSourceArray3F source =
@@ -225,34 +222,40 @@ public final class ColladaDocument
       source.put3f(x, y, z);
     }
 
-    Constraints.constrainArbitrary(element_count == source
-      .getArray3f()
-      .size(), "Correct number of source elements read");
+    if (element_count == source.getArray3f().size() == false) {
+      @SuppressWarnings("boxing") final String r =
+        String.format(
+          "Expected %d elements but got %d",
+          element_count,
+          source.getArray3f().size());
+      assert r != null;
+      throw new RangeCheckException(r);
+    }
 
     return source;
   }
 
-  private final @Nonnull XPathContext                                xpc;
-  private final @Nonnull StringBuilder                               message;
-  private final @Nonnull Log                                         log;
-  private final @Nonnull HashMap<ColladaSourceID, ColladaSource>     sources;
-  private final @Nonnull HashMap<ColladaGeometryID, ColladaGeometry> geometries;
-  private final @Nonnull Document                                    document;
-  private final @Nonnull Log                                         log_source;
-  private final @Nonnull Log                                         log_geometry;
+  private final XPathContext                                xpc;
+  private final StringBuilder                               message;
+  private final LogUsableType                               log;
+  private final HashMap<ColladaSourceID, ColladaSource>     sources;
+  private final HashMap<ColladaGeometryID, ColladaGeometry> geometries;
+  private final Document                                    document;
+  private final LogUsableType                               log_source;
+  private final LogUsableType                               log_geometry;
 
   private ColladaDocument(
-    final @Nonnull Document in_document,
-    final @Nonnull Log in_log)
-    throws ConstraintError,
-      RXMLException
+    final Document in_document,
+    final LogUsableType in_log)
+    throws RXMLException
   {
-    this.document = Constraints.constrainNotNull(in_document, "Document");
+    this.document = NullCheck.notNull(in_document, "Document");
     this.message = new StringBuilder();
     this.xpc = new XPathContext("c", ColladaDocument.COLLADA_URI.toString());
-    this.log = new Log(in_log, "collada-parser");
-    this.log_source = new Log(this.log, "source");
-    this.log_geometry = new Log(this.log, "geometry");
+
+    this.log = NullCheck.notNull(in_log, "Log").with("collada-parser");
+    this.log_source = this.log.with("source");
+    this.log_geometry = this.log.with("geometry");
 
     this.log.debug("Initialized document '" + in_document.getBaseURI() + "'");
     this.sources = new HashMap<ColladaSourceID, ColladaSource>();
@@ -262,8 +265,7 @@ public final class ColladaDocument
   }
 
   private void geometriesLoad()
-    throws ConstraintError,
-      RXMLException
+    throws RXMLException
   {
     final Nodes nodes =
       this.document.query(
@@ -275,7 +277,9 @@ public final class ColladaDocument
       this.message.append("Loading ");
       this.message.append(nodes.size());
       this.message.append(" geometries");
-      this.log_geometry.debug(this.message.toString());
+      final String r = this.message.toString();
+      assert r != null;
+      this.log_geometry.debug(r);
     }
 
     for (int index = 0; index < nodes.size(); ++index) {
@@ -285,8 +289,8 @@ public final class ColladaDocument
   }
 
   private void geometryAdd(
-    final @Nonnull ColladaGeometryID id,
-    final @Nonnull ColladaGeometry cg)
+    final ColladaGeometryID id,
+    final ColladaGeometry cg)
   {
     {
       this.message.setLength(0);
@@ -301,9 +305,8 @@ public final class ColladaDocument
   }
 
   private void geometryLoad(
-    final @Nonnull Element e)
-    throws ConstraintError,
-      RXMLException
+    final Element e)
+    throws RXMLException
   {
     RXMLUtilities.checkIsElement(e, "geometry", ColladaDocument.COLLADA_URI);
 
@@ -316,7 +319,9 @@ public final class ColladaDocument
       this.message.setLength(0);
       this.message.append("Loading geometry ");
       this.message.append(id);
-      this.log_geometry.debug(this.message.toString());
+      final String r = this.message.toString();
+      assert r != null;
+      this.log_geometry.debug(r);
     }
 
     final ColladaAxis axis =
@@ -346,10 +351,9 @@ public final class ColladaDocument
     this.geometryAdd(id, cg);
   }
 
-  private @Nonnull ColladaPolylist geometryLoadPolylist(
-    final @Nonnull Element e)
-    throws RXMLException,
-      ConstraintError
+  private ColladaPolylist geometryLoadPolylist(
+    final Element e)
+    throws RXMLException
   {
     try {
       RXMLUtilities
@@ -366,7 +370,9 @@ public final class ColladaDocument
         this.message.append("Expecting ");
         this.message.append(pcount);
         this.message.append(" polygons");
-        this.log_geometry.debug(this.message.toString());
+        final String r = this.message.toString();
+        assert r != null;
+        this.log_geometry.debug(r);
       }
 
       /**
@@ -411,32 +417,36 @@ public final class ColladaDocument
         poly_offset += (vcount * indices_per_vertex);
       }
 
-      Constraints.constrainArbitrary(
-        polygons.size() == pcount,
-        "Correct number of polygons parsed");
+      if (polygons.size() != pcount) {
+        @SuppressWarnings("boxing") final String s =
+          String.format(
+            "Incorrect number of polygons parsed. Expected %d but got %d",
+            pcount,
+            polygons.size());
+        assert s != null;
+        throw new RangeCheckException(s);
+      }
 
       return new ColladaPolylist(inputs, polygons);
     } catch (final NumberFormatException x) {
       this.message.setLength(0);
       this.message
         .append("Could not parse element in indices array of polylist");
-      throw new RXMLException.RXMLExceptionNumberFormatError(
-        x,
-        this.message.toString());
+      final String r = this.message.toString();
+      assert r != null;
+      throw new RXMLException.RXMLExceptionNumberFormatError(x, r);
     }
   }
 
-  public @CheckForNull ColladaGeometry getGeometry(
-    final @Nonnull ColladaGeometryID id)
-    throws ConstraintError
+  public @Nullable ColladaGeometry getGeometry(
+    final ColladaGeometryID id)
   {
-    Constraints.constrainNotNull(id, "ID");
+    NullCheck.notNull(id, "ID");
     return this.geometries.get(id);
   }
 
-  private @Nonnull Element getGeometryElement(
-    final @Nonnull ColladaGeometryID id)
-    throws ConstraintError
+  private Element getGeometryElement(
+    final ColladaGeometryID id)
   {
     final StringBuilder query = new StringBuilder();
     query.append("/c:COLLADA/c:library_geometries/c:geometry[@id='");
@@ -444,34 +454,35 @@ public final class ColladaDocument
     query.append("']");
 
     final Nodes nodes = this.document.query(query.toString(), this.xpc);
-    Constraints.constrainArbitrary(
-      nodes.size() == 1,
-      "Exactly one geometry with id " + id + " exists");
+
+    if (nodes.size() != 1) {
+      throw new IllegalArgumentException(
+        "Expected exactly one geometry with id " + id);
+    }
 
     return (Element) nodes.get(0);
   }
 
-  public @Nonnull SortedSet<ColladaGeometryID> getGeometryIDs()
+  public SortedSet<ColladaGeometryID> getGeometryIDs()
   {
     return new TreeSet<ColladaGeometryID>(this.geometries.keySet());
   }
 
-  public @CheckForNull ColladaSource getSource(
-    final @Nonnull ColladaSourceID id)
-    throws ConstraintError
+  public @Nullable ColladaSource getSource(
+    final ColladaSourceID id)
   {
-    Constraints.constrainNotNull(id, "ID");
+    NullCheck.notNull(id, "ID");
     return this.sources.get(id);
   }
 
-  public @Nonnull SortedSet<ColladaSourceID> getSourceIDs()
+  public SortedSet<ColladaSourceID> getSourceIDs()
   {
     return new TreeSet<ColladaSourceID>(this.sources.keySet());
   }
 
   private void sourceAdd(
-    final @Nonnull ColladaSourceID id,
-    final @Nonnull ColladaSource source)
+    final ColladaSourceID id,
+    final ColladaSource source)
   {
     {
       this.message.setLength(0);
@@ -479,18 +490,19 @@ public final class ColladaDocument
       this.message.append(id);
       this.message.append(": ");
       this.message.append(source);
-      this.log_source.debug(this.message.toString());
+      final String r = this.message.toString();
+      assert r != null;
+      this.log_source.debug(r);
     }
 
     this.sources.put(id, source);
   }
 
-  private @Nonnull ColladaSource sourceLoadFloatArray(
-    final @Nonnull ColladaSourceID id,
-    final @Nonnull Element es,
-    final @Nonnull ColladaAxis axis)
-    throws RXMLException,
-      ConstraintError
+  private ColladaSource sourceLoadFloatArray(
+    final ColladaSourceID id,
+    final Element es,
+    final ColladaAxis axis)
+    throws RXMLException
   {
     try {
       final Element et =
@@ -513,7 +525,9 @@ public final class ColladaDocument
         this.message.append("Expecting ");
         this.message.append(element_count);
         this.message.append(" elements");
-        this.log_source.debug(this.message.toString());
+        final String r = this.message.toString();
+        assert r != null;
+        this.log_source.debug(r);
       }
 
       final int param_count =
@@ -526,7 +540,9 @@ public final class ColladaDocument
         this.message.append("Array consists of groups of ");
         this.message.append(param_count);
         this.message.append(" values");
-        this.log_source.debug(this.message.toString());
+        final String r = this.message.toString();
+        assert r != null;
+        this.log_source.debug(r);
       }
 
       Type type;
@@ -578,15 +594,14 @@ public final class ColladaDocument
         .append("Could not parse element in float array of source '");
       this.message.append(id);
       this.message.append("'");
-      throw new RXMLException.RXMLExceptionNumberFormatError(
-        x,
-        this.message.toString());
+      final String r = this.message.toString();
+      assert r != null;
+      throw new RXMLException.RXMLExceptionNumberFormatError(x, r);
     }
   }
 
   private void sourcesLoad()
-    throws ConstraintError,
-      RXMLException
+    throws RXMLException
   {
     final Nodes nodes = this.document.query("/c:COLLADA//c:source", this.xpc);
 
@@ -595,7 +610,9 @@ public final class ColladaDocument
       this.message.append("Loading ");
       this.message.append(nodes.size());
       this.message.append(" sources");
-      this.log_source.debug(this.message.toString());
+      final String r = this.message.toString();
+      assert r != null;
+      this.log_source.debug(r);
     }
 
     for (int index = 0; index < nodes.size(); ++index) {
@@ -613,7 +630,9 @@ public final class ColladaDocument
         this.message.setLength(0);
         this.message.append("Loading source ");
         this.message.append(id);
-        this.log_source.debug(this.message.toString());
+        final String r = this.message.toString();
+        assert r != null;
+        this.log_source.debug(r);
       }
 
       if (es.getChildElements(

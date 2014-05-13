@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.awt.Dimension;
 
-import javax.annotation.Nonnull;
 import javax.swing.JFrame;
 
 final class SBLogsWindow extends JFrame
@@ -29,7 +28,7 @@ final class SBLogsWindow extends JFrame
     serialVersionUID = 4283712509235461406L;
   }
 
-  private final @Nonnull SBLogPanel log_panel;
+  private final  SBLogPanel log_panel;
 
   public SBLogsWindow()
   {
@@ -42,7 +41,7 @@ final class SBLogsWindow extends JFrame
   }
 
   void addText(
-    final @Nonnull String text)
+    final  String text)
   {
     this.log_panel.addText(text);
   }

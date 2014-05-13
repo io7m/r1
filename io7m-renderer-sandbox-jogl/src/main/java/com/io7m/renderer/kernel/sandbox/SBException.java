@@ -18,18 +18,16 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.io.File;
 
-import javax.annotation.Nonnull;
-
 abstract class SBException extends Exception
 {
   final static class SBExceptionImageLoading extends SBException
   {
     private static final long   serialVersionUID = 7521983144069448194L;
-    private final @Nonnull File file;
+    private final  File file;
 
     @SuppressWarnings("synthetic-access") SBExceptionImageLoading(
-      final @Nonnull File in_file,
-      final @Nonnull String message)
+      final  File in_file,
+      final  String message)
     {
       super(Type.SB_EXCEPTION_IMAGE_LOADING, in_file + ": " + message);
       this.file = in_file;
@@ -41,7 +39,7 @@ abstract class SBException extends Exception
     private static final long serialVersionUID = 4254147123710014337L;
 
     @SuppressWarnings("synthetic-access") SBExceptionInputError(
-      final @Nonnull String message)
+      final  String message)
     {
       super(Type.SB_EXCEPTION_INPUT_ERROR, message);
     }
@@ -55,11 +53,11 @@ abstract class SBException extends Exception
 
   private static final long   serialVersionUID = -746503205823207820L;
 
-  private final @Nonnull Type type;
+  private final  Type type;
 
   private SBException(
-    final @Nonnull Type in_type,
-    final @Nonnull String message)
+    final  Type in_type,
+    final  String message)
   {
     super(message);
     this.type = in_type;

@@ -16,15 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KInstanceRegularType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoLabel;
 
 interface KMaterialAlbedoLabelCacheType
 {
-  @Nonnull KMaterialAlbedoLabel getAlbedoLabelRegular(
-    final @Nonnull KInstanceRegularType instance)
-    throws ConstraintError;
+  KMaterialAlbedoLabel getAlbedoLabelRegular(
+    final KInstanceRegularType instance);
 }

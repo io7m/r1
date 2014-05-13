@@ -18,14 +18,11 @@ package com.io7m.renderer.kernel;
 
 import java.math.BigInteger;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcache.JCacheLoaderType;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.types.RException;
 
@@ -35,7 +32,7 @@ import com.io7m.renderer.types.RException;
  * {@link KFramebufferForwardDescription}.
  */
 
-public final class KFramebufferForwardCacheLoader implements
+@EqualityReference public final class KFramebufferForwardCacheLoader implements
   JCacheLoaderType<KFramebufferForwardDescription, KFramebufferForwardType, RException>
 {
   /**
@@ -46,59 +43,46 @@ public final class KFramebufferForwardCacheLoader implements
    * @param log
    *          A log handle
    * @return A new cache loader
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  public static @Nonnull
+  public static
     JCacheLoaderType<KFramebufferForwardDescription, KFramebufferForwardType, RException>
     newLoader(
-      final @Nonnull JCGLImplementation gi,
-      final @Nonnull Log log)
-      throws ConstraintError
+      final JCGLImplementationType gi,
+      final LogUsableType log)
   {
     return new KFramebufferForwardCacheLoader(gi, log);
   }
 
-  private final @Nonnull JCGLImplementation gi;
-  private final @Nonnull Log                log;
+  private final JCGLImplementationType gi;
+  private final LogUsableType          log;
 
   private KFramebufferForwardCacheLoader(
-    final @Nonnull JCGLImplementation in_gi,
-    final @Nonnull Log in_log)
-    throws ConstraintError
+    final JCGLImplementationType in_gi,
+    final LogUsableType in_log)
   {
     this.log =
-      new Log(
-        Constraints.constrainNotNull(in_log, "Log"),
-        "framebuffer-forward-cache");
-    this.gi = Constraints.constrainNotNull(in_gi, "OpenGL implementation");
+
+    NullCheck.notNull(in_log, "Log").with("framebuffer-forward-cache");
+    this.gi = NullCheck.notNull(in_gi, "OpenGL implementation");
   }
 
   @Override public void cacheValueClose(
-    final @Nonnull KFramebufferForwardType v)
+    final KFramebufferForwardType v)
     throws RException
   {
-    try {
-      v.kFramebufferDelete(this.gi);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    v.kFramebufferDelete(this.gi);
   }
 
-  @Override public @Nonnull KFramebufferForwardType cacheValueLoad(
-    final @Nonnull KFramebufferForwardDescription key)
+  @Override public KFramebufferForwardType cacheValueLoad(
+    final KFramebufferForwardDescription key)
     throws RException
   {
-    try {
-      return KFramebufferForward.newFramebuffer(this.gi, key);
-    } catch (final ConstraintError e) {
-      throw new UnreachableCodeException(e);
-    }
+    return KFramebufferForward.newFramebuffer(this.gi, key);
   }
 
   @Override public BigInteger cacheValueSizeOf(
-    final @Nonnull KFramebufferForwardType v)
+    final KFramebufferForwardType v)
   {
     return BigInteger.valueOf(v.kFramebufferGetSizeBytes());
   }

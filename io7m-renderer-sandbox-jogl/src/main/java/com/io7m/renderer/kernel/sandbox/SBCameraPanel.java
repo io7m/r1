@@ -20,7 +20,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -29,7 +28,7 @@ import javax.swing.JSeparator;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RMatrixI4x4F;
@@ -37,22 +36,21 @@ import com.io7m.renderer.types.RTransformProjectionType;
 
 public final class SBCameraPanel extends JPanel
 {
-  private static final long                           serialVersionUID;
+  private static final long                  serialVersionUID;
 
   static {
     serialVersionUID = -55144553467054055L;
   }
 
-  protected final @Nonnull JLabel                     error_icon;
-  protected final @Nonnull JLabel                     error_text;
-  protected final @Nonnull SBProjectionMatrixControls controls;
-  protected final @Nonnull MatrixM4x4F                temporary;
+  protected final JLabel                     error_icon;
+  protected final JLabel                     error_text;
+  protected final SBProjectionMatrixControls controls;
+  protected final MatrixM4x4F                temporary;
 
   public SBCameraPanel(
-    final @Nonnull JFrame owner,
-    final @Nonnull SBSceneControllerRendererControl controller)
-    throws IOException,
-      ConstraintError
+    final JFrame owner,
+    final SBSceneControllerRendererControl controller)
+    throws IOException
   {
     this.controls = SBProjectionMatrixControls.newControls();
     this.temporary = new MatrixM4x4F();
@@ -68,7 +66,7 @@ public final class SBCameraPanel extends JPanel
     final JButton reset = new JButton("Reset");
     reset.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         controller.rendererUnsetCustomProjection();
       }
@@ -77,7 +75,7 @@ public final class SBCameraPanel extends JPanel
     final JButton cancel = new JButton("Cancel");
     cancel.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         SBWindowUtilities.closeWindow(owner);
       }
@@ -86,7 +84,7 @@ public final class SBCameraPanel extends JPanel
     final JButton apply = new JButton("Apply");
     apply.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         SBCameraPanel.this.trySendMatrix(controller);
       }
@@ -95,7 +93,7 @@ public final class SBCameraPanel extends JPanel
     final JButton ok = new JButton("OK");
     ok.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         SBCameraPanel.this.trySendMatrix(controller);
         SBWindowUtilities.closeWindow(owner);
@@ -107,7 +105,7 @@ public final class SBCameraPanel extends JPanel
   }
 
   protected void setError(
-    final @Nonnull String message)
+    final String message)
   {
     this.error_icon.setVisible(true);
     this.error_text.setText(message);
@@ -115,7 +113,7 @@ public final class SBCameraPanel extends JPanel
   }
 
   protected void trySendMatrix(
-    final @Nonnull SBSceneControllerRendererControl controller)
+    final SBSceneControllerRendererControl controller)
   {
     try {
       final SBProjectionDescription m = this.controls.getDescription();
@@ -124,8 +122,6 @@ public final class SBCameraPanel extends JPanel
       controller.rendererSetCustomProjection(mat);
       SBCameraPanel.this.unsetError();
     } catch (final SBExceptionInputError x) {
-      SBCameraPanel.this.setError(x.getMessage());
-    } catch (final ConstraintError x) {
       SBCameraPanel.this.setError(x.getMessage());
     }
   }

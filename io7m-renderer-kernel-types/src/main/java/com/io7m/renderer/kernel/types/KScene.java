@@ -17,11 +17,7 @@
 package com.io7m.renderer.kernel.types;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 
 import org.pcollections.HashPMap;
 import org.pcollections.HashTreePMap;
@@ -30,10 +26,11 @@ import org.pcollections.MapPSet;
 import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -65,56 +62,43 @@ import com.io7m.renderer.types.RException;
  * </p>
  */
 
-@Immutable public final class KScene
+@EqualityStructural public final class KScene
 {
   private static final class Builder implements KSceneBuilderWithCreateType
   {
-    private static final @Nonnull KInstanceTransformedVisitorType<KTranslucentType, ConstraintError> IDENTITY_TRANSLUCENT;
+    private static final KInstanceTransformedVisitorType<KTranslucentType, UnreachableCodeException> IDENTITY_TRANSLUCENT;
 
     static {
       IDENTITY_TRANSLUCENT =
-        new KInstanceTransformedVisitorType<KTranslucentType, ConstraintError>() {
-          @Override public @Nonnull
-            KTranslucentType
-            transformedOpaqueAlphaDepth(
-              final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
-              throws ConstraintError,
-                RException,
-                JCGLException
+        new KInstanceTransformedVisitorType<KTranslucentType, UnreachableCodeException>() {
+          @Override public KTranslucentType transformedOpaqueAlphaDepth(
+            final KInstanceTransformedOpaqueAlphaDepth i)
+            throws RException,
+              JCGLException
           {
             throw new UnreachableCodeException();
           }
 
-          @Override public @Nonnull
-            KTranslucentType
-            transformedOpaqueRegular(
-              final @Nonnull KInstanceTransformedOpaqueRegular i)
-              throws ConstraintError,
-                RException,
-                JCGLException
+          @Override public KTranslucentType transformedOpaqueRegular(
+            final KInstanceTransformedOpaqueRegular i)
+            throws RException,
+              JCGLException
           {
             throw new UnreachableCodeException();
           }
 
-          @Override public @Nonnull
-            KTranslucentType
-            transformedTranslucentRefractive(
-              final @Nonnull KInstanceTransformedTranslucentRefractive i)
-              throws ConstraintError,
-                ConstraintError,
-                RException,
-                JCGLException
+          @Override public KTranslucentType transformedTranslucentRefractive(
+            final KInstanceTransformedTranslucentRefractive i)
+            throws RException,
+              JCGLException
           {
             return i;
           }
 
-          @Override public @Nonnull
-            KTranslucentType
-            transformedTranslucentRegular(
-              final @Nonnull KInstanceTransformedTranslucentRegular i)
-              throws ConstraintError,
-                RException,
-                JCGLException
+          @Override public KTranslucentType transformedTranslucentRegular(
+            final KInstanceTransformedTranslucentRegular i)
+            throws RException,
+              JCGLException
           {
             return i;
           }
@@ -122,10 +106,8 @@ import com.io7m.renderer.types.RException;
           @Override public
             KTranslucentType
             transformedTranslucentSpecularOnly(
-              final @Nonnull KInstanceTransformedTranslucentSpecularOnly i)
-              throws ConstraintError,
-                ConstraintError,
-                RException,
+              final KInstanceTransformedTranslucentSpecularOnly i)
+              throws RException,
                 JCGLException
           {
             throw new UnreachableCodeException();
@@ -133,23 +115,22 @@ import com.io7m.renderer.types.RException;
         };
     }
 
-    private final @Nonnull KCamera                                                                   camera;
-    private @Nonnull MapPSet<KLightType>                                                             lights_all;
-    private @Nonnull MapPSet<KInstanceTransformedType>                                               lit;
-    private @Nonnull HashPMap<KLightType, List<KInstanceTransformedOpaqueType>>                      lit_opaque;
-    private @Nonnull HashPMap<KLightType, List<KInstanceTransformedOpaqueType>>                      shadow_casters;
-    private @Nonnull MapPSet<KLightType>                                                             shadow_lights;
-    private @Nonnull MapPSet<KInstanceTransformedType>                                               unlit;
-    private @Nonnull MapPSet<KInstanceTransformedOpaqueType>                                         unlit_opaque;
-    private @Nonnull MapPSet<KInstanceTransformedType>                                               visible_instances;
-    private @Nonnull MapPSet<KInstanceTransformedOpaqueType>                                         visible_opaque;
-    private @Nonnull PVector<KTranslucentType>                                                       visible_translucent_ordered;
+    private final KCamera                                                                            camera;
+    private MapPSet<KLightType>                                                                      lights_all;
+    private MapPSet<KInstanceTransformedType>                                                        lit;
+    private HashPMap<KLightType, List<KInstanceTransformedOpaqueType>>                               lit_opaque;
+    private HashPMap<KLightType, List<KInstanceTransformedOpaqueType>>                               shadow_casters;
+    private MapPSet<KLightType>                                                                      shadow_lights;
+    private MapPSet<KInstanceTransformedType>                                                        unlit;
+    private MapPSet<KInstanceTransformedOpaqueType>                                                  unlit_opaque;
+    private MapPSet<KInstanceTransformedType>                                                        visible_instances;
+    private MapPSet<KInstanceTransformedOpaqueType>                                                  visible_opaque;
+    private PVector<KTranslucentType>                                                                visible_translucent_ordered;
 
-    protected Builder(
-      final @Nonnull KCamera in_camera)
-      throws ConstraintError
+    @SuppressWarnings("null") protected Builder(
+      final KCamera in_camera)
     {
-      this.camera = Constraints.constrainNotNull(in_camera, "Camera");
+      this.camera = NullCheck.notNull(in_camera, "Camera");
       this.lit = HashTreePSet.empty();
       this.lit_opaque = HashTreePMap.empty();
       this.shadow_lights = HashTreePSet.empty();
@@ -163,7 +144,7 @@ import com.io7m.renderer.types.RException;
     }
 
     private void addLight(
-      final @Nonnull KLightType light)
+      final KLightType light)
     {
       if (light.lightHasShadow()) {
         this.shadow_lights = this.shadow_lights.plus(light);
@@ -172,8 +153,8 @@ import com.io7m.renderer.types.RException;
     }
 
     private void addOpaqueInstance(
-      final @Nonnull KLightType light,
-      final @Nonnull KInstanceTransformedOpaqueType instance)
+      final KLightType light,
+      final KInstanceTransformedOpaqueType instance)
     {
       final PVector<KInstanceTransformedOpaqueType> instances;
       if (this.lit_opaque.containsKey(light)) {
@@ -190,8 +171,8 @@ import com.io7m.renderer.types.RException;
     }
 
     private void addShadowCaster(
-      final @Nonnull KLightType light,
-      final @Nonnull KInstanceTransformedOpaqueType instance)
+      final KLightType light,
+      final KInstanceTransformedOpaqueType instance)
     {
       TreePVector<KInstanceTransformedOpaqueType> casters = null;
       if (this.shadow_casters.containsKey(light)) {
@@ -207,68 +188,86 @@ import com.io7m.renderer.types.RException;
     }
 
     private void checkNotLit(
-      final @Nonnull KInstanceTransformedType transformed)
-      throws ConstraintError
+      final KInstanceTransformedType transformed)
     {
-      Constraints.constrainArbitrary(
-        this.lit.contains(transformed) == false,
-        "Instance not already lit");
+      if (this.lit.contains(transformed)) {
+        final String s =
+          String.format("Instance %s is already lit", transformed);
+        throw new IllegalStateException(s);
+      }
     }
 
     private void checkNotUnlit(
-      final @Nonnull KInstanceTransformedType transformed)
-      throws ConstraintError
+      final KInstanceTransformedType transformed)
     {
-      Constraints.constrainArbitrary(
-        this.unlit.contains(transformed) == false,
-        "Instance not already unlit");
+      if (this.unlit.contains(transformed)) {
+        final String s =
+          String.format("Instance %s is already unlit", transformed);
+        throw new IllegalStateException(s);
+      }
     }
 
     private void checkOpaqueLit(
-      final @Nonnull KLightType light,
-      final @Nonnull KInstanceTransformedOpaqueType transformed)
-      throws ConstraintError
+      final KLightType light,
+      final KInstanceTransformedOpaqueType transformed)
     {
-      Constraints.constrainNotNull(light, "Light");
+      NullCheck.notNull(light, "Light");
       this.checkNotUnlit(transformed);
     }
 
-    @Override public void sceneAddInvisibleWithShadow(
-      final @Nonnull KLightType light,
-      final @Nonnull KInstanceTransformedOpaqueType instance)
-      throws ConstraintError
+    @Override public boolean equals(
+      final @Nullable Object other)
     {
+      return super.equals(other);
+    }
+
+    @Override public int hashCode()
+    {
+      return super.hashCode();
+    }
+
+    @Override public void sceneAddInvisibleWithShadow(
+      final KLightType light,
+      final KInstanceTransformedOpaqueType instance)
+    {
+      NullCheck.notNull(light, "Light");
+      NullCheck.notNull(instance, "Instance");
+
       if (light.lightHasShadow()) {
         this.addShadowCaster(light, instance);
       }
     }
 
     @Override public void sceneAddOpaqueLitVisibleWithoutShadow(
-      final @Nonnull KLightType light,
-      final @Nonnull KInstanceTransformedOpaqueType instance)
-      throws ConstraintError
+      final KLightType light,
+      final KInstanceTransformedOpaqueType instance)
     {
+      NullCheck.notNull(light, "Light");
+      NullCheck.notNull(instance, "Instance");
+
       this.checkOpaqueLit(light, instance);
       this.addOpaqueInstance(light, instance);
       this.addLight(light);
     }
 
     @Override public void sceneAddOpaqueLitVisibleWithShadow(
-      final @Nonnull KLightType light,
-      final @Nonnull KInstanceTransformedOpaqueType instance)
-      throws ConstraintError
+      final KLightType light,
+      final KInstanceTransformedOpaqueType instance)
     {
+      NullCheck.notNull(light, "Light");
+      NullCheck.notNull(instance, "Instance");
+
       this.checkOpaqueLit(light, instance);
       this.addOpaqueInstance(light, instance);
       this.sceneAddInvisibleWithShadow(light, instance);
     }
 
     @Override public void sceneAddOpaqueUnlit(
-      final @Nonnull KInstanceTransformedOpaqueType instance)
-      throws ConstraintError
+      final KInstanceTransformedOpaqueType instance)
     {
-      this.checkNotLit(instance);
+      NullCheck.notNull(instance, "Instance");
 
+      this.checkNotLit(instance);
       this.unlit = this.unlit.plus(instance);
       this.unlit_opaque = this.unlit_opaque.plus(instance);
       this.visible_opaque = this.visible_opaque.plus(instance);
@@ -276,19 +275,21 @@ import com.io7m.renderer.types.RException;
     }
 
     @Override public void sceneAddTranslucentLit(
-      final @Nonnull KInstanceTransformedTranslucentLitType instance,
-      final @Nonnull Set<KLightType> lights)
-      throws ConstraintError
+      final KInstanceTransformedTranslucentLitType instance,
+      final Set<KLightType> lights)
     {
+      NullCheck.notNull(instance, "Instance");
+      NullCheck.notNullAll(lights, "Light");
+
       try {
         this.checkNotUnlit(instance);
 
-        final KInstanceTransformedTranslucentLitVisitorType<KTranslucentType, ConstraintError> v =
-          new KInstanceTransformedTranslucentLitVisitorType<KTranslucentType, ConstraintError>() {
+        final KInstanceTransformedTranslucentLitVisitorType<KTranslucentType, UnreachableCodeException> v =
+          new KInstanceTransformedTranslucentLitVisitorType<KTranslucentType, UnreachableCodeException>() {
             @Override public
               KTranslucentType
               transformedTranslucentLitRegular(
-                final @Nonnull KInstanceTransformedTranslucentRegular i)
+                final KInstanceTransformedTranslucentRegular i)
             {
               return new KTranslucentRegularLit(i, lights);
             }
@@ -296,7 +297,7 @@ import com.io7m.renderer.types.RException;
             @Override public
               KTranslucentType
               transformedTranslucentLitSpecularOnly(
-                final @Nonnull KInstanceTransformedTranslucentSpecularOnly i)
+                final KInstanceTransformedTranslucentSpecularOnly i)
             {
               return new KTranslucentSpecularOnlyLit(i, lights);
             }
@@ -315,9 +316,10 @@ import com.io7m.renderer.types.RException;
     }
 
     @Override public void sceneAddTranslucentUnlit(
-      final @Nonnull KInstanceTransformedTranslucentUnlitType instance)
-      throws ConstraintError
+      final KInstanceTransformedTranslucentUnlitType instance)
     {
+      NullCheck.notNull(instance, "Instance");
+
       try {
         this.checkNotLit(instance);
         this.unlit = this.unlit.plus(instance);
@@ -355,112 +357,32 @@ import com.io7m.renderer.types.RException;
   }
 
   /**
-   * Information about the opaque instances in the current scene.
-   */
-
-  @Immutable public static final class KSceneOpaques
-  {
-    private final @Nonnull Set<KInstanceTransformedOpaqueType>                   all;
-    private final @Nonnull Map<KLightType, List<KInstanceTransformedOpaqueType>> lit;
-    private final @Nonnull Set<KInstanceTransformedOpaqueType>                   unlit;
-
-    private KSceneOpaques(
-      final @Nonnull Map<KLightType, List<KInstanceTransformedOpaqueType>> in_lit,
-      final @Nonnull Set<KInstanceTransformedOpaqueType> in_unlit,
-      final @Nonnull Set<KInstanceTransformedOpaqueType> visible)
-    {
-      this.lit = in_lit;
-      this.unlit = in_unlit;
-      this.all = visible;
-    }
-
-    /**
-     * @return A flat list of all the visible opaque objects in the scene.
-     */
-
-    public @Nonnull Set<KInstanceTransformedOpaqueType> getAll()
-    {
-      return this.all;
-    }
-
-    /**
-     * @return The set of opaque instances affected by each light in the
-     *         scene.
-     */
-
-    public @Nonnull
-      Map<KLightType, List<KInstanceTransformedOpaqueType>>
-      getLitInstances()
-    {
-      return this.lit;
-    }
-
-    /**
-     * @return The set of unlit opaque instances in the scene.
-     */
-
-    public @Nonnull Set<KInstanceTransformedOpaqueType> getUnlitInstances()
-    {
-      return this.unlit;
-    }
-  }
-
-  /**
-   * Information about the shadow casters in the current scene.
-   */
-
-  @Immutable public static final class KSceneShadows
-  {
-    private final @Nonnull Map<KLightType, List<KInstanceTransformedOpaqueType>> shadow_casters;
-
-    private KSceneShadows(
-      final @Nonnull Map<KLightType, List<KInstanceTransformedOpaqueType>> in_shadow_casters)
-    {
-      this.shadow_casters = in_shadow_casters;
-    }
-
-    /**
-     * @return The set of shadow casters for each light in the scene.
-     */
-
-    public @Nonnull
-      Map<KLightType, List<KInstanceTransformedOpaqueType>>
-      getShadowCasters()
-    {
-      return this.shadow_casters;
-    }
-  }
-
-  /**
    * Retrieve a new {@link KSceneBuilderWithCreateType} with which to
    * construct a scene, rendered from the perspective of <code>camera</code>.
    * 
    * @param camera
    *          The observer of the scene
    * @return A new scene builder
-   * @throws ConstraintError
-   *           Iff <code>camera == null</code>.
    */
 
-  public static @Nonnull KSceneBuilderWithCreateType newBuilder(
-    final @Nonnull KCamera camera)
-    throws ConstraintError
+  public static KSceneBuilderWithCreateType newBuilder(
+    final KCamera camera)
   {
     return new Builder(camera);
   }
 
-  private final @Nonnull KCamera                       camera;
-  private final @Nonnull KSceneOpaques                 opaques;
-  private final @Nonnull KSceneShadows                 shadows;
-  private final @Nonnull List<KTranslucentType>        translucents;
-  private final @Nonnull Set<KInstanceTransformedType> visible;
+  private final KCamera                       camera;
+  private final KSceneOpaques                 opaques;
+  private final KSceneShadows                 shadows;
+  private final List<KTranslucentType>        translucents;
+  private final Set<KInstanceTransformedType> visible;
 
   private KScene(
-    final @Nonnull KCamera in_camera,
-    final @Nonnull KSceneOpaques in_opaques,
-    final @Nonnull List<KTranslucentType> in_translucents,
-    final @Nonnull KSceneShadows in_shadows,
-    final @Nonnull Set<KInstanceTransformedType> in_visible)
+    final KCamera in_camera,
+    final KSceneOpaques in_opaques,
+    final List<KTranslucentType> in_translucents,
+    final KSceneShadows in_shadows,
+    final Set<KInstanceTransformedType> in_visible)
   {
     this.camera = in_camera;
     this.opaques = in_opaques;
@@ -469,11 +391,31 @@ import com.io7m.renderer.types.RException;
     this.visible = in_visible;
   }
 
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KScene other = (KScene) obj;
+    return (this.camera.equals(other.camera))
+      && (this.opaques.equals(other.opaques))
+      && (this.shadows.equals(other.shadows))
+      && (this.translucents.equals(other.translucents))
+      && (this.visible.equals(other.visible));
+  }
+
   /**
    * @return The scene's camera
    */
 
-  public @Nonnull KCamera getCamera()
+  public KCamera getCamera()
   {
     return this.camera;
   }
@@ -482,7 +424,7 @@ import com.io7m.renderer.types.RException;
    * @return The set of opaque instances in the current scene.
    */
 
-  public @Nonnull KSceneOpaques getOpaques()
+  public KSceneOpaques getOpaques()
   {
     return this.opaques;
   }
@@ -491,7 +433,7 @@ import com.io7m.renderer.types.RException;
    * @return The set of shadow casters in the current scene.
    */
 
-  public @Nonnull KSceneShadows getShadows()
+  public KSceneShadows getShadows()
   {
     return this.shadows;
   }
@@ -500,7 +442,7 @@ import com.io7m.renderer.types.RException;
    * @return The set of translucent instances in the current scene.
    */
 
-  public @Nonnull List<KTranslucentType> getTranslucents()
+  public List<KTranslucentType> getTranslucents()
   {
     return this.translucents;
   }
@@ -510,8 +452,20 @@ import com.io7m.renderer.types.RException;
    *         instances that were not added as invisible shadow casters).
    */
 
-  public @Nonnull Set<KInstanceTransformedType> getVisibleInstances()
+  public Set<KInstanceTransformedType> getVisibleInstances()
   {
     return this.visible;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.camera.hashCode();
+    result = (prime * result) + this.opaques.hashCode();
+    result = (prime * result) + this.shadows.hashCode();
+    result = (prime * result) + this.translucents.hashCode();
+    result = (prime * result) + this.visible.hashCode();
+    return result;
   }
 }

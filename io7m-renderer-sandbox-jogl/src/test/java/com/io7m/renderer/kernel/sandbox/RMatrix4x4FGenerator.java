@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,7 @@ package com.io7m.renderer.kernel.sandbox;
 import net.java.quickcheck.Generator;
 
 import com.io7m.jtensors.VectorI4F;
-import com.io7m.jtensors.VectorReadable4F;
+import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RTransformType;
 
@@ -28,28 +28,28 @@ final class RMatrix4x4FGenerator<T extends RTransformType> implements
 {
   @Override public RMatrixI4x4F<T> next()
   {
-    final VectorReadable4F column_0 =
+    final VectorReadable4FType column_0 =
       new VectorI4F(
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f);
 
-    final VectorReadable4F column_1 =
+    final VectorReadable4FType column_1 =
       new VectorI4F(
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f);
 
-    final VectorReadable4F column_2 =
+    final VectorReadable4FType column_2 =
       new VectorI4F(
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f);
 
-    final VectorReadable4F column_3 =
+    final VectorReadable4FType column_3 =
       new VectorI4F(
         (float) Math.random() * 10000.0f,
         (float) Math.random() * 10000.0f,

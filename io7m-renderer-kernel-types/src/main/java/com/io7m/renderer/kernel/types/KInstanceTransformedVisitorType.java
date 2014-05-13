@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
@@ -40,8 +37,7 @@ public interface KInstanceTransformedVisitorType<A, E extends Throwable>
    * @param i
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws JCGLException
@@ -50,10 +46,9 @@ public interface KInstanceTransformedVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A transformedOpaqueAlphaDepth(
-    final @Nonnull KInstanceTransformedOpaqueAlphaDepth i)
+  A transformedOpaqueAlphaDepth(
+    final KInstanceTransformedOpaqueAlphaDepth i)
     throws E,
-      ConstraintError,
       RException,
       JCGLException;
 
@@ -63,8 +58,7 @@ public interface KInstanceTransformedVisitorType<A, E extends Throwable>
    * @param i
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws JCGLException
@@ -73,10 +67,9 @@ public interface KInstanceTransformedVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A transformedOpaqueRegular(
-    final @Nonnull KInstanceTransformedOpaqueRegular i)
+  A transformedOpaqueRegular(
+    final KInstanceTransformedOpaqueRegular i)
     throws E,
-      ConstraintError,
       RException,
       JCGLException;
 
@@ -86,8 +79,7 @@ public interface KInstanceTransformedVisitorType<A, E extends Throwable>
    * @param i
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws JCGLException
@@ -96,10 +88,9 @@ public interface KInstanceTransformedVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A transformedTranslucentRefractive(
-    final @Nonnull KInstanceTransformedTranslucentRefractive i)
+  A transformedTranslucentRefractive(
+    final KInstanceTransformedTranslucentRefractive i)
     throws E,
-      ConstraintError,
       RException,
       JCGLException;
 
@@ -109,8 +100,7 @@ public interface KInstanceTransformedVisitorType<A, E extends Throwable>
    * @param i
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws JCGLException
@@ -119,10 +109,9 @@ public interface KInstanceTransformedVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A transformedTranslucentRegular(
-    final @Nonnull KInstanceTransformedTranslucentRegular i)
+  A transformedTranslucentRegular(
+    final KInstanceTransformedTranslucentRegular i)
     throws E,
-      ConstraintError,
       RException,
       JCGLException;
 
@@ -132,8 +121,7 @@ public interface KInstanceTransformedVisitorType<A, E extends Throwable>
    * @param i
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws ConstraintError
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws JCGLException
@@ -142,10 +130,9 @@ public interface KInstanceTransformedVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  @Nonnull A transformedTranslucentSpecularOnly(
-    final @Nonnull KInstanceTransformedTranslucentSpecularOnly i)
+  A transformedTranslucentSpecularOnly(
+    final KInstanceTransformedTranslucentSpecularOnly i)
     throws E,
-      ConstraintError,
       RException,
       JCGLException;
 }

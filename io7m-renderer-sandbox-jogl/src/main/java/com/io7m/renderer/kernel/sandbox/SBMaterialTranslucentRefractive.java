@@ -16,35 +16,32 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
 public final class SBMaterialTranslucentRefractive implements
   SBMaterialTranslucent
 {
-  private final @Nonnull SBMaterialDescriptionTranslucentRefractive description;
-  private final @Nonnull Integer                                    id;
-  private final @CheckForNull SBTexture2D<SBTexture2DKindNormal>    map_normal;
+  private final SBMaterialDescriptionTranslucentRefractive   description;
+  private final Integer                                      id;
+  private final @Nullable SBTexture2D<SBTexture2DKindNormal> map_normal;
 
   public SBMaterialTranslucentRefractive(
-    final @Nonnull Integer in_id,
-    final @Nonnull SBMaterialDescriptionTranslucentRefractive in_description,
-    final @CheckForNull SBTexture2D<SBTexture2DKindNormal> in_map_normal)
+    final Integer in_id,
+    final SBMaterialDescriptionTranslucentRefractive in_description,
+    final @Nullable SBTexture2D<SBTexture2DKindNormal> in_map_normal)
   {
     this.id = in_id;
     this.description = in_description;
     this.map_normal = in_map_normal;
   }
 
-  @Override public @Nonnull Integer materialGetID()
+  @Override public Integer materialGetID()
   {
     return this.id;
   }
 
-  @Override public @Nonnull String materialGetName()
+  @Override public String materialGetName()
   {
     return this.description.materialDescriptionGetName();
   }
@@ -55,8 +52,7 @@ public final class SBMaterialTranslucentRefractive implements
     materialTranslucentVisitableAccept(
       final V v)
       throws E,
-        RException,
-        ConstraintError
+        RException
   {
     return v.materialVisitTranslucentRefractive(this);
   }
@@ -74,8 +70,7 @@ public final class SBMaterialTranslucentRefractive implements
     materialVisitableAccept(
       final V v)
       throws E,
-        RException,
-        ConstraintError
+        RException
   {
     return v.materialVisitTranslucent(this);
   }

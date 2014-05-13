@@ -18,22 +18,19 @@ package com.io7m.renderer.kernel.sandbox;
 
 import java.util.HashSet;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.ThreadSafe;
+import com.io7m.jintegers.CheckedMath;
 
-import com.io7m.jaux.CheckedMath;
-
-@ThreadSafe public final class SBUniqueNames
+public final class SBUniqueNames
 {
-  private final @Nonnull HashSet<String> values;
+  private final HashSet<String> values;
 
   SBUniqueNames()
   {
     this.values = new HashSet<String>();
   }
 
-  synchronized @Nonnull String get(
-    final @Nonnull String name)
+  synchronized String get(
+    final String name)
   {
     String suffix = null;
     String prefix = null;
@@ -69,9 +66,11 @@ import com.io7m.jaux.CheckedMath;
         buffer.append(".");
         buffer.append(suffix);
       }
-      if (this.values.contains(buffer.toString()) == false) {
-        this.values.add(buffer.toString());
-        return buffer.toString();
+      final String text = buffer.toString();
+      if (this.values.contains(text) == false) {
+        this.values.add(text);
+        assert text != null;
+        return text;
       }
     }
   }

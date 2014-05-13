@@ -16,11 +16,8 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jcanephora.JCGLImplementation;
-import com.io7m.jlog.Log;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jlog.LogUsableType;
 import com.io7m.renderer.kernel.KFramebufferRGBACacheType;
 import com.io7m.renderer.kernel.KFramebufferRGBAUsableType;
 import com.io7m.renderer.kernel.KShaderCacheType;
@@ -29,16 +26,14 @@ import com.io7m.renderer.types.RException;
 public interface SBKPostprocessor
 {
   void postprocessorInitialize(
-    final @Nonnull JCGLImplementation gi,
-    final @Nonnull KFramebufferRGBACacheType rgba_cache,
-    final @Nonnull KShaderCacheType shader_cache,
-    final @Nonnull Log log)
-    throws RException,
-      ConstraintError;
+    final JCGLImplementationType gi,
+    final KFramebufferRGBACacheType rgba_cache,
+    final KShaderCacheType shader_cache,
+    final LogUsableType log)
+    throws RException;
 
   void postprocessorRun(
-    final @Nonnull KFramebufferRGBAUsableType input,
-    final @Nonnull KFramebufferRGBAUsableType output)
-    throws RException,
-      ConstraintError;
+    final KFramebufferRGBAUsableType input,
+    final KFramebufferRGBAUsableType output)
+    throws RException;
 }

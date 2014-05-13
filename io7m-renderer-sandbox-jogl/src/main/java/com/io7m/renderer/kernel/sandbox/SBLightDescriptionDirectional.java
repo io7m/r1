@@ -16,29 +16,25 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.types.RException;
 
-@Immutable final class SBLightDescriptionDirectional implements
-  SBLightDescription
+final class SBLightDescriptionDirectional implements SBLightDescription
 {
-  private final @Nonnull Integer           id;
-  private final @Nonnull KLightDirectional actual;
+  private final Integer           id;
+  private final KLightDirectional actual;
 
   SBLightDescriptionDirectional(
-    final @Nonnull Integer in_id,
-    final @Nonnull KLightDirectional in_actual)
+    final Integer in_id,
+    final KLightDirectional in_actual)
   {
     this.id = in_id;
     this.actual = in_actual;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -93,8 +89,7 @@ import com.io7m.renderer.types.RException;
     A
     lightDescriptionVisitableAccept(
       final V v)
-      throws ConstraintError,
-        RException,
+      throws RException,
         E
   {
     return v.lightVisitDirectional(this);

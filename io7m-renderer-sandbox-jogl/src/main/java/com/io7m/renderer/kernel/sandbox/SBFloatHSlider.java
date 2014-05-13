@@ -19,7 +19,6 @@ package com.io7m.renderer.kernel.sandbox;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -30,8 +29,8 @@ import javax.swing.event.ChangeListener;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 
 public final class SBFloatHSlider implements SBControls
@@ -53,22 +52,20 @@ public final class SBFloatHSlider implements SBControls
     return (int) (((f - min) / (max - min)) * 100);
   }
 
-  private float                     current;
-  private final @Nonnull JTextField field;
-  private final @Nonnull RowGroup   group;
-  private final @Nonnull JLabel     label;
-  private final float               maximum;
-  private final float               minimum;
-  private final @Nonnull JSlider    slider;
+  private float            current;
+  private final JTextField field;
+  private final RowGroup   group;
+  private final JLabel     label;
+  private final float      maximum;
+  private final float      minimum;
+  private final JSlider    slider;
 
   public SBFloatHSlider(
-    final @Nonnull String in_label,
+    final String in_label,
     final float in_minimum,
     final float in_maximum)
-    throws ConstraintError
   {
-    this.label =
-      new JLabel(Constraints.constrainNotNull(in_label, "ForwardLabel"));
+    this.label = new JLabel(NullCheck.notNull(in_label, "ForwardLabel"));
     this.group = new RowGroup();
 
     this.maximum = in_maximum;
@@ -84,7 +81,7 @@ public final class SBFloatHSlider implements SBControls
       @SuppressWarnings({ "synthetic-access" }) @Override public
         void
         stateChanged(
-          final @Nonnull ChangeEvent ev)
+          final @Nullable ChangeEvent ev)
       {
         final int slider_current = SBFloatHSlider.this.slider.getValue();
         SBFloatHSlider.this.current =
@@ -100,7 +97,7 @@ public final class SBFloatHSlider implements SBControls
       @SuppressWarnings("synthetic-access") @Override public
         void
         actionPerformed(
-          final ActionEvent e)
+          final @Nullable ActionEvent e)
       {
         try {
           final float actual =
@@ -140,12 +137,12 @@ public final class SBFloatHSlider implements SBControls
     return this.current;
   }
 
-  public @Nonnull JTextField getField()
+  public JTextField getField()
   {
     return this.field;
   }
 
-  public @Nonnull JLabel getLabel()
+  public JLabel getLabel()
   {
     return this.label;
   }
@@ -160,7 +157,7 @@ public final class SBFloatHSlider implements SBControls
     return this.minimum;
   }
 
-  public @Nonnull JSlider getSlider()
+  public JSlider getSlider()
   {
     return this.slider;
   }

@@ -16,10 +16,7 @@
 
 package com.io7m.renderer.xml.collada;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
+import com.io7m.jnull.NullCheck;
 
 public enum ColladaSemantic
 {
@@ -47,25 +44,24 @@ public enum ColladaSemantic
   SEMANTIC_VERTEX("VERTEX"),
   SEMANTIC_WEIGHT("WEIGHT");
 
-  public static @Nonnull ColladaSemantic fromName(
-    final @Nonnull String name)
-    throws ConstraintError
+  public static ColladaSemantic fromName(
+    final String name)
   {
-    Constraints.constrainNotNull(name, "Name");
+    NullCheck.notNull(name, "Name");
     final ColladaSemantic c = ColladaSemantic.valueOf("SEMANTIC_" + name);
-    Constraints.constrainNotNull(c, "Resulting value");
+    NullCheck.notNull(c, "Resulting value");
     return c;
   }
 
-  private final @Nonnull String name;
+  private final String name;
 
   private ColladaSemantic(
-    final @Nonnull String in_name)
+    final String in_name)
   {
     this.name = in_name;
   }
 
-  public @Nonnull String getName()
+  public String getName()
   {
     return this.name;
   }

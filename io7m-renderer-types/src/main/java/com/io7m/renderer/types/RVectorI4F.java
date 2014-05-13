@@ -16,8 +16,7 @@
 
 package com.io7m.renderer.types;
 
-import javax.annotation.Nonnull;
-
+import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jtensors.VectorI4F;
 
 /**
@@ -28,8 +27,8 @@ import com.io7m.jtensors.VectorI4F;
  *          A phantom type parameter describing the coordinate space
  */
 
-public final class RVectorI4F<T extends RSpaceType> extends VectorI4F implements
-  RVectorReadable4FType<T>
+@EqualityStructural public final class RVectorI4F<T extends RSpaceType> extends
+  VectorI4F implements RVectorReadable4FType<T>
 {
   /**
    * Construct a new vector.
@@ -61,7 +60,7 @@ public final class RVectorI4F<T extends RSpaceType> extends VectorI4F implements
    */
 
   public RVectorI4F(
-    final @Nonnull RVectorReadable4FType<T> v)
+    final RVectorReadable4FType<T> v)
   {
     super(v);
   }

@@ -16,18 +16,18 @@
 
 package com.io7m.renderer.types;
 
-import com.io7m.jtensors.MatrixReadable4x4F;
+import com.io7m.jtensors.MatrixReadable4x4FType;
 
 /**
- * A readable interface to 4x4 matrices indexed by the type {@link RTransformType}
- * the matrix represents.
+ * A readable interface to 4x4 matrices indexed by the type
+ * {@link RTransformType} the matrix represents.
  * 
  * @param <T>
  *          A phantom type parameter describing the type of transform
  */
 
 public interface RMatrixReadable4x4FType<T extends RTransformType> extends
-  MatrixReadable4x4F
+  MatrixReadable4x4FType
 {
   // No extra functions.
 }

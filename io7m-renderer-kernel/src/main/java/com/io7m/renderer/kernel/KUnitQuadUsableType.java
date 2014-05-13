@@ -16,30 +16,28 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jcanephora.ArrayBufferUsable;
-import com.io7m.jcanephora.IndexBufferUsable;
-import com.io7m.jcanephora.JCGLResourceSized;
-import com.io7m.jcanephora.JCGLResourceUsable;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.IndexBufferUsableType;
+import com.io7m.jcanephora.JCGLResourceSizedType;
+import com.io7m.jcanephora.JCGLResourceUsableType;
 
 /**
  * The usable interface to unit quads.
  */
 
 public interface KUnitQuadUsableType extends
-  JCGLResourceUsable,
-  JCGLResourceSized
+  JCGLResourceUsableType,
+  JCGLResourceSizedType
 {
   /**
    * @return The array buffer that backs the quad
    */
 
-  @Nonnull ArrayBufferUsable getArray();
+  ArrayBufferUsableType getArray();
 
   /**
    * @return The index buffer that backs the quad
    */
 
-  @Nonnull IndexBufferUsable getIndices();
+  IndexBufferUsableType getIndices();
 }

@@ -20,7 +20,6 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
@@ -29,23 +28,24 @@ import javax.swing.JTextField;
 import net.java.dev.designgridlayout.DesignGridLayout;
 import net.java.dev.designgridlayout.RowGroup;
 
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 
 public final class SBMaterialControlsEmissive implements
   SBControlsDataType<SBMaterialEmissiveDescription>
 {
-  protected final @Nonnull JTextField     texture;
-  protected final @Nonnull JButton        texture_select;
-  protected final @Nonnull SBFloatHSlider level;
-  private final @Nonnull RowGroup         group;
+  protected final JTextField     texture;
+  protected final JButton        texture_select;
+  protected final SBFloatHSlider level;
+  private final RowGroup         group;
 
   public SBMaterialControlsEmissive(
-    final @Nonnull SBSceneControllerTextures controller,
-    final @Nonnull Log log)
-    throws ConstraintError
+    final SBSceneControllerTextures controller,
+    final LogUsableType log)
   {
     this.group = new RowGroup();
 
@@ -54,7 +54,7 @@ public final class SBMaterialControlsEmissive implements
     this.texture_select = new JButton("Select...");
     this.texture_select.addActionListener(new ActionListener() {
       @Override public void actionPerformed(
-        final @Nonnull ActionEvent e)
+        final @Nullable ActionEvent e)
       {
         final SBTextures2DWindow twindow =
           new SBTextures2DWindow(
@@ -92,14 +92,17 @@ public final class SBMaterialControlsEmissive implements
   }
 
   @Override public SBMaterialEmissiveDescription controlsSave()
-    throws SBExceptionInputError,
-      ConstraintError
+    throws SBExceptionInputError
   {
-    final String tt = this.texture.getText();
-    final PathVirtual path =
-      (tt.equals("")) ? null : PathVirtual.ofString(tt);
+    try {
+      final String tt = this.texture.getText();
+      final PathVirtual path =
+        (tt.equals("")) ? null : PathVirtual.ofString(tt);
 
-    return new SBMaterialEmissiveDescription(this.level.getCurrent(), path);
+      return new SBMaterialEmissiveDescription(this.level.getCurrent(), path);
+    } catch (final FilesystemError e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 
   @Override public void controlsHide()
@@ -113,7 +116,7 @@ public final class SBMaterialControlsEmissive implements
   }
 
   @Override public void controlsLoadFrom(
-    final @Nonnull SBMaterialEmissiveDescription mat_m)
+    final SBMaterialEmissiveDescription mat_m)
   {
     this.level.setCurrent(mat_m.getEmission());
     final PathVirtual tt = mat_m.getTexture();

@@ -18,10 +18,6 @@ package com.io7m.renderer.kernel.types;
 
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-
 /**
  * A mutable "builder" interface for creating immutable {@link KScene}
  * snapshots.
@@ -53,17 +49,11 @@ public interface KSceneBuilderType
    * @param instance
    *          The shadow-casting instance
    * 
-   * @throws ConstraintError
-   *           If any of the following hold:
-   *           <ul>
-   *           <li><code>light == null || instance == null</code></li>
-   *           </ul>
    */
 
   void sceneAddInvisibleWithShadow(
-    final @Nonnull KLightType light,
-    final @Nonnull KInstanceTransformedOpaqueType instance)
-    throws ConstraintError;
+    final KLightType light,
+    final KInstanceTransformedOpaqueType instance);
 
   /**
    * <p>
@@ -87,21 +77,15 @@ public interface KSceneBuilderType
    * @param instance
    *          The instance
    * 
-   * @throws ConstraintError
-   *           If any of the following hold:
-   *           <ul>
-   *           <li><code>light == null || instance == null</code></li>
-   *           <li>The material used for <code>instance</code> is translucent</li>
-   *           </ul>
+   * 
    * 
    * @see #sceneAddInvisibleWithShadow(KLightType,
    *      KInstanceTransformedOpaqueType)
    */
 
   void sceneAddOpaqueLitVisibleWithoutShadow(
-    final @Nonnull KLightType light,
-    final @Nonnull KInstanceTransformedOpaqueType instance)
-    throws ConstraintError;
+    final KLightType light,
+    final KInstanceTransformedOpaqueType instance);
 
   /**
    * <p>
@@ -123,21 +107,14 @@ public interface KSceneBuilderType
    * @param instance
    *          The instance
    * 
-   * @throws ConstraintError
-   *           If any of the following hold:
-   *           <ul>
-   *           <li><code>light == null || instance == null</code></li>
-   *           <li>The material used for <code>instance</code> is translucent</li>
-   *           </ul>
    * 
    * @see #sceneAddInvisibleWithShadow(KLightType,
    *      KInstanceTransformedOpaqueType)
    */
 
   void sceneAddOpaqueLitVisibleWithShadow(
-    final @Nonnull KLightType light,
-    final @Nonnull KInstanceTransformedOpaqueType instance)
-    throws ConstraintError;
+    final KLightType light,
+    final KInstanceTransformedOpaqueType instance);
 
   /**
    * <p>
@@ -153,17 +130,10 @@ public interface KSceneBuilderType
    * @param instance
    *          The shadow-casting instance
    * 
-   * @throws ConstraintError
-   *           If any of the following hold:
-   *           <ul>
-   *           <li><code>instance == null</code></li>
-   *           <li>The material used for <code>instance</code> is translucent</li>
-   *           </ul>
    */
 
   void sceneAddOpaqueUnlit(
-    final @Nonnull KInstanceTransformedOpaqueType instance)
-    throws ConstraintError;
+    final KInstanceTransformedOpaqueType instance);
 
   /**
    * <p>
@@ -191,20 +161,13 @@ public interface KSceneBuilderType
    * @param instance
    *          The shadow-casting instance
    * 
-   * @throws ConstraintError
-   *           If any of the following hold:
-   *           <ul>
-   *           <li><code>lights == null || instance == null</code></li>
-   *           </ul>
-   * 
    * @see #sceneAddInvisibleWithShadow(KLightType,
    *      KInstanceTransformedOpaqueType)
    */
 
   void sceneAddTranslucentLit(
-    final @Nonnull KInstanceTransformedTranslucentLitType instance,
-    final @Nonnull Set<KLightType> lights)
-    throws ConstraintError;
+    final KInstanceTransformedTranslucentLitType instance,
+    final Set<KLightType> lights);
 
   /**
    * <p>
@@ -214,14 +177,8 @@ public interface KSceneBuilderType
    * 
    * @param instance
    *          The unlit instance
-   * @throws ConstraintError
-   *           If any of the following hold:
-   *           <ul>
-   *           <li><code>instance == null</code></li>
-   *           </ul>
    */
 
   void sceneAddTranslucentUnlit(
-    final @Nonnull KInstanceTransformedTranslucentUnlitType instance)
-    throws ConstraintError;
+    final KInstanceTransformedTranslucentUnlitType instance);
 }

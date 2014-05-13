@@ -16,9 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.renderer.kernel.types.KLightLabel;
 import com.io7m.renderer.kernel.types.KLightType;
 
@@ -34,11 +31,8 @@ interface KLightLabelCacheType
    * @param light
    *          The light
    * @return The label for the given light
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
-  @Nonnull KLightLabel getLightLabel(
-    final @Nonnull KLightType light)
-    throws ConstraintError;
+  KLightLabel getLightLabel(
+    final KLightType light);
 }

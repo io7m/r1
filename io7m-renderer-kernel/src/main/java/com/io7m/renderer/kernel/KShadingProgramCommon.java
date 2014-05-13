@@ -16,26 +16,25 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jaux.functional.Option;
-import com.io7m.jaux.functional.Option.Some;
-import com.io7m.jaux.functional.Unit;
-import com.io7m.jcanephora.ArrayBufferAttribute;
-import com.io7m.jcanephora.ArrayBufferUsable;
-import com.io7m.jcanephora.JCBProgram;
+import com.io7m.jcanephora.ArrayAttributeType;
+import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLRuntimeException;
-import com.io7m.jcanephora.JCGLTextures2DStaticCommon;
-import com.io7m.jcanephora.JCGLTexturesCubeStaticCommon;
-import com.io7m.jcanephora.Texture2DStaticUsable;
-import com.io7m.jcanephora.TextureCubeStaticUsable;
-import com.io7m.jcanephora.TextureUnit;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jcanephora.TextureCubeStaticUsableType;
+import com.io7m.jcanephora.TextureUnitType;
+import com.io7m.jcanephora.api.JCGLTextures2DStaticCommonType;
+import com.io7m.jcanephora.api.JCGLTexturesCubeStaticCommonType;
+import com.io7m.jcanephora.batchexec.JCBProgramType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.None;
+import com.io7m.jfunctional.OptionPartialVisitorType;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorM4F;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
@@ -85,7 +84,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
  * </p>
  */
 
-public final class KShadingProgramCommon
+@EqualityReference public final class KShadingProgramCommon
 {
   private static final String MATRIX_NAME_MODEL                  = "m_model";
   private static final String MATRIX_NAME_MODELVIEW              =
@@ -129,42 +128,37 @@ public final class KShadingProgramCommon
    *          The program
    * @param array
    *          The array
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    * @throws JCGLException
    *           If an OpenGL error occurs
    */
 
   public static void bindAttributeColour(
-    final @Nonnull JCBProgram program,
-    final @Nonnull ArrayBufferUsable array)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final ArrayBufferUsableType array)
+    throws JCGLException
   {
     KShadingProgramCommon.bindAttributeColourUnchecked(
-      Constraints.constrainNotNull(program, "Program"),
-      Constraints.constrainNotNull(array, "Array"));
+      NullCheck.notNull(program, "Program"),
+      NullCheck.notNull(array, "Array"));
   }
 
   static void bindAttributeColourUnchecked(
-    final @Nonnull JCBProgram program,
-    final @Nonnull ArrayBufferUsable array)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final ArrayBufferUsableType array)
+    throws JCGLException
   {
-    final ArrayBufferAttribute a =
-      array.getAttribute(KMeshAttributes.ATTRIBUTE_COLOUR.getName());
+    final ArrayAttributeType a =
+      array.arrayGetAttribute(KMeshAttributes.ATTRIBUTE_COLOUR.getName());
     program.programAttributeBind("v_colour", a);
   }
 
   static void bindAttributeNormal(
-    final @Nonnull JCBProgram program,
-    final @Nonnull ArrayBufferUsable array)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final ArrayBufferUsableType array)
+    throws JCGLException
   {
-    final ArrayBufferAttribute a =
-      array.getAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+    final ArrayAttributeType a =
+      array.arrayGetAttribute(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
     program.programAttributeBind("v_normal", a);
   }
 
@@ -176,42 +170,37 @@ public final class KShadingProgramCommon
    *          The program
    * @param array
    *          The array
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    * @throws JCGLException
    *           If an OpenGL error occurs
    */
 
   public static void bindAttributePosition(
-    final @Nonnull JCBProgram program,
-    final @Nonnull ArrayBufferUsable array)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final ArrayBufferUsableType array)
+    throws JCGLException
   {
     KShadingProgramCommon.bindAttributePositionUnchecked(
-      Constraints.constrainNotNull(program, "Program"),
-      Constraints.constrainNotNull(array, "Array"));
+      NullCheck.notNull(program, "Program"),
+      NullCheck.notNull(array, "Array"));
   }
 
   static void bindAttributePositionUnchecked(
-    final @Nonnull JCBProgram program,
-    final @Nonnull ArrayBufferUsable array)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final ArrayBufferUsableType array)
+    throws JCGLException
   {
-    final ArrayBufferAttribute a =
-      array.getAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+    final ArrayAttributeType a =
+      array.arrayGetAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
     program.programAttributeBind("v_position", a);
   }
 
   static void bindAttributeTangent4(
-    final @Nonnull JCBProgram program,
-    final @Nonnull ArrayBufferUsable array)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final ArrayBufferUsableType array)
+    throws JCGLException
   {
-    final ArrayBufferAttribute a =
-      array.getAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4.getName());
+    final ArrayAttributeType a =
+      array.arrayGetAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4.getName());
     program.programAttributeBind("v_tangent4", a);
   }
 
@@ -223,382 +212,372 @@ public final class KShadingProgramCommon
    *          The program
    * @param array
    *          The array
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    * @throws JCGLException
    *           If an OpenGL error occurs
    */
 
   public static void bindAttributeUV(
-    final @Nonnull JCBProgram program,
-    final @Nonnull ArrayBufferUsable array)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final ArrayBufferUsableType array)
+    throws JCGLException
   {
     KShadingProgramCommon.bindAttributeUVUnchecked(
-      Constraints.constrainNotNull(program, "Program"),
-      Constraints.constrainNotNull(array, "Array"));
+      NullCheck.notNull(program, "Program"),
+      NullCheck.notNull(array, "Array"));
   }
 
   static void bindAttributeUVUnchecked(
-    final @Nonnull JCBProgram program,
-    final @Nonnull ArrayBufferUsable array)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final ArrayBufferUsableType array)
+    throws JCGLException
   {
-    final ArrayBufferAttribute a =
-      array.getAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
+    final ArrayAttributeType a =
+      array.arrayGetAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
     program.programAttributeBind("v_uv", a);
   }
 
   static void bindPutTextureAlbedo(
-    final @Nonnull JCBProgram program,
-    final @Nonnull JCGLTextures2DStaticCommon gt,
-    final @Nonnull KMaterialAlbedo m,
-    final @Nonnull TextureUnit texture_unit)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final JCGLTextures2DStaticCommonType gt,
+    final KMaterialAlbedo m,
+    final TextureUnitType texture_unit)
+    throws JCGLException
   {
-    Constraints.constrainArbitrary(
-      m.getTexture().isSome(),
-      "Material contains albedo texture");
+    if (m.getTexture().isNone()) {
+      throw new IllegalArgumentException(
+        "Material does not contain an albedo texture");
+    }
 
-    final Option<Texture2DStaticUsable> opt = m.getTexture();
-    final Some<Texture2DStaticUsable> some =
-      (Option.Some<Texture2DStaticUsable>) opt;
-    gt.texture2DStaticBind(texture_unit, some.value);
+    final OptionType<Texture2DStaticUsableType> opt = m.getTexture();
+    final Some<Texture2DStaticUsableType> some =
+      (Some<Texture2DStaticUsableType>) opt;
+    gt.texture2DStaticBind(texture_unit, some.get());
     KShadingProgramCommon.putTextureAlbedoUnchecked(program, texture_unit);
   }
 
   static void bindPutTextureEmissive(
-    final @Nonnull JCBProgram program,
-    final @Nonnull JCGLTextures2DStaticCommon gt,
-    final @Nonnull KMaterialEmissive m,
-    final @Nonnull TextureUnit texture_unit)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final JCGLTextures2DStaticCommonType gt,
+    final KMaterialEmissive m,
+    final TextureUnitType texture_unit)
+    throws JCGLException
   {
-    Constraints.constrainArbitrary(
-      m.getTexture().isSome(),
-      "Material contains an emissive texture");
+    if (m.getTexture().isNone()) {
+      throw new IllegalArgumentException(
+        "Material does not contain an emissive texture");
+    }
 
-    final Option<Texture2DStaticUsable> opt = m.getTexture();
-    final Some<Texture2DStaticUsable> some =
-      (Option.Some<Texture2DStaticUsable>) opt;
-    gt.texture2DStaticBind(texture_unit, some.value);
+    final OptionType<Texture2DStaticUsableType> opt = m.getTexture();
+    final Some<Texture2DStaticUsableType> some =
+      (Some<Texture2DStaticUsableType>) opt;
+    gt.texture2DStaticBind(texture_unit, some.get());
     KShadingProgramCommon.putTextureEmissive(program, texture_unit);
   }
 
   static void bindPutTextureEnvironment(
-    final @Nonnull JCBProgram program,
-    final @Nonnull JCGLTexturesCubeStaticCommon gt,
-    final @Nonnull KMaterialEnvironment m,
-    final @Nonnull TextureUnit texture_unit)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final JCGLTexturesCubeStaticCommonType gt,
+    final KMaterialEnvironment m,
+    final TextureUnitType texture_unit)
+    throws JCGLException
   {
-    Constraints.constrainArbitrary(
-      m.getTexture().isSome(),
-      "Material contains an environment texture");
+    if (m.getTexture().isNone()) {
+      throw new IllegalArgumentException(
+        "Material does not contain an environment texture");
+    }
 
-    final Option<TextureCubeStaticUsable> opt = m.getTexture();
-    final Some<TextureCubeStaticUsable> some =
-      (Option.Some<TextureCubeStaticUsable>) opt;
-    gt.textureCubeStaticBind(texture_unit, some.value);
+    final OptionType<TextureCubeStaticUsableType> opt = m.getTexture();
+    final Some<TextureCubeStaticUsableType> some =
+      (Some<TextureCubeStaticUsableType>) opt;
+    gt.textureCubeStaticBind(texture_unit, some.get());
     KShadingProgramCommon.putTextureEnvironment(program, texture_unit);
   }
 
   static void bindPutTextureNormal(
-    final @Nonnull JCBProgram program,
-    final @Nonnull JCGLTextures2DStaticCommon gt,
-    final @Nonnull KMaterialNormal m,
-    final @Nonnull TextureUnit texture_unit)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final JCGLTextures2DStaticCommonType gt,
+    final KMaterialNormal m,
+    final TextureUnitType texture_unit)
+    throws JCGLException
   {
-    Constraints.constrainArbitrary(
-      m.getTexture().isSome(),
-      "Material contains a normal texture");
+    if (m.getTexture().isNone()) {
+      throw new IllegalArgumentException(
+        "Material does not contain a normal texture");
+    }
 
-    final Option<Texture2DStaticUsable> opt = m.getTexture();
-    final Some<Texture2DStaticUsable> some =
-      (Option.Some<Texture2DStaticUsable>) opt;
-    gt.texture2DStaticBind(texture_unit, some.value);
+    final OptionType<Texture2DStaticUsableType> opt = m.getTexture();
+    final Some<Texture2DStaticUsableType> some =
+      (Some<Texture2DStaticUsableType>) opt;
+    gt.texture2DStaticBind(texture_unit, some.get());
     KShadingProgramCommon.putTextureNormal(program, texture_unit);
   }
 
   static void bindPutTextureProjection(
-    final @Nonnull JCBProgram program,
-    final @Nonnull JCGLTextures2DStaticCommon gt,
-    final @Nonnull KLightProjective light,
-    final @Nonnull TextureUnit texture_unit)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final JCGLTextures2DStaticCommonType gt,
+    final KLightProjective light,
+    final TextureUnitType texture_unit)
+    throws JCGLException
   {
     gt.texture2DStaticBind(texture_unit, light.getTexture());
     KShadingProgramCommon.putTextureProjection(program, texture_unit);
   }
 
   static void bindPutTextureShadowMapBasic(
-    final @Nonnull JCBProgram program,
-    final @Nonnull JCGLTextures2DStaticCommon gt,
-    final @Nonnull Texture2DStaticUsable texture,
-    final @Nonnull TextureUnit texture_unit)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final JCGLTextures2DStaticCommonType gt,
+    final Texture2DStaticUsableType texture,
+    final TextureUnitType texture_unit)
+    throws JCGLException
   {
     gt.texture2DStaticBind(texture_unit, texture);
     KShadingProgramCommon.putTextureShadowMapBasic(program, texture_unit);
   }
 
   static void bindPutTextureSpecular(
-    final @Nonnull JCBProgram program,
-    final @Nonnull JCGLTextures2DStaticCommon gt,
-    final @Nonnull KMaterialSpecular m,
-    final @Nonnull TextureUnit texture_unit)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final JCGLTextures2DStaticCommonType gt,
+    final KMaterialSpecular m,
+    final TextureUnitType texture_unit)
+    throws JCGLException
   {
-    Constraints.constrainArbitrary(
-      m.getTexture().isSome(),
-      "Material contains a specular texture");
+    if (m.getTexture().isNone()) {
+      throw new IllegalArgumentException(
+        "Material does not contain a specular texture");
+    }
 
-    final Option<Texture2DStaticUsable> opt = m.getTexture();
-    final Some<Texture2DStaticUsable> some =
-      (Option.Some<Texture2DStaticUsable>) opt;
-    gt.texture2DStaticBind(texture_unit, some.value);
+    final OptionType<Texture2DStaticUsableType> opt = m.getTexture();
+    final Some<Texture2DStaticUsableType> some =
+      (Some<Texture2DStaticUsableType>) opt;
+    gt.texture2DStaticBind(texture_unit, some.get());
     KShadingProgramCommon.putTextureSpecular(program, texture_unit);
   }
 
   static boolean existsAttributeNormal(
-    final @Nonnull JCBProgram e)
+    final JCBProgramType e)
   {
-    return e.programGet().getAttributes().containsKey("v_normal");
+    return e.programGet().programGetAttributes().containsKey("v_normal");
   }
 
   static boolean existsAttributePosition(
-    final @Nonnull JCBProgram e)
+    final JCBProgramType e)
   {
-    return e.programGet().getAttributes().containsKey("v_position");
+    return e.programGet().programGetAttributes().containsKey("v_position");
   }
 
   static boolean existsAttributeTangent4(
-    final @Nonnull JCBProgram e)
+    final JCBProgramType e)
   {
-    return e.programGet().getAttributes().containsKey("v_tangent4");
+    return e.programGet().programGetAttributes().containsKey("v_tangent4");
   }
 
   static boolean existsAttributeUV(
-    final @Nonnull JCBProgram e)
+    final JCBProgramType e)
   {
-    return e.programGet().getAttributes().containsKey("v_uv");
+    return e.programGet().programGetAttributes().containsKey("v_uv");
   }
 
   static boolean existsLightDirectional(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey("light_directional.direction");
   }
 
   static boolean existsLightProjective(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey("light_projective.position");
   }
 
   static boolean existsLightSpherical(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey("light_spherical.position");
   }
 
   static boolean existsMaterialAlbedoColour(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey("material.albedo.colour");
   }
 
   static boolean existsMaterialAlbedoMix(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey("material.albedo.mix");
   }
 
   static boolean existsMaterialAlphaOpacity(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey("material.alpha.opacity");
   }
 
   static boolean existsMaterialEmissiveLevel(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey("p_emission.amount");
   }
 
   static boolean existsMaterialEnvironmentMix(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey("p_environment.mix");
   }
 
   static boolean existsMaterialSpecularExponent(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey("p_specular.exponent");
   }
 
   static boolean existsMaterialSpecularIntensity(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey("p_specular.intensity");
   }
 
   static boolean existsMatrixInverseView(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey(KShadingProgramCommon.MATRIX_NAME_VIEW_INVERSE);
   }
 
   static boolean existsMatrixNormal(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey(KShadingProgramCommon.MATRIX_NAME_NORMAL);
   }
 
   static boolean existsMatrixTextureProjection(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey("m_texture_projection");
   }
 
   static boolean existsMatrixUV(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey(KShadingProgramCommon.MATRIX_NAME_UV);
   }
 
   static boolean existsTextureAlbedo(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey(KShadingProgramCommon.TEXTURE_NAME_ALBEDO);
   }
 
   static boolean existsTextureEmissive(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey(KShadingProgramCommon.TEXTURE_NAME_EMISSION);
   }
 
   static boolean existsTextureEnvironment(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey(KShadingProgramCommon.TEXTURE_NAME_ENVIRONMENT);
   }
 
   static boolean existsTextureNormal(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey(KShadingProgramCommon.TEXTURE_NAME_NORMAL);
   }
 
   static boolean existsTextureSpecular(
-    final @Nonnull JCBProgram program)
+    final JCBProgramType program)
   {
     return program
       .programGet()
-      .getUniforms()
+      .programGetUniforms()
       .containsKey(KShadingProgramCommon.TEXTURE_NAME_SPECULAR);
   }
 
   static void putAttributeNormal(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RVectorReadable3FType<RSpaceObjectType> r)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final RVectorReadable3FType<RSpaceObjectType> r)
+    throws JCGLException
   {
     program.programAttributePutVector3F("v_normal", r);
   }
 
   static void putAttributeTangent4(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RVectorI4F<RSpaceObjectType> t)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final RVectorI4F<RSpaceObjectType> t)
+    throws JCGLException
   {
     program.programAttributePutVector4F("v_tangent4", t);
   }
 
   static void putAttributeUV(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RVectorI2F<RSpaceTextureType> uv)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final RVectorI2F<RSpaceTextureType> uv)
+    throws JCGLException
   {
     program.programAttributePutVector2F("v_uv", uv);
   }
 
   static void putLightDirectional(
-    final @Nonnull JCBProgram e,
-    final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4FType<RTransformViewType> view,
-    final @Nonnull KLightDirectional light)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType e,
+    final MatrixM4x4F.Context context,
+    final RMatrixReadable4x4FType<RTransformViewType> view,
+    final KLightDirectional light)
+    throws JCGLException
   {
     KShadingProgramCommon.putLightDirectionalDirection(
       e,
@@ -613,36 +592,31 @@ public final class KShadingProgramCommon
   }
 
   static void putLightDirectionalColour(
-    final @Nonnull JCBProgram e,
-    final @Nonnull RVectorReadable3FType<RSpaceRGBType> colour)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType e,
+    final RVectorReadable3FType<RSpaceRGBType> colour)
+    throws JCGLException
   {
     e.programUniformPutVector3f("light_directional.colour", colour);
   }
 
   static void putLightDirectionalColourReuse(
-    final @Nonnull JCBProgram e)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType e)
+    throws JCGLException
   {
     e.programUniformUseExisting("light_directional.colour");
   }
 
   static void putLightDirectionalDirection(
-    final @Nonnull JCBProgram e,
-    final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4FType<RTransformViewType> view,
-    final @Nonnull RVectorReadable3FType<RSpaceWorldType> direction)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType e,
+    final MatrixM4x4F.Context context,
+    final RMatrixReadable4x4FType<RTransformViewType> view,
+    final RVectorReadable3FType<RSpaceWorldType> direction)
+    throws JCGLException
   {
     final VectorM4F light_eye = new VectorM4F();
     final VectorM4F light_world = new VectorM4F();
-    light_world.x = direction.getXF();
-    light_world.y = direction.getYF();
-    light_world.z = direction.getZF();
-    light_world.w = 0.0f;
+    light_world.copyFrom3F(direction);
+    light_world.setWF(0.0f);
 
     MatrixM4x4F.multiplyVector4FWithContext(
       context,
@@ -653,34 +627,30 @@ public final class KShadingProgramCommon
   }
 
   static void putLightDirectionalDirectionReuse(
-    final @Nonnull JCBProgram e)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType e)
+    throws JCGLException
   {
     e.programUniformUseExisting("light_directional.direction");
   }
 
   static void putLightDirectionalIntensity(
-    final @Nonnull JCBProgram e,
+    final JCBProgramType e,
     final float intensity)
-    throws ConstraintError,
-      JCGLException
+    throws JCGLException
   {
     e.programUniformPutFloat("light_directional.intensity", intensity);
   }
 
   static void putLightDirectionalIntensityReuse(
-    final @Nonnull JCBProgram e)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType e)
+    throws JCGLException
   {
     e.programUniformUseExisting("light_directional.intensity");
   }
 
   static void putLightDirectionalReuse(
-    final @Nonnull JCBProgram e)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType e)
+    throws JCGLException
   {
     KShadingProgramCommon.putLightDirectionalDirectionReuse(e);
     KShadingProgramCommon.putLightDirectionalColourReuse(e);
@@ -688,73 +658,63 @@ public final class KShadingProgramCommon
   }
 
   static void putLightProjectiveColour(
-
-    final @Nonnull JCBProgram e,
-    final @Nonnull RVectorReadable3FType<RSpaceRGBType> colour)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType e,
+    final RVectorReadable3FType<RSpaceRGBType> colour)
+    throws JCGLException
   {
     e.programUniformPutVector3f("light_projective.colour", colour);
   }
 
   static void putLightProjectiveColourReuse(
-    final @Nonnull JCBProgram e)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType e)
+    throws JCGLException
   {
     e.programUniformUseExisting("light_projective.colour");
   }
 
   static void putLightProjectiveFalloff(
 
-    final @Nonnull JCBProgram e,
+    final JCBProgramType e,
     final float falloff)
-    throws ConstraintError,
-      JCGLException
+    throws JCGLException
   {
     e.programUniformPutFloat("light_projective.falloff", falloff);
   }
 
   static void putLightProjectiveFalloffReuse(
-    final @Nonnull JCBProgram e)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType e)
+    throws JCGLException
   {
     e.programUniformUseExisting("light_projective.falloff");
   }
 
   static void putLightProjectiveIntensity(
 
-    final @Nonnull JCBProgram e,
+    final JCBProgramType e,
     final float intensity)
-    throws ConstraintError,
-      JCGLException
+    throws JCGLException
   {
     e.programUniformPutFloat("light_projective.intensity", intensity);
   }
 
   static void putLightProjectiveIntensityReuse(
-    final @Nonnull JCBProgram e)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType e)
+    throws JCGLException
   {
     e.programUniformUseExisting("light_projective.intensity");
   }
 
   static void putLightProjectivePosition(
-    final @Nonnull JCBProgram program,
-    final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4FType<RTransformViewType> view,
-    final @Nonnull RVectorReadable3FType<RSpaceWorldType> position)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final MatrixM4x4F.Context context,
+    final RMatrixReadable4x4FType<RTransformViewType> view,
+    final RVectorReadable3FType<RSpaceWorldType> position)
+    throws JCGLException
   {
     final VectorM4F light_eye = new VectorM4F();
     final VectorM4F light_world = new VectorM4F();
-    light_world.x = position.getXF();
-    light_world.y = position.getYF();
-    light_world.z = position.getZF();
-    light_world.w = 1.0f;
+    light_world.copyFrom3F(position);
+    light_world.setWF(1.0f);
 
     MatrixM4x4F.multiplyVector4FWithContext(
       context,
@@ -765,37 +725,33 @@ public final class KShadingProgramCommon
   }
 
   static void putLightProjectivePositionReuse(
-    final @Nonnull JCBProgram program)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program)
+    throws JCGLException
   {
     program.programUniformUseExisting("light_projective.position");
   }
 
   static void putLightProjectiveRange(
-    final @Nonnull JCBProgram e,
+    final JCBProgramType e,
     final float range)
-    throws ConstraintError,
-      JCGLException
+    throws JCGLException
   {
     e.programUniformPutFloat("light_projective.range", range);
   }
 
   static void putLightProjectiveRangeReuse(
-    final @Nonnull JCBProgram e)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType e)
+    throws JCGLException
   {
     e.programUniformUseExisting("light_projective.range");
   }
 
   static void putLightProjectiveWithoutTextureProjection(
-    final @Nonnull JCBProgram program,
-    final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4FType<RTransformViewType> view,
-    final @Nonnull KLightProjective light)
+    final JCBProgramType program,
+    final MatrixM4x4F.Context context,
+    final RMatrixReadable4x4FType<RTransformViewType> view,
+    final KLightProjective light)
     throws JCGLException,
-      ConstraintError,
       RException
   {
     KShadingProgramCommon.putLightProjectivePosition(
@@ -814,48 +770,53 @@ public final class KShadingProgramCommon
       light.getFalloff());
     KShadingProgramCommon.putLightProjectiveRange(program, light.getRange());
 
-    switch (light.lightGetShadow().type) {
-      case OPTION_NONE:
-      {
-        break;
-      }
-      case OPTION_SOME:
-      {
-        final KShadowType ks =
-          ((Option.Some<KShadowType>) light.lightGetShadow()).value;
-        ks.shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-          @Override public Unit shadowMappedBasic(
-            final @Nonnull KShadowMappedBasic s)
-            throws JCGLException,
-              JCGLException,
-              RException,
-              ConstraintError
-          {
-            KShadingProgramCommon.putShadowBasic(program, s);
-            return Unit.unit();
-          }
+    final OptionType<KShadowType> ls = light.lightGetShadow();
+    ls
+      .acceptPartial(new OptionPartialVisitorType<KShadowType, Unit, RException>() {
+        @Override public Unit none(
+          final None<KShadowType> none)
+          throws RException
+        {
+          return Unit.unit();
+        }
 
-          @Override public Unit shadowMappedVariance(
-            final @Nonnull KShadowMappedVariance s)
-            throws JCGLException,
-              JCGLException,
-              RException,
-              ConstraintError
-          {
-            KShadingProgramCommon.putShadowVariance(program, s);
-            return Unit.unit();
+        @Override public Unit some(
+          final Some<KShadowType> some)
+          throws RException
+        {
+          final KShadowType ks = some.get();
+          try {
+            return ks
+              .shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
+                @Override public Unit shadowMappedBasic(
+                  final KShadowMappedBasic s)
+                  throws JCGLException,
+                    RException
+                {
+                  KShadingProgramCommon.putShadowBasic(program, s);
+                  return Unit.unit();
+                }
+
+                @Override public Unit shadowMappedVariance(
+                  final KShadowMappedVariance s)
+                  throws JCGLException,
+                    RException
+                {
+                  KShadingProgramCommon.putShadowVariance(program, s);
+                  return Unit.unit();
+                }
+              });
+          } catch (final JCGLException e) {
+            throw RException.fromJCGLException(e);
           }
-        });
-        break;
-      }
-    }
+        }
+      });
   }
 
   static void putLightProjectiveWithoutTextureProjectionReuse(
-    final @Nonnull JCBProgram program,
-    final @Nonnull KLightProjective light)
+    final JCBProgramType program,
+    final KLightProjective light)
     throws JCGLException,
-      ConstraintError,
       RException
   {
     KShadingProgramCommon.putLightProjectivePositionReuse(program);
@@ -864,50 +825,53 @@ public final class KShadingProgramCommon
     KShadingProgramCommon.putLightProjectiveFalloffReuse(program);
     KShadingProgramCommon.putLightProjectiveRangeReuse(program);
 
-    switch (light.lightGetShadow().type) {
-      case OPTION_NONE:
-      {
-        break;
-      }
-      case OPTION_SOME:
-      {
-        final KShadowType ks =
-          ((Option.Some<KShadowType>) light.lightGetShadow()).value;
-        ks.shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-          @Override public Unit shadowMappedBasic(
-            final @Nonnull KShadowMappedBasic s)
-            throws JCGLException,
-              JCGLException,
-              RException,
-              ConstraintError
-          {
-            KShadingProgramCommon.putShadowBasicReuse(program);
-            return Unit.unit();
-          }
+    final OptionType<KShadowType> ls = light.lightGetShadow();
+    ls
+      .acceptPartial(new OptionPartialVisitorType<KShadowType, Unit, RException>() {
+        @Override public Unit none(
+          final None<KShadowType> n)
+          throws RException
+        {
+          return Unit.unit();
+        }
 
-          @Override public Unit shadowMappedVariance(
-            final @Nonnull KShadowMappedVariance s)
-            throws JCGLException,
-              JCGLException,
-              RException,
-              ConstraintError
-          {
-            KShadingProgramCommon.putShadowVarianceReuse(program);
-            return Unit.unit();
+        @Override public Unit some(
+          final Some<KShadowType> some)
+          throws RException
+        {
+          final KShadowType ks = some.get();
+          try {
+            return ks
+              .shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
+                @Override public Unit shadowMappedBasic(
+                  final KShadowMappedBasic s)
+                  throws JCGLException
+                {
+                  KShadingProgramCommon.putShadowBasicReuse(program);
+                  return Unit.unit();
+                }
+
+                @Override public Unit shadowMappedVariance(
+                  final KShadowMappedVariance s)
+                  throws JCGLException
+                {
+                  KShadingProgramCommon.putShadowVarianceReuse(program);
+                  return Unit.unit();
+                }
+              });
+          } catch (final JCGLException e) {
+            throw RException.fromJCGLException(e);
           }
-        });
-        break;
-      }
-    }
+        }
+      });
   }
 
   static void putLightSpherical(
-    final @Nonnull JCBProgram program,
-    final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4FType<RTransformViewType> view,
-    final @Nonnull KLightSphere light)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final MatrixM4x4F.Context context,
+    final RMatrixReadable4x4FType<RTransformViewType> view,
+    final KLightSphere light)
+    throws JCGLException
   {
     KShadingProgramCommon.putLightSphericalPosition(
       program,
@@ -926,70 +890,62 @@ public final class KShadingProgramCommon
   }
 
   static void putLightSphericalColour(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RVectorReadable3FType<RSpaceRGBType> colour)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final RVectorReadable3FType<RSpaceRGBType> colour)
+    throws JCGLException
   {
     program.programUniformPutVector3f("light_spherical.colour", colour);
   }
 
   static void putLightSphericalColourReuse(
-    final @Nonnull JCBProgram program)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program)
+    throws JCGLException
   {
     program.programUniformUseExisting("light_spherical.colour");
   }
 
   static void putLightSphericalFalloff(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float falloff)
-    throws ConstraintError,
-      JCGLException
+    throws JCGLException
   {
     program.programUniformPutFloat("light_spherical.falloff", falloff);
   }
 
   static void putLightSphericalFalloffReuse(
-    final @Nonnull JCBProgram program)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program)
+    throws JCGLException
   {
     program.programUniformUseExisting("light_spherical.falloff");
   }
 
   static void putLightSphericalIntensity(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float intensity)
-    throws ConstraintError,
-      JCGLException
+    throws JCGLException
   {
     program.programUniformPutFloat("light_spherical.intensity", intensity);
   }
 
   static void putLightSphericalIntensityReuse(
-    final @Nonnull JCBProgram program)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program)
+    throws JCGLException
   {
     program.programUniformUseExisting("light_spherical.intensity");
   }
 
   static void putLightSphericalPosition(
-    final @Nonnull JCBProgram program,
-    final @Nonnull MatrixM4x4F.Context context,
-    final @Nonnull RMatrixReadable4x4FType<RTransformViewType> view,
-    final @Nonnull RVectorReadable3FType<RSpaceWorldType> position)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final MatrixM4x4F.Context context,
+    final RMatrixReadable4x4FType<RTransformViewType> view,
+    final RVectorReadable3FType<RSpaceWorldType> position)
+    throws JCGLException
   {
     final VectorM4F light_eye = new VectorM4F();
     final VectorM4F light_world = new VectorM4F();
-    light_world.x = position.getXF();
-    light_world.y = position.getYF();
-    light_world.z = position.getZF();
-    light_world.w = 1.0f;
+
+    light_world.copyFrom3F(position);
+    light_world.setWF(1.0f);
 
     MatrixM4x4F.multiplyVector4FWithContext(
       context,
@@ -1000,34 +956,30 @@ public final class KShadingProgramCommon
   }
 
   static void putLightSphericalPositionReuse(
-    final @Nonnull JCBProgram program)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program)
+    throws JCGLException
   {
     program.programUniformUseExisting("light_spherical.position");
   }
 
   static void putLightSphericalRange(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float range)
-    throws ConstraintError,
-      JCGLException
+    throws JCGLException
   {
     program.programUniformPutFloat("light_spherical.range", range);
   }
 
   static void putLightSphericalRangeReuse(
-    final @Nonnull JCBProgram program)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program)
+    throws JCGLException
   {
     program.programUniformUseExisting("light_spherical.range");
   }
 
   static void putLightSphericalReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     KShadingProgramCommon.putLightSphericalPositionReuse(program);
     KShadingProgramCommon.putLightSphericalColourReuse(program);
@@ -1037,10 +989,9 @@ public final class KShadingProgramCommon
   }
 
   static void putMaterialAlbedo(
-    final @Nonnull JCBProgram program,
-    final @Nonnull KMaterialAlbedo albedo)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final KMaterialAlbedo albedo)
+    throws JCGLException
   {
     KShadingProgramCommon.putMaterialAlbedoMix(program, albedo.getMix());
     KShadingProgramCommon
@@ -1048,46 +999,41 @@ public final class KShadingProgramCommon
   }
 
   static void putMaterialAlbedoColour(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RVectorReadable4FType<RSpaceRGBAType> rgba)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final RVectorReadable4FType<RSpaceRGBAType> rgba)
+    throws JCGLException
   {
     program.programUniformPutVector4f("p_albedo.colour", rgba);
   }
 
   static void putMaterialAlbedoMix(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float mix)
-    throws ConstraintError,
-      JCGLException
+    throws JCGLException
   {
     program.programUniformPutFloat("p_albedo.mix", mix);
   }
 
   static void putMaterialAlphaDepthThreshold(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float threshold)
-    throws JCGLException,
-      ConstraintError
+    throws JCGLException
   {
     program.programUniformPutFloat("p_alpha_depth", threshold);
   }
 
   static void putMaterialAlphaOpacity(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float opacity)
-    throws JCGLException,
-      ConstraintError
+    throws JCGLException
   {
     program.programUniformPutFloat("p_opacity", opacity);
   }
 
   static void putMaterialEmissive(
-    final @Nonnull JCBProgram program,
-    final @Nonnull KMaterialEmissive emissive)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final KMaterialEmissive emissive)
+    throws JCGLException
   {
     KShadingProgramCommon.putMaterialEmissiveLevel(
       program,
@@ -1095,37 +1041,33 @@ public final class KShadingProgramCommon
   }
 
   static void putMaterialEmissiveLevel(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float emission)
-    throws JCGLException,
-      ConstraintError
+    throws JCGLException
   {
     program.programUniformPutFloat("p_emission.amount", emission);
   }
 
   static void putMaterialEnvironment(
-    final @Nonnull JCBProgram program,
-    final @Nonnull KMaterialEnvironment envi)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final KMaterialEnvironment envi)
+    throws JCGLException
   {
     KShadingProgramCommon.putMaterialEnvironmentMix(program, envi.getMix());
   }
 
   static void putMaterialEnvironmentMix(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float mix)
-    throws ConstraintError,
-      JCGLException
+    throws JCGLException
   {
     program.programUniformPutFloat("p_environment.mix", mix);
   }
 
   static void putMaterialRefractive(
-    final @Nonnull JCBProgram program,
-    final @Nonnull KMaterialRefractive material)
-    throws JCGLRuntimeException,
-      ConstraintError
+    final JCBProgramType program,
+    final KMaterialRefractive material)
+    throws JCGLException
   {
     KShadingProgramCommon.putMaterialRefractiveScale(
       program,
@@ -1133,19 +1075,17 @@ public final class KShadingProgramCommon
   }
 
   static void putMaterialRefractiveScale(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float scale)
-    throws JCGLRuntimeException,
-      ConstraintError
+    throws JCGLException
   {
     program.programUniformPutFloat("p_refraction.scale", scale);
   }
 
   static void putMaterialSpecular(
-    final @Nonnull JCBProgram program,
-    final @Nonnull KMaterialSpecular m)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final KMaterialSpecular m)
+    throws JCGLException
   {
     KShadingProgramCommon.putMaterialSpecularExponent(
       program,
@@ -1154,28 +1094,25 @@ public final class KShadingProgramCommon
   }
 
   static void putMaterialSpecularColour(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RVectorReadable3FType<RSpaceRGBType> colour)
-    throws ConstraintError,
-      JCGLException
+    final JCBProgramType program,
+    final RVectorReadable3FType<RSpaceRGBType> colour)
+    throws JCGLException
   {
     program.programUniformPutVector3f("p_specular.colour", colour);
   }
 
   static void putMaterialSpecularExponent(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float e)
-    throws ConstraintError,
-      JCGLException
+    throws JCGLException
   {
     program.programUniformPutFloat("p_specular.exponent", e);
   }
 
   static void putMatrixInverseView(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable4x4FType<RTransformViewInverseType> m)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final RMatrixReadable4x4FType<RTransformViewInverseType> m)
+    throws JCGLException
   {
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_VIEW_INVERSE,
@@ -1183,10 +1120,9 @@ public final class KShadingProgramCommon
   }
 
   static void putMatrixModel(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable4x4FType<RTransformModelType> m)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final RMatrixReadable4x4FType<RTransformModelType> m)
+    throws JCGLException
   {
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_MODEL,
@@ -1202,26 +1138,22 @@ public final class KShadingProgramCommon
    *          The matrix
    * @throws JCGLException
    *           If an OpenGL error occurs
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
   public static void putMatrixModelView(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable4x4FType<RTransformModelViewType> m)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final RMatrixReadable4x4FType<RTransformModelViewType> m)
+    throws JCGLException
   {
     KShadingProgramCommon.putMatrixModelViewUnchecked(
-      Constraints.constrainNotNull(program, "Program"),
-      Constraints.constrainNotNull(m, "Matrix"));
+      NullCheck.notNull(program, "Program"),
+      NullCheck.notNull(m, "Matrix"));
   }
 
   static void putMatrixModelViewUnchecked(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable4x4FType<RTransformModelViewType> m)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final RMatrixReadable4x4FType<RTransformModelViewType> m)
+    throws JCGLException
   {
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_MODELVIEW,
@@ -1229,10 +1161,9 @@ public final class KShadingProgramCommon
   }
 
   static void putMatrixNormal(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable3x3FType<RTransformNormalType> mn)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final RMatrixReadable3x3FType<RTransformNormalType> mn)
+    throws JCGLException
   {
     program.programUniformPutMatrix3x3f(
       KShadingProgramCommon.MATRIX_NAME_NORMAL,
@@ -1240,10 +1171,9 @@ public final class KShadingProgramCommon
   }
 
   static void putMatrixPosition(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixM3x3F<RTransformModelType> m)
-    throws JCGLRuntimeException,
-      ConstraintError
+    final JCBProgramType program,
+    final RMatrixM3x3F<RTransformModelType> m)
+    throws JCGLException
   {
     program.programUniformPutMatrix3x3f(
       KShadingProgramCommon.MATRIX_NAME_POSITION,
@@ -1259,47 +1189,39 @@ public final class KShadingProgramCommon
    *          The matrix
    * @throws JCGLException
    *           If an OpenGL error occurs
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
   public static void putMatrixProjection(
-    final @Nonnull JCBProgram p,
-    final @Nonnull RMatrixReadable4x4FType<RTransformProjectionType> m)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType p,
+    final RMatrixReadable4x4FType<RTransformProjectionType> m)
+    throws JCGLException
   {
     KShadingProgramCommon.putMatrixProjectionUnchecked(
-      Constraints.constrainNotNull(p, "Program"),
-      Constraints.constrainNotNull(m, "Matrix"));
+      NullCheck.notNull(p, "Program"),
+      NullCheck.notNull(m, "Matrix"));
   }
 
   static void putMatrixProjectionReuse(
-    final @Nonnull JCBProgram p)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType p)
+    throws JCGLException
   {
     p.programUniformUseExisting(KShadingProgramCommon.MATRIX_NAME_PROJECTION);
   }
 
   static void putMatrixProjectionUnchecked(
-    final @Nonnull JCBProgram p,
-    final @Nonnull RMatrixReadable4x4FType<RTransformProjectionType> m)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType p,
+    final RMatrixReadable4x4FType<RTransformProjectionType> m)
+    throws JCGLException
   {
     p.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_PROJECTION,
       m);
   }
 
-  static
-    void
-    putMatrixProjectiveModelView(
-      final @Nonnull JCBProgram program,
-      final @Nonnull RMatrixReadable4x4FType<RTransformProjectiveModelViewType> m)
-      throws JCGLException,
-        ConstraintError
+  static void putMatrixProjectiveModelView(
+    final JCBProgramType program,
+    final RMatrixReadable4x4FType<RTransformProjectiveModelViewType> m)
+    throws JCGLException
   {
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_PROJECTIVE_MODELVIEW,
@@ -1307,21 +1229,17 @@ public final class KShadingProgramCommon
   }
 
   static void putMatrixProjectiveModelViewReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     program
       .programUniformUseExisting(KShadingProgramCommon.MATRIX_NAME_PROJECTIVE_MODELVIEW);
   }
 
-  static
-    void
-    putMatrixProjectiveProjection(
-      final @Nonnull JCBProgram program,
-      final @Nonnull RMatrixReadable4x4FType<RTransformProjectiveProjectionType> m)
-      throws JCGLException,
-        ConstraintError
+  static void putMatrixProjectiveProjection(
+    final JCBProgramType program,
+    final RMatrixReadable4x4FType<RTransformProjectiveProjectionType> m)
+    throws JCGLException
   {
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_PROJECTIVE_PROJECTION,
@@ -1329,9 +1247,8 @@ public final class KShadingProgramCommon
   }
 
   static void putMatrixProjectiveProjectionReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     program
       .programUniformUseExisting(KShadingProgramCommon.MATRIX_NAME_PROJECTIVE_PROJECTION);
@@ -1346,26 +1263,22 @@ public final class KShadingProgramCommon
    *          The matrix
    * @throws JCGLException
    *           If an OpenGL error occurs
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
   public static void putMatrixUV(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable3x3FType<RTransformTextureType> m)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final RMatrixReadable3x3FType<RTransformTextureType> m)
+    throws JCGLException
   {
     KShadingProgramCommon.putMatrixUVUnchecked(
-      Constraints.constrainNotNull(program, "Program"),
-      Constraints.constrainNotNull(m, "Matrix"));
+      NullCheck.notNull(program, "Program"),
+      NullCheck.notNull(m, "Matrix"));
   }
 
   static void putMatrixUVUnchecked(
-    final @Nonnull JCBProgram program,
-    final @Nonnull RMatrixReadable3x3FType<RTransformTextureType> m)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final RMatrixReadable3x3FType<RTransformTextureType> m)
+    throws JCGLException
   {
     program.programUniformPutMatrix3x3f(
       KShadingProgramCommon.MATRIX_NAME_UV,
@@ -1373,10 +1286,9 @@ public final class KShadingProgramCommon
   }
 
   static void putRefractionTextureScene(
-    final @Nonnull JCBProgram program,
-    final @Nonnull TextureUnit unit)
-    throws JCGLRuntimeException,
-      ConstraintError
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
   {
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_REFRACTION_SCENE,
@@ -1384,10 +1296,9 @@ public final class KShadingProgramCommon
   }
 
   static void putRefractionTextureSceneMask(
-    final @Nonnull JCBProgram program,
-    final @Nonnull TextureUnit unit)
-    throws JCGLRuntimeException,
-      ConstraintError
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
   {
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_REFRACTION_SCENE_MASK,
@@ -1395,10 +1306,9 @@ public final class KShadingProgramCommon
   }
 
   static void putShadowBasic(
-    final @Nonnull JCBProgram program,
-    final @Nonnull KShadowMappedBasic shadow)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final KShadowMappedBasic shadow)
+    throws JCGLException
   {
     KShadingProgramCommon.putShadowBasicDepthBias(
       program,
@@ -1409,54 +1319,48 @@ public final class KShadingProgramCommon
   }
 
   static void putShadowBasicDepthBias(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float depth_bias)
-    throws JCGLException,
-      ConstraintError
+    throws JCGLException
   {
     program.programUniformPutFloat("shadow_basic.depth_bias", depth_bias);
   }
 
   static void putShadowBasicDepthBiasReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     program.programUniformUseExisting("shadow_basic.depth_bias");
   }
 
   static void putShadowBasicFactorMinimum(
 
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float min)
-    throws JCGLException,
-      ConstraintError
+    throws JCGLException
   {
     program.programUniformPutFloat("shadow_basic.factor_min", min);
   }
 
   static void putShadowBasicFactorMinimumReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     program.programUniformUseExisting("shadow_basic.factor_min");
   }
 
   static void putShadowBasicReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     KShadingProgramCommon.putShadowBasicDepthBiasReuse(program);
     KShadingProgramCommon.putShadowBasicFactorMinimumReuse(program);
   }
 
   static void putShadowVariance(
-    final @Nonnull JCBProgram program,
-    final @Nonnull KShadowMappedVariance shadow)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final KShadowMappedVariance shadow)
+    throws JCGLException
   {
     KShadingProgramCommon.putShadowVarianceMinimumVariance(
       program,
@@ -1470,60 +1374,53 @@ public final class KShadingProgramCommon
   }
 
   static void putShadowVarianceFactorMinimum(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float min)
-    throws JCGLException,
-      ConstraintError
+    throws JCGLException
   {
     program.programUniformPutFloat("shadow_variance.factor_min", min);
   }
 
   static void putShadowVarianceFactorMinimumReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     program.programUniformUseExisting("shadow_variance.factor_min");
   }
 
   static void putShadowVarianceLightBleedReduction(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float r)
-    throws JCGLRuntimeException,
-      ConstraintError
+    throws JCGLException
   {
     program.programUniformPutFloat("shadow_variance.bleed_reduction", r);
   }
 
   static void putShadowVarianceLightBleedReductionReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLRuntimeException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     program.programUniformUseExisting("shadow_variance.bleed_reduction");
   }
 
   static void putShadowVarianceMinimumVariance(
-    final @Nonnull JCBProgram program,
+    final JCBProgramType program,
     final float min)
-    throws JCGLException,
-      ConstraintError
+    throws JCGLException
   {
     program.programUniformPutFloat("shadow_variance.variance_min", min);
   }
 
   static void putShadowVarianceMinimumVarianceReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     program.programUniformUseExisting("shadow_variance.variance_min");
   }
 
   static void putShadowVarianceReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     KShadingProgramCommon.putShadowVarianceMinimumVarianceReuse(program);
     KShadingProgramCommon.putShadowVarianceFactorMinimumReuse(program);
@@ -1540,26 +1437,22 @@ public final class KShadingProgramCommon
    *          The texture unit
    * @throws JCGLException
    *           If an OpenGL error occurs
-   * @throws ConstraintError
-   *           If any parameter is <code>null</code>
    */
 
   public static void putTextureAlbedo(
-    final @Nonnull JCBProgram program,
-    final @Nonnull TextureUnit unit)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
   {
     KShadingProgramCommon.putTextureAlbedoUnchecked(
-      Constraints.constrainNotNull(program, "Program"),
-      Constraints.constrainNotNull(unit, "Unit"));
+      NullCheck.notNull(program, "Program"),
+      NullCheck.notNull(unit, "Unit"));
   }
 
   static void putTextureAlbedoUnchecked(
-    final @Nonnull JCBProgram program,
-    final @Nonnull TextureUnit unit)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
   {
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_ALBEDO,
@@ -1567,10 +1460,9 @@ public final class KShadingProgramCommon
   }
 
   static void putTextureEmissive(
-    final @Nonnull JCBProgram program,
-    final @Nonnull TextureUnit unit)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
   {
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_EMISSION,
@@ -1578,10 +1470,9 @@ public final class KShadingProgramCommon
   }
 
   static void putTextureEnvironment(
-    final @Nonnull JCBProgram program,
-    final @Nonnull TextureUnit unit)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
   {
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_ENVIRONMENT,
@@ -1589,10 +1480,9 @@ public final class KShadingProgramCommon
   }
 
   static void putTextureNormal(
-    final @Nonnull JCBProgram program,
-    final @Nonnull TextureUnit unit)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
   {
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_NORMAL,
@@ -1600,10 +1490,9 @@ public final class KShadingProgramCommon
   }
 
   static void putTextureProjection(
-    final @Nonnull JCBProgram program,
-    final @Nonnull TextureUnit unit)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
   {
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_PROJECTION,
@@ -1611,19 +1500,17 @@ public final class KShadingProgramCommon
   }
 
   static void putTextureProjectionReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLRuntimeException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     program
       .programUniformUseExisting(KShadingProgramCommon.TEXTURE_NAME_PROJECTION);
   }
 
   static void putTextureShadowMapBasic(
-    final @Nonnull JCBProgram program,
-    final @Nonnull TextureUnit unit)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
   {
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_SHADOW_BASIC,
@@ -1631,19 +1518,17 @@ public final class KShadingProgramCommon
   }
 
   static void putTextureShadowMapBasicReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     program
       .programUniformUseExisting(KShadingProgramCommon.TEXTURE_NAME_SHADOW_BASIC);
   }
 
   static void putTextureShadowMapVariance(
-    final @Nonnull JCBProgram program,
-    final @Nonnull TextureUnit unit)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
   {
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_SHADOW_VARIANCE,
@@ -1651,19 +1536,17 @@ public final class KShadingProgramCommon
   }
 
   static void putTextureShadowMapVarianceReuse(
-    final @Nonnull JCBProgram program)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program)
+    throws JCGLException
   {
     program
       .programUniformUseExisting(KShadingProgramCommon.TEXTURE_NAME_SHADOW_VARIANCE);
   }
 
   static void putTextureSpecular(
-    final @Nonnull JCBProgram program,
-    final @Nonnull TextureUnit unit)
-    throws JCGLException,
-      ConstraintError
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
   {
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_SPECULAR,

@@ -16,14 +16,13 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import com.io7m.jnull.Nullable;
 
 /**
  * A description of the refractive properties of a material.
  */
 
-@Immutable public final class KMaterialRefractive
+public final class KMaterialRefractive
 {
   /**
    * Create new refractive material properties
@@ -35,7 +34,7 @@ import javax.annotation.concurrent.Immutable;
    * @return New refractive properties
    */
 
-  public static @Nonnull KMaterialRefractive newRefractive(
+  public static KMaterialRefractive newRefractive(
     final float scale,
     final boolean masked)
   {
@@ -54,7 +53,7 @@ import javax.annotation.concurrent.Immutable;
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -66,13 +65,9 @@ import javax.annotation.concurrent.Immutable;
       return false;
     }
     final KMaterialRefractive other = (KMaterialRefractive) obj;
-    if (this.masked != other.masked) {
-      return false;
-    }
-    if (Float.floatToIntBits(this.scale) != Float.floatToIntBits(other.scale)) {
-      return false;
-    }
-    return true;
+    return (this.masked == other.masked)
+      && (Float.floatToIntBits(this.scale) == Float
+        .floatToIntBits(other.scale));
   }
 
   /**
@@ -110,7 +105,9 @@ import javax.annotation.concurrent.Immutable;
     builder.append(" masked=");
     builder.append(this.masked);
     builder.append("]");
-    return builder.toString();
+    final String r = builder.toString();
+    assert r != null;
+    return r;
   }
 
   /**
@@ -122,7 +119,7 @@ import javax.annotation.concurrent.Immutable;
    * @return The current material with <code>masking == m</code>.
    */
 
-  public @Nonnull KMaterialRefractive withMasked(
+  public KMaterialRefractive withMasked(
     final boolean m)
   {
     return new KMaterialRefractive(this.scale, m);
@@ -137,7 +134,7 @@ import javax.annotation.concurrent.Immutable;
    * @return The current material with <code>scale == s</code>.
    */
 
-  public @Nonnull KMaterialRefractive withScale(
+  public KMaterialRefractive withScale(
     final float s)
   {
     return new KMaterialRefractive(s, this.masked);

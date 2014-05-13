@@ -16,11 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
-import javax.annotation.Nonnull;
-
-import com.io7m.jaux.Constraints.ConstraintError;
 import com.io7m.jcache.PCacheAbstract;
 import com.io7m.jcache.PCacheType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KShadowMapDescriptionType;
 import com.io7m.renderer.types.RException;
 
@@ -28,34 +26,30 @@ import com.io7m.renderer.types.RException;
  * Shadow map caches.
  */
 
-public final class KShadowMapCache extends
+@EqualityReference public final class KShadowMapCache extends
   PCacheAbstract<KShadowMapDescriptionType, KShadowMapType, RException> implements
   KShadowMapCacheType
 {
+
   /**
    * Wrap the given cache and expose a {@link KShadowMapCacheType} interface.
    * 
    * @param c
    *          The cache
    * @return A cache
-   * @throws ConstraintError
-   *           If <code>c == null</code>
    */
 
-  public static @Nonnull
+  public static
     KShadowMapCacheType
     wrap(
-      final @Nonnull PCacheType<KShadowMapDescriptionType, KShadowMapType, RException> c)
-      throws ConstraintError
+      final PCacheType<KShadowMapDescriptionType, KShadowMapType, RException> c)
   {
     return new KShadowMapCache(c);
   }
 
   private KShadowMapCache(
-    final @Nonnull PCacheType<KShadowMapDescriptionType, KShadowMapType, RException> in_cache)
-    throws ConstraintError
+    final PCacheType<KShadowMapDescriptionType, KShadowMapType, RException> in_cache)
   {
     super(in_cache);
   }
-
 }

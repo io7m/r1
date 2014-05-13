@@ -16,49 +16,46 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
-import com.io7m.jaux.Constraints.ConstraintError;
-import com.io7m.jaux.UnreachableCodeException;
-import com.io7m.jcanephora.ArrayBufferAttributeDescriptor;
+import com.io7m.jcanephora.ArrayAttributeDescriptor;
 import com.io7m.jcanephora.JCGLScalarType;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * Standard names and types for attributes in vertex data.
  */
 
-@Immutable public final class KMeshAttributes
+@EqualityReference public final class KMeshAttributes
 {
   /**
    * The name and type of per-vertex bitangent vector attributes
    */
 
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_BITANGENT;
+  public static final ArrayAttributeDescriptor ATTRIBUTE_BITANGENT;
 
   /**
    * The name and type of per-vertex colour data attributes
    */
 
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_COLOUR;
+  public static final ArrayAttributeDescriptor ATTRIBUTE_COLOUR;
 
   /**
    * The name and type of per-vertex normal vector attributes
    */
 
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_NORMAL;
+  public static final ArrayAttributeDescriptor ATTRIBUTE_NORMAL;
 
   /**
    * The name and type of per-vertex object-space position attributes
    */
 
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_POSITION;
+  public static final ArrayAttributeDescriptor ATTRIBUTE_POSITION;
 
   /**
    * The name and type of per-vertex tangent vector attributes
    */
 
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT3;
+  public static final ArrayAttributeDescriptor ATTRIBUTE_TANGENT3;
 
   /**
    * The name and type of per-vertex tangent vector attributes, where the
@@ -70,57 +67,56 @@ import com.io7m.jcanephora.JCGLScalarType;
    * four-component tangent vector).
    */
 
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_TANGENT4;
+  public static final ArrayAttributeDescriptor ATTRIBUTE_TANGENT4;
 
   /**
    * The name and type of per-vertex UV coordinates
    */
 
-  public static final @Nonnull ArrayBufferAttributeDescriptor ATTRIBUTE_UV;
+  public static final ArrayAttributeDescriptor ATTRIBUTE_UV;
 
   static {
-    try {
-      ATTRIBUTE_BITANGENT =
-        new ArrayBufferAttributeDescriptor(
-          "bitangent",
-          JCGLScalarType.TYPE_FLOAT,
-          3);
+    ATTRIBUTE_BITANGENT =
+      ArrayAttributeDescriptor.newAttribute(
+        "bitangent",
+        JCGLScalarType.TYPE_FLOAT,
+        3);
 
-      ATTRIBUTE_COLOUR =
-        new ArrayBufferAttributeDescriptor(
-          "colour",
-          JCGLScalarType.TYPE_FLOAT,
-          4);
+    ATTRIBUTE_COLOUR =
+      ArrayAttributeDescriptor.newAttribute(
+        "colour",
+        JCGLScalarType.TYPE_FLOAT,
+        4);
 
-      ATTRIBUTE_NORMAL =
-        new ArrayBufferAttributeDescriptor(
-          "normal",
-          JCGLScalarType.TYPE_FLOAT,
-          3);
+    ATTRIBUTE_NORMAL =
+      ArrayAttributeDescriptor.newAttribute(
+        "normal",
+        JCGLScalarType.TYPE_FLOAT,
+        3);
 
-      ATTRIBUTE_POSITION =
-        new ArrayBufferAttributeDescriptor(
-          "position",
-          JCGLScalarType.TYPE_FLOAT,
-          3);
+    ATTRIBUTE_POSITION =
+      ArrayAttributeDescriptor.newAttribute(
+        "position",
+        JCGLScalarType.TYPE_FLOAT,
+        3);
 
-      ATTRIBUTE_TANGENT3 =
-        new ArrayBufferAttributeDescriptor(
-          "tangent3",
-          JCGLScalarType.TYPE_FLOAT,
-          3);
+    ATTRIBUTE_TANGENT3 =
+      ArrayAttributeDescriptor.newAttribute(
+        "tangent3",
+        JCGLScalarType.TYPE_FLOAT,
+        3);
 
-      ATTRIBUTE_TANGENT4 =
-        new ArrayBufferAttributeDescriptor(
-          "tangent4",
-          JCGLScalarType.TYPE_FLOAT,
-          4);
+    ATTRIBUTE_TANGENT4 =
+      ArrayAttributeDescriptor.newAttribute(
+        "tangent4",
+        JCGLScalarType.TYPE_FLOAT,
+        4);
 
-      ATTRIBUTE_UV =
-        new ArrayBufferAttributeDescriptor("uv", JCGLScalarType.TYPE_FLOAT, 2);
-    } catch (final ConstraintError x) {
-      throw new UnreachableCodeException();
-    }
+    ATTRIBUTE_UV =
+      ArrayAttributeDescriptor.newAttribute(
+        "uv",
+        JCGLScalarType.TYPE_FLOAT,
+        2);
   }
 
   private KMeshAttributes()

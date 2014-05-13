@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-import javax.annotation.Nonnull;
 
 /**
  * The type of regular instances. That is, instances that have materials
@@ -31,5 +30,5 @@ public interface KInstanceRegularType extends KInstanceType
    * @return The regular material of this instance
    */
 
-  @Nonnull KMaterialRegularType instanceGetMaterial();
+   KMaterialRegularType instanceGetMaterial();
 }

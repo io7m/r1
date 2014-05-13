@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,25 +16,22 @@
 
 package com.io7m.renderer.xml.collada;
 
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
-import com.io7m.jaux.Constraints;
-import com.io7m.jaux.Constraints.ConstraintError;
-
-@Immutable public final class ColladaName
+@EqualityStructural public final class ColladaName
 {
-  private final @Nonnull String actual;
+  private final String actual;
 
   public ColladaName(
-    final @Nonnull String in_actual)
-    throws ConstraintError
+    final String in_actual)
   {
-    this.actual = Constraints.constrainNotNull(in_actual, "Actual");
+    this.actual = NullCheck.notNull(in_actual, "Actual");
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -49,7 +46,7 @@ import com.io7m.jaux.Constraints.ConstraintError;
     return this.actual.equals(other.actual);
   }
 
-  public @Nonnull String getActual()
+  public String getActual()
   {
     return this.actual;
   }
@@ -63,5 +60,4 @@ import com.io7m.jaux.Constraints.ConstraintError;
   {
     return this.actual;
   }
-
 }

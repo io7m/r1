@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.kernel.examples;
 
-import javax.annotation.Nonnull;
-
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
 
@@ -31,11 +29,11 @@ public interface ExampleViewLookAtType extends ExampleViewType
    * @return The view source
    */
 
-  @Nonnull RVectorI3F<RSpaceWorldType> viewGetSource();
+  RVectorI3F<RSpaceWorldType> viewGetSource();
 
   /**
    * @return The view target
    */
 
-  @Nonnull RVectorI3F<RSpaceWorldType> viewGetTarget();
+  RVectorI3F<RSpaceWorldType> viewGetTarget();
 }
