@@ -16,24 +16,12 @@
 
 package com.io7m.renderer.kernel.types;
 
-
 /**
- * <p>
- * An instance that will be rendered in "translucent" mode.
- * </p>
- * <p>
- * Translucent instances are rendered in a specific order (typically from
- * furthest to nearest) and, depending on the specific material, may be
- * blended with the image in the current framebuffer.
- * </p>
+ * The type of meshes with translucent materials, with specific transforms and
+ * UV matrices.
  */
 
 public interface KInstanceTranslucentType extends KInstanceType
 {
-
-  /**
-   * @return The faces that will be rendered
-   */
-
-   KFaceSelection instanceGetFaces();
+  // Nothing
 }

@@ -23,8 +23,10 @@ import com.io7m.renderer.kernel.examples.ExampleSceneType;
 import com.io7m.renderer.kernel.examples.ExampleSceneUtilities;
 import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
+import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialEnvironment;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.types.RException;
@@ -60,19 +62,22 @@ public final class SLEnvironment0 implements ExampleSceneType
           scene.cubeTexture("toronto/cube.rxc"),
           false));
 
-    final KInstanceTransformedOpaqueRegular i =
-      KInstanceTransformedOpaqueRegular.newInstance(
-        KInstanceOpaqueRegular.newInstance(
+    final KInstanceOpaqueRegular i =
+      KInstanceOpaqueRegular.newInstance(
+        KMeshWithMaterialOpaqueRegular.newInstance(
           material,
           scene.mesh("plane2x2_PN.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
         ExampleSceneUtilities.IDENTITY_UV);
 
-    scene.sceneAddOpaqueLitVisibleWithShadow(
-      ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE
-        .withPosition(ExampleSceneUtilities.CENTER),
-      i);
+    {
+      final KLightSphereBuilderType b =
+        KLightSphere
+          .newBuilderWithFreshID(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
+      b.setPosition(ExampleSceneUtilities.CENTER);
+      scene.sceneAddOpaqueLitVisibleWithShadow(b.build(), i);
+    }
   }
 
   @Override public List<ExampleViewType> exampleViewpoints()

@@ -23,7 +23,7 @@ import net.java.dev.designgridlayout.RowGroup;
 
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KBlurParameters;
-import com.io7m.renderer.kernel.types.KBlurParameters.BuilderType;
+import com.io7m.renderer.kernel.types.KBlurParametersBuilderType;
 
 public final class SBBlurControls implements
   SBControlsDataType<KBlurParameters>
@@ -100,7 +100,7 @@ public final class SBBlurControls implements
   @Override public KBlurParameters controlsSave()
     throws SBExceptionInputError
   {
-    final BuilderType b = KBlurParameters.newBuilder();
+    final KBlurParametersBuilderType b = KBlurParameters.newBuilder();
     b.setBlurSize(this.blur_size.getCurrent());
     b.setPasses(this.passes.getCurrent());
     b.setScale(this.scale.getCurrent());

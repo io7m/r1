@@ -16,11 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.renderer.kernel.types.KInstanceRegularType;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialRegularType;
 import com.io7m.renderer.kernel.types.KMaterialEnvironmentLabel;
 
 interface KMaterialEnvironmentLabelCacheType
 {
   KMaterialEnvironmentLabel getEnvironmentLabelRegular(
-    final KInstanceRegularType instance);
+    final KMeshWithMaterialRegularType instance);
 }

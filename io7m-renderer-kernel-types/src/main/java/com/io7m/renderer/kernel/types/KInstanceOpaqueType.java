@@ -16,28 +16,16 @@
 
 package com.io7m.renderer.kernel.types;
 
-
 /**
- * <p>
- * An instance that will be rendered in opaque mode.
- * </p>
- * <p>
- * Opaque instances are rendered in an arbitrary order, using the depth buffer
- * to ensure that objects appear at the correct perceived distance.
- * </p>
+ * A mesh with an opaque material, with a specific transform and texture
+ * matrix.
  */
 
-public interface KInstanceOpaqueType extends KInstanceRegularType
+public interface KInstanceOpaqueType extends KInstanceType
 {
   /**
-   * @return The regular material of this instance
+   * @return The mesh with material.
    */
 
-  @Override  KMaterialOpaqueType instanceGetMaterial();
-
-  /**
-   * @return The faces that will be rendered
-   */
-
-   KFaceSelection instanceGetFaces();
+  KMeshWithMaterialOpaqueType instanceGetMeshWithMaterial();
 }

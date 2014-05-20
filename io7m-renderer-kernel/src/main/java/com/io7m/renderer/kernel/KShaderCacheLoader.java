@@ -28,6 +28,7 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jvvfs.FSCapabilityReadType;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
  * A cache loader that can load and construct shading programs of type
@@ -81,7 +82,7 @@ import com.io7m.renderer.types.RException;
     try {
       gc.programDelete(v.getProgram());
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
@@ -100,7 +101,7 @@ import com.io7m.renderer.types.RException;
         name,
         this.log);
     } catch (final JCGLException x) {
-      throw RException.fromJCGLException(x);
+      throw RExceptionJCGL.fromJCGLException(x);
     }
   }
 

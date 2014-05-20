@@ -24,7 +24,7 @@ import java.util.Map;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 
 @EqualityReference final class KSceneBatchedDepth
@@ -32,9 +32,9 @@ import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
   interface BuilderType
   {
     void sceneAddInstance(
-      final KInstanceTransformedOpaqueType instance);
+      final KInstanceOpaqueType instance);
 
-      Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>
+      Map<KMaterialDepthLabel, List<KInstanceOpaqueType>>
       sceneCreate();
   }
 
@@ -42,7 +42,7 @@ import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
     BuilderType
   {
     private final KMaterialDepthLabelCacheType                                   cache;
-    private final Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> in_progress;
+    private final Map<KMaterialDepthLabel, List<KInstanceOpaqueType>> in_progress;
     private boolean                                                              valid;
 
     public KSceneBatchedDepthBuilder(
@@ -51,11 +51,11 @@ import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
       this.valid = true;
       this.cache = NullCheck.notNull(in_cache, "Depth label cache");
       this.in_progress =
-        new HashMap<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>();
+        new HashMap<KMaterialDepthLabel, List<KInstanceOpaqueType>>();
     }
 
     @Override public void sceneAddInstance(
-      final KInstanceTransformedOpaqueType instance)
+      final KInstanceOpaqueType instance)
     {
       NullCheck.notNull(instance, "Instance");
 
@@ -64,12 +64,12 @@ import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
       }
 
       final KMaterialDepthLabel depth_label =
-        this.cache.getDepthLabel(instance.instanceGet());
-      List<KInstanceTransformedOpaqueType> depth_batch;
+        this.cache.getDepthLabel(instance.instanceGetMeshWithMaterial());
+      List<KInstanceOpaqueType> depth_batch;
       if (this.in_progress.containsKey(depth_label)) {
         depth_batch = this.in_progress.get(depth_label);
       } else {
-        depth_batch = new ArrayList<KInstanceTransformedOpaqueType>();
+        depth_batch = new ArrayList<KInstanceOpaqueType>();
       }
 
       depth_batch.add(instance);
@@ -77,7 +77,7 @@ import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
     }
 
     @Override public
-      Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>
+      Map<KMaterialDepthLabel, List<KInstanceOpaqueType>>
       sceneCreate()
     {
       this.valid = false;

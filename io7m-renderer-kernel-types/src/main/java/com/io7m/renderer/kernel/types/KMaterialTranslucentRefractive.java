@@ -67,6 +67,25 @@ import com.io7m.renderer.types.RTransformTextureType;
     this.refractive = NullCheck.notNull(in_refractive, "Refractive");
   }
 
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KMaterialTranslucentRefractive other =
+      (KMaterialTranslucentRefractive) obj;
+    return this.normal.equals(other.normal)
+      && this.refractive.equals(other.refractive)
+      && this.uv_matrix.equals(other.uv_matrix);
+  }
+
   /**
    * @return The refraction parameters for the material
    */
@@ -74,6 +93,27 @@ import com.io7m.renderer.types.RTransformTextureType;
   public KMaterialRefractive getRefractive()
   {
     return this.refractive;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.normal.hashCode();
+    result = (prime * result) + this.refractive.hashCode();
+    result = (prime * result) + this.uv_matrix.hashCode();
+    return result;
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
+    A
+    materialAccept(
+      final V v)
+      throws E,
+        RException
+  {
+    return v.materialTranslucent(this);
   }
 
   @Override public KMaterialNormal materialGetNormal()
@@ -95,17 +135,6 @@ import com.io7m.renderer.types.RTransformTextureType;
         RException
   {
     return v.translucentRefractive(this);
-  }
-
-  @Override public
-    <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
-    A
-    materialAccept(
-      final V v)
-      throws E,
-        RException
-  {
-    return v.materialTranslucent(this);
   }
 
   @Override public int texturesGetRequired()
@@ -144,35 +173,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     final KMaterialRefractive m)
   {
     return new KMaterialTranslucentRefractive(this.uv_matrix, this.normal, m);
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.normal.hashCode();
-    result = (prime * result) + this.refractive.hashCode();
-    result = (prime * result) + this.uv_matrix.hashCode();
-    return result;
-  }
-
-  @Override public boolean equals(
-    final @Nullable Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KMaterialTranslucentRefractive other =
-      (KMaterialTranslucentRefractive) obj;
-    return this.normal.equals(other.normal)
-      && this.refractive.equals(other.refractive)
-      && this.uv_matrix.equals(other.uv_matrix);
   }
 
   /**

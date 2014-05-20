@@ -1,0 +1,54 @@
+/*
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
+ * 
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+ * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+package com.io7m.renderer.kernel.types;
+
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * A readable interface to mutable scene builders.
+ */
+
+public interface KSceneBuilderReadableType
+{
+  /**
+   * @return A read-only map of the current set of instances present in the
+   *         scene.
+   */
+
+  Map<KInstanceID, KInstanceType> sceneGetInstances();
+
+  /**
+   * @return A read-only map of the current shadow-casting instances present
+   *         in the scene, by light.
+   */
+
+  Map<KLightID, KInstanceID> sceneGetInstancesShadowCasting();
+
+  /**
+   * @return A read-only map of the current set of lights present in the
+   *         scene.
+   */
+
+  Map<KLightID, KLightType> sceneGetLights();
+
+  /**
+   * @return A read-only set of the current shadow-casing lights in the scene.
+   */
+
+  Set<KLightID> sceneGetLightsShadowCasting();
+}

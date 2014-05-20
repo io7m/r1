@@ -16,11 +16,43 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.renderer.types.RException;
+
 /**
  * The type of translucent instances that can be rendered without lighting.
  */
 
-public interface KInstanceTranslucentUnlitType
+public interface KInstanceTranslucentUnlitType extends
+  KInstanceTranslucentType
 {
-  // Nothing
+  /**
+   * Be visited by the given generic visitor.
+   * 
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   * 
+   * @param <A>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          A specific visitor subtype
+   * 
+   * @throws RException
+   *           If the visitor raises {@link RException}
+   * @throws JCGLException
+   *           If the visitor raises {@link JCGLException}
+   */
+
+    <A, E extends Throwable, V extends KInstanceTranslucentUnlitVisitorType<A, E>>
+    A
+    transformedTranslucentUnlitAccept(
+      final V v)
+      throws E,
+        RException,
+        JCGLException;
 }

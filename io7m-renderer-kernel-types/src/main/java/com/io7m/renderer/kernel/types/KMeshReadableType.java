@@ -28,29 +28,47 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 public interface KMeshReadableType
 {
   /**
+   * @return <code>true</code> if the mesh has usable UV coordinates.
+   */
+
+  boolean meshHasUVs();
+
+  /**
+   * @return <code>true</code> if the mesh has usable normal vectors.
+   */
+
+  boolean meshHasNormals();
+
+  /**
+   * @return <code>true</code> if the mesh has usable tangent vectors.
+   */
+
+  boolean meshHasTangents();
+
+  /**
    * @return The array buffer that holds the mesh data
    */
 
-  ArrayBufferUsableType getArrayBuffer();
+  ArrayBufferUsableType meshGetArrayBuffer();
 
   /**
    * @return The lower bound, in object space, of all vertex positions in the
    *         mesh
    */
 
-  RVectorReadable3FType<RSpaceObjectType> getBoundsLower();
+  RVectorReadable3FType<RSpaceObjectType> meshGetBoundsLower();
 
   /**
    * @return The upper bound, in object space, of all vertex positions in the
    *         mesh
    */
 
-  RVectorReadable3FType<RSpaceObjectType> getBoundsUpper();
+  RVectorReadable3FType<RSpaceObjectType> meshGetBoundsUpper();
 
   /**
    * @return The index buffer describing primitives in the mesh data
    */
 
-  IndexBufferUsableType getIndexBuffer();
+  IndexBufferUsableType meshGetIndexBuffer();
 
 }

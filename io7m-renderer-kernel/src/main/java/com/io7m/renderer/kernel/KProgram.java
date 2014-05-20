@@ -67,6 +67,9 @@ import com.io7m.jvvfs.FSCapabilityReadType;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionFilesystem;
+import com.io7m.renderer.types.RExceptionIO;
+import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RXMLException;
 
 /**
@@ -630,11 +633,11 @@ import com.io7m.renderer.types.RXMLException;
     } catch (final ParserConfigurationException x) {
       throw RXMLException.parserConfigurationException(x);
     } catch (final IOException e) {
-      throw RException.fromIOException(e);
+      throw RExceptionIO.fromIOException(e);
     } catch (final FilesystemError e) {
-      throw RException.fromFilesystemException(e);
+      throw RExceptionFilesystem.fromFilesystemException(e);
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 

@@ -16,14 +16,20 @@
 
 package com.io7m.renderer.kernel.sandbox;
 
+import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.OptionVisitorType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionUserError;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
@@ -144,18 +150,36 @@ final class SBLightDescriptionProjective implements SBLightDescription
 
   KLightProjective getLight(
     final SBTexture2D<SBTexture2DKindAlbedo> t)
+    throws RExceptionUserError,
+      RException
   {
-    return KLightProjective.newProjective(
-      this.id,
-      t.getTexture(),
-      this.position,
-      this.orientation,
-      this.colour,
-      this.intensity,
-      (float) this.projection.getFar(),
-      this.falloff,
-      this.projection_matrix,
-      this.getShadow());
+    final KLightProjectiveBuilderType b = KLightProjective.newBuilder();
+    b.setColor(this.colour);
+    b.setFalloff(this.falloff);
+    b.setIntensity(this.intensity);
+    b.setOrientation(this.orientation);
+    b.setPosition(this.position);
+    b.setProjection(this.projection_matrix);
+    b.setRange((float) this.projection.getFar());
+
+    this.getShadow().accept(new OptionVisitorType<KShadowType, Unit>() {
+      @Override public Unit none(
+        final None<KShadowType> n)
+      {
+        b.setNoShadow();
+        return Unit.unit();
+      }
+
+      @Override public Unit some(
+        final Some<KShadowType> s)
+      {
+        b.setShadow(s.get());
+        return Unit.unit();
+      }
+    });
+
+    b.setTexture(t.getTexture());
+    return b.build();
   }
 
   public QuaternionI4F getOrientation()

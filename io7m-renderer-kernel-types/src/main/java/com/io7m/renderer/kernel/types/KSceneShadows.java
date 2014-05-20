@@ -28,11 +28,14 @@ import com.io7m.jnull.Nullable;
 
 @EqualityStructural public final class KSceneShadows
 {
-  private final Map<KLightType, List<KInstanceTransformedOpaqueType>> shadow_casters;
+  private final Map<KLightID, KLightType>                           lights;
+  private final Map<KLightID, List<KInstanceOpaqueType>> shadow_casters;
 
   KSceneShadows(
-    final Map<KLightType, List<KInstanceTransformedOpaqueType>> in_shadow_casters)
+    final Map<KLightID, KLightType> in_lights,
+    final Map<KLightID, List<KInstanceOpaqueType>> in_shadow_casters)
   {
+    this.lights = in_lights;
     this.shadow_casters = in_shadow_casters;
   }
 
@@ -49,7 +52,17 @@ import com.io7m.jnull.Nullable;
       return false;
     }
     final KSceneShadows other = (KSceneShadows) obj;
-    return (this.shadow_casters.equals(other.shadow_casters));
+    return this.lights.equals(other.lights)
+      && this.shadow_casters.equals(other.shadow_casters);
+  }
+
+  /**
+   * @return The lights present.
+   */
+
+  public Map<KLightID, KLightType> getLights()
+  {
+    return this.lights;
   }
 
   /**
@@ -57,7 +70,7 @@ import com.io7m.jnull.Nullable;
    */
 
   public
-    Map<KLightType, List<KInstanceTransformedOpaqueType>>
+    Map<KLightID, List<KInstanceOpaqueType>>
     getShadowCasters()
   {
     return this.shadow_casters;
@@ -67,6 +80,7 @@ import com.io7m.jnull.Nullable;
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + this.lights.hashCode();
     result = (prime * result) + this.shadow_casters.hashCode();
     return result;
   }

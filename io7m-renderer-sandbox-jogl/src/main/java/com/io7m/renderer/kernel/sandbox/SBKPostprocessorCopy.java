@@ -44,6 +44,7 @@ import com.io7m.renderer.kernel.KShaderCacheType;
 import com.io7m.renderer.kernel.KUnitQuad;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 public final class SBKPostprocessorCopy
 {
@@ -292,7 +293,7 @@ public final class SBKPostprocessorCopy
             log);
 
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       }
     }
 

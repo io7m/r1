@@ -28,17 +28,6 @@ import com.io7m.jtensors.QuaternionM4F;
 
 public final class KTransformContext
 {
-  @Override public boolean equals(
-    final @Nullable Object other)
-  {
-    return super.equals(other);
-  }
-
-  @Override public int hashCode()
-  {
-    return super.hashCode();
-  }
-
   /**
    * Construct a new transform context
    * 
@@ -51,11 +40,12 @@ public final class KTransformContext
   }
 
   private final MatrixM3x3F         t_matrix3x3;
+
   private final MatrixM3x3F.Context t_matrix3x3_context;
+
   private final MatrixM4x4F         t_matrix4x4;
   private final MatrixM4x4F.Context t_matrix4x4_context;
   private final QuaternionM4F       t_rotation;
-
   private KTransformContext()
   {
     this.t_rotation = new QuaternionM4F();
@@ -63,6 +53,11 @@ public final class KTransformContext
     this.t_matrix4x4_context = new MatrixM4x4F.Context();
     this.t_matrix3x3 = new MatrixM3x3F();
     this.t_matrix3x3_context = new MatrixM3x3F.Context();
+  }
+  @Override public boolean equals(
+    final @Nullable Object other)
+  {
+    return super.equals(other);
   }
 
   /**
@@ -118,5 +113,10 @@ public final class KTransformContext
   public QuaternionM4F getTemporaryRotation()
   {
     return this.t_rotation;
+  }
+
+  @Override public int hashCode()
+  {
+    return super.hashCode();
   }
 }

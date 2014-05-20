@@ -18,46 +18,60 @@ package com.io7m.renderer.kernel.types;
 
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RMatrixI3x3F;
+import com.io7m.renderer.types.RTransformTextureType;
 
 /**
- * The type of instances.
+ * The type of instances with instance-specific transformations (
+ * {@link KTransformType}).
  */
 
-public interface KInstanceType
+public interface KInstanceType extends KMeshWithMaterialType
 {
   /**
-   * Be visited by the given generic visitor.
-   * 
-   * @param v
-   *          The visitor
-   * @return The value returned by the visitor
-   * 
-   * @throws JCGLException
-   *           Iff the visitor raises {@link JCGLException}
-   * @throws RException
-   *           Iff the visitor raises {@link RException}
-   * @throws E
-   *           Iff the visitor raises <code>E</code
+   * @return The unique identifier for the instance
+   */
+
+  KInstanceID instanceGetID();
+
+  /**
+   * @return The transform associated with the instance
+   */
+
+  KTransformType instanceGetTransform();
+
+  /**
+   * @return The instance-specific texture transformation matrix
+   */
+
+  RMatrixI3x3F<RTransformTextureType> instanceGetUVMatrix();
+
+  /**
+   * Accept a visitor.
    * 
    * @param <A>
-   *          The return type of the visitor
+   *          The type of values returned by the visitor
    * @param <E>
    *          The type of exceptions raised by the visitor
    * @param <V>
-   *          A specific visitor subtype
+   *          The type of the visitor
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws E
+   *           If the visitor raises <code>E</code>
+   * 
+   * @throws RException
+   *           If the visitor raises {@link RException}
+   * @throws JCGLException
+   *           If the visitor raises {@link JCGLException}
    */
 
     <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
-    instanceAccept(
+    transformedAccept(
       final V v)
       throws E,
         RException,
         JCGLException;
-
-  /**
-   * @return The mesh used by the current instance
-   */
-
-  KMeshReadableType instanceGetMesh();
 }

@@ -24,7 +24,7 @@ import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KBlurParameters;
-import com.io7m.renderer.kernel.types.KBlurParameters.BuilderType;
+import com.io7m.renderer.kernel.types.KBlurParametersBuilderType;
 import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KDepthVariancePrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
@@ -94,7 +94,7 @@ public final class SBLightShadowDescriptionGenerator implements
             description,
             this.index_gen.next().intValue());
 
-        final BuilderType bb = KBlurParameters.newBuilder();
+        final KBlurParametersBuilderType bb = KBlurParameters.newBuilder();
         bb.setBlurSize((float) (Math.random() * 32.0f));
         bb.setScale((float) Math.random());
         bb.setPasses((int) (Math.random() * 32));

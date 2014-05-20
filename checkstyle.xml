@@ -167,7 +167,7 @@
     <!-- <module name="SimplifyBooleanExpression"/> -->
     <module name="SimplifyBooleanReturn"/>
     <module name="StaticVariableName">
-      <property name="format" value="^[A-Z][A-Z0-9]*$"/>
+      <property name="format" value="^[A-Z][A-Z0-9_]*$"/>
     </module>
     <module name="StringLiteralEquality"/>
     <module name="TrailingComment"/>

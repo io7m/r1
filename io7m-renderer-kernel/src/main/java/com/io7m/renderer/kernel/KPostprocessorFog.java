@@ -37,6 +37,8 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionCache;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 @EqualityReference final class KPostprocessorFog implements
   KPostprocessorRGBAWithDepthType<KFogParameters>
@@ -196,9 +198,9 @@ import com.io7m.renderer.types.RException;
       }
 
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCacheException e) {
-      throw RException.fromJCacheException(e);
+      throw RExceptionCache.fromJCacheException(e);
     }
   }
 

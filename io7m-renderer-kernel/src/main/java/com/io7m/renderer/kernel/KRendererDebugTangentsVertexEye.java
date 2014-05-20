@@ -38,13 +38,15 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KCamera;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneOpaques;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionCache;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
  * A debug renderer that displays the calculated eye-space tangents for all
@@ -83,7 +85,7 @@ import com.io7m.renderer.types.RException;
   private static void renderInstanceOpaque(
     final JCGLInterfaceCommonType gc,
     final JCBProgramType p,
-    final KInstanceTransformedOpaqueType i,
+    final KInstanceOpaqueType i,
     final MatricesInstanceType mi)
     throws JCGLException
   {
@@ -102,10 +104,10 @@ import com.io7m.renderer.types.RException;
      */
 
     try {
-      final KInstanceType instance = i.instanceGet();
+      final KInstanceType instance = i.instanceGetMeshWithMaterial();
       final KMeshReadableType mesh = instance.instanceGetMesh();
-      final ArrayBufferUsableType array = mesh.getArrayBuffer();
-      final IndexBufferUsableType indices = mesh.getIndexBuffer();
+      final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
+      final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
@@ -169,12 +171,12 @@ import com.io7m.renderer.types.RException;
                 o);
               return Unit.unit();
             } catch (final JCacheException e) {
-              throw RException.fromJCacheException(e);
+              throw RExceptionCache.fromJCacheException(e);
             }
           }
         });
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
@@ -226,7 +228,7 @@ import com.io7m.renderer.types.RException;
             mo.getMatrixProjection());
 
           final KSceneOpaques opaques = scene.getOpaques();
-          for (final KInstanceTransformedOpaqueType o : opaques.getAll()) {
+          for (final KInstanceOpaqueType o : opaques.getAll()) {
             mo.withInstance(
               o,
               new MatricesInstanceFunctionType<Unit, JCGLException>() {

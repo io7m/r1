@@ -24,6 +24,7 @@ import net.java.dev.designgridlayout.DesignGridLayout;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.types.RSpaceWorldType;
 
 public final class SBLightControlsSpherical implements
@@ -116,22 +117,22 @@ public final class SBLightControlsSpherical implements
   {
     final KLightSphere l = d.getLight();
     this.intensity.setCurrent(l.lightGetIntensity());
-    this.colour.controlsLoadFrom(l.lightGetColour());
-    this.position.setVector(l.getPosition());
-    this.falloff.setCurrent(l.getFalloff());
-    this.radius.setCurrent(l.getRadius());
+    this.colour.controlsLoadFrom(l.lightGetColor());
+    this.position.setVector(l.lightGetPosition());
+    this.falloff.setCurrent(l.lightGetFalloff());
+    this.radius.setCurrent(l.lightGetRadius());
   }
 
   @Override public SBLightDescriptionSpherical controlsSave()
     throws SBExceptionInputError
   {
-    return new SBLightDescriptionSpherical(
-      this.id,
-      KLightSphere.newSpherical(
-        this.colour.controlsSave(),
-        this.intensity.getCurrent(),
-        this.position.getVector(),
-        this.radius.getCurrent(),
-        this.falloff.getCurrent()));
+    final KLightSphereBuilderType b = KLightSphere.newBuilder();
+    b.setColor(this.colour.controlsSave());
+    b.setIntensity(this.intensity.getCurrent());
+    b.setPosition(this.position.getVector());
+    b.setRadius(this.radius.getCurrent());
+    b.setFalloff(this.falloff.getCurrent());
+
+    return new SBLightDescriptionSpherical(this.id, b.build());
   }
 }

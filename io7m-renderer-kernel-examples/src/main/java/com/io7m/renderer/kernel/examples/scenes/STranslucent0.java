@@ -27,11 +27,12 @@ import com.io7m.renderer.kernel.examples.ExampleSceneType;
 import com.io7m.renderer.kernel.examples.ExampleSceneUtilities;
 import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedo;
 import com.io7m.renderer.kernel.types.KMaterialAlpha;
@@ -100,9 +101,9 @@ public final class STranslucent0 implements ExampleSceneType
         new VectorI3F(0.0f, 16.0f, 0.0f),
         new VectorI3F(0.0f, 0.0f, 16.0f));
 
-    final KInstanceTransformedOpaqueRegular floor =
-      KInstanceTransformedOpaqueRegular.newInstance(
-        KInstanceOpaqueRegular.newInstance(
+    final KInstanceOpaqueRegular floor =
+      KInstanceOpaqueRegular.newInstance(
+        KMeshWithMaterialOpaqueRegular.newInstance(
           floor_mat,
           scene.mesh("plane2x2_PNTU.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
@@ -139,9 +140,9 @@ public final class STranslucent0 implements ExampleSceneType
         1.0f,
         1.0f), new RVectorI3F<RSpaceWorldType>(0.0f, 0.5f, 0.0f));
 
-    final KInstanceTransformedTranslucentRegular glass =
-      KInstanceTransformedTranslucentRegular.newInstance(
-        KInstanceTranslucentRegular.newInstance(
+    final KInstanceTranslucentRegular glass =
+      KInstanceTranslucentRegular.newInstance(
+        KMeshWithMaterialTranslucentRegular.newInstance(
           glass_mat,
           scene.mesh("plane2x2_PNTU.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
@@ -152,53 +153,54 @@ public final class STranslucent0 implements ExampleSceneType
      * A white light centered on the translucent piece.
      */
 
-    final KLightSphere lb =
-      KLightSphere.newSpherical(
-        ExampleSceneUtilities.RGB_WHITE,
-        1.0f,
-        new RVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f),
-        8.0f,
-        1.0f);
+    final KLightSphere lb;
+
+    {
+      final KLightSphereBuilderType b = KLightSphere.newBuilder();
+      b.setRadius(8.0f);
+      b.setFalloff(1.0f);
+      b.setIntensity(1.0f);
+      b.setColor(ExampleSceneUtilities.RGB_WHITE);
+      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f));
+      lb = b.build();
+    }
 
     /**
      * Coloured lights at each corner of the translucent piece.
      */
 
-    final KLightSphere l0 =
-      KLightSphere.newSpherical(
-        ExampleSceneUtilities.RGB_RED,
-        1.0f,
-        new RVectorI3F<RSpaceWorldType>(-1.5f, 1.5f, -1.0f),
-        8.0f,
-        1.0f);
-    final KLightSphere l1 =
-      KLightSphere.newSpherical(
-        ExampleSceneUtilities.RGB_BLUE,
-        1.0f,
-        new RVectorI3F<RSpaceWorldType>(1.5f, 1.5f, -1.0f),
-        8.0f,
-        1.0f);
-    final KLightSphere l2 =
-      KLightSphere.newSpherical(
-        ExampleSceneUtilities.RGB_GREEN,
-        1.0f,
-        new RVectorI3F<RSpaceWorldType>(-1.5f, 1.5f, 1.0f),
-        8.0f,
-        1.0f);
-    final KLightSphere l3 =
-      KLightSphere.newSpherical(
-        ExampleSceneUtilities.RGB_YELLOW,
-        1.0f,
-        new RVectorI3F<RSpaceWorldType>(1.5f, 1.5f, 1.0f),
-        8.0f,
-        1.0f);
-    final KLightSphere l4 =
-      KLightSphere.newSpherical(
-        ExampleSceneUtilities.RGB_WHITE,
-        1.0f,
-        new RVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 0.0f),
-        8.0f,
-        1.0f);
+    final KLightSphere l0;
+    final KLightSphere l1;
+    final KLightSphere l2;
+    final KLightSphere l3;
+    final KLightSphere l4;
+
+    {
+      final KLightSphereBuilderType b = KLightSphere.newBuilder();
+      b.setRadius(8.0f);
+      b.setFalloff(1.0f);
+      b.setIntensity(1.0f);
+
+      b.setColor(ExampleSceneUtilities.RGB_RED);
+      b.setPosition(new RVectorI3F<RSpaceWorldType>(-1.5f, 1.5f, -1.0f));
+      l0 = b.build();
+
+      b.setColor(ExampleSceneUtilities.RGB_BLUE);
+      b.setPosition(new RVectorI3F<RSpaceWorldType>(1.5f, 1.5f, -1.0f));
+      l1 = b.build();
+
+      b.setColor(ExampleSceneUtilities.RGB_GREEN);
+      b.setPosition(new RVectorI3F<RSpaceWorldType>(-1.5f, 1.5f, 1.0f));
+      l2 = b.build();
+
+      b.setColor(ExampleSceneUtilities.RGB_YELLOW);
+      b.setPosition(new RVectorI3F<RSpaceWorldType>(1.5f, 1.5f, 1.0f));
+      l3 = b.build();
+
+      b.setColor(ExampleSceneUtilities.RGB_WHITE);
+      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 0.0f));
+      l4 = b.build();
+    }
 
     final Set<KLightType> lights = new HashSet<KLightType>();
     lights.add(lb);

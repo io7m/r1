@@ -29,15 +29,18 @@ import com.io7m.jnull.Nullable;
 
 @EqualityStructural public final class KSceneOpaques
 {
-  private final Set<KInstanceTransformedOpaqueType>                   all;
-  private final Map<KLightType, List<KInstanceTransformedOpaqueType>> lit;
-  private final Set<KInstanceTransformedOpaqueType>                   unlit;
+  private final Set<KInstanceOpaqueType>                 all;
+  private final Map<KLightID, KLightType>                           lights;
+  private final Map<KLightID, List<KInstanceOpaqueType>> lit;
+  private final Set<KInstanceOpaqueType>                 unlit;
 
   KSceneOpaques(
-    final Map<KLightType, List<KInstanceTransformedOpaqueType>> in_lit,
-    final Set<KInstanceTransformedOpaqueType> in_unlit,
-    final Set<KInstanceTransformedOpaqueType> visible)
+    final Map<KLightID, KLightType> in_lights,
+    final Map<KLightID, List<KInstanceOpaqueType>> in_lit,
+    final Set<KInstanceOpaqueType> in_unlit,
+    final Set<KInstanceOpaqueType> visible)
   {
+    this.lights = in_lights;
     this.lit = in_lit;
     this.unlit = in_unlit;
     this.all = visible;
@@ -65,9 +68,18 @@ import com.io7m.jnull.Nullable;
    * @return A flat list of all the visible opaque objects in the scene.
    */
 
-  public Set<KInstanceTransformedOpaqueType> getAll()
+  public Set<KInstanceOpaqueType> getAll()
   {
     return this.all;
+  }
+
+  /**
+   * @return The lights present.
+   */
+
+  public Map<KLightID, KLightType> getLights()
+  {
+    return this.lights;
   }
 
   /**
@@ -75,7 +87,7 @@ import com.io7m.jnull.Nullable;
    */
 
   public
-    Map<KLightType, List<KInstanceTransformedOpaqueType>>
+    Map<KLightID, List<KInstanceOpaqueType>>
     getLitInstances()
   {
     return this.lit;
@@ -85,7 +97,7 @@ import com.io7m.jnull.Nullable;
    * @return The set of unlit opaque instances in the scene.
    */
 
-  public Set<KInstanceTransformedOpaqueType> getUnlitInstances()
+  public Set<KInstanceOpaqueType> getUnlitInstances()
   {
     return this.unlit;
   }
@@ -95,6 +107,7 @@ import com.io7m.jnull.Nullable;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.all.hashCode();
+    result = (prime * result) + this.lights.hashCode();
     result = (prime * result) + this.lit.hashCode();
     result = (prime * result) + this.unlit.hashCode();
     return result;

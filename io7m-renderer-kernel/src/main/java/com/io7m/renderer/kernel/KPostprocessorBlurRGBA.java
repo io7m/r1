@@ -29,6 +29,8 @@ import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionCache;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
  * The default implementation of an RGBA blur postprocessor.
@@ -249,9 +251,9 @@ import com.io7m.renderer.types.RException;
       }
 
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCacheException e) {
-      throw RException.fromJCacheException(e);
+      throw RExceptionCache.fromJCacheException(e);
     }
   }
 

@@ -133,9 +133,9 @@ import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentLitType;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentUnlitType;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentLitType;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentUnlitType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
@@ -143,6 +143,9 @@ import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionCache;
+import com.io7m.renderer.types.RExceptionIO;
+import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RXMLException;
@@ -459,9 +462,9 @@ import com.jogamp.opengl.util.FPSAnimator;
             } catch (final ValidityException e) {
               throw RXMLException.validityException(e);
             } catch (final IOException e) {
-              throw RException.fromIOException(e);
+              throw RExceptionIO.fromIOException(e);
             } catch (final JCGLException e) {
-              throw RException.fromJCGLException(e);
+              throw RExceptionJCGL.fromJCGLException(e);
             } catch (final ParsingException e) {
               throw RXMLException.parsingException(e);
             }
@@ -476,14 +479,14 @@ import com.jogamp.opengl.util.FPSAnimator;
 
           @Override public void sceneAddInvisibleWithShadow(
             final KLightType light,
-            final KInstanceTransformedOpaqueType instance)
+            final KInstanceOpaqueType instance)
           {
             scene_builder.sceneAddInvisibleWithShadow(light, instance);
           }
 
           @Override public void sceneAddOpaqueLitVisibleWithoutShadow(
             final KLightType light,
-            final KInstanceTransformedOpaqueType instance)
+            final KInstanceOpaqueType instance)
           {
             scene_builder.sceneAddOpaqueLitVisibleWithoutShadow(
               light,
@@ -492,26 +495,26 @@ import com.jogamp.opengl.util.FPSAnimator;
 
           @Override public void sceneAddOpaqueLitVisibleWithShadow(
             final KLightType light,
-            final KInstanceTransformedOpaqueType instance)
+            final KInstanceOpaqueType instance)
           {
             scene_builder.sceneAddOpaqueLitVisibleWithShadow(light, instance);
           }
 
           @Override public void sceneAddOpaqueUnlit(
-            final KInstanceTransformedOpaqueType instance)
+            final KInstanceOpaqueType instance)
           {
             scene_builder.sceneAddOpaqueUnlit(instance);
           }
 
           @Override public void sceneAddTranslucentLit(
-            final KInstanceTransformedTranslucentLitType instance,
+            final KInstanceTranslucentLitType instance,
             final Set<KLightType> lights)
           {
             scene_builder.sceneAddTranslucentLit(instance, lights);
           }
 
           @Override public void sceneAddTranslucentUnlit(
-            final KInstanceTransformedTranslucentUnlitType instance)
+            final KInstanceTranslucentUnlitType instance)
           {
             scene_builder.sceneAddTranslucentUnlit(instance);
           }
@@ -523,9 +526,9 @@ import com.jogamp.opengl.util.FPSAnimator;
             try {
               return VExampleWindowGL.this.loadTexture(name);
             } catch (final IOException e) {
-              throw RException.fromIOException(e);
+              throw RExceptionIO.fromIOException(e);
             } catch (final JCGLException e) {
-              throw RException.fromJCGLException(e);
+              throw RExceptionJCGL.fromJCGLException(e);
             }
           }
         });
@@ -560,9 +563,9 @@ import com.jogamp.opengl.util.FPSAnimator;
 
               return Unit.unit();
             } catch (final JCacheException e) {
-              throw RException.fromJCacheException(e);
+              throw RExceptionCache.fromJCacheException(e);
             } catch (final JCGLException e) {
-              throw RException.fromJCGLException(e);
+              throw RExceptionJCGL.fromJCGLException(e);
             }
           }
         });
@@ -835,24 +838,24 @@ import com.jogamp.opengl.util.FPSAnimator;
 
         message.setLength(0);
         message.append("Mesh lower bound: ");
-        message.append(km.getBoundsLower());
+        message.append(km.meshGetBoundsLower());
         this.glog.debug(message.toString());
 
         message.setLength(0);
         message.append("Mesh upper bound: ");
-        message.append(km.getBoundsUpper());
+        message.append(km.meshGetBoundsUpper());
         this.glog.debug(message.toString());
 
         return km;
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } catch (final IOException e) {
-        throw RException.fromIOException(e);
+        throw RExceptionIO.fromIOException(e);
       } finally {
         try {
           stream.close();
         } catch (final IOException e) {
-          throw RException.fromIOException(e);
+          throw RExceptionIO.fromIOException(e);
         }
       }
     }

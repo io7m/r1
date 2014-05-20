@@ -26,6 +26,8 @@ import org.junit.Test;
 import com.io7m.jfunctional.Option;
 import com.io7m.jnull.NullCheckException;
 import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
+import com.io7m.renderer.kernel.types.KVersion;
 import com.io7m.renderer.tests.types.RVectorI3FGenerator;
 import com.io7m.renderer.tests.utilities.TestUtilities;
 import com.io7m.renderer.types.RSpaceRGBType;
@@ -36,64 +38,14 @@ import com.io7m.renderer.types.RVectorI3F;
 {
   @Test(expected = NullCheckException.class) public void testNull_0()
   {
-    final RVectorI3F<RSpaceWorldType> position =
-      new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f);
-    KLightSphere.newSpherical(
-      (RVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull(),
-      1.0f,
-      position,
-      1.0f,
-      1.0f);
+    final KLightSphereBuilderType b = KLightSphere.newBuilder();
+    b.setColor((RVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
   }
 
   @Test(expected = NullCheckException.class) public void testNull_1()
   {
-    final RVectorI3F<RSpaceRGBType> colour =
-      new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
-    KLightSphere.newSpherical(
-      colour,
-      1.0f,
-      (RVectorI3F<RSpaceWorldType>) TestUtilities.actuallyNull(),
-      1.0f,
-      1.0f);
-  }
-
-  @Test(expected = NullCheckException.class) public void testNull_2()
-  {
-    KLightSphere s = null;
-
-    try {
-      final RVectorI3F<RSpaceWorldType> position =
-        new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f);
-      final RVectorI3F<RSpaceRGBType> colour =
-        new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
-      s = KLightSphere.newSpherical(colour, 1.0f, position, 1.0f, 1.0f);
-    } catch (final Throwable x) {
-      Assert.fail(x.getMessage());
-    }
-
-    assert s != null;
-    s.withColour((RVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
-  }
-
-  @Test(expected = NullCheckException.class) public void testNull_3()
-  {
-    KLightSphere s = null;
-
-    try {
-      final RVectorI3F<RSpaceWorldType> position =
-        new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f);
-      final RVectorI3F<RSpaceRGBType> colour =
-        new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
-      s = KLightSphere.newSpherical(colour, 1.0f, position, 1.0f, 1.0f);
-    } catch (final Throwable x) {
-      Assert.fail(x.getMessage());
-    }
-
-    assert s != null;
-    s
-      .withPosition((RVectorI3F<RSpaceWorldType>) TestUtilities
-        .actuallyNull());
+    final KLightSphereBuilderType b = KLightSphere.newBuilder();
+    b.setPosition((RVectorI3F<RSpaceWorldType>) TestUtilities.actuallyNull());
   }
 
   @Test public void testAttributes()
@@ -110,22 +62,53 @@ import com.io7m.renderer.types.RVectorI3F;
         final KLightSphere s)
         throws Throwable
       {
-        Assert.assertEquals(s.withFalloff(23.0f).getFalloff(), 23.0f, 0.0f);
+        {
+          final KLightSphereBuilderType b =
+            KLightSphere.newBuilderWithSameID(s);
+          final float f = s.lightGetFalloff() + 1.0f;
+          b.setFalloff(f);
+          final KLightSphere r = b.build();
+          Assert.assertEquals(r.lightGetFalloff(), f, 0.0f);
+        }
 
-        Assert.assertEquals(
-          s.withIntensity(23.0f).lightGetIntensity(),
-          23.0f,
-          0.0f);
+        {
+          final KLightSphereBuilderType b =
+            KLightSphere.newBuilderWithSameID(s);
+          final float i = s.lightGetIntensity() + 1.0f;
+          b.setIntensity(i);
+          final KLightSphere r = b.build();
+          Assert.assertEquals(r.lightGetIntensity(), i, 0.0f);
+        }
 
-        Assert.assertEquals(s.withRadius(23.0f).getRadius(), 23.0f, 0.0f);
+        {
+          final KLightSphereBuilderType b =
+            KLightSphere.newBuilderWithSameID(s);
+          final float r = s.lightGetRadius() + 1.0f;
+          b.setRadius(r);
+          final KLightSphere ss = b.build();
+          Assert.assertEquals(ss.lightGetRadius(), r, 0.0f);
+        }
 
-        final RVectorI3F<RSpaceRGBType> c =
-          new RVectorI3F<RSpaceRGBType>(0.0f, 0.5f, 1.0f);
-        Assert.assertEquals(s.withColour(c).lightGetColour(), c);
+        {
+          final KLightSphereBuilderType b =
+            KLightSphere.newBuilderWithSameID(s);
+          final RVectorI3F<RSpaceRGBType> c =
+            new RVectorI3F<RSpaceRGBType>(0.0f, 0.5f, 1.0f);
 
-        final RVectorI3F<RSpaceWorldType> p =
-          new RVectorI3F<RSpaceWorldType>(0.0f, 0.5f, 1.0f);
-        Assert.assertEquals(s.withPosition(p).getPosition(), p);
+          b.setColor(c);
+          final KLightSphere r = b.build();
+          Assert.assertEquals(c, r.lightGetColor());
+        }
+
+        {
+          final KLightSphereBuilderType b =
+            KLightSphere.newBuilderWithSameID(s);
+          final RVectorI3F<RSpaceWorldType> p =
+            new RVectorI3F<RSpaceWorldType>(0.0f, 0.5f, 1.0f);
+          b.setPosition(p);
+          final KLightSphere r = b.build();
+          Assert.assertEquals(r.lightGetPosition(), p);
+        }
 
         Assert.assertEquals(s.lightGetShadow(), Option.none());
         Assert.assertFalse(s.lightHasShadow());
@@ -149,26 +132,152 @@ import com.io7m.renderer.types.RVectorI3F;
       {
         Assert.assertEquals(s, s);
 
-        Assert.assertNotEquals(s.withFalloff(s.getFalloff() + 1.0f), s);
+        {
+          final KLightSphereBuilderType b =
+            KLightSphere.newBuilderWithSameID(s);
+          b.setFalloff(s.lightGetFalloff() + 1.0f);
+          final KLightSphere r = b.build();
+          Assert.assertNotEquals(r, s);
+        }
 
         Assert.assertNotEquals(s, Integer.valueOf(23));
 
         Assert.assertNotEquals(s, null);
 
-        Assert.assertNotEquals(
-          s.withIntensity(s.lightGetIntensity() + 1.0f),
-          s);
+        {
+          final KLightSphereBuilderType b =
+            KLightSphere.newBuilderWithSameID(s);
+          b.setIntensity(s.lightGetIntensity() + 1.0f);
+          final KLightSphere r = b.build();
+          Assert.assertNotEquals(r, s);
+        }
 
-        Assert.assertNotEquals(s.withRadius(s.getRadius() + 1.0f), s);
+        {
+          final KLightSphereBuilderType b =
+            KLightSphere.newBuilderWithSameID(s);
+          b.setRadius(s.lightGetRadius() + 1.0f);
+          final KLightSphere r = b.build();
+          Assert.assertNotEquals(r, s);
+        }
 
-        final RVectorI3F<RSpaceRGBType> lc = s.lightGetColour();
-        Assert.assertNotEquals(s.withColour(new RVectorI3F<RSpaceRGBType>(lc
-          .getXF() + 1.0f, lc.getYF(), lc.getZF())), s);
+        {
+          final RVectorI3F<RSpaceRGBType> lc = s.lightGetColor();
+          final RVectorI3F<RSpaceRGBType> c =
+            new RVectorI3F<RSpaceRGBType>(lc.getXF() + 1.0f, lc.getYF(), lc
+              .getZF());
 
-        final RVectorI3F<RSpaceWorldType> lp = s.getPosition();
-        Assert.assertNotEquals(s
-          .withPosition(new RVectorI3F<RSpaceWorldType>(lp.getXF() + 1.0f, lp
-            .getYF(), lp.getZF())), s);
+          final KLightSphereBuilderType b =
+            KLightSphere.newBuilderWithSameID(s);
+          b.setColor(c);
+          final KLightSphere r = b.build();
+          Assert.assertNotEquals(r, s);
+        }
+
+        {
+          final RVectorI3F<RSpaceWorldType> lp = s.lightGetPosition();
+          final RVectorI3F<RSpaceWorldType> p =
+            new RVectorI3F<RSpaceWorldType>(lp.getXF() + 1.0f, lp.getYF(), lp
+              .getZF());
+
+          final KLightSphereBuilderType b =
+            KLightSphere.newBuilderWithSameID(s);
+          b.setPosition(p);
+          final KLightSphere r = b.build();
+          Assert.assertNotEquals(r, s);
+        }
+      }
+    });
+  }
+
+  @Test public void testBuilderWithSameID()
+  {
+    final Generator<RVectorI3F<RSpaceRGBType>> colour_gen1 =
+      new RVectorI3FGenerator<RSpaceRGBType>();
+    final Generator<RVectorI3F<RSpaceWorldType>> position_gen1 =
+      new RVectorI3FGenerator<RSpaceWorldType>();
+    final Generator<KLightSphere> gen =
+      new KLightSphereGenerator(colour_gen1, position_gen1);
+
+    QuickCheck.forAllVerbose(gen, new AbstractCharacteristic<KLightSphere>() {
+      @Override protected void doSpecify(
+        final KLightSphere s)
+        throws Throwable
+      {
+        final KLightSphereBuilderType b =
+          KLightSphere.newBuilderWithSameID(s);
+
+        final RVectorI3F<RSpaceRGBType> c_next = colour_gen1.next();
+        assert c_next != null;
+        final RVectorI3F<RSpaceWorldType> p_next = position_gen1.next();
+        assert p_next != null;
+
+        final float f = (float) Math.random();
+        final float i = (float) Math.random();
+        final float r = (float) Math.random();
+
+        b.setColor(c_next);
+        b.setFalloff(f);
+        b.setIntensity(i);
+        b.setPosition(p_next);
+        b.setRadius(r);
+
+        final KLightSphere t = b.build();
+        Assert.assertEquals(s.lightGetID(), t.lightGetID());
+        Assert.assertEquals(c_next, t.lightGetColor());
+        Assert.assertEquals(p_next, t.lightGetPosition());
+        Assert.assertEquals(f, t.lightGetFalloff(), 0.0f);
+        Assert.assertEquals(i, t.lightGetIntensity(), 0.0f);
+        Assert.assertEquals(r, t.lightGetRadius(), 0.0f);
+        Assert.assertEquals(KVersion.first(), t.lightGetVersion());
+      }
+    });
+  }
+
+  @Test public void testBuilderWithFreshID()
+  {
+    final Generator<RVectorI3F<RSpaceRGBType>> colour_gen1 =
+      new RVectorI3FGenerator<RSpaceRGBType>();
+    final Generator<RVectorI3F<RSpaceWorldType>> position_gen1 =
+      new RVectorI3FGenerator<RSpaceWorldType>();
+    final Generator<KLightSphere> gen =
+      new KLightSphereGenerator(colour_gen1, position_gen1);
+
+    QuickCheck.forAllVerbose(gen, new AbstractCharacteristic<KLightSphere>() {
+      @Override protected void doSpecify(
+        final KLightSphere s)
+        throws Throwable
+      {
+        final KLightSphereBuilderType b =
+          KLightSphere.newBuilderWithFreshID(s);
+
+        final RVectorI3F<RSpaceRGBType> c_next = colour_gen1.next();
+        assert c_next != null;
+        final RVectorI3F<RSpaceWorldType> p_next = position_gen1.next();
+        assert p_next != null;
+
+        final float f = (float) Math.random();
+        final float i = (float) Math.random();
+        final float r = (float) Math.random();
+
+        b.setColor(c_next);
+        b.setFalloff(f);
+        b.setIntensity(i);
+        b.setPosition(p_next);
+        b.setRadius(r);
+
+        final KLightSphere t = b.build();
+        Assert.assertNotEquals(s.lightGetID(), t.lightGetID());
+        Assert.assertEquals(c_next, t.lightGetColor());
+        Assert.assertEquals(p_next, t.lightGetPosition());
+        Assert.assertEquals(f, t.lightGetFalloff(), 0.0f);
+        Assert.assertEquals(i, t.lightGetIntensity(), 0.0f);
+        Assert.assertEquals(r, t.lightGetRadius(), 0.0f);
+
+        /**
+         * The version of spherical lights never changes.
+         */
+
+        Assert.assertEquals(KVersion.first(), t.lightGetVersion());
       }
     });
   }

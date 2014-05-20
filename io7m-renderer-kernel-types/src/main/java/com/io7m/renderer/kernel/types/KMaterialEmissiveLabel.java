@@ -16,10 +16,8 @@
 
 package com.io7m.renderer.kernel.types;
 
-import java.util.Map;
-
-import com.io7m.jcanephora.ArrayAttributeDescriptor;
-import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
 /**
@@ -49,8 +47,8 @@ public enum KMaterialEmissiveLabel
 
   EMISSIVE_NONE("", 0);
 
-  private static KMaterialEmissiveLabel fromInstanceData(
-    final ArrayBufferUsableType a,
+  private static KMaterialEmissiveLabel fromData(
+    final KMeshReadableType mesh,
     final KMaterialEmissive emissive)
   {
     if (emissive.getEmission() == 0.0) {
@@ -58,34 +56,71 @@ public enum KMaterialEmissiveLabel
     }
 
     final boolean has_texture = emissive.getTexture().isSome();
-    if (has_texture) {
-      final Map<String, ArrayAttributeDescriptor> ad =
-        a.arrayGetDescriptor().getAttributes();
-      if (ad.containsKey(KMeshAttributes.ATTRIBUTE_UV.getName())) {
-        return KMaterialEmissiveLabel.EMISSIVE_MAPPED;
-      }
+    if (has_texture && mesh.meshHasUVs()) {
+      return KMaterialEmissiveLabel.EMISSIVE_MAPPED;
     }
 
     return KMaterialEmissiveLabel.EMISSIVE_CONSTANT;
   }
 
   /**
-   * Derive an emissive label for the given instance.
+   * Check whether two materials would derive the same label for an arbitrary
+   * mesh <code>m</code>.
    * 
-   * @param instance
-   *          The instance
+   * @param ma
+   *          The first material
+   * @param mb
+   *          The second material
+   * @return <code>true</code> if applying <code>ma</code> to a mesh
+   *         <code>m</code> would yield the same label as applying
+   *         <code>mb</code> to <code>m</code>.
+   */
+
+  public static boolean wouldDeriveSameLabel(
+    final KMaterialEmissive ma,
+    final KMaterialEmissive mb)
+  {
+    NullCheck.notNull(ma, "Material A");
+    NullCheck.notNull(mb, "Material B");
+
+    if (ma == mb) {
+      return true;
+    }
+
+    final boolean ea0 = ma.getEmission() == 0.0;
+    final boolean eb0 = mb.getEmission() == 0.0;
+    if (ea0 != eb0) {
+      return false;
+    }
+
+    final OptionType<Texture2DStaticUsableType> mat = ma.getTexture();
+    final OptionType<Texture2DStaticUsableType> mbt = mb.getTexture();
+    if (mat.isNone() && mbt.isNone()) {
+      return true;
+    }
+    if (mat.isSome() && mbt.isSome()) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Derive an emissive label for the given mesh and material.
+   * 
+   * @param mwm
+   *          The mesh and material
    * @return An emissive label
    */
 
   public static KMaterialEmissiveLabel fromInstanceRegular(
-    final KInstanceRegularType instance)
+    final KMeshWithMaterialRegularType mwm)
   {
-    NullCheck.notNull(instance, "Instance");
-    final KMeshReadableType mesh = instance.instanceGetMesh();
-    final ArrayBufferUsableType a = mesh.getArrayBuffer();
+    NullCheck.notNull(mwm, "Mesh and material");
+    final KMeshReadableType mesh = mwm.meshGetMesh();
     final KMaterialEmissive emissive =
-      instance.instanceGetMaterial().materialGetEmissive();
-    return KMaterialEmissiveLabel.fromInstanceData(a, emissive);
+      mwm.meshGetMaterial().materialGetEmissive();
+
+    return KMaterialEmissiveLabel.fromData(mesh, emissive);
   }
 
   private final String code;

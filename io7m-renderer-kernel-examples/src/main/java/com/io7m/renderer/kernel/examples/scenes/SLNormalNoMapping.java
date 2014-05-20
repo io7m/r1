@@ -24,8 +24,8 @@ import com.io7m.renderer.kernel.examples.ExampleSceneType;
 import com.io7m.renderer.kernel.examples.ExampleSceneUtilities;
 import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialNormal;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KTransformOST;
@@ -81,27 +81,27 @@ public final class SLNormalNoMapping implements ExampleSceneType
       ExampleSceneUtilities.OPAQUE_MATTE_WHITE.withNormal(KMaterialNormal
         .newNormalMapped(scene.texture("tiles_normal.png")));
 
-    final KInstanceTransformedOpaqueRegular i0 =
-      KInstanceTransformedOpaqueRegular.newInstance(
-        KInstanceOpaqueRegular.newInstance(
+    final KInstanceOpaqueRegular i0 =
+      KInstanceOpaqueRegular.newInstance(
+        KMeshWithMaterialOpaqueRegular.newInstance(
           material,
           scene.mesh("plane2x2_PN.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
         left,
         ExampleSceneUtilities.IDENTITY_UV);
 
-    final KInstanceTransformedOpaqueRegular i1 =
-      KInstanceTransformedOpaqueRegular.newInstance(
-        KInstanceOpaqueRegular.newInstance(
+    final KInstanceOpaqueRegular i1 =
+      KInstanceOpaqueRegular.newInstance(
+        KMeshWithMaterialOpaqueRegular.newInstance(
           material,
           scene.mesh("plane2x2_PNT.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
         center,
         ExampleSceneUtilities.IDENTITY_UV);
 
-    final KInstanceTransformedOpaqueRegular i2 =
-      KInstanceTransformedOpaqueRegular.newInstance(
-        KInstanceOpaqueRegular.newInstance(
+    final KInstanceOpaqueRegular i2 =
+      KInstanceOpaqueRegular.newInstance(
+        KMeshWithMaterialOpaqueRegular.newInstance(
           material,
           scene.mesh("plane2x2_PNU.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),

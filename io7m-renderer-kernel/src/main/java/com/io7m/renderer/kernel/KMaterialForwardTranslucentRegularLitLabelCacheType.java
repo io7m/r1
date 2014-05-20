@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularLitLabel;
 
@@ -25,5 +25,5 @@ interface KMaterialForwardTranslucentRegularLitLabelCacheType
     KMaterialForwardTranslucentRegularLitLabel
     getForwardLabelTranslucentRegularLit(
       final KLightType light,
-      final KInstanceTranslucentRegular instance);
+      final KMeshWithMaterialTranslucentRegular instance);
 }

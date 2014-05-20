@@ -19,13 +19,13 @@ package com.io7m.renderer.kernel.sandbox;
 import java.util.Collection;
 
 import com.io7m.jfunctional.Pair;
-import com.io7m.renderer.kernel.types.KInstanceTransformedType;
+import com.io7m.renderer.kernel.types.KInstanceType;
 import com.io7m.renderer.types.RException;
 
 interface SBSceneControllerRenderer
 {
   public
-    Pair<Collection<SBLight>, Collection<Pair<KInstanceTransformedType, SBInstance>>>
+    Pair<Collection<SBLight>, Collection<Pair<KInstanceType, SBInstance>>>
     rendererGetScene()
       throws RException;
 }

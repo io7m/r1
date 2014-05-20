@@ -25,6 +25,7 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
  * A cache loader that can construct depth-variance framebuffers of type
@@ -83,7 +84,7 @@ public final class KFramebufferDepthVarianceCacheLoader implements
         this.gi,
         key);
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 

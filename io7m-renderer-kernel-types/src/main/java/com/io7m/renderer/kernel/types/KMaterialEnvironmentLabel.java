@@ -46,7 +46,7 @@ public enum KMaterialEnvironmentLabel
 
   ENVIRONMENT_REFLECTIVE_MAPPED("ELM", 1);
 
-  private static KMaterialEnvironmentLabel fromInstanceData(
+  private static KMaterialEnvironmentLabel fromData(
     final KMaterialNormalLabel normal,
     final KMaterialSpecular specular,
     final KMaterialEnvironment environment)
@@ -79,24 +79,24 @@ public enum KMaterialEnvironmentLabel
   }
 
   /**
-   * Derive an environment mapping label for the given instance.
+   * Derive an environment mapping label for the given mesh and material.
    * 
-   * @param instance
-   *          The instance
+   * @param mwm
+   *          The mesh and material
    * @param n
-   *          The normal mapping label for the instance
+   *          The normal mapping label for the mesh and material
    * @return An emissive label
    */
 
   public static KMaterialEnvironmentLabel fromInstanceRegular(
     final KMaterialNormalLabel n,
-    final KInstanceRegularType instance)
+    final KMeshWithMaterialRegularType mwm)
   {
-    NullCheck.notNull(instance, "Instance");
-    final KMaterialRegularType m = instance.instanceGetMaterial();
+    NullCheck.notNull(mwm, "Mesh and material");
+    final KMaterialRegularType m = mwm.meshGetMaterial();
     final KMaterialSpecular s = m.materialGetSpecular();
     final KMaterialEnvironment e = m.materialGetEnvironment();
-    return KMaterialEnvironmentLabel.fromInstanceData(n, s, e);
+    return KMaterialEnvironmentLabel.fromData(n, s, e);
   }
 
   private final String code;

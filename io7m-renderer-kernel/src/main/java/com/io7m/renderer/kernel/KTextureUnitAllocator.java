@@ -28,6 +28,7 @@ import com.io7m.jcanephora.api.JCGLTexturesCubeStaticCommonType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionUserError;
 
 /**
  * <p>
@@ -81,7 +82,7 @@ import com.io7m.renderer.types.RException;
         RException
     {
       if (this.has_child) {
-        throw RException.fromAPIMisuse("Context already has a child");
+        throw RExceptionUserError.fromAPIMisuse("Context already has a child");
       }
 
       try {
@@ -232,7 +233,7 @@ import com.io7m.renderer.types.RException;
       RException
   {
     if (this.in_use) {
-      throw RException.fromAPIMisuse("Allocator is already in use");
+      throw RExceptionUserError.fromAPIMisuse("Allocator is already in use");
     }
 
     try {

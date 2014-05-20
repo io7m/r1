@@ -21,22 +21,22 @@ import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
 
 /**
- * The type of materials applied to instances ({@link KInstanceType}).
+ * The type of materials applied to meshes ({@link KMeshWithMaterialType}).
  */
 
 public interface KMaterialType extends KTexturesRequiredType
 {
   /**
-   * @return The material values relating to surface normals.
+   * @return The unique identifier of the material.
    */
 
-  KMaterialNormal materialGetNormal();
+  KMaterialID materialGetID();
 
   /**
-   * @return The material's UV texture matrix.
+   * @return The version of the material.
    */
 
-  RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix();
+  KVersion materialGetVersion();
 
   /**
    * Be visited by the given generic visitor.
@@ -64,4 +64,16 @@ public interface KMaterialType extends KTexturesRequiredType
       final V v)
       throws E,
         RException;
+
+  /**
+   * @return The material values relating to surface normals.
+   */
+
+  KMaterialNormal materialGetNormal();
+
+  /**
+   * @return The material's UV texture matrix.
+   */
+
+  RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix();
 }

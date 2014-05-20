@@ -45,9 +45,7 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentSpecularOnly;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KLightDirectional;
@@ -62,11 +60,15 @@ import com.io7m.renderer.kernel.types.KMaterialLabelRegularType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KTranslucentRegularLit;
 import com.io7m.renderer.kernel.types.KTranslucentSpecularOnlyLit;
 import com.io7m.renderer.kernel.types.KTranslucentType;
 import com.io7m.renderer.kernel.types.KTranslucentVisitorType;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionCache;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
  * The default implementation of the {@link KTranslucentRendererType}.
@@ -126,7 +128,7 @@ import com.io7m.renderer.types.RException;
     final MatricesInstanceType mwi,
     final KMaterialLabelRegularType label,
     final JCBProgramType program,
-    final KInstanceTransformedTranslucentRegular instance)
+    final KInstanceTranslucentRegular instance)
     throws JCGLException,
 
       RException
@@ -137,12 +139,12 @@ import com.io7m.renderer.types.RException;
         throws JCGLException,
           RException
       {
-        final KMeshReadableType mesh = instance.instanceGetMesh();
-        final ArrayBufferUsableType array = mesh.getArrayBuffer();
-        final IndexBufferUsableType indices = mesh.getIndexBuffer();
-        final KInstanceTranslucentRegular actual = instance.getInstance();
-        final KMaterialTranslucentRegular material =
-          actual.instanceGetMaterial();
+        final KMeshReadableType mesh = instance.meshGetMesh();
+        final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
+        final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
+        final KMeshWithMaterialTranslucentRegular actual =
+          instance.getMeshWithMaterial();
+        final KMaterialTranslucentRegular material = actual.meshGetMaterial();
 
         KRendererCommon.putInstanceMatricesRegular(program, mwi, label);
         KRendererCommon.putInstanceTexturesRegular(
@@ -206,7 +208,7 @@ import com.io7m.renderer.types.RException;
     final KMaterialForwardTranslucentRegularLitLabel label,
     final KLightType light,
     final JCBProgramType program,
-    final KInstanceTransformedTranslucentRegular instance)
+    final KInstanceTranslucentRegular instance)
     throws JCGLException,
 
       RException
@@ -286,7 +288,7 @@ import com.io7m.renderer.types.RException;
     final KMaterialForwardTranslucentRegularLitLabel label,
     final KLightDirectional l,
     final JCBProgramType program,
-    final KInstanceTransformedTranslucentRegular instance)
+    final KInstanceTranslucentRegular instance)
     throws JCGLException,
 
       RException
@@ -326,7 +328,7 @@ import com.io7m.renderer.types.RException;
     final KMaterialForwardTranslucentRegularLitLabel label,
     final KLightProjective light,
     final JCBProgramType program,
-    final KInstanceTransformedTranslucentRegular instance)
+    final KInstanceTranslucentRegular instance)
     throws JCGLException,
       RException
   {
@@ -350,7 +352,7 @@ import com.io7m.renderer.types.RException;
 
     KShadingProgramCommon.putTextureProjection(
       program,
-      texture_unit_ctx.withTexture2D(light.getTexture()));
+      texture_unit_ctx.withTexture2D(light.lightGetTexture()));
 
     mwp.withInstance(
       instance,
@@ -384,7 +386,7 @@ import com.io7m.renderer.types.RException;
     final KMaterialForwardTranslucentRegularLitLabel label,
     final KLightSphere l,
     final JCBProgramType program,
-    final KInstanceTransformedTranslucentRegular instance)
+    final KInstanceTranslucentRegular instance)
     throws JCGLException,
 
       RException
@@ -422,7 +424,7 @@ import com.io7m.renderer.types.RException;
     final MatricesInstanceType mwi,
     final KMaterialForwardTranslucentSpecularOnlyLitLabel label,
     final JCBProgramType program,
-    final KInstanceTransformedTranslucentSpecularOnly instance)
+    final KInstanceTranslucentSpecularOnly instance)
     throws JCGLException,
       RException
   {
@@ -432,13 +434,13 @@ import com.io7m.renderer.types.RException;
         throws JCGLException,
           RException
       {
-        final KMeshReadableType mesh = instance.instanceGetMesh();
-        final ArrayBufferUsableType array = mesh.getArrayBuffer();
-        final IndexBufferUsableType indices = mesh.getIndexBuffer();
-        final KInstanceTranslucentSpecularOnly actual =
-          instance.getInstance();
+        final KMeshReadableType mesh = instance.meshGetMesh();
+        final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
+        final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
+        final KMeshWithMaterialTranslucentSpecularOnly actual =
+          instance.getMeshWithMaterial();
         final KMaterialTranslucentSpecularOnly material =
-          actual.instanceGetMaterial();
+          actual.getMaterial();
 
         KRendererCommon.putInstanceMatricesSpecularOnly(program, mwi, label);
         KRendererCommon.putInstanceTexturesSpecularOnly(
@@ -502,7 +504,7 @@ import com.io7m.renderer.types.RException;
     final KMaterialForwardTranslucentSpecularOnlyLitLabel label,
     final KLightType light,
     final JCBProgramType program,
-    final KInstanceTransformedTranslucentSpecularOnly instance)
+    final KInstanceTranslucentSpecularOnly instance)
     throws JCGLException,
       RException
   {
@@ -583,7 +585,7 @@ import com.io7m.renderer.types.RException;
     final KMaterialForwardTranslucentSpecularOnlyLitLabel label,
     final KLightDirectional l,
     final JCBProgramType program,
-    final KInstanceTransformedTranslucentSpecularOnly instance)
+    final KInstanceTranslucentSpecularOnly instance)
     throws JCGLException,
       RException
   {
@@ -622,7 +624,7 @@ import com.io7m.renderer.types.RException;
     final KMaterialForwardTranslucentSpecularOnlyLitLabel label,
     final KLightProjective light,
     final JCBProgramType program,
-    final KInstanceTransformedTranslucentSpecularOnly instance)
+    final KInstanceTranslucentSpecularOnly instance)
     throws JCGLException,
       RException
   {
@@ -646,7 +648,7 @@ import com.io7m.renderer.types.RException;
 
     KShadingProgramCommon.putTextureProjection(
       program,
-      texture_unit_ctx.withTexture2D(light.getTexture()));
+      texture_unit_ctx.withTexture2D(light.lightGetTexture()));
 
     mwp.withInstance(
       instance,
@@ -680,7 +682,7 @@ import com.io7m.renderer.types.RException;
     final KMaterialForwardTranslucentSpecularOnlyLitLabel label,
     final KLightSphere l,
     final JCBProgramType program,
-    final KInstanceTransformedTranslucentSpecularOnly instance)
+    final KInstanceTranslucentSpecularOnly instance)
     throws JCGLException,
 
       RException
@@ -743,7 +745,7 @@ import com.io7m.renderer.types.RException;
         this.log.debug("initialized");
       }
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
@@ -778,7 +780,7 @@ import com.io7m.renderer.types.RException;
         translucent
           .translucentAccept(new KTranslucentVisitorType<Unit, JCacheException>() {
             @Override public Unit translucentRefractive(
-              final KInstanceTransformedTranslucentRefractive t)
+              final KInstanceTranslucentRefractive t)
               throws JCGLException,
                 RException
             {
@@ -793,11 +795,11 @@ import com.io7m.renderer.types.RException;
 
                 JCacheException
             {
-              final KInstanceTransformedTranslucentRegular trans_instance =
+              final KInstanceTranslucentRegular trans_instance =
                 t.translucentGetInstance();
-              final KInstanceTranslucentRegular instance =
-                trans_instance.getInstance();
-              final KFaceSelection faces = instance.instanceGetFaces();
+              final KMeshWithMaterialTranslucentRegular mwm =
+                trans_instance.getMeshWithMaterial();
+              final KFaceSelection faces = mwm.meshWithMaterialGetFaces();
               KRendererCommon.renderConfigureFaceCulling(gc, faces);
 
               KTranslucentRenderer.this.renderTranslucentRegularLit(
@@ -809,14 +811,15 @@ import com.io7m.renderer.types.RException;
             }
 
             @Override public Unit translucentRegularUnlit(
-              final KInstanceTransformedTranslucentRegular t)
+              final KInstanceTranslucentRegular t)
               throws JCGLException,
                 RException,
 
                 JCacheException
             {
-              final KInstanceTranslucentRegular instance = t.getInstance();
-              final KFaceSelection faces = instance.instanceGetFaces();
+              final KMeshWithMaterialTranslucentRegular mwm =
+                t.getMeshWithMaterial();
+              final KFaceSelection faces = mwm.meshWithMaterialGetFaces();
               KRendererCommon.renderConfigureFaceCulling(gc, faces);
 
               KTranslucentRenderer.this.renderTranslucentRegularUnlit(
@@ -833,14 +836,14 @@ import com.io7m.renderer.types.RException;
                 JCGLException,
                 RException
             {
-              final KInstanceTransformedTranslucentSpecularOnly trans_instance =
+              final KInstanceTranslucentSpecularOnly trans_instance =
                 t.translucentGetInstance();
-              final KInstanceTranslucentSpecularOnly instance =
-                trans_instance.getInstance();
+              final KMeshWithMaterialTranslucentSpecularOnly mwm =
+                trans_instance.getMeshWithMaterial();
 
               KRendererCommon.renderConfigureFaceCulling(
                 gc,
-                instance.instanceGetFaces());
+                mwm.meshWithMaterialGetFaces());
 
               KTranslucentRenderer.this.renderTranslucentSpecularOnlyLit(
                 gc,
@@ -853,9 +856,9 @@ import com.io7m.renderer.types.RException;
       }
 
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCacheException e) {
-      throw RException.fromJCacheException(e);
+      throw RExceptionCache.fromJCacheException(e);
     }
   }
 
@@ -877,13 +880,12 @@ import com.io7m.renderer.types.RException;
       final KLightType light = iter.next();
       assert light != null;
 
-      final KInstanceTransformedTranslucentRegular instance =
-        t.translucentGetInstance();
+      final KInstanceTranslucentRegular instance = t.translucentGetInstance();
 
       final KMaterialForwardTranslucentRegularLitLabel label =
         this.decider.getForwardLabelTranslucentRegularLit(
           light,
-          instance.getInstance());
+          instance.getMeshWithMaterial());
 
       final int required = label.texturesGetRequired();
       if (unit_allocator.hasEnoughUnits(required) == false) {
@@ -945,14 +947,14 @@ import com.io7m.renderer.types.RException;
     final JCGLInterfaceCommonType gc,
     final MatricesObserverType mwo,
     final KTextureUnitAllocator unit_allocator,
-    final KInstanceTransformedTranslucentRegular t)
+    final KInstanceTranslucentRegular t)
     throws JCGLException,
       RException,
       JCacheException
   {
-    final KInstanceTranslucentRegular instance = t.getInstance();
+    final KMeshWithMaterialTranslucentRegular mwm = t.getMeshWithMaterial();
     final KMaterialForwardTranslucentRegularUnlitLabel label =
-      this.decider.getForwardLabelTranslucentRegularUnlit(instance);
+      this.decider.getForwardLabelTranslucentRegularUnlit(mwm);
 
     gc.blendingEnable(
       BlendFunction.BLEND_ONE,
@@ -1026,13 +1028,13 @@ import com.io7m.renderer.types.RException;
       final KLightType light = iter.next();
       assert light != null;
 
-      final KInstanceTransformedTranslucentSpecularOnly instance =
+      final KInstanceTranslucentSpecularOnly instance =
         t.translucentGetInstance();
 
       final KMaterialForwardTranslucentSpecularOnlyLitLabel label =
         this.decider.getForwardLabelTranslucentSpecularOnlyLit(
           light,
-          instance.getInstance());
+          instance.getMeshWithMaterial());
 
       final int required = label.texturesGetRequired();
       if (unit_allocator.hasEnoughUnits(required) == false) {

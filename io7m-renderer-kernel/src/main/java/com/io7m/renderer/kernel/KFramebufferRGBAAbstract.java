@@ -44,6 +44,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
 {
@@ -143,7 +144,7 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.color);
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -302,7 +303,7 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.color);
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -423,7 +424,7 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.color);
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }

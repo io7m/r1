@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-
 /**
  * Labels for refractive properties.
  */
@@ -39,27 +38,27 @@ public enum KMaterialRefractiveLabel
   REFRACTIVE_UNMASKED("TR", 1);
 
   /**
-   * Determine the refractive label for the given instance
+   * Determine the refractive label for the given mesh and material.
    * 
-   * @param instance
-   *          The instance
-   * @return A label for the given instance
+   * @param mwm
+   *          The mesh and material
+   * @return A label for the given mesh and material
    */
 
-  public static  KMaterialRefractiveLabel fromInstance(
-    final  KInstanceTranslucentRefractive instance)
+  public static KMaterialRefractiveLabel fromMeshAndMaterial(
+    final KMeshWithMaterialTranslucentRefractive mwm)
   {
-    if (instance.instanceGetMaterial().getRefractive().isMasked()) {
+    if (mwm.getMaterial().getRefractive().isMasked()) {
       return REFRACTIVE_MASKED;
     }
     return REFRACTIVE_UNMASKED;
   }
 
-  private final  String code;
-  private int                   textures_required;
+  private final String code;
+  private int          textures_required;
 
   private KMaterialRefractiveLabel(
-    final  String in_code,
+    final String in_code,
     final int in_textures_required)
   {
     this.code = in_code;

@@ -22,6 +22,7 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
  * <p>
@@ -52,7 +53,7 @@ import com.io7m.renderer.types.RException;
     try {
       return KFramebufferForwardAbstract.newFramebuffer(gi, description);
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 

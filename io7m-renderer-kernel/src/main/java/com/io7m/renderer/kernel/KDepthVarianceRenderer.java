@@ -48,13 +48,14 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitorType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueType;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformViewType;
@@ -109,12 +110,12 @@ import com.io7m.renderer.types.RTransformViewType;
     final MatricesObserverType mwo,
     final JCBProgramType jp,
     final KMaterialDepthVarianceLabel label,
-    final List<KInstanceTransformedOpaqueType> batch,
+    final List<KInstanceOpaqueType> batch,
     final OptionType<KFaceSelection> faces)
     throws JCGLException,
       RException
   {
-    for (final KInstanceTransformedOpaqueType i : batch) {
+    for (final KInstanceOpaqueType i : batch) {
       mwo.withInstance(
         i,
         new MatricesInstanceFunctionType<Unit, JCGLException>() {
@@ -141,13 +142,13 @@ import com.io7m.renderer.types.RTransformViewType;
     final MatricesInstanceType mwi,
     final JCBProgramType jp,
     final KMaterialDepthVarianceLabel label,
-    final KInstanceTransformedOpaqueType i,
+    final KInstanceOpaqueType i,
     final OptionType<KFaceSelection> faces)
     throws JCGLException,
       RException
   {
     final KMaterialOpaqueType material =
-      i.instanceGet().instanceGetMaterial();
+      i.instanceGetMeshWithMaterial().meshGetMaterial();
     final List<TextureUnitType> units = gc.textureGetUnits();
 
     /**
@@ -241,10 +242,11 @@ import com.io7m.renderer.types.RTransformViewType;
      */
 
     try {
-      final KInstanceOpaqueType actual = i.instanceGet();
-      final KMeshReadableType mesh = actual.instanceGetMesh();
-      final ArrayBufferUsableType array = mesh.getArrayBuffer();
-      final IndexBufferUsableType indices = mesh.getIndexBuffer();
+      final KMeshWithMaterialOpaqueType actual =
+        i.instanceGetMeshWithMaterial();
+      final KMeshReadableType mesh = actual.meshGetMesh();
+      final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
+      final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(jp, array);
@@ -308,7 +310,7 @@ import com.io7m.renderer.types.RTransformViewType;
   private
     void
     renderDepthPassBatches(
-      final Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final Map<KMaterialDepthVarianceLabel, List<KInstanceOpaqueType>> batches,
       final JCGLInterfaceCommonType gc,
       final MatricesObserverType mwo,
       final OptionType<KFaceSelection> faces)
@@ -324,7 +326,7 @@ import com.io7m.renderer.types.RTransformViewType;
     gc.blendingDisable();
 
     for (final KMaterialDepthVarianceLabel label : batches.keySet()) {
-      final List<KInstanceTransformedOpaqueType> batch = batches.get(label);
+      final List<KInstanceOpaqueType> batch = batches.get(label);
       final KProgram program = this.shader_cache.cacheGetLU(label.getName());
       final JCBExecutorType exec = program.getExecutable();
 
@@ -354,7 +356,7 @@ import com.io7m.renderer.types.RTransformViewType;
     rendererEvaluateDepthVariance(
       final RMatrixI4x4F<RTransformViewType> view,
       final RMatrixI4x4F<RTransformProjectionType> projection,
-      final Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final Map<KMaterialDepthVarianceLabel, List<KInstanceOpaqueType>> batches,
       final KFramebufferDepthVarianceUsableType framebuffer,
       final OptionType<KFaceSelection> faces)
       throws RException
@@ -384,7 +386,7 @@ import com.io7m.renderer.types.RTransformViewType;
           }
         });
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
@@ -396,7 +398,7 @@ import com.io7m.renderer.types.RTransformViewType;
   private
     void
     renderScene(
-      final Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final Map<KMaterialDepthVarianceLabel, List<KInstanceOpaqueType>> batches,
       final KFramebufferDepthVarianceUsableType framebuffer,
       final MatricesObserverType mwo,
       final OptionType<KFaceSelection> faces)

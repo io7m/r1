@@ -44,9 +44,9 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KMeshReadableType mesh)
   {
     final RVectorReadable3FType<RSpaceObjectType> b_lower =
-      mesh.getBoundsLower();
+      mesh.meshGetBoundsLower();
     final RVectorReadable3FType<RSpaceObjectType> b_upper =
-      mesh.getBoundsUpper();
+      mesh.meshGetBoundsUpper();
 
     final float front = b_upper.getZF();
     final float left = b_lower.getXF();

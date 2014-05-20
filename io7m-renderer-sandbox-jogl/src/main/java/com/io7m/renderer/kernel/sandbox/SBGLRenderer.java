@@ -179,14 +179,14 @@ import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentSpecularOnly;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentType;
-import com.io7m.renderer.kernel.types.KInstanceTransformedType;
-import com.io7m.renderer.kernel.types.KInstanceTransformedVisitorType;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentSpecularOnly;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentType;
+import com.io7m.renderer.kernel.types.KInstanceType;
+import com.io7m.renderer.kernel.types.KInstanceVisitorType;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
@@ -329,7 +329,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
             {
               message.setLength(0);
               message.append("Mesh lower bound: ");
-              message.append(km.getBoundsLower());
+              message.append(km.meshGetBoundsLower());
               final String text = message.toString();
               assert text != null;
               SBGLRenderer.this.log.debug(text);
@@ -338,7 +338,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
             {
               message.setLength(0);
               message.append("Mesh upper bound: ");
-              message.append(km.getBoundsUpper());
+              message.append(km.meshGetBoundsUpper());
               final String text = message.toString();
               assert text != null;
               SBGLRenderer.this.log.debug(text);
@@ -1056,8 +1056,8 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
         final KLightProjective actual = observer.getLight().getLight();
         KMatrices.makeViewMatrix(
           this.camera_transform_context,
-          actual.getPosition(),
-          actual.getOrientation(),
+          actual.lightGetPosition(),
+          actual.lightGetOrientation(),
           this.camera_view_matrix_temporary);
 
         this.camera_view_matrix =
@@ -1105,7 +1105,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
 
         final KLightProjective actual = observer.getLight().getLight();
         final RMatrixI4x4F<RTransformProjectionType> p =
-          actual.getProjection();
+          actual.lightGetProjection();
         MatrixM4x4F.setIdentity(this.matrix_projection);
         p.makeMatrixM4x4F(this.matrix_projection);
         break;
@@ -2113,7 +2113,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
             final KMeshReadableType mesh =
               sm.get(SBGLRenderer.SPHERE_16_8_MESH);
 
-            final RVectorI3F<RSpaceRGBType> lc = kp.lightGetColour();
+            final RVectorI3F<RSpaceRGBType> lc = kp.lightGetColor();
             final VectorM4F colour =
               new VectorM4F(lc.getXF(), lc.getYF(), lc.getZF(), 1.0f);
 
@@ -2128,7 +2128,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
               MatrixM4x4F.setIdentity(SBGLRenderer.this.matrix_model);
               MatrixM4x4F.translateByVector3FInPlace(
                 SBGLRenderer.this.matrix_model,
-                kp.getPosition());
+                kp.lightGetPosition());
               MatrixM4x4F.set(SBGLRenderer.this.matrix_model, 0, 0, 0.05f);
               MatrixM4x4F.set(SBGLRenderer.this.matrix_model, 1, 1, 0.05f);
               MatrixM4x4F.set(SBGLRenderer.this.matrix_model, 2, 2, 0.05f);
@@ -2145,8 +2145,8 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
                   final JCBProgramType program)
                   throws JCGLException
                 {
-                  final IndexBufferUsableType indices = mesh.getIndexBuffer();
-                  final ArrayBufferUsableType array = mesh.getArrayBuffer();
+                  final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
+                  final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
 
                   KShadingProgramCommon.putMatrixProjection(
                     program,
@@ -2187,10 +2187,10 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
               MatrixM4x4F.setIdentity(SBGLRenderer.this.matrix_model);
               MatrixM4x4F.translateByVector3FInPlace(
                 SBGLRenderer.this.matrix_model,
-                kp.getPosition());
+                kp.lightGetPosition());
 
               QuaternionM4F.makeRotationMatrix4x4(
-                kp.getOrientation(),
+                kp.lightGetOrientation(),
                 SBGLRenderer.this.matrix_model_temporary);
 
               MatrixM4x4F.multiplyInPlace(
@@ -2273,7 +2273,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
             final KMeshReadableType mesh =
               sm.get(SBGLRenderer.SPHERE_16_8_MESH);
 
-            final RVectorI3F<RSpaceRGBType> lc = kp.lightGetColour();
+            final RVectorI3F<RSpaceRGBType> lc = kp.lightGetColor();
             final VectorM4F colour =
               new VectorM4F(lc.getXF(), lc.getYF(), lc.getZF(), 1.0f);
 
@@ -2284,7 +2284,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
             MatrixM4x4F.setIdentity(SBGLRenderer.this.matrix_model);
             MatrixM4x4F.translateByVector3FInPlace(
               SBGLRenderer.this.matrix_model,
-              kp.getPosition());
+              kp.lightGetPosition());
             MatrixM4x4F.set(SBGLRenderer.this.matrix_model, 0, 0, 0.05f);
             MatrixM4x4F.set(SBGLRenderer.this.matrix_model, 1, 1, 0.05f);
             MatrixM4x4F.set(SBGLRenderer.this.matrix_model, 2, 2, 0.05f);
@@ -2303,8 +2303,8 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
                 final JCBProgramType program)
                 throws JCGLException
               {
-                final IndexBufferUsableType indices = mesh.getIndexBuffer();
-                final ArrayBufferUsableType array = mesh.getArrayBuffer();
+                final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
+                final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
 
                 KShadingProgramCommon.putMatrixProjection(
                   program,
@@ -2343,17 +2343,17 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
                 SBGLRenderer.this.matrix_model,
                 0,
                 0,
-                kp.getRadius());
+                kp.lightGetRadius());
               MatrixM4x4F.set(
                 SBGLRenderer.this.matrix_model,
                 1,
                 1,
-                kp.getRadius());
+                kp.lightGetRadius());
               MatrixM4x4F.set(
                 SBGLRenderer.this.matrix_model,
                 2,
                 2,
-                kp.getRadius());
+                kp.lightGetRadius());
 
               MatrixM4x4F.multiply(
                 SBGLRenderer.this.matrix_view,
@@ -2365,8 +2365,8 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
                   final JCBProgramType program)
                   throws JCGLException
                 {
-                  final IndexBufferUsableType indices = mesh.getIndexBuffer();
-                  final ArrayBufferUsableType array = mesh.getArrayBuffer();
+                  final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
+                  final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
 
                   KShadingProgramCommon.putMatrixProjection(
                     program,
@@ -2428,7 +2428,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
       assert cvm != null;
       final KCamera kcamera = KCamera.newCamera(cvm, projection);
 
-      final Pair<Collection<SBLight>, Collection<Pair<KInstanceTransformedType, SBInstance>>> scene_things =
+      final Pair<Collection<SBLight>, Collection<Pair<KInstanceType, SBInstance>>> scene_things =
         c.rendererGetScene();
 
       this.scene_lights = scene_things.getLeft();
@@ -2444,8 +2444,8 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
        * kernel).
        */
 
-      final ArrayList<Pair<KInstanceTransformedTranslucentType, SBInstance>> translucents =
-        new ArrayList<Pair<KInstanceTransformedTranslucentType, SBInstance>>();
+      final ArrayList<Pair<KInstanceTranslucentType, SBInstance>> translucents =
+        new ArrayList<Pair<KInstanceTranslucentType, SBInstance>>();
 
       final HashSet<KLightType> all_lights = new HashSet<KLightType>();
       for (final SBLight light : scene_things.getLeft()) {
@@ -2455,12 +2455,12 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
       for (final SBLight light : scene_things.getLeft()) {
         final KLightType klight = light.getLight();
 
-        for (final Pair<KInstanceTransformedType, SBInstance> pair : scene_things
+        for (final Pair<KInstanceType, SBInstance> pair : scene_things
           .getRight()) {
           pair.getLeft().transformedAccept(
-            new KInstanceTransformedVisitorType<Unit, RException>() {
+            new KInstanceVisitorType<Unit, RException>() {
               @Override public Unit transformedOpaqueAlphaDepth(
-                final KInstanceTransformedOpaqueAlphaDepth i)
+                final KInstanceOpaqueAlphaDepth i)
                 throws RException,
                   JCGLException
               {
@@ -2473,7 +2473,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
               }
 
               @Override public Unit transformedOpaqueRegular(
-                final KInstanceTransformedOpaqueRegular i)
+                final KInstanceOpaqueRegular i)
                 throws RException,
                   JCGLException
               {
@@ -2486,36 +2486,36 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
               }
 
               @Override public Unit transformedTranslucentRefractive(
-                final KInstanceTransformedTranslucentRefractive i)
+                final KInstanceTranslucentRefractive i)
                 throws RException,
                   JCGLException
               {
-                final KInstanceTransformedTranslucentType kti = i;
-                final Pair<KInstanceTransformedTranslucentType, SBInstance> p =
+                final KInstanceTranslucentType kti = i;
+                final Pair<KInstanceTranslucentType, SBInstance> p =
                   Pair.pair(kti, pair.getRight());
                 translucents.add(p);
                 return Unit.unit();
               }
 
               @Override public Unit transformedTranslucentRegular(
-                final KInstanceTransformedTranslucentRegular i)
+                final KInstanceTranslucentRegular i)
                 throws RException,
                   JCGLException
               {
-                final KInstanceTransformedTranslucentType kti = i;
-                final Pair<KInstanceTransformedTranslucentType, SBInstance> p =
+                final KInstanceTranslucentType kti = i;
+                final Pair<KInstanceTranslucentType, SBInstance> p =
                   Pair.pair(kti, pair.getRight());
                 translucents.add(p);
                 return Unit.unit();
               }
 
               @Override public Unit transformedTranslucentSpecularOnly(
-                final KInstanceTransformedTranslucentSpecularOnly i)
+                final KInstanceTranslucentSpecularOnly i)
                 throws RException,
                   JCGLException
               {
-                final KInstanceTransformedTranslucentType kti = i;
-                final Pair<KInstanceTransformedTranslucentType, SBInstance> p =
+                final KInstanceTranslucentType kti = i;
+                final Pair<KInstanceTranslucentType, SBInstance> p =
                   Pair.pair(kti, pair.getRight());
                 translucents.add(p);
                 return Unit.unit();
@@ -2534,10 +2534,10 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
       Collections
         .sort(
           translucents,
-          new Comparator<Pair<KInstanceTransformedTranslucentType, SBInstance>>() {
+          new Comparator<Pair<KInstanceTranslucentType, SBInstance>>() {
             @Override public int compare(
-              final Pair<KInstanceTransformedTranslucentType, SBInstance> o1,
-              final Pair<KInstanceTransformedTranslucentType, SBInstance> o2)
+              final Pair<KInstanceTranslucentType, SBInstance> o1,
+              final Pair<KInstanceTranslucentType, SBInstance> o2)
             {
               final RVectorI3F<RSpaceWorldType> pos1 =
                 o1.getRight().getPosition();
@@ -2547,11 +2547,11 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
             }
           });
 
-      for (final Pair<KInstanceTransformedTranslucentType, SBInstance> pair : translucents) {
+      for (final Pair<KInstanceTranslucentType, SBInstance> pair : translucents) {
         pair.getLeft().transformedAccept(
-          new KInstanceTransformedVisitorType<Unit, RException>() {
+          new KInstanceVisitorType<Unit, RException>() {
             @Override public Unit transformedOpaqueAlphaDepth(
-              final KInstanceTransformedOpaqueAlphaDepth i)
+              final KInstanceOpaqueAlphaDepth i)
               throws RException,
                 JCGLException
             {
@@ -2559,7 +2559,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
             }
 
             @Override public Unit transformedOpaqueRegular(
-              final KInstanceTransformedOpaqueRegular i)
+              final KInstanceOpaqueRegular i)
               throws RException,
                 JCGLException
             {
@@ -2567,7 +2567,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
             }
 
             @Override public Unit transformedTranslucentRefractive(
-              final KInstanceTransformedTranslucentRefractive i)
+              final KInstanceTranslucentRefractive i)
               throws RException,
                 JCGLException
             {
@@ -2576,7 +2576,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
             }
 
             @Override public Unit transformedTranslucentRegular(
-              final KInstanceTransformedTranslucentRegular i)
+              final KInstanceTranslucentRegular i)
               throws RException,
                 JCGLException
             {
@@ -2589,7 +2589,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
             }
 
             @Override public Unit transformedTranslucentSpecularOnly(
-              final KInstanceTransformedTranslucentSpecularOnly i)
+              final KInstanceTranslucentSpecularOnly i)
               throws RException,
                 JCGLException
             {

@@ -26,79 +26,12 @@ import com.io7m.jranges.RangeCheck;
 public final class KBlurParameters
 {
   /**
-   * A mutable builder interface for constructing parameters.
-   */
-
-  public interface BuilderType
-  {
-    /**
-     * @return A new set of blur parameters initialized to all of the values
-     *         given to the builder so far.
-     */
-
-    KBlurParameters build();
-
-    /**
-     * <p>
-     * Set the blur size. A blur size larger than <code>1.0</code> will
-     * typically result in visible banding.
-     * </p>
-     * <p>
-     * The default is <code>1.0</code>.
-     * </p>
-     * 
-     * @param size
-     *          The size of the blur effect.
-     */
-
-    void setBlurSize(
-      final float size);
-
-    /**
-     * <p>
-     * Set the number of passes. A greater number of passes will strengthen
-     * the effect of the blur at the cost of processing time. A value of
-     * <code>0</code> will result in no blur being applied at all.
-     * </p>
-     * <p>
-     * The default is <code>1</code>.
-     * </p>
-     * 
-     * @param passes
-     *          The number of passes
-     */
-
-    void setPasses(
-      int passes);
-
-    /**
-     * <p>
-     * The amount of downsampling to be performed during blurring. A value of
-     * <code>1.0</code> implies no scaling. A value of <code>0.5</code> will
-     * halve the width and height of the original image before blurring. The
-     * more downsampling applied, the stronger the effect of the blur (but the
-     * greater the loss of image precision).
-     * </p>
-     * <p>
-     * The default is <code>1</code>.
-     * </p>
-     * 
-     * @param scale
-     *          The coefficient by which to multiply the dimensions of the
-     *          image
-     */
-
-    void setScale(
-      final float scale);
-  }
-
-  /**
    * @return A new parameter builder
    */
 
-  public static BuilderType newBuilder()
+  public static KBlurParametersBuilderType newBuilder()
   {
-    return new BuilderType() {
+    return new KBlurParametersBuilderType() {
       private float blur_size = 1.0f;
       private int   passes    = 1;
       private float scale     = 1.0f;

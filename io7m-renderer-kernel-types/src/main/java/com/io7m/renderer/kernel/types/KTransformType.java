@@ -20,25 +20,11 @@ import com.io7m.jtensors.MatrixM4x4F;
 
 /**
  * The type of transforms, applied to instances (
- * {@link KInstanceTransformedType} ).
+ * {@link KInstanceType} ).
  */
 
 public interface KTransformType
 {
-  /**
-   * Produce a 4x4 matrix for the current transformation, writing the
-   * resulting matrix to <code>m</code>.
-   * 
-   * @param context
-   *          The current transform context
-   * @param m
-   *          The matrix to which values will be written
-   */
-
-  void transformMakeMatrix4x4F(
-    final KTransformContext context,
-    final MatrixM4x4F m);
-
   /**
    * Be visited by the given generic visitor.
    * 
@@ -61,4 +47,18 @@ public interface KTransformType
     transformAccept(
       final V v)
       throws E;
+
+  /**
+   * Produce a 4x4 matrix for the current transformation, writing the
+   * resulting matrix to <code>m</code>.
+   * 
+   * @param context
+   *          The current transform context
+   * @param m
+   *          The matrix to which values will be written
+   */
+
+  void transformMakeMatrix4x4F(
+    final KTransformContext context,
+    final MatrixM4x4F m);
 }

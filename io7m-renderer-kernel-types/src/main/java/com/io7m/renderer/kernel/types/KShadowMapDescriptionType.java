@@ -51,12 +51,6 @@ public interface KShadowMapDescriptionType
         RException;
 
   /**
-   * @return The identifier of the light associated with the map
-   */
-
-  Integer mapGetLightID();
-
-  /**
    * @return The size exponent of the map, where the width and height of the
    *         map will be <code>2 ^ {@link #mapGetSizeExponent()}</code>, where
    *         {@link #mapGetSizeExponent()}<code> >= 1</code>.

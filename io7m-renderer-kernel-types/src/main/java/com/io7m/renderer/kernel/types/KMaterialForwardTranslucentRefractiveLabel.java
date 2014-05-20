@@ -129,39 +129,6 @@ import com.io7m.junreachable.UnreachableCodeException;
         in_normal);
   }
 
-  /**
-   * @return The refractive label
-   */
-
-  public KMaterialRefractiveLabel getRefractive()
-  {
-    return this.refractive;
-  }
-
-  @Override public String labelGetCode()
-  {
-    return this.code;
-  }
-
-  /**
-   * @return The normal-mapping label
-   */
-
-  public KMaterialNormalLabel labelGetNormal()
-  {
-    return this.normal;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.code.hashCode();
-    result = (prime * result) + this.normal.hashCode();
-    result = (prime * result) + this.refractive.hashCode();
-    return result;
-  }
-
   @Override public boolean equals(
     final @Nullable Object obj)
   {
@@ -179,6 +146,39 @@ import com.io7m.junreachable.UnreachableCodeException;
     return this.code.equals(other.code)
       && (this.normal == other.normal)
       && (this.refractive == other.refractive);
+  }
+
+  /**
+   * @return The refractive label
+   */
+
+  public KMaterialRefractiveLabel getRefractive()
+  {
+    return this.refractive;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.code.hashCode();
+    result = (prime * result) + this.normal.hashCode();
+    result = (prime * result) + this.refractive.hashCode();
+    return result;
+  }
+
+  @Override public String labelGetCode()
+  {
+    return this.code;
+  }
+
+  /**
+   * @return The normal-mapping label
+   */
+
+  public KMaterialNormalLabel labelGetNormal()
+  {
+    return this.normal;
   }
 
   @Override public boolean labelImpliesUV()

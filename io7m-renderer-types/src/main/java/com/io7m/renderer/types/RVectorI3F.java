@@ -30,10 +30,26 @@ import com.io7m.jtensors.VectorI3F;
 @EqualityStructural public class RVectorI3F<T extends RSpaceType> extends
   VectorI3F implements RVectorReadable3FType<T>
 {
+  private static final RVectorI3F<?> ONE_FIELD;
   private static final RVectorI3F<?> ZERO_FIELD;
 
   static {
     ZERO_FIELD = new RVectorI3F<RSpaceType>(0.0f, 0.0f, 0.0f);
+    ONE_FIELD = new RVectorI3F<RSpaceType>(1.0f, 1.0f, 1.0f);
+  }
+
+  /**
+   * @return The one vector <code>(1.0, 1.0, 1.0)</code>.
+   * @param <T>
+   *          The desired coordinate space
+   */
+
+  @SuppressWarnings("unchecked") public static
+    <T extends RSpaceType>
+    RVectorI3F<T>
+    one()
+  {
+    return (RVectorI3F<T>) RVectorI3F.ONE_FIELD;
   }
 
   /**

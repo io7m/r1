@@ -25,7 +25,9 @@ import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.kernel.types.KLightDirectional;
+import com.io7m.renderer.kernel.types.KLightDirectionalBuilderType;
 import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
@@ -65,9 +67,11 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
         final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
         final float intensity = (float) Math.random();
 
-        return new SBLightDescriptionDirectional(
-          this.id,
-          KLightDirectional.newDirectional(direction, colour, intensity));
+        final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
+        b.setColor(colour);
+        b.setDirection(direction);
+        b.setIntensity(intensity);
+        return new SBLightDescriptionDirectional(this.id, b.build());
       }
       case LIGHT_PROJECTIVE:
       {
@@ -100,14 +104,14 @@ public final class SBLightGenerator implements Generator<SBLightDescription>
         final float radius = (float) Math.random() * 64.0f;
         final RVectorI3F<RSpaceWorldType> position = this.world_gen.next();
 
-        return new SBLightDescriptionSpherical(
-          this.id,
-          KLightSphere.newSpherical(
-            colour,
-            intensity,
-            position,
-            radius,
-            falloff));
+        final KLightSphereBuilderType b = KLightSphere.newBuilder();
+        b.setColor(colour);
+        b.setFalloff(falloff);
+        b.setRadius(radius);
+        b.setPosition(position);
+        b.setIntensity(intensity);
+
+        return new SBLightDescriptionSpherical(this.id, b.build());
       }
     }
 

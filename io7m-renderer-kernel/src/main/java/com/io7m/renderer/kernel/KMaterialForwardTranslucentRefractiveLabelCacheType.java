@@ -16,12 +16,12 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRefractiveLabel;
 
 interface KMaterialForwardTranslucentRefractiveLabelCacheType
 {
     KMaterialForwardTranslucentRefractiveLabel
     getForwardLabelTranslucentRefractive(
-      final KInstanceTranslucentRefractive instance);
+      final KMeshWithMaterialTranslucentRefractive instance);
 }

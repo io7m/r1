@@ -40,11 +40,13 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KCamera;
-import com.io7m.renderer.kernel.types.KInstanceTransformedType;
+import com.io7m.renderer.kernel.types.KInstanceType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionCache;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
  * A debug renderer that displays the calculated eye-space normals for all
@@ -128,12 +130,12 @@ import com.io7m.renderer.types.RException;
                 o);
               return Unit.unit();
             } catch (final JCacheException e) {
-              throw RException.fromJCacheException(e);
+              throw RExceptionCache.fromJCacheException(e);
             }
           }
         });
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
@@ -145,7 +147,7 @@ import com.io7m.renderer.types.RException;
   @SuppressWarnings("static-method") private void renderMesh(
     final JCGLInterfaceCommonType gc,
     final JCBProgramType p,
-    final KInstanceTransformedType i,
+    final KInstanceType i,
     final MatricesInstanceType mi)
     throws JCGLException
   {
@@ -165,8 +167,8 @@ import com.io7m.renderer.types.RException;
 
     try {
       final KMeshReadableType mesh = i.instanceGetMesh();
-      final ArrayBufferUsableType array = mesh.getArrayBuffer();
-      final IndexBufferUsableType indices = mesh.getIndexBuffer();
+      final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
+      final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
@@ -226,10 +228,10 @@ import com.io7m.renderer.types.RException;
             p,
             mo.getMatrixProjection());
 
-          final Set<KInstanceTransformedType> instances =
+          final Set<KInstanceType> instances =
             scene.getVisibleInstances();
 
-          for (final KInstanceTransformedType i : instances) {
+          for (final KInstanceType i : instances) {
             mo.withInstance(
               i,
               new MatricesInstanceFunctionType<Unit, JCGLException>() {

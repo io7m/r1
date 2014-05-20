@@ -47,15 +47,18 @@ import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRefractiveLabel;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.kernel.types.KMeshBoundsTriangles;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRefractive;
 import com.io7m.renderer.types.RCoordinates;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionCache;
+import com.io7m.renderer.types.RExceptionJCGL;
+import com.io7m.renderer.types.RExceptionUserError;
 import com.io7m.renderer.types.RMatrixReadable4x4FType;
 import com.io7m.renderer.types.RSpaceClipType;
 import com.io7m.renderer.types.RSpaceNDCType;
@@ -445,12 +448,11 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KRegionCopierType copier,
     final KFramebufferForwardUsableType scene,
     final KFramebufferForwardUsableType temporary,
-    final KInstanceTransformedTranslucentRefractive r,
+    final KInstanceTranslucentRefractive r,
     final KMaterialForwardTranslucentRefractiveLabel label,
     final KMutableMatrices.MatricesInstanceType mi,
     final AreaInclusive window_bounds_area)
     throws RException,
-
       JCacheException,
       JCGLException
   {
@@ -499,7 +501,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KTextureUnitAllocator unit_allocator,
     final KFramebufferForwardUsableType scene,
     final KFramebufferForwardUsableType temporary,
-    final KInstanceTransformedTranslucentRefractive r,
+    final KInstanceTranslucentRefractive r,
     final KMaterialForwardTranslucentRefractiveLabel label,
     final KMutableMatrices.MatricesInstanceType mi)
     throws JCGLException,
@@ -522,7 +524,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final JCGLImplementationType g,
     final KShaderCacheType shader_cache,
     final KFramebufferRGBAUsableType scene_mask,
-    final KInstanceTransformedTranslucentRefractive r,
+    final KInstanceTranslucentRefractive r,
     final MatricesInstanceType mi,
     final KMeshReadableType mesh)
     throws RException,
@@ -549,7 +551,8 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 
             gc.blendingDisable();
 
-            final KInstanceTranslucentRefractive instance = r.getInstance();
+            final KMeshWithMaterialTranslucentRefractive instance =
+              r.getInstance();
             KRendererCommon.renderConfigureFaceCulling(
               gc,
               instance.instanceGetFaces());
@@ -573,8 +576,8 @@ import com.io7m.renderer.types.RVectorReadable3FType;
               program,
               mi.getMatrixModelView());
 
-            final ArrayBufferUsableType array = mesh.getArrayBuffer();
-            final IndexBufferUsableType indices = mesh.getIndexBuffer();
+            final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
+            final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
             gc.arrayBufferBind(array);
             KShadingProgramCommon.bindAttributePositionUnchecked(
               program,
@@ -606,7 +609,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       final KFramebufferRGBAUsableType scene,
       final KFramebufferRGBAUsableType scene_mask,
       final KFramebufferRGBAUsableType destination,
-      final KInstanceTransformedTranslucentRefractive r,
+      final KInstanceTranslucentRefractive r,
       final KMaterialForwardTranslucentRefractiveLabel label,
       final MatricesInstanceType mi,
       final KMeshReadableType mesh)
@@ -614,13 +617,13 @@ import com.io7m.renderer.types.RVectorReadable3FType;
         RException,
         JCacheException
   {
-    final KInstanceTranslucentRefractive instance = r.getInstance();
+    final KMeshWithMaterialTranslucentRefractive instance = r.getInstance();
     final KMaterialTranslucentRefractive material =
-      instance.instanceGetMaterial();
+      instance.meshGetMaterial();
     final KProgram kprogram = shader_cache.cacheGetLU(label.labelGetCode());
 
-    final ArrayBufferUsableType array = mesh.getArrayBuffer();
-    final IndexBufferUsableType indices = mesh.getIndexBuffer();
+    final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
+    final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
 
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     kprogram.getExecutable().execRun(
@@ -706,7 +709,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       final KTextureUnitAllocator unit_allocator,
       final KFramebufferForwardUsableType scene,
       final KFramebufferForwardUsableType temporary,
-      final KInstanceTransformedTranslucentRefractive r,
+      final KInstanceTranslucentRefractive r,
       final KMaterialForwardTranslucentRefractiveLabel label,
       final MatricesInstanceType mi,
       final KMeshReadableType mesh)
@@ -714,13 +717,13 @@ import com.io7m.renderer.types.RVectorReadable3FType;
         RException,
         JCacheException
   {
-    final KInstanceTranslucentRefractive instance = r.getInstance();
+    final KMeshWithMaterialTranslucentRefractive instance = r.getInstance();
     final KMaterialTranslucentRefractive material =
-      instance.instanceGetMaterial();
+      instance.meshGetMaterial();
     final KProgram kprogram = shader_cache.cacheGetLU(label.labelGetCode());
 
-    final ArrayBufferUsableType array = mesh.getArrayBuffer();
-    final IndexBufferUsableType indices = mesh.getIndexBuffer();
+    final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
+    final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
 
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     kprogram.getExecutable().execRun(
@@ -837,7 +840,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       this.matrix_context = new MatrixM4x4F.Context();
 
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
@@ -849,7 +852,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   @Override public void rendererRefractionEvaluate(
     final KFramebufferForwardUsableType scene,
     final KMutableMatrices.MatricesObserverType observer,
-    final KInstanceTransformedTranslucentRefractive r)
+    final KInstanceTranslucentRefractive r)
     throws RException
   {
     NullCheck.notNull(scene, "Scene");
@@ -860,7 +863,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       final JCGLInterfaceCommonType gc = this.g.getGLCommon();
 
       if (gc.framebufferDrawIsBound(scene.kFramebufferGetColorFramebuffer()) == false) {
-        throw RException.fromAPIMisuse("Framebuffer is not bound");
+        throw RExceptionUserError.fromAPIMisuse("Framebuffer is not bound");
       }
 
       observer.withInstance(
@@ -877,24 +880,24 @@ import com.io7m.renderer.types.RVectorReadable3FType;
                 r,
                 mi);
             } catch (final JCacheException e) {
-              throw RException.fromJCacheException(e);
+              throw RExceptionCache.fromJCacheException(e);
             }
             return Unit.unit();
           }
         });
 
       if (gc.framebufferDrawIsBound(scene.kFramebufferGetColorFramebuffer()) == false) {
-        throw RException.fromAPIMisuse("Framebuffer is not bound");
+        throw RExceptionUserError.fromAPIMisuse("Framebuffer is not bound");
       }
 
     } catch (final JCGLException x) {
-      throw RException.fromJCGLException(x);
+      throw RExceptionJCGL.fromJCGLException(x);
     }
   }
 
   private void rendererRefractionEvaluateForInstance(
     final KFramebufferForwardUsableType scene,
-    final KInstanceTransformedTranslucentRefractive r,
+    final KInstanceTranslucentRefractive r,
     final KMutableMatrices.MatricesInstanceType mi)
     throws JCGLException,
       RException,

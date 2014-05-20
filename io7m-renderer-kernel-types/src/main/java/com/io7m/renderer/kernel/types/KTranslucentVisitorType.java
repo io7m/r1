@@ -46,7 +46,7 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    */
 
   A translucentRefractive(
-    final KInstanceTransformedTranslucentRefractive t)
+    final KInstanceTranslucentRefractive t)
     throws E,
       JCGLException,
       RException;
@@ -86,7 +86,7 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    */
 
   A translucentRegularUnlit(
-    final KInstanceTransformedTranslucentRegular t)
+    final KInstanceTranslucentRegular t)
     throws E,
       JCGLException,
       RException;
