@@ -21,54 +21,94 @@ import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RMatrixI3x3F;
+import com.io7m.renderer.types.RTransformTextureType;
 
 /**
  * <p>
- * An instance with an opaque alpha-depth material applied.
- * </p>
- * <p>
- * Opaque instances may be rendered in any order, and the depth buffer is used
- * to ensure that the instances appear at the correct perceived distance
- * onscreen.
+ * A mesh with an opaque material ({@link KMeshWithMaterialOpaqueRegular}),
+ * with a specific transform and texture matrix.
  * </p>
  */
 
 @EqualityStructural public final class KInstanceOpaqueAlphaDepth implements
-  KInstanceWithMaterialType<KMaterialOpaqueAlphaDepth>,
   KInstanceOpaqueType
 {
+  private static final class Builder implements
+    KInstanceBuilderType<KInstanceOpaqueAlphaDepth>
+  {
+    public Builder(
+      final KInstanceID id)
+    {
+      // TODO Auto-generated constructor stub
+    }
+  }
+
   /**
-   * Create a new instance with an opaque material.
+   * <p>
+   * Create a builder for creating new instances. The builder will be
+   * initialized to values based on the given instance.
+   * </p>
+   * <p>
+   * The {@link KInstanceBuilderType#build()} function will return an instance
+   * with same {@link KInstanceID} as the initial instance every time it is
+   * called. This effectively allows for efficiently "mutating" an immutable
+   * instance over time without the need for creating lots of intermediate
+   * immutable objects when manipulating multiple parameters.
+   * </p>
    * 
-   * @param in_material
-   *          The material
-   * @param in_mesh
-   *          The mesh
-   * @param in_faces
-   *          The faces that will be rendered
+   * @param i
+   *          The initial instance.
+   * @return A new instance builder.
+   */
+
+  public static
+    KInstanceBuilderType<KInstanceOpaqueAlphaDepth>
+    newBuilderWithSameID(
+      final KInstanceOpaqueAlphaDepth i)
+  {
+    return new Builder(i.id);
+  }
+
+  /**
+   * Construct a new opaque instance.
+   * 
+   * @param in_mwm
+   *          The mesh and material
+   * @param in_transform
+   *          The transform applied to the instance
+   * @param in_uv_matrix
+   *          The per-instance UV matrix
    * @return A new instance
    */
 
   public static KInstanceOpaqueAlphaDepth newInstance(
-    final KMaterialOpaqueAlphaDepth in_material,
-    final KMesh in_mesh,
-    final KFaceSelection in_faces)
+    final KMeshWithMaterialOpaqueAlphaDepth in_mwm,
+    final KTransformType in_transform,
+    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
   {
-    return new KInstanceOpaqueAlphaDepth(in_material, in_mesh, in_faces);
+    return new KInstanceOpaqueAlphaDepth(
+      KInstanceID.freshID(),
+      in_mwm,
+      in_transform,
+      in_uv_matrix);
   }
 
-  private final KFaceSelection            faces;
-  private final KMaterialOpaqueAlphaDepth material;
-  private final KMeshReadableType         mesh;
+  private final KInstanceID                         id;
+  private final KMeshWithMaterialOpaqueAlphaDepth   mesh;
+  private final KTransformType                      transform;
+  private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KInstanceOpaqueAlphaDepth(
-    final KMaterialOpaqueAlphaDepth in_material,
-    final KMesh in_mesh,
-    final KFaceSelection in_faces)
+    final KInstanceID in_id,
+    final KMeshWithMaterialOpaqueAlphaDepth in_mwm,
+    final KTransformType in_transform,
+    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
   {
-    this.mesh = NullCheck.notNull(in_mesh, "Mesh");
-    this.material = NullCheck.notNull(in_material, "Material");
-    this.faces = NullCheck.notNull(in_faces, "Faces");
+    this.id = NullCheck.notNull(in_id, "ID");
+    this.transform = NullCheck.notNull(in_transform, "Transform");
+    this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
+    this.mesh = NullCheck.notNull(in_mwm, "Mesh");
   }
 
   @Override public boolean equals(
@@ -84,44 +124,80 @@ import com.io7m.renderer.types.RException;
       return false;
     }
     final KInstanceOpaqueAlphaDepth other = (KInstanceOpaqueAlphaDepth) obj;
-    return this.material.equals(other.material)
+    return this.id.equals(other.id)
       && this.mesh.equals(other.mesh)
-      && this.faces.equals(other.faces);
+      && this.transform.equals(other.transform)
+      && this.uv_matrix.equals(other.uv_matrix);
+  }
+
+  /**
+   * @return The mesh and material.
+   */
+
+  public KMeshWithMaterialOpaqueAlphaDepth getMeshWithMaterial()
+  {
+    return this.mesh;
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.material.hashCode();
+    result = (prime * result) + this.id.hashCode();
     result = (prime * result) + this.mesh.hashCode();
+    result = (prime * result) + this.transform.hashCode();
+    result = (prime * result) + this.uv_matrix.hashCode();
     return result;
   }
 
-  @Override public KMaterialOpaqueAlphaDepth instanceGetMaterial()
+  @Override public KInstanceID instanceGetID()
   {
-    return this.material;
+    return this.id;
   }
 
-  @Override public KMeshReadableType instanceGetMesh()
+  @Override public
+    KMeshWithMaterialOpaqueAlphaDepth
+    instanceGetMeshWithMaterial()
   {
     return this.mesh;
+  }
+
+  @Override public KTransformType instanceGetTransform()
+  {
+    return this.transform;
+  }
+
+  @Override public RMatrixI3x3F<RTransformTextureType> instanceGetUVMatrix()
+  {
+    return this.uv_matrix;
+  }
+
+  @Override public KMeshReadableType meshGetMesh()
+  {
+    return this.mesh.meshGetMesh();
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KMeshWithMaterialVisitorType<A, E>>
+    A
+    meshWithMaterialAccept(
+      final V v)
+      throws E,
+        RException,
+        JCGLException
+  {
+    return v.meshWithMaterialOpaqueAlphaDepth(this.mesh);
   }
 
   @Override public
     <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
-    instanceAccept(
+    transformedAccept(
       final V v)
       throws E,
         JCGLException,
         RException
   {
-    return v.instanceOpaqueAlphaDepth(this);
-  }
-
-  @Override public KFaceSelection instanceGetFaces()
-  {
-    return this.faces;
+    return v.transformedOpaqueAlphaDepth(this);
   }
 }

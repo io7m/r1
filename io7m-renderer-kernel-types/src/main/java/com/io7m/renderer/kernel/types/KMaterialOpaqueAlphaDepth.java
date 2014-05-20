@@ -33,6 +33,24 @@ import com.io7m.renderer.types.RTransformTextureType;
 @EqualityStructural public final class KMaterialOpaqueAlphaDepth implements
   KMaterialOpaqueType
 {
+  private static final class Builder implements
+    KMaterialOpaqueBuilderType<KMaterialOpaqueAlphaDepth>
+  {
+    private final KMaterialOpaqueAlphaDepth original;
+
+    Builder(
+      final KMaterialOpaqueAlphaDepth m)
+    {
+      this.original = NullCheck.notNull(m, "Original");
+    }
+
+    @Override public void setAlbedo(
+      final KMaterialAlbedo m)
+    {
+
+    }
+  }
+
   /**
    * Construct a new alpha-to-depth material.
    * 
@@ -63,6 +81,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     final float in_alpha_threshold)
   {
     return new KMaterialOpaqueAlphaDepth(
+      KMaterialID.freshID(),
+      KVersion.first(),
       in_uv_matrix,
       in_normal,
       in_albedo,
@@ -80,8 +100,12 @@ import com.io7m.renderer.types.RTransformTextureType;
   private final KMaterialSpecular                   specular;
   private final int                                 textures_required;
   private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
+  private final KVersion                            version;
+  private final KMaterialID                         id;
 
   protected KMaterialOpaqueAlphaDepth(
+    final KMaterialID in_id,
+    final KVersion in_version,
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final KMaterialNormal in_normal,
     final KMaterialAlbedo in_albedo,
@@ -90,6 +114,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     final KMaterialSpecular in_specular,
     final float in_alpha_threshold)
   {
+    this.id = NullCheck.notNull(in_id, "ID");
+    this.version = NullCheck.notNull(in_version, "Version");
     this.normal = NullCheck.notNull(in_normal, "Normal");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
     this.albedo = NullCheck.notNull(in_albedo, "Albedo");
@@ -169,6 +195,17 @@ import com.io7m.renderer.types.RTransformTextureType;
     return result;
   }
 
+  @Override public
+    <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
+    A
+    materialAccept(
+      final V v)
+      throws E,
+        RException
+  {
+    return v.materialOpaque(this);
+  }
+
   @Override public KMaterialAlbedo materialGetAlbedo()
   {
     return this.albedo;
@@ -210,173 +247,18 @@ import com.io7m.renderer.types.RTransformTextureType;
     return v.materialOpaqueAlphaDepth(this);
   }
 
-  @Override public
-    <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
-    A
-    materialAccept(
-      final V v)
-      throws E,
-        RException
-  {
-    return v.materialOpaque(this);
-  }
-
   @Override public int texturesGetRequired()
   {
     return this.textures_required;
   }
 
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param m
-   *          The albedo parameters
-   * @return The current material with <code>albedo == m</code>.
-   */
-
-  public KMaterialOpaqueAlphaDepth withAlbedo(
-    final KMaterialAlbedo m)
+  @Override public KMaterialID materialGetID()
   {
-    return new KMaterialOpaqueAlphaDepth(
-      this.uv_matrix,
-      this.normal,
-      m,
-      this.emissive,
-      this.environment,
-      this.specular,
-      this.alpha_threshold);
+    return this.id;
   }
 
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param t
-   *          The alpha threshold parameter
-   * @return The current material with <code>alpha_threshold == t</code>.
-   */
-
-  public KMaterialOpaqueAlphaDepth withAlphaThreshold(
-    final float t)
+  @Override public KVersion materialGetVersion()
   {
-    return new KMaterialOpaqueAlphaDepth(
-      this.uv_matrix,
-      this.normal,
-      this.albedo,
-      this.emissive,
-      this.environment,
-      this.specular,
-      t);
-  }
-
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param m
-   *          The emissive parameters
-   * @return The current material with <code>emissive == m</code>.
-   */
-
-  public KMaterialOpaqueAlphaDepth withEmissive(
-    final KMaterialEmissive m)
-  {
-    return new KMaterialOpaqueAlphaDepth(
-      this.uv_matrix,
-      this.normal,
-      this.albedo,
-      m,
-      this.environment,
-      this.specular,
-      this.alpha_threshold);
-  }
-
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param e
-   *          The environment parameters
-   * @return The current material with <code>environment == e</code>.
-   */
-
-  public KMaterialOpaqueAlphaDepth withEnvironment(
-    final KMaterialEnvironment e)
-  {
-    return new KMaterialOpaqueAlphaDepth(
-      this.uv_matrix,
-      this.normal,
-      this.albedo,
-      this.emissive,
-      e,
-      this.specular,
-      this.alpha_threshold);
-  }
-
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param m
-   *          The normal mapping parameters
-   * @return The current material with <code>normal == m</code>.
-   */
-
-  public KMaterialOpaqueAlphaDepth withNormal(
-    final KMaterialNormal m)
-  {
-    return new KMaterialOpaqueAlphaDepth(
-      this.uv_matrix,
-      m,
-      this.albedo,
-      this.emissive,
-      this.environment,
-      this.specular,
-      this.alpha_threshold);
-  }
-
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param s
-   *          The specular parameters
-   * @return The current material with <code>specular == s</code>.
-   */
-
-  public KMaterialOpaqueAlphaDepth withSpecular(
-    final KMaterialSpecular s)
-  {
-    return new KMaterialOpaqueAlphaDepth(
-      this.uv_matrix,
-      this.normal,
-      this.albedo,
-      this.emissive,
-      this.environment,
-      s,
-      this.alpha_threshold);
-  }
-
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param m
-   *          The UV matrix
-   * @return The current material with <code>uv_matrix == m</code>.
-   */
-
-  public KMaterialOpaqueAlphaDepth withUVMatrix(
-    final RMatrixI3x3F<RTransformTextureType> m)
-  {
-    return new KMaterialOpaqueAlphaDepth(
-      m,
-      this.normal,
-      this.albedo,
-      this.emissive,
-      this.environment,
-      this.specular,
-      this.alpha_threshold);
+    return this.version;
   }
 }

@@ -145,6 +145,17 @@ import com.io7m.renderer.types.RTransformTextureType;
     return result;
   }
 
+  @Override public
+    <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
+    A
+    materialAccept(
+      final V v)
+      throws E,
+        RException
+  {
+    return v.materialTranslucent(this);
+  }
+
   @Override public KMaterialAlbedo materialGetAlbedo()
   {
     return this.albedo;
@@ -193,17 +204,6 @@ import com.io7m.renderer.types.RTransformTextureType;
         RException
   {
     return v.translucentRegular(this);
-  }
-
-  @Override public
-    <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
-    A
-    materialAccept(
-      final V v)
-      throws E,
-        RException
-  {
-    return v.materialTranslucent(this);
   }
 
   @Override public int texturesGetRequired()

@@ -30,11 +30,11 @@ import com.io7m.renderer.types.RException;
 @EqualityStructural public final class KTranslucentSpecularOnlyLit implements
   KTranslucentType
 {
-  private final KInstanceTransformedTranslucentSpecularOnly instance;
+  private final KInstanceTranslucentSpecularOnly instance;
   private final Set<KLightType>                             lights;
 
   protected KTranslucentSpecularOnlyLit(
-    final KInstanceTransformedTranslucentSpecularOnly in_instance,
+    final KInstanceTranslucentSpecularOnly in_instance,
     final Set<KLightType> in_lights)
   {
     this.instance = in_instance;
@@ -84,7 +84,7 @@ import com.io7m.renderer.types.RException;
    * @return The instance
    */
 
-  public KInstanceTransformedTranslucentSpecularOnly translucentGetInstance()
+  public KInstanceTranslucentSpecularOnly translucentGetInstance()
   {
     return this.instance;
   }

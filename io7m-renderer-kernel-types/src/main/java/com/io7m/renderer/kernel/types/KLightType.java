@@ -53,10 +53,16 @@ public interface KLightType
       E;
 
   /**
-   * @return The colour of the light
+   * @return The color of the light
    */
 
-  RVectorI3F<RSpaceRGBType> lightGetColour();
+  RVectorI3F<RSpaceRGBType> lightGetColor();
+
+  /**
+   * @return The unique identifier of the light.
+   */
+
+  KLightID lightGetID();
 
   /**
    * @return The intensity of the light
@@ -72,7 +78,13 @@ public interface KLightType
   OptionType<KShadowType> lightGetShadow();
 
   /**
-   * @return <code>true</code> iff the light has a shadow
+   * @return The version of the light.
+   */
+
+  KVersion lightGetVersion();
+
+  /**
+   * @return <code>true</code> iff the light has a shadow.
    */
 
   boolean lightHasShadow();

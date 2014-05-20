@@ -23,6 +23,7 @@ import java.util.List;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedo;
 import com.io7m.renderer.kernel.types.KMaterialAlpha;
 import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
@@ -399,14 +400,16 @@ public final class ExampleSceneUtilities
       STANDARD_VIEW_LEFT = Collections.unmodifiableList(views);
     }
 
-    LIGHT_SPHERICAL_LARGE_WHITE =
-      KLightSphere.newSpherical(
-        ExampleSceneUtilities.RGB_WHITE,
-        1.0f,
-        new RVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f),
-        32.0f,
-        1.0f);
+    {
+      final KLightSphereBuilderType b = KLightSphere.newBuilder();
+      b.setColor(ExampleSceneUtilities.RGB_WHITE);
+      b.setFalloff(1.0f);
+      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f));
+      b.setRadius(32.0f);
+      b.setIntensity(1.0f);
 
+      LIGHT_SPHERICAL_LARGE_WHITE = b.build();
+    }
   }
 
   private ExampleSceneUtilities()

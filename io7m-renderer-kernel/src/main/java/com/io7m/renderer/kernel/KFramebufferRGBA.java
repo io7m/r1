@@ -22,6 +22,7 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
  * A simple RGBA "image-only" framebuffer with no depth or stencil
@@ -51,7 +52,7 @@ import com.io7m.renderer.types.RException;
     try {
       return KFramebufferRGBAAbstract.newRGBA(gi, description);
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 

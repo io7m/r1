@@ -16,11 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
 
 interface KMaterialAlphaLabelCacheType
 {
   KMaterialAlphaOpacityType getAlphaLabelTranslucentRegular(
-    final KInstanceTranslucentRegular instance);
+    final KMeshWithMaterialTranslucentRegular instance);
 }

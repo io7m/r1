@@ -43,15 +43,15 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KCamera;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueType;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentSpecularOnly;
-import com.io7m.renderer.kernel.types.KInstanceTransformedType;
-import com.io7m.renderer.kernel.types.KInstanceTransformedVisitorType;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentSpecularOnly;
+import com.io7m.renderer.kernel.types.KInstanceType;
+import com.io7m.renderer.kernel.types.KInstanceVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
@@ -61,6 +61,7 @@ import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
  * A debug renderer that displays the calculated depth for all meshes.
@@ -149,7 +150,7 @@ import com.io7m.renderer.types.RException;
           }
         });
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
@@ -162,13 +163,13 @@ import com.io7m.renderer.types.RException;
     final JCGLInterfaceCommonType gc,
     final JCBProgramType p,
     final MatricesInstanceType mi,
-    final KInstanceTransformedOpaqueType instance,
+    final KInstanceOpaqueType instance,
     final KMaterialDepthLabel label)
     throws JCGLException,
       RException
   {
     final KMaterialOpaqueType material =
-      instance.instanceGet().instanceGetMaterial();
+      instance.instanceGetMeshWithMaterial().meshGetMaterial();
     final List<TextureUnitType> units = gc.textureGetUnits();
     final TextureUnitType u = units.get(0);
     assert u != null;
@@ -262,8 +263,8 @@ import com.io7m.renderer.types.RException;
 
     try {
       final KMeshReadableType mesh = instance.instanceGetMesh();
-      final ArrayBufferUsableType array = mesh.getArrayBuffer();
-      final IndexBufferUsableType indices = mesh.getIndexBuffer();
+      final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
+      final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
@@ -297,13 +298,13 @@ import com.io7m.renderer.types.RException;
   private void renderInstancePre(
     final JCGLInterfaceCommonType gc,
     final MatricesObserverType mo,
-    final KInstanceTransformedOpaqueType instance,
+    final KInstanceOpaqueType instance,
     final MatricesInstanceType mi)
     throws JCGLException,
       RException
   {
     try {
-      final KInstanceOpaqueType ii = instance.instanceGet();
+      final KMeshWithMaterialOpaqueType ii = instance.instanceGetMeshWithMaterial();
 
       final KMaterialDepthLabel label =
         KRendererDebugDepth.this.depth_labels.getDepthLabel(ii);
@@ -362,14 +363,14 @@ import com.io7m.renderer.types.RException;
 
       gc.viewportSet(framebuffer.kFramebufferGetArea());
 
-      final Set<KInstanceTransformedType> instances =
+      final Set<KInstanceType> instances =
         scene.getVisibleInstances();
 
-      for (final KInstanceTransformedType instance : instances) {
+      for (final KInstanceType instance : instances) {
         instance
-          .transformedAccept(new KInstanceTransformedVisitorType<Unit, JCGLException>() {
+          .transformedAccept(new KInstanceVisitorType<Unit, JCGLException>() {
             @Override public Unit transformedOpaqueAlphaDepth(
-              final KInstanceTransformedOpaqueAlphaDepth i)
+              final KInstanceOpaqueAlphaDepth i)
               throws JCGLException,
                 RException
             {
@@ -388,7 +389,7 @@ import com.io7m.renderer.types.RException;
             }
 
             @Override public Unit transformedOpaqueRegular(
-              final KInstanceTransformedOpaqueRegular i)
+              final KInstanceOpaqueRegular i)
               throws JCGLException,
                 RException
             {
@@ -407,21 +408,21 @@ import com.io7m.renderer.types.RException;
             }
 
             @Override public Unit transformedTranslucentRefractive(
-              final KInstanceTransformedTranslucentRefractive i)
+              final KInstanceTranslucentRefractive i)
               throws JCGLException
             {
               return Unit.unit();
             }
 
             @Override public Unit transformedTranslucentRegular(
-              final KInstanceTransformedTranslucentRegular i)
+              final KInstanceTranslucentRegular i)
               throws JCGLException
             {
               return Unit.unit();
             }
 
             @Override public Unit transformedTranslucentSpecularOnly(
-              final KInstanceTransformedTranslucentSpecularOnly i)
+              final KInstanceTranslucentSpecularOnly i)
               throws RException,
                 JCGLException
             {

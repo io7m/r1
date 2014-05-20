@@ -40,8 +40,8 @@ import com.io7m.renderer.tests.FakeTexture2DStatic;
 import com.io7m.renderer.tests.FakeTextureCubeStatic;
 import com.io7m.renderer.tests.FakeTextureUnit;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RException.RExceptionAPIMisuse;
-import com.io7m.renderer.types.RException.RResourceException;
+import com.io7m.renderer.types.RExceptionUserError;
+import com.io7m.renderer.types.RExceptionResource;
 
 @SuppressWarnings("static-method") public final class KTextureUnitAllocatorTest
 {
@@ -162,7 +162,7 @@ import com.io7m.renderer.types.RException.RResourceException;
     Assert.assertEquals(units.size(), called.get());
   }
 
-  @Test(expected = RResourceException.class) public void testUseAll_2D_1()
+  @Test(expected = RExceptionResource.class) public void testUseAll_2D_1()
     throws JCGLException,
       RException
   {
@@ -449,7 +449,7 @@ import com.io7m.renderer.types.RException.RResourceException;
                       {
                         try {
                           context.withTexture2D(t);
-                        } catch (final RResourceException x) {
+                        } catch (final RExceptionResource x) {
                           caught.set(true);
                         }
                       }
@@ -517,7 +517,7 @@ import com.io7m.renderer.types.RException.RResourceException;
     Assert.assertEquals(units.size(), called.get());
   }
 
-  @Test(expected = RResourceException.class) public void testUseAll_Cube_1()
+  @Test(expected = RExceptionResource.class) public void testUseAll_Cube_1()
     throws JCGLException,
       RException
   {
@@ -652,7 +652,7 @@ import com.io7m.renderer.types.RException.RResourceException;
                       {
                         try {
                           context.withTextureCube(t);
-                        } catch (final RResourceException x) {
+                        } catch (final RExceptionResource x) {
                           caught.set(true);
                         }
                       }
@@ -686,7 +686,7 @@ import com.io7m.renderer.types.RException.RResourceException;
     Assert.assertTrue(caught.get());
   }
 
-  @Test(expected = RExceptionAPIMisuse.class) public void testUseSelf_0()
+  @Test(expected = RExceptionUserError.class) public void testUseSelf_0()
     throws JCGLException,
       RException
   {
@@ -714,7 +714,7 @@ import com.io7m.renderer.types.RException.RResourceException;
     });
   }
 
-  @Test(expected = RExceptionAPIMisuse.class) public void testUseSelf_1()
+  @Test(expected = RExceptionUserError.class) public void testUseSelf_1()
     throws JCGLException,
       RException
   {

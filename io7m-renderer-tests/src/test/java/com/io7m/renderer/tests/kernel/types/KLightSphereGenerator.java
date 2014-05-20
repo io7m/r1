@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import net.java.quickcheck.Generator;
 
 import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
@@ -45,11 +46,13 @@ public final class KLightSphereGenerator implements Generator<KLightSphere>
     final RVectorI3F<RSpaceWorldType> position = this.position_gen.next();
     final float radius = (float) Math.random();
     final float falloff = (float) Math.random();
-    return KLightSphere.newSpherical(
-      colour,
-      intensity,
-      position,
-      radius,
-      falloff);
+
+    final KLightSphereBuilderType b = KLightSphere.newBuilder();
+    b.setColor(colour);
+    b.setIntensity(intensity);
+    b.setPosition(position);
+    b.setRadius(radius);
+    b.setFalloff(falloff);
+    return b.build();
   }
 }

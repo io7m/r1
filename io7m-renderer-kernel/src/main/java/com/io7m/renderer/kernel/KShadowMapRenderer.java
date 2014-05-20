@@ -42,7 +42,7 @@ import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KFaceSelection;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
@@ -55,6 +55,7 @@ import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RMatrixM4x4F;
 import com.io7m.renderer.types.RTransformProjectionType;
@@ -175,7 +176,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
     this.shadow_cache.cachePeriodStart();
     try {
-      final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>> casters =
+      final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceOpaqueType>>> casters =
         batches.getShadowCasters();
       assert casters != null;
       final Set<KLightType> lights = casters.keySet();
@@ -215,14 +216,14 @@ import com.io7m.renderer.types.RTransformViewType;
           } catch (final RException e) {
             throw e;
           } catch (final JCGLException e) {
-            throw RException.fromJCGLException(e);
+            throw RExceptionJCGL.fromJCGLException(e);
           } catch (final JCacheException e) {
             throw new UnreachableCodeException(e);
           }
         }
       });
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     } finally {
       this.shadow_cache.cachePeriodEnd();
     }
@@ -236,7 +237,7 @@ import com.io7m.renderer.types.RTransformViewType;
   private
     void
     renderShadowMapBasicBatch(
-      final Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final Map<KMaterialDepthLabel, List<KInstanceOpaqueType>> batches,
       final KShadowMapBasic smb,
       final MatricesProjectiveLightType mwp)
       throws RException
@@ -267,13 +268,13 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     final KShadowMapCacheType cache = this.shadow_cache;
 
-    final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>> casters =
+    final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceOpaqueType>>> casters =
       batched.getShadowCasters();
 
     for (final KLightType light : casters.keySet()) {
       assert light.lightHasShadow();
 
-      final Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batch =
+      final Map<KMaterialDepthLabel, List<KInstanceOpaqueType>> batch =
         casters.get(light);
       assert batch != null;
 
@@ -476,7 +477,7 @@ import com.io7m.renderer.types.RTransformViewType;
   private
     void
     renderShadowMapVarianceBatch(
-      final Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batch,
+      final Map<KMaterialDepthLabel, List<KInstanceOpaqueType>> batch,
       final KShadowMappedVariance shadow,
       final KShadowMapVariance smv,
       final MatricesProjectiveLightType mwp)
@@ -487,8 +488,8 @@ import com.io7m.renderer.types.RTransformViewType;
     final RMatrixI4x4F<RTransformProjectionType> proj =
       RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveProjection());
 
-    final Map<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaqueType>> vbatch =
-      new HashMap<KMaterialDepthVarianceLabel, List<KInstanceTransformedOpaqueType>>();
+    final Map<KMaterialDepthVarianceLabel, List<KInstanceOpaqueType>> vbatch =
+      new HashMap<KMaterialDepthVarianceLabel, List<KInstanceOpaqueType>>();
     for (final KMaterialDepthLabel k : batch.keySet()) {
       assert k != null;
 

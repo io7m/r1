@@ -19,6 +19,7 @@ package com.io7m.renderer.tests.kernel.types;
 import net.java.quickcheck.Generator;
 
 import com.io7m.renderer.kernel.types.KLightDirectional;
+import com.io7m.renderer.kernel.types.KLightDirectionalBuilderType;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
@@ -42,6 +43,11 @@ public final class KLightDirectionalGenerator implements
     final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
     final float intensity = (float) Math.random();
     final RVectorI3F<RSpaceWorldType> direction = this.direction_gen.next();
-    return KLightDirectional.newDirectional(direction, colour, intensity);
+
+    final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
+    b.setColor(colour);
+    b.setIntensity(intensity);
+    b.setDirection(direction);
+    return b.build();
   }
 }

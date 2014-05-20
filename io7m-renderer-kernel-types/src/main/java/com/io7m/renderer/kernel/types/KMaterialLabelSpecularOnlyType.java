@@ -33,14 +33,14 @@ public interface KMaterialLabelSpecularOnlyType extends
    KMaterialNormalLabel labelGetNormal();
 
   /**
-   * @return If the material implies a specular map
-   */
-
-  boolean labelImpliesSpecularMap();
-
-  /**
    * @return The specular label
    */
 
    KMaterialSpecularLabel labelGetSpecular();
+
+  /**
+   * @return If the material implies a specular map
+   */
+
+  boolean labelImpliesSpecularMap();
 }

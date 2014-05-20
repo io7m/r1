@@ -32,7 +32,7 @@ import com.io7m.renderer.types.RException;
 public interface KInstanceVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit an opaque alpha-to-depth instance.
+   * Visit an opaque alpha-depth instance.
    * 
    * @param i
    *          The instance
@@ -46,7 +46,7 @@ public interface KInstanceVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A instanceOpaqueAlphaDepth(
+  A transformedOpaqueAlphaDepth(
     final KInstanceOpaqueAlphaDepth i)
     throws E,
       RException,
@@ -67,7 +67,7 @@ public interface KInstanceVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A instanceOpaqueRegular(
+  A transformedOpaqueRegular(
     final KInstanceOpaqueRegular i)
     throws E,
       RException,
@@ -88,7 +88,7 @@ public interface KInstanceVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A instanceTranslucentRefractive(
+  A transformedTranslucentRefractive(
     final KInstanceTranslucentRefractive i)
     throws E,
       RException,
@@ -109,7 +109,7 @@ public interface KInstanceVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A instanceTranslucentRegular(
+  A transformedTranslucentRegular(
     final KInstanceTranslucentRegular i)
     throws E,
       RException,
@@ -130,7 +130,7 @@ public interface KInstanceVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A instanceTranslucentSpecularOnly(
+  A transformedTranslucentSpecularOnly(
     final KInstanceTranslucentSpecularOnly i)
     throws E,
       RException,

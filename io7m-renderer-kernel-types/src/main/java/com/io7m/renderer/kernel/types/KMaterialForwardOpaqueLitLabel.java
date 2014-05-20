@@ -33,37 +33,6 @@ import com.io7m.jnull.Nullable;
   KMaterialLabelRegularType
 {
 
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.code.hashCode();
-    result = (prime * result) + this.light.hashCode();
-    result = (prime * result) + this.regular.hashCode();
-    result = (prime * result) + this.textures;
-    return result;
-  }
-
-  @Override public boolean equals(
-    final @Nullable Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KMaterialForwardOpaqueLitLabel other =
-      (KMaterialForwardOpaqueLitLabel) obj;
-    return this.code.equals(other.code)
-      && (this.light == other.light)
-      && (this.regular.equals(other.regular))
-      && (this.textures == other.textures);
-  }
-
   /**
    * @return The set of all possible lit opaque labels.
    */
@@ -118,10 +87,11 @@ import com.io7m.jnull.Nullable;
   }
 
   private final String                       code;
+
   private final KLightLabel                  light;
+
   private final KMaterialForwardRegularLabel regular;
   private final int                          textures;
-
   private KMaterialForwardOpaqueLitLabel(
     final KLightLabel in_light,
     final KMaterialForwardRegularLabel in_regular)
@@ -138,6 +108,25 @@ import com.io7m.jnull.Nullable;
 
     this.textures =
       this.light.texturesGetRequired() + this.regular.texturesGetRequired();
+  }
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final KMaterialForwardOpaqueLitLabel other =
+      (KMaterialForwardOpaqueLitLabel) obj;
+    return this.code.equals(other.code)
+      && (this.light == other.light)
+      && (this.regular.equals(other.regular))
+      && (this.textures == other.textures);
   }
 
   /**
@@ -156,6 +145,17 @@ import com.io7m.jnull.Nullable;
   public KMaterialLabelRegularType getRegular()
   {
     return this.regular;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.code.hashCode();
+    result = (prime * result) + this.light.hashCode();
+    result = (prime * result) + this.regular.hashCode();
+    result = (prime * result) + this.textures;
+    return result;
   }
 
   @Override public KMaterialAlbedoLabel labelGetAlbedo()

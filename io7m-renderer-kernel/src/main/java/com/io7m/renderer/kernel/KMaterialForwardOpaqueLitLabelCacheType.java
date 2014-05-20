@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueLitLabel;
 
@@ -24,5 +24,5 @@ interface KMaterialForwardOpaqueLitLabelCacheType
 {
   KMaterialForwardOpaqueLitLabel getForwardLabelOpaqueLit(
     final KLightType light,
-    final KInstanceOpaqueType instance);
+    final KMeshWithMaterialOpaqueType instance);
 }

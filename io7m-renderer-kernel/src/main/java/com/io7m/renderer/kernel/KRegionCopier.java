@@ -50,6 +50,8 @@ import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionUserError;
+import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
 
@@ -284,7 +286,7 @@ import com.io7m.renderer.types.RTransformTextureType;
         this.log.debug("initialized");
       }
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
@@ -301,7 +303,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     NullCheck.notNull(target_area, "Target area");
 
     if (source == target) {
-      throw RException
+      throw RExceptionUserError
         .fromAPIMisuse("Source framebuffer must not be equal to target framebuffer");
     }
 
@@ -380,7 +382,7 @@ import com.io7m.renderer.types.RTransformTextureType;
           }
         });
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
@@ -397,7 +399,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     NullCheck.notNull(target_area, "Target area");
 
     if (source == target) {
-      throw RException
+      throw RExceptionUserError
         .fromAPIMisuse("Source framebuffer must not be equal to target framebuffer");
     }
 
@@ -476,7 +478,7 @@ import com.io7m.renderer.types.RTransformTextureType;
           }
         });
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
@@ -496,7 +498,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     NullCheck.notNull(target_area, "Target area");
 
     if (source == target) {
-      throw RException
+      throw RExceptionUserError
         .fromAPIMisuse("Source framebuffer must not be equal to target framebuffer");
     }
 
@@ -564,7 +566,7 @@ import com.io7m.renderer.types.RTransformTextureType;
           }
         });
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
@@ -682,7 +684,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     } catch (final JCGLException x) {
-      throw RException.fromJCGLException(x);
+      throw RExceptionJCGL.fromJCGLException(x);
     }
   }
 
@@ -773,7 +775,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     } catch (final JCGLException x) {
-      throw RException.fromJCGLException(x);
+      throw RExceptionJCGL.fromJCGLException(x);
     }
   }
 
@@ -832,7 +834,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     } catch (final JCacheException x) {
       throw new UnreachableCodeException(x);
     } catch (final JCGLException x) {
-      throw RException.fromJCGLException(x);
+      throw RExceptionJCGL.fromJCGLException(x);
     }
   }
 

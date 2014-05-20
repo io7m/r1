@@ -21,10 +21,6 @@ import java.io.IOException;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jvvfs.FilesystemError;
-import com.io7m.renderer.types.RException.RExceptionAPIMisuse;
-import com.io7m.renderer.types.RException.RInternalAssertionException;
-import com.io7m.renderer.types.RException.RNotSupportedException;
-import com.io7m.renderer.types.RException.RResourceException;
 
 /**
  * A generic exception visitor, returning values of type <code>T</code> and
@@ -105,7 +101,7 @@ public interface RExceptionVisitorType<T, E extends Throwable>
    */
 
   T exceptionVisitNotSupportedException(
-    final RNotSupportedException e)
+    final RExceptionNotSupported e)
     throws E;
 
   /**
@@ -118,8 +114,8 @@ public interface RExceptionVisitorType<T, E extends Throwable>
    *           If required
    */
 
-  T exceptionVisitProgrammingErrorException(
-    RExceptionAPIMisuse e)
+  T exceptionVisitUserErrorException(
+    RExceptionUserError e)
     throws E;
 
   /**
@@ -133,7 +129,7 @@ public interface RExceptionVisitorType<T, E extends Throwable>
    */
 
   T exceptionVisitResourceException(
-    final RResourceException e)
+    final RExceptionResource e)
     throws E;
 
   /**
@@ -161,6 +157,6 @@ public interface RExceptionVisitorType<T, E extends Throwable>
    */
 
   T exceptionVisitInternalAssertionException(
-    final RInternalAssertionException e)
+    final RExceptionInternalAssertion e)
     throws E;
 }

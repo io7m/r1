@@ -48,6 +48,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 @EqualityReference abstract class KFramebufferDepthVariance implements
   KFramebufferDepthVarianceType
@@ -267,7 +268,7 @@ import com.io7m.renderer.types.RException;
         gc.texture2DStaticDelete(this.depth);
         gc.texture2DStaticDelete(this.variance);
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         this.setDeleted(true);
       }

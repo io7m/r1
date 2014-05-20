@@ -41,19 +41,19 @@ public enum KMaterialAlphaOpacityType
   ALPHA_OPACITY_ONE_MINUS_DOT("TD");
 
   /**
-   * Derive an opacity type from the given instance, assuming the instance has
-   * the given normal label.
+   * Derive an opacity type from the given mesh and material, assuming the
+   * mesh and material has the given normal label.
    * 
    * @param normal
-   *          The normal label for the instance
-   * @param instance
-   *          The instance
+   *          The normal label for the mesh and material
+   * @param mwm
+   *          The mesh and material
    * @return An opacity type
    */
 
-  public static  KMaterialAlphaOpacityType fromInstanceSpecularOnly(
-    final  KMaterialNormalLabel normal,
-    final  KInstanceTranslucentSpecularOnly instance)
+  public static KMaterialAlphaOpacityType fromMeshAndMaterialRegular(
+    final KMaterialNormalLabel normal,
+    final KMeshWithMaterialTranslucentRegular mwm)
   {
     switch (normal) {
       case NORMAL_NONE:
@@ -63,8 +63,7 @@ public enum KMaterialAlphaOpacityType
       case NORMAL_MAPPED:
       case NORMAL_VERTEX:
       {
-        final KMaterialAlpha alpha =
-          instance.instanceGetMaterial().getAlpha();
+        final KMaterialAlpha alpha = mwm.meshGetMaterial().materialGetAlpha();
         switch (alpha.getType()) {
           case ALPHA_OPACITY_CONSTANT:
           {
@@ -82,19 +81,19 @@ public enum KMaterialAlphaOpacityType
   }
 
   /**
-   * Derive an opacity type from the given instance, assuming the instance has
-   * the given normal label.
+   * Derive an opacity type from the given mesh and material, assuming the
+   * mesh and material has the given normal label.
    * 
    * @param normal
-   *          The normal label for the instance
-   * @param instance
-   *          The instance
+   *          The normal label for the mesh and material
+   * @param mwm
+   *          The mesh and material
    * @return An opacity type
    */
 
-  public static  KMaterialAlphaOpacityType fromInstanceRegular(
-    final  KMaterialNormalLabel normal,
-    final  KInstanceTranslucentRegular instance)
+  public static KMaterialAlphaOpacityType fromMeshAndMaterialSpecularOnly(
+    final KMaterialNormalLabel normal,
+    final KMeshWithMaterialTranslucentSpecularOnly mwm)
   {
     switch (normal) {
       case NORMAL_NONE:
@@ -104,8 +103,7 @@ public enum KMaterialAlphaOpacityType
       case NORMAL_MAPPED:
       case NORMAL_VERTEX:
       {
-        final KMaterialAlpha alpha =
-          instance.instanceGetMaterial().materialGetAlpha();
+        final KMaterialAlpha alpha = mwm.getMaterial().getAlpha();
         switch (alpha.getType()) {
           case ALPHA_OPACITY_CONSTANT:
           {
@@ -122,10 +120,10 @@ public enum KMaterialAlphaOpacityType
     throw new UnreachableCodeException();
   }
 
-  private final  String code;
+  private final String code;
 
   private KMaterialAlphaOpacityType(
-    final  String in_code)
+    final String in_code)
   {
     this.code = in_code;
   }

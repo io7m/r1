@@ -53,6 +53,7 @@ import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
  * Provides the base implementation for {@link KFramebufferForward}.
@@ -180,7 +181,7 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
         gc.texture2DStaticDelete(this.color);
         gc.texture2DStaticDelete(this.depth);
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -435,7 +436,7 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
         gc.texture2DStaticDelete(this.color);
         gc.texture2DStaticDelete(this.depth);
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -607,7 +608,7 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
         gc.texture2DStaticDelete(this.color);
         gc.texture2DStaticDelete(this.depth);
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -807,7 +808,7 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
         gc.texture2DStaticDelete(this.color);
         gc.texture2DStaticDelete(this.depth);
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }

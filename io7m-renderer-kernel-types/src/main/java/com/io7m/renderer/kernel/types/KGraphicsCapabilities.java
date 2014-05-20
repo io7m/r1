@@ -112,20 +112,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.depth_textures = in_depth_textures;
   }
 
-  @Override public boolean getSupportsDepthTextures()
-  {
-    return this.depth_textures;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + (this.depth_textures ? 1231 : 1237);
-    result = (prime * result) + this.texture_units;
-    return result;
-  }
-
   @Override public boolean equals(
     final @Nullable Object obj)
   {
@@ -143,8 +129,22 @@ import com.io7m.junreachable.UnreachableCodeException;
       && (this.texture_units != other.texture_units);
   }
 
+  @Override public boolean getSupportsDepthTextures()
+  {
+    return this.depth_textures;
+  }
+
   @Override public int getTextureUnits()
   {
     return this.texture_units;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + (this.depth_textures ? 1231 : 1237);
+    result = (prime * result) + this.texture_units;
+    return result;
   }
 }

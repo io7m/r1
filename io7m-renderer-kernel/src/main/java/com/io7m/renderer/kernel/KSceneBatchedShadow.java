@@ -23,7 +23,7 @@ import java.util.Map;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 import com.io7m.renderer.kernel.types.KSceneShadows;
@@ -52,28 +52,28 @@ public final class KSceneBatchedShadow
     NullCheck.notNull(shadows, "Shadows");
     NullCheck.notNull(depth_labels, "Depth label cache");
 
-    final Map<KLightType, List<KInstanceTransformedOpaqueType>> casters =
+    final Map<KLightType, List<KInstanceOpaqueType>> casters =
       shadows.getShadowCasters();
-    final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>> batched_casters =
-      new HashMap<KLightType, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>>();
+    final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceOpaqueType>>> batched_casters =
+      new HashMap<KLightType, Map<KMaterialDepthLabel, List<KInstanceOpaqueType>>>();
 
     for (final KLightType light : casters.keySet()) {
       assert light.lightHasShadow();
 
-      final List<KInstanceTransformedOpaqueType> instances =
+      final List<KInstanceOpaqueType> instances =
         casters.get(light);
-      final Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> by_label =
-        new HashMap<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>();
+      final Map<KMaterialDepthLabel, List<KInstanceOpaqueType>> by_label =
+        new HashMap<KMaterialDepthLabel, List<KInstanceOpaqueType>>();
 
-      for (final KInstanceTransformedOpaqueType i : instances) {
+      for (final KInstanceOpaqueType i : instances) {
         final KMaterialDepthLabel label =
-          depth_labels.getDepthLabel(i.instanceGet());
+          depth_labels.getDepthLabel(i.instanceGetMeshWithMaterial());
 
-        List<KInstanceTransformedOpaqueType> label_casters = null;
+        List<KInstanceOpaqueType> label_casters = null;
         if (by_label.containsKey(label)) {
           label_casters = by_label.get(label);
         } else {
-          label_casters = new ArrayList<KInstanceTransformedOpaqueType>();
+          label_casters = new ArrayList<KInstanceOpaqueType>();
         }
 
         label_casters.add(i);
@@ -87,10 +87,10 @@ public final class KSceneBatchedShadow
     return new KSceneBatchedShadow(batched_casters);
   }
 
-  private final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>> shadow_casters;
+  private final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceOpaqueType>>> shadow_casters;
 
   private KSceneBatchedShadow(
-    final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>> in_shadow_casters)
+    final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceOpaqueType>>> in_shadow_casters)
   {
     this.shadow_casters = in_shadow_casters;
   }
@@ -117,7 +117,7 @@ public final class KSceneBatchedShadow
    */
 
   public
-    Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>>>
+    Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceOpaqueType>>>
     getShadowCasters()
   {
     return this.shadow_casters;

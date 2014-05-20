@@ -31,8 +31,6 @@ public final class KShadowMapVarianceDescription implements
   /**
    * Create a new description of a shadow map.
    * 
-   * @param in_light_id
-   *          The light associated with the shadow map
    * @param in_description
    *          The description of the depth/variance framebuffer
    * @param in_size_exponent
@@ -41,26 +39,19 @@ public final class KShadowMapVarianceDescription implements
    */
 
   public static KShadowMapVarianceDescription newDescription(
-    final Integer in_light_id,
     final KFramebufferDepthVarianceDescription in_description,
     final int in_size_exponent)
   {
-    return new KShadowMapVarianceDescription(
-      in_light_id,
-      in_description,
-      in_size_exponent);
+    return new KShadowMapVarianceDescription(in_description, in_size_exponent);
   }
 
   private final KFramebufferDepthVarianceDescription description;
-  private final Integer                              light_id;
   private final int                                  size_exponent;
 
   private KShadowMapVarianceDescription(
-    final Integer in_light_id,
     final KFramebufferDepthVarianceDescription in_description,
     final int in_size_exponent)
   {
-    this.light_id = NullCheck.notNull(in_light_id, "Light ID");
     this.size_exponent =
       (int) RangeCheck.checkIncludedIn(
         in_size_exponent,
@@ -87,9 +78,6 @@ public final class KShadowMapVarianceDescription implements
     if (!this.description.equals(other.description)) {
       return false;
     }
-    if (!this.light_id.equals(other.light_id)) {
-      return false;
-    }
     if (this.size_exponent != other.size_exponent) {
       return false;
     }
@@ -110,7 +98,6 @@ public final class KShadowMapVarianceDescription implements
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.description.hashCode();
-    result = (prime * result) + this.light_id.hashCode();
     result = (prime * result) + this.size_exponent;
     return result;
   }
@@ -124,11 +111,6 @@ public final class KShadowMapVarianceDescription implements
         RException
   {
     return v.shadowMapDescriptionVariance(this);
-  }
-
-  @Override public Integer mapGetLightID()
-  {
-    return this.light_id;
   }
 
   @Override public int mapGetSizeExponent()

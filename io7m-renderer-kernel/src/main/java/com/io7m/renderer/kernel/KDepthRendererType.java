@@ -21,7 +21,7 @@ import java.util.Map;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueType;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI4x4F;
@@ -56,7 +56,7 @@ public interface KDepthRendererType extends KRendererType
     rendererEvaluateDepth(
       final RMatrixI4x4F<RTransformViewType> view,
       final RMatrixI4x4F<RTransformProjectionType> projection,
-      final Map<KMaterialDepthLabel, List<KInstanceTransformedOpaqueType>> batches,
+      final Map<KMaterialDepthLabel, List<KInstanceOpaqueType>> batches,
       final KFramebufferDepthUsableType framebuffer,
       final OptionType<KFaceSelection> faces)
       throws RException;

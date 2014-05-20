@@ -16,10 +16,8 @@
 
 package com.io7m.renderer.kernel.types;
 
-import java.util.Map;
-
-import com.io7m.jcanephora.ArrayAttributeDescriptor;
-import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
 /**
@@ -43,42 +41,61 @@ public enum KMaterialAlbedoLabel
 
   ALBEDO_TEXTURED("BT", 1);
 
-  private static KMaterialAlbedoLabel fromInstanceData(
-    final ArrayBufferUsableType a,
-    final KMaterialAlbedo albedo)
+  /**
+   * Derive an albedo label for the given mesh and material.
+   * 
+   * @param mwm
+   *          The mesh and material
+   * @return An albedo label
+   */
+
+  public static KMaterialAlbedoLabel fromMeshAndMaterialRegular(
+    final KMeshWithMaterialRegularType mwm)
   {
-    final Map<String, ArrayAttributeDescriptor> ad =
-      a.arrayGetDescriptor().getAttributes();
+    NullCheck.notNull(mwm, "Mesh and material");
 
-    if (ad.containsKey(KMeshAttributes.ATTRIBUTE_UV.getName())) {
-      if (albedo.getTexture().isSome()) {
-        if (albedo.getMix() == 0.0) {
-          return KMaterialAlbedoLabel.ALBEDO_COLOURED;
-        }
-        return KMaterialAlbedoLabel.ALBEDO_TEXTURED;
-      }
+    final KMeshReadableType mesh = mwm.meshGetMesh();
+    final KMaterialRegularType material = mwm.meshGetMaterial();
+    final KMaterialAlbedo albedo = material.materialGetAlbedo();
+
+    if (mesh.meshHasUVs() && albedo.getTexture().isSome()) {
+      return KMaterialAlbedoLabel.ALBEDO_TEXTURED;
     }
-
     return KMaterialAlbedoLabel.ALBEDO_COLOURED;
   }
 
   /**
-   * Derive an albedo label for the given instance.
+   * Check whether two materials would derive the same label for an arbitrary
+   * mesh <code>m</code>.
    * 
-   * @param instance
-   *          The instance
-   * @return An albedo label
+   * @param ma
+   *          The first material
+   * @param mb
+   *          The second material
+   * @return <code>true</code> if applying <code>ma</code> to a mesh
+   *         <code>m</code> would yield the same label as applying
+   *         <code>mb</code> to <code>m</code>.
    */
 
-  public static KMaterialAlbedoLabel fromInstanceRegular(
-    final KInstanceRegularType instance)
+  public static boolean wouldDeriveSameLabel(
+    final KMaterialAlbedo ma,
+    final KMaterialAlbedo mb)
   {
-    NullCheck.notNull(instance, "Instance");
-    final KMeshReadableType mesh = instance.instanceGetMesh();
-    final ArrayBufferUsableType a = mesh.getArrayBuffer();
-    final KMaterialRegularType material = instance.instanceGetMaterial();
-    final KMaterialAlbedo albedo = material.materialGetAlbedo();
-    return KMaterialAlbedoLabel.fromInstanceData(a, albedo);
+    NullCheck.notNull(ma, "Material A");
+    NullCheck.notNull(mb, "Material B");
+
+    if (ma == mb) {
+      return true;
+    }
+    final OptionType<Texture2DStaticUsableType> mat = ma.getTexture();
+    final OptionType<Texture2DStaticUsableType> mbt = mb.getTexture();
+    if (mat.isNone() && mbt.isNone()) {
+      return true;
+    }
+    if (mat.isSome() && mbt.isSome()) {
+      return true;
+    }
+    return false;
   }
 
   private final String code;

@@ -16,11 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialForwardOpaqueUnlitLabel;
 
 interface KMaterialForwardOpaqueUnlitLabelCacheType
 {
   KMaterialForwardOpaqueUnlitLabel getForwardLabelOpaqueUnlit(
-    final KInstanceOpaqueType instance);
+    final KMeshWithMaterialOpaqueType instance);
 }

@@ -51,10 +51,11 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedType;
+import com.io7m.renderer.kernel.types.KInstanceType;
 import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedo;
 import com.io7m.renderer.kernel.types.KMaterialEmissive;
 import com.io7m.renderer.kernel.types.KMaterialEnvironment;
@@ -69,7 +70,7 @@ import com.io7m.renderer.tests.FakeArrayBuffer;
 import com.io7m.renderer.tests.FakeIndexBuffer;
 import com.io7m.renderer.tests.FakeTexture2DStatic;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RException.RExceptionAPIMisuse;
+import com.io7m.renderer.types.RExceptionUserError;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RMatrixM3x3F;
@@ -97,44 +98,49 @@ import com.io7m.renderer.types.RVectorI4F;
 {
   private static @NonNull KLightProjective makeKProjective()
   {
-    final Texture2DStaticUsableType texture =
-      FakeTexture2DStatic.getDefault();
+    try {
+      final Texture2DStaticUsableType texture =
+        FakeTexture2DStatic.getDefault();
 
-    final RVectorI3F<RSpaceWorldType> position =
-      new RVectorI3F<RSpaceWorldType>(0, 0, 0);
-    final QuaternionI4F orientation = new QuaternionI4F();
-    final RVectorI3F<RSpaceRGBType> colour =
-      new RVectorI3F<RSpaceRGBType>(0, 0, 0);
-    final float intensity = 0.0f;
-    final float range = 0.0f;
-    final float falloff = 0.0f;
+      final RVectorI3F<RSpaceWorldType> position =
+        new RVectorI3F<RSpaceWorldType>(0, 0, 0);
+      final QuaternionI4F orientation = new QuaternionI4F();
+      final RVectorI3F<RSpaceRGBType> colour =
+        new RVectorI3F<RSpaceRGBType>(0, 0, 0);
+      final float intensity = 0.0f;
+      final float range = 0.0f;
+      final float falloff = 0.0f;
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    m_projection.set(0, 0, 7.0f);
-    m_projection.set(1, 1, 7.0f);
-    m_projection.set(2, 2, 7.0f);
-    m_projection.set(3, 3, 7.0f);
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+      final RMatrixM4x4F<RTransformProjectionType> m_projection =
+        new RMatrixM4x4F<RTransformProjectionType>();
+      m_projection.set(0, 0, 7.0f);
+      m_projection.set(1, 1, 7.0f);
+      m_projection.set(2, 2, 7.0f);
+      m_projection.set(3, 3, 7.0f);
+      final RMatrixI4x4F<RTransformProjectionType> projection =
+        RMatrixI4x4F.newFromReadable(m_projection);
 
-    final OptionType<KShadowType> shadow = Option.none();
-    final Integer v = Integer.valueOf(23);
-    assert v != null;
-    return KLightProjective.newProjective(
-      v,
-      texture,
-      position,
-      orientation,
-      colour,
-      intensity,
-      range,
-      falloff,
-      projection,
-      shadow);
+      final OptionType<KShadowType> shadow = Option.none();
+      final Integer v = Integer.valueOf(23);
+      assert v != null;
+
+      final KLightProjectiveBuilderType b = KLightProjective.newBuilder();
+      b.setColor(colour);
+      b.setFalloff(falloff);
+      b.setIntensity(intensity);
+      b.setOrientation(orientation);
+      b.setPosition(position);
+      b.setProjection(projection);
+      b.setRange(range);
+      b.setShadowOption(shadow);
+      b.setTexture(texture);
+      return b.build();
+    } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 
-  private static @NonNull KInstanceTransformedType makeMeshInstance()
+  private static @NonNull KInstanceType makeMeshInstance()
   {
     try {
       final RMatrixI3x3F<RTransformTextureType> uv_matrix =
@@ -188,8 +194,8 @@ import com.io7m.renderer.types.RVectorI4F;
           environment,
           specular);
 
-      final KInstanceOpaqueRegular kmi =
-        KInstanceOpaqueRegular.newInstance(
+      final KMeshWithMaterialOpaqueRegular kmi =
+        KMeshWithMaterialOpaqueRegular.newInstance(
           material,
           mesh,
           KFaceSelection.FACE_RENDER_FRONT);
@@ -201,8 +207,8 @@ import com.io7m.renderer.types.RVectorI4F;
       final KTransformType trans =
         KTransformOST.newTransform(orientation, scale, translation);
 
-      final KInstanceTransformedOpaqueRegular kmit =
-        KInstanceTransformedOpaqueRegular.newInstance(kmi, trans, uv_matrix);
+      final KInstanceOpaqueRegular kmit =
+        KInstanceOpaqueRegular.newInstance(kmi, trans, uv_matrix);
 
       return kmit;
     } catch (final JCGLExceptionAttributeDuplicate x) {
@@ -480,7 +486,7 @@ import com.io7m.renderer.types.RVectorI4F;
       });
   }
 
-  @Test(expected = RExceptionAPIMisuse.class) public
+  @Test(expected = RExceptionUserError.class) public
     void
     testWithInstanceTwice()
       throws RException

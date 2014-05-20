@@ -32,6 +32,12 @@ public interface KMaterialLabelRegularType extends
    KMaterialAlbedoLabel labelGetAlbedo();
 
   /**
+   * @return The emissive label
+   */
+
+   KMaterialEmissiveLabel labelGetEmissive();
+
+  /**
    * @return The environment label
    */
 
@@ -44,20 +50,14 @@ public interface KMaterialLabelRegularType extends
    KMaterialNormalLabel labelGetNormal();
 
   /**
-   * @return If the material implies a specular map
-   */
-
-  boolean labelImpliesSpecularMap();
-
-  /**
-   * @return The emissive label
-   */
-
-   KMaterialEmissiveLabel labelGetEmissive();
-
-  /**
    * @return The specular label
    */
 
    KMaterialSpecularLabel labelGetSpecular();
+
+  /**
+   * @return If the material implies a specular map
+   */
+
+  boolean labelImpliesSpecularMap();
 }

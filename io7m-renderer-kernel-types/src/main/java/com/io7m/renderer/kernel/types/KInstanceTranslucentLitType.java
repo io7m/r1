@@ -20,10 +20,11 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.renderer.types.RException;
 
 /**
- * The type of translucent instances that can be rendered with lighting.
+ * The type of instances that have translucent materials that can be rendered
+ * with lighting.
  */
 
-public interface KInstanceTranslucentLitType
+public interface KInstanceTranslucentLitType extends KInstanceTranslucentType
 {
   /**
    * Be visited by the given generic visitor.
@@ -49,7 +50,7 @@ public interface KInstanceTranslucentLitType
 
     <A, E extends Throwable, V extends KInstanceTranslucentLitVisitorType<A, E>>
     A
-    translucentLitAccept(
+    instanceTranslucentLitAccept(
       final V v)
       throws E,
         RException,

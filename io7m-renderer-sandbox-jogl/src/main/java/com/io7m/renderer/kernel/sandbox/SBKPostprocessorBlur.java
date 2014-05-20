@@ -40,6 +40,7 @@ import com.io7m.renderer.kernel.KUnitQuad;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 public final class SBKPostprocessorBlur
 {
@@ -144,7 +145,7 @@ public final class SBKPostprocessorBlur
             log);
 
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       }
     }
 

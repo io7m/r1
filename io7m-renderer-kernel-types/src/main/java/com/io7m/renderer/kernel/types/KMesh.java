@@ -16,8 +16,12 @@
 
 package com.io7m.renderer.kernel.types;
 
+import java.util.Map;
+
+import com.io7m.jcanephora.ArrayAttributeDescriptor;
 import com.io7m.jcanephora.ArrayBufferType;
 import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.IndexBufferType;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
@@ -56,6 +60,38 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   JCGLResourceUsableType,
   JCGLResourceSizedType
 {
+  private static boolean hasNormals(
+    final Map<String, ArrayAttributeDescriptor> as)
+  {
+    final ArrayAttributeDescriptor ta =
+      as.get(KMeshAttributes.ATTRIBUTE_NORMAL);
+    if (ta != null) {
+      return ta.equals(KMeshAttributes.ATTRIBUTE_NORMAL);
+    }
+    return false;
+  }
+
+  private static boolean hasTangents(
+    final Map<String, ArrayAttributeDescriptor> as)
+  {
+    final ArrayAttributeDescriptor ta =
+      as.get(KMeshAttributes.ATTRIBUTE_TANGENT4);
+    if (ta != null) {
+      return ta.equals(KMeshAttributes.ATTRIBUTE_TANGENT4);
+    }
+    return false;
+  }
+
+  private static boolean hasUVs(
+    final Map<String, ArrayAttributeDescriptor> as)
+  {
+    final ArrayAttributeDescriptor ta = as.get(KMeshAttributes.ATTRIBUTE_UV);
+    if (ta != null) {
+      return ta.equals(KMeshAttributes.ATTRIBUTE_UV);
+    }
+    return false;
+  }
+
   /**
    * Construct a new mesh.
    * 
@@ -83,6 +119,9 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   private final RVectorI3F<RSpaceObjectType> bounds_lower;
   private final RVectorI3F<RSpaceObjectType> bounds_upper;
   private boolean                            deleted;
+  private final boolean                      has_normals;
+  private final boolean                      has_tangents;
+  private final boolean                      has_uv;
   private final IndexBufferType              indices;
 
   private KMesh(
@@ -95,6 +134,13 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     this.indices = NullCheck.notNull(in_indices, "Indices");
     this.bounds_lower = NullCheck.notNull(in_bounds_lower, "Lower bounds");
     this.bounds_upper = NullCheck.notNull(in_bounds_upper, "Upper bounds");
+
+    final ArrayDescriptor d = this.array.arrayGetDescriptor();
+    final Map<String, ArrayAttributeDescriptor> as = d.getAttributes();
+
+    this.has_uv = KMesh.hasUVs(as);
+    this.has_normals = KMesh.hasNormals(as);
+    this.has_tangents = KMesh.hasTangents(as);
   }
 
   /**
@@ -142,26 +188,6 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       && this.indices.equals(other.indices);
   }
 
-  @Override public ArrayBufferUsableType getArrayBuffer()
-  {
-    return this.array;
-  }
-
-  @Override public RVectorReadable3FType<RSpaceObjectType> getBoundsLower()
-  {
-    return this.bounds_lower;
-  }
-
-  @Override public RVectorReadable3FType<RSpaceObjectType> getBoundsUpper()
-  {
-    return this.bounds_upper;
-  }
-
-  @Override public IndexBufferUsableType getIndexBuffer()
-  {
-    return this.indices;
-  }
-
   @Override public int hashCode()
   {
     final int prime = 31;
@@ -172,6 +198,45 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     result = (prime * result) + (this.deleted ? 1231 : 1237);
     result = (prime * result) + this.indices.hashCode();
     return result;
+  }
+
+  @Override public ArrayBufferUsableType meshGetArrayBuffer()
+  {
+    return this.array;
+  }
+
+  @Override public
+    RVectorReadable3FType<RSpaceObjectType>
+    meshGetBoundsLower()
+  {
+    return this.bounds_lower;
+  }
+
+  @Override public
+    RVectorReadable3FType<RSpaceObjectType>
+    meshGetBoundsUpper()
+  {
+    return this.bounds_upper;
+  }
+
+  @Override public IndexBufferUsableType meshGetIndexBuffer()
+  {
+    return this.indices;
+  }
+
+  @Override public boolean meshHasNormals()
+  {
+    return this.has_normals;
+  }
+
+  @Override public boolean meshHasTangents()
+  {
+    return this.has_tangents;
+  }
+
+  @Override public boolean meshHasUVs()
+  {
+    return this.has_uv;
   }
 
   @Override public long resourceGetSizeBytes()

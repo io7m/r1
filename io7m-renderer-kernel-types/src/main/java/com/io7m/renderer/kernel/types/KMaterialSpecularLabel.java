@@ -51,7 +51,7 @@ public enum KMaterialSpecularLabel
 
   SPECULAR_NONE("", 0);
 
-  private static KMaterialSpecularLabel fromInstanceData(
+  private static KMaterialSpecularLabel fromData(
     final KMaterialNormalLabel normal,
     final ArrayBufferUsableType a,
     final KMaterialSpecular s)
@@ -82,46 +82,45 @@ public enum KMaterialSpecularLabel
   }
 
   /**
-   * Derive a specular label for the given instance.
+   * Derive a specular label for the given mesh and material.
    * 
-   * @param instance
-   *          The instance
+   * @param mwm
+   *          The mesh and material
    * @param n
-   *          The normal-mapping label for the instance
+   *          The normal-mapping label for the mesh and material
    * @return A specular label
    */
 
-  public static KMaterialSpecularLabel fromInstanceRegular(
+  public static KMaterialSpecularLabel fromRegular(
     final KMaterialNormalLabel n,
-    final KInstanceRegularType instance)
+    final KMeshWithMaterialRegularType mwm)
   {
-    NullCheck.notNull(instance, "Instance");
-    final KMeshReadableType mesh = instance.instanceGetMesh();
-    final ArrayBufferUsableType a = mesh.getArrayBuffer();
-    final KMaterialSpecular s =
-      instance.instanceGetMaterial().materialGetSpecular();
-    return KMaterialSpecularLabel.fromInstanceData(n, a, s);
+    NullCheck.notNull(mwm, "Mesh with material");
+    final KMeshReadableType mesh = mwm.meshGetMesh();
+    final ArrayBufferUsableType a = mesh.meshGetArrayBuffer();
+    final KMaterialSpecular s = mwm.meshGetMaterial().materialGetSpecular();
+    return KMaterialSpecularLabel.fromData(n, a, s);
   }
 
   /**
-   * Derive a specular label for the given instance.
+   * Derive a specular label for the given mesh and material.
    * 
-   * @param instance
-   *          The instance
+   * @param mwm
+   *          The mesh and material
    * @param n
-   *          The normal-mapping label for the instance
+   *          The normal-mapping label for the mesh and material
    * @return A specular label
    */
 
-  public static KMaterialSpecularLabel fromInstanceSpecularOnly(
+  public static KMaterialSpecularLabel fromSpecularOnly(
     final KMaterialNormalLabel n,
-    final KInstanceTranslucentSpecularOnly instance)
+    final KMeshWithMaterialTranslucentSpecularOnly mwm)
   {
-    NullCheck.notNull(instance, "Instance");
-    final KMeshReadableType mesh = instance.instanceGetMesh();
-    final ArrayBufferUsableType a = mesh.getArrayBuffer();
-    final KMaterialSpecular s = instance.instanceGetMaterial().getSpecular();
-    return KMaterialSpecularLabel.fromInstanceData(n, a, s);
+    NullCheck.notNull(mwm, "Mesh with material");
+    final KMeshReadableType mesh = mwm.meshGetMesh();
+    final ArrayBufferUsableType a = mesh.meshGetArrayBuffer();
+    final KMaterialSpecular s = mwm.getMaterial().getSpecular();
+    return KMaterialSpecularLabel.fromData(n, a, s);
   }
 
   private final String code;

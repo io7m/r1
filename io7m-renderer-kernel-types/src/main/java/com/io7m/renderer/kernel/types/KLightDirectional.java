@@ -27,43 +27,159 @@ import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
 
 /**
+ * <p>
  * A directional light, from a conceptually infinite distance away.
+ * </p>
  */
 
 @EqualityStructural public final class KLightDirectional implements
   KLightType
 {
-  /**
-   * Create a new directional light.
-   * 
-   * @param direction
-   *          The direction in world space that the emitted light is
-   *          travelling
-   * @param colour
-   *          The colour of the light
-   * @param intensity
-   *          The intensity of the light
-   * @return A new directional light
-   */
-
-  public static KLightDirectional newDirectional(
-    final RVectorI3F<RSpaceWorldType> direction,
-    final RVectorI3F<RSpaceRGBType> colour,
-    final float intensity)
+  @SuppressWarnings("synthetic-access") private static final class Builder implements
+    KLightDirectionalBuilderType
   {
-    return new KLightDirectional(direction, colour, intensity);
+    private RVectorI3F<RSpaceRGBType>                           color;
+    private RVectorI3F<RSpaceWorldType>                         direction;
+    private @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
+    private final @Nullable KLightDirectional                   original;
+
+    Builder()
+    {
+      this.original = null;
+      this.color = RVectorI3F.one();
+      this.direction = RVectorI3F.zero();
+      this.intensity = 1.0f;
+    }
+
+    Builder(
+      final KLightDirectional in_original)
+    {
+      this.original = NullCheck.notNull(in_original, "Light");
+      this.color = in_original.color;
+      this.direction = in_original.direction;
+      this.intensity = in_original.intensity;
+    }
+
+    @Override public KLightDirectional build()
+    {
+      final KLightDirectional o = this.original;
+
+      if (o != null) {
+        final KLightDirectional k =
+          new KLightDirectional(
+            o.id,
+            this.direction,
+            this.color,
+            this.intensity);
+        return k;
+      }
+
+      return new KLightDirectional(
+        KLightID.freshID(),
+        this.direction,
+        this.color,
+        this.intensity);
+    }
+
+    @Override public void setColor(
+      final RVectorI3F<RSpaceRGBType> in_color)
+    {
+      this.color = NullCheck.notNull(in_color, "Color");
+    }
+
+    @Override public void setDirection(
+      final RVectorI3F<RSpaceWorldType> in_direction)
+    {
+      this.direction = NullCheck.notNull(in_direction, "Direction");
+    }
+
+    @Override public void setIntensity(
+      final float in_intensity)
+    {
+      this.intensity = in_intensity;
+    }
   }
 
-  private final RVectorI3F<RSpaceRGBType>                           colour;
+  /**
+   * <p>
+   * Create a builder for creating new directional lights.
+   * </p>
+   * <p>
+   * The {@link KLightDirectionalBuilderType#build()} function will return a
+   * light with a fresh {@link KLightID} every time it is called.
+   * </p>
+   * 
+   * @return A new light builder.
+   */
+
+  public static KLightDirectionalBuilderType newBuilder()
+  {
+    return new Builder();
+  }
+
+  /**
+   * <p>
+   * Create a builder for creating new directional lights. The builder will be
+   * initialized to values based on the given light.
+   * </p>
+   * <p>
+   * The {@link KLightDirectionalBuilderType#build()} function will return a
+   * light with a fresh {@link KLightID} every time it is called. This
+   * effectively allows for creating sets of similar lights.
+   * </p>
+   * 
+   * @param d
+   *          The initial light.
+   * @return A new light builder.
+   */
+
+  public static KLightDirectionalBuilderType newBuilderWithFreshID(
+    final KLightDirectional d)
+  {
+    final Builder b = new Builder();
+    b.setColor(d.color);
+    b.setDirection(d.direction);
+    b.setIntensity(d.intensity);
+    return b;
+  }
+
+  /**
+   * <p>
+   * Create a builder for creating new directional lights. The builder will be
+   * initialized to values based on the given light.
+   * </p>
+   * <p>
+   * The {@link KLightDirectionalBuilderType#build()} function will return a
+   * light with same {@link KLightID} as the initial light every time it is
+   * called. This effectively allows for efficiently "mutating" an immutable
+   * light over time without the need for creating lots of intermediate
+   * immutable objects when manipulating multiple parameters.
+   * </p>
+   * 
+   * @param d
+   *          The initial light.
+   * @return A new light builder.
+   */
+
+  public static KLightDirectionalBuilderType newBuilderWithSameID(
+    final KLightDirectional d)
+  {
+    return new Builder(d);
+  }
+
+  private final RVectorI3F<RSpaceRGBType>                           color;
   private final RVectorI3F<RSpaceWorldType>                         direction;
+  private final KLightID                                            id;
   private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
 
   private KLightDirectional(
+    final KLightID in_id,
     final RVectorI3F<RSpaceWorldType> in_direction,
-    final RVectorI3F<RSpaceRGBType> in_colour,
+    final RVectorI3F<RSpaceRGBType> in_color,
     final float in_intensity)
   {
-    this.colour = NullCheck.notNull(in_colour, "Colour");
+    this.id = NullCheck.notNull(in_id, "ID");
+    this.color = NullCheck.notNull(in_color, "Color");
     this.intensity = in_intensity;
     this.direction = NullCheck.notNull(in_direction, "Direction");
   }
@@ -81,56 +197,22 @@ import com.io7m.renderer.types.RVectorI3F;
       return false;
     }
     final KLightDirectional other = (KLightDirectional) obj;
-    if (!this.colour.equals(other.colour)) {
-      return false;
-    }
-    if (!this.direction.equals(other.direction)) {
-      return false;
-    }
-    if (Float.floatToIntBits(this.intensity) != Float
-      .floatToIntBits(other.intensity)) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * @return The direction in world space that the emitted light is travelling
-   */
-
-  public RVectorI3F<RSpaceWorldType> getDirection()
-  {
-    return this.direction;
+    return this.color.equals(other.color)
+      && this.direction.equals(other.direction)
+      && this.id.equals(other.id)
+      && (Float.floatToIntBits(this.intensity) == Float
+        .floatToIntBits(other.intensity));
   }
 
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.colour.hashCode();
+    result = (prime * result) + this.color.hashCode();
     result = (prime * result) + this.direction.hashCode();
+    result = (prime * result) + this.id.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.intensity);
     return result;
-  }
-
-  @Override public RVectorI3F<RSpaceRGBType> lightGetColour()
-  {
-    return this.colour;
-  }
-
-  @Override public float lightGetIntensity()
-  {
-    return this.intensity;
-  }
-
-  @Override public OptionType<KShadowType> lightGetShadow()
-  {
-    return Option.none();
-  }
-
-  @Override public boolean lightHasShadow()
-  {
-    return false;
   }
 
   @Override public
@@ -144,65 +226,64 @@ import com.io7m.renderer.types.RVectorI3F;
     return v.lightDirectional(this);
   }
 
+  @Override public RVectorI3F<RSpaceRGBType> lightGetColor()
+  {
+    return this.color;
+  }
+
+  /**
+   * @return The direction in world space that the emitted light is traveling.
+   */
+
+  public RVectorI3F<RSpaceWorldType> lightGetDirection()
+  {
+    return this.direction;
+  }
+
+  @Override public KLightID lightGetID()
+  {
+    return this.id;
+  }
+
+  @Override public float lightGetIntensity()
+  {
+    return this.intensity;
+  }
+
+  @Override public OptionType<KShadowType> lightGetShadow()
+  {
+    return Option.none();
+  }
+
+  /*
+   * It is not possible to make a backwards-incompatible change to a
+   * directional light, so the minimum version number is always used.
+   */
+
+  @Override public KVersion lightGetVersion()
+  {
+    return KVersion.first();
+  }
+
+  @Override public boolean lightHasShadow()
+  {
+    return false;
+  }
+
   @Override public String toString()
   {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("[KLightDirectional colour=");
-    builder.append(this.colour);
-    builder.append(" direction=");
-    builder.append(this.direction);
-    builder.append(" intensity=");
-    builder.append(this.intensity);
-    builder.append("]");
-    final String r = builder.toString();
-    assert r != null;
-    return r;
-  }
-
-  /**
-   * Return a light representing the current light with the given
-   * modification.
-   * 
-   * @param new_colour
-   *          The new colour
-   * @return The current material with <code>colour == new_colour</code>.
-   */
-
-  public KLightDirectional withColour(
-    final RVectorI3F<RSpaceRGBType> new_colour)
-  {
-    return new KLightDirectional(this.direction, new_colour, this.intensity);
-  }
-
-  /**
-   * Return a light representing the current light with the given
-   * modification.
-   * 
-   * @param new_direction
-   *          The new direction
-   * @return The current material with <code>direction == new_direction</code>
-   *         .
-   */
-
-  public KLightDirectional withDirection(
-    final RVectorI3F<RSpaceWorldType> new_direction)
-  {
-    return new KLightDirectional(new_direction, this.colour, this.intensity);
-  }
-
-  /**
-   * Return a light representing the current light with the given
-   * modification.
-   * 
-   * @param new_intensity
-   *          The new intensity
-   * @return The current material with <code>intensity == new_intensity</code>
-   *         .
-   */
-
-  public KLightDirectional withIntensity(
-    final float new_intensity)
-  {
-    return new KLightDirectional(this.direction, this.colour, new_intensity);
+    final StringBuilder b = new StringBuilder();
+    b.append("[KLightDirectional color=");
+    b.append(this.color);
+    b.append(" direction=");
+    b.append(this.direction);
+    b.append(" intensity=");
+    b.append(this.intensity);
+    b.append(" id=");
+    b.append(this.id);
+    b.append("]");
+    final String s = b.toString();
+    assert s != null;
+    return s;
   }
 }

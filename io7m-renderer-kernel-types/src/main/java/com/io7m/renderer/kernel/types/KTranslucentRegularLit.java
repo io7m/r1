@@ -28,11 +28,11 @@ import com.io7m.renderer.types.RException;
 
 public final class KTranslucentRegularLit implements KTranslucentType
 {
-  private final KInstanceTransformedTranslucentRegular instance;
+  private final KInstanceTranslucentRegular instance;
   private final Set<KLightType>                        lights;
 
   protected KTranslucentRegularLit(
-    final KInstanceTransformedTranslucentRegular in_instance,
+    final KInstanceTranslucentRegular in_instance,
     final Set<KLightType> in_lights)
   {
     this.instance = in_instance;
@@ -81,7 +81,7 @@ public final class KTranslucentRegularLit implements KTranslucentType
    * @return The instance
    */
 
-  public KInstanceTransformedTranslucentRegular translucentGetInstance()
+  public KInstanceTranslucentRegular translucentGetInstance()
   {
     return this.instance;
   }

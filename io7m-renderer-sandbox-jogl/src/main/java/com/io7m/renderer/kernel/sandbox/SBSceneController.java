@@ -70,18 +70,19 @@ import com.io7m.jparasol.xml.PGLSLMetaXML;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueAlphaDepth;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentSpecularOnly;
-import com.io7m.renderer.kernel.types.KInstanceTransformedType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentSpecularOnly;
+import com.io7m.renderer.kernel.types.KInstanceType;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedo;
 import com.io7m.renderer.kernel.types.KMaterialAlpha;
 import com.io7m.renderer.kernel.types.KMaterialEmissive;
@@ -168,18 +169,18 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
               s.texture2DGet(ld.getTexture());
 
             assert t != null;
-            final KLightProjective kp =
-              KLightProjective.newProjective(
-                ld.getID(),
-                t.getTexture(),
-                ld.getPosition(),
-                ld.getOrientation(),
-                ld.getColour(),
-                ld.getIntensity(),
-                (float) ld.getProjection().getFar(),
-                ld.getFalloff(),
-                ld.getProjectionMatrix(),
-                ld.getShadow());
+            final KLightProjectiveBuilderType b =
+              KLightProjective.newBuilder();
+            b.setColor(ld.getColour());
+            b.setFalloff(ld.getFalloff());
+            b.setIntensity(ld.getIntensity());
+            b.setOrientation(ld.getOrientation());
+            b.setPosition(ld.getPosition());
+            b.setProjection(ld.getProjectionMatrix());
+            b.setRange((float) ld.getProjection().getFar());
+            b.setShadowOption(ld.getShadow());
+            b.setTexture(t.getTexture());
+            final KLightProjective kp = b.build();
 
             scene_temp.set(s.lightAdd(new SBLightProjective(ld, kp)));
             return Unit.unit();
@@ -1316,7 +1317,7 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
   }
 
   @Override public
-    Pair<Collection<SBLight>, Collection<Pair<KInstanceTransformedType, SBInstance>>>
+    Pair<Collection<SBLight>, Collection<Pair<KInstanceType, SBInstance>>>
     rendererGetScene()
       throws RException
   {
@@ -1324,7 +1325,7 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
     final SBScene scene = saf.scene;
 
     final Collection<SBLight> lights = scene.lightsGet();
-    MapPSet<Pair<KInstanceTransformedType, SBInstance>> meshes =
+    MapPSet<Pair<KInstanceType, SBInstance>> meshes =
       HashTreePSet.empty();
 
     for (final SBInstance i : scene.instancesGet()) {
@@ -1348,41 +1349,41 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
       assert mesh != null;
       final KMesh km = mesh.getMesh();
 
-      final KInstanceTransformedType kit =
+      final KInstanceType kit =
         kmat
-          .materialAccept(new KMaterialVisitorType<KInstanceTransformedType, RException>() {
-            @Override public KInstanceTransformedType materialOpaque(
+          .materialAccept(new KMaterialVisitorType<KInstanceType, RException>() {
+            @Override public KInstanceType materialOpaque(
               final KMaterialOpaqueType m)
               throws RException
             {
               return m
-                .materialOpaqueAccept(new KMaterialOpaqueVisitorType<KInstanceTransformedType, RException>() {
+                .materialOpaqueAccept(new KMaterialOpaqueVisitorType<KInstanceType, RException>() {
                   @Override public
-                    KInstanceTransformedType
+                    KInstanceType
                     materialOpaqueAlphaDepth(
                       final KMaterialOpaqueAlphaDepth mo)
                       throws RException
                   {
-                    final KInstanceOpaqueAlphaDepth ki =
-                      KInstanceOpaqueAlphaDepth.newInstance(
+                    final KMeshWithMaterialOpaqueAlphaDepth ki =
+                      KMeshWithMaterialOpaqueAlphaDepth.newInstance(
                         mo,
                         km,
                         i.getFaces());
-                    return KInstanceTransformedOpaqueAlphaDepth.newInstance(
+                    return KInstanceOpaqueAlphaDepth.newInstance(
                       ki,
                       kt,
                       i.getUVMatrix());
                   }
 
                   @Override public
-                    KInstanceTransformedType
+                    KInstanceType
                     materialOpaqueRegular(
                       final KMaterialOpaqueRegular mo)
                       throws RException
                   {
-                    final KInstanceOpaqueRegular ki =
-                      KInstanceOpaqueRegular.newInstance(mo, km, i.getFaces());
-                    return KInstanceTransformedOpaqueRegular.newInstance(
+                    final KMeshWithMaterialOpaqueRegular ki =
+                      KMeshWithMaterialOpaqueRegular.newInstance(mo, km, i.getFaces());
+                    return KInstanceOpaqueRegular.newInstance(
                       ki,
                       kt,
                       i.getUVMatrix());
@@ -1390,54 +1391,54 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
                 });
             }
 
-            @Override public KInstanceTransformedType materialTranslucent(
+            @Override public KInstanceType materialTranslucent(
               final KMaterialTranslucentType m)
               throws RException
             {
               return m
-                .materialTranslucentAccept(new KMaterialTranslucentVisitorType<KInstanceTransformedType, RException>() {
+                .materialTranslucentAccept(new KMaterialTranslucentVisitorType<KInstanceType, RException>() {
                   @Override public
-                    KInstanceTransformedType
+                    KInstanceType
                     translucentRefractive(
                       final KMaterialTranslucentRefractive mtr)
                       throws RException
                   {
-                    final KInstanceTranslucentRefractive ki =
-                      KInstanceTranslucentRefractive.newInstance(
+                    final KMeshWithMaterialTranslucentRefractive ki =
+                      KMeshWithMaterialTranslucentRefractive.newInstance(
                         mtr,
                         km,
                         i.getFaces());
-                    return KInstanceTransformedTranslucentRefractive
+                    return KInstanceTranslucentRefractive
                       .newInstance(ki, kt, i.getUVMatrix());
                   }
 
                   @Override public
-                    KInstanceTransformedType
+                    KInstanceType
                     translucentRegular(
                       final KMaterialTranslucentRegular mtr)
                       throws RException
                   {
-                    final KInstanceTranslucentRegular ki =
-                      KInstanceTranslucentRegular.newInstance(
+                    final KMeshWithMaterialTranslucentRegular ki =
+                      KMeshWithMaterialTranslucentRegular.newInstance(
                         mtr,
                         km,
                         i.getFaces());
-                    return KInstanceTransformedTranslucentRegular
+                    return KInstanceTranslucentRegular
                       .newInstance(ki, kt, i.getUVMatrix());
                   }
 
                   @Override public
-                    KInstanceTransformedType
+                    KInstanceType
                     translucentSpecularOnly(
                       final KMaterialTranslucentSpecularOnly mts)
                       throws RException
                   {
-                    final KInstanceTranslucentSpecularOnly ki =
-                      KInstanceTranslucentSpecularOnly.newInstance(
+                    final KMeshWithMaterialTranslucentSpecularOnly ki =
+                      KMeshWithMaterialTranslucentSpecularOnly.newInstance(
                         mts,
                         km,
                         i.getFaces());
-                    return KInstanceTransformedTranslucentSpecularOnly
+                    return KInstanceTranslucentSpecularOnly
                       .newInstance(ki, kt, i.getUVMatrix());
                   }
                 });
@@ -1448,7 +1449,7 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
     }
 
     final Collection<SBLight> lgen = lights;
-    final Collection<Pair<KInstanceTransformedType, SBInstance>> lm = meshes;
+    final Collection<Pair<KInstanceType, SBInstance>> lm = meshes;
     assert lm != null;
     return Pair.pair(lgen, lm);
   }
@@ -1596,18 +1597,17 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
               .sceneTextures2DGet()
               .get(ld.getTexture());
 
-          final KLightProjective kp =
-            KLightProjective.newProjective(
-              ld.getID(),
-              t.getTexture(),
-              ld.getPosition(),
-              ld.getOrientation(),
-              ld.getColour(),
-              ld.getIntensity(),
-              (float) ld.getProjection().getFar(),
-              ld.getFalloff(),
-              ld.getProjectionMatrix(),
-              ld.getShadow());
+          final KLightProjectiveBuilderType b = KLightProjective.newBuilder();
+          b.setColor(ld.getColour());
+          b.setFalloff(ld.getFalloff());
+          b.setIntensity(ld.getIntensity());
+          b.setOrientation(ld.getOrientation());
+          b.setPosition(ld.getPosition());
+          b.setProjection(ld.getProjectionMatrix());
+          b.setRange((float) ld.getProjection().getFar());
+          b.setShadowOption(ld.getShadow());
+          b.setTexture(t.getTexture());
+          final KLightProjective kp = b.build();
 
           final SBLightProjective l = new SBLightProjective(ld, kp);
           SBSceneController.this.internalStateUpdateSceneOnly(state.get().scene

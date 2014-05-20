@@ -16,12 +16,12 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRegularUnlitLabel;
 
 interface KMaterialForwardTranslucentRegularUnlitLabelCacheType
 {
     KMaterialForwardTranslucentRegularUnlitLabel
     getForwardLabelTranslucentRegularUnlit(
-      final KInstanceTranslucentRegular instance);
+      final KMeshWithMaterialTranslucentRegular instance);
 }

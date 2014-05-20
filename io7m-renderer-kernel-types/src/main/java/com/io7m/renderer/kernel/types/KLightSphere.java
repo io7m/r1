@@ -27,55 +27,186 @@ import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
 
 /**
+ * <p>
  * A spherical light emits light from the given location in all directions,
  * with the intensity of the attenuated over distance according to the given
  * falloff value, and is maximally attenuated at the given radius value.
+ * </p>
  */
 
 @EqualityStructural public final class KLightSphere implements KLightType
 {
+  @SuppressWarnings("synthetic-access") private static final class Builder implements
+    KLightSphereBuilderType
+  {
+    private RVectorI3F<RSpaceRGBType>    color;
+    private float                        exponent;
+    private float                        intensity;
+    private final @Nullable KLightSphere original;
+    private RVectorI3F<RSpaceWorldType>  position;
+    private float                        radius;
+
+    Builder()
+    {
+      this.original = null;
+      this.color = RVectorI3F.one();
+      this.intensity = 1.0f;
+      this.exponent = 1.0f;
+      this.radius = 8.0f;
+      this.position = RVectorI3F.zero();
+    }
+
+    Builder(
+      final KLightSphere in_original)
+    {
+      this.original = NullCheck.notNull(in_original, "Light");
+      this.color = in_original.colour;
+      this.intensity = in_original.intensity;
+      this.exponent = in_original.falloff;
+      this.radius = in_original.radius;
+      this.position = in_original.position;
+    }
+
+    @Override public KLightSphere build()
+    {
+      final KLightSphere o = this.original;
+      if (o != null) {
+        final KLightSphere k =
+          new KLightSphere(
+            o.id,
+            this.color,
+            this.intensity,
+            this.position,
+            this.radius,
+            this.exponent);
+        return k;
+      }
+
+      return new KLightSphere(
+        KLightID.freshID(),
+        this.color,
+        this.intensity,
+        this.position,
+        this.radius,
+        this.exponent);
+    }
+
+    @Override public void setColor(
+      final RVectorI3F<RSpaceRGBType> in_color)
+    {
+      this.color = NullCheck.notNull(in_color, "Color");
+    }
+
+    @Override public void setFalloff(
+      final float in_exponent)
+    {
+      this.exponent = in_exponent;
+    }
+
+    @Override public void setIntensity(
+      final float in_intensity)
+    {
+      this.intensity = in_intensity;
+    }
+
+    @Override public void setPosition(
+      final RVectorI3F<RSpaceWorldType> in_position)
+    {
+      this.position = NullCheck.notNull(in_position, "Position");
+    }
+
+    @Override public void setRadius(
+      final float in_radius)
+    {
+      this.radius = in_radius;
+    }
+  }
+
   /**
-   * Construct a new spherical light.
+   * <p>
+   * Create a builder for creating new spherical lights.
+   * </p>
+   * <p>
+   * The {@link KLightSphereBuilderType#build()} function will return a light
+   * with a fresh {@link KLightID} every time it is called.
+   * </p>
    * 
-   * @param colour
-   *          The colour of the new light
-   * @param intensity
-   *          The intensity of the new light
-   * @param position
-   *          The position in world-space of the new light
-   * @param radius
-   *          The radius of the new light
-   * @param falloff
-   *          The falloff exponent for the given light, where 1.0 is linear
-   *          falloff
-   * @return A new spherical light
+   * @return A new light builder.
    */
 
-  public static
-    KLightSphere
-    newSpherical(
-      final RVectorI3F<RSpaceRGBType> colour,
-      final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity,
-      final RVectorI3F<RSpaceWorldType> position,
-      final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius,
-      final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float falloff)
+  public static KLightSphereBuilderType newBuilder()
   {
-    return new KLightSphere(colour, intensity, position, radius, falloff);
+    return new Builder();
+  }
+
+  /**
+   * <p>
+   * Create a builder for creating new spherical lights. The builder will be
+   * initialized to values based on the given light.
+   * </p>
+   * <p>
+   * The {@link KLightSphereBuilderType#build()} function will return a light
+   * with a fresh {@link KLightID} every time it is called. This effectively
+   * allows for creating sets of similar lights.
+   * </p>
+   * 
+   * @param s
+   *          The initial light.
+   * @return A new light builder.
+   */
+
+  public static KLightSphereBuilderType newBuilderWithFreshID(
+    final KLightSphere s)
+  {
+    final Builder b = new Builder();
+    b.setColor(s.colour);
+    b.setFalloff(s.falloff);
+    b.setIntensity(s.intensity);
+    b.setPosition(s.position);
+    b.setRadius(s.radius);
+    return b;
+  }
+
+  /**
+   * <p>
+   * Create a builder for creating new spherical lights. The builder will be
+   * initialized to values based on the given light.
+   * </p>
+   * <p>
+   * The {@link KLightSphereBuilderType#build()} function will return a light
+   * with same {@link KLightID} as the initial light every time it is called.
+   * This effectively allows for efficiently "mutating" an immutable light
+   * over time without the need for creating lots of intermediate immutable
+   * objects when manipulating multiple parameters.
+   * </p>
+   * 
+   * @param s
+   *          The initial light.
+   * @return A new light builder.
+   */
+
+  public static KLightSphereBuilderType newBuilderWithSameID(
+    final KLightSphere s)
+  {
+    return new Builder(s);
   }
 
   private final RVectorI3F<RSpaceRGBType>                                      colour;
   private final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float           falloff;
+  private final KLightID                                                       id;
   private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float            intensity;
   private final RVectorI3F<RSpaceWorldType>                                    position;
   private final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius;
 
   private KLightSphere(
+    final KLightID in_id,
     final RVectorI3F<RSpaceRGBType> in_colour,
     final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float in_intensity,
     final RVectorI3F<RSpaceWorldType> in_position,
     final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float in_radius,
     final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float in_falloff)
   {
+    this.id = NullCheck.notNull(in_id, "ID");
     this.colour = NullCheck.notNull(in_colour, "Colour");
     this.intensity = in_intensity;
     this.position = NullCheck.notNull(in_position, "Position");
@@ -99,38 +230,12 @@ import com.io7m.renderer.types.RVectorI3F;
     return this.colour.equals(other.colour)
       && (Float.floatToIntBits(this.falloff) == Float
         .floatToIntBits(other.falloff))
+      && this.id.equals(other.id)
       && (Float.floatToIntBits(this.intensity) == Float
         .floatToIntBits(other.intensity))
       && this.position.equals(other.position)
       && (Float.floatToIntBits(this.radius) == Float
         .floatToIntBits(other.radius));
-  }
-
-  /**
-   * @return The falloff exponent for the light
-   */
-
-  public float getFalloff()
-  {
-    return this.falloff;
-  }
-
-  /**
-   * @return The world position of the light
-   */
-
-  public RVectorI3F<RSpaceWorldType> getPosition()
-  {
-    return this.position;
-  }
-
-  /**
-   * @return The radius of the light
-   */
-
-  public float getRadius()
-  {
-    return this.radius;
   }
 
   @Override public int hashCode()
@@ -139,30 +244,11 @@ import com.io7m.renderer.types.RVectorI3F;
     int result = 1;
     result = (prime * result) + this.colour.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.falloff);
+    result = (prime * result) + this.id.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.intensity);
     result = (prime * result) + this.position.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.radius);
     return result;
-  }
-
-  @Override public RVectorI3F<RSpaceRGBType> lightGetColour()
-  {
-    return this.colour;
-  }
-
-  @Override public float lightGetIntensity()
-  {
-    return this.intensity;
-  }
-
-  @Override public OptionType<KShadowType> lightGetShadow()
-  {
-    return Option.none();
-  }
-
-  @Override public boolean lightHasShadow()
-  {
-    return false;
   }
 
   @Override public
@@ -176,121 +262,86 @@ import com.io7m.renderer.types.RVectorI3F;
     return v.lightSpherical(this);
   }
 
+  @Override public RVectorI3F<RSpaceRGBType> lightGetColor()
+  {
+    return this.colour;
+  }
+
+  /**
+   * @return The falloff exponent for the light
+   */
+
+  public float lightGetFalloff()
+  {
+    return this.falloff;
+  }
+
+  @Override public KLightID lightGetID()
+  {
+    return this.id;
+  }
+
+  @Override public float lightGetIntensity()
+  {
+    return this.intensity;
+  }
+
+  /**
+   * @return The world position of the light
+   */
+
+  public RVectorI3F<RSpaceWorldType> lightGetPosition()
+  {
+    return this.position;
+  }
+
+  /**
+   * @return The radius of the light
+   */
+
+  public float lightGetRadius()
+  {
+    return this.radius;
+  }
+
+  @Override public OptionType<KShadowType> lightGetShadow()
+  {
+    return Option.none();
+  }
+
+  /*
+   * It is not possible to make a backwards-incompatible change to a spherical
+   * light, so the minimum version number is always used.
+   */
+
+  @Override public KVersion lightGetVersion()
+  {
+    return KVersion.first();
+  }
+
+  @Override public boolean lightHasShadow()
+  {
+    return false;
+  }
+
   @Override public String toString()
   {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("[KSphere ");
-    builder.append(super.toString());
-    builder.append(" position=");
-    builder.append(this.position);
-    builder.append(" radius=");
-    builder.append(this.radius);
-    builder.append(" falloff=");
-    builder.append(this.falloff);
-    builder.append("]");
-    final String r = builder.toString();
+    final StringBuilder b = new StringBuilder();
+    b.append("[KLightSphere colour=");
+    b.append(this.colour);
+    b.append(" falloff=");
+    b.append(this.falloff);
+    b.append(" id=");
+    b.append(this.id);
+    b.append(" intensity=");
+    b.append(this.intensity);
+    b.append(" position=");
+    b.append(this.position);
+    b.append(" radius=");
+    b.append(this.radius);
+    b.append("]");
+    final String r = b.toString();
     assert r != null;
     return r;
-  }
-
-  /**
-   * Return a light representing the current light with the given
-   * modification.
-   * 
-   * @param new_colour
-   *          The new colour
-   * @return The current material with <code>colour == new_colour</code>.
-   */
-
-  public KLightSphere withColour(
-    final RVectorI3F<RSpaceRGBType> new_colour)
-  {
-    return new KLightSphere(
-      new_colour,
-      this.intensity,
-      this.position,
-      this.radius,
-      this.falloff);
-  }
-
-  /**
-   * Return a light representing the current light with the given
-   * modification.
-   * 
-   * @param new_falloff
-   *          The new falloff
-   * @return The current material with <code>falloff == new_falloff</code> .
-   */
-
-  public KLightSphere withFalloff(
-    final float new_falloff)
-  {
-    return new KLightSphere(
-      this.colour,
-      this.intensity,
-      this.position,
-      this.radius,
-      new_falloff);
-  }
-
-  /**
-   * Return a light representing the current light with the given
-   * modification.
-   * 
-   * @param new_intensity
-   *          The new intensity
-   * @return The current material with <code>intensity == new_intensity</code>
-   *         .
-   */
-
-  public KLightSphere withIntensity(
-    final float new_intensity)
-  {
-    return new KLightSphere(
-      this.colour,
-      new_intensity,
-      this.position,
-      this.radius,
-      this.falloff);
-  }
-
-  /**
-   * Return a light representing the current light with the given
-   * modification.
-   * 
-   * @param new_position
-   *          The new position
-   * @return The current material with <code>position == new_position</code>.
-   */
-
-  public KLightSphere withPosition(
-    final RVectorI3F<RSpaceWorldType> new_position)
-  {
-    return new KLightSphere(
-      this.colour,
-      this.intensity,
-      new_position,
-      this.radius,
-      this.falloff);
-  }
-
-  /**
-   * Return a light representing the current light with the given
-   * modification.
-   * 
-   * @param new_radius
-   *          The new radius
-   * @return The current material with <code>radius == new_radius</code> .
-   */
-
-  public KLightSphere withRadius(
-    final float new_radius)
-  {
-    return new KLightSphere(
-      this.colour,
-      this.intensity,
-      this.position,
-      new_radius,
-      this.falloff);
   }
 }

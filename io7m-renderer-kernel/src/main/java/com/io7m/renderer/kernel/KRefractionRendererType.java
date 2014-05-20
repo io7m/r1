@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.renderer.kernel.types.KInstanceTransformedTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -42,6 +42,6 @@ public interface KRefractionRendererType extends KRendererType
   void rendererRefractionEvaluate(
     final KFramebufferForwardUsableType framebuffer,
     final KMutableMatrices.MatricesObserverType observer,
-    final KInstanceTransformedTranslucentRefractive r)
+    final KInstanceTranslucentRefractive r)
     throws RException;
 }

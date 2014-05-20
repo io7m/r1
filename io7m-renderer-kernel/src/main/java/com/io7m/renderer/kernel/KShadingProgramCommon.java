@@ -50,6 +50,7 @@ import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RMatrixReadable3x3FType;
 import com.io7m.renderer.types.RMatrixReadable4x4FType;
@@ -319,7 +320,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     final TextureUnitType texture_unit)
     throws JCGLException
   {
-    gt.texture2DStaticBind(texture_unit, light.getTexture());
+    gt.texture2DStaticBind(texture_unit, light.lightGetTexture());
     KShadingProgramCommon.putTextureProjection(program, texture_unit);
   }
 
@@ -583,9 +584,9 @@ import com.io7m.renderer.types.RVectorReadable4FType;
       e,
       context,
       view,
-      light.getDirection());
+      light.lightGetDirection());
     KShadingProgramCommon
-      .putLightDirectionalColour(e, light.lightGetColour());
+      .putLightDirectionalColour(e, light.lightGetColor());
     KShadingProgramCommon.putLightDirectionalIntensity(
       e,
       light.lightGetIntensity());
@@ -758,17 +759,17 @@ import com.io7m.renderer.types.RVectorReadable4FType;
       program,
       context,
       view,
-      light.getPosition());
+      light.lightGetPosition());
     KShadingProgramCommon.putLightProjectiveColour(
       program,
-      light.lightGetColour());
+      light.lightGetColor());
     KShadingProgramCommon.putLightProjectiveIntensity(
       program,
       light.lightGetIntensity());
     KShadingProgramCommon.putLightProjectiveFalloff(
       program,
-      light.getFalloff());
-    KShadingProgramCommon.putLightProjectiveRange(program, light.getRange());
+      light.lightGetFalloff());
+    KShadingProgramCommon.putLightProjectiveRange(program, light.lightGetRange());
 
     final OptionType<KShadowType> ls = light.lightGetShadow();
     ls
@@ -807,7 +808,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
                 }
               });
           } catch (final JCGLException e) {
-            throw RException.fromJCGLException(e);
+            throw RExceptionJCGL.fromJCGLException(e);
           }
         }
       });
@@ -860,7 +861,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
                 }
               });
           } catch (final JCGLException e) {
-            throw RException.fromJCGLException(e);
+            throw RExceptionJCGL.fromJCGLException(e);
           }
         }
       });
@@ -877,15 +878,15 @@ import com.io7m.renderer.types.RVectorReadable4FType;
       program,
       context,
       view,
-      light.getPosition());
+      light.lightGetPosition());
 
-    final RVectorI3F<RSpaceRGBType> colour = light.lightGetColour();
+    final RVectorI3F<RSpaceRGBType> colour = light.lightGetColor();
     KShadingProgramCommon.putLightSphericalColour(program, colour);
     final float intensity = light.lightGetIntensity();
     KShadingProgramCommon.putLightSphericalIntensity(program, intensity);
-    final float radius = light.getRadius();
+    final float radius = light.lightGetRadius();
     KShadingProgramCommon.putLightSphericalRange(program, radius);
-    final float falloff = light.getFalloff();
+    final float falloff = light.lightGetFalloff();
     KShadingProgramCommon.putLightSphericalFalloff(program, falloff);
   }
 

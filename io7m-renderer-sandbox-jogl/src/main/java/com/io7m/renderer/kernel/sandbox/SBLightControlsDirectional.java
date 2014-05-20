@@ -25,6 +25,7 @@ import net.java.dev.designgridlayout.RowGroup;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.sandbox.SBException.SBExceptionInputError;
 import com.io7m.renderer.kernel.types.KLightDirectional;
+import com.io7m.renderer.kernel.types.KLightDirectionalBuilderType;
 import com.io7m.renderer.types.RSpaceWorldType;
 
 public final class SBLightControlsDirectional implements
@@ -111,19 +112,18 @@ public final class SBLightControlsDirectional implements
     final SBLightDescriptionDirectional d)
   {
     final KLightDirectional l = d.getLight();
-    this.colour.controlsLoadFrom(l.lightGetColour());
+    this.colour.controlsLoadFrom(l.lightGetColor());
     this.intensity.setCurrent(l.lightGetIntensity());
-    this.direction.setVector(l.getDirection());
+    this.direction.setVector(l.lightGetDirection());
   }
 
   @Override public SBLightDescriptionDirectional controlsSave()
     throws SBExceptionInputError
   {
-    return new SBLightDescriptionDirectional(
-      this.id,
-      KLightDirectional.newDirectional(
-        this.direction.getVector(),
-        this.colour.controlsSave(),
-        this.intensity.getCurrent()));
+    final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
+    b.setColor(this.colour.controlsSave());
+    b.setDirection(this.direction.getVector());
+    b.setIntensity(this.intensity.getCurrent());
+    return new SBLightDescriptionDirectional(this.id, b.build());
   }
 }

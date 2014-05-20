@@ -49,6 +49,7 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 @EqualityReference abstract class KFramebufferDepth implements
   KFramebufferDepthType
@@ -158,7 +159,7 @@ import com.io7m.renderer.types.RException;
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.depth);
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -332,7 +333,7 @@ import com.io7m.renderer.types.RException;
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.depth);
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -466,7 +467,7 @@ import com.io7m.renderer.types.RException;
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.depth);
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -613,7 +614,7 @@ import com.io7m.renderer.types.RException;
         gc.renderbufferDelete(this.renderbuffer);
         gc.texture2DStaticDelete(this.depth);
       } catch (final JCGLException e) {
-        throw RException.fromJCGLException(e);
+        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -695,7 +696,7 @@ import com.io7m.renderer.types.RException;
           }
         });
     } catch (final JCGLException e) {
-      throw RException.fromJCGLException(e);
+      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 

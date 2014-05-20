@@ -24,8 +24,8 @@ import com.io7m.renderer.kernel.examples.ExampleSceneType;
 import com.io7m.renderer.kernel.examples.ExampleSceneUtilities;
 import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KInstanceTransformedOpaqueRegular;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.types.RException;
@@ -68,27 +68,27 @@ public final class SLEmpty1 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_SCALE,
         new RVectorI3F<RSpaceWorldType>(5.0f, 0.0f, 0.0f));
 
-    final KInstanceTransformedOpaqueRegular i0 =
-      KInstanceTransformedOpaqueRegular.newInstance(
-        KInstanceOpaqueRegular.newInstance(
+    final KInstanceOpaqueRegular i0 =
+      KInstanceOpaqueRegular.newInstance(
+        KMeshWithMaterialOpaqueRegular.newInstance(
           ExampleSceneUtilities.OPAQUE_MATTE_BLUE,
           scene.mesh("plane2x2_PN.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
         left,
         ExampleSceneUtilities.IDENTITY_UV);
 
-    final KInstanceTransformedOpaqueRegular i1 =
-      KInstanceTransformedOpaqueRegular.newInstance(
-        KInstanceOpaqueRegular.newInstance(
+    final KInstanceOpaqueRegular i1 =
+      KInstanceOpaqueRegular.newInstance(
+        KMeshWithMaterialOpaqueRegular.newInstance(
           ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
           scene.mesh("plane2x2_PN.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
         ExampleSceneUtilities.IDENTITY_UV);
 
-    final KInstanceTransformedOpaqueRegular i2 =
-      KInstanceTransformedOpaqueRegular.newInstance(
-        KInstanceOpaqueRegular.newInstance(
+    final KInstanceOpaqueRegular i2 =
+      KInstanceOpaqueRegular.newInstance(
+        KMeshWithMaterialOpaqueRegular.newInstance(
           ExampleSceneUtilities.OPAQUE_MATTE_RED,
           scene.mesh("plane2x2_PN.rmx"),
           KFaceSelection.FACE_RENDER_FRONT),

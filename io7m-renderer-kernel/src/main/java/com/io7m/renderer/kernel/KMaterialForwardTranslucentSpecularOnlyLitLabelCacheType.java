@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.renderer.kernel.types.KInstanceTranslucentSpecularOnly;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentSpecularOnlyLitLabel;
 
@@ -25,5 +25,5 @@ interface KMaterialForwardTranslucentSpecularOnlyLitLabelCacheType
     KMaterialForwardTranslucentSpecularOnlyLitLabel
     getForwardLabelTranslucentSpecularOnlyLit(
       final KLightType light,
-      final KInstanceTranslucentSpecularOnly instance);
+      final KMeshWithMaterialTranslucentSpecularOnly instance);
 }

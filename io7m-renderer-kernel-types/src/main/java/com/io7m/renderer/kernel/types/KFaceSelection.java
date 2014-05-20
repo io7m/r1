@@ -23,16 +23,16 @@ package com.io7m.renderer.kernel.types;
 public enum KFaceSelection
 {
   /**
-   * Render only front faces.
-   */
-
-  FACE_RENDER_FRONT,
-
-  /**
    * Render only back faces.
    */
 
   FACE_RENDER_BACK,
+
+  /**
+   * Render only front faces.
+   */
+
+  FACE_RENDER_FRONT,
 
   /**
    * Render front and back faces.

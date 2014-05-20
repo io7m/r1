@@ -29,11 +29,11 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
-import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
-import com.io7m.renderer.kernel.types.KInstanceRegularType;
-import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
-import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
-import com.io7m.renderer.kernel.types.KInstanceTranslucentSpecularOnly;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueType;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialRegularType;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRefractive;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KInstanceType;
 import com.io7m.renderer.kernel.types.KLightLabel;
 import com.io7m.renderer.kernel.types.KLightType;
@@ -81,24 +81,24 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
     return new KLabelDecider(capabilities, config);
   }
 
-  private final LRUCacheType<KInstanceRegularType, KMaterialAlbedoLabel, UnreachableCodeException>                                     albedo_cache;
-  private final LRUCacheType<KInstanceTranslucentRegular, KMaterialAlphaOpacityType, UnreachableCodeException>                         alpha_regular_cache;
-  private final LRUCacheType<KInstanceTranslucentSpecularOnly, KMaterialAlphaOpacityType, UnreachableCodeException>                    alpha_specular_only_cache;
+  private final LRUCacheType<KMeshWithMaterialRegularType, KMaterialAlbedoLabel, UnreachableCodeException>                                     albedo_cache;
+  private final LRUCacheType<KMeshWithMaterialTranslucentRegular, KMaterialAlphaOpacityType, UnreachableCodeException>                         alpha_regular_cache;
+  private final LRUCacheType<KMeshWithMaterialTranslucentSpecularOnly, KMaterialAlphaOpacityType, UnreachableCodeException>                    alpha_specular_only_cache;
   private final LRUCacheConfig                                                                                                         cache_config;
   private final KGraphicsCapabilitiesType                                                                                              capabilities;
-  private final LRUCacheType<KInstanceOpaqueType, KMaterialDepthLabel, UnreachableCodeException>                                       depth_cache;
-  private final LRUCacheType<KInstanceRegularType, KMaterialEmissiveLabel, UnreachableCodeException>                                   emissive_cache;
-  private final LRUCacheType<KInstanceRegularType, KMaterialEnvironmentLabel, UnreachableCodeException>                                environment_cache;
-  private final LRUCacheType<KInstanceOpaqueType, KMaterialForwardOpaqueUnlitLabel, UnreachableCodeException>                          forward_opaque_unlit_cache;
-  private final LRUCacheType<KInstanceRegularType, KMaterialForwardRegularLabel, UnreachableCodeException>                             forward_regular_cache;
-  private final LRUCacheType<KInstanceTranslucentRefractive, KMaterialForwardTranslucentRefractiveLabel, UnreachableCodeException>     forward_translucent_refractive_cache;
-  private final LRUCacheType<KInstanceTranslucentRegular, KMaterialForwardTranslucentRegularUnlitLabel, UnreachableCodeException>      forward_translucent_regular_unlit_cache;
-  private final LRUCacheType<KInstanceTranslucentSpecularOnly, KMaterialForwardTranslucentSpecularOnlyLabel, UnreachableCodeException> forward_translucent_specular_only_cache;
+  private final LRUCacheType<KMeshWithMaterialOpaqueType, KMaterialDepthLabel, UnreachableCodeException>                                       depth_cache;
+  private final LRUCacheType<KMeshWithMaterialRegularType, KMaterialEmissiveLabel, UnreachableCodeException>                                   emissive_cache;
+  private final LRUCacheType<KMeshWithMaterialRegularType, KMaterialEnvironmentLabel, UnreachableCodeException>                                environment_cache;
+  private final LRUCacheType<KMeshWithMaterialOpaqueType, KMaterialForwardOpaqueUnlitLabel, UnreachableCodeException>                          forward_opaque_unlit_cache;
+  private final LRUCacheType<KMeshWithMaterialRegularType, KMaterialForwardRegularLabel, UnreachableCodeException>                             forward_regular_cache;
+  private final LRUCacheType<KMeshWithMaterialTranslucentRefractive, KMaterialForwardTranslucentRefractiveLabel, UnreachableCodeException>     forward_translucent_refractive_cache;
+  private final LRUCacheType<KMeshWithMaterialTranslucentRegular, KMaterialForwardTranslucentRegularUnlitLabel, UnreachableCodeException>      forward_translucent_regular_unlit_cache;
+  private final LRUCacheType<KMeshWithMaterialTranslucentSpecularOnly, KMaterialForwardTranslucentSpecularOnlyLabel, UnreachableCodeException> forward_translucent_specular_only_cache;
   private final LRUCacheType<KLightType, KLightLabel, UnreachableCodeException>                                                        light_cache;
   private final LRUCacheType<KInstanceType, KMaterialNormalLabel, UnreachableCodeException>                                            normal_cache;
-  private final LRUCacheType<KInstanceTranslucentRefractive, KMaterialRefractiveLabel, UnreachableCodeException>                       refractive_cache;
-  private final LRUCacheType<KInstanceTranslucentSpecularOnly, KMaterialSpecularLabel, UnreachableCodeException>                       specular_only_cache;
-  private final LRUCacheType<KInstanceRegularType, KMaterialSpecularLabel, UnreachableCodeException>                                   specular_regular_cache;
+  private final LRUCacheType<KMeshWithMaterialTranslucentRefractive, KMaterialRefractiveLabel, UnreachableCodeException>                       refractive_cache;
+  private final LRUCacheType<KMeshWithMaterialTranslucentSpecularOnly, KMaterialSpecularLabel, UnreachableCodeException>                       specular_only_cache;
+  private final LRUCacheType<KMeshWithMaterialRegularType, KMaterialSpecularLabel, UnreachableCodeException>                                   specular_regular_cache;
 
   private KLabelDecider(
     final KGraphicsCapabilities in_capabilities,
@@ -129,7 +129,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   @Override public KMaterialAlbedoLabel getAlbedoLabelRegular(
-    final KInstanceRegularType instance)
+    final KMeshWithMaterialRegularType instance)
   {
     try {
       return this.albedo_cache.cacheGetLU(instance);
@@ -139,7 +139,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   @Override public KMaterialAlphaOpacityType getAlphaLabelTranslucentRegular(
-    final KInstanceTranslucentRegular instance)
+    final KMeshWithMaterialTranslucentRegular instance)
   {
     try {
       return this.alpha_regular_cache.cacheGetLU(instance);
@@ -149,7 +149,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private KMaterialAlphaOpacityType getAlphaLabelTranslucentSpecularOnly(
-    final KInstanceTranslucentSpecularOnly instance)
+    final KMeshWithMaterialTranslucentSpecularOnly instance)
   {
     try {
       return this.alpha_specular_only_cache.cacheGetLU(instance);
@@ -159,7 +159,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   @Override public KMaterialDepthLabel getDepthLabel(
-    final KInstanceOpaqueType instance)
+    final KMeshWithMaterialOpaqueType instance)
   {
     try {
       return this.depth_cache.cacheGetLU(instance);
@@ -169,7 +169,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   @Override public KMaterialEmissiveLabel getEmissiveLabelRegular(
-    final KInstanceRegularType instance)
+    final KMeshWithMaterialRegularType instance)
   {
     try {
       return this.emissive_cache.cacheGetLU(instance);
@@ -179,7 +179,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   @Override public KMaterialEnvironmentLabel getEnvironmentLabelRegular(
-    final KInstanceRegularType instance)
+    final KMeshWithMaterialRegularType instance)
   {
     try {
       return this.environment_cache.cacheGetLU(instance);
@@ -190,7 +190,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
 
   @Override public KMaterialForwardOpaqueLitLabel getForwardLabelOpaqueLit(
     final KLightType light,
-    final KInstanceOpaqueType instance)
+    final KMeshWithMaterialOpaqueType instance)
   {
     return KMaterialForwardOpaqueLitLabel.newLabel(
       this.getLightLabel(light),
@@ -200,7 +200,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   @Override public
     KMaterialForwardOpaqueUnlitLabel
     getForwardLabelOpaqueUnlit(
-      final KInstanceOpaqueType instance)
+      final KMeshWithMaterialOpaqueType instance)
   {
     try {
       return this.forward_opaque_unlit_cache.cacheGetLU(instance);
@@ -210,7 +210,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   @Override public KMaterialForwardRegularLabel getForwardLabelRegular(
-    final KInstanceRegularType instance)
+    final KMeshWithMaterialRegularType instance)
   {
     try {
       return this.forward_regular_cache.cacheGetLU(instance);
@@ -222,7 +222,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   private
     KMaterialForwardTranslucentSpecularOnlyLabel
     getForwardLabelSpecularOnly(
-      final KInstanceTranslucentSpecularOnly instance)
+      final KMeshWithMaterialTranslucentSpecularOnly instance)
   {
     try {
       return this.forward_translucent_specular_only_cache
@@ -235,7 +235,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   @Override public
     KMaterialForwardTranslucentRefractiveLabel
     getForwardLabelTranslucentRefractive(
-      final KInstanceTranslucentRefractive instance)
+      final KMeshWithMaterialTranslucentRefractive instance)
   {
     try {
       return this.forward_translucent_refractive_cache.cacheGetLU(instance);
@@ -248,7 +248,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
     KMaterialForwardTranslucentRegularLitLabel
     getForwardLabelTranslucentRegularLit(
       final KLightType light,
-      final KInstanceTranslucentRegular instance)
+      final KMeshWithMaterialTranslucentRegular instance)
   {
     return KMaterialForwardTranslucentRegularLitLabel.newLabel(
       this.getLightLabel(light),
@@ -259,7 +259,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   @Override public
     KMaterialForwardTranslucentRegularUnlitLabel
     getForwardLabelTranslucentRegularUnlit(
-      final KInstanceTranslucentRegular instance)
+      final KMeshWithMaterialTranslucentRegular instance)
   {
     try {
       return this.forward_translucent_regular_unlit_cache
@@ -273,7 +273,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
     KMaterialForwardTranslucentSpecularOnlyLitLabel
     getForwardLabelTranslucentSpecularOnlyLit(
       final KLightType light,
-      final KInstanceTranslucentSpecularOnly instance)
+      final KMeshWithMaterialTranslucentSpecularOnly instance)
   {
     return KMaterialForwardTranslucentSpecularOnlyLitLabel.newLabel(
       this.getLightLabel(light),
@@ -302,7 +302,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   @Override public KMaterialRefractiveLabel getRefractiveLabel(
-    final KInstanceTranslucentRefractive instance)
+    final KMeshWithMaterialTranslucentRefractive instance)
   {
     try {
       return this.refractive_cache.cacheGetLU(instance);
@@ -338,7 +338,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   @Override public KMaterialSpecularLabel getSpecularLabelRegular(
-    final KInstanceRegularType instance)
+    final KMeshWithMaterialRegularType instance)
   {
     try {
       return this.specular_regular_cache.cacheGetLU(instance);
@@ -348,12 +348,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheTrivial<KInstanceRegularType, KMaterialAlbedoLabel, UnreachableCodeException>
+    LRUCacheTrivial<KMeshWithMaterialRegularType, KMaterialAlbedoLabel, UnreachableCodeException>
     newAlbedoCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceRegularType, KMaterialAlbedoLabel, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialRegularType, KMaterialAlbedoLabel, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialAlbedoLabel v)
           {
@@ -361,9 +361,9 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           }
 
           @Override public KMaterialAlbedoLabel cacheValueLoad(
-            final KInstanceRegularType instance)
+            final KMeshWithMaterialRegularType instance)
           {
-            return KMaterialAlbedoLabel.fromInstanceRegular(instance);
+            return KMaterialAlbedoLabel.fromMeshAndMaterialRegular(instance);
           }
 
           @Override public BigInteger cacheValueSizeOf(
@@ -378,12 +378,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheTrivial<KInstanceTranslucentRegular, KMaterialAlphaOpacityType, UnreachableCodeException>
+    LRUCacheTrivial<KMeshWithMaterialTranslucentRegular, KMaterialAlphaOpacityType, UnreachableCodeException>
     newAlphaRegularCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceTranslucentRegular, KMaterialAlphaOpacityType, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialTranslucentRegular, KMaterialAlphaOpacityType, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialAlphaOpacityType v)
           {
@@ -391,12 +391,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           }
 
           @Override public KMaterialAlphaOpacityType cacheValueLoad(
-            final KInstanceTranslucentRegular instance)
+            final KMeshWithMaterialTranslucentRegular instance)
           {
             try {
               final KMaterialNormalLabel normal =
                 KLabelDecider.this.normal_cache.cacheGetLU(instance);
-              return KMaterialAlphaOpacityType.fromInstanceRegular(
+              return KMaterialAlphaOpacityType.fromMeshAndMaterialRegular(
                 normal,
                 instance);
             } catch (final JCacheException x) {
@@ -415,12 +415,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheType<KInstanceTranslucentSpecularOnly, KMaterialAlphaOpacityType, UnreachableCodeException>
+    LRUCacheType<KMeshWithMaterialTranslucentSpecularOnly, KMaterialAlphaOpacityType, UnreachableCodeException>
     newAlphaSpecularOnlyCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceTranslucentSpecularOnly, KMaterialAlphaOpacityType, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialTranslucentSpecularOnly, KMaterialAlphaOpacityType, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialAlphaOpacityType v)
           {
@@ -428,12 +428,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           }
 
           @Override public KMaterialAlphaOpacityType cacheValueLoad(
-            final KInstanceTranslucentSpecularOnly instance)
+            final KMeshWithMaterialTranslucentSpecularOnly instance)
           {
             try {
               final KMaterialNormalLabel normal =
                 KLabelDecider.this.normal_cache.cacheGetLU(instance);
-              return KMaterialAlphaOpacityType.fromInstanceSpecularOnly(
+              return KMaterialAlphaOpacityType.fromMeshAndMaterialSpecularOnly(
                 normal,
                 instance);
             } catch (final JCacheException x) {
@@ -452,12 +452,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheTrivial<KInstanceOpaqueType, KMaterialDepthLabel, UnreachableCodeException>
+    LRUCacheTrivial<KMeshWithMaterialOpaqueType, KMaterialDepthLabel, UnreachableCodeException>
     newDepthCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceOpaqueType, KMaterialDepthLabel, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialOpaqueType, KMaterialDepthLabel, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialDepthLabel v)
           {
@@ -465,12 +465,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           }
 
           @Override public KMaterialDepthLabel cacheValueLoad(
-            final KInstanceOpaqueType instance)
+            final KMeshWithMaterialOpaqueType instance)
           {
             try {
               final KMaterialAlbedoLabel albedo =
                 KLabelDecider.this.albedo_cache.cacheGetLU(instance);
-              return KMaterialDepthLabel.fromInstanceOpaque(albedo, instance);
+              return KMaterialDepthLabel.fromMeshAndMaterialOpaque(albedo, instance);
             } catch (final JCacheException e) {
               throw new UnreachableCodeException(e);
             }
@@ -488,12 +488,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheTrivial<KInstanceRegularType, KMaterialEmissiveLabel, UnreachableCodeException>
+    LRUCacheTrivial<KMeshWithMaterialRegularType, KMaterialEmissiveLabel, UnreachableCodeException>
     newEmissiveCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceRegularType, KMaterialEmissiveLabel, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialRegularType, KMaterialEmissiveLabel, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialEmissiveLabel v)
           {
@@ -501,7 +501,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           }
 
           @Override public KMaterialEmissiveLabel cacheValueLoad(
-            final KInstanceRegularType instance)
+            final KMeshWithMaterialRegularType instance)
           {
             return KMaterialEmissiveLabel.fromInstanceRegular(instance);
           }
@@ -518,12 +518,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheTrivial<KInstanceRegularType, KMaterialEnvironmentLabel, UnreachableCodeException>
+    LRUCacheTrivial<KMeshWithMaterialRegularType, KMaterialEnvironmentLabel, UnreachableCodeException>
     newEnvironmentCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceRegularType, KMaterialEnvironmentLabel, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialRegularType, KMaterialEnvironmentLabel, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialEnvironmentLabel v)
           {
@@ -531,10 +531,10 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           }
 
           @Override public KMaterialEnvironmentLabel cacheValueLoad(
-            final KInstanceRegularType instance)
+            final KMeshWithMaterialRegularType instance)
           {
             try {
-              return KMaterialEnvironmentLabel.fromInstanceRegular(
+              return KMaterialEnvironmentLabel.fromMeshAndMaterialRegular(
                 KLabelDecider.this.normal_cache.cacheGetLU(instance),
                 instance);
             } catch (final JCacheException x) {
@@ -553,12 +553,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheTrivial<KInstanceOpaqueType, KMaterialForwardOpaqueUnlitLabel, UnreachableCodeException>
+    LRUCacheTrivial<KMeshWithMaterialOpaqueType, KMaterialForwardOpaqueUnlitLabel, UnreachableCodeException>
     newForwardOpaqueUnlitCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceOpaqueType, KMaterialForwardOpaqueUnlitLabel, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialOpaqueType, KMaterialForwardOpaqueUnlitLabel, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialForwardOpaqueUnlitLabel v)
           {
@@ -566,7 +566,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           }
 
           @Override public KMaterialForwardOpaqueUnlitLabel cacheValueLoad(
-            final KInstanceOpaqueType instance)
+            final KMeshWithMaterialOpaqueType instance)
           {
             try {
               final KMaterialAlbedoLabel albedo =
@@ -595,12 +595,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheTrivial<KInstanceRegularType, KMaterialForwardRegularLabel, UnreachableCodeException>
+    LRUCacheTrivial<KMeshWithMaterialRegularType, KMaterialForwardRegularLabel, UnreachableCodeException>
     newForwardRegularCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceRegularType, KMaterialForwardRegularLabel, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialRegularType, KMaterialForwardRegularLabel, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialForwardRegularLabel v)
           {
@@ -608,7 +608,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           }
 
           @Override public KMaterialForwardRegularLabel cacheValueLoad(
-            final KInstanceRegularType instance)
+            final KMeshWithMaterialRegularType instance)
           {
             try {
               final KMaterialAlbedoLabel albedo =
@@ -691,7 +691,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           @Override public KMaterialNormalLabel cacheValueLoad(
             final KInstanceType instance)
           {
-            return KMaterialNormalLabel.fromInstance(instance);
+            return KMaterialNormalLabel.fromMeshAndMaterial(instance);
           }
 
           @Override public BigInteger cacheValueSizeOf(
@@ -706,12 +706,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheTrivial<KInstanceTranslucentRefractive, KMaterialRefractiveLabel, UnreachableCodeException>
+    LRUCacheTrivial<KMeshWithMaterialTranslucentRefractive, KMaterialRefractiveLabel, UnreachableCodeException>
     newRefractiveCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceTranslucentRefractive, KMaterialRefractiveLabel, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialTranslucentRefractive, KMaterialRefractiveLabel, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialRefractiveLabel v)
           {
@@ -719,9 +719,9 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           }
 
           @Override public KMaterialRefractiveLabel cacheValueLoad(
-            final KInstanceTranslucentRefractive instance)
+            final KMeshWithMaterialTranslucentRefractive instance)
           {
-            return KMaterialRefractiveLabel.fromInstance(instance);
+            return KMaterialRefractiveLabel.fromMeshAndMaterial(instance);
           }
 
           @Override public BigInteger cacheValueSizeOf(
@@ -736,12 +736,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheTrivial<KInstanceRegularType, KMaterialSpecularLabel, UnreachableCodeException>
+    LRUCacheTrivial<KMeshWithMaterialRegularType, KMaterialSpecularLabel, UnreachableCodeException>
     newSpecularCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceRegularType, KMaterialSpecularLabel, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialRegularType, KMaterialSpecularLabel, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialSpecularLabel v)
           {
@@ -749,10 +749,10 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           }
 
           @Override public KMaterialSpecularLabel cacheValueLoad(
-            final KInstanceRegularType instance)
+            final KMeshWithMaterialRegularType instance)
           {
             try {
-              return KMaterialSpecularLabel.fromInstanceRegular(
+              return KMaterialSpecularLabel.fromMeshAndMaterialRegular(
                 KLabelDecider.this.normal_cache.cacheGetLU(instance),
                 instance);
             } catch (final JCacheException x) {
@@ -771,12 +771,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheType<KInstanceTranslucentSpecularOnly, KMaterialSpecularLabel, UnreachableCodeException>
+    LRUCacheType<KMeshWithMaterialTranslucentSpecularOnly, KMaterialSpecularLabel, UnreachableCodeException>
     newSpecularOnlyCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceTranslucentSpecularOnly, KMaterialSpecularLabel, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialTranslucentSpecularOnly, KMaterialSpecularLabel, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialSpecularLabel v)
           {
@@ -784,10 +784,10 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           }
 
           @Override public KMaterialSpecularLabel cacheValueLoad(
-            final KInstanceTranslucentSpecularOnly instance)
+            final KMeshWithMaterialTranslucentSpecularOnly instance)
           {
             try {
-              return KMaterialSpecularLabel.fromInstanceSpecularOnly(
+              return KMaterialSpecularLabel.fromMeshAndMaterialSpecularOnly(
                 KLabelDecider.this.normal_cache.cacheGetLU(instance),
                 instance);
             } catch (final JCacheException x) {
@@ -806,12 +806,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheTrivial<KInstanceTranslucentRefractive, KMaterialForwardTranslucentRefractiveLabel, UnreachableCodeException>
+    LRUCacheTrivial<KMeshWithMaterialTranslucentRefractive, KMaterialForwardTranslucentRefractiveLabel, UnreachableCodeException>
     newTranslucentRefractiveCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceTranslucentRefractive, KMaterialForwardTranslucentRefractiveLabel, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialTranslucentRefractive, KMaterialForwardTranslucentRefractiveLabel, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialForwardTranslucentRefractiveLabel v)
           {
@@ -821,7 +821,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           @Override public
             KMaterialForwardTranslucentRefractiveLabel
             cacheValueLoad(
-              final KInstanceTranslucentRefractive instance)
+              final KMeshWithMaterialTranslucentRefractive instance)
           {
             try {
               final KMaterialNormalLabel normal =
@@ -848,12 +848,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheTrivial<KInstanceTranslucentRegular, KMaterialForwardTranslucentRegularUnlitLabel, UnreachableCodeException>
+    LRUCacheTrivial<KMeshWithMaterialTranslucentRegular, KMaterialForwardTranslucentRegularUnlitLabel, UnreachableCodeException>
     newTranslucentRegularUnlitCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceTranslucentRegular, KMaterialForwardTranslucentRegularUnlitLabel, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialTranslucentRegular, KMaterialForwardTranslucentRegularUnlitLabel, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialForwardTranslucentRegularUnlitLabel v)
           {
@@ -863,7 +863,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           @Override public
             KMaterialForwardTranslucentRegularUnlitLabel
             cacheValueLoad(
-              final KInstanceTranslucentRegular instance)
+              final KMeshWithMaterialTranslucentRegular instance)
           {
             try {
               final KMaterialAlbedoLabel albedo =
@@ -896,12 +896,12 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
   }
 
   private
-    LRUCacheType<KInstanceTranslucentSpecularOnly, KMaterialForwardTranslucentSpecularOnlyLabel, UnreachableCodeException>
+    LRUCacheType<KMeshWithMaterialTranslucentSpecularOnly, KMaterialForwardTranslucentSpecularOnlyLabel, UnreachableCodeException>
     newTranslucentSpecularOnlyCache()
   {
     return LRUCacheTrivial
       .newCache(
-        new JCacheLoaderType<KInstanceTranslucentSpecularOnly, KMaterialForwardTranslucentSpecularOnlyLabel, UnreachableCodeException>() {
+        new JCacheLoaderType<KMeshWithMaterialTranslucentSpecularOnly, KMaterialForwardTranslucentSpecularOnlyLabel, UnreachableCodeException>() {
           @Override public void cacheValueClose(
             final KMaterialForwardTranslucentSpecularOnlyLabel v)
           {
@@ -911,7 +911,7 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularLabel;
           @Override public
             KMaterialForwardTranslucentSpecularOnlyLabel
             cacheValueLoad(
-              final KInstanceTranslucentSpecularOnly instance)
+              final KMeshWithMaterialTranslucentSpecularOnly instance)
           {
             try {
               final KMaterialNormalLabel normal =

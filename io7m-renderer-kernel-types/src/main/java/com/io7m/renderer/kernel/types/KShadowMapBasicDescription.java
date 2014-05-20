@@ -32,8 +32,6 @@ import com.io7m.renderer.types.RException;
   /**
    * Create a new description of a shadow map.
    * 
-   * @param in_light_id
-   *          The light associated with the shadow map
    * @param in_description
    *          The description of the depth framebuffer
    * @param in_size_exponent
@@ -42,26 +40,19 @@ import com.io7m.renderer.types.RException;
    */
 
   public static KShadowMapBasicDescription newDescription(
-    final Integer in_light_id,
     final KFramebufferDepthDescription in_description,
     final int in_size_exponent)
   {
-    return new KShadowMapBasicDescription(
-      in_light_id,
-      in_description,
-      in_size_exponent);
+    return new KShadowMapBasicDescription(in_description, in_size_exponent);
   }
 
   private final KFramebufferDepthDescription description;
-  private final Integer                      light_id;
   private final int                          size_exponent;
 
   private KShadowMapBasicDescription(
-    final Integer in_light_id,
     final KFramebufferDepthDescription in_description,
     final int in_size_exponent)
   {
-    this.light_id = NullCheck.notNull(in_light_id, "Light ID");
     this.size_exponent =
       (int) RangeCheck.checkIncludedIn(
         in_size_exponent,
@@ -87,9 +78,6 @@ import com.io7m.renderer.types.RException;
     if (!this.description.equals(other.description)) {
       return false;
     }
-    if (!this.light_id.equals(other.light_id)) {
-      return false;
-    }
     if (this.size_exponent != other.size_exponent) {
       return false;
     }
@@ -110,7 +98,6 @@ import com.io7m.renderer.types.RException;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.description.hashCode();
-    result = (prime * result) + this.light_id.hashCode();
     result = (prime * result) + this.size_exponent;
     return result;
   }
@@ -124,11 +111,6 @@ import com.io7m.renderer.types.RException;
         E
   {
     return v.shadowMapDescriptionBasic(this);
-  }
-
-  @Override public Integer mapGetLightID()
-  {
-    return this.light_id;
   }
 
   @Override public int mapGetSizeExponent()

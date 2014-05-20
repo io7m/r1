@@ -16,12 +16,9 @@
 
 package com.io7m.renderer.kernel.types;
 
-import java.util.Map;
-
-import com.io7m.jcanephora.ArrayAttributeDescriptor;
-import com.io7m.jcanephora.ArrayBufferUsableType;
-import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
@@ -53,88 +50,95 @@ public enum KMaterialNormalLabel
 
   NORMAL_VERTEX("NV", 0);
 
-  private static boolean canNormalMap(
-    final ArrayBufferUsableType a,
+  private static KMaterialNormalLabel fromData(
+    final KMeshReadableType mesh,
     final KMaterialNormal normal)
   {
-    final ArrayDescriptor d = a.arrayGetDescriptor();
-    final Map<String, ArrayAttributeDescriptor> da = d.getAttributes();
-
-    if (da.containsKey(KMeshAttributes.ATTRIBUTE_UV.getName())) {
-      if (da.containsKey(KMeshAttributes.ATTRIBUTE_TANGENT4.getName())) {
+    if (mesh.meshHasNormals()) {
+      if (mesh.meshHasUVs() && mesh.meshHasTangents()) {
         if (normal.getTexture().isSome()) {
-          return true;
+          return KMaterialNormalLabel.NORMAL_MAPPED;
         }
       }
+      return KMaterialNormalLabel.NORMAL_VERTEX;
     }
-    return false;
+
+    return KMaterialNormalLabel.NORMAL_NONE;
   }
 
   /**
-   * Derive a normal label for the given instance.
+   * Derive a normal label for the given mesh and material.
    * 
-   * @param instance
-   *          The instance
+   * @param mwm
+   *          The mesh and material
    * @return A normal label
    */
 
   @SuppressWarnings("synthetic-access") public static
     KMaterialNormalLabel
-    fromInstance(
-      final KInstanceType instance)
+    fromMeshAndMaterial(
+      final KMeshWithMaterialType mwm)
   {
-    NullCheck.notNull(instance, "Instance");
+    NullCheck.notNull(mwm, "Mesh");
 
-    final KMeshReadableType mesh = instance.instanceGetMesh();
-    final ArrayBufferUsableType a = mesh.getArrayBuffer();
+    final KMeshReadableType mesh = mwm.meshGetMesh();
 
     try {
-      return instance
-        .instanceAccept(new KInstanceVisitorType<KMaterialNormalLabel, UnreachableCodeException>() {
-          @Override public KMaterialNormalLabel instanceOpaqueAlphaDepth(
-            final KInstanceOpaqueAlphaDepth i)
+      return mwm
+        .meshWithMaterialAccept(new KMeshWithMaterialVisitorType<KMaterialNormalLabel, UnreachableCodeException>() {
+          @Override public
+            KMaterialNormalLabel
+            meshWithMaterialOpaqueAlphaDepth(
+              final KMeshWithMaterialOpaqueAlphaDepth i)
+              throws RException
           {
-            final KMaterialOpaqueType material = i.instanceGetMaterial();
+            final KMaterialOpaqueType material = i.meshGetMaterial();
             final KMaterialNormal normal = material.materialGetNormal();
-            return KMaterialNormalLabel.fromInstanceData(a, normal);
-          }
-
-          @Override public KMaterialNormalLabel instanceOpaqueRegular(
-            final KInstanceOpaqueRegular i)
-          {
-            final KMaterialOpaqueType material = i.instanceGetMaterial();
-            final KMaterialNormal normal = material.materialGetNormal();
-            return KMaterialNormalLabel.fromInstanceData(a, normal);
+            return KMaterialNormalLabel.fromData(mesh, normal);
           }
 
           @Override public
             KMaterialNormalLabel
-            instanceTranslucentRefractive(
-              final KInstanceTranslucentRefractive i)
+            meshWithMaterialOpaqueRegular(
+              final KMeshWithMaterialOpaqueRegular i)
+              throws RException
           {
-            final KMaterialTranslucentType material = i.instanceGetMaterial();
+            final KMaterialOpaqueType material = i.meshGetMaterial();
             final KMaterialNormal normal = material.materialGetNormal();
-            return KMaterialNormalLabel.fromInstanceData(a, normal);
-          }
-
-          @Override public KMaterialNormalLabel instanceTranslucentRegular(
-            final KInstanceTranslucentRegular i)
-          {
-            final KMaterialTranslucentType material = i.instanceGetMaterial();
-            final KMaterialNormal normal = material.materialGetNormal();
-            return KMaterialNormalLabel.fromInstanceData(a, normal);
+            return KMaterialNormalLabel.fromData(mesh, normal);
           }
 
           @Override public
             KMaterialNormalLabel
-            instanceTranslucentSpecularOnly(
-              final KInstanceTranslucentSpecularOnly i)
-              throws RException,
-                JCGLException
+            meshWithMaterialTranslucentRefractive(
+              final KMeshWithMaterialTranslucentRefractive i)
+              throws RException
           {
-            final KMaterialTranslucentType material = i.instanceGetMaterial();
+            final KMaterialTranslucentType material = i.getMaterial();
             final KMaterialNormal normal = material.materialGetNormal();
-            return KMaterialNormalLabel.fromInstanceData(a, normal);
+            return KMaterialNormalLabel.fromData(mesh, normal);
+          }
+
+          @Override public
+            KMaterialNormalLabel
+            meshWithMaterialTranslucentRegular(
+              final KMeshWithMaterialTranslucentRegular i)
+              throws RException
+          {
+            final KMaterialTranslucentType material = i.meshGetMaterial();
+            final KMaterialNormal normal = material.materialGetNormal();
+            return KMaterialNormalLabel.fromData(mesh, normal);
+          }
+
+          @Override public
+            KMaterialNormalLabel
+            meshWithMaterialTranslucentSpecularOnly(
+              final KMeshWithMaterialTranslucentSpecularOnly i)
+              throws RException
+          {
+            final KMaterialTranslucentType material = i.getMaterial();
+            final KMaterialNormal normal = material.materialGetNormal();
+            return KMaterialNormalLabel.fromData(mesh, normal);
           }
         });
     } catch (final JCGLException e) {
@@ -144,20 +148,38 @@ public enum KMaterialNormalLabel
     }
   }
 
-  private static KMaterialNormalLabel fromInstanceData(
-    final ArrayBufferUsableType a,
-    final KMaterialNormal normal)
-  {
-    final ArrayDescriptor d = a.arrayGetDescriptor();
-    final Map<String, ArrayAttributeDescriptor> da = d.getAttributes();
+  /**
+   * Check whether two materials would derive the same label for an arbitrary
+   * mesh <code>m</code>.
+   * 
+   * @param ma
+   *          The first material
+   * @param mb
+   *          The second material
+   * @return <code>true</code> if applying <code>ma</code> to a mesh
+   *         <code>m</code> would yield the same label as applying
+   *         <code>mb</code> to <code>m</code>.
+   */
 
-    if (da.containsKey(KMeshAttributes.ATTRIBUTE_NORMAL.getName())) {
-      if (KMaterialNormalLabel.canNormalMap(a, normal)) {
-        return KMaterialNormalLabel.NORMAL_MAPPED;
-      }
-      return KMaterialNormalLabel.NORMAL_VERTEX;
+  public static boolean wouldDeriveSameLabel(
+    final KMaterialNormal ma,
+    final KMaterialNormal mb)
+  {
+    NullCheck.notNull(ma, "Material A");
+    NullCheck.notNull(mb, "Material B");
+
+    if (ma == mb) {
+      return true;
     }
-    return KMaterialNormalLabel.NORMAL_NONE;
+    final OptionType<Texture2DStaticUsableType> mat = ma.getTexture();
+    final OptionType<Texture2DStaticUsableType> mbt = mb.getTexture();
+    if (mat.isNone() && mbt.isNone()) {
+      return true;
+    }
+    if (mat.isSome() && mbt.isSome()) {
+      return true;
+    }
+    return false;
   }
 
   private final String code;
