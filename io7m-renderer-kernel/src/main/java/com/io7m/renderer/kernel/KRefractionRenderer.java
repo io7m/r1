@@ -28,7 +28,6 @@ import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
@@ -36,7 +35,6 @@ import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.PartialFunctionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.NullCheckException;
@@ -44,21 +42,26 @@ import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorReadable4FType;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
-import com.io7m.renderer.kernel.types.KMaterialForwardTranslucentRefractiveLabel;
+import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
+import com.io7m.renderer.kernel.types.KMaterialNormalVertex;
+import com.io7m.renderer.kernel.types.KMaterialNormalVisitorType;
+import com.io7m.renderer.kernel.types.KMaterialRefractiveMasked;
+import com.io7m.renderer.kernel.types.KMaterialRefractiveUnmasked;
+import com.io7m.renderer.kernel.types.KMaterialRefractiveVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.kernel.types.KMeshBoundsTriangles;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
-import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRefractive;
 import com.io7m.renderer.types.RCoordinates;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionCache;
+import com.io7m.renderer.types.RExceptionFramebufferNotBound;
 import com.io7m.renderer.types.RExceptionJCGL;
-import com.io7m.renderer.types.RExceptionUserError;
 import com.io7m.renderer.types.RMatrixReadable4x4FType;
 import com.io7m.renderer.types.RSpaceClipType;
 import com.io7m.renderer.types.RSpaceNDCType;
@@ -76,7 +79,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
  * The default implementation of the refraction renderer interface.
  */
 
-@EqualityReference public final class KRefractionRenderer implements
+@SuppressWarnings("synthetic-access") @EqualityReference public final class KRefractionRenderer implements
   KRefractionRendererType
 {
   private static final String               NAME;
@@ -314,8 +317,6 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    *          A bounds cache
    * @param bounds_tri_cache
    *          A triangle cache
-   * @param label_cache
-   *          A label cache
    * @return A new renderer
    * 
    * @throws RException
@@ -328,8 +329,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KShaderCacheType shader_cache,
     final KFramebufferForwardCacheType forward_cache,
     final KMeshBoundsCacheType<RSpaceObjectType> bounds_cache,
-    final KMeshBoundsTrianglesCacheType<RSpaceObjectType> bounds_tri_cache,
-    final KMaterialForwardTranslucentRefractiveLabelCacheType label_cache)
+    final KMeshBoundsTrianglesCacheType<RSpaceObjectType> bounds_tri_cache)
     throws RException
   {
     return new KRefractionRenderer(
@@ -338,37 +338,41 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       shader_cache,
       forward_cache,
       bounds_cache,
-      bounds_tri_cache,
-      label_cache);
+      bounds_tri_cache);
   }
 
   private static void putInstanceAttributes(
-    final KMaterialForwardTranslucentRefractiveLabel label,
+    final KMaterialTranslucentRefractive material,
     final ArrayBufferUsableType array,
     final JCBProgramType program)
-    throws JCGLException
+    throws JCGLException,
+      RException
   {
     KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
 
-    switch (label.labelGetNormal()) {
-      case NORMAL_MAPPED:
-      {
-        KShadingProgramCommon.bindAttributeTangent4(program, array);
-        KShadingProgramCommon.bindAttributeNormal(program, array);
-        break;
-      }
-      case NORMAL_VERTEX:
-      {
-        KShadingProgramCommon.bindAttributeNormal(program, array);
-        break;
-      }
-      case NORMAL_NONE:
-      {
-        break;
-      }
-    }
+    material.materialGetNormal().normalAccept(
+      new KMaterialNormalVisitorType<Unit, JCGLException>() {
+        @Override public Unit mapped(
+          final KMaterialNormalMapped m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.bindAttributeTangent4(program, array);
+          KShadingProgramCommon.bindAttributeNormal(program, array);
+          return Unit.unit();
+        }
 
-    if (label.labelImpliesUV()) {
+        @Override public Unit vertex(
+          final KMaterialNormalVertex m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.bindAttributeNormal(program, array);
+          return Unit.unit();
+        }
+      });
+
+    if (material.materialRequiresUVCoordinates()) {
       KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
     }
   }
@@ -376,36 +380,24 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   private static void putInstanceMatrices(
     final JCBProgramType program,
     final MatricesInstanceType mwi,
-    final KMaterialForwardTranslucentRefractiveLabel label)
+    final KMaterialTranslucentRefractive material)
     throws JCGLException
   {
     KShadingProgramCommon.putMatrixModelViewUnchecked(
       program,
       mwi.getMatrixModelView());
 
-    if (label.labelImpliesUV()) {
+    if (material.materialRequiresUVCoordinates()) {
       KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
     }
 
-    switch (label.labelGetNormal()) {
-      case NORMAL_MAPPED:
-      case NORMAL_VERTEX:
-      {
-        KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
-        break;
-      }
-      case NORMAL_NONE:
-      {
-        break;
-      }
-    }
+    KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
   }
 
   private static
     <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
     void
     putTextures(
-      final KMaterialForwardTranslucentRefractiveLabel label,
       final KMaterialTranslucentRefractive material,
       final KFramebufferRGBAUsableType scene,
       final JCBProgramType program,
@@ -413,27 +405,27 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       throws JCGLException,
         RException
   {
-    switch (label.labelGetNormal()) {
-      case NORMAL_MAPPED:
-      {
-        final Some<Texture2DStaticUsableType> some =
-          (Some<Texture2DStaticUsableType>) material
-            .materialGetNormal()
-            .getTexture();
-        KShadingProgramCommon.putTextureNormal(
-          program,
-          context.withTexture2D(some.get()));
-        break;
-      }
-      case NORMAL_VERTEX:
-      {
-        break;
-      }
-      case NORMAL_NONE:
-      {
-        break;
-      }
-    }
+    material.materialGetNormal().normalAccept(
+      new KMaterialNormalVisitorType<Unit, JCGLException>() {
+        @Override public Unit mapped(
+          final KMaterialNormalMapped m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putTextureNormal(
+            program,
+            context.withTexture2D(m.getTexture()));
+          return Unit.unit();
+        }
+
+        @Override public Unit vertex(
+          final KMaterialNormalVertex m)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+      });
 
     KShadingProgramCommon.putRefractionTextureScene(
       program,
@@ -449,7 +441,6 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KFramebufferForwardUsableType scene,
     final KFramebufferForwardUsableType temporary,
     final KInstanceTranslucentRefractive r,
-    final KMaterialForwardTranslucentRefractiveLabel label,
     final KMutableMatrices.MatricesInstanceType mi,
     final AreaInclusive window_bounds_area)
     throws RException,
@@ -486,7 +477,6 @@ import com.io7m.renderer.types.RVectorReadable3FType;
         mask,
         temporary,
         r,
-        label,
         mi,
         mesh);
 
@@ -502,7 +492,6 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KFramebufferForwardUsableType scene,
     final KFramebufferForwardUsableType temporary,
     final KInstanceTranslucentRefractive r,
-    final KMaterialForwardTranslucentRefractiveLabel label,
     final KMutableMatrices.MatricesInstanceType mi)
     throws JCGLException,
       RException,
@@ -515,7 +504,6 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       scene,
       temporary,
       r,
-      label,
       mi,
       r.instanceGetMesh());
   }
@@ -531,12 +519,12 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       JCacheException,
       JCGLException
   {
-    final KProgram kprogram = shader_cache.cacheGetLU("debug_ccolour");
+    final KProgram kprogram = shader_cache.cacheGetLU("debug_ccolor");
 
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     kprogram.getExecutable().execRun(
       new JCBExecutorProcedureType<RException>() {
-        @SuppressWarnings("synthetic-access") @Override public void call(
+        @Override public void call(
           final JCBProgramType program)
           throws JCGLException,
             RException
@@ -546,22 +534,14 @@ import com.io7m.renderer.types.RVectorReadable3FType;
               .kFramebufferGetColorFramebuffer());
 
             program.programUniformPutVector4f(
-              "f_ccolour",
+              "f_ccolor",
               KRefractionRenderer.WHITE);
 
             gc.blendingDisable();
 
-            final KMeshWithMaterialTranslucentRefractive instance =
-              r.getInstance();
             KRendererCommon.renderConfigureFaceCulling(
               gc,
-              instance.instanceGetFaces());
-
-            for (int index = 0; index < 10; ++index) {
-              KRendererCommon.renderConfigureFaceCulling(
-                gc,
-                instance.instanceGetFaces());
-            }
+              r.instanceGetFaceSelection());
 
             gc.colorBufferMask(true, true, true, true);
             gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 1.0f);
@@ -599,7 +579,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       });
   }
 
-  @SuppressWarnings("synthetic-access") private static
+  private static
     <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
     void
     rendererRefractionEvaluateRenderMasked(
@@ -610,17 +590,16 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       final KFramebufferRGBAUsableType scene_mask,
       final KFramebufferRGBAUsableType destination,
       final KInstanceTranslucentRefractive r,
-      final KMaterialForwardTranslucentRefractiveLabel label,
       final MatricesInstanceType mi,
       final KMeshReadableType mesh)
       throws JCGLException,
         RException,
         JCacheException
   {
-    final KMeshWithMaterialTranslucentRefractive instance = r.getInstance();
-    final KMaterialTranslucentRefractive material =
-      instance.meshGetMaterial();
-    final KProgram kprogram = shader_cache.cacheGetLU(label.labelGetCode());
+    final KMaterialTranslucentRefractive material = r.getMaterial();
+    final String shader_code =
+      KRefractionRenderer.shaderCodeFromMaterial(material);
+    final KProgram kprogram = shader_cache.cacheGetLU(shader_code);
 
     final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
     final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
@@ -641,7 +620,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 
             KRendererCommon.renderConfigureFaceCulling(
               gc,
-              instance.instanceGetFaces());
+              r.instanceGetFaceSelection());
 
             gc.colorBufferMask(true, true, true, true);
             gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
@@ -657,10 +636,10 @@ import com.io7m.renderer.types.RVectorReadable3FType;
                   program,
                   mi.getMatrixProjection());
 
-                KRefractionRenderer.putInstanceMatrices(program, mi, label);
+                KRefractionRenderer
+                  .putInstanceMatrices(program, mi, material);
 
                 KRefractionRenderer.putTextures(
-                  label,
                   material,
                   scene,
                   program,
@@ -671,13 +650,34 @@ import com.io7m.renderer.types.RVectorReadable3FType;
                   context.withTexture2D(scene_mask
                     .kFramebufferGetRGBATexture()));
 
-                KShadingProgramCommon.putMaterialRefractive(
-                  program,
-                  material.getRefractive());
+                material.getRefractive().refractiveAccept(
+                  new KMaterialRefractiveVisitorType<Unit, JCGLException>() {
+                    @Override public Unit masked(
+                      final KMaterialRefractiveMasked m)
+                      throws RException,
+                        JCGLException
+                    {
+                      KShadingProgramCommon.putMaterialRefractiveMasked(
+                        program,
+                        m);
+                      return Unit.unit();
+                    }
+
+                    @Override public Unit unmasked(
+                      final KMaterialRefractiveUnmasked m)
+                      throws RException,
+                        JCGLException
+                    {
+                      KShadingProgramCommon.putMaterialRefractiveUnmasked(
+                        program,
+                        m);
+                      return Unit.unit();
+                    }
+                  });
 
                 gc.arrayBufferBind(array);
                 KRefractionRenderer.putInstanceAttributes(
-                  label,
+                  material,
                   array,
                   program);
 
@@ -701,27 +701,24 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       });
   }
 
-  @SuppressWarnings("synthetic-access") private static
-    void
-    rendererRefractionEvaluateRenderUnmasked(
-      final JCGLImplementationType g,
-      final KShaderCacheType shader_cache,
-      final KTextureUnitAllocator unit_allocator,
-      final KFramebufferForwardUsableType scene,
-      final KFramebufferForwardUsableType temporary,
-      final KInstanceTranslucentRefractive r,
-      final KMaterialForwardTranslucentRefractiveLabel label,
-      final MatricesInstanceType mi,
-      final KMeshReadableType mesh)
-      throws JCGLException,
-        RException,
-        JCacheException
+  private static void rendererRefractionEvaluateRenderUnmasked(
+    final JCGLImplementationType g,
+    final KShaderCacheType shader_cache,
+    final KTextureUnitAllocator unit_allocator,
+    final KFramebufferForwardUsableType scene,
+    final KFramebufferForwardUsableType temporary,
+    final KInstanceTranslucentRefractive r,
+    final MatricesInstanceType mi,
+    final KMeshReadableType mesh)
+    throws JCGLException,
+      RException,
+      JCacheException
   {
-    final KMeshWithMaterialTranslucentRefractive instance = r.getInstance();
-    final KMaterialTranslucentRefractive material =
-      instance.meshGetMaterial();
-    final KProgram kprogram = shader_cache.cacheGetLU(label.labelGetCode());
+    final KMaterialTranslucentRefractive material = r.getMaterial();
+    final String shader_code =
+      KRefractionRenderer.shaderCodeFromMaterial(material);
 
+    final KProgram kprogram = shader_cache.cacheGetLU(shader_code);
     final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
     final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
 
@@ -741,7 +738,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 
             KRendererCommon.renderConfigureFaceCulling(
               gc,
-              instance.instanceGetFaces());
+              r.instanceGetFaceSelection());
 
             gc.colorBufferMask(true, true, true, true);
             gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
@@ -757,22 +754,43 @@ import com.io7m.renderer.types.RVectorReadable3FType;
                   program,
                   mi.getMatrixProjection());
 
-                KRefractionRenderer.putInstanceMatrices(program, mi, label);
+                KRefractionRenderer
+                  .putInstanceMatrices(program, mi, material);
 
                 KRefractionRenderer.putTextures(
-                  label,
                   material,
                   scene,
                   program,
                   context);
 
-                KShadingProgramCommon.putMaterialRefractive(
-                  program,
-                  material.getRefractive());
+                material.getRefractive().refractiveAccept(
+                  new KMaterialRefractiveVisitorType<Unit, JCGLException>() {
+                    @Override public Unit masked(
+                      final KMaterialRefractiveMasked m)
+                      throws RException,
+                        JCGLException
+                    {
+                      KShadingProgramCommon.putMaterialRefractiveMasked(
+                        program,
+                        m);
+                      return Unit.unit();
+                    }
+
+                    @Override public Unit unmasked(
+                      final KMaterialRefractiveUnmasked m)
+                      throws RException,
+                        JCGLException
+                    {
+                      KShadingProgramCommon.putMaterialRefractiveUnmasked(
+                        program,
+                        m);
+                      return Unit.unit();
+                    }
+                  });
 
                 gc.arrayBufferBind(array);
                 KRefractionRenderer.putInstanceAttributes(
-                  label,
+                  material,
                   array,
                   program);
 
@@ -796,19 +814,26 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       });
   }
 
-  private final KMeshBoundsCacheType<RSpaceObjectType>              bounds_cache;
-  private final KMeshBoundsTrianglesCacheType<RSpaceObjectType>     bounds_tri_cache;
-  private final KRegionCopierType                                   copier;
-  private final KFramebufferForwardCacheType                        forward_cache;
-  private final JCGLImplementationType                              g;
-  private final KMaterialForwardTranslucentRefractiveLabelCacheType label_cache;
-  private final MatrixM4x4F.Context                                 matrix_context;
-  private final RVectorM3F<RSpaceNDCType>                           ndc_bounds_lower;
-  private final RVectorM3F<RSpaceNDCType>                           ndc_bounds_upper;
-  private final KShaderCacheType                                    shader_cache;
-  private final KTextureUnitAllocator                               texture_units;
-  private final RVectorM3F<RSpaceWindowType>                        window_bounds_lower;
-  private final RVectorM3F<RSpaceWindowType>                        window_bounds_upper;
+  private static String shaderCodeFromMaterial(
+    final KMaterialTranslucentRefractive material)
+  {
+    final String r = String.format("Fwd_%s", material.materialUnlitGetCode());
+    assert r != null;
+    return r;
+  }
+
+  private final KMeshBoundsCacheType<RSpaceObjectType>          bounds_cache;
+  private final KMeshBoundsTrianglesCacheType<RSpaceObjectType> bounds_tri_cache;
+  private final KRegionCopierType                               copier;
+  private final KFramebufferForwardCacheType                    forward_cache;
+  private final JCGLImplementationType                          g;
+  private final MatrixM4x4F.Context                             matrix_context;
+  private final RVectorM3F<RSpaceNDCType>                       ndc_bounds_lower;
+  private final RVectorM3F<RSpaceNDCType>                       ndc_bounds_upper;
+  private final KShaderCacheType                                shader_cache;
+  private final KTextureUnitAllocator                           texture_units;
+  private final RVectorM3F<RSpaceWindowType>                    window_bounds_lower;
+  private final RVectorM3F<RSpaceWindowType>                    window_bounds_upper;
 
   private KRefractionRenderer(
     final JCGLImplementationType gl,
@@ -816,8 +841,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KShaderCacheType in_shader_cache,
     final KFramebufferForwardCacheType in_forward_cache,
     final KMeshBoundsCacheType<RSpaceObjectType> in_bounds_cache,
-    final KMeshBoundsTrianglesCacheType<RSpaceObjectType> in_bounds_tri_cache,
-    final KMaterialForwardTranslucentRefractiveLabelCacheType in_label_cache)
+    final KMeshBoundsTrianglesCacheType<RSpaceObjectType> in_bounds_tri_cache)
     throws RException
   {
     try {
@@ -829,7 +853,6 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       this.bounds_cache = NullCheck.notNull(in_bounds_cache, "Bounds cache");
       this.bounds_tri_cache =
         NullCheck.notNull(in_bounds_tri_cache, "Bounds triangle cache");
-      this.label_cache = NullCheck.notNull(in_label_cache, "Label cache");
 
       this.texture_units =
         KTextureUnitAllocator.newAllocator(this.g.getGLCommon());
@@ -863,13 +886,13 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       final JCGLInterfaceCommonType gc = this.g.getGLCommon();
 
       if (gc.framebufferDrawIsBound(scene.kFramebufferGetColorFramebuffer()) == false) {
-        throw RExceptionUserError.fromAPIMisuse("Framebuffer is not bound");
+        throw new RExceptionFramebufferNotBound("Framebuffer is not bound");
       }
 
       observer.withInstance(
         r,
         new MatricesInstanceFunctionType<Unit, JCGLException>() {
-          @SuppressWarnings("synthetic-access") @Override public Unit run(
+          @Override public Unit run(
             final MatricesInstanceType mi)
             throws RException,
               JCGLException
@@ -887,7 +910,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
         });
 
       if (gc.framebufferDrawIsBound(scene.kFramebufferGetColorFramebuffer()) == false) {
-        throw RExceptionUserError.fromAPIMisuse("Framebuffer is not bound");
+        throw new RExceptionFramebufferNotBound("Framebuffer is not bound");
       }
 
     } catch (final JCGLException x) {
@@ -949,43 +972,55 @@ import com.io7m.renderer.types.RVectorReadable3FType;
           temporary.getValue(),
           window_bounds_area);
 
-        final KMaterialForwardTranslucentRefractiveLabel label =
-          this.label_cache.getForwardLabelTranslucentRefractive(r
-            .getInstance());
+        final KMaterialTranslucentRefractive material = r.getMaterial();
 
-        switch (label.getRefractive()) {
-          case REFRACTIVE_MASKED:
-          {
-            KRefractionRenderer.rendererRefractionEvaluateForInstanceMasked(
-              this.g,
-              this.forward_cache,
-              this.shader_cache,
-              this.texture_units,
-              this.copier,
-              scene,
-              temporary.getValue(),
-              r,
-              label,
-              mi,
-              window_bounds_area);
+        material.getRefractive().refractiveAccept(
+          new KMaterialRefractiveVisitorType<Unit, JCGLException>() {
+            @Override public Unit masked(
+              final KMaterialRefractiveMasked m)
+              throws RException,
+                JCGLException
+            {
+              try {
+                KRefractionRenderer
+                  .rendererRefractionEvaluateForInstanceMasked(
+                    KRefractionRenderer.this.g,
+                    KRefractionRenderer.this.forward_cache,
+                    KRefractionRenderer.this.shader_cache,
+                    KRefractionRenderer.this.texture_units,
+                    KRefractionRenderer.this.copier,
+                    scene,
+                    temporary.getValue(),
+                    r,
+                    mi,
+                    window_bounds_area);
+                return Unit.unit();
+              } catch (final JCacheException e) {
+                throw new UnreachableCodeException(e);
+              }
+            }
 
-            break;
-          }
-          case REFRACTIVE_UNMASKED:
-          {
-            KRefractionRenderer
-              .rendererRefractionEvaluateForInstanceUnmasked(
-                this.g,
-                this.shader_cache,
-                this.texture_units,
-                scene,
-                temporary.getValue(),
-                r,
-                label,
-                mi);
-            break;
-          }
-        }
+            @Override public Unit unmasked(
+              final KMaterialRefractiveUnmasked m)
+              throws RException,
+                JCGLException
+            {
+              try {
+                KRefractionRenderer
+                  .rendererRefractionEvaluateForInstanceUnmasked(
+                    KRefractionRenderer.this.g,
+                    KRefractionRenderer.this.shader_cache,
+                    KRefractionRenderer.this.texture_units,
+                    scene,
+                    temporary.getValue(),
+                    r,
+                    mi);
+                return Unit.unit();
+              } catch (final JCacheException e) {
+                throw new UnreachableCodeException(e);
+              }
+            }
+          });
 
         this.copier.copierCopyRGBAWithDepth(
           temporary.getValue(),

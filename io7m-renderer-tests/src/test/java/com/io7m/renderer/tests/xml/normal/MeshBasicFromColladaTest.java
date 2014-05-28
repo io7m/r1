@@ -23,20 +23,21 @@ import org.junit.Test;
 
 import com.io7m.jlog.LogType;
 import com.io7m.jnull.NonNull;
+import com.io7m.renderer.meshes.MeshBasic;
 import com.io7m.renderer.tests.xml.collada.ColladaDocumentTest;
-import com.io7m.renderer.types.RXMLException;
+import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionMeshMissingUVs;
 import com.io7m.renderer.xml.collada.ColladaDocument;
 import com.io7m.renderer.xml.collada.ColladaGeometry;
 import com.io7m.renderer.xml.collada.ColladaGeometryID;
-import com.io7m.renderer.xml.normal.MeshBasic;
-import com.io7m.renderer.xml.normal.MeshBasicColladaImporter;
+import com.io7m.renderer.xml.tools.MeshBasicColladaImporter;
 
 @SuppressWarnings("static-method") public class MeshBasicFromColladaTest
 {
   private static @NonNull MeshBasic makeMeshBasic(
     final @NonNull String file,
     final @NonNull ColladaGeometryID geo)
-    throws RXMLException
+    throws RException
   {
     final LogType log = ColladaDocumentTest.getLog();
     final Document doc = ColladaDocumentTest.getDocument(file);
@@ -51,7 +52,7 @@ import com.io7m.renderer.xml.normal.MeshBasicColladaImporter;
   }
 
   @Test public void testMeshCubeOneFace()
-    throws RXMLException
+    throws RException
   {
     final MeshBasic m =
       MeshBasicFromColladaTest.makeMeshBasic(
@@ -66,7 +67,7 @@ import com.io7m.renderer.xml.normal.MeshBasicColladaImporter;
   }
 
   @Test public void testMeshCylinder()
-    throws RXMLException
+    throws RException
   {
     final MeshBasic m =
       MeshBasicFromColladaTest.makeMeshBasic(
@@ -80,8 +81,8 @@ import com.io7m.renderer.xml.normal.MeshBasicColladaImporter;
     Assert.assertEquals(60, m.trianglesGet().size());
   }
 
-  @Test public void testMeshHex()
-    throws RXMLException
+  @Test(expected = RExceptionMeshMissingUVs.class) public void testMeshHex()
+    throws RException
   {
     final MeshBasic m =
       MeshBasicFromColladaTest.makeMeshBasic(
@@ -96,7 +97,7 @@ import com.io7m.renderer.xml.normal.MeshBasicColladaImporter;
   }
 
   @Test public void testMeshTriTextured()
-    throws RXMLException
+    throws RException
   {
     final MeshBasic m =
       MeshBasicFromColladaTest.makeMeshBasic(
@@ -110,8 +111,10 @@ import com.io7m.renderer.xml.normal.MeshBasicColladaImporter;
     Assert.assertEquals(1, m.trianglesGet().size());
   }
 
-  @Test public void testMeshTriUntextured()
-    throws RXMLException
+  @Test(expected = RExceptionMeshMissingUVs.class) public
+    void
+    testMeshTriUntextured()
+      throws RException
   {
     final MeshBasic m =
       MeshBasicFromColladaTest.makeMeshBasic(

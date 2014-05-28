@@ -21,17 +21,28 @@ import java.net.URISyntaxException;
 
 import com.io7m.junreachable.UnreachableCodeException;
 
+/**
+ * XML constants for the mesh format.
+ */
+
 public final class RXMLConstants
 {
+  /**
+   * The XML URI of the schema.
+   */
+
   public static final URI MESHES_URI;
-  public static final int MESHES_VERSION;
 
   static {
     try {
       MESHES_URI = new URI("http://schemas.io7m.com/renderer/1.0.0/meshes");
-      MESHES_VERSION = 1;
     } catch (final URISyntaxException e) {
       throw new UnreachableCodeException();
     }
+  }
+
+  private RXMLConstants()
+  {
+    throw new UnreachableCodeException();
   }
 }

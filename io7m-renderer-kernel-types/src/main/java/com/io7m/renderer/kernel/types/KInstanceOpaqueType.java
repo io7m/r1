@@ -16,16 +16,42 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.renderer.types.RException;
+
 /**
- * A mesh with an opaque material, with a specific transform and texture
+ * An instance with an opaque material, with a specific transform and texture
  * matrix.
  */
 
 public interface KInstanceOpaqueType extends KInstanceType
 {
   /**
-   * @return The mesh with material.
+   * Accept a visitor.
+   * 
+   * @param <A>
+   *          The type of values returned by the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          The type of the visitor
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws E
+   *           If the visitor raises <code>E</code>
+   * 
+   * @throws RException
+   *           If the visitor raises {@link RException}
+   * @throws JCGLException
+   *           If the visitor raises {@link JCGLException}
    */
 
-  KMeshWithMaterialOpaqueType instanceGetMeshWithMaterial();
+    <A, E extends Throwable, V extends KInstanceOpaqueVisitorType<A, E>>
+    A
+    opaqueAccept(
+      final V v)
+      throws E,
+        RException,
+        JCGLException;
 }

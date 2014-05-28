@@ -23,7 +23,6 @@
 
   <r:define name="io7m.renderer.cube-maps.cube-map">
     <r:element name="c:cube-map">
-      <r:attribute name="c:version"><r:data type="nonNegativeInteger"/></r:attribute>
       <r:attribute name="c:name"><r:data type="token"/></r:attribute>
       <r:ref name="io7m.renderer.cube-maps.positive-z"/>
       <r:ref name="io7m.renderer.cube-maps.negative-z"/>

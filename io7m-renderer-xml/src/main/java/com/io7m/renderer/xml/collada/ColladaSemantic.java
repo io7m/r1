@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,8 +18,19 @@ package com.io7m.renderer.xml.collada;
 
 import com.io7m.jnull.NullCheck;
 
+/**
+ * <p>
+ * A COLLADA "semantic". This is essentially used to indicate what a given
+ * array of data is supposed to mean.
+ * </p>
+ * <p>
+ * Consult the COLLADA specification for the meanings.
+ * </p>
+ */
+
 public enum ColladaSemantic
 {
+  // CHECKSTYLE_JAVADOC:OFF
   SEMANTIC_BINORMAL("BINORMAL"),
   SEMANTIC_COLOR("COLOR"),
   SEMANTIC_CONTINUITY("CONTINUITY"),
@@ -43,6 +54,15 @@ public enum ColladaSemantic
   SEMANTIC_UV("UV"),
   SEMANTIC_VERTEX("VERTEX"),
   SEMANTIC_WEIGHT("WEIGHT");
+  // CHECKSTYLE_JAVADOC:ON
+
+  /**
+   * Construct a semantic.
+   * 
+   * @param name
+   *          The name.
+   * @return A semantic.
+   */
 
   public static ColladaSemantic fromName(
     final String name)
@@ -60,6 +80,10 @@ public enum ColladaSemantic
   {
     this.name = in_name;
   }
+
+  /**
+   * @return The name of the semantic.
+   */
 
   public String getName()
   {

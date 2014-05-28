@@ -16,13 +16,18 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.OptionVisitorType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionLightMissingTexture;
 import com.io7m.renderer.types.RExceptionUserError;
@@ -42,7 +47,7 @@ import com.io7m.renderer.types.RVectorI3F;
  * </p>
  */
 
-@EqualityStructural public final class KLightProjective implements KLightType
+@EqualityReference public final class KLightProjective implements KLightType
 {
   @SuppressWarnings("synthetic-access") private static final class Builder implements
     KLightProjectiveBuilderType
@@ -56,16 +61,10 @@ import com.io7m.renderer.types.RVectorI3F;
     private float                                  range;
     private OptionType<KShadowType>                shadow;
     private @Nullable Texture2DStaticUsableType    texture;
-    private final boolean                          fresh;
-    private KVersion                               next;
-    private final KLightID                         id;
 
     Builder()
     {
-      this.fresh = true;
-      this.id = KLightID.freshID();
       this.color = RVectorI3F.one();
-      this.next = KVersion.first();
       this.intensity = 1.0f;
       this.falloff = 1.0f;
       this.position = RVectorI3F.zero();
@@ -77,13 +76,9 @@ import com.io7m.renderer.types.RVectorI3F;
     }
 
     Builder(
-      final boolean in_fresh_id,
       final KLightProjective in_original)
     {
       NullCheck.notNull(in_original, "Light");
-      this.id = in_original.id;
-      this.fresh = in_fresh_id;
-      this.next = in_original.version;
       this.color = in_original.color;
       this.intensity = in_original.intensity;
       this.falloff = in_original.falloff;
@@ -95,34 +90,21 @@ import com.io7m.renderer.types.RVectorI3F;
       this.shadow = in_original.shadow;
     }
 
-    @Override public KLightProjective build()
+    @Override public KLightProjective build(
+      final KGraphicsCapabilitiesType caps)
       throws RException,
         RExceptionUserError
     {
+      NullCheck.notNull(caps, "Capabilities");
+
       final Texture2DStaticUsableType t = this.texture;
       if (t == null) {
         throw new RExceptionLightMissingTexture(
           "No texture specified for projective light");
       }
 
-      if (this.fresh) {
-        return new KLightProjective(
-          this.id,
-          KVersion.first(),
-          t,
-          this.position,
-          this.orientation,
-          this.color,
-          this.intensity,
-          this.range,
-          this.falloff,
-          this.projection,
-          this.shadow);
-      }
-
+      final String c = KLightProjective.getCode(caps, this.shadow);
       return new KLightProjective(
-        this.id,
-        this.next,
         t,
         this.position,
         this.orientation,
@@ -131,7 +113,8 @@ import com.io7m.renderer.types.RVectorI3F;
         this.range,
         this.falloff,
         this.projection,
-        this.shadow);
+        this.shadow,
+        c);
     }
 
     @Override public void setColor(
@@ -155,7 +138,6 @@ import com.io7m.renderer.types.RVectorI3F;
     @Override public void setNoShadow()
     {
       this.shadow = Option.none();
-      this.next = this.next.next();
     }
 
     @Override public void setOrientation(
@@ -186,14 +168,12 @@ import com.io7m.renderer.types.RVectorI3F;
       final KShadowType in_shadow)
     {
       this.shadow = Option.some(NullCheck.notNull(in_shadow, "Shadow"));
-      this.next = this.next.next();
     }
 
     @Override public void setShadowOption(
       final OptionType<KShadowType> s)
     {
       this.shadow = NullCheck.notNull(s, "Shadow");
-      this.next = this.next.next();
     }
 
     @Override public void setTexture(
@@ -203,13 +183,50 @@ import com.io7m.renderer.types.RVectorI3F;
     }
   }
 
+  private static String getCode(
+    final KGraphicsCapabilitiesType caps,
+    final OptionType<KShadowType> in_shadow)
+  {
+    return in_shadow.accept(new OptionVisitorType<KShadowType, String>() {
+      @Override public String none(
+        final None<KShadowType> n)
+      {
+        return "LProj";
+      }
+
+      @Override public String some(
+        final Some<KShadowType> s)
+      {
+        try {
+          return s.get().shadowAccept(
+            new KShadowVisitorType<String, RException>() {
+              @Override public String shadowMappedBasic(
+                final KShadowMappedBasic smb)
+              {
+                if (caps.getSupportsDepthTextures()) {
+                  return "LProjSMBasic";
+                }
+                return "LProjSMBasic4444";
+              }
+
+              @Override public String shadowMappedVariance(
+                final KShadowMappedVariance smv)
+              {
+                return "LProjSMVar";
+              }
+            });
+        } catch (final JCGLException e) {
+          throw new UnreachableCodeException(e);
+        } catch (final RException e) {
+          throw new UnreachableCodeException(e);
+        }
+      }
+    });
+  }
+
   /**
    * <p>
    * Create a builder for creating new projective lights.
-   * </p>
-   * <p>
-   * The {@link KLightProjectiveBuilderType#build()} function will return a
-   * light with a fresh {@link KLightID} every time it is called.
    * </p>
    * 
    * @return A new light builder.
@@ -225,50 +242,21 @@ import com.io7m.renderer.types.RVectorI3F;
    * Create a builder for creating new spherical lights. The builder will be
    * initialized to values based on the given light.
    * </p>
-   * <p>
-   * The {@link KLightProjectiveBuilderType#build()} function will return a
-   * light with a fresh {@link KLightID} every time it is called. This
-   * effectively allows for creating sets of similar lights.
-   * </p>
    * 
    * @param p
    *          The initial light.
    * @return A new light builder.
    */
 
-  public static KLightProjectiveBuilderType newBuilderWithFreshID(
+  public static KLightProjectiveBuilderType newBuilderFrom(
     final KLightProjective p)
   {
-    return new Builder(true, p);
+    return new Builder(p);
   }
 
-  /**
-   * <p>
-   * Create a builder for creating new spherical lights. The builder will be
-   * initialized to values based on the given light.
-   * </p>
-   * <p>
-   * The {@link KLightProjectiveBuilderType#build()} function will return a
-   * light with same {@link KLightID} as the initial light every time it is
-   * called. This effectively allows for efficiently "mutating" an immutable
-   * light over time without the need for creating lots of intermediate
-   * immutable objects when manipulating multiple parameters.
-   * </p>
-   * 
-   * @param p
-   *          The initial light.
-   * @return A new light builder.
-   */
-
-  public static KLightProjectiveBuilderType newBuilderWithSameID(
-    final KLightProjective p)
-  {
-    return new Builder(false, p);
-  }
-
+  private final String                                 code;
   private final RVectorI3F<RSpaceRGBType>              color;
   private final float                                  falloff;
-  private final KLightID                               id;
   private final float                                  intensity;
   private final QuaternionI4F                          orientation;
   private final RVectorI3F<RSpaceWorldType>            position;
@@ -276,11 +264,9 @@ import com.io7m.renderer.types.RVectorI3F;
   private final float                                  range;
   private final OptionType<KShadowType>                shadow;
   private final Texture2DStaticUsableType              texture;
-  private final KVersion                               version;
+  private final int                                    textures;
 
   private KLightProjective(
-    final KLightID in_id,
-    final KVersion in_version,
     final Texture2DStaticUsableType in_texture,
     final RVectorI3F<RSpaceWorldType> in_position,
     final QuaternionI4F in_orientation,
@@ -289,11 +275,9 @@ import com.io7m.renderer.types.RVectorI3F;
     final float in_range,
     final float in_falloff,
     final RMatrixI4x4F<RTransformProjectionType> in_projection,
-    final OptionType<KShadowType> in_shadow)
+    final OptionType<KShadowType> in_shadow,
+    final String in_code)
   {
-    this.id = NullCheck.notNull(in_id, "ID");
-    this.version = NullCheck.notNull(in_version, "Version");
-
     this.intensity = in_intensity;
     this.color = NullCheck.notNull(in_color, "Color");
     this.position = NullCheck.notNull(in_position, "Position");
@@ -303,20 +287,13 @@ import com.io7m.renderer.types.RVectorI3F;
     this.projection = NullCheck.notNull(in_projection, "Projection");
     this.texture = NullCheck.notNull(in_texture, "Texture");
     this.shadow = NullCheck.notNull(in_shadow, "Shadow");
-  }
+    this.code = NullCheck.notNull(in_code, "Code");
 
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = super.hashCode();
-    result = (prime * result) + Float.floatToIntBits(this.falloff);
-    result = (prime * result) + this.orientation.hashCode();
-    result = (prime * result) + this.position.hashCode();
-    result = (prime * result) + this.projection.hashCode();
-    result = (prime * result) + Float.floatToIntBits(this.range);
-    result = (prime * result) + this.shadow.hashCode();
-    result = (prime * result) + this.texture.hashCode();
-    return result;
+    /**
+     * One texture for the light, and at most one for the shadow.
+     */
+
+    this.textures = 1 + (this.shadow.isSome() ? 1 : 0);
   }
 
   @Override public
@@ -328,6 +305,11 @@ import com.io7m.renderer.types.RVectorI3F;
         RException
   {
     return v.lightProjective(this);
+  }
+
+  @Override public String lightGetCode()
+  {
+    return this.code;
   }
 
   @Override public RVectorI3F<RSpaceRGBType> lightGetColor()
@@ -342,11 +324,6 @@ import com.io7m.renderer.types.RVectorI3F;
   public float lightGetFalloff()
   {
     return this.falloff;
-  }
-
-  @Override public KLightID lightGetID()
-  {
-    return this.id;
   }
 
   @Override public float lightGetIntensity()
@@ -404,14 +381,14 @@ import com.io7m.renderer.types.RVectorI3F;
     return this.texture;
   }
 
-  @Override public KVersion lightGetVersion()
-  {
-    return this.version;
-  }
-
   @Override public boolean lightHasShadow()
   {
     return this.shadow.isSome();
+  }
+
+  @Override public int texturesGetRequired()
+  {
+    return this.textures;
   }
 
   @Override public String toString()
@@ -421,8 +398,6 @@ import com.io7m.renderer.types.RVectorI3F;
     b.append(this.color);
     b.append(" falloff=");
     b.append(this.falloff);
-    b.append(" id=");
-    b.append(this.id);
     b.append(" intensity=");
     b.append(this.intensity);
     b.append(" orientation=");
@@ -437,8 +412,6 @@ import com.io7m.renderer.types.RVectorI3F;
     b.append(this.shadow);
     b.append(" texture=");
     b.append(this.texture);
-    b.append(" version=");
-    b.append(this.version);
     b.append("]");
     final String r = b.toString();
     assert r != null;

@@ -17,7 +17,7 @@
 package com.io7m.renderer.types;
 
 /**
- * A type representing the linear RGBA colour space.
+ * A type representing the linear RGBA color space.
  */
 
 public interface RSpaceRGBAType extends RSpaceType

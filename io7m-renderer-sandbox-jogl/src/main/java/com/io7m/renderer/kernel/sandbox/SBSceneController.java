@@ -70,6 +70,7 @@ import com.io7m.jparasol.xml.PGLSLMetaXML;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.renderer.kernel.types.KMaterialRequiresUVType;
 import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueAlphaDepth;
 import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueAlphaDepth;
@@ -88,7 +89,7 @@ import com.io7m.renderer.kernel.types.KMaterialAlpha;
 import com.io7m.renderer.kernel.types.KMaterialEmissive;
 import com.io7m.renderer.kernel.types.KMaterialEnvironment;
 import com.io7m.renderer.kernel.types.KMaterialNormal;
-import com.io7m.renderer.kernel.types.KMaterialOpaqueAlphaDepth;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitorType;
@@ -241,13 +242,13 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
   {
     return m
       .materialVisitableAccept(new SBMaterialVisitor<KMaterialType, RException>() {
-        @Override public KMaterialType materialVisitOpaque(
+        @Override public KMaterialRequiresUVType materialVisitOpaque(
           final SBMaterialOpaque mo)
           throws RException
         {
           return mo
             .materialOpaqueVisitableAccept(new SBMaterialOpaqueVisitor<KMaterialType, RException>() {
-              @Override public KMaterialType materialVisitOpaqueAlphaDepth(
+              @Override public KMaterialRequiresUVType materialVisitOpaqueAlphaDepth(
                 final SBMaterialOpaqueAlphaToDepth moa)
                 throws RException
               {
@@ -289,7 +290,7 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
                   md.getAlphaThreshold());
               }
 
-              @Override public KMaterialType materialVisitOpaqueRegular(
+              @Override public KMaterialRequiresUVType materialVisitOpaqueRegular(
                 final SBMaterialOpaqueRegular mor)
                 throws RException
               {
@@ -332,14 +333,14 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
             });
         }
 
-        @Override public KMaterialType materialVisitTranslucent(
+        @Override public KMaterialRequiresUVType materialVisitTranslucent(
           final SBMaterialTranslucent mt)
           throws RException
         {
           return mt
             .materialTranslucentVisitableAccept(new SBMaterialTranslucentVisitor<KMaterialType, RException>() {
               @Override public
-                KMaterialType
+                KMaterialRequiresUVType
                 materialVisitTranslucentRefractive(
                   final SBMaterialTranslucentRefractive mtr)
                   throws RException
@@ -364,7 +365,7 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
               }
 
               @SuppressWarnings("synthetic-access") @Override public
-                KMaterialType
+                KMaterialRequiresUVType
                 materialVisitTranslucentRegular(
                   final SBMaterialTranslucentRegular mtr)
                   throws RException
@@ -411,7 +412,7 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
               }
 
               @Override public
-                KMaterialType
+                KMaterialRequiresUVType
                 materialVisitTranslucentSpecularOnly(
                   final SBMaterialTranslucentSpecularOnly mtr)
                   throws RException

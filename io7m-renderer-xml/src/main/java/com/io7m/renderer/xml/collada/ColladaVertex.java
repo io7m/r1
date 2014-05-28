@@ -23,19 +23,25 @@ import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * A COLLADA vertex.
+ */
+
 @EqualityStructural public final class ColladaVertex
 {
   private final List<Integer> indices;
+
+  /**
+   * Construct a vertex.
+   * 
+   * @param in_indices
+   *          The list of indices.
+   */
 
   public ColladaVertex(
     final List<Integer> in_indices)
   {
     this.indices = NullCheck.notNullAll(in_indices, "Indices");
-  }
-
-  @Override public int hashCode()
-  {
-    return this.indices.hashCode();
   }
 
   @Override public boolean equals(
@@ -54,10 +60,19 @@ import com.io7m.jnull.Nullable;
     return this.indices.equals(other.indices);
   }
 
+  /**
+   * @return A read-only view of the list of indices.
+   */
+
   public List<Integer> getIndices()
   {
     final List<Integer> r = Collections.unmodifiableList(this.indices);
     assert r != null;
     return r;
+  }
+
+  @Override public int hashCode()
+  {
+    return this.indices.hashCode();
   }
 }

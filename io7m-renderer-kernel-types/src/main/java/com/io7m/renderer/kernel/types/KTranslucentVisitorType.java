@@ -45,7 +45,7 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A translucentRefractive(
+  A refractive(
     final KInstanceTranslucentRefractive t)
     throws E,
       JCGLException,
@@ -65,7 +65,7 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A translucentRegularLit(
+  A regularLit(
     final KTranslucentRegularLit t)
     throws E,
       JCGLException,
@@ -85,7 +85,7 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A translucentRegularUnlit(
+  A regularUnlit(
     final KInstanceTranslucentRegular t)
     throws E,
       JCGLException,
@@ -105,7 +105,7 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A translucentSpecularOnlyLit(
+  A specularOnly(
     final KTranslucentSpecularOnlyLit t)
     throws E,
       JCGLException,

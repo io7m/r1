@@ -18,18 +18,113 @@ package com.io7m.renderer.kernel.types;
 
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionMaterialMissingAlbedoTexture;
+import com.io7m.renderer.types.RExceptionMaterialMissingSpecularTexture;
 import com.io7m.renderer.types.RMatrixI3x3F;
+import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RTransformTextureType;
+import com.io7m.renderer.types.RVectorI3F;
 
 /**
  * The type of translucent, specular-only materials.
  */
 
 @EqualityStructural public final class KMaterialTranslucentSpecularOnly implements
-  KMaterialTranslucentType
+  KMaterialTranslucentType,
+  KMaterialLitType
 {
+  @SuppressWarnings("synthetic-access") private static final class Builder implements
+    KMaterialTranslucentSpecularOnlyBuilderType
+  {
+    private static final RVectorI3F<RSpaceRGBType> WHITE;
+
+    static {
+      WHITE = new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
+    }
+
+    private KMaterialAlphaType                     alpha;
+    private KMaterialNormalType                    normal;
+    private KMaterialSpecularNotNoneType           specular;
+    private RMatrixI3x3F<RTransformTextureType>    uv_matrix;
+
+    public Builder()
+    {
+      this.uv_matrix = RMatrixI3x3F.identity();
+      this.alpha = KMaterialAlphaConstant.constant(1.0f);
+      this.normal = KMaterialNormalVertex.vertex();
+      this.specular =
+        KMaterialSpecularConstant.constant(Builder.WHITE, 16.0f);
+    }
+
+    public Builder(
+      final KMaterialTranslucentSpecularOnly in_previous)
+    {
+      NullCheck.notNull(in_previous, "Previous");
+      this.uv_matrix = in_previous.uv_matrix;
+      this.alpha = in_previous.alpha;
+      this.normal = in_previous.normal;
+      this.specular = in_previous.specular;
+    }
+
+    @Override public KMaterialTranslucentSpecularOnly build()
+      throws RExceptionMaterialMissingAlbedoTexture,
+        RExceptionMaterialMissingSpecularTexture,
+        RException
+    {
+      return KMaterialTranslucentSpecularOnly.newMaterial(
+        this.uv_matrix,
+        this.alpha,
+        this.normal,
+        this.specular);
+    }
+
+    @Override public void setAlpha(
+      final KMaterialAlphaType in_alpha)
+    {
+      this.alpha = NullCheck.notNull(in_alpha, "Alpha");
+    }
+
+    @Override public void setNormal(
+      final KMaterialNormalType in_normal)
+    {
+      this.normal = NullCheck.notNull(in_normal, "Normal");
+    }
+
+    @Override public void setSpecular(
+      final KMaterialSpecularNotNoneType in_specular)
+    {
+      this.specular = NullCheck.notNull(in_specular, "Specular");
+    }
+
+    @Override public void setUVMatrix(
+      final RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
+    {
+      this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
+    }
+  }
+
+  /**
+   * @return A new material builder.
+   */
+
+  public static KMaterialTranslucentSpecularOnlyBuilderType newBuilder()
+  {
+    return new Builder();
+  }
+
+  /**
+   * @param o
+   *          The base material.
+   * @return A new material builder based on the given material.
+   */
+
+  public static KMaterialTranslucentSpecularOnlyBuilderType newBuilder(
+    final KMaterialTranslucentSpecularOnly o)
+  {
+    return new Builder(o);
+  }
+
   /**
    * Construct a new specular-only translucent material.
    * 
@@ -46,81 +141,82 @@ import com.io7m.renderer.types.RTransformTextureType;
 
   public static KMaterialTranslucentSpecularOnly newMaterial(
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
-    final KMaterialAlpha in_alpha,
-    final KMaterialNormal in_normal,
-    final KMaterialSpecular in_specular)
+    final KMaterialAlphaType in_alpha,
+    final KMaterialNormalType in_normal,
+    final KMaterialSpecularNotNoneType in_specular)
   {
+    KMaterialVerification.materialVerifyTranslucentSpecularOnly(
+      in_alpha,
+      in_normal,
+      in_specular);
+
+    final String code_lit =
+      KMaterialCodes.makeTranslucentSpecularOnlyLitCode(
+        in_alpha,
+        in_normal,
+        in_specular);
+
     return new KMaterialTranslucentSpecularOnly(
+      code_lit,
       in_uv_matrix,
       in_alpha,
       in_normal,
       in_specular);
   }
 
-  private final KMaterialAlpha                      alpha;
-  private final KMaterialNormal                     normal;
-  private final KMaterialSpecular                   specular;
+  private final KMaterialAlphaType                  alpha;
+  private final String                              code_lit;
+  private final KMaterialNormalType                 normal;
+  private boolean                                   required_uv;
+  private final KMaterialSpecularNotNoneType        specular;
+  private final int                                 textures_required;
   private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KMaterialTranslucentSpecularOnly(
+    final String in_code_lit,
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
-    final KMaterialAlpha in_alpha,
-    final KMaterialNormal in_normal,
-    final KMaterialSpecular in_specular)
+    final KMaterialAlphaType in_alpha,
+    final KMaterialNormalType in_normal,
+    final KMaterialSpecularNotNoneType in_specular)
   {
+    this.code_lit = NullCheck.notNull(in_code_lit, "Lit code");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
     this.alpha = NullCheck.notNull(in_alpha, "Alpha");
     this.normal = NullCheck.notNull(in_normal, "Normal");
     this.specular = NullCheck.notNull(in_specular, "Specular");
-  }
 
-  @Override public boolean equals(
-    final @Nullable Object obj)
-  {
-    if (this == obj) {
-      return true;
+    {
+      int req = 0;
+      req += in_normal.texturesGetRequired();
+      req += in_specular.texturesGetRequired();
+      this.textures_required = req;
     }
-    if (obj == null) {
-      return false;
+
+    {
+      boolean req = false;
+      req |= in_alpha.materialRequiresUVCoordinates();
+      req |= in_normal.materialRequiresUVCoordinates();
+      req |= in_specular.materialRequiresUVCoordinates();
+      this.required_uv = req;
     }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KMaterialTranslucentSpecularOnly other =
-      (KMaterialTranslucentSpecularOnly) obj;
-    return this.alpha.equals(other.alpha)
-      && this.normal.equals(other.normal)
-      && this.specular.equals(other.specular)
-      && this.uv_matrix.equals(other.uv_matrix);
   }
 
   /**
-   * @return The alpha properties for the material
+   * @return The material's alpha properties.
    */
 
-  public KMaterialAlpha getAlpha()
+  public KMaterialAlphaType getAlpha()
   {
     return this.alpha;
   }
 
   /**
-   * @return The specular parameters for the material
+   * @return The material's specular properties.
    */
 
-  public KMaterialSpecular getSpecular()
+  public KMaterialSpecularNotNoneType getSpecular()
   {
     return this.specular;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.alpha.hashCode();
-    result = (prime * result) + this.normal.hashCode();
-    result = (prime * result) + this.specular.hashCode();
-    result = (prime * result) + this.uv_matrix.hashCode();
-    return result;
   }
 
   @Override public
@@ -134,7 +230,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     return v.materialTranslucent(this);
   }
 
-  @Override public KMaterialNormal materialGetNormal()
+  @Override public KMaterialNormalType materialGetNormal()
   {
     return this.normal;
   }
@@ -142,6 +238,16 @@ import com.io7m.renderer.types.RTransformTextureType;
   @Override public RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix()
   {
     return this.uv_matrix;
+  }
+
+  @Override public String materialLitGetCode()
+  {
+    return this.code_lit;
+  }
+
+  @Override public boolean materialRequiresUVCoordinates()
+  {
+    return this.required_uv;
   }
 
   @Override public
@@ -157,83 +263,27 @@ import com.io7m.renderer.types.RTransformTextureType;
 
   @Override public int texturesGetRequired()
   {
-    return this.normal.texturesGetRequired()
-      + this.specular.texturesGetRequired();
+    return this.textures_required;
   }
 
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param m
-   *          The alpha parameters
-   * @return The current material with <code>alpha == m</code>.
-   */
-
-  public KMaterialTranslucentSpecularOnly withAlpha(
-    final KMaterialAlpha m)
+  @Override public String toString()
   {
-    return new KMaterialTranslucentSpecularOnly(
-      this.uv_matrix,
-      m,
-      this.normal,
-      this.specular);
-  }
-
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param m
-   *          The normal mapping parameters
-   * @return The current material with <code>normal == m</code>.
-   */
-
-  public KMaterialTranslucentSpecularOnly withNormal(
-    final KMaterialNormal m)
-  {
-    return new KMaterialTranslucentSpecularOnly(
-      this.uv_matrix,
-      this.alpha,
-      m,
-      this.specular);
-  }
-
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param m
-   *          The specular parameters
-   * @return The current material with <code>specular == m</code>.
-   */
-
-  public KMaterialTranslucentSpecularOnly withSpecular(
-    final KMaterialSpecular m)
-  {
-    return new KMaterialTranslucentSpecularOnly(
-      this.uv_matrix,
-      this.alpha,
-      this.normal,
-      m);
-  }
-
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param m
-   *          The UV matrix
-   * @return The current material with <code>uv_matrix == m</code>.
-   */
-
-  public KMaterialTranslucentSpecularOnly withUVMatrix(
-    final RMatrixI3x3F<RTransformTextureType> m)
-  {
-    return new KMaterialTranslucentSpecularOnly(
-      m,
-      this.alpha,
-      this.normal,
-      this.specular);
+    final StringBuilder b = new StringBuilder();
+    b.append("[KMaterialTranslucentSpecularOnly alpha=");
+    b.append(this.alpha);
+    b.append(" code_lit=");
+    b.append(this.code_lit);
+    b.append(" normal=");
+    b.append(this.normal);
+    b.append(" specular=");
+    b.append(this.specular);
+    b.append(" textures_required=");
+    b.append(this.textures_required);
+    b.append(" uv_matrix=");
+    b.append(this.uv_matrix);
+    b.append("]");
+    final String r = b.toString();
+    assert r != null;
+    return r;
   }
 }

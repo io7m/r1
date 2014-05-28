@@ -23,12 +23,12 @@ import com.io7m.renderer.kernel.examples.ExampleSceneType;
 import com.io7m.renderer.kernel.examples.ExampleSceneUtilities;
 import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
-import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
-import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
@@ -57,19 +57,24 @@ public final class SLSpecular2 implements ExampleSceneType
     final ExampleSceneBuilderType scene)
     throws RException
   {
-    final KMaterialOpaqueRegular material =
-      ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE
-        .withNormal(KMaterialNormal.newNormalMapped(scene
-          .texture("tiles_normal.png")));
+    final KMaterialOpaqueRegular material;
+
+    {
+      final KMaterialOpaqueRegularBuilderType b =
+        KMaterialOpaqueRegular
+          .newBuilder(ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE);
+      b.setNormal(KMaterialNormalMapped.mapped(scene
+        .texture("tiles_normal.png")));
+      material = b.build();
+    }
 
     final KInstanceOpaqueRegular i =
       KInstanceOpaqueRegular.newInstance(
-        KMeshWithMaterialOpaqueRegular.newInstance(
-          material,
-          scene.mesh("plane2x2_PNU.rmx"),
-          KFaceSelection.FACE_RENDER_FRONT),
+        scene.mesh("plane2x2.rmx"),
+        material,
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
-        ExampleSceneUtilities.IDENTITY_UV);
+        ExampleSceneUtilities.IDENTITY_UV,
+        KFaceSelection.FACE_RENDER_FRONT);
 
     {
       final KLightSphereBuilderType b = KLightSphere.newBuilder();
@@ -79,19 +84,19 @@ public final class SLSpecular2 implements ExampleSceneType
 
       b.setColor(ExampleSceneUtilities.RGB_RED);
       b.setPosition(new RVectorI3F<RSpaceWorldType>(-0.5f, 1.0f, 1.0f));
-      scene.sceneAddOpaqueLitVisibleWithShadow(b.build(), i);
+      scene.sceneAddOpaqueLitVisibleWithoutShadow(b.build(), i);
 
       b.setColor(ExampleSceneUtilities.RGB_BLUE);
       b.setPosition(new RVectorI3F<RSpaceWorldType>(0.5f, 1.0f, -1.0f));
-      scene.sceneAddOpaqueLitVisibleWithShadow(b.build(), i);
+      scene.sceneAddOpaqueLitVisibleWithoutShadow(b.build(), i);
     }
 
     {
       final KLightSphereBuilderType b =
         KLightSphere
-          .newBuilderWithFreshID(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
+          .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setPosition(ExampleSceneUtilities.CENTER);
-      scene.sceneAddOpaqueLitVisibleWithShadow(b.build(), i);
+      scene.sceneAddOpaqueLitVisibleWithoutShadow(b.build(), i);
     }
   }
 

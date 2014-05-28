@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel.types;
 
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
@@ -28,7 +27,8 @@ import com.io7m.renderer.types.RTransformTextureType;
  */
 
 @EqualityStructural public final class KMaterialTranslucentRefractive implements
-  KMaterialTranslucentType
+  KMaterialTranslucentType,
+  KMaterialUnlitType
 {
   /**
    * Construct a new regular translucent material.
@@ -44,65 +44,64 @@ import com.io7m.renderer.types.RTransformTextureType;
 
   public static KMaterialTranslucentRefractive newMaterial(
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
-    final KMaterialNormal in_normal,
-    final KMaterialRefractive in_refractive)
+    final KMaterialNormalType in_normal,
+    final KMaterialRefractiveType in_refractive)
   {
+    KMaterialVerification.materialVerifyTranslucentRefractive(
+      in_normal,
+      in_refractive);
+
+    final String code_unlit =
+      KMaterialCodes.makeTranslucentRefractiveUnlitCode(
+        in_normal,
+        in_refractive);
+
     return new KMaterialTranslucentRefractive(
+      code_unlit,
       in_uv_matrix,
       in_normal,
       in_refractive);
   }
 
-  private final KMaterialNormal                     normal;
-  private final KMaterialRefractive                 refractive;
+  private final String                              code_unlit;
+  private final KMaterialNormalType                 normal;
+  private final KMaterialRefractiveType             refractive;
+  private boolean                                   required_uv;
+  private final int                                 textures_required;
   private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KMaterialTranslucentRefractive(
+    final String in_code_unlit,
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
-    final KMaterialNormal in_normal,
-    final KMaterialRefractive in_refractive)
+    final KMaterialNormalType in_normal,
+    final KMaterialRefractiveType in_refractive)
   {
+    this.code_unlit = NullCheck.notNull(in_code_unlit, "Unlit code");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
     this.normal = NullCheck.notNull(in_normal, "Normal");
     this.refractive = NullCheck.notNull(in_refractive, "Refractive");
-  }
 
-  @Override public boolean equals(
-    final @Nullable Object obj)
-  {
-    if (this == obj) {
-      return true;
+    {
+      int req = 0;
+      req += in_normal.texturesGetRequired();
+      this.textures_required = req;
     }
-    if (obj == null) {
-      return false;
+
+    {
+      boolean req = false;
+      req |= in_normal.materialRequiresUVCoordinates();
+      req |= in_refractive.materialRequiresUVCoordinates();
+      this.required_uv = req;
     }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KMaterialTranslucentRefractive other =
-      (KMaterialTranslucentRefractive) obj;
-    return this.normal.equals(other.normal)
-      && this.refractive.equals(other.refractive)
-      && this.uv_matrix.equals(other.uv_matrix);
   }
 
   /**
    * @return The refraction parameters for the material
    */
 
-  public KMaterialRefractive getRefractive()
+  public KMaterialRefractiveType getRefractive()
   {
     return this.refractive;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.normal.hashCode();
-    result = (prime * result) + this.refractive.hashCode();
-    result = (prime * result) + this.uv_matrix.hashCode();
-    return result;
   }
 
   @Override public
@@ -116,7 +115,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     return v.materialTranslucent(this);
   }
 
-  @Override public KMaterialNormal materialGetNormal()
+  @Override public KMaterialNormalType materialGetNormal()
   {
     return this.normal;
   }
@@ -124,6 +123,11 @@ import com.io7m.renderer.types.RTransformTextureType;
   @Override public RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix()
   {
     return this.uv_matrix;
+  }
+
+  @Override public boolean materialRequiresUVCoordinates()
+  {
+    return this.required_uv;
   }
 
   @Override public
@@ -137,56 +141,32 @@ import com.io7m.renderer.types.RTransformTextureType;
     return v.translucentRefractive(this);
   }
 
+  @Override public String materialUnlitGetCode()
+  {
+    return this.code_unlit;
+  }
+
   @Override public int texturesGetRequired()
   {
-    return this.normal.texturesGetRequired();
+    return this.textures_required;
   }
 
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param m
-   *          The normal mapping parameters
-   * @return The current material with <code>normal == m</code>.
-   */
-
-  public KMaterialTranslucentRefractive withNormal(
-    final KMaterialNormal m)
+  @Override public String toString()
   {
-    return new KMaterialTranslucentRefractive(
-      this.uv_matrix,
-      m,
-      this.refractive);
-  }
-
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param m
-   *          The refraction parameters
-   * @return The current material with <code>refractive == m</code>.
-   */
-
-  public KMaterialTranslucentRefractive withRefractive(
-    final KMaterialRefractive m)
-  {
-    return new KMaterialTranslucentRefractive(this.uv_matrix, this.normal, m);
-  }
-
-  /**
-   * Return a material representing the current material with the given
-   * modification.
-   * 
-   * @param m
-   *          The UV matrix
-   * @return The current material with <code>uv_matrix == m</code>.
-   */
-
-  public KMaterialTranslucentRefractive withUVMatrix(
-    final RMatrixI3x3F<RTransformTextureType> m)
-  {
-    return new KMaterialTranslucentRefractive(m, this.normal, this.refractive);
+    final StringBuilder b = new StringBuilder();
+    b.append("[KMaterialTranslucentRefractive code_unlit=");
+    b.append(this.code_unlit);
+    b.append(" normal=");
+    b.append(this.normal);
+    b.append(" refractive=");
+    b.append(this.refractive);
+    b.append(" textures_required=");
+    b.append(this.textures_required);
+    b.append(" uv_matrix=");
+    b.append(this.uv_matrix);
+    b.append("]");
+    final String r = b.toString();
+    assert r != null;
+    return r;
   }
 }

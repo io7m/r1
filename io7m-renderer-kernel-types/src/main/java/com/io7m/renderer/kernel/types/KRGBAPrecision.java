@@ -17,25 +17,25 @@
 package com.io7m.renderer.kernel.types;
 
 /**
- * A description of the precision of colour components in a framebuffer.
+ * A description of the precision of color components in a framebuffer.
  */
 
 public enum KRGBAPrecision
 {
   /**
-   * 16-bit half-precision floating point colour components.
+   * 16-bit half-precision floating point color components.
    */
 
   RGBA_PRECISION_16F,
 
   /**
-   * 32-bit single-precision floating point colour components.
+   * 32-bit single-precision floating point color components.
    */
 
   RGBA_PRECISION_32F,
 
   /**
-   * 8-bit unsigned fixed-point colour components.
+   * 8-bit unsigned fixed-point color components.
    */
 
   RGBA_PRECISION_8

@@ -19,9 +19,11 @@ package com.io7m.renderer.kernel.types;
 import java.util.Set;
 
 import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
+import com.io7m.renderer.types.RExceptionInstanceAlreadyShadowed;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
-import com.io7m.renderer.types.RExceptionInstancesNotDistinct;
-import com.io7m.renderer.types.RExceptionLightsNotDistinct;
+import com.io7m.renderer.types.RExceptionInstanceAlreadyUnshadowed;
+import com.io7m.renderer.types.RExceptionInstanceAlreadyVisible;
+import com.io7m.renderer.types.RExceptionLightMissingShadow;
 
 /**
  * A mutable "builder" interface for creating immutable {@link KScene}
@@ -54,23 +56,19 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    * @param instance
    *          The shadow-casting instance
    * 
-   * @throws RExceptionLightsNotDistinct
-   *           If adding <code>light</code> to the scene would result in two
-   *           <i>non-distinct</i> lights being present in the same scene.
-   * @throws RExceptionInstancesNotDistinct
-   *           If adding <code>instance</code> to the scene would result in
-   *           two <i>non-distinct</i> instances being present in the same
-   *           scene.
-   * 
-   * @see KLightID
-   * @see KInstanceID
+   * @throws RExceptionInstanceAlreadyVisible
+   *           If the given instance is already a visible instance for the
+   *           given light - an instance cannot be both visible and invisible
+   *           for a given light!
+   * @throws RExceptionLightMissingShadow
+   *           If the light has no shadow.
    */
 
   void sceneAddInvisibleWithShadow(
     final KLightType light,
     final KInstanceOpaqueType instance)
-    throws RExceptionLightsNotDistinct,
-      RExceptionInstancesNotDistinct;
+    throws RExceptionInstanceAlreadyVisible,
+      RExceptionLightMissingShadow;
 
   /**
    * <p>
@@ -93,28 +91,21 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    *          The light
    * @param instance
    *          The instance
-   * @throws RExceptionLightsNotDistinct
-   *           If adding <code>light</code> to the scene would result in two
-   *           <i>non-distinct</i> lights being present in the same scene.
    * @throws RExceptionInstanceAlreadyUnlit
    *           If <code>instance</code> has already been added to the scene
    *           without lighting.
-   * @throws RExceptionInstancesNotDistinct
-   *           If adding <code>instance</code> to the scene would result in
-   *           two <i>non-distinct</i> instances being present in the same
-   *           scene.
+   * @throws RExceptionInstanceAlreadyShadowed
+   *           If <code>instance</code> has already been added to the scene
+   *           without a shadow.
    * 
-   * @see KLightID
-   * @see KInstanceID
    * @see #sceneAddInvisibleWithShadow(KLightType, KInstanceOpaqueType)
    */
 
   void sceneAddOpaqueLitVisibleWithoutShadow(
     final KLightType light,
     final KInstanceOpaqueType instance)
-    throws RExceptionLightsNotDistinct,
-      RExceptionInstanceAlreadyUnlit,
-      RExceptionInstancesNotDistinct;
+    throws RExceptionInstanceAlreadyUnlit,
+      RExceptionInstanceAlreadyShadowed;
 
   /**
    * <p>
@@ -135,28 +126,25 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    *          The light
    * @param instance
    *          The instance
-   * @throws RExceptionLightsNotDistinct
-   *           If adding <code>light</code> to the scene would result in two
-   *           <i>non-distinct</i> lights being present in the same scene.
+   * 
    * @throws RExceptionInstanceAlreadyUnlit
    *           If <code>instance</code> has already been added to the scene
    *           without lighting.
-   * @throws RExceptionInstancesNotDistinct
-   *           If adding <code>instance</code> to the scene would result in
-   *           two <i>non-distinct</i> instances being present in the same
-   *           scene.
+   * @throws RExceptionLightMissingShadow
+   *           If the light has no shadow.
+   * @throws RExceptionInstanceAlreadyUnshadowed
+   *           If <code>instance</code> is already a non shadow-caster for the
+   *           given light.
    * 
-   * @see KLightID
-   * @see KInstanceID
    * @see #sceneAddInvisibleWithShadow(KLightType, KInstanceOpaqueType)
    */
 
   void sceneAddOpaqueLitVisibleWithShadow(
     final KLightType light,
     final KInstanceOpaqueType instance)
-    throws RExceptionLightsNotDistinct,
-      RExceptionInstanceAlreadyUnlit,
-      RExceptionInstancesNotDistinct;
+    throws RExceptionInstanceAlreadyUnlit,
+      RExceptionLightMissingShadow,
+      RExceptionInstanceAlreadyUnshadowed;
 
   /**
    * <p>
@@ -208,19 +196,13 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    *          The set of lights affecting the instance
    * @param instance
    *          The shadow-casting instance
-   * @throws RExceptionLightsNotDistinct
-   *           If adding one or more of the given lights to the scene would
-   *           result in two <i>non-distinct</i> lights being present in the
-   *           same scene.
-   * @see KLightID
    * 
    * @see #sceneAddInvisibleWithShadow(KLightType, KInstanceOpaqueType)
    */
 
   void sceneAddTranslucentLit(
     final KInstanceTranslucentLitType instance,
-    final Set<KLightType> lights)
-    throws RExceptionLightsNotDistinct;
+    final Set<KLightType> lights);
 
   /**
    * <p>

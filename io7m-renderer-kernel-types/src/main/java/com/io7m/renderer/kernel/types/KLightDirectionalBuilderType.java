@@ -31,11 +31,10 @@ public interface KLightDirectionalBuilderType
    * Construct a light.
    * </p>
    * <p>
-   * This function can be called as many times as required, yielding new (but
-   * not necessarily <i>distinct</i>) lights each time it is called.
+   * This function can be called as many times as required, yielding new
+   * lights each time it is called.
    * </p>
    * 
-   * @see KLightID
    * @return A new light based on all of the parameters given so far.
    */
 

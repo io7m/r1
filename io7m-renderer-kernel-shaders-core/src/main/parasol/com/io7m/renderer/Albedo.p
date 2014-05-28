@@ -28,19 +28,19 @@ module Albedo is
   import com.io7m.parasol.Vector4f   as V4;
 
   type t is record
-    colour : vector_4f, -- The base surface colour
-    mix    : float      -- The linear mix between the colour and texture, in the range [0, 1]
+    color : vector_4f, -- The base surface color
+    mix    : float      -- The linear mix between the color and texture, in the range [0, 1]
   end;
 
   function opaque (
     d : t
   ) : vector_4f =
-    new vector_4f (d.colour [x y z], 1.0);
+    new vector_4f (d.color [x y z], 1.0);
 
   function translucent (
     d : t
   ) : vector_4f =
-    d.colour;
+    d.color;
 
   function textured_opaque (
     t : sampler_2d,
@@ -50,7 +50,7 @@ module Albedo is
     let
       value tc = S.texture (t, u);
       value m  = F.multiply (tc [w], d.mix);
-      value c  = V3.interpolate (d.colour [x y z], tc [x y z], m);
+      value c  = V3.interpolate (d.color [x y z], tc [x y z], m);
     in
       new vector_4f (c, 1.0)
     end;
@@ -64,7 +64,7 @@ module Albedo is
       value tc = S.texture (t, u);
       value m  = F.multiply (tc [w], d.mix);
     in
-      V4.interpolate (d.colour, tc, m)
+      V4.interpolate (d.color, tc, m)
     end;
 
 end;

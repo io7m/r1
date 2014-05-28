@@ -23,13 +23,13 @@ import com.io7m.renderer.kernel.examples.ExampleSceneType;
 import com.io7m.renderer.kernel.examples.ExampleSceneUtilities;
 import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
-import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
-import com.io7m.renderer.kernel.types.KMaterialEnvironment;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentReflection;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.renderer.kernel.types.KMaterialSpecular;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegularBuilderType;
+import com.io7m.renderer.kernel.types.KMaterialSpecularConstant;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -56,31 +56,34 @@ public final class SLEnvironment1 implements ExampleSceneType
     final ExampleSceneBuilderType scene)
     throws RException
   {
-    final KMaterialOpaqueRegular material =
-      ExampleSceneUtilities.OPAQUE_MATTE_WHITE.withEnvironment(
-        KMaterialEnvironment.newEnvironmentMapped(
-          1.0f,
-          scene.cubeTexture("toronto/cube.rxc"),
-          false)).withSpecular(
-        KMaterialSpecular.newSpecularUnmapped(
-          ExampleSceneUtilities.RGB_WHITE,
-          64.0f));
+    final KMaterialOpaqueRegular material;
+    {
+      final KMaterialOpaqueRegularBuilderType b =
+        KMaterialOpaqueRegular
+          .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
+      b.setEnvironment(KMaterialEnvironmentReflection.reflection(
+        1.0f,
+        scene.cubeTexture("toronto/cube.rxc")));
+      b.setSpecular(KMaterialSpecularConstant.constant(
+        ExampleSceneUtilities.RGB_WHITE,
+        64.0f));
+      material = b.build();
+    }
 
     final KInstanceOpaqueRegular i =
       KInstanceOpaqueRegular.newInstance(
-        KMeshWithMaterialOpaqueRegular.newInstance(
-          material,
-          scene.mesh("plane2x2_PN.rmx"),
-          KFaceSelection.FACE_RENDER_FRONT),
+        scene.mesh("plane2x2.rmx"),
+        material,
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
-        ExampleSceneUtilities.IDENTITY_UV);
+        ExampleSceneUtilities.IDENTITY_UV,
+        KFaceSelection.FACE_RENDER_FRONT);
 
     {
       final KLightSphereBuilderType b =
         KLightSphere
-          .newBuilderWithFreshID(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
+          .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setPosition(ExampleSceneUtilities.CENTER);
-      scene.sceneAddOpaqueLitVisibleWithShadow(b.build(), i);
+      scene.sceneAddOpaqueLitVisibleWithoutShadow(b.build(), i);
     }
   }
 

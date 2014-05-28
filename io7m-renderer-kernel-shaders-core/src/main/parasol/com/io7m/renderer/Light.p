@@ -26,12 +26,12 @@ module Light is
   import com.io7m.parasol.Vector3f as V3;
 
   --
-  -- A basic coloured light with a position, maximum range, intensity,
+  -- A basic colored light with a position, maximum range, intensity,
   -- and falloff exponent.
   --
 
   type t is record
-    colour    : vector_3f,
+    color    : vector_3f,
     position  : vector_3f,
     intensity : float,
     range     : float,

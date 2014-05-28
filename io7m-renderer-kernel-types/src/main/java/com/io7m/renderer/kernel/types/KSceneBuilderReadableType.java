@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,29 +27,64 @@ import java.util.Set;
 public interface KSceneBuilderReadableType
 {
   /**
-   * @return A read-only map of the current set of instances present in the
-   *         scene.
+   * @return The scene's camera.
    */
 
-  Map<KInstanceID, KInstanceType> sceneGetInstances();
+  KCamera sceneGetCamera();
+
+  /**
+   * @return A read-only set of the instances present in the scene in any
+   *         form.
+   */
+
+  Set<KInstanceType> sceneGetInstances();
+
+  /**
+   * @return A read-only set of the lit (visible) opaque instances present in
+   *         the scene.
+   */
+
+  Set<KInstanceOpaqueType> sceneGetInstancesOpaqueLitVisible();
+
+  /**
+   * @return A read-only map of the current lit (visible) opaque instances
+   *         present in the scene, by light.
+   */
+
+    Map<KLightType, Set<KInstanceOpaqueType>>
+    sceneGetInstancesOpaqueLitVisibleByLight();
 
   /**
    * @return A read-only map of the current shadow-casting instances present
    *         in the scene, by light.
    */
 
-  Map<KLightID, KInstanceID> sceneGetInstancesShadowCasting();
+    Map<KLightType, Set<KInstanceOpaqueType>>
+    sceneGetInstancesOpaqueShadowCastingByLight();
 
   /**
-   * @return A read-only map of the current set of lights present in the
+   * @return A read-only set of the unlit opaque instances present in the
    *         scene.
    */
 
-  Map<KLightID, KLightType> sceneGetLights();
+  Set<KInstanceOpaqueType> sceneGetInstancesOpaqueUnlit();
+
+  /**
+   * @return A read-only set of the lights present in the scene.
+   */
+
+  Set<KLightType> sceneGetLights();
 
   /**
    * @return A read-only set of the current shadow-casing lights in the scene.
    */
 
-  Set<KLightID> sceneGetLightsShadowCasting();
+  Set<KLightType> sceneGetLightsShadowCasting();
+
+  /**
+   * @return A list of the translucents in the scene, in the order in which
+   *         they'll be rendered.
+   */
+
+  List<KTranslucentType> sceneGetTranslucents();
 }

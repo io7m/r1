@@ -16,67 +16,47 @@
 
 package com.io7m.renderer.tests.kernel.types;
 
+import net.java.quickcheck.QuickCheck;
+import net.java.quickcheck.characteristic.AbstractCharacteristic;
+import net.java.quickcheck.generator.support.DoubleGenerator;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.io7m.jnull.NullCheckException;
-import com.io7m.renderer.kernel.types.KMaterialAlpha;
-import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
-import com.io7m.renderer.tests.utilities.TestUtilities;
+import com.io7m.renderer.kernel.types.KMaterialAlphaConstant;
+import com.io7m.renderer.kernel.types.KMaterialAlphaOneMinusDot;
 
-@SuppressWarnings("static-method") public final class KMaterialAlphaTest
+@SuppressWarnings({ "static-method" }) public final class KMaterialAlphaTest
 {
-  @Test public void testAttributes()
+  @Test public void testConstant()
   {
-    final KMaterialAlpha a =
-      KMaterialAlpha.newAlpha(
-        KMaterialAlphaOpacityType.ALPHA_OPACITY_CONSTANT,
-        1.0f);
-    Assert.assertEquals(a.getOpacity(), 1.0f, 0.0f);
-    Assert.assertEquals(
-      a.getType(),
-      KMaterialAlphaOpacityType.ALPHA_OPACITY_CONSTANT);
+    QuickCheck.forAllVerbose(
+      new DoubleGenerator(),
+      new AbstractCharacteristic<Double>() {
+        @Override protected void doSpecify(
+          final Double x)
+          throws Throwable
+        {
+          final KMaterialAlphaConstant m =
+            KMaterialAlphaConstant.constant(x.floatValue());
+          Assert.assertEquals(x.floatValue(), m.getOpacity(), 0.0);
+        }
+      });
   }
 
-  @Test public void testEqualsHashCode()
+  @Test public void testDot()
   {
-    final KMaterialAlpha m0 =
-      KMaterialAlpha.newAlpha(
-        KMaterialAlphaOpacityType.ALPHA_OPACITY_CONSTANT,
-        1.0f);
-    final KMaterialAlpha m1 =
-      KMaterialAlpha.newAlpha(
-        KMaterialAlphaOpacityType.ALPHA_OPACITY_CONSTANT,
-        1.0f);
-    final KMaterialAlpha m2 =
-      KMaterialAlpha.newAlpha(
-        KMaterialAlphaOpacityType.ALPHA_OPACITY_ONE_MINUS_DOT,
-        1.0f);
-    final KMaterialAlpha m3 =
-      KMaterialAlpha.newAlpha(
-        KMaterialAlphaOpacityType.ALPHA_OPACITY_CONSTANT,
-        0.5f);
-
-    Assert.assertEquals(m0, m0);
-    Assert.assertEquals(m0, m1);
-    Assert.assertNotEquals(m0, null);
-    Assert.assertNotEquals(m0, Integer.valueOf(23));
-    Assert.assertNotEquals(m0, m2);
-    Assert.assertNotEquals(m0, m3);
-
-    Assert.assertEquals(m0.hashCode(), m1.hashCode());
-    Assert.assertNotEquals(m0.hashCode(), m2.hashCode());
-    Assert.assertNotEquals(m0.hashCode(), m3.hashCode());
-
-    Assert.assertEquals(m0.toString(), m1.toString());
-    Assert.assertNotEquals(m0.toString(), m2.toString());
-    Assert.assertNotEquals(m0.toString(), m3.toString());
-  }
-
-  @Test(expected = NullCheckException.class) public void testNull_0()
-  {
-    KMaterialAlpha.newAlpha(
-      (KMaterialAlphaOpacityType) TestUtilities.actuallyNull(),
-      1.0f);
+    QuickCheck.forAllVerbose(
+      new DoubleGenerator(),
+      new AbstractCharacteristic<Double>() {
+        @Override protected void doSpecify(
+          final Double x)
+          throws Throwable
+        {
+          final KMaterialAlphaOneMinusDot m =
+            KMaterialAlphaOneMinusDot.oneMinusDot(x.floatValue());
+          Assert.assertEquals(x.floatValue(), m.getOpacity(), 0.0);
+        }
+      });
   }
 }

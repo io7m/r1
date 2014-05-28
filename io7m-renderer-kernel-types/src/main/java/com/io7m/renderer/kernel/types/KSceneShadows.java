@@ -16,10 +16,11 @@
 
 package com.io7m.renderer.kernel.types;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 /**
@@ -28,15 +29,13 @@ import com.io7m.jnull.Nullable;
 
 @EqualityStructural public final class KSceneShadows
 {
-  private final Map<KLightID, KLightType>                           lights;
-  private final Map<KLightID, List<KInstanceOpaqueType>> shadow_casters;
+  private final Map<KLightType, Set<KInstanceOpaqueType>> shadow_casters;
 
   KSceneShadows(
-    final Map<KLightID, KLightType> in_lights,
-    final Map<KLightID, List<KInstanceOpaqueType>> in_shadow_casters)
+    final Map<KLightType, Set<KInstanceOpaqueType>> in_shadow_casters)
   {
-    this.lights = in_lights;
-    this.shadow_casters = in_shadow_casters;
+    this.shadow_casters =
+      NullCheck.notNull(in_shadow_casters, "Shadow casters");
   }
 
   @Override public boolean equals(
@@ -52,36 +51,20 @@ import com.io7m.jnull.Nullable;
       return false;
     }
     final KSceneShadows other = (KSceneShadows) obj;
-    return this.lights.equals(other.lights)
-      && this.shadow_casters.equals(other.shadow_casters);
-  }
-
-  /**
-   * @return The lights present.
-   */
-
-  public Map<KLightID, KLightType> getLights()
-  {
-    return this.lights;
+    return this.shadow_casters.equals(other.shadow_casters);
   }
 
   /**
    * @return The set of shadow casters for each light in the scene.
    */
 
-  public
-    Map<KLightID, List<KInstanceOpaqueType>>
-    getShadowCasters()
+  public Map<KLightType, Set<KInstanceOpaqueType>> getShadowCasters()
   {
     return this.shadow_casters;
   }
 
   @Override public int hashCode()
   {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.lights.hashCode();
-    result = (prime * result) + this.shadow_casters.hashCode();
-    return result;
+    return this.shadow_casters.hashCode();
   }
 }

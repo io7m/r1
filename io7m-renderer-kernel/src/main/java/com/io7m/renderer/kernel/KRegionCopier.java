@@ -50,7 +50,7 @@ import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RExceptionUserError;
+import com.io7m.renderer.types.RExceptionCopierSourceEqualsTarget;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
@@ -173,10 +173,10 @@ import com.io7m.renderer.types.RTransformTextureType;
       final AreaInclusive target_area)
       throws JCGLException
   {
-    assert source.kFramebufferGetDepthIsPackedColour() == false;
+    assert source.kFramebufferGetDepthIsPackedColor() == false;
     assert source.kFramebufferGetColorFramebuffer() == source
       .kFramebufferGetDepthPassFramebuffer();
-    assert target.kFramebufferGetDepthIsPackedColour() == false;
+    assert target.kFramebufferGetDepthIsPackedColor() == false;
     assert target.kFramebufferGetColorFramebuffer() == target
       .kFramebufferGetDepthPassFramebuffer();
 
@@ -303,8 +303,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     NullCheck.notNull(target_area, "Target area");
 
     if (source == target) {
-      throw RExceptionUserError
-        .fromAPIMisuse("Source framebuffer must not be equal to target framebuffer");
+      throw new RExceptionCopierSourceEqualsTarget(
+        "Source framebuffer must not be equal to target framebuffer");
     }
 
     try {
@@ -399,8 +399,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     NullCheck.notNull(target_area, "Target area");
 
     if (source == target) {
-      throw RExceptionUserError
-        .fromAPIMisuse("Source framebuffer must not be equal to target framebuffer");
+      throw new RExceptionCopierSourceEqualsTarget(
+        "Source framebuffer must not be equal to target framebuffer");
     }
 
     try {
@@ -498,8 +498,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     NullCheck.notNull(target_area, "Target area");
 
     if (source == target) {
-      throw RExceptionUserError
-        .fromAPIMisuse("Source framebuffer must not be equal to target framebuffer");
+      throw new RExceptionCopierSourceEqualsTarget(
+        "Source framebuffer must not be equal to target framebuffer");
     }
 
     try {
@@ -850,10 +850,10 @@ import com.io7m.renderer.types.RTransformTextureType;
       throws RException,
         JCGLException
   {
-    assert source.kFramebufferGetDepthIsPackedColour() == false;
+    assert source.kFramebufferGetDepthIsPackedColor() == false;
     assert source.kFramebufferGetColorFramebuffer() == source
       .kFramebufferGetDepthPassFramebuffer();
-    assert target.kFramebufferGetDepthIsPackedColour() == false;
+    assert target.kFramebufferGetDepthIsPackedColor() == false;
     assert target.kFramebufferGetColorFramebuffer() == target
       .kFramebufferGetDepthPassFramebuffer();
 
@@ -898,8 +898,8 @@ import com.io7m.renderer.types.RTransformTextureType;
       throws RException,
         JCGLException
   {
-    assert source.kFramebufferGetDepthIsPackedColour() == target
-      .kFramebufferGetDepthIsPackedColour();
+    assert source.kFramebufferGetDepthIsPackedColor() == target
+      .kFramebufferGetDepthIsPackedColor();
 
     this.texture_units.withContext(new KTextureUnitWithType() {
       @Override public void run(
@@ -907,7 +907,7 @@ import com.io7m.renderer.types.RTransformTextureType;
         throws JCGLException,
           RException
       {
-        if (target.kFramebufferGetDepthIsPackedColour()) {
+        if (target.kFramebufferGetDepthIsPackedColor()) {
           assert source.kFramebufferGetColorFramebuffer() != source
             .kFramebufferGetDepthPassFramebuffer();
           assert target.kFramebufferGetColorFramebuffer() != target

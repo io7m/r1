@@ -27,20 +27,20 @@ import com.io7m.renderer.kernel.examples.ExampleSceneType;
 import com.io7m.renderer.kernel.examples.ExampleSceneUtilities;
 import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
-import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
-import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.kernel.types.KLightType;
-import com.io7m.renderer.kernel.types.KMaterialAlbedo;
-import com.io7m.renderer.kernel.types.KMaterialAlpha;
-import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
-import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
+import com.io7m.renderer.kernel.types.KMaterialAlphaConstant;
+import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.renderer.kernel.types.KMaterialSpecular;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegularBuilderType;
+import com.io7m.renderer.kernel.types.KMaterialSpecularConstant;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentRegularBuilderType;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.types.RException;
@@ -86,14 +86,19 @@ public final class STranslucent0 implements ExampleSceneType
         1.0f,
         8.0f), new RVectorI3F<RSpaceWorldType>(0.0f, -1.0f, 0.0f));
 
-    final KMaterialOpaqueRegular floor_mat =
-      ExampleSceneUtilities.OPAQUE_MATTE_WHITE.withAlbedo(
-        KMaterialAlbedo.newAlbedoTextured(
-          ExampleSceneUtilities.RGBA_WHITE,
-          1.0f,
-          scene.texture("tiles_albedo.png"))).withNormal(
-        KMaterialNormal.newNormalMapped(scene
-          .texture("tiles_normal_soft.png")));
+    final KMaterialOpaqueRegular floor_mat;
+    {
+      final KMaterialOpaqueRegularBuilderType b =
+        KMaterialOpaqueRegular
+          .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
+      b.setAlbedo(KMaterialAlbedoTextured.textured(
+        ExampleSceneUtilities.RGBA_WHITE,
+        1.0f,
+        scene.texture("tiles_albedo.png")));
+      b.setNormal(KMaterialNormalMapped.mapped(scene
+        .texture("tiles_normal_soft.png")));
+      floor_mat = b.build();
+    }
 
     final RMatrixI3x3F<RTransformTextureType> floor_mat_uv =
       RMatrixI3x3F.newFromColumns(
@@ -103,36 +108,31 @@ public final class STranslucent0 implements ExampleSceneType
 
     final KInstanceOpaqueRegular floor =
       KInstanceOpaqueRegular.newInstance(
-        KMeshWithMaterialOpaqueRegular.newInstance(
-          floor_mat,
-          scene.mesh("plane2x2_PNTU.rmx"),
-          KFaceSelection.FACE_RENDER_FRONT),
+        scene.mesh("plane2x2.rmx"),
+        floor_mat,
         floor_trans,
-        floor_mat_uv);
+        floor_mat_uv,
+        KFaceSelection.FACE_RENDER_FRONT);
 
     /**
      * A glass piece.
      */
 
-    final KMaterialTranslucentRegular glass_mat =
-      ExampleSceneUtilities.TRANSLUCENT_MATTE_WHITE
-        .withAlbedo(
-          KMaterialAlbedo.newAlbedoUntextured(new RVectorI4F<RSpaceRGBAType>(
-            0f,
-            0f,
-            0f,
-            0f)))
-        .withSpecular(
-          KMaterialSpecular.newSpecularUnmapped(
-            ExampleSceneUtilities.RGB_WHITE,
-            64.0f))
-        .withNormal(
-          KMaterialNormal.newNormalMapped(scene
-            .texture("tiles_normal_soft.png")))
-        .withAlpha(
-          KMaterialAlpha.newAlpha(
-            KMaterialAlphaOpacityType.ALPHA_OPACITY_CONSTANT,
-            1.0f));
+    final KMaterialTranslucentRegular glass_mat;
+    {
+      final KMaterialTranslucentRegularBuilderType b =
+        KMaterialTranslucentRegular
+          .newBuilder(ExampleSceneUtilities.TRANSLUCENT_MATTE_WHITE);
+      b.setAlbedo(KMaterialAlbedoUntextured
+        .untextured(new RVectorI4F<RSpaceRGBAType>(0f, 0f, 0f, 0f)));
+      b.setSpecular(KMaterialSpecularConstant.constant(
+        ExampleSceneUtilities.RGB_WHITE,
+        64.0f));
+      b.setNormal(KMaterialNormalMapped.mapped(scene
+        .texture("tiles_normal_soft.png")));
+      b.setAlpha(KMaterialAlphaConstant.constant(1.0f));
+      glass_mat = b.build();
+    }
 
     final KTransformType glass_trans =
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
@@ -142,12 +142,11 @@ public final class STranslucent0 implements ExampleSceneType
 
     final KInstanceTranslucentRegular glass =
       KInstanceTranslucentRegular.newInstance(
-        KMeshWithMaterialTranslucentRegular.newInstance(
-          glass_mat,
-          scene.mesh("plane2x2_PNTU.rmx"),
-          KFaceSelection.FACE_RENDER_FRONT),
+        scene.mesh("plane2x2.rmx"),
+        glass_mat,
         glass_trans,
-        ExampleSceneUtilities.IDENTITY_UV);
+        ExampleSceneUtilities.IDENTITY_UV,
+        KFaceSelection.FACE_RENDER_FRONT);
 
     /**
      * A white light centered on the translucent piece.
@@ -213,7 +212,7 @@ public final class STranslucent0 implements ExampleSceneType
     scene.sceneAddTranslucentLit(glass, lights);
 
     for (final KLightType l : lights) {
-      scene.sceneAddOpaqueLitVisibleWithShadow(l, floor);
+      scene.sceneAddOpaqueLitVisibleWithoutShadow(l, floor);
     }
   }
 

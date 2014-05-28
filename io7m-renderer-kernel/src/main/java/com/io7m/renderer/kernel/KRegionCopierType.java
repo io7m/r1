@@ -27,9 +27,9 @@ public interface KRegionCopierType
 {
   /**
    * <p>
-   * Copy the given <code>source_area</code> from the colour buffer of
-   * <code>source</code> to the given <code>target_area</code> of the colour
-   * buffer of <code>target</code>. The colour buffer is expected to contain
+   * Copy the given <code>source_area</code> from the color buffer of
+   * <code>source</code> to the given <code>target_area</code> of the color
+   * buffer of <code>target</code>. The color buffer is expected to contain
    * depth-variance data, but the copying operation is functionally identical
    * to
    * {@link #copierCopyRGBAOnly(KFramebufferRGBAUsableType, AreaInclusive, KFramebufferRGBAUsableType, AreaInclusive)}
@@ -62,8 +62,8 @@ public interface KRegionCopierType
 
   /**
    * <p>
-   * Copy the given <code>source_area</code> from the colour buffer of
-   * <code>source</code> to the given <code>target_area</code> of the colour
+   * Copy the given <code>source_area</code> from the color buffer of
+   * <code>source</code> to the given <code>target_area</code> of the color
    * buffer of <code>target</code>.
    * </p>
    * <p>
@@ -93,9 +93,9 @@ public interface KRegionCopierType
 
   /**
    * <p>
-   * Copy the given <code>source_area</code> from the colour and depth buffers
-   * of <code>source</code> to the given <code>target_area</code> of the
-   * colour and depth buffers of <code>target</code>.
+   * Copy the given <code>source_area</code> from the color and depth buffers
+   * of <code>source</code> to the given <code>target_area</code> of the color
+   * and depth buffers of <code>target</code>.
    * </p>
    * <p>
    * If the sizes of the two areas differ, the region will be scaled to the

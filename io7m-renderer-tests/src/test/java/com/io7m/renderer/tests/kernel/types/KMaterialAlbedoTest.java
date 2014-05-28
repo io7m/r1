@@ -25,111 +25,53 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.Some;
-import com.io7m.jnull.NullCheckException;
-import com.io7m.renderer.kernel.types.KMaterialAlbedo;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.renderer.tests.FakeTexture2DStatic;
 import com.io7m.renderer.tests.types.RVectorI4FGenerator;
-import com.io7m.renderer.tests.utilities.TestUtilities;
 import com.io7m.renderer.types.RSpaceRGBAType;
 import com.io7m.renderer.types.RVectorI4F;
 
-@SuppressWarnings("static-method") public final class KMaterialAlbedoTest
+@SuppressWarnings({ "static-method", "null" }) public final class KMaterialAlbedoTest
 {
-  final RVectorI4F<RSpaceRGBAType> red   = new RVectorI4F<RSpaceRGBAType>(
-                                           1.0f,
-                                           0.0f,
-                                           0.0f,
-                                           1.0f);
-
-  final RVectorI4F<RSpaceRGBAType> white = new RVectorI4F<RSpaceRGBAType>(
-                                           1.0f,
-                                           1.0f,
-                                           1.0f,
-                                           1.0f);
-
-  @Test public void testAttributes()
+  @Test public void testUntextured()
   {
-    final Generator<Texture2DStaticUsableType> tex_gen =
-      FakeTexture2DStatic.generator(new StringGenerator());
-    final RVectorI4FGenerator<RSpaceRGBAType> colour_gen =
-      new RVectorI4FGenerator<RSpaceRGBAType>();
-
     QuickCheck.forAllVerbose(
-      new KMaterialAlbedoGenerator(colour_gen, tex_gen),
-      new AbstractCharacteristic<KMaterialAlbedo>() {
+      new RVectorI4FGenerator<RSpaceRGBAType>(),
+      new AbstractCharacteristic<RVectorI4F<RSpaceRGBAType>>() {
         @Override protected void doSpecify(
-          final KMaterialAlbedo m)
+          final RVectorI4F<RSpaceRGBAType> c)
           throws Throwable
         {
-          final RVectorI4F<RSpaceRGBAType> c = colour_gen.next();
-          Assert.assertEquals(m.withColour(c).getColour(), c);
-          Assert.assertEquals(m.withMix(0.5f).getMix(), 0.5f, 0.0f);
-
-          final Some<Texture2DStaticUsableType> t =
-            (Some<Texture2DStaticUsableType>) Option.some(tex_gen.next());
-          Assert.assertEquals(m.withTexture(t.get()).getTexture(), t);
-          Assert.assertEquals(m
-            .withTexture(t.get())
-            .withoutTexture()
-            .getTexture(), Option.none());
-
-          Assert.assertEquals(m.withTexture(t.get()).texturesGetRequired(), 1);
-          Assert.assertEquals(m.withoutTexture().texturesGetRequired(), 0);
+          final KMaterialAlbedoUntextured m =
+            KMaterialAlbedoUntextured.untextured(c);
+          Assert.assertEquals(c, m.getColor());
         }
       });
   }
 
-  @Test public void testEqualsHashCode()
+  @Test public void testTextured()
   {
-    final Texture2DStaticUsableType t0 = FakeTexture2DStatic.getDefault();
-    final Texture2DStaticUsableType t1 =
-      FakeTexture2DStatic.getDefaultWithName("other");
+    final Generator<Texture2DStaticUsableType> tg =
+      FakeTexture2DStatic.generator(new StringGenerator());
 
-    final KMaterialAlbedo m0 =
-      KMaterialAlbedo.newAlbedoTextured(this.white, 0.0f, t0);
-    final KMaterialAlbedo m1 =
-      KMaterialAlbedo.newAlbedoTextured(this.white, 0.0f, t0);
-    final KMaterialAlbedo m2 =
-      KMaterialAlbedo.newAlbedoTextured(this.red, 0.0f, t0);
-    final KMaterialAlbedo m3 =
-      KMaterialAlbedo.newAlbedoTextured(this.white, 1.0f, t0);
-    final KMaterialAlbedo m4 =
-      KMaterialAlbedo.newAlbedoTextured(this.white, 0.0f, t1);
+    QuickCheck.forAllVerbose(
+      new RVectorI4FGenerator<RSpaceRGBAType>(),
+      new AbstractCharacteristic<RVectorI4F<RSpaceRGBAType>>() {
+        @Override protected void doSpecify(
+          final RVectorI4F<RSpaceRGBAType> c)
+          throws Throwable
+        {
+          final Texture2DStaticUsableType t = tg.next();
+          final float mix = (float) Math.random();
 
-    Assert.assertEquals(m0, m0);
-    Assert.assertEquals(m0, m1);
-    Assert.assertNotEquals(m0, null);
-    Assert.assertNotEquals(m0, Integer.valueOf(23));
-    Assert.assertNotEquals(m0, m2);
-    Assert.assertNotEquals(m0, m3);
-    Assert.assertNotEquals(m0, m4);
+          final KMaterialAlbedoTextured m =
+            KMaterialAlbedoTextured.textured(c, mix, t);
 
-    Assert.assertEquals(m0.hashCode(), m1.hashCode());
-    Assert.assertNotEquals(m0.hashCode(), m2.hashCode());
-    Assert.assertNotEquals(m0.hashCode(), m3.hashCode());
-    Assert.assertNotEquals(m0.hashCode(), m4.hashCode());
-
-    Assert.assertEquals(m0.toString(), m1.toString());
-    Assert.assertNotEquals(m0.toString(), m2.toString());
-    Assert.assertNotEquals(m0.toString(), m3.toString());
-    Assert.assertNotEquals(m0.toString(), m4.toString());
-  }
-
-  @Test(expected = NullCheckException.class) public void testNull_0()
-  {
-    KMaterialAlbedo.newAlbedoTextured(
-      (RVectorI4F<RSpaceRGBAType>) TestUtilities.actuallyNull(),
-      0.0f,
-      FakeTexture2DStatic.getDefault());
-  }
-
-  @Test(expected = NullCheckException.class) public void testNull_1()
-  {
-    KMaterialAlbedo.newAlbedoTextured(
-      this.white,
-      0.0f,
-      (Texture2DStaticUsableType) TestUtilities.actuallyNull());
+          Assert.assertEquals(c, m.getColor());
+          Assert.assertEquals(mix, m.getMix(), 0.0);
+          Assert.assertEquals(t, m.getTexture());
+        }
+      });
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -43,8 +46,16 @@ import com.io7m.renderer.xml.collada.ColladaSource.ColladaSourceArray3F;
 import com.io7m.renderer.xml.collada.ColladaSource.ColladaVertices;
 import com.io7m.renderer.xml.collada.ColladaSource.Type;
 
+/**
+ * A loaded COLLADA document.
+ */
+
 public final class ColladaDocument
 {
+  /**
+   * The COLLADA namespace URI.
+   */
+
   public static final URI COLLADA_URI;
 
   static {
@@ -55,14 +66,15 @@ public final class ColladaDocument
     }
   }
 
-  private static SortedSet<ColladaSourceID> geometryLoadSourceIDs(
+  private static NavigableSet<ColladaSourceID> geometryLoadSourceIDs(
     final Elements e)
     throws RXMLException
   {
-    final TreeSet<ColladaSourceID> source_ids =
+    final NavigableSet<ColladaSourceID> source_ids =
       new TreeSet<ColladaSourceID>();
     for (int index = 0; index < e.size(); ++index) {
       final Element es = e.get(index);
+      assert es != null;
       RXMLUtilities.checkIsElement(es, "source", ColladaDocument.COLLADA_URI);
 
       final ColladaSourceID sid =
@@ -92,9 +104,10 @@ public final class ColladaDocument
     final Elements ei =
       RXMLUtilities.getChildren(e, "input", ColladaDocument.COLLADA_URI);
 
-    final ArrayList<ColladaInput> inputs = new ArrayList<ColladaInput>();
+    final List<ColladaInput> inputs = new ArrayList<ColladaInput>();
     for (int index = 0; index < ei.size(); ++index) {
       final Element ie = ei.get(index);
+      assert ie != null;
       final ColladaInput i = ColladaDocument.parseInput(ie);
       inputs.add(i);
     }
@@ -112,25 +125,27 @@ public final class ColladaDocument
 
     log.debug("Retrieved axis " + name);
 
-    if (name.equals("UP_X")) {
+    if ("UP_X".equals(name)) {
       return ColladaAxis.COLLADA_AXIS_X_UP;
     }
-    if (name.equals("UP_Y")) {
+    if ("UP_Y".equals(name)) {
       return ColladaAxis.COLLADA_AXIS_Y_UP;
     }
     return ColladaAxis.COLLADA_AXIS_Z_UP;
   }
 
-  private static Element getVerticesElementForGeometry(
-    final Element eg)
-    throws RXMLException
-  {
-    final Element em =
-      RXMLUtilities.getChild(eg, "mesh", ColladaDocument.COLLADA_URI);
-    final Element ev =
-      RXMLUtilities.getChild(em, "vertices", ColladaDocument.COLLADA_URI);
-    return ev;
-  }
+  /**
+   * Load a COLLADA document from the given document (which is expected to be
+   * schema-valid with respect to the COLLADA schema).
+   * 
+   * @param document
+   *          The document.
+   * @param log
+   *          A log interface.
+   * @return A COLLADA document.
+   * @throws RXMLException
+   *           If an XML error occurs.
+   */
 
   public static ColladaDocument newDocument(
     final Document document,
@@ -146,11 +161,14 @@ public final class ColladaDocument
   {
     RXMLUtilities.checkIsElement(ie, "input", ColladaDocument.COLLADA_URI);
 
-    final ColladaSourceID source =
-      new ColladaSourceID(RXMLUtilities
+    final String ss =
+      RXMLUtilities
         .getAttributeNonEmptyString(
           RXMLUtilities.getAttributeInDefaultNamespace(ie, "source"))
-        .substring(1));
+        .substring(1);
+    assert ss != null;
+
+    final ColladaSourceID source = new ColladaSourceID(ss);
     final ColladaSemantic s =
       ColladaSemantic.fromName(RXMLUtilities
         .getAttributeNonEmptyString(RXMLUtilities
@@ -163,15 +181,16 @@ public final class ColladaDocument
     return new ColladaInput(source, s, offset);
   }
 
-  private static ArrayList<ColladaInput> parseInputs(
+  private static List<ColladaInput> parseInputs(
     final Element e)
     throws RXMLException
   {
-    final ArrayList<ColladaInput> inputs = new ArrayList<ColladaInput>();
+    final List<ColladaInput> inputs = new ArrayList<ColladaInput>();
     final Elements eis =
       RXMLUtilities.getChildren(e, "input", ColladaDocument.COLLADA_URI);
     for (int index = 0; index < eis.size(); ++index) {
       final Element ei = eis.get(index);
+      assert ei != null;
       final ColladaInput i = ColladaDocument.parseInput(ei);
       inputs.add(i);
     }
@@ -235,14 +254,14 @@ public final class ColladaDocument
     return source;
   }
 
-  private final XPathContext                                xpc;
-  private final StringBuilder                               message;
-  private final LogUsableType                               log;
-  private final HashMap<ColladaSourceID, ColladaSource>     sources;
-  private final HashMap<ColladaGeometryID, ColladaGeometry> geometries;
-  private final Document                                    document;
-  private final LogUsableType                               log_source;
-  private final LogUsableType                               log_geometry;
+  private final XPathContext                            xpc;
+  private final StringBuilder                           message;
+  private final LogUsableType                           log;
+  private final Map<ColladaSourceID, ColladaSource>     sources;
+  private final Map<ColladaGeometryID, ColladaGeometry> geometries;
+  private final Document                                document;
+  private final LogUsableType                           log_source;
+  private final LogUsableType                           log_geometry;
 
   private ColladaDocument(
     final Document in_document,
@@ -284,6 +303,7 @@ public final class ColladaDocument
 
     for (int index = 0; index < nodes.size(); ++index) {
       final Element e = (Element) nodes.get(index);
+      assert e != null;
       this.geometryLoad(e);
     }
   }
@@ -298,7 +318,9 @@ public final class ColladaDocument
       this.message.append(id);
       this.message.append(": ");
       this.message.append(cg);
-      this.log_geometry.debug(this.message.toString());
+      final String r = this.message.toString();
+      assert r != null;
+      this.log_geometry.debug(r);
     }
 
     this.geometries.put(id, cg);
@@ -359,7 +381,7 @@ public final class ColladaDocument
       RXMLUtilities
         .checkIsElement(e, "polylist", ColladaDocument.COLLADA_URI);
 
-      final ArrayList<ColladaInput> inputs = ColladaDocument.parseInputs(e);
+      final List<ColladaInput> inputs = ColladaDocument.parseInputs(e);
 
       final int pcount =
         RXMLUtilities.getAttributeInteger(RXMLUtilities
@@ -395,17 +417,16 @@ public final class ColladaDocument
        */
 
       final int indices_per_vertex = inputs.size();
-      final ArrayList<ColladaPoly> polygons = new ArrayList<ColladaPoly>();
+      final List<ColladaPoly> polygons = new ArrayList<ColladaPoly>();
 
       int poly_offset = 0;
       for (int index = 0; index < vcs.length; ++index) {
         final int vcount = Integer.valueOf(vcs[index]).intValue();
 
-        final ArrayList<ColladaVertex> vertices =
-          new ArrayList<ColladaVertex>();
+        final List<ColladaVertex> vertices = new ArrayList<ColladaVertex>();
         for (int v = 0; v < vcount; ++v) {
           final int vertex_offset = poly_offset + (v * indices_per_vertex);
-          final ArrayList<Integer> indices = new ArrayList<Integer>();
+          final List<Integer> indices = new ArrayList<Integer>();
           for (int i = 0; i < indices_per_vertex; ++i) {
             final Integer value = Integer.valueOf(ps[vertex_offset + i]);
             indices.add(value);
@@ -438,6 +459,13 @@ public final class ColladaDocument
     }
   }
 
+  /**
+   * @param id
+   *          The identifier.
+   * @return The geometry with the given <code>id</code>, or <code>null</code>
+   *         if it does not exist.
+   */
+
   public @Nullable ColladaGeometry getGeometry(
     final ColladaGeometryID id)
   {
@@ -445,28 +473,21 @@ public final class ColladaDocument
     return this.geometries.get(id);
   }
 
-  private Element getGeometryElement(
-    final ColladaGeometryID id)
-  {
-    final StringBuilder query = new StringBuilder();
-    query.append("/c:COLLADA/c:library_geometries/c:geometry[@id='");
-    query.append(id.getActual());
-    query.append("']");
+  /**
+   * @return The set of geometry IDs in the document.
+   */
 
-    final Nodes nodes = this.document.query(query.toString(), this.xpc);
-
-    if (nodes.size() != 1) {
-      throw new IllegalArgumentException(
-        "Expected exactly one geometry with id " + id);
-    }
-
-    return (Element) nodes.get(0);
-  }
-
-  public SortedSet<ColladaGeometryID> getGeometryIDs()
+  public NavigableSet<ColladaGeometryID> getGeometryIDs()
   {
     return new TreeSet<ColladaGeometryID>(this.geometries.keySet());
   }
+
+  /**
+   * @param id
+   *          The identifier.
+   * @return The source with the given <code>id</code>, or <code>null</code>
+   *         if it does not exist.
+   */
 
   public @Nullable ColladaSource getSource(
     final ColladaSourceID id)
@@ -475,7 +496,11 @@ public final class ColladaDocument
     return this.sources.get(id);
   }
 
-  public SortedSet<ColladaSourceID> getSourceIDs()
+  /**
+   * @return The set of source IDs in the document.
+   */
+
+  public NavigableSet<ColladaSourceID> getSourceIDs()
   {
     return new TreeSet<ColladaSourceID>(this.sources.keySet());
   }
@@ -617,6 +642,7 @@ public final class ColladaDocument
 
     for (int index = 0; index < nodes.size(); ++index) {
       final Element es = (Element) nodes.get(index);
+      assert es != null;
 
       final ColladaSourceID id =
         new ColladaSourceID(

@@ -67,7 +67,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   }
 
   private final KRegionCopierType         copier;
-  private final VectorM3F                 fog_colour;
+  private final VectorM3F                 fog_color;
   private final JCGLImplementationType    gi;
   private final LogUsableType             log;
   private final KUnitQuadUsableType       quad;
@@ -90,7 +90,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       NullCheck.notNull(in_rgba_cache, "RGBA framebuffer cache");
     this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
     this.quad = NullCheck.notNull(in_quad, "Quad");
-    this.fog_colour = new VectorM3F(0.1f, 0.1f, 0.1f);
+    this.fog_color = new VectorM3F(0.1f, 0.1f, 0.1f);
   }
 
   private
@@ -113,7 +113,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
       gc.blendingDisable();
       gc.colorBufferMask(true, true, true, true);
-      gc.colorBufferClearV3f(this.fog_colour);
+      gc.colorBufferClearV3f(this.fog_color);
       gc.cullingDisable();
       gc.viewportSet(output.kFramebufferGetArea());
 
@@ -146,8 +146,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
               input.kFramebufferGetDepthTexture());
 
             p.programUniformPutVector3f(
-              "fog.colour",
-              KPostprocessorFog.this.fog_colour);
+              "fog.color",
+              KPostprocessorFog.this.fog_color);
             p.programUniformPutTextureUnit("t_image", image_unit);
             p.programUniformPutTextureUnit("t_image_depth", depth_unit);
             p.programExecute(new JCBProgramProcedureType<JCGLException>() {

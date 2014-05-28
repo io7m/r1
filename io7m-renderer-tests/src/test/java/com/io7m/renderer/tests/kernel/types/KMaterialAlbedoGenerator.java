@@ -19,32 +19,34 @@ package com.io7m.renderer.tests.kernel.types;
 import net.java.quickcheck.Generator;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.renderer.kernel.types.KMaterialAlbedo;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoType;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.renderer.types.RSpaceRGBAType;
 import com.io7m.renderer.types.RVectorI4F;
 
-public final class KMaterialAlbedoGenerator implements
-  Generator<KMaterialAlbedo>
+@SuppressWarnings("null") public final class KMaterialAlbedoGenerator implements
+  Generator<KMaterialAlbedoType>
 {
   private final Generator<Texture2DStaticUsableType>  tex_gen;
   private final Generator<RVectorI4F<RSpaceRGBAType>> vec_gen;
 
   public KMaterialAlbedoGenerator(
-    final Generator<RVectorI4F<RSpaceRGBAType>> vec_gen1,
-    final Generator<Texture2DStaticUsableType> tex_gen1)
+    final Generator<RVectorI4F<RSpaceRGBAType>> in_vec_gen,
+    final Generator<Texture2DStaticUsableType> in_tex_gen)
   {
-    this.vec_gen = vec_gen1;
-    this.tex_gen = tex_gen1;
+    this.vec_gen = in_vec_gen;
+    this.tex_gen = in_tex_gen;
   }
 
-  @SuppressWarnings("null") @Override public KMaterialAlbedo next()
+  @Override public KMaterialAlbedoType next()
   {
     if (Math.random() > 0.5) {
-      return KMaterialAlbedo.newAlbedoTextured(
+      return KMaterialAlbedoTextured.textured(
         this.vec_gen.next(),
         (float) Math.random(),
         this.tex_gen.next());
     }
-    return KMaterialAlbedo.newAlbedoUntextured(this.vec_gen.next());
+    return KMaterialAlbedoUntextured.untextured(this.vec_gen.next());
   }
 }

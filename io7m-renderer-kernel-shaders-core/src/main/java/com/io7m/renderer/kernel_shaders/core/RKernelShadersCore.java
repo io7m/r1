@@ -16,11 +16,16 @@
 
 package com.io7m.renderer.kernel_shaders.core;
 
+import com.io7m.junreachable.UnreachableCodeException;
+
 /**
  * Placeholder class for locating files by class resource.
  */
 
 public final class RKernelShadersCore
 {
-  // Nothing
+  private RKernelShadersCore()
+  {
+    throw new UnreachableCodeException();
+  }
 }

@@ -24,7 +24,6 @@ import com.io7m.renderer.kernel.examples.ExampleSceneType;
 import com.io7m.renderer.kernel.examples.ExampleSceneUtilities;
 import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
-import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
@@ -70,38 +69,35 @@ public final class SLEmpty1 implements ExampleSceneType
 
     final KInstanceOpaqueRegular i0 =
       KInstanceOpaqueRegular.newInstance(
-        KMeshWithMaterialOpaqueRegular.newInstance(
-          ExampleSceneUtilities.OPAQUE_MATTE_BLUE,
-          scene.mesh("plane2x2_PN.rmx"),
-          KFaceSelection.FACE_RENDER_FRONT),
+        scene.mesh("plane2x2.rmx"),
+        ExampleSceneUtilities.OPAQUE_MATTE_BLUE,
         left,
-        ExampleSceneUtilities.IDENTITY_UV);
+        ExampleSceneUtilities.IDENTITY_UV,
+        KFaceSelection.FACE_RENDER_FRONT);
 
     final KInstanceOpaqueRegular i1 =
       KInstanceOpaqueRegular.newInstance(
-        KMeshWithMaterialOpaqueRegular.newInstance(
-          ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
-          scene.mesh("plane2x2_PN.rmx"),
-          KFaceSelection.FACE_RENDER_FRONT),
+        scene.mesh("plane2x2.rmx"),
+        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
-        ExampleSceneUtilities.IDENTITY_UV);
+        ExampleSceneUtilities.IDENTITY_UV,
+        KFaceSelection.FACE_RENDER_FRONT);
 
     final KInstanceOpaqueRegular i2 =
       KInstanceOpaqueRegular.newInstance(
-        KMeshWithMaterialOpaqueRegular.newInstance(
-          ExampleSceneUtilities.OPAQUE_MATTE_RED,
-          scene.mesh("plane2x2_PN.rmx"),
-          KFaceSelection.FACE_RENDER_FRONT),
+        scene.mesh("plane2x2.rmx"),
+        ExampleSceneUtilities.OPAQUE_MATTE_RED,
         right,
-        ExampleSceneUtilities.IDENTITY_UV);
+        ExampleSceneUtilities.IDENTITY_UV,
+        KFaceSelection.FACE_RENDER_FRONT);
 
-    scene.sceneAddOpaqueLitVisibleWithShadow(
+    scene.sceneAddOpaqueLitVisibleWithoutShadow(
       ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE,
       i0);
-    scene.sceneAddOpaqueLitVisibleWithShadow(
+    scene.sceneAddOpaqueLitVisibleWithoutShadow(
       ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE,
       i1);
-    scene.sceneAddOpaqueLitVisibleWithShadow(
+    scene.sceneAddOpaqueLitVisibleWithoutShadow(
       ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE,
       i2);
   }

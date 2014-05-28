@@ -18,15 +18,19 @@ package com.io7m.renderer.tests.kernel.types;
 
 import net.java.quickcheck.Generator;
 
-import com.io7m.renderer.kernel.types.KMaterialRefractive;
+import com.io7m.renderer.kernel.types.KMaterialRefractiveMasked;
+import com.io7m.renderer.kernel.types.KMaterialRefractiveType;
+import com.io7m.renderer.kernel.types.KMaterialRefractiveUnmasked;
 
 public final class KMaterialRefractiveGenerator implements
-  Generator<KMaterialRefractive>
+  Generator<KMaterialRefractiveType>
 {
-  @Override public KMaterialRefractive next()
+  @Override public KMaterialRefractiveType next()
   {
-    return KMaterialRefractive.newRefractive(
-      (float) Math.random(),
-      Math.random() > 0.5);
+    if (Math.random() > 0.5) {
+      return KMaterialRefractiveUnmasked.unmasked((float) Math.random());
+    }
+
+    return KMaterialRefractiveMasked.masked((float) Math.random());
   }
 }

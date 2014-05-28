@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,10 +16,28 @@
 
 package com.io7m.renderer.xml.rmx;
 
+/**
+ * The type of mesh attributes.
+ */
+
 public enum RXMLMeshAttribute
 {
+  /**
+   * Normal vectors.
+   */
+
   NORMAL_3F,
+
+  /**
+   * Tangent vectors, with the fourth component indicating whether or not the
+   * vector needs to be inverted.
+   */
+
   TANGENT_4F,
-  TANGENT_3F_BITANGENT_3F,
+
+  /**
+   * UV coordinates.
+   */
+
   UV_2F
 }

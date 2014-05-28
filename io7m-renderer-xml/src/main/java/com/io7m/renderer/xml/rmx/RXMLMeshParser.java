@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.xml.rmx;
 
-import java.util.EnumSet;
-
 import nu.xom.Attribute;
 import nu.xom.Document;
 import nu.xom.Element;
@@ -34,29 +32,38 @@ import com.io7m.renderer.types.RVectorI4F;
 import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.RXMLUtilities;
 
+/**
+ * A mesh parser implementation that parses a document and delivers events to
+ * a given {@link RXMLMeshParserEventsType} interface.
+ * 
+ * @param <E>
+ *          The type of exceptions raised by the event interface.
+ */
+
 public final class RXMLMeshParser<E extends Throwable>
 {
-  private static void checkVersion(
-    final Element e)
-    throws RXMLException
-  {
-    final Attribute a =
-      RXMLUtilities.getAttribute(e, "version", RXMLConstants.MESHES_URI);
-    final int version = RXMLUtilities.getAttributeInteger(a);
-    if (version != RXMLConstants.MESHES_VERSION) {
-      final StringBuilder message = new StringBuilder();
-      message.append("Unexpected version ");
-      message.append(version);
-      message.append(", supported version is ");
-      message.append(RXMLConstants.MESHES_VERSION);
-      throw RXMLException.validityException(new ValidityException(message
-        .toString()));
-    }
-  }
+  /**
+   * Construct a new parser from the given document, which is expected to be
+   * schema-valid.
+   * 
+   * @param <E>
+   *          The type of exceptions raised by the parser.
+   * @param d
+   *          The document.
+   * @param events
+   *          The parser events interface.
+   * @return A parser.
+   * 
+   * 
+   * @throws E
+   *           If required.
+   * @throws RXMLException
+   *           If required.
+   */
 
   public static <E extends Throwable> RXMLMeshParser<E> parseFromDocument(
     final Document d,
-    final RXMLMeshParserEvents<E> events)
+    final RXMLMeshParserEventsType<E> events)
     throws E,
       RXMLException
   {
@@ -66,9 +73,28 @@ public final class RXMLMeshParser<E extends Throwable>
     return new RXMLMeshParser<E>(r, events);
   }
 
+  /**
+   * Construct a new parser from the given element, which is expected to be
+   * schema-valid.
+   * 
+   * @param <E>
+   *          The type of exceptions raised by the parser.
+   * @param e
+   *          The element.
+   * @param events
+   *          The parser events interface.
+   * @return A parser.
+   * 
+   * 
+   * @throws E
+   *           If required.
+   * @throws RXMLException
+   *           If required.
+   */
+
   public static <E extends Throwable> RXMLMeshParser<E> parseFromElement(
     final Element e,
-    final RXMLMeshParserEvents<E> events)
+    final RXMLMeshParserEventsType<E> events)
     throws E,
       RXMLException
   {
@@ -78,12 +104,12 @@ public final class RXMLMeshParser<E extends Throwable>
 
   private static <E extends Throwable> void parseTriangles(
     final Element e,
-    final RXMLMeshParserEvents<E> events)
+    final RXMLMeshParserEventsType<E> events)
     throws E,
 
       RXMLException
   {
-    assert e.getLocalName().equals("triangles");
+    assert "triangles".equals(e.getLocalName());
 
     final int count =
       RXMLUtilities.getAttributeInteger(RXMLUtilities.getAttribute(
@@ -134,68 +160,11 @@ public final class RXMLMeshParser<E extends Throwable>
     events.eventMeshTrianglesEnded();
   }
 
-  private static RXMLMeshType parseType(
-    final Element e)
-  {
-    assert e.getLocalName().equals("type");
-
-    final EnumSet<RXMLMeshAttribute> attributes =
-      EnumSet.noneOf(RXMLMeshAttribute.class);
-    assert attributes != null;
-
-    final Element en =
-      RXMLUtilities.getOptionalChild(
-        e,
-        "attribute-normal-3f",
-        RXMLConstants.MESHES_URI);
-
-    if (en != null) {
-      attributes.add(RXMLMeshAttribute.NORMAL_3F);
-    }
-
-    final Element et =
-      RXMLUtilities.getOptionalChild(
-        e,
-        "attribute-tangent-4f",
-        RXMLConstants.MESHES_URI);
-
-    if (et != null) {
-      attributes.add(RXMLMeshAttribute.TANGENT_4F);
-    }
-
-    /**
-     * If bitangent-3f is present, then tangent-3f must be too, if the
-     * document is schema-valid.
-     */
-
-    final Element eb =
-      RXMLUtilities.getOptionalChild(
-        e,
-        "attribute-bitangent-3f",
-        RXMLConstants.MESHES_URI);
-
-    if (eb != null) {
-      attributes.add(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F);
-    }
-
-    final Element eu =
-      RXMLUtilities.getOptionalChild(
-        e,
-        "attribute-uv-2f",
-        RXMLConstants.MESHES_URI);
-
-    if (eu != null) {
-      attributes.add(RXMLMeshAttribute.UV_2F);
-    }
-
-    return new RXMLMeshType(attributes);
-  }
-
   private static RVectorI3F<RSpaceObjectType> parseVertexPosition(
     final Element v)
     throws RXMLException
   {
-    assert v.getLocalName().equals("v");
+    assert "v".equals(v.getLocalName());
 
     final Element p =
       RXMLUtilities.getChild(v, "p", RXMLConstants.MESHES_URI);
@@ -206,13 +175,12 @@ public final class RXMLMeshParser<E extends Throwable>
 
   private static <E extends Throwable> void parseVertices(
     final Element ev,
-    final RXMLMeshType type,
-    final RXMLMeshParserEvents<E> events)
+    final RXMLMeshParserEventsType<E> events)
     throws E,
 
       RXMLException
   {
-    assert ev.getLocalName().equals("vertices");
+    assert "vertices".equals(ev.getLocalName());
 
     final VectorM3F bounds_lower =
       new VectorM3F(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
@@ -263,7 +231,7 @@ public final class RXMLMeshParser<E extends Throwable>
 
       events.eventMeshVertexPosition(index, position);
 
-      if (type.hasNormal()) {
+      {
         final Element n =
           RXMLUtilities.getChild(v, "n", RXMLConstants.MESHES_URI);
         final RVectorI3F<RSpaceObjectType> vn =
@@ -273,17 +241,7 @@ public final class RXMLMeshParser<E extends Throwable>
         events.eventMeshVertexNormal(index, vn);
       }
 
-      if (type.hasTangent3f()) {
-        final Element t =
-          RXMLUtilities.getChild(v, "t3", RXMLConstants.MESHES_URI);
-        final RVectorI3F<RSpaceObjectType> vt =
-          RXMLUtilities.getElementAttributesVector3f(
-            t,
-            RXMLConstants.MESHES_URI);
-        events.eventMeshVertexTangent3f(index, vt);
-      }
-
-      if (type.hasTangent4f()) {
+      {
         final Element t =
           RXMLUtilities.getChild(v, "t4", RXMLConstants.MESHES_URI);
         final RVectorI4F<RSpaceObjectType> vt =
@@ -293,17 +251,7 @@ public final class RXMLMeshParser<E extends Throwable>
         events.eventMeshVertexTangent4f(index, vt);
       }
 
-      if (type.hasBitangent()) {
-        final Element t =
-          RXMLUtilities.getChild(v, "b", RXMLConstants.MESHES_URI);
-        final RVectorI3F<RSpaceObjectType> vb =
-          RXMLUtilities.getElementAttributesVector3f(
-            t,
-            RXMLConstants.MESHES_URI);
-        events.eventMeshVertexBitangent(index, vb);
-      }
-
-      if (type.hasUV()) {
+      {
         final Element u =
           RXMLUtilities.getChild(v, "u", RXMLConstants.MESHES_URI);
         final RVectorI2F<RSpaceTextureType> vu =
@@ -323,11 +271,11 @@ public final class RXMLMeshParser<E extends Throwable>
         .getYF(), bounds_upper.getZF()));
   }
 
-  private final RXMLMeshParserEvents<E> events;
+  private final RXMLMeshParserEventsType<E> events;
 
   private RXMLMeshParser(
     final Element e,
-    final RXMLMeshParserEvents<E> in_events)
+    final RXMLMeshParserEventsType<E> in_events)
     throws E,
       RXMLException
   {
@@ -337,7 +285,6 @@ public final class RXMLMeshParser<E extends Throwable>
       this.events.eventMeshStarted();
 
       RXMLUtilities.checkIsElement(e, "mesh", RXMLConstants.MESHES_URI);
-      RXMLMeshParser.checkVersion(e);
 
       final Attribute na =
         RXMLUtilities.getAttribute(e, "name", RXMLConstants.MESHES_URI);
@@ -345,14 +292,9 @@ public final class RXMLMeshParser<E extends Throwable>
       assert nav != null;
       in_events.eventMeshName(nav);
 
-      final Element et =
-        RXMLUtilities.getChild(e, "type", RXMLConstants.MESHES_URI);
-      final RXMLMeshType mt = RXMLMeshParser.parseType(et);
-      in_events.eventMeshType(mt);
-
       final Element ev =
         RXMLUtilities.getChild(e, "vertices", RXMLConstants.MESHES_URI);
-      RXMLMeshParser.parseVertices(ev, mt, in_events);
+      RXMLMeshParser.parseVertices(ev, in_events);
 
       final Element etr =
         RXMLUtilities.getChild(e, "triangles", RXMLConstants.MESHES_URI);

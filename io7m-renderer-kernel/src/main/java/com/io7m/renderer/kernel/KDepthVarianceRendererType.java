@@ -52,12 +52,11 @@ public interface KDepthVarianceRendererType extends KRendererType
    *           If an error occurs during rendering
    */
 
-    void
-    rendererEvaluateDepthVariance(
-      final RMatrixI4x4F<RTransformViewType> view,
-      final RMatrixI4x4F<RTransformProjectionType> projection,
-      final Map<KMaterialDepthVarianceLabel, List<KInstanceOpaqueType>> batches,
-      final KFramebufferDepthVarianceUsableType framebuffer,
-      final OptionType<KFaceSelection> faces)
-      throws RException;
+  void rendererEvaluateDepthVariance(
+    final RMatrixI4x4F<RTransformViewType> view,
+    final RMatrixI4x4F<RTransformProjectionType> projection,
+    final Map<String, List<KInstanceOpaqueType>> batches,
+    final KFramebufferDepthVarianceUsableType framebuffer,
+    final OptionType<KFaceSelection> faces)
+    throws RException;
 }

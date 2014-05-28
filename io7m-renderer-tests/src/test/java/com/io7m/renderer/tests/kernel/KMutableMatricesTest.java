@@ -22,13 +22,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.io7m.jcanephora.ArrayAttributeDescriptor;
 import com.io7m.jcanephora.ArrayBufferType;
 import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.ArrayDescriptorBuilderType;
 import com.io7m.jcanephora.IndexBufferType;
 import com.io7m.jcanephora.JCGLExceptionAttributeDuplicate;
-import com.io7m.jcanephora.JCGLScalarType;
 import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.UsageHint;
@@ -51,25 +49,34 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
-import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceType;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
-import com.io7m.renderer.kernel.types.KMaterialAlbedo;
-import com.io7m.renderer.kernel.types.KMaterialEmissive;
-import com.io7m.renderer.kernel.types.KMaterialEnvironment;
-import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
+import com.io7m.renderer.kernel.types.KMaterialDepthConstant;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveNone;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentNone;
+import com.io7m.renderer.kernel.types.KMaterialNormalVertex;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.renderer.kernel.types.KMaterialSpecular;
+import com.io7m.renderer.kernel.types.KMaterialSpecularNone;
 import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.kernel.types.KMeshAttributes;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.tests.FakeArrayBuffer;
+import com.io7m.renderer.tests.FakeCapabilities;
 import com.io7m.renderer.tests.FakeIndexBuffer;
 import com.io7m.renderer.tests.FakeTexture2DStatic;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionMaterialMissingAlbedoTexture;
+import com.io7m.renderer.types.RExceptionMaterialMissingSpecularTexture;
+import com.io7m.renderer.types.RExceptionMatricesInstanceActive;
+import com.io7m.renderer.types.RExceptionMatricesObserverActive;
+import com.io7m.renderer.types.RExceptionMatricesObserverInactive;
+import com.io7m.renderer.types.RExceptionMatricesProjectiveActive;
+import com.io7m.renderer.types.RExceptionMatricesProjectiveInactive;
 import com.io7m.renderer.types.RExceptionUserError;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RMatrixI4x4F;
@@ -124,6 +131,8 @@ import com.io7m.renderer.types.RVectorI4F;
       final Integer v = Integer.valueOf(23);
       assert v != null;
 
+      final FakeCapabilities caps = new FakeCapabilities();
+
       final KLightProjectiveBuilderType b = KLightProjective.newBuilder();
       b.setColor(colour);
       b.setFalloff(falloff);
@@ -134,7 +143,7 @@ import com.io7m.renderer.types.RVectorI4F;
       b.setRange(range);
       b.setShadowOption(shadow);
       b.setTexture(texture);
-      return b.build();
+      return b.build(caps);
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
     }
@@ -147,10 +156,10 @@ import com.io7m.renderer.types.RVectorI4F;
         RMatrixI3x3F.identity();
 
       final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
-      b.addAttribute(ArrayAttributeDescriptor.newAttribute(
-        "position",
-        JCGLScalarType.TYPE_FLOAT,
-        3));
+      b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
+      b.addAttribute(KMeshAttributes.ATTRIBUTE_NORMAL);
+      b.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
+      b.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
 
       final ArrayDescriptor d = b.build();
       final ArrayBufferType array =
@@ -174,31 +183,25 @@ import com.io7m.renderer.types.RVectorI4F;
 
       final RVectorI4F<RSpaceRGBAType> colour =
         new RVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.0f);
-      final KMaterialAlbedo albedo =
-        KMaterialAlbedo.newAlbedoUntextured(colour);
-      final KMaterialEmissive emissive = KMaterialEmissive.newEmissiveNone();
-      final KMaterialEnvironment environment =
-        KMaterialEnvironment.newEnvironmentUnmapped();
-      final KMaterialNormal normal = KMaterialNormal.newNormalUnmapped();
+      final KMaterialAlbedoUntextured albedo =
+        KMaterialAlbedoUntextured.untextured(colour);
+      final KMaterialEmissiveNone emissive = KMaterialEmissiveNone.none();
+      final KMaterialEnvironmentNone environment =
+        KMaterialEnvironmentNone.none();
+      final KMaterialNormalVertex normal = KMaterialNormalVertex.vertex();
 
       final RVectorI3F<RSpaceRGBType> rgb = RVectorI3F.zero();
-      final KMaterialSpecular specular =
-        KMaterialSpecular.newSpecularUnmapped(rgb, 0.0f);
+      final KMaterialSpecularNone specular = KMaterialSpecularNone.none();
 
       final KMaterialOpaqueRegular material =
         KMaterialOpaqueRegular.newMaterial(
           uv_matrix,
-          normal,
           albedo,
+          KMaterialDepthConstant.constant(),
           emissive,
           environment,
+          normal,
           specular);
-
-      final KMeshWithMaterialOpaqueRegular kmi =
-        KMeshWithMaterialOpaqueRegular.newInstance(
-          material,
-          mesh,
-          KFaceSelection.FACE_RENDER_FRONT);
 
       final QuaternionI4F orientation = new QuaternionI4F();
       final VectorI3F scale = new VectorI3F(0, 0, 0);
@@ -208,11 +211,22 @@ import com.io7m.renderer.types.RVectorI4F;
         KTransformOST.newTransform(orientation, scale, translation);
 
       final KInstanceOpaqueRegular kmit =
-        KInstanceOpaqueRegular.newInstance(kmi, trans, uv_matrix);
+        KInstanceOpaqueRegular.newInstance(
+          mesh,
+          material,
+          trans,
+          uv_matrix,
+          KFaceSelection.FACE_RENDER_FRONT);
 
       return kmit;
     } catch (final JCGLExceptionAttributeDuplicate x) {
       throw new UnreachableCodeException(x);
+    } catch (final RExceptionMaterialMissingAlbedoTexture e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMaterialMissingSpecularTexture e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RException e) {
+      throw new UnreachableCodeException(e);
     }
   }
 
@@ -570,6 +584,125 @@ import com.io7m.renderer.types.RVectorI4F;
     saved.get().getMatrixViewInverse();
   }
 
+  @Test(expected = RExceptionMatricesObserverInactive.class) public
+    void
+    testWithInstanceWithProjectiveObserverInactive()
+      throws RException
+  {
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
+      RMatrixI4x4F.identity();
+    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
+    final AtomicReference<MatricesProjectiveLightType> r =
+      KMutableMatricesTest.saveProjectiveDangerously(mm, projection, view);
+
+    final MatricesInstanceWithProjectiveFunctionType<Object, RException> f =
+      new MatricesInstanceWithProjectiveFunctionType<Object, RException>() {
+        @Override public Object run(
+          final MatricesInstanceWithProjectiveType p)
+          throws RException
+        {
+          return Unit.unit();
+        }
+      };
+
+    final KInstanceType i = KMutableMatricesTest.makeMeshInstance();
+    r.get().withInstance(i, f);
+  }
+
+  @Test(expected = RExceptionMatricesProjectiveInactive.class) public
+    void
+    testWithInstanceWithProjectiveProjectiveInactive()
+      throws RException
+  {
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
+      RMatrixI4x4F.identity();
+    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
+
+    mm.withObserver(
+      view,
+      projection,
+      new MatricesObserverFunctionType<Unit, RException>() {
+        @Override public Unit run(
+          final MatricesObserverType o)
+          throws RException,
+            RException
+        {
+          final AtomicReference<MatricesProjectiveLightType> saved =
+            new AtomicReference<MatricesProjectiveLightType>();
+          final KLightProjective p = KMutableMatricesTest.makeKProjective();
+          final MatricesProjectiveLightFunctionType<Unit, RException> f =
+            new MatricesProjectiveLightFunctionType<Unit, RException>() {
+              @Override public Unit run(
+                final MatricesProjectiveLightType mp)
+                throws RException,
+                  RException
+              {
+                saved.set(mp);
+                return Unit.unit();
+              }
+            };
+
+          o.withProjectiveLight(p, f);
+
+          final MatricesInstanceWithProjectiveFunctionType<Unit, RException> f2 =
+            new MatricesInstanceWithProjectiveFunctionType<Unit, RException>() {
+              @Override public Unit run(
+                final MatricesInstanceWithProjectiveType _)
+                throws RException
+              {
+                return Unit.unit();
+              }
+            };
+
+          final KInstanceType i = KMutableMatricesTest.makeMeshInstance();
+          saved.get().withInstance(i, f2);
+          return Unit.unit();
+        }
+      });
+
+    final AtomicReference<MatricesProjectiveLightType> r =
+      KMutableMatricesTest.saveProjectiveDangerously(mm, projection, view);
+
+    final MatricesInstanceWithProjectiveFunctionType<Object, RException> f =
+      new MatricesInstanceWithProjectiveFunctionType<Object, RException>() {
+        @Override public Object run(
+          final MatricesInstanceWithProjectiveType p)
+          throws RException
+        {
+          return Unit.unit();
+        }
+      };
+
+    final KInstanceType i = KMutableMatricesTest.makeMeshInstance();
+    r.get().withInstance(i, f);
+  }
+
+  @Test(expected = RExceptionMatricesObserverInactive.class) public
+    void
+    testWithProjectiveObserverInactive()
+      throws RException
+  {
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final AtomicReference<MatricesObserverType> r =
+      KMutableMatricesTest.saveObserverDangerously(mm);
+
+    final MatricesProjectiveLightFunctionType<Object, RException> f =
+      new MatricesProjectiveLightFunctionType<Object, RException>() {
+        @Override public Object run(
+          final MatricesProjectiveLightType p)
+          throws RException
+        {
+          return Unit.unit();
+        }
+      };
+
+    final KLightProjective p = KMutableMatricesTest.makeKProjective();
+
+    r.get().withProjectiveLight(p, f);
+  }
+
   @Test public void testWithObserverOnce()
     throws RException
   {
@@ -681,7 +814,7 @@ import com.io7m.renderer.types.RVectorI4F;
       });
   }
 
-  @Test(expected = NullCheckException.class) public
+  @Test(expected = RExceptionMatricesObserverActive.class) public
     void
     testWithObserverTwice()
       throws RException
@@ -761,6 +894,57 @@ import com.io7m.renderer.types.RVectorI4F;
       KMutableMatricesTest.saveProjectiveDangerously(mm, projection, view);
 
     saved.get().getMatrixProjectiveView();
+  }
+
+  @Test(expected = RExceptionMatricesProjectiveActive.class) public
+    void
+    testWithProjectiveObserverTwice()
+      throws RException
+  {
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+
+    final RMatrixM4x4F<RTransformProjectionType> m_projection =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformProjectionType> projection =
+      RMatrixI4x4F.newFromReadable(m_projection);
+
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
+      RMatrixI4x4F.newFromReadable(m_view);
+
+    final KInstanceType i = KMutableMatricesTest.makeMeshInstance();
+
+    mm.withObserver(
+      view,
+      projection,
+      new MatricesObserverFunctionType<Unit, NullCheckException>() {
+        @Override public Unit run(
+          final MatricesObserverType o)
+          throws RException
+        {
+          return o.withProjectiveLight(
+            KMutableMatricesTest.makeKProjective(),
+            new MatricesProjectiveLightFunctionType<Unit, NullCheckException>() {
+              @Override public Unit run(
+                final MatricesProjectiveLightType p)
+                throws RException
+              {
+                final MatricesInstanceFunctionType<Unit, NullCheckException> f =
+                  new MatricesInstanceFunctionType<Unit, NullCheckException>() {
+                    @Override public Unit run(
+                      final MatricesInstanceType _)
+                      throws RException
+                    {
+                      return Unit.unit();
+                    }
+                  };
+                o.withInstance(i, f);
+                return Unit.unit();
+              }
+            });
+        }
+      });
   }
 
   @Test public void testWithProjectiveInstanceOnce()
@@ -867,7 +1051,7 @@ import com.io7m.renderer.types.RVectorI4F;
     Assert.assertTrue(instance_once.get());
   }
 
-  @Test(expected = NullCheckException.class) public
+  @Test(expected = RExceptionMatricesInstanceActive.class) public
     void
     testWithProjectiveInstanceTwice()
       throws RException
@@ -1107,7 +1291,7 @@ import com.io7m.renderer.types.RVectorI4F;
       });
   }
 
-  @Test(expected = NullCheckException.class) public
+  @Test(expected = RExceptionMatricesProjectiveActive.class) public
     void
     testWithProjectiveTwice()
       throws RException

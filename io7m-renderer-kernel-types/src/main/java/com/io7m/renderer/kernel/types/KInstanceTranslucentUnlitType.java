@@ -50,7 +50,7 @@ public interface KInstanceTranslucentUnlitType extends
 
     <A, E extends Throwable, V extends KInstanceTranslucentUnlitVisitorType<A, E>>
     A
-    transformedTranslucentUnlitAccept(
+    translucentUnlitAccept(
       final V v)
       throws E,
         RException,

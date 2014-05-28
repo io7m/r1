@@ -24,44 +24,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jfunctional.Option;
-import com.io7m.jnull.NullCheckException;
-import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
 import com.io7m.renderer.tests.FakeTexture2DStatic;
-import com.io7m.renderer.tests.utilities.TestUtilities;
 
-@SuppressWarnings("static-method") public final class KMaterialNormalTest
+@SuppressWarnings({ "static-method", "null" }) public final class KMaterialNormalTest
 {
-  @Test public void testEqualsHashCode()
-  {
-    final Texture2DStaticUsableType t0 = FakeTexture2DStatic.getDefault();
-    final Texture2DStaticUsableType t1 =
-      FakeTexture2DStatic.getDefaultWithName("other");
-
-    final KMaterialNormal m0 = KMaterialNormal.newNormalMapped(t0);
-    final KMaterialNormal m1 = KMaterialNormal.newNormalMapped(t0);
-    final KMaterialNormal m4 = KMaterialNormal.newNormalMapped(t1);
-
-    Assert.assertEquals(m0, m0);
-    Assert.assertEquals(m0, m1);
-    Assert.assertNotEquals(m0, null);
-    Assert.assertNotEquals(m0, Integer.valueOf(23));
-    Assert.assertNotEquals(m0, m4);
-
-    Assert.assertEquals(m0.hashCode(), m1.hashCode());
-    Assert.assertNotEquals(m0.hashCode(), m4.hashCode());
-
-    Assert.assertEquals(m0.toString(), m1.toString());
-    Assert.assertNotEquals(m0.toString(), m4.toString());
-  }
-
-  @Test(expected = NullCheckException.class) public void testNull_0()
-  {
-    KMaterialNormal.newNormalMapped((Texture2DStaticUsableType) TestUtilities
-      .actuallyNull());
-  }
-
-  @Test public void testTextures()
+  @Test public void testMapped()
   {
     QuickCheck.forAllVerbose(
       FakeTexture2DStatic.generator(new StringGenerator()),
@@ -70,15 +38,8 @@ import com.io7m.renderer.tests.utilities.TestUtilities;
           final Texture2DStaticUsableType t)
           throws Throwable
         {
-          Assert.assertEquals(
-            KMaterialNormal.newNormalMapped(t).getTexture(),
-            Option.some(t));
-          Assert.assertEquals(KMaterialNormal
-            .newNormalMapped(t)
-            .texturesGetRequired(), 1);
-          Assert.assertEquals(KMaterialNormal
-            .newNormalUnmapped()
-            .texturesGetRequired(), 0);
+          final KMaterialNormalMapped m = KMaterialNormalMapped.mapped(t);
+          Assert.assertEquals(t, m.getTexture());
         }
       });
   }

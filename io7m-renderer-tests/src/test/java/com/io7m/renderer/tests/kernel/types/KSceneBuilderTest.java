@@ -28,20 +28,25 @@ import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KFaceSelection;
-import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
-import com.io7m.renderer.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
-import com.io7m.renderer.kernel.types.KMeshWithMaterialTranslucentRegular;
-import com.io7m.renderer.kernel.types.KMaterialAlbedo;
-import com.io7m.renderer.kernel.types.KMaterialAlpha;
-import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
-import com.io7m.renderer.kernel.types.KMaterialEmissive;
-import com.io7m.renderer.kernel.types.KMaterialEnvironment;
-import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KInstanceTranslucentUnlitType;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoType;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
+import com.io7m.renderer.kernel.types.KMaterialAlphaConstant;
+import com.io7m.renderer.kernel.types.KMaterialAlphaType;
+import com.io7m.renderer.kernel.types.KMaterialDepthConstant;
+import com.io7m.renderer.kernel.types.KMaterialDepthType;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveNone;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveType;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentNone;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentType;
+import com.io7m.renderer.kernel.types.KMaterialNormalType;
+import com.io7m.renderer.kernel.types.KMaterialNormalVertex;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.renderer.kernel.types.KMaterialSpecular;
+import com.io7m.renderer.kernel.types.KMaterialSpecularNone;
+import com.io7m.renderer.kernel.types.KMaterialSpecularType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
@@ -52,11 +57,17 @@ import com.io7m.renderer.kernel.types.KTransformMatrix4x4;
 import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.tests.FakeArrayBuffer;
 import com.io7m.renderer.tests.FakeIndexBuffer;
+import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionMaterialMissingAlbedoTexture;
+import com.io7m.renderer.types.RExceptionMaterialMissingSpecularTexture;
+import com.io7m.renderer.types.RExceptionMeshMissingNormals;
+import com.io7m.renderer.types.RExceptionMeshMissingPositions;
+import com.io7m.renderer.types.RExceptionMeshMissingTangents;
+import com.io7m.renderer.types.RExceptionMeshMissingUVs;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceRGBAType;
-import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RTransformModelType;
 import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformTextureType;
@@ -66,53 +77,49 @@ import com.io7m.renderer.types.RVectorI4F;
 
 public final class KSceneBuilderTest extends KSceneBuilderContract
 {
-  @Override protected @NonNull
-    KInstanceOpaqueType
-    getTransformedOpaque(
-      final int i)
+  @Override protected @NonNull KInstanceOpaqueType getOpaque()
   {
     try {
       final RMatrixI3x3F<RTransformTextureType> uv_m =
         RMatrixI3x3F.identity();
-      final KMaterialNormal normal = KMaterialNormal.newNormalUnmapped();
-      final KMaterialAlbedo albedo =
-        KMaterialAlbedo.newAlbedoUntextured(new RVectorI4F<RSpaceRGBAType>(
+      final KMaterialNormalType normal = KMaterialNormalVertex.vertex();
+      final KMaterialAlbedoType albedo =
+        KMaterialAlbedoUntextured.untextured(new RVectorI4F<RSpaceRGBAType>(
           1.0f,
           1.0f,
           1.0f,
           1.0f));
-      final KMaterialEmissive emissive = KMaterialEmissive.newEmissiveNone();
-      final KMaterialEnvironment env =
-        KMaterialEnvironment.newEnvironmentUnmapped();
-      final KMaterialSpecular spec =
-        KMaterialSpecular.newSpecularUnmapped(new RVectorI3F<RSpaceRGBType>(
-          0.0f,
-          0.0f,
-          0.0f), 0.0f);
+      final KMaterialEmissiveType emissive = KMaterialEmissiveNone.none();
+      final KMaterialEnvironmentType env = KMaterialEnvironmentNone.none();
+      final KMaterialSpecularType spec = KMaterialSpecularNone.none();
+      final KMaterialDepthType depth = KMaterialDepthConstant.constant();
       final KMaterialOpaqueRegular mat =
         KMaterialOpaqueRegular.newMaterial(
           uv_m,
-          normal,
           albedo,
+          depth,
           emissive,
           env,
+          normal,
           spec);
 
       final ArrayDescriptorBuilderType tb = ArrayDescriptor.newBuilder();
       tb.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
       tb.addAttribute(KMeshAttributes.ATTRIBUTE_NORMAL);
+      tb.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
+      tb.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
       final ArrayDescriptor t = tb.build();
 
       final ArrayBufferType array =
         new FakeArrayBuffer(
-          i,
+          0,
           new RangeInclusiveL(0, 99),
           t,
           UsageHint.USAGE_STATIC_DRAW);
 
       final IndexBufferType indices =
         new FakeIndexBuffer(
-          i,
+          0,
           new RangeInclusiveL(0, 99),
           UsageHint.USAGE_STATIC_DRAW,
           JCGLUnsignedType.TYPE_UNSIGNED_INT);
@@ -124,20 +131,31 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
       final KMeshReadableType mesh =
         KMesh.newMesh(array, indices, bounds_lower, bounds_upper);
 
-      final KMeshWithMaterialOpaqueRegular io =
-        KMeshWithMaterialOpaqueRegular.newInstance(
-          mat,
-          mesh,
-          KFaceSelection.FACE_RENDER_FRONT);
-
       final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
       final KTransformType transform =
         KTransformMatrix4x4.newTransform(model);
+
       return KInstanceOpaqueRegular.newInstance(
-        io,
+        mesh,
+        mat,
         transform,
-        uv_m);
+        uv_m,
+        KFaceSelection.FACE_RENDER_FRONT);
     } catch (final JCGLExceptionAttributeDuplicate e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMeshMissingUVs e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMeshMissingNormals e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMeshMissingTangents e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMeshMissingPositions e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMaterialMissingAlbedoTexture e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMaterialMissingSpecularTexture e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RException e) {
       throw new UnreachableCodeException(e);
     }
   }
@@ -151,33 +169,22 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
     return KScene.newBuilder(camera);
   }
 
-  @Override protected
-    KInstanceTranslucentLitType
-    getTransformedTranslucent(
-      final int i)
+  @Override protected KInstanceTranslucentRegular getTranslucent()
   {
     try {
       final RMatrixI3x3F<RTransformTextureType> uv_m =
         RMatrixI3x3F.identity();
-      final KMaterialNormal normal = KMaterialNormal.newNormalUnmapped();
-      final KMaterialAlbedo albedo =
-        KMaterialAlbedo.newAlbedoUntextured(new RVectorI4F<RSpaceRGBAType>(
+      final KMaterialNormalType normal = KMaterialNormalVertex.vertex();
+      final KMaterialAlbedoType albedo =
+        KMaterialAlbedoUntextured.untextured(new RVectorI4F<RSpaceRGBAType>(
           1.0f,
           1.0f,
           1.0f,
           1.0f));
-      final KMaterialEmissive emissive = KMaterialEmissive.newEmissiveNone();
-      final KMaterialEnvironment env =
-        KMaterialEnvironment.newEnvironmentUnmapped();
-      final KMaterialSpecular spec =
-        KMaterialSpecular.newSpecularUnmapped(new RVectorI3F<RSpaceRGBType>(
-          0.0f,
-          0.0f,
-          0.0f), 0.0f);
-      final KMaterialAlpha alpha =
-        KMaterialAlpha.newAlpha(
-          KMaterialAlphaOpacityType.ALPHA_OPACITY_CONSTANT,
-          1.0f);
+      final KMaterialEmissiveType emissive = KMaterialEmissiveNone.none();
+      final KMaterialEnvironmentType env = KMaterialEnvironmentNone.none();
+      final KMaterialSpecularType spec = KMaterialSpecularNone.none();
+      final KMaterialAlphaType alpha = KMaterialAlphaConstant.constant(1.0f);
       final KMaterialTranslucentRegular mat =
         KMaterialTranslucentRegular.newMaterial(
           uv_m,
@@ -191,18 +198,20 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
       final ArrayDescriptorBuilderType tb = ArrayDescriptor.newBuilder();
       tb.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
       tb.addAttribute(KMeshAttributes.ATTRIBUTE_NORMAL);
+      tb.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
+      tb.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
       final ArrayDescriptor t = tb.build();
 
       final ArrayBufferType array =
         new FakeArrayBuffer(
-          i,
+          0,
           new RangeInclusiveL(0, 99),
           t,
           UsageHint.USAGE_STATIC_DRAW);
 
       final IndexBufferType indices =
         new FakeIndexBuffer(
-          i,
+          0,
           new RangeInclusiveL(0, 99),
           UsageHint.USAGE_STATIC_DRAW,
           JCGLUnsignedType.TYPE_UNSIGNED_INT);
@@ -214,20 +223,108 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
       final KMeshReadableType mesh =
         KMesh.newMesh(array, indices, bounds_lower, bounds_upper);
 
-      final KMeshWithMaterialTranslucentRegular io =
-        KMeshWithMaterialTranslucentRegular.newInstance(
-          mat,
-          mesh,
-          KFaceSelection.FACE_RENDER_FRONT);
+      final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
+      final KTransformType transform =
+        KTransformMatrix4x4.newTransform(model);
+      return KInstanceTranslucentRegular.newInstance(
+        mesh,
+        mat,
+        transform,
+        uv_m,
+        KFaceSelection.FACE_RENDER_FRONT);
+    } catch (final JCGLExceptionAttributeDuplicate e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMeshMissingUVs e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMeshMissingNormals e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMeshMissingTangents e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMeshMissingPositions e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMaterialMissingSpecularTexture e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
+  @Override protected KInstanceTranslucentUnlitType getTranslucentUnlit()
+  {
+    try {
+      final RMatrixI3x3F<RTransformTextureType> uv_m =
+        RMatrixI3x3F.identity();
+      final KMaterialNormalType normal = KMaterialNormalVertex.vertex();
+      final KMaterialAlbedoType albedo =
+        KMaterialAlbedoUntextured.untextured(new RVectorI4F<RSpaceRGBAType>(
+          1.0f,
+          1.0f,
+          1.0f,
+          1.0f));
+      final KMaterialEmissiveType emissive = KMaterialEmissiveNone.none();
+      final KMaterialEnvironmentType env = KMaterialEnvironmentNone.none();
+      final KMaterialSpecularType spec = KMaterialSpecularNone.none();
+      final KMaterialAlphaType alpha = KMaterialAlphaConstant.constant(1.0f);
+      final KMaterialTranslucentRegular mat =
+        KMaterialTranslucentRegular.newMaterial(
+          uv_m,
+          albedo,
+          alpha,
+          emissive,
+          env,
+          normal,
+          spec);
+
+      final ArrayDescriptorBuilderType tb = ArrayDescriptor.newBuilder();
+      tb.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
+      tb.addAttribute(KMeshAttributes.ATTRIBUTE_NORMAL);
+      tb.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
+      tb.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
+      final ArrayDescriptor t = tb.build();
+
+      final ArrayBufferType array =
+        new FakeArrayBuffer(
+          0,
+          new RangeInclusiveL(0, 99),
+          t,
+          UsageHint.USAGE_STATIC_DRAW);
+
+      final IndexBufferType indices =
+        new FakeIndexBuffer(
+          0,
+          new RangeInclusiveL(0, 99),
+          UsageHint.USAGE_STATIC_DRAW,
+          JCGLUnsignedType.TYPE_UNSIGNED_INT);
+
+      final RVectorI3F<RSpaceObjectType> bounds_lower =
+        new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f);
+      final RVectorI3F<RSpaceObjectType> bounds_upper =
+        new RVectorI3F<RSpaceObjectType>(1.0f, 1.0f, 1.0f);
+      final KMeshReadableType mesh =
+        KMesh.newMesh(array, indices, bounds_lower, bounds_upper);
 
       final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
       final KTransformType transform =
         KTransformMatrix4x4.newTransform(model);
       return KInstanceTranslucentRegular.newInstance(
-        io,
+        mesh,
+        mat,
         transform,
-        uv_m);
+        uv_m,
+        KFaceSelection.FACE_RENDER_FRONT);
     } catch (final JCGLExceptionAttributeDuplicate e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMeshMissingUVs e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMeshMissingNormals e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMeshMissingTangents e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMeshMissingPositions e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RExceptionMaterialMissingSpecularTexture e) {
+      throw new UnreachableCodeException(e);
+    } catch (final RException e) {
       throw new UnreachableCodeException(e);
     }
   }

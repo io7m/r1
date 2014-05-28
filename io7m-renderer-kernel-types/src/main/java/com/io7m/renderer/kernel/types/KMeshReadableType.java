@@ -28,24 +28,6 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 public interface KMeshReadableType
 {
   /**
-   * @return <code>true</code> if the mesh has usable UV coordinates.
-   */
-
-  boolean meshHasUVs();
-
-  /**
-   * @return <code>true</code> if the mesh has usable normal vectors.
-   */
-
-  boolean meshHasNormals();
-
-  /**
-   * @return <code>true</code> if the mesh has usable tangent vectors.
-   */
-
-  boolean meshHasTangents();
-
-  /**
    * @return The array buffer that holds the mesh data
    */
 

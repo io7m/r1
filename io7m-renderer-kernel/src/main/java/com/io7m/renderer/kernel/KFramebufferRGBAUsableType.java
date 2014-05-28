@@ -49,7 +49,7 @@ public interface KFramebufferRGBAUsableType extends KFramebufferUsableType
 
   /**
    * <p>
-   * Retrieve the RGBA colour texture that backs the scene framebuffer.
+   * Retrieve the RGBA color texture that backs the scene framebuffer.
    * </p>
    * 
    * @return A reference to the texture that backs the color buffer

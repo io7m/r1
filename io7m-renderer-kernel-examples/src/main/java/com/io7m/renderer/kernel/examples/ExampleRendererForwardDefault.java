@@ -39,7 +39,6 @@ import com.io7m.renderer.kernel.KFramebufferDepthVarianceCacheType;
 import com.io7m.renderer.kernel.KFramebufferForwardCache;
 import com.io7m.renderer.kernel.KFramebufferForwardCacheLoader;
 import com.io7m.renderer.kernel.KFramebufferForwardCacheType;
-import com.io7m.renderer.kernel.KLabelDecider;
 import com.io7m.renderer.kernel.KMeshBoundsCache;
 import com.io7m.renderer.kernel.KMeshBoundsCacheType;
 import com.io7m.renderer.kernel.KMeshBoundsObjectSpaceCacheLoader;
@@ -104,6 +103,9 @@ public final class ExampleRendererForwardDefault extends
   {
     NullCheck.notNull(gi, "GL");
 
+    final KGraphicsCapabilities caps =
+      KGraphicsCapabilities.getCapabilities(gi);
+
     final KUnitQuad quad = KUnitQuad.newQuad(gi.getGLCommon(), log);
 
     final KRegionCopierType copier =
@@ -112,7 +114,7 @@ public final class ExampleRendererForwardDefault extends
     final KDepthRendererType depth_renderer =
       KDepthRenderer.newRenderer(gi, shader_cache, log);
     final KDepthVarianceRendererType depth_variance_renderer =
-      KDepthVarianceRenderer.newRenderer(gi, shader_cache, log);
+      KDepthVarianceRenderer.newRenderer(gi, shader_cache);
 
     final BLUCacheConfig depth_variance_cache_config =
       BLUCacheConfig
@@ -177,11 +179,6 @@ public final class ExampleRendererForwardDefault extends
         KMeshBoundsTrianglesObjectSpaceCacheLoader.newLoader(),
         bounds_triangle_cache_config));
 
-    final KLabelDecider label_cache =
-      KLabelDecider.newDecider(
-        KGraphicsCapabilities.getCapabilities(gi),
-        BigInteger.valueOf(1024));
-
     final KRefractionRendererType refraction_renderer =
       KRefractionRenderer.newRenderer(
         gi,
@@ -189,15 +186,14 @@ public final class ExampleRendererForwardDefault extends
         shader_cache,
         forward_cache,
         bounds_cache,
-        bounds_tri_cache,
-        label_cache);
+        bounds_tri_cache);
 
     final KTranslucentRendererType translucent_renderer =
       KTranslucentRenderer.newRenderer(
         gi,
-        label_cache,
         shader_cache,
         refraction_renderer,
+        caps,
         log);
 
     return new ExampleRendererForwardDefault(KRendererForward.newRenderer(
@@ -205,7 +201,6 @@ public final class ExampleRendererForwardDefault extends
       depth_renderer,
       shadow_renderer,
       translucent_renderer,
-      label_cache,
       shader_cache,
       log), quad);
   }

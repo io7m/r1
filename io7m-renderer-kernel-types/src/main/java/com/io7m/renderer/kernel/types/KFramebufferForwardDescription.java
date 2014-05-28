@@ -32,7 +32,7 @@ import com.io7m.jnull.Nullable;
    * Create a new description of a forward-rendering framebuffer.
    * 
    * @param in_rgba_description
-   *          The description of the colour buffer
+   *          The description of the color buffer
    * @param in_depth_description
    *          The description of the depth buffer
    * @return A new description of a forward-rendering framebuffer
@@ -93,7 +93,7 @@ import com.io7m.jnull.Nullable;
   }
 
   /**
-   * @return The description of the colour buffer
+   * @return The description of the color buffer
    */
 
   public KFramebufferRGBADescription getRGBADescription()

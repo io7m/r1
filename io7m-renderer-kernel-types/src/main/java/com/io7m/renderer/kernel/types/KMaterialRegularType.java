@@ -16,35 +16,36 @@
 
 package com.io7m.renderer.kernel.types;
 
-
 /**
  * The type of regular materials (opaque, or translucent non-refractive).
  */
 
-public interface KMaterialRegularType extends KMaterialType
+public interface KMaterialRegularType extends
+  KMaterialType,
+  KMaterialLitType,
+  KMaterialUnlitType
 {
   /**
    * @return The material albedo properties
    */
 
-   KMaterialAlbedo materialGetAlbedo();
+  KMaterialAlbedoType materialRegularGetAlbedo();
 
   /**
    * @return The material emissive properties
    */
 
-   KMaterialEmissive materialGetEmissive();
+  KMaterialEmissiveType materialRegularGetEmissive();
 
   /**
    * @return The material environment mapping properties
    */
 
-   KMaterialEnvironment materialGetEnvironment();
+  KMaterialEnvironmentType materialRegularGetEnvironment();
 
   /**
    * @return The material specularity properties
    */
 
-   KMaterialSpecular materialGetSpecular();
-
+  KMaterialSpecularType materialRegularGetSpecular();
 }
