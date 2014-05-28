@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,12 +21,37 @@ import java.util.SortedSet;
 
 import com.io7m.jnull.NullCheck;
 
+/**
+ * <p>
+ * The type of COLLADA geometries.
+ * </p>
+ */
+
 public abstract class ColladaGeometry
 {
+  /**
+   * A polygon mesh.
+   */
+
   public static final class ColladaMesh extends ColladaGeometry
   {
     private final ColladaPolylist            polylist;
     private final SortedSet<ColladaSourceID> source_ids;
+
+    /**
+     * Construct a polygon mesh.
+     * 
+     * @param id
+     *          The geometry ID.
+     * @param document
+     *          The COLLADA document.
+     * @param in_source_ids
+     *          The list of source IDs.
+     * @param p
+     *          The polygon list.
+     * @param axis
+     *          The axis type.
+     */
 
     @SuppressWarnings("synthetic-access") public ColladaMesh(
       final ColladaGeometryID id,
@@ -40,10 +65,18 @@ public abstract class ColladaGeometry
       this.polylist = NullCheck.notNull(p, "Polylist");
     }
 
+    /**
+     * @return The list of polygons.
+     */
+
     public ColladaPolylist getPolylist()
     {
       return this.polylist;
     }
+
+    /**
+     * @return The set of source IDs.
+     */
 
     public SortedSet<ColladaSourceID> getSourceIDs()
     {
@@ -69,15 +102,23 @@ public abstract class ColladaGeometry
     }
   }
 
+  /**
+   * An enum representing the different types of geometries.
+   */
+
   public static enum Type
   {
+    /**
+     * A polygon mesh.
+     */
+
     GEOMETRY_MESH
   }
 
-  private final ColladaGeometryID id;
-  private final Type              type;
   private final ColladaAxis       axis;
   private final ColladaDocument   document;
+  private final ColladaGeometryID id;
+  private final Type              type;
 
   private ColladaGeometry(
     final Type in_type,
@@ -91,20 +132,36 @@ public abstract class ColladaGeometry
     this.axis = NullCheck.notNull(in_axis, "Axis");
   }
 
+  /**
+   * @return The axis type.
+   */
+
   public ColladaAxis getAxis()
   {
     return this.axis;
   }
+
+  /**
+   * @return The COLLADA document.
+   */
 
   public ColladaDocument getDocument()
   {
     return this.document;
   }
 
+  /**
+   * @return The geometry ID.
+   */
+
   public ColladaGeometryID getID()
   {
     return this.id;
   }
+
+  /**
+   * @return The geometry type.
+   */
 
   public Type getType()
   {

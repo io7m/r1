@@ -25,7 +25,7 @@ import com.io7m.renderer.types.RVectorI3F;
  * The type of lights.
  */
 
-public interface KLightType
+public interface KLightType extends KTexturesRequiredType
 {
   /**
    * Be visited by the given generic visitor.
@@ -53,16 +53,16 @@ public interface KLightType
       E;
 
   /**
+   * @return The code for the light.
+   */
+
+  String lightGetCode();
+
+  /**
    * @return The color of the light
    */
 
   RVectorI3F<RSpaceRGBType> lightGetColor();
-
-  /**
-   * @return The unique identifier of the light.
-   */
-
-  KLightID lightGetID();
 
   /**
    * @return The intensity of the light
@@ -76,12 +76,6 @@ public interface KLightType
    */
 
   OptionType<KShadowType> lightGetShadow();
-
-  /**
-   * @return The version of the light.
-   */
-
-  KVersion lightGetVersion();
 
   /**
    * @return <code>true</code> iff the light has a shadow.

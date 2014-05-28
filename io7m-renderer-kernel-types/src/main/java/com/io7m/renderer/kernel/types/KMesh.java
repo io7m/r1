@@ -32,6 +32,10 @@ import com.io7m.jcanephora.api.JCGLIndexBuffersType;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.renderer.types.RExceptionMeshMissingNormals;
+import com.io7m.renderer.types.RExceptionMeshMissingPositions;
+import com.io7m.renderer.types.RExceptionMeshMissingTangents;
+import com.io7m.renderer.types.RExceptionMeshMissingUVs;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorReadable3FType;
@@ -46,12 +50,12 @@ import com.io7m.renderer.types.RVectorReadable3FType;
  * <ul>
  * <li>The array buffer must have an attribute of type
  * {@link KMeshAttributes#ATTRIBUTE_POSITION}.</li>
- * <li>If the mesh has per-vertex normals, they must be of type
+ * <li>The array buffer must have per-vertex normals of type
  * {@link KMeshAttributes#ATTRIBUTE_NORMAL}.</li>
- * <li>If the mesh has texture coordinates, they must be of type
+ * <li>The array buffer must have texture coordinates of type
  * {@link KMeshAttributes#ATTRIBUTE_UV}.</li>
- * <li>If the mesh has per-vertex tangents, they must be of type
- * {@link KMeshAttributes#ATTRIBUTE_TANGENT3}.</li>
+ * <li>The array buffer must have per-vertex tangents of type
+ * {@link KMeshAttributes#ATTRIBUTE_TANGENT4}.</li>
  * <ul>
  */
 
@@ -64,9 +68,20 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final Map<String, ArrayAttributeDescriptor> as)
   {
     final ArrayAttributeDescriptor ta =
-      as.get(KMeshAttributes.ATTRIBUTE_NORMAL);
+      as.get(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
     if (ta != null) {
       return ta.equals(KMeshAttributes.ATTRIBUTE_NORMAL);
+    }
+    return false;
+  }
+
+  private static boolean hasPositions(
+    final Map<String, ArrayAttributeDescriptor> as)
+  {
+    final ArrayAttributeDescriptor ta =
+      as.get(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+    if (ta != null) {
+      return ta.equals(KMeshAttributes.ATTRIBUTE_POSITION);
     }
     return false;
   }
@@ -75,7 +90,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final Map<String, ArrayAttributeDescriptor> as)
   {
     final ArrayAttributeDescriptor ta =
-      as.get(KMeshAttributes.ATTRIBUTE_TANGENT4);
+      as.get(KMeshAttributes.ATTRIBUTE_TANGENT4.getName());
     if (ta != null) {
       return ta.equals(KMeshAttributes.ATTRIBUTE_TANGENT4);
     }
@@ -85,7 +100,8 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   private static boolean hasUVs(
     final Map<String, ArrayAttributeDescriptor> as)
   {
-    final ArrayAttributeDescriptor ta = as.get(KMeshAttributes.ATTRIBUTE_UV);
+    final ArrayAttributeDescriptor ta =
+      as.get(KMeshAttributes.ATTRIBUTE_UV.getName());
     if (ta != null) {
       return ta.equals(KMeshAttributes.ATTRIBUTE_UV);
     }
@@ -104,6 +120,14 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @param in_bounds_upper
    *          The object-space upper bound
    * @return A new mesh
+   * @throws RExceptionMeshMissingTangents
+   *           If the array does not have tangent vectors.
+   * @throws RExceptionMeshMissingNormals
+   *           If the array does not have normal vectors.
+   * @throws RExceptionMeshMissingUVs
+   *           If the array does not have UV coordinates.
+   * @throws RExceptionMeshMissingPositions
+   *           If the array does not have positions.
    */
 
   public static KMesh newMesh(
@@ -111,6 +135,10 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final IndexBufferType in_indices,
     final RVectorI3F<RSpaceObjectType> in_bounds_lower,
     final RVectorI3F<RSpaceObjectType> in_bounds_upper)
+    throws RExceptionMeshMissingUVs,
+      RExceptionMeshMissingNormals,
+      RExceptionMeshMissingTangents,
+      RExceptionMeshMissingPositions
   {
     return new KMesh(in_array, in_indices, in_bounds_lower, in_bounds_upper);
   }
@@ -119,9 +147,6 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   private final RVectorI3F<RSpaceObjectType> bounds_lower;
   private final RVectorI3F<RSpaceObjectType> bounds_upper;
   private boolean                            deleted;
-  private final boolean                      has_normals;
-  private final boolean                      has_tangents;
-  private final boolean                      has_uv;
   private final IndexBufferType              indices;
 
   private KMesh(
@@ -129,6 +154,10 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final IndexBufferType in_indices,
     final RVectorI3F<RSpaceObjectType> in_bounds_lower,
     final RVectorI3F<RSpaceObjectType> in_bounds_upper)
+    throws RExceptionMeshMissingUVs,
+      RExceptionMeshMissingNormals,
+      RExceptionMeshMissingTangents,
+      RExceptionMeshMissingPositions
   {
     this.array = NullCheck.notNull(in_array, "Array");
     this.indices = NullCheck.notNull(in_indices, "Indices");
@@ -138,9 +167,18 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final ArrayDescriptor d = this.array.arrayGetDescriptor();
     final Map<String, ArrayAttributeDescriptor> as = d.getAttributes();
 
-    this.has_uv = KMesh.hasUVs(as);
-    this.has_normals = KMesh.hasNormals(as);
-    this.has_tangents = KMesh.hasTangents(as);
+    if (KMesh.hasPositions(as) == false) {
+      throw RExceptionMeshMissingPositions.fromArray(this.array);
+    }
+    if (KMesh.hasUVs(as) == false) {
+      throw RExceptionMeshMissingUVs.fromArray(this.array);
+    }
+    if (KMesh.hasNormals(as) == false) {
+      throw RExceptionMeshMissingNormals.fromArray(this.array);
+    }
+    if (KMesh.hasTangents(as) == false) {
+      throw RExceptionMeshMissingTangents.fromArray(this.array);
+    }
   }
 
   /**
@@ -222,21 +260,6 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   @Override public IndexBufferUsableType meshGetIndexBuffer()
   {
     return this.indices;
-  }
-
-  @Override public boolean meshHasNormals()
-  {
-    return this.has_normals;
-  }
-
-  @Override public boolean meshHasTangents()
-  {
-    return this.has_tangents;
-  }
-
-  @Override public boolean meshHasUVs()
-  {
-    return this.has_uv;
   }
 
   @Override public long resourceGetSizeBytes()

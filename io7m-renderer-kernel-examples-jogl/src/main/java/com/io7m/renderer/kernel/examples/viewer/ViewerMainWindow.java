@@ -212,7 +212,9 @@ final class ViewerMainWindow extends JFrame
     }
 
     this.examples = ExampleList.getExamples();
+    // CHECKSTYLE:OFF
     final Vector<String> example_vector = new Vector<String>();
+    // CHECKSTYLE:ON
     for (final String name : this.examples.keySet()) {
       example_vector.add(name);
     }

@@ -21,8 +21,19 @@ import java.awt.event.WindowEvent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
+import com.io7m.junreachable.UnreachableCodeException;
+
+/**
+ * Window utility functions.
+ */
+
 final class VWindowUtilities
 {
+  private VWindowUtilities()
+  {
+    throw new UnreachableCodeException();
+  }
+
   /**
    * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given dialog.
    */

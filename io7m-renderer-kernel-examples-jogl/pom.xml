@@ -275,6 +275,87 @@
          </execution>
         </executions>
       </plugin>
+
+      <!-- Produce windows binaries -->
+      <plugin>
+        <groupId>com.akathist.maven.plugins.launch4j</groupId>
+        <artifactId>launch4j-maven-plugin</artifactId>
+        <version>1.5.2</version>
+        <executions>
+          <execution>
+            <id>l4j-viewer-gui</id>
+            <phase>package</phase>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
+            <configuration>
+              <headerType>gui</headerType>
+              <outfile>target/viewer.exe</outfile>
+              <dontWrapJar>true</dontWrapJar>
+              <jar>lib/${project.name}-${project.version}.jar</jar>
+              <icon>src/main/resources/com/io7m/renderer/kernel/examples/viewer/icon.ico</icon>
+              <errTitle>viewer</errTitle>
+              <cmdLine>viewer.conf</cmdLine>
+              <classPath>
+                <mainClass>com.io7m.renderer.kernel.examples.viewer.ViewerMain</mainClass>
+                <jarLocation>lib/</jarLocation>
+              </classPath>
+              <jre>
+                <minVersion>1.6.0</minVersion>
+                <opts>
+                  <opt>-Dcom.io7m.renderer.sandbox.no_console=true</opt>
+                </opts>
+              </jre>
+            </configuration>
+          </execution>
+          <execution>
+            <id>l4j-viewer-console</id>
+            <phase>package</phase>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
+            <configuration>
+              <headerType>console</headerType>
+              <outfile>target/viewer-console.exe</outfile>
+              <dontWrapJar>true</dontWrapJar>
+              <jar>lib/${project.name}-${project.version}.jar</jar>
+              <icon>src/main/resources/com/io7m/renderer/kernel/examples/viewer/icon.ico</icon>
+              <errTitle>viewer</errTitle>
+              <cmdLine>viewer.conf</cmdLine>
+              <classPath>
+                <mainClass>com.io7m.renderer.kernel.examples.viewer.ViewerMain</mainClass>
+                <jarLocation>lib/</jarLocation>
+              </classPath>
+              <jre>
+                <minVersion>1.6.0</minVersion>
+                <opts>
+                  <opt>-Dcom.io7m.renderer.sandbox.no_console=true</opt>
+                </opts>
+              </jre>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Produce application archive -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <id>make-assembly-app</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/viewer.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
 
     <!-- Allow deployment over ssh -->

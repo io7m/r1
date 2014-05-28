@@ -18,8 +18,8 @@ package com.io7m.renderer.tests.kernel.types;
 
 import net.java.quickcheck.Generator;
 
-import com.io7m.renderer.kernel.types.KMaterialNormal;
-import com.io7m.renderer.kernel.types.KMaterialRefractive;
+import com.io7m.renderer.kernel.types.KMaterialNormalType;
+import com.io7m.renderer.kernel.types.KMaterialRefractiveType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
@@ -28,17 +28,17 @@ public final class KMaterialTranslucentRefractiveGenerator implements
   Generator<KMaterialTranslucentRefractive>
 {
   private final Generator<RMatrixI3x3F<RTransformTextureType>> matrix_gen;
-  private final Generator<KMaterialNormal>                     normal_gen;
-  private final Generator<KMaterialRefractive>                 refr_gen;
+  private final Generator<KMaterialNormalType>                 normal_gen;
+  private final Generator<KMaterialRefractiveType>             refr_gen;
 
   public KMaterialTranslucentRefractiveGenerator(
-    final Generator<RMatrixI3x3F<RTransformTextureType>> matrix_gen1,
-    final Generator<KMaterialNormal> normal_gen1,
-    final Generator<KMaterialRefractive> refr_gen1)
+    final Generator<RMatrixI3x3F<RTransformTextureType>> in_matrix_gen,
+    final Generator<KMaterialNormalType> in_normal_gen,
+    final Generator<KMaterialRefractiveType> in_refr_gen)
   {
-    this.matrix_gen = matrix_gen1;
-    this.normal_gen = normal_gen1;
-    this.refr_gen = refr_gen1;
+    this.matrix_gen = in_matrix_gen;
+    this.normal_gen = in_normal_gen;
+    this.refr_gen = in_refr_gen;
   }
 
   @SuppressWarnings("null") @Override public

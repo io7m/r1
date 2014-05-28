@@ -20,15 +20,32 @@ import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * A unique identifier for a geometry in a COLLADA document.
+ */
+
 @EqualityStructural public final class ColladaGeometryID implements
   Comparable<ColladaGeometryID>
 {
   private final String actual;
 
+  /**
+   * Construct an identifier.
+   * 
+   * @param in_actual
+   *          The base name of the identifier.
+   */
+
   public ColladaGeometryID(
     final String in_actual)
   {
     this.actual = NullCheck.notNull(in_actual, "Actual");
+  }
+
+  @Override public int compareTo(
+    final ColladaGeometryID o)
+  {
+    return this.actual.compareTo(o.actual);
   }
 
   @Override public boolean equals(
@@ -47,6 +64,10 @@ import com.io7m.jnull.Nullable;
     return this.actual.equals(other.actual);
   }
 
+  /**
+   * @return The actual identifier name as a string.
+   */
+
   public String getActual()
   {
     return this.actual;
@@ -60,11 +81,5 @@ import com.io7m.jnull.Nullable;
   @Override public String toString()
   {
     return this.actual;
-  }
-
-  @Override public int compareTo(
-    final ColladaGeometryID o)
-  {
-    return this.actual.compareTo(o.actual);
   }
 }

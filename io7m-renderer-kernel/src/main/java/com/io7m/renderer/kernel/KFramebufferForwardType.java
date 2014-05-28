@@ -33,7 +33,7 @@ package com.io7m.renderer.kernel;
  * and a depth renderbuffer <tt>R</tt>, and <tt>F1</tt> will consist of an
  * RGBA texture to which packed depth values will be encoded, and the same
  * depth renderbuffer <tt>R</tt>. Consult
- * {@link #kFramebufferGetDepthIsPackedColour()}.
+ * {@link #kFramebufferGetDepthIsPackedColor()}.
  * </p>
  */
 

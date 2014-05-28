@@ -23,7 +23,6 @@ import com.io7m.renderer.kernel.examples.ExampleSceneType;
 import com.io7m.renderer.kernel.examples.ExampleSceneUtilities;
 import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
-import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
@@ -55,19 +54,18 @@ public final class SLEmpty0 implements ExampleSceneType
   {
     final KInstanceOpaqueRegular i =
       KInstanceOpaqueRegular.newInstance(
-        KMeshWithMaterialOpaqueRegular.newInstance(
-          ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
-          scene.mesh("plane2x2_PN.rmx"),
-          KFaceSelection.FACE_RENDER_FRONT),
+        scene.mesh("plane2x2.rmx"),
+        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
-        ExampleSceneUtilities.IDENTITY_UV);
+        ExampleSceneUtilities.IDENTITY_UV,
+        KFaceSelection.FACE_RENDER_FRONT);
 
     {
       final KLightSphereBuilderType b =
         KLightSphere
-          .newBuilderWithFreshID(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
+          .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setPosition(ExampleSceneUtilities.CENTER);
-      scene.sceneAddOpaqueLitVisibleWithShadow(b.build(), i);
+      scene.sceneAddOpaqueLitVisibleWithoutShadow(b.build(), i);
     }
   }
 

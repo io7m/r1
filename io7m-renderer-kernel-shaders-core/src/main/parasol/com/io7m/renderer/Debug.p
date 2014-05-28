@@ -29,10 +29,10 @@ module Debug is
   import com.io7m.renderer.Normals as N;
 
   --
-  -- "Constant colour" program.
+  -- "Constant color" program.
   --
 
-  shader vertex debug_ccolour_v is
+  shader vertex debug_ccolor_v is
     in v_position              : vector_3f;
     parameter m_modelview      : matrix_4x4f;
     parameter m_projection     : matrix_4x4f;
@@ -47,16 +47,16 @@ module Debug is
     out f_position_clip = clip_position;
   end;
 
-  shader fragment debug_ccolour_f is
-    parameter f_ccolour : vector_4f;
+  shader fragment debug_ccolor_f is
+    parameter f_ccolor : vector_4f;
     out       out_0     : vector_4f as 0;
   as
-    out out_0 = f_ccolour;
+    out out_0 = f_ccolor;
   end;
 
-  shader program debug_ccolour is
-    vertex   debug_ccolour_v;
-    fragment debug_ccolour_f;
+  shader program debug_ccolor is
+    vertex   debug_ccolor_v;
+    fragment debug_ccolor_f;
   end;
 
   --
@@ -128,13 +128,13 @@ module Debug is
   end;
 
   --
-  -- "Vertex colour" program.
+  -- "Vertex color" program.
   --
 
-  shader vertex debug_vcolour_v is
+  shader vertex debug_vcolor_v is
     in v_position              : vector_3f;
-    in v_colour                : vector_4f;
-    out f_colour               : vector_4f;
+    in v_color                : vector_4f;
+    out f_color               : vector_4f;
     out vertex f_position_clip : vector_4f;
     parameter m_modelview      : matrix_4x4f;
     parameter m_projection     : matrix_4x4f;
@@ -146,19 +146,19 @@ module Debug is
       );
   as
     out f_position_clip = clip_position;
-    out f_colour        = v_colour;
+    out f_color        = v_color;
   end;
 
-  shader fragment debug_vcolour_f is
-    in  f_colour : vector_4f;
+  shader fragment debug_vcolor_f is
+    in  f_color : vector_4f;
     out out_0    : vector_4f as 0;
   as
-    out out_0 = f_colour;
+    out out_0 = f_color;
   end;
 
-  shader program debug_vcolour is
-    vertex   debug_vcolour_v;
-    fragment debug_vcolour_f;
+  shader program debug_vcolor is
+    vertex   debug_vcolor_v;
+    fragment debug_vcolor_f;
   end;
 
   --

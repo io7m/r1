@@ -17,7 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import com.io7m.jtensors.VectorReadable4FType;
-import com.io7m.renderer.kernel.types.KScene;
+import com.io7m.renderer.kernel.types.KSceneBatchedForward;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -41,15 +41,15 @@ public interface KRendererForwardType extends KRendererType
 
   void rendererForwardEvaluate(
     final KFramebufferForwardUsableType framebuffer,
-    final KScene scene)
+    final KSceneBatchedForward scene)
     throws RException;
 
   /**
-   * Set the background colour to which the renderer will clear the
-   * framebuffer prior to rendering.
+   * Set the background color to which the renderer will clear the framebuffer
+   * prior to rendering.
    * 
    * @param rgba
-   *          The background colour
+   *          The background color
    */
 
   void rendererForwardSetBackgroundRGBA(

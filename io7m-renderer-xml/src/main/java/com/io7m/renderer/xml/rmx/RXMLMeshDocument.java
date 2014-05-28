@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -38,7 +39,12 @@ import org.xml.sax.XMLReader;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RXMLException;
+
+/**
+ * Functions to validate and load an XML mesh document.
+ */
 
 public final class RXMLMeshDocument
 {
@@ -46,8 +52,10 @@ public final class RXMLMeshDocument
    * Load an XML document representing a mesh from the input stream
    * <code>s</code>.
    * 
-   * @throws ConstraintError
-   *           Iff <code>s == null</code>.
+   * @param s
+   *          The input stream.
+   * @return A loaded document.
+   * 
    * @throws IOException
    *           Iff an I/O error occurs whilst reading from the input stream.
    * @throws RXMLException
@@ -74,8 +82,7 @@ public final class RXMLMeshDocument
         SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
       spf.setSchema(sf.newSchema(schema_url));
 
-      final ArrayList<SAXException> exceptions =
-        new ArrayList<SAXException>();
+      final List<SAXException> exceptions = new ArrayList<SAXException>();
 
       final SAXParser sp = spf.newSAXParser();
       final XMLReader xr = sp.getXMLReader();
@@ -112,7 +119,7 @@ public final class RXMLMeshDocument
       assert d != null;
       return d;
     } catch (final SAXException e) {
-      final ArrayList<SAXException> es = new ArrayList<SAXException>();
+      final List<SAXException> es = new ArrayList<SAXException>();
       es.add(e);
       throw RXMLException.saxExceptions(es);
     } catch (final ValidityException e) {
@@ -122,5 +129,10 @@ public final class RXMLMeshDocument
     } catch (final ParserConfigurationException e) {
       throw RXMLException.parserConfigurationException(e);
     }
+  }
+
+  private RXMLMeshDocument()
+  {
+    throw new UnreachableCodeException();
   }
 }

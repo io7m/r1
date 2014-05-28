@@ -31,24 +31,6 @@ import com.io7m.renderer.types.RException;
 public interface KMaterialOpaqueVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit an opaque alpha-to-depth material.
-   * 
-   * @param m
-   *          The material
-   * @return A value of type <code>A</code>
-   * 
-   * @throws RException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  A materialOpaqueAlphaDepth(
-    final KMaterialOpaqueAlphaDepth m)
-    throws RException,
-      E;
-
-  /**
    * Visit a regular opaque material.
    * 
    * @param m

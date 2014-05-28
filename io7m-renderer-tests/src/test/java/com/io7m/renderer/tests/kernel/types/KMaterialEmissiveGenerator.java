@@ -19,29 +19,42 @@ package com.io7m.renderer.tests.kernel.types;
 import net.java.quickcheck.Generator;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.renderer.kernel.types.KMaterialEmissive;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveConstant;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveMapped;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveNone;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveType;
 
-public final class KMaterialEmissiveGenerator implements
-  Generator<KMaterialEmissive>
+@SuppressWarnings("null") public final class KMaterialEmissiveGenerator implements
+  Generator<KMaterialEmissiveType>
 {
   private final Generator<Texture2DStaticUsableType> tex_gen;
 
   public KMaterialEmissiveGenerator(
-    final Generator<Texture2DStaticUsableType> tex_gen1)
+    final Generator<Texture2DStaticUsableType> in_tex_gen)
   {
-    this.tex_gen = tex_gen1;
+    this.tex_gen = in_tex_gen;
   }
 
-  @Override public KMaterialEmissive next()
+  @Override public KMaterialEmissiveType next()
   {
-    if (Math.random() > 0.5) {
-      final Texture2DStaticUsableType tn = this.tex_gen.next();
-      assert tn != null;
-      return KMaterialEmissive.newEmissiveMapped((float) Math.random(), tn);
+    final int r = (int) (Math.random() * 3);
+    switch (r) {
+      case 0:
+      {
+        return KMaterialEmissiveNone.none();
+      }
+      case 1:
+      {
+        return KMaterialEmissiveConstant.constant((float) Math.random());
+      }
+      case 2:
+      {
+        return KMaterialEmissiveMapped.mapped(
+          (float) Math.random(),
+          this.tex_gen.next());
+      }
     }
-    if (Math.random() < 0.05) {
-      return KMaterialEmissive.newEmissiveNone();
-    }
-    return KMaterialEmissive.newEmissiveUnmapped((float) Math.random());
+    throw new UnreachableCodeException();
   }
 }

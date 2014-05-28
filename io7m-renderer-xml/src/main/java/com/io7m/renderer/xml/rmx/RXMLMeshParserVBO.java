@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -33,11 +33,13 @@ import com.io7m.jcanephora.IndexBufferType;
 import com.io7m.jcanephora.IndexBufferUpdateUnmapped;
 import com.io7m.jcanephora.IndexBufferUpdateUnmappedType;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLExceptionAttributeDuplicate;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLArrayBuffersType;
 import com.io7m.jcanephora.api.JCGLIndexBuffersType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
@@ -47,26 +49,26 @@ import com.io7m.renderer.types.RVectorI4F;
 import com.io7m.renderer.types.RXMLException;
 
 /**
- * An implementation of the {@link RXMLMeshParserEvents} interface that
+ * An implementation of the {@link RXMLMeshParserEventsType} interface that
  * produces an array buffer and index buffer whilst parsing.
+ * 
+ * @param <G>
+ *          The type of OpenGL interfaces.
  */
 
-public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
+@SuppressWarnings("synthetic-access") public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
 {
-  private class Events implements RXMLMeshParserEvents<JCGLException>
+  private class Events implements RXMLMeshParserEventsType<JCGLException>
   {
     private @Nullable ArrayBufferUpdateUnmappedType array_data;
-    private @Nullable CursorWritable3fType          cursor_bitangent;
     private @Nullable CursorWritableIndexType       cursor_index;
     private @Nullable CursorWritable3fType          cursor_normal;
     private @Nullable CursorWritable3fType          cursor_pos;
-    private @Nullable CursorWritable3fType          cursor_tangent3f;
     private @Nullable CursorWritable4fType          cursor_tangent4f;
     private @Nullable CursorWritable2fType          cursor_uv;
     private final G                                 gl;
     private @Nullable IndexBufferUpdateUnmappedType indices_data;
-    private @Nullable RXMLMeshType                  mtype;
-    private @Nullable ArrayDescriptor               type;
+    private final ArrayDescriptor                   type;
     private final UsageHint                         usage;
 
     public Events(
@@ -75,6 +77,17 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
     {
       this.gl = NullCheck.notNull(g, "OpenGL interface");
       this.usage = NullCheck.notNull(hint, "Usage hint");
+
+      try {
+        final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
+        b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
+        b.addAttribute(KMeshAttributes.ATTRIBUTE_NORMAL);
+        b.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
+        b.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
+        this.type = b.build();
+      } catch (final JCGLExceptionAttributeDuplicate e) {
+        throw new UnreachableCodeException(e);
+      }
     }
 
     @Override public void eventError(
@@ -180,46 +193,6 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
       this.cursor_index = this.indices_data.getCursor();
     }
 
-    @Override public void eventMeshType(
-      final RXMLMeshType mt)
-      throws JCGLException
-    {
-      this.checkParsing();
-
-      final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
-      b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
-      if (mt.hasNormal()) {
-        b.addAttribute(KMeshAttributes.ATTRIBUTE_NORMAL);
-      }
-      if (mt.hasTangent3f()) {
-        b.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT3);
-      }
-      if (mt.hasTangent4f()) {
-        b.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
-      }
-      if (mt.hasBitangent()) {
-        b.addAttribute(KMeshAttributes.ATTRIBUTE_BITANGENT);
-      }
-      if (mt.hasUV()) {
-        b.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
-      }
-
-      this.type = b.build();
-      this.mtype = mt;
-    }
-
-    @Override public void eventMeshVertexBitangent(
-      final int index,
-      final RVectorI3F<RSpaceObjectType> bitangent)
-      throws JCGLException
-    {
-      this.checkParsing();
-
-      final CursorWritable3fType c = this.cursor_bitangent;
-      assert c != null;
-      c.put3f(bitangent.getXF(), bitangent.getYF(), bitangent.getZF());
-    }
-
     @Override public void eventMeshVertexEnded(
       final int index)
     {
@@ -254,17 +227,6 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
       this.checkParsing();
     }
 
-    @Override public void eventMeshVertexTangent3f(
-      final int index,
-      final RVectorI3F<RSpaceObjectType> tangent)
-    {
-      this.checkParsing();
-
-      final CursorWritable3fType c = this.cursor_tangent3f;
-      assert c != null;
-      c.put3f(tangent.getXF(), tangent.getYF(), tangent.getZF());
-    }
-
     @Override public void eventMeshVertexTangent4f(
       final int index,
       final RVectorI4F<RSpaceObjectType> tangent)
@@ -291,12 +253,10 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
       c.put2f(uv.getXF(), uv.getYF());
     }
 
-    @SuppressWarnings("synthetic-access") @Override public
-      void
-      eventMeshVerticesEnded(
-        final RVectorI3F<RSpaceObjectType> lower,
-        final RVectorI3F<RSpaceObjectType> upper)
-        throws JCGLException
+    @Override public void eventMeshVerticesEnded(
+      final RVectorI3F<RSpaceObjectType> lower,
+      final RVectorI3F<RSpaceObjectType> upper)
+      throws JCGLException
     {
       this.checkParsing();
 
@@ -308,17 +268,9 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
       if (cnor != null) {
         this.checkCursorCompletelyAssigned(cnor, "Normal attribute");
       }
-      final CursorWritable3fType ctan3 = this.cursor_tangent3f;
-      if (ctan3 != null) {
-        this.checkCursorCompletelyAssigned(ctan3, "Tangent3 attribute");
-      }
       final CursorWritable4fType ctan4 = this.cursor_tangent4f;
       if (ctan4 != null) {
         this.checkCursorCompletelyAssigned(ctan4, "Tangent4 attribute");
-      }
-      final CursorWritable3fType cbit = this.cursor_bitangent;
-      if (cbit != null) {
-        this.checkCursorCompletelyAssigned(cbit, "Bitangent attribute");
       }
       final CursorWritable2fType cuv = this.cursor_uv;
       if (cuv != null) {
@@ -372,36 +324,32 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
       this.cursor_pos =
         this.array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION
           .getName());
-
-      final RXMLMeshType mt = this.mtype;
-      assert mt != null;
-
-      if (mt.hasNormal()) {
-        this.cursor_normal =
-          ad.getCursor3f(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
-      }
-
-      if (mt.hasUV()) {
-        this.cursor_uv =
-          ad.getCursor2f(KMeshAttributes.ATTRIBUTE_UV.getName());
-      }
-
-      if (mt.hasTangent3f()) {
-        this.cursor_tangent3f =
-          ad.getCursor3f(KMeshAttributes.ATTRIBUTE_TANGENT3.getName());
-      }
-
-      if (mt.hasTangent4f()) {
-        this.cursor_tangent4f =
-          ad.getCursor4f(KMeshAttributes.ATTRIBUTE_TANGENT4.getName());
-      }
-
-      if (mt.hasBitangent()) {
-        this.cursor_bitangent =
-          ad.getCursor3f(KMeshAttributes.ATTRIBUTE_BITANGENT.getName());
-      }
+      this.cursor_normal =
+        ad.getCursor3f(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
+      this.cursor_uv = ad.getCursor2f(KMeshAttributes.ATTRIBUTE_UV.getName());
+      this.cursor_tangent4f =
+        ad.getCursor4f(KMeshAttributes.ATTRIBUTE_TANGENT4.getName());
     }
   }
+
+  /**
+   * Construct a parser for the given document, which is expected to be
+   * schema-valid.
+   * 
+   * @param <G>
+   *          The precise type of OpenGL interfaces.
+   * @param d
+   *          The document.
+   * @param g
+   *          The OpenGL interface.
+   * @param hint
+   *          The usage hit for the loaded meshes.
+   * @return A parser.
+   * @throws RXMLException
+   *           On XML errors.
+   * @throws JCGLException
+   *           On OpenGL errors.
+   */
 
   public static
     <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
@@ -421,6 +369,25 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
     return new RXMLMeshParserVBO<G>(g, hint, root);
   }
 
+  /**
+   * Construct a parser for the given element, which is expected to be
+   * schema-valid.
+   * 
+   * @param <G>
+   *          The precise type of OpenGL interfaces.
+   * @param e
+   *          The element.
+   * @param g
+   *          The OpenGL interface.
+   * @param hint
+   *          The usage hit for the loaded meshes.
+   * @return A parser.
+   * @throws RXMLException
+   *           On XML errors.
+   * @throws JCGLException
+   *           On OpenGL errors.
+   */
+
   public static
     <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
     RXMLMeshParserVBO<G>
@@ -437,16 +404,16 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
     return new RXMLMeshParserVBO<G>(g, hint, e);
   }
 
-  protected @Nullable ArrayBufferType            array;
+  private @Nullable ArrayBufferType              array;
   private @Nullable RVectorI3F<RSpaceObjectType> bounds_lower;
   private @Nullable RVectorI3F<RSpaceObjectType> bounds_upper;
-  protected boolean                              error;
+  private boolean                                error;
   private final Events                           events;
-  protected @Nullable IndexBufferType            indices;
-  protected @Nullable String                     name;
+  private @Nullable IndexBufferType              indices;
+  private @Nullable String                       name;
   private final RXMLMeshParser<JCGLException>    parser;
-  protected boolean                              parsing;
-  protected boolean                              success;
+  private boolean                                parsing;
+  private boolean                                success;
 
   private RXMLMeshParserVBO(
     final G g,
@@ -463,7 +430,7 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
   }
 
   /**
-   * Retrieve the array buffer produced from a successful parse.
+   * @return The array buffer produced from a successful parse.
    */
 
   public ArrayBufferType getArrayBuffer()
@@ -475,10 +442,10 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
   }
 
   /**
-   * Retrieve the lower bounds of all the vertices in the parsed mesh.
+   * @return The lower bounds of all the vertices in the parsed mesh.
    */
 
-  public final RVectorI3F<RSpaceObjectType> getBoundsLower()
+  public RVectorI3F<RSpaceObjectType> getBoundsLower()
   {
     this.checkParsingSuccessful();
     final RVectorI3F<RSpaceObjectType> r = this.bounds_lower;
@@ -487,10 +454,10 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
   }
 
   /**
-   * Retrieve the upper bounds of all the vertices in the parsed mesh.
+   * @return The upper bounds of all the vertices in the parsed mesh.
    */
 
-  public final RVectorI3F<RSpaceObjectType> getBoundsUpper()
+  public RVectorI3F<RSpaceObjectType> getBoundsUpper()
   {
     this.checkParsingSuccessful();
     final RVectorI3F<RSpaceObjectType> r = this.bounds_upper;
@@ -499,7 +466,7 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
   }
 
   /**
-   * Retrieve the index buffer produced from a successful parse.
+   * @return The index buffer produced from a successful parse.
    */
 
   public IndexBufferType getIndexBuffer()
@@ -518,7 +485,7 @@ public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexB
   }
 
   /**
-   * Retrieve the name of the parsed mesh.
+   * @return The name of the parsed mesh.
    */
 
   public String getName()

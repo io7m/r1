@@ -27,8 +27,10 @@ import com.io7m.jcanephora.api.JCGLTextures2DStaticCommonType;
 import com.io7m.jcanephora.api.JCGLTexturesCubeStaticCommonType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RExceptionUserError;
+import com.io7m.renderer.types.RExceptionUnitAllocatorActive;
+import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
 
 /**
  * <p>
@@ -54,16 +56,15 @@ import com.io7m.renderer.types.RExceptionUserError;
   @EqualityReference private final class Context implements
     KTextureUnitContextType
   {
-    private int       count;
-    private final int first;
-    private boolean   has_child;
+    private int               count;
+    private final int         first;
+    private @Nullable Context child;
 
     Context(
       final int in_first)
     {
       this.first = in_first;
       this.count = 0;
-      this.has_child = false;
     }
 
     @Override public int getTextureCountForContext()
@@ -81,18 +82,20 @@ import com.io7m.renderer.types.RExceptionUserError;
       throws JCGLException,
         RException
     {
-      if (this.has_child) {
-        throw RExceptionUserError.fromAPIMisuse("Context already has a child");
+      if (this.child != null) {
+        throw new RExceptionUnitAllocatorMultipleChildren(
+          "Context already has a child (" + this.child + ")");
       }
 
       try {
-        this.has_child = true;
+        this.child = new Context(this.first + this.count);
+
         final Context c = new Context(this.first + this.count);
         f.run(c);
         KTextureUnitAllocator.this.texturesRemoved(c
           .getTextureCountForContext());
       } finally {
-        this.has_child = false;
+        this.child = null;
       }
     }
 
@@ -233,7 +236,7 @@ import com.io7m.renderer.types.RExceptionUserError;
       RException
   {
     if (this.in_use) {
-      throw RExceptionUserError.fromAPIMisuse("Allocator is already in use");
+      throw new RExceptionUnitAllocatorActive("Allocator is already in use");
     }
 
     try {

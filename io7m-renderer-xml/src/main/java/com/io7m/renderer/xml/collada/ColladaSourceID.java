@@ -20,10 +20,21 @@ import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * A unique identifier for a source in a COLLADA document.
+ */
+
 @EqualityStructural public final class ColladaSourceID implements
   Comparable<ColladaSourceID>
 {
   private final String actual;
+
+  /**
+   * Construct an identifier.
+   * 
+   * @param in_actual
+   *          The base name of the identifier.
+   */
 
   public ColladaSourceID(
     final String in_actual)
@@ -46,6 +57,10 @@ import com.io7m.jnull.Nullable;
     final ColladaSourceID other = (ColladaSourceID) obj;
     return this.actual.equals(other.actual);
   }
+
+  /**
+   * @return The actual identifier name as a string.
+   */
 
   public String getActual()
   {

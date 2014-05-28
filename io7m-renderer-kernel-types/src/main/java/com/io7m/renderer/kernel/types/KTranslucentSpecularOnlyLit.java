@@ -77,7 +77,7 @@ import com.io7m.renderer.types.RException;
         JCGLException,
         RException
   {
-    return v.translucentSpecularOnlyLit(this);
+    return v.specularOnly(this);
   }
 
   /**

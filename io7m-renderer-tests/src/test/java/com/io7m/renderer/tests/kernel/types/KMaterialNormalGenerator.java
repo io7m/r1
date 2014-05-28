@@ -21,26 +21,28 @@ import javax.annotation.Nonnull;
 import net.java.quickcheck.Generator;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
+import com.io7m.renderer.kernel.types.KMaterialNormalType;
+import com.io7m.renderer.kernel.types.KMaterialNormalVertex;
 
 public final class KMaterialNormalGenerator implements
-  Generator<KMaterialNormal>
+  Generator<KMaterialNormalType>
 {
   private final @Nonnull Generator<Texture2DStaticUsableType> tex_gen;
 
   public KMaterialNormalGenerator(
-    final @Nonnull Generator<Texture2DStaticUsableType> tex_gen1)
+    final @Nonnull Generator<Texture2DStaticUsableType> in_tex_gen)
   {
-    this.tex_gen = tex_gen1;
+    this.tex_gen = in_tex_gen;
   }
 
-  @Override public KMaterialNormal next()
+  @Override public KMaterialNormalType next()
   {
     if (Math.random() > 0.5) {
       final Texture2DStaticUsableType tn = this.tex_gen.next();
       assert tn != null;
-      return KMaterialNormal.newNormalMapped(tn);
+      return KMaterialNormalMapped.mapped(tn);
     }
-    return KMaterialNormal.newNormalUnmapped();
+    return KMaterialNormalVertex.vertex();
   }
 }

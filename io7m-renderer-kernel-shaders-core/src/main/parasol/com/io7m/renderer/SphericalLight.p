@@ -31,10 +31,10 @@ module SphericalLight is
 
   --
   -- Given a spherical light [light], calculate the diffuse
-  -- colour based on [d], with minimum emission level [e].
+  -- color based on [d], with minimum emission level [e].
   --
 
-  function diffuse_colour (
+  function diffuse_color (
     light : Light.t,
     d     : Light.vectors,
     e     : float
@@ -44,18 +44,18 @@ module SphericalLight is
         F.maximum (0.0, V3.dot (d.stl, d.normal));
       value factor_e =
         F.maximum (factor, e);
-      value colour =
-        V3.multiply_scalar (V3.multiply_scalar (light.colour, light.intensity), factor_e);
+      value color =
+        V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor_e);
     in
-      colour
+      color
     end;
 
   --
   -- Given a spherical light [light], calculate the specular
-  -- colour based on [d].
+  -- color based on [d].
   --
 
-  function specular_colour (
+  function specular_color (
     light : Light.t,
     d     : Light.vectors,
     s     : Specular.t
@@ -63,10 +63,10 @@ module SphericalLight is
     let
       value factor =
         F.power (F.maximum (0.0, V3.dot (d.reflection, d.stl)), s.exponent);
-      value colour =
-        V3.multiply_scalar (V3.multiply_scalar (light.colour, light.intensity), factor);
+      value color =
+        V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor);
     in
-      V3.multiply (colour, s.colour)
+      V3.multiply (color, s.color)
     end;
 
 end;

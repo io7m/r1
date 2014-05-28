@@ -16,6 +16,10 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionMaterialMissingAlbedoTexture;
+import com.io7m.renderer.types.RExceptionMaterialMissingSpecularTexture;
+
 /**
  * The type of mutable builders for opaque materials.
  * 
@@ -26,12 +30,22 @@ package com.io7m.renderer.kernel.types;
 public interface KMaterialOpaqueBuilderType<M extends KMaterialOpaqueType>
 {
   /**
-   * Set the material albedo.
+   * Construct a material based on all of the parameters given so far.
    * 
-   * @param m
-   *          The albedo.
+   * @return The material.
+   * 
+   * @throws RExceptionMaterialMissingAlbedoTexture
+   *           If one or more material properties require an albedo texture,
+   *           but one was not provided.
+   * @throws RExceptionMaterialMissingSpecularTexture
+   *           If one or more material properties require a specular texture,
+   *           but one was not provided.
+   * @throws RException
+   *           If an error occurs.
    */
 
-  void setAlbedo(
-    final KMaterialAlbedo m);
+  M build()
+    throws RExceptionMaterialMissingAlbedoTexture,
+      RExceptionMaterialMissingSpecularTexture,
+      RException;
 }

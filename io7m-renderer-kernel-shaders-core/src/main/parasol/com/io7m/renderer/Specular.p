@@ -24,7 +24,7 @@ module Specular is
 
   type t is record
     exponent : float,    -- The specular exponent in the range [1, 127]
-    colour   : vector_3f -- The specular colour/intensity
+    color   : vector_3f -- The specular color/intensity
   end;
 
 end;

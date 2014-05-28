@@ -28,16 +28,10 @@ import com.io7m.junreachable.UnreachableCodeException;
 @EqualityReference public final class KMeshAttributes
 {
   /**
-   * The name and type of per-vertex bitangent vector attributes
+   * The name and type of per-vertex color data attributes
    */
 
-  public static final ArrayAttributeDescriptor ATTRIBUTE_BITANGENT;
-
-  /**
-   * The name and type of per-vertex colour data attributes
-   */
-
-  public static final ArrayAttributeDescriptor ATTRIBUTE_COLOUR;
+  public static final ArrayAttributeDescriptor ATTRIBUTE_COLOR;
 
   /**
    * The name and type of per-vertex normal vector attributes
@@ -50,12 +44,6 @@ import com.io7m.junreachable.UnreachableCodeException;
    */
 
   public static final ArrayAttributeDescriptor ATTRIBUTE_POSITION;
-
-  /**
-   * The name and type of per-vertex tangent vector attributes
-   */
-
-  public static final ArrayAttributeDescriptor ATTRIBUTE_TANGENT3;
 
   /**
    * The name and type of per-vertex tangent vector attributes, where the
@@ -76,15 +64,9 @@ import com.io7m.junreachable.UnreachableCodeException;
   public static final ArrayAttributeDescriptor ATTRIBUTE_UV;
 
   static {
-    ATTRIBUTE_BITANGENT =
+    ATTRIBUTE_COLOR =
       ArrayAttributeDescriptor.newAttribute(
-        "bitangent",
-        JCGLScalarType.TYPE_FLOAT,
-        3);
-
-    ATTRIBUTE_COLOUR =
-      ArrayAttributeDescriptor.newAttribute(
-        "colour",
+        "color",
         JCGLScalarType.TYPE_FLOAT,
         4);
 
@@ -97,12 +79,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     ATTRIBUTE_POSITION =
       ArrayAttributeDescriptor.newAttribute(
         "position",
-        JCGLScalarType.TYPE_FLOAT,
-        3);
-
-    ATTRIBUTE_TANGENT3 =
-      ArrayAttributeDescriptor.newAttribute(
-        "tangent3",
         JCGLScalarType.TYPE_FLOAT,
         3);
 

@@ -19,12 +19,16 @@ package com.io7m.renderer.tests.kernel.types;
 import net.java.quickcheck.Generator;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.renderer.kernel.types.KMaterialSpecular;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.kernel.types.KMaterialSpecularConstant;
+import com.io7m.renderer.kernel.types.KMaterialSpecularMapped;
+import com.io7m.renderer.kernel.types.KMaterialSpecularNone;
+import com.io7m.renderer.kernel.types.KMaterialSpecularType;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RVectorI3F;
 
 public final class KMaterialSpecularGenerator implements
-  Generator<KMaterialSpecular>
+  Generator<KMaterialSpecularType>
 {
   private final Generator<Texture2DStaticUsableType> tex_gen;
   private final Generator<RVectorI3F<RSpaceRGBType>> vec_gen;
@@ -37,16 +41,28 @@ public final class KMaterialSpecularGenerator implements
     this.tex_gen = tex_gen1;
   }
 
-  @SuppressWarnings("null") @Override public KMaterialSpecular next()
+  @SuppressWarnings("null") @Override public KMaterialSpecularType next()
   {
-    if (Math.random() > 0.5) {
-      return KMaterialSpecular.newSpecularMapped(
-        this.vec_gen.next(),
-        (float) Math.random(),
-        this.tex_gen.next());
+    final int r = (int) (Math.random() * 3);
+    switch (r) {
+      case 0:
+      {
+        return KMaterialSpecularNone.none();
+      }
+      case 1:
+      {
+        return KMaterialSpecularConstant.constant(
+          this.vec_gen.next(),
+          (float) Math.random());
+      }
+      case 2:
+      {
+        return KMaterialSpecularMapped.mapped(
+          this.vec_gen.next(),
+          (float) Math.random(),
+          this.tex_gen.next());
+      }
     }
-    return KMaterialSpecular.newSpecularUnmapped(
-      this.vec_gen.next(),
-      (float) Math.random());
+    throw new UnreachableCodeException();
   }
 }

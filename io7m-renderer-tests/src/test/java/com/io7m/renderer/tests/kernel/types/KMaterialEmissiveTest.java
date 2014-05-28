@@ -25,79 +25,55 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.Some;
-import com.io7m.jnull.NullCheckException;
-import com.io7m.renderer.kernel.types.KMaterialEmissive;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveConstant;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveMapped;
 import com.io7m.renderer.tests.FakeTexture2DStatic;
-import com.io7m.renderer.tests.utilities.TestUtilities;
+import com.io7m.renderer.tests.types.RVectorI4FGenerator;
+import com.io7m.renderer.types.RSpaceRGBAType;
+import com.io7m.renderer.types.RVectorI4F;
 
-@SuppressWarnings("static-method") public final class KMaterialEmissiveTest
+@SuppressWarnings({ "static-method", "null" }) public final class KMaterialEmissiveTest
 {
-  @Test public void testAttributes()
+  @Test public void testMapped()
   {
-    final Generator<Texture2DStaticUsableType> tex_gen =
+    final Generator<Texture2DStaticUsableType> tg =
       FakeTexture2DStatic.generator(new StringGenerator());
 
     QuickCheck.forAllVerbose(
-      new KMaterialEmissiveGenerator(tex_gen),
-      new AbstractCharacteristic<KMaterialEmissive>() {
+      new RVectorI4FGenerator<RSpaceRGBAType>(),
+      new AbstractCharacteristic<RVectorI4F<RSpaceRGBAType>>() {
         @Override protected void doSpecify(
-          final KMaterialEmissive m)
+          final RVectorI4F<RSpaceRGBAType> c)
           throws Throwable
         {
-          Assert.assertEquals(m.withEmission(0.5f).getEmission(), 0.5f, 0.0f);
+          final Texture2DStaticUsableType t = tg.next();
+          final float e = (float) Math.random();
 
-          final Texture2DStaticUsableType tn = tex_gen.next();
-          assert tn != null;
-          final Some<Texture2DStaticUsableType> t =
-            (Some<Texture2DStaticUsableType>) Option.some(tn);
-          Assert.assertEquals(m.withMap(t.get()).getTexture(), t);
-          Assert.assertEquals(
-            m.withMap(t.get()).withoutMap().getTexture(),
-            Option.none());
+          final KMaterialEmissiveMapped m =
+            KMaterialEmissiveMapped.mapped(e, t);
 
-          Assert.assertEquals(m.withMap(t.get()).texturesGetRequired(), 1);
-          Assert.assertEquals(m.withoutMap().texturesGetRequired(), 0);
+          Assert.assertEquals(e, m.getEmission(), 0.0);
+          Assert.assertEquals(t, m.getTexture());
         }
       });
   }
 
-  @Test public void testEqualsHashCode()
+  @Test public void testConstant()
   {
-    final Texture2DStaticUsableType t0 = FakeTexture2DStatic.getDefault();
-    final Texture2DStaticUsableType t1 =
-      FakeTexture2DStatic.getDefaultWithName("other");
+    QuickCheck.forAllVerbose(
+      new RVectorI4FGenerator<RSpaceRGBAType>(),
+      new AbstractCharacteristic<RVectorI4F<RSpaceRGBAType>>() {
+        @Override protected void doSpecify(
+          final RVectorI4F<RSpaceRGBAType> c)
+          throws Throwable
+        {
+          final float e = (float) Math.random();
 
-    final KMaterialEmissive m0 =
-      KMaterialEmissive.newEmissiveMapped(0.0f, t0);
-    final KMaterialEmissive m1 =
-      KMaterialEmissive.newEmissiveMapped(0.0f, t0);
-    final KMaterialEmissive m3 =
-      KMaterialEmissive.newEmissiveMapped(1.0f, t0);
-    final KMaterialEmissive m4 =
-      KMaterialEmissive.newEmissiveMapped(0.0f, t1);
+          final KMaterialEmissiveConstant m =
+            KMaterialEmissiveConstant.constant(e);
 
-    Assert.assertEquals(m0, m0);
-    Assert.assertEquals(m0, m1);
-    Assert.assertNotEquals(m0, null);
-    Assert.assertNotEquals(m0, Integer.valueOf(23));
-    Assert.assertNotEquals(m0, m3);
-    Assert.assertNotEquals(m0, m4);
-
-    Assert.assertEquals(m0.hashCode(), m1.hashCode());
-    Assert.assertNotEquals(m0.hashCode(), m3.hashCode());
-    Assert.assertNotEquals(m0.hashCode(), m4.hashCode());
-
-    Assert.assertEquals(m0.toString(), m1.toString());
-    Assert.assertNotEquals(m0.toString(), m3.toString());
-    Assert.assertNotEquals(m0.toString(), m4.toString());
-  }
-
-  @Test(expected = NullCheckException.class) public void testNull_0()
-  {
-    KMaterialEmissive.newEmissiveMapped(
-      0.0f,
-      (Texture2DStaticUsableType) TestUtilities.actuallyNull());
+          Assert.assertEquals(e, m.getEmission(), 0.0);
+        }
+      });
   }
 }

@@ -20,7 +20,6 @@ import com.io7m.jcanephora.ArrayAttributeType;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLTextures2DStaticCommonType;
 import com.io7m.jcanephora.api.JCGLTexturesCubeStaticCommonType;
@@ -38,12 +37,19 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
-import com.io7m.renderer.kernel.types.KMaterialAlbedo;
-import com.io7m.renderer.kernel.types.KMaterialEmissive;
-import com.io7m.renderer.kernel.types.KMaterialEnvironment;
-import com.io7m.renderer.kernel.types.KMaterialNormal;
-import com.io7m.renderer.kernel.types.KMaterialRefractive;
-import com.io7m.renderer.kernel.types.KMaterialSpecular;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
+import com.io7m.renderer.kernel.types.KMaterialAlphaConstant;
+import com.io7m.renderer.kernel.types.KMaterialAlphaOneMinusDot;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveConstant;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveMapped;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentReflection;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentReflectionMapped;
+import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
+import com.io7m.renderer.kernel.types.KMaterialRefractiveMasked;
+import com.io7m.renderer.kernel.types.KMaterialRefractiveUnmasked;
+import com.io7m.renderer.kernel.types.KMaterialSpecularConstant;
+import com.io7m.renderer.kernel.types.KMaterialSpecularMapped;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
@@ -122,8 +128,8 @@ import com.io7m.renderer.types.RVectorReadable4FType;
                                                                    "t_specular";
 
   /**
-   * Bind the vertex colour attribute of the given array to the colour
-   * attribute of the given program.
+   * Bind the vertex color attribute of the given array to the color attribute
+   * of the given program.
    * 
    * @param program
    *          The program
@@ -133,24 +139,24 @@ import com.io7m.renderer.types.RVectorReadable4FType;
    *           If an OpenGL error occurs
    */
 
-  public static void bindAttributeColour(
+  public static void bindAttributeColor(
     final JCBProgramType program,
     final ArrayBufferUsableType array)
     throws JCGLException
   {
-    KShadingProgramCommon.bindAttributeColourUnchecked(
+    KShadingProgramCommon.bindAttributeColorUnchecked(
       NullCheck.notNull(program, "Program"),
       NullCheck.notNull(array, "Array"));
   }
 
-  static void bindAttributeColourUnchecked(
+  static void bindAttributeColorUnchecked(
     final JCBProgramType program,
     final ArrayBufferUsableType array)
     throws JCGLException
   {
     final ArrayAttributeType a =
-      array.arrayGetAttribute(KMeshAttributes.ATTRIBUTE_COLOUR.getName());
-    program.programAttributeBind("v_colour", a);
+      array.arrayGetAttribute(KMeshAttributes.ATTRIBUTE_COLOR.getName());
+    program.programAttributeBind("v_color", a);
   }
 
   static void bindAttributeNormal(
@@ -240,76 +246,56 @@ import com.io7m.renderer.types.RVectorReadable4FType;
   static void bindPutTextureAlbedo(
     final JCBProgramType program,
     final JCGLTextures2DStaticCommonType gt,
-    final KMaterialAlbedo m,
+    final KMaterialAlbedoTextured mat,
     final TextureUnitType texture_unit)
     throws JCGLException
   {
-    if (m.getTexture().isNone()) {
-      throw new IllegalArgumentException(
-        "Material does not contain an albedo texture");
-    }
-
-    final OptionType<Texture2DStaticUsableType> opt = m.getTexture();
-    final Some<Texture2DStaticUsableType> some =
-      (Some<Texture2DStaticUsableType>) opt;
-    gt.texture2DStaticBind(texture_unit, some.get());
+    final Texture2DStaticUsableType t = mat.getTexture();
+    gt.texture2DStaticBind(texture_unit, t);
     KShadingProgramCommon.putTextureAlbedoUnchecked(program, texture_unit);
   }
 
   static void bindPutTextureEmissive(
     final JCBProgramType program,
     final JCGLTextures2DStaticCommonType gt,
-    final KMaterialEmissive m,
+    final KMaterialEmissiveMapped m,
     final TextureUnitType texture_unit)
     throws JCGLException
   {
-    if (m.getTexture().isNone()) {
-      throw new IllegalArgumentException(
-        "Material does not contain an emissive texture");
-    }
-
-    final OptionType<Texture2DStaticUsableType> opt = m.getTexture();
-    final Some<Texture2DStaticUsableType> some =
-      (Some<Texture2DStaticUsableType>) opt;
-    gt.texture2DStaticBind(texture_unit, some.get());
+    gt.texture2DStaticBind(texture_unit, m.getTexture());
     KShadingProgramCommon.putTextureEmissive(program, texture_unit);
   }
 
-  static void bindPutTextureEnvironment(
+  static void bindPutTextureEnvironmentReflection(
     final JCBProgramType program,
     final JCGLTexturesCubeStaticCommonType gt,
-    final KMaterialEnvironment m,
+    final KMaterialEnvironmentReflection m,
     final TextureUnitType texture_unit)
     throws JCGLException
   {
-    if (m.getTexture().isNone()) {
-      throw new IllegalArgumentException(
-        "Material does not contain an environment texture");
-    }
+    gt.textureCubeStaticBind(texture_unit, m.getTexture());
+    KShadingProgramCommon.putTextureEnvironment(program, texture_unit);
+  }
 
-    final OptionType<TextureCubeStaticUsableType> opt = m.getTexture();
-    final Some<TextureCubeStaticUsableType> some =
-      (Some<TextureCubeStaticUsableType>) opt;
-    gt.textureCubeStaticBind(texture_unit, some.get());
+  static void bindPutTextureEnvironmentReflectionMapped(
+    final JCBProgramType program,
+    final JCGLTexturesCubeStaticCommonType gt,
+    final KMaterialEnvironmentReflectionMapped m,
+    final TextureUnitType texture_unit)
+    throws JCGLException
+  {
+    gt.textureCubeStaticBind(texture_unit, m.getTexture());
     KShadingProgramCommon.putTextureEnvironment(program, texture_unit);
   }
 
   static void bindPutTextureNormal(
     final JCBProgramType program,
     final JCGLTextures2DStaticCommonType gt,
-    final KMaterialNormal m,
+    final KMaterialNormalMapped m,
     final TextureUnitType texture_unit)
     throws JCGLException
   {
-    if (m.getTexture().isNone()) {
-      throw new IllegalArgumentException(
-        "Material does not contain a normal texture");
-    }
-
-    final OptionType<Texture2DStaticUsableType> opt = m.getTexture();
-    final Some<Texture2DStaticUsableType> some =
-      (Some<Texture2DStaticUsableType>) opt;
-    gt.texture2DStaticBind(texture_unit, some.get());
+    gt.texture2DStaticBind(texture_unit, m.getTexture());
     KShadingProgramCommon.putTextureNormal(program, texture_unit);
   }
 
@@ -338,19 +324,11 @@ import com.io7m.renderer.types.RVectorReadable4FType;
   static void bindPutTextureSpecular(
     final JCBProgramType program,
     final JCGLTextures2DStaticCommonType gt,
-    final KMaterialSpecular m,
+    final KMaterialSpecularMapped m,
     final TextureUnitType texture_unit)
     throws JCGLException
   {
-    if (m.getTexture().isNone()) {
-      throw new IllegalArgumentException(
-        "Material does not contain a specular texture");
-    }
-
-    final OptionType<Texture2DStaticUsableType> opt = m.getTexture();
-    final Some<Texture2DStaticUsableType> some =
-      (Some<Texture2DStaticUsableType>) opt;
-    gt.texture2DStaticBind(texture_unit, some.get());
+    gt.texture2DStaticBind(texture_unit, m.getTexture());
     KShadingProgramCommon.putTextureSpecular(program, texture_unit);
   }
 
@@ -405,13 +383,13 @@ import com.io7m.renderer.types.RVectorReadable4FType;
       .containsKey("light_spherical.position");
   }
 
-  static boolean existsMaterialAlbedoColour(
+  static boolean existsMaterialAlbedoColor(
     final JCBProgramType program)
   {
     return program
       .programGet()
       .programGetUniforms()
-      .containsKey("material.albedo.colour");
+      .containsKey("material.albedo.color");
   }
 
   static boolean existsMaterialAlbedoMix(
@@ -585,26 +563,25 @@ import com.io7m.renderer.types.RVectorReadable4FType;
       context,
       view,
       light.lightGetDirection());
-    KShadingProgramCommon
-      .putLightDirectionalColour(e, light.lightGetColor());
+    KShadingProgramCommon.putLightDirectionalColor(e, light.lightGetColor());
     KShadingProgramCommon.putLightDirectionalIntensity(
       e,
       light.lightGetIntensity());
   }
 
-  static void putLightDirectionalColour(
+  static void putLightDirectionalColor(
     final JCBProgramType e,
-    final RVectorReadable3FType<RSpaceRGBType> colour)
+    final RVectorReadable3FType<RSpaceRGBType> color)
     throws JCGLException
   {
-    e.programUniformPutVector3f("light_directional.colour", colour);
+    e.programUniformPutVector3f("light_directional.color", color);
   }
 
-  static void putLightDirectionalColourReuse(
+  static void putLightDirectionalColorReuse(
     final JCBProgramType e)
     throws JCGLException
   {
-    e.programUniformUseExisting("light_directional.colour");
+    e.programUniformUseExisting("light_directional.color");
   }
 
   static void putLightDirectionalDirection(
@@ -654,23 +631,23 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     throws JCGLException
   {
     KShadingProgramCommon.putLightDirectionalDirectionReuse(e);
-    KShadingProgramCommon.putLightDirectionalColourReuse(e);
+    KShadingProgramCommon.putLightDirectionalColorReuse(e);
     KShadingProgramCommon.putLightDirectionalIntensityReuse(e);
   }
 
-  static void putLightProjectiveColour(
+  static void putLightProjectiveColor(
     final JCBProgramType e,
-    final RVectorReadable3FType<RSpaceRGBType> colour)
+    final RVectorReadable3FType<RSpaceRGBType> color)
     throws JCGLException
   {
-    e.programUniformPutVector3f("light_projective.colour", colour);
+    e.programUniformPutVector3f("light_projective.color", color);
   }
 
-  static void putLightProjectiveColourReuse(
+  static void putLightProjectiveColorReuse(
     final JCBProgramType e)
     throws JCGLException
   {
-    e.programUniformUseExisting("light_projective.colour");
+    e.programUniformUseExisting("light_projective.color");
   }
 
   static void putLightProjectiveFalloff(
@@ -760,7 +737,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
       context,
       view,
       light.lightGetPosition());
-    KShadingProgramCommon.putLightProjectiveColour(
+    KShadingProgramCommon.putLightProjectiveColor(
       program,
       light.lightGetColor());
     KShadingProgramCommon.putLightProjectiveIntensity(
@@ -769,7 +746,9 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     KShadingProgramCommon.putLightProjectiveFalloff(
       program,
       light.lightGetFalloff());
-    KShadingProgramCommon.putLightProjectiveRange(program, light.lightGetRange());
+    KShadingProgramCommon.putLightProjectiveRange(
+      program,
+      light.lightGetRange());
 
     final OptionType<KShadowType> ls = light.lightGetShadow();
     ls
@@ -821,7 +800,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
       RException
   {
     KShadingProgramCommon.putLightProjectivePositionReuse(program);
-    KShadingProgramCommon.putLightProjectiveColourReuse(program);
+    KShadingProgramCommon.putLightProjectiveColorReuse(program);
     KShadingProgramCommon.putLightProjectiveIntensityReuse(program);
     KShadingProgramCommon.putLightProjectiveFalloffReuse(program);
     KShadingProgramCommon.putLightProjectiveRangeReuse(program);
@@ -880,8 +859,8 @@ import com.io7m.renderer.types.RVectorReadable4FType;
       view,
       light.lightGetPosition());
 
-    final RVectorI3F<RSpaceRGBType> colour = light.lightGetColor();
-    KShadingProgramCommon.putLightSphericalColour(program, colour);
+    final RVectorI3F<RSpaceRGBType> color = light.lightGetColor();
+    KShadingProgramCommon.putLightSphericalColor(program, color);
     final float intensity = light.lightGetIntensity();
     KShadingProgramCommon.putLightSphericalIntensity(program, intensity);
     final float radius = light.lightGetRadius();
@@ -890,19 +869,19 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     KShadingProgramCommon.putLightSphericalFalloff(program, falloff);
   }
 
-  static void putLightSphericalColour(
+  static void putLightSphericalColor(
     final JCBProgramType program,
-    final RVectorReadable3FType<RSpaceRGBType> colour)
+    final RVectorReadable3FType<RSpaceRGBType> color)
     throws JCGLException
   {
-    program.programUniformPutVector3f("light_spherical.colour", colour);
+    program.programUniformPutVector3f("light_spherical.color", color);
   }
 
-  static void putLightSphericalColourReuse(
+  static void putLightSphericalColorReuse(
     final JCBProgramType program)
     throws JCGLException
   {
-    program.programUniformUseExisting("light_spherical.colour");
+    program.programUniformUseExisting("light_spherical.color");
   }
 
   static void putLightSphericalFalloff(
@@ -983,28 +962,18 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     throws JCGLException
   {
     KShadingProgramCommon.putLightSphericalPositionReuse(program);
-    KShadingProgramCommon.putLightSphericalColourReuse(program);
+    KShadingProgramCommon.putLightSphericalColorReuse(program);
     KShadingProgramCommon.putLightSphericalIntensityReuse(program);
     KShadingProgramCommon.putLightSphericalRangeReuse(program);
     KShadingProgramCommon.putLightSphericalFalloffReuse(program);
   }
 
-  static void putMaterialAlbedo(
-    final JCBProgramType program,
-    final KMaterialAlbedo albedo)
-    throws JCGLException
-  {
-    KShadingProgramCommon.putMaterialAlbedoMix(program, albedo.getMix());
-    KShadingProgramCommon
-      .putMaterialAlbedoColour(program, albedo.getColour());
-  }
-
-  static void putMaterialAlbedoColour(
+  static void putMaterialAlbedoColor(
     final JCBProgramType program,
     final RVectorReadable4FType<RSpaceRGBAType> rgba)
     throws JCGLException
   {
-    program.programUniformPutVector4f("p_albedo.colour", rgba);
+    program.programUniformPutVector4f("p_albedo.color", rgba);
   }
 
   static void putMaterialAlbedoMix(
@@ -1015,12 +984,46 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     program.programUniformPutFloat("p_albedo.mix", mix);
   }
 
+  static void putMaterialAlbedoTextured(
+    final JCBProgramType program,
+    final KMaterialAlbedoTextured albedo)
+    throws JCGLException
+  {
+    KShadingProgramCommon.putMaterialAlbedoMix(program, albedo.getMix());
+    KShadingProgramCommon.putMaterialAlbedoColor(program, albedo.getColor());
+  }
+
+  static void putMaterialAlbedoUntextured(
+    final JCBProgramType program,
+    final KMaterialAlbedoUntextured albedo)
+    throws JCGLException
+  {
+    KShadingProgramCommon.putMaterialAlbedoColor(program, albedo.getColor());
+    KShadingProgramCommon.putMaterialAlbedoMix(program, 0.0f);
+  }
+
+  static void putMaterialAlphaConstant(
+    final JCBProgramType program,
+    final KMaterialAlphaConstant m)
+    throws JCGLException
+  {
+    KShadingProgramCommon.putMaterialAlphaOpacity(program, m.getOpacity());
+  }
+
   static void putMaterialAlphaDepthThreshold(
     final JCBProgramType program,
     final float threshold)
     throws JCGLException
   {
     program.programUniformPutFloat("p_alpha_depth", threshold);
+  }
+
+  static void putMaterialAlphaOneMinusDot(
+    final JCBProgramType program,
+    final KMaterialAlphaOneMinusDot m)
+    throws JCGLException
+  {
+    KShadingProgramCommon.putMaterialAlphaOpacity(program, m.getOpacity());
   }
 
   static void putMaterialAlphaOpacity(
@@ -1031,9 +1034,9 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     program.programUniformPutFloat("p_opacity", opacity);
   }
 
-  static void putMaterialEmissive(
+  static void putMaterialEmissiveConstant(
     final JCBProgramType program,
-    final KMaterialEmissive emissive)
+    final KMaterialEmissiveConstant emissive)
     throws JCGLException
   {
     KShadingProgramCommon.putMaterialEmissiveLevel(
@@ -1049,12 +1052,14 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     program.programUniformPutFloat("p_emission.amount", emission);
   }
 
-  static void putMaterialEnvironment(
+  static void putMaterialEmissiveMapped(
     final JCBProgramType program,
-    final KMaterialEnvironment envi)
+    final KMaterialEmissiveMapped emissive)
     throws JCGLException
   {
-    KShadingProgramCommon.putMaterialEnvironmentMix(program, envi.getMix());
+    KShadingProgramCommon.putMaterialEmissiveLevel(
+      program,
+      emissive.getEmission());
   }
 
   static void putMaterialEnvironmentMix(
@@ -1065,9 +1070,25 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     program.programUniformPutFloat("p_environment.mix", mix);
   }
 
-  static void putMaterialRefractive(
+  static void putMaterialEnvironmentReflection(
     final JCBProgramType program,
-    final KMaterialRefractive material)
+    final KMaterialEnvironmentReflection envi)
+    throws JCGLException
+  {
+    KShadingProgramCommon.putMaterialEnvironmentMix(program, envi.getMix());
+  }
+
+  static void putMaterialEnvironmentReflectionMapped(
+    final JCBProgramType program,
+    final KMaterialEnvironmentReflectionMapped envi)
+    throws JCGLException
+  {
+    KShadingProgramCommon.putMaterialEnvironmentMix(program, envi.getMix());
+  }
+
+  static void putMaterialRefractiveMasked(
+    final JCBProgramType program,
+    final KMaterialRefractiveMasked material)
     throws JCGLException
   {
     KShadingProgramCommon.putMaterialRefractiveScale(
@@ -1083,23 +1104,33 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     program.programUniformPutFloat("p_refraction.scale", scale);
   }
 
-  static void putMaterialSpecular(
+  static void putMaterialRefractiveUnmasked(
     final JCBProgramType program,
-    final KMaterialSpecular m)
+    final KMaterialRefractiveUnmasked material)
+    throws JCGLException
+  {
+    KShadingProgramCommon.putMaterialRefractiveScale(
+      program,
+      material.getScale());
+  }
+
+  static void putMaterialSpecularColor(
+    final JCBProgramType program,
+    final RVectorReadable3FType<RSpaceRGBType> color)
+    throws JCGLException
+  {
+    program.programUniformPutVector3f("p_specular.color", color);
+  }
+
+  static void putMaterialSpecularConstant(
+    final JCBProgramType program,
+    final KMaterialSpecularConstant m)
     throws JCGLException
   {
     KShadingProgramCommon.putMaterialSpecularExponent(
       program,
       m.getExponent());
-    KShadingProgramCommon.putMaterialSpecularColour(program, m.getColour());
-  }
-
-  static void putMaterialSpecularColour(
-    final JCBProgramType program,
-    final RVectorReadable3FType<RSpaceRGBType> colour)
-    throws JCGLException
-  {
-    program.programUniformPutVector3f("p_specular.colour", colour);
+    KShadingProgramCommon.putMaterialSpecularColor(program, m.getColor());
   }
 
   static void putMaterialSpecularExponent(
@@ -1108,6 +1139,17 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     throws JCGLException
   {
     program.programUniformPutFloat("p_specular.exponent", e);
+  }
+
+  static void putMaterialSpecularMapped(
+    final JCBProgramType program,
+    final KMaterialSpecularMapped m)
+    throws JCGLException
+  {
+    KShadingProgramCommon.putMaterialSpecularExponent(
+      program,
+      m.getExponent());
+    KShadingProgramCommon.putMaterialSpecularColor(program, m.getColor());
   }
 
   static void putMatrixInverseView(

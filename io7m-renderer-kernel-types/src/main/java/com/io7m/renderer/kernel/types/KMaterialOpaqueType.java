@@ -22,8 +22,14 @@ import com.io7m.renderer.types.RException;
  * The type of opaque materials.
  */
 
-public interface KMaterialOpaqueType extends KMaterialRegularType
+public interface KMaterialOpaqueType extends KMaterialType
 {
+  /**
+   * @return The material properties related to depth rendering.
+   */
+
+  KMaterialDepthType materialOpaqueGetDepth();
+
   /**
    * Be visited by the given generic visitor.
    * 
@@ -46,7 +52,7 @@ public interface KMaterialOpaqueType extends KMaterialRegularType
 
     <A, E extends Throwable, V extends KMaterialOpaqueVisitorType<A, E>>
     A
-    materialOpaqueAccept(
+    opaqueAccept(
       final V v)
       throws E,
         RException;

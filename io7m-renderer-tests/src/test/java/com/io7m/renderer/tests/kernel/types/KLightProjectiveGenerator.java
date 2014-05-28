@@ -22,6 +22,7 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jnull.NonNull;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
 import com.io7m.renderer.kernel.types.KShadowType;
@@ -40,8 +41,10 @@ public final class KLightProjectiveGenerator implements
   private final @NonNull Generator<RMatrixI4x4F<RTransformProjectionType>> proj_gen;
   private final @NonNull Generator<Texture2DStaticUsableType>              tex_gen;
   private final @NonNull Generator<KShadowType>                            shad_gen;
+  private final @NonNull KGraphicsCapabilitiesType                         caps;
 
   public KLightProjectiveGenerator(
+    final @NonNull KGraphicsCapabilitiesType in_caps,
     final @NonNull Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen,
     final @NonNull Generator<RVectorI3F<RSpaceWorldType>> in_position_gen,
     final @NonNull Generator<QuaternionI4F> in_quat_gen,
@@ -49,6 +52,7 @@ public final class KLightProjectiveGenerator implements
     final @NonNull Generator<Texture2DStaticUsableType> in_tex_gen,
     final @NonNull Generator<KShadowType> in_shad_gen)
   {
+    this.caps = in_caps;
     this.colour_gen = in_colour_gen;
     this.position_gen = in_position_gen;
     this.quat_gen = in_quat_gen;
@@ -76,7 +80,7 @@ public final class KLightProjectiveGenerator implements
         b.setNoShadow();
       }
 
-      return b.build();
+      return b.build(this.caps);
     } catch (final Throwable x) {
       throw new UnreachableCodeException(x);
     }

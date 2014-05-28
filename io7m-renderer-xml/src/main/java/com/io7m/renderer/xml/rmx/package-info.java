@@ -15,7 +15,7 @@
  */
 
 /**
- * RMX meshes.
+ * RMX mesh format.
  */
 
 @com.io7m.jnull.NonNullByDefault package com.io7m.renderer.xml.rmx;

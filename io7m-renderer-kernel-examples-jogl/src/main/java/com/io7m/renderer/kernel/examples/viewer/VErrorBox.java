@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,8 +19,6 @@ package com.io7m.renderer.kernel.examples.viewer;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -35,45 +33,19 @@ import javax.swing.SwingUtilities;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
 
-import com.io7m.jlog.Log;
-import com.io7m.jlog.LogLevel;
-import com.io7m.jlog.LogPolicyAllOn;
-import com.io7m.jlog.LogType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
+
+/**
+ * Error message functions.
+ */
 
 final class VErrorBox
 {
-  public static void main(
-    final String args[])
+  private VErrorBox()
   {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override public void run()
-      {
-        final LogType log =
-          Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "test");
-
-        try {
-          final StringBuilder m = new StringBuilder();
-          for (int index = 0; index < 32; ++index) {
-            m.append("This is too much text, and this is line "
-              + index
-              + "\n");
-          }
-
-          Integer.parseInt(m.toString());
-        } catch (final NumberFormatException x) {
-          final JDialog d = VErrorBox.showError(log, x);
-          d.addWindowListener(new WindowAdapter() {
-            @Override public void windowClosing(
-              final @Nullable WindowEvent e)
-            {
-              System.exit(0);
-            }
-          });
-        }
-      }
-    });
+    throw new UnreachableCodeException();
   }
 
   private static JDialog showActualErrorBox(

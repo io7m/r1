@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
-import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
@@ -34,7 +34,7 @@ import com.io7m.renderer.types.RVectorI3F;
  * </p>
  */
 
-@EqualityStructural public final class KLightSphere implements KLightType
+@EqualityReference public final class KLightSphere implements KLightType
 {
   @SuppressWarnings("synthetic-access") private static final class Builder implements
     KLightSphereBuilderType
@@ -60,7 +60,7 @@ import com.io7m.renderer.types.RVectorI3F;
       final KLightSphere in_original)
     {
       this.original = NullCheck.notNull(in_original, "Light");
-      this.color = in_original.colour;
+      this.color = in_original.color;
       this.intensity = in_original.intensity;
       this.exponent = in_original.falloff;
       this.radius = in_original.radius;
@@ -73,7 +73,6 @@ import com.io7m.renderer.types.RVectorI3F;
       if (o != null) {
         final KLightSphere k =
           new KLightSphere(
-            o.id,
             this.color,
             this.intensity,
             this.position,
@@ -83,7 +82,6 @@ import com.io7m.renderer.types.RVectorI3F;
       }
 
       return new KLightSphere(
-        KLightID.freshID(),
         this.color,
         this.intensity,
         this.position,
@@ -126,10 +124,6 @@ import com.io7m.renderer.types.RVectorI3F;
    * <p>
    * Create a builder for creating new spherical lights.
    * </p>
-   * <p>
-   * The {@link KLightSphereBuilderType#build()} function will return a light
-   * with a fresh {@link KLightID} every time it is called.
-   * </p>
    * 
    * @return A new light builder.
    */
@@ -144,111 +138,67 @@ import com.io7m.renderer.types.RVectorI3F;
    * Create a builder for creating new spherical lights. The builder will be
    * initialized to values based on the given light.
    * </p>
-   * <p>
-   * The {@link KLightSphereBuilderType#build()} function will return a light
-   * with a fresh {@link KLightID} every time it is called. This effectively
-   * allows for creating sets of similar lights.
-   * </p>
    * 
    * @param s
    *          The initial light.
    * @return A new light builder.
    */
 
-  public static KLightSphereBuilderType newBuilderWithFreshID(
-    final KLightSphere s)
-  {
-    final Builder b = new Builder();
-    b.setColor(s.colour);
-    b.setFalloff(s.falloff);
-    b.setIntensity(s.intensity);
-    b.setPosition(s.position);
-    b.setRadius(s.radius);
-    return b;
-  }
-
-  /**
-   * <p>
-   * Create a builder for creating new spherical lights. The builder will be
-   * initialized to values based on the given light.
-   * </p>
-   * <p>
-   * The {@link KLightSphereBuilderType#build()} function will return a light
-   * with same {@link KLightID} as the initial light every time it is called.
-   * This effectively allows for efficiently "mutating" an immutable light
-   * over time without the need for creating lots of intermediate immutable
-   * objects when manipulating multiple parameters.
-   * </p>
-   * 
-   * @param s
-   *          The initial light.
-   * @return A new light builder.
-   */
-
-  public static KLightSphereBuilderType newBuilderWithSameID(
+  public static KLightSphereBuilderType newBuilderFrom(
     final KLightSphere s)
   {
     return new Builder(s);
   }
 
-  private final RVectorI3F<RSpaceRGBType>                                      colour;
+  /**
+   * Construct a new spherical light.
+   * 
+   * @param in_color
+   *          The color.
+   * @param in_intensity
+   *          The intensity.
+   * @param in_position
+   *          The position.
+   * @param in_radius
+   *          The radius.
+   * @param in_falloff
+   *          The falloff.
+   * @return A new spherical light.
+   */
+
+  public static KLightSphere newLight(
+    final RVectorI3F<RSpaceRGBType> in_color,
+    final float in_intensity,
+    final RVectorI3F<RSpaceWorldType> in_position,
+    final float in_radius,
+    final float in_falloff)
+  {
+    return new KLightSphere(
+      in_color,
+      in_intensity,
+      in_position,
+      in_radius,
+      in_falloff);
+  }
+
+  private final RVectorI3F<RSpaceRGBType>                                      color;
   private final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float           falloff;
-  private final KLightID                                                       id;
   private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float            intensity;
   private final RVectorI3F<RSpaceWorldType>                                    position;
   private final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius;
 
   private KLightSphere(
-    final KLightID in_id,
-    final RVectorI3F<RSpaceRGBType> in_colour,
+    final RVectorI3F<RSpaceRGBType> in_color,
     final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float in_intensity,
     final RVectorI3F<RSpaceWorldType> in_position,
     final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float in_radius,
     final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float in_falloff)
   {
-    this.id = NullCheck.notNull(in_id, "ID");
-    this.colour = NullCheck.notNull(in_colour, "Colour");
+    this.color = NullCheck.notNull(in_color, "Color");
     this.intensity = in_intensity;
     this.position = NullCheck.notNull(in_position, "Position");
     this.radius = in_radius;
     this.falloff = in_falloff;
-  }
-
-  @Override public boolean equals(
-    final @Nullable Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KLightSphere other = (KLightSphere) obj;
-    return this.colour.equals(other.colour)
-      && (Float.floatToIntBits(this.falloff) == Float
-        .floatToIntBits(other.falloff))
-      && this.id.equals(other.id)
-      && (Float.floatToIntBits(this.intensity) == Float
-        .floatToIntBits(other.intensity))
-      && this.position.equals(other.position)
-      && (Float.floatToIntBits(this.radius) == Float
-        .floatToIntBits(other.radius));
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.colour.hashCode();
-    result = (prime * result) + Float.floatToIntBits(this.falloff);
-    result = (prime * result) + this.id.hashCode();
-    result = (prime * result) + Float.floatToIntBits(this.intensity);
-    result = (prime * result) + this.position.hashCode();
-    result = (prime * result) + Float.floatToIntBits(this.radius);
-    return result;
   }
 
   @Override public
@@ -262,9 +212,14 @@ import com.io7m.renderer.types.RVectorI3F;
     return v.lightSpherical(this);
   }
 
+  @Override public String lightGetCode()
+  {
+    return "LSph";
+  }
+
   @Override public RVectorI3F<RSpaceRGBType> lightGetColor()
   {
-    return this.colour;
+    return this.color;
   }
 
   /**
@@ -274,11 +229,6 @@ import com.io7m.renderer.types.RVectorI3F;
   public float lightGetFalloff()
   {
     return this.falloff;
-  }
-
-  @Override public KLightID lightGetID()
-  {
-    return this.id;
   }
 
   @Override public float lightGetIntensity()
@@ -309,30 +259,23 @@ import com.io7m.renderer.types.RVectorI3F;
     return Option.none();
   }
 
-  /*
-   * It is not possible to make a backwards-incompatible change to a spherical
-   * light, so the minimum version number is always used.
-   */
-
-  @Override public KVersion lightGetVersion()
-  {
-    return KVersion.first();
-  }
-
   @Override public boolean lightHasShadow()
   {
     return false;
   }
 
+  @Override public int texturesGetRequired()
+  {
+    return 0;
+  }
+
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[KLightSphere colour=");
-    b.append(this.colour);
+    b.append("[KLightSphere color=");
+    b.append(this.color);
     b.append(" falloff=");
     b.append(this.falloff);
-    b.append(" id=");
-    b.append(this.id);
     b.append(" intensity=");
     b.append(this.intensity);
     b.append(" position=");

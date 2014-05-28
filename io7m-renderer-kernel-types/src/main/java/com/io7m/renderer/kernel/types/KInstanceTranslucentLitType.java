@@ -50,7 +50,7 @@ public interface KInstanceTranslucentLitType extends KInstanceTranslucentType
 
     <A, E extends Throwable, V extends KInstanceTranslucentLitVisitorType<A, E>>
     A
-    instanceTranslucentLitAccept(
+    translucentLitAccept(
       final V v)
       throws E,
         RException,

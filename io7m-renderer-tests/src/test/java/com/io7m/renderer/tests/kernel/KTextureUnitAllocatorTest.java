@@ -40,8 +40,9 @@ import com.io7m.renderer.tests.FakeTexture2DStatic;
 import com.io7m.renderer.tests.FakeTextureCubeStatic;
 import com.io7m.renderer.tests.FakeTextureUnit;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RExceptionUserError;
 import com.io7m.renderer.types.RExceptionResource;
+import com.io7m.renderer.types.RExceptionUnitAllocatorActive;
+import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
 
 @SuppressWarnings("static-method") public final class KTextureUnitAllocatorTest
 {
@@ -686,9 +687,11 @@ import com.io7m.renderer.types.RExceptionResource;
     Assert.assertTrue(caught.get());
   }
 
-  @Test(expected = RExceptionUserError.class) public void testUseSelf_0()
-    throws JCGLException,
-      RException
+  @Test(expected = RExceptionUnitAllocatorActive.class) public
+    void
+    testUseSelf_0()
+      throws JCGLException,
+        RException
   {
     final List<TextureUnitType> units =
       KTextureUnitAllocatorTest.makeUnits(8);
@@ -714,9 +717,11 @@ import com.io7m.renderer.types.RExceptionResource;
     });
   }
 
-  @Test(expected = RExceptionUserError.class) public void testUseSelf_1()
-    throws JCGLException,
-      RException
+  @Test(expected = RExceptionUnitAllocatorMultipleChildren.class) public
+    void
+    testUseSelf_1()
+      throws JCGLException,
+        RException
   {
     final List<TextureUnitType> units =
       KTextureUnitAllocatorTest.makeUnits(8);

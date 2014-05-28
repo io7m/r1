@@ -16,11 +16,12 @@
 
 package com.io7m.renderer.kernel.types;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 /**
@@ -29,21 +30,29 @@ import com.io7m.jnull.Nullable;
 
 @EqualityStructural public final class KSceneOpaques
 {
-  private final Set<KInstanceOpaqueType>                 all;
-  private final Map<KLightID, KLightType>                           lights;
-  private final Map<KLightID, List<KInstanceOpaqueType>> lit;
-  private final Set<KInstanceOpaqueType>                 unlit;
-
-  KSceneOpaques(
-    final Map<KLightID, KLightType> in_lights,
-    final Map<KLightID, List<KInstanceOpaqueType>> in_lit,
-    final Set<KInstanceOpaqueType> in_unlit,
-    final Set<KInstanceOpaqueType> visible)
+  static KSceneOpaques newOpaques(
+    final Map<KLightType, Set<KInstanceOpaqueType>> in_lit,
+    final Set<KInstanceOpaqueType> in_unlit)
   {
-    this.lights = in_lights;
-    this.lit = in_lit;
-    this.unlit = in_unlit;
-    this.all = visible;
+    return new KSceneOpaques(in_lit, in_unlit);
+  }
+
+  private final Set<KInstanceOpaqueType>                  all;
+  private final Map<KLightType, Set<KInstanceOpaqueType>> lit;
+  private final Set<KInstanceOpaqueType>                  unlit;
+
+  private KSceneOpaques(
+    final Map<KLightType, Set<KInstanceOpaqueType>> in_lit,
+    final Set<KInstanceOpaqueType> in_unlit)
+  {
+    this.lit = NullCheck.notNull(in_lit);
+    this.unlit = NullCheck.notNull(in_unlit);
+
+    this.all = new HashSet<KInstanceOpaqueType>();
+    this.all.addAll(in_unlit);
+    for (final Set<KInstanceOpaqueType> v : in_lit.values()) {
+      this.all.addAll(v);
+    }
   }
 
   @Override public boolean equals(
@@ -74,21 +83,10 @@ import com.io7m.jnull.Nullable;
   }
 
   /**
-   * @return The lights present.
-   */
-
-  public Map<KLightID, KLightType> getLights()
-  {
-    return this.lights;
-  }
-
-  /**
    * @return The set of opaque instances affected by each light in the scene.
    */
 
-  public
-    Map<KLightID, List<KInstanceOpaqueType>>
-    getLitInstances()
+  public Map<KLightType, Set<KInstanceOpaqueType>> getLitInstances()
   {
     return this.lit;
   }
@@ -107,7 +105,6 @@ import com.io7m.jnull.Nullable;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.all.hashCode();
-    result = (prime * result) + this.lights.hashCode();
     result = (prime * result) + this.lit.hashCode();
     result = (prime * result) + this.unlit.hashCode();
     return result;

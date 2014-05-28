@@ -37,12 +37,9 @@ public interface KLightProjectiveBuilderType
    * <p>
    * Construct a light.
    * </p>
-   * <p>
-   * This function can be called as many times as required, yielding new (but
-   * not necessarily <i>distinct</i>) lights each time it is called.
-   * </p>
    * 
-   * @see KLightID
+   * @param caps
+   *          The current graphics capabilities.
    * @return A new light based on all of the parameters given so far.
    * @throws RExceptionUserError
    *           If no texture was specified.
@@ -50,7 +47,8 @@ public interface KLightProjectiveBuilderType
    *           If any other error occurs.
    */
 
-  KLightProjective build()
+  KLightProjective build(
+    final KGraphicsCapabilitiesType caps)
     throws RExceptionUserError,
       RException;
 

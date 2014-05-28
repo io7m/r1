@@ -23,10 +23,10 @@ import com.io7m.renderer.kernel.examples.ExampleSceneType;
 import com.io7m.renderer.kernel.examples.ExampleSceneUtilities;
 import com.io7m.renderer.kernel.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
-import com.io7m.renderer.kernel.types.KMeshWithMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KMaterialNormal;
+import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -53,20 +53,25 @@ public final class SLNormalMapping implements ExampleSceneType
     final ExampleSceneBuilderType scene)
     throws RException
   {
-    final KMaterialOpaqueRegular material =
-      ExampleSceneUtilities.OPAQUE_MATTE_WHITE.withNormal(KMaterialNormal
-        .newNormalMapped(scene.texture("tiles_normal.png")));
+    final KMaterialOpaqueRegular material;
+    {
+      final KMaterialOpaqueRegularBuilderType b =
+        KMaterialOpaqueRegular
+          .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
+      b.setNormal(KMaterialNormalMapped.mapped(scene
+        .texture("tiles_normal.png")));
+      material = b.build();
+    }
 
     final KInstanceOpaqueRegular i =
       KInstanceOpaqueRegular.newInstance(
-        KMeshWithMaterialOpaqueRegular.newInstance(
-          material,
-          scene.mesh("plane2x2_PNTU.rmx"),
-          KFaceSelection.FACE_RENDER_FRONT),
+        scene.mesh("plane2x2.rmx"),
+        material,
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
-        ExampleSceneUtilities.IDENTITY_UV);
+        ExampleSceneUtilities.IDENTITY_UV,
+        KFaceSelection.FACE_RENDER_FRONT);
 
-    scene.sceneAddOpaqueLitVisibleWithShadow(
+    scene.sceneAddOpaqueLitVisibleWithoutShadow(
       ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE,
       i);
   }

@@ -32,7 +32,7 @@ import com.io7m.renderer.types.RException;
 public interface KInstanceVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit an opaque alpha-depth instance.
+   * Visit an opaque instance.
    * 
    * @param i
    *          The instance
@@ -46,14 +46,14 @@ public interface KInstanceVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A transformedOpaqueAlphaDepth(
-    final KInstanceOpaqueAlphaDepth i)
+  A opaque(
+    final KInstanceOpaqueType i)
     throws E,
       RException,
       JCGLException;
 
   /**
-   * Visit a regular opaque instance.
+   * Visit a translucent instance.
    * 
    * @param i
    *          The instance
@@ -67,71 +67,8 @@ public interface KInstanceVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A transformedOpaqueRegular(
-    final KInstanceOpaqueRegular i)
-    throws E,
-      RException,
-      JCGLException;
-
-  /**
-   * Visit a refractive instance.
-   * 
-   * @param i
-   *          The instance
-   * @return A value of type <code>A</code>
-   * 
-   * @throws RException
-   *           If required
-   * @throws JCGLException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  A transformedTranslucentRefractive(
-    final KInstanceTranslucentRefractive i)
-    throws E,
-      RException,
-      JCGLException;
-
-  /**
-   * Visit a regular translucent instance.
-   * 
-   * @param i
-   *          The instance
-   * @return A value of type <code>A</code>
-   * 
-   * @throws RException
-   *           If required
-   * @throws JCGLException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  A transformedTranslucentRegular(
-    final KInstanceTranslucentRegular i)
-    throws E,
-      RException,
-      JCGLException;
-
-  /**
-   * Visit a specular-only instance.
-   * 
-   * @param i
-   *          The instance
-   * @return A value of type <code>A</code>
-   * 
-   * @throws RException
-   *           If required
-   * @throws JCGLException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  A transformedTranslucentSpecularOnly(
-    final KInstanceTranslucentSpecularOnly i)
+  A translucent(
+    final KInstanceTranslucentType i)
     throws E,
       RException,
       JCGLException;

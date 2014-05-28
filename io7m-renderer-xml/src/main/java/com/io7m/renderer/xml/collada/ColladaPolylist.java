@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,10 +24,23 @@ import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * A list of polygons and inputs.
+ */
+
 @EqualityStructural public final class ColladaPolylist
 {
   private final List<ColladaInput> inputs;
   private final List<ColladaPoly>  polygons;
+
+  /**
+   * Construct a list of polygons.
+   * 
+   * @param in_inputs
+   *          The inputs.
+   * @param in_polygons
+   *          The polygons.
+   */
 
   public ColladaPolylist(
     final List<ColladaInput> in_inputs,
@@ -69,9 +82,10 @@ import com.io7m.jnull.Nullable;
   }
 
   /**
-   * Retrieve the list of inputs for this polylist. The list of inputs is
-   * sorted according to each input's offsets. That is, the input declared
-   * with offset 0 will be at the head of the list.
+   * @return A read-only view of the list of inputs for this polylist. The
+   *         list of inputs is sorted according to each input's offsets. That
+   *         is, the input declared with offset 0 will be at the head of the
+   *         list.
    */
 
   public List<ColladaInput> getInputs()
@@ -80,6 +94,10 @@ import com.io7m.jnull.Nullable;
     assert r != null;
     return r;
   }
+
+  /**
+   * @return A read-only view of the current list of polygons.
+   */
 
   public List<ColladaPoly> getPolygons()
   {

@@ -39,12 +39,12 @@ public interface KFramebufferDepthUsableType extends KFramebufferUsableType
 
   /**
    * @return <code>true</code> if the samplable depth data is stored in a
-   *         packed colour texture. This is only true on implementations that
+   *         packed color texture. This is only true on implementations that
    *         do not support depth textures (only certain implementations of
    *         OpenGL ES2 lack them).
    */
 
-  boolean kFramebufferGetDepthIsPackedColour();
+  boolean kFramebufferGetDepthIsPackedColor();
 
   /**
    * <p>
@@ -56,7 +56,7 @@ public interface KFramebufferDepthUsableType extends KFramebufferUsableType
    * framebuffer, so rendering to one will typically affect the other.
    * </p>
    * 
-   * @see #kFramebufferGetDepthIsPackedColour()
+   * @see #kFramebufferGetDepthIsPackedColor()
    * @return A reference to the framebuffer
    */
 
@@ -66,8 +66,8 @@ public interface KFramebufferDepthUsableType extends KFramebufferUsableType
    * <p>
    * Retrieve the current depth values of the scene as a texture. If the
    * current OpenGL version does not support depth textures, the texture will
-   * be in a packed colour format that must be decoded to retrieve the
-   * original depths.
+   * be in a packed color format that must be decoded to retrieve the original
+   * depths.
    * </p>
    * 
    * @return A reference to the texture that backs the depth buffer

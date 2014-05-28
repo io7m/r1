@@ -46,7 +46,7 @@ public interface KInstanceTranslucentLitVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A transformedTranslucentLitRegular(
+  A regular(
     final KInstanceTranslucentRegular i)
     throws E,
       RException,
@@ -67,7 +67,7 @@ public interface KInstanceTranslucentLitVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A transformedTranslucentLitSpecularOnly(
+  A specularOnly(
     final KInstanceTranslucentSpecularOnly i)
     throws E,
       RException,

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -44,8 +44,25 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 
 public enum ColladaAxis
 {
+  /**
+   * Positive X faces up, negative Y faces right, and positive Z faces towards
+   * the viewer.
+   */
+
   COLLADA_AXIS_X_UP,
+
+  /**
+   * Positive X faces right, positive Y faces up, and positive Z faces towards
+   * the viewer.
+   */
+
   COLLADA_AXIS_Y_UP,
+
+  /**
+   * Positive X faces right, negative Y faces towards the viewer, and positive
+   * Z faces up.
+   */
+
   COLLADA_AXIS_Z_UP;
 
   private static final VectorI3F AXIS_X;
@@ -64,6 +81,19 @@ public enum ColladaAxis
    * according to <tt>source_axes</tt>, to the coordinate system with the axes
    * oriented according to <tt>dest_axes</tt>.
    * </p>
+   * 
+   * @param <R>
+   *          The type of coordinate system.
+   * @param matrix
+   *          A temporary matrix.
+   * @param source_axes
+   *          The axes of the source coordinate system.
+   * @param source
+   *          The source vector.
+   * @param dest_axes
+   *          The axes of the destination coordinate system.
+   * 
+   * @return The vector in the given destination coordinate system.
    */
 
   public static <R extends RSpaceType> RVectorI3F<R> convertAxes(

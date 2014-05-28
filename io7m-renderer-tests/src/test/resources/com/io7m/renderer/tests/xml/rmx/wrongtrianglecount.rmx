@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<m:mesh xmlns:m="http://schemas.io7m.com/renderer/1.0.0/meshes" m:version="1" m:name="some-mesh">
-  <m:type>
-    <m:attribute-position-3f/>
-    <m:attribute-normal-3f/>
-    <m:attribute-tangent-4f/>
-    <m:attribute-uv-2f/>
-  </m:type>
+<m:mesh xmlns:m="http://schemas.io7m.com/renderer/1.0.0/meshes" m:name="some-mesh">
   <m:vertices m:count="1">
     <m:v>
       <m:p m:x="0.0" m:y="0.0" m:z="0.0"/>

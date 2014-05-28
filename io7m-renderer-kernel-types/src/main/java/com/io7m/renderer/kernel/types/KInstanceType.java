@@ -26,26 +26,8 @@ import com.io7m.renderer.types.RTransformTextureType;
  * {@link KTransformType}).
  */
 
-public interface KInstanceType extends KMeshWithMaterialType
+public interface KInstanceType
 {
-  /**
-   * @return The unique identifier for the instance
-   */
-
-  KInstanceID instanceGetID();
-
-  /**
-   * @return The transform associated with the instance
-   */
-
-  KTransformType instanceGetTransform();
-
-  /**
-   * @return The instance-specific texture transformation matrix
-   */
-
-  RMatrixI3x3F<RTransformTextureType> instanceGetUVMatrix();
-
   /**
    * Accept a visitor.
    * 
@@ -69,9 +51,33 @@ public interface KInstanceType extends KMeshWithMaterialType
 
     <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
     A
-    transformedAccept(
+    instanceAccept(
       final V v)
       throws E,
         RException,
         JCGLException;
+
+  /**
+   * @return The faces that will be rendered.
+   */
+
+  KFaceSelection instanceGetFaceSelection();
+
+  /**
+   * @return The mesh.
+   */
+
+  KMeshReadableType instanceGetMesh();
+
+  /**
+   * @return The transform associated with the instance
+   */
+
+  KTransformType instanceGetTransform();
+
+  /**
+   * @return The instance-specific texture transformation matrix
+   */
+
+  RMatrixI3x3F<RTransformTextureType> instanceGetUVMatrix();
 }

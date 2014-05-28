@@ -24,13 +24,30 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI3F;
 
-public abstract class ColladaSource
+/**
+ * The type of COLLADA sources.
+ */
+
+@SuppressWarnings("synthetic-access") public abstract class ColladaSource
 {
+  /**
+   * A source array consisting of two-element floating point vectors.
+   */
+
   public static final class ColladaSourceArray2F extends ColladaSource
   {
-    private final ArrayList<VectorI2F> array_2f;
+    private final List<VectorI2F> array_2f;
 
-    @SuppressWarnings("synthetic-access") public ColladaSourceArray2F(
+    /**
+     * Construct a source array.
+     * 
+     * @param id
+     *          The source ID.
+     * @param axis
+     *          The axis.
+     */
+
+    public ColladaSourceArray2F(
       final ColladaSourceID id,
       final ColladaAxis axis)
     {
@@ -38,12 +55,25 @@ public abstract class ColladaSource
       this.array_2f = new ArrayList<VectorI2F>();
     }
 
+    /**
+     * @return A read-only view of the current list of values.
+     */
+
     public List<VectorI2F> getArray2f()
     {
       final List<VectorI2F> r = Collections.unmodifiableList(this.array_2f);
       assert r != null;
       return r;
     }
+
+    /**
+     * Add a value.
+     * 
+     * @param x
+     *          The X component.
+     * @param y
+     *          The Y component.
+     */
 
     public void put2f(
       final float x,
@@ -58,11 +88,24 @@ public abstract class ColladaSource
     }
   }
 
+  /**
+   * A source array consisting of three-element floating point vectors.
+   */
+
   public static final class ColladaSourceArray3F extends ColladaSource
   {
-    private final ArrayList<VectorI3F> array_3f;
+    private final List<VectorI3F> array_3f;
 
-    @SuppressWarnings("synthetic-access") public ColladaSourceArray3F(
+    /**
+     * Construct a source array.
+     * 
+     * @param id
+     *          The source ID.
+     * @param axis
+     *          The axis.
+     */
+
+    public ColladaSourceArray3F(
       final ColladaSourceID id,
       final ColladaAxis axis)
     {
@@ -70,12 +113,27 @@ public abstract class ColladaSource
       this.array_3f = new ArrayList<VectorI3F>();
     }
 
+    /**
+     * @return A read-only view of the current list of values.
+     */
+
     public List<VectorI3F> getArray3f()
     {
       final List<VectorI3F> r = Collections.unmodifiableList(this.array_3f);
       assert r != null;
       return r;
     }
+
+    /**
+     * Add a value.
+     * 
+     * @param x
+     *          The X component.
+     * @param y
+     *          The Y component.
+     * @param z
+     *          The Z component.
+     */
 
     public void put3f(
       final float x,
@@ -100,7 +158,18 @@ public abstract class ColladaSource
   {
     private final List<ColladaInput> inputs;
 
-    @SuppressWarnings("synthetic-access") public ColladaVertices(
+    /**
+     * Construct a source array.
+     * 
+     * @param id
+     *          The source ID.
+     * @param in_inputs
+     *          The list of inputs.
+     * @param axis
+     *          The axis.
+     */
+
+    public ColladaVertices(
       final ColladaSourceID id,
       final List<ColladaInput> in_inputs,
       final ColladaAxis axis)
@@ -108,6 +177,10 @@ public abstract class ColladaSource
       super(Type.SOURCE_VERTICES, id, axis);
       this.inputs = NullCheck.notNullAll(in_inputs, "Inputs");
     }
+
+    /**
+     * @return A read-only view of the current list of inputs.
+     */
 
     public List<ColladaInput> getInputs()
     {
@@ -135,9 +208,9 @@ public abstract class ColladaSource
     SOURCE_VERTICES,
   }
 
+  private final ColladaAxis     axis;
   private final ColladaSourceID id;
   private final Type            type;
-  private final ColladaAxis     axis;
 
   private ColladaSource(
     final Type in_type,
@@ -149,15 +222,27 @@ public abstract class ColladaSource
     this.axis = NullCheck.notNull(in_axis, "Axis");
   }
 
+  /**
+   * @return The axis type.
+   */
+
   public ColladaAxis getAxis()
   {
     return this.axis;
   }
 
+  /**
+   * @return The identifier of the source.
+   */
+
   public final ColladaSourceID getID()
   {
     return this.id;
   }
+
+  /**
+   * @return The source type.
+   */
 
   public final Type getType()
   {

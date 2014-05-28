@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,8 +59,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
-import nu.xom.Builder;
-import nu.xom.Document;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
@@ -70,31 +67,16 @@ import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.ArrayBufferType;
 import com.io7m.jcanephora.ArrayBufferUsableType;
-import com.io7m.jcanephora.CMFNegativeXKind;
-import com.io7m.jcanephora.CMFNegativeYKind;
-import com.io7m.jcanephora.CMFNegativeZKind;
-import com.io7m.jcanephora.CMFPositiveXKind;
-import com.io7m.jcanephora.CMFPositiveYKind;
-import com.io7m.jcanephora.CMFPositiveZKind;
-import com.io7m.jcanephora.CubeMapFaceInputStream;
-import com.io7m.jcanephora.IndexBufferType;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jcanephora.TextureCubeStaticType;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureLoaderType;
 import com.io7m.jcanephora.TextureUnitType;
-import com.io7m.jcanephora.TextureWrapR;
-import com.io7m.jcanephora.TextureWrapS;
-import com.io7m.jcanephora.TextureWrapT;
-import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
@@ -129,6 +111,10 @@ import com.io7m.renderer.kernel.examples.ExampleSceneBuilderType;
 import com.io7m.renderer.kernel.examples.ExampleSceneType;
 import com.io7m.renderer.kernel.examples.ExampleSceneUtilities;
 import com.io7m.renderer.kernel.examples.ExampleViewType;
+import com.io7m.renderer.kernel.examples.tools.EMeshCache;
+import com.io7m.renderer.kernel.examples.tools.ETexture2DCache;
+import com.io7m.renderer.kernel.examples.tools.ETextureCubeCache;
+import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
@@ -136,22 +122,25 @@ import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentUnlitType;
+import com.io7m.renderer.kernel.types.KInstanceType;
 import com.io7m.renderer.kernel.types.KLightType;
-import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
+import com.io7m.renderer.kernel.types.KSceneBatchedForward;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
+import com.io7m.renderer.kernel.types.KTranslucentType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionCache;
 import com.io7m.renderer.types.RExceptionIO;
+import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
+import com.io7m.renderer.types.RExceptionInstanceAlreadyShadowed;
+import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
+import com.io7m.renderer.types.RExceptionInstanceAlreadyUnshadowed;
+import com.io7m.renderer.types.RExceptionInstanceAlreadyVisible;
 import com.io7m.renderer.types.RExceptionJCGL;
-import com.io7m.renderer.types.RSpaceObjectType;
-import com.io7m.renderer.types.RVectorI3F;
+import com.io7m.renderer.types.RExceptionLightMissingShadow;
 import com.io7m.renderer.types.RXMLException;
-import com.io7m.renderer.xml.cubemap.CubeMap;
-import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
-import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.FPSAnimator;
 
@@ -381,27 +370,27 @@ import com.jogamp.opengl.util.FPSAnimator;
       }
     }
 
-    private final ViewerConfig                             config;
-    private final Map<String, TextureCubeStaticUsableType> cube_textures;
-    private final AtomicInteger                            current_view_index;
-    private final ExampleSceneType                         example;
-    private final FSCapabilityReadType                     filesystem;
-    private @Nullable KFramebufferType                     framebuffer;
-    private @Nullable JCGLImplementationType               gi;
-    private final LogUsableType                            glog;
-    private final Map<String, KMesh>                       meshes;
-    private @Nullable KUnitQuad                            quad;
-    private @Nullable ExampleRendererType                  renderer;
-    private final ExampleRendererConstructorType           renderer_cons;
-    private final JLabel                                   renderer_label;
-    private final VExpectedImage                           results_panel;
-    private boolean                                        running;
-    private @Nullable KShaderCacheType                     shader_cache;
-    private @Nullable TextureLoaderType                    texture_loader;
-    private final Map<String, Texture2DStaticUsableType>   textures;
-    private final AtomicDouble                             time_fps_estimate;
-    private final AtomicLong                               time_last;
-    private final AtomicBoolean                            want_save;
+    private final ViewerConfig                   config;
+    private final AtomicInteger                  current_view_index;
+    private final ExampleSceneType               example;
+    private final FSCapabilityReadType           filesystem;
+    private @Nullable KFramebufferType           framebuffer;
+    private @Nullable JCGLImplementationType     gi;
+    private final LogUsableType                  glog;
+    private @Nullable KUnitQuad                  quad;
+    private @Nullable ExampleRendererType        renderer;
+    private final ExampleRendererConstructorType renderer_cons;
+    private final JLabel                         renderer_label;
+    private final VExpectedImage                 results_panel;
+    private boolean                              running;
+    private @Nullable KShaderCacheType           shader_cache;
+    private @Nullable TextureLoaderType          texture_loader;
+    private final AtomicDouble                   time_fps_estimate;
+    private final AtomicLong                     time_last;
+    private final AtomicBoolean                  want_save;
+    private @Nullable ETextureCubeCache          cube_cache;
+    private @Nullable ETexture2DCache            texture2d_cache;
+    private @Nullable EMeshCache                 mesh_cache;
 
     public VExampleWindowGL(
       final LogUsableType in_log,
@@ -415,9 +404,6 @@ import com.jogamp.opengl.util.FPSAnimator;
       final JLabel in_renderer_label)
     {
       this.glog = in_log.with("gl");
-      this.meshes = new HashMap<String, KMesh>();
-      this.textures = new HashMap<String, Texture2DStaticUsableType>();
-      this.cube_textures = new HashMap<String, TextureCubeStaticUsableType>();
       this.filesystem = in_filesystem;
       this.renderer_cons = in_renderer_cons;
       this.example = in_example;
@@ -458,7 +444,9 @@ import com.jogamp.opengl.util.FPSAnimator;
             throws RException
           {
             try {
-              return VExampleWindowGL.this.loadCube(name);
+              final ETextureCubeCache cc = VExampleWindowGL.this.cube_cache;
+              assert cc != null;
+              return cc.loadCube(name);
             } catch (final ValidityException e) {
               throw RXMLException.validityException(e);
             } catch (final IOException e) {
@@ -474,12 +462,16 @@ import com.jogamp.opengl.util.FPSAnimator;
             final String name)
             throws RException
           {
-            return VExampleWindowGL.this.loadMesh(name);
+            final EMeshCache mc = VExampleWindowGL.this.mesh_cache;
+            assert mc != null;
+            return mc.loadMesh(name);
           }
 
           @Override public void sceneAddInvisibleWithShadow(
             final KLightType light,
             final KInstanceOpaqueType instance)
+            throws RExceptionInstanceAlreadyVisible,
+              RExceptionLightMissingShadow
           {
             scene_builder.sceneAddInvisibleWithShadow(light, instance);
           }
@@ -487,6 +479,8 @@ import com.jogamp.opengl.util.FPSAnimator;
           @Override public void sceneAddOpaqueLitVisibleWithoutShadow(
             final KLightType light,
             final KInstanceOpaqueType instance)
+            throws RExceptionInstanceAlreadyUnlit,
+              RExceptionInstanceAlreadyShadowed
           {
             scene_builder.sceneAddOpaqueLitVisibleWithoutShadow(
               light,
@@ -496,12 +490,16 @@ import com.jogamp.opengl.util.FPSAnimator;
           @Override public void sceneAddOpaqueLitVisibleWithShadow(
             final KLightType light,
             final KInstanceOpaqueType instance)
+            throws RExceptionInstanceAlreadyUnlit,
+              RExceptionLightMissingShadow,
+              RExceptionInstanceAlreadyUnshadowed
           {
             scene_builder.sceneAddOpaqueLitVisibleWithShadow(light, instance);
           }
 
           @Override public void sceneAddOpaqueUnlit(
             final KInstanceOpaqueType instance)
+            throws RExceptionInstanceAlreadyLit
           {
             scene_builder.sceneAddOpaqueUnlit(instance);
           }
@@ -524,12 +522,69 @@ import com.jogamp.opengl.util.FPSAnimator;
             throws RException
           {
             try {
-              return VExampleWindowGL.this.loadTexture(name);
+              final ETexture2DCache tc =
+                VExampleWindowGL.this.texture2d_cache;
+              assert tc != null;
+              return tc.loadTexture(name);
             } catch (final IOException e) {
               throw RExceptionIO.fromIOException(e);
             } catch (final JCGLException e) {
               throw RExceptionJCGL.fromJCGLException(e);
             }
+          }
+
+          @Override public KCamera sceneGetCamera()
+          {
+            return scene_builder.sceneGetCamera();
+          }
+
+          @Override public Set<KInstanceType> sceneGetInstances()
+          {
+            return scene_builder.sceneGetInstances();
+          }
+
+          @Override public
+            Set<KInstanceOpaqueType>
+            sceneGetInstancesOpaqueLitVisible()
+          {
+            return scene_builder.sceneGetInstancesOpaqueLitVisible();
+          }
+
+          @Override public
+            Map<KLightType, Set<KInstanceOpaqueType>>
+            sceneGetInstancesOpaqueLitVisibleByLight()
+          {
+            return scene_builder.sceneGetInstancesOpaqueLitVisibleByLight();
+          }
+
+          @Override public
+            Map<KLightType, Set<KInstanceOpaqueType>>
+            sceneGetInstancesOpaqueShadowCastingByLight()
+          {
+            return scene_builder
+              .sceneGetInstancesOpaqueShadowCastingByLight();
+          }
+
+          @Override public
+            Set<KInstanceOpaqueType>
+            sceneGetInstancesOpaqueUnlit()
+          {
+            return scene_builder.sceneGetInstancesOpaqueUnlit();
+          }
+
+          @Override public Set<KLightType> sceneGetLights()
+          {
+            return scene_builder.sceneGetLights();
+          }
+
+          @Override public Set<KLightType> sceneGetLightsShadowCasting()
+          {
+            return scene_builder.sceneGetLightsShadowCasting();
+          }
+
+          @Override public List<KTranslucentType> sceneGetTranslucents()
+          {
+            return scene_builder.sceneGetTranslucents();
           }
         });
 
@@ -553,7 +608,11 @@ import com.jogamp.opengl.util.FPSAnimator;
                 (KFramebufferForwardType) VExampleWindowGL.this.framebuffer;
               assert fb != null;
 
-              fr.rendererForwardEvaluate(fb, scene_builder.sceneCreate());
+              final KScene sc = scene_builder.sceneCreate();
+              final KSceneBatchedForward batched =
+                KSceneBatchedForward.fromScene(sc);
+
+              fr.rendererForwardEvaluate(fb, batched);
               VExampleWindowGL.this.renderSceneResults(fb);
 
               if (VExampleWindowGL.this.want_save.get()) {
@@ -637,6 +696,12 @@ import com.jogamp.opengl.util.FPSAnimator;
           TextureLoaderImageIO
             .newTextureLoaderWithAlphaPremultiplication(this.glog);
 
+        this.cube_cache =
+          new ETextureCubeCache(g, this.texture_loader, this.glog);
+        this.texture2d_cache =
+          new ETexture2DCache(g, this.texture_loader, this.glog);
+        this.mesh_cache = new EMeshCache(g, this.glog);
+
         final LRUCacheConfig scc =
           LRUCacheConfig
             .empty()
@@ -706,200 +771,6 @@ import com.jogamp.opengl.util.FPSAnimator;
 
       } catch (final Throwable e) {
         this.failed(e);
-      }
-    }
-
-    private TextureCubeStaticUsableType loadCube(
-      final String name)
-      throws IOException,
-        JCGLException,
-        ValidityException,
-        ParsingException,
-        RXMLException
-    {
-      if (this.cube_textures.containsKey(name)) {
-        return this.cube_textures.get(name);
-      }
-
-      final StringBuilder message = new StringBuilder();
-      message.setLength(0);
-      message.append("Loading texture from ");
-      message.append(name);
-      this.glog.debug(message.toString());
-
-      final File file =
-        new File(String.format("/com/io7m/renderer/kernel/examples/%s", name));
-      final InputStream stream =
-        VExample.class.getResourceAsStream(file.toString());
-
-      try {
-        final Builder builder = new Builder();
-        final Document document = builder.build(stream);
-        final CubeMap cube = CubeMap.fromXML(document.getRootElement());
-
-        final File parent = file.getParentFile();
-
-        final CubeMapFaceInputStream<CMFPositiveZKind> positive_z =
-          new CubeMapFaceInputStream<CMFPositiveZKind>(
-            VExample.class.getResourceAsStream(new File(parent, cube
-              .getPositiveZ()).toString()));
-        final CubeMapFaceInputStream<CMFPositiveYKind> positive_y =
-          new CubeMapFaceInputStream<CMFPositiveYKind>(
-            VExample.class.getResourceAsStream(new File(parent, cube
-              .getPositiveY()).toString()));
-        final CubeMapFaceInputStream<CMFPositiveXKind> positive_x =
-          new CubeMapFaceInputStream<CMFPositiveXKind>(
-            VExample.class.getResourceAsStream(new File(parent, cube
-              .getPositiveX()).toString()));
-        final CubeMapFaceInputStream<CMFNegativeZKind> negative_z =
-          new CubeMapFaceInputStream<CMFNegativeZKind>(
-            VExample.class.getResourceAsStream(new File(parent, cube
-              .getNegativeZ()).toString()));
-        final CubeMapFaceInputStream<CMFNegativeYKind> negative_y =
-          new CubeMapFaceInputStream<CMFNegativeYKind>(
-            VExample.class.getResourceAsStream(new File(parent, cube
-              .getNegativeY()).toString()));
-        final CubeMapFaceInputStream<CMFNegativeXKind> negative_x =
-          new CubeMapFaceInputStream<CMFNegativeXKind>(
-            VExample.class.getResourceAsStream(new File(parent, cube
-              .getNegativeX()).toString()));
-
-        final TextureLoaderType tl = this.texture_loader;
-        assert tl != null;
-        final JCGLImplementationType g = this.gi;
-        assert g != null;
-
-        final TextureCubeStaticType t =
-          tl.loadCubeRHStaticInferred(
-            g,
-            TextureWrapR.TEXTURE_WRAP_CLAMP_TO_EDGE,
-            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-            TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-            positive_z,
-            negative_z,
-            positive_y,
-            negative_y,
-            positive_x,
-            negative_x,
-            name);
-        this.cube_textures.put(name, t);
-        return t;
-      } finally {
-        stream.close();
-      }
-    }
-
-    private KMesh loadMesh(
-      final String name)
-      throws RException
-    {
-      if (this.meshes.containsKey(name)) {
-        return this.meshes.get(name);
-      }
-
-      final StringBuilder message = new StringBuilder();
-      message.setLength(0);
-      message.append("Loading mesh from ");
-      message.append(name);
-      this.glog.debug(message.toString());
-
-      final InputStream stream =
-        VExample.class.getResourceAsStream(String.format(
-          "/com/io7m/renderer/kernel/examples/%s",
-          name));
-
-      final JCGLImplementationType g = this.gi;
-      assert g != null;
-      final JCGLInterfaceCommonType gl = g.getGLCommon();
-
-      try {
-        final Document document =
-          RXMLMeshDocument.parseFromStreamValidating(stream);
-
-        final RXMLMeshParserVBO<JCGLInterfaceCommonType> p =
-          RXMLMeshParserVBO.parseFromDocument(
-            document,
-            gl,
-            UsageHint.USAGE_STATIC_DRAW);
-
-        final ArrayBufferType array = p.getArrayBuffer();
-        final IndexBufferType index = p.getIndexBuffer();
-        final RVectorI3F<RSpaceObjectType> lower = p.getBoundsLower();
-        final RVectorI3F<RSpaceObjectType> upper = p.getBoundsUpper();
-        final KMesh km = KMesh.newMesh(array, index, lower, upper);
-        this.meshes.put(name, km);
-
-        message.setLength(0);
-        message.append("Loaded mesh ");
-        message.append(name);
-        this.glog.debug(message.toString());
-
-        message.setLength(0);
-        message.append("Mesh lower bound: ");
-        message.append(km.meshGetBoundsLower());
-        this.glog.debug(message.toString());
-
-        message.setLength(0);
-        message.append("Mesh upper bound: ");
-        message.append(km.meshGetBoundsUpper());
-        this.glog.debug(message.toString());
-
-        return km;
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
-      } catch (final IOException e) {
-        throw RExceptionIO.fromIOException(e);
-      } finally {
-        try {
-          stream.close();
-        } catch (final IOException e) {
-          throw RExceptionIO.fromIOException(e);
-        }
-      }
-    }
-
-    private Texture2DStaticUsableType loadTexture(
-      final String name)
-      throws IOException,
-        JCGLException
-    {
-      if (this.textures.containsKey(name)) {
-        return this.textures.get(name);
-      }
-
-      final StringBuilder message = new StringBuilder();
-      message.setLength(0);
-      message.append("Loading texture from ");
-      message.append(name);
-      this.glog.debug(message.toString());
-
-      final InputStream stream =
-        VExample.class.getResourceAsStream(String.format(
-          "/com/io7m/renderer/kernel/examples/%s",
-          name));
-
-      try {
-        final TextureLoaderType tl = this.texture_loader;
-        assert tl != null;
-
-        final JCGLImplementationType g = this.gi;
-        assert g != null;
-
-        final Texture2DStaticType t =
-          tl.load2DStaticInferred(
-            g,
-            TextureWrapS.TEXTURE_WRAP_REPEAT,
-            TextureWrapT.TEXTURE_WRAP_REPEAT,
-            TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-            TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-            stream,
-            name);
-        this.textures.put(name, t);
-        return t;
-      } finally {
-        stream.close();
       }
     }
 

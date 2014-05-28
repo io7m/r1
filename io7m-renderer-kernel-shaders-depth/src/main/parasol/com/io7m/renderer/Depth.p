@@ -53,10 +53,10 @@ module Depth is
 
   --
   -- Rendering of the depth values of constant-depth objects into the depth buffer.
-  -- The colour value is expected to be ignored with glColorMask.
+  -- The color value is expected to be ignored with glColorMask.
   --
 
-  shader fragment depth_C_f is
+  shader fragment depth_DepC_f is
     in f_position : vector_4f;
     out out_0     : vector_4f as 0;
   with
@@ -66,18 +66,18 @@ module Depth is
     out out_0 = rgba;
   end;
 
-  shader program depth_C is
+  shader program depth_DepC is
     vertex   depth_simple_v;
-    fragment depth_C_f;
+    fragment depth_DepC_f;
   end;
 
   --
-  -- Rendering of the depth values of constant-depth objects into the colour buffer,
+  -- Rendering of the depth values of constant-depth objects into the color buffer,
   -- packed into four 4-bit cells. This is for use on platforms that do not
   -- have depth textures.
   --
 
-  shader fragment depth_CP4_f is
+  shader fragment depth_DepC4444_f is
     in f_position : vector_4f;
     out out_0     : vector_4f as 0;
   with
@@ -86,63 +86,16 @@ module Depth is
     out out_0 = rgba;
   end;
 
-  shader program depth_CP4 is
+  shader program depth_DepC4444 is
     vertex   depth_simple_v;
-    fragment depth_CP4_f;
-  end;
-
-  --
-  -- Rendering of the depth values of uniform-depth objects into the depth buffer.
-  -- The colour value is expected to be ignored with glColorMask.
-  --
-
-  shader fragment depth_U_f is
-    in f_position           : vector_4f;
-    parameter p_albedo      : Albedo.t;
-    parameter p_alpha_depth : float;
-    out out_0               : vector_4f as 0;
-  with
-    value albedo : vector_4f = Albedo.translucent (p_albedo);
-    discard (F.lesser (albedo [w], p_alpha_depth));
-    value rgba = new vector_4f (0.0, Fragment.coordinate [z], 1.0, 1.0);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program depth_U is
-    vertex   depth_simple_v;
-    fragment depth_U_f;
-  end;
-
-  --
-  -- Rendering of the depth values of uniform-depth objects into the colour buffer,
-  -- packed into four 4-bit cells. This is for use on platforms that do not
-  -- have depth textures.
-  --
-
-  shader fragment depth_UP4_f is
-    in f_position           : vector_4f;
-    parameter p_albedo      : Albedo.t;
-    parameter p_alpha_depth : float;
-    out out_0               : vector_4f as 0;
-  with
-    value albedo : vector_4f = Albedo.translucent (p_albedo);
-    discard (F.lesser (albedo [w], p_alpha_depth));
-    value rgba = Pack.pack4444 (Fragment.coordinate [z]);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program depth_UP4 is
-    vertex   depth_simple_v;
-    fragment depth_UP4_f;
+    fragment depth_DepC4444_f;
   end;
 
   --
   -- Rendering of the depth values of mapped-depth objects into the
   -- depth buffer.
   --
-  -- The colour value is expected to be ignored with glColorMask.
+  -- The color value is expected to be ignored with glColorMask.
   --
 
   shader vertex depth_textured_v is
@@ -173,7 +126,7 @@ module Depth is
     out f_uv            = uv;
   end;
   
-  shader fragment depth_M_f is
+  shader fragment depth_DepM_f is
     in f_uv                 : vector_2f;
     in f_position           : vector_4f;
     out out_0               : vector_4f as 0;
@@ -194,18 +147,18 @@ module Depth is
     out out_0 = rgba;
   end;
 
-  shader program depth_M is
+  shader program depth_DepM is
     vertex   depth_textured_v;
-    fragment depth_M_f;
+    fragment depth_DepM_f;
   end;
 
   --
   -- Rendering of the depth values of mapped-depth objects 
-  -- into the colour buffer, packed into four 4-bit cells. This is for use on 
+  -- into the color buffer, packed into four 4-bit cells. This is for use on 
   -- platforms that do not have depth textures.
   --
 
-  shader fragment depth_MP4_f is
+  shader fragment depth_DepM4444_f is
     in f_uv                 : vector_2f;
     in f_position           : vector_4f;
     out out_0               : vector_4f as 0;
@@ -225,9 +178,9 @@ module Depth is
     out out_0 = rgba;
   end;
 
-  shader program depth_MP4 is
+  shader program depth_DepM4444 is
     vertex   depth_textured_v;
-    fragment depth_MP4_f;
+    fragment depth_DepM4444_f;
   end;
 
 end;

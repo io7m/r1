@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +31,6 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.VectorM2I;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
@@ -48,16 +46,14 @@ import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightVisitorType;
-import com.io7m.renderer.kernel.types.KMaterialDepthLabel;
+import com.io7m.renderer.kernel.types.KSceneBatchedShadow;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KShadowVisitorType;
-import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RMatrixM4x4F;
 import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformViewType;
 
@@ -112,7 +108,6 @@ import com.io7m.renderer.types.RTransformViewType;
       depth_renderer,
       depth_variance_renderer,
       blur,
-      shader_cache,
       shadow_cache,
       log);
   }
@@ -121,28 +116,20 @@ import com.io7m.renderer.types.RTransformViewType;
   private final KDepthRendererType                  depth_renderer;
   private final KDepthVarianceRendererType          depth_variance_renderer;
   private final JCGLImplementationType              g;
-  private final StringBuilder                       label_cache;
   private final LogUsableType                       log;
-  private final RMatrixM4x4F<RTransformViewType>    m4_view;
   private final KMutableMatrices                    matrices;
-  private final KShaderCacheType                    shader_cache;
   private final KShadowMapCacheType                 shadow_cache;
-  private final KTransformContext                   transform_context;
-  private final VectorM2I                           viewport_size;
 
   private KShadowMapRenderer(
     final JCGLImplementationType gl,
     final KDepthRendererType in_depth_renderer,
     final KDepthVarianceRendererType in_depth_variance_renderer,
     final KPostprocessorBlurDepthVarianceType in_blur,
-    final KShaderCacheType in_shader_cache,
     final KShadowMapCacheType in_shadow_cache,
     final LogUsableType in_log)
   {
-    this.log =
-      NullCheck.notNull(in_log, "LogUsableType").with("shadow-map-renderer");
+    this.log = NullCheck.notNull(in_log, "Log").with("shadow-map-renderer");
     this.g = NullCheck.notNull(gl, "OpenGL implementation");
-    this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
     this.shadow_cache = NullCheck.notNull(in_shadow_cache, "Shadow cache");
 
     this.depth_renderer =
@@ -151,12 +138,7 @@ import com.io7m.renderer.types.RTransformViewType;
       NullCheck
         .notNull(in_depth_variance_renderer, "Depth variance renderer");
     this.blur = NullCheck.notNull(in_blur, "Blur postprocessor");
-
-    this.viewport_size = new VectorM2I();
-    this.label_cache = new StringBuilder();
     this.matrices = KMutableMatrices.newMatrices();
-    this.transform_context = KTransformContext.newContext();
-    this.m4_view = new RMatrixM4x4F<RTransformViewType>();
 
     if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
       this.log.debug("initialized");
@@ -176,8 +158,8 @@ import com.io7m.renderer.types.RTransformViewType;
 
     this.shadow_cache.cachePeriodStart();
     try {
-      final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceOpaqueType>>> casters =
-        batches.getShadowCasters();
+      final Map<KLightType, Map<String, List<KInstanceOpaqueType>>> casters =
+        batches.getBatches();
       assert casters != null;
       final Set<KLightType> lights = casters.keySet();
       assert lights != null;
@@ -234,13 +216,11 @@ import com.io7m.renderer.types.RTransformViewType;
     return KShadowMapRenderer.NAME;
   }
 
-  private
-    void
-    renderShadowMapBasicBatch(
-      final Map<KMaterialDepthLabel, List<KInstanceOpaqueType>> batches,
-      final KShadowMapBasic smb,
-      final MatricesProjectiveLightType mwp)
-      throws RException
+  private void renderShadowMapBasicBatch(
+    final Map<String, List<KInstanceOpaqueType>> batches,
+    final KShadowMapBasic smb,
+    final MatricesProjectiveLightType mwp)
+    throws RException
   {
     final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveView());
@@ -268,14 +248,13 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     final KShadowMapCacheType cache = this.shadow_cache;
 
-    final Map<KLightType, Map<KMaterialDepthLabel, List<KInstanceOpaqueType>>> casters =
-      batched.getShadowCasters();
+    final Map<KLightType, Map<String, List<KInstanceOpaqueType>>> casters =
+      batched.getBatches();
 
     for (final KLightType light : casters.keySet()) {
       assert light.lightHasShadow();
 
-      final Map<KMaterialDepthLabel, List<KInstanceOpaqueType>> batch =
-        casters.get(light);
+      final Map<String, List<KInstanceOpaqueType>> batch = casters.get(light);
       assert batch != null;
 
       light.lightAccept(new KLightVisitorType<Unit, JCGLException>() {
@@ -474,32 +453,17 @@ import com.io7m.renderer.types.RTransformViewType;
 
   }
 
-  private
-    void
-    renderShadowMapVarianceBatch(
-      final Map<KMaterialDepthLabel, List<KInstanceOpaqueType>> batch,
-      final KShadowMappedVariance shadow,
-      final KShadowMapVariance smv,
-      final MatricesProjectiveLightType mwp)
-      throws RException
+  private void renderShadowMapVarianceBatch(
+    final Map<String, List<KInstanceOpaqueType>> batches,
+    final KShadowMappedVariance shadow,
+    final KShadowMapVariance smv,
+    final MatricesProjectiveLightType mwp)
+    throws RException
   {
     final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveView());
     final RMatrixI4x4F<RTransformProjectionType> proj =
       RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveProjection());
-
-    final Map<KMaterialDepthVarianceLabel, List<KInstanceOpaqueType>> vbatch =
-      new HashMap<KMaterialDepthVarianceLabel, List<KInstanceOpaqueType>>();
-    for (final KMaterialDepthLabel k : batch.keySet()) {
-      assert k != null;
-
-      final KMaterialDepthVarianceLabel vlabel =
-        KMaterialDepthVarianceLabel.fromDepthLabel(k);
-
-      assert batch.containsKey(k);
-      vbatch.put(vlabel, batch.get(k));
-    }
-    assert batch.size() == vbatch.size();
 
     /**
      * Variance shadow mapping does not require front-face culling, so
@@ -510,7 +474,7 @@ import com.io7m.renderer.types.RTransformViewType;
     this.depth_variance_renderer.rendererEvaluateDepthVariance(
       view,
       proj,
-      vbatch,
+      batches,
       smv.getFramebuffer(),
       none);
 

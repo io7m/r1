@@ -17,40 +17,6 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://schemas.io7m.com/renderer/1.0.0/meshes" xmlns:rt="http://schemas.io7m.com/renderer/1.0.0/types" xmlns:rm="http://schemas.io7m.com/renderer/1.0.0/meshes">
   <xs:import namespace="http://schemas.io7m.com/renderer/1.0.0/types" schemaLocation="types.xsd"/>
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
-  <xs:element name="attribute-position-3f">
-    <xs:complexType/>
-  </xs:element>
-  <xs:element name="attribute-normal-3f">
-    <xs:complexType/>
-  </xs:element>
-  <xs:element name="attribute-tangent-3f">
-    <xs:complexType/>
-  </xs:element>
-  <xs:element name="attribute-tangent-4f">
-    <xs:complexType/>
-  </xs:element>
-  <xs:element name="attribute-bitangent-3f">
-    <xs:complexType/>
-  </xs:element>
-  <xs:element name="attribute-uv-2f">
-    <xs:complexType/>
-  </xs:element>
-  <xs:element name="type">
-    <xs:complexType>
-      <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element ref="rm:attribute-position-3f"/>
-        <xs:element ref="rm:attribute-normal-3f"/>
-        <xs:choice>
-          <xs:choice>
-            <xs:element ref="rm:attribute-tangent-3f"/>
-            <xs:element ref="rm:attribute-bitangent-3f"/>
-          </xs:choice>
-          <xs:element ref="rm:attribute-tangent-4f"/>
-        </xs:choice>
-        <xs:element ref="rm:attribute-uv-2f"/>
-      </xs:choice>
-    </xs:complexType>
-  </xs:element>
   <xs:element name="p">
     <xs:complexType>
       <xs:attribute name="x" use="required" form="qualified" type="xs:float"/>
@@ -65,26 +31,12 @@
       <xs:attribute name="z" use="required" form="qualified" type="xs:float"/>
     </xs:complexType>
   </xs:element>
-  <xs:element name="t3">
-    <xs:complexType>
-      <xs:attribute name="x" use="required" form="qualified" type="xs:float"/>
-      <xs:attribute name="y" use="required" form="qualified" type="xs:float"/>
-      <xs:attribute name="z" use="required" form="qualified" type="xs:float"/>
-    </xs:complexType>
-  </xs:element>
   <xs:element name="t4">
     <xs:complexType>
       <xs:attribute name="x" use="required" form="qualified" type="xs:float"/>
       <xs:attribute name="y" use="required" form="qualified" type="xs:float"/>
       <xs:attribute name="z" use="required" form="qualified" type="xs:float"/>
       <xs:attribute name="w" use="required" form="qualified" type="xs:float"/>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="b">
-    <xs:complexType>
-      <xs:attribute name="x" use="required" form="qualified" type="xs:float"/>
-      <xs:attribute name="y" use="required" form="qualified" type="xs:float"/>
-      <xs:attribute name="z" use="required" form="qualified" type="xs:float"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="u">
@@ -98,13 +50,7 @@
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="rm:p"/>
         <xs:element ref="rm:n"/>
-        <xs:choice>
-          <xs:choice>
-            <xs:element ref="rm:t3"/>
-            <xs:element ref="rm:b"/>
-          </xs:choice>
-          <xs:element ref="rm:t4"/>
-        </xs:choice>
+        <xs:element ref="rm:t4"/>
         <xs:element ref="rm:u"/>
       </xs:choice>
     </xs:complexType>
@@ -135,11 +81,9 @@
   <xs:element name="mesh">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="rm:type"/>
         <xs:element ref="rm:vertices"/>
         <xs:element ref="rm:triangles"/>
       </xs:sequence>
-      <xs:attribute name="version" use="required" form="qualified" type="xs:nonNegativeInteger"/>
       <xs:attribute name="name" use="required" form="qualified" type="xs:token"/>
     </xs:complexType>
   </xs:element>

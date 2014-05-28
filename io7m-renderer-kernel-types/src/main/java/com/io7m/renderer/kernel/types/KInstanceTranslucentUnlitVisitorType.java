@@ -46,7 +46,7 @@ public interface KInstanceTranslucentUnlitVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A transformedTranslucentUnlitRefractive(
+  A refractive(
     final KInstanceTranslucentRefractive i)
     throws E,
       RException,
@@ -67,7 +67,7 @@ public interface KInstanceTranslucentUnlitVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A transformedTranslucentUnlitRegular(
+  A regular(
     final KInstanceTranslucentRegular i)
     throws E,
       RException,

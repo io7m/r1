@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import com.io7m.renderer.kernel.types.KCamera;
+import com.io7m.renderer.kernel.types.KSceneBatchedShadow;
 import com.io7m.renderer.types.RException;
 
 /**

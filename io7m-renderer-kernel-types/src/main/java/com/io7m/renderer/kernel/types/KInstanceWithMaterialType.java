@@ -24,7 +24,7 @@ package com.io7m.renderer.kernel.types;
  *          The type of material
  */
 
-public interface KInstanceWithMaterialType<T extends KMaterialType>
+public interface KInstanceWithMaterialType<T extends KMaterialRequiresUVType>
 {
   /**
    * @return The material associated with the current instance

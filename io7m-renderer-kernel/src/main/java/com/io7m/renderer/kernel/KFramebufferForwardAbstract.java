@@ -199,7 +199,7 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
       return this.description.getDepthDescription();
     }
 
-    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    @Override public boolean kFramebufferGetDepthIsPackedColor()
     {
       return false;
     }
@@ -454,7 +454,7 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
       return this.description.getDepthDescription();
     }
 
-    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    @Override public boolean kFramebufferGetDepthIsPackedColor()
     {
       return false;
     }
@@ -626,7 +626,7 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
       return this.description.getDepthDescription();
     }
 
-    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    @Override public boolean kFramebufferGetDepthIsPackedColor()
     {
       return false;
     }
@@ -826,7 +826,7 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
       return this.description.getDepthDescription();
     }
 
-    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    @Override public boolean kFramebufferGetDepthIsPackedColor()
     {
       return true;
     }

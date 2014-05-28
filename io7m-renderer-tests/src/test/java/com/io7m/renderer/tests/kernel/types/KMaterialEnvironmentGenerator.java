@@ -19,29 +19,44 @@ package com.io7m.renderer.tests.kernel.types;
 import net.java.quickcheck.Generator;
 
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
-import com.io7m.renderer.kernel.types.KMaterialEnvironment;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentNone;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentReflection;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentReflectionMapped;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentType;
 
 public final class KMaterialEnvironmentGenerator implements
-  Generator<KMaterialEnvironment>
+  Generator<KMaterialEnvironmentType>
 {
   private final Generator<TextureCubeStaticUsableType> tex_gen;
 
   public KMaterialEnvironmentGenerator(
-    final Generator<TextureCubeStaticUsableType> tex_gen1)
+    final Generator<TextureCubeStaticUsableType> in_tex_gen)
   {
-    this.tex_gen = tex_gen1;
+    this.tex_gen = in_tex_gen;
   }
 
-  @Override public KMaterialEnvironment next()
+  @SuppressWarnings("null") @Override public KMaterialEnvironmentType next()
   {
-    if (Math.random() > 0.5) {
-      final TextureCubeStaticUsableType tn = this.tex_gen.next();
-      assert tn != null;
-      return KMaterialEnvironment.newEnvironmentMapped(
-        (float) Math.random(),
-        tn,
-        Math.random() > 0.5 ? true : false);
+    final int r = (int) (Math.random() * 3);
+    switch (r) {
+      case 0:
+      {
+        return KMaterialEnvironmentNone.none();
+      }
+      case 1:
+      {
+        return KMaterialEnvironmentReflection.reflection(
+          (float) Math.random(),
+          this.tex_gen.next());
+      }
+      case 2:
+      {
+        return KMaterialEnvironmentReflectionMapped.reflectionMapped(
+          (float) Math.random(),
+          this.tex_gen.next());
+      }
     }
-    return KMaterialEnvironment.newEnvironmentUnmapped();
+    throw new UnreachableCodeException();
   }
 }

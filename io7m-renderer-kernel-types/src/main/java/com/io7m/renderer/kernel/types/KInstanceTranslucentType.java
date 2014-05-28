@@ -16,6 +16,9 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.renderer.types.RException;
+
 /**
  * The type of meshes with translucent materials, with specific transforms and
  * UV matrices.
@@ -23,5 +26,32 @@ package com.io7m.renderer.kernel.types;
 
 public interface KInstanceTranslucentType extends KInstanceType
 {
-  // Nothing
+  /**
+   * Accept a visitor.
+   * 
+   * @param <A>
+   *          The type of values returned by the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          The type of the visitor
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   * @throws E
+   *           If the visitor raises <code>E</code>
+   * 
+   * @throws RException
+   *           If the visitor raises {@link RException}
+   * @throws JCGLException
+   *           If the visitor raises {@link JCGLException}
+   */
+
+    <A, E extends Throwable, V extends KInstanceTranslucentVisitorType<A, E>>
+    A
+    translucentAccept(
+      final V v)
+      throws E,
+        RException,
+        JCGLException;
 }

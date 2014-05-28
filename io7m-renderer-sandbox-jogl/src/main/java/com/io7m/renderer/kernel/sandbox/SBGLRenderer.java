@@ -2457,7 +2457,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
 
         for (final Pair<KInstanceType, SBInstance> pair : scene_things
           .getRight()) {
-          pair.getLeft().transformedAccept(
+          pair.getLeft().instanceAccept(
             new KInstanceVisitorType<Unit, RException>() {
               @Override public Unit transformedOpaqueAlphaDepth(
                 final KInstanceOpaqueAlphaDepth i)
@@ -2548,7 +2548,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
           });
 
       for (final Pair<KInstanceTranslucentType, SBInstance> pair : translucents) {
-        pair.getLeft().transformedAccept(
+        pair.getLeft().instanceAccept(
           new KInstanceVisitorType<Unit, RException>() {
             @Override public Unit transformedOpaqueAlphaDepth(
               final KInstanceOpaqueAlphaDepth i)

@@ -172,7 +172,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       return this.description;
     }
 
-    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    @Override public boolean kFramebufferGetDepthIsPackedColor()
     {
       return false;
     }
@@ -346,7 +346,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       return this.description;
     }
 
-    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    @Override public boolean kFramebufferGetDepthIsPackedColor()
     {
       return false;
     }
@@ -480,7 +480,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       return this.description;
     }
 
-    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    @Override public boolean kFramebufferGetDepthIsPackedColor()
     {
       return false;
     }
@@ -627,7 +627,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       return this.description;
     }
 
-    @Override public boolean kFramebufferGetDepthIsPackedColour()
+    @Override public boolean kFramebufferGetDepthIsPackedColor()
     {
       return true;
     }

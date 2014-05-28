@@ -21,11 +21,26 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 
+/**
+ * A COLLADA input specification.
+ */
+
 @EqualityStructural public final class ColladaInput
 {
-  private final ColladaSourceID source;
-  private final ColladaSemantic semantic;
   private final int             offset;
+  private final ColladaSemantic semantic;
+  private final ColladaSourceID source;
+
+  /**
+   * Construct an input.
+   * 
+   * @param in_source
+   *          The source.
+   * @param in_semantic
+   *          The semantic.
+   * @param in_offset
+   *          The offset.
+   */
 
   public ColladaInput(
     final ColladaSourceID in_source,
@@ -67,15 +82,27 @@ import com.io7m.jranges.RangeCheck;
     return true;
   }
 
+  /**
+   * @return The offset.
+   */
+
   public int getOffset()
   {
     return this.offset;
   }
 
+  /**
+   * @return The semantic.
+   */
+
   public ColladaSemantic getSemantic()
   {
     return this.semantic;
   }
+
+  /**
+   * @return The source.
+   */
 
   public ColladaSourceID getSource()
   {

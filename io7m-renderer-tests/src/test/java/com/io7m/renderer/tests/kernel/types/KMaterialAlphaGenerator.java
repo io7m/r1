@@ -18,18 +18,18 @@ package com.io7m.renderer.tests.kernel.types;
 
 import net.java.quickcheck.Generator;
 
-import com.io7m.renderer.kernel.types.KMaterialAlpha;
-import com.io7m.renderer.kernel.types.KMaterialAlphaOpacityType;
+import com.io7m.renderer.kernel.types.KMaterialAlphaConstant;
+import com.io7m.renderer.kernel.types.KMaterialAlphaOneMinusDot;
+import com.io7m.renderer.kernel.types.KMaterialAlphaType;
 
 public final class KMaterialAlphaGenerator implements
-  Generator<KMaterialAlpha>
+  Generator<KMaterialAlphaType>
 {
-  @Override public KMaterialAlpha next()
+  @Override public KMaterialAlphaType next()
   {
-    final KMaterialAlphaOpacityType[] v = KMaterialAlphaOpacityType.values();
-    final KMaterialAlphaOpacityType type =
-      v[(int) (Math.random() * (v.length - 1))];
-    assert type != null;
-    return KMaterialAlpha.newAlpha(type, (float) Math.random());
+    if (Math.random() > 0.5) {
+      return KMaterialAlphaConstant.constant((float) Math.random());
+    }
+    return KMaterialAlphaOneMinusDot.oneMinusDot((float) Math.random());
   }
 }

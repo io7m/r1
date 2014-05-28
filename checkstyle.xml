@@ -4,16 +4,48 @@
   "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
+
+  <!-- Allow control of Javadoc checks with CHECKSTYLE_JAVADOC:ON and CHECKSTYLE_JAVADOC:OFF -->
+  <module name="SuppressionCommentFilter">
+    <property name="onCommentFormat" value="CHECKSTYLE_JAVADOC:ON"/>
+    <property name="offCommentFormat" value="CHECKSTYLE_JAVADOC:OFF"/>
+    <property name="checkFormat" value="Javadoc.*"/>
+  </module>
+
+  <!-- Allow control of spacing checks with CHECKSTYLE_SPACE:ON and CHECKSTYLE_SPACE:OFF -->
+  <module name="SuppressionCommentFilter">
+    <property name="onCommentFormat" value="CHECKSTYLE_SPACE:ON"/>
+    <property name="offCommentFormat" value="CHECKSTYLE_SPACE:OFF"/>
+    <property name="checkFormat" value="NoWhitespaceAfter"/>
+  </module>
+
+  <!-- Allow control of all checks with CHECKSTYLE:ON and CHECKSTYLE:OFF -->
+  <module name="SuppressionCommentFilter">
+    <property name="onCommentFormat" value="CHECKSTYLE:ON"/>
+    <property name="offCommentFormat" value="CHECKSTYLE:OFF"/>
+    <property name="checkFormat" value=".*"/>
+  </module>
+  
+    <!-- Allow control of visibility checks with CHECKSTYLE_VISIBILITY:ON and CHECKSTYLE_VISIBILITY:OFF -->
+  <module name="SuppressionCommentFilter">
+    <property name="onCommentFormat" value="CHECKSTYLE_VISIBILITY:ON"/>
+    <property name="offCommentFormat" value="CHECKSTYLE_VISIBILITY:OFF"/>
+    <property name="checkFormat" value="VisibilityModifier"/>
+  </module>
+
   <property name="severity" value="error"/>
   <module name="TreeWalker">
+    <!-- Required to use the SuppressionCommentFilter above -->
+    <module name="FileContentsHolder"/>
+
     <!--
     <module name="AbstractClassName"/>
     <module name="AnnotationUseStyle"/>
     -->
 
-    <!-- Require that anonymous inner classes are less than 100 lines. -->
+    <!-- Require that anonymous inner classes are less than 150 lines. -->
     <module name="AnonInnerLength">
-      <property name="max" value="100"/>
+      <property name="max" value="150"/>
     </module>
 
     <module name="ArrayTrailingComma"/>
@@ -25,18 +57,23 @@
     <module name="AvoidStarImport"/>
     <module name="AvoidStaticImport"/>
     <module name="BooleanExpressionComplexity"/>
+
     <module name="ClassDataAbstractionCoupling">
-      <property name="max" value="20"/>
+      <property name="max" value="25"/>
     </module>
+
     <module name="ClassFanOutComplexity">
-      <property name="max" value="85"/>
+      <property name="max" value="95"/>
     </module>
+
     <module name="ClassTypeParameterName"/>
     <module name="ConstantName"/>
     <module name="CovariantEquals"/>
+
     <module name="CyclomaticComplexity">
-      <property name="max" value="20"/>
+      <property name="max" value="25"/>
     </module>
+
     <!--
     <module name="DeclarationOrder"/>
     -->
@@ -56,7 +93,7 @@
     <module name="EqualsAvoidNull"/>
     <module name="EqualsHashCode"/>
     <module name="ExecutableStatementCount">
-      <property name="max" value="60"/>
+      <property name="max" value="70"/>
     </module>
     <module name="ExplicitInitialization"/>
     <module name="FallThrough"/>
@@ -83,7 +120,7 @@
     <module name="InterfaceIsType"/>
     <module name="JUnitTestCase"/>
     <module name="JavaNCSS">
-      <property name="methodMaximum" value="60"/>
+      <property name="methodMaximum" value="85"/>
     </module>
     <module name="JavadocMethod">
       <property name="scope" value="public"/>
@@ -185,7 +222,11 @@
     </module>
 
     <module name="TypecastParenPad"/>
-    <module name="UncommentedMain"/>
+
+    <module name="UncommentedMain">
+      <property name="excludedClasses" value="Main$"/>
+    </module>
+
     <module name="UnusedImports"/>
     <module name="UpperEll"/>
     <module name="VisibilityModifier"/>

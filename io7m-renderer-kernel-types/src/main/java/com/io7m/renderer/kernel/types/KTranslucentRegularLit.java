@@ -74,7 +74,7 @@ public final class KTranslucentRegularLit implements KTranslucentType
         JCGLException,
         RException
   {
-    return v.translucentRegularLit(this);
+    return v.regularLit(this);
   }
 
   /**

@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.jequality.AlmostEqualFloat.ContextRelative;
+import com.io7m.jnull.NonNull;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
@@ -36,12 +37,11 @@ import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.rmx.RXMLMeshAttribute;
 import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
 import com.io7m.renderer.xml.rmx.RXMLMeshParser;
-import com.io7m.renderer.xml.rmx.RXMLMeshParserEvents;
-import com.io7m.renderer.xml.rmx.RXMLMeshType;
+import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
 
 @SuppressWarnings("synthetic-access") public final class RXMLMeshParserTests
 {
-  class Show implements RXMLMeshParserEvents<Throwable>
+  class Show implements RXMLMeshParserEventsType<Throwable>
   {
     @Override public void eventError(
       final RXMLException e)
@@ -86,13 +86,6 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
       // Nothing
     }
 
-    @Override public void eventMeshType(
-      final RXMLMeshType mt)
-      throws Throwable
-    {
-      // Nothing
-    }
-
     @Override public void eventMeshVertexEnded(
       final int index)
       throws Throwable
@@ -123,25 +116,9 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
       // Nothing
     }
 
-    @Override public void eventMeshVertexTangent3f(
-      final int index,
-      final RVectorI3F<RSpaceObjectType> tangent)
-      throws Throwable
-    {
-      // Nothing
-    }
-
     @Override public void eventMeshVertexTangent4f(
       final int index,
       final RVectorI4F<RSpaceObjectType> tangent)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshVertexBitangent(
-      final int index,
-      final RVectorI3F<RSpaceObjectType> bitangent)
       throws Throwable
     {
       // Nothing
@@ -177,7 +154,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
     }
   }
 
-  private InputStream getFile(
+  private @NonNull InputStream getFile(
     final String name)
   {
     final InputStream s = this.getClass().getResourceAsStream(name);
@@ -229,17 +206,15 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
       final EnumSet<RXMLMeshAttribute> attribs =
         EnumSet.noneOf(RXMLMeshAttribute.class);
       attribs.add(RXMLMeshAttribute.NORMAL_3F);
-      attribs.add(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F);
+      attribs.add(RXMLMeshAttribute.TANGENT_4F);
       attribs.add(RXMLMeshAttribute.UV_2F);
 
-      final RXMLMeshType expected_type = new RXMLMeshType(attribs);
       final int expected_vertices = 3;
 
       final Checked c =
         new Checked(
           expected_name,
           expected_triangles,
-          expected_type,
           expected_vertices,
           new RVectorI3F<RSpaceObjectType>(-23.0f, -34.0f, -11.0f),
           new RVectorI3F<RSpaceObjectType>(56.0f, 72.0f, 4.0f));
@@ -251,7 +226,6 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
 
       Assert.assertTrue(c.mesh_ended);
       Assert.assertTrue(c.mesh_started);
-      Assert.assertTrue(c.mesh_type_called);
       Assert.assertTrue(c.mesh_vertex_ended);
       Assert.assertTrue(c.triangle_called);
       Assert.assertTrue(c.triangles_ended);
@@ -259,7 +233,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
       Assert.assertTrue(c.vertex_normal_called);
       Assert.assertTrue(c.vertex_position_called);
       Assert.assertTrue(c.vertex_started_called);
-      Assert.assertTrue(c.vertex_tangent3f_called);
+      Assert.assertTrue(c.vertex_tangent4f_called);
       Assert.assertTrue(c.vertex_uv_called);
       Assert.assertTrue(c.vertices_ended);
       Assert.assertTrue(c.vertices_started);
@@ -282,17 +256,6 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
 
   @Test(expected = RXMLException.RXMLValidityException.class) public
     void
-    testXMLStreamWrongVersion()
-      throws Throwable
-  {
-    final InputStream s = this.getFile("wrongversion.rmx");
-    final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
-    RXMLMeshParser.parseFromDocument(d, new Show());
-    s.close();
-  }
-
-  @Test(expected = RXMLException.RXMLValidityException.class) public
-    void
     testXMLStreamWrongVertexCount()
       throws RXMLException,
         Throwable
@@ -303,44 +266,38 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
     s.close();
   }
 
-  static class Checked implements RXMLMeshParserEvents<Throwable>
+  static class Checked implements RXMLMeshParserEventsType<Throwable>
   {
-    private boolean                            mesh_ended;
-    private boolean                            mesh_started;
-    private final String                       expected_name;
-    private boolean                            triangle_called;
-    private boolean                            triangles_ended;
-    private boolean                            triangles_started;
-    private final int                          expected_triangles;
-    private boolean                            mesh_type_called;
-    private final RXMLMeshType                 expected_type;
-    private boolean                            mesh_vertex_ended;
-    private boolean                            vertex_normal_called;
-    private boolean                            vertex_position_called;
-    private boolean                            vertex_started_called;
-    private boolean                            vertex_tangent3f_called;
-    private boolean                            vertex_tangent4f_called;
-    private boolean                            vertex_bitangent_called;
-    private boolean                            vertex_uv_called;
-    private boolean                            vertices_ended;
-    private boolean                            vertices_started;
-    private final int                          expected_vertices;
-    private int                                triangle = 0;
-    private int                                vertices = 0;
-    private final RVectorI3F<RSpaceObjectType> expected_lower;
-    private final RVectorI3F<RSpaceObjectType> expected_upper;
+    private boolean                                     mesh_ended;
+    private boolean                                     mesh_started;
+    private final @NonNull String                       expected_name;
+    private boolean                                     triangle_called;
+    private boolean                                     triangles_ended;
+    private boolean                                     triangles_started;
+    private final int                                   expected_triangles;
+    private boolean                                     mesh_vertex_ended;
+    private boolean                                     vertex_normal_called;
+    private boolean                                     vertex_position_called;
+    private boolean                                     vertex_started_called;
+    private boolean                                     vertex_tangent4f_called;
+    private boolean                                     vertex_uv_called;
+    private boolean                                     vertices_ended;
+    private boolean                                     vertices_started;
+    private final int                                   expected_vertices;
+    private int                                         triangle = 0;
+    private int                                         vertices = 0;
+    private final @NonNull RVectorI3F<RSpaceObjectType> expected_lower;
+    private final @NonNull RVectorI3F<RSpaceObjectType> expected_upper;
 
     Checked(
-      final String in_expected_name,
+      final @NonNull String in_expected_name,
       final int in_expected_triangles,
-      final RXMLMeshType in_expected_type,
       final int in_vertices_expected,
-      final RVectorI3F<RSpaceObjectType> in_expected_lower,
-      final RVectorI3F<RSpaceObjectType> in_expected_upper)
+      final @NonNull RVectorI3F<RSpaceObjectType> in_expected_lower,
+      final @NonNull RVectorI3F<RSpaceObjectType> in_expected_upper)
     {
       this.expected_name = in_expected_name;
       this.expected_triangles = in_expected_triangles;
-      this.expected_type = in_expected_type;
       this.expected_vertices = in_vertices_expected;
       this.expected_lower = in_expected_lower;
       this.expected_upper = in_expected_upper;
@@ -392,14 +349,6 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
       Assert.assertEquals(this.expected_triangles, count);
     }
 
-    @Override public void eventMeshType(
-      final RXMLMeshType mt)
-      throws Throwable
-    {
-      this.mesh_type_called = true;
-      Assert.assertEquals(this.expected_type, mt);
-    }
-
     @Override public void eventMeshVertexEnded(
       final int index)
       throws Throwable
@@ -429,14 +378,6 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
     {
       this.vertex_started_called = true;
       ++this.vertices;
-    }
-
-    @Override public void eventMeshVertexTangent3f(
-      final int index,
-      final RVectorI3F<RSpaceObjectType> tangent)
-      throws Throwable
-    {
-      this.vertex_tangent3f_called = true;
     }
 
     @Override public void eventMeshVertexTangent4f(
@@ -494,20 +435,10 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
     {
       this.mesh_started = true;
     }
-
-    @Override public void eventMeshVertexBitangent(
-      final int index,
-      final RVectorI3F<RSpaceObjectType> bitangent)
-      throws Throwable
-    {
-      this.vertex_bitangent_called = true;
-    }
   }
 
-  @SuppressWarnings("synthetic-access") @Test public
-    void
-    testXMLStreamAllCalled()
-      throws Throwable
+  @Test public void testXMLStreamAllCalled()
+    throws Throwable
   {
     try {
       final String expected_name = "some-mesh";
@@ -516,17 +447,15 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
       final EnumSet<RXMLMeshAttribute> attribs =
         EnumSet.noneOf(RXMLMeshAttribute.class);
       attribs.add(RXMLMeshAttribute.NORMAL_3F);
-      attribs.add(RXMLMeshAttribute.TANGENT_3F_BITANGENT_3F);
+      attribs.add(RXMLMeshAttribute.TANGENT_4F);
       attribs.add(RXMLMeshAttribute.UV_2F);
 
-      final RXMLMeshType expected_type = new RXMLMeshType(attribs);
       final int expected_vertices = 3;
 
       final Checked c =
         new Checked(
           expected_name,
           expected_triangles,
-          expected_type,
           expected_vertices,
           new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f),
           new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f));
@@ -538,7 +467,6 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
 
       Assert.assertTrue(c.mesh_ended);
       Assert.assertTrue(c.mesh_started);
-      Assert.assertTrue(c.mesh_type_called);
       Assert.assertTrue(c.mesh_vertex_ended);
       Assert.assertTrue(c.triangle_called);
       Assert.assertTrue(c.triangles_ended);
@@ -546,7 +474,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshType;
       Assert.assertTrue(c.vertex_normal_called);
       Assert.assertTrue(c.vertex_position_called);
       Assert.assertTrue(c.vertex_started_called);
-      Assert.assertTrue(c.vertex_tangent3f_called);
+      Assert.assertTrue(c.vertex_tangent4f_called);
       Assert.assertTrue(c.vertex_uv_called);
       Assert.assertTrue(c.vertices_ended);
       Assert.assertTrue(c.vertices_started);

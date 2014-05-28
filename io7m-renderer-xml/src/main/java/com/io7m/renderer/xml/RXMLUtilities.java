@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 <code@io7m.com> http://io7m.com
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,6 +27,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.jtensors.VectorReadable4FType;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceRGBAType;
@@ -40,8 +41,25 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 import com.io7m.renderer.types.RVectorReadable4FType;
 import com.io7m.renderer.types.RXMLException;
 
+/**
+ * Utilities for reading XML documents.
+ */
+
 public final class RXMLUtilities
 {
+  /**
+   * @param e
+   *          The element.
+   * @param name
+   *          The local name.
+   * @param uri
+   *          The namespace URI.
+   * @return <code>e</code> if <code>e</code> has local name <code>name</code>
+   *         and namespace <code>uri</code>.
+   * @throws RXMLException
+   *           Otherwise.
+   */
+
   public static Element checkIsElement(
     final Element e,
     final String name,
@@ -67,6 +85,19 @@ public final class RXMLUtilities
     return e;
   }
 
+  /**
+   * @param e
+   *          The element.
+   * @param name
+   *          The local name of the attribute.
+   * @param uri
+   *          The namespace URI.
+   * @return The attribute with <code>name</code> and namespace
+   *         <code>uri</code>.
+   * @throws RXMLException
+   *           If the attribute does not exist.
+   */
+
   public static Attribute getAttribute(
     final Element e,
     final String name,
@@ -85,11 +116,25 @@ public final class RXMLUtilities
     return a;
   }
 
+  /**
+   * @param a
+   *          The attribute.
+   * @return The value of the given attribute as a boolean.
+   */
+
   public static boolean getAttributeBoolean(
     final Attribute a)
   {
     return Boolean.valueOf(a.getValue()).booleanValue();
   }
+
+  /**
+   * @param a
+   *          The attribute.
+   * @return The value of the given attribute as a float.
+   * @throws RXMLException
+   *           If the attribute value cannot be parsed as the required type.
+   */
 
   public static float getAttributeFloat(
     final Attribute a)
@@ -106,6 +151,17 @@ public final class RXMLUtilities
         .toString()));
     }
   }
+
+  /**
+   * @param e
+   *          The element.
+   * @param name
+   *          The local name of the attribute.
+   * 
+   * @return The attribute with <code>name</code> in the default namespace.
+   * @throws RXMLException
+   *           If the attribute does not exist.
+   */
 
   public static Attribute getAttributeInDefaultNamespace(
     final Element e,
@@ -124,6 +180,14 @@ public final class RXMLUtilities
     return a;
   }
 
+  /**
+   * @param a
+   *          The attribute.
+   * @return The value of the given attribute as an integer.
+   * @throws RXMLException
+   *           If the attribute value cannot be parsed as the required type.
+   */
+
   public static int getAttributeInteger(
     final Attribute a)
     throws RXMLException
@@ -140,6 +204,14 @@ public final class RXMLUtilities
     }
   }
 
+  /**
+   * @param a
+   *          The attribute.
+   * @return The value of the given attribute as a non-empty string.
+   * @throws RXMLException
+   *           If the attribute value cannot be parsed as the required type.
+   */
+
   public static String getAttributeNonEmptyString(
     final Attribute a)
     throws RXMLException
@@ -152,6 +224,18 @@ public final class RXMLUtilities
     }
     return a.getValue();
   }
+
+  /**
+   * @param e
+   *          The element.
+   * @param name
+   *          The name.
+   * @param uri
+   *          The namespace URI.
+   * @return The first child with the given name and namespace URI.
+   * @throws RXMLException
+   *           If there are no matching child elements.
+   */
 
   public static Element getChild(
     final Element e,
@@ -171,6 +255,16 @@ public final class RXMLUtilities
     return RXMLUtilities.checkIsElement(es.get(0), name, uri);
   }
 
+  /**
+   * @param e
+   *          The element.
+   * @param name
+   *          The name.
+   * @param uri
+   *          The namespace URI.
+   * @return All children with the given name and namespace URI.
+   */
+
   public static Elements getChildren(
     final Element e,
     final String name,
@@ -178,6 +272,22 @@ public final class RXMLUtilities
   {
     return e.getChildElements(name, uri.toString());
   }
+
+  /**
+   * Load a matrix column from attributes on the given element.
+   * 
+   * @param <T>
+   *          The type of vector space.
+   * @param e
+   *          The element.
+   * @param uri
+   *          The namespace URI.
+   * @return The matrix column.
+   * @throws RXMLException
+   *           If attributes are missing or have the wrong types.
+   * @see #putElementAttributesMatrixColumn3(Element, VectorReadable3FType,
+   *      String, URI)
+   */
 
   public static
     <T extends RSpaceType>
@@ -195,6 +305,22 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(a1),
       RXMLUtilities.getAttributeFloat(a2));
   }
+
+  /**
+   * Load a matrix column from attributes on the given element.
+   * 
+   * @param <T>
+   *          The type of vector space.
+   * @param e
+   *          The element.
+   * @param uri
+   *          The namespace URI.
+   * @return The matrix column.
+   * @throws RXMLException
+   *           If attributes are missing or have the wrong types.
+   * @see #putElementAttributesMatrixColumn4(Element, VectorReadable4FType,
+   *      String, URI)
+   */
 
   public static
     <T extends RSpaceType>
@@ -215,6 +341,18 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(a3));
   }
 
+  /**
+   * Load a quaternion from attributes on the given element.
+   * 
+   * @param e
+   *          The element.
+   * @param uri
+   *          The namespace URI.
+   * @return The matrix column.
+   * @throws RXMLException
+   *           If attributes are missing or have the wrong types.
+   */
+
   public static QuaternionI4F getElementAttributesQuaternion4f(
     final Element e,
     final URI uri)
@@ -231,6 +369,20 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(aw));
   }
 
+  /**
+   * Load a color vector from attributes on the given element.
+   * 
+   * @param e
+   *          The element.
+   * @param uri
+   *          The namespace URI.
+   * @return The matrix column.
+   * @throws RXMLException
+   *           If attributes are missing or have the wrong types.
+   * @see #putElementAttributesRGB(Element, RVectorReadable3FType, String,
+   *      URI)
+   */
+
   public static RVectorI3F<RSpaceRGBType> getElementAttributesRGB(
     final Element e,
     final URI uri)
@@ -244,6 +396,20 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(ay),
       RXMLUtilities.getAttributeFloat(az));
   }
+
+  /**
+   * Load a color vector from attributes on the given element.
+   * 
+   * @param e
+   *          The element.
+   * @param uri
+   *          The namespace URI.
+   * @return The matrix column.
+   * @throws RXMLException
+   *           If attributes are missing or have the wrong types.
+   * @see #putElementAttributesRGBA(Element, RVectorReadable4FType, String,
+   *      URI)
+   */
 
   public static RVectorI4F<RSpaceRGBAType> getElementAttributesRGBA(
     final Element e,
@@ -261,6 +427,20 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(aw));
   }
 
+  /**
+   * Load a vector from attributes on the given element.
+   * 
+   * @param <T>
+   *          The type of vector space.
+   * @param e
+   *          The element.
+   * @param uri
+   *          The namespace URI.
+   * @return The matrix column.
+   * @throws RXMLException
+   *           If attributes are missing or have the wrong types.
+   */
+
   public static
     <T extends RSpaceType>
     RVectorI2F<T>
@@ -275,6 +455,22 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(ax),
       RXMLUtilities.getAttributeFloat(ay));
   }
+
+  /**
+   * Load a vector from attributes on the given element.
+   * 
+   * @param <T>
+   *          The type of vector space.
+   * @param e
+   *          The element.
+   * @param uri
+   *          The namespace URI.
+   * @return The matrix column.
+   * @throws RXMLException
+   *           If attributes are missing or have the wrong types.
+   * @see #putElementAttributesVector3f(Element, RVectorReadable3FType,
+   *      String, URI)
+   */
 
   public static
     <T extends RSpaceType>
@@ -292,6 +488,22 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(ay),
       RXMLUtilities.getAttributeFloat(az));
   }
+
+  /**
+   * Load a vector from attributes on the given element.
+   * 
+   * @param <T>
+   *          The type of vector space.
+   * @param e
+   *          The element.
+   * @param uri
+   *          The namespace URI.
+   * @return The matrix column.
+   * @throws RXMLException
+   *           If attributes are missing or have the wrong types.
+   * @see #putElementAttributesVector4f(Element, RVectorReadable4FType,
+   *      String, URI)
+   */
 
   public static
     <T extends RSpaceType>
@@ -312,14 +524,22 @@ public final class RXMLUtilities
       RXMLUtilities.getAttributeFloat(aw));
   }
 
+  /**
+   * @param e
+   *          The element.
+   * @return The value of the given element as a boolean.
+   * @throws RXMLException
+   *           If the value cannot be parsed as the required type.
+   */
+
   public static boolean getElementBoolean(
     final Element e)
     throws RXMLException
   {
     final String v = e.getValue();
-    if (v.equals("true")) {
+    if ("true".equals(v)) {
       return true;
-    } else if (v.equals("false")) {
+    } else if ("false".equals(v)) {
       return false;
     }
 
@@ -331,21 +551,13 @@ public final class RXMLUtilities
       .toString()));
   }
 
-  public static float getElementFloat(
-    final Element e)
-    throws RXMLException
-  {
-    try {
-      return Float.parseFloat(e.getValue());
-    } catch (final NumberFormatException x) {
-      final StringBuilder message = new StringBuilder();
-      message.append("Expected a floating point value but got '");
-      message.append(e.getValue());
-      message.append("'");
-      throw RXMLException.validityException(new ValidityException(message
-        .toString()));
-    }
-  }
+  /**
+   * @param e
+   *          The element.
+   * @return The value of the given element as a double.
+   * @throws RXMLException
+   *           If the value cannot be parsed as the required type.
+   */
 
   public static double getElementDouble(
     final Element e)
@@ -363,6 +575,38 @@ public final class RXMLUtilities
     }
   }
 
+  /**
+   * @param e
+   *          The element.
+   * @return The value of the given element as a float.
+   * @throws RXMLException
+   *           If the value cannot be parsed as the required type.
+   */
+
+  public static float getElementFloat(
+    final Element e)
+    throws RXMLException
+  {
+    try {
+      return Float.parseFloat(e.getValue());
+    } catch (final NumberFormatException x) {
+      final StringBuilder message = new StringBuilder();
+      message.append("Expected a floating point value but got '");
+      message.append(e.getValue());
+      message.append("'");
+      throw RXMLException.validityException(new ValidityException(message
+        .toString()));
+    }
+  }
+
+  /**
+   * @param e
+   *          The element.
+   * @return The value of the given element as an integer.
+   * @throws RXMLException
+   *           If the value cannot be parsed as the required type.
+   */
+
   public static int getElementInteger(
     final Element e)
     throws RXMLException
@@ -378,6 +622,20 @@ public final class RXMLUtilities
         .toString()));
     }
   }
+
+  /**
+   * Load a matrix from the given element.
+   * 
+   * @param <T>
+   *          The type of matrix transform.
+   * @param e
+   *          The element.
+   * @param uri
+   *          The namespace URI.
+   * @return A matrix.
+   * @throws RXMLException
+   *           IF the an error occurred whilst trying to parse a matrix.
+   */
 
   public static
     <T extends RTransformType>
@@ -406,6 +664,20 @@ public final class RXMLUtilities
     final RMatrixI3x3F<T> m = RMatrixI3x3F.newFromColumns(c0, c1, c2);
     return m;
   }
+
+  /**
+   * Load a matrix from the given element.
+   * 
+   * @param <T>
+   *          The type of matrix transform.
+   * @param e
+   *          The element.
+   * @param uri
+   *          The namespace URI.
+   * @return A matrix.
+   * @throws RXMLException
+   *           IF the an error occurred whilst trying to parse a matrix.
+   */
 
   public static
     <T extends RTransformType>
@@ -438,6 +710,14 @@ public final class RXMLUtilities
     return m;
   }
 
+  /**
+   * @param e
+   *          The element.
+   * @return The value of the given element as a non-empty string.
+   * @throws RXMLException
+   *           If the value cannot be parsed as the required type.
+   */
+
   public static String getElementNonEmptyString(
     final Element e)
     throws RXMLException
@@ -450,6 +730,18 @@ public final class RXMLUtilities
     }
     return e.getValue();
   }
+
+  /**
+   * Load a color vector from the given element.
+   * 
+   * @param e
+   *          The element.
+   * @param uri
+   *          The namespace URI.
+   * @return A matrix.
+   * @throws RXMLException
+   *           IF the an error occurred whilst trying to parse a vector.
+   */
 
   public static RVectorI3F<RSpaceRGBType> getElementRGB(
     final Element e,
@@ -465,6 +757,20 @@ public final class RXMLUtilities
       RXMLUtilities.getElementFloat(eb));
   }
 
+  /**
+   * Load a vector from the given element.
+   * 
+   * @param <T>
+   *          The vector coordinate space.
+   * @param e
+   *          The element.
+   * @param uri
+   *          The namespace URI.
+   * @return A matrix.
+   * @throws RXMLException
+   *           IF the an error occurred whilst trying to parse a vector.
+   */
+
   public static <T extends RSpaceType> RVectorI3F<T> getElementVector3f(
     final Element e,
     final URI uri)
@@ -479,6 +785,17 @@ public final class RXMLUtilities
       RXMLUtilities.getElementFloat(ez));
   }
 
+  /**
+   * @param e
+   *          The element.
+   * @param name
+   *          The local name.
+   * @param uri
+   *          The namespace URI.
+   * @return The first child of the given element with the given name and
+   *         namespace URI, or <code>null</code> if there isn't one.
+   */
+
   public static @Nullable Element getOptionalChild(
     final Element e,
     final String name,
@@ -490,6 +807,57 @@ public final class RXMLUtilities
     }
     return es.get(0);
   }
+
+  /**
+   * @param e
+   *          The element.
+   * @param name
+   *          The local name.
+   * @param uri
+   *          The namespace URI.
+   * @return <code>true</code> if <code>e</code> has exactly one child with
+   *         local name <code>name</code> in the namespace <code>uri</code>.
+   */
+
+  public static boolean hasChild(
+    final Element e,
+    final String name,
+    final URI uri)
+  {
+    final Elements es = e.getChildElements(name, uri.toString());
+    return es.size() == 1;
+  }
+
+  /**
+   * @param e
+   *          The element.
+   * @param name
+   *          The local name.
+   * @param uri
+   *          The namespace URI.
+   * @return <code>true</code> if <code>e</code> has children with local name
+   *         <code>name</code> in the namespace <code>uri</code>.
+   */
+
+  public static boolean hasChildren(
+    final Element e,
+    final String name,
+    final URI uri)
+  {
+    final Elements es = e.getChildElements(name, uri.toString());
+    return es.size() >= 1;
+  }
+
+  /**
+   * @param e
+   *          The element.
+   * @param name
+   *          The local name.
+   * @param uri
+   *          The namespace URI.
+   * @return <code>true</code> if <code>e</code> has local name
+   *         <code>name</code> and namespace <code>uri</code>.
+   */
 
   public static boolean isElement(
     final Element e,
@@ -505,6 +873,23 @@ public final class RXMLUtilities
     return true;
   }
 
+  /**
+   * Add an attribute with local name <code>name</code>, prefix
+   * <code>prefix</code>, and namespace <code>uri</code> to <code>e</code>,
+   * with the value <code>value</code>.
+   * 
+   * @param e
+   *          The element.
+   * @param prefix
+   *          The namespace prefix.
+   * @param name
+   *          The local name.
+   * @param value
+   *          The value.
+   * @param uri
+   *          The namespace URI.
+   */
+
   public static void putElementAttributeInteger(
     final Element e,
     final String prefix,
@@ -519,6 +904,19 @@ public final class RXMLUtilities
         Integer.toString(value));
     e.addAttribute(a);
   }
+
+  /**
+   * Add the given matrix column as attributes to the element <code>e</code>.
+   * 
+   * @param e
+   *          The element.
+   * @param prefix
+   *          The namespace prefix.
+   * @param column
+   *          The matrix column.
+   * @param uri
+   *          The namespace URI.
+   */
 
   public static void putElementAttributesMatrixColumn3(
     final Element e,
@@ -540,6 +938,19 @@ public final class RXMLUtilities
     e.addAttribute(a1);
     e.addAttribute(a2);
   }
+
+  /**
+   * Add the given matrix column as attributes to the element <code>e</code>.
+   * 
+   * @param e
+   *          The element.
+   * @param prefix
+   *          The namespace prefix.
+   * @param column
+   *          The matrix column.
+   * @param uri
+   *          The namespace URI.
+   */
 
   public static void putElementAttributesMatrixColumn4(
     final Element e,
@@ -565,6 +976,20 @@ public final class RXMLUtilities
     e.addAttribute(a2);
     e.addAttribute(a3);
   }
+
+  /**
+   * Serialize the given vector to attributes on the given element.
+   * 
+   * @param e
+   *          The element.
+   * @param rgb
+   *          The vector.
+   * @param prefix
+   *          The namespace prefix.
+   * @param uri
+   *          The namespace URI.
+   * @see #getElementAttributesRGB(Element, URI)
+   */
 
   public static void putElementAttributesRGB(
     final Element e,
@@ -593,6 +1018,20 @@ public final class RXMLUtilities
     e.addAttribute(ab);
   }
 
+  /**
+   * Serialize the given vector to attributes on the given element.
+   * 
+   * @param e
+   *          The element.
+   * @param rgba
+   *          The vector.
+   * @param prefix
+   *          The namespace prefix.
+   * @param uri
+   *          The namespace URI.
+   * @see #getElementAttributesRGBA(Element, URI)
+   */
+
   public static void putElementAttributesRGBA(
     final Element e,
     final RVectorReadable4FType<RSpaceRGBAType> rgba,
@@ -618,6 +1057,23 @@ public final class RXMLUtilities
     e.addAttribute(aa);
   }
 
+  /**
+   * Add an attribute with local name <code>name</code>, prefix
+   * <code>prefix</code>, and namespace <code>uri</code> to <code>e</code>,
+   * with the value <code>value</code>.
+   * 
+   * @param e
+   *          The element.
+   * @param prefix
+   *          The namespace prefix.
+   * @param name
+   *          The local name.
+   * @param value
+   *          The value.
+   * @param uri
+   *          The namespace URI.
+   */
+
   public static void putElementAttributeString(
     final Element e,
     final String prefix,
@@ -629,6 +1085,22 @@ public final class RXMLUtilities
       new Attribute(prefix + ":" + name, uri.toString(), value);
     e.addAttribute(a);
   }
+
+  /**
+   * Serialize the given vector to attributes on the given element.
+   * 
+   * @param <T>
+   *          The type of vector coordinate space.
+   * @param e
+   *          The element.
+   * @param v
+   *          The vector.
+   * @param prefix
+   *          The namespace prefix.
+   * @param uri
+   *          The namespace URI.
+   * @see #getElementAttributesVector3f(Element, URI)
+   */
 
   public static <T extends RSpaceType> void putElementAttributesVector3f(
     final Element e,
@@ -647,6 +1119,22 @@ public final class RXMLUtilities
     e.addAttribute(ay);
     e.addAttribute(az);
   }
+
+  /**
+   * Serialize the given vector to attributes on the given element.
+   * 
+   * @param <T>
+   *          The type of vector coordinate space.
+   * @param e
+   *          The element.
+   * @param v
+   *          The vector.
+   * @param prefix
+   *          The namespace prefix.
+   * @param uri
+   *          The namespace URI.
+   * @see #getElementAttributesVector4f(Element, URI)
+   */
 
   public static <T extends RSpaceType> void putElementAttributesVector4f(
     final Element e,
@@ -669,6 +1157,23 @@ public final class RXMLUtilities
     e.addAttribute(aw);
   }
 
+  /**
+   * Add an element with local name <code>name</code>, prefix
+   * <code>prefix</code>, and namespace <code>uri</code> to <code>e</code>,
+   * with the value <code>value</code>.
+   * 
+   * @param e
+   *          The element.
+   * @param prefix
+   *          The namespace prefix.
+   * @param name
+   *          The local name.
+   * @param value
+   *          The value.
+   * @param uri
+   *          The namespace URI.
+   */
+
   @SuppressWarnings("boxing") public static void putElementDouble(
     final Element e,
     final String prefix,
@@ -683,6 +1188,21 @@ public final class RXMLUtilities
       String.format("%.15f", value),
       uri);
   }
+
+  /**
+   * Serialize the given matrix to attributes on the given element.
+   * 
+   * @param <T>
+   *          The type of matrix transform.
+   * @param e
+   *          The element.
+   * @param m
+   *          The matrix.
+   * @param prefix
+   *          The namespace prefix.
+   * @param uri
+   *          The namespace URI.
+   */
 
   public static <T extends RTransformType> void putElementMatrixI3x3F(
     final Element e,
@@ -702,6 +1222,21 @@ public final class RXMLUtilities
     }
   }
 
+  /**
+   * Serialize the given matrix to attributes on the given element.
+   * 
+   * @param <T>
+   *          The type of matrix transform.
+   * @param e
+   *          The element.
+   * @param m
+   *          The matrix.
+   * @param prefix
+   *          The namespace prefix.
+   * @param uri
+   *          The namespace URI.
+   */
+
   public static <T extends RTransformType> void putElementMatrixI4x4F(
     final Element e,
     final String prefix,
@@ -720,6 +1255,23 @@ public final class RXMLUtilities
     }
   }
 
+  /**
+   * Add an element with local name <code>name</code>, prefix
+   * <code>prefix</code>, and namespace <code>uri</code> to <code>e</code>,
+   * with the value <code>value</code>.
+   * 
+   * @param e
+   *          The element.
+   * @param prefix
+   *          The namespace prefix.
+   * @param name
+   *          The local name.
+   * @param value
+   *          The value.
+   * @param uri
+   *          The namespace URI.
+   */
+
   public static void putElementString(
     final Element e,
     final String prefix,
@@ -732,21 +1284,8 @@ public final class RXMLUtilities
     e.appendChild(en);
   }
 
-  public static boolean hasChild(
-    final Element e,
-    final String name,
-    final URI uri)
+  private RXMLUtilities()
   {
-    final Elements es = e.getChildElements(name, uri.toString());
-    return es.size() == 1;
-  }
-
-  public static boolean hasChildren(
-    final Element e,
-    final String name,
-    final URI uri)
-  {
-    final Elements es = e.getChildElements(name, uri.toString());
-    return es.size() >= 1;
+    throw new UnreachableCodeException();
   }
 }

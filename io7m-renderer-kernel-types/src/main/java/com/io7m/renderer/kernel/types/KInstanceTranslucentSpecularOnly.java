@@ -19,14 +19,12 @@ package com.io7m.renderer.kernel.types;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RTransformTextureType;
 
 /**
- * A mesh with a specular-only material (
- * {@link KMeshWithMaterialTranslucentSpecularOnly}), with a specific
+ * A mesh with a specular-only material ( {@link KMesh}), with a specific
  * transform and texture matrix.
  */
 
@@ -36,87 +34,83 @@ import com.io7m.renderer.types.RTransformTextureType;
   /**
    * Construct a new translucent regular instance.
    * 
-   * @param in_mwm
-   *          The actual instance
+   * @param in_mesh
+   *          The mesh
+   * @param in_material
+   *          The material
    * @param in_transform
    *          The transform applied to the instance
    * @param in_uv_matrix
    *          The per-instance UV matrix
+   * @param in_faces
+   *          The face selection
    * @return A new instance
    */
 
   public static KInstanceTranslucentSpecularOnly newInstance(
-    final KMeshWithMaterialTranslucentSpecularOnly in_mwm,
+    final KMeshReadableType in_mesh,
+    final KMaterialTranslucentSpecularOnly in_material,
     final KTransformType in_transform,
-    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
+    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final KFaceSelection in_faces)
   {
     return new KInstanceTranslucentSpecularOnly(
-      KInstanceID.freshID(),
-      in_mwm,
+      in_mesh,
+      in_material,
       in_transform,
-      in_uv_matrix);
+      in_uv_matrix,
+      in_faces);
   }
 
-  private final KInstanceID                              id;
+  private final KFaceSelection                      faces;
 
-  private final KMeshWithMaterialTranslucentSpecularOnly mesh;
-  private final KTransformType                           transform;
-  private final RMatrixI3x3F<RTransformTextureType>      uv_matrix;
+  private final KMaterialTranslucentSpecularOnly    material;
+  private final KMeshReadableType                   mesh;
+  private final KTransformType                      transform;
+  private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
   private KInstanceTranslucentSpecularOnly(
-    final KInstanceID in_id,
-    final KMeshWithMaterialTranslucentSpecularOnly in_mesh,
+    final KMeshReadableType in_mesh,
+    final KMaterialTranslucentSpecularOnly in_material,
     final KTransformType in_transform,
-    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
+    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final KFaceSelection in_faces)
   {
-    this.id = NullCheck.notNull(in_id, "ID");
     this.transform = NullCheck.notNull(in_transform, "Transform");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
     this.mesh = NullCheck.notNull(in_mesh, "Mesh");
-  }
-
-  @Override public boolean equals(
-    final @Nullable Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KInstanceTranslucentSpecularOnly other =
-      (KInstanceTranslucentSpecularOnly) obj;
-    return this.id.equals(other.id)
-      && this.mesh.equals(other.mesh)
-      && this.transform.equals(other.transform)
-      && this.uv_matrix.equals(other.uv_matrix);
+    this.material = NullCheck.notNull(in_material, "Material");
+    this.faces = NullCheck.notNull(in_faces, "Faces");
   }
 
   /**
-   * @return The mesh and material.
+   * @return The material.
    */
 
-  public KMeshWithMaterialTranslucentSpecularOnly getMeshWithMaterial()
+  public KMaterialTranslucentSpecularOnly getMaterial()
+  {
+    return this.material;
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
+    A
+    instanceAccept(
+      final V v)
+      throws E,
+        RException,
+        JCGLException
+  {
+    return v.translucent(this);
+  }
+
+  @Override public KFaceSelection instanceGetFaceSelection()
+  {
+    return this.faces;
+  }
+
+  @Override public KMeshReadableType instanceGetMesh()
   {
     return this.mesh;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.id.hashCode();
-    result = (prime * result) + this.mesh.hashCode();
-    result = (prime * result) + this.transform.hashCode();
-    result = (prime * result) + this.uv_matrix.hashCode();
-    return result;
-  }
-
-  @Override public KInstanceID instanceGetID()
-  {
-    return this.id;
   }
 
   @Override public KTransformType instanceGetTransform()
@@ -129,44 +123,46 @@ import com.io7m.renderer.types.RTransformTextureType;
     return this.uv_matrix;
   }
 
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[KInstanceTranslucentSpecularOnly faces=");
+    b.append(this.faces);
+    b.append(" material=");
+    b.append(this.material);
+    b.append(" mesh=");
+    b.append(this.mesh);
+    b.append(" transform=");
+    b.append(this.transform);
+    b.append(" uv_matrix=");
+    b.append(this.uv_matrix);
+    b.append("]");
+    final String r = b.toString();
+    assert r != null;
+    return r;
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KInstanceTranslucentVisitorType<A, E>>
+    A
+    translucentAccept(
+      final V v)
+      throws E,
+        RException,
+        JCGLException
+  {
+    return v.specularOnly(this);
+  }
+
   @Override public
     <A, E extends Throwable, V extends KInstanceTranslucentLitVisitorType<A, E>>
     A
-    instanceTranslucentLitAccept(
+    translucentLitAccept(
       final V v)
       throws E,
         RException,
         JCGLException
   {
-    return v.transformedTranslucentLitSpecularOnly(this);
-  }
-
-  @Override public KMeshReadableType meshGetMesh()
-  {
-    return this.mesh.meshGetMesh();
-  }
-
-  @Override public
-    <A, E extends Throwable, V extends KMeshWithMaterialVisitorType<A, E>>
-    A
-    meshWithMaterialAccept(
-      final V v)
-      throws E,
-        RException,
-        JCGLException
-  {
-    return v.meshWithMaterialTranslucentSpecularOnly(this.mesh);
-  }
-
-  @Override public
-    <A, E extends Throwable, V extends KInstanceVisitorType<A, E>>
-    A
-    transformedAccept(
-      final V v)
-      throws E,
-        RException,
-        JCGLException
-  {
-    return v.transformedTranslucentSpecularOnly(this);
+    return v.specularOnly(this);
   }
 }
