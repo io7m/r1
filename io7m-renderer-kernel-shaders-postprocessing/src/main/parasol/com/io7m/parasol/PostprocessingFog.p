@@ -24,7 +24,7 @@ module PostprocessingFog is
   import com.io7m.renderer.Postprocessing;
 
   type t is record
-    colour : vector_3f
+    color : vector_3f
   end;
 
   shader fragment fog_f is
@@ -40,7 +40,7 @@ module PostprocessingFog is
       S2.texture (t_image_depth, f_uv) [x];
     value rgba =
       new vector_4f (
-        V3.interpolate (pixel [x y z], fog.colour, depth_sample),
+        V3.interpolate (pixel [x y z], fog.color, depth_sample),
         1.0
       );
   as
