@@ -26,9 +26,7 @@ import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
-import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.renderer.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
@@ -57,16 +55,8 @@ public final class SLSpecular2 implements ExampleSceneType
     final ExampleSceneBuilderType scene)
     throws RException
   {
-    final KMaterialOpaqueRegular material;
-
-    {
-      final KMaterialOpaqueRegularBuilderType b =
-        KMaterialOpaqueRegular
-          .newBuilder(ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE);
-      b.setNormal(KMaterialNormalMapped.mapped(scene
-        .texture("tiles_normal.png")));
-      material = b.build();
-    }
+    final KMaterialOpaqueRegular material =
+      ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE;
 
     final KInstanceOpaqueRegular i =
       KInstanceOpaqueRegular.newInstance(
