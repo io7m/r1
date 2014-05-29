@@ -52,6 +52,8 @@ import com.io7m.renderer.kernel.KRefractionRendererType;
 import com.io7m.renderer.kernel.KRegionCopier;
 import com.io7m.renderer.kernel.KRegionCopierType;
 import com.io7m.renderer.kernel.KRendererForward;
+import com.io7m.renderer.kernel.KRendererForwardOpaque;
+import com.io7m.renderer.kernel.KRendererForwardOpaqueType;
 import com.io7m.renderer.kernel.KRendererForwardType;
 import com.io7m.renderer.kernel.KShaderCacheType;
 import com.io7m.renderer.kernel.KShadowMapCache;
@@ -196,12 +198,15 @@ public final class ExampleRendererForwardDefault extends
         caps,
         log);
 
+    final KRendererForwardOpaqueType opaque_renderer =
+      KRendererForwardOpaque.newRenderer(gi, shader_cache);
+
     return new ExampleRendererForwardDefault(KRendererForward.newRenderer(
       gi,
       depth_renderer,
       shadow_renderer,
       translucent_renderer,
-      shader_cache,
+      opaque_renderer,
       log), quad);
   }
 
