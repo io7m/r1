@@ -10,10 +10,10 @@
     <artifactId>io7m-renderer</artifactId>
     <version>0.9.0</version>
   </parent>
-  <artifactId>io7m-renderer-kernel-shaders-core</artifactId>
+  <artifactId>io7m-renderer-shaders-core</artifactId>
 
   <packaging>jar</packaging>
-  <description>3D renderer (Kernel shader core sources)</description>
+  <description>3D renderer (Shader core sources)</description>
   <url>http://mvn.io7m.com/${project.artifactId}/</url>
   <name>${project.artifactId}</name>
 
