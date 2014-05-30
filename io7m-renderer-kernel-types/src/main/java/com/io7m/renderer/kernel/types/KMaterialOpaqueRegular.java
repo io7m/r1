@@ -197,7 +197,7 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_specular);
 
     final String code_lit =
-      KMaterialCodes.makeOpaqueRegularLitCode(
+      KMaterialCodes.makeOpaqueRegularLitCodeWithoutDepth(
         in_albedo,
         in_emissive,
         in_environment,

@@ -101,7 +101,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
   public static KTranslucentRendererType newRenderer(
     final JCGLImplementationType in_g,
-    final KShaderCacheType in_shader_cache,
+    final KShaderCacheForwardTranslucentType in_shader_cache,
     final KRefractionRendererType in_refraction_renderer,
     final KGraphicsCapabilitiesType in_caps,
     final LogUsableType in_log)
@@ -676,25 +676,16 @@ import com.io7m.renderer.types.RExceptionJCGL;
       });
   }
 
-  private static String shaderCodeFromUnlit(
-    final KMaterialTranslucentRegular m)
-  {
-    final String r = String.format("Fwd_%s", m.materialUnlitGetCode());
-    assert r != null;
-    return r;
-  }
-
-  private final KGraphicsCapabilitiesType caps;
-  private final JCGLImplementationType    g;
-  private final LogUsableType             log;
-  private final KRefractionRendererType   refraction_renderer;
-  private final KShaderCacheType          shader_cache;
-
-  private final KTextureUnitAllocator     texture_units;
+  private final KGraphicsCapabilitiesType          caps;
+  private final JCGLImplementationType             g;
+  private final LogUsableType                      log;
+  private final KRefractionRendererType            refraction_renderer;
+  private final KShaderCacheForwardTranslucentType shader_cache;
+  private final KTextureUnitAllocator              texture_units;
 
   private KTranslucentRenderer(
     final JCGLImplementationType in_g,
-    final KShaderCacheType in_shader_cache,
+    final KShaderCacheForwardTranslucentType in_shader_cache,
     final KRefractionRendererType in_refraction_renderer,
     final KGraphicsCapabilitiesType in_caps,
     final LogUsableType in_log)
@@ -845,8 +836,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KTranslucentRegularLit t,
     final MatricesObserverType mwo)
     throws RException,
-      JCGLException,
-      JCacheException
+      JCGLException
   {
     final KTextureUnitAllocator unit_allocator = this.texture_units;
     final Set<KLightType> lights = t.translucentGetLights();
@@ -884,7 +874,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
         gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
       }
 
-      final KProgram kprogram = this.shader_cache.cacheGetLU(shader_code);
+      final KProgram kprogram =
+        this.shader_cache.getForwardTranslucentLit(shader_code);
 
       kprogram.getExecutable().execRun(
         new JCBExecutorProcedureType<RException>() {
@@ -922,17 +913,16 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KTextureUnitAllocator unit_allocator,
     final KInstanceTranslucentRegular t)
     throws JCGLException,
-      RException,
-      JCacheException
+      RException
   {
-    final String shader_code =
-      KTranslucentRenderer.shaderCodeFromUnlit(t.getMaterial());
+    final String shader_code = t.getMaterial().materialUnlitGetCode();
 
     gc.blendingEnable(
       BlendFunction.BLEND_ONE,
       BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
 
-    final KProgram kprogram = this.shader_cache.cacheGetLU(shader_code);
+    final KProgram kprogram =
+      this.shader_cache.getForwardTranslucentUnlit(shader_code);
 
     kprogram.getExecutable().execRun(
       new JCBExecutorProcedureType<RException>() {
@@ -980,7 +970,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KTranslucentSpecularOnlyLit t,
     final MatricesObserverType mwo)
     throws RException,
-      JCacheException,
       JCGLException
   {
     final KTextureUnitAllocator unit_allocator = this.texture_units;
@@ -1013,7 +1002,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
           unit_allocator.getUnitCount());
       }
 
-      final KProgram kprogram = this.shader_cache.cacheGetLU(shader_code);
+      final KProgram kprogram =
+        this.shader_cache.getForwardTranslucentLit(shader_code);
 
       kprogram.getExecutable().execRun(
         new JCBExecutorProcedureType<RException>() {
@@ -1087,7 +1077,13 @@ import com.io7m.renderer.types.RExceptionJCGL;
   {
     final String lcode = this.shaderCodeFromLight(light);
     final String mcode = material.materialLitGetCode();
-    final String r = String.format("Fwd_%s_%s", lcode, mcode);
+
+    final StringBuilder s = new StringBuilder();
+    s.append(lcode);
+    s.append("_");
+    s.append(mcode);
+
+    final String r = s.toString();
     assert r != null;
     return r;
   }
@@ -1098,7 +1094,13 @@ import com.io7m.renderer.types.RExceptionJCGL;
   {
     final String lcode = this.shaderCodeFromLight(light);
     final String mcode = material.materialLitGetCode();
-    final String r = String.format("Fwd_%s_%s", lcode, mcode);
+
+    final StringBuilder s = new StringBuilder();
+    s.append(lcode);
+    s.append("_");
+    s.append(mcode);
+
+    final String r = s.toString();
     assert r != null;
     return r;
   }

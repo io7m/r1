@@ -44,9 +44,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.jproperties.JPropertyException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.jvvfs.Filesystem;
-import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.FilesystemType;
-import com.io7m.jvvfs.PathVirtual;
 
 /**
  * The main viewer.
@@ -197,26 +195,10 @@ public final class ViewerSingleMain
         try {
           final FilesystemType fs =
             Filesystem.makeWithoutArchiveDirectory(log);
-          fs.mountArchiveFromAnywhere(
-            config.getShaderArchiveDebugFile(),
-            PathVirtual.ROOT);
-          fs.mountArchiveFromAnywhere(
-            config.getShaderArchiveDepthFile(),
-            PathVirtual.ROOT);
-          fs.mountArchiveFromAnywhere(
-            config.getShaderArchiveForwardFile(),
-            PathVirtual.ROOT);
-          fs.mountArchiveFromAnywhere(
-            config.getShaderArchivePostprocessingFile(),
-            PathVirtual.ROOT);
 
           final ViewerSingleMainWindow w =
             new ViewerSingleMainWindow(config, log, fs, example_name);
           w.run();
-        } catch (final FilesystemError e) {
-          log.critical("Filesystem error: " + e.getMessage());
-          e.printStackTrace();
-          System.exit(1);
         } catch (final ClassNotFoundException e) {
           log.critical("Scene error: " + e.getMessage());
           e.printStackTrace();

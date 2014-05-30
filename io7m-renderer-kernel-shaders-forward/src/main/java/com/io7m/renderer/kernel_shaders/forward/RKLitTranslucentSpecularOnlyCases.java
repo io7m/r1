@@ -22,6 +22,7 @@ import java.util.List;
 import com.io7m.jfunctional.Pair;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentSpecularOnly;
+import com.io7m.renderer.kernel_shaders.core.FakeImmutableCapabilities;
 
 public final class RKLitTranslucentSpecularOnlyCases
 {

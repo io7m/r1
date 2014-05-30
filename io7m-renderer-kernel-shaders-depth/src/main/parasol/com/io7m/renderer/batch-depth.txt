@@ -1,6 +1,4 @@
-depth_DepC       : com.io7m.renderer.Depth.depth_DepC
-depth_DepC4444   : com.io7m.renderer.Depth.depth_DepC4444
-depth_DepM       : com.io7m.renderer.Depth.depth_DepM
-depth_DepM4444   : com.io7m.renderer.Depth.depth_DepM4444
-depth_variance_C : com.io7m.renderer.DepthVariance.depth_variance_C
-depth_variance_M : com.io7m.renderer.DepthVariance.depth_variance_M
+DepC     : com.io7m.renderer.Depth.depth_DepC
+DepC4444 : com.io7m.renderer.Depth.depth_DepC4444
+DepM     : com.io7m.renderer.Depth.depth_DepM
+DepM4444 : com.io7m.renderer.Depth.depth_DepM4444

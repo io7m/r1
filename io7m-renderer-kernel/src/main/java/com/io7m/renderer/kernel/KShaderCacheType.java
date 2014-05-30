@@ -16,15 +16,16 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.jcache.LUCacheType;
-import com.io7m.renderer.types.RException;
-
 /**
- * The type of shader caches.
+ * The type of aggregated shader caches.
  */
 
 public interface KShaderCacheType extends
-  LUCacheType<String, KProgram, RException>
+  KShaderCacheDepthType,
+  KShaderCacheDepthVarianceType,
+  KShaderCacheForwardOpaqueType,
+  KShaderCacheForwardTranslucentType,
+  KShaderCachePostprocessingType
 {
-  // No extra functions
+  // No extra functions.
 }

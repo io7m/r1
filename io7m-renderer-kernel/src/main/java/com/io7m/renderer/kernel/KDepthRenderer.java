@@ -16,10 +16,10 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.DepthFunction;
@@ -81,25 +81,13 @@ import com.io7m.renderer.types.RTransformViewType;
     NAME = "depth";
   }
 
-  private static String fromDepthCode(
-    final KGraphicsCapabilitiesType caps,
-    final String depth_code)
-  {
-    final String r;
-    if (caps.getSupportsDepthTextures() == false) {
-      r = String.format("depth_%s4444", depth_code);
-    } else {
-      r = String.format("depth_%s", depth_code);
-    }
-    assert r != null;
-    return r;
-  }
-
   /**
    * Construct a new depth renderer.
    * 
    * @param g
    *          The OpenGL implementation
+   * @param caps
+   *          The current graphics capabilities
    * @param shader_cache
    *          The shader cache
    * @param log
@@ -112,11 +100,12 @@ import com.io7m.renderer.types.RTransformViewType;
 
   public static KDepthRendererType newRenderer(
     final JCGLImplementationType g,
-    final KShaderCacheType shader_cache,
+    final KGraphicsCapabilitiesType caps,
+    final KShaderCacheDepthType shader_cache,
     final LogUsableType log)
     throws RException
   {
-    return new KDepthRenderer(g, shader_cache, log);
+    return new KDepthRenderer(g, caps, shader_cache, log);
   }
 
   private static void renderDepthPassBatch(
@@ -286,16 +275,18 @@ import com.io7m.renderer.types.RTransformViewType;
       gc.arrayBufferUnbind();
     }
   }
+
   private final KGraphicsCapabilitiesType caps;
   private final JCGLImplementationType    g;
   private final LogUsableType             log;
   private final KMutableMatrices          matrices;
-
-  private final KShaderCacheType          shader_cache;
+  private final KShaderCacheDepthType     shader_cache;
+  private final Map<String, String>       code_map;
 
   private KDepthRenderer(
     final JCGLImplementationType gl,
-    final KShaderCacheType in_shader_cache,
+    final KGraphicsCapabilitiesType in_caps,
+    final KShaderCacheDepthType in_shader_cache,
     final LogUsableType in_log)
     throws RException
   {
@@ -307,12 +298,42 @@ import com.io7m.renderer.types.RTransformViewType;
       this.caps = KGraphicsCapabilities.getCapabilities(gl);
       this.matrices = KMutableMatrices.newMatrices();
 
+      this.code_map = KDepthRenderer.makeCodeMap(in_caps);
+
       if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
         this.log.debug("initialized");
       }
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }
+  }
+
+  private static Map<String, String> makeCodeMap(
+    final KGraphicsCapabilitiesType caps)
+  {
+    final Map<String, String> m = new HashMap<String, String>();
+
+    if (caps.getSupportsDepthTextures()) {
+      {
+        final String code = KMaterialDepthAlpha.getMaterialCode();
+        m.put(code, String.format("%s4444", code));
+      }
+      {
+        final String code = KMaterialDepthConstant.getMaterialCode();
+        m.put(code, String.format("%s4444", code));
+      }
+    } else {
+      {
+        final String code = KMaterialDepthAlpha.getMaterialCode();
+        m.put(code, code);
+      }
+      {
+        final String code = KMaterialDepthConstant.getMaterialCode();
+        m.put(code, code);
+      }
+    }
+
+    return m;
   }
 
   private void renderConfigureDepthColorMasks(
@@ -331,8 +352,7 @@ import com.io7m.renderer.types.RTransformViewType;
     final JCGLInterfaceCommonType gc,
     final MatricesObserverType mwo,
     final OptionType<KFaceSelection> faces)
-    throws JCacheException,
-      JCGLException,
+    throws JCGLException,
       RException
   {
     for (final String depth_code : batches.keySet()) {
@@ -340,9 +360,10 @@ import com.io7m.renderer.types.RTransformViewType;
       final List<KInstanceOpaqueType> batch = batches.get(depth_code);
       assert batch != null;
 
-      final String shader_code =
-        KDepthRenderer.fromDepthCode(this.caps, depth_code);
-      final KProgram program = this.shader_cache.cacheGetLU(shader_code);
+      final String shader_code = this.code_map.get(depth_code);
+      assert shader_code != null;
+
+      final KProgram program = this.shader_cache.getDepth(shader_code);
       final JCBExecutorType exec = program.getExecutable();
 
       exec.execRun(new JCBExecutorProcedureType<RException>() {
@@ -430,8 +451,6 @@ import com.io7m.renderer.types.RTransformViewType;
 
       this.renderConfigureDepthColorMasks(gc);
       this.renderDepthPassBatches(batches, gc, mwo, faces);
-    } catch (final JCacheException e) {
-      throw new UnreachableCodeException(e);
     } finally {
       gc.framebufferDrawUnbind();
     }

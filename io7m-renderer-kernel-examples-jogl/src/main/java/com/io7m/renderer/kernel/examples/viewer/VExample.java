@@ -63,7 +63,6 @@ import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import com.io7m.jcache.JCacheException;
 import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcanephora.AreaInclusive;
@@ -96,8 +95,8 @@ import com.io7m.renderer.kernel.KFramebufferForwardType;
 import com.io7m.renderer.kernel.KFramebufferType;
 import com.io7m.renderer.kernel.KProgram;
 import com.io7m.renderer.kernel.KRendererForwardType;
-import com.io7m.renderer.kernel.KShaderCache;
-import com.io7m.renderer.kernel.KShaderCacheLoader;
+import com.io7m.renderer.kernel.KShaderCacheFilesystem;
+import com.io7m.renderer.kernel.KShaderCacheFilesystemLoader;
 import com.io7m.renderer.kernel.KShaderCacheType;
 import com.io7m.renderer.kernel.KShadingProgramCommon;
 import com.io7m.renderer.kernel.KUnitQuad;
@@ -131,7 +130,6 @@ import com.io7m.renderer.kernel.types.KSceneBatchedForward;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.kernel.types.KTranslucentType;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RExceptionCache;
 import com.io7m.renderer.types.RExceptionIO;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyShadowed;
@@ -621,8 +619,6 @@ import com.jogamp.opengl.util.FPSAnimator;
               }
 
               return Unit.unit();
-            } catch (final JCacheException e) {
-              throw RExceptionCache.fromJCacheException(e);
             } catch (final JCGLException e) {
               throw RExceptionJCGL.fromJCGLException(e);
             }
@@ -708,8 +704,11 @@ import com.jogamp.opengl.util.FPSAnimator;
             .withMaximumCapacity(BigInteger.valueOf(1024));
 
         final KShaderCacheType sc =
-          KShaderCache.wrap(LRUCacheTrivial.newCache(
-            KShaderCacheLoader.newLoader(g, this.filesystem, this.glog),
+          KShaderCacheFilesystem.wrap(LRUCacheTrivial.newCache(
+            KShaderCacheFilesystemLoader.newLoader(
+              g,
+              this.filesystem,
+              this.glog),
             scc));
         assert sc != null;
         this.shader_cache = sc;
@@ -777,8 +776,7 @@ import com.jogamp.opengl.util.FPSAnimator;
     private void renderSceneResults(
       final KFramebufferForwardType fb)
       throws JCGLException,
-        RException,
-        JCacheException
+        RException
     {
       final JCGLImplementationType g = this.gi;
       assert g != null;
@@ -786,7 +784,7 @@ import com.jogamp.opengl.util.FPSAnimator;
 
       final KShaderCacheType sc = this.shader_cache;
       assert sc != null;
-      final KProgram kp = sc.cacheGetLU("postprocessing_copy_rgba");
+      final KProgram kp = sc.getPostprocessing("copy_rgba");
       gc.framebufferDrawUnbind();
 
       try {

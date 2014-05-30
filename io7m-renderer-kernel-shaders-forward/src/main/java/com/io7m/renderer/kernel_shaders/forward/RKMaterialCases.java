@@ -55,6 +55,8 @@ import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KMaterialVerification;
+import com.io7m.renderer.kernel_shaders.core.FakeTexture2DStatic;
+import com.io7m.renderer.kernel_shaders.core.FakeTextureCubeStatic;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RSpaceRGBType;

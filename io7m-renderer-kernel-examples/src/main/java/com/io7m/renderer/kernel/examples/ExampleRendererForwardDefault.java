@@ -114,7 +114,7 @@ public final class ExampleRendererForwardDefault extends
       KRegionCopier.newCopier(gi, log, shader_cache, quad);
 
     final KDepthRendererType depth_renderer =
-      KDepthRenderer.newRenderer(gi, shader_cache, log);
+      KDepthRenderer.newRenderer(gi, caps, shader_cache, log);
     final KDepthVarianceRendererType depth_variance_renderer =
       KDepthVarianceRenderer.newRenderer(gi, shader_cache);
 

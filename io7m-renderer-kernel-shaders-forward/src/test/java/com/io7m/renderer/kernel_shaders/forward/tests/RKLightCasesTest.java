@@ -25,7 +25,7 @@ import org.reflections.Reflections;
 import com.io7m.jfunctional.Pair;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KShadowType;
-import com.io7m.renderer.kernel_shaders.forward.FakeImmutableCapabilities;
+import com.io7m.renderer.kernel_shaders.core.FakeImmutableCapabilities;
 import com.io7m.renderer.kernel_shaders.forward.RKLightCases;
 
 @SuppressWarnings("static-method") public final class RKLightCasesTest

@@ -221,8 +221,8 @@
                 <argument>${project.build.directory}/parasol/batch-postprocessing.txt</argument>
                 <argument>${project.build.directory}/parasol/source-list.txt</argument>
                 <argument>${project.build.directory}/parasol/</argument>
-                <argument>${project.build.directory}/glsl/com/io7m/renderer/kernel</argument>
-                <argument>${project.build.directory}/glsl-compact/com/io7m/renderer/kernel</argument>
+                <argument>${project.build.directory}/glsl</argument>
+                <argument>${project.build.directory}/glsl-compact</argument>
               </arguments>
             </configuration>
           </execution>

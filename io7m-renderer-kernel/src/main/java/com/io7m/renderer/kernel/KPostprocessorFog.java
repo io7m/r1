@@ -54,7 +54,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KRegionCopierType copier,
     final KUnitQuadUsableType quad,
     final KFramebufferRGBACacheType rgba_cache,
-    final KShaderCacheType shader_cache,
+    final KShaderCachePostprocessingType shader_cache,
     final LogUsableType log)
   {
     return new KPostprocessorFog(
@@ -66,20 +66,20 @@ import com.io7m.renderer.types.RExceptionJCGL;
       log);
   }
 
-  private final KRegionCopierType         copier;
-  private final VectorM3F                 fog_color;
-  private final JCGLImplementationType    gi;
-  private final LogUsableType             log;
-  private final KUnitQuadUsableType       quad;
-  private final KFramebufferRGBACacheType rgba_cache;
-  private final KShaderCacheType          shader_cache;
+  private final KRegionCopierType              copier;
+  private final VectorM3F                      fog_color;
+  private final JCGLImplementationType         gi;
+  private final LogUsableType                  log;
+  private final KUnitQuadUsableType            quad;
+  private final KFramebufferRGBACacheType      rgba_cache;
+  private final KShaderCachePostprocessingType shader_cache;
 
   private KPostprocessorFog(
     final JCGLImplementationType in_gi,
     final KRegionCopierType in_copier,
     final KUnitQuadUsableType in_quad,
     final KFramebufferRGBACacheType in_rgba_cache,
-    final KShaderCacheType in_shader_cache,
+    final KShaderCachePostprocessingType in_shader_cache,
     final LogUsableType in_log)
   {
     this.log = NullCheck.notNull(in_log, "Log").with(KPostprocessorFog.NAME);
@@ -100,13 +100,12 @@ import com.io7m.renderer.types.RExceptionJCGL;
       final F input,
       final KFramebufferRGBAUsableType output)
       throws JCGLException,
-        RException,
-        JCacheException
+        RException
   {
     final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
 
-    final KProgram fog = this.shader_cache.cacheGetLU("postprocessing_fog");
+    final KProgram fog = this.shader_cache.getPostprocessing("fog");
 
     try {
       gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());

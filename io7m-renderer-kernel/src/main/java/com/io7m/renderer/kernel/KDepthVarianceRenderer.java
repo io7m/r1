@@ -19,8 +19,6 @@ package com.io7m.renderer.kernel;
 import java.util.List;
 import java.util.Map;
 
-import com.io7m.jcache.JCacheException;
-import com.io7m.jcache.LUCacheType;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.DepthFunction;
@@ -78,14 +76,6 @@ import com.io7m.renderer.types.RTransformViewType;
     NAME = "depth-variance";
   }
 
-  private static String fromDepthCode(
-    final String depth_code)
-  {
-    final String r = String.format("depth_variance_%s", depth_code);
-    assert r != null;
-    return r;
-  }
-
   /**
    * Construct a new depth renderer.
    * 
@@ -102,7 +92,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   public static KDepthVarianceRendererType newRenderer(
     final JCGLImplementationType g,
-    final KShaderCacheType shader_cache)
+    final KShaderCacheDepthVarianceType shader_cache)
     throws RException
   {
     return new KDepthVarianceRenderer(g, shader_cache);
@@ -281,14 +271,13 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  private final JCGLImplementationType                    g;
-  private final KMutableMatrices                          matrices;
-
-  private final LUCacheType<String, KProgram, RException> shader_cache;
+  private final JCGLImplementationType        g;
+  private final KMutableMatrices              matrices;
+  private final KShaderCacheDepthVarianceType shader_cache;
 
   private KDepthVarianceRenderer(
     final JCGLImplementationType gl,
-    final LUCacheType<String, KProgram, RException> in_shader_cache)
+    final KShaderCacheDepthVarianceType in_shader_cache)
   {
     this.g = NullCheck.notNull(gl, "OpenGL implementation");
     this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
@@ -300,8 +289,7 @@ import com.io7m.renderer.types.RTransformViewType;
     final JCGLInterfaceCommonType gc,
     final MatricesObserverType mwo,
     final OptionType<KFaceSelection> faces)
-    throws JCacheException,
-      JCGLException,
+    throws JCGLException,
       RException
   {
     gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
@@ -317,9 +305,7 @@ import com.io7m.renderer.types.RTransformViewType;
       final List<KInstanceOpaqueType> batch = batches.get(depth_code);
       assert batch != null;
 
-      final String shader_code =
-        KDepthVarianceRenderer.fromDepthCode(depth_code);
-      final KProgram program = this.shader_cache.cacheGetLU(shader_code);
+      final KProgram program = this.shader_cache.getDepthVariance(depth_code);
       final JCBExecutorType exec = program.getExecutable();
 
       exec.execRun(new JCBExecutorProcedureType<RException>() {
@@ -403,8 +389,6 @@ import com.io7m.renderer.types.RTransformViewType;
       gc.viewportSet(area);
 
       this.renderDepthPassBatches(batches, gc, mwo, faces);
-    } catch (final JCacheException e) {
-      throw new UnreachableCodeException(e);
     } finally {
       gc.framebufferDrawUnbind();
     }

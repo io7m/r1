@@ -19,7 +19,6 @@ package com.io7m.renderer.kernel;
 import java.util.List;
 import java.util.Map;
 
-import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
@@ -68,7 +67,6 @@ import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RExceptionCache;
 import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
@@ -92,7 +90,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
   public static KRendererForwardOpaqueType newRenderer(
     final JCGLImplementationType in_g,
-    final KShaderCacheType in_shader_cache)
+    final KShaderCacheForwardOpaqueType in_shader_cache)
     throws RException
   {
     return new KRendererForwardOpaque(in_g, in_shader_cache);
@@ -574,26 +572,23 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final String light_code,
     final String material_code)
   {
-    final String r = String.format("Fwd_%s_%s", light_code, material_code);
+    final StringBuilder s = new StringBuilder();
+    s.append(light_code);
+    s.append("_");
+    s.append(material_code);
+
+    final String r = s.toString();
     assert r != null;
     return r;
   }
 
-  private static String shaderCodeFromUnlitOpaqueRegular(
-    final String material_code)
-  {
-    final String r = String.format("Fwd_%s", material_code);
-    assert r != null;
-    return r;
-  }
-
-  private final JCGLImplementationType g;
-  private final KShaderCacheType       shader_cache;
-  private final KTextureUnitAllocator  texture_units;
+  private final JCGLImplementationType        g;
+  private final KShaderCacheForwardOpaqueType shader_cache;
+  private final KTextureUnitAllocator         texture_units;
 
   private KRendererForwardOpaque(
     final JCGLImplementationType in_g,
-    final KShaderCacheType in_shader_cache)
+    final KShaderCacheForwardOpaqueType in_shader_cache)
     throws RException
   {
     try {
@@ -687,7 +682,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
           }
 
           final KTextureUnitAllocator unit_allocator = this.texture_units;
-          final KProgram kprogram = this.shader_cache.cacheGetLU(shader_code);
+          final KProgram kprogram =
+            this.shader_cache.getForwardOpaqueLit(shader_code);
 
           kprogram.getExecutable().execRun(
             new JCBExecutorProcedureType<RException>() {
@@ -711,8 +707,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
-    } catch (final JCacheException e) {
-      throw RExceptionCache.fromJCacheException(e);
     }
   }
 
@@ -765,12 +759,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
         assert instances != null;
         assert instances.isEmpty() == false;
 
-        final String shader_code =
-          KRendererForwardOpaque
-            .shaderCodeFromUnlitOpaqueRegular(material_code);
-
         final KTextureUnitAllocator units = this.texture_units;
-        final KProgram kprogram = this.shader_cache.cacheGetLU(shader_code);
+        final KProgram kprogram =
+          this.shader_cache.getForwardOpaqueUnlit(material_code);
 
         kprogram.getExecutable().execRun(
           new JCBExecutorProcedureType<RException>() {
@@ -789,8 +780,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
           });
       }
 
-    } catch (final JCacheException e) {
-      throw RExceptionCache.fromJCacheException(e);
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }

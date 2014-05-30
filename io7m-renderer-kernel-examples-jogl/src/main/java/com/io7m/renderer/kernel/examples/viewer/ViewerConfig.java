@@ -21,46 +21,45 @@ import java.util.Properties;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jproperties.JProperties;
-import com.io7m.jproperties.JPropertyNonexistent;
+import com.io7m.jproperties.JPropertyException;
+import com.io7m.jproperties.JPropertyIncorrectType;
 
 final class ViewerConfig
 {
   public static ViewerConfig fromProperties(
     final Properties props)
-    throws JPropertyNonexistent
+    throws JPropertyException
   {
     return new ViewerConfig(props);
   }
 
   private final Properties props;
   private final File       replacement_results_directory;
-  private final File       shader_archive_debug_file;
-  private final File       shader_archive_depth_file;
-  private final File       shader_archive_forward_file;
-  private final File       shader_archive_postprocessing_file;
+  private final boolean    eclipse;
+  private String           program_version;
 
   public ViewerConfig(
     final Properties in_props)
-    throws JPropertyNonexistent
+    throws JPropertyException
   {
     this.props = NullCheck.notNull(in_props, "Properties");
 
-    this.shader_archive_debug_file =
-      new File(JProperties.getString(
-        in_props,
-        "com.io7m.renderer.kernel.examples.viewer.shaders.debug"));
-    this.shader_archive_depth_file =
-      new File(JProperties.getString(
-        in_props,
-        "com.io7m.renderer.kernel.examples.viewer.shaders.depth"));
-    this.shader_archive_forward_file =
-      new File(JProperties.getString(
-        in_props,
-        "com.io7m.renderer.kernel.examples.viewer.shaders.forward"));
-    this.shader_archive_postprocessing_file =
-      new File(JProperties.getString(
-        in_props,
-        "com.io7m.renderer.kernel.examples.viewer.shaders.postprocessing"));
+    this.eclipse = System.getenv("ECLIPSE") != null;
+    if (this.eclipse) {
+      final String v = System.getenv("ECLIPSE");
+      final String r = "[0-9]+\\.[0-9]+\\.[0-9]+";
+      if (v.matches(r)) {
+        this.program_version = v;
+      } else {
+        throw new JPropertyIncorrectType("ECLIPSE variable must match: " + r);
+      }
+    } else {
+      this.program_version =
+        NullCheck.notNull(this
+          .getClass()
+          .getPackage()
+          .getImplementationVersion(), "Version");
+    }
 
     this.replacement_results_directory =
       new File(
@@ -70,28 +69,18 @@ final class ViewerConfig
             "com.io7m.renderer.kernel.examples.viewer.replacement-results-directory"));
   }
 
+  public boolean isEclipse()
+  {
+    return this.eclipse;
+  }
+
   public File getReplacementResultsDirectory()
   {
     return this.replacement_results_directory;
   }
 
-  public File getShaderArchiveDebugFile()
+  public String getProgramVersion()
   {
-    return this.shader_archive_debug_file;
-  }
-
-  public File getShaderArchiveDepthFile()
-  {
-    return this.shader_archive_depth_file;
-  }
-
-  public File getShaderArchiveForwardFile()
-  {
-    return this.shader_archive_forward_file;
-  }
-
-  public File getShaderArchivePostprocessingFile()
-  {
-    return this.shader_archive_postprocessing_file;
+    return this.program_version;
   }
 }
