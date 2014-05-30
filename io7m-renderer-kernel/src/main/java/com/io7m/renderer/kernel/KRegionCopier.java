@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel;
 
 import java.util.EnumSet;
 
-import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.FramebufferBlitBuffer;
@@ -48,7 +47,6 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM3x3F;
-import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionCopierSourceEqualsTarget;
 import com.io7m.renderer.types.RExceptionJCGL;
@@ -70,9 +68,9 @@ import com.io7m.renderer.types.RTransformTextureType;
   private static final String                         SHADER_COPY_RGBA_DEPTH;
 
   static {
-    SHADER_COPY_RGBA_DEPTH = "postprocessing_copy_rgba_depth";
-    SHADER_COPY_DEPTH4444 = "postprocessing_copy_depth4444";
-    SHADER_COPY_RGBA = "postprocessing_copy_rgba";
+    SHADER_COPY_RGBA_DEPTH = "copy_rgba_depth";
+    SHADER_COPY_DEPTH4444 = "copy_depth4444";
+    SHADER_COPY_RGBA = "copy_rgba";
 
     DEPTH_ONLY =
       NullCheck.notNull(EnumSet
@@ -249,7 +247,7 @@ import com.io7m.renderer.types.RTransformTextureType;
   public static KRegionCopierType newCopier(
     final JCGLImplementationType g,
     final LogUsableType log,
-    final KShaderCacheType shader_cache,
+    final KShaderCachePostprocessingType shader_cache,
     final KUnitQuadUsableType quad)
     throws RException
   {
@@ -261,13 +259,13 @@ import com.io7m.renderer.types.RTransformTextureType;
   private final LogUsableType                       log;
   private final RMatrixM3x3F<RTransformTextureType> matrix_uv;
   private final KUnitQuadUsableType                 quad;
-  private final KShaderCacheType                    shader_cache;
+  private final KShaderCachePostprocessingType      shader_cache;
   private final KTextureUnitAllocator               texture_units;
 
   private KRegionCopier(
     final JCGLImplementationType in_g,
     final LogUsableType in_log,
-    final KShaderCacheType in_shader_cache,
+    final KShaderCachePostprocessingType in_shader_cache,
     final KUnitQuadUsableType in_quad)
     throws RException
   {
@@ -591,7 +589,6 @@ import com.io7m.renderer.types.RTransformTextureType;
       final KFramebufferDepthVarianceUsableType target,
       final AreaInclusive target_area)
       throws RException,
-
         JCGLException
   {
     if (this.blit) {
@@ -642,7 +639,7 @@ import com.io7m.renderer.types.RTransformTextureType;
         source_select_area,
         this.matrix_uv);
 
-      final KProgram kp = this.shader_cache.cacheGetLU(shader_name);
+      final KProgram kp = this.shader_cache.getPostprocessing(shader_name);
       gc.framebufferDrawBind(target);
 
       try {
@@ -681,8 +678,6 @@ import com.io7m.renderer.types.RTransformTextureType;
         gc.framebufferDrawUnbind();
       }
 
-    } catch (final JCacheException x) {
-      throw new UnreachableCodeException(x);
     } catch (final JCGLException x) {
       throw RExceptionJCGL.fromJCGLException(x);
     }
@@ -734,7 +729,7 @@ import com.io7m.renderer.types.RTransformTextureType;
         source_select_area,
         this.matrix_uv);
 
-      final KProgram kp = this.shader_cache.cacheGetLU(shader_name);
+      final KProgram kp = this.shader_cache.getPostprocessing(shader_name);
       gc.framebufferDrawBind(target);
 
       try {
@@ -772,8 +767,6 @@ import com.io7m.renderer.types.RTransformTextureType;
         gc.framebufferDrawUnbind();
       }
 
-    } catch (final JCacheException x) {
-      throw new UnreachableCodeException(x);
     } catch (final JCGLException x) {
       throw RExceptionJCGL.fromJCGLException(x);
     }
@@ -795,7 +788,7 @@ import com.io7m.renderer.types.RTransformTextureType;
         source_select_area,
         this.matrix_uv);
 
-      final KProgram kp = this.shader_cache.cacheGetLU(shader_name);
+      final KProgram kp = this.shader_cache.getPostprocessing(shader_name);
       gc.framebufferDrawBind(target);
 
       try {
@@ -831,8 +824,6 @@ import com.io7m.renderer.types.RTransformTextureType;
         gc.framebufferDrawUnbind();
       }
 
-    } catch (final JCacheException x) {
-      throw new UnreachableCodeException(x);
     } catch (final JCGLException x) {
       throw RExceptionJCGL.fromJCGLException(x);
     }

@@ -95,7 +95,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLImplementationType gi,
     final KRegionCopierType copier,
     final KFramebufferRGBACacheType rgba_cache,
-    final KShaderCacheType shader_cache,
+    final KShaderCachePostprocessingType shader_cache,
     final KUnitQuadUsableType quad,
     final LogUsableType log)
   {
@@ -108,18 +108,18 @@ import com.io7m.renderer.types.RExceptionJCGL;
       log);
   }
 
-  private final KRegionCopierType         copier;
-  private final JCGLImplementationType    gi;
-  private final LogUsableType             log;
-  private final KUnitQuadUsableType       quad;
-  private final KFramebufferRGBACacheType rgba_cache;
-  private final KShaderCacheType          shader_cache;
+  private final KRegionCopierType              copier;
+  private final JCGLImplementationType         gi;
+  private final LogUsableType                  log;
+  private final KUnitQuadUsableType            quad;
+  private final KFramebufferRGBACacheType      rgba_cache;
+  private final KShaderCachePostprocessingType shader_cache;
 
   private KPostprocessorBlurRGBA(
     final JCGLImplementationType in_gi,
     final KRegionCopierType in_copier,
     final KFramebufferRGBACacheType in_rgba_cache,
-    final KShaderCacheType in_shader_cache,
+    final KShaderCachePostprocessingType in_shader_cache,
     final KUnitQuadUsableType in_quad,
     final LogUsableType in_log)
   {
@@ -144,8 +144,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KFramebufferRGBAUsableType temporary,
     final KFramebufferRGBAUsableType target)
     throws JCGLException,
-      RException,
-      JCacheException
+      RException
   {
     assert source != temporary;
     assert temporary != target;
@@ -154,26 +153,23 @@ import com.io7m.renderer.types.RExceptionJCGL;
       this.gi,
       parameters.getBlurSize(),
       this.quad,
-      this.shader_cache
-        .cacheGetLU("postprocessing_gaussian_blur_horizontal_4f"),
+      this.shader_cache.getPostprocessing("gaussian_blur_horizontal_4f"),
       source.kFramebufferGetRGBATexture(),
       source.kFramebufferGetArea(),
       temporary.kFramebufferGetColorFramebuffer(),
       temporary.kFramebufferGetArea(),
       false);
 
-    KPostprocessorBlurCommon
-      .evaluateBlurV(
-        this.gi,
-        this.quad,
-        parameters.getBlurSize(),
-        this.shader_cache
-          .cacheGetLU("postprocessing_gaussian_blur_vertical_4f"),
-        temporary.kFramebufferGetRGBATexture(),
-        temporary.kFramebufferGetArea(),
-        target.kFramebufferGetColorFramebuffer(),
-        target.kFramebufferGetArea(),
-        false);
+    KPostprocessorBlurCommon.evaluateBlurV(
+      this.gi,
+      this.quad,
+      parameters.getBlurSize(),
+      this.shader_cache.getPostprocessing("gaussian_blur_vertical_4f"),
+      temporary.kFramebufferGetRGBATexture(),
+      temporary.kFramebufferGetArea(),
+      target.kFramebufferGetColorFramebuffer(),
+      target.kFramebufferGetArea(),
+      false);
   }
 
   @Override public void postprocessorEvaluateRGBA(

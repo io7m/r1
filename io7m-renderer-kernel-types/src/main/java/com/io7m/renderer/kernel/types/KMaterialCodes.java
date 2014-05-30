@@ -20,7 +20,33 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 final class KMaterialCodes
 {
-  public static String makeOpaqueRegularLitCode(
+  public static String makeOpaqueRegularLitCodeWithDepth(
+    final KMaterialDepthType in_depth,
+    final KMaterialAlbedoType in_albedo,
+    final KMaterialEmissiveType in_emissive,
+    final KMaterialEnvironmentType in_environment,
+    final KMaterialNormalType in_normal,
+    final KMaterialSpecularType in_specular)
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("O_");
+    b.append(in_depth.codeGet());
+    b.append("_");
+
+    KMaterialCodes.makeRegularLitCode(
+      in_albedo,
+      in_emissive,
+      in_environment,
+      in_normal,
+      in_specular,
+      b);
+
+    final String r = b.toString();
+    assert r != null;
+    return r;
+  }
+
+  public static String makeOpaqueRegularLitCodeWithoutDepth(
     final KMaterialAlbedoType in_albedo,
     final KMaterialEmissiveType in_emissive,
     final KMaterialEnvironmentType in_environment,

@@ -1,0 +1,2 @@
+DepC : com.io7m.renderer.DepthVariance.depth_variance_C
+DepM : com.io7m.renderer.DepthVariance.depth_variance_M

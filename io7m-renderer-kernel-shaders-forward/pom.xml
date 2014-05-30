@@ -76,19 +76,18 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-kernel-shaders-core</artifactId>
       <version>${project.version}</version>
-      <classifier>shader-sources</classifier>
-      <type>zip</type>
     </dependency>
-
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-kernel-types</artifactId>
       <version>${project.version}</version>
     </dependency>
+
     <dependency>
       <groupId>com.io7m.jparasol</groupId>
       <artifactId>io7m-jparasol-compiler-frontend</artifactId>
       <version>${com.io7m.jparasol.versionRange}</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>com.io7m.jparasol</groupId>
@@ -156,110 +155,6 @@
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
-      </plugin>
-
-      <!-- Unpack Parasol sources -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
-        <executions>
-          <execution>
-            <id>unpack-shaders-core-sources</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <configuration>
-              <includeGroupIds>${project.groupId}</includeGroupIds>
-              <includeArtifactIds>io7m-renderer-kernel-shaders-core</includeArtifactIds>
-              <includeClassifiers>shader-sources</includeClassifiers>
-              <includeTypes>zip</includeTypes>
-              <outputDirectory>${project.build.directory}/parasol</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Copy any hand-written Parasol resources into output directory -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
-        <executions>
-          <execution>
-            <id>copy-parasol-resources</id>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <phase>generate-sources</phase>
-            <configuration>
-              <outputDirectory>${project.build.directory}/parasol/</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>src/main/resources/</directory>
-                  <filtering>false</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Compile Parasol shader sources -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-        <executions>
-          <execution>
-            <id>make-parasol-forward-sources</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <mainClass>com.io7m.renderer.kernel_shaders.forward.ForwardMakeAll</mainClass>
-              <arguments>
-                <argument>${project.build.directory}/parasol/</argument>
-                <argument>${project.build.directory}/glsl/com/io7m/renderer/kernel</argument>
-                <argument>${project.build.directory}/glsl-compact/com/io7m/renderer/kernel</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Produce archives -->
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.4</version>
-        <executions>
-          <execution>
-            <id>make-shader-archive</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>src/main/assembly/shaders.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-          <execution>
-            <id>make-shader-source-archive</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>src/main/assembly/shader-sources.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <!-- Create source jar -->

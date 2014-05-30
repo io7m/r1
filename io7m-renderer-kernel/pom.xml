@@ -84,12 +84,11 @@
       <version>${project.version}</version>
       <classifier>shaders</classifier>
       <type>zip</type>
-      <exclusions>
-        <exclusion>
-          <groupId>com.io7m.jparasol</groupId>
-          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
-        </exclusion>
-      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-debug</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -98,26 +97,76 @@
       <version>${project.version}</version>
       <classifier>shaders</classifier>
       <type>zip</type>
-      <exclusions>
-        <exclusion>
-          <groupId>com.io7m.jparasol</groupId>
-          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
-        </exclusion>
-      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-depth</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-kernel-shaders-forward</artifactId>
+      <artifactId>io7m-renderer-kernel-shaders-depth_variance</artifactId>
       <version>${project.version}</version>
       <classifier>shaders</classifier>
       <type>zip</type>
-      <exclusions>
-        <exclusion>
-          <groupId>com.io7m.jparasol</groupId>
-          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
-        </exclusion>
-      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-depth_variance</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-forward-opaque-lit</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-forward-opaque-lit</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-forward-opaque-unlit</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-forward-opaque-unlit</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-forward-translucent-lit</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-forward-translucent-lit</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-forward-translucent-unlit</artifactId>
+      <version>${project.version}</version>
+      <classifier>shaders</classifier>
+      <type>zip</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-forward-translucent-unlit</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -126,12 +175,11 @@
       <version>${project.version}</version>
       <classifier>shaders</classifier>
       <type>zip</type>
-      <exclusions>
-        <exclusion>
-          <groupId>com.io7m.jparasol</groupId>
-          <artifactId>io7m-jparasol-compiler-frontend</artifactId>
-        </exclusion>
-      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-postprocessing</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>

@@ -96,7 +96,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLImplementationType gi,
     final KRegionCopierType copier,
     final KFramebufferDepthVarianceCacheType depth_variance_cache,
-    final KShaderCacheType shader_cache,
+    final KShaderCachePostprocessingType shader_cache,
     final KUnitQuadUsableType quad,
     final LogUsableType log)
   {
@@ -114,13 +114,13 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private final JCGLImplementationType             gi;
   private final LogUsableType                      log;
   private final KUnitQuadUsableType                quad;
-  private final KShaderCacheType                   shader_cache;
+  private final KShaderCachePostprocessingType     shader_cache;
 
   private KPostprocessorBlurDepthVariance(
     final JCGLImplementationType in_gi,
     final KRegionCopierType in_copier,
     final KFramebufferDepthVarianceCacheType in_depth_variance_cache,
-    final KShaderCacheType in_shader_cache,
+    final KShaderCachePostprocessingType in_shader_cache,
     final KUnitQuadUsableType in_quad,
     final LogUsableType in_log)
   {
@@ -147,8 +147,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KFramebufferDepthVarianceUsableType temporary,
     final KFramebufferDepthVarianceUsableType target)
     throws JCGLException,
-      RException,
-      JCacheException
+      RException
   {
     assert source != temporary;
     assert temporary != target;
@@ -157,8 +156,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       this.gi,
       parameters.getBlurSize(),
       this.quad,
-      this.shader_cache
-        .cacheGetLU("postprocessing_gaussian_blur_horizontal_4f"),
+      this.shader_cache.getPostprocessing("gaussian_blur_horizontal_4f"),
       source.kFramebufferGetDepthVarianceTexture(),
       source.kFramebufferGetArea(),
       temporary.kFramebufferGetDepthVariancePassFramebuffer(),
@@ -169,8 +167,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       this.gi,
       this.quad,
       parameters.getBlurSize(),
-      this.shader_cache
-        .cacheGetLU("postprocessing_gaussian_blur_vertical_4f"),
+      this.shader_cache.getPostprocessing("gaussian_blur_vertical_4f"),
       temporary.kFramebufferGetDepthVarianceTexture(),
       temporary.kFramebufferGetArea(),
       target.kFramebufferGetDepthVariancePassFramebuffer(),

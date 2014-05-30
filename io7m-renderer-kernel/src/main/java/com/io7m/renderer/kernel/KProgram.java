@@ -151,7 +151,7 @@ import com.io7m.renderer.types.RXMLException;
 
   private static PGLSLMetaXML getMeta(
     final FSCapabilityReadType fs,
-    final String name,
+    final PathVirtual name,
     final LogUsableType log)
     throws IOException,
       FilesystemError,
@@ -160,7 +160,7 @@ import com.io7m.renderer.types.RXMLException;
       SAXException,
       ParserConfigurationException
   {
-    final PathVirtual path = KProgram.getShaderPathMeta(name);
+    final PathVirtual path = name.appendName("meta.xml");
     final InputStream mf = fs.openFile(path);
     try {
       return PGLSLMetaXML.fromStream(mf, log);
@@ -186,17 +186,6 @@ import com.io7m.renderer.types.RXMLException;
     }
   }
 
-  private static PathVirtual getShaderPath(
-    final JCGLSLVersionNumber version,
-    final JCGLApi api,
-    final String name)
-    throws JCGLExceptionUnsupported,
-      FilesystemError
-  {
-    return KProgram.getShaderPathDirectory(name).appendName(
-      KProgram.getShadingLanguageName(version, api));
-  }
-
   /**
    * Retrieve the path of the directory that contains code and metadata for
    * the shader <code>name</code>.
@@ -217,18 +206,19 @@ import com.io7m.renderer.types.RXMLException;
   }
 
   /**
-   * Retrieve the path to the metadata file for the shader.
-   * 
+   * @return The path to the metadata file for the shader.
+   * @param base
+   *          The shader directory.
    * @param name
-   *          The name of the shader
-   * @return The path to the metadata file for the shader
+   *          The name of the shader.
    */
 
   public static PathVirtual getShaderPathMeta(
+    final PathVirtual base,
     final String name)
   {
     try {
-      return KProgram.getShaderPathDirectory(name).appendName("meta.xml");
+      return base.appendName(name).appendName("meta.xml");
     } catch (final FilesystemError e) {
       throw new UnreachableCodeException(e);
     }
@@ -318,7 +308,7 @@ import com.io7m.renderer.types.RXMLException;
     final JCGLShadersCommonType gl,
     final FSCapabilityReadType fs,
     final Version v,
-    final String name,
+    final PathVirtual name,
     final PGLSLMetaXML m,
     final LogUsableType log)
     throws FilesystemError,
@@ -330,16 +320,20 @@ import com.io7m.renderer.types.RXMLException;
     assert mappings.containsKey(v);
     final CompactedShaders cs = mappings.get(v);
 
-    final PathVirtual path = KProgram.getShaderPathDirectory(name);
-    final PathVirtual path_v = path.appendName(cs.getVertexShader() + ".g");
-    final PathVirtual path_f = path.appendName(cs.getFragmentShader() + ".g");
+    final PathVirtual path_v = name.appendName(cs.getVertexShader() + ".g");
+    final PathVirtual path_f = name.appendName(cs.getFragmentShader() + ".g");
 
     final InputStream v_stream = fs.openFile(path_v);
     try {
       final InputStream f_stream = fs.openFile(path_f);
       try {
         final ProgramType p =
-          KProgram.newProgramFromStreams(gl, name, v_stream, f_stream, v);
+          KProgram.newProgramFromStreams(
+            gl,
+            name.toString(),
+            v_stream,
+            f_stream,
+            v);
         return new KProgram(gl, m, p, log);
       } finally {
         f_stream.close();
@@ -391,23 +385,32 @@ import com.io7m.renderer.types.RXMLException;
     final FSCapabilityReadType fs,
     final JCGLSLVersionNumber version,
     final JCGLApi api,
-    final String name,
+    final PathVirtual name,
     final PGLSLMetaXML m,
     final LogUsableType log)
     throws FilesystemError,
       IOException,
       JCGLException
   {
-    final PathVirtual path = KProgram.getShaderPath(version, api, name);
-    final PathVirtual path_v = PathVirtual.ofString(path.toString() + ".v");
-    final PathVirtual path_f = PathVirtual.ofString(path.toString() + ".f");
+    final String name_v =
+      KProgram.getShadingLanguageName(version, api) + ".v";
+    final String name_f =
+      KProgram.getShadingLanguageName(version, api) + ".f";
+
+    final PathVirtual path_v = name.appendName(name_v);
+    final PathVirtual path_f = name.appendName(name_f);
 
     final InputStream v_stream = fs.openFile(path_v);
     try {
       final InputStream f_stream = fs.openFile(path_f);
       try {
         final ProgramType p =
-          KProgram.newProgramFromStreams(gl, name, v_stream, f_stream, null);
+          KProgram.newProgramFromStreams(
+            gl,
+            name.toString(),
+            v_stream,
+            f_stream,
+            null);
         return new KProgram(gl, m, p, log);
       } finally {
         f_stream.close();
@@ -598,7 +601,7 @@ import com.io7m.renderer.types.RXMLException;
     final JCGLSLVersionNumber version,
     final JCGLApi api,
     final FSCapabilityReadType fs,
-    final String name,
+    final PathVirtual name,
     final LogUsableType log)
     throws RException
   {
@@ -610,7 +613,8 @@ import com.io7m.renderer.types.RXMLException;
       NullCheck.notNull(name, "Name");
       NullCheck.notNull(log, "Log");
 
-      final LogUsableType logp = KProgram.getLog(version, api, name, log);
+      final LogUsableType logp =
+        KProgram.getLog(version, api, name.toString(), log);
 
       final Version v =
         Version

@@ -20,8 +20,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
-import com.io7m.renderer.kernel_shaders.forward.RKLitCase;
 import com.io7m.renderer.kernel_shaders.forward.RKLightCases;
+import com.io7m.renderer.kernel_shaders.forward.RKLitCase;
 import com.io7m.renderer.kernel_shaders.forward.RKLitTranslucentRegularCases;
 import com.io7m.renderer.kernel_shaders.forward.RKMaterialCases;
 

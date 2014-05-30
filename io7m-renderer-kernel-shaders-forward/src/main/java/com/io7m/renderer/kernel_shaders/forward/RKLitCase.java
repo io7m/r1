@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel_shaders.forward;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialType;
+import com.io7m.renderer.kernel_shaders.core.FakeImmutableCapabilities;
 
 public final class RKLitCase<M extends KMaterialType>
 {

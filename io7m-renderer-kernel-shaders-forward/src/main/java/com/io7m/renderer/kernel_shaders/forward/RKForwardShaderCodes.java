@@ -30,7 +30,7 @@ public final class RKForwardShaderCodes
   {
     final String lcode = l.lightGetCode();
     final String mcode = m.materialLitGetCode();
-    final String scode = String.format("Fwd_%s_%s", lcode, mcode);
+    final String scode = String.format("%s_%s", lcode, mcode);
     assert scode != null;
     return scode;
   }
@@ -44,31 +44,47 @@ public final class RKForwardShaderCodes
   }
 
   public static String fromLitTranslucentRegular(
-    final RKLitCase<KMaterialTranslucentRegular> c)
+    final KLightType l,
+    final KMaterialTranslucentRegular m)
   {
-    final String lcode = c.getLight().lightGetCode();
-    final String mcode = c.getMaterial().materialLitGetCode();
-    final String scode = String.format("Fwd_%s_%s", lcode, mcode);
+    final String lcode = l.lightGetCode();
+    final String mcode = m.materialLitGetCode();
+    final String scode = String.format("%s_%s", lcode, mcode);
     assert scode != null;
     return scode;
   }
 
-  public static String fromLitTranslucentSpecularOnly(
-    final RKLitCase<KMaterialTranslucentSpecularOnly> c)
+  public static String fromLitTranslucentRegularCase(
+    final RKLitCase<KMaterialTranslucentRegular> c)
   {
-    final String lcode = c.getLight().lightGetCode();
-    final String mcode = c.getMaterial().materialLitGetCode();
-    final String scode = String.format("Fwd_%s_%s", lcode, mcode);
+    return RKForwardShaderCodes.fromLitTranslucentRegular(
+      c.getLight(),
+      c.getMaterial());
+  }
+
+  public static String fromLitTranslucentSpecularOnly(
+    final KLightType l,
+    final KMaterialTranslucentSpecularOnly m)
+  {
+    final String lcode = l.lightGetCode();
+    final String mcode = m.materialLitGetCode();
+    final String scode = String.format("%s_%s", lcode, mcode);
     assert scode != null;
     return scode;
+  }
+
+  public static String fromLitTranslucentSpecularOnlyCase(
+    final RKLitCase<KMaterialTranslucentSpecularOnly> c)
+  {
+    return RKForwardShaderCodes.fromLitTranslucentSpecularOnly(
+      c.getLight(),
+      c.getMaterial());
   }
 
   public static String fromUnlitOpaqueRegular(
     final KMaterialOpaqueRegular m)
   {
-    final String code = String.format("Fwd_%s", m.materialUnlitGetCode());
-    assert code != null;
-    return code;
+    return m.materialUnlitGetCode();
   }
 
   public static String fromUnlitOpaqueRegular(
@@ -76,7 +92,7 @@ public final class RKForwardShaderCodes
   {
     final String lcode = c.getLight().lightGetCode();
     final String mcode = c.getMaterial().materialLitGetCode();
-    final String scode = String.format("Fwd_%s_%s", lcode, mcode);
+    final String scode = String.format("%s_%s", lcode, mcode);
     assert scode != null;
     return scode;
   }
@@ -84,16 +100,12 @@ public final class RKForwardShaderCodes
   public static String fromUnlitTranslucentRefractive(
     final KMaterialTranslucentRefractive m)
   {
-    final String code = String.format("Fwd_%s", m.materialUnlitGetCode());
-    assert code != null;
-    return code;
+    return m.materialUnlitGetCode();
   }
 
   public static String fromUnlitTranslucentRegular(
     final KMaterialTranslucentRegular m)
   {
-    final String code = String.format("Fwd_%s", m.materialUnlitGetCode());
-    assert code != null;
-    return code;
+    return m.materialUnlitGetCode();
   }
 }

@@ -22,7 +22,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Properties;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -34,7 +33,8 @@ import org.xml.sax.SAXException;
 
 import com.io7m.jfunctional.Pair;
 import com.io7m.jlog.Log;
-import com.io7m.jlog.LogPolicyProperties;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogPolicyType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.Nullable;
@@ -42,31 +42,13 @@ import com.io7m.jparasol.CompilerError;
 import com.io7m.jparasol.frontend.Frontend;
 import com.io7m.jparasol.xml.Batch;
 import com.io7m.jparasol.xml.PGLSLCompactor;
-import com.io7m.jproperties.JPropertyException;
 
 public final class DepthMakeAll
 {
-  private static void makeSourcesList(
-    final File out_parasol_dir,
-    final File out_sources)
-    throws IOException
+  private static LogUsableType getLog()
   {
-    final String[] sources = out_parasol_dir.list(new FilenameFilter() {
-      @Override public boolean accept(
-        final @Nullable File dir,
-        final @Nullable String name)
-      {
-        assert name != null;
-        return name.endsWith(".p");
-      }
-    });
-
-    final FileWriter writer = new FileWriter(out_sources);
-    for (final String s : sources) {
-      writer.write(String.format("%s/%s\n", out_parasol_dir, s));
-    }
-    writer.flush();
-    writer.close();
+    final LogPolicyType policy = LogPolicyAllOn.newPolicy(LogLevel.LOG_INFO);
+    return Log.newLog(policy, "make-depth");
   }
 
   public static void main(
@@ -79,8 +61,7 @@ public final class DepthMakeAll
       ParserConfigurationException,
       ParseException,
       CompilerError,
-      InterruptedException,
-      JPropertyException
+      InterruptedException
   {
     if (args.length != 5) {
       final String message =
@@ -88,6 +69,8 @@ public final class DepthMakeAll
       System.err.println(message);
       throw new IllegalArgumentException(message);
     }
+
+    final LogUsableType log = DepthMakeAll.getLog();
 
     final File out_batch = new File(args[0]);
     final File out_sources = new File(args[1]);
@@ -113,6 +96,7 @@ public final class DepthMakeAll
 
     DepthMakeAll.makeSourcesList(out_parasol_dir, out_sources);
     DepthMakeAll.makeCompileSources(
+      log,
       out_parasol_dir,
       out_sources,
       out_batch,
@@ -121,6 +105,7 @@ public final class DepthMakeAll
   }
 
   private static void makeCompileSources(
+    final LogUsableType log,
     @SuppressWarnings("unused") final File source_dir,
     final File out_sources,
     final File batch,
@@ -134,8 +119,7 @@ public final class DepthMakeAll
       ParserConfigurationException,
       ParseException,
       CompilerError,
-      InterruptedException,
-      JPropertyException
+      InterruptedException
   {
     final ArrayList<String> argslist = new ArrayList<String>();
 
@@ -156,7 +140,7 @@ public final class DepthMakeAll
       final Batch b = Batch.fromFile(out_dir, batch);
       for (final Pair<String, String> k : b.getTargets()) {
         final File program_in = new File(out_dir, k.getLeft());
-        System.out.println("info: compact " + program_in);
+        log.info("Compact " + program_in);
         final File program_out = new File(out_compact_dir, k.getLeft());
         PGLSLCompactor.newCompactor(
           program_in,
@@ -166,14 +150,26 @@ public final class DepthMakeAll
     }
   }
 
-  private static LogUsableType getLog()
-    throws JPropertyException
+  private static void makeSourcesList(
+    final File out_parasol_dir,
+    final File out_sources)
+    throws IOException
   {
-    final Properties props = new Properties();
-    props.setProperty("com.io7m.parasol.level", "LOG_INFO");
-    props.setProperty("com.io7m.parasol.logs.compactor", "false");
-    final LogPolicyType policy =
-      LogPolicyProperties.newPolicy(props, "com.io7m.parasol");
-    return Log.newLog(policy, "compactor");
+    final String[] sources = out_parasol_dir.list(new FilenameFilter() {
+      @Override public boolean accept(
+        final @Nullable File dir,
+        final @Nullable String name)
+      {
+        assert name != null;
+        return name.endsWith(".p");
+      }
+    });
+
+    final FileWriter writer = new FileWriter(out_sources);
+    for (final String s : sources) {
+      writer.write(String.format("%s/%s\n", out_parasol_dir, s));
+    }
+    writer.flush();
+    writer.close();
   }
 }

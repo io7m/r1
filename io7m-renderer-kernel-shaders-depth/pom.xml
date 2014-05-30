@@ -80,9 +80,16 @@
       <type>zip</type>
     </dependency>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-shaders-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.io7m.jparasol</groupId>
       <artifactId>io7m-jparasol-compiler-frontend</artifactId>
       <version>${com.io7m.jparasol.versionRange}</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>com.io7m.jparasol</groupId>
@@ -194,7 +201,7 @@
         <version>1.2.1</version>
         <executions>
           <execution>
-            <id>make-parasol-depth-sources</id>
+            <id>make-parasol-sources</id>
             <phase>prepare-package</phase>
             <goals>
               <goal>java</goal>
@@ -205,8 +212,8 @@
                 <argument>${project.build.directory}/parasol/batch-depth.txt</argument>
                 <argument>${project.build.directory}/parasol/source-list.txt</argument>
                 <argument>${project.build.directory}/parasol/</argument>
-                <argument>${project.build.directory}/glsl/com/io7m/renderer/kernel</argument>
-                <argument>${project.build.directory}/glsl-compact/com/io7m/renderer/kernel</argument>
+                <argument>${project.build.directory}/glsl/</argument>
+                <argument>${project.build.directory}/glsl-compact/</argument>
               </arguments>
             </configuration>
           </execution>
