@@ -10,10 +10,10 @@
     <artifactId>io7m-renderer</artifactId>
     <version>0.9.0</version>
   </parent>
-  <artifactId>io7m-renderer-kernel-examples-jogl</artifactId>
+  <artifactId>io7m-renderer-examples-jogl</artifactId>
 
   <packaging>jar</packaging>
-  <description>3D renderer (Kernel examples and visual test cases, JOGL frontend)</description>
+  <description>3D renderer (Examples and visual test cases - JOGL frontend)</description>
   <url>http://mvn.io7m.com/${project.artifactId}/</url>
   <name>${project.artifactId}</name>
 
@@ -79,7 +79,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-kernel-examples</artifactId>
+      <artifactId>io7m-renderer-examples</artifactId>
       <version>${project.version}</version>
     </dependency>
 

@@ -15,16 +15,16 @@
   <url>http://mvn.io7m.com/${project.artifactId}/</url>
 
   <modules>
-    <module>io7m-renderer-kernel-examples-jogl</module>
-    <module>io7m-renderer-kernel-examples</module>
+    <module>io7m-renderer-examples-jogl</module>
+    <module>io7m-renderer-examples</module>
     <module>io7m-renderer-kernel-shaders-core</module>
     <module>io7m-renderer-kernel-shaders-debug</module>
     <module>io7m-renderer-kernel-shaders-depth</module>
     <module>io7m-renderer-kernel-shaders-depth_variance</module>
     <module>io7m-renderer-kernel-shaders-forward-opaque-lit</module>
     <module>io7m-renderer-kernel-shaders-forward-opaque-unlit</module>
-    <module>io7m-renderer-kernel-shaders-forward-translucent-unlit</module>
     <module>io7m-renderer-kernel-shaders-forward-translucent-lit</module>
+    <module>io7m-renderer-kernel-shaders-forward-translucent-unlit</module>
     <module>io7m-renderer-kernel-shaders-forward</module>
     <module>io7m-renderer-kernel-shaders-postprocessing</module>
     <module>io7m-renderer-kernel-types</module>
