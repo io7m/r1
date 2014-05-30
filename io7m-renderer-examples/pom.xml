@@ -10,10 +10,10 @@
     <artifactId>io7m-renderer</artifactId>
     <version>0.9.0</version>
   </parent>
-  <artifactId>io7m-renderer-kernel-examples</artifactId>
+  <artifactId>io7m-renderer-examples</artifactId>
 
   <packaging>jar</packaging>
-  <description>3D renderer (Kernel examples and visual test cases)</description>
+  <description>3D renderer (Examples and visual test cases)</description>
   <url>http://mvn.io7m.com/${project.artifactId}/</url>
   <name>${project.artifactId}</name>
 
