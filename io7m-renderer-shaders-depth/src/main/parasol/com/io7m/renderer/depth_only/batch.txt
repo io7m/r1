@@ -1,0 +1,4 @@
+DepC     : com.io7m.renderer.depth_only.Depth.depth_DepC
+DepC4444 : com.io7m.renderer.depth_only.Depth.depth_DepC4444
+DepM     : com.io7m.renderer.depth_only.Depth.depth_DepM
+DepM4444 : com.io7m.renderer.depth_only.Depth.depth_DepM4444

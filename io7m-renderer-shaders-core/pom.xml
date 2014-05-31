@@ -182,7 +182,7 @@
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>src/main/assembly/shader-sources.xml</descriptor>
+                <descriptor>src/main/assembly/com/io7m/renderer/shaders/core/shader-sources.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>

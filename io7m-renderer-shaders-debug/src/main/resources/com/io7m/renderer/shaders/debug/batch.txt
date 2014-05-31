@@ -1,0 +1,14 @@
+bitangents_vertex_eye   : com.io7m.renderer.debug.Debug.bitangents_vertex_eye
+bitangents_vertex_local : com.io7m.renderer.debug.Debug.bitangents_vertex_local
+ccolor                  : com.io7m.renderer.debug.Debug.ccolor
+flat_uv                 : com.io7m.renderer.debug.Debug.flat_uv
+normals_map_eye         : com.io7m.renderer.debug.Debug.normals_map_eye
+normals_map_local       : com.io7m.renderer.debug.Debug.normals_map_local
+normals_map_tangent     : com.io7m.renderer.debug.Debug.normals_map_tangent
+normals_vertex_eye      : com.io7m.renderer.debug.Debug.normals_vertex_eye
+normals_vertex_local    : com.io7m.renderer.debug.Debug.normals_vertex_local
+show_depth              : com.io7m.renderer.debug.Debug.show_depth
+tangents_vertex_eye     : com.io7m.renderer.debug.Debug.tangents_vertex_eye
+tangents_vertex_local   : com.io7m.renderer.debug.Debug.tangents_vertex_local
+uv                      : com.io7m.renderer.debug.Debug.uv
+vcolor                  : com.io7m.renderer.debug.Debug.vcolor

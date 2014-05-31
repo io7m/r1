@@ -1,7 +1,0 @@
-gaussian_blur_horizontal_4f : com.io7m.renderer.PostprocessingBlur.blur_horizontal_4f
-gaussian_blur_vertical_4f   : com.io7m.renderer.PostprocessingBlur.blur_vertical_4f
-gaussian_blur_horizontal_2f : com.io7m.renderer.PostprocessingBlur.blur_horizontal_2f
-gaussian_blur_vertical_2f   : com.io7m.renderer.PostprocessingBlur.blur_vertical_2f
-identity                    : com.io7m.renderer.Postprocessing.identity
-fog                         : com.io7m.renderer.PostprocessingFog.fog
-copy_rgba                   : com.io7m.renderer.PostprocessingCopy.copy_rgba
