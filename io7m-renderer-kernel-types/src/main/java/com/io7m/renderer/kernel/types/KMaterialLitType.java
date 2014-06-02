@@ -25,9 +25,30 @@ package com.io7m.renderer.kernel.types;
 public interface KMaterialLitType
 {
   /**
-   * @return The code for the material as it would appear if the material was
+   * @return <p>
+   *         The code for the material as it would appear if the material was
    *         being applied to a lit instance.
+   *         </p>
+   *         <p>
+   *         The code is the same as that returned by
+   *         {@link #materialLitGetCodeWithoutDepth()} but includes a section
+   *         derived from a {@link KMaterialDepthType} if the material has
+   *         depth properties.
+   *         </p>
    */
 
-  String materialLitGetCode();
+  String materialLitGetCodeWithDepth();
+
+  /**
+   * @return <p>
+   *         The code for the material as it would appear if the material was
+   *         being applied to a lit instance.
+   *         </p>
+   *         <p>
+   *         The code does not contain a section derived from a
+   *         {@link KMaterialDepthType}.
+   *         </p>
+   */
+
+  String materialLitGetCodeWithoutDepth();
 }

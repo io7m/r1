@@ -91,6 +91,11 @@ public final class KMaterialEnvironmentReflection implements
     return this.texture;
   }
 
+  @Override public boolean materialRequiresUVCoordinates()
+  {
+    return false;
+  }
+
   @Override public int texturesGetRequired()
   {
     return 1;
@@ -107,10 +112,5 @@ public final class KMaterialEnvironmentReflection implements
     final String r = b.toString();
     assert r != null;
     return r;
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return false;
   }
 }

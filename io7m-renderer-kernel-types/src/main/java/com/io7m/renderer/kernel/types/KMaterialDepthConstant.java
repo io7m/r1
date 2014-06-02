@@ -71,13 +71,13 @@ public final class KMaterialDepthConstant implements KMaterialDepthType
     return v.constant(this);
   }
 
-  @Override public String toString()
-  {
-    return "[KMaterialDepthConstant]";
-  }
-
   @Override public boolean materialRequiresUVCoordinates()
   {
     return false;
+  }
+
+  @Override public String toString()
+  {
+    return "[KMaterialDepthConstant]";
   }
 }

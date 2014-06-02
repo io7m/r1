@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-
 /**
  * The type of regular instances. That is, instances that have materials
  * applied that are regular (@link {@link KMaterialRegularType}).
@@ -30,5 +29,5 @@ public interface KInstanceRegularType extends KInstanceType
    * @return The regular material of this instance
    */
 
-   KMaterialRegularType instanceGetMaterial();
+  KMaterialRegularType instanceGetMaterial();
 }

@@ -19,8 +19,7 @@ package com.io7m.renderer.kernel.types;
 import com.io7m.jtensors.MatrixM4x4F;
 
 /**
- * The type of transforms, applied to instances (
- * {@link KInstanceType} ).
+ * The type of transforms, applied to instances ( {@link KInstanceType} ).
  */
 
 public interface KTransformType

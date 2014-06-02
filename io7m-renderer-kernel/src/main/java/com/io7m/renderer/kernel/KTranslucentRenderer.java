@@ -1076,7 +1076,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KMaterialTranslucentRegular material)
   {
     final String lcode = this.shaderCodeFromLight(light);
-    final String mcode = material.materialLitGetCode();
+    final String mcode = material.materialLitGetCodeWithoutDepth();
 
     final StringBuilder s = new StringBuilder();
     s.append(lcode);
@@ -1093,7 +1093,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KMaterialTranslucentSpecularOnly material)
   {
     final String lcode = this.shaderCodeFromLight(light);
-    final String mcode = material.materialLitGetCode();
+    final String mcode = material.materialLitGetCodeWithoutDepth();
 
     final StringBuilder s = new StringBuilder();
     s.append(lcode);

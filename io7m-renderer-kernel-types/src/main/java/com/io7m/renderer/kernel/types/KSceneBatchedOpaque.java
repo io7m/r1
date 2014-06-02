@@ -133,7 +133,7 @@ public final class KSceneBatchedOpaque
             @Override public String materialOpaqueRegular(
               final KMaterialOpaqueRegular m)
             {
-              return m.materialLitGetCode();
+              return m.materialLitGetCodeWithoutDepth();
             }
           });
       }

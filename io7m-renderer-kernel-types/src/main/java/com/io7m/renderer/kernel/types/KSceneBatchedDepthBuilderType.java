@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-
 /**
  * The type of mutable builders for depth batches.
  */

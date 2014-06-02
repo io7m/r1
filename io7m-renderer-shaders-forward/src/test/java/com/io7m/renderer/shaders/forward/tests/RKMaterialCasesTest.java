@@ -123,7 +123,7 @@ import com.io7m.renderer.shaders.forward.RKMaterialCases;
     Assert.assertTrue(oc.size() > (count / 2));
 
     for (final KMaterialOpaqueRegular o : oc) {
-      System.out.println(o.materialLitGetCode());
+      System.out.println(o.materialLitGetCodeWithoutDepth());
     }
   }
 

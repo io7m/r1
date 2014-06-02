@@ -71,6 +71,11 @@ public final class KMaterialEmissiveConstant implements KMaterialEmissiveType
     return this.emission;
   }
 
+  @Override public boolean materialRequiresUVCoordinates()
+  {
+    return false;
+  }
+
   @Override public int texturesGetRequired()
   {
     return 0;
@@ -85,10 +90,5 @@ public final class KMaterialEmissiveConstant implements KMaterialEmissiveType
     final String r = b.toString();
     assert r != null;
     return r;
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return false;
   }
 }

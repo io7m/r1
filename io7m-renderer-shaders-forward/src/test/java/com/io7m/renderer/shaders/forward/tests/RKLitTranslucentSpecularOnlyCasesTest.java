@@ -56,7 +56,7 @@ import com.io7m.renderer.shaders.forward.RKMaterialCases;
 
     for (final RKLitCase<KMaterialTranslucentRegular> c : oc.getCases()) {
       final String lc = c.getLight().lightGetCode();
-      final String mc = c.getMaterial().materialLitGetCode();
+      final String mc = c.getMaterial().materialLitGetCodeWithoutDepth();
       System.out.printf("%s_%s\n", lc, mc);
     }
   }

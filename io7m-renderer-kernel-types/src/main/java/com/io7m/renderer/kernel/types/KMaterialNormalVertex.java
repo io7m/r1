@@ -51,6 +51,11 @@ public final class KMaterialNormalVertex implements KMaterialNormalType
     return "";
   }
 
+  @Override public boolean materialRequiresUVCoordinates()
+  {
+    return false;
+  }
+
   @Override public
     <A, E extends Throwable, V extends KMaterialNormalVisitorType<A, E>>
     A
@@ -70,10 +75,5 @@ public final class KMaterialNormalVertex implements KMaterialNormalType
   @Override public String toString()
   {
     return "[KMaterialNormalVertex]";
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return false;
   }
 }

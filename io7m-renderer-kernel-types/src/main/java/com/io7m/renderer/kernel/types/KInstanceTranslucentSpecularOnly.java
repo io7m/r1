@@ -68,6 +68,7 @@ import com.io7m.renderer.types.RTransformTextureType;
   private final KMeshReadableType                   mesh;
   private final KTransformType                      transform;
   private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
+
   private KInstanceTranslucentSpecularOnly(
     final KMeshReadableType in_mesh,
     final KMaterialTranslucentSpecularOnly in_material,

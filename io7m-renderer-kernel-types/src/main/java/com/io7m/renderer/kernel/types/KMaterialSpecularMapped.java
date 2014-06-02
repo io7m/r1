@@ -95,10 +95,26 @@ public final class KMaterialSpecularMapped implements
     return this.texture;
   }
 
+  @Override public boolean materialRequiresUVCoordinates()
+  {
+    return true;
+  }
+
   @Override public
     <A, E extends Throwable, V extends KMaterialSpecularVisitorType<A, E>>
     A
     specularAccept(
+      final V v)
+      throws E,
+        RException
+  {
+    return v.mapped(this);
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KMaterialSpecularNotNoneVisitorType<A, E>>
+    A
+    specularNotNoneAccept(
       final V v)
       throws E,
         RException
@@ -124,21 +140,5 @@ public final class KMaterialSpecularMapped implements
     final String r = b.toString();
     assert r != null;
     return r;
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return true;
-  }
-
-  @Override public
-    <A, E extends Throwable, V extends KMaterialSpecularNotNoneVisitorType<A, E>>
-    A
-    specularNotNoneAccept(
-      final V v)
-      throws E,
-        RException
-  {
-    return v.mapped(this);
   }
 }

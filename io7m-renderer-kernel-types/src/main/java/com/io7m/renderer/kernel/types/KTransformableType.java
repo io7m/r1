@@ -16,12 +16,11 @@
 
 package com.io7m.renderer.kernel.types;
 
-
 /**
  * The type of objects that can be transformed.
  */
 
 interface KTransformableType
 {
-   KTransformType getTransform();
+  KTransformType getTransform();
 }

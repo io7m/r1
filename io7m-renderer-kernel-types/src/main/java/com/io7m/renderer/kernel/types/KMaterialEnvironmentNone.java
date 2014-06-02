@@ -63,6 +63,11 @@ public final class KMaterialEnvironmentNone implements
     return v.none(this);
   }
 
+  @Override public boolean materialRequiresUVCoordinates()
+  {
+    return false;
+  }
+
   @Override public int texturesGetRequired()
   {
     return 0;
@@ -71,10 +76,5 @@ public final class KMaterialEnvironmentNone implements
   @Override public String toString()
   {
     return "[KMaterialEnvironmentNone]";
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return false;
   }
 }

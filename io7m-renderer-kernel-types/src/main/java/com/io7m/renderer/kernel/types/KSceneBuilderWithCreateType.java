@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-
 /**
  * An extension of the {@link KSceneBuilderType} interface that allows for
  * final scene creation.
@@ -30,5 +29,5 @@ public interface KSceneBuilderWithCreateType extends KSceneBuilderType
    * @return A newly constructed scene
    */
 
-   KScene sceneCreate();
+  KScene sceneCreate();
 }
