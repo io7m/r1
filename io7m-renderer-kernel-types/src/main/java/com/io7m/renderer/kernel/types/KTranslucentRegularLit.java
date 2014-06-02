@@ -29,7 +29,7 @@ import com.io7m.renderer.types.RException;
 public final class KTranslucentRegularLit implements KTranslucentType
 {
   private final KInstanceTranslucentRegular instance;
-  private final Set<KLightType>                        lights;
+  private final Set<KLightType>             lights;
 
   protected KTranslucentRegularLit(
     final KInstanceTranslucentRegular in_instance,

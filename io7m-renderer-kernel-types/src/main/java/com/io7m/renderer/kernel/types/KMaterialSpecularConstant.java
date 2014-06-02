@@ -95,6 +95,17 @@ public final class KMaterialSpecularConstant implements
     return v.constant(this);
   }
 
+  @Override public
+    <A, E extends Throwable, V extends KMaterialSpecularNotNoneVisitorType<A, E>>
+    A
+    specularNotNoneAccept(
+      final V v)
+      throws E,
+        RException
+  {
+    return v.constant(this);
+  }
+
   @Override public int texturesGetRequired()
   {
     return 0;
@@ -111,16 +122,5 @@ public final class KMaterialSpecularConstant implements
     final String r = b.toString();
     assert r != null;
     return r;
-  }
-
-  @Override public
-    <A, E extends Throwable, V extends KMaterialSpecularNotNoneVisitorType<A, E>>
-    A
-    specularNotNoneAccept(
-      final V v)
-      throws E,
-        RException
-  {
-    return v.constant(this);
   }
 }

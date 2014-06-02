@@ -62,6 +62,11 @@ public final class KMaterialNormalMapped implements KMaterialNormalType
     return this.texture;
   }
 
+  @Override public boolean materialRequiresUVCoordinates()
+  {
+    return true;
+  }
+
   @Override public
     <A, E extends Throwable, V extends KMaterialNormalVisitorType<A, E>>
     A
@@ -87,10 +92,5 @@ public final class KMaterialNormalMapped implements KMaterialNormalType
     final String r = b.toString();
     assert r != null;
     return r;
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return true;
   }
 }

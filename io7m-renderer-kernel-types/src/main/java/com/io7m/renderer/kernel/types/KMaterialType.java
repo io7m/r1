@@ -24,7 +24,9 @@ import com.io7m.renderer.types.RTransformTextureType;
  * The type of materials applied to meshes.
  */
 
-public interface KMaterialType extends KTexturesRequiredType, KMaterialRequiresUVType
+public interface KMaterialType extends
+  KTexturesRequiredType,
+  KMaterialRequiresUVType
 {
   /**
    * Be visited by the given generic visitor.

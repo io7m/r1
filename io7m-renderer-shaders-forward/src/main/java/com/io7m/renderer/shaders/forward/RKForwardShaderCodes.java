@@ -29,7 +29,7 @@ public final class RKForwardShaderCodes
     final KMaterialOpaqueRegular m)
   {
     final String lcode = l.lightGetCode();
-    final String mcode = m.materialLitGetCode();
+    final String mcode = m.materialLitGetCodeWithoutDepth();
     final String scode = String.format("%s_%s", lcode, mcode);
     assert scode != null;
     return scode;
@@ -48,7 +48,7 @@ public final class RKForwardShaderCodes
     final KMaterialTranslucentRegular m)
   {
     final String lcode = l.lightGetCode();
-    final String mcode = m.materialLitGetCode();
+    final String mcode = m.materialLitGetCodeWithoutDepth();
     final String scode = String.format("%s_%s", lcode, mcode);
     assert scode != null;
     return scode;
@@ -67,7 +67,7 @@ public final class RKForwardShaderCodes
     final KMaterialTranslucentSpecularOnly m)
   {
     final String lcode = l.lightGetCode();
-    final String mcode = m.materialLitGetCode();
+    final String mcode = m.materialLitGetCodeWithoutDepth();
     final String scode = String.format("%s_%s", lcode, mcode);
     assert scode != null;
     return scode;
@@ -91,7 +91,7 @@ public final class RKForwardShaderCodes
     final RKLitCase<KMaterialOpaqueRegular> c)
   {
     final String lcode = c.getLight().lightGetCode();
-    final String mcode = c.getMaterial().materialLitGetCode();
+    final String mcode = c.getMaterial().materialLitGetCodeWithoutDepth();
     final String scode = String.format("%s_%s", lcode, mcode);
     assert scode != null;
     return scode;

@@ -305,7 +305,12 @@ import com.io7m.renderer.types.RTransformTextureType;
     return this.uv_matrix;
   }
 
-  @Override public String materialLitGetCode()
+  @Override public String materialLitGetCodeWithDepth()
+  {
+    return this.code_lit;
+  }
+
+  @Override public String materialLitGetCodeWithoutDepth()
   {
     return this.code_lit;
   }

@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-
 /**
  * The interface supported by instances that have associated materials.
  * 
@@ -30,5 +29,5 @@ public interface KInstanceWithMaterialType<T extends KMaterialRequiresUVType>
    * @return The material associated with the current instance
    */
 
-   T instanceGetMaterial();
+  T instanceGetMaterial();
 }

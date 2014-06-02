@@ -31,7 +31,7 @@ import com.io7m.renderer.types.RException;
   KTranslucentType
 {
   private final KInstanceTranslucentSpecularOnly instance;
-  private final Set<KLightType>                             lights;
+  private final Set<KLightType>                  lights;
 
   protected KTranslucentSpecularOnlyLit(
     final KInstanceTranslucentSpecularOnly in_instance,

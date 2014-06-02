@@ -196,8 +196,17 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_normal,
       in_specular);
 
-    final String code_lit =
+    final String code_lit_without_depth =
       KMaterialCodes.makeOpaqueRegularLitCodeWithoutDepth(
+        in_albedo,
+        in_emissive,
+        in_environment,
+        in_normal,
+        in_specular);
+
+    final String code_lit_with_depth =
+      KMaterialCodes.makeOpaqueRegularLitCodeWithDepth(
+        in_depth,
         in_albedo,
         in_emissive,
         in_environment,
@@ -212,7 +221,8 @@ import com.io7m.renderer.types.RTransformTextureType;
         in_normal);
 
     return new KMaterialOpaqueRegular(
-      code_lit,
+      code_lit_without_depth,
+      code_lit_with_depth,
       code_unlit,
       in_uv_matrix,
       in_albedo,
@@ -224,7 +234,8 @@ import com.io7m.renderer.types.RTransformTextureType;
   }
 
   private final KMaterialAlbedoType                 albedo;
-  private final String                              code_lit;
+  private final String                              code_lit_with_depth;
+  private final String                              code_lit_without_depth;
   private final String                              code_unlit;
   private final KMaterialDepthType                  depth;
   private final KMaterialEmissiveType               emissive;
@@ -236,7 +247,8 @@ import com.io7m.renderer.types.RTransformTextureType;
   private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KMaterialOpaqueRegular(
-    final String in_code_lit,
+    final String in_code_lit_without_depth,
+    final String in_code_lit_with_depth,
     final String in_code_unlit,
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final KMaterialAlbedoType in_albedo,
@@ -253,7 +265,12 @@ import com.io7m.renderer.types.RTransformTextureType;
     this.normal = NullCheck.notNull(in_normal, "Normal");
     this.specular = NullCheck.notNull(in_specular, "Specular");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
-    this.code_lit = NullCheck.notNull(in_code_lit, "Lit code");
+
+    this.code_lit_without_depth =
+      NullCheck.notNull(in_code_lit_without_depth, "Lit code");
+    this.code_lit_with_depth =
+      NullCheck.notNull(in_code_lit_with_depth, "Lit code");
+
     this.code_unlit = NullCheck.notNull(in_code_unlit, "Unlit code");
 
     {
@@ -338,9 +355,14 @@ import com.io7m.renderer.types.RTransformTextureType;
     return this.uv_matrix;
   }
 
-  @Override public String materialLitGetCode()
+  @Override public String materialLitGetCodeWithDepth()
   {
-    return this.code_lit;
+    return this.code_lit_with_depth;
+  }
+
+  @Override public String materialLitGetCodeWithoutDepth()
+  {
+    return this.code_lit_without_depth;
   }
 
   @Override public KMaterialDepthType materialOpaqueGetDepth()
@@ -400,7 +422,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     b.append("[KMaterialOpaqueRegular albedo=");
     b.append(this.albedo);
     b.append(" code_lit=");
-    b.append(this.code_lit);
+    b.append(this.code_lit_without_depth);
     b.append(" code_unlit=");
     b.append(this.code_unlit);
     b.append(" depth=");

@@ -62,6 +62,11 @@ public final class KMaterialEmissiveNone implements KMaterialEmissiveType
     return v.none(this);
   }
 
+  @Override public boolean materialRequiresUVCoordinates()
+  {
+    return false;
+  }
+
   @Override public int texturesGetRequired()
   {
     return 0;
@@ -70,10 +75,5 @@ public final class KMaterialEmissiveNone implements KMaterialEmissiveType
   @Override public String toString()
   {
     return "[KMaterialEmissiveNone]";
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return false;
   }
 }

@@ -88,6 +88,11 @@ public final class KMaterialDepthAlpha implements KMaterialDepthType
     return this.threshold;
   }
 
+  @Override public boolean materialRequiresUVCoordinates()
+  {
+    return true;
+  }
+
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
@@ -97,10 +102,5 @@ public final class KMaterialDepthAlpha implements KMaterialDepthType
     final String r = b.toString();
     assert r != null;
     return r;
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return true;
   }
 }

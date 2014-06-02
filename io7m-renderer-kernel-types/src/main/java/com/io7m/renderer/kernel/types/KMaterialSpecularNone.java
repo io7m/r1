@@ -52,6 +52,11 @@ public final class KMaterialSpecularNone implements KMaterialSpecularType
     return "";
   }
 
+  @Override public boolean materialRequiresUVCoordinates()
+  {
+    return false;
+  }
+
   @Override public
     <A, E extends Throwable, V extends KMaterialSpecularVisitorType<A, E>>
     A
@@ -71,10 +76,5 @@ public final class KMaterialSpecularNone implements KMaterialSpecularType
   @Override public String toString()
   {
     return "[KMaterialSpecularNone]";
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return false;
   }
 }

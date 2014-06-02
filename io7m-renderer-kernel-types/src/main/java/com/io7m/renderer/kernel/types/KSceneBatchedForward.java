@@ -54,11 +54,11 @@ import com.io7m.jnull.NullCheck;
       in_scene.getTranslucents());
   }
 
+  private final KCamera                camera;
   private final KSceneBatchedDepth     depth;
   private final KSceneBatchedOpaque    opaques;
   private final KSceneBatchedShadow    shadows;
   private final List<KTranslucentType> translucents;
-  private final KCamera                camera;
 
   private KSceneBatchedForward(
     final KCamera in_camera,

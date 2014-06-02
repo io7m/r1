@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.kernel.types;
 
-
 /**
  * A generic transform visitor, returning values of type <code>A</code> and
  * raising exceptions of type <code>E</code>.
@@ -40,7 +39,7 @@ public interface KTransformVisitorType<A, E extends Throwable>
    */
 
   A transformMatrix4x4(
-    final  KTransformMatrix4x4 t)
+    final KTransformMatrix4x4 t)
     throws E;
 
   /**
@@ -54,6 +53,6 @@ public interface KTransformVisitorType<A, E extends Throwable>
    */
 
   A transformOST(
-    final  KTransformOST t)
+    final KTransformOST t)
     throws E;
 }

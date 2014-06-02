@@ -108,6 +108,11 @@ public final class KMaterialAlbedoTextured implements KMaterialAlbedoType
     return this.texture;
   }
 
+  @Override public boolean materialRequiresUVCoordinates()
+  {
+    return true;
+  }
+
   @Override public int texturesGetRequired()
   {
     return 1;
@@ -126,10 +131,5 @@ public final class KMaterialAlbedoTextured implements KMaterialAlbedoType
     final String r = b.toString();
     assert r != null;
     return r;
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return true;
   }
 }
