@@ -47,14 +47,6 @@ public interface KSceneBuilderReadableType
   Set<KInstanceOpaqueType> sceneGetInstancesOpaqueLitVisible();
 
   /**
-   * @return A read-only map of the current lit (visible) opaque instances
-   *         present in the scene, by light.
-   */
-
-    Map<KLightType, Set<KInstanceOpaqueType>>
-    sceneGetInstancesOpaqueLitVisibleByLight();
-
-  /**
    * @return A read-only map of the current shadow-casting instances present
    *         in the scene, by light.
    */

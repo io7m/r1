@@ -128,15 +128,13 @@ import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBatchedForward;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
+import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.kernel.types.KTranslucentType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionIO;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyShadowed;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyUnshadowed;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyVisible;
 import com.io7m.renderer.types.RExceptionJCGL;
+import com.io7m.renderer.types.RExceptionLightGroupAlreadyAdded;
 import com.io7m.renderer.types.RExceptionLightMissingShadow;
 import com.io7m.renderer.types.RXMLException;
 import com.jogamp.common.nio.Buffers;
@@ -465,36 +463,6 @@ import com.jogamp.opengl.util.FPSAnimator;
             return mc.loadMesh(name);
           }
 
-          @Override public void sceneAddInvisibleWithShadow(
-            final KLightType light,
-            final KInstanceOpaqueType instance)
-            throws RExceptionInstanceAlreadyVisible,
-              RExceptionLightMissingShadow
-          {
-            scene_builder.sceneAddInvisibleWithShadow(light, instance);
-          }
-
-          @Override public void sceneAddOpaqueLitVisibleWithoutShadow(
-            final KLightType light,
-            final KInstanceOpaqueType instance)
-            throws RExceptionInstanceAlreadyUnlit,
-              RExceptionInstanceAlreadyShadowed
-          {
-            scene_builder.sceneAddOpaqueLitVisibleWithoutShadow(
-              light,
-              instance);
-          }
-
-          @Override public void sceneAddOpaqueLitVisibleWithShadow(
-            final KLightType light,
-            final KInstanceOpaqueType instance)
-            throws RExceptionInstanceAlreadyUnlit,
-              RExceptionLightMissingShadow,
-              RExceptionInstanceAlreadyUnshadowed
-          {
-            scene_builder.sceneAddOpaqueLitVisibleWithShadow(light, instance);
-          }
-
           @Override public void sceneAddOpaqueUnlit(
             final KInstanceOpaqueType instance)
             throws RExceptionInstanceAlreadyLit
@@ -550,13 +518,6 @@ import com.jogamp.opengl.util.FPSAnimator;
 
           @Override public
             Map<KLightType, Set<KInstanceOpaqueType>>
-            sceneGetInstancesOpaqueLitVisibleByLight()
-          {
-            return scene_builder.sceneGetInstancesOpaqueLitVisibleByLight();
-          }
-
-          @Override public
-            Map<KLightType, Set<KInstanceOpaqueType>>
             sceneGetInstancesOpaqueShadowCastingByLight()
           {
             return scene_builder
@@ -583,6 +544,21 @@ import com.jogamp.opengl.util.FPSAnimator;
           @Override public List<KTranslucentType> sceneGetTranslucents()
           {
             return scene_builder.sceneGetTranslucents();
+          }
+
+          @Override public void sceneAddShadowCaster(
+            final KLightType light,
+            final KInstanceOpaqueType instance)
+            throws RExceptionLightMissingShadow
+          {
+            scene_builder.sceneAddShadowCaster(light, instance);
+          }
+
+          @Override public KSceneLightGroupBuilderType sceneNewLightGroup(
+            final String name)
+            throws RExceptionLightGroupAlreadyAdded
+          {
+            return scene_builder.sceneNewLightGroup(name);
           }
         });
 

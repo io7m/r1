@@ -27,6 +27,7 @@ import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
@@ -66,6 +67,9 @@ public final class SLSpecular2 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
+    final KSceneLightGroupBuilderType g = scene.sceneNewLightGroup("g");
+    g.groupAddInstance(i);
+
     {
       final KLightSphereBuilderType b = KLightSphere.newBuilder();
       b.setRadius(2.0f);
@@ -74,11 +78,11 @@ public final class SLSpecular2 implements ExampleSceneType
 
       b.setColor(ExampleSceneUtilities.RGB_RED);
       b.setPosition(new RVectorI3F<RSpaceWorldType>(-0.5f, 1.0f, 1.0f));
-      scene.sceneAddOpaqueLitVisibleWithoutShadow(b.build(), i);
+      g.groupAddLight(b.build());
 
       b.setColor(ExampleSceneUtilities.RGB_BLUE);
       b.setPosition(new RVectorI3F<RSpaceWorldType>(0.5f, 1.0f, -1.0f));
-      scene.sceneAddOpaqueLitVisibleWithoutShadow(b.build(), i);
+      g.groupAddLight(b.build());
     }
 
     {
@@ -86,7 +90,7 @@ public final class SLSpecular2 implements ExampleSceneType
         KLightSphere
           .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setPosition(ExampleSceneUtilities.CENTER);
-      scene.sceneAddOpaqueLitVisibleWithoutShadow(b.build(), i);
+      g.groupAddLight(b.build());
     }
   }
 

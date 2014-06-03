@@ -16,8 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jfunctional.OptionType;
@@ -61,7 +61,7 @@ public interface KRendererForwardOpaqueType
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final MatricesObserverType mwo,
-    final Map<KLightType, Map<String, List<KInstanceOpaqueType>>> batches)
+    final Map<KLightType, Map<String, Set<KInstanceOpaqueType>>> batches)
     throws RException;
 
   /**
@@ -93,6 +93,6 @@ public interface KRendererForwardOpaqueType
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final MatricesObserverType mwo,
-    final Map<String, List<KInstanceOpaqueType>> batches)
+    final Map<String, Set<KInstanceOpaqueType>> batches)
     throws RException;
 }

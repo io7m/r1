@@ -16,8 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.BlendFunction;
@@ -272,7 +272,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KTextureUnitAllocator unit_allocator,
     final MatricesObserverType mwo,
     final KLightType light,
-    final List<KInstanceOpaqueType> instances,
+    final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program)
     throws JCGLException,
       RException
@@ -372,7 +372,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType unit_context,
     final MatricesObserverType mwo,
-    final List<KInstanceOpaqueType> instances,
+    final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program,
     final KLightDirectional l)
     throws JCGLException,
@@ -414,7 +414,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShadowMapContextType shadow_context,
     final KTextureUnitContextType unit_context,
     final MatricesProjectiveLightType mwp,
-    final List<KInstanceOpaqueType> instances,
+    final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program,
     final KLightProjective light)
     throws RException,
@@ -485,7 +485,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType unit_context,
     final MatricesObserverType mwo,
-    final List<KInstanceOpaqueType> instances,
+    final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program,
     final KLightSphere l)
     throws JCGLException,
@@ -528,7 +528,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KTextureUnitAllocator units,
     final MatricesObserverType mwo,
-    final List<KInstanceOpaqueType> instances,
+    final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program)
     throws JCGLException,
       RException
@@ -605,7 +605,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final MatricesObserverType mwo,
-    final Map<KLightType, Map<String, List<KInstanceOpaqueType>>> by_light)
+    final Map<KLightType, Map<String, Set<KInstanceOpaqueType>>> by_light)
     throws RException
   {
     NullCheck.notNull(shadow_context, "Shadow context");
@@ -645,18 +645,18 @@ import com.io7m.renderer.types.RExceptionJCGL;
       for (final KLightType light : by_light.keySet()) {
         assert light != null;
 
-        final Map<String, List<KInstanceOpaqueType>> by_code =
+        final Map<String, Set<KInstanceOpaqueType>> by_code =
           by_light.get(light);
 
         for (final String material_code : by_code.keySet()) {
           assert material_code != null;
 
-          final List<KInstanceOpaqueType> instances =
+          final Set<KInstanceOpaqueType> instances =
             by_code.get(material_code);
           assert instances != null;
           assert instances.isEmpty() == false;
 
-          final KInstanceOpaqueType first = instances.get(0);
+          final KInstanceOpaqueType first = instances.iterator().next();
           final KMaterialOpaqueRegular material =
             first
               .opaqueAccept(new KInstanceOpaqueVisitorType<KMaterialOpaqueRegular, RException>() {
@@ -714,7 +714,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final MatricesObserverType mwo,
-    final Map<String, List<KInstanceOpaqueType>> batches)
+    final Map<String, Set<KInstanceOpaqueType>> batches)
     throws RException
   {
     NullCheck.notNull(shadow_context, "Shadow context");
@@ -754,8 +754,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       for (final String material_code : batches.keySet()) {
         assert material_code != null;
 
-        final List<KInstanceOpaqueType> instances =
-          batches.get(material_code);
+        final Set<KInstanceOpaqueType> instances = batches.get(material_code);
         assert instances != null;
         assert instances.isEmpty() == false;
 

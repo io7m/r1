@@ -16,28 +16,50 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
 import com.io7m.renderer.types.RExceptionLightGroupLacksInstances;
 import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
 
 /**
- * An extension of the {@link KSceneBuilderType} interface that allows for
- * final scene creation.
+ * The type of mutable builders for scene light groups.
  */
 
-public interface KSceneBuilderWithCreateType extends KSceneBuilderType
+public interface KSceneLightGroupBuilderType
 {
   /**
-   * Construct a {@link KScene} from the currently added instances and light
-   * groups.
+   * Add an instance to the group.
    * 
-   * @return A newly constructed scene
-   * @throws RExceptionLightGroupLacksLights
-   *           One or more light groups lack lights.
-   * @throws RExceptionLightGroupLacksInstances
-   *           One or more light groups lack instances.
+   * @param o
+   *          The instance.
+   * @throws RExceptionInstanceAlreadyUnlit
+   *           If the given instance has already been added to the scene
+   *           without lighting.
    */
 
-  KScene sceneCreate()
+  void groupAddInstance(
+    final KInstanceOpaqueType o)
+    throws RExceptionInstanceAlreadyUnlit;
+
+  /**
+   * Add a light to the group.
+   * 
+   * @param light
+   *          The light.
+   */
+
+  void groupAddLight(
+    final KLightType light);
+
+  /**
+   * @return A group consisting of all the instances and lights added so far.
+   * 
+   * @throws RExceptionLightGroupLacksInstances
+   *           If no instances have been added.
+   * @throws RExceptionLightGroupLacksLights
+   *           If no lights have been added.
+   */
+
+  KSceneLightGroup groupBuild()
     throws RExceptionLightGroupLacksInstances,
       RExceptionLightGroupLacksLights;
 }

@@ -26,6 +26,7 @@ import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
+import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -65,7 +66,10 @@ public final class SLSpecular0 implements ExampleSceneType
         KLightSphere
           .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setPosition(ExampleSceneUtilities.CENTER);
-      scene.sceneAddOpaqueLitVisibleWithoutShadow(b.build(), i);
+
+      final KSceneLightGroupBuilderType g = scene.sceneNewLightGroup("g");
+      g.groupAddLight(b.build());
+      g.groupAddInstance(i);
     }
   }
 

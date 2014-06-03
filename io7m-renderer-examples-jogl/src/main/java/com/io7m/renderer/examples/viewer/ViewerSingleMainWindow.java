@@ -98,14 +98,12 @@ import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBatchedForward;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
+import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.kernel.types.KTranslucentType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyShadowed;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyUnshadowed;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyVisible;
 import com.io7m.renderer.types.RExceptionJCGL;
+import com.io7m.renderer.types.RExceptionLightGroupAlreadyAdded;
 import com.io7m.renderer.types.RExceptionLightMissingShadow;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
@@ -309,35 +307,6 @@ final class ViewerSingleMainWindow implements Runnable
           return Runner.this.cache_mesh.loadMesh(name);
         }
 
-        @Override public void sceneAddInvisibleWithShadow(
-          final KLightType light,
-          final KInstanceOpaqueType instance)
-          throws RExceptionInstanceAlreadyVisible,
-            RExceptionLightMissingShadow
-        {
-          scene_builder.sceneAddInvisibleWithShadow(light, instance);
-        }
-
-        @Override public void sceneAddOpaqueLitVisibleWithoutShadow(
-          final KLightType light,
-          final KInstanceOpaqueType instance)
-          throws RExceptionInstanceAlreadyUnlit,
-            RExceptionInstanceAlreadyShadowed
-        {
-          scene_builder
-            .sceneAddOpaqueLitVisibleWithoutShadow(light, instance);
-        }
-
-        @Override public void sceneAddOpaqueLitVisibleWithShadow(
-          final KLightType light,
-          final KInstanceOpaqueType instance)
-          throws RExceptionInstanceAlreadyUnlit,
-            RExceptionLightMissingShadow,
-            RExceptionInstanceAlreadyUnshadowed
-        {
-          scene_builder.sceneAddOpaqueLitVisibleWithShadow(light, instance);
-        }
-
         @Override public void sceneAddOpaqueUnlit(
           final KInstanceOpaqueType instance)
           throws RExceptionInstanceAlreadyLit
@@ -373,13 +342,6 @@ final class ViewerSingleMainWindow implements Runnable
           sceneGetInstancesOpaqueLitVisible()
         {
           return scene_builder.sceneGetInstancesOpaqueLitVisible();
-        }
-
-        @Override public
-          Map<KLightType, Set<KInstanceOpaqueType>>
-          sceneGetInstancesOpaqueLitVisibleByLight()
-        {
-          return scene_builder.sceneGetInstancesOpaqueLitVisibleByLight();
         }
 
         @Override public
@@ -422,6 +384,21 @@ final class ViewerSingleMainWindow implements Runnable
           } catch (final JCGLException e) {
             throw new RuntimeException(e);
           }
+        }
+
+        @Override public void sceneAddShadowCaster(
+          final KLightType light,
+          final KInstanceOpaqueType instance)
+          throws RExceptionLightMissingShadow
+        {
+          scene_builder.sceneAddShadowCaster(light, instance);
+        }
+
+        @Override public KSceneLightGroupBuilderType sceneNewLightGroup(
+          final String name)
+          throws RExceptionLightGroupAlreadyAdded
+        {
+          return scene_builder.sceneNewLightGroup(name);
         }
       };
 

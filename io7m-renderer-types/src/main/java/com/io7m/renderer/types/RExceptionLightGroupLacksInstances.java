@@ -14,30 +14,41 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel.types;
+package com.io7m.renderer.types;
 
-import com.io7m.renderer.types.RExceptionLightGroupLacksInstances;
-import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
+import com.io7m.jequality.annotations.EqualityReference;
 
 /**
- * An extension of the {@link KSceneBuilderType} interface that allows for
- * final scene creation.
+ * An exception representing an attempt to create a light group that does not
+ * contain any instances.
  */
 
-public interface KSceneBuilderWithCreateType extends KSceneBuilderType
+@EqualityReference public final class RExceptionLightGroupLacksInstances extends
+  RExceptionUserError
 {
+  private static final long serialVersionUID;
+
+  static {
+    serialVersionUID = 245320325852486209L;
+  }
+
   /**
-   * Construct a {@link KScene} from the currently added instances and light
-   * groups.
+   * Construct an exception with the given message.
    * 
-   * @return A newly constructed scene
-   * @throws RExceptionLightGroupLacksLights
-   *           One or more light groups lack lights.
-   * @throws RExceptionLightGroupLacksInstances
-   *           One or more light groups lack instances.
+   * @param message
+   *          The message.
    */
 
-  KScene sceneCreate()
-    throws RExceptionLightGroupLacksInstances,
-      RExceptionLightGroupLacksLights;
+  public RExceptionLightGroupLacksInstances(
+    final String message)
+  {
+    super(message);
+  }
+
+  @Override <T, E extends Throwable> T exceptionAccept(
+    final RExceptionVisitorType<T, E> v)
+    throws E
+  {
+    return v.exceptionVisitUserErrorException(this);
+  }
 }
