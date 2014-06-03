@@ -27,6 +27,7 @@ import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegularBuilderType;
+import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -71,9 +72,9 @@ public final class SLNormalMapping implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    scene.sceneAddOpaqueLitVisibleWithoutShadow(
-      ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE,
-      i);
+    final KSceneLightGroupBuilderType g = scene.sceneNewLightGroup("g");
+    g.groupAddLight(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
+    g.groupAddInstance(i);
   }
 
   @Override public List<ExampleViewType> exampleViewpoints()

@@ -40,36 +40,37 @@ import com.io7m.jnull.NullCheck;
   {
     NullCheck.notNull(in_scene, "Scene");
 
-    final KSceneOpaques o = in_scene.getOpaques();
-    final KSceneBatchedDepth in_depth = KSceneBatchedDepth.newBatches(o);
-    final KSceneBatchedOpaque in_opaques = KSceneBatchedOpaque.newBatches(o);
+    final KSceneBatchedForwardOpaque in_forward =
+      KSceneBatchedForwardOpaque.fromScene(in_scene);
+    final KSceneBatchedDepth in_depth =
+      KSceneBatchedDepth.newBatches(in_scene);
     final KSceneBatchedShadow in_shadows =
       KSceneBatchedShadow.newBatches(in_scene.getShadows());
 
     return new KSceneBatchedForward(
       in_scene.getCamera(),
       in_depth,
-      in_opaques,
+      in_forward,
       in_shadows,
       in_scene.getTranslucents());
   }
 
-  private final KCamera                camera;
-  private final KSceneBatchedDepth     depth;
-  private final KSceneBatchedOpaque    opaques;
-  private final KSceneBatchedShadow    shadows;
-  private final List<KTranslucentType> translucents;
+  private final KCamera                    camera;
+  private final KSceneBatchedDepth         depth;
+  private final KSceneBatchedForwardOpaque forward;
+  private final KSceneBatchedShadow        shadows;
+  private final List<KTranslucentType>     translucents;
 
   private KSceneBatchedForward(
     final KCamera in_camera,
     final KSceneBatchedDepth in_depth,
-    final KSceneBatchedOpaque in_opaques,
+    final KSceneBatchedForwardOpaque in_forward,
     final KSceneBatchedShadow in_shadows,
     final List<KTranslucentType> in_translucents)
   {
     this.camera = NullCheck.notNull(in_camera, "Camera");
     this.depth = NullCheck.notNull(in_depth, "Depth");
-    this.opaques = NullCheck.notNull(in_opaques, "Opaques");
+    this.forward = NullCheck.notNull(in_forward, "Forward opaques");
     this.shadows = NullCheck.notNull(in_shadows, "Shadows");
     this.translucents = NullCheck.notNull(in_translucents, "Translucents");
   }
@@ -93,12 +94,12 @@ import com.io7m.jnull.NullCheck;
   }
 
   /**
-   * @return The batched opaque instances.
+   * @return The opaque instances for forward-rendering.
    */
 
-  public KSceneBatchedOpaque getOpaques()
+  public KSceneBatchedForwardOpaque getForwardOpaques()
   {
-    return this.opaques;
+    return this.forward;
   }
 
   /**

@@ -30,6 +30,7 @@ import com.io7m.renderer.kernel.types.KMaterialEnvironmentReflection;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialSpecularConstant;
+import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -83,7 +84,10 @@ public final class SLEnvironment1 implements ExampleSceneType
         KLightSphere
           .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setPosition(ExampleSceneUtilities.CENTER);
-      scene.sceneAddOpaqueLitVisibleWithoutShadow(b.build(), i);
+
+      final KSceneLightGroupBuilderType g = scene.sceneNewLightGroup("g");
+      g.groupAddLight(b.build());
+      g.groupAddInstance(i);
     }
   }
 

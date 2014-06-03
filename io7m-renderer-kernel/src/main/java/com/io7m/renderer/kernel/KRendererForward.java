@@ -38,7 +38,7 @@ import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KSceneBatchedDepth;
 import com.io7m.renderer.kernel.types.KSceneBatchedForward;
-import com.io7m.renderer.kernel.types.KSceneBatchedOpaque;
+import com.io7m.renderer.kernel.types.KSceneBatchedForwardOpaque;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixI4x4F;
@@ -239,20 +239,21 @@ import com.io7m.renderer.types.RTransformViewType;
             gc.colorBufferMask(true, true, true, true);
             gc.colorBufferClearV4f(KRendererForward.this.background);
 
-            final KSceneBatchedOpaque opaques = scene.getOpaques();
+            final KSceneBatchedForwardOpaque opaques =
+              scene.getForwardOpaques();
 
             KRendererForward.this.opaque_renderer.rendererEvaluateOpaqueLit(
               shadow_context,
               KRendererForward.DEPTH_EQUALS,
               mwo,
-              opaques.getLit());
+              opaques.getLitBatches());
 
             KRendererForward.this.opaque_renderer
               .rendererEvaluateOpaqueUnlit(
                 shadow_context,
                 KRendererForward.DEPTH_EQUALS,
                 mwo,
-                opaques.getUnlit());
+                opaques.getUnlitBatches());
 
             KRendererForward.this.translucent_renderer
               .rendererEvaluateTranslucents(

@@ -19,10 +19,7 @@ package com.io7m.renderer.kernel.types;
 import java.util.Set;
 
 import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyShadowed;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyUnshadowed;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyVisible;
+import com.io7m.renderer.types.RExceptionLightGroupAlreadyAdded;
 import com.io7m.renderer.types.RExceptionLightMissingShadow;
 
 /**
@@ -34,10 +31,35 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
 {
   /**
    * <p>
+   * Add an instance <code>instance</code> which is expected to have an opaque
+   * material and is unaffected by lighting.
+   * </p>
+   * <p>
+   * Due to depth buffering, opaque instances may be rendered in any order and
+   * therefore the order that they are added to the scene has no effect on the
+   * rendered image.
+   * </p>
+   * 
+   * @param instance
+   *          The shadow-casting instance
+   * @throws RExceptionInstanceAlreadyLit
+   *           If the instance has already been added to one or more light
+   *           groups.
+   * 
+   * @see #sceneAddOpaqueLitVisibleWithoutShadow(KLightType,
+   *      KInstanceOpaqueType)
+   * @see #sceneAddOpaqueLitVisibleWithShadow(KLightType, KInstanceOpaqueType)
+   */
+
+  void sceneAddOpaqueUnlit(
+    final KInstanceOpaqueType instance)
+    throws RExceptionInstanceAlreadyLit;
+
+  /**
+   * <p>
    * Add an invisible instance <code>instance</code> associated with light
    * <code>light</code>. The instance will not appear in the rendered scene,
-   * but will cast a shadow if <code>light</code> is configured to produce
-   * shadows.
+   * but will cast a shadow.
    * </p>
    * <p>
    * Shadow casting is controlled by depth buffering (even for translucent
@@ -56,121 +78,14 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    * @param instance
    *          The shadow-casting instance
    * 
-   * @throws RExceptionInstanceAlreadyVisible
-   *           If the given instance is already a visible instance for the
-   *           given light - an instance cannot be both visible and invisible
-   *           for a given light!
    * @throws RExceptionLightMissingShadow
    *           If the light has no shadow.
    */
 
-  void sceneAddInvisibleWithShadow(
+  void sceneAddShadowCaster(
     final KLightType light,
     final KInstanceOpaqueType instance)
-    throws RExceptionInstanceAlreadyVisible,
-      RExceptionLightMissingShadow;
-
-  /**
-   * <p>
-   * Add an instance <code>instance</code> which is expected to have an opaque
-   * material lit by light <code>light</code>. The instance will not cast a
-   * shadow, even if <code>light</code> is configured to produce them.
-   * </p>
-   * <p>
-   * Due to depth buffering, opaque instances may be rendered in any order and
-   * therefore the order that they are added to the scene has no effect on the
-   * rendered image.
-   * </p>
-   * <p>
-   * Allowing instances to appear in scenes without casting shadows is
-   * supported in order to allow separate, simplified geometry to be used for
-   * shadow casting.
-   * </p>
-   * 
-   * @param light
-   *          The light
-   * @param instance
-   *          The instance
-   * @throws RExceptionInstanceAlreadyUnlit
-   *           If <code>instance</code> has already been added to the scene
-   *           without lighting.
-   * @throws RExceptionInstanceAlreadyShadowed
-   *           If <code>instance</code> has already been added to the scene
-   *           without a shadow.
-   * 
-   * @see #sceneAddInvisibleWithShadow(KLightType, KInstanceOpaqueType)
-   */
-
-  void sceneAddOpaqueLitVisibleWithoutShadow(
-    final KLightType light,
-    final KInstanceOpaqueType instance)
-    throws RExceptionInstanceAlreadyUnlit,
-      RExceptionInstanceAlreadyShadowed;
-
-  /**
-   * <p>
-   * Add an instance <code>instance</code> which is expected to have an opaque
-   * material lit by light <code>light</code>.
-   * </p>
-   * <p>
-   * Due to depth buffering, opaque instances may be rendered in any order and
-   * therefore the order that they are added to the scene has no effect on the
-   * rendered image.
-   * </p>
-   * <p>
-   * The instance will cast a shadow if <code>light</code> is configured to
-   * produce shadows.
-   * </p>
-   * 
-   * @param light
-   *          The light
-   * @param instance
-   *          The instance
-   * 
-   * @throws RExceptionInstanceAlreadyUnlit
-   *           If <code>instance</code> has already been added to the scene
-   *           without lighting.
-   * @throws RExceptionLightMissingShadow
-   *           If the light has no shadow.
-   * @throws RExceptionInstanceAlreadyUnshadowed
-   *           If <code>instance</code> is already a non shadow-caster for the
-   *           given light.
-   * 
-   * @see #sceneAddInvisibleWithShadow(KLightType, KInstanceOpaqueType)
-   */
-
-  void sceneAddOpaqueLitVisibleWithShadow(
-    final KLightType light,
-    final KInstanceOpaqueType instance)
-    throws RExceptionInstanceAlreadyUnlit,
-      RExceptionLightMissingShadow,
-      RExceptionInstanceAlreadyUnshadowed;
-
-  /**
-   * <p>
-   * Add an instance <code>instance</code> which is expected to have an opaque
-   * material and is unaffected by lighting.
-   * </p>
-   * <p>
-   * Due to depth buffering, opaque instances may be rendered in any order and
-   * therefore the order that they are added to the scene has no effect on the
-   * rendered image.
-   * </p>
-   * 
-   * @param instance
-   *          The shadow-casting instance
-   * @throws RExceptionInstanceAlreadyLit
-   *           If the instance has already been added to the scene with
-   *           lighting.
-   * 
-   * @see #sceneAddOpaqueLitVisibleWithoutShadow(KLightType,
-   *      KInstanceOpaqueType)
-   * @see #sceneAddOpaqueLitVisibleWithShadow(KLightType, KInstanceOpaqueType)
-   */
-
-  void sceneAddOpaqueUnlit(
-    final KInstanceOpaqueType instance)
-    throws RExceptionInstanceAlreadyLit;
+    throws RExceptionLightMissingShadow;
 
   /**
    * <p>
@@ -179,7 +94,7 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    * not cast a shadow, even if any <code>lights</code> are configured to
    * produce them. To make the instance cast shadows for a particular light,
    * it must also be added to the scene with
-   * {@link #sceneAddInvisibleWithShadow(KLightType, KInstanceOpaqueType)} .
+   * {@link #sceneAddShadowCaster(KLightType, KInstanceOpaqueType)} .
    * </p>
    * <p>
    * Translucent instances are rendered in the order that they are added to
@@ -197,7 +112,7 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    * @param instance
    *          The shadow-casting instance
    * 
-   * @see #sceneAddInvisibleWithShadow(KLightType, KInstanceOpaqueType)
+   * @see #sceneAddShadowCaster(KLightType, KInstanceOpaqueType)
    */
 
   void sceneAddTranslucentLit(
@@ -216,4 +131,21 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
 
   void sceneAddTranslucentUnlit(
     final KInstanceTranslucentUnlitType instance);
+
+  /**
+   * <p>
+   * Construct a new builder to construct a light group.
+   * </p>
+   * 
+   * @return A new light group builder.
+   * @param name
+   *          The name of the new light group.
+   * 
+   * @throws RExceptionLightGroupAlreadyAdded
+   *           A light group already exists with the given name.
+   */
+
+  KSceneLightGroupBuilderType sceneNewLightGroup(
+    final String name)
+    throws RExceptionLightGroupAlreadyAdded;
 }
