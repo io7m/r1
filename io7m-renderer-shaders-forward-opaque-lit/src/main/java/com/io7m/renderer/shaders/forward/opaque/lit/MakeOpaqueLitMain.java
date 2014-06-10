@@ -40,8 +40,8 @@ import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.shaders.core.EasyCompactor;
 import com.io7m.renderer.shaders.forward.RKForwardShader;
 import com.io7m.renderer.shaders.forward.RKForwardShaderCodes;
-import com.io7m.renderer.shaders.forward.RKLitCase;
-import com.io7m.renderer.shaders.forward.RKLitOpaqueRegularCases;
+import com.io7m.renderer.shaders.forward.RKFLitCase;
+import com.io7m.renderer.shaders.forward.RKFLitOpaqueRegularCases;
 
 /**
  * Generate all opaque+lit shaders.
@@ -119,15 +119,15 @@ public final class MakeOpaqueLitMain
       }
     }
 
-    final List<RKLitCase<KMaterialOpaqueRegular>> opaque_lit =
-      new RKLitOpaqueRegularCases().getCases();
+    final List<RKFLitCase<KMaterialOpaqueRegular>> opaque_lit =
+      new RKFLitOpaqueRegularCases().getCases();
 
     MakeOpaqueLitMain.makeSourcesLitOpaque(log, opaque_lit, out_parasol_dir);
 
     {
       log.info("Generating batch: " + out_batch);
       final FileWriter writer = new FileWriter(out_batch);
-      for (final RKLitCase<KMaterialOpaqueRegular> c : opaque_lit) {
+      for (final RKFLitCase<KMaterialOpaqueRegular> c : opaque_lit) {
         assert c != null;
         final String code = RKForwardShaderCodes.fromLitOpaqueRegularCase(c);
         writer.append(code);
@@ -213,7 +213,7 @@ public final class MakeOpaqueLitMain
 
   private static void makeSourcesLitOpaque(
     final LogUsableType log,
-    final List<RKLitCase<KMaterialOpaqueRegular>> opaque_lit,
+    final List<RKFLitCase<KMaterialOpaqueRegular>> opaque_lit,
     final File dir)
     throws IOException
   {
@@ -221,7 +221,7 @@ public final class MakeOpaqueLitMain
       throw new IOException(dir + " is not a directory");
     }
 
-    for (final RKLitCase<KMaterialOpaqueRegular> c : opaque_lit) {
+    for (final RKFLitCase<KMaterialOpaqueRegular> c : opaque_lit) {
       assert c != null;
 
       final String code =

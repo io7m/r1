@@ -44,6 +44,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.jproperties.JPropertyException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.jvvfs.Filesystem;
+import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.FilesystemType;
 
 /**
@@ -52,11 +53,6 @@ import com.io7m.jvvfs.FilesystemType;
 
 public final class ViewerSingleMain
 {
-  private ViewerSingleMain()
-  {
-    throw new UnreachableCodeException();
-  }
-
   private static void announceTime()
   {
     final Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -69,8 +65,7 @@ public final class ViewerSingleMain
   private static boolean hasConsole()
   {
     final String gui =
-      System
-        .getProperty("com.io7m.renderer.kernel.examples.viewer.no_console");
+      System.getProperty("com.io7m.renderer.examples.viewer.no_console");
     if (gui == null) {
       return true;
     }
@@ -108,11 +103,12 @@ public final class ViewerSingleMain
 
     ViewerSingleMain.announceTime();
 
-    if (args.length < 2) {
-      ViewerSingleMain.showFatalErrorAndExitWithoutException(
-        ViewerSingleMain.makeEmptyLog(),
-        "No configuration file",
-        "Required arguments: viewer.conf example-class-name");
+    if (args.length < 3) {
+      ViewerSingleMain
+        .showFatalErrorAndExitWithoutException(
+          ViewerSingleMain.makeEmptyLog(),
+          "No configuration file",
+          "Required arguments: viewer.conf example-renderer-name example-class-name");
     }
 
     try {
@@ -120,7 +116,7 @@ public final class ViewerSingleMain
       final FileInputStream s = new FileInputStream(new File(args[0]));
       p.load(s);
       s.close();
-      ViewerSingleMain.run(p, args[1]);
+      ViewerSingleMain.run(p, args[1], args[2]);
     } catch (final FileNotFoundException e) {
       ViewerSingleMain.showFatalErrorAndExit(
         ViewerSingleMain.makeEmptyLog(),
@@ -151,23 +147,25 @@ public final class ViewerSingleMain
    *          The configuration properties.
    * @throws JPropertyException
    *           If an error occurs whilst parsing properties.
+   * @param renderer_name
+   *          The unqualified name of the renderer.
    * @param example_name
    *          The unqualified name of the example.
    */
 
   public static void run(
     final Properties props,
+    final String renderer_name,
     final String example_name)
     throws JPropertyException
   {
     final LogPolicyType policy =
-      LogPolicyProperties.newPolicy(
-        props,
-        "com.io7m.renderer.kernel.examples");
+      LogPolicyProperties.newPolicy(props, "com.io7m.renderer.examples");
     final LogType log = Log.newLog(policy, "viewer");
     ViewerSingleMain.runWithConfig(
       ViewerConfig.fromProperties(props),
       log,
+      renderer_name,
       example_name);
   }
 
@@ -178,6 +176,8 @@ public final class ViewerSingleMain
    *          The config.
    * @param log
    *          A log interface.
+   * @param renderer_name
+   *          The unqualified name of the renderer.
    * @param example_name
    *          The unqualified name of the example.
    */
@@ -185,6 +185,7 @@ public final class ViewerSingleMain
   public static void runWithConfig(
     final ViewerConfig config,
     final LogType log,
+    final String renderer_name,
     final String example_name)
   {
     SwingUtilities.invokeLater(new Runnable() {
@@ -196,8 +197,15 @@ public final class ViewerSingleMain
           final FilesystemType fs =
             Filesystem.makeWithoutArchiveDirectory(log);
 
+          VShaderFilesystem.setupShaderFilesystem(config, fs, log);
+
           final ViewerSingleMainWindow w =
-            new ViewerSingleMainWindow(config, log, fs, example_name);
+            new ViewerSingleMainWindow(
+              config,
+              log,
+              fs,
+              renderer_name,
+              example_name);
           w.run();
         } catch (final ClassNotFoundException e) {
           log.critical("Scene error: " + e.getMessage());
@@ -209,6 +217,10 @@ public final class ViewerSingleMain
           System.exit(1);
         } catch (final IllegalAccessException e) {
           log.critical("Scene error: " + e.getMessage());
+          e.printStackTrace();
+          System.exit(1);
+        } catch (final FilesystemError e) {
+          log.critical("Filesystem error: " + e.getMessage());
           e.printStackTrace();
           System.exit(1);
         }
@@ -314,5 +326,10 @@ public final class ViewerSingleMain
     } catch (final InterruptedException x) {
       x.printStackTrace();
     }
+  }
+
+  private ViewerSingleMain()
+  {
+    throw new UnreachableCodeException();
   }
 }

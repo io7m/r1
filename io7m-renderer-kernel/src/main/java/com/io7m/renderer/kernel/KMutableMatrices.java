@@ -22,6 +22,7 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.MatrixM4x4F.Context;
@@ -41,6 +42,7 @@ import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentSpecularOnly;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KTransformContext;
 import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.types.RException;
@@ -181,6 +183,11 @@ import com.io7m.renderer.types.RTransformViewType;
       getMatrixViewInverse()
     {
       return this.parent.getMatrixViewInverse();
+    }
+
+    @Override public KProjectionType getProjection()
+    {
+      return this.parent.getProjection();
     }
 
     void instanceStart(
@@ -407,6 +414,16 @@ import com.io7m.renderer.types.RTransformViewType;
       return this.parent.getMatrixViewInverse();
     }
 
+    @Override public KProjectionType getProjection()
+    {
+      return this.parent.getProjection();
+    }
+
+    @Override public KProjectionType getProjectiveProjection()
+    {
+      return this.parent.getProjectiveProjection();
+    }
+
     void instanceStart(
       final KInstanceType i)
     {
@@ -572,29 +589,25 @@ import com.io7m.renderer.types.RTransformViewType;
   public interface MatricesInstanceType extends MatricesObserverValuesType
   {
     /**
-     * @return The current model matrix for the instance @ * If an internal
-     *         constraint error occurs
+     * @return The current model matrix for the instance
      */
 
     RMatrixReadable4x4FType<RTransformModelType> getMatrixModel();
 
     /**
-     * @return The current model-view matrix for the instance @ * If an
-     *         internal constraint error occurs
+     * @return The current model-view matrix for the instance
      */
 
     RMatrixReadable4x4FType<RTransformModelViewType> getMatrixModelView();
 
     /**
-     * @return The current normal matrix for the instance @ * If an internal
-     *         constraint error occurs
+     * @return The current normal matrix for the instance
      */
 
     RMatrixReadable3x3FType<RTransformNormalType> getMatrixNormal();
 
     /**
-     * @return The current UV matrix for the instance @ * If an internal
-     *         constraint error occurs
+     * @return The current UV matrix for the instance
      */
 
     RMatrixM3x3F<RTransformTextureType> getMatrixUV();
@@ -640,8 +653,7 @@ import com.io7m.renderer.types.RTransformViewType;
     MatricesProjectiveLightValuesType
   {
     /**
-     * @return The current modelview matrix for a projective observer @ * If
-     *         an internal constraint error occurs
+     * @return The current modelview matrix for a projective observer
      */
 
       RMatrixM4x4F<RTransformProjectiveModelViewType>
@@ -744,31 +756,34 @@ import com.io7m.renderer.types.RTransformViewType;
   public interface MatricesObserverValuesType
   {
     /**
-     * @return The matrix context @ * If an internal constraint error occurs
+     * @return The matrix context
      */
 
     MatrixM4x4F.Context getMatrixContext();
 
     /**
-     * @return The current projection matrix for an observer @ * If an
-     *         internal constraint error occurs
+     * @return The current projection matrix for an observer
      */
 
     RMatrixReadable4x4FType<RTransformProjectionType> getMatrixProjection();
 
     /**
-     * @return The current view matrix for an observer @ * If an internal
-     *         constraint error occurs
+     * @return The current view matrix for an observer
      */
 
     RMatrixReadable4x4FType<RTransformViewType> getMatrixView();
 
     /**
-     * @return The current inverse view matrix for an observer @ * If an
-     *         internal constraint error occurs
+     * @return The current inverse view matrix for an observer
      */
 
     RMatrixReadable4x4FType<RTransformViewInverseType> getMatrixViewInverse();
+
+    /**
+     * @return The current projection for the observer
+     */
+
+    KProjectionType getProjection();
   }
 
   /**
@@ -843,19 +858,23 @@ import com.io7m.renderer.types.RTransformViewType;
     MatricesObserverValuesType
   {
     /**
-     * @return The current projection matrix for the projective light @ * If
-     *         an internal constraint error occurs
+     * @return The current projection matrix for the projective light
      */
 
       RMatrixM4x4F<RTransformProjectiveProjectionType>
       getMatrixProjectiveProjection();
 
     /**
-     * @return The current view matrix for the projective light @ * If an
-     *         internal constraint error occurs
+     * @return The current view matrix for the projective light
      */
 
     RMatrixM4x4F<RTransformProjectiveViewType> getMatrixProjectiveView();
+
+    /**
+     * @return The projection for the current projective light.
+     */
+
+    KProjectionType getProjectiveProjection();
   }
 
   @EqualityReference private class Observer implements MatricesObserverType
@@ -863,6 +882,7 @@ import com.io7m.renderer.types.RTransformViewType;
     private final RMatrixM4x4F<RTransformProjectionType>  matrix_projection;
     private final RMatrixM4x4F<RTransformViewType>        matrix_view;
     private final RMatrixM4x4F<RTransformViewInverseType> matrix_view_inverse;
+    private @Nullable KProjectionType                     projection;
 
     public Observer()
     {
@@ -902,18 +922,27 @@ import com.io7m.renderer.types.RTransformViewType;
       return this.matrix_view_inverse;
     }
 
+    @Override public KProjectionType getProjection()
+    {
+      assert KMutableMatrices.this.observerIsActive();
+      assert this.projection != null;
+      return this.projection;
+    }
+
     final void observerStart(
       final RMatrixI4x4F<RTransformViewType> view,
-      final RMatrixI4x4F<RTransformProjectionType> projection)
+      final KProjectionType in_projection)
     {
       KMutableMatrices.this.observerSetStarted();
+      this.projection = in_projection;
 
       /**
        * Calculate projection and view matrices.
        */
 
       view.makeMatrixM4x4F(this.matrix_view);
-      projection.makeMatrixM4x4F(this.matrix_projection);
+      in_projection.projectionGetMatrix().makeMatrixM4x4F(
+        this.matrix_projection);
 
       MatrixM4x4F.invertWithContext(
         KMutableMatrices.this.matrix_context,
@@ -979,6 +1008,7 @@ import com.io7m.renderer.types.RTransformViewType;
     private final RMatrixM4x4F<RTransformProjectiveProjectionType> matrix_projective_projection;
     private final RMatrixM4x4F<RTransformProjectiveViewType>       matrix_projective_view;
     private final Observer                                         parent;
+    private @Nullable KProjectionType                              projection;
 
     public ProjectiveLight(
       final Observer in_observer)
@@ -1035,6 +1065,19 @@ import com.io7m.renderer.types.RTransformViewType;
       return this.parent.getMatrixViewInverse();
     }
 
+    @Override public KProjectionType getProjection()
+    {
+      return this.parent.getProjection();
+    }
+
+    @Override public KProjectionType getProjectiveProjection()
+    {
+      assert KMutableMatrices.this.observerIsActive();
+      assert KMutableMatrices.this.projectiveLightIsActive();
+      assert this.projection != null;
+      return this.projection;
+    }
+
     final void projectiveStart(
       final KLightProjective p)
     {
@@ -1056,7 +1099,10 @@ import com.io7m.renderer.types.RTransformViewType;
        * Produce the eye -> clip transformation matrix for the given light.
        */
 
-      p.lightGetProjection().makeMatrixM4x4F(
+      final KProjectionType proj = p.lightGetProjection();
+
+      this.projection = proj;
+      proj.projectionGetMatrix().makeMatrixM4x4F(
         this.matrix_projective_projection);
     }
 
@@ -1194,7 +1240,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   public <T, E extends Throwable> T withObserver(
     final RMatrixI4x4F<RTransformViewType> view,
-    final RMatrixI4x4F<RTransformProjectionType> projection,
+    final KProjectionType projection,
     final MatricesObserverFunctionType<T, E> f)
     throws E,
       RException

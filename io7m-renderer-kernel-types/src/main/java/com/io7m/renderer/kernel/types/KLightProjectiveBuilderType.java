@@ -21,10 +21,8 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionUserError;
-import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RVectorI3F;
 
 /**
@@ -150,7 +148,7 @@ public interface KLightProjectiveBuilderType
    */
 
   void setProjection(
-    final RMatrixI4x4F<RTransformProjectionType> projection);
+    final KProjectionType projection);
 
   /**
    * <p>

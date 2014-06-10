@@ -23,16 +23,14 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KLightType;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.tests.FakeCapabilities;
 import com.io7m.renderer.tests.FakeTexture2DStatic;
 import com.io7m.renderer.tests.QuaternionI4FGenerator;
-import com.io7m.renderer.tests.types.RMatrixI4x4FGenerator;
 import com.io7m.renderer.tests.types.RVectorI3FGenerator;
-import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RVectorI3F;
 
 public final class KLightGenerator implements Generator<KLightType>
@@ -50,8 +48,7 @@ public final class KLightGenerator implements Generator<KLightType>
     final Generator<RVectorI3F<RSpaceWorldType>> in_position_gen =
       new RVectorI3FGenerator<RSpaceWorldType>();
     final Generator<QuaternionI4F> in_quat_gen = new QuaternionI4FGenerator();
-    final Generator<RMatrixI4x4F<RTransformProjectionType>> in_proj_gen =
-      new RMatrixI4x4FGenerator<RTransformProjectionType>();
+    final Generator<KProjectionType> in_proj_gen = new KProjectionGenerator();
     final Generator<String> name_gen = new StringGenerator();
     final Generator<Texture2DStaticUsableType> in_tex_gen =
       FakeTexture2DStatic.generator(name_gen);

@@ -19,6 +19,8 @@ package com.io7m.renderer.tests.kernel;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.annotation.Nonnull;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,12 +32,15 @@ import com.io7m.jcanephora.JCGLExceptionAttributeDuplicate;
 import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.UsageHint;
+import com.io7m.jequality.AlmostEqualFloat;
+import com.io7m.jequality.AlmostEqualFloat.ContextRelative;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheckException;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -62,6 +67,8 @@ import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialSpecularNone;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
+import com.io7m.renderer.kernel.types.KProjection;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
@@ -133,13 +140,15 @@ import com.io7m.renderer.types.RVectorI4F;
 
       final FakeCapabilities caps = new FakeCapabilities();
 
-      final KLightProjectiveBuilderType b = KLightProjective.newBuilder();
+      final KLightProjectiveBuilderType b =
+        KLightProjective.newBuilder(
+          FakeTexture2DStatic.getDefault(),
+          KMutableMatricesTest.arbitraryProjection());
       b.setColor(colour);
       b.setFalloff(falloff);
       b.setIntensity(intensity);
       b.setOrientation(orientation);
       b.setPosition(position);
-      b.setProjection(projection);
       b.setRange(range);
       b.setShadowOption(shadow);
       b.setTexture(texture);
@@ -236,8 +245,8 @@ import com.io7m.renderer.types.RVectorI4F;
       final KMutableMatrices mm)
       throws RException
   {
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.identity();
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
     final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
 
     final AtomicReference<MatricesObserverType> saved =
@@ -262,7 +271,7 @@ import com.io7m.renderer.types.RVectorI4F;
     AtomicReference<MatricesProjectiveLightType>
     saveProjectiveDangerously(
       final KMutableMatrices mm,
-      final @NonNull RMatrixI4x4F<RTransformProjectionType> projection,
+      final @NonNull KProjectionType projection,
       final @NonNull RMatrixI4x4F<RTransformViewType> view)
       throws RException
   {
@@ -297,10 +306,8 @@ import com.io7m.renderer.types.RVectorI4F;
     final KMutableMatrices mm)
     throws RException
   {
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -373,10 +380,8 @@ import com.io7m.renderer.types.RVectorI4F;
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final AtomicBoolean instance_once = new AtomicBoolean();
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -455,10 +460,8 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -507,10 +510,8 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -590,8 +591,8 @@ import com.io7m.renderer.types.RVectorI4F;
       throws RException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.identity();
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
     final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
     final AtomicReference<MatricesProjectiveLightType> r =
       KMutableMatricesTest.saveProjectiveDangerously(mm, projection, view);
@@ -616,8 +617,8 @@ import com.io7m.renderer.types.RVectorI4F;
       throws RException
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.identity();
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
     final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
 
     mm.withObserver(
@@ -716,8 +717,16 @@ import com.io7m.renderer.types.RVectorI4F;
     m_projection.set(1, 1, 2.0f);
     m_projection.set(2, 2, 2.0f);
     m_projection.set(3, 3, 2.0f);
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+
+    final KProjectionType projection =
+      KProjection.fromFrustumWithContext(
+        new MatrixM4x4F(),
+        -10.0f,
+        10.0f,
+        -10.0f,
+        10.0f,
+        1.0f,
+        100.0f);
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -727,6 +736,8 @@ import com.io7m.renderer.types.RVectorI4F;
     m_view.set(3, 3, 3.0f);
     final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
+
+    final ContextRelative ctx = new AlmostEqualFloat.ContextRelative();
 
     mm.withObserver(
       view,
@@ -743,10 +754,25 @@ import com.io7m.renderer.types.RVectorI4F;
           {
             final RMatrixReadable4x4FType<RTransformProjectionType> m =
               o.getMatrixProjection();
-            Assert.assertEquals(2.0f, m.getRowColumnF(0, 0), 0.0f);
-            Assert.assertEquals(2.0f, m.getRowColumnF(1, 1), 0.0f);
-            Assert.assertEquals(2.0f, m.getRowColumnF(2, 2), 0.0f);
-            Assert.assertEquals(2.0f, m.getRowColumnF(3, 3), 0.0f);
+
+            System.out.println(m);
+
+            Assert.assertTrue(AlmostEqualFloat.almostEqual(
+              ctx,
+              m.getRowColumnF(0, 0),
+              0.1f));
+            Assert.assertTrue(AlmostEqualFloat.almostEqual(
+              ctx,
+              m.getRowColumnF(1, 1),
+              0.1f));
+            Assert.assertTrue(AlmostEqualFloat.almostEqual(
+              ctx,
+              m.getRowColumnF(2, 2),
+              -1.020202040672302f));
+            Assert.assertTrue(AlmostEqualFloat.almostEqual(
+              ctx,
+              m.getRowColumnF(3, 3),
+              0.0f));
           }
 
           {
@@ -779,10 +805,8 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -821,8 +845,9 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.identity();
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
+
     final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
 
     mm.withObserver(
@@ -850,6 +875,18 @@ import com.io7m.renderer.types.RVectorI4F;
       });
   }
 
+  private static @Nonnull KProjectionType arbitraryProjection()
+  {
+    return KProjection.fromFrustumWithContext(
+      new MatrixM4x4F(),
+      -1.0f,
+      1.0f,
+      -1.0f,
+      1.0f,
+      1.0f,
+      100.0f);
+  }
+
   @Test(expected = AssertionError.class) public
     void
     testWithProjectiveFault0()
@@ -857,10 +894,8 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -880,10 +915,8 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -903,10 +936,8 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -952,10 +983,8 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -1058,10 +1087,8 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -1113,10 +1140,8 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -1179,8 +1204,8 @@ import com.io7m.renderer.types.RVectorI4F;
     m_projection.set(1, 1, 2.0f);
     m_projection.set(2, 2, 2.0f);
     m_projection.set(3, 3, 2.0f);
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -1213,10 +1238,26 @@ import com.io7m.renderer.types.RVectorI4F;
                     p.getMatrixProjectiveProjection();
                   final RMatrixM4x4F<RTransformProjectiveProjectionType> r =
                     new RMatrixM4x4F<RTransformProjectiveProjectionType>();
-                  r.set(0, 0, 7.0f);
-                  r.set(1, 1, 7.0f);
-                  r.set(2, 2, 7.0f);
-                  r.set(3, 3, 7.0f);
+                  r.set(0, 0, 1.0f);
+                  r.set(0, 1, 0.0f);
+                  r.set(0, 2, 0.0f);
+                  r.set(0, 3, 0.0f);
+
+                  r.set(1, 0, 0.0f);
+                  r.set(1, 1, 1.0f);
+                  r.set(1, 2, 0.0f);
+                  r.set(1, 3, 0.0f);
+
+                  r.set(2, 0, 0.0f);
+                  r.set(2, 1, 0.0f);
+                  r.set(2, 2, -1.02020204f);
+                  r.set(2, 3, -2.02020201f);
+
+                  r.set(3, 0, 0.0f);
+                  r.set(3, 1, 0.0f);
+                  r.set(3, 2, -1.0f);
+                  r.set(3, 3, 0.0f);
+
                   Assert.assertEquals(r, m);
                 }
 
@@ -1246,10 +1287,8 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();
@@ -1298,10 +1337,8 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
-    final RMatrixM4x4F<RTransformProjectionType> m_projection =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(m_projection);
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
 
     final RMatrixM4x4F<RTransformProjectionType> m_view =
       new RMatrixM4x4F<RTransformProjectionType>();

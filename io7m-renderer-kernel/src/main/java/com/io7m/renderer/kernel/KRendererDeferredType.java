@@ -16,11 +16,42 @@
 
 package com.io7m.renderer.kernel;
 
+import com.io7m.jtensors.VectorReadable4FType;
+import com.io7m.renderer.kernel.types.KSceneBatchedDeferred;
+import com.io7m.renderer.types.RException;
+
 /**
  * The type of deferred renderers.
  */
 
 public interface KRendererDeferredType extends KRendererType
 {
-  // Nothing
+  /**
+   * Evaluate the renderer for the given scene, writing the results to the
+   * given framebuffer.
+   * 
+   * @param framebuffer
+   *          The framebuffer
+   * @param scene
+   *          The scene
+   * 
+   * @throws RException
+   *           If an error occurs
+   */
+
+  void rendererDeferredEvaluate(
+    final KFramebufferDeferredUsableType framebuffer,
+    final KSceneBatchedDeferred scene)
+    throws RException;
+
+  /**
+   * Set the background color to which the renderer will clear the framebuffer
+   * prior to rendering.
+   * 
+   * @param rgba
+   *          The background color
+   */
+
+  void rendererDeferredSetBackgroundRGBA(
+    final VectorReadable4FType rgba);
 }

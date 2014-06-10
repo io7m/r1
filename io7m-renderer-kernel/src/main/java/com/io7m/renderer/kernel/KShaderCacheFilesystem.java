@@ -54,6 +54,61 @@ import com.io7m.renderer.types.RExceptionFilesystem;
     super(c);
   }
 
+  @Override public KProgram getDeferredGeometry(
+    final String name)
+    throws RException
+  {
+    try {
+      return this.cacheGetLU(KShaderPaths.PATH_DEFERRED_GEOMETRY
+        .appendName(name));
+    } catch (final FilesystemError e) {
+      throw RExceptionFilesystem.fromFilesystemException(e);
+    } catch (final JCacheException e) {
+      throw RExceptionCache.fromJCacheException(e);
+    }
+  }
+
+  @Override public KProgram getDeferredLight(
+    final String name)
+    throws RException
+  {
+    try {
+      return this.cacheGetLU(KShaderPaths.PATH_DEFERRED_LIGHT
+        .appendName(name));
+    } catch (final FilesystemError e) {
+      throw RExceptionFilesystem.fromFilesystemException(e);
+    } catch (final JCacheException e) {
+      throw RExceptionCache.fromJCacheException(e);
+    }
+  }
+
+  @Override public KProgram getDepth(
+    final String name)
+    throws RException
+  {
+    try {
+      return this.cacheGetLU(KShaderPaths.PATH_DEPTH.appendName(name));
+    } catch (final FilesystemError e) {
+      throw RExceptionFilesystem.fromFilesystemException(e);
+    } catch (final JCacheException e) {
+      throw RExceptionCache.fromJCacheException(e);
+    }
+  }
+
+  @Override public KProgram getDepthVariance(
+    final String name)
+    throws RException
+  {
+    try {
+      return this.cacheGetLU(KShaderPaths.PATH_DEPTH_VARIANCE
+        .appendName(name));
+    } catch (final FilesystemError e) {
+      throw RExceptionFilesystem.fromFilesystemException(e);
+    } catch (final JCacheException e) {
+      throw RExceptionCache.fromJCacheException(e);
+    }
+  }
+
   @Override public KProgram getForwardOpaqueLit(
     final String name)
     throws RException
@@ -110,19 +165,6 @@ import com.io7m.renderer.types.RExceptionFilesystem;
     }
   }
 
-  @Override public KProgram getDepth(
-    final String name)
-    throws RException
-  {
-    try {
-      return this.cacheGetLU(KShaderPaths.PATH_DEPTH.appendName(name));
-    } catch (final FilesystemError e) {
-      throw RExceptionFilesystem.fromFilesystemException(e);
-    } catch (final JCacheException e) {
-      throw RExceptionCache.fromJCacheException(e);
-    }
-  }
-
   @Override public KProgram getPostprocessing(
     final String name)
     throws RException
@@ -137,13 +179,12 @@ import com.io7m.renderer.types.RExceptionFilesystem;
     }
   }
 
-  @Override public KProgram getDepthVariance(
+  @Override public KProgram getDebug(
     final String name)
     throws RException
   {
     try {
-      return this.cacheGetLU(KShaderPaths.PATH_DEPTH_VARIANCE
-        .appendName(name));
+      return this.cacheGetLU(KShaderPaths.PATH_DEBUG.appendName(name));
     } catch (final FilesystemError e) {
       throw RExceptionFilesystem.fromFilesystemException(e);
     } catch (final JCacheException e) {

@@ -64,7 +64,6 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
   private static final class KFramebufferForwardGL2 extends
     KFramebufferForwardAbstract
   {
-
     public static KFramebufferForwardType newFramebuffer(
       final JCGLInterfaceGL2Type gl,
       final KFramebufferForwardDescription description)

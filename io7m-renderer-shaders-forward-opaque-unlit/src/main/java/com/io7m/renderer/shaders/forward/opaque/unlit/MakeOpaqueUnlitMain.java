@@ -40,7 +40,7 @@ import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.shaders.core.EasyCompactor;
 import com.io7m.renderer.shaders.forward.RKForwardShader;
 import com.io7m.renderer.shaders.forward.RKForwardShaderCodes;
-import com.io7m.renderer.shaders.forward.RKUnlitOpaqueRegularCases;
+import com.io7m.renderer.shaders.forward.RKFUnlitOpaqueRegularCases;
 
 /**
  * Generate all opaque+unlit shaders.
@@ -119,7 +119,7 @@ public final class MakeOpaqueUnlitMain
     }
 
     final List<KMaterialOpaqueRegular> opaque_unlit =
-      new RKUnlitOpaqueRegularCases().getCases();
+      new RKFUnlitOpaqueRegularCases().getCases();
 
     MakeOpaqueUnlitMain.makeSourcesUnlitOpaque(
       log,

@@ -105,15 +105,6 @@ import com.io7m.renderer.types.RXMLException;
     }
   }
 
-  private static PathVirtual makeBasePath()
-  {
-    try {
-      return PathVirtual.ofString("/com/io7m/renderer/kernel");
-    } catch (final FilesystemError e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
   private static API getAPI(
     final JCGLApi api)
   {
@@ -456,6 +447,15 @@ import com.io7m.renderer.types.RXMLException;
       }
     } finally {
       v_stream.close();
+    }
+  }
+
+  private static PathVirtual makeBasePath()
+  {
+    try {
+      return PathVirtual.ofString("/com/io7m/renderer/kernel");
+    } catch (final FilesystemError e) {
+      throw new UnreachableCodeException(e);
     }
   }
 

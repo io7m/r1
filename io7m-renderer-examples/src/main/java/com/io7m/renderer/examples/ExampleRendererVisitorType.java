@@ -28,6 +28,36 @@ import com.io7m.renderer.types.RException;
 public interface ExampleRendererVisitorType<T>
 {
   /**
+   * Visit a debug renderer.
+   * 
+   * @param r
+   *          The renderer
+   * @return A value of type <code>T</code>
+   * 
+   * @throws RException
+   *           If required
+   */
+
+  T visitDebug(
+    final ExampleRendererDebugType r)
+    throws RException;
+
+  /**
+   * Visit a deferred renderer.
+   * 
+   * @param r
+   *          The renderer
+   * @return A value of type <code>T</code>
+   * 
+   * @throws RException
+   *           If required
+   */
+
+  T visitDeferred(
+    final ExampleRendererDeferredType r)
+    throws RException;
+
+  /**
    * Visit a forward renderer.
    * 
    * @param r

@@ -41,8 +41,8 @@ import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.shaders.core.EasyCompactor;
 import com.io7m.renderer.shaders.forward.RKForwardShader;
 import com.io7m.renderer.shaders.forward.RKForwardShaderCodes;
-import com.io7m.renderer.shaders.forward.RKUnlitTranslucentRefractiveCases;
-import com.io7m.renderer.shaders.forward.RKUnlitTranslucentRegularCases;
+import com.io7m.renderer.shaders.forward.RKFUnlitTranslucentRefractiveCases;
+import com.io7m.renderer.shaders.forward.RKFUnlitTranslucentRegularCases;
 
 /**
  * Generate all opaque+unlit shaders.
@@ -121,9 +121,9 @@ public final class MakeTranslucentUnlitMain
     }
 
     final List<KMaterialTranslucentRegular> translucent_regular =
-      new RKUnlitTranslucentRegularCases().getCases();
+      new RKFUnlitTranslucentRegularCases().getCases();
     final List<KMaterialTranslucentRefractive> translucent_refractive =
-      new RKUnlitTranslucentRefractiveCases().getCases();
+      new RKFUnlitTranslucentRefractiveCases().getCases();
 
     MakeTranslucentUnlitMain.makeSourcesUnlitTranslucentRegular(
       log,

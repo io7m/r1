@@ -1,0 +1,434 @@
+/*
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
+ * 
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+ * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+package com.io7m.renderer.shaders.deferred;
+
+import com.io7m.jfunctional.Unit;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.kernel.types.KLightType;
+import com.io7m.renderer.kernel.types.KMaterialAlbedoType;
+import com.io7m.renderer.kernel.types.KMaterialDepthAlpha;
+import com.io7m.renderer.kernel.types.KMaterialDepthConstant;
+import com.io7m.renderer.kernel.types.KMaterialDepthType;
+import com.io7m.renderer.kernel.types.KMaterialDepthVisitorType;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveConstant;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveMapped;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveNone;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveType;
+import com.io7m.renderer.kernel.types.KMaterialEmissiveVisitorType;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentType;
+import com.io7m.renderer.kernel.types.KMaterialNormalType;
+import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialRegularType;
+import com.io7m.renderer.kernel.types.KMaterialSpecularConstant;
+import com.io7m.renderer.kernel.types.KMaterialSpecularMapped;
+import com.io7m.renderer.kernel.types.KMaterialSpecularNone;
+import com.io7m.renderer.kernel.types.KMaterialSpecularType;
+import com.io7m.renderer.kernel.types.KMaterialSpecularVisitorType;
+import com.io7m.renderer.kernel.types.KMaterialType;
+import com.io7m.renderer.shaders.forward.RKForwardShader;
+import com.io7m.renderer.types.RException;
+
+public final class RKDeferredShader
+{
+  public static final String PACKAGE_DEFERRED_GEOMETRY_OPAQUE_REGULAR;
+  public static final String PACKAGE_DEFERRED_LIGHT;
+
+  static {
+    PACKAGE_DEFERRED_GEOMETRY_OPAQUE_REGULAR =
+      "com.io7m.renderer.kernel.deferred.geometry.regular";
+    PACKAGE_DEFERRED_LIGHT = "com.io7m.renderer.kernel.deferred.light";
+  }
+
+  public static void fragmentShaderDeclarationsCommon(
+    final StringBuilder b,
+    final KMaterialType m)
+  {
+    b.append("  -- Standard declarations\n");
+    b.append("  in f_position_eye  : vector_4f;\n");
+    b.append("  in f_position_clip : vector_4f;\n");
+    b.append("\n");
+
+    if (m.materialRequiresUVCoordinates()) {
+      b.append("  -- UV coordinates\n");
+      b.append("  in f_uv : vector_2f;\n");
+      b.append("\n");
+    }
+
+    b.append("  -- G-Buffer outputs\n");
+    b.append("  out out_albedo     : vector_4f as 0;\n");
+    b.append("  out out_normal     : vector_2f as 1;\n");
+    b.append("  out out_specular   : vector_4f as 2;\n");
+    b.append("\n");
+  }
+
+  public static void fragmentShaderDeclarationsDepth(
+    final StringBuilder b,
+    final KMaterialDepthType depth)
+  {
+    try {
+      depth
+        .depthAccept(new KMaterialDepthVisitorType<Unit, UnreachableCodeException>() {
+          @Override public Unit alpha(
+            final KMaterialDepthAlpha m)
+          {
+            b.append("  -- Depth declarations\n");
+            b.append("  parameter p_alpha_depth : float;\n");
+            b.append("\n");
+            return Unit.unit();
+          }
+
+          @Override public Unit constant(
+            final KMaterialDepthConstant m)
+          {
+            return Unit.unit();
+          }
+        });
+    } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
+  private static void fragmentShaderDiscardDepth(
+    final StringBuilder b,
+    final KMaterialDepthType depth)
+  {
+    try {
+      depth
+        .depthAccept(new KMaterialDepthVisitorType<Unit, UnreachableCodeException>() {
+          @Override public Unit alpha(
+            final KMaterialDepthAlpha m)
+          {
+            b.append("    discard (F.lesser (albedo [w], p_alpha_depth));\n");
+            return Unit.unit();
+          }
+
+          @Override public Unit constant(
+            final KMaterialDepthConstant m)
+          {
+            return Unit.unit();
+          }
+        });
+    } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
+  public static void fragmentShaderOpaqueRegular(
+    final StringBuilder b,
+    final KMaterialOpaqueRegular m)
+  {
+    final KMaterialNormalType normal = m.materialGetNormal();
+    final KMaterialAlbedoType albedo = m.materialRegularGetAlbedo();
+    final KMaterialDepthType depth = m.materialOpaqueGetDepth();
+    final KMaterialEmissiveType emissive = m.materialRegularGetEmissive();
+    final KMaterialEnvironmentType envi = m.materialRegularGetEnvironment();
+    final KMaterialSpecularType specular = m.materialRegularGetSpecular();
+
+    b.append("shader fragment f is\n");
+    RKDeferredShader.fragmentShaderDeclarationsCommon(b, m);
+    RKForwardShader.fragmentShaderDeclarationsAlbedo(b, albedo);
+    RKDeferredShader.fragmentShaderDeclarationsDepth(b, depth);
+    RKForwardShader.fragmentShaderDeclarationsEmissive(b, emissive);
+    RKForwardShader.fragmentShaderDeclarationsNormal(b, normal);
+    RKForwardShader.fragmentShaderDeclarationsSpecular(b, specular);
+    RKForwardShader.fragmentShaderDeclarationsEnvironment(b, envi);
+    b.append("with\n");
+    RKForwardShader.fragmentShaderValuesNormal(b, normal);
+    RKForwardShader.fragmentShaderValuesEmission(b, emissive);
+    RKForwardShader.fragmentShaderValuesSpecular(b, specular);
+    RKForwardShader.fragmentShaderValuesEnvironment(b, envi);
+    RKForwardShader.fragmentShaderValuesAlbedoOpaque(b, albedo);
+    RKDeferredShader.fragmentShaderDiscardDepth(b, depth);
+    RKForwardShader.fragmentShaderValuesSurfaceOpaque(b, envi);
+    RKDeferredShader.fragmentShaderValuesResults(b, emissive, specular);
+    b.append("as\n");
+    b.append("  out out_albedo   = r_albedo;\n");
+    b.append("  out out_normal   = r_normal;\n");
+    b.append("  out out_specular = r_specular;\n");
+    b.append("end;\n");
+    b.append("\n");
+  }
+
+  private static void fragmentShaderValuesResults(
+    final StringBuilder b,
+    final KMaterialEmissiveType emissive,
+    final KMaterialSpecularType specular)
+  {
+    try {
+      b.append("  value r_normal =\n");
+      b.append("    Normals.compress (n);\n");
+      b.append("\n");
+
+      emissive
+        .emissiveAccept(new KMaterialEmissiveVisitorType<Unit, UnreachableCodeException>() {
+          @Override public Unit constant(
+            final KMaterialEmissiveConstant m)
+          {
+            b.append("  value r_albedo =\n");
+            b.append("    new vector_4f (\n");
+            b.append("      surface [x y z],\n");
+            b.append("      p_emission.amount\n");
+            b.append("    );\n");
+            b.append("\n");
+            return Unit.unit();
+          }
+
+          @Override public Unit mapped(
+            final KMaterialEmissiveMapped m)
+          {
+            b.append("  value r_albedo =\n");
+            b.append("    new vector_4f (\n");
+            b.append("      surface [x y z],\n");
+            b.append("      p_emission.amount\n");
+            b.append("    );\n");
+            b.append("\n");
+            return Unit.unit();
+          }
+
+          @Override public Unit none(
+            final KMaterialEmissiveNone m)
+          {
+            b.append("  value r_albedo =\n");
+            b.append("    new vector_4f (\n");
+            b.append("      surface [x y z],\n");
+            b.append("      0.0\n");
+            b.append("    );\n");
+            b.append("\n");
+            return Unit.unit();
+          }
+        });
+
+      specular
+        .specularAccept(new KMaterialSpecularVisitorType<Unit, UnreachableCodeException>() {
+          @Override public Unit constant(
+            final KMaterialSpecularConstant m)
+          {
+            b.append("  value r_specular =\n");
+            b.append("    new vector_4f (\n");
+            b.append("      p_specular.color,\n");
+            b.append("      F.divide (p_specular.exponent, 256.0)\n");
+            b.append("    );\n");
+            b.append("\n");
+            return Unit.unit();
+          }
+
+          @Override public Unit mapped(
+            final KMaterialSpecularMapped m)
+          {
+            b.append("  value r_specular =\n");
+            b.append("    new vector_4f (\n");
+            b.append("      p_specular.color,\n");
+            b.append("      F.divide (p_specular.exponent, 256.0)\n");
+            b.append("    );\n");
+            b.append("\n");
+            return Unit.unit();
+          }
+
+          @Override public Unit none(
+            final KMaterialSpecularNone m)
+          {
+            b.append("  value r_specular =\n");
+            b.append("    new vector_4f (0.0, 0.0, 0.0, 0.0);\n");
+            b.append("\n");
+            return Unit.unit();
+          }
+        });
+
+    } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
+  public static void moduleEnd(
+    final StringBuilder b)
+  {
+    b.append("end;\n");
+    b.append("\n");
+  }
+
+  public static String moduleGeometryOpaqueRegular(
+    final KMaterialOpaqueRegular m)
+  {
+    final String code = m.materialLitGetCodeWithDepth();
+
+    final StringBuilder b = new StringBuilder();
+    RKDeferredShader.moduleStart(
+      b,
+      RKDeferredShader.PACKAGE_DEFERRED_GEOMETRY_OPAQUE_REGULAR,
+      code);
+    RKDeferredShader.vertexShaderOpaqueRegular(b, m);
+    RKDeferredShader.fragmentShaderOpaqueRegular(b, m);
+    RKDeferredShader.moduleProgram(b);
+    RKDeferredShader.moduleEnd(b);
+
+    final String r = b.toString();
+    assert r != null;
+    return r;
+  }
+
+  public static String moduleLight(
+    final KLightType l)
+  {
+    final String code = l.lightGetCode();
+
+    final StringBuilder b = new StringBuilder();
+    RKDeferredShader.moduleStart(
+      b,
+      RKDeferredShader.PACKAGE_DEFERRED_GEOMETRY_OPAQUE_REGULAR,
+      code);
+    RKDeferredShader.vertexShaderLight(b);
+    RKDeferredShader.fragmentShaderLight(b, l);
+    RKDeferredShader.moduleProgram(b);
+    RKDeferredShader.moduleEnd(b);
+
+    final String r = b.toString();
+    assert r != null;
+    return r;
+  }
+
+  public static void fragmentShaderLight(
+    final StringBuilder b,
+    final KLightType l)
+  {
+    b.append("shader fragment f is\n");
+    b.append("\n");
+    b.append("  -- G-buffer components\n");
+    b.append("  parameter t_map_albedo   : sampler_2d;\n");
+    b.append("  parameter t_map_normal   : sampler_2d;\n");
+    b.append("  parameter t_map_specular : sampler_2d;\n");
+    b.append("  parameter t_map_depth    : sampler_2d;\n");
+    b.append("\n");
+    b.append("  -- Standard declarations\n");
+    b.append("  in f_position_eye  : vector_4f;\n");
+    b.append("  in f_position_clip : vector_4f;\n");
+    b.append("  out out_0          : vector_4f as 0;\n");
+    b.append("\n");
+    b.append("with\n");
+
+    b.append("as\n");
+    b.append("  out out_0 = rgba;\n");
+    b.append("end;\n");
+    b.append("\n");
+  }
+
+  public static void vertexShaderLight(
+    final StringBuilder b)
+  {
+    b.append("shader vertex v is\n");
+    b.append("  -- Vertex position coordinates\n");
+    b.append("  in v_position              : vector_3f;\n");
+    b.append("  out f_position_eye         : vector_4f;\n");
+    b.append("  out vertex f_position_clip : vector_4f;\n");
+    b.append("\n");
+    b.append("  -- Standard matrices\n");
+    b.append("  parameter m_modelview      : matrix_4x4f;\n");
+    b.append("  parameter m_projection     : matrix_4x4f;\n");
+    b.append("\n");
+    b.append("with\n");
+    b.append("\n");
+    b.append("  -- Position values\n");
+    b.append("  value position_eye =\n");
+    b.append("    M4.multiply_vector (\n");
+    b.append("      m_modelview,\n");
+    b.append("      new vector_4f (v_position, 1.0)\n");
+    b.append("    );\n");
+    b.append("\n");
+    b.append("  value position_clip =\n");
+    b.append("    M4.multiply_vector (\n");
+    b.append("      M4.multiply (m_projection, m_modelview),\n");
+    b.append("      new vector_4f (v_position, 1.0)\n");
+    b.append("    );\n");
+    b.append("\n");
+    b.append("as\n");
+    b.append("  -- Standard writes\n");
+    b.append("  out f_position_clip = position_clip;\n");
+    b.append("  out f_position_eye  = position_eye;\n");
+    b.append("  out f_uv            = uv;\n");
+    b.append("end;\n");
+    b.append("\n");
+  }
+
+  public static void moduleProgram(
+    final StringBuilder b)
+  {
+    b.append("shader program p is\n");
+    b.append("  vertex   v;\n");
+    b.append("  fragment f;\n");
+    b.append("end;\n");
+    b.append("\n");
+  }
+
+  public static void moduleStart(
+    final StringBuilder b,
+    final String package_name,
+    final String module_name)
+  {
+    b.append("package ");
+    b.append(package_name);
+    b.append(";\n");
+    b.append("\n");
+    b.append("module ");
+    b.append(module_name);
+    b.append(" is\n");
+    b.append("\n");
+    b.append("import com.io7m.parasol.Matrix3x3f as M3;\n");
+    b.append("import com.io7m.parasol.Matrix4x4f as M4;\n");
+    b.append("import com.io7m.parasol.Vector3f   as V3;\n");
+    b.append("import com.io7m.parasol.Vector4f   as V4;\n");
+    b.append("import com.io7m.parasol.Sampler2D  as S;\n");
+    b.append("import com.io7m.parasol.Float      as F;\n");
+    b.append("\n");
+    b.append("import com.io7m.renderer.core.Albedo;\n");
+    b.append("import com.io7m.renderer.core.CubeMap;\n");
+    b.append("import com.io7m.renderer.core.DirectionalLight;\n");
+    b.append("import com.io7m.renderer.core.Emission;\n");
+    b.append("import com.io7m.renderer.core.Environment;\n");
+    b.append("import com.io7m.renderer.core.Light;\n");
+    b.append("import com.io7m.renderer.core.Normals;\n");
+    b.append("import com.io7m.renderer.core.ProjectiveLight;\n");
+    b.append("import com.io7m.renderer.core.Refraction;\n");
+    b.append("import com.io7m.renderer.core.ShadowBasic;\n");
+    b.append("import com.io7m.renderer.core.ShadowVariance;\n");
+    b.append("import com.io7m.renderer.core.Specular;\n");
+    b.append("import com.io7m.renderer.core.SphericalLight;\n");
+    b.append("import com.io7m.renderer.core.VectorAux;\n");
+    b.append("\n");
+  }
+
+  public static void vertexShaderOpaqueRegular(
+    final StringBuilder b,
+    final KMaterialRegularType m)
+  {
+    b.append("shader vertex v is\n");
+    RKForwardShader.vertexShaderStandardDeclarations(b);
+    RKForwardShader.vertexShaderStandardDeclarationsNormal(
+      b,
+      m.materialGetNormal());
+    b.append("with\n");
+    RKForwardShader.vertexShaderStandardValues(b);
+    RKForwardShader.vertexShaderStandardValuesNormals(
+      b,
+      m.materialGetNormal());
+    b.append("as\n");
+    RKForwardShader.vertexShaderStandardWritesNormals(
+      b,
+      m.materialGetNormal());
+    RKForwardShader.vertexShaderStandardWrites(b);
+    b.append("end;\n");
+    b.append("\n");
+  }
+}

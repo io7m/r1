@@ -54,7 +54,6 @@ import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformViewType;
 
 /**
@@ -224,8 +223,6 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveView());
-    final RMatrixI4x4F<RTransformProjectionType> proj =
-      RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveProjection());
 
     /**
      * Basic shadow mapping produces fewer artifacts if only back faces are
@@ -234,7 +231,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
     this.depth_renderer.rendererEvaluateDepth(
       view,
-      proj,
+      mwp.getProjectiveProjection(),
       batches,
       smb.getFramebuffer(),
       Option.some(KFaceSelection.FACE_RENDER_BACK));
@@ -439,7 +436,7 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     this.matrices.withObserver(
       camera.getViewMatrix(),
-      camera.getProjectionMatrix(),
+      camera.getProjection(),
       new MatricesObserverFunctionType<Unit, JCGLException>() {
         @Override public Unit run(
           final MatricesObserverType mo)
@@ -462,8 +459,6 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveView());
-    final RMatrixI4x4F<RTransformProjectionType> proj =
-      RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveProjection());
 
     /**
      * Variance shadow mapping does not require front-face culling, so
@@ -473,7 +468,7 @@ import com.io7m.renderer.types.RTransformViewType;
     final OptionType<KFaceSelection> none = Option.none();
     this.depth_variance_renderer.rendererEvaluateDepthVariance(
       view,
-      proj,
+      mwp.getProjectiveProjection(),
       batches,
       smv.getFramebuffer(),
       none);

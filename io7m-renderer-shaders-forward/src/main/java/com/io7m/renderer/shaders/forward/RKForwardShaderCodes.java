@@ -36,7 +36,7 @@ public final class RKForwardShaderCodes
   }
 
   public static String fromLitOpaqueRegularCase(
-    final RKLitCase<KMaterialOpaqueRegular> c)
+    final RKFLitCase<KMaterialOpaqueRegular> c)
   {
     return RKForwardShaderCodes.fromLitOpaqueRegular(
       c.getLight(),
@@ -55,7 +55,7 @@ public final class RKForwardShaderCodes
   }
 
   public static String fromLitTranslucentRegularCase(
-    final RKLitCase<KMaterialTranslucentRegular> c)
+    final RKFLitCase<KMaterialTranslucentRegular> c)
   {
     return RKForwardShaderCodes.fromLitTranslucentRegular(
       c.getLight(),
@@ -74,7 +74,7 @@ public final class RKForwardShaderCodes
   }
 
   public static String fromLitTranslucentSpecularOnlyCase(
-    final RKLitCase<KMaterialTranslucentSpecularOnly> c)
+    final RKFLitCase<KMaterialTranslucentSpecularOnly> c)
   {
     return RKForwardShaderCodes.fromLitTranslucentSpecularOnly(
       c.getLight(),
@@ -88,7 +88,7 @@ public final class RKForwardShaderCodes
   }
 
   public static String fromUnlitOpaqueRegular(
-    final RKLitCase<KMaterialOpaqueRegular> c)
+    final RKFLitCase<KMaterialOpaqueRegular> c)
   {
     final String lcode = c.getLight().lightGetCode();
     final String mcode = c.getMaterial().materialLitGetCodeWithoutDepth();

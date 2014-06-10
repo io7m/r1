@@ -23,17 +23,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 final class KFramebufferCommon
 {
-  @Override public boolean equals(
-    final @Nullable Object other)
-  {
-    throw new UnreachableCodeException();
-  }
-
-  @Override public int hashCode()
-  {
-    throw new UnreachableCodeException();
-  }
-
   static void checkFramebufferStatus(
     final FramebufferStatus status)
     throws JCGLExceptionUnsupported
@@ -53,6 +42,17 @@ final class KFramebufferCommon
   }
 
   private KFramebufferCommon()
+  {
+    throw new UnreachableCodeException();
+  }
+
+  @Override public boolean equals(
+    final @Nullable Object other)
+  {
+    throw new UnreachableCodeException();
+  }
+
+  @Override public int hashCode()
   {
     throw new UnreachableCodeException();
   }

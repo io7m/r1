@@ -32,6 +32,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheckException;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
@@ -45,6 +46,8 @@ import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
+import com.io7m.renderer.kernel.types.KProjection;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.kernel.types.KSceneLightGroup;
@@ -72,8 +75,20 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
   {
     try {
       final FakeCapabilities caps = new FakeCapabilities();
-      final KLightProjectiveBuilderType b = KLightProjective.newBuilder();
-      b.setTexture(FakeTexture2DStatic.getDefault());
+      final KProjectionType projection =
+        KProjection.fromFrustumWithContext(
+          new MatrixM4x4F(),
+          -1.0f,
+          1.0f,
+          -1.0f,
+          1.0f,
+          1.0f,
+          100.0f);
+
+      final KLightProjectiveBuilderType b =
+        KLightProjective.newBuilder(
+          FakeTexture2DStatic.getDefault(),
+          projection);
       final RangeInclusiveL r = new RangeInclusiveL(0, 99);
       final KFramebufferDepthDescription fbd =
         KFramebufferDepthDescription.newDescription(

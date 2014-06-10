@@ -44,4 +44,43 @@ import com.io7m.jequality.annotations.EqualityReference;
   {
     return v.exceptionVisitNotSupportedException(this);
   }
+
+  /**
+   * Construct an exception with an informative message explaining why
+   * variance shadow maps are not available.
+   * 
+   * @return A new exception
+   */
+
+  public static RExceptionNotSupported varianceShadowMapsNotSupported()
+  {
+    final StringBuilder m = new StringBuilder();
+    m.append("Variance shadow maps are not supported on this platform.\n");
+    m.append("Variance shadow maps are currently supported on:\n");
+    m.append("  OpenGL >= 3.0 or\n");
+    m.append("  OpenGL ES >= 3.0 with GL_EXT_color_buffer_float or\n");
+    m.append("  OpenGL ES >= 3.0 with GL_EXT_color_buffer_half_float\n");
+    final String s = m.toString();
+    assert s != null;
+    return new RExceptionNotSupported(s);
+  }
+
+  /**
+   * Construct an exception with an informative message explaining why
+   * deferred rendering is not available.
+   * 
+   * @return A new exception
+   */
+
+  public static RExceptionNotSupported deferredRenderingNotSupported()
+  {
+    final StringBuilder m = new StringBuilder();
+    m.append("Deferred rendering is not supported on this platform.\n");
+    m.append("Deferred rendering is currently supported on:\n");
+    m.append("  OpenGL >= 3.0 or\n");
+    m.append("  OpenGL ES >= 3.0 with GL_EXT_color_buffer_half_float\n");
+    final String s = m.toString();
+    assert s != null;
+    return new RExceptionNotSupported(s);
+  }
 }

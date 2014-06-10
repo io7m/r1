@@ -61,10 +61,12 @@ import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jvvfs.FilesystemType;
 import com.io7m.renderer.examples.ExampleClasses;
 import com.io7m.renderer.examples.ExampleRendererConstructorType;
-import com.io7m.renderer.examples.ExampleRendererForwardDefault;
+import com.io7m.renderer.examples.ExampleRendererDebugType;
+import com.io7m.renderer.examples.ExampleRendererDeferredType;
 import com.io7m.renderer.examples.ExampleRendererForwardType;
 import com.io7m.renderer.examples.ExampleRendererType;
 import com.io7m.renderer.examples.ExampleRendererVisitorType;
+import com.io7m.renderer.examples.ExampleRenderers;
 import com.io7m.renderer.examples.ExampleSceneBuilderType;
 import com.io7m.renderer.examples.ExampleSceneType;
 import com.io7m.renderer.examples.ExampleSceneUtilities;
@@ -72,10 +74,14 @@ import com.io7m.renderer.examples.ExampleViewType;
 import com.io7m.renderer.examples.tools.EMeshCache;
 import com.io7m.renderer.examples.tools.ETexture2DCache;
 import com.io7m.renderer.examples.tools.ETextureCubeCache;
+import com.io7m.renderer.kernel.KFramebufferDeferred;
+import com.io7m.renderer.kernel.KFramebufferDeferredType;
 import com.io7m.renderer.kernel.KFramebufferForward;
 import com.io7m.renderer.kernel.KFramebufferForwardType;
 import com.io7m.renderer.kernel.KFramebufferType;
 import com.io7m.renderer.kernel.KProgram;
+import com.io7m.renderer.kernel.KRendererDebugType;
+import com.io7m.renderer.kernel.KRendererDeferredType;
 import com.io7m.renderer.kernel.KRendererForwardType;
 import com.io7m.renderer.kernel.KShaderCacheFilesystem;
 import com.io7m.renderer.kernel.KShaderCacheFilesystemLoader;
@@ -88,6 +94,8 @@ import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
+import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
+import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentUnlitType;
@@ -96,6 +104,7 @@ import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
+import com.io7m.renderer.kernel.types.KSceneBatchedDeferred;
 import com.io7m.renderer.kernel.types.KSceneBatchedForward;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
@@ -146,17 +155,18 @@ final class ViewerSingleMainWindow implements Runnable
       }
     }
 
-    private final ETexture2DCache        cache_2d;
-    private final ETextureCubeCache      cache_cube;
-    private final EMeshCache             cache_mesh;
-    private final ExampleSceneType       example;
-    private final KFramebufferType       framebuffer;
-    private final JCGLImplementationType gi;
-    private final TextureLoaderType      loader;
-    private final KUnitQuad              quad;
-    private final ExampleRendererType    renderer;
-    private final KShaderCacheType       shader_cache;
-    private int                          view_index;
+    private final ETexture2DCache           cache_2d;
+    private final ETextureCubeCache         cache_cube;
+    private final EMeshCache                cache_mesh;
+    private final ExampleSceneType          example;
+    private final KFramebufferType          framebuffer;
+    private final JCGLImplementationType    gi;
+    private final TextureLoaderType         loader;
+    private final KUnitQuad                 quad;
+    private final ExampleRendererType       renderer;
+    private final KShaderCacheType          shader_cache;
+    private int                             view_index;
+    private final KGraphicsCapabilitiesType caps;
 
     Runner(
       final GLAutoDrawable drawable,
@@ -177,6 +187,7 @@ final class ViewerSingleMainWindow implements Runnable
       this.cache_2d = new ETexture2DCache(in_gi, this.loader, in_log);
       this.cache_mesh = new EMeshCache(in_gi, in_log);
       this.quad = KUnitQuad.newQuad(in_gi.getGLCommon(), in_log);
+      this.caps = KGraphicsCapabilities.getCapabilities(in_gi);
 
       final LRUCacheConfig scc =
         LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(1024));
@@ -195,15 +206,54 @@ final class ViewerSingleMainWindow implements Runnable
       this.framebuffer =
         this.renderer
           .rendererAccept(new ExampleRendererVisitorType<KFramebufferType>() {
-            @Override public KFramebufferType visitForward(
-              final ExampleRendererForwardType rf)
+            @Override public KFramebufferType visitDeferred(
+              final ExampleRendererDeferredType r)
               throws RException
+            {
+              final AreaInclusive area = this.makeArea();
+
+              final KFramebufferRGBADescription rgba_description =
+                KFramebufferRGBADescription.newDescription(
+                  area,
+                  TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+                  TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+                  KRGBAPrecision.RGBA_PRECISION_8);
+
+              final KFramebufferDepthDescription depth_description =
+                KFramebufferDepthDescription.newDescription(
+                  area,
+                  TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
+                  TextureFilterMinification.TEXTURE_FILTER_NEAREST,
+                  KDepthPrecision.DEPTH_PRECISION_24);
+
+              return KFramebufferDeferred.newFramebuffer(
+                Runner.this.gi,
+                KFramebufferForwardDescription.newDescription(
+                  rgba_description,
+                  depth_description));
+            }
+
+            private AreaInclusive makeArea()
             {
               final RangeInclusiveL range_x =
                 new RangeInclusiveL(0, drawable.getWidth() - 1);
               final RangeInclusiveL range_y =
                 new RangeInclusiveL(0, drawable.getHeight() - 1);
               final AreaInclusive area = new AreaInclusive(range_x, range_y);
+              return area;
+            }
+
+            @Override public KFramebufferType visitForward(
+              final ExampleRendererForwardType rf)
+              throws RException
+            {
+              return this.makeForward();
+            }
+
+            private KFramebufferType makeForward()
+              throws RException
+            {
+              final AreaInclusive area = this.makeArea();
 
               final KFramebufferRGBADescription rgba_description =
                 KFramebufferRGBADescription.newDescription(
@@ -224,6 +274,13 @@ final class ViewerSingleMainWindow implements Runnable
                 KFramebufferForwardDescription.newDescription(
                   rgba_description,
                   depth_description));
+            }
+
+            @Override public KFramebufferType visitDebug(
+              final ExampleRendererDebugType r)
+              throws RException
+            {
+              return this.makeForward();
             }
           });
     }
@@ -314,6 +371,14 @@ final class ViewerSingleMainWindow implements Runnable
           scene_builder.sceneAddOpaqueUnlit(instance);
         }
 
+        @Override public void sceneAddShadowCaster(
+          final KLightType light,
+          final KInstanceOpaqueType instance)
+          throws RExceptionLightMissingShadow
+        {
+          scene_builder.sceneAddShadowCaster(light, instance);
+        }
+
         @Override public void sceneAddTranslucentLit(
           final KInstanceTranslucentLitType instance,
           final Set<KLightType> lights)
@@ -373,6 +438,13 @@ final class ViewerSingleMainWindow implements Runnable
           return scene_builder.sceneGetTranslucents();
         }
 
+        @Override public KSceneLightGroupBuilderType sceneNewLightGroup(
+          final String name)
+          throws RExceptionLightGroupAlreadyAdded
+        {
+          return scene_builder.sceneNewLightGroup(name);
+        }
+
         @Override public Texture2DStaticUsableType texture(
           final String name)
           throws RException
@@ -386,25 +458,51 @@ final class ViewerSingleMainWindow implements Runnable
           }
         }
 
-        @Override public void sceneAddShadowCaster(
-          final KLightType light,
-          final KInstanceOpaqueType instance)
-          throws RExceptionLightMissingShadow
+        @Override public KGraphicsCapabilitiesType capabilities()
         {
-          scene_builder.sceneAddShadowCaster(light, instance);
+          return Runner.this.caps;
         }
 
-        @Override public KSceneLightGroupBuilderType sceneNewLightGroup(
+        @Override public Texture2DStaticUsableType textureClamped(
           final String name)
-          throws RExceptionLightGroupAlreadyAdded
+          throws RException
         {
-          return scene_builder.sceneNewLightGroup(name);
+          try {
+            return Runner.this.cache_2d.loadTextureClamped(name);
+          } catch (final IOException e) {
+            throw new RuntimeException(e);
+          } catch (final JCGLException e) {
+            throw new RuntimeException(e);
+          }
         }
       };
 
       this.example.exampleScene(b);
 
       this.renderer.rendererAccept(new ExampleRendererVisitorType<Unit>() {
+        @Override public Unit visitDeferred(
+          final ExampleRendererDeferredType rd)
+          throws RException
+        {
+          try {
+            final KRendererDeferredType dr = rd.rendererGetDeferred();
+            final KFramebufferDeferredType fb =
+              (KFramebufferDeferredType) Runner.this.framebuffer;
+            assert fb != null;
+
+            final KScene sc = scene_builder.sceneCreate();
+            final KSceneBatchedDeferred batched =
+              KSceneBatchedDeferred.fromScene(sc);
+
+            dr.rendererDeferredEvaluate(fb, batched);
+            Runner.this.renderSceneResults(fb);
+
+            return Unit.unit();
+          } catch (final JCGLException e) {
+            throw RExceptionJCGL.fromJCGLException(e);
+          }
+        }
+
         @Override public Unit visitForward(
           final ExampleRendererForwardType rf)
           throws RException
@@ -427,6 +525,27 @@ final class ViewerSingleMainWindow implements Runnable
             throw RExceptionJCGL.fromJCGLException(e);
           }
         }
+
+        @Override public Unit visitDebug(
+          final ExampleRendererDebugType rd)
+          throws RException
+        {
+          try {
+            final KRendererDebugType dr = rd.rendererGetDebug();
+            final KFramebufferForwardType fb =
+              (KFramebufferForwardType) Runner.this.framebuffer;
+            assert fb != null;
+
+            final KScene sc = scene_builder.sceneCreate();
+
+            dr.rendererDebugEvaluate(fb, sc);
+            Runner.this.renderSceneResults(fb);
+
+            return Unit.unit();
+          } catch (final JCGLException e) {
+            throw RExceptionJCGL.fromJCGLException(e);
+          }
+        }
       });
     }
 
@@ -438,15 +557,17 @@ final class ViewerSingleMainWindow implements Runnable
     }
   }
 
-  private final ViewerConfig     config;
-  private final ExampleSceneType example;
-  private final FilesystemType   fs;
-  private final LogType          log;
+  private final ViewerConfig                   config;
+  private final ExampleSceneType               example;
+  private final FilesystemType                 fs;
+  private final LogType                        log;
+  private final ExampleRendererConstructorType renderer;
 
   public ViewerSingleMainWindow(
     final ViewerConfig in_config,
     final LogType in_log,
     final FilesystemType in_fs,
+    final String renderer_name,
     final String example_name)
     throws ClassNotFoundException,
       InstantiationException,
@@ -455,6 +576,8 @@ final class ViewerSingleMainWindow implements Runnable
     this.config = in_config;
     this.fs = in_fs;
     this.log = in_log;
+
+    this.renderer = ExampleRenderers.getRenderer(renderer_name);
     this.example = ExampleClasses.getScene(example_name);
   }
 
@@ -506,7 +629,7 @@ final class ViewerSingleMainWindow implements Runnable
               gi,
               ViewerSingleMainWindow.this.fs,
               ViewerSingleMainWindow.this.example,
-              ExampleRendererForwardDefault.get(),
+              ViewerSingleMainWindow.this.renderer,
               ViewerSingleMainWindow.this.log);
         } catch (final JCGLException e) {
           throw new RuntimeException(e);

@@ -31,6 +31,7 @@ import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jnull.NonNull;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KFaceSelection;
@@ -54,6 +55,8 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularType;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
+import com.io7m.renderer.kernel.types.KProjection;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBatchedForwardOpaque;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
@@ -74,7 +77,6 @@ import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceRGBAType;
 import com.io7m.renderer.types.RTransformModelType;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformTextureType;
 import com.io7m.renderer.types.RTransformViewType;
 import com.io7m.renderer.types.RVectorI3F;
@@ -167,8 +169,15 @@ import com.io7m.renderer.types.RVectorI4F;
 
   protected static @NonNull KSceneBuilderWithCreateType newBuilder()
   {
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.identity();
+    final KProjectionType projection =
+      KProjection.fromFrustumWithContext(
+        new MatrixM4x4F(),
+        -1.0f,
+        1.0f,
+        -1.0f,
+        1.0f,
+        1.0f,
+        100.0f);
     final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
     final KCamera camera = KCamera.newCamera(view, projection);
     return KScene.newBuilder(camera);

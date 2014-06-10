@@ -26,7 +26,7 @@ import com.io7m.jfunctional.Pair;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.shaders.core.FakeImmutableCapabilities;
-import com.io7m.renderer.shaders.forward.RKLightCases;
+import com.io7m.renderer.shaders.forward.RKFLightCases;
 
 @SuppressWarnings("static-method") public final class RKLightCasesTest
 {
@@ -37,7 +37,7 @@ import com.io7m.renderer.shaders.forward.RKLightCases;
 
   @Test public void testLightCasesShow()
   {
-    final RKLightCases c = new RKLightCases();
+    final RKFLightCases c = new RKFLightCases();
     for (final Pair<KLightType, FakeImmutableCapabilities> p : c.getCases()) {
       System.out.println(p.getLeft().lightGetCode());
     }
@@ -64,7 +64,7 @@ import com.io7m.renderer.shaders.forward.RKLightCases;
 
     types = types + (st.size() + 1);
 
-    final RKLightCases c = new RKLightCases();
+    final RKFLightCases c = new RKFLightCases();
     Assert.assertEquals(types, c.getCases().size());
   }
 }

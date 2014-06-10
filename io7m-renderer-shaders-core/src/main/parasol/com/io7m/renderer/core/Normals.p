@@ -18,9 +18,11 @@ package com.io7m.renderer.core;
 
 module Normals is
 
+  import com.io7m.parasol.Float as F;
   import com.io7m.parasol.Matrix3x3f as M3;
-  import com.io7m.parasol.Vector3f   as V3;
-  import com.io7m.parasol.Sampler2D  as S;
+  import com.io7m.parasol.Vector2f as V2;
+  import com.io7m.parasol.Vector3f as V3;
+  import com.io7m.parasol.Sampler2D as S;
 
   --
   -- Convert a normal vector to "display" format.
@@ -114,5 +116,39 @@ module Normals is
       m_normal,
       bump_local (t_normal, n, t, b, uv)
     );
+
+  --
+  -- Compress the (normalized) vector [n] into two elements
+  -- using a spheremap transform.
+  --
+
+  function compress (n : vector_3f) : vector_2f =
+    let
+      value p = F.square_root (F.add (F.multiply (n [z], 8.0), 8.0));
+      value x = F.add (F.divide (n [x], p), 0.5);
+      value y = F.add (F.divide (n [y], p), 0.5);
+    in
+      new vector_2f (x, y)
+    end;
+
+  --
+  -- Decompress the given vector, assuming it was encoded with
+  -- a spheremap transform.
+  --
+
+  function decompress (n : vector_2f) : vector_3f =
+    let
+      value fn = new vector_2f (
+        F.subtract (F.multiply (n [x], 4.0), 2.0),
+        F.subtract (F.multiply (n [y], 4.0), 2.0)
+      );
+      value f = V2.dot (fn, fn);
+      value g = F.square_root (F.subtract (1.0, F.divide (f, 4.0)));
+      value x = F.multiply (fn [x], g);
+      value y = F.multiply (fn [y], g);
+      value z = F.subtract (1.0, F.divide (f, 2.0));
+    in
+      new vector_3f (x, y, z)
+    end;
 
 end;

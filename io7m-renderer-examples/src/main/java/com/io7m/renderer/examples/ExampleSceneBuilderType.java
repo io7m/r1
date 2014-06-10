@@ -18,6 +18,7 @@ package com.io7m.renderer.examples;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
+import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KSceneBuilderType;
 import com.io7m.renderer.types.RException;
@@ -28,6 +29,12 @@ import com.io7m.renderer.types.RException;
 
 public interface ExampleSceneBuilderType extends KSceneBuilderType
 {
+  /**
+   * @return The current graphics capabilities.
+   */
+
+  KGraphicsCapabilitiesType capabilities();
+
   /**
    * Load the mesh with the given name.
    * 
@@ -53,6 +60,21 @@ public interface ExampleSceneBuilderType extends KSceneBuilderType
    */
 
   Texture2DStaticUsableType texture(
+    final String name)
+    throws RException;
+
+  /**
+   * Load the texture with the given name, with the wrapping mode set to
+   * {@link com.io7m.jcanephora.TextureWrapS#TEXTURE_WRAP_CLAMP_TO_EDGE}.
+   * 
+   * @param name
+   *          The name
+   * @return An allocated texture
+   * @throws RException
+   *           If an error occurs
+   */
+
+  Texture2DStaticUsableType textureClamped(
     final String name)
     throws RException;
 

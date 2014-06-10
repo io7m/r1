@@ -36,13 +36,13 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KFaceSelection;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KSceneBatchedDepth;
 import com.io7m.renderer.kernel.types.KSceneBatchedForward;
 import com.io7m.renderer.kernel.types.KSceneBatchedForwardOpaque;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformViewType;
 
 /**
@@ -147,7 +147,7 @@ import com.io7m.renderer.types.RTransformViewType;
     try {
       this.matrices.withObserver(
         camera.getViewMatrix(),
-        camera.getProjectionMatrix(),
+        camera.getProjection(),
         new MatricesObserverFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
             final MatricesObserverType mwo)
@@ -195,8 +195,6 @@ import com.io7m.renderer.types.RTransformViewType;
 
     final RMatrixI4x4F<RTransformViewType> m_view =
       RMatrixI4x4F.newFromReadable(mwo.getMatrixView());
-    final RMatrixI4x4F<RTransformProjectionType> m_proj =
-      RMatrixI4x4F.newFromReadable(mwo.getMatrixProjection());
 
     /**
      * Populate depth buffer with opaque objects.
@@ -204,9 +202,11 @@ import com.io7m.renderer.types.RTransformViewType;
 
     final OptionType<KFaceSelection> none = Option.none();
     final KSceneBatchedDepth depth = scene.getDepthInstances();
+    final KProjectionType projection = scene.getCamera().getProjection();
+
     this.depth_renderer.rendererEvaluateDepth(
       m_view,
-      m_proj,
+      projection,
       depth.getInstancesByCode(),
       framebuffer,
       none);
