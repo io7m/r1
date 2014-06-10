@@ -21,7 +21,9 @@ package com.io7m.renderer.kernel;
  */
 
 public interface KShaderCacheType extends
+  KShaderCacheDeferredType,
   KShaderCacheDepthType,
+  KShaderCacheDebugType,
   KShaderCacheDepthVarianceType,
   KShaderCacheForwardOpaqueType,
   KShaderCacheForwardTranslucentType,

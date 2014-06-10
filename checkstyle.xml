@@ -120,7 +120,7 @@
     <module name="InterfaceIsType"/>
     <module name="JUnitTestCase"/>
     <module name="JavaNCSS">
-      <property name="methodMaximum" value="85"/>
+      <property name="methodMaximum" value="90"/>
     </module>
     <module name="JavadocMethod">
       <property name="scope" value="public"/>

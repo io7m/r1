@@ -32,7 +32,7 @@ import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialRefractiveType;
 import com.io7m.renderer.kernel.types.KMaterialSpecularNotNoneType;
 import com.io7m.renderer.kernel.types.KMaterialSpecularType;
-import com.io7m.renderer.shaders.forward.RKMaterialCases;
+import com.io7m.renderer.shaders.forward.RKFMaterialCases;
 
 @SuppressWarnings("static-method") public final class RKMaterialCasesTest
 {
@@ -47,7 +47,7 @@ import com.io7m.renderer.shaders.forward.RKMaterialCases;
     final Set<Class<? extends KMaterialAlbedoType>> st =
       r.getSubTypesOf(KMaterialAlbedoType.class);
 
-    final RKMaterialCases c = new RKMaterialCases();
+    final RKFMaterialCases c = new RKFMaterialCases();
     Assert.assertEquals(st.size(), c.getCasesAlbedo().size());
   }
 
@@ -57,7 +57,7 @@ import com.io7m.renderer.shaders.forward.RKMaterialCases;
     final Set<Class<? extends KMaterialDepthType>> st =
       r.getSubTypesOf(KMaterialDepthType.class);
 
-    final RKMaterialCases c = new RKMaterialCases();
+    final RKFMaterialCases c = new RKFMaterialCases();
     Assert.assertEquals(st.size(), c.getCasesDepth().size());
   }
 
@@ -67,7 +67,7 @@ import com.io7m.renderer.shaders.forward.RKMaterialCases;
     final Set<Class<? extends KMaterialNormalType>> st =
       r.getSubTypesOf(KMaterialNormalType.class);
 
-    final RKMaterialCases c = new RKMaterialCases();
+    final RKFMaterialCases c = new RKFMaterialCases();
     Assert.assertEquals(st.size(), c.getCasesNormal().size());
   }
 
@@ -77,7 +77,7 @@ import com.io7m.renderer.shaders.forward.RKMaterialCases;
     final Set<Class<? extends KMaterialEmissiveType>> st =
       r.getSubTypesOf(KMaterialEmissiveType.class);
 
-    final RKMaterialCases c = new RKMaterialCases();
+    final RKFMaterialCases c = new RKFMaterialCases();
     Assert.assertEquals(st.size(), c.getCasesEmissive().size());
   }
 
@@ -87,7 +87,7 @@ import com.io7m.renderer.shaders.forward.RKMaterialCases;
     final Set<Class<? extends KMaterialEnvironmentType>> st =
       r.getSubTypesOf(KMaterialEnvironmentType.class);
 
-    final RKMaterialCases c = new RKMaterialCases();
+    final RKFMaterialCases c = new RKFMaterialCases();
     Assert.assertEquals(st.size(), c.getCasesEnvironment().size());
   }
 
@@ -112,7 +112,7 @@ import com.io7m.renderer.shaders.forward.RKMaterialCases;
       count = a.size() * e.size() * ev.size() * s.size() * n.size();
     }
 
-    final RKMaterialCases c = new RKMaterialCases();
+    final RKFMaterialCases c = new RKFMaterialCases();
     final List<KMaterialOpaqueRegular> oc = c.getCasesLitOpaqueRegular();
 
     System.out.println("Expected cases : " + oc.size());
@@ -133,7 +133,7 @@ import com.io7m.renderer.shaders.forward.RKMaterialCases;
     final Set<Class<? extends KMaterialRefractiveType>> st =
       r.getSubTypesOf(KMaterialRefractiveType.class);
 
-    final RKMaterialCases c = new RKMaterialCases();
+    final RKFMaterialCases c = new RKFMaterialCases();
     Assert.assertEquals(st.size(), c.getCasesRefractive().size());
   }
 
@@ -144,7 +144,7 @@ import com.io7m.renderer.shaders.forward.RKMaterialCases;
       r.getSubTypesOf(KMaterialSpecularType.class);
     st.remove(KMaterialSpecularNotNoneType.class);
 
-    final RKMaterialCases c = new RKMaterialCases();
+    final RKFMaterialCases c = new RKFMaterialCases();
     Assert.assertEquals(st.size(), c.getCasesSpecular().size());
   }
 }

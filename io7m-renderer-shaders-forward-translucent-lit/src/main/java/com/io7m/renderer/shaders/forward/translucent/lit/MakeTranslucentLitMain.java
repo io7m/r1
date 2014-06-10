@@ -41,9 +41,9 @@ import com.io7m.renderer.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.renderer.shaders.core.EasyCompactor;
 import com.io7m.renderer.shaders.forward.RKForwardShader;
 import com.io7m.renderer.shaders.forward.RKForwardShaderCodes;
-import com.io7m.renderer.shaders.forward.RKLitCase;
-import com.io7m.renderer.shaders.forward.RKLitTranslucentRegularCases;
-import com.io7m.renderer.shaders.forward.RKLitTranslucentSpecularOnlyCases;
+import com.io7m.renderer.shaders.forward.RKFLitCase;
+import com.io7m.renderer.shaders.forward.RKFLitTranslucentRegularCases;
+import com.io7m.renderer.shaders.forward.RKFLitTranslucentSpecularOnlyCases;
 
 /**
  * Generate all translucent+lit shaders.
@@ -121,10 +121,10 @@ public final class MakeTranslucentLitMain
       }
     }
 
-    final List<RKLitCase<KMaterialTranslucentRegular>> translucent_lit_regular =
-      new RKLitTranslucentRegularCases().getCases();
-    final List<RKLitCase<KMaterialTranslucentSpecularOnly>> translucent_lit_specular =
-      new RKLitTranslucentSpecularOnlyCases().getCases();
+    final List<RKFLitCase<KMaterialTranslucentRegular>> translucent_lit_regular =
+      new RKFLitTranslucentRegularCases().getCases();
+    final List<RKFLitCase<KMaterialTranslucentSpecularOnly>> translucent_lit_specular =
+      new RKFLitTranslucentSpecularOnlyCases().getCases();
 
     MakeTranslucentLitMain.makeSourcesLitTranslucentRegular(
       log,
@@ -156,14 +156,14 @@ public final class MakeTranslucentLitMain
     generateBatches(
       final LogUsableType log,
       final File out_batch,
-      final List<RKLitCase<KMaterialTranslucentRegular>> translucent_lit_regular,
-      final List<RKLitCase<KMaterialTranslucentSpecularOnly>> translucent_lit_specular)
+      final List<RKFLitCase<KMaterialTranslucentRegular>> translucent_lit_regular,
+      final List<RKFLitCase<KMaterialTranslucentSpecularOnly>> translucent_lit_specular)
       throws IOException
   {
     log.info("Generating batch: " + out_batch);
     final FileWriter writer = new FileWriter(out_batch);
 
-    for (final RKLitCase<KMaterialTranslucentRegular> c : translucent_lit_regular) {
+    for (final RKFLitCase<KMaterialTranslucentRegular> c : translucent_lit_regular) {
       assert c != null;
       final String code =
         RKForwardShaderCodes.fromLitTranslucentRegularCase(c);
@@ -176,7 +176,7 @@ public final class MakeTranslucentLitMain
       writer.append("\n");
     }
 
-    for (final RKLitCase<KMaterialTranslucentSpecularOnly> c : translucent_lit_specular) {
+    for (final RKFLitCase<KMaterialTranslucentSpecularOnly> c : translucent_lit_specular) {
       assert c != null;
       final String code =
         RKForwardShaderCodes.fromLitTranslucentSpecularOnlyCase(c);
@@ -256,7 +256,7 @@ public final class MakeTranslucentLitMain
 
   private static void makeSourcesLitTranslucentRegular(
     final LogUsableType log,
-    final List<RKLitCase<KMaterialTranslucentRegular>> cases,
+    final List<RKFLitCase<KMaterialTranslucentRegular>> cases,
     final File dir)
     throws IOException
   {
@@ -264,7 +264,7 @@ public final class MakeTranslucentLitMain
       throw new IOException(dir + " is not a directory");
     }
 
-    for (final RKLitCase<KMaterialTranslucentRegular> c : cases) {
+    for (final RKFLitCase<KMaterialTranslucentRegular> c : cases) {
       assert c != null;
 
       final String code =
@@ -289,7 +289,7 @@ public final class MakeTranslucentLitMain
 
   private static void makeSourcesLitTranslucentSpecularOnly(
     final LogUsableType log,
-    final List<RKLitCase<KMaterialTranslucentSpecularOnly>> cases,
+    final List<RKFLitCase<KMaterialTranslucentSpecularOnly>> cases,
     final File dir)
     throws IOException
   {
@@ -297,7 +297,7 @@ public final class MakeTranslucentLitMain
       throw new IOException(dir + " is not a directory");
     }
 
-    for (final RKLitCase<KMaterialTranslucentSpecularOnly> c : cases) {
+    for (final RKFLitCase<KMaterialTranslucentSpecularOnly> c : cases) {
       assert c != null;
 
       final String code =

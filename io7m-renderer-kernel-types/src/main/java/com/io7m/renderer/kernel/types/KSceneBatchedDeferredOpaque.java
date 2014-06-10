@@ -105,7 +105,8 @@ public final class KSceneBatchedDeferredOpaque
                 final KInstanceOpaqueRegular o)
               {
                 final String code =
-                  o.getMaterial().materialLitGetCodeWithoutDepth();
+                  o.getMaterial().materialLitGetCodeWithDepth();
+
                 Set<KInstanceOpaqueType> batch_instances;
                 if (by_material.containsKey(code)) {
                   batch_instances = by_material.get(code);

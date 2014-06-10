@@ -60,8 +60,8 @@ import com.io7m.renderer.types.RTransformTextureType;
 @SuppressWarnings("synthetic-access") @EqualityReference public final class KRegionCopier implements
   KRegionCopierType
 {
-  private static final EnumSet<FramebufferBlitBuffer> DEPTH_ONLY;
   private static final EnumSet<FramebufferBlitBuffer> COLOR_ONLY;
+  private static final EnumSet<FramebufferBlitBuffer> DEPTH_ONLY;
 
   private static final String                         SHADER_COPY_DEPTH4444;
   private static final String                         SHADER_COPY_RGBA;

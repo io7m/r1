@@ -26,34 +26,23 @@ import com.io7m.jvvfs.PathVirtual;
 
 public final class KShaderPaths
 {
-  private KShaderPaths()
-  {
-    throw new UnreachableCodeException();
-  }
-
   /**
-   * The path to forward rendering opaque+unlit shaders.
+   * The path to debug shaders.
    */
 
-  public static final PathVirtual PATH_FORWARD_OPAQUE_UNLIT;
+  public static final PathVirtual PATH_DEBUG;
 
   /**
-   * The path to forward rendering opaque+lit shaders.
+   * The path to deferred geometry-pass shaders.
    */
 
-  public static final PathVirtual PATH_FORWARD_OPAQUE_LIT;
+  public static final PathVirtual PATH_DEFERRED_GEOMETRY;
 
   /**
-   * The path to forward rendering translucent+unlit shaders.
+   * The path to deferred light-pass shaders.
    */
 
-  public static final PathVirtual PATH_FORWARD_TRANSLUCENT_UNLIT;
-
-  /**
-   * The path to forward rendering translucent+lit shaders.
-   */
-
-  public static final PathVirtual PATH_FORWARD_TRANSLUCENT_LIT;
+  public static final PathVirtual PATH_DEFERRED_LIGHT;
 
   /**
    * The path to depth shaders.
@@ -68,6 +57,30 @@ public final class KShaderPaths
   public static final PathVirtual PATH_DEPTH_VARIANCE;
 
   /**
+   * The path to forward rendering opaque+lit shaders.
+   */
+
+  public static final PathVirtual PATH_FORWARD_OPAQUE_LIT;
+
+  /**
+   * The path to forward rendering opaque+unlit shaders.
+   */
+
+  public static final PathVirtual PATH_FORWARD_OPAQUE_UNLIT;
+
+  /**
+   * The path to forward rendering translucent+lit shaders.
+   */
+
+  public static final PathVirtual PATH_FORWARD_TRANSLUCENT_LIT;
+
+  /**
+   * The path to forward rendering translucent+unlit shaders.
+   */
+
+  public static final PathVirtual PATH_FORWARD_TRANSLUCENT_UNLIT;
+
+  /**
    * The path to postprocessing shaders.
    */
 
@@ -75,6 +88,15 @@ public final class KShaderPaths
 
   static {
     try {
+      PATH_DEBUG = PathVirtual.ofString("/shaders/debug");
+
+      PATH_DEFERRED_GEOMETRY =
+        PathVirtual.ofString("/shaders/deferred/geometry");
+      PATH_DEFERRED_LIGHT = PathVirtual.ofString("/shaders/deferred/light");
+
+      PATH_DEPTH = PathVirtual.ofString("/shaders/depth");
+      PATH_DEPTH_VARIANCE = PathVirtual.ofString("/shaders/depth_variance");
+
       PATH_FORWARD_OPAQUE_UNLIT =
         PathVirtual.ofString("/shaders/forward/opaque/unlit");
       PATH_FORWARD_OPAQUE_LIT =
@@ -85,12 +107,14 @@ public final class KShaderPaths
       PATH_FORWARD_TRANSLUCENT_LIT =
         PathVirtual.ofString("/shaders/forward/translucent/lit");
 
-      PATH_DEPTH = PathVirtual.ofString("/shaders/depth");
-      PATH_DEPTH_VARIANCE = PathVirtual.ofString("/shaders/depth_variance");
-
       PATH_POSTPROCESSING = PathVirtual.ofString("/shaders/postprocessing");
     } catch (final FilesystemError e) {
       throw new UnreachableCodeException(e);
     }
+  }
+
+  private KShaderPaths()
+  {
+    throw new UnreachableCodeException();
   }
 }

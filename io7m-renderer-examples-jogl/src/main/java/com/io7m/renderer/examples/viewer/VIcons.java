@@ -28,11 +28,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 final class VIcons
 {
-  private VIcons()
-  {
-    throw new UnreachableCodeException();
-  }
-
   static JLabel makeErrorIcon()
     throws IOException
   {
@@ -42,5 +37,10 @@ final class VIcons
     final BufferedImage image = ImageIO.read(stream);
     stream.close();
     return new JLabel(new ImageIcon(image));
+  }
+
+  private VIcons()
+  {
+    throw new UnreachableCodeException();
   }
 }

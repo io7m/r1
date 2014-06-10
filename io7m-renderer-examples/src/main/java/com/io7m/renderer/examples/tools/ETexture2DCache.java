@@ -39,10 +39,10 @@ import com.io7m.jnull.NullCheck;
 
 public final class ETexture2DCache
 {
-  private final Map<String, Texture2DStaticUsableType> textures;
+  private final JCGLImplementationType                 gi;
   private final LogUsableType                          glog;
   private final TextureLoaderType                      texture_loader;
-  private final JCGLImplementationType                 gi;
+  private final Map<String, Texture2DStaticUsableType> textures;
 
   /**
    * Initialize the cache.
@@ -67,27 +67,13 @@ public final class ETexture2DCache
     this.textures = new HashMap<String, Texture2DStaticUsableType>();
   }
 
-  /**
-   * Load a cube texture with the given name.
-   * 
-   * @param name
-   *          The name.
-   * @return A cube texture.
-   * @throws IOException
-   *           On I/O errors.
-   * @throws JCGLException
-   *           On GL errors.
-   */
-
-  public Texture2DStaticUsableType loadTexture(
-    final String name)
+  private Texture2DStaticUsableType loadActual(
+    final String name,
+    final TextureWrapS wrap_s,
+    final TextureWrapT wrap_t)
     throws IOException,
       JCGLException
   {
-    if (this.textures.containsKey(name)) {
-      return this.textures.get(name);
-    }
-
     final StringBuilder message = new StringBuilder();
     message.setLength(0);
     message.append("Loading texture from ");
@@ -109,8 +95,8 @@ public final class ETexture2DCache
       final Texture2DStaticType t =
         tl.load2DStaticInferred(
           g,
-          TextureWrapS.TEXTURE_WRAP_REPEAT,
-          TextureWrapT.TEXTURE_WRAP_REPEAT,
+          wrap_s,
+          wrap_t,
           TextureFilterMinification.TEXTURE_FILTER_LINEAR,
           TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
           stream,
@@ -120,5 +106,60 @@ public final class ETexture2DCache
     } finally {
       stream.close();
     }
+  }
+
+  /**
+   * Load a cube texture with the given name.
+   * 
+   * @param name
+   *          The name.
+   * @return A cube texture.
+   * @throws IOException
+   *           On I/O errors.
+   * @throws JCGLException
+   *           On GL errors.
+   */
+
+  public Texture2DStaticUsableType loadTexture(
+    final String name)
+    throws IOException,
+      JCGLException
+  {
+    if (this.textures.containsKey(name)) {
+      return this.textures.get(name);
+    }
+
+    final TextureWrapS wrap_s = TextureWrapS.TEXTURE_WRAP_REPEAT;
+    final TextureWrapT wrap_t = TextureWrapT.TEXTURE_WRAP_REPEAT;
+
+    return this.loadActual(name, wrap_s, wrap_t);
+  }
+
+  /**
+   * Load a cube texture with the given name, with the wrapping modes set to
+   * clamp to edge.
+   * 
+   * @param name
+   *          The name.
+   * @return A cube texture.
+   * @throws IOException
+   *           On I/O errors.
+   * @throws JCGLException
+   *           On GL errors.
+   */
+
+  public Texture2DStaticUsableType loadTextureClamped(
+    final String name)
+    throws IOException,
+      JCGLException
+  {
+    if (this.textures.containsKey(name)) {
+      return this.textures.get(name);
+    }
+
+    final TextureWrapS wrap_s = TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE;
+    final TextureWrapT wrap_t = TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE;
+
+    return this.loadActual(name, wrap_s, wrap_t);
   }
 }

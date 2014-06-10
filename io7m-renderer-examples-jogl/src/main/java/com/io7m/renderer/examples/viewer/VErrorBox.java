@@ -43,11 +43,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 final class VErrorBox
 {
-  private VErrorBox()
-  {
-    throw new UnreachableCodeException();
-  }
-
   private static JDialog showActualErrorBox(
     final String title,
     final String message,
@@ -202,5 +197,10 @@ final class VErrorBox
 
     e.printStackTrace(new PrintWriter(writer));
     return writer.toString();
+  }
+
+  private VErrorBox()
+  {
+    throw new UnreachableCodeException();
   }
 }

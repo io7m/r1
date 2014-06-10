@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import nu.xom.Document;
 
@@ -68,6 +69,26 @@ public final class EMeshCache
     this.meshes = new HashMap<String, KMesh>();
   }
 
+  private static InputStream openMesh(
+    final String name)
+    throws IOException
+  {
+    final InputStream raw_stream =
+      EMeshCache.class.getResourceAsStream(String.format(
+        "/com/io7m/renderer/examples/%s",
+        name));
+    assert raw_stream != null;
+
+    final InputStream stream;
+    if (name.endsWith(".rmxz")) {
+      stream = new GZIPInputStream(raw_stream);
+    } else {
+      stream = raw_stream;
+    }
+
+    return stream;
+  }
+
   /**
    * Load a mesh with the given unqualified name.
    * 
@@ -92,17 +113,15 @@ public final class EMeshCache
     message.append(name);
     this.glog.debug(message.toString());
 
-    final InputStream stream =
-      EMeshCache.class.getResourceAsStream(String.format(
-        "/com/io7m/renderer/examples/%s",
-        name));
-    assert stream != null;
-
     final JCGLImplementationType g = this.gi;
     assert g != null;
     final JCGLInterfaceCommonType gl = g.getGLCommon();
 
+    InputStream stream = null;
+
     try {
+      stream = EMeshCache.openMesh(name);
+
       final Document document =
         RXMLMeshDocument.parseFromStreamValidating(stream);
 
@@ -141,7 +160,9 @@ public final class EMeshCache
       throw RExceptionIO.fromIOException(e);
     } finally {
       try {
-        stream.close();
+        if (stream != null) {
+          stream.close();
+        }
       } catch (final IOException e) {
         throw RExceptionIO.fromIOException(e);
       }

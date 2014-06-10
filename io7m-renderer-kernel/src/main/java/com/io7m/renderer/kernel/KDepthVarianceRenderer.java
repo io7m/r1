@@ -57,10 +57,10 @@ import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitorType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformViewType;
 
 /**
@@ -330,7 +330,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   @Override public void rendererEvaluateDepthVariance(
     final RMatrixI4x4F<RTransformViewType> view,
-    final RMatrixI4x4F<RTransformProjectionType> projection,
+    final KProjectionType projection,
     final Map<String, List<KInstanceOpaqueType>> batches,
     final KFramebufferDepthVarianceUsableType framebuffer,
     final OptionType<KFaceSelection> faces)

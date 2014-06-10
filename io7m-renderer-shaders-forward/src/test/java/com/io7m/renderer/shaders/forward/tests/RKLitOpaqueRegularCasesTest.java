@@ -20,18 +20,18 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.renderer.shaders.forward.RKLightCases;
-import com.io7m.renderer.shaders.forward.RKLitCase;
-import com.io7m.renderer.shaders.forward.RKLitOpaqueRegularCases;
-import com.io7m.renderer.shaders.forward.RKMaterialCases;
+import com.io7m.renderer.shaders.forward.RKFLightCases;
+import com.io7m.renderer.shaders.forward.RKFLitCase;
+import com.io7m.renderer.shaders.forward.RKFLitOpaqueRegularCases;
+import com.io7m.renderer.shaders.forward.RKFMaterialCases;
 
 @SuppressWarnings("static-method") public final class RKLitOpaqueRegularCasesTest
 {
   @Test public void testCasesLitOpaqueRegular()
   {
-    final RKMaterialCases mc = new RKMaterialCases();
-    final RKLightCases lc = new RKLightCases();
-    final RKLitOpaqueRegularCases oc = new RKLitOpaqueRegularCases();
+    final RKFMaterialCases mc = new RKFMaterialCases();
+    final RKFLightCases lc = new RKFLightCases();
+    final RKFLitOpaqueRegularCases oc = new RKFLitOpaqueRegularCases();
 
     /**
      * All of the material cases are valid for all of the lights.
@@ -50,9 +50,9 @@ import com.io7m.renderer.shaders.forward.RKMaterialCases;
 
   @Test public void testCasesLitOpaqueRegularShow()
   {
-    final RKLitOpaqueRegularCases oc = new RKLitOpaqueRegularCases();
+    final RKFLitOpaqueRegularCases oc = new RKFLitOpaqueRegularCases();
 
-    for (final RKLitCase<KMaterialOpaqueRegular> c : oc.getCases()) {
+    for (final RKFLitCase<KMaterialOpaqueRegular> c : oc.getCases()) {
       final String lc = c.getLight().lightGetCode();
       final String mc = c.getMaterial().materialLitGetCodeWithoutDepth();
       System.out.printf("%s_%s\n", lc, mc);

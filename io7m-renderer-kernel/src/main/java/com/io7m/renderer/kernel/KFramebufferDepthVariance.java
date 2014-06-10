@@ -49,6 +49,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
+import com.io7m.renderer.types.RExceptionNotSupported;
 
 @EqualityReference abstract class KFramebufferDepthVariance implements
   KFramebufferDepthVarianceType
@@ -309,7 +310,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
           throws JCGLException,
             RException
         {
-          throw RException.varianceShadowMapsNotSupported();
+          throw RExceptionNotSupported.varianceShadowMapsNotSupported();
         }
 
         @Override public KFramebufferDepthVariance implementationIsGL3(
@@ -329,7 +330,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
           throws JCGLException,
             RException
         {
-          throw RException.varianceShadowMapsNotSupported();
+          throw RExceptionNotSupported.varianceShadowMapsNotSupported();
         }
 
         @Override public KFramebufferDepthVariance implementationIsGLES3(
@@ -346,7 +347,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
                 gl.hasColorBufferFloat());
           }
 
-          throw RException.varianceShadowMapsNotSupported();
+          throw RExceptionNotSupported.varianceShadowMapsNotSupported();
         }
       });
   }

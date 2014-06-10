@@ -18,15 +18,15 @@ package com.io7m.renderer.examples;
 
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jcanephora.ViewMatrix;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.renderer.kernel.types.KCamera;
+import com.io7m.renderer.kernel.types.KProjection;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceWorldType;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformViewType;
 import com.io7m.renderer.types.RVectorI3F;
 
@@ -72,7 +72,6 @@ import com.io7m.renderer.types.RVectorI3F;
     this.target = in_target;
 
     final MatrixM4x4F temp = new MatrixM4x4F();
-
     ViewMatrix.lookAt(
       temp,
       this.source,
@@ -82,15 +81,14 @@ import com.io7m.renderer.types.RVectorI3F;
     final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(temp);
 
-    ProjectionMatrix.makePerspectiveProjection(
-      temp,
-      0.1f,
-      100.0f,
-      640.0 / 480.0,
-      Math.toRadians(90.0));
-
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(temp);
+    MatrixM4x4F.setIdentity(temp);
+    final KProjectionType projection =
+      KProjection.fromPerspectiveWithContext(
+        temp,
+        0.1f,
+        100.0f,
+        640.0f / 480.0f,
+        (float) Math.toRadians(90));
 
     this.camera = KCamera.newCamera(view, projection);
   }

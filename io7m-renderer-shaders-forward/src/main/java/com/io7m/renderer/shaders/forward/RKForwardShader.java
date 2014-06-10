@@ -75,10 +75,10 @@ import com.io7m.renderer.types.RException;
 {
   public static final String PACKAGE_FORWARD_OPAQUE_LIT_REGULAR;
   public static final String PACKAGE_FORWARD_OPAQUE_UNLIT_REGULAR;
-  public static final String PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REGULAR;
-  public static final String PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REFRACTIVE;
   public static final String PACKAGE_FORWARD_TRANSLUCENT_LIT_REGULAR;
   public static final String PACKAGE_FORWARD_TRANSLUCENT_LIT_SPECULAR_ONLY;
+  public static final String PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REFRACTIVE;
+  public static final String PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REGULAR;
 
   static {
     PACKAGE_FORWARD_OPAQUE_UNLIT_REGULAR =
@@ -95,7 +95,7 @@ import com.io7m.renderer.types.RException;
       "com.io7m.renderer.kernel.forward.translucent.lit.specular_only";
   }
 
-  private static void fragmentShaderDeclarationsAlbedo(
+  public static void fragmentShaderDeclarationsAlbedo(
     final StringBuilder b,
     final KMaterialAlbedoType albedo)
   {
@@ -126,7 +126,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderDeclarationsAlpha(
+  public static void fragmentShaderDeclarationsAlpha(
     final StringBuilder b)
   {
     b.append("  -- Alpha parameters\n");
@@ -134,7 +134,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  private static void fragmentShaderDeclarationsCommon(
+  public static void fragmentShaderDeclarationsCommon(
     final StringBuilder b,
     final KMaterialType m)
   {
@@ -151,7 +151,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderDeclarationsEmissive(
+  public static void fragmentShaderDeclarationsEmissive(
     final StringBuilder b,
     final KMaterialEmissiveType m)
   {
@@ -188,7 +188,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderDeclarationsEnvironment(
+  public static void fragmentShaderDeclarationsEnvironment(
     final StringBuilder b,
     final KMaterialEnvironmentType envi)
   {
@@ -234,7 +234,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderDeclarationsLight(
+  public static void fragmentShaderDeclarationsLight(
     final StringBuilder b,
     final KLightType l)
   {
@@ -336,7 +336,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderDeclarationsNormal(
+  public static void fragmentShaderDeclarationsNormal(
     final StringBuilder b,
     final KMaterialNormalType m)
   {
@@ -372,7 +372,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderDeclarationsRefractive(
+  public static void fragmentShaderDeclarationsRefractive(
     final StringBuilder b,
     final KMaterialRefractiveType refractive)
   {
@@ -403,7 +403,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderDeclarationsSpecular(
+  public static void fragmentShaderDeclarationsSpecular(
     final StringBuilder b,
     final KMaterialSpecularType s)
   {
@@ -440,7 +440,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderLitTranslucentRegular(
+  public static void fragmentShaderLitTranslucentRegular(
     final StringBuilder b,
     final KGraphicsCapabilitiesType c,
     final KLightType l,
@@ -478,7 +478,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  private static void fragmentShaderLitTranslucentSpecularOnly(
+  public static void fragmentShaderLitTranslucentSpecularOnly(
     final StringBuilder b,
     final KGraphicsCapabilitiesType c,
     final KLightType l,
@@ -508,7 +508,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  private static void fragmentShaderOpaqueLit(
+  public static void fragmentShaderOpaqueLit(
     final StringBuilder b,
     final KGraphicsCapabilitiesType caps,
     final KLightType l,
@@ -543,7 +543,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  private static void fragmentShaderOpaqueUnlit(
+  public static void fragmentShaderOpaqueUnlit(
     final StringBuilder b,
     final KMaterialOpaqueRegular m)
   {
@@ -571,7 +571,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  private static void fragmentShaderTranslucentUnlitRefractive(
+  public static void fragmentShaderTranslucentUnlitRefractive(
     final StringBuilder b,
     final KMaterialTranslucentRefractive m)
   {
@@ -589,7 +589,7 @@ import com.io7m.renderer.types.RException;
     b.append("end;\n");
   }
 
-  private static void fragmentShaderTranslucentUnlitRegular(
+  public static void fragmentShaderTranslucentUnlitRegular(
     final StringBuilder b,
     final KMaterialTranslucentRegular m)
   {
@@ -620,7 +620,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  private static void fragmentShaderValuesAlbedoOpaque(
+  public static void fragmentShaderValuesAlbedoOpaque(
     final StringBuilder b,
     final KMaterialAlbedoType albedo)
   {
@@ -653,7 +653,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesAlbedoTranslucent(
+  public static void fragmentShaderValuesAlbedoTranslucent(
     final StringBuilder b,
     final KMaterialAlbedoType albedo)
   {
@@ -689,7 +689,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesAlpha(
+  public static void fragmentShaderValuesAlpha(
     final StringBuilder b,
     final KMaterialAlphaType alpha)
   {
@@ -722,7 +722,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesEmission(
+  public static void fragmentShaderValuesEmission(
     final StringBuilder b,
     final KMaterialEmissiveType emissive)
   {
@@ -758,7 +758,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesEnvironment(
+  public static void fragmentShaderValuesEnvironment(
     final StringBuilder b,
     final KMaterialEnvironmentType envi)
   {
@@ -806,7 +806,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesLight(
+  public static void fragmentShaderValuesLight(
     final StringBuilder b,
     final KGraphicsCapabilitiesType caps,
     final KLightType l,
@@ -852,7 +852,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesLightDirectional(
+  public static void fragmentShaderValuesLightDirectional(
     final StringBuilder b,
     final KMaterialEmissiveType emissive,
     final KMaterialSpecularType specular)
@@ -956,7 +956,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesLightDirectionalSpecularOnly(
+  public static void fragmentShaderValuesLightDirectionalSpecularOnly(
     final StringBuilder b,
     final KMaterialSpecularType specular)
   {
@@ -1013,7 +1013,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesLightProjective(
+  public static void fragmentShaderValuesLightProjective(
     final StringBuilder b,
     final KGraphicsCapabilitiesType caps,
     final KLightProjective lp,
@@ -1220,7 +1220,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesLightProjectiveSpecularOnly(
+  public static void fragmentShaderValuesLightProjectiveSpecularOnly(
     final StringBuilder b,
     final KGraphicsCapabilitiesType caps,
     final KLightProjective lp,
@@ -1366,7 +1366,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesLightSpecularOnly(
+  public static void fragmentShaderValuesLightSpecularOnly(
     final StringBuilder b,
     final KGraphicsCapabilitiesType c,
     final KLightType l,
@@ -1408,7 +1408,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesLightSpherical(
+  public static void fragmentShaderValuesLightSpherical(
     final StringBuilder b,
     final KMaterialEmissiveType emissive,
     final KMaterialSpecularType specular)
@@ -1531,7 +1531,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesLightSphericalSpecularOnly(
+  public static void fragmentShaderValuesLightSphericalSpecularOnly(
     final StringBuilder b,
     final KMaterialSpecularType specular)
   {
@@ -1600,7 +1600,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesNormal(
+  public static void fragmentShaderValuesNormal(
     final StringBuilder b,
     final KMaterialNormalType normal)
   {
@@ -1637,7 +1637,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesRefractionRGBA(
+  public static void fragmentShaderValuesRefractionRGBA(
     final StringBuilder b,
     final KMaterialNormalType normal,
     final KMaterialRefractiveType refractive)
@@ -1700,7 +1700,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesRGBAOpaqueLit(
+  public static void fragmentShaderValuesRGBAOpaqueLit(
     final StringBuilder b,
     final KMaterialSpecularType specular)
   {
@@ -1742,14 +1742,14 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesRGBAOpaqueUnlit(
+  public static void fragmentShaderValuesRGBAOpaqueUnlit(
     final StringBuilder b)
   {
     b.append("  -- RGBA opaque unlit\n");
     b.append("  value rgba = new vector_4f (surface [x y z], 1.0);\n");
   }
 
-  private static void fragmentShaderValuesRGBATranslucentLit(
+  public static void fragmentShaderValuesRGBATranslucentLit(
     final StringBuilder b,
     final KMaterialSpecularType specular)
   {
@@ -1816,7 +1816,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesRGBATranslucentLitSpecularOnly(
+  public static void fragmentShaderValuesRGBATranslucentLitSpecularOnly(
     final StringBuilder b,
     final KMaterialSpecularType specular)
   {
@@ -1858,7 +1858,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesRGBATranslucentUnlit(
+  public static void fragmentShaderValuesRGBATranslucentUnlit(
     final StringBuilder b)
   {
     b.append("  -- RGBA translucent unlit\n");
@@ -1866,7 +1866,7 @@ import com.io7m.renderer.types.RException;
     b.append("  value rgba = new vector_4f (surface [x y z], a);\n");
   }
 
-  private static void fragmentShaderValuesSpecular(
+  public static void fragmentShaderValuesSpecular(
     final StringBuilder b,
     final KMaterialSpecularType s)
   {
@@ -1904,7 +1904,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesSpecularOnly(
+  public static void fragmentShaderValuesSpecularOnly(
     final StringBuilder b,
     final KMaterialSpecularType specular)
   {
@@ -1942,7 +1942,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesSurfaceOpaque(
+  public static void fragmentShaderValuesSurfaceOpaque(
     final StringBuilder b,
     final KMaterialEnvironmentType envi)
   {
@@ -1997,7 +1997,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void fragmentShaderValuesSurfaceTranslucent(
+  public static void fragmentShaderValuesSurfaceTranslucent(
     final StringBuilder b,
     final KMaterialEnvironmentType envi)
   {
@@ -2046,7 +2046,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void moduleEnd(
+  public static void moduleEnd(
     final StringBuilder b)
   {
     b.append("end;\n");
@@ -2120,7 +2120,7 @@ import com.io7m.renderer.types.RException;
     return r;
   }
 
-  private static void moduleProgram(
+  public static void moduleProgram(
     final StringBuilder b)
   {
     b.append("shader program p is\n");
@@ -2130,7 +2130,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  private static void moduleStart(
+  public static void moduleStart(
     final StringBuilder b,
     final String package_name,
     final String module_name)
@@ -2228,7 +2228,7 @@ import com.io7m.renderer.types.RException;
     return r;
   }
 
-  private static void vertexShaderLit(
+  public static void vertexShaderLit(
     final StringBuilder b,
     final KLightType l,
     final KMaterialType m)
@@ -2255,7 +2255,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  private static void vertexShaderLitRegular(
+  public static void vertexShaderLitRegular(
     final StringBuilder b,
     final KLightType l,
     final KMaterialRegularType m)
@@ -2282,7 +2282,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  private static void vertexShaderStandardDeclarations(
+  public static void vertexShaderStandardDeclarations(
     final StringBuilder b)
   {
     b.append("  -- Vertex position coordinates\n");
@@ -2301,7 +2301,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  private static void vertexShaderStandardDeclarationsLight(
+  public static void vertexShaderStandardDeclarationsLight(
     final StringBuilder b,
     final KLightType l)
   {
@@ -2355,7 +2355,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void vertexShaderStandardDeclarationsNormal(
+  public static void vertexShaderStandardDeclarationsNormal(
     final StringBuilder b,
     final KMaterialNormalType normal)
   {
@@ -2393,7 +2393,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void vertexShaderStandardValues(
+  public static void vertexShaderStandardValues(
     final StringBuilder b)
   {
     b.append("  -- Position values\n");
@@ -2418,7 +2418,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  private static void vertexShaderStandardValuesLight(
+  public static void vertexShaderStandardValuesLight(
     final StringBuilder b,
     final KLightType l)
   {
@@ -2459,7 +2459,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void vertexShaderStandardValuesNormals(
+  public static void vertexShaderStandardValuesNormals(
     final StringBuilder b,
     final KMaterialNormalType normal)
   {
@@ -2495,7 +2495,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void vertexShaderStandardWrites(
+  public static void vertexShaderStandardWrites(
     final StringBuilder b)
   {
     b.append("  -- Standard writes\n");
@@ -2505,7 +2505,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  private static void vertexShaderStandardWritesLight(
+  public static void vertexShaderStandardWritesLight(
     final StringBuilder b,
     final KLightType l)
   {
@@ -2540,7 +2540,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void vertexShaderStandardWritesNormals(
+  public static void vertexShaderStandardWritesNormals(
     final StringBuilder b,
     final KMaterialNormalType normal)
   {
@@ -2572,7 +2572,7 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private static void vertexShaderUnlitRegular(
+  public static void vertexShaderUnlitRegular(
     final StringBuilder b,
     final KMaterialType m)
   {

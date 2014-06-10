@@ -92,6 +92,8 @@ import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jvvfs.FSCapabilityReadType;
 import com.io7m.renderer.examples.ExampleData;
 import com.io7m.renderer.examples.ExampleRendererConstructorType;
+import com.io7m.renderer.examples.ExampleRendererDebugType;
+import com.io7m.renderer.examples.ExampleRendererDeferredType;
 import com.io7m.renderer.examples.ExampleRendererForwardType;
 import com.io7m.renderer.examples.ExampleRendererType;
 import com.io7m.renderer.examples.ExampleRendererVisitorType;
@@ -102,10 +104,14 @@ import com.io7m.renderer.examples.ExampleViewType;
 import com.io7m.renderer.examples.tools.EMeshCache;
 import com.io7m.renderer.examples.tools.ETexture2DCache;
 import com.io7m.renderer.examples.tools.ETextureCubeCache;
+import com.io7m.renderer.kernel.KFramebufferDeferred;
+import com.io7m.renderer.kernel.KFramebufferDeferredType;
 import com.io7m.renderer.kernel.KFramebufferForward;
 import com.io7m.renderer.kernel.KFramebufferForwardType;
 import com.io7m.renderer.kernel.KFramebufferType;
 import com.io7m.renderer.kernel.KProgram;
+import com.io7m.renderer.kernel.KRendererDebugType;
+import com.io7m.renderer.kernel.KRendererDeferredType;
 import com.io7m.renderer.kernel.KRendererForwardType;
 import com.io7m.renderer.kernel.KShaderCacheFilesystem;
 import com.io7m.renderer.kernel.KShaderCacheFilesystemLoader;
@@ -118,6 +124,8 @@ import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
+import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
+import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentUnlitType;
@@ -126,6 +134,7 @@ import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
+import com.io7m.renderer.kernel.types.KSceneBatchedDeferred;
 import com.io7m.renderer.kernel.types.KSceneBatchedForward;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
@@ -143,6 +152,172 @@ import com.jogamp.opengl.util.FPSAnimator;
 @SuppressWarnings("synthetic-access") final class VExample implements
   Callable<Unit>
 {
+  private static final class ExampleSceneBuilder implements
+    ExampleSceneBuilderType
+  {
+    private final KGraphicsCapabilitiesType   caps;
+    private final ETextureCubeCache           cube_cache;
+    private final EMeshCache                  mesh_cache;
+    private final KSceneBuilderWithCreateType scene_builder;
+    private final ETexture2DCache             texture2d_cache;
+
+    private ExampleSceneBuilder(
+      final KSceneBuilderWithCreateType in_scene_builder,
+      final KGraphicsCapabilitiesType in_caps,
+      final ETextureCubeCache in_cube_cache,
+      final EMeshCache in_mesh_cache,
+      final ETexture2DCache in_texture2d_cache)
+    {
+      this.scene_builder = in_scene_builder;
+      this.caps = in_caps;
+      this.cube_cache = in_cube_cache;
+      this.mesh_cache = in_mesh_cache;
+      this.texture2d_cache = in_texture2d_cache;
+    }
+
+    @Override public KGraphicsCapabilitiesType capabilities()
+    {
+      return this.caps;
+    }
+
+    @Override public TextureCubeStaticUsableType cubeTexture(
+      final String name)
+      throws RException
+    {
+      try {
+        final ETextureCubeCache cc = this.cube_cache;
+        assert cc != null;
+        return cc.loadCube(name);
+      } catch (final ValidityException e) {
+        throw RXMLException.validityException(e);
+      } catch (final IOException e) {
+        throw RExceptionIO.fromIOException(e);
+      } catch (final JCGLException e) {
+        throw RExceptionJCGL.fromJCGLException(e);
+      } catch (final ParsingException e) {
+        throw RXMLException.parsingException(e);
+      }
+    }
+
+    @Override public KMeshReadableType mesh(
+      final String name)
+      throws RException
+    {
+      final EMeshCache mc = this.mesh_cache;
+      assert mc != null;
+      return mc.loadMesh(name);
+    }
+
+    @Override public void sceneAddOpaqueUnlit(
+      final KInstanceOpaqueType instance)
+      throws RExceptionInstanceAlreadyLit
+    {
+      this.scene_builder.sceneAddOpaqueUnlit(instance);
+    }
+
+    @Override public void sceneAddShadowCaster(
+      final KLightType light,
+      final KInstanceOpaqueType instance)
+      throws RExceptionLightMissingShadow
+    {
+      this.scene_builder.sceneAddShadowCaster(light, instance);
+    }
+
+    @Override public void sceneAddTranslucentLit(
+      final KInstanceTranslucentLitType instance,
+      final Set<KLightType> lights)
+    {
+      this.scene_builder.sceneAddTranslucentLit(instance, lights);
+    }
+
+    @Override public void sceneAddTranslucentUnlit(
+      final KInstanceTranslucentUnlitType instance)
+    {
+      this.scene_builder.sceneAddTranslucentUnlit(instance);
+    }
+
+    @Override public KCamera sceneGetCamera()
+    {
+      return this.scene_builder.sceneGetCamera();
+    }
+
+    @Override public Set<KInstanceType> sceneGetInstances()
+    {
+      return this.scene_builder.sceneGetInstances();
+    }
+
+    @Override public
+      Set<KInstanceOpaqueType>
+      sceneGetInstancesOpaqueLitVisible()
+    {
+      return this.scene_builder.sceneGetInstancesOpaqueLitVisible();
+    }
+
+    @Override public
+      Map<KLightType, Set<KInstanceOpaqueType>>
+      sceneGetInstancesOpaqueShadowCastingByLight()
+    {
+      return this.scene_builder.sceneGetInstancesOpaqueShadowCastingByLight();
+    }
+
+    @Override public Set<KInstanceOpaqueType> sceneGetInstancesOpaqueUnlit()
+    {
+      return this.scene_builder.sceneGetInstancesOpaqueUnlit();
+    }
+
+    @Override public Set<KLightType> sceneGetLights()
+    {
+      return this.scene_builder.sceneGetLights();
+    }
+
+    @Override public Set<KLightType> sceneGetLightsShadowCasting()
+    {
+      return this.scene_builder.sceneGetLightsShadowCasting();
+    }
+
+    @Override public List<KTranslucentType> sceneGetTranslucents()
+    {
+      return this.scene_builder.sceneGetTranslucents();
+    }
+
+    @Override public KSceneLightGroupBuilderType sceneNewLightGroup(
+      final String name)
+      throws RExceptionLightGroupAlreadyAdded
+    {
+      return this.scene_builder.sceneNewLightGroup(name);
+    }
+
+    @Override public Texture2DStaticUsableType texture(
+      final String name)
+      throws RException
+    {
+      try {
+        final ETexture2DCache tc = this.texture2d_cache;
+        assert tc != null;
+        return tc.loadTexture(name);
+      } catch (final IOException e) {
+        throw RExceptionIO.fromIOException(e);
+      } catch (final JCGLException e) {
+        throw RExceptionJCGL.fromJCGLException(e);
+      }
+    }
+
+    @Override public Texture2DStaticUsableType textureClamped(
+      final String name)
+      throws RException
+    {
+      try {
+        final ETexture2DCache tc = this.texture2d_cache;
+        assert tc != null;
+        return tc.loadTextureClamped(name);
+      } catch (final IOException e) {
+        throw RExceptionIO.fromIOException(e);
+      } catch (final JCGLException e) {
+        throw RExceptionJCGL.fromJCGLException(e);
+      }
+    }
+  }
+
   private static final class VExampleWindow extends JFrame
   {
     private static final long      serialVersionUID;
@@ -158,6 +333,7 @@ import com.jogamp.opengl.util.FPSAnimator;
     private final ExampleSceneType example;
     private final VExpectedImage   expected;
     private final JLabel           expected_label;
+    private final Timer            fps_update_timer;
     private final VExampleWindowGL gl_events;
     private final JLabel           label_example;
     private final JLabel           label_fps;
@@ -165,7 +341,6 @@ import com.jogamp.opengl.util.FPSAnimator;
     private final JLabel           label_view;
     private final LogUsableType    log;
     private final AtomicBoolean    want_save;
-    private final Timer            fps_update_timer;
 
     public VExampleWindow(
       final LogUsableType in_log,
@@ -334,6 +509,7 @@ import com.jogamp.opengl.util.FPSAnimator;
 
   private static final class VExampleWindowGL implements GLEventListener
   {
+
     private static void drawQuad(
       final JCGLInterfaceCommonType gc,
       final KUnitQuadUsableType quad,
@@ -366,13 +542,16 @@ import com.jogamp.opengl.util.FPSAnimator;
       }
     }
 
+    private @Nullable KGraphicsCapabilitiesType  caps;
     private final ViewerConfig                   config;
+    private @Nullable ETextureCubeCache          cube_cache;
     private final AtomicInteger                  current_view_index;
     private final ExampleSceneType               example;
     private final FSCapabilityReadType           filesystem;
     private @Nullable KFramebufferType           framebuffer;
     private @Nullable JCGLImplementationType     gi;
     private final LogUsableType                  glog;
+    private @Nullable EMeshCache                 mesh_cache;
     private @Nullable KUnitQuad                  quad;
     private @Nullable ExampleRendererType        renderer;
     private final ExampleRendererConstructorType renderer_cons;
@@ -381,12 +560,10 @@ import com.jogamp.opengl.util.FPSAnimator;
     private boolean                              running;
     private @Nullable KShaderCacheType           shader_cache;
     private @Nullable TextureLoaderType          texture_loader;
+    private @Nullable ETexture2DCache            texture2d_cache;
     private final AtomicDouble                   time_fps_estimate;
     private final AtomicLong                     time_last;
     private final AtomicBoolean                  want_save;
-    private @Nullable ETextureCubeCache          cube_cache;
-    private @Nullable ETexture2DCache            texture2d_cache;
-    private @Nullable EMeshCache                 mesh_cache;
 
     public VExampleWindowGL(
       final LogUsableType in_log,
@@ -434,133 +611,17 @@ import com.jogamp.opengl.util.FPSAnimator;
         final KSceneBuilderWithCreateType scene_builder =
           KScene.newBuilder(view.getCamera());
 
-        this.example.exampleScene(new ExampleSceneBuilderType() {
-          @Override public TextureCubeStaticUsableType cubeTexture(
-            final String name)
-            throws RException
-          {
-            try {
-              final ETextureCubeCache cc = VExampleWindowGL.this.cube_cache;
-              assert cc != null;
-              return cc.loadCube(name);
-            } catch (final ValidityException e) {
-              throw RXMLException.validityException(e);
-            } catch (final IOException e) {
-              throw RExceptionIO.fromIOException(e);
-            } catch (final JCGLException e) {
-              throw RExceptionJCGL.fromJCGLException(e);
-            } catch (final ParsingException e) {
-              throw RXMLException.parsingException(e);
-            }
-          }
+        assert this.cube_cache != null;
+        assert this.mesh_cache != null;
+        assert this.texture2d_cache != null;
+        assert this.caps != null;
 
-          @Override public KMeshReadableType mesh(
-            final String name)
-            throws RException
-          {
-            final EMeshCache mc = VExampleWindowGL.this.mesh_cache;
-            assert mc != null;
-            return mc.loadMesh(name);
-          }
-
-          @Override public void sceneAddOpaqueUnlit(
-            final KInstanceOpaqueType instance)
-            throws RExceptionInstanceAlreadyLit
-          {
-            scene_builder.sceneAddOpaqueUnlit(instance);
-          }
-
-          @Override public void sceneAddTranslucentLit(
-            final KInstanceTranslucentLitType instance,
-            final Set<KLightType> lights)
-          {
-            scene_builder.sceneAddTranslucentLit(instance, lights);
-          }
-
-          @Override public void sceneAddTranslucentUnlit(
-            final KInstanceTranslucentUnlitType instance)
-          {
-            scene_builder.sceneAddTranslucentUnlit(instance);
-          }
-
-          @Override public Texture2DStaticUsableType texture(
-            final String name)
-            throws RException
-          {
-            try {
-              final ETexture2DCache tc =
-                VExampleWindowGL.this.texture2d_cache;
-              assert tc != null;
-              return tc.loadTexture(name);
-            } catch (final IOException e) {
-              throw RExceptionIO.fromIOException(e);
-            } catch (final JCGLException e) {
-              throw RExceptionJCGL.fromJCGLException(e);
-            }
-          }
-
-          @Override public KCamera sceneGetCamera()
-          {
-            return scene_builder.sceneGetCamera();
-          }
-
-          @Override public Set<KInstanceType> sceneGetInstances()
-          {
-            return scene_builder.sceneGetInstances();
-          }
-
-          @Override public
-            Set<KInstanceOpaqueType>
-            sceneGetInstancesOpaqueLitVisible()
-          {
-            return scene_builder.sceneGetInstancesOpaqueLitVisible();
-          }
-
-          @Override public
-            Map<KLightType, Set<KInstanceOpaqueType>>
-            sceneGetInstancesOpaqueShadowCastingByLight()
-          {
-            return scene_builder
-              .sceneGetInstancesOpaqueShadowCastingByLight();
-          }
-
-          @Override public
-            Set<KInstanceOpaqueType>
-            sceneGetInstancesOpaqueUnlit()
-          {
-            return scene_builder.sceneGetInstancesOpaqueUnlit();
-          }
-
-          @Override public Set<KLightType> sceneGetLights()
-          {
-            return scene_builder.sceneGetLights();
-          }
-
-          @Override public Set<KLightType> sceneGetLightsShadowCasting()
-          {
-            return scene_builder.sceneGetLightsShadowCasting();
-          }
-
-          @Override public List<KTranslucentType> sceneGetTranslucents()
-          {
-            return scene_builder.sceneGetTranslucents();
-          }
-
-          @Override public void sceneAddShadowCaster(
-            final KLightType light,
-            final KInstanceOpaqueType instance)
-            throws RExceptionLightMissingShadow
-          {
-            scene_builder.sceneAddShadowCaster(light, instance);
-          }
-
-          @Override public KSceneLightGroupBuilderType sceneNewLightGroup(
-            final String name)
-            throws RExceptionLightGroupAlreadyAdded
-          {
-            return scene_builder.sceneNewLightGroup(name);
-          }
-        });
+        this.example.exampleScene(new ExampleSceneBuilder(
+          scene_builder,
+          this.caps,
+          this.cube_cache,
+          this.mesh_cache,
+          this.texture2d_cache));
 
         final JCGLImplementationType g = this.gi;
         assert g != null;
@@ -572,6 +633,34 @@ import com.jogamp.opengl.util.FPSAnimator;
         assert r != null;
 
         r.rendererAccept(new ExampleRendererVisitorType<Unit>() {
+          @Override public Unit visitDeferred(
+            final ExampleRendererDeferredType rd)
+            throws RException
+          {
+            try {
+              final KRendererDeferredType dr = rd.rendererGetDeferred();
+              final KFramebufferDeferredType fb =
+                (KFramebufferDeferredType) VExampleWindowGL.this.framebuffer;
+              assert fb != null;
+
+              final KScene sc = scene_builder.sceneCreate();
+              final KSceneBatchedDeferred batched =
+                KSceneBatchedDeferred.fromScene(sc);
+
+              dr.rendererDeferredEvaluate(fb, batched);
+              VExampleWindowGL.this.renderSceneResults(fb);
+
+              if (VExampleWindowGL.this.want_save.get()) {
+                VExampleWindowGL.this.want_save.set(false);
+                VExampleWindowGL.this.saveImage(drawable, view_index);
+              }
+
+              return Unit.unit();
+            } catch (final JCGLException e) {
+              throw RExceptionJCGL.fromJCGLException(e);
+            }
+          }
+
           @Override public Unit visitForward(
             final ExampleRendererForwardType rf)
             throws RException
@@ -587,6 +676,32 @@ import com.jogamp.opengl.util.FPSAnimator;
                 KSceneBatchedForward.fromScene(sc);
 
               fr.rendererForwardEvaluate(fb, batched);
+              VExampleWindowGL.this.renderSceneResults(fb);
+
+              if (VExampleWindowGL.this.want_save.get()) {
+                VExampleWindowGL.this.want_save.set(false);
+                VExampleWindowGL.this.saveImage(drawable, view_index);
+              }
+
+              return Unit.unit();
+            } catch (final JCGLException e) {
+              throw RExceptionJCGL.fromJCGLException(e);
+            }
+          }
+
+          @Override public Unit visitDebug(
+            final ExampleRendererDebugType rd)
+            throws RException
+          {
+            try {
+              final KRendererDebugType dr = rd.rendererGetDebug();
+              final KFramebufferForwardType fb =
+                (KFramebufferForwardType) VExampleWindowGL.this.framebuffer;
+              assert fb != null;
+
+              final KScene sc = scene_builder.sceneCreate();
+
+              dr.rendererDebugEvaluate(fb, sc);
               VExampleWindowGL.this.renderSceneResults(fb);
 
               if (VExampleWindowGL.this.want_save.get()) {
@@ -664,6 +779,8 @@ import com.jogamp.opengl.util.FPSAnimator;
         assert g != null;
         this.gi = g;
 
+        this.caps = KGraphicsCapabilities.getCapabilities(g);
+
         this.texture_loader =
           TextureLoaderImageIO
             .newTextureLoaderWithAlphaPremultiplication(this.glog);
@@ -709,9 +826,34 @@ import com.jogamp.opengl.util.FPSAnimator;
         this.framebuffer =
           r
             .rendererAccept(new ExampleRendererVisitorType<KFramebufferType>() {
-              @Override public KFramebufferType visitForward(
-                final ExampleRendererForwardType rf)
+              @Override public KFramebufferType visitDeferred(
+                final ExampleRendererDeferredType rd)
                 throws RException
+              {
+                final AreaInclusive area = this.makeArea();
+
+                final KFramebufferRGBADescription rgba_description =
+                  KFramebufferRGBADescription.newDescription(
+                    area,
+                    TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+                    TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+                    KRGBAPrecision.RGBA_PRECISION_8);
+
+                final KFramebufferDepthDescription depth_description =
+                  KFramebufferDepthDescription.newDescription(
+                    area,
+                    TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
+                    TextureFilterMinification.TEXTURE_FILTER_NEAREST,
+                    KDepthPrecision.DEPTH_PRECISION_24);
+
+                return KFramebufferDeferred.newFramebuffer(
+                  g,
+                  KFramebufferForwardDescription.newDescription(
+                    rgba_description,
+                    depth_description));
+              }
+
+              private AreaInclusive makeArea()
               {
                 final RangeInclusiveL range_x =
                   new RangeInclusiveL(0, drawable.getWidth() - 1);
@@ -719,6 +861,20 @@ import com.jogamp.opengl.util.FPSAnimator;
                   new RangeInclusiveL(0, drawable.getHeight() - 1);
                 final AreaInclusive area =
                   new AreaInclusive(range_x, range_y);
+                return area;
+              }
+
+              @Override public KFramebufferType visitForward(
+                final ExampleRendererForwardType rf)
+                throws RException
+              {
+                return this.makeForward();
+              }
+
+              private KFramebufferType makeForward()
+                throws RException
+              {
+                final AreaInclusive area = this.makeArea();
 
                 final KFramebufferRGBADescription rgba_description =
                   KFramebufferRGBADescription.newDescription(
@@ -739,6 +895,13 @@ import com.jogamp.opengl.util.FPSAnimator;
                   KFramebufferForwardDescription.newDescription(
                     rgba_description,
                     depth_description));
+              }
+
+              @Override public KFramebufferType visitDebug(
+                final ExampleRendererDebugType rd)
+                throws RException
+              {
+                return this.makeForward();
               }
             });
 
