@@ -43,9 +43,6 @@ import com.io7m.jlog.LogType;
 import com.io7m.jnull.Nullable;
 import com.io7m.jproperties.JPropertyException;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.jvvfs.Filesystem;
-import com.io7m.jvvfs.FilesystemError;
-import com.io7m.jvvfs.FilesystemType;
 
 /**
  * The main viewer.
@@ -194,16 +191,10 @@ public final class ViewerSingleMain
         log.debug("starting");
 
         try {
-          final FilesystemType fs =
-            Filesystem.makeWithoutArchiveDirectory(log);
-
-          VShaderFilesystem.setupShaderFilesystem(config, fs, log);
-
           final ViewerSingleMainWindow w =
             new ViewerSingleMainWindow(
               config,
               log,
-              fs,
               renderer_name,
               example_name);
           w.run();
@@ -217,10 +208,6 @@ public final class ViewerSingleMain
           System.exit(1);
         } catch (final IllegalAccessException e) {
           log.critical("Scene error: " + e.getMessage());
-          e.printStackTrace();
-          System.exit(1);
-        } catch (final FilesystemError e) {
-          log.critical("Filesystem error: " + e.getMessage());
           e.printStackTrace();
           System.exit(1);
         }

@@ -54,8 +54,8 @@ import com.io7m.renderer.types.RException;
     return new KFramebufferRGBACacheLoader(gi, log);
   }
 
-  private final JCGLImplementationType gi;
-  private final LogUsableType          log;
+  private final JCGLImplementationType                    gi;
+  @SuppressWarnings("unused") private final LogUsableType log;
 
   private KFramebufferRGBACacheLoader(
     final JCGLImplementationType in_gi,

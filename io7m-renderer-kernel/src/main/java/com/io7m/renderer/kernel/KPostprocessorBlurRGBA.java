@@ -144,7 +144,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KFramebufferRGBAUsableType temporary,
     final KFramebufferRGBAUsableType target)
     throws JCGLException,
-      RException
+      RException,
+      JCacheException
   {
     assert source != temporary;
     assert temporary != target;
@@ -153,7 +154,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       this.gi,
       parameters.getBlurSize(),
       this.quad,
-      this.shader_cache.getPostprocessing("gaussian_blur_horizontal_4f"),
+      this.shader_cache.cacheGetLU("gaussian_blur_horizontal_4f"),
       source.kFramebufferGetRGBATexture(),
       source.kFramebufferGetArea(),
       temporary.kFramebufferGetColorFramebuffer(),
@@ -164,7 +165,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       this.gi,
       this.quad,
       parameters.getBlurSize(),
-      this.shader_cache.getPostprocessing("gaussian_blur_vertical_4f"),
+      this.shader_cache.cacheGetLU("gaussian_blur_vertical_4f"),
       temporary.kFramebufferGetRGBATexture(),
       temporary.kFramebufferGetArea(),
       target.kFramebufferGetColorFramebuffer(),

@@ -33,6 +33,7 @@ import nu.xom.Elements;
 import nu.xom.Nodes;
 import nu.xom.XPathContext;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -50,7 +51,7 @@ import com.io7m.renderer.xml.collada.ColladaSource.Type;
  * A loaded COLLADA document.
  */
 
-public final class ColladaDocument
+@EqualityReference public final class ColladaDocument
 {
   /**
    * The COLLADA namespace URI.

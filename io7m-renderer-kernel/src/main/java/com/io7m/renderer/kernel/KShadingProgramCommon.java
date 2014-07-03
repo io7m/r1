@@ -33,6 +33,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorM4F;
+import com.io7m.jtensors.VectorReadable2FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.kernel.types.KLightProjective;
@@ -51,6 +52,7 @@ import com.io7m.renderer.kernel.types.KMaterialRefractiveUnmasked;
 import com.io7m.renderer.kernel.types.KMaterialSpecularConstant;
 import com.io7m.renderer.kernel.types.KMaterialSpecularMapped;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 import com.io7m.renderer.kernel.types.KShadowType;
@@ -109,6 +111,14 @@ import com.io7m.renderer.types.RVectorReadable4FType;
   private static final String MATRIX_NAME_VIEW_INVERSE           =
                                                                    "m_view_inv";
   private static final String TEXTURE_NAME_ALBEDO                = "t_albedo";
+  private static final String TEXTURE_NAME_DEFERRED_ALBEDO       =
+                                                                   "t_map_albedo";
+  private static final String TEXTURE_NAME_DEFERRED_DEPTH        =
+                                                                   "t_map_depth";
+  private static final String TEXTURE_NAME_DEFERRED_NORMAL       =
+                                                                   "t_map_normal";
+  private static final String TEXTURE_NAME_DEFERRED_SPECULAR     =
+                                                                   "t_map_specular";
   private static final String TEXTURE_NAME_EMISSION              =
                                                                    "t_emission";
   private static final String TEXTURE_NAME_ENVIRONMENT           =
@@ -549,6 +559,71 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     throws JCGLException
   {
     program.programAttributePutVector2F("v_uv", uv);
+  }
+
+  static void putDeferredMapAlbedo(
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_DEFERRED_ALBEDO,
+      unit);
+  }
+
+  static void putDeferredMapDepth(
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_DEFERRED_DEPTH,
+      unit);
+  }
+
+  static void putDeferredMapNormal(
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_DEFERRED_NORMAL,
+      unit);
+  }
+
+  static void putDeferredMapSpecular(
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_DEFERRED_SPECULAR,
+      unit);
+  }
+
+  static void putFrustum(
+    final JCBProgramType program,
+    final KProjectionType projection)
+    throws JCGLException
+  {
+    program.programUniformPutFloat(
+      "frustum.x_left",
+      projection.projectionGetXMinimum());
+    program.programUniformPutFloat(
+      "frustum.x_right",
+      projection.projectionGetXMaximum());
+    program.programUniformPutFloat(
+      "frustum.y_bottom",
+      projection.projectionGetYMinimum());
+    program.programUniformPutFloat(
+      "frustum.y_top",
+      projection.projectionGetYMaximum());
+    program.programUniformPutFloat(
+      "frustum.z_near",
+      projection.projectionGetZNear());
+    program.programUniformPutFloat(
+      "frustum.z_far",
+      projection.projectionGetZFar());
   }
 
   static void putLightDirectional(
@@ -1346,6 +1421,14 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_REFRACTION_SCENE_MASK,
       unit);
+  }
+
+  static void putScreenSize(
+    final JCBProgramType program,
+    final VectorReadable2FType size)
+    throws JCGLException
+  {
+    program.programUniformPutVector2f("screen_size", size);
   }
 
   static void putShadowBasic(

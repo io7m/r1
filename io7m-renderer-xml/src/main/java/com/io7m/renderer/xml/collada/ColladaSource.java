@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI3F;
@@ -28,13 +29,14 @@ import com.io7m.jtensors.VectorI3F;
  * The type of COLLADA sources.
  */
 
-@SuppressWarnings("synthetic-access") public abstract class ColladaSource
+@SuppressWarnings("synthetic-access") @EqualityReference public abstract class ColladaSource
 {
   /**
    * A source array consisting of two-element floating point vectors.
    */
 
-  public static final class ColladaSourceArray2F extends ColladaSource
+  @EqualityReference public static final class ColladaSourceArray2F extends
+    ColladaSource
   {
     private final List<VectorI2F> array_2f;
 
@@ -92,7 +94,8 @@ import com.io7m.jtensors.VectorI3F;
    * A source array consisting of three-element floating point vectors.
    */
 
-  public static final class ColladaSourceArray3F extends ColladaSource
+  @EqualityReference public static final class ColladaSourceArray3F extends
+    ColladaSource
   {
     private final List<VectorI3F> array_3f;
 
@@ -154,7 +157,8 @@ import com.io7m.jtensors.VectorI3F;
    * uses it as a "source" throughout.
    */
 
-  public static final class ColladaVertices extends ColladaSource
+  @EqualityReference public static final class ColladaVertices extends
+    ColladaSource
   {
     private final List<ColladaInput> inputs;
 

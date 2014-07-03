@@ -82,112 +82,46 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-shaders-debug</artifactId>
       <version>${project.version}</version>
-      <classifier>shaders</classifier>
-      <type>zip</type>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-shaders-debug</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-shaders-deferred-geometry</artifactId>
-      <version>${project.version}</version>
-      <classifier>shaders</classifier>
-      <type>zip</type>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-shaders-deferred-geometry</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-shaders-depth</artifactId>
+      <artifactId>io7m-renderer-shaders-deferred-light</artifactId>
       <version>${project.version}</version>
-      <classifier>shaders</classifier>
-      <type>zip</type>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-shaders-depth</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-shaders-depth_variance</artifactId>
       <version>${project.version}</version>
-      <classifier>shaders</classifier>
-      <type>zip</type>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-shaders-depth_variance</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-shaders-forward-opaque-lit</artifactId>
-      <version>${project.version}</version>
-      <classifier>shaders</classifier>
-      <type>zip</type>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-shaders-forward-opaque-lit</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-shaders-forward-opaque-unlit</artifactId>
       <version>${project.version}</version>
-      <classifier>shaders</classifier>
-      <type>zip</type>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-shaders-forward-opaque-unlit</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-shaders-forward-translucent-lit</artifactId>
-      <version>${project.version}</version>
-      <classifier>shaders</classifier>
-      <type>zip</type>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-shaders-forward-translucent-lit</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-shaders-forward-translucent-unlit</artifactId>
       <version>${project.version}</version>
-      <classifier>shaders</classifier>
-      <type>zip</type>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-shaders-forward-translucent-unlit</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-shaders-postprocessing</artifactId>
-      <version>${project.version}</version>
-      <classifier>shaders</classifier>
-      <type>zip</type>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>

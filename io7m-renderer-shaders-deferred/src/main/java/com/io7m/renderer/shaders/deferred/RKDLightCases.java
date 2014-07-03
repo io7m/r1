@@ -22,6 +22,7 @@ import java.util.List;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -47,7 +48,7 @@ import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
 
-public final class RKDLightCases
+@EqualityReference public final class RKDLightCases
 {
   private static List<KLightType> makeLightCases()
   {

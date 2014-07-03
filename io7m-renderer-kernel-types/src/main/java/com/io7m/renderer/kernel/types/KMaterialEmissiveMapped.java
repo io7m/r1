@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel.types;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.types.RException;
 
@@ -24,7 +25,8 @@ import com.io7m.renderer.types.RException;
  * The type of constant emission properties.
  */
 
-public final class KMaterialEmissiveMapped implements KMaterialEmissiveType
+@EqualityReference public final class KMaterialEmissiveMapped implements
+  KMaterialEmissiveType
 {
   /**
    * Construct new emission properties.

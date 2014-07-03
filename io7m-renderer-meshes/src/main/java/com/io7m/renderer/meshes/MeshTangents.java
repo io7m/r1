@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.OrthonormalizedI3F;
 import com.io7m.jtensors.VectorI3F;
@@ -37,7 +38,7 @@ import com.io7m.renderer.types.RVectorM3F;
  * </p>
  */
 
-public final class MeshTangents
+@EqualityReference public final class MeshTangents
 {
   private static MeshTangents copyMesh(
     final MeshBasic m)

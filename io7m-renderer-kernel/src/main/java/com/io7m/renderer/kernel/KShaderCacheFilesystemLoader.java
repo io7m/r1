@@ -27,18 +27,23 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jvvfs.FSCapabilityReadType;
-import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
+ * <p>
  * A cache loader that can load and construct shading programs of type
  * {@link KProgram} from a given {@link FSCapabilityRead} filesystem, based on
  * the given program name.
+ * </p>
+ * <p>
+ * Programs will be loaded from the root of the filesystem, so the cache can
+ * only serve one type of shader per filesystem.
+ * </p>
  */
 
 @EqualityReference public final class KShaderCacheFilesystemLoader implements
-  JCacheLoaderType<PathVirtual, KProgram, RException>
+  JCacheLoaderType<String, KProgram, RException>
 {
   /**
    * Construct a new cache loader.
@@ -53,12 +58,10 @@ import com.io7m.renderer.types.RExceptionJCGL;
    * @return A new cache loader
    */
 
-  public static
-    JCacheLoaderType<PathVirtual, KProgram, RException>
-    newLoader(
-      final JCGLImplementationType gi,
-      final FSCapabilityReadType fs,
-      final LogUsableType log)
+  public static JCacheLoaderType<String, KProgram, RException> newLoader(
+    final JCGLImplementationType gi,
+    final FSCapabilityReadType fs,
+    final LogUsableType log)
   {
     return new KShaderCacheFilesystemLoader(gi, fs, log);
   }
@@ -91,14 +94,15 @@ import com.io7m.renderer.types.RExceptionJCGL;
   }
 
   @Override public KProgram cacheValueLoad(
-    final PathVirtual name)
+    final String name)
     throws RException
   {
     try {
       final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
       final JCGLSLVersion version = gc.metaGetSLVersion();
+
       return KProgram.newProgramFromFilesystem(
-        this.gi.getGLCommon(),
+        this.gi,
         version.getNumber(),
         version.getAPI(),
         this.fs,

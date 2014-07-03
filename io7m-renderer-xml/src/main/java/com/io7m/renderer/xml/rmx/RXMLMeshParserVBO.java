@@ -37,6 +37,7 @@ import com.io7m.jcanephora.JCGLExceptionAttributeDuplicate;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLArrayBuffersType;
 import com.io7m.jcanephora.api.JCGLIndexBuffersType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -56,9 +57,10 @@ import com.io7m.renderer.types.RXMLException;
  *          The type of OpenGL interfaces.
  */
 
-@SuppressWarnings("synthetic-access") public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
+@SuppressWarnings("synthetic-access") @EqualityReference public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
 {
-  private class Events implements RXMLMeshParserEventsType<JCGLException>
+  @EqualityReference private class Events implements
+    RXMLMeshParserEventsType<JCGLException>
   {
     private @Nullable ArrayBufferUpdateUnmappedType array_data;
     private @Nullable CursorWritableIndexType       cursor_index;

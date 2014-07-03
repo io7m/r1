@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 
@@ -23,7 +24,7 @@ import com.io7m.jranges.RangeCheck;
  * Parameters for blur effects.
  */
 
-public final class KBlurParameters
+@EqualityStructural public final class KBlurParameters
 {
   /**
    * @return A new parameter builder

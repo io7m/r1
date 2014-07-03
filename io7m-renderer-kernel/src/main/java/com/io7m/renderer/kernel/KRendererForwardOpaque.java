@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel;
 import java.util.Map;
 import java.util.Set;
 
+import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
@@ -33,6 +34,7 @@ import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.OptionPartialVisitorType;
 import com.io7m.jfunctional.OptionType;
@@ -73,7 +75,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
  * A forward renderer for opaque objects.
  */
 
-@SuppressWarnings("synthetic-access") public final class KRendererForwardOpaque implements
+@SuppressWarnings("synthetic-access") @EqualityReference public final class KRendererForwardOpaque implements
   KRendererForwardOpaqueType
 {
   /**
@@ -81,8 +83,11 @@ import com.io7m.renderer.types.RExceptionJCGL;
    * 
    * @param in_g
    *          The OpenGL interface.
-   * @param in_shader_cache
-   *          The shader cache.
+   * @param in_shader_unlit_cache
+   *          The unlit shader cache.
+   * @param in_shader_lit_cache
+   *          The lit shader cache.
+   * 
    * @return A new renderer.
    * @throws RException
    *           If an error occurs.
@@ -90,10 +95,14 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
   public static KRendererForwardOpaqueType newRenderer(
     final JCGLImplementationType in_g,
-    final KShaderCacheForwardOpaqueType in_shader_cache)
+    final KShaderCacheForwardOpaqueUnlitType in_shader_unlit_cache,
+    final KShaderCacheForwardOpaqueLitType in_shader_lit_cache)
     throws RException
   {
-    return new KRendererForwardOpaque(in_g, in_shader_cache);
+    return new KRendererForwardOpaque(
+      in_g,
+      in_shader_unlit_cache,
+      in_shader_lit_cache);
   }
 
   private static void putShadow(
@@ -582,20 +591,25 @@ import com.io7m.renderer.types.RExceptionJCGL;
     return r;
   }
 
-  private final JCGLImplementationType        g;
-  private final KShaderCacheForwardOpaqueType shader_cache;
-  private final KTextureUnitAllocator         texture_units;
+  private final JCGLImplementationType             g;
+  private final KShaderCacheForwardOpaqueLitType   shader_lit_cache;
+  private final KShaderCacheForwardOpaqueUnlitType shader_unlit_cache;
+  private final KTextureUnitAllocator              texture_units;
 
   private KRendererForwardOpaque(
     final JCGLImplementationType in_g,
-    final KShaderCacheForwardOpaqueType in_shader_cache)
+    final KShaderCacheForwardOpaqueUnlitType in_shader_unlit_cache,
+    final KShaderCacheForwardOpaqueLitType in_shader_lit_cache)
     throws RException
   {
     try {
       this.g = NullCheck.notNull(in_g, "GL");
       this.texture_units =
         KTextureUnitAllocator.newAllocator(this.g.getGLCommon());
-      this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
+      this.shader_lit_cache =
+        NullCheck.notNull(in_shader_lit_cache, "Shader lit cache");
+      this.shader_unlit_cache =
+        NullCheck.notNull(in_shader_unlit_cache, "Shader unlit cache");
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }
@@ -683,7 +697,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
           final KTextureUnitAllocator unit_allocator = this.texture_units;
           final KProgram kprogram =
-            this.shader_cache.getForwardOpaqueLit(shader_code);
+            this.shader_lit_cache.cacheGetLU(shader_code);
 
           kprogram.getExecutable().execRun(
             new JCBExecutorProcedureType<RException>() {
@@ -707,6 +721,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
+    } catch (final JCacheException e) {
+      throw new UnreachableCodeException(e);
     }
   }
 
@@ -760,7 +776,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
         final KTextureUnitAllocator units = this.texture_units;
         final KProgram kprogram =
-          this.shader_cache.getForwardOpaqueUnlit(material_code);
+          this.shader_unlit_cache.cacheGetLU(material_code);
 
         kprogram.getExecutable().execRun(
           new JCBExecutorProcedureType<RException>() {
@@ -781,6 +797,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
+    } catch (final JCacheException e) {
+      throw new UnreachableCodeException(e);
     }
   }
 }

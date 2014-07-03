@@ -17,7 +17,11 @@
 package com.io7m.renderer.shaders.forward;
 
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.None;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionPartialVisitorType;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -55,7 +59,6 @@ import com.io7m.renderer.kernel.types.KMaterialRefractiveMasked;
 import com.io7m.renderer.kernel.types.KMaterialRefractiveType;
 import com.io7m.renderer.kernel.types.KMaterialRefractiveUnmasked;
 import com.io7m.renderer.kernel.types.KMaterialRefractiveVisitorType;
-import com.io7m.renderer.kernel.types.KMaterialRegularType;
 import com.io7m.renderer.kernel.types.KMaterialSpecularConstant;
 import com.io7m.renderer.kernel.types.KMaterialSpecularMapped;
 import com.io7m.renderer.kernel.types.KMaterialSpecularNone;
@@ -71,14 +74,16 @@ import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.types.RException;
 
-@SuppressWarnings("synthetic-access") public final class RKForwardShader
+@EqualityReference public final class RKForwardShader
 {
-  public static final String PACKAGE_FORWARD_OPAQUE_LIT_REGULAR;
-  public static final String PACKAGE_FORWARD_OPAQUE_UNLIT_REGULAR;
-  public static final String PACKAGE_FORWARD_TRANSLUCENT_LIT_REGULAR;
-  public static final String PACKAGE_FORWARD_TRANSLUCENT_LIT_SPECULAR_ONLY;
-  public static final String PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REFRACTIVE;
-  public static final String PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REGULAR;
+  private static final OptionType<KLightType> NO_LIGHT = Option.none();
+
+  public static final String                  PACKAGE_FORWARD_OPAQUE_LIT_REGULAR;
+  public static final String                  PACKAGE_FORWARD_OPAQUE_UNLIT_REGULAR;
+  public static final String                  PACKAGE_FORWARD_TRANSLUCENT_LIT_REGULAR;
+  public static final String                  PACKAGE_FORWARD_TRANSLUCENT_LIT_SPECULAR_ONLY;
+  public static final String                  PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REFRACTIVE;
+  public static final String                  PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REGULAR;
 
   static {
     PACKAGE_FORWARD_OPAQUE_UNLIT_REGULAR =
@@ -2065,9 +2070,8 @@ import com.io7m.renderer.types.RException;
       b,
       RKForwardShader.PACKAGE_FORWARD_OPAQUE_LIT_REGULAR,
       code);
-    RKForwardShader.vertexShaderLitRegular(b, l, m);
     RKForwardShader.fragmentShaderOpaqueLit(b, c, l, m);
-    RKForwardShader.moduleProgram(b);
+    RKForwardShader.moduleProgram(b, Option.some(l), m.materialGetNormal());
     RKForwardShader.moduleEnd(b);
 
     final String r = b.toString();
@@ -2087,9 +2091,8 @@ import com.io7m.renderer.types.RException;
       b,
       RKForwardShader.PACKAGE_FORWARD_TRANSLUCENT_LIT_REGULAR,
       code);
-    RKForwardShader.vertexShaderLit(b, l, m);
     RKForwardShader.fragmentShaderLitTranslucentRegular(b, c, l, m);
-    RKForwardShader.moduleProgram(b);
+    RKForwardShader.moduleProgram(b, Option.some(l), m.materialGetNormal());
     RKForwardShader.moduleEnd(b);
 
     final String r = b.toString();
@@ -2110,9 +2113,8 @@ import com.io7m.renderer.types.RException;
       b,
       RKForwardShader.PACKAGE_FORWARD_TRANSLUCENT_LIT_SPECULAR_ONLY,
       code);
-    RKForwardShader.vertexShaderLit(b, l, m);
     RKForwardShader.fragmentShaderLitTranslucentSpecularOnly(b, c, l, m);
-    RKForwardShader.moduleProgram(b);
+    RKForwardShader.moduleProgram(b, Option.some(l), m.materialGetNormal());
     RKForwardShader.moduleEnd(b);
 
     final String r = b.toString();
@@ -2121,13 +2123,116 @@ import com.io7m.renderer.types.RException;
   }
 
   public static void moduleProgram(
-    final StringBuilder b)
+    final StringBuilder b,
+    final OptionType<KLightType> o,
+    final KMaterialNormalType m)
   {
-    b.append("shader program p is\n");
-    b.append("  vertex   v;\n");
-    b.append("  fragment f;\n");
-    b.append("end;\n");
-    b.append("\n");
+    try {
+      b.append("shader program p is\n");
+
+      final String vcode =
+        o
+          .acceptPartial(new OptionPartialVisitorType<KLightType, String, RException>() {
+            @Override public String none(
+              final None<KLightType> n)
+              throws RException
+            {
+              return m
+                .normalAccept(new KMaterialNormalVisitorType<String, UnreachableCodeException>() {
+                  @Override public String mapped(
+                    final KMaterialNormalMapped __)
+                  {
+                    return "VertexShaders.standard_NorM";
+                  }
+
+                  @Override public String vertex(
+                    final KMaterialNormalVertex __)
+                  {
+                    return "VertexShaders.standard";
+                  }
+                });
+            }
+
+            @Override public String some(
+              final Some<KLightType> s)
+              throws RException
+            {
+              return s.get().lightAccept(
+                new KLightVisitorType<String, UnreachableCodeException>() {
+                  @Override public String lightDirectional(
+                    final KLightDirectional _)
+                    throws RException
+                  {
+                    return m
+                      .normalAccept(new KMaterialNormalVisitorType<String, UnreachableCodeException>() {
+                        @Override public String mapped(
+                          final KMaterialNormalMapped __)
+                        {
+                          return "VertexShaders.standard_NorM";
+                        }
+
+                        @Override public String vertex(
+                          final KMaterialNormalVertex __)
+                        {
+                          return "VertexShaders.standard";
+                        }
+                      });
+                  }
+
+                  @Override public String lightProjective(
+                    final KLightProjective _)
+                    throws RException
+                  {
+                    return m
+                      .normalAccept(new KMaterialNormalVisitorType<String, UnreachableCodeException>() {
+                        @Override public String mapped(
+                          final KMaterialNormalMapped __)
+                        {
+                          return "VertexShaders.standard_Proj_NorM";
+                        }
+
+                        @Override public String vertex(
+                          final KMaterialNormalVertex __)
+                        {
+                          return "VertexShaders.standard_Proj";
+                        }
+                      });
+                  }
+
+                  @Override public String lightSpherical(
+                    final KLightSphere _)
+                    throws RException
+                  {
+                    return m
+                      .normalAccept(new KMaterialNormalVisitorType<String, UnreachableCodeException>() {
+                        @Override public String mapped(
+                          final KMaterialNormalMapped __)
+                        {
+                          return "VertexShaders.standard_NorM";
+                        }
+
+                        @Override public String vertex(
+                          final KMaterialNormalVertex __)
+                        {
+                          return "VertexShaders.standard";
+                        }
+                      });
+                  }
+                });
+
+            }
+          });
+
+      b.append("  vertex ");
+      b.append(vcode);
+      b.append(";\n");
+
+      b.append("  fragment f;\n");
+      b.append("end;\n");
+      b.append("\n");
+    } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 
   public static void moduleStart(
@@ -2164,6 +2269,7 @@ import com.io7m.renderer.types.RException;
     b.append("import com.io7m.renderer.core.Specular;\n");
     b.append("import com.io7m.renderer.core.SphericalLight;\n");
     b.append("import com.io7m.renderer.core.VectorAux;\n");
+    b.append("import com.io7m.renderer.core.VertexShaders;\n");
     b.append("\n");
   }
 
@@ -2177,9 +2283,11 @@ import com.io7m.renderer.types.RException;
       b,
       RKForwardShader.PACKAGE_FORWARD_OPAQUE_UNLIT_REGULAR,
       code);
-    RKForwardShader.vertexShaderUnlitRegular(b, m);
     RKForwardShader.fragmentShaderOpaqueUnlit(b, m);
-    RKForwardShader.moduleProgram(b);
+    RKForwardShader.moduleProgram(
+      b,
+      RKForwardShader.NO_LIGHT,
+      m.materialGetNormal());
     RKForwardShader.moduleEnd(b);
 
     final String r = b.toString();
@@ -2198,9 +2306,11 @@ import com.io7m.renderer.types.RException;
       b,
       RKForwardShader.PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REFRACTIVE,
       code);
-    RKForwardShader.vertexShaderUnlitRegular(b, m);
     RKForwardShader.fragmentShaderTranslucentUnlitRefractive(b, m);
-    RKForwardShader.moduleProgram(b);
+    RKForwardShader.moduleProgram(
+      b,
+      RKForwardShader.NO_LIGHT,
+      m.materialGetNormal());
     RKForwardShader.moduleEnd(b);
 
     final String r = b.toString();
@@ -2218,380 +2328,15 @@ import com.io7m.renderer.types.RException;
       b,
       RKForwardShader.PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REGULAR,
       code);
-    RKForwardShader.vertexShaderUnlitRegular(b, m);
     RKForwardShader.fragmentShaderTranslucentUnlitRegular(b, m);
-    RKForwardShader.moduleProgram(b);
+    RKForwardShader.moduleProgram(
+      b,
+      RKForwardShader.NO_LIGHT,
+      m.materialGetNormal());
     RKForwardShader.moduleEnd(b);
 
     final String r = b.toString();
     assert r != null;
     return r;
-  }
-
-  public static void vertexShaderLit(
-    final StringBuilder b,
-    final KLightType l,
-    final KMaterialType m)
-  {
-    b.append("shader vertex v is\n");
-    RKForwardShader.vertexShaderStandardDeclarations(b);
-    RKForwardShader.vertexShaderStandardDeclarationsNormal(
-      b,
-      m.materialGetNormal());
-    RKForwardShader.vertexShaderStandardDeclarationsLight(b, l);
-    b.append("with\n");
-    RKForwardShader.vertexShaderStandardValues(b);
-    RKForwardShader.vertexShaderStandardValuesNormals(
-      b,
-      m.materialGetNormal());
-    RKForwardShader.vertexShaderStandardValuesLight(b, l);
-    b.append("as\n");
-    RKForwardShader.vertexShaderStandardWritesNormals(
-      b,
-      m.materialGetNormal());
-    RKForwardShader.vertexShaderStandardWrites(b);
-    RKForwardShader.vertexShaderStandardWritesLight(b, l);
-    b.append("end;\n");
-    b.append("\n");
-  }
-
-  public static void vertexShaderLitRegular(
-    final StringBuilder b,
-    final KLightType l,
-    final KMaterialRegularType m)
-  {
-    b.append("shader vertex v is\n");
-    RKForwardShader.vertexShaderStandardDeclarations(b);
-    RKForwardShader.vertexShaderStandardDeclarationsNormal(
-      b,
-      m.materialGetNormal());
-    RKForwardShader.vertexShaderStandardDeclarationsLight(b, l);
-    b.append("with\n");
-    RKForwardShader.vertexShaderStandardValues(b);
-    RKForwardShader.vertexShaderStandardValuesNormals(
-      b,
-      m.materialGetNormal());
-    RKForwardShader.vertexShaderStandardValuesLight(b, l);
-    b.append("as\n");
-    RKForwardShader.vertexShaderStandardWritesNormals(
-      b,
-      m.materialGetNormal());
-    RKForwardShader.vertexShaderStandardWrites(b);
-    RKForwardShader.vertexShaderStandardWritesLight(b, l);
-    b.append("end;\n");
-    b.append("\n");
-  }
-
-  public static void vertexShaderStandardDeclarations(
-    final StringBuilder b)
-  {
-    b.append("  -- Vertex position coordinates\n");
-    b.append("  in v_position              : vector_3f;\n");
-    b.append("  out f_position_eye         : vector_4f;\n");
-    b.append("  out vertex f_position_clip : vector_4f;\n");
-    b.append("\n");
-    b.append("  -- Standard matrices\n");
-    b.append("  parameter m_modelview      : matrix_4x4f;\n");
-    b.append("  parameter m_projection     : matrix_4x4f;\n");
-    b.append("\n");
-    b.append("  -- UV coordinates\n");
-    b.append("  in v_uv        : vector_2f;\n");
-    b.append("  out f_uv       : vector_2f;\n");
-    b.append("  parameter m_uv : matrix_3x3f;\n");
-    b.append("\n");
-  }
-
-  public static void vertexShaderStandardDeclarationsLight(
-    final StringBuilder b,
-    final KLightType l)
-  {
-    try {
-      l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
-        @Override public Unit lightDirectional(
-          final KLightDirectional ld)
-        {
-          return Unit.unit();
-        }
-
-        @Override public Unit lightProjective(
-          final KLightProjective lp)
-        {
-          b.append("  -- Projective light parameters\n");
-          b.append("  parameter m_projective_modelview  : matrix_4x4f;\n");
-          b.append("  parameter m_projective_projection : matrix_4x4f;\n");
-          b.append("\n");
-
-          return lp.lightGetShadow().accept(
-            new OptionVisitorType<KShadowType, Unit>() {
-              @Override public Unit none(
-                final None<KShadowType> n)
-              {
-                b.append("  -- Projective light outputs\n");
-                b.append("  out f_position_light_clip : vector_4f;\n");
-                b.append("\n");
-                return Unit.unit();
-              }
-
-              @Override public Unit some(
-                final Some<KShadowType> s)
-              {
-                b.append("  -- Projective light (shadow mapped) outputs\n");
-                b.append("  out f_position_light_eye  : vector_4f;\n");
-                b.append("  out f_position_light_clip : vector_4f;\n");
-                b.append("\n");
-                return Unit.unit();
-              }
-            });
-        }
-
-        @Override public Unit lightSpherical(
-          final KLightSphere ls)
-        {
-          return Unit.unit();
-        }
-      });
-    } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
-  public static void vertexShaderStandardDeclarationsNormal(
-    final StringBuilder b,
-    final KMaterialNormalType normal)
-  {
-    try {
-      normal
-        .normalAccept(new KMaterialNormalVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit mapped(
-            final KMaterialNormalMapped m)
-          {
-            b.append("  -- Mapped normal attributes\n");
-            b.append("  in v_normal        : vector_3f;\n");
-            b.append("  in v_tangent4      : vector_4f;\n");
-            b.append("  out f_normal_model : vector_3f;\n");
-            b.append("  out f_tangent      : vector_3f;\n");
-            b.append("  out f_bitangent    : vector_3f;\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit vertex(
-            final KMaterialNormalVertex m)
-          {
-            b.append("  -- Vertex normal attributes and parameters\n");
-            b.append("  in v_normal        : vector_3f;\n");
-            b.append("  out f_normal_eye   : vector_3f;\n");
-            b.append("  parameter m_normal : matrix_3x3f;\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-        });
-
-      b.append("\n");
-    } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
-  public static void vertexShaderStandardValues(
-    final StringBuilder b)
-  {
-    b.append("  -- Position values\n");
-    b.append("  value position_eye =\n");
-    b.append("    M4.multiply_vector (\n");
-    b.append("      m_modelview,\n");
-    b.append("      new vector_4f (v_position, 1.0)\n");
-    b.append("    );\n");
-    b.append("\n");
-    b.append("  value position_clip =\n");
-    b.append("    M4.multiply_vector (\n");
-    b.append("      M4.multiply (m_projection, m_modelview),\n");
-    b.append("      new vector_4f (v_position, 1.0)\n");
-    b.append("    );\n");
-    b.append("\n");
-    b.append("  -- Transformed UV coordinates\n");
-    b.append("  value uv =\n");
-    b.append("    M3.multiply_vector (\n");
-    b.append("      m_uv,\n");
-    b.append("      new vector_3f (v_uv, 1.0)\n");
-    b.append("    ) [x y];\n");
-    b.append("\n");
-  }
-
-  public static void vertexShaderStandardValuesLight(
-    final StringBuilder b,
-    final KLightType l)
-  {
-    try {
-      l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
-        @Override public Unit lightDirectional(
-          final KLightDirectional ld)
-        {
-          return Unit.unit();
-        }
-
-        @Override public Unit lightProjective(
-          final KLightProjective lp)
-        {
-          b.append("  -- Projective lighting coordinates\n");
-          b.append("  value position_light_eye : vector_4f =\n");
-          b.append("    M4.multiply_vector (\n");
-          b.append("      m_projective_modelview,\n");
-          b.append("      new vector_4f (v_position, 1.0)\n");
-          b.append("    );\n");
-          b.append("  value position_light_clip : vector_4f =\n");
-          b.append("    M4.multiply_vector (\n");
-          b.append("      m_projective_projection,\n");
-          b.append("      position_light_eye\n");
-          b.append("    );\n");
-          b.append("\n");
-          return Unit.unit();
-        }
-
-        @Override public Unit lightSpherical(
-          final KLightSphere ls)
-        {
-          return Unit.unit();
-        }
-      });
-    } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
-  public static void vertexShaderStandardValuesNormals(
-    final StringBuilder b,
-    final KMaterialNormalType normal)
-  {
-    try {
-      normal
-        .normalAccept(new KMaterialNormalVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit mapped(
-            final KMaterialNormalMapped m)
-          {
-            b.append("  -- Mapped normal values\n");
-            b.append("  value tangent =\n");
-            b.append("    v_tangent4 [x y z];\n");
-            b.append("  value bitangent =\n");
-            b.append("    Normals.bitangent (v_normal, v_tangent4);\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit vertex(
-            final KMaterialNormalVertex m)
-          {
-            b.append("  -- Vertex normal values\n");
-            b.append("  value normal_eye =\n");
-            b.append("    M3.multiply_vector (m_normal, v_normal);\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-        });
-
-      b.append("\n");
-    } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
-  public static void vertexShaderStandardWrites(
-    final StringBuilder b)
-  {
-    b.append("  -- Standard writes\n");
-    b.append("  out f_position_clip = position_clip;\n");
-    b.append("  out f_position_eye  = position_eye;\n");
-    b.append("  out f_uv            = uv;\n");
-    b.append("\n");
-  }
-
-  public static void vertexShaderStandardWritesLight(
-    final StringBuilder b,
-    final KLightType l)
-  {
-    try {
-      l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
-        @Override public Unit lightDirectional(
-          final KLightDirectional ld)
-        {
-          return Unit.unit();
-        }
-
-        @Override public Unit lightProjective(
-          final KLightProjective lp)
-        {
-          b.append("  -- Projective lighting\n");
-          b.append("  out f_position_light_clip = position_light_clip;\n");
-          if (lp.lightHasShadow()) {
-            b.append("  out f_position_light_eye  = position_light_eye;\n");
-          }
-          b.append("\n");
-          return Unit.unit();
-        }
-
-        @Override public Unit lightSpherical(
-          final KLightSphere ls)
-        {
-          return Unit.unit();
-        }
-      });
-    } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
-  public static void vertexShaderStandardWritesNormals(
-    final StringBuilder b,
-    final KMaterialNormalType normal)
-  {
-    try {
-      normal
-        .normalAccept(new KMaterialNormalVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit mapped(
-            final KMaterialNormalMapped m)
-          {
-            b.append("  -- Writes for mapped normals\n");
-            b.append("  out f_normal_model = v_normal;\n");
-            b.append("  out f_tangent      = tangent;\n");
-            b.append("  out f_bitangent    = bitangent;\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit vertex(
-            final KMaterialNormalVertex m)
-          {
-            b.append("  -- Writes for vertex normals\n");
-            b.append("  out f_normal_eye = normal_eye;\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-        });
-    } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
-  public static void vertexShaderUnlitRegular(
-    final StringBuilder b,
-    final KMaterialType m)
-  {
-    b.append("shader vertex v is\n");
-    RKForwardShader.vertexShaderStandardDeclarations(b);
-    RKForwardShader.vertexShaderStandardDeclarationsNormal(
-      b,
-      m.materialGetNormal());
-    b.append("with\n");
-    RKForwardShader.vertexShaderStandardValues(b);
-    RKForwardShader.vertexShaderStandardValuesNormals(
-      b,
-      m.materialGetNormal());
-    b.append("as\n");
-    RKForwardShader.vertexShaderStandardWritesNormals(
-      b,
-      m.materialGetNormal());
-    RKForwardShader.vertexShaderStandardWrites(b);
-    b.append("end;\n");
-    b.append("\n");
   }
 }

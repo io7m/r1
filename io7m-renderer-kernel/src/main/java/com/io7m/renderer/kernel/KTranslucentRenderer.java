@@ -88,8 +88,10 @@ import com.io7m.renderer.types.RExceptionJCGL;
    *          The OpenGL implementation
    * @param in_refraction_renderer
    *          A refraction renderer
-   * @param in_shader_cache
-   *          A shader cache
+   * @param in_shader_unlit_cache
+   *          An unlit shader cache
+   * @param in_shader_lit_cache
+   *          An lit shader cache
    * @param in_caps
    *          The current graphics capabilities
    * @param in_log
@@ -101,7 +103,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
   public static KTranslucentRendererType newRenderer(
     final JCGLImplementationType in_g,
-    final KShaderCacheForwardTranslucentType in_shader_cache,
+    final KShaderCacheForwardTranslucentUnlitType in_shader_unlit_cache,
+    final KShaderCacheForwardTranslucentLitType in_shader_lit_cache,
     final KRefractionRendererType in_refraction_renderer,
     final KGraphicsCapabilitiesType in_caps,
     final LogUsableType in_log)
@@ -109,7 +112,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
   {
     return new KTranslucentRenderer(
       in_g,
-      in_shader_cache,
+      in_shader_unlit_cache,
+      in_shader_lit_cache,
       in_refraction_renderer,
       in_caps,
       in_log);
@@ -676,16 +680,18 @@ import com.io7m.renderer.types.RExceptionJCGL;
       });
   }
 
-  private final KGraphicsCapabilitiesType          caps;
-  private final JCGLImplementationType             g;
-  private final LogUsableType                      log;
-  private final KRefractionRendererType            refraction_renderer;
-  private final KShaderCacheForwardTranslucentType shader_cache;
-  private final KTextureUnitAllocator              texture_units;
+  private final KGraphicsCapabilitiesType               caps;
+  private final JCGLImplementationType                  g;
+  private final LogUsableType                           log;
+  private final KRefractionRendererType                 refraction_renderer;
+  private final KShaderCacheForwardTranslucentLitType   shader_lit_cache;
+  private final KShaderCacheForwardTranslucentUnlitType shader_unlit_cache;
+  private final KTextureUnitAllocator                   texture_units;
 
   private KTranslucentRenderer(
     final JCGLImplementationType in_g,
-    final KShaderCacheForwardTranslucentType in_shader_cache,
+    final KShaderCacheForwardTranslucentUnlitType in_shader_unlit_cache,
+    final KShaderCacheForwardTranslucentLitType in_shader_lit_cache,
     final KRefractionRendererType in_refraction_renderer,
     final KGraphicsCapabilitiesType in_caps,
     final LogUsableType in_log)
@@ -695,7 +701,12 @@ import com.io7m.renderer.types.RExceptionJCGL;
       this.log =
         NullCheck.notNull(in_log, "Log").with(KTranslucentRenderer.NAME);
       this.g = NullCheck.notNull(in_g, "GL implementation");
-      this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
+
+      this.shader_unlit_cache =
+        NullCheck.notNull(in_shader_unlit_cache, "Shader unlit cache");
+      this.shader_lit_cache =
+        NullCheck.notNull(in_shader_lit_cache, "Shader lit cache");
+
       this.texture_units =
         KTextureUnitAllocator.newAllocator(in_g.getGLCommon());
       this.caps = NullCheck.notNull(in_caps, "Capabilities");
@@ -836,7 +847,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KTranslucentRegularLit t,
     final MatricesObserverType mwo)
     throws RException,
-      JCGLException
+      JCGLException,
+      JCacheException
   {
     final KTextureUnitAllocator unit_allocator = this.texture_units;
     final Set<KLightType> lights = t.translucentGetLights();
@@ -874,8 +886,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
         gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
       }
 
-      final KProgram kprogram =
-        this.shader_cache.getForwardTranslucentLit(shader_code);
+      final KProgram kprogram = this.shader_lit_cache.cacheGetLU(shader_code);
 
       kprogram.getExecutable().execRun(
         new JCBExecutorProcedureType<RException>() {
@@ -913,7 +924,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KTextureUnitAllocator unit_allocator,
     final KInstanceTranslucentRegular t)
     throws JCGLException,
-      RException
+      RException,
+      JCacheException
   {
     final String shader_code = t.getMaterial().materialUnlitGetCode();
 
@@ -921,8 +933,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       BlendFunction.BLEND_ONE,
       BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
 
-    final KProgram kprogram =
-      this.shader_cache.getForwardTranslucentUnlit(shader_code);
+    final KProgram kprogram = this.shader_unlit_cache.cacheGetLU(shader_code);
 
     kprogram.getExecutable().execRun(
       new JCBExecutorProcedureType<RException>() {
@@ -970,7 +981,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KTranslucentSpecularOnlyLit t,
     final MatricesObserverType mwo)
     throws RException,
-      JCGLException
+      JCGLException,
+      JCacheException
   {
     final KTextureUnitAllocator unit_allocator = this.texture_units;
     final Set<KLightType> lights = t.translucentGetLights();
@@ -1002,8 +1014,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
           unit_allocator.getUnitCount());
       }
 
-      final KProgram kprogram =
-        this.shader_cache.getForwardTranslucentLit(shader_code);
+      final KProgram kprogram = this.shader_lit_cache.cacheGetLU(shader_code);
 
       kprogram.getExecutable().execRun(
         new JCBExecutorProcedureType<RException>() {

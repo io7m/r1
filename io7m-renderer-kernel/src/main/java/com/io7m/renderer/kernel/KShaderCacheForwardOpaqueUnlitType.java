@@ -17,7 +17,6 @@
 package com.io7m.renderer.kernel;
 
 import com.io7m.jcache.LUCacheType;
-import com.io7m.jvvfs.PathVirtual;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -25,17 +24,7 @@ import com.io7m.renderer.types.RException;
  */
 
 public interface KShaderCacheForwardOpaqueUnlitType extends
-  LUCacheType<PathVirtual, KProgram, RException>
+  LUCacheType<String, KProgram, RException>
 {
-  /**
-   * @param name
-   *          The shader name.
-   * @return The named shader.
-   * @throws RException
-   *           If an error occurs.
-   */
-
-  KProgram getForwardOpaqueUnlit(
-    final String name)
-    throws RException;
+  // No extra functions.
 }

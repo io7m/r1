@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.renderer.types.RSpaceObjectType;
@@ -39,7 +40,7 @@ import com.io7m.renderer.types.RVectorI3F;
  * </p>
  */
 
-public final class MeshBasic
+@EqualityReference public final class MeshBasic
 {
   /**
    * Construct a new empty mesh with the given name.
@@ -58,7 +59,7 @@ public final class MeshBasic
   private final String                              name;
   private final List<RVectorI3F<RSpaceObjectType>>  normals;
   private final List<RVectorI3F<RSpaceObjectType>>  positions;
-  private final List<MeshTriangle>             triangles;
+  private final List<MeshTriangle>                  triangles;
   private final List<RVectorI2F<RSpaceTextureType>> uvs;
   private final Map<MeshBasicVertex, Integer>       vertex_map;
   private final List<MeshBasicVertex>               vertices;
@@ -202,8 +203,7 @@ public final class MeshBasic
 
   public List<MeshTriangle> trianglesGet()
   {
-    final List<MeshTriangle> r =
-      Collections.unmodifiableList(this.triangles);
+    final List<MeshTriangle> r = Collections.unmodifiableList(this.triangles);
     assert r != null;
     return r;
   }

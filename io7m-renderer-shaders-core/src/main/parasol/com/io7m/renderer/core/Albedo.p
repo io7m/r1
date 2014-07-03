@@ -29,7 +29,7 @@ module Albedo is
 
   type t is record
     color : vector_4f, -- The base surface color
-    mix    : float      -- The linear mix between the color and texture, in the range [0, 1]
+    mix   : float      -- The linear mix between the color and texture, in the range [0, 1]
   end;
 
   function opaque (

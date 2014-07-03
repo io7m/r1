@@ -100,12 +100,13 @@ import com.io7m.renderer.types.RExceptionJCGL;
       final F input,
       final KFramebufferRGBAUsableType output)
       throws JCGLException,
-        RException
+        RException,
+        JCacheException
   {
     final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
 
-    final KProgram fog = this.shader_cache.getPostprocessing("fog");
+    final KProgram fog = this.shader_cache.cacheGetLU("fog");
 
     try {
       gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());

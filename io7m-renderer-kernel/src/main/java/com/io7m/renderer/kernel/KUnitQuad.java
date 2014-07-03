@@ -35,11 +35,10 @@ import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLArrayBuffersType;
 import com.io7m.jcanephora.api.JCGLIndexBuffersType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
-import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
 
 /**
@@ -47,7 +46,7 @@ import com.io7m.renderer.kernel.types.KMeshAttributes;
  * oriented towards <code>+Z</code>.
  */
 
-@EqualityStructural public final class KUnitQuad implements
+@EqualityReference public final class KUnitQuad implements
   KUnitQuadUsableType
 {
   /**
@@ -176,28 +175,6 @@ import com.io7m.renderer.kernel.types.KMeshAttributes;
     }
   }
 
-  @Override public boolean equals(
-    final @Nullable Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final KUnitQuad other = (KUnitQuad) obj;
-    if (!this.array.equals(other.array)) {
-      return false;
-    }
-    if (!this.indices.equals(other.indices)) {
-      return false;
-    }
-    return true;
-  }
-
   /**
    * @return The array buffer that backs the quad
    */
@@ -214,15 +191,6 @@ import com.io7m.renderer.kernel.types.KMeshAttributes;
   @Override public IndexBufferUsableType getIndices()
   {
     return this.indices;
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.array.hashCode();
-    result = (prime * result) + this.indices.hashCode();
-    return result;
   }
 
   @Override public long resourceGetSizeBytes()

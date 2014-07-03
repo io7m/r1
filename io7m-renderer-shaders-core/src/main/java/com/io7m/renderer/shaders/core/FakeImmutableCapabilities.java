@@ -16,13 +16,14 @@
 
 package com.io7m.renderer.shaders.core;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 
 /**
  * Configurable capabilities for shader generation.
  */
 
-public final class FakeImmutableCapabilities implements
+@EqualityReference public final class FakeImmutableCapabilities implements
   KGraphicsCapabilitiesType
 {
   private final boolean supports_depth;

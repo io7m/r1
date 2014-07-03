@@ -18,10 +18,10 @@ package com.io7m.renderer.kernel;
 
 import com.io7m.jcanephora.FramebufferStatus;
 import com.io7m.jcanephora.JCGLExceptionUnsupported;
-import com.io7m.jnull.Nullable;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
 
-final class KFramebufferCommon
+@EqualityReference final class KFramebufferCommon
 {
   static void checkFramebufferStatus(
     final FramebufferStatus status)
@@ -42,17 +42,6 @@ final class KFramebufferCommon
   }
 
   private KFramebufferCommon()
-  {
-    throw new UnreachableCodeException();
-  }
-
-  @Override public boolean equals(
-    final @Nullable Object other)
-  {
-    throw new UnreachableCodeException();
-  }
-
-  @Override public int hashCode()
   {
     throw new UnreachableCodeException();
   }

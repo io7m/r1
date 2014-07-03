@@ -170,47 +170,11 @@
         </executions>
       </plugin>
 
-      <!-- Generate, compile, and compact shaders. -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-        <executions>
-          <execution>
-            <id>make-parasol-forward-sources</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <mainClass>com.io7m.renderer.shaders.deferred.geometry.MakeGeometryMain</mainClass>
-              <arguments>
-                <argument>${project.build.directory}/parasol/</argument>
-                <argument>${project.build.directory}/glsl/</argument>
-                <argument>${project.build.directory}/glsl-compact/</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- Produce shader archives -->
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.4</version>
         <executions>
-          <execution>
-            <id>make-shader-archive</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>src/main/assembly/com/io7m/renderer/shaders/deferred/geometry/shaders.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
           <execution>
             <id>make-shader-source-archive</id>
             <phase>package</phase>
@@ -310,6 +274,39 @@
                   <Built-By>io7m</Built-By>
                 </manifestEntries>
               </archive>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- 
+        Compile Parasol shader sources.
+        
+        Note that this is dependent on the project jar having been produced.
+        This introduces an unfortunate dependency on the fact that two plugins
+        in the same phase will be executed in the order that they are declared
+        in the POM file.
+      -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <id>make-parasol-deferred-geometry-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>java</executable>
+              <arguments>
+                <argument>-classpath</argument>
+                <classpath/>
+                <argument>com.io7m.renderer.shaders.deferred.geometry.RShadersDeferredGeometryMakeAll</argument>
+                <argument>${project.build.directory}/parasol/</argument>
+                <argument>${project.build.directory}/${project.artifactId}-${project.version}.jar</argument>
+              </arguments>
             </configuration>
           </execution>
         </executions>

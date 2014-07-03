@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
@@ -25,7 +26,7 @@ import com.io7m.renderer.types.RException;
  * A description of a map suitable for variance shadow mapping.
  */
 
-public final class KShadowMapVarianceDescription implements
+@EqualityStructural public final class KShadowMapVarianceDescription implements
   KShadowMapDescriptionType
 {
   /**

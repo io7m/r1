@@ -19,6 +19,7 @@ package com.io7m.renderer.xml.collada;
 import java.util.Collections;
 import java.util.SortedSet;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 
 /**
@@ -27,13 +28,14 @@ import com.io7m.jnull.NullCheck;
  * </p>
  */
 
-public abstract class ColladaGeometry
+@EqualityReference public abstract class ColladaGeometry
 {
   /**
    * A polygon mesh.
    */
 
-  public static final class ColladaMesh extends ColladaGeometry
+  @EqualityReference public static final class ColladaMesh extends
+    ColladaGeometry
   {
     private final ColladaPolylist            polylist;
     private final SortedSet<ColladaSourceID> source_ids;

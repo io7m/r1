@@ -18,12 +18,13 @@ package com.io7m.renderer.shaders.forward;
 
 import java.util.List;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 
-public final class RKFUnlitTranslucentRefractiveCases
+@EqualityReference public final class RKFUnlitTranslucentRefractiveCases
 {
   private final List<KMaterialTranslucentRefractive> cases;
-  private final RKFMaterialCases                      material_cases;
+  private final RKFMaterialCases                     material_cases;
 
   public RKFUnlitTranslucentRefractiveCases()
   {

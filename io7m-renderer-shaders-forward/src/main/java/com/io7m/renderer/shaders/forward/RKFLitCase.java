@@ -16,16 +16,17 @@
 
 package com.io7m.renderer.shaders.forward;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialType;
 import com.io7m.renderer.shaders.core.FakeImmutableCapabilities;
 
-public final class RKFLitCase<M extends KMaterialType>
+@EqualityReference public final class RKFLitCase<M extends KMaterialType>
 {
   private final FakeImmutableCapabilities caps;
-  private final KLightType            light;
-  private final M                     material;
+  private final KLightType                light;
+  private final M                         material;
 
   public RKFLitCase(
     final KLightType in_light,

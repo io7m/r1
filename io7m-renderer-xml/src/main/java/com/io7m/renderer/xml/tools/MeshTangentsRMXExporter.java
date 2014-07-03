@@ -21,6 +21,7 @@ import java.util.List;
 import nu.xom.Attribute;
 import nu.xom.Element;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.meshes.MeshTangents;
@@ -37,7 +38,7 @@ import com.io7m.renderer.xml.rmx.RXMLConstants;
  * An exporter to produce XML descriptions of {@link MeshTangents} meshes.
  */
 
-public final class MeshTangentsRMXExporter
+@EqualityReference public final class MeshTangentsRMXExporter
 {
   private static Attribute floatAttribute(
     final String name,

@@ -70,7 +70,7 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
 
 @EqualityReference public final class KScene
 {
-  @SuppressWarnings({ "null", "unchecked", "synthetic-access" }) private static final class Builder implements
+  @SuppressWarnings({ "null", "unchecked", "synthetic-access" }) @EqualityReference private static final class Builder implements
     KSceneBuilderWithCreateType
   {
     private static RExceptionLightGroupAlreadyAdded lightGroupAlreadyAdded(
@@ -410,7 +410,7 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
     }
   }
 
-  @SuppressWarnings({ "null" }) private static final class BuilderState
+  @SuppressWarnings({ "null" }) @EqualityReference private static final class BuilderState
   {
     // CHECKSTYLE_VISIBILITY:OFF
     final MapPSet<KInstanceType>                             instances_all;
@@ -461,7 +461,7 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
     }
   }
 
-  @SuppressWarnings({ "null", "synthetic-access" }) private static final class LightGroupBuilder implements
+  @SuppressWarnings({ "null", "synthetic-access" }) @EqualityReference private static final class LightGroupBuilder implements
     KSceneLightGroupBuilderType
   {
     private LightGroupState group_state;
@@ -570,7 +570,7 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
     }
   }
 
-  @SuppressWarnings({ "null" }) private static final class LightGroupState
+  @SuppressWarnings({ "null" }) @EqualityReference private static final class LightGroupState
   {
     // CHECKSTYLE_VISIBILITY:OFF
     final MapPSet<KInstanceOpaqueType> instances;

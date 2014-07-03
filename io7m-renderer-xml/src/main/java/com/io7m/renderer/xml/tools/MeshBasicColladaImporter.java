@@ -18,6 +18,7 @@ package com.io7m.renderer.xml.tools;
 
 import java.util.List;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeCheckException;
@@ -51,9 +52,9 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
  * An importer that can load a {@link MeshBasic} from a COLLADA document.
  */
 
-public final class MeshBasicColladaImporter
+@EqualityReference public final class MeshBasicColladaImporter
 {
-  static class Offsets
+  @EqualityReference static class Offsets
   {
     private static int getNormalOffset(
       final List<ColladaInput> inputs)

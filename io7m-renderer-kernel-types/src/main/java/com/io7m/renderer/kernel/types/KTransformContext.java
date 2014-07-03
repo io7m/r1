@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
@@ -26,7 +27,7 @@ import com.io7m.jtensors.QuaternionM4F;
  * allocating.
  */
 
-public final class KTransformContext
+@EqualityStructural public final class KTransformContext
 {
   /**
    * Construct a new transform context

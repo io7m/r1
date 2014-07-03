@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.TextureCubeStaticType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoType;
@@ -63,7 +64,7 @@ import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RTransformTextureType;
 import com.io7m.renderer.types.RVectorI3F;
 
-public final class RKFMaterialCases
+@EqualityReference public final class RKFMaterialCases
 {
   private static List<KMaterialAlbedoType> makeAlbedoCases()
   {
@@ -477,7 +478,8 @@ public final class RKFMaterialCases
     this.cases_env = RKFMaterialCases.makeEnvironmentCases();
     this.cases_normal = RKFMaterialCases.makeNormalCases();
     this.cases_specular = RKFMaterialCases.makeSpecularCases();
-    this.cases_specular_not_none = RKFMaterialCases.makeSpecularNotNoneCases();
+    this.cases_specular_not_none =
+      RKFMaterialCases.makeSpecularNotNoneCases();
     this.cases_refractive = RKFMaterialCases.makeRefractiveCases();
 
     this.cases_lit_opaque_regular =

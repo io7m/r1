@@ -55,7 +55,13 @@ import com.io7m.renderer.kernel.KRendererDeferred;
 import com.io7m.renderer.kernel.KRendererDeferredOpaque;
 import com.io7m.renderer.kernel.KRendererDeferredOpaqueType;
 import com.io7m.renderer.kernel.KRendererDeferredType;
-import com.io7m.renderer.kernel.KShaderCacheType;
+import com.io7m.renderer.kernel.KShaderCacheDeferredGeometryType;
+import com.io7m.renderer.kernel.KShaderCacheDeferredLightType;
+import com.io7m.renderer.kernel.KShaderCacheDepthType;
+import com.io7m.renderer.kernel.KShaderCacheDepthVarianceType;
+import com.io7m.renderer.kernel.KShaderCacheForwardTranslucentLitType;
+import com.io7m.renderer.kernel.KShaderCacheForwardTranslucentUnlitType;
+import com.io7m.renderer.kernel.KShaderCachePostprocessingType;
 import com.io7m.renderer.kernel.KShadowMapCache;
 import com.io7m.renderer.kernel.KShadowMapCacheLoader;
 import com.io7m.renderer.kernel.KShadowMapCacheType;
@@ -81,27 +87,59 @@ public final class ExampleRendererDeferredDefault extends
 
   public static ExampleRendererConstructorType get()
   {
-    return new ExampleRendererConstructorType() {
+    return new ExampleRendererConstructorDeferredType() {
+      @Override public <A, E extends Exception> A matchConstructor(
+        final ExampleRendererConstructorVisitorType<A, E> v)
+        throws E,
+          RException,
+          JCGLException
+      {
+        return v.deferred(this);
+      }
+
       @SuppressWarnings("synthetic-access") @Override public
         ExampleRendererType
         newRenderer(
           final LogUsableType log,
-          final KShaderCacheType shader_cache,
+          final KShaderCacheForwardTranslucentLitType in_shader_translucent_lit_cache,
+          final KShaderCacheForwardTranslucentUnlitType in_shader_translucent_unlit_cache,
+          final KShaderCacheDepthType in_shader_depth_cache,
+          final KShaderCacheDepthVarianceType in_shader_depth_variance_cache,
+          final KShaderCachePostprocessingType in_shader_postprocessing_cache,
+          final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache,
+          final KShaderCacheDeferredLightType in_shader_deferred_light_cache,
           final JCGLImplementationType gi)
           throws JCGLException,
             RException
       {
-        return ExampleRendererDeferredDefault.make(log, shader_cache, gi);
+        return ExampleRendererDeferredDefault.make(
+          log,
+          in_shader_translucent_lit_cache,
+          in_shader_translucent_unlit_cache,
+          in_shader_depth_cache,
+          in_shader_depth_variance_cache,
+          in_shader_postprocessing_cache,
+          in_shader_deferred_geo_cache,
+          in_shader_deferred_light_cache,
+          gi);
       }
     };
   }
 
-  @SuppressWarnings("null") private static ExampleRendererDeferredType make(
-    final LogUsableType log,
-    final KShaderCacheType shader_cache,
-    final JCGLImplementationType gi)
-    throws JCGLException,
-      RException
+  @SuppressWarnings("null") private static
+    ExampleRendererDeferredType
+    make(
+      final LogUsableType log,
+      final KShaderCacheForwardTranslucentLitType in_shader_translucent_lit_cache,
+      final KShaderCacheForwardTranslucentUnlitType in_shader_translucent_unlit_cache,
+      final KShaderCacheDepthType in_shader_depth_cache,
+      final KShaderCacheDepthVarianceType in_shader_depth_variance_cache,
+      final KShaderCachePostprocessingType in_shader_postprocessing_cache,
+      final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache,
+      final KShaderCacheDeferredLightType in_shader_deferred_light_cache,
+      final JCGLImplementationType gi)
+      throws JCGLException,
+        RException
   {
     NullCheck.notNull(gi, "GL");
 
@@ -111,12 +149,12 @@ public final class ExampleRendererDeferredDefault extends
     final KUnitQuad quad = KUnitQuad.newQuad(gi.getGLCommon(), log);
 
     final KRegionCopierType copier =
-      KRegionCopier.newCopier(gi, log, shader_cache, quad);
+      KRegionCopier.newCopier(gi, log, in_shader_postprocessing_cache, quad);
 
     final KDepthRendererType depth_renderer =
-      KDepthRenderer.newRenderer(gi, caps, shader_cache, log);
+      KDepthRenderer.newRenderer(gi, caps, in_shader_depth_cache, log);
     final KDepthVarianceRendererType depth_variance_renderer =
-      KDepthVarianceRenderer.newRenderer(gi, shader_cache);
+      KDepthVarianceRenderer.newRenderer(gi, in_shader_depth_variance_cache);
 
     final BLUCacheConfig depth_variance_cache_config =
       BLUCacheConfig
@@ -133,7 +171,7 @@ public final class ExampleRendererDeferredDefault extends
         gi,
         copier,
         depth_variance_cache,
-        shader_cache,
+        in_shader_postprocessing_cache,
         quad,
         log);
 
@@ -153,7 +191,6 @@ public final class ExampleRendererDeferredDefault extends
         depth_renderer,
         depth_variance_renderer,
         blur,
-        shader_cache,
         shadow_cache,
         log);
 
@@ -185,7 +222,7 @@ public final class ExampleRendererDeferredDefault extends
       KRefractionRenderer.newRenderer(
         gi,
         copier,
-        shader_cache,
+        in_shader_translucent_unlit_cache,
         forward_cache,
         bounds_cache,
         bounds_tri_cache);
@@ -193,13 +230,18 @@ public final class ExampleRendererDeferredDefault extends
     final KTranslucentRendererType translucent_renderer =
       KTranslucentRenderer.newRenderer(
         gi,
-        shader_cache,
+        in_shader_translucent_unlit_cache,
+        in_shader_translucent_lit_cache,
         refraction_renderer,
         caps,
         log);
 
     final KRendererDeferredOpaqueType opaque_renderer =
-      KRendererDeferredOpaque.newRenderer(gi, shader_cache);
+      KRendererDeferredOpaque.newRenderer(
+        gi,
+        quad,
+        in_shader_deferred_geo_cache,
+        in_shader_deferred_light_cache);
 
     return new ExampleRendererDeferredDefault(KRendererDeferred.newRenderer(
       gi,

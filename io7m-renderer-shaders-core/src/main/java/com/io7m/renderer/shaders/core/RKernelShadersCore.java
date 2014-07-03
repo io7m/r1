@@ -16,13 +16,14 @@
 
 package com.io7m.renderer.shaders.core;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * Placeholder class for locating files by class resource.
  */
 
-public final class RKernelShadersCore
+@EqualityReference public final class RKernelShadersCore
 {
   private RKernelShadersCore()
   {

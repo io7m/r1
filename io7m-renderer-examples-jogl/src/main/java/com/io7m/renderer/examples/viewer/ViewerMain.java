@@ -43,9 +43,6 @@ import com.io7m.jlog.LogType;
 import com.io7m.jnull.Nullable;
 import com.io7m.jproperties.JPropertyException;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.jvvfs.Filesystem;
-import com.io7m.jvvfs.FilesystemError;
-import com.io7m.jvvfs.FilesystemType;
 
 /**
  * The main viewer.
@@ -175,21 +172,9 @@ public final class ViewerMain
       @Override public void run()
       {
         log.debug("starting");
-
-        try {
-          final FilesystemType fs =
-            Filesystem.makeWithoutArchiveDirectory(log);
-
-          VShaderFilesystem.setupShaderFilesystem(config, fs, log);
-
-          final ViewerMainWindow vmw = new ViewerMainWindow(config, log, fs);
-          vmw.pack();
-          vmw.setVisible(true);
-        } catch (final FilesystemError e) {
-          VErrorBox.showErrorWithTitleLater(log, "Filesystem error", e);
-          e.printStackTrace();
-          System.exit(1);
-        }
+        final ViewerMainWindow vmw = new ViewerMainWindow(config, log);
+        vmw.pack();
+        vmw.setVisible(true);
       }
     });
   }

@@ -24,6 +24,7 @@ import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -60,7 +61,7 @@ import com.io7m.renderer.types.RTransformViewType;
  * The default shadow map renderer implementation.
  */
 
-@SuppressWarnings("synthetic-access") public final class KShadowMapRenderer implements
+@SuppressWarnings("synthetic-access") @EqualityReference public final class KShadowMapRenderer implements
   KShadowMapRendererType
 {
   private static final String NAME;
@@ -82,8 +83,6 @@ import com.io7m.renderer.types.RTransformViewType;
    *          A blur postprocessor for softening shadow maps
    * @param shadow_cache
    *          A shadow map cache
-   * @param shader_cache
-   *          The shader cache
    * @param log
    *          A log handle
    * @return A new depth renderer
@@ -97,7 +96,6 @@ import com.io7m.renderer.types.RTransformViewType;
     final KDepthRendererType depth_renderer,
     final KDepthVarianceRendererType depth_variance_renderer,
     final KPostprocessorBlurDepthVarianceType blur,
-    final KShaderCacheType shader_cache,
     final KShadowMapCacheType shadow_cache,
     final LogUsableType log)
     throws RException

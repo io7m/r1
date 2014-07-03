@@ -30,7 +30,7 @@ module Debug is
   -- "Constant color" program.
   --
 
-  shader vertex ccolor_v is
+  shader vertex show_ccolor_v is
     in v_position              : vector_3f;
     parameter m_modelview      : matrix_4x4f;
     parameter m_projection     : matrix_4x4f;
@@ -45,23 +45,23 @@ module Debug is
     out f_position_clip = clip_position;
   end;
 
-  shader fragment ccolor_f is
+  shader fragment show_ccolor_f is
     parameter f_ccolor : vector_4f;
     out       out_0     : vector_4f as 0;
   as
     out out_0 = f_ccolor;
   end;
 
-  shader program ccolor is
-    vertex   ccolor_v;
-    fragment ccolor_f;
+  shader program show_ccolor is
+    vertex   show_ccolor_v;
+    fragment show_ccolor_f;
   end;
 
   --
   -- Visible UV program.
   --
 
-  shader vertex uv_v is
+  shader vertex show_uv_v is
     in v_position              : vector_3f;
     in v_uv                    : vector_2f;
     out f_uv                   : vector_2f;
@@ -79,7 +79,7 @@ module Debug is
     out f_uv            = v_uv;
   end;
 
-  shader fragment uv_f is
+  shader fragment show_uv_f is
     in  f_uv  : vector_2f;
     out out_0 : vector_4f as 0;
   with
@@ -88,16 +88,16 @@ module Debug is
     out out_0 = rgba;
   end;
 
-  shader program uv is
-    vertex   uv_v;
-    fragment uv_f;
+  shader program show_uv is
+    vertex   show_uv_v;
+    fragment show_uv_f;
   end;
 
   --
   -- "Vertex color" program.
   --
 
-  shader vertex vcolor_v is
+  shader vertex show_vcolor_v is
     in v_position              : vector_3f;
     in v_color                : vector_4f;
     out f_color               : vector_4f;
@@ -115,23 +115,23 @@ module Debug is
     out f_color        = v_color;
   end;
 
-  shader fragment vcolor_f is
+  shader fragment show_vcolor_f is
     in  f_color : vector_4f;
-    out out_0    : vector_4f as 0;
+    out out_0   : vector_4f as 0;
   as
     out out_0 = f_color;
   end;
 
-  shader program vcolor is
-    vertex   vcolor_v;
-    fragment vcolor_f;
+  shader program show_vcolor is
+    vertex   show_vcolor_v;
+    fragment show_vcolor_f;
   end;
 
   --
   -- Flat textured UV program.
   --
 
-  shader vertex flat_uv_v is
+  shader vertex show_flat_uv_v is
     in v_position              : vector_3f;
     in v_uv                    : vector_2f;
     out f_uv                   : vector_2f;
@@ -149,7 +149,7 @@ module Debug is
     out f_uv        = v_uv;
   end;
 
-  shader fragment flat_uv_f is
+  shader fragment show_flat_uv_f is
     in        f_uv     : vector_2f;
     parameter t_albedo : sampler_2d;
     out       out_0    : vector_4f as 0;
@@ -159,9 +159,9 @@ module Debug is
     out out_0 = rgba;
   end;
 
-  shader program flat_uv is
-    vertex   flat_uv_v;
-    fragment flat_uv_f;
+  shader program show_flat_uv is
+    vertex   show_flat_uv_v;
+    fragment show_flat_uv_f;
   end;
 
 end;

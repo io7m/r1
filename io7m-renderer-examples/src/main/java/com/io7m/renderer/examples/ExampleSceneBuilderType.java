@@ -36,6 +36,20 @@ public interface ExampleSceneBuilderType extends KSceneBuilderType
   KGraphicsCapabilitiesType capabilities();
 
   /**
+   * Load the cube texture with the given name.
+   * 
+   * @param name
+   *          The name
+   * @return An allocated texture
+   * @throws RException
+   *           If an error occurs
+   */
+
+  TextureCubeStaticUsableType cubeTexture(
+    final String name)
+    throws RException;
+
+  /**
    * Load the mesh with the given name.
    * 
    * @param name
@@ -75,20 +89,6 @@ public interface ExampleSceneBuilderType extends KSceneBuilderType
    */
 
   Texture2DStaticUsableType textureClamped(
-    final String name)
-    throws RException;
-
-  /**
-   * Load the cube texture with the given name.
-   * 
-   * @param name
-   *          The name
-   * @return An allocated texture
-   * @throws RException
-   *           If an error occurs
-   */
-
-  TextureCubeStaticUsableType cubeTexture(
     final String name)
     throws RException;
 }

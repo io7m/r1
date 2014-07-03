@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.types;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jtensors.VectorM2F;
 import com.io7m.junreachable.UnreachableCodeException;
 
@@ -23,7 +24,7 @@ import com.io7m.junreachable.UnreachableCodeException;
  * Functions to encode and decode normals using a spheremap transform.
  */
 
-public final class RSphericalTransform
+@EqualityReference public final class RSphericalTransform
 {
   /**
    * Decode the vector <code>n</code>, returning a normal vector in

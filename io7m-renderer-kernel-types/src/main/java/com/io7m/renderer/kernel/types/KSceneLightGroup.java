@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel.types;
 
 import java.util.Set;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 
 /**
@@ -26,7 +27,7 @@ import com.io7m.jnull.NullCheck;
  * </p>
  */
 
-public final class KSceneLightGroup
+@EqualityReference public final class KSceneLightGroup
 {
   private final Set<KInstanceOpaqueType> instances;
   private final Set<KLightType>          lights;

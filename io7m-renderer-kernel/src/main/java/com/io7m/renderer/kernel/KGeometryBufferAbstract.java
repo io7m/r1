@@ -43,14 +43,16 @@ import com.io7m.jcanephora.api.JCGLInterfaceGL3Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
 import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RExceptionNotSupported;
 
-abstract class KGeometryBufferAbstract implements KGeometryBufferType
+@EqualityReference abstract class KGeometryBufferAbstract implements
+  KGeometryBufferType
 {
-  private static final class KGeometryBuffer_GL3ES3 extends
+  @EqualityReference private static final class KGeometryBuffer_GL3ES3 extends
     KGeometryBufferAbstract
   {
     public static
@@ -106,23 +108,30 @@ abstract class KGeometryBufferAbstract implements KGeometryBufferType
 
       final List<FramebufferColorAttachmentPointType> points =
         gl.framebufferGetColorAttachmentPoints();
+      final FramebufferColorAttachmentPointType attach_0 = points.get(0);
+      final FramebufferColorAttachmentPointType attach_1 = points.get(1);
+      final FramebufferColorAttachmentPointType attach_2 = points.get(2);
+      assert attach_0 != null;
+      assert attach_1 != null;
+      assert attach_2 != null;
+
       final List<FramebufferDrawBufferType> buffers =
         gl.framebufferGetDrawBuffers();
 
       final Map<FramebufferDrawBufferType, FramebufferColorAttachmentPointType> mappings =
         new HashMap<FramebufferDrawBufferType, FramebufferColorAttachmentPointType>();
-      mappings.put(buffers.get(0), points.get(0));
-      mappings.put(buffers.get(1), points.get(1));
-      mappings.put(buffers.get(2), points.get(2));
+      mappings.put(buffers.get(0), attach_0);
+      mappings.put(buffers.get(1), attach_1);
+      mappings.put(buffers.get(2), attach_2);
 
       final FramebufferType fb = gl.framebufferAllocate();
       gl.framebufferDrawBind(fb);
 
       try {
         gl.framebufferDrawAttachDepthStencilTexture2D(fb, depth);
-        gl.framebufferDrawAttachColorTexture2DAt(fb, points.get(0), albedo);
-        gl.framebufferDrawAttachColorTexture2DAt(fb, points.get(1), normal);
-        gl.framebufferDrawAttachColorTexture2DAt(fb, points.get(2), specular);
+        gl.framebufferDrawAttachColorTexture2DAt(fb, attach_0, albedo);
+        gl.framebufferDrawAttachColorTexture2DAt(fb, attach_1, normal);
+        gl.framebufferDrawAttachColorTexture2DAt(fb, attach_2, specular);
         gl.framebufferDrawSetBuffers(fb, mappings);
 
         final FramebufferStatus status = gl.framebufferDrawValidate(fb);
@@ -255,6 +264,11 @@ abstract class KGeometryBufferAbstract implements KGeometryBufferType
   }
 
   private boolean deleted;
+
+  public final boolean isDeleted()
+  {
+    return this.deleted;
+  }
 
   final void setDeleted(
     final boolean b)

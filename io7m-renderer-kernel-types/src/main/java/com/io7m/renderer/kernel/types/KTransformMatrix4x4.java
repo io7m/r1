@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.renderer.types.RMatrixI4x4F;
@@ -25,7 +26,8 @@ import com.io7m.renderer.types.RTransformModelType;
  * An object-space to world-space transformation consisting of a 4x4 matrix.
  */
 
-public final class KTransformMatrix4x4 implements KTransformType
+@EqualityStructural public final class KTransformMatrix4x4 implements
+  KTransformType
 {
   /**
    * Construct a new transformation with the given matrix.

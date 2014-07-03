@@ -40,15 +40,16 @@ import com.io7m.jcanephora.api.JCGLInterfaceGL3Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
 import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
-import com.io7m.jnull.Nullable;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 
-abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
+@EqualityReference abstract class KFramebufferRGBAAbstract implements
+  KFramebufferRGBAType
 {
-  private static final class KFramebufferRGBA_GL2 extends
+  @EqualityReference private static final class KFramebufferRGBA_GL2 extends
     KFramebufferRGBAAbstract
   {
     public static KFramebufferRGBAAbstract newRGBA(
@@ -107,34 +108,6 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
       this.description = desc;
     }
 
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KFramebufferRGBA_GL2 other = (KFramebufferRGBA_GL2) obj;
-      return this.color.equals(other.color)
-        && this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer);
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.color.hashCode();
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      return result;
-    }
-
     @Override public void kFramebufferDelete(
       final JCGLImplementationType g)
       throws RException
@@ -168,7 +141,7 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
     }
   }
 
-  private static final class KFramebufferRGBA_GL3ES3 extends
+  @EqualityReference private static final class KFramebufferRGBA_GL3ES3 extends
     KFramebufferRGBAAbstract
   {
 
@@ -266,34 +239,6 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
       this.description = desc;
     }
 
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KFramebufferRGBA_GL3ES3 other = (KFramebufferRGBA_GL3ES3) obj;
-      return this.color.equals(other.color)
-        && this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer);
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.color.hashCode();
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      return result;
-    }
-
     @Override public void kFramebufferDelete(
       final JCGLImplementationType g)
       throws RException
@@ -327,7 +272,7 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
     }
   }
 
-  private static final class KFramebufferRGBA_GLES2 extends
+  @EqualityReference private static final class KFramebufferRGBA_GLES2 extends
     KFramebufferRGBAAbstract
   {
 
@@ -385,34 +330,6 @@ abstract class KFramebufferRGBAAbstract implements KFramebufferRGBAType
       this.color = c;
       this.framebuffer = fb;
       this.description = desc;
-    }
-
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KFramebufferRGBA_GLES2 other = (KFramebufferRGBA_GLES2) obj;
-      return this.color.equals(other.color)
-        && this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer);
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.color.hashCode();
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      return result;
     }
 
     @Override public void kFramebufferDelete(
