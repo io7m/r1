@@ -41,8 +41,8 @@ import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
 import com.io7m.jcanephora.api.JCGLRenderbuffersGL3ES3Type;
 import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
@@ -55,58 +55,12 @@ import com.io7m.renderer.types.RExceptionNotSupported;
  * Provides the base implementation for {@link KFramebufferDeferred}.
  */
 
-abstract class KFramebufferDeferredAbstract implements
+@EqualityReference abstract class KFramebufferDeferredAbstract implements
   KFramebufferDeferredType
 {
-  private static final class KFramebufferDeferredGL3ES3 extends
+  @EqualityReference private static final class KFramebufferDeferredGL3ES3 extends
     KFramebufferDeferredAbstract
   {
-    private static Texture2DStaticType makeDepth(
-      final KFramebufferDepthDescription desc_depth,
-      final int width,
-      final int height,
-      final JCGLTextures2DStaticGL3ES3Type gl)
-      throws JCGLException
-    {
-      switch (desc_depth.getDepthPrecision()) {
-        case DEPTH_PRECISION_16:
-        {
-          return gl.texture2DStaticAllocateDepth16(
-            "depth-16",
-            width,
-            height,
-            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-            desc_depth.getFilterMinification(),
-            desc_depth.getFilterMagnification());
-        }
-        case DEPTH_PRECISION_24:
-        {
-          return gl.texture2DStaticAllocateDepth24(
-            "depth-24",
-            width,
-            height,
-            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-            desc_depth.getFilterMinification(),
-            desc_depth.getFilterMagnification());
-        }
-        case DEPTH_PRECISION_32F:
-        {
-          return gl.texture2DStaticAllocateDepth32f(
-            "depth-32f",
-            width,
-            height,
-            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-            desc_depth.getFilterMinification(),
-            desc_depth.getFilterMagnification());
-        }
-      }
-
-      throw new UnreachableCodeException();
-    }
-
     private static Texture2DStaticType makeRGBA(
       final KFramebufferRGBADescription desc_rgba,
       final int width,
@@ -173,8 +127,8 @@ abstract class KFramebufferDeferredAbstract implements
 
       final Texture2DStaticType c =
         KFramebufferDeferredGL3ES3.makeRGBA(desc_rgba, width, height, gl);
-      final Texture2DStaticType d =
-        KFramebufferDeferredGL3ES3.makeDepth(desc_depth, width, height, gl);
+      final Texture2DStaticUsableType d =
+        gbuffer.geomGetTextureDepthStencil();
 
       final List<FramebufferColorAttachmentPointType> points =
         gl.framebufferGetColorAttachmentPoints();
@@ -189,7 +143,7 @@ abstract class KFramebufferDeferredAbstract implements
       gl.framebufferDrawBind(fb);
       try {
         gl.framebufferDrawAttachColorTexture2D(fb, c);
-        gl.framebufferDrawAttachDepthTexture2D(fb, d);
+        gl.framebufferDrawAttachDepthStencilTexture2D(fb, d);
         gl.framebufferDrawSetBuffers(fb, mappings);
         final FramebufferStatus status = gl.framebufferDrawValidate(fb);
         KFramebufferCommon.checkFramebufferStatus(status);
@@ -201,14 +155,14 @@ abstract class KFramebufferDeferredAbstract implements
     }
 
     private final Texture2DStaticType            color;
-    private final Texture2DStaticType            depth;
+    private final Texture2DStaticUsableType      depth;
     private final KFramebufferForwardDescription description;
     private final FramebufferType                framebuffer;
     private final KGeometryBufferType            gbuffer;
 
     public KFramebufferDeferredGL3ES3(
       final Texture2DStaticType c,
-      final Texture2DStaticType d,
+      final Texture2DStaticUsableType d,
       final FramebufferType fb,
       final KFramebufferForwardDescription in_description,
       final KGeometryBufferType in_gbuffer)
@@ -222,39 +176,6 @@ abstract class KFramebufferDeferredAbstract implements
       this.gbuffer = in_gbuffer;
     }
 
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KFramebufferDeferredGL3ES3 other =
-        (KFramebufferDeferredGL3ES3) obj;
-      return this.color.equals(other.color)
-        && this.depth.equals(other.depth)
-        && this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer)
-        && this.gbuffer.equals(other.gbuffer);
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.color.hashCode();
-      result = (prime * result) + this.depth.hashCode();
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      result = (prime * result) + this.gbuffer.hashCode();
-      return result;
-    }
-
     @Override public void kFramebufferDelete(
       final JCGLImplementationType g)
       throws RException
@@ -263,7 +184,6 @@ abstract class KFramebufferDeferredAbstract implements
         final JCGLInterfaceCommonType gc = g.getGLCommon();
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.color);
-        gc.texture2DStaticDelete(this.depth);
         this.gbuffer.geomDelete(g);
       } catch (final JCGLException e) {
         throw RExceptionJCGL.fromJCGLException(e);
@@ -337,10 +257,10 @@ abstract class KFramebufferDeferredAbstract implements
     NullCheck.notNull(gi, "GL implementation");
     NullCheck.notNull(description, "Description");
 
+    final KFramebufferRGBADescription rgba_d =
+      description.getRGBADescription();
     final KGeometryBufferAbstract gbuffer =
-      KGeometryBufferAbstract.newRGBA(gi, description
-        .getRGBADescription()
-        .getArea());
+      KGeometryBufferAbstract.newRGBA(gi, rgba_d.getArea());
 
     return gi
       .implementationAccept(new JCGLImplementationVisitorType<KFramebufferDeferredType, RException>() {

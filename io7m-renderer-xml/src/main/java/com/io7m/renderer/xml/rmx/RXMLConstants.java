@@ -19,13 +19,14 @@ package com.io7m.renderer.xml.rmx;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * XML constants for the mesh format.
  */
 
-public final class RXMLConstants
+@EqualityReference public final class RXMLConstants
 {
   /**
    * The XML URI of the schema.

@@ -27,34 +27,6 @@ import java.util.TreeMap;
 public final class ExampleRenderers
 {
   /**
-   * @return The available renderers
-   */
-
-  public static
-    SortedMap<String, ExampleRendererConstructorType>
-    getRenderers()
-  {
-    final SortedMap<String, ExampleRendererConstructorType> r =
-      new TreeMap<String, ExampleRendererConstructorType>();
-
-    r.put(
-      ExampleRendererDebugPosition.class.getCanonicalName(),
-      ExampleRendererDebugPosition.get());
-    r.put(
-      ExampleRendererForwardDefault.class.getCanonicalName(),
-      ExampleRendererForwardDefault.get());
-    r.put(
-      ExampleRendererDeferredDefault.class.getCanonicalName(),
-      ExampleRendererDeferredDefault.get());
-
-    final SortedMap<String, ExampleRendererConstructorType> ur =
-      Collections.unmodifiableSortedMap(r);
-
-    assert ur != null;
-    return ur;
-  }
-
-  /**
    * Attempt to retrieve the renderer with the given unqualified name.
    * 
    * @param name
@@ -88,6 +60,34 @@ public final class ExampleRenderers
     }
 
     throw new ClassNotFoundException(c_name);
+  }
+
+  /**
+   * @return The available renderers
+   */
+
+  public static
+    SortedMap<String, ExampleRendererConstructorType>
+    getRenderers()
+  {
+    final SortedMap<String, ExampleRendererConstructorType> r =
+      new TreeMap<String, ExampleRendererConstructorType>();
+
+    r.put(
+      ExampleRendererDebugPosition.class.getCanonicalName(),
+      ExampleRendererDebugPosition.get());
+    r.put(
+      ExampleRendererForwardDefault.class.getCanonicalName(),
+      ExampleRendererForwardDefault.get());
+    r.put(
+      ExampleRendererDeferredDefault.class.getCanonicalName(),
+      ExampleRendererDeferredDefault.get());
+
+    final SortedMap<String, ExampleRendererConstructorType> ur =
+      Collections.unmodifiableSortedMap(r);
+
+    assert ur != null;
+    return ur;
   }
 
   private ExampleRenderers()

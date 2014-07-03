@@ -17,16 +17,15 @@
 package com.io7m.renderer.kernel;
 
 import com.io7m.jcanephora.api.JCGLImplementationType;
-import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
 import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
 import com.io7m.renderer.types.RException;
 
-abstract class KShadowMap implements KShadowMapType
+@EqualityReference abstract class KShadowMap implements KShadowMapType
 {
-  @EqualityStructural static final class KShadowMapBasic extends KShadowMap
+  @EqualityReference static final class KShadowMapBasic extends KShadowMap
   {
     private final KShadowMapBasicDescription description;
     private final KFramebufferDepth          framebuffer;
@@ -39,23 +38,6 @@ abstract class KShadowMap implements KShadowMapType
       this.framebuffer = NullCheck.notNull(in_framebuffer, "Framebuffer");
     }
 
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KShadowMapBasic other = (KShadowMapBasic) obj;
-      return this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer);
-    }
-
     public KShadowMapBasicDescription getDescription()
     {
       return this.description;
@@ -64,15 +46,6 @@ abstract class KShadowMap implements KShadowMapType
     public KFramebufferDepth getFramebuffer()
     {
       return this.framebuffer;
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      return result;
     }
 
     @Override public
@@ -104,8 +77,7 @@ abstract class KShadowMap implements KShadowMapType
     }
   }
 
-  @EqualityStructural static final class KShadowMapVariance extends
-    KShadowMap
+  @EqualityReference static final class KShadowMapVariance extends KShadowMap
   {
     private final KShadowMapVarianceDescription description;
     private final KFramebufferDepthVariance     framebuffer;
@@ -118,23 +90,6 @@ abstract class KShadowMap implements KShadowMapType
       this.framebuffer = NullCheck.notNull(in_framebuffer, "Framebuffer");
     }
 
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KShadowMapVariance other = (KShadowMapVariance) obj;
-      return this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer);
-    }
-
     public KShadowMapVarianceDescription getDescription()
     {
       return this.description;
@@ -143,15 +98,6 @@ abstract class KShadowMap implements KShadowMapType
     public KFramebufferDepthVariance getFramebuffer()
     {
       return this.framebuffer;
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      return result;
     }
 
     @Override public

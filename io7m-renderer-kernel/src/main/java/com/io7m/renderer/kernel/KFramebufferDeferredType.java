@@ -28,5 +28,5 @@ public interface KFramebufferDeferredType extends
   KFramebufferForwardType,
   KFramebufferDeferredUsableType
 {
-
+  // No extra functions.
 }

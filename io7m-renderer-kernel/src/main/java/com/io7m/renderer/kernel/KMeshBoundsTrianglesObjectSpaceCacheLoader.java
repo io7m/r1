@@ -66,6 +66,8 @@ import com.io7m.renderer.types.RSpaceObjectType;
   @Override public BigInteger cacheValueSizeOf(
     final KMeshBoundsTriangles<RSpaceObjectType> v)
   {
-    return BigInteger.ONE;
+    final BigInteger r = BigInteger.ONE;
+    assert r != null;
+    return r;
   }
 }

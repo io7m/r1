@@ -16,9 +16,8 @@
 
 package com.io7m.renderer.kernel.types;
 
-import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionMaterialMissingAlbedoTexture;
 import com.io7m.renderer.types.RExceptionMaterialMissingSpecularTexture;
@@ -29,11 +28,11 @@ import com.io7m.renderer.types.RTransformTextureType;
  * The type of regular opaque materials.
  */
 
-@EqualityStructural public final class KMaterialOpaqueRegular implements
+@EqualityReference public final class KMaterialOpaqueRegular implements
   KMaterialOpaqueType,
   KMaterialRegularType
 {
-  @SuppressWarnings("synthetic-access") private static final class Builder implements
+  @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KMaterialOpaqueRegularBuilderType
   {
     private KMaterialAlbedoType                 albedo;
@@ -293,45 +292,6 @@ import com.io7m.renderer.types.RTransformTextureType;
       req |= in_specular.materialRequiresUVCoordinates();
       this.required_uv = req;
     }
-  }
-
-  @Override public boolean equals(
-    final @Nullable Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-
-    final KMaterialOpaqueRegular other = (KMaterialOpaqueRegular) obj;
-    return this.albedo.equals(other.albedo)
-      && this.emissive.equals(other.emissive)
-      && this.environment.equals(other.environment)
-      && this.depth.equals(other.depth)
-      && this.normal.equals(other.normal)
-      && this.specular.equals(other.specular)
-      && (this.textures_required == other.textures_required)
-      && this.uv_matrix.equals(other.uv_matrix);
-  }
-
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.albedo.hashCode();
-    result = (prime * result) + this.depth.hashCode();
-    result = (prime * result) + this.emissive.hashCode();
-    result = (prime * result) + this.environment.hashCode();
-    result = (prime * result) + this.normal.hashCode();
-    result = (prime * result) + this.specular.hashCode();
-    result = (prime * result) + this.textures_required;
-    result = (prime * result) + this.uv_matrix.hashCode();
-    return result;
   }
 
   @Override public

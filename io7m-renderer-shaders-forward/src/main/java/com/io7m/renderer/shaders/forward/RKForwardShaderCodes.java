@@ -16,13 +16,14 @@
 
 package com.io7m.renderer.shaders.forward;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentSpecularOnly;
 
-public final class RKForwardShaderCodes
+@EqualityReference public final class RKForwardShaderCodes
 {
   public static String fromLitOpaqueRegular(
     final KLightType l,

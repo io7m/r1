@@ -37,6 +37,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -46,7 +47,7 @@ import com.io7m.renderer.types.RXMLException;
  * Functions to validate and load an XML mesh document.
  */
 
-public final class RXMLMeshDocument
+@EqualityReference public final class RXMLMeshDocument
 {
   /**
    * Load an XML document representing a mesh from the input stream

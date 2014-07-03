@@ -27,6 +27,7 @@ import org.xml.sax.SAXException;
 
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jparasol.xml.JPXMLException;
 
 /**
  * The root type of exceptions raised by XML parsers and validators.
@@ -35,6 +36,33 @@ import com.io7m.jnull.NullCheck;
 @SuppressWarnings("synthetic-access") @EqualityReference public abstract class RXMLException extends
   RException
 {
+  /**
+   * An exception caused by a {@link JPXMLException}.
+   */
+
+  @EqualityReference public static final class RJPXMLException extends
+    RXMLException
+  {
+    private static final long serialVersionUID = -7586780514130613772L;
+
+    private RJPXMLException(
+      final JPXMLException x)
+    {
+      super(x);
+    }
+
+    /**
+     * @return The cause of this exception as a specific type.
+     */
+
+    public ValidityException getValidityException()
+    {
+      final ValidityException x = (ValidityException) this.getCause();
+      assert x != null;
+      return x;
+    }
+  }
+
   /**
    * An exception caused by a {@link NumberFormatException}.
    */
@@ -216,6 +244,20 @@ import com.io7m.jnull.NullCheck;
   }
 
   private static final long serialVersionUID = 6801665395546178708L;
+
+  /**
+   * Construct an {@link RXMLException} from the given exception.
+   * 
+   * @param e
+   *          The cause
+   * @return A new exception
+   */
+
+  public static RXMLException fromJPXMLException(
+    final JPXMLException e)
+  {
+    return new RJPXMLException(e);
+  }
 
   /**
    * Construct an {@link RXMLException} from the given exception.

@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel;
 
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.types.RException;
@@ -31,7 +32,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
  * </p>
  */
 
-public final class KFramebufferDeferred
+@EqualityReference public final class KFramebufferDeferred
 {
   /**
    * Construct a new framebuffer from the given description.

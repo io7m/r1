@@ -16,9 +16,14 @@
 
 package com.io7m.renderer.shaders.deferred;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.kernel.types.KLightDirectional;
+import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
+import com.io7m.renderer.kernel.types.KLightVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoType;
 import com.io7m.renderer.kernel.types.KMaterialDepthAlpha;
 import com.io7m.renderer.kernel.types.KMaterialDepthConstant;
@@ -30,9 +35,11 @@ import com.io7m.renderer.kernel.types.KMaterialEmissiveNone;
 import com.io7m.renderer.kernel.types.KMaterialEmissiveType;
 import com.io7m.renderer.kernel.types.KMaterialEmissiveVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialEnvironmentType;
+import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
 import com.io7m.renderer.kernel.types.KMaterialNormalType;
+import com.io7m.renderer.kernel.types.KMaterialNormalVertex;
+import com.io7m.renderer.kernel.types.KMaterialNormalVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.renderer.kernel.types.KMaterialRegularType;
 import com.io7m.renderer.kernel.types.KMaterialSpecularConstant;
 import com.io7m.renderer.kernel.types.KMaterialSpecularMapped;
 import com.io7m.renderer.kernel.types.KMaterialSpecularNone;
@@ -42,15 +49,15 @@ import com.io7m.renderer.kernel.types.KMaterialType;
 import com.io7m.renderer.shaders.forward.RKForwardShader;
 import com.io7m.renderer.types.RException;
 
-public final class RKDeferredShader
+@EqualityReference public final class RKDeferredShader
 {
   public static final String PACKAGE_DEFERRED_GEOMETRY_OPAQUE_REGULAR;
   public static final String PACKAGE_DEFERRED_LIGHT;
 
   static {
     PACKAGE_DEFERRED_GEOMETRY_OPAQUE_REGULAR =
-      "com.io7m.renderer.kernel.deferred.geometry.regular";
-    PACKAGE_DEFERRED_LIGHT = "com.io7m.renderer.kernel.deferred.light";
+      "com.io7m.renderer.deferred.geometry.regular";
+    PACKAGE_DEFERRED_LIGHT = "com.io7m.renderer.deferred.light";
   }
 
   public static void fragmentShaderDeclarationsCommon(
@@ -122,6 +129,187 @@ public final class RKDeferredShader
             return Unit.unit();
           }
         });
+    } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
+  public static void fragmentShaderLight(
+    final StringBuilder b,
+    final KLightType l)
+  {
+    try {
+      b.append("shader fragment f is\n");
+      b.append("\n");
+      b.append("  -- G-buffer components\n");
+      b.append("  parameter t_map_albedo   : sampler_2d;\n");
+      b.append("  parameter t_map_normal   : sampler_2d;\n");
+      b.append("  parameter t_map_specular : sampler_2d;\n");
+      b.append("  parameter t_map_depth    : sampler_2d;\n");
+      b.append("\n");
+      b.append("  -- Standard declarations\n");
+      b.append("  out out_0 : vector_4f as 0;\n");
+      b.append("\n");
+      b.append("  parameter screen_size : vector_2f;\n");
+      b.append("  parameter frustum     : Frustum.t;\n");
+      b.append("\n");
+
+      l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
+        @Override public Unit lightDirectional(
+          final KLightDirectional ld)
+          throws RException
+        {
+          b.append("  -- Directional light parameters\n");
+          b.append("  parameter light_directional : DirectionalLight.t;\n");
+          b.append("\n");
+          return Unit.unit();
+        }
+
+        @Override public Unit lightProjective(
+          final KLightProjective lp)
+          throws RException,
+            UnreachableCodeException
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit lightSpherical(
+          final KLightSphere ls)
+          throws RException
+        {
+          return Unit.unit();
+        }
+      });
+
+      b.append("with\n");
+      b.append("  value screen_position =\n");
+      b.append("    Fragment.coordinate [x y];\n");
+      b.append("  value map_position =\n");
+      b.append("    Transform.screen_to_texture (\n");
+      b.append("      screen_size,\n");
+      b.append("      screen_position\n");
+      b.append("    );\n");
+      b.append("\n");
+
+      b.append("  -- Reconstruct eye-space position.\n");
+      b.append("  value depth_sample = \n");
+      b.append("    S.texture (t_map_depth, map_position) [x];\n");
+      b.append("  value eye_position =\n");
+      b.append("    Transform.screen_to_eye (\n");
+      b.append("      screen_position,\n");
+      b.append("      depth_sample,\n");
+      b.append("      screen_size,\n");
+      b.append("      frustum\n");
+      b.append("    );\n");
+      b.append("\n");
+
+      b.append("  -- Get surface normal\n");
+      b.append("  value normal_sample =\n");
+      b.append("    S.texture (t_map_normal, map_position) [x y];\n");
+      b.append("  value normal =\n");
+      b.append("    Normals.decompress (normal_sample);\n");
+      b.append("\n");
+
+      b.append("  -- Get surface albedo and emission\n");
+      b.append("  value albedo_sample =\n");
+      b.append("    S.texture (t_map_albedo, map_position);\n");
+      b.append("  value albedo =\n");
+      b.append("    albedo_sample [x y z];\n");
+      b.append("  value emission =\n");
+      b.append("    albedo_sample [w];\n");
+      b.append("\n");
+
+      b.append("  -- Get surface specular\n");
+      b.append("  value specular_sample =\n");
+      b.append("    S.texture (t_map_specular, map_position);\n");
+      b.append("  value specular = record Specular.t {\n");
+      b.append("    color    = specular_sample [x y z],\n");
+      b.append("    exponent = F.multiply (specular_sample [w], 256.0)\n");
+      b.append("  };\n");
+      b.append("\n");
+
+      l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
+        @Override public Unit lightDirectional(
+          final KLightDirectional ld)
+          throws RException,
+            UnreachableCodeException
+        {
+          b.append("  -- Directional light vectors\n");
+          b.append("  value light_vectors =\n");
+          b.append("    DirectionalLight.vectors (\n");
+          b.append("      light_directional,\n");
+          b.append("      eye_position [x y z],\n");
+          b.append("      normal\n");
+          b.append("    );\n");
+
+          b.append("  -- Directional emissive diffuse light term\n");
+          b.append("  value light_diffuse : vector_3f =\n");
+          b.append("    DirectionalLight.diffuse_color (\n");
+          b.append("      light_directional,\n");
+          b.append("      light_vectors,\n");
+          b.append("      emission\n");
+          b.append("     );\n");
+
+          b.append("  -- Directional specular light term\n");
+          b.append("  value light_specular : vector_3f =\n");
+          b.append("    DirectionalLight.specular_color (\n");
+          b.append("      light_directional,\n");
+          b.append("      light_vectors,\n");
+          b.append("      specular\n");
+          b.append("    );\n");
+
+          return Unit.unit();
+        }
+
+        @Override public Unit lightProjective(
+          final KLightProjective lp)
+          throws RException,
+            UnreachableCodeException
+        {
+          // TODO Auto-generated method stub
+
+          b.append("  -- Directional emissive diffuse light term\n");
+          b.append("  value light_diffuse : vector_3f =\n");
+          b.append("    new vector_3f (0.0,0.0,0.0);\n");
+
+          b.append("  -- Directional specular light term\n");
+          b.append("  value light_specular : vector_3f =\n");
+          b.append("    new vector_3f (0.0,0.0,0.0);\n");
+
+          return Unit.unit();
+        }
+
+        @Override public Unit lightSpherical(
+          final KLightSphere ls)
+          throws RException,
+            UnreachableCodeException
+        {
+          // TODO Auto-generated method stub
+
+          b.append("  -- Directional emissive diffuse light term\n");
+          b.append("  value light_diffuse : vector_3f =\n");
+          b.append("    new vector_3f (0.0,0.0,0.0);\n");
+
+          b.append("  -- Directional specular light term\n");
+          b.append("  value light_specular : vector_3f =\n");
+          b.append("    new vector_3f (0.0,0.0,0.0);\n");
+
+          return Unit.unit();
+        }
+      });
+
+      b.append("  value lit_d =\n");
+      b.append("    V3.multiply (albedo, light_diffuse);\n");
+      b.append("  value lit_s =\n");
+      b.append("    V3.add (lit_d, light_specular);\n");
+      b.append("  value rgba =\n");
+      b.append("    new vector_4f (lit_s [x y z], 1.0);\n");
+
+      b.append("as\n");
+      b.append("  out out_0 = rgba;\n");
+      b.append("end;\n");
+      b.append("\n");
+
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
     }
@@ -270,9 +458,8 @@ public final class RKDeferredShader
       b,
       RKDeferredShader.PACKAGE_DEFERRED_GEOMETRY_OPAQUE_REGULAR,
       code);
-    RKDeferredShader.vertexShaderOpaqueRegular(b, m);
     RKDeferredShader.fragmentShaderOpaqueRegular(b, m);
-    RKDeferredShader.moduleProgram(b);
+    RKDeferredShader.moduleProgramGeometry(b, m.materialGetNormal());
     RKDeferredShader.moduleEnd(b);
 
     final String r = b.toString();
@@ -288,11 +475,10 @@ public final class RKDeferredShader
     final StringBuilder b = new StringBuilder();
     RKDeferredShader.moduleStart(
       b,
-      RKDeferredShader.PACKAGE_DEFERRED_GEOMETRY_OPAQUE_REGULAR,
+      RKDeferredShader.PACKAGE_DEFERRED_LIGHT,
       code);
-    RKDeferredShader.vertexShaderLight(b);
     RKDeferredShader.fragmentShaderLight(b, l);
-    RKDeferredShader.moduleProgram(b);
+    RKDeferredShader.moduleProgramLight(b, l);
     RKDeferredShader.moduleEnd(b);
 
     final String r = b.toString();
@@ -300,76 +486,86 @@ public final class RKDeferredShader
     return r;
   }
 
-  public static void fragmentShaderLight(
+  public static void moduleProgramLight(
     final StringBuilder b,
     final KLightType l)
   {
-    b.append("shader fragment f is\n");
-    b.append("\n");
-    b.append("  -- G-buffer components\n");
-    b.append("  parameter t_map_albedo   : sampler_2d;\n");
-    b.append("  parameter t_map_normal   : sampler_2d;\n");
-    b.append("  parameter t_map_specular : sampler_2d;\n");
-    b.append("  parameter t_map_depth    : sampler_2d;\n");
-    b.append("\n");
-    b.append("  -- Standard declarations\n");
-    b.append("  in f_position_eye  : vector_4f;\n");
-    b.append("  in f_position_clip : vector_4f;\n");
-    b.append("  out out_0          : vector_4f as 0;\n");
-    b.append("\n");
-    b.append("with\n");
+    try {
+      l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
+        @Override public Unit lightDirectional(
+          final KLightDirectional ld)
+          throws RException
+        {
+          b.append("shader program p is\n");
+          b.append("  vertex VertexShaders.standard_clip;\n");
+          b.append("  fragment f;\n");
+          b.append("end;\n");
+          b.append("\n");
+          return Unit.unit();
+        }
 
-    b.append("as\n");
-    b.append("  out out_0 = rgba;\n");
-    b.append("end;\n");
-    b.append("\n");
+        @Override public Unit lightProjective(
+          final KLightProjective lp)
+          throws RException
+        {
+          b.append("shader program p is\n");
+          b.append("  vertex VertexShaders.standard;\n");
+          b.append("  fragment f;\n");
+          b.append("end;\n");
+          b.append("\n");
+          return Unit.unit();
+        }
+
+        @Override public Unit lightSpherical(
+          final KLightSphere ls)
+          throws RException
+        {
+          b.append("shader program p is\n");
+          b.append("  vertex VertexShaders.standard;\n");
+          b.append("  fragment f;\n");
+          b.append("end;\n");
+          b.append("\n");
+          return Unit.unit();
+        }
+      });
+    } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 
-  public static void vertexShaderLight(
-    final StringBuilder b)
+  public static void moduleProgramGeometry(
+    final StringBuilder b,
+    final KMaterialNormalType n)
   {
-    b.append("shader vertex v is\n");
-    b.append("  -- Vertex position coordinates\n");
-    b.append("  in v_position              : vector_3f;\n");
-    b.append("  out f_position_eye         : vector_4f;\n");
-    b.append("  out vertex f_position_clip : vector_4f;\n");
-    b.append("\n");
-    b.append("  -- Standard matrices\n");
-    b.append("  parameter m_modelview      : matrix_4x4f;\n");
-    b.append("  parameter m_projection     : matrix_4x4f;\n");
-    b.append("\n");
-    b.append("with\n");
-    b.append("\n");
-    b.append("  -- Position values\n");
-    b.append("  value position_eye =\n");
-    b.append("    M4.multiply_vector (\n");
-    b.append("      m_modelview,\n");
-    b.append("      new vector_4f (v_position, 1.0)\n");
-    b.append("    );\n");
-    b.append("\n");
-    b.append("  value position_clip =\n");
-    b.append("    M4.multiply_vector (\n");
-    b.append("      M4.multiply (m_projection, m_modelview),\n");
-    b.append("      new vector_4f (v_position, 1.0)\n");
-    b.append("    );\n");
-    b.append("\n");
-    b.append("as\n");
-    b.append("  -- Standard writes\n");
-    b.append("  out f_position_clip = position_clip;\n");
-    b.append("  out f_position_eye  = position_eye;\n");
-    b.append("  out f_uv            = uv;\n");
-    b.append("end;\n");
-    b.append("\n");
-  }
+    try {
+      b.append("shader program p is\n");
 
-  public static void moduleProgram(
-    final StringBuilder b)
-  {
-    b.append("shader program p is\n");
-    b.append("  vertex   v;\n");
-    b.append("  fragment f;\n");
-    b.append("end;\n");
-    b.append("\n");
+      final String vcode =
+        n
+          .normalAccept(new KMaterialNormalVisitorType<String, UnreachableCodeException>() {
+            @Override public String mapped(
+              final KMaterialNormalMapped m)
+            {
+              return "VertexShaders.standard_NorM";
+            }
+
+            @Override public String vertex(
+              final KMaterialNormalVertex m)
+            {
+              return "VertexShaders.standard";
+            }
+          });
+
+      b.append("  vertex ");
+      b.append(vcode);
+      b.append(";\n");
+
+      b.append("  fragment f;\n");
+      b.append("end;\n");
+      b.append("\n");
+    } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 
   public static void moduleStart(
@@ -385,18 +581,20 @@ public final class RKDeferredShader
     b.append(module_name);
     b.append(" is\n");
     b.append("\n");
+    b.append("import com.io7m.parasol.Float      as F;\n");
+    b.append("import com.io7m.parasol.Fragment;\n");
     b.append("import com.io7m.parasol.Matrix3x3f as M3;\n");
     b.append("import com.io7m.parasol.Matrix4x4f as M4;\n");
     b.append("import com.io7m.parasol.Vector3f   as V3;\n");
     b.append("import com.io7m.parasol.Vector4f   as V4;\n");
     b.append("import com.io7m.parasol.Sampler2D  as S;\n");
-    b.append("import com.io7m.parasol.Float      as F;\n");
     b.append("\n");
     b.append("import com.io7m.renderer.core.Albedo;\n");
     b.append("import com.io7m.renderer.core.CubeMap;\n");
     b.append("import com.io7m.renderer.core.DirectionalLight;\n");
     b.append("import com.io7m.renderer.core.Emission;\n");
     b.append("import com.io7m.renderer.core.Environment;\n");
+    b.append("import com.io7m.renderer.core.Frustum;\n");
     b.append("import com.io7m.renderer.core.Light;\n");
     b.append("import com.io7m.renderer.core.Normals;\n");
     b.append("import com.io7m.renderer.core.ProjectiveLight;\n");
@@ -405,30 +603,9 @@ public final class RKDeferredShader
     b.append("import com.io7m.renderer.core.ShadowVariance;\n");
     b.append("import com.io7m.renderer.core.Specular;\n");
     b.append("import com.io7m.renderer.core.SphericalLight;\n");
+    b.append("import com.io7m.renderer.core.Transform;\n");
     b.append("import com.io7m.renderer.core.VectorAux;\n");
-    b.append("\n");
-  }
-
-  public static void vertexShaderOpaqueRegular(
-    final StringBuilder b,
-    final KMaterialRegularType m)
-  {
-    b.append("shader vertex v is\n");
-    RKForwardShader.vertexShaderStandardDeclarations(b);
-    RKForwardShader.vertexShaderStandardDeclarationsNormal(
-      b,
-      m.materialGetNormal());
-    b.append("with\n");
-    RKForwardShader.vertexShaderStandardValues(b);
-    RKForwardShader.vertexShaderStandardValuesNormals(
-      b,
-      m.materialGetNormal());
-    b.append("as\n");
-    RKForwardShader.vertexShaderStandardWritesNormals(
-      b,
-      m.materialGetNormal());
-    RKForwardShader.vertexShaderStandardWrites(b);
-    b.append("end;\n");
+    b.append("import com.io7m.renderer.core.VertexShaders;\n");
     b.append("\n");
   }
 }

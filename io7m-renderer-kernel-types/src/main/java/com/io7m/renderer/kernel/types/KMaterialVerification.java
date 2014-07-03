@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
@@ -26,7 +27,7 @@ import com.io7m.renderer.types.RExceptionMaterialMissingSpecularTexture;
  * Functions to verify that materials are correctly constructed.
  */
 
-public final class KMaterialVerification
+@EqualityReference public final class KMaterialVerification
 {
   /**
    * If alpha-to-depth rendering is specified, check that an albedo texture is

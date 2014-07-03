@@ -26,7 +26,8 @@ module DebugPosition is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Fragment;
 
-  import com.io7m.renderer.core.Position;
+  import com.io7m.renderer.core.Frustum;
+  import com.io7m.renderer.core.Transform;
 
   --
   -- Eye space position reconstruction program.
@@ -56,53 +57,45 @@ module DebugPosition is
   end;
 
   shader fragment show_position_reconstruction_eye_f is
-    parameter screen_width     : float;
-    parameter screen_height    : float;
+    parameter screen_size : vector_2f;
+    parameter frustum     : Frustum.t;
 
-    parameter frustum_x_left   : float;
-    parameter frustum_x_right  : float;
-    parameter frustum_y_top    : float;
-    parameter frustum_y_bottom : float;
-    parameter frustum_z_near   : float;
-    parameter frustum_z_far    : float;
-
-    in f_position_eye  : vector_4f;
+    in f_position_eye : vector_4f;
 
     out out_0 : vector_4f as 0;
   with
-    value ndc =
-      Position.screen_to_ndc (
-        Fragment.coordinate [x y],
-        screen_width,
-        screen_height
-      );
+   -- value ndc =
+   --   Transform.screen_to_ndc (
+   --     Fragment.coordinate [x y],
+   --     screen_size
+   --   );
 
-    value eye_z =
-      Position.eye_z_from_depth (
-        Fragment.coordinate [z],
-        frustum_z_near,
-        frustum_z_far
-      ); 
+   -- value eye_z =
+   --   Transform.eye_z_from_depth (
+   --     Fragment.coordinate [z],
+   --     frustum.z_near,
+   --     frustum.z_far
+   --   ); 
 
+   -- value eye =
+   --   new vector_4f (
+   --     Transform.ndc_to_eye (ndc, frustum, eye_z),
+   --     1.0
+   --   );
+      
     value eye =
-      new vector_4f (
-        Position.ndc_to_eye (
-          ndc,
-          frustum_x_left,
-          frustum_x_right,
-          frustum_y_top,
-          frustum_y_bottom,
-          frustum_z_near,
-          eye_z
-        ),
-        1.0
+      Transform.screen_to_eye (
+        Fragment.coordinate [x y],
+        Fragment.coordinate [z],
+        screen_size,
+        frustum
       );
 
     value diff =
       V4.subtract (f_position_eye, eye);
       
     value rgba =
-      diff;
+      eye;
   as
     out out_0 = rgba;
   end;

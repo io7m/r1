@@ -24,13 +24,15 @@ import com.io7m.jcanephora.TextureFormat;
 import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jranges.RangeInclusiveL;
 
 /**
  * Fake Cube static textures for shader generation.
  */
 
-public final class FakeTextureCubeStatic implements TextureCubeStaticType
+@EqualityReference public final class FakeTextureCubeStatic implements
+  TextureCubeStaticType
 {
   /**
    * @return The default instance.

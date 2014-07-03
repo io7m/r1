@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.DepthFunction;
@@ -31,12 +32,15 @@ import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
 import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.VectorI2F;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
@@ -57,7 +61,7 @@ import com.io7m.renderer.types.RTransformViewType;
  * A debug renderer for testing position reconstruction.
  */
 
-@SuppressWarnings("synthetic-access") public final class KRendererDebugPosition implements
+@SuppressWarnings("synthetic-access") @EqualityReference public final class KRendererDebugPosition implements
   KRendererDebugType
 {
   private static final String NAME;
@@ -95,6 +99,49 @@ import com.io7m.renderer.types.RTransformViewType;
       in_depth_renderer,
       in_shader_cache_debug,
       in_log);
+  }
+
+  private static void render(
+    final JCGLInterfaceCommonType gc,
+    final JCBProgramType program,
+    final KFramebufferForwardUsableType framebuffer,
+    final MatricesInstanceType o,
+    final KInstanceType i)
+    throws JCGLException
+  {
+    final KMeshReadableType mesh = i.instanceGetMesh();
+    final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
+    final IndexBufferUsableType index = mesh.meshGetIndexBuffer();
+
+    gc.arrayBufferBind(array);
+    KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+
+    KRendererCommon.renderConfigureFaceCulling(
+      gc,
+      i.instanceGetFaceSelection());
+
+    KShadingProgramCommon.putMatrixModelView(program, o.getMatrixModelView());
+    KShadingProgramCommon.putMatrixProjection(
+      program,
+      o.getMatrixProjection());
+
+    final KProjectionType projection = o.getProjection();
+
+    final AreaInclusive framebuffer_area = framebuffer.kFramebufferGetArea();
+    final long width = framebuffer_area.getRangeX().getInterval();
+    final long height = framebuffer_area.getRangeY().getInterval();
+
+    KShadingProgramCommon
+      .putScreenSize(program, new VectorI2F(width, height));
+    KShadingProgramCommon.putFrustum(program, projection);
+
+    program.programExecute(new JCBProgramProcedureType<JCGLException>() {
+      @Override public void call()
+        throws JCGLException
+      {
+        gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
+      }
+    });
   }
 
   private final KDepthRendererType     depth_renderer;
@@ -145,8 +192,13 @@ import com.io7m.renderer.types.RTransformViewType;
             throws JCGLException,
               RException
           {
-            KRendererDebugPosition.this.renderScene(framebuffer, scene, mwo);
-            return Unit.unit();
+            try {
+              KRendererDebugPosition.this
+                .renderScene(framebuffer, scene, mwo);
+              return Unit.unit();
+            } catch (final JCacheException e) {
+              throw new UnreachableCodeException(e);
+            }
           }
         });
     } catch (final JCGLException e) {
@@ -164,7 +216,8 @@ import com.io7m.renderer.types.RTransformViewType;
     final KScene scene,
     final MatricesObserverType mwo)
     throws RException,
-      JCGLException
+      JCGLException,
+      JCacheException
   {
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
 
@@ -201,7 +254,8 @@ import com.io7m.renderer.types.RTransformViewType;
       gc.depthBufferWriteDisable();
 
       final KProgram kp =
-        this.shader_cache_debug.getDebug("show_position_reconstruction_eye");
+        this.shader_cache_debug
+          .cacheGetLU("show_position_reconstruction_eye");
 
       final JCBExecutorType exec = kp.getExecutable();
       exec.execRun(new JCBExecutorProcedureType<RException>() {
@@ -237,65 +291,5 @@ import com.io7m.renderer.types.RTransformViewType;
     } finally {
       gc.framebufferDrawUnbind();
     }
-  }
-
-  private static void render(
-    final JCGLInterfaceCommonType gc,
-    final JCBProgramType program,
-    final KFramebufferForwardUsableType framebuffer,
-    final MatricesInstanceType o,
-    final KInstanceType i)
-    throws JCGLException
-  {
-    final KMeshReadableType mesh = i.instanceGetMesh();
-    final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
-    final IndexBufferUsableType index = mesh.meshGetIndexBuffer();
-
-    gc.arrayBufferBind(array);
-    KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
-
-    KRendererCommon.renderConfigureFaceCulling(
-      gc,
-      i.instanceGetFaceSelection());
-
-    KShadingProgramCommon.putMatrixModelView(program, o.getMatrixModelView());
-    KShadingProgramCommon.putMatrixProjection(
-      program,
-      o.getMatrixProjection());
-
-    final KProjectionType projection = o.getProjection();
-
-    final AreaInclusive framebuffer_area = framebuffer.kFramebufferGetArea();
-    final long width = framebuffer_area.getRangeX().getInterval();
-    final long height = framebuffer_area.getRangeY().getInterval();
-
-    program.programUniformPutFloat("screen_width", width);
-    program.programUniformPutFloat("screen_height", height);
-    program.programUniformPutFloat(
-      "frustum_x_left",
-      projection.projectionGetXMinimum());
-    program.programUniformPutFloat(
-      "frustum_x_right",
-      projection.projectionGetXMaximum());
-    program.programUniformPutFloat(
-      "frustum_y_top",
-      projection.projectionGetYMaximum());
-    program.programUniformPutFloat(
-      "frustum_y_bottom",
-      projection.projectionGetYMinimum());
-    program.programUniformPutFloat(
-      "frustum_z_near",
-      projection.projectionGetZNear());
-    program.programUniformPutFloat(
-      "frustum_z_far",
-      projection.projectionGetZFar());
-
-    program.programExecute(new JCBProgramProcedureType<JCGLException>() {
-      @Override public void call()
-        throws JCGLException
-      {
-        gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
-      }
-    });
   }
 }

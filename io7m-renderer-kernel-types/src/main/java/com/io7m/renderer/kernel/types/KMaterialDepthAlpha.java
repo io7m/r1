@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -29,7 +30,8 @@ import com.io7m.renderer.types.RException;
  * </p>
  */
 
-public final class KMaterialDepthAlpha implements KMaterialDepthType
+@EqualityReference public final class KMaterialDepthAlpha implements
+  KMaterialDepthType
 {
   /**
    * Construct new depth properties.

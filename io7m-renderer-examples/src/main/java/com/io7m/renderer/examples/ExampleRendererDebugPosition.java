@@ -28,7 +28,8 @@ import com.io7m.renderer.kernel.KDepthRenderer;
 import com.io7m.renderer.kernel.KDepthRendererType;
 import com.io7m.renderer.kernel.KRendererDebugPosition;
 import com.io7m.renderer.kernel.KRendererDebugType;
-import com.io7m.renderer.kernel.KShaderCacheType;
+import com.io7m.renderer.kernel.KShaderCacheDebugType;
+import com.io7m.renderer.kernel.KShaderCacheDepthType;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.types.RException;
 
@@ -45,24 +46,39 @@ public final class ExampleRendererDebugPosition implements
 
   public static ExampleRendererConstructorType get()
   {
-    return new ExampleRendererConstructorType() {
+    return new ExampleRendererConstructorDebugType() {
+      @Override public <A, E extends Exception> A matchConstructor(
+        final ExampleRendererConstructorVisitorType<A, E> v)
+        throws E,
+          RException,
+          JCGLException
+      {
+        return v.debug(this);
+      }
+
       @SuppressWarnings("synthetic-access") @Override public
         ExampleRendererType
         newRenderer(
           final LogUsableType log,
-          final KShaderCacheType shader_cache,
+          final KShaderCacheDepthType shader_depth_cache,
+          final KShaderCacheDebugType shader_debug_cache,
           final JCGLImplementationType gi)
           throws JCGLException,
             RException
       {
-        return ExampleRendererDebugPosition.make(log, shader_cache, gi);
+        return ExampleRendererDebugPosition.make(
+          log,
+          shader_depth_cache,
+          shader_debug_cache,
+          gi);
       }
     };
   }
 
   @SuppressWarnings("null") private static ExampleRendererDebugType make(
     final LogUsableType log,
-    final KShaderCacheType shader_cache,
+    final KShaderCacheDepthType shader_depth_cache,
+    final KShaderCacheDebugType shader_debug_cache,
     final JCGLImplementationType gi)
     throws JCGLException,
       RException
@@ -73,7 +89,7 @@ public final class ExampleRendererDebugPosition implements
       KGraphicsCapabilities.getCapabilities(gi);
 
     final KDepthRendererType depth_renderer =
-      KDepthRenderer.newRenderer(gi, caps, shader_cache, log);
+      KDepthRenderer.newRenderer(gi, caps, shader_depth_cache, log);
 
     final BuilderType shadow_cache_config_builder = PCacheConfig.newBuilder();
     shadow_cache_config_builder.setMaximumAge(BigInteger.valueOf(60));
@@ -83,7 +99,7 @@ public final class ExampleRendererDebugPosition implements
       KRendererDebugPosition.newRenderer(
         gi,
         depth_renderer,
-        shader_cache,
+        shader_debug_cache,
         log);
 
     return new ExampleRendererDebugPosition(r);

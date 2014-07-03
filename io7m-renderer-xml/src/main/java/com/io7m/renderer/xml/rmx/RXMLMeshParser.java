@@ -22,6 +22,7 @@ import nu.xom.Element;
 import nu.xom.Elements;
 import nu.xom.ValidityException;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM3F;
 import com.io7m.renderer.types.RSpaceObjectType;
@@ -40,7 +41,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
  *          The type of exceptions raised by the event interface.
  */
 
-public final class RXMLMeshParser<E extends Throwable>
+@EqualityReference public final class RXMLMeshParser<E extends Throwable>
 {
   /**
    * Construct a new parser from the given document, which is expected to be

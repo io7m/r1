@@ -41,6 +41,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.Log;
 import com.io7m.jlog.LogPolicyProperties;
 import com.io7m.jlog.LogPolicyType;
@@ -60,7 +61,7 @@ import com.io7m.renderer.xml.collada.ColladaGeometryID;
  * The main program for converting COLLADA meshes to RMX meshes.
  */
 
-public final class ColladaToRMX
+@EqualityReference public final class ColladaToRMX
 {
   private ColladaToRMX()
   {
@@ -69,7 +70,7 @@ public final class ColladaToRMX
 
   private static final String PROGRAM = "collada-to-rmx";
 
-  private static class ExportConfig
+  @EqualityReference private static class ExportConfig
   {
     public ExportConfig(
       final File in_input,

@@ -33,7 +33,7 @@ module DebugNormals is
   -- Visible object-space normals.
   --
 
-  shader vertex normals_vertex_local_v is
+  shader vertex show_normals_vertex_local_v is
     in v_position              : vector_3f;
     in v_normal                : vector_3f;
     out f_normal               : vector_3f;
@@ -51,7 +51,7 @@ module DebugNormals is
     out f_normal        = v_normal;
   end;
 
-  shader fragment normals_vertex_local_f is
+  shader fragment show_normals_vertex_local_f is
     in f_normal : vector_3f;
     out out_0   : vector_4f as 0;
   with
@@ -60,16 +60,16 @@ module DebugNormals is
     out out_0 = rgba;
   end;
 
-  shader program normals_vertex_local is
-    vertex   normals_vertex_local_v;
-    fragment normals_vertex_local_f;
+  shader program show_normals_vertex_local is
+    vertex   show_normals_vertex_local_v;
+    fragment show_normals_vertex_local_f;
   end;
 
   --
   -- Visible eye-space normals.
   --
 
-  shader vertex normals_vertex_eye_v is
+  shader vertex show_normals_vertex_eye_v is
     in v_position              : vector_3f;
     in v_normal                : vector_3f;
     out f_normal               : vector_3f;
@@ -90,7 +90,7 @@ module DebugNormals is
     out f_normal        = normal;
   end;
 
-  shader fragment normals_vertex_eye_f is
+  shader fragment show_normals_vertex_eye_f is
     in f_normal : vector_3f;
     out out_0   : vector_4f as 0;
   with
@@ -99,16 +99,16 @@ module DebugNormals is
     out out_0 = rgba;
   end;
 
-  shader program normals_vertex_eye is
-    vertex   normals_vertex_eye_v;
-    fragment normals_vertex_eye_f;
+  shader program show_normals_vertex_eye is
+    vertex   show_normals_vertex_eye_v;
+    fragment show_normals_vertex_eye_f;
   end;
 
   --
   -- Visible object-space bitangents.
   --
 
-  shader vertex bitangents_vertex_local_v is
+  shader vertex show_bitangents_vertex_local_v is
     in v_position              : vector_3f;
     in v_normal                : vector_3f;
     in v_tangent4              : vector_4f;
@@ -129,7 +129,7 @@ module DebugNormals is
     out f_bitangent     = bitangent;
   end;
 
-  shader fragment bitangents_vertex_local_f is
+  shader fragment show_bitangents_vertex_local_f is
     in f_bitangent : vector_3f;
     out out_0      : vector_4f as 0;
   with
@@ -138,16 +138,16 @@ module DebugNormals is
     out out_0 = rgba;
   end;
 
-  shader program bitangents_vertex_local is
-    vertex   bitangents_vertex_local_v;
-    fragment bitangents_vertex_local_f;
+  shader program show_bitangents_vertex_local is
+    vertex   show_bitangents_vertex_local_v;
+    fragment show_bitangents_vertex_local_f;
   end;
 
   --
   -- Visible object-space tangents.
   --
 
-  shader vertex tangents_vertex_local_v is
+  shader vertex show_tangents_vertex_local_v is
     in v_position              : vector_3f;
     in v_tangent4              : vector_4f;
     out f_tangent              : vector_3f;
@@ -167,7 +167,7 @@ module DebugNormals is
     out f_tangent       = tangent;
   end;
 
-  shader fragment tangents_vertex_local_f is
+  shader fragment show_tangents_vertex_local_f is
     in f_tangent : vector_3f;
     out out_0    : vector_4f as 0;
   with
@@ -176,16 +176,16 @@ module DebugNormals is
     out out_0 = rgba;
   end;
 
-  shader program tangents_vertex_local is
-    vertex   tangents_vertex_local_v;
-    fragment tangents_vertex_local_f;
+  shader program show_tangents_vertex_local is
+    vertex   show_tangents_vertex_local_v;
+    fragment show_tangents_vertex_local_f;
   end;
 
   --
   -- Visible eye-space bitangents.
   --
 
-  shader vertex bitangents_vertex_eye_v is
+  shader vertex show_bitangents_vertex_eye_v is
     in v_position              : vector_3f;
     in v_normal                : vector_3f;
     in v_tangent4              : vector_4f;
@@ -207,7 +207,7 @@ module DebugNormals is
     out f_bitangent     = bitangent;
   end;
 
-  shader fragment bitangents_vertex_eye_f is
+  shader fragment show_bitangents_vertex_eye_f is
     in f_bitangent : vector_3f;
     out out_0      : vector_4f as 0;
   with
@@ -216,16 +216,16 @@ module DebugNormals is
     out out_0 = rgba;
   end;
 
-  shader program bitangents_vertex_eye is
-    vertex   bitangents_vertex_eye_v;
-    fragment bitangents_vertex_eye_f;
+  shader program show_bitangents_vertex_eye is
+    vertex   show_bitangents_vertex_eye_v;
+    fragment show_bitangents_vertex_eye_f;
   end;
 
   --
   -- Visible object-space tangents.
   --
 
-  shader vertex tangents_vertex_eye_v is
+  shader vertex show_tangents_vertex_eye_v is
     in v_position              : vector_3f;
     in v_tangent4              : vector_4f;
     out f_tangent              : vector_3f;
@@ -246,7 +246,7 @@ module DebugNormals is
     out f_tangent       = tangent;
   end;
 
-  shader fragment tangents_vertex_eye_f is
+  shader fragment show_tangents_vertex_eye_f is
     in f_tangent : vector_3f;
     out out_0    : vector_4f as 0;
   with
@@ -255,16 +255,16 @@ module DebugNormals is
     out out_0 = rgba;
   end;
 
-  shader program tangents_vertex_eye is
-    vertex   tangents_vertex_eye_v;
-    fragment tangents_vertex_eye_f;
+  shader program show_tangents_vertex_eye is
+    vertex   show_tangents_vertex_eye_v;
+    fragment show_tangents_vertex_eye_f;
   end;
 
   --
   -- Visible object-space mapped normals.
   --
 
-  shader vertex normals_map_local_v is
+  shader vertex show_normals_map_local_v is
     in v_position              : vector_3f;
     in v_normal                : vector_3f;
     in v_tangent4              : vector_4f;
@@ -294,7 +294,7 @@ module DebugNormals is
     out f_uv            = v_uv;
   end;
 
-  shader fragment normals_map_local_f is
+  shader fragment show_normals_map_local_f is
     in f_normal        : vector_3f;
     in f_tangent       : vector_3f;
     in f_bitangent     : vector_3f;
@@ -315,16 +315,16 @@ module DebugNormals is
     out out_0 = rgba;
   end;
 
-  shader program normals_map_local is
-    vertex   normals_map_local_v;
-    fragment normals_map_local_f;
+  shader program show_normals_map_local is
+    vertex   show_normals_map_local_v;
+    fragment show_normals_map_local_f;
   end;
 
   --
   -- Visible eye-space mapped normals.
   --
 
-  shader vertex normals_map_eye_v is
+  shader vertex show_normals_map_eye_v is
     in v_position              : vector_3f;
     in v_normal                : vector_3f;
     in v_tangent4              : vector_4f;
@@ -354,7 +354,7 @@ module DebugNormals is
     out f_uv            = v_uv;
   end;
 
-  shader fragment normals_map_eye_f is
+  shader fragment show_normals_map_eye_f is
     in f_normal        : vector_3f;
     in f_tangent       : vector_3f;
     in f_bitangent     : vector_3f;
@@ -377,16 +377,16 @@ module DebugNormals is
     out out_0 = rgba;
   end;
 
-  shader program normals_map_eye is
-    vertex   normals_map_eye_v;
-    fragment normals_map_eye_f;
+  shader program show_normals_map_eye is
+    vertex   show_normals_map_eye_v;
+    fragment show_normals_map_eye_f;
   end;
 
   --
   -- Visible tangent-space mapped normals.
   --
 
-  shader vertex normals_map_tangent_v is
+  shader vertex show_normals_map_tangent_v is
     in v_position              : vector_3f;
     in v_uv                    : vector_2f;
     out f_uv                   : vector_2f;
@@ -404,7 +404,7 @@ module DebugNormals is
     out f_uv            = v_uv;
   end;
 
-  shader fragment normals_map_tangent_f is
+  shader fragment show_normals_map_tangent_f is
     in f_uv            : vector_2f;
     parameter t_normal : sampler_2d;
     out out_0          : vector_4f as 0;
@@ -414,9 +414,9 @@ module DebugNormals is
     out out_0 = rgba;
   end;
 
-  shader program normals_map_tangent is
-    vertex   normals_map_tangent_v;
-    fragment normals_map_tangent_f;
+  shader program show_normals_map_tangent is
+    vertex   show_normals_map_tangent_v;
+    fragment show_normals_map_tangent_f;
   end;
 
 end;

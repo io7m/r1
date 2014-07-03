@@ -93,7 +93,7 @@
     <module name="EqualsAvoidNull"/>
     <module name="EqualsHashCode"/>
     <module name="ExecutableStatementCount">
-      <property name="max" value="70"/>
+      <property name="max" value="85"/>
     </module>
     <module name="ExplicitInitialization"/>
     <module name="FallThrough"/>
@@ -120,7 +120,7 @@
     <module name="InterfaceIsType"/>
     <module name="JUnitTestCase"/>
     <module name="JavaNCSS">
-      <property name="methodMaximum" value="90"/>
+      <property name="methodMaximum" value="95"/>
     </module>
     <module name="JavadocMethod">
       <property name="scope" value="public"/>
@@ -146,8 +146,8 @@
       <property name="format" value="^[a-z][a-z0-9_]*$"/>
     </module>
     <module name="MethodCount">
-      <property name="maxTotal" value="150"/>
-      <property name="maxPackage" value="150"/>
+      <property name="maxTotal" value="170"/>
+      <property name="maxPackage" value="170"/>
     </module>
     <module name="MethodName">
       <property name="format" value="^[a-z][A-Za-z0-9]*$"/>

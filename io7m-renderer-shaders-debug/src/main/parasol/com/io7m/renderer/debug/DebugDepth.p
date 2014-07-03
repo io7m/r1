@@ -30,7 +30,7 @@ module DebugDepth is
   -- Visible depth program.
   --
 
-  shader vertex depth_v is
+  shader vertex show_depth_v is
     in v_position              : vector_3f;
     parameter m_modelview      : matrix_4x4f;
     parameter m_projection     : matrix_4x4f;
@@ -45,7 +45,7 @@ module DebugDepth is
     out f_position_clip = clip_position;
   end;
 
-  shader fragment depth_f is
+  shader fragment show_depth_f is
     out out_0 : vector_4f as 0;
   with
     value rgba = new vector_4f (Fragment.coordinate [z z z], 1.0);
@@ -54,8 +54,8 @@ module DebugDepth is
   end;
 
   shader program show_depth is
-    vertex   depth_v;
-    fragment depth_f;
+    vertex   show_depth_v;
+    fragment show_depth_f;
   end;
   
 end;

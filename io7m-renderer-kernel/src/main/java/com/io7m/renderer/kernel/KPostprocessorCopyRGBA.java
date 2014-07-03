@@ -60,7 +60,7 @@ import com.io7m.renderer.types.RExceptionCache;
     final JCGLImplementationType gi,
     final KRegionCopierType copier,
     final KFramebufferRGBACacheType rgba_cache,
-    final KShaderCacheType shader_cache,
+    final KShaderCachePostprocessingType shader_cache,
     final LogUsableType log)
   {
     return new KPostprocessorCopyRGBA(
@@ -71,17 +71,17 @@ import com.io7m.renderer.types.RExceptionCache;
       log);
   }
 
-  private final KRegionCopierType         copier;
-  private final JCGLImplementationType    gi;
-  private final LogUsableType             log;
-  private final KFramebufferRGBACacheType rgba_cache;
-  private final KShaderCacheType          shader_cache;
+  private final KRegionCopierType              copier;
+  private final JCGLImplementationType         gi;
+  private final LogUsableType                  log;
+  private final KFramebufferRGBACacheType      rgba_cache;
+  private final KShaderCachePostprocessingType shader_cache;
 
   private KPostprocessorCopyRGBA(
     final JCGLImplementationType in_gi,
     final KRegionCopierType in_copier,
     final KFramebufferRGBACacheType in_rgba_cache,
-    final KShaderCacheType in_shader_cache,
+    final KShaderCachePostprocessingType in_shader_cache,
     final LogUsableType in_log)
   {
     this.log =

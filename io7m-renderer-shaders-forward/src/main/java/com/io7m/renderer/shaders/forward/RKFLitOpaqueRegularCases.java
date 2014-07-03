@@ -19,16 +19,19 @@ package com.io7m.renderer.shaders.forward;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Pair;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.shaders.core.FakeImmutableCapabilities;
 
-public final class RKFLitOpaqueRegularCases
+@EqualityReference public final class RKFLitOpaqueRegularCases
 {
-  private static List<RKFLitCase<KMaterialOpaqueRegular>> makeOpaqueListCases(
-    final RKFLightCases in_light_cases,
-    final RKFMaterialCases in_material_cases)
+  private static
+    List<RKFLitCase<KMaterialOpaqueRegular>>
+    makeOpaqueListCases(
+      final RKFLightCases in_light_cases,
+      final RKFMaterialCases in_material_cases)
   {
     final List<RKFLitCase<KMaterialOpaqueRegular>> cases =
       new ArrayList<RKFLitCase<KMaterialOpaqueRegular>>();
@@ -51,8 +54,8 @@ public final class RKFLitOpaqueRegularCases
   }
 
   private final List<RKFLitCase<KMaterialOpaqueRegular>> cases;
-  private final RKFLightCases                          light_cases;
-  private final RKFMaterialCases                       material_cases;
+  private final RKFLightCases                            light_cases;
+  private final RKFMaterialCases                         material_cases;
 
   public RKFLitOpaqueRegularCases()
   {

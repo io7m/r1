@@ -96,7 +96,10 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     p.add(KTriangleClipping.PLANE_POSITIVE_X);
     p.add(KTriangleClipping.PLANE_POSITIVE_Y);
     p.add(KTriangleClipping.PLANE_POSITIVE_Z);
-    PLANES = Collections.unmodifiableList(p);
+
+    final List<VectorI4F> r = Collections.unmodifiableList(p);
+    assert r != null;
+    PLANES = r;
   }
 
   /**

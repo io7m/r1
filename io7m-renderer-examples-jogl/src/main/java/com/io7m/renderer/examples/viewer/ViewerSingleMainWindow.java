@@ -17,7 +17,6 @@
 package com.io7m.renderer.examples.viewer;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,8 +31,7 @@ import javax.media.opengl.GLProfile;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
-import com.io7m.jcache.LRUCacheConfig;
-import com.io7m.jcache.LRUCacheTrivial;
+import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.IndexBufferUsableType;
@@ -58,9 +56,14 @@ import com.io7m.jlog.LogType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeInclusiveL;
-import com.io7m.jvvfs.FilesystemType;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.jvvfs.FilesystemError;
 import com.io7m.renderer.examples.ExampleClasses;
+import com.io7m.renderer.examples.ExampleRendererConstructorDebugType;
+import com.io7m.renderer.examples.ExampleRendererConstructorDeferredType;
+import com.io7m.renderer.examples.ExampleRendererConstructorForwardType;
 import com.io7m.renderer.examples.ExampleRendererConstructorType;
+import com.io7m.renderer.examples.ExampleRendererConstructorVisitorType;
 import com.io7m.renderer.examples.ExampleRendererDebugType;
 import com.io7m.renderer.examples.ExampleRendererDeferredType;
 import com.io7m.renderer.examples.ExampleRendererForwardType;
@@ -83,9 +86,7 @@ import com.io7m.renderer.kernel.KProgram;
 import com.io7m.renderer.kernel.KRendererDebugType;
 import com.io7m.renderer.kernel.KRendererDeferredType;
 import com.io7m.renderer.kernel.KRendererForwardType;
-import com.io7m.renderer.kernel.KShaderCacheFilesystem;
-import com.io7m.renderer.kernel.KShaderCacheFilesystemLoader;
-import com.io7m.renderer.kernel.KShaderCacheType;
+import com.io7m.renderer.kernel.KShaderCachePostprocessingType;
 import com.io7m.renderer.kernel.KShadingProgramCommon;
 import com.io7m.renderer.kernel.KUnitQuad;
 import com.io7m.renderer.kernel.KUnitQuadUsableType;
@@ -164,16 +165,16 @@ final class ViewerSingleMainWindow implements Runnable
     private final TextureLoaderType         loader;
     private final KUnitQuad                 quad;
     private final ExampleRendererType       renderer;
-    private final KShaderCacheType          shader_cache;
     private int                             view_index;
     private final KGraphicsCapabilitiesType caps;
+    private final VShaderCaches             shader_caches;
 
     Runner(
       final GLAutoDrawable drawable,
       final JCGLImplementationType in_gi,
-      final FilesystemType in_filesystem,
       final ExampleSceneType in_example,
       final ExampleRendererConstructorType in_renderer_cons,
+      final VShaderCaches in_shader_caches,
       final LogUsableType in_log)
       throws JCGLException,
         RException
@@ -188,20 +189,57 @@ final class ViewerSingleMainWindow implements Runnable
       this.cache_mesh = new EMeshCache(in_gi, in_log);
       this.quad = KUnitQuad.newQuad(in_gi.getGLCommon(), in_log);
       this.caps = KGraphicsCapabilities.getCapabilities(in_gi);
-
-      final LRUCacheConfig scc =
-        LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(1024));
-
-      this.shader_cache =
-        KShaderCacheFilesystem.wrap(LRUCacheTrivial.newCache(
-          KShaderCacheFilesystemLoader.newLoader(
-            this.gi,
-            in_filesystem,
-            in_log),
-          scc));
+      this.shader_caches = in_shader_caches;
 
       this.renderer =
-        in_renderer_cons.newRenderer(in_log, this.shader_cache, this.gi);
+        in_renderer_cons
+          .matchConstructor(new ExampleRendererConstructorVisitorType<ExampleRendererType, RException>() {
+            @Override public ExampleRendererType debug(
+              final ExampleRendererConstructorDebugType c)
+              throws RException,
+                JCGLException
+            {
+              return c.newRenderer(
+                in_log,
+                in_shader_caches.getShaderDepthCache(),
+                in_shader_caches.getShaderDebugCache(),
+                in_gi);
+            }
+
+            @Override public ExampleRendererType deferred(
+              final ExampleRendererConstructorDeferredType c)
+              throws RException,
+                JCGLException
+            {
+              return c.newRenderer(
+                in_log,
+                in_shader_caches.getShaderForwardTranslucentLitCache(),
+                in_shader_caches.getShaderForwardTranslucentUnlitCache(),
+                in_shader_caches.getShaderDepthCache(),
+                in_shader_caches.getShaderDepthVarianceCache(),
+                in_shader_caches.getShaderPostprocessingCache(),
+                in_shader_caches.getShaderDeferredGeoCache(),
+                in_shader_caches.getShaderDeferredLightCache(),
+                in_gi);
+            }
+
+            @Override public ExampleRendererType forward(
+              final ExampleRendererConstructorForwardType c)
+              throws RException,
+                JCGLException
+            {
+              return c.newRenderer(
+                in_log,
+                in_shader_caches.getShaderForwardOpaqueLitCache(),
+                in_shader_caches.getShaderForwardOpaqueUnlitCache(),
+                in_shader_caches.getShaderForwardTranslucentLitCache(),
+                in_shader_caches.getShaderForwardTranslucentUnlitCache(),
+                in_shader_caches.getShaderDepthCache(),
+                in_shader_caches.getShaderDepthVarianceCache(),
+                in_shader_caches.getShaderPostprocessingCache(),
+                in_gi);
+            }
+          });
 
       this.framebuffer =
         this.renderer
@@ -288,15 +326,17 @@ final class ViewerSingleMainWindow implements Runnable
     private void renderSceneResults(
       final KFramebufferForwardType fb)
       throws JCGLException,
-        RException
+        RException,
+        JCacheException
     {
       final JCGLImplementationType g = this.gi;
       assert g != null;
       final JCGLInterfaceCommonType gc = g.getGLCommon();
 
-      final KShaderCacheType sc = this.shader_cache;
+      final KShaderCachePostprocessingType sc =
+        this.shader_caches.getShaderPostprocessingCache();
       assert sc != null;
-      final KProgram kp = sc.getPostprocessing("copy_rgba");
+      final KProgram kp = sc.cacheGetLU("copy_rgba");
       gc.framebufferDrawUnbind();
 
       try {
@@ -500,6 +540,8 @@ final class ViewerSingleMainWindow implements Runnable
             return Unit.unit();
           } catch (final JCGLException e) {
             throw RExceptionJCGL.fromJCGLException(e);
+          } catch (final JCacheException e) {
+            throw new UnreachableCodeException(e);
           }
         }
 
@@ -523,6 +565,8 @@ final class ViewerSingleMainWindow implements Runnable
             return Unit.unit();
           } catch (final JCGLException e) {
             throw RExceptionJCGL.fromJCGLException(e);
+          } catch (final JCacheException e) {
+            throw new UnreachableCodeException(e);
           }
         }
 
@@ -544,6 +588,8 @@ final class ViewerSingleMainWindow implements Runnable
             return Unit.unit();
           } catch (final JCGLException e) {
             throw RExceptionJCGL.fromJCGLException(e);
+          } catch (final JCacheException e) {
+            throw new UnreachableCodeException(e);
           }
         }
       });
@@ -559,14 +605,12 @@ final class ViewerSingleMainWindow implements Runnable
 
   private final ViewerConfig                   config;
   private final ExampleSceneType               example;
-  private final FilesystemType                 fs;
   private final LogType                        log;
   private final ExampleRendererConstructorType renderer;
 
   public ViewerSingleMainWindow(
     final ViewerConfig in_config,
     final LogType in_log,
-    final FilesystemType in_fs,
     final String renderer_name,
     final String example_name)
     throws ClassNotFoundException,
@@ -574,9 +618,7 @@ final class ViewerSingleMainWindow implements Runnable
       IllegalAccessException
   {
     this.config = in_config;
-    this.fs = in_fs;
     this.log = in_log;
-
     this.renderer = ExampleRenderers.getRenderer(renderer_name);
     this.example = ExampleClasses.getScene(example_name);
   }
@@ -623,17 +665,25 @@ final class ViewerSingleMainWindow implements Runnable
               ctx,
               ViewerSingleMainWindow.this.log);
 
+          final VShaderCaches caches =
+            VShaderCaches.newCachesFromArchives(
+              gi,
+              ViewerSingleMainWindow.this.config,
+              ViewerSingleMainWindow.this.log);
+
           this.runner =
             new Runner(
               drawable,
               gi,
-              ViewerSingleMainWindow.this.fs,
               ViewerSingleMainWindow.this.example,
               ViewerSingleMainWindow.this.renderer,
+              caches,
               ViewerSingleMainWindow.this.log);
         } catch (final JCGLException e) {
           throw new RuntimeException(e);
         } catch (final RException e) {
+          throw new RuntimeException(e);
+        } catch (final FilesystemError e) {
           throw new RuntimeException(e);
         }
       }

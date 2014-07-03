@@ -34,7 +34,7 @@ import com.io7m.renderer.types.RVectorI3F;
 
 @EqualityReference public final class KLightDirectional implements KLightType
 {
-  @SuppressWarnings("synthetic-access") private static final class Builder implements
+  @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightDirectionalBuilderType
   {
     private RVectorI3F<RSpaceRGBType>                           color;

@@ -17,7 +17,7 @@
 package com.io7m.renderer.kernel.types;
 
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
@@ -28,7 +28,7 @@ import com.io7m.renderer.types.RTransformTextureType;
  * texture matrix.
  */
 
-@EqualityStructural public final class KInstanceTranslucentRegular implements
+@EqualityReference public final class KInstanceTranslucentRegular implements
   KInstanceTranslucentUnlitType,
   KInstanceTranslucentLitType,
   KTranslucentType

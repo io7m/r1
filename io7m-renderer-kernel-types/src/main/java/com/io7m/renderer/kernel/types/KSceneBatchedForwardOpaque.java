@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -31,7 +32,7 @@ import com.io7m.renderer.types.RException;
  * Opaque instances, batched for forward rendering.
  */
 
-public final class KSceneBatchedForwardOpaque
+@EqualityReference public final class KSceneBatchedForwardOpaque
 {
   private static void addInstancesForLight(
     final Map<KLightType, Map<String, Set<KInstanceOpaqueType>>> lit_batches,

@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,8 +62,7 @@ import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import com.io7m.jcache.LRUCacheConfig;
-import com.io7m.jcache.LRUCacheTrivial;
+import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.IndexBufferUsableType;
@@ -89,9 +87,13 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeInclusiveL;
-import com.io7m.jvvfs.FSCapabilityReadType;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.examples.ExampleData;
+import com.io7m.renderer.examples.ExampleRendererConstructorDebugType;
+import com.io7m.renderer.examples.ExampleRendererConstructorDeferredType;
+import com.io7m.renderer.examples.ExampleRendererConstructorForwardType;
 import com.io7m.renderer.examples.ExampleRendererConstructorType;
+import com.io7m.renderer.examples.ExampleRendererConstructorVisitorType;
 import com.io7m.renderer.examples.ExampleRendererDebugType;
 import com.io7m.renderer.examples.ExampleRendererDeferredType;
 import com.io7m.renderer.examples.ExampleRendererForwardType;
@@ -113,9 +115,7 @@ import com.io7m.renderer.kernel.KProgram;
 import com.io7m.renderer.kernel.KRendererDebugType;
 import com.io7m.renderer.kernel.KRendererDeferredType;
 import com.io7m.renderer.kernel.KRendererForwardType;
-import com.io7m.renderer.kernel.KShaderCacheFilesystem;
-import com.io7m.renderer.kernel.KShaderCacheFilesystemLoader;
-import com.io7m.renderer.kernel.KShaderCacheType;
+import com.io7m.renderer.kernel.KShaderCachePostprocessingType;
 import com.io7m.renderer.kernel.KShadingProgramCommon;
 import com.io7m.renderer.kernel.KUnitQuad;
 import com.io7m.renderer.kernel.KUnitQuadUsableType;
@@ -345,7 +345,6 @@ import com.jogamp.opengl.util.FPSAnimator;
     public VExampleWindow(
       final LogUsableType in_log,
       final ViewerConfig in_config,
-      final FSCapabilityReadType in_filesystem,
       final ExampleRendererConstructorType in_renderer_cons,
       final ExampleSceneType in_example)
     {
@@ -373,7 +372,6 @@ import com.jogamp.opengl.util.FPSAnimator;
           in_config,
           this.current_view_index,
           this.want_save,
-          in_filesystem,
           in_example,
           in_renderer_cons,
           this.expected,
@@ -547,7 +545,6 @@ import com.jogamp.opengl.util.FPSAnimator;
     private @Nullable ETextureCubeCache          cube_cache;
     private final AtomicInteger                  current_view_index;
     private final ExampleSceneType               example;
-    private final FSCapabilityReadType           filesystem;
     private @Nullable KFramebufferType           framebuffer;
     private @Nullable JCGLImplementationType     gi;
     private final LogUsableType                  glog;
@@ -558,7 +555,7 @@ import com.jogamp.opengl.util.FPSAnimator;
     private final JLabel                         renderer_label;
     private final VExpectedImage                 results_panel;
     private boolean                              running;
-    private @Nullable KShaderCacheType           shader_cache;
+    private @Nullable VShaderCaches              shader_caches;
     private @Nullable TextureLoaderType          texture_loader;
     private @Nullable ETexture2DCache            texture2d_cache;
     private final AtomicDouble                   time_fps_estimate;
@@ -570,14 +567,12 @@ import com.jogamp.opengl.util.FPSAnimator;
       final ViewerConfig in_config,
       final AtomicInteger in_view_id,
       final AtomicBoolean in_want_save,
-      final FSCapabilityReadType in_filesystem,
       final ExampleSceneType in_example,
       final ExampleRendererConstructorType in_renderer_cons,
       final VExpectedImage in_results_panel,
       final JLabel in_renderer_label)
     {
       this.glog = in_log.with("gl");
-      this.filesystem = in_filesystem;
       this.renderer_cons = in_renderer_cons;
       this.example = in_example;
       this.current_view_index = in_view_id;
@@ -658,6 +653,8 @@ import com.jogamp.opengl.util.FPSAnimator;
               return Unit.unit();
             } catch (final JCGLException e) {
               throw RExceptionJCGL.fromJCGLException(e);
+            } catch (final JCacheException e) {
+              throw new UnreachableCodeException(e);
             }
           }
 
@@ -686,6 +683,8 @@ import com.jogamp.opengl.util.FPSAnimator;
               return Unit.unit();
             } catch (final JCGLException e) {
               throw RExceptionJCGL.fromJCGLException(e);
+            } catch (final JCacheException e) {
+              throw new UnreachableCodeException(e);
             }
           }
 
@@ -712,6 +711,8 @@ import com.jogamp.opengl.util.FPSAnimator;
               return Unit.unit();
             } catch (final JCGLException e) {
               throw RExceptionJCGL.fromJCGLException(e);
+            } catch (final JCacheException e) {
+              throw new UnreachableCodeException(e);
             }
           }
         });
@@ -791,27 +792,65 @@ import com.jogamp.opengl.util.FPSAnimator;
           new ETexture2DCache(g, this.texture_loader, this.glog);
         this.mesh_cache = new EMeshCache(g, this.glog);
 
-        final LRUCacheConfig scc =
-          LRUCacheConfig
-            .empty()
-            .withMaximumCapacity(BigInteger.valueOf(1024));
-
-        final KShaderCacheType sc =
-          KShaderCacheFilesystem.wrap(LRUCacheTrivial.newCache(
-            KShaderCacheFilesystemLoader.newLoader(
-              g,
-              this.filesystem,
-              this.glog),
-            scc));
-        assert sc != null;
-        this.shader_cache = sc;
+        this.shader_caches =
+          VShaderCaches.newCachesFromArchives(g, this.config, this.glog);
 
         final JCGLInterfaceCommonType gc = g.getGLCommon();
         this.quad = KUnitQuad.newQuad(gc, this.glog);
 
+        final VShaderCaches sc = this.shader_caches;
+        assert sc != null;
+
         final ExampleRendererType r =
-          this.renderer_cons.newRenderer(this.glog, sc, g);
-        assert r != null;
+          this.renderer_cons
+            .matchConstructor(new ExampleRendererConstructorVisitorType<ExampleRendererType, RException>() {
+              @Override public ExampleRendererType debug(
+                final ExampleRendererConstructorDebugType c)
+                throws RException,
+                  JCGLException
+              {
+                return c.newRenderer(
+                  VExampleWindowGL.this.glog,
+                  sc.getShaderDepthCache(),
+                  sc.getShaderDebugCache(),
+                  g);
+              }
+
+              @Override public ExampleRendererType deferred(
+                final ExampleRendererConstructorDeferredType c)
+                throws RException,
+                  JCGLException
+              {
+                return c.newRenderer(
+                  VExampleWindowGL.this.glog,
+                  sc.getShaderForwardTranslucentLitCache(),
+                  sc.getShaderForwardTranslucentUnlitCache(),
+                  sc.getShaderDepthCache(),
+                  sc.getShaderDepthVarianceCache(),
+                  sc.getShaderPostprocessingCache(),
+                  sc.getShaderDeferredGeoCache(),
+                  sc.getShaderDeferredLightCache(),
+                  g);
+              }
+
+              @Override public ExampleRendererType forward(
+                final ExampleRendererConstructorForwardType c)
+                throws RException,
+                  JCGLException
+              {
+                return c.newRenderer(
+                  VExampleWindowGL.this.glog,
+                  sc.getShaderForwardOpaqueLitCache(),
+                  sc.getShaderForwardOpaqueUnlitCache(),
+                  sc.getShaderForwardTranslucentLitCache(),
+                  sc.getShaderForwardTranslucentUnlitCache(),
+                  sc.getShaderDepthCache(),
+                  sc.getShaderDepthVarianceCache(),
+                  sc.getShaderPostprocessingCache(),
+                  g);
+              }
+            });
+
         this.renderer = r;
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -915,15 +954,19 @@ import com.jogamp.opengl.util.FPSAnimator;
     private void renderSceneResults(
       final KFramebufferForwardType fb)
       throws JCGLException,
-        RException
+        RException,
+        JCacheException
     {
       final JCGLImplementationType g = this.gi;
       assert g != null;
       final JCGLInterfaceCommonType gc = g.getGLCommon();
 
-      final KShaderCacheType sc = this.shader_cache;
+      final VShaderCaches scs = this.shader_caches;
+      assert scs != null;
+      final KShaderCachePostprocessingType sc =
+        scs.getShaderPostprocessingCache();
       assert sc != null;
-      final KProgram kp = sc.getPostprocessing("copy_rgba");
+      final KProgram kp = sc.cacheGetLU("copy_rgba");
       gc.framebufferDrawUnbind();
 
       try {
@@ -1206,7 +1249,6 @@ import com.jogamp.opengl.util.FPSAnimator;
   private final ViewerConfig                      config;
   private @Nullable ExampleSceneType              example;
   private final Class<? extends ExampleSceneType> example_type;
-  private final FSCapabilityReadType              filesystem;
   private final LogUsableType                     log;
   private final ExampleRendererConstructorType    renderer_cons;
   private @Nullable VExampleWindow                window;
@@ -1214,7 +1256,6 @@ import com.jogamp.opengl.util.FPSAnimator;
   VExample(
     final LogUsableType in_log,
     final ViewerConfig in_config,
-    final FSCapabilityReadType in_filesystem,
     final ExampleRendererConstructorType in_renderer_cons,
     final Class<? extends ExampleSceneType> in_example_type)
   {
@@ -1222,7 +1263,6 @@ import com.jogamp.opengl.util.FPSAnimator;
     this.example_type = in_example_type;
     this.renderer_cons = in_renderer_cons;
     this.config = in_config;
-    this.filesystem = in_filesystem;
   }
 
   @Override public Unit call()
@@ -1240,7 +1280,6 @@ import com.jogamp.opengl.util.FPSAnimator;
       new VExampleWindow(
         this.log,
         this.config,
-        this.filesystem,
         this.renderer_cons,
         this.example);
     assert w != null;

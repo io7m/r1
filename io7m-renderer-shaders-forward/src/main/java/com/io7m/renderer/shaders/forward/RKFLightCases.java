@@ -22,6 +22,7 @@ import java.util.List;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Pair;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
@@ -48,7 +49,7 @@ import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
 
-public final class RKFLightCases
+@EqualityReference public final class RKFLightCases
 {
   private static
     List<Pair<KLightType, FakeImmutableCapabilities>>

@@ -38,4 +38,5 @@ import com.io7m.jtensors.MatrixM3x3F;
   {
     super();
   }
+
 }

@@ -25,11 +25,6 @@ import com.io7m.renderer.examples.scenes.SLEmpty0;
 
 public final class ExampleClasses
 {
-  private ExampleClasses()
-  {
-    throw new UnreachableCodeException();
-  }
-
   /**
    * Attempt to retrieve the scene with the given unqualified name.
    * 
@@ -60,5 +55,10 @@ public final class ExampleClasses
     final Class<? extends ExampleSceneType> c =
       (Class<? extends ExampleSceneType>) Class.forName(c_name);
     return c.newInstance();
+  }
+
+  private ExampleClasses()
+  {
+    throw new UnreachableCodeException();
   }
 }

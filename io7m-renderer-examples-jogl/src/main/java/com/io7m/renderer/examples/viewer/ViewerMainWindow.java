@@ -53,7 +53,6 @@ import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.jvvfs.FSCapabilityReadType;
 import com.io7m.renderer.examples.ExampleList;
 import com.io7m.renderer.examples.ExampleRendererConstructorType;
 import com.io7m.renderer.examples.ExampleRenderers;
@@ -153,8 +152,7 @@ final class ViewerMainWindow extends JFrame
 
   public ViewerMainWindow(
     final ViewerConfig config,
-    final LogType in_log,
-    final FSCapabilityReadType fs)
+    final LogType in_log)
   {
     super("Viewer");
     this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -234,10 +232,11 @@ final class ViewerMainWindow extends JFrame
         final String renderer_name = (String) rlist.getSelectedItem();
         final String example_name = elist.getSelectedValue();
 
-        final VExample v =
-          new VExample(in_log, config, fs, ViewerMainWindow.this.renderers
-            .get(renderer_name), ViewerMainWindow.this.examples
-            .get(example_name));
+        final ExampleRendererConstructorType r =
+          ViewerMainWindow.this.renderers.get(renderer_name);
+        final Class<? extends ExampleSceneType> ex =
+          ViewerMainWindow.this.examples.get(example_name);
+        final VExample v = new VExample(in_log, config, r, ex);
 
         final SwingWorker<Unit, Unit> worker = new SwingWorker<Unit, Unit>() {
           @Override protected Unit doInBackground()
