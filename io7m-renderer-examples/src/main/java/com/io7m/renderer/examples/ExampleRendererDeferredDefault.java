@@ -70,6 +70,8 @@ import com.io7m.renderer.kernel.KShadowMapRendererType;
 import com.io7m.renderer.kernel.KTranslucentRenderer;
 import com.io7m.renderer.kernel.KTranslucentRendererType;
 import com.io7m.renderer.kernel.KUnitQuad;
+import com.io7m.renderer.kernel.KUnitQuadCache;
+import com.io7m.renderer.kernel.KUnitQuadCacheType;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceObjectType;
@@ -147,6 +149,8 @@ public final class ExampleRendererDeferredDefault extends
       KGraphicsCapabilities.getCapabilities(gi);
 
     final KUnitQuad quad = KUnitQuad.newQuad(gi.getGLCommon(), log);
+    final KUnitQuadCacheType quad_cache =
+      KUnitQuadCache.newTrivial(gi.getGLCommon(), log);
 
     final KRegionCopierType copier =
       KRegionCopier.newCopier(gi, log, in_shader_postprocessing_cache, quad);
@@ -239,7 +243,7 @@ public final class ExampleRendererDeferredDefault extends
     final KRendererDeferredOpaqueType opaque_renderer =
       KRendererDeferredOpaque.newRenderer(
         gi,
-        quad,
+        quad_cache,
         in_shader_deferred_geo_cache,
         in_shader_deferred_light_cache);
 
