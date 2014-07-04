@@ -153,7 +153,11 @@ public final class ExampleRendererDeferredDefault extends
       KUnitQuadCache.newTrivial(gi.getGLCommon(), log);
 
     final KRegionCopierType copier =
-      KRegionCopier.newCopier(gi, log, in_shader_postprocessing_cache, quad);
+      KRegionCopier.newCopier(
+        gi,
+        log,
+        in_shader_postprocessing_cache,
+        quad_cache);
 
     final KDepthRendererType depth_renderer =
       KDepthRenderer.newRenderer(gi, caps, in_shader_depth_cache, log);
@@ -176,7 +180,7 @@ public final class ExampleRendererDeferredDefault extends
         copier,
         depth_variance_cache,
         in_shader_postprocessing_cache,
-        quad,
+        quad_cache,
         log);
 
     final BuilderType shadow_cache_config_builder = PCacheConfig.newBuilder();
