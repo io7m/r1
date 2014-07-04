@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -76,7 +76,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
  */
 
 @SuppressWarnings({ "synthetic-access" }) @EqualityReference public final class KRendererDeferredOpaque implements
-KRendererDeferredOpaqueType
+  KRendererDeferredOpaqueType
 {
   /**
    * Construct a new opaque renderer.
@@ -100,7 +100,7 @@ KRendererDeferredOpaqueType
     final KUnitQuadCacheType in_quad_cache,
     final KShaderCacheDeferredGeometryType in_shader_geo_cache,
     final KShaderCacheDeferredLightType in_shader_light_cache)
-      throws RException
+    throws RException
   {
     return new KRendererDeferredOpaque(
       in_g,
@@ -115,7 +115,7 @@ KRendererDeferredOpaqueType
     final MatricesObserverType mwo,
     final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program)
-      throws RException,
+    throws RException,
       JCGLException
   {
     for (final KInstanceOpaqueType i : instances) {
@@ -126,13 +126,13 @@ KRendererDeferredOpaqueType
         new MatricesInstanceFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
             final MatricesInstanceType mwi)
-              throws JCGLException,
+            throws JCGLException,
               RException
           {
             units.withContext(new KTextureUnitWithType() {
               @Override public void run(
                 final KTextureUnitContextType context)
-                  throws JCGLException,
+                throws JCGLException,
                   RException
               {
                 KRendererDeferredOpaque.renderGroupGeometryInstance(
@@ -155,13 +155,13 @@ KRendererDeferredOpaqueType
     final MatricesInstanceType mwi,
     final JCBProgramType program,
     final KInstanceOpaqueType i)
-      throws JCGLException,
+    throws JCGLException,
       RException
   {
     units.withContext(new KTextureUnitWithType() {
       @Override public void run(
         final KTextureUnitContextType context)
-          throws JCGLException,
+        throws JCGLException,
           RException
       {
         final KMeshReadableType mesh = i.instanceGetMesh();
@@ -169,13 +169,13 @@ KRendererDeferredOpaqueType
         final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
         final KMaterialOpaqueRegular material =
           i
-          .opaqueAccept(new KInstanceOpaqueVisitorType<KMaterialOpaqueRegular, UnreachableCodeException>() {
-            @Override public KMaterialOpaqueRegular regular(
-              final KInstanceOpaqueRegular o)
-            {
-              return o.getMaterial();
-            }
-          });
+            .opaqueAccept(new KInstanceOpaqueVisitorType<KMaterialOpaqueRegular, UnreachableCodeException>() {
+              @Override public KMaterialOpaqueRegular regular(
+                final KInstanceOpaqueRegular o)
+              {
+                return o.getMaterial();
+              }
+            });
 
         KRendererCommon.renderConfigureFaceCulling(
           gc,
@@ -184,19 +184,19 @@ KRendererDeferredOpaqueType
         KShadingProgramCommon.putMatrixProjectionReuse(program);
         KRendererCommon.putInstanceMatricesRegular(program, mwi, material);
         KRendererCommon
-        .putInstanceTexturesRegular(context, program, material);
+          .putInstanceTexturesRegular(context, program, material);
         KRendererCommon.putMaterialRegular(program, material);
 
         try {
           gc.arrayBufferBind(array);
           KShadingProgramCommon
-          .bindAttributePositionUnchecked(program, array);
+            .bindAttributePositionUnchecked(program, array);
 
           material.materialGetNormal().normalAccept(
             new KMaterialNormalVisitorType<Unit, JCGLException>() {
               @Override public Unit mapped(
                 final KMaterialNormalMapped m)
-                  throws RException,
+                throws RException,
                   JCGLException
               {
                 KShadingProgramCommon.bindAttributeTangent4(program, array);
@@ -206,7 +206,7 @@ KRendererDeferredOpaqueType
 
               @Override public Unit vertex(
                 final KMaterialNormalVertex m)
-                  throws RException,
+                throws RException,
                   JCGLException
               {
                 KShadingProgramCommon.bindAttributeNormal(program, array);
@@ -223,13 +223,13 @@ KRendererDeferredOpaqueType
             i.instanceGetFaceSelection());
 
           program
-          .programExecute(new JCBProgramProcedureType<JCGLException>() {
-            @Override public void call()
-              throws JCGLException
-            {
-              gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-            }
-          });
+            .programExecute(new JCBProgramProcedureType<JCGLException>() {
+              @Override public void call()
+                throws JCGLException
+              {
+                gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+              }
+            });
 
         } finally {
           gc.arrayBufferUnbind();
@@ -250,7 +250,7 @@ KRendererDeferredOpaqueType
     final KUnitQuadCacheType in_quad_cache,
     final KShaderCacheDeferredGeometryType in_shader_geo_cache,
     final KShaderCacheDeferredLightType in_shader_light_cache)
-      throws RException
+    throws RException
   {
     try {
       this.g = NullCheck.notNull(in_g, "GL");
@@ -273,7 +273,7 @@ KRendererDeferredOpaqueType
     final OptionType<DepthFunction> depth_function,
     final MatricesObserverType mwo,
     final KSceneBatchedDeferredOpaque batches)
-      throws RException
+    throws RException
   {
     try {
       final List<Group> groups = batches.getGroups();
@@ -301,7 +301,7 @@ KRendererDeferredOpaqueType
     final OptionType<DepthFunction> depth_function,
     final MatricesObserverType mwo,
     final KSceneBatchedDeferredOpaque.Group group)
-      throws JCGLException,
+    throws JCGLException,
       RException,
       JCacheException
   {
@@ -313,7 +313,7 @@ KRendererDeferredOpaqueType
     final KFramebufferDeferredUsableType framebuffer,
     final MatricesObserverType mwo,
     final Group group)
-      throws JCGLException,
+    throws JCGLException,
       RException
   {
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
@@ -371,7 +371,7 @@ KRendererDeferredOpaqueType
         this.texture_units.withContext(new KTextureUnitWithType() {
           @Override public void run(
             final KTextureUnitContextType texture_context)
-              throws JCGLException,
+            throws JCGLException,
               RException
           {
             KRendererDeferredOpaque.this.renderGroupLight(
@@ -395,13 +395,13 @@ KRendererDeferredOpaqueType
     final MatricesObserverType mwo,
     final KTextureUnitContextType texture_unit_context,
     final KLightType light)
-      throws RException,
+    throws RException,
       JCGLException
   {
     light.lightAccept(new KLightVisitorType<Unit, JCGLException>() {
       @Override public Unit lightDirectional(
         final KLightDirectional l)
-          throws RException,
+        throws RException,
           JCGLException
       {
         try {
@@ -419,7 +419,7 @@ KRendererDeferredOpaqueType
 
       @Override public Unit lightProjective(
         final KLightProjective l)
-          throws RException,
+        throws RException,
           JCGLException
       {
         throw new UnimplementedCodeException();
@@ -427,7 +427,7 @@ KRendererDeferredOpaqueType
 
       @Override public Unit lightSpherical(
         final KLightSphere l)
-          throws RException,
+        throws RException,
           JCGLException
       {
         throw new UnimplementedCodeException();
@@ -441,7 +441,7 @@ KRendererDeferredOpaqueType
     final MatricesObserverType mwo,
     final KTextureUnitContextType texture_unit_context,
     final KLightDirectional l)
-      throws RException,
+    throws RException,
       JCacheException,
       JCGLException
   {
@@ -449,7 +449,7 @@ KRendererDeferredOpaqueType
       framebuffer.kFramebufferGetGeometryBuffer();
     final KProgram kp = this.shader_light_cache.cacheGetLU(l.lightGetCode());
 
-    final KUnitQuadUsableType q = this.quad_cache.cacheGetLU(Unit.unit());
+    final KUnitQuad q = this.quad_cache.cacheGetLU(Unit.unit());
     final ArrayBufferUsableType array = q.getArray();
     final IndexBufferUsableType index = q.getIndices();
 
@@ -457,7 +457,7 @@ KRendererDeferredOpaqueType
     exec.execRun(new JCBExecutorProcedureType<RException>() {
       @Override public void call(
         final JCBProgramType program)
-          throws JCGLException,
+        throws JCGLException,
           RException
       {
         gc.arrayBufferBind(array);
@@ -485,8 +485,8 @@ KRendererDeferredOpaqueType
           program,
           texture_unit_context.withTexture2D(gbuffer.geomGetTextureNormal()));
         KShadingProgramCommon
-        .putDeferredMapSpecular(program, texture_unit_context
-          .withTexture2D(gbuffer.geomGetTextureSpecular()));
+          .putDeferredMapSpecular(program, texture_unit_context
+            .withTexture2D(gbuffer.geomGetTextureSpecular()));
 
         KShadingProgramCommon.putLightDirectional(
           program,
@@ -512,7 +512,7 @@ KRendererDeferredOpaqueType
     final OptionType<DepthFunction> depth_function,
     final MatricesObserverType mwo,
     final KSceneBatchedDeferredOpaque.Group group)
-      throws JCGLException,
+    throws JCGLException,
       RException,
       JCacheException
   {
@@ -538,23 +538,23 @@ KRendererDeferredOpaqueType
       gc.depthBufferClear(1.0f);
 
       depth_function
-      .acceptPartial(new OptionPartialVisitorType<DepthFunction, Unit, JCGLException>() {
-        @Override public Unit none(
-          final None<DepthFunction> n)
+        .acceptPartial(new OptionPartialVisitorType<DepthFunction, Unit, JCGLException>() {
+          @Override public Unit none(
+            final None<DepthFunction> n)
             throws JCGLException
-        {
-          gc.depthBufferTestDisable();
-          return Unit.unit();
-        }
+          {
+            gc.depthBufferTestDisable();
+            return Unit.unit();
+          }
 
-        @Override public Unit some(
-          final Some<DepthFunction> s)
+          @Override public Unit some(
+            final Some<DepthFunction> s)
             throws JCGLException
-        {
-          gc.depthBufferTestEnable(s.get());
-          return Unit.unit();
-        }
-      });
+          {
+            gc.depthBufferTestEnable(s.get());
+            return Unit.unit();
+          }
+        });
 
       /**
        * Configure the stencil buffer such that any bit of geometry written
@@ -593,7 +593,7 @@ KRendererDeferredOpaqueType
           new JCBExecutorProcedureType<RException>() {
             @Override public void call(
               final JCBProgramType program)
-                throws JCGLException,
+              throws JCGLException,
                 RException
             {
               KShadingProgramCommon.putMatrixProjection(

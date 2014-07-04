@@ -18,6 +18,7 @@ package com.io7m.renderer.kernel;
 
 import java.util.List;
 
+import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.FramebufferUsableType;
@@ -33,14 +34,16 @@ import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.types.RException;
 
 @EqualityReference final class KPostprocessorBlurCommon
 {
   static void evaluateBlurH(
     final JCGLImplementationType gi,
     final float blur_size,
-    final KUnitQuadUsableType quad,
+    final KUnitQuadCacheType quad_cache,
     final KProgram blur_h,
     final Texture2DStaticUsableType input_texture,
     final AreaInclusive input_area,
@@ -67,12 +70,14 @@ import com.io7m.junreachable.UnreachableCodeException;
       gc.viewportSet(output_area);
 
       final JCBExecutorType e = blur_h.getExecutable();
-      e.execRun(new JCBExecutorProcedureType<JCGLException>() {
+      e.execRun(new JCBExecutorProcedureType<RException>() {
         @Override public void call(
           final JCBProgramType p)
-          throws JCGLException
+          throws JCGLException,
+            RException
         {
           try {
+            final KUnitQuad quad = quad_cache.cacheGetLU(Unit.unit());
             final ArrayBufferUsableType array = quad.getArray();
             final IndexBufferUsableType indices = quad.getIndices();
 
@@ -98,6 +103,8 @@ import com.io7m.junreachable.UnreachableCodeException;
               }
             });
 
+          } catch (final JCacheException x) {
+            throw new UnreachableCodeException(x);
           } finally {
             gc.arrayBufferUnbind();
           }
@@ -110,7 +117,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   static void evaluateBlurV(
     final JCGLImplementationType gi,
-    final KUnitQuadUsableType quad,
+    final KUnitQuadCacheType quad_cache,
     final float blur_size,
     final KProgram blur_v,
     final Texture2DStaticUsableType input_texture,
@@ -138,12 +145,14 @@ import com.io7m.junreachable.UnreachableCodeException;
       gc.viewportSet(output_area);
 
       final JCBExecutorType e = blur_v.getExecutable();
-      e.execRun(new JCBExecutorProcedureType<JCGLException>() {
+      e.execRun(new JCBExecutorProcedureType<RException>() {
         @Override public void call(
           final JCBProgramType p)
-          throws JCGLException
+          throws JCGLException,
+            RException
         {
           try {
+            final KUnitQuad quad = quad_cache.cacheGetLU(Unit.unit());
             final ArrayBufferUsableType array = quad.getArray();
             final IndexBufferUsableType indices = quad.getIndices();
 
@@ -169,6 +178,8 @@ import com.io7m.junreachable.UnreachableCodeException;
               }
             });
 
+          } catch (final JCacheException x) {
+            throw new UnreachableCodeException(x);
           } finally {
             gc.arrayBufferUnbind();
           }

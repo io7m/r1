@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -37,7 +37,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
  */
 
 @EqualityReference public final class KPostprocessorBlurDepthVariance implements
-  KPostprocessorBlurDepthVarianceType
+KPostprocessorBlurDepthVarianceType
 {
   private static final String NAME;
 
@@ -76,7 +76,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
   /**
    * Construct a new postprocessor.
-   * 
+   *
    * @param gi
    *          The OpenGL implementation
    * @param copier
@@ -85,8 +85,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
    *          A framebuffer cache
    * @param shader_cache
    *          A shader cache
-   * @param quad
-   *          A unit quad
+   * @param quad_cache
+   *          A unit quad_cache cache
    * @param log
    *          A log handle
    * @return A new postprocessor
@@ -97,7 +97,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KRegionCopierType copier,
     final KFramebufferDepthVarianceCacheType depth_variance_cache,
     final KShaderCachePostprocessingType shader_cache,
-    final KUnitQuadUsableType quad,
+    final KUnitQuadCacheType quad_cache,
     final LogUsableType log)
   {
     return new KPostprocessorBlurDepthVariance(
@@ -105,7 +105,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       copier,
       depth_variance_cache,
       shader_cache,
-      quad,
+      quad_cache,
       log);
   }
 
@@ -113,7 +113,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private final KFramebufferDepthVarianceCacheType depth_variance_cache;
   private final JCGLImplementationType             gi;
   private final LogUsableType                      log;
-  private final KUnitQuadUsableType                quad;
+  private final KUnitQuadCacheType                 quad_cache;
   private final KShaderCachePostprocessingType     shader_cache;
 
   private KPostprocessorBlurDepthVariance(
@@ -121,7 +121,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KRegionCopierType in_copier,
     final KFramebufferDepthVarianceCacheType in_depth_variance_cache,
     final KShaderCachePostprocessingType in_shader_cache,
-    final KUnitQuadUsableType in_quad,
+    final KUnitQuadCacheType in_quad_cache,
     final LogUsableType in_log)
   {
     this.gi = NullCheck.notNull(in_gi, "GL implementation");
@@ -134,7 +134,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
     this.copier = NullCheck.notNull(in_copier, "Copier");
 
-    this.quad = NullCheck.notNull(in_quad, "Quad");
+    this.quad_cache = NullCheck.notNull(in_quad_cache, "Quad cache");
 
     if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
       this.log.debug("initialized");
@@ -146,7 +146,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KFramebufferDepthVarianceUsableType source,
     final KFramebufferDepthVarianceUsableType temporary,
     final KFramebufferDepthVarianceUsableType target)
-    throws JCGLException,
+      throws JCGLException,
       RException,
       JCacheException
   {
@@ -156,7 +156,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     KPostprocessorBlurCommon.evaluateBlurH(
       this.gi,
       parameters.getBlurSize(),
-      this.quad,
+      this.quad_cache,
       this.shader_cache.cacheGetLU("gaussian_blur_horizontal_4f"),
       source.kFramebufferGetDepthVarianceTexture(),
       source.kFramebufferGetArea(),
@@ -166,7 +166,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     KPostprocessorBlurCommon.evaluateBlurV(
       this.gi,
-      this.quad,
+      this.quad_cache,
       parameters.getBlurSize(),
       this.shader_cache.cacheGetLU("gaussian_blur_vertical_4f"),
       temporary.kFramebufferGetDepthVarianceTexture(),
@@ -180,7 +180,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KBlurParameters parameters,
     final KFramebufferDepthVarianceUsableType input,
     final KFramebufferDepthVarianceUsableType output)
-    throws RException
+      throws RException
   {
     try {
 

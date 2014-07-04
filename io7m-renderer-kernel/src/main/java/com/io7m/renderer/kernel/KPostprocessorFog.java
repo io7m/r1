@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -32,16 +32,18 @@ import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM3F;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionCache;
 import com.io7m.renderer.types.RExceptionJCGL;
 
 @EqualityReference final class KPostprocessorFog implements
-  KPostprocessorRGBAWithDepthType<KFogParameters>
+KPostprocessorRGBAWithDepthType<KFogParameters>
 {
   private static final String NAME;
 
@@ -52,7 +54,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   public static KPostprocessorFog postprocessorNew(
     final JCGLImplementationType gi,
     final KRegionCopierType copier,
-    final KUnitQuadUsableType quad,
+    final KUnitQuadCacheType quad_cache,
     final KFramebufferRGBACacheType rgba_cache,
     final KShaderCachePostprocessingType shader_cache,
     final LogUsableType log)
@@ -60,7 +62,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     return new KPostprocessorFog(
       gi,
       copier,
-      quad,
+      quad_cache,
       rgba_cache,
       shader_cache,
       log);
@@ -70,14 +72,14 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private final VectorM3F                      fog_color;
   private final JCGLImplementationType         gi;
   private final LogUsableType                  log;
-  private final KUnitQuadUsableType            quad;
+  private final KUnitQuadCacheType             quad_cache;
   private final KFramebufferRGBACacheType      rgba_cache;
   private final KShaderCachePostprocessingType shader_cache;
 
   private KPostprocessorFog(
     final JCGLImplementationType in_gi,
     final KRegionCopierType in_copier,
-    final KUnitQuadUsableType in_quad,
+    final KUnitQuadCacheType in_quad_cache,
     final KFramebufferRGBACacheType in_rgba_cache,
     final KShaderCachePostprocessingType in_shader_cache,
     final LogUsableType in_log)
@@ -89,19 +91,19 @@ import com.io7m.renderer.types.RExceptionJCGL;
     this.rgba_cache =
       NullCheck.notNull(in_rgba_cache, "RGBA framebuffer cache");
     this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
-    this.quad = NullCheck.notNull(in_quad, "Quad");
+    this.quad_cache = NullCheck.notNull(in_quad_cache, "Quad cache");
     this.fog_color = new VectorM3F(0.1f, 0.1f, 0.1f);
   }
 
   private
-    <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
-    void
-    evaluateFog(
-      final F input,
-      final KFramebufferRGBAUsableType output)
+  <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
+  void
+  evaluateFog(
+    final F input,
+    final KFramebufferRGBAUsableType output)
       throws JCGLException,
-        RException,
-        JCacheException
+      RException,
+      JCacheException
   {
     final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
@@ -118,16 +120,18 @@ import com.io7m.renderer.types.RExceptionJCGL;
       gc.viewportSet(output.kFramebufferGetArea());
 
       final JCBExecutorType e = fog.getExecutable();
-      e.execRun(new JCBExecutorProcedureType<JCGLException>() {
+      e.execRun(new JCBExecutorProcedureType<RException>() {
         @SuppressWarnings("synthetic-access") @Override public void call(
           final JCBProgramType p)
-          throws JCGLException
+            throws JCGLException,
+            RException
         {
           try {
-            final ArrayBufferUsableType array =
-              KPostprocessorFog.this.quad.getArray();
-            final IndexBufferUsableType indices =
-              KPostprocessorFog.this.quad.getIndices();
+            final KUnitQuad quad =
+              KPostprocessorFog.this.quad_cache.cacheGetLU(Unit.unit());
+
+            final ArrayBufferUsableType array = quad.getArray();
+            final IndexBufferUsableType indices = quad.getIndices();
 
             gc.arrayBufferBind(array);
             KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
@@ -158,6 +162,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
               }
             });
 
+          } catch (final JCacheException x) {
+            throw new UnreachableCodeException(x);
           } finally {
             gc.arrayBufferUnbind();
           }
@@ -169,12 +175,12 @@ import com.io7m.renderer.types.RExceptionJCGL;
   }
 
   @Override public
-    <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
-    void
-    postprocessorEvaluateRGBAWithDepth(
-      final KFogParameters config,
-      final F input,
-      final KFramebufferRGBAUsableType output)
+  <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
+  void
+  postprocessorEvaluateRGBAWithDepth(
+    final KFogParameters config,
+    final F input,
+    final KFramebufferRGBAUsableType output)
       throws RException
   {
     NullCheck.notNull(config, "Configuration");
