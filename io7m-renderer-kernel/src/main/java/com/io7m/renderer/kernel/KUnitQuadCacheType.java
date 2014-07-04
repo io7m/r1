@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -14,36 +14,18 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.tests;
+package com.io7m.renderer.kernel;
 
-import com.io7m.jcanephora.TextureUnitType;
-import com.io7m.jnull.Nullable;
+import com.io7m.jcache.LUCacheType;
+import com.io7m.jfunctional.Unit;
+import com.io7m.renderer.types.RException;
 
-public final class FakeTextureUnit implements TextureUnitType
+/**
+ * The type of caches for unit quads.
+ */
+
+public interface KUnitQuadCacheType extends
+  LUCacheType<Unit, KUnitQuad, RException>
 {
-  public static TextureUnitType newUnit(
-    final int index)
-  {
-    return new FakeTextureUnit(index);
-  }
-
-  private final int index;
-
-  private FakeTextureUnit(
-    final int i)
-  {
-    this.index = i;
-  }
-
-  @Override public int compareTo(
-    final @Nullable TextureUnitType o)
-  {
-    assert o != null;
-    return Integer.compare(this.index, o.unitGetIndex());
-  }
-
-  @Override public int unitGetIndex()
-  {
-    return this.index;
-  }
+  // No extra functions.
 }
