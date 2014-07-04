@@ -16,6 +16,9 @@
 
 package com.io7m.renderer.kernel;
 
+import java.math.BigInteger;
+
+import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcanephora.ArrayBufferType;
 import com.io7m.jcanephora.ArrayBufferUpdateUnmapped;
 import com.io7m.jcanephora.ArrayBufferUpdateUnmappedType;
@@ -34,12 +37,14 @@ import com.io7m.jcanephora.ResourceCheck;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLArrayBuffersType;
 import com.io7m.jcanephora.api.JCGLIndexBuffersType;
-import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
+import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionJCGL;
 
 /**
  * A unit quad, from <code>(-1, -1, -1)</code> to <code>(1, 1, -1)</code>,
@@ -49,6 +54,59 @@ import com.io7m.renderer.kernel.types.KMeshAttributes;
 @EqualityReference public final class KUnitQuad implements
   KUnitQuadUsableType
 {
+  /**
+   * Construct a new {@link JCacheLoaderType} that produces new
+   * {@link KUnitQuad} instances as required.
+   * 
+   * @param <G>
+   *          The precise type of OpenGL interface required
+   * @param gl
+   *          The OpenGL interface
+   * @param log
+   *          A log interface
+   * @return A cache loader
+   */
+
+  public static
+    <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
+    JCacheLoaderType<Unit, KUnitQuad, RException>
+    newCacheLoader(
+      final G gl,
+      final LogUsableType log)
+  {
+    return new JCacheLoaderType<Unit, KUnitQuad, RException>() {
+      @Override public void cacheValueClose(
+        final KUnitQuad v)
+        throws RException
+      {
+        try {
+          v.delete(gl);
+        } catch (final JCGLException e) {
+          throw RExceptionJCGL.fromJCGLException(e);
+        }
+      }
+
+      @Override public KUnitQuad cacheValueLoad(
+        final Unit _)
+        throws RException
+      {
+        try {
+          return KUnitQuad.newQuad(gl, log);
+        } catch (final JCGLException e) {
+          throw RExceptionJCGL.fromJCGLException(e);
+        }
+      }
+
+      @Override public BigInteger cacheValueSizeOf(
+        final KUnitQuad _)
+      {
+        final BigInteger one = BigInteger.ONE;
+        assert one != null;
+        return one;
+      }
+    };
+  }
+
   /**
    * Construct a new unit quad.
    * 
@@ -155,14 +213,16 @@ import com.io7m.renderer.kernel.types.KMeshAttributes;
   /**
    * Delete all resources associated with the quad.
    * 
+   * @param <G>
+   *          The precise type of OpenGL interface required.
    * @param gc
    *          The OpenGL interface
    * @throws JCGLException
    *           If an error occurs
    */
 
-  public void delete(
-    final JCGLInterfaceCommonType gc)
+  public <G extends JCGLArrayBuffersType & JCGLIndexBuffersType> void delete(
+    final G gc)
     throws JCGLException
   {
     ResourceCheck.notDeleted(this);

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -46,17 +46,18 @@ import com.io7m.jequality.validator.ValidatorResult;
 
     final FilterBuilder filter =
       new FilterBuilder()
-        .include(FilterBuilder.prefix("com.io7m.renderer"))
-        .exclude(FilterBuilder.prefix("com.io7m.renderer.tests"));
+    .include(FilterBuilder.prefix("com.io7m.renderer"))
+    .exclude(FilterBuilder.prefix("com.io7m.renderer.shaders"))
+    .exclude(FilterBuilder.prefix("com.io7m.renderer.tests"));
 
     final Set<URL> urls =
       ClasspathHelper.forClassLoader(classLoadersList
         .toArray(new ClassLoader[0]));
 
     return new Reflections(new ConfigurationBuilder()
-      .setScanners(
-        new SubTypesScanner(false /* don't exclude Object.class */),
-        new ResourcesScanner())
+    .setScanners(
+      new SubTypesScanner(false /* don't exclude Object.class */),
+      new ResourcesScanner())
       .setUrls(urls)
       .filterInputsBy(filter));
   }
