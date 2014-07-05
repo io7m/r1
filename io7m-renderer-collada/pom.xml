@@ -312,7 +312,7 @@
                   <Implementation-Vendor>io7m.com</Implementation-Vendor>
                   <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
                   <Built-By>io7m</Built-By>
-                  <Main-Class>com.io7m.renderer.xml.collada.tools.ColladaToRMX</Main-Class>
+                  <Main-Class>com.io7m.renderer.xml.collada.tools.RColladaToRMX</Main-Class>
                 </manifestEntries>
               </archive>
               <descriptors>

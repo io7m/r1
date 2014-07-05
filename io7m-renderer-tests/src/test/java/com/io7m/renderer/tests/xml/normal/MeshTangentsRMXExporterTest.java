@@ -34,7 +34,7 @@ import com.io7m.renderer.types.RExceptionMeshMissingUVs;
 import com.io7m.renderer.xml.collada.RColladaDocument;
 import com.io7m.renderer.xml.collada.RColladaGeometry;
 import com.io7m.renderer.xml.collada.RColladaGeometryID;
-import com.io7m.renderer.xml.collada.tools.MeshBasicColladaImporter;
+import com.io7m.renderer.xml.collada.tools.RColladaToMeshBasic;
 import com.io7m.renderer.xml.rmx.RXMLExporter;
 
 @SuppressWarnings("static-method") public class MeshTangentsRMXExporterTest
@@ -63,8 +63,8 @@ import com.io7m.renderer.xml.rmx.RXMLExporter;
     assert geom != null;
 
     final RXMLExporter exporter = new RXMLExporter(log);
-    final MeshBasicColladaImporter importer =
-      new MeshBasicColladaImporter(log);
+    final RColladaToMeshBasic importer =
+      new RColladaToMeshBasic(log);
     final RMeshBasic m = importer.newMeshFromColladaGeometry(cd, geom);
     final RMeshTangents mt = RMeshTangents.makeWithTangents(m);
     final Element x = exporter.toXML(mt);

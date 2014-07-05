@@ -52,7 +52,7 @@ import com.io7m.renderer.xml.collada.RColladaVertex;
  * An importer that can load a {@link RMeshBasic} from a COLLADA document.
  */
 
-@EqualityReference public final class MeshBasicColladaImporter
+@EqualityReference public final class RColladaToMeshBasic
 {
   @EqualityReference static class Offsets
   {
@@ -203,7 +203,7 @@ import com.io7m.renderer.xml.collada.RColladaVertex;
    *          A log interface.
    */
 
-  public MeshBasicColladaImporter(
+  public RColladaToMeshBasic(
     final LogUsableType in_log)
   {
     this.log =
@@ -327,7 +327,7 @@ import com.io7m.renderer.xml.collada.RColladaVertex;
     final ColladaSourceArray2F source =
       (RColladaSource.ColladaSourceArray2F) doc.getSource(input.getSource());
     assert source != null;
-    MeshBasicColladaImporter.loadColladaTexCoords(m, source);
+    RColladaToMeshBasic.loadColladaTexCoords(m, source);
 
     this.log.debug("Loaded " + m.uvsGet().size() + " texture coordinates");
   }
@@ -450,7 +450,7 @@ import com.io7m.renderer.xml.collada.RColladaVertex;
         final Offsets offsets = new Offsets(cm.getID(), inputs);
         final List<RColladaPoly> polys = pl.getPolygons();
         this.loadColladaSources(doc, m, inputs);
-        MeshBasicColladaImporter.loadColladaPolygons(
+        RColladaToMeshBasic.loadColladaPolygons(
           m,
           offsets,
           polys,
