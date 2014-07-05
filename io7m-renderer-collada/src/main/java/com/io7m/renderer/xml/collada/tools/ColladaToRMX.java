@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.xml.tools;
+package com.io7m.renderer.xml.collada.tools;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,6 +56,7 @@ import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.collada.ColladaDocument;
 import com.io7m.renderer.xml.collada.ColladaGeometry;
 import com.io7m.renderer.xml.collada.ColladaGeometryID;
+import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
 
 /**
  * The main program for converting COLLADA meshes to RMX meshes.

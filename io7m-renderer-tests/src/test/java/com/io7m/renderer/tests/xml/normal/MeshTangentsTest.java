@@ -42,8 +42,8 @@ import com.io7m.renderer.types.RVectorI4F;
 import com.io7m.renderer.xml.collada.ColladaDocument;
 import com.io7m.renderer.xml.collada.ColladaGeometry;
 import com.io7m.renderer.xml.collada.ColladaGeometryID;
-import com.io7m.renderer.xml.tools.MeshBasicColladaImporter;
-import com.io7m.renderer.xml.tools.MeshTangentsRMXExporter;
+import com.io7m.renderer.xml.collada.tools.MeshBasicColladaImporter;
+import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
 
 @SuppressWarnings({ "boxing", "static-method" }) public class MeshTangentsTest
 {

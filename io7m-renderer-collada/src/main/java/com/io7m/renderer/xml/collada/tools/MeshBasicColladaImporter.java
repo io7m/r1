@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.xml.tools;
+package com.io7m.renderer.xml.collada.tools;
 
 import java.util.List;
 
