@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.xml.tools;
+package com.io7m.renderer.xml.rmx;
 
 import java.util.List;
 
@@ -32,7 +32,6 @@ import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
-import com.io7m.renderer.xml.rmx.RXMLConstants;
 
 /**
  * An exporter to produce XML descriptions of {@link MeshTangents} meshes.

@@ -10,10 +10,10 @@
     <artifactId>io7m-renderer</artifactId>
     <version>0.9.0</version>
   </parent>
-  <artifactId>io7m-renderer-examples</artifactId>
+  <artifactId>io7m-renderer-meshes-xml</artifactId>
 
   <packaging>jar</packaging>
-  <description>3D renderer (Examples and visual test cases)</description>
+  <description>3D renderer (XML format for meshes)</description>
   <url>http://mvn.io7m.com/${project.artifactId}/</url>
   <name>${project.artifactId}</name>
 
@@ -74,35 +74,18 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-kernel</artifactId>
+      <artifactId>io7m-renderer-meshes</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-meshes-xml</artifactId>
+      <artifactId>io7m-renderer-types</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-xml</artifactId>
       <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>2.0.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.reflections</groupId>
-      <artifactId>reflections</artifactId>
-      <version>0.9.9-RC1</version>
     </dependency>
   </dependencies>
 
@@ -120,6 +103,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>3.3</version>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.maven.plugin</groupId>
+        <artifactId>emma-maven-plugin</artifactId>
+        <version>1.2</version>
       </plugin>
     </plugins>
   </reporting>
@@ -141,6 +129,22 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-install-plugin</artifactId>
         <version>2.4</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.6</version>
+      </plugin>
+
+      <!-- Require JDK >= 1.6 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
       </plugin>
 
       <!-- Check style -->
@@ -166,15 +170,32 @@
         </executions>
       </plugin>
 
-      <!-- Require JDK >= 1.6 -->
+      <!-- Produce jar files -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <!-- Produce custom manifest in jar files -->
+          <execution>
+            <id>code-jar</id>
+            <configuration>
+              <archive>
+                <manifestEntries>
+                  <Specification-Title>${project.name}</Specification-Title>
+                  <Specification-Version>${project.version}</Specification-Version>
+                  <Specification-Vendor>io7m.com</Specification-Vendor>
+                  <Implementation-Title>${project.name}</Implementation-Title>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                  <Implementation-Vendor>io7m.com</Implementation-Vendor>
+                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  <Built-By>io7m</Built-By>
+                  <Sealed>true</Sealed>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- Create source jar -->
@@ -199,7 +220,6 @@
                   <Implementation-Vendor>io7m.com</Implementation-Vendor>
                   <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
                   <Built-By>io7m</Built-By>
-                  <Sealed>true</Sealed>
                 </manifestEntries>
               </archive>
             </configuration>
@@ -207,32 +227,16 @@
         </executions>
       </plugin>
 
-      <!-- Produce jar files -->
+      <!-- Tell the surefire plugin to fork only once per set of unit tests, -->
+      <!-- and redirect test output -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <id>default-jar</id>
-            <configuration>
-              <archive>
-                <manifestEntries>
-                  <Specification-Title>${project.name}</Specification-Title>
-                  <Specification-Version>${project.version}</Specification-Version>
-                  <Specification-Vendor>io7m.com</Specification-Vendor>
-                  <Implementation-Title>${project.name}</Implementation-Title>
-                  <Implementation-Version>${project.version}</Implementation-Version>
-                  <Implementation-Vendor>io7m.com</Implementation-Vendor>
-                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
-                  <Built-By>io7m</Built-By>
-                  <Sealed>true</Sealed>
-                </manifestEntries>
-              </archive>
-            </configuration>
-          </execution>
-        </executions>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.15</version>
+        <configuration>
+          <forkMode>once</forkMode>
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+        </configuration>
       </plugin>
 
       <!-- Create javadoc jar -->
@@ -248,6 +252,7 @@
               <goal>jar</goal>
             </goals>
             <configuration>
+              <bottom><![CDATA[Copyright &#169; {currentYear} &lt;code@io7m.com&gt; http://io7m.com]]></bottom>
               <archive>
                 <manifestEntries>
                   <Specification-Title>${project.name}</Specification-Title>
@@ -261,7 +266,22 @@
                 </manifestEntries>
               </archive>
             </configuration>
-         </execution>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Enable code coverage for unit tests -->
+      <plugin>
+        <groupId>org.sonatype.maven.plugin</groupId>
+        <artifactId>emma-maven-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
+          <execution>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>instrument</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
     </plugins>
@@ -283,6 +303,62 @@
           <artifactId>lifecycle-mapping</artifactId>
           <version>1.0.0</version>
           <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.sonatype.maven.plugin</groupId>
+                    <artifactId>emma-maven-plugin</artifactId>
+                    <versionRange>[1.2,)</versionRange>
+                    <goals>
+                      <goal>instrument</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>xml-maven-plugin</artifactId>
+                    <versionRange>[1.0,)</versionRange>
+                    <goals>
+                      <goal>transform</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>com.io7m.saxon-plugin</groupId>
+                    <artifactId>io7m-saxon-plugin</artifactId>
+                    <versionRange>[1.0.0,)</versionRange>
+                    <goals>
+                      <goal>transform</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <versionRange>[2.11,)</versionRange>
+                    <goals>
+                      <goal>check</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
           </configuration>
         </plugin>
       </plugins>
