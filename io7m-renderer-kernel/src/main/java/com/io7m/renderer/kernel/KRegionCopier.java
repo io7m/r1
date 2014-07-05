@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -49,8 +49,8 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KUnitQuad;
 import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
+import com.io7m.renderer.kernel.types.KUnitQuadUsableType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionCopierSourceEqualsTarget;
 import com.io7m.renderer.types.RExceptionJCGL;
@@ -62,7 +62,7 @@ import com.io7m.renderer.types.RTransformTextureType;
  */
 
 @SuppressWarnings("synthetic-access") @EqualityReference public final class KRegionCopier implements
-KRegionCopierType
+  KRegionCopierType
 {
   private static final EnumSet<FramebufferBlitBuffer> COLOR_ONLY;
   private static final EnumSet<FramebufferBlitBuffer> DEPTH_ONLY;
@@ -135,14 +135,14 @@ KRegionCopierType
   }
 
   private static
-  <G extends JCGLFramebuffersGL3Type>
-  void
-  copyBlitDepthVarianceOnlyGL3(
-    final G gc,
-    final KFramebufferDepthVarianceUsableType source,
-    final AreaInclusive source_area,
-    final KFramebufferDepthVarianceUsableType target,
-    final AreaInclusive target_area)
+    <G extends JCGLFramebuffersGL3Type>
+    void
+    copyBlitDepthVarianceOnlyGL3(
+      final G gc,
+      final KFramebufferDepthVarianceUsableType source,
+      final AreaInclusive source_area,
+      final KFramebufferDepthVarianceUsableType target,
+      final AreaInclusive target_area)
       throws JCGLException
   {
     gc.framebufferReadBind(source
@@ -165,14 +165,14 @@ KRegionCopierType
   }
 
   private static
-  <G extends JCGLFramebuffersGL3Type, F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
-  void
-  copyBlitRGBADepthGL3(
-    final G gc,
-    final F source,
-    final AreaInclusive source_area,
-    final F target,
-    final AreaInclusive target_area)
+    <G extends JCGLFramebuffersGL3Type, F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
+    void
+    copyBlitRGBADepthGL3(
+      final G gc,
+      final F source,
+      final AreaInclusive source_area,
+      final F target,
+      final AreaInclusive target_area)
       throws JCGLException
   {
     assert source.kFramebufferGetDepthIsPackedColor() == false;
@@ -205,14 +205,14 @@ KRegionCopierType
   }
 
   private static
-  <G extends JCGLFramebuffersGL3Type>
-  void
-  copyBlitRGBAOnlyGL3(
-    final G gc,
-    final KFramebufferRGBAUsableType source,
-    final AreaInclusive source_area,
-    final KFramebufferRGBAUsableType target,
-    final AreaInclusive target_area)
+    <G extends JCGLFramebuffersGL3Type>
+    void
+    copyBlitRGBAOnlyGL3(
+      final G gc,
+      final KFramebufferRGBAUsableType source,
+      final AreaInclusive source_area,
+      final KFramebufferRGBAUsableType target,
+      final AreaInclusive target_area)
       throws JCGLException
   {
     gc.framebufferReadBind(source.kFramebufferGetColorFramebuffer());
@@ -253,7 +253,7 @@ KRegionCopierType
     final LogUsableType log,
     final KShaderCachePostprocessingType shader_cache,
     final KUnitQuadCacheType quad_cache)
-      throws RException
+    throws RException
   {
     return new KRegionCopier(g, log, shader_cache, quad_cache);
   }
@@ -271,7 +271,7 @@ KRegionCopierType
     final LogUsableType in_log,
     final KShaderCachePostprocessingType in_shader_cache,
     final KUnitQuadCacheType in_quad_cache)
-      throws RException
+    throws RException
   {
     try {
       this.g = NullCheck.notNull(in_g, "GL implementation");
@@ -297,7 +297,7 @@ KRegionCopierType
     final AreaInclusive source_area,
     final KFramebufferDepthVarianceUsableType target,
     final AreaInclusive target_area)
-      throws RException
+    throws RException
   {
     NullCheck.notNull(source, "Source");
     NullCheck.notNull(source_area, "Source area");
@@ -311,79 +311,79 @@ KRegionCopierType
 
     try {
       this.g
-      .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
-        @Override public Unit implementationIsGL2(
-          final JCGLInterfaceGL2Type gl)
+        .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
+          @Override public Unit implementationIsGL2(
+            final JCGLInterfaceGL2Type gl)
             throws JCGLException,
-            RException
-        {
-          KRegionCopier.this.copyDepthVarianceOnlyGL3(
-            gl,
-            source,
-            source_area,
-            target,
-            target_area);
-          return Unit.unit();
-        }
+              RException
+          {
+            KRegionCopier.this.copyDepthVarianceOnlyGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
 
-        @Override public Unit implementationIsGL3(
-          final JCGLInterfaceGL3Type gl)
+          @Override public Unit implementationIsGL3(
+            final JCGLInterfaceGL3Type gl)
             throws JCGLException,
-            RException
-        {
-          KRegionCopier.this.copyDepthVarianceOnlyGL3(
-            gl,
-            source,
-            source_area,
-            target,
-            target_area);
-          return Unit.unit();
-        }
+              RException
+          {
+            KRegionCopier.this.copyDepthVarianceOnlyGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
 
-        @Override public Unit implementationIsGLES2(
-          final JCGLInterfaceGLES2Type gl)
+          @Override public Unit implementationIsGLES2(
+            final JCGLInterfaceGLES2Type gl)
             throws JCGLException,
-            RException
-        {
-          KRegionCopier.this.texture_units
-          .withContext(new KTextureUnitWithType() {
-            @Override public void run(
-              final KTextureUnitContextType context)
-                throws JCGLException,
-                RException
-            {
-              try {
-                KRegionCopier.this.copyDrawColorOnly(
-                  gl,
-                  context,
-                  source.kFramebufferGetDepthVarianceTexture(),
-                  source_area,
-                  target.kFramebufferGetDepthVariancePassFramebuffer(),
-                  target_area,
-                  KRegionCopier.SHADER_COPY_RGBA);
-              } catch (final JCacheException e) {
-                throw new UnreachableCodeException(e);
-              }
-            }
-          });
-          return Unit.unit();
-        }
+              RException
+          {
+            KRegionCopier.this.texture_units
+              .withContext(new KTextureUnitWithType() {
+                @Override public void run(
+                  final KTextureUnitContextType context)
+                  throws JCGLException,
+                    RException
+                {
+                  try {
+                    KRegionCopier.this.copyDrawColorOnly(
+                      gl,
+                      context,
+                      source.kFramebufferGetDepthVarianceTexture(),
+                      source_area,
+                      target.kFramebufferGetDepthVariancePassFramebuffer(),
+                      target_area,
+                      KRegionCopier.SHADER_COPY_RGBA);
+                  } catch (final JCacheException e) {
+                    throw new UnreachableCodeException(e);
+                  }
+                }
+              });
+            return Unit.unit();
+          }
 
-        @Override public Unit implementationIsGLES3(
-          final JCGLInterfaceGLES3Type gl)
+          @Override public Unit implementationIsGLES3(
+            final JCGLInterfaceGLES3Type gl)
             throws JCGLException,
 
-            RException
-        {
-          KRegionCopier.this.copyDepthVarianceOnlyGL3(
-            gl,
-            source,
-            source_area,
-            target,
-            target_area);
-          return Unit.unit();
-        }
-      });
+              RException
+          {
+            KRegionCopier.this.copyDepthVarianceOnlyGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
+        });
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }
@@ -394,7 +394,7 @@ KRegionCopierType
     final AreaInclusive source_area,
     final KFramebufferRGBAUsableType target,
     final AreaInclusive target_area)
-      throws RException
+    throws RException
   {
     NullCheck.notNull(source, "Source");
     NullCheck.notNull(source_area, "Source area");
@@ -408,95 +408,95 @@ KRegionCopierType
 
     try {
       this.g
-      .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
-        @Override public Unit implementationIsGL2(
-          final JCGLInterfaceGL2Type gl)
+        .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
+          @Override public Unit implementationIsGL2(
+            final JCGLInterfaceGL2Type gl)
             throws JCGLException,
 
-            RException
-        {
-          KRegionCopier.this.copyRGBAOnlyGL3(
-            gl,
-            source,
-            source_area,
-            target,
-            target_area);
-          return Unit.unit();
-        }
+              RException
+          {
+            KRegionCopier.this.copyRGBAOnlyGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
 
-        @Override public Unit implementationIsGL3(
-          final JCGLInterfaceGL3Type gl)
+          @Override public Unit implementationIsGL3(
+            final JCGLInterfaceGL3Type gl)
             throws JCGLException,
 
-            RException
-        {
-          KRegionCopier.this.copyRGBAOnlyGL3(
-            gl,
-            source,
-            source_area,
-            target,
-            target_area);
-          return Unit.unit();
-        }
+              RException
+          {
+            KRegionCopier.this.copyRGBAOnlyGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
 
-        @Override public Unit implementationIsGLES2(
-          final JCGLInterfaceGLES2Type gl)
+          @Override public Unit implementationIsGLES2(
+            final JCGLInterfaceGLES2Type gl)
             throws JCGLException,
 
-            RException
-        {
-          KRegionCopier.this.texture_units
-          .withContext(new KTextureUnitWithType() {
-            @Override public void run(
-              final KTextureUnitContextType context)
-                throws JCGLException,
-                RException
-            {
-              try {
-                KRegionCopier.this.copyDrawColorOnly(
-                  gl,
-                  context,
-                  source.kFramebufferGetRGBATexture(),
-                  source_area,
-                  target.kFramebufferGetColorFramebuffer(),
-                  target_area,
-                  KRegionCopier.SHADER_COPY_RGBA);
-              } catch (final JCacheException e) {
-                throw new UnreachableCodeException(e);
-              }
-            }
-          });
-          return Unit.unit();
-        }
+              RException
+          {
+            KRegionCopier.this.texture_units
+              .withContext(new KTextureUnitWithType() {
+                @Override public void run(
+                  final KTextureUnitContextType context)
+                  throws JCGLException,
+                    RException
+                {
+                  try {
+                    KRegionCopier.this.copyDrawColorOnly(
+                      gl,
+                      context,
+                      source.kFramebufferGetRGBATexture(),
+                      source_area,
+                      target.kFramebufferGetColorFramebuffer(),
+                      target_area,
+                      KRegionCopier.SHADER_COPY_RGBA);
+                  } catch (final JCacheException e) {
+                    throw new UnreachableCodeException(e);
+                  }
+                }
+              });
+            return Unit.unit();
+          }
 
-        @Override public Unit implementationIsGLES3(
-          final JCGLInterfaceGLES3Type gl)
+          @Override public Unit implementationIsGLES3(
+            final JCGLInterfaceGLES3Type gl)
             throws JCGLException,
 
-            RException
-        {
-          KRegionCopier.this.copyRGBAOnlyGL3(
-            gl,
-            source,
-            source_area,
-            target,
-            target_area);
-          return Unit.unit();
-        }
-      });
+              RException
+          {
+            KRegionCopier.this.copyRGBAOnlyGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
+        });
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
   @Override public
-  <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
-  void
-  copierCopyRGBAWithDepth(
-    final F source,
-    final AreaInclusive source_area,
-    final F target,
-    final AreaInclusive target_area)
+    <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
+    void
+    copierCopyRGBAWithDepth(
+      final F source,
+      final AreaInclusive source_area,
+      final F target,
+      final AreaInclusive target_area)
       throws RException
   {
     NullCheck.notNull(source, "Source");
@@ -511,67 +511,67 @@ KRegionCopierType
 
     try {
       this.g
-      .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
-        @Override public Unit implementationIsGL2(
-          final JCGLInterfaceGL2Type gl)
+        .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
+          @Override public Unit implementationIsGL2(
+            final JCGLInterfaceGL2Type gl)
             throws JCGLException,
 
-            RException
-        {
-          KRegionCopier.this.copyRGBADepthGL3(
-            gl,
-            source,
-            source_area,
-            target,
-            target_area);
-          return Unit.unit();
-        }
+              RException
+          {
+            KRegionCopier.this.copyRGBADepthGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
 
-        @Override public Unit implementationIsGL3(
-          final JCGLInterfaceGL3Type gl)
+          @Override public Unit implementationIsGL3(
+            final JCGLInterfaceGL3Type gl)
             throws JCGLException,
 
-            RException
-        {
-          KRegionCopier.this.copyRGBADepthGL3(
-            gl,
-            source,
-            source_area,
-            target,
-            target_area);
-          return Unit.unit();
-        }
+              RException
+          {
+            KRegionCopier.this.copyRGBADepthGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
 
-        @Override public Unit implementationIsGLES2(
-          final JCGLInterfaceGLES2Type gl)
+          @Override public Unit implementationIsGLES2(
+            final JCGLInterfaceGLES2Type gl)
             throws JCGLException,
 
-            RException
-        {
-          KRegionCopier.this.copyRGBADepthGLES2(
-            gl,
-            source,
-            source_area,
-            target,
-            target_area);
-          return Unit.unit();
-        }
+              RException
+          {
+            KRegionCopier.this.copyRGBADepthGLES2(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
 
-        @Override public Unit implementationIsGLES3(
-          final JCGLInterfaceGLES3Type gl)
+          @Override public Unit implementationIsGLES3(
+            final JCGLInterfaceGLES3Type gl)
             throws JCGLException,
 
-            RException
-        {
-          KRegionCopier.this.copyRGBADepthGL3(
-            gl,
-            source,
-            source_area,
-            target,
-            target_area);
-          return Unit.unit();
-        }
-      });
+              RException
+          {
+            KRegionCopier.this.copyRGBADepthGL3(
+              gl,
+              source,
+              source_area,
+              target,
+              target_area);
+            return Unit.unit();
+          }
+        });
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }
@@ -589,16 +589,16 @@ KRegionCopierType
   }
 
   private
-  <G extends JCGLInterfaceCommonType & JCGLFramebuffersGL3Type>
-  void
-  copyDepthVarianceOnlyGL3(
-    final G gl,
-    final KFramebufferDepthVarianceUsableType source,
-    final AreaInclusive source_area,
-    final KFramebufferDepthVarianceUsableType target,
-    final AreaInclusive target_area)
+    <G extends JCGLInterfaceCommonType & JCGLFramebuffersGL3Type>
+    void
+    copyDepthVarianceOnlyGL3(
+      final G gl,
+      final KFramebufferDepthVarianceUsableType source,
+      final AreaInclusive source_area,
+      final KFramebufferDepthVarianceUsableType target,
+      final AreaInclusive target_area)
       throws RException,
-      JCGLException
+        JCGLException
   {
     if (this.blit) {
       KRegionCopier.copyBlitDepthVarianceOnlyGL3(
@@ -611,7 +611,7 @@ KRegionCopierType
       this.texture_units.withContext(new KTextureUnitWithType() {
         @Override public void run(
           final KTextureUnitContextType context)
-            throws JCGLException,
+          throws JCGLException,
             RException
         {
           try {
@@ -640,12 +640,12 @@ KRegionCopierType
     final FramebufferUsableType target,
     final AreaInclusive target_select_area,
     final String shader_name)
-      throws RException,
+    throws RException,
       JCacheException
   {
     assert source_color
-    .textureGetArea()
-    .equals(source_depth.textureGetArea());
+      .textureGetArea()
+      .equals(source_depth.textureGetArea());
 
     try {
       KRegionCopier.calculateRegionMatrices(
@@ -671,7 +671,7 @@ KRegionCopierType
           e.execRun(new JCBExecutorProcedureType<RException>() {
             @Override public void call(
               final JCBProgramType p)
-                throws JCGLException,
+              throws JCGLException,
                 RException
             {
               p.programUniformPutTextureUnit(
@@ -706,7 +706,7 @@ KRegionCopierType
     final FramebufferUsableType color_framebuffer,
     final FramebufferUsableType depth_framebuffer,
     final AreaInclusive target_area)
-      throws RException,
+    throws RException,
       JCacheException
   {
     this.copyDrawColorOnly(
@@ -736,7 +736,7 @@ KRegionCopierType
     final FramebufferUsableType target,
     final AreaInclusive target_select_area,
     final String shader_name)
-      throws RException,
+    throws RException,
       JCacheException
   {
     try {
@@ -766,7 +766,7 @@ KRegionCopierType
           e.execRun(new JCBExecutorProcedureType<RException>() {
             @Override public void call(
               final JCBProgramType p)
-                throws JCGLException,
+              throws JCGLException,
                 RException
             {
               final TextureUnitType unit =
@@ -796,7 +796,7 @@ KRegionCopierType
     final FramebufferUsableType target,
     final AreaInclusive target_select_area,
     final String shader_name)
-      throws RException,
+    throws RException,
       JCacheException
   {
     try {
@@ -824,7 +824,7 @@ KRegionCopierType
           e.execRun(new JCBExecutorProcedureType<RException>() {
             @Override public void call(
               final JCBProgramType p)
-                throws JCGLException,
+              throws JCGLException,
                 RException
             {
               final TextureUnitType unit =
@@ -847,16 +847,16 @@ KRegionCopierType
   }
 
   private
-  <G extends JCGLInterfaceCommonType & JCGLFramebuffersGL3Type, F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
-  void
-  copyRGBADepthGL3(
-    final G gl,
-    final F source,
-    final AreaInclusive source_area,
-    final F target,
-    final AreaInclusive target_area)
+    <G extends JCGLInterfaceCommonType & JCGLFramebuffersGL3Type, F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
+    void
+    copyRGBADepthGL3(
+      final G gl,
+      final F source,
+      final AreaInclusive source_area,
+      final F target,
+      final AreaInclusive target_area)
       throws RException,
-      JCGLException
+        JCGLException
   {
     assert source.kFramebufferGetDepthIsPackedColor() == false;
     assert source.kFramebufferGetColorFramebuffer() == source
@@ -876,7 +876,7 @@ KRegionCopierType
       this.texture_units.withContext(new KTextureUnitWithType() {
         @Override public void run(
           final KTextureUnitContextType context)
-            throws JCGLException,
+          throws JCGLException,
             RException
         {
           try {
@@ -898,16 +898,16 @@ KRegionCopierType
   }
 
   private
-  <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
-  void
-  copyRGBADepthGLES2(
-    final JCGLInterfaceGLES2Type gl,
-    final F source,
-    final AreaInclusive source_area,
-    final F target,
-    final AreaInclusive target_area)
+    <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
+    void
+    copyRGBADepthGLES2(
+      final JCGLInterfaceGLES2Type gl,
+      final F source,
+      final AreaInclusive source_area,
+      final F target,
+      final AreaInclusive target_area)
       throws RException,
-      JCGLException
+        JCGLException
   {
     assert source.kFramebufferGetDepthIsPackedColor() == target
       .kFramebufferGetDepthIsPackedColor();
@@ -915,7 +915,7 @@ KRegionCopierType
     this.texture_units.withContext(new KTextureUnitWithType() {
       @Override public void run(
         final KTextureUnitContextType texture_context)
-          throws JCGLException,
+        throws JCGLException,
           RException
       {
         try {
@@ -959,16 +959,16 @@ KRegionCopierType
   }
 
   private
-  <G extends JCGLInterfaceCommonType & JCGLFramebuffersGL3Type>
-  void
-  copyRGBAOnlyGL3(
-    final G gl,
-    final KFramebufferRGBAUsableType source,
-    final AreaInclusive source_area,
-    final KFramebufferRGBAUsableType target,
-    final AreaInclusive target_area)
+    <G extends JCGLInterfaceCommonType & JCGLFramebuffersGL3Type>
+    void
+    copyRGBAOnlyGL3(
+      final G gl,
+      final KFramebufferRGBAUsableType source,
+      final AreaInclusive source_area,
+      final KFramebufferRGBAUsableType target,
+      final AreaInclusive target_area)
       throws RException,
-      JCGLException
+        JCGLException
   {
     if (this.blit) {
       KRegionCopier.copyBlitRGBAOnlyGL3(
@@ -981,7 +981,7 @@ KRegionCopierType
       this.texture_units.withContext(new KTextureUnitWithType() {
         @Override public void run(
           final KTextureUnitContextType context)
-            throws JCGLException,
+          throws JCGLException,
             RException
         {
           try {
@@ -1004,12 +1004,13 @@ KRegionCopierType
   private void drawQuad(
     final JCGLInterfaceCommonType gc,
     final JCBProgramType p)
-      throws JCGLException,
+    throws JCGLException,
       JCGLException,
       RException
   {
     try {
-      final KUnitQuad quad = this.quad_cache.cacheGetLU(Unit.unit());
+      final KUnitQuadUsableType quad =
+        this.quad_cache.cacheGetLU(Unit.unit());
       final ArrayBufferUsableType array = quad.getArray();
       final IndexBufferUsableType indices = quad.getIndices();
 
@@ -1024,7 +1025,7 @@ KRegionCopierType
       p.programExecute(new JCBProgramProcedureType<RException>() {
         @Override public void call()
           throws JCGLException,
-          RException
+            RException
         {
           gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
         }

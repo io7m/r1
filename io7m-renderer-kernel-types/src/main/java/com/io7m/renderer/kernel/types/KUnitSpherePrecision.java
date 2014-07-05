@@ -14,23 +14,29 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel;
-
-import com.io7m.jcache.LUCacheType;
-import com.io7m.renderer.kernel.types.KMeshBounds;
-import com.io7m.renderer.kernel.types.KMeshReadableType;
-import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RSpaceType;
+package com.io7m.renderer.kernel.types;
 
 /**
- * The type of mesh bounds caches.
- *
- * @param <R>
- *          The type of coordinate space
+ * A type representing the available precision of unit spheres.
  */
 
-public interface KMeshBoundsCacheType<R extends RSpaceType> extends
-  LUCacheType<KMeshReadableType, KMeshBounds<R>, KMeshBounds<R>, RException>
+public enum KUnitSpherePrecision
 {
-  // No extra functions.
+  /**
+   * Unit spheres consisting of 16 segments.
+   */
+
+  KUNIT_SPHERE_16,
+
+  /**
+   * Unit spheres consisting of 32 segments.
+   */
+
+  KUNIT_SPHERE_32,
+
+  /**
+   * Unit spheres consisting of 64 segments.
+   */
+
+  KUNIT_SPHERE_64,
 }

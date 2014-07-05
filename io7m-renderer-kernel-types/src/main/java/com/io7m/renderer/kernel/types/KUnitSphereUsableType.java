@@ -14,23 +14,30 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel;
+package com.io7m.renderer.kernel.types;
 
-import com.io7m.jcache.LUCacheType;
-import com.io7m.renderer.kernel.types.KMeshBounds;
-import com.io7m.renderer.kernel.types.KMeshReadableType;
-import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RSpaceType;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.IndexBufferUsableType;
+import com.io7m.jcanephora.JCGLResourceSizedType;
+import com.io7m.jcanephora.JCGLResourceUsableType;
 
 /**
- * The type of mesh bounds caches.
- *
- * @param <R>
- *          The type of coordinate space
+ * The usable interface to unit spheres.
  */
 
-public interface KMeshBoundsCacheType<R extends RSpaceType> extends
-  LUCacheType<KMeshReadableType, KMeshBounds<R>, KMeshBounds<R>, RException>
+public interface KUnitSphereUsableType extends
+  JCGLResourceUsableType,
+  JCGLResourceSizedType
 {
-  // No extra functions.
+  /**
+   * @return The array buffer that backs the sphere
+   */
+
+  ArrayBufferUsableType getArray();
+
+  /**
+   * @return The index buffer that backs the sphere
+   */
+
+  IndexBufferUsableType getIndices();
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,6 +18,7 @@ package com.io7m.renderer.xml.collada.tools;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,6 +26,7 @@ import java.io.PrintWriter;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.SortedSet;
+import java.util.zip.GZIPOutputStream;
 
 import nu.xom.Builder;
 import nu.xom.Document;
@@ -77,12 +79,14 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
       final File in_input,
       final @Nullable File in_output,
       final String in_mesh_name,
-      final @Nullable String in_output_mesh_name)
+      final @Nullable String in_output_mesh_name,
+      final boolean in_compress)
     {
       this.input = in_input;
       this.output = in_output;
       this.mesh_name = in_mesh_name;
       this.output_mesh_name = in_output_mesh_name;
+      this.compress = in_compress;
     }
 
     // CHECKSTYLE_VISIBILITY:OFF
@@ -90,12 +94,13 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
     final @Nullable File   output;
     final String           mesh_name;
     final @Nullable String output_mesh_name;
+    final boolean          compress;
     // CHECKSTYLE_VISIBILITY:ON
   }
 
   /**
    * Main program.
-   * 
+   *
    * @param args
    *          Command line arguments.
    */
@@ -130,9 +135,16 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
         final String mesh_name = line.getOptionValue("export");
         final String output_mesh_name = line.getOptionValue("name");
 
+        final boolean compress = line.hasOption("compress");
+
         assert mesh_name != null;
         final ExportConfig config =
-          new ExportConfig(input, output, mesh_name, output_mesh_name);
+          new ExportConfig(
+            input,
+            output,
+            mesh_name,
+            output_mesh_name,
+            compress);
         ColladaToRMX.commandExportFile(log, config);
       }
 
@@ -153,7 +165,7 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
     }
   }
 
-  private static void commandExportFile(
+  @SuppressWarnings("resource") private static void commandExportFile(
     final LogUsableType log,
     final ExportConfig config)
     throws ValidityException,
@@ -189,10 +201,14 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
     final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
     final Element x = exporter.toXML(tan);
 
-    @SuppressWarnings("resource") final OutputStream output_stream =
-      (config.output != null)
-        ? new FileOutputStream(config.output)
-        : System.out;
+    final OutputStream output_stream;
+    if (config.compress) {
+      output_stream =
+        new GZIPOutputStream(ColladaToRMX.openOutputStream(config));
+    } else {
+      output_stream = ColladaToRMX.openOutputStream(config);
+    }
+    assert output_stream != null;
 
     final Serializer s = new Serializer(output_stream);
     s.setIndent(2);
@@ -204,6 +220,19 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
     if (config.output != null) {
       output_stream.close();
     }
+  }
+
+  private static OutputStream openOutputStream(
+    final ExportConfig config)
+    throws FileNotFoundException
+  {
+    final OutputStream output_stream;
+    output_stream =
+      (config.output != null)
+        ? new FileOutputStream(config.output)
+        : System.out;
+    assert output_stream != null;
+    return output_stream;
   }
 
   private static void commandListFile(
@@ -240,7 +269,7 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
 
   /**
    * Retrieve a log interface.
-   * 
+   *
    * @param debug
    *          <code>true</code> if debugging should be enabled.
    * @return A log interface.
@@ -289,6 +318,12 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
     {
       final Option o =
         new Option("d", "debug", false, "Enable debug logging");
+      os.addOption(o);
+    }
+
+    {
+      final Option o =
+        new Option("z", "compress", false, "GZip compress output");
       os.addOption(o);
     }
 

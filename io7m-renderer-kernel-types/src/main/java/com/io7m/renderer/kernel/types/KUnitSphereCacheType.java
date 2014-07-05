@@ -14,23 +14,17 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel;
+package com.io7m.renderer.kernel.types;
 
 import com.io7m.jcache.LUCacheType;
-import com.io7m.renderer.kernel.types.KMeshBounds;
-import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RSpaceType;
 
 /**
- * The type of mesh bounds caches.
- *
- * @param <R>
- *          The type of coordinate space
+ * The type of caches for unit spheres.
  */
 
-public interface KMeshBoundsCacheType<R extends RSpaceType> extends
-  LUCacheType<KMeshReadableType, KMeshBounds<R>, KMeshBounds<R>, RException>
+public interface KUnitSphereCacheType extends
+  LUCacheType<KUnitSpherePrecision, KUnitSphereUsableType, KUnitSphere, RException>
 {
   // No extra functions.
 }

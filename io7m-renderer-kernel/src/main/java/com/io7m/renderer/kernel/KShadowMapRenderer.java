@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -72,7 +72,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   /**
    * Construct a new shadow map renderer.
-   * 
+   *
    * @param g
    *          The OpenGL implementation
    * @param depth_renderer
@@ -86,7 +86,7 @@ import com.io7m.renderer.types.RTransformViewType;
    * @param log
    *          A log handle
    * @return A new depth renderer
-   * 
+   *
    * @throws RException
    *           If an error occurs during initialization
    */
@@ -164,14 +164,14 @@ import com.io7m.renderer.types.RTransformViewType;
       this.renderShadowMapsInitialize(lights);
       this.renderShadowMapsPre(camera, batches);
       return with.withMaps(new KShadowMapContextType() {
-        @Override public KShadowMapType getShadowMap(
+        @Override public KShadowMapUsableType getShadowMap(
           final KShadowType shadow)
           throws RException
         {
           try {
             return shadow
-              .shadowAccept(new KShadowVisitorType<KShadowMapType, JCacheException>() {
-                @Override public KShadowMapType shadowMappedBasic(
+              .shadowAccept(new KShadowVisitorType<KShadowMapUsableType, JCacheException>() {
+                @Override public KShadowMapUsableType shadowMappedBasic(
                   final KShadowMappedBasic s)
                   throws JCGLException,
                     RException,
@@ -181,7 +181,7 @@ import com.io7m.renderer.types.RTransformViewType;
                     .cacheGetPeriodic(s.getDescription());
                 }
 
-                @Override public KShadowMapType shadowMappedVariance(
+                @Override public KShadowMapUsableType shadowMappedVariance(
                   final KShadowMappedVariance s)
                   throws JCGLException,
                     RException,
