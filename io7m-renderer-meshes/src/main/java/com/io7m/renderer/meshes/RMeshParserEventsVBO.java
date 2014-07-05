@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -46,15 +46,15 @@ import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
 
 /**
- * An implementation of the {@link MeshParserEventsType} interface that
+ * An implementation of the {@link RMeshParserEventsType} interface that
  * produces an array buffer and index buffer whilst parsing.
  *
  * @param <G>
  *          The type of OpenGL interfaces.
  */
 
-@EqualityReference public final class MeshParserEventsVBO<G extends JCGLArrayBuffersType & JCGLIndexBuffersType> implements
-  MeshParserEventsType<JCGLException>
+@EqualityReference public final class RMeshParserEventsVBO<G extends JCGLArrayBuffersType & JCGLIndexBuffersType> implements
+  RMeshParserEventsType<JCGLException>
 {
   private static void checkCursorCompletelyAssigned(
     final CursorType cpos,
@@ -81,12 +81,12 @@ import com.io7m.renderer.types.RVectorI4F;
 
   public static
     <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
-    MeshParserEventsVBO<G>
+    RMeshParserEventsVBO<G>
     newEvents(
       final G g,
       final UsageHint hint)
   {
-    return new MeshParserEventsVBO<G>(g, hint);
+    return new RMeshParserEventsVBO<G>(g, hint);
   }
 
   private @Nullable ArrayBufferType               array;
@@ -107,7 +107,7 @@ import com.io7m.renderer.types.RVectorI4F;
   private final ArrayDescriptor                   type;
   private final UsageHint                         usage;
 
-  private MeshParserEventsVBO(
+  private RMeshParserEventsVBO(
     final G g,
     final UsageHint hint)
   {
@@ -121,7 +121,7 @@ import com.io7m.renderer.types.RVectorI4F;
       b.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
       b.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
       this.type = b.build();
-      this.parsing = true;
+      this.parsing = false;
     } catch (final JCGLExceptionAttributeDuplicate e) {
       throw new UnreachableCodeException(e);
     }
@@ -311,25 +311,25 @@ import com.io7m.renderer.types.RVectorI4F;
 
     final CursorWritable3fType cpos = this.cursor_pos;
     if (cpos != null) {
-      MeshParserEventsVBO.checkCursorCompletelyAssigned(
+      RMeshParserEventsVBO.checkCursorCompletelyAssigned(
         cpos,
         "Position attribute");
     }
     final CursorWritable3fType cnor = this.cursor_normal;
     if (cnor != null) {
-      MeshParserEventsVBO.checkCursorCompletelyAssigned(
+      RMeshParserEventsVBO.checkCursorCompletelyAssigned(
         cnor,
         "Normal attribute");
     }
     final CursorWritable4fType ctan4 = this.cursor_tangent4f;
     if (ctan4 != null) {
-      MeshParserEventsVBO.checkCursorCompletelyAssigned(
+      RMeshParserEventsVBO.checkCursorCompletelyAssigned(
         ctan4,
         "Tangent4 attribute");
     }
     final CursorWritable2fType cuv = this.cursor_uv;
     if (cuv != null) {
-      MeshParserEventsVBO.checkCursorCompletelyAssigned(
+      RMeshParserEventsVBO.checkCursorCompletelyAssigned(
         cuv,
         "UV attribute attribute");
     }

@@ -28,7 +28,7 @@ import org.junit.Test;
 import com.io7m.jequality.AlmostEqualFloat.ContextRelative;
 import com.io7m.jnull.NonNull;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.meshes.MeshParserEventsType;
+import com.io7m.renderer.meshes.RMeshParserEventsType;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
@@ -41,7 +41,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParser;
 
 @SuppressWarnings("synthetic-access") public final class RXMLMeshParserTests
 {
-  class Show implements MeshParserEventsType<Throwable>
+  class Show implements RMeshParserEventsType<Throwable>
   {
     @Override public void eventError(
       final Exception e)
@@ -266,7 +266,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParser;
     s.close();
   }
 
-  static class Checked implements MeshParserEventsType<Throwable>
+  static class Checked implements RMeshParserEventsType<Throwable>
   {
     private boolean                                     mesh_ended;
     private boolean                                     mesh_started;

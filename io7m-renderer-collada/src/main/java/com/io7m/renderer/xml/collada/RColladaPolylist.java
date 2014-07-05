@@ -28,10 +28,10 @@ import com.io7m.jnull.Nullable;
  * A list of polygons and inputs.
  */
 
-@EqualityStructural public final class ColladaPolylist
+@EqualityStructural public final class RColladaPolylist
 {
-  private final List<ColladaInput> inputs;
-  private final List<ColladaPoly>  polygons;
+  private final List<RColladaInput> inputs;
+  private final List<RColladaPoly>  polygons;
 
   /**
    * Construct a list of polygons.
@@ -42,17 +42,17 @@ import com.io7m.jnull.Nullable;
    *          The polygons.
    */
 
-  public ColladaPolylist(
-    final List<ColladaInput> in_inputs,
-    final List<ColladaPoly> in_polygons)
+  public RColladaPolylist(
+    final List<RColladaInput> in_inputs,
+    final List<RColladaPoly> in_polygons)
   {
     this.inputs = NullCheck.notNullAll(in_inputs, "Inputs");
     this.polygons = NullCheck.notNullAll(in_polygons, "Indices");
 
-    Collections.sort(in_inputs, new Comparator<ColladaInput>() {
+    Collections.sort(in_inputs, new Comparator<RColladaInput>() {
       @Override public int compare(
-        final @Nullable ColladaInput o1,
-        final @Nullable ColladaInput o2)
+        final @Nullable RColladaInput o1,
+        final @Nullable RColladaInput o2)
       {
         assert o1 != null;
         assert o2 != null;
@@ -73,7 +73,7 @@ import com.io7m.jnull.Nullable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final ColladaPolylist other = (ColladaPolylist) obj;
+    final RColladaPolylist other = (RColladaPolylist) obj;
     if (!this.inputs.equals(other.inputs)) {
       return false;
     }
@@ -90,9 +90,9 @@ import com.io7m.jnull.Nullable;
    *         list.
    */
 
-  public List<ColladaInput> getInputs()
+  public List<RColladaInput> getInputs()
   {
-    final List<ColladaInput> r = Collections.unmodifiableList(this.inputs);
+    final List<RColladaInput> r = Collections.unmodifiableList(this.inputs);
     assert r != null;
     return r;
   }
@@ -101,9 +101,9 @@ import com.io7m.jnull.Nullable;
    * @return A read-only view of the current list of polygons.
    */
 
-  public List<ColladaPoly> getPolygons()
+  public List<RColladaPoly> getPolygons()
   {
-    final List<ColladaPoly> r = Collections.unmodifiableList(this.polygons);
+    final List<RColladaPoly> r = Collections.unmodifiableList(this.polygons);
     assert r != null;
     return r;
   }
@@ -120,7 +120,7 @@ import com.io7m.jnull.Nullable;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[ColladaPolylist ");
+    builder.append("[RColladaPolylist ");
     builder.append(this.inputs);
     builder.append(" (");
     builder.append(this.polygons.size());

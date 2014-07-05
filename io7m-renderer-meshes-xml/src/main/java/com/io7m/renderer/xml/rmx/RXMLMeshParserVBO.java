@@ -27,13 +27,13 @@ import com.io7m.jcanephora.api.JCGLArrayBuffersType;
 import com.io7m.jcanephora.api.JCGLIndexBuffersType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.renderer.meshes.MeshParserEventsVBO;
+import com.io7m.renderer.meshes.RMeshParserEventsVBO;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RXMLException;
 
 /**
- * The glue between a {@link RXMLMeshParser} and a {@link MeshParserEventsVBO}
+ * The glue between a {@link RXMLMeshParser} and a {@link RMeshParserEventsVBO}
  * for producing vertex buffer objects directly from XML meshes.
  *
  * @param <G>
@@ -114,7 +114,7 @@ import com.io7m.renderer.types.RXMLException;
     return new RXMLMeshParserVBO<G>(g, hint, e);
   }
 
-  private final MeshParserEventsVBO<G>                                    events;
+  private final RMeshParserEventsVBO<G>                                    events;
   @SuppressWarnings("unused") private final RXMLMeshParser<JCGLException> parser;
 
   private RXMLMeshParserVBO(
@@ -124,7 +124,7 @@ import com.io7m.renderer.types.RXMLException;
     throws JCGLException,
       RXMLException
   {
-    this.events = MeshParserEventsVBO.newEvents(g, hint);
+    this.events = RMeshParserEventsVBO.newEvents(g, hint);
     this.parser = RXMLMeshParser.parseFromElement(e, this.events);
   }
 

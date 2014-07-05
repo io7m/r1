@@ -28,7 +28,7 @@ import com.io7m.jnull.Nullable;
  * </p>
  */
 
-@EqualityStructural public final class MeshTriangle
+@EqualityStructural public final class RMeshTriangle
 {
   private final int v0;
   private final int v1;
@@ -45,7 +45,7 @@ import com.io7m.jnull.Nullable;
    *          The index of the third vertex.
    */
 
-  public MeshTriangle(
+  public RMeshTriangle(
     final int in_v0,
     final int in_v1,
     final int in_v2)
@@ -67,7 +67,7 @@ import com.io7m.jnull.Nullable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final MeshTriangle other = (MeshTriangle) obj;
+    final RMeshTriangle other = (RMeshTriangle) obj;
     return (this.v0 == other.v0)
       && (this.v1 == other.v1)
       && (this.v2 == other.v2);

@@ -25,7 +25,7 @@ import com.io7m.jranges.RangeCheckException;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.meshes.MeshBasic;
+import com.io7m.renderer.meshes.RMeshBasic;
 import com.io7m.renderer.types.RExceptionMeshMissingNormals;
 import com.io7m.renderer.types.RExceptionMeshMissingPositions;
 import com.io7m.renderer.types.RExceptionMeshMissingUVs;
@@ -33,23 +33,23 @@ import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.xml.collada.ColladaAxis;
-import com.io7m.renderer.xml.collada.ColladaDocument;
-import com.io7m.renderer.xml.collada.ColladaGeometry;
-import com.io7m.renderer.xml.collada.ColladaGeometry.ColladaMesh;
-import com.io7m.renderer.xml.collada.ColladaGeometryID;
-import com.io7m.renderer.xml.collada.ColladaInput;
-import com.io7m.renderer.xml.collada.ColladaPoly;
-import com.io7m.renderer.xml.collada.ColladaPolylist;
-import com.io7m.renderer.xml.collada.ColladaSemantic;
-import com.io7m.renderer.xml.collada.ColladaSource;
-import com.io7m.renderer.xml.collada.ColladaSource.ColladaSourceArray2F;
-import com.io7m.renderer.xml.collada.ColladaSource.ColladaSourceArray3F;
-import com.io7m.renderer.xml.collada.ColladaSource.ColladaVertices;
-import com.io7m.renderer.xml.collada.ColladaVertex;
+import com.io7m.renderer.xml.collada.RColladaAxis;
+import com.io7m.renderer.xml.collada.RColladaDocument;
+import com.io7m.renderer.xml.collada.RColladaGeometry;
+import com.io7m.renderer.xml.collada.RColladaGeometry.ColladaMesh;
+import com.io7m.renderer.xml.collada.RColladaGeometryID;
+import com.io7m.renderer.xml.collada.RColladaInput;
+import com.io7m.renderer.xml.collada.RColladaPoly;
+import com.io7m.renderer.xml.collada.RColladaPolylist;
+import com.io7m.renderer.xml.collada.RColladaSemantic;
+import com.io7m.renderer.xml.collada.RColladaSource;
+import com.io7m.renderer.xml.collada.RColladaSource.ColladaSourceArray2F;
+import com.io7m.renderer.xml.collada.RColladaSource.ColladaSourceArray3F;
+import com.io7m.renderer.xml.collada.RColladaSource.ColladaVertices;
+import com.io7m.renderer.xml.collada.RColladaVertex;
 
 /**
- * An importer that can load a {@link MeshBasic} from a COLLADA document.
+ * An importer that can load a {@link RMeshBasic} from a COLLADA document.
  */
 
 @EqualityReference public final class MeshBasicColladaImporter
@@ -57,10 +57,10 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
   @EqualityReference static class Offsets
   {
     private static int getNormalOffset(
-      final List<ColladaInput> inputs)
+      final List<RColladaInput> inputs)
     {
       for (int index = 0; index < inputs.size(); ++index) {
-        if (inputs.get(index).getSemantic() == ColladaSemantic.SEMANTIC_NORMAL) {
+        if (inputs.get(index).getSemantic() == RColladaSemantic.SEMANTIC_NORMAL) {
           return index;
         }
       }
@@ -68,10 +68,10 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
     }
 
     private static int getPositionOffset(
-      final List<ColladaInput> inputs)
+      final List<RColladaInput> inputs)
     {
       for (int index = 0; index < inputs.size(); ++index) {
-        if (inputs.get(index).getSemantic() == ColladaSemantic.SEMANTIC_VERTEX) {
+        if (inputs.get(index).getSemantic() == RColladaSemantic.SEMANTIC_VERTEX) {
           return index;
         }
       }
@@ -79,10 +79,10 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
     }
 
     private static int getUVOffset(
-      final List<ColladaInput> inputs)
+      final List<RColladaInput> inputs)
     {
       for (int index = 0; index < inputs.size(); ++index) {
-        if (inputs.get(index).getSemantic() == ColladaSemantic.SEMANTIC_TEXCOORD) {
+        if (inputs.get(index).getSemantic() == RColladaSemantic.SEMANTIC_TEXCOORD) {
           return index;
         }
       }
@@ -97,8 +97,8 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
     // CHECKSTYLE_VISIBILITY:ON
 
     Offsets(
-      final ColladaGeometryID geom_id,
-      final List<ColladaInput> inputs)
+      final RColladaGeometryID geom_id,
+      final List<RColladaInput> inputs)
       throws RExceptionMeshMissingPositions,
         RExceptionMeshMissingNormals,
         RExceptionMeshMissingUVs
@@ -139,21 +139,21 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
   }
 
   private static void loadColladaPolygons(
-    final MeshBasic m,
+    final RMeshBasic m,
     final Offsets offsets,
-    final List<ColladaPoly> polygons,
+    final List<RColladaPoly> polygons,
     final LogUsableType log)
   {
-    for (final ColladaPoly poly : polygons) {
-      final List<ColladaVertex> vertices = poly.getVertices();
+    for (final RColladaPoly poly : polygons) {
+      final List<RColladaVertex> vertices = poly.getVertices();
 
       if (vertices.size() != 3) {
         throw new RangeCheckException("Polygons must have three vertices");
       }
 
-      final ColladaVertex v0 = vertices.get(0);
-      final ColladaVertex v1 = vertices.get(1);
-      final ColladaVertex v2 = vertices.get(2);
+      final RColladaVertex v0 = vertices.get(0);
+      final RColladaVertex v1 = vertices.get(1);
+      final RColladaVertex v2 = vertices.get(2);
 
       final int normal_v0 =
         v0.getIndices().get(offsets.normal_index).intValue();
@@ -184,7 +184,7 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
   }
 
   private static void loadColladaTexCoords(
-    final MeshBasic m,
+    final RMeshBasic m,
     final ColladaSourceArray2F source)
   {
     final List<VectorI2F> a = source.getArray2f();
@@ -213,15 +213,15 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
   }
 
   private void loadColladaNormals(
-    final MeshBasic m,
+    final RMeshBasic m,
     final ColladaSourceArray3F source)
   {
-    final ColladaAxis source_axis = source.getAxis();
-    if (source_axis != ColladaAxis.COLLADA_AXIS_Y_UP) {
+    final RColladaAxis source_axis = source.getAxis();
+    if (source_axis != RColladaAxis.COLLADA_AXIS_Y_UP) {
       this.log.debug("Converting normals from axis "
         + source_axis
         + " to "
-        + ColladaAxis.COLLADA_AXIS_Y_UP);
+        + RColladaAxis.COLLADA_AXIS_Y_UP);
     }
 
     final List<VectorI3F> a = source.getArray3f();
@@ -229,12 +229,12 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
       final RVectorI3F<RSpaceObjectType> vec =
         new RVectorI3F<RSpaceObjectType>(v.getXF(), v.getYF(), v.getZF());
 
-      if (source_axis != ColladaAxis.COLLADA_AXIS_Y_UP) {
-        m.normalAdd(ColladaAxis.convertAxes(
+      if (source_axis != RColladaAxis.COLLADA_AXIS_Y_UP) {
+        m.normalAdd(RColladaAxis.convertAxes(
           this.matrix,
           source_axis,
           vec,
-          ColladaAxis.COLLADA_AXIS_Y_UP));
+          RColladaAxis.COLLADA_AXIS_Y_UP));
       } else {
         m.normalAdd(vec);
       }
@@ -242,15 +242,15 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
   }
 
   private void loadColladaPositions(
-    final MeshBasic m,
+    final RMeshBasic m,
     final ColladaSourceArray3F source)
   {
-    final ColladaAxis source_axis = source.getAxis();
-    if (source_axis != ColladaAxis.COLLADA_AXIS_Y_UP) {
+    final RColladaAxis source_axis = source.getAxis();
+    if (source_axis != RColladaAxis.COLLADA_AXIS_Y_UP) {
       this.log.debug("Converting positions from axis "
         + source_axis
         + " to "
-        + ColladaAxis.COLLADA_AXIS_Y_UP);
+        + RColladaAxis.COLLADA_AXIS_Y_UP);
     }
 
     final List<VectorI3F> a = source.getArray3f();
@@ -258,12 +258,12 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
       final RVectorI3F<RSpaceObjectType> vec =
         new RVectorI3F<RSpaceObjectType>(v.getXF(), v.getYF(), v.getZF());
 
-      if (source_axis != ColladaAxis.COLLADA_AXIS_Y_UP) {
-        m.positionAdd(ColladaAxis.convertAxes(
+      if (source_axis != RColladaAxis.COLLADA_AXIS_Y_UP) {
+        m.positionAdd(RColladaAxis.convertAxes(
           this.matrix,
           source_axis,
           vec,
-          ColladaAxis.COLLADA_AXIS_Y_UP));
+          RColladaAxis.COLLADA_AXIS_Y_UP));
       } else {
         m.positionAdd(vec);
       }
@@ -271,11 +271,11 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
   }
 
   private void loadColladaSources(
-    final ColladaDocument doc,
-    final MeshBasic m,
-    final List<ColladaInput> inputs)
+    final RColladaDocument doc,
+    final RMeshBasic m,
+    final List<RColladaInput> inputs)
   {
-    for (final ColladaInput input : inputs) {
+    for (final RColladaInput input : inputs) {
       switch (input.getSemantic()) {
         case SEMANTIC_VERTEX:
         {
@@ -320,12 +320,12 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
   }
 
   private void loadSourceVertexUVCoordinates(
-    final ColladaDocument doc,
-    final MeshBasic m,
-    final ColladaInput input)
+    final RColladaDocument doc,
+    final RMeshBasic m,
+    final RColladaInput input)
   {
     final ColladaSourceArray2F source =
-      (ColladaSource.ColladaSourceArray2F) doc.getSource(input.getSource());
+      (RColladaSource.ColladaSourceArray2F) doc.getSource(input.getSource());
     assert source != null;
     MeshBasicColladaImporter.loadColladaTexCoords(m, source);
 
@@ -333,32 +333,32 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
   }
 
   private void loadSourceVertexNormals(
-    final ColladaDocument doc,
-    final MeshBasic m,
-    final ColladaInput input)
+    final RColladaDocument doc,
+    final RMeshBasic m,
+    final RColladaInput input)
   {
     final ColladaSourceArray3F source =
-      (ColladaSource.ColladaSourceArray3F) doc.getSource(input.getSource());
+      (RColladaSource.ColladaSourceArray3F) doc.getSource(input.getSource());
     assert source != null;
     this.loadColladaNormals(m, source);
     this.log.debug("Loaded " + m.normalsGet().size() + " normals");
   }
 
   private void loadSourceVertexPositions(
-    final ColladaDocument doc,
-    final MeshBasic m,
-    final ColladaInput input)
+    final RColladaDocument doc,
+    final RMeshBasic m,
+    final RColladaInput input)
   {
     final ColladaVertices vertices =
-      (ColladaSource.ColladaVertices) doc.getSource(input.getSource());
+      (RColladaSource.ColladaVertices) doc.getSource(input.getSource());
     assert vertices != null;
 
     boolean got_position = false;
-    for (final ColladaInput vertex_input : vertices.getInputs()) {
-      if (vertex_input.getSemantic() == ColladaSemantic.SEMANTIC_POSITION) {
+    for (final RColladaInput vertex_input : vertices.getInputs()) {
+      if (vertex_input.getSemantic() == RColladaSemantic.SEMANTIC_POSITION) {
         got_position = true;
         final ColladaSourceArray3F source =
-          (ColladaSource.ColladaSourceArray3F) doc.getSource(vertex_input
+          (RColladaSource.ColladaSourceArray3F) doc.getSource(vertex_input
             .getSource());
         assert source != null;
 
@@ -390,9 +390,9 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
    *           If the geometry does not have vertex positions.
    */
 
-  public MeshBasic newMeshFromColladaGeometry(
-    final ColladaDocument doc,
-    final ColladaGeometry geom)
+  public RMeshBasic newMeshFromColladaGeometry(
+    final RColladaDocument doc,
+    final RColladaGeometry geom)
     throws RExceptionMeshMissingPositions,
       RExceptionMeshMissingNormals,
       RExceptionMeshMissingUVs
@@ -423,9 +423,9 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
    *           If the geometry does not have vertex positions.
    */
 
-  public MeshBasic newMeshFromColladaGeometryWithName(
-    final ColladaDocument doc,
-    final ColladaGeometry geom,
+  public RMeshBasic newMeshFromColladaGeometryWithName(
+    final RColladaDocument doc,
+    final RColladaGeometry geom,
     final String name)
     throws RExceptionMeshMissingPositions,
       RExceptionMeshMissingNormals,
@@ -440,15 +440,15 @@ import com.io7m.renderer.xml.collada.ColladaVertex;
         "Geometry did not come from the given document");
     }
 
-    final MeshBasic m = MeshBasic.newMesh(name);
+    final RMeshBasic m = RMeshBasic.newMesh(name);
     switch (geom.getType()) {
       case GEOMETRY_MESH:
       {
         final ColladaMesh cm = (ColladaMesh) geom;
-        final ColladaPolylist pl = cm.getPolylist();
-        final List<ColladaInput> inputs = pl.getInputs();
+        final RColladaPolylist pl = cm.getPolylist();
+        final List<RColladaInput> inputs = pl.getInputs();
         final Offsets offsets = new Offsets(cm.getID(), inputs);
-        final List<ColladaPoly> polys = pl.getPolygons();
+        final List<RColladaPoly> polys = pl.getPolygons();
         this.loadColladaSources(doc, m, inputs);
         MeshBasicColladaImporter.loadColladaPolygons(
           m,

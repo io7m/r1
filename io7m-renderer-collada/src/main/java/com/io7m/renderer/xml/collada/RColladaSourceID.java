@@ -24,8 +24,8 @@ import com.io7m.jnull.Nullable;
  * A unique identifier for a source in a COLLADA document.
  */
 
-@EqualityStructural public final class ColladaSourceID implements
-Comparable<ColladaSourceID>
+@EqualityStructural public final class RColladaSourceID implements
+Comparable<RColladaSourceID>
 {
   private final String actual;
 
@@ -36,7 +36,7 @@ Comparable<ColladaSourceID>
    *          The base name of the identifier.
    */
 
-  public ColladaSourceID(
+  public RColladaSourceID(
     final String in_actual)
   {
     this.actual = NullCheck.notNull(in_actual, "Actual");
@@ -54,7 +54,7 @@ Comparable<ColladaSourceID>
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final ColladaSourceID other = (ColladaSourceID) obj;
+    final RColladaSourceID other = (RColladaSourceID) obj;
     return this.actual.equals(other.actual);
   }
 
@@ -78,7 +78,7 @@ Comparable<ColladaSourceID>
   }
 
   @Override public int compareTo(
-    final @Nullable ColladaSourceID o)
+    final @Nullable RColladaSourceID o)
   {
     assert o != null;
     return this.actual.compareTo(o.actual);

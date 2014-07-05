@@ -25,7 +25,7 @@ import nu.xom.ValidityException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM3F;
-import com.io7m.renderer.meshes.MeshParserEventsType;
+import com.io7m.renderer.meshes.RMeshParserEventsType;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
@@ -36,7 +36,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
 /**
  * A mesh parser implementation that parses a document and delivers events to
- * a given {@link MeshParserEventsType} interface.
+ * a given {@link RMeshParserEventsType} interface.
  * 
  * @param <E>
  *          The type of exceptions raised by the event interface.
@@ -65,7 +65,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
   public static <E extends Throwable> RXMLMeshParser<E> parseFromDocument(
     final Document d,
-    final MeshParserEventsType<E> events)
+    final RMeshParserEventsType<E> events)
     throws E,
       RXMLException
   {
@@ -96,7 +96,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
   public static <E extends Throwable> RXMLMeshParser<E> parseFromElement(
     final Element e,
-    final MeshParserEventsType<E> events)
+    final RMeshParserEventsType<E> events)
     throws E,
       RXMLException
   {
@@ -106,7 +106,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
   private static <E extends Throwable> void parseTriangles(
     final Element e,
-    final MeshParserEventsType<E> events)
+    final RMeshParserEventsType<E> events)
     throws E,
 
       RXMLException
@@ -177,7 +177,7 @@ import com.io7m.renderer.xml.RXMLUtilities;
 
   private static <E extends Throwable> void parseVertices(
     final Element ev,
-    final MeshParserEventsType<E> events)
+    final RMeshParserEventsType<E> events)
     throws E,
 
       RXMLException
@@ -273,11 +273,11 @@ import com.io7m.renderer.xml.RXMLUtilities;
         .getYF(), bounds_upper.getZF()));
   }
 
-  private final MeshParserEventsType<E> events;
+  private final RMeshParserEventsType<E> events;
 
   private RXMLMeshParser(
     final Element e,
-    final MeshParserEventsType<E> in_events)
+    final RMeshParserEventsType<E> in_events)
     throws E,
       RXMLException
   {

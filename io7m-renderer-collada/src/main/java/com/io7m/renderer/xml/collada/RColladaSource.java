@@ -29,14 +29,14 @@ import com.io7m.jtensors.VectorI3F;
  * The type of COLLADA sources.
  */
 
-@SuppressWarnings("synthetic-access") @EqualityReference public abstract class ColladaSource
+@SuppressWarnings("synthetic-access") @EqualityReference public abstract class RColladaSource
 {
   /**
    * A source array consisting of two-element floating point vectors.
    */
 
   @EqualityReference public static final class ColladaSourceArray2F extends
-    ColladaSource
+    RColladaSource
   {
     private final List<VectorI2F> array_2f;
 
@@ -50,8 +50,8 @@ import com.io7m.jtensors.VectorI3F;
      */
 
     public ColladaSourceArray2F(
-      final ColladaSourceID id,
-      final ColladaAxis axis)
+      final RColladaSourceID id,
+      final RColladaAxis axis)
     {
       super(Type.SOURCE_TYPE_VECTOR_2F, id, axis);
       this.array_2f = new ArrayList<VectorI2F>();
@@ -95,7 +95,7 @@ import com.io7m.jtensors.VectorI3F;
    */
 
   @EqualityReference public static final class ColladaSourceArray3F extends
-    ColladaSource
+    RColladaSource
   {
     private final List<VectorI3F> array_3f;
 
@@ -109,8 +109,8 @@ import com.io7m.jtensors.VectorI3F;
      */
 
     public ColladaSourceArray3F(
-      final ColladaSourceID id,
-      final ColladaAxis axis)
+      final RColladaSourceID id,
+      final RColladaAxis axis)
     {
       super(Type.SOURCE_TYPE_VECTOR_3F, id, axis);
       this.array_3f = new ArrayList<VectorI3F>();
@@ -158,9 +158,9 @@ import com.io7m.jtensors.VectorI3F;
    */
 
   @EqualityReference public static final class ColladaVertices extends
-    ColladaSource
+    RColladaSource
   {
-    private final List<ColladaInput> inputs;
+    private final List<RColladaInput> inputs;
 
     /**
      * Construct a source array.
@@ -174,9 +174,9 @@ import com.io7m.jtensors.VectorI3F;
      */
 
     public ColladaVertices(
-      final ColladaSourceID id,
-      final List<ColladaInput> in_inputs,
-      final ColladaAxis axis)
+      final RColladaSourceID id,
+      final List<RColladaInput> in_inputs,
+      final RColladaAxis axis)
     {
       super(Type.SOURCE_VERTICES, id, axis);
       this.inputs = NullCheck.notNullAll(in_inputs, "Inputs");
@@ -186,9 +186,9 @@ import com.io7m.jtensors.VectorI3F;
      * @return A read-only view of the current list of inputs.
      */
 
-    public List<ColladaInput> getInputs()
+    public List<RColladaInput> getInputs()
     {
-      final List<ColladaInput> r = Collections.unmodifiableList(this.inputs);
+      final List<RColladaInput> r = Collections.unmodifiableList(this.inputs);
       assert r != null;
       return r;
     }
@@ -212,14 +212,14 @@ import com.io7m.jtensors.VectorI3F;
     SOURCE_VERTICES,
   }
 
-  private final ColladaAxis     axis;
-  private final ColladaSourceID id;
+  private final RColladaAxis     axis;
+  private final RColladaSourceID id;
   private final Type            type;
 
-  private ColladaSource(
+  private RColladaSource(
     final Type in_type,
-    final ColladaSourceID in_id,
-    final ColladaAxis in_axis)
+    final RColladaSourceID in_id,
+    final RColladaAxis in_axis)
   {
     this.id = NullCheck.notNull(in_id, "ID");
     this.type = NullCheck.notNull(in_type, "Type");
@@ -230,7 +230,7 @@ import com.io7m.jtensors.VectorI3F;
    * @return The axis type.
    */
 
-  public ColladaAxis getAxis()
+  public RColladaAxis getAxis()
   {
     return this.axis;
   }
@@ -239,7 +239,7 @@ import com.io7m.jtensors.VectorI3F;
    * @return The identifier of the source.
    */
 
-  public final ColladaSourceID getID()
+  public final RColladaSourceID getID()
   {
     return this.id;
   }

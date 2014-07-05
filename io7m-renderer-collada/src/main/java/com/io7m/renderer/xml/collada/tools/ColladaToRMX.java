@@ -51,14 +51,14 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.Nullable;
 import com.io7m.jproperties.JPropertyException;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.meshes.MeshBasic;
-import com.io7m.renderer.meshes.MeshTangents;
+import com.io7m.renderer.meshes.RMeshBasic;
+import com.io7m.renderer.meshes.RMeshTangents;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RXMLException;
-import com.io7m.renderer.xml.collada.ColladaDocument;
-import com.io7m.renderer.xml.collada.ColladaGeometry;
-import com.io7m.renderer.xml.collada.ColladaGeometryID;
-import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
+import com.io7m.renderer.xml.collada.RColladaDocument;
+import com.io7m.renderer.xml.collada.RColladaGeometry;
+import com.io7m.renderer.xml.collada.RColladaGeometryID;
+import com.io7m.renderer.xml.rmx.RXMLExporter;
 
 /**
  * The main program for converting COLLADA meshes to RMX meshes.
@@ -176,9 +176,9 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
     final Document doc = ColladaToRMX.getDocument(config.input);
     doc.setBaseURI(config.input.toURI().toString());
 
-    final ColladaGeometryID gid = new ColladaGeometryID(config.mesh_name);
-    final ColladaDocument cdoc = ColladaDocument.newDocument(doc, log);
-    final ColladaGeometry geo = cdoc.getGeometry(gid);
+    final RColladaGeometryID gid = new RColladaGeometryID(config.mesh_name);
+    final RColladaDocument cdoc = RColladaDocument.newDocument(doc, log);
+    final RColladaGeometry geo = cdoc.getGeometry(gid);
 
     if (geo == null) {
       throw new NoSuchElementException("Mesh '" + gid + "' does not exist");
@@ -187,7 +187,7 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
     final MeshBasicColladaImporter importer =
       new MeshBasicColladaImporter(log);
 
-    MeshBasic basic = null;
+    RMeshBasic basic = null;
     final String m_name = config.output_mesh_name;
     if (m_name != null) {
       log.debug("Using mesh name '" + m_name + "'");
@@ -197,8 +197,8 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
     }
 
     log.debug("Generating tangents");
-    final MeshTangents tan = MeshTangents.makeWithTangents(basic);
-    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
+    final RMeshTangents tan = RMeshTangents.makeWithTangents(basic);
+    final RXMLExporter exporter = new RXMLExporter(log);
     final Element x = exporter.toXML(tan);
 
     final OutputStream output_stream;
@@ -246,9 +246,9 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
     final Document doc = ColladaToRMX.getDocument(input);
     doc.setBaseURI(input.toURI().toString());
 
-    final ColladaDocument cdoc = ColladaDocument.newDocument(doc, log);
-    final SortedSet<ColladaGeometryID> geoms = cdoc.getGeometryIDs();
-    for (final ColladaGeometryID g : geoms) {
+    final RColladaDocument cdoc = RColladaDocument.newDocument(doc, log);
+    final SortedSet<RColladaGeometryID> geoms = cdoc.getGeometryIDs();
+    for (final RColladaGeometryID g : geoms) {
       System.out.println(g);
     }
   }

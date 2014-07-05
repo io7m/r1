@@ -27,7 +27,7 @@ import com.io7m.jnull.Nullable;
  * A COLLADA vertex.
  */
 
-@EqualityStructural public final class ColladaVertex
+@EqualityStructural public final class RColladaVertex
 {
   private final List<Integer> indices;
 
@@ -38,7 +38,7 @@ import com.io7m.jnull.Nullable;
    *          The list of indices.
    */
 
-  public ColladaVertex(
+  public RColladaVertex(
     final List<Integer> in_indices)
   {
     this.indices = NullCheck.notNullAll(in_indices, "Indices");
@@ -56,7 +56,7 @@ import com.io7m.jnull.Nullable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final ColladaVertex other = (ColladaVertex) obj;
+    final RColladaVertex other = (RColladaVertex) obj;
     return this.indices.equals(other.indices);
   }
 
