@@ -14,27 +14,26 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.xml.rmx;
+package com.io7m.renderer.meshes;
 
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
-import com.io7m.renderer.types.RXMLException;
 
 /**
  * An interface that accepts events from a mesh parser.
- * 
+ *
  * @param <E>
  *          The type of exceptions raised.
  */
 
-public interface RXMLMeshParserEventsType<E extends Throwable>
+public interface MeshParserEventsType<E extends Throwable>
 {
   /**
-   * Called upon XML parser errors.
-   * 
+   * Called upon errors.
+   *
    * @param e
    *          The exception.
    * @throws E
@@ -42,13 +41,13 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
    */
 
   void eventError(
-    final RXMLException e)
+    final Exception e)
     throws E;
 
   /**
    * Called when parsing of the mesh finishes. This function is called
    * regardless of whether any error was raised during parsing.
-   * 
+   *
    * @throws E
    *           If required.
    */
@@ -58,7 +57,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
 
   /**
    * Called when the mesh name is encountered.
-   * 
+   *
    * @param name
    *          The name.
    * @throws E
@@ -72,7 +71,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
   /**
    * Called when parsing of the mesh starts. This function is called
    * unconditionally.
-   * 
+   *
    * @throws E
    *           If required.
    */
@@ -83,7 +82,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
   /**
    * Called when a triangle is encountered. Guaranteed not to be called before
    * {@link #eventMeshTrianglesStarted(int)}.
-   * 
+   *
    * @param index
    *          The triangle index.
    * @param v0
@@ -106,7 +105,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
   /**
    * Called when parsing of triangles has ended. Guaranteed not to be called
    * before {@link #eventMeshTrianglesStarted(int)}.
-   * 
+   *
    * @throws E
    *           If required.
    */
@@ -116,7 +115,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
 
   /**
    * Called when parsing of triangles is about to begin.
-   * 
+   *
    * @param count
    *          The number of triangles to be parsed.
    * @throws E
@@ -130,7 +129,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
   /**
    * Called when parsing of a mesh vertex has ended. Guaranteed not to be
    * called before {@link #eventMeshVertexStarted(int)} for the given index.
-   * 
+   *
    * @param index
    *          The index of the vertex.
    * @throws E
@@ -143,7 +142,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
 
   /**
    * Called when parsing the normal vector for a vertex.
-   * 
+   *
    * @param index
    *          The vertex index.
    * @param normal
@@ -159,7 +158,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
 
   /**
    * Called when parsing the position for a vertex.
-   * 
+   *
    * @param index
    *          The vertex index.
    * @param position
@@ -175,7 +174,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
 
   /**
    * Called when parsing of a mesh vertex has started.
-   * 
+   *
    * @param index
    *          The index of the vertex.
    * @throws E
@@ -188,7 +187,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
 
   /**
    * Called when parsing the tangent for a vertex.
-   * 
+   *
    * @param index
    *          The vertex index.
    * @param tangent
@@ -204,7 +203,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
 
   /**
    * Called when parsing the UV coordinates for a vertex.
-   * 
+   *
    * @param index
    *          The vertex index.
    * @param uv
@@ -220,7 +219,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
 
   /**
    * Called when parsing of mesh vertices has ended.
-   * 
+   *
    * @param bounds_lower
    *          The accumulated lower bounds of all of the vertex positions.
    * @param bounds_upper
@@ -236,7 +235,7 @@ public interface RXMLMeshParserEventsType<E extends Throwable>
 
   /**
    * Called when parsing of mesh vertices has started.
-   * 
+   *
    * @param count
    *          The number of vertices to be parsed.
    * @throws E
