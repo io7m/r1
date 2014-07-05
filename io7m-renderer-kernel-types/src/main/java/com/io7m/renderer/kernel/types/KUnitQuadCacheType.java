@@ -14,30 +14,18 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.kernel;
+package com.io7m.renderer.kernel.types;
 
-import com.io7m.jcanephora.ArrayBufferUsableType;
-import com.io7m.jcanephora.IndexBufferUsableType;
-import com.io7m.jcanephora.JCGLResourceSizedType;
-import com.io7m.jcanephora.JCGLResourceUsableType;
+import com.io7m.jcache.LUCacheType;
+import com.io7m.jfunctional.Unit;
+import com.io7m.renderer.types.RException;
 
 /**
- * The usable interface to unit quads.
+ * The type of caches for unit quads.
  */
 
-public interface KUnitQuadUsableType extends
-  JCGLResourceUsableType,
-  JCGLResourceSizedType
+public interface KUnitQuadCacheType extends
+  LUCacheType<Unit, KUnitQuad, RException>
 {
-  /**
-   * @return The array buffer that backs the quad
-   */
-
-  ArrayBufferUsableType getArray();
-
-  /**
-   * @return The index buffer that backs the quad
-   */
-
-  IndexBufferUsableType getIndices();
+  // No extra functions.
 }

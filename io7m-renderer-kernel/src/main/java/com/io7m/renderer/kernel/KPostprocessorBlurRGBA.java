@@ -28,6 +28,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
+import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionCache;
 import com.io7m.renderer.types.RExceptionJCGL;
