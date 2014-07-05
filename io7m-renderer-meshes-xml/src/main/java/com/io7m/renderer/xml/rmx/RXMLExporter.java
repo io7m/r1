@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -79,9 +79,7 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     final Element e =
       new Element("m:mesh", RXMLConstants.MESHES_URI.toString());
-    e.addAttribute(RXMLExporter.stringAttribute(
-      "m:name",
-      m.getName()));
+    e.addAttribute(RXMLExporter.stringAttribute("m:name", m.getName()));
     return e;
   }
 
@@ -91,18 +89,13 @@ import com.io7m.renderer.types.RVectorI4F;
     final String uri = RXMLConstants.MESHES_URI.toString();
     final Element ets = new Element("m:triangles", uri);
     final List<RMeshTriangle> triangles = m.trianglesGet();
-    ets.addAttribute(RXMLExporter.intAttribute(
-      "m:count",
-      triangles.size()));
+    ets.addAttribute(RXMLExporter.intAttribute("m:count", triangles.size()));
 
     for (final RMeshTriangle t : triangles) {
       final Element et = new Element("m:tri", uri);
-      et
-        .addAttribute(RXMLExporter.intAttribute("m:v0", t.getV0()));
-      et
-        .addAttribute(RXMLExporter.intAttribute("m:v1", t.getV1()));
-      et
-        .addAttribute(RXMLExporter.intAttribute("m:v2", t.getV2()));
+      et.addAttribute(RXMLExporter.intAttribute("m:v0", t.getV0()));
+      et.addAttribute(RXMLExporter.intAttribute("m:v1", t.getV1()));
+      et.addAttribute(RXMLExporter.intAttribute("m:v2", t.getV2()));
       ets.appendChild(et);
     }
 
@@ -120,57 +113,39 @@ import com.io7m.renderer.types.RVectorI4F;
     final List<RVectorI4F<RSpaceObjectType>> tangents = m.tangentsGet();
 
     final Element evs = new Element("m:vertices", uri);
-    evs.addAttribute(RXMLExporter.intAttribute(
-      "m:count",
-      vertices.size()));
+    evs.addAttribute(RXMLExporter.intAttribute("m:count", vertices.size()));
 
     for (final RMeshTangentsVertex v : vertices) {
       final Element ev = new Element("m:v", uri);
 
       final Element ep = new Element("m:p", uri);
       final RVectorI3F<RSpaceObjectType> p = positions.get(v.getPosition());
-      ep
-        .addAttribute(RXMLExporter.floatAttribute("m:x", p.getXF()));
-      ep
-        .addAttribute(RXMLExporter.floatAttribute("m:y", p.getYF()));
-      ep
-        .addAttribute(RXMLExporter.floatAttribute("m:z", p.getZF()));
+      ep.addAttribute(RXMLExporter.floatAttribute("m:x", p.getXF()));
+      ep.addAttribute(RXMLExporter.floatAttribute("m:y", p.getYF()));
+      ep.addAttribute(RXMLExporter.floatAttribute("m:z", p.getZF()));
       ev.appendChild(ep);
 
       final Element en = new Element("m:n", uri);
       final RVectorI3F<RSpaceObjectType> n = normals.get(v.getNormal());
-      en
-        .addAttribute(RXMLExporter.floatAttribute("m:x", n.getXF()));
-      en
-        .addAttribute(RXMLExporter.floatAttribute("m:y", n.getYF()));
-      en
-        .addAttribute(RXMLExporter.floatAttribute("m:z", n.getZF()));
+      en.addAttribute(RXMLExporter.floatAttribute("m:x", n.getXF()));
+      en.addAttribute(RXMLExporter.floatAttribute("m:y", n.getYF()));
+      en.addAttribute(RXMLExporter.floatAttribute("m:z", n.getZF()));
       ev.appendChild(en);
 
       {
         final Element et = new Element("m:t4", uri);
         final RVectorI4F<RSpaceObjectType> t = tangents.get(v.getTangent());
-        et.addAttribute(RXMLExporter.floatAttribute(
-          "m:x",
-          t.getXF()));
-        et.addAttribute(RXMLExporter.floatAttribute(
-          "m:y",
-          t.getYF()));
-        et.addAttribute(RXMLExporter.floatAttribute(
-          "m:z",
-          t.getZF()));
-        et.addAttribute(RXMLExporter.floatAttribute(
-          "m:w",
-          t.getWF()));
+        et.addAttribute(RXMLExporter.floatAttribute("m:x", t.getXF()));
+        et.addAttribute(RXMLExporter.floatAttribute("m:y", t.getYF()));
+        et.addAttribute(RXMLExporter.floatAttribute("m:z", t.getZF()));
+        et.addAttribute(RXMLExporter.floatAttribute("m:w", t.getWF()));
         ev.appendChild(et);
       }
 
       final Element eu = new Element("m:u", uri);
       final RVectorI2F<RSpaceTextureType> u = uvs.get(v.getUV());
-      eu
-        .addAttribute(RXMLExporter.floatAttribute("m:x", u.getXF()));
-      eu
-        .addAttribute(RXMLExporter.floatAttribute("m:y", u.getYF()));
+      eu.addAttribute(RXMLExporter.floatAttribute("m:x", u.getXF()));
+      eu.addAttribute(RXMLExporter.floatAttribute("m:y", u.getYF()));
       ev.appendChild(eu);
 
       evs.appendChild(ev);
@@ -183,7 +158,7 @@ import com.io7m.renderer.types.RVectorI4F;
 
   /**
    * Construct an exporter.
-   * 
+   *
    * @param in_log
    *          A log interface.
    */
@@ -192,13 +167,12 @@ import com.io7m.renderer.types.RVectorI4F;
     final LogUsableType in_log)
   {
     this.log =
-      NullCheck.notNull(in_log, "Log interface").with(
-        "mesh-tangents-rmx-exporter");
+      NullCheck.notNull(in_log, "Log interface").with("rmx-exporter");
   }
 
   /**
    * Produce XML for the given mesh.
-   * 
+   *
    * @param m
    *          The mesh.
    * @return An XML root element for a mesh description.
