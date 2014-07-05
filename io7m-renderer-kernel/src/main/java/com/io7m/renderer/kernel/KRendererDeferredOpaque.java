@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -67,9 +67,9 @@ import com.io7m.renderer.kernel.types.KMaterialNormalVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KSceneBatchedDeferredOpaque;
-import com.io7m.renderer.kernel.types.KUnitQuad;
-import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
 import com.io7m.renderer.kernel.types.KSceneBatchedDeferredOpaque.Group;
+import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
+import com.io7m.renderer.kernel.types.KUnitQuadUsableType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 
@@ -451,7 +451,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       framebuffer.kFramebufferGetGeometryBuffer();
     final KProgram kp = this.shader_light_cache.cacheGetLU(l.lightGetCode());
 
-    final KUnitQuad q = this.quad_cache.cacheGetLU(Unit.unit());
+    final KUnitQuadUsableType q = this.quad_cache.cacheGetLU(Unit.unit());
     final ArrayBufferUsableType array = q.getArray();
     final IndexBufferUsableType index = q.getIndices();
 

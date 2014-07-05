@@ -42,7 +42,7 @@ import com.io7m.renderer.types.RExceptionCache;
 
   /**
    * Construct a new postprocessor.
-   * 
+   *
    * @param gi
    *          The OpenGL implementation
    * @param copier
@@ -106,11 +106,11 @@ import com.io7m.renderer.types.RExceptionCache;
       final AreaInclusive target_select = parameters.getTargetSelect();
 
       if (input == output) {
-        final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAType> r =
+        final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> r =
           this.rgba_cache.bluCacheGet(input.kFramebufferGetRGBADescription());
 
         try {
-          final KFramebufferRGBAType temp = r.getValue();
+          final KFramebufferRGBAUsableType temp = r.getValue();
 
           /**
            * Copy the source region of the input to the temporary buffer. Note

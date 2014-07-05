@@ -19,12 +19,9 @@ package com.io7m.renderer.examples;
 import java.math.BigInteger;
 
 import com.io7m.jcache.BLUCacheConfig;
-import com.io7m.jcache.BLUCacheTrivial;
 import com.io7m.jcache.LRUCacheConfig;
-import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcache.PCacheConfig;
 import com.io7m.jcache.PCacheConfig.BuilderType;
-import com.io7m.jcache.PCacheTrivial;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jlog.LogUsableType;
@@ -34,17 +31,13 @@ import com.io7m.renderer.kernel.KDepthRendererType;
 import com.io7m.renderer.kernel.KDepthVarianceRenderer;
 import com.io7m.renderer.kernel.KDepthVarianceRendererType;
 import com.io7m.renderer.kernel.KFramebufferDepthVarianceCache;
-import com.io7m.renderer.kernel.KFramebufferDepthVarianceCacheLoader;
 import com.io7m.renderer.kernel.KFramebufferDepthVarianceCacheType;
 import com.io7m.renderer.kernel.KFramebufferForwardCache;
-import com.io7m.renderer.kernel.KFramebufferForwardCacheLoader;
 import com.io7m.renderer.kernel.KFramebufferForwardCacheType;
 import com.io7m.renderer.kernel.KMeshBoundsCache;
 import com.io7m.renderer.kernel.KMeshBoundsCacheType;
-import com.io7m.renderer.kernel.KMeshBoundsObjectSpaceCacheLoader;
 import com.io7m.renderer.kernel.KMeshBoundsTrianglesCache;
 import com.io7m.renderer.kernel.KMeshBoundsTrianglesCacheType;
-import com.io7m.renderer.kernel.KMeshBoundsTrianglesObjectSpaceCacheLoader;
 import com.io7m.renderer.kernel.KPostprocessorBlurDepthVariance;
 import com.io7m.renderer.kernel.KPostprocessorBlurDepthVarianceType;
 import com.io7m.renderer.kernel.KRefractionRenderer;
@@ -63,7 +56,6 @@ import com.io7m.renderer.kernel.KShaderCacheForwardTranslucentLitType;
 import com.io7m.renderer.kernel.KShaderCacheForwardTranslucentUnlitType;
 import com.io7m.renderer.kernel.KShaderCachePostprocessingType;
 import com.io7m.renderer.kernel.KShadowMapCache;
-import com.io7m.renderer.kernel.KShadowMapCacheLoader;
 import com.io7m.renderer.kernel.KShadowMapCacheType;
 import com.io7m.renderer.kernel.KShadowMapRenderer;
 import com.io7m.renderer.kernel.KShadowMapRendererType;
@@ -150,7 +142,7 @@ public final class ExampleRendererForwardDefault extends
 
     final KUnitQuad quad = KUnitQuad.newQuad(gi.getGLCommon(), log);
     final KUnitQuadCacheType quad_cache =
-      KUnitQuadCache.newTrivial(gi.getGLCommon(), log);
+      KUnitQuadCache.newCache(gi.getGLCommon(), log);
 
     final KRegionCopierType copier =
       KRegionCopier.newCopier(
@@ -170,9 +162,10 @@ public final class ExampleRendererForwardDefault extends
         .withMaximumBorrowsPerKey(BigInteger.TEN)
         .withMaximumCapacity(BigInteger.valueOf(1024 * 1024 * 8 * 128));
     final KFramebufferDepthVarianceCacheType depth_variance_cache =
-      KFramebufferDepthVarianceCache.wrap(BLUCacheTrivial.newCache(
-        KFramebufferDepthVarianceCacheLoader.newLoader(gi, log),
-        depth_variance_cache_config));
+      KFramebufferDepthVarianceCache.newCacheWithConfig(
+        gi,
+        depth_variance_cache_config,
+        log);
 
     final KPostprocessorBlurDepthVarianceType blur =
       KPostprocessorBlurDepthVariance.postprocessorNew(
@@ -187,12 +180,11 @@ public final class ExampleRendererForwardDefault extends
     shadow_cache_config_builder.setMaximumAge(BigInteger.valueOf(60));
     shadow_cache_config_builder.setNoMaximumSize();
 
-    final PCacheConfig shadow_cache_config =
-      shadow_cache_config_builder.create();
     final KShadowMapCacheType shadow_cache =
-      KShadowMapCache.wrap(PCacheTrivial.newCache(
-        KShadowMapCacheLoader.newLoader(gi, log),
-        shadow_cache_config));
+      KShadowMapCache.newCacheWithConfig(
+        gi,
+        shadow_cache_config_builder.create(),
+        log);
     final KShadowMapRendererType shadow_renderer =
       KShadowMapRenderer.newRenderer(
         gi,
@@ -208,23 +200,20 @@ public final class ExampleRendererForwardDefault extends
         .withMaximumBorrowsPerKey(BigInteger.TEN)
         .withMaximumCapacity(BigInteger.valueOf(640 * 480 * 4 * 128));
     final KFramebufferForwardCacheType forward_cache =
-      KFramebufferForwardCache.wrap(BLUCacheTrivial.newCache(
-        KFramebufferForwardCacheLoader.newLoader(gi, log),
-        forward_cache_config));
+      KFramebufferForwardCache.newCacheWithConfig(
+        gi,
+        forward_cache_config,
+        log);
 
     final LRUCacheConfig bounds_cache_config =
       LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(1024));
     final KMeshBoundsCacheType<RSpaceObjectType> bounds_cache =
-      KMeshBoundsCache.wrap(LRUCacheTrivial.newCache(
-        KMeshBoundsObjectSpaceCacheLoader.newLoader(),
-        bounds_cache_config));
+      KMeshBoundsCache.newCacheWithConfig(bounds_cache_config);
 
     final LRUCacheConfig bounds_triangle_cache_config =
       LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(1024));
     final KMeshBoundsTrianglesCacheType<RSpaceObjectType> bounds_tri_cache =
-      KMeshBoundsTrianglesCache.wrap(LRUCacheTrivial.newCache(
-        KMeshBoundsTrianglesObjectSpaceCacheLoader.newLoader(),
-        bounds_triangle_cache_config));
+      KMeshBoundsTrianglesCache.newCache(bounds_triangle_cache_config);
 
     final KRefractionRendererType refraction_renderer =
       KRefractionRenderer.newRenderer(

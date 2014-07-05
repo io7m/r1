@@ -16,29 +16,51 @@
 
 package com.io7m.renderer.kernel;
 
+import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcache.LRUCacheAbstract;
+import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcache.LRUCacheType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KMeshBounds;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceType;
 
 /**
  * Mesh bounds caches.
- * 
+ *
  * @param <R>
  *          The type of coordinate space
  */
 
 @EqualityReference public final class KMeshBoundsCache<R extends RSpaceType> extends
-  LRUCacheAbstract<KMeshReadableType, KMeshBounds<R>, RException> implements
+  LRUCacheAbstract<KMeshReadableType, KMeshBounds<R>, KMeshBounds<R>, RException> implements
   KMeshBoundsCacheType<R>
 {
   /**
+   * Construct a new trivial cache with the given config.
+   *
+   * @see KMeshBoundsObjectSpaceCacheLoader
+   * @param config
+   *          The config
+   * @return A cache
+   */
+
+  public static KMeshBoundsCacheType<RSpaceObjectType> newCacheWithConfig(
+    final LRUCacheConfig config)
+  {
+    final JCacheLoaderType<KMeshReadableType, KMeshBounds<RSpaceObjectType>, RException> loader =
+      KMeshBoundsObjectSpaceCacheLoader.newLoader();
+    final LRUCacheType<KMeshReadableType, KMeshBounds<RSpaceObjectType>, KMeshBounds<RSpaceObjectType>, RException> c =
+      LRUCacheTrivial.newCache(loader, config);
+    return new KMeshBoundsCache<RSpaceObjectType>(c);
+  }
+
+  /**
    * Wrap the given cache and expose a {@link KMeshBoundsCacheType} interface.
-   * 
+   *
    * @param <R>
    *          The type of coordinate space
    * @param c
@@ -46,14 +68,17 @@ import com.io7m.renderer.types.RSpaceType;
    * @return A cache
    */
 
-  public static <R extends RSpaceType> KMeshBoundsCacheType<R> wrap(
-    final LRUCacheTrivial<KMeshReadableType, KMeshBounds<R>, RException> c)
+  public static
+    <R extends RSpaceType>
+    KMeshBoundsCacheType<R>
+    wrap(
+      final LRUCacheTrivial<KMeshReadableType, KMeshBounds<R>, KMeshBounds<R>, RException> c)
   {
     return new KMeshBoundsCache<R>(c);
   }
 
   private KMeshBoundsCache(
-    final LRUCacheType<KMeshReadableType, KMeshBounds<R>, RException> c)
+    final LRUCacheType<KMeshReadableType, KMeshBounds<R>, KMeshBounds<R>, RException> c)
   {
     super(c);
   }

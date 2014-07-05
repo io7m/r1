@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -38,7 +38,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
  */
 
 @EqualityReference public final class KPostprocessorBlurDepthVariance implements
-KPostprocessorBlurDepthVarianceType
+  KPostprocessorBlurDepthVarianceType
 {
   private static final String NAME;
 
@@ -147,7 +147,7 @@ KPostprocessorBlurDepthVarianceType
     final KFramebufferDepthVarianceUsableType source,
     final KFramebufferDepthVarianceUsableType temporary,
     final KFramebufferDepthVarianceUsableType target)
-      throws JCGLException,
+    throws JCGLException,
       RException,
       JCacheException
   {
@@ -181,7 +181,7 @@ KPostprocessorBlurDepthVarianceType
     final KBlurParameters parameters,
     final KFramebufferDepthVarianceUsableType input,
     final KFramebufferDepthVarianceUsableType output)
-      throws RException
+    throws RException
   {
     try {
 
@@ -210,7 +210,7 @@ KPostprocessorBlurDepthVarianceType
           parameters,
           desc);
 
-      final BLUCacheReceiptType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType> receipt_a =
+      final BLUCacheReceiptType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceUsableType> receipt_a =
         this.depth_variance_cache.bluCacheGet(new_desc);
 
       try {
@@ -219,7 +219,7 @@ KPostprocessorBlurDepthVarianceType
           return;
         }
 
-        final BLUCacheReceiptType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType> receipt_b =
+        final BLUCacheReceiptType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceUsableType> receipt_b =
           this.depth_variance_cache.bluCacheGet(new_desc);
 
         try {

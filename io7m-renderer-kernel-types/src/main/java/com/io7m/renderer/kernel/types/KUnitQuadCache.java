@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -35,7 +35,8 @@ import com.io7m.renderer.types.RException;
  */
 
 @EqualityReference public final class KUnitQuadCache extends
-  LRUCacheAbstract<Unit, KUnitQuad, RException> implements KUnitQuadCacheType
+  LRUCacheAbstract<Unit, KUnitQuadUsableType, KUnitQuad, RException> implements
+  KUnitQuadCacheType
 {
   /**
    * Construct a trivial cache that shares a single {@link KUnitQuad} instance
@@ -54,7 +55,7 @@ import com.io7m.renderer.types.RException;
   public static
     <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
     KUnitQuadCacheType
-    newTrivial(
+    newCache(
       final G g,
       final LogUsableType log)
   {
@@ -65,7 +66,7 @@ import com.io7m.renderer.types.RException;
       KUnitQuad.newCacheLoader(g, log);
     final LRUCacheConfig config =
       LRUCacheConfig.empty().withMaximumCapacity(one);
-    final LRUCacheType<Unit, KUnitQuad, RException> c =
+    final LRUCacheType<Unit, KUnitQuadUsableType, KUnitQuad, RException> c =
       LRUCacheTrivial.newCache(loader, config);
 
     return new KUnitQuadCache(c);
@@ -80,13 +81,13 @@ import com.io7m.renderer.types.RException;
    */
 
   public static KUnitQuadCacheType wrap(
-    final LRUCacheType<Unit, KUnitQuad, RException> c)
+    final LRUCacheType<Unit, KUnitQuadUsableType, KUnitQuad, RException> c)
   {
     return new KUnitQuadCache(c);
   }
 
   private KUnitQuadCache(
-    final LRUCacheType<Unit, KUnitQuad, RException> in_cache)
+    final LRUCacheType<Unit, KUnitQuadUsableType, KUnitQuad, RException> in_cache)
   {
     super(in_cache);
   }

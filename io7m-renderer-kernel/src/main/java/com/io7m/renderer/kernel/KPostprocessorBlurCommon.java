@@ -36,8 +36,8 @@ import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KUnitQuad;
 import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
+import com.io7m.renderer.kernel.types.KUnitQuadUsableType;
 import com.io7m.renderer.types.RException;
 
 @EqualityReference final class KPostprocessorBlurCommon
@@ -79,7 +79,8 @@ import com.io7m.renderer.types.RException;
             RException
         {
           try {
-            final KUnitQuad quad = quad_cache.cacheGetLU(Unit.unit());
+            final KUnitQuadUsableType quad =
+              quad_cache.cacheGetLU(Unit.unit());
             final ArrayBufferUsableType array = quad.getArray();
             final IndexBufferUsableType indices = quad.getIndices();
 
@@ -154,7 +155,8 @@ import com.io7m.renderer.types.RException;
             RException
         {
           try {
-            final KUnitQuad quad = quad_cache.cacheGetLU(Unit.unit());
+            final KUnitQuadUsableType quad =
+              quad_cache.cacheGetLU(Unit.unit());
             final ArrayBufferUsableType array = quad.getArray();
             final IndexBufferUsableType indices = quad.getIndices();
 

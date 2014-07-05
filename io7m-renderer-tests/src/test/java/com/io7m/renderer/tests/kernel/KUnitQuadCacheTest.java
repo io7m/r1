@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,9 +25,9 @@ import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogUsableType;
-import com.io7m.renderer.kernel.types.KUnitQuad;
 import com.io7m.renderer.kernel.types.KUnitQuadCache;
 import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
+import com.io7m.renderer.kernel.types.KUnitQuadUsableType;
 import com.io7m.renderer.tests.FakeJCGLArrayAndIndexBuffers;
 import com.io7m.renderer.types.RException;
 
@@ -40,11 +40,11 @@ import com.io7m.renderer.types.RException;
     final LogUsableType log =
       Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests");
     final FakeJCGLArrayAndIndexBuffers g = new FakeJCGLArrayAndIndexBuffers();
-    final KUnitQuadCacheType c = KUnitQuadCache.newTrivial(g, log);
+    final KUnitQuadCacheType c = KUnitQuadCache.newCache(g, log);
 
-    final KUnitQuad kq0 = c.cacheGetLU(Unit.unit());
+    final KUnitQuadUsableType kq0 = c.cacheGetLU(Unit.unit());
     Assert.assertNotNull(kq0);
-    final KUnitQuad kq1 = c.cacheGetLU(Unit.unit());
+    final KUnitQuadUsableType kq1 = c.cacheGetLU(Unit.unit());
     Assert.assertNotNull(kq1);
 
     Assert.assertSame(kq0, kq1);

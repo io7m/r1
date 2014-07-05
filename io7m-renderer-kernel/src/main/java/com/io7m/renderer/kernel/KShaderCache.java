@@ -28,7 +28,7 @@ import com.io7m.renderer.types.RException;
  */
 
 @EqualityReference public final class KShaderCache extends
-  LRUCacheAbstract<String, KProgram, RException> implements
+  LRUCacheAbstract<String, KProgram, KProgram, RException> implements
   KShaderCacheDebugType,
   KShaderCacheDeferredGeometryType,
   KShaderCacheDeferredLightType,
@@ -43,14 +43,14 @@ import com.io7m.renderer.types.RException;
   /**
    * Wrap the given cache and expose a {@link KShaderCacheDebugType}
    * interface.
-   * 
+   *
    * @param c
    *          The cache
    * @return A cache
    */
 
   public static KShaderCacheDebugType wrapDebug(
-    final LRUCacheType<String, KProgram, RException> c)
+    final LRUCacheType<String, KProgram, KProgram, RException> c)
   {
     return new KShaderCache(c);
   }
@@ -58,14 +58,14 @@ import com.io7m.renderer.types.RException;
   /**
    * Wrap the given cache and expose a
    * {@link KShaderCacheDeferredGeometryType} interface.
-   * 
+   *
    * @param c
    *          The cache
    * @return A cache
    */
 
   public static KShaderCacheDeferredGeometryType wrapDeferredGeometry(
-    final LRUCacheType<String, KProgram, RException> c)
+    final LRUCacheType<String, KProgram, KProgram, RException> c)
   {
     return new KShaderCache(c);
   }
@@ -73,14 +73,14 @@ import com.io7m.renderer.types.RException;
   /**
    * Wrap the given cache and expose a
    * {@link KShaderCacheDeferredGeometryType} interface.
-   * 
+   *
    * @param c
    *          The cache
    * @return A cache
    */
 
   public static KShaderCacheDeferredLightType wrapDeferredLight(
-    final LRUCacheType<String, KProgram, RException> c)
+    final LRUCacheType<String, KProgram, KProgram, RException> c)
   {
     return new KShaderCache(c);
   }
@@ -88,14 +88,14 @@ import com.io7m.renderer.types.RException;
   /**
    * Wrap the given cache and expose a {@link KShaderCacheDepthType}
    * interface.
-   * 
+   *
    * @param c
    *          The cache
    * @return A cache
    */
 
   public static KShaderCacheDepthType wrapDepth(
-    final LRUCacheType<String, KProgram, RException> c)
+    final LRUCacheType<String, KProgram, KProgram, RException> c)
   {
     return new KShaderCache(c);
   }
@@ -103,14 +103,14 @@ import com.io7m.renderer.types.RException;
   /**
    * Wrap the given cache and expose a {@link KShaderCacheDepthVarianceType}
    * interface.
-   * 
+   *
    * @param c
    *          The cache
    * @return A cache
    */
 
   public static KShaderCacheDepthVarianceType wrapDepthVariance(
-    final LRUCacheType<String, KProgram, RException> c)
+    final LRUCacheType<String, KProgram, KProgram, RException> c)
   {
     return new KShaderCache(c);
   }
@@ -118,14 +118,14 @@ import com.io7m.renderer.types.RException;
   /**
    * Wrap the given cache and expose a
    * {@link KShaderCacheForwardOpaqueLitType} interface.
-   * 
+   *
    * @param c
    *          The cache
    * @return A cache
    */
 
   public static KShaderCacheForwardOpaqueLitType wrapForwardOpaqueLit(
-    final LRUCacheType<String, KProgram, RException> c)
+    final LRUCacheType<String, KProgram, KProgram, RException> c)
   {
     return new KShaderCache(c);
   }
@@ -133,14 +133,14 @@ import com.io7m.renderer.types.RException;
   /**
    * Wrap the given cache and expose a
    * {@link KShaderCacheForwardOpaqueUnlitType} interface.
-   * 
+   *
    * @param c
    *          The cache
    * @return A cache
    */
 
   public static KShaderCacheForwardOpaqueUnlitType wrapForwardOpaqueUnlit(
-    final LRUCacheType<String, KProgram, RException> c)
+    final LRUCacheType<String, KProgram, KProgram, RException> c)
   {
     return new KShaderCache(c);
   }
@@ -148,7 +148,7 @@ import com.io7m.renderer.types.RException;
   /**
    * Wrap the given cache and expose a
    * {@link KShaderCacheForwardTranslucentLitType} interface.
-   * 
+   *
    * @param c
    *          The cache
    * @return A cache
@@ -157,7 +157,7 @@ import com.io7m.renderer.types.RException;
   public static
     KShaderCacheForwardTranslucentLitType
     wrapForwardTranslucentLit(
-      final LRUCacheType<String, KProgram, RException> c)
+      final LRUCacheType<String, KProgram, KProgram, RException> c)
   {
     return new KShaderCache(c);
   }
@@ -165,7 +165,7 @@ import com.io7m.renderer.types.RException;
   /**
    * Wrap the given cache and expose a
    * {@link KShaderCacheForwardTranslucentUnlitType} interface.
-   * 
+   *
    * @param c
    *          The cache
    * @return A cache
@@ -174,7 +174,7 @@ import com.io7m.renderer.types.RException;
   public static
     KShaderCacheForwardTranslucentUnlitType
     wrapForwardTranslucentUnlit(
-      final LRUCacheType<String, KProgram, RException> c)
+      final LRUCacheType<String, KProgram, KProgram, RException> c)
   {
     return new KShaderCache(c);
   }
@@ -182,20 +182,20 @@ import com.io7m.renderer.types.RException;
   /**
    * Wrap the given cache and expose a {@link KShaderCachePostprocessingType}
    * interface.
-   * 
+   *
    * @param c
    *          The cache
    * @return A cache
    */
 
   public static KShaderCachePostprocessingType wrapPostprocessing(
-    final LRUCacheType<String, KProgram, RException> c)
+    final LRUCacheType<String, KProgram, KProgram, RException> c)
   {
     return new KShaderCache(c);
   }
 
   private KShaderCache(
-    final LRUCacheType<String, KProgram, RException> c)
+    final LRUCacheType<String, KProgram, KProgram, RException> c)
   {
     super(c);
   }

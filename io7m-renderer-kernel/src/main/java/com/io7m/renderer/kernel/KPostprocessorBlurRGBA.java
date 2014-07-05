@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -38,7 +38,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
  */
 
 @EqualityReference public final class KPostprocessorBlurRGBA implements
-KPostprocessorBlurRGBAType
+  KPostprocessorBlurRGBAType
 {
   private static final String NAME;
 
@@ -144,7 +144,7 @@ KPostprocessorBlurRGBAType
     final KFramebufferRGBAUsableType source,
     final KFramebufferRGBAUsableType temporary,
     final KFramebufferRGBAUsableType target)
-      throws JCGLException,
+    throws JCGLException,
       RException,
       JCacheException
   {
@@ -178,7 +178,7 @@ KPostprocessorBlurRGBAType
     final KBlurParameters parameters,
     final KFramebufferRGBAUsableType input,
     final KFramebufferRGBAUsableType output)
-      throws RException
+    throws RException
   {
     NullCheck.notNull(parameters, "Parameters");
     NullCheck.notNull(input, "Input");
@@ -208,7 +208,7 @@ KPostprocessorBlurRGBAType
         return;
       }
 
-      final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAType> receipt_a =
+      final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt_a =
         this.rgba_cache.bluCacheGet(new_desc);
 
       try {
@@ -217,7 +217,7 @@ KPostprocessorBlurRGBAType
           return;
         }
 
-        final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAType> receipt_b =
+        final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt_b =
           this.rgba_cache.bluCacheGet(new_desc);
 
         try {

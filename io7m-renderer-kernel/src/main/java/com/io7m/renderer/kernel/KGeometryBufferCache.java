@@ -27,26 +27,28 @@ import com.io7m.renderer.types.RException;
  */
 
 @EqualityReference public final class KGeometryBufferCache extends
-  BLUCacheAbstract<AreaInclusive, KGeometryBufferType, RException> implements
+  BLUCacheAbstract<AreaInclusive, KGeometryBufferUsableType, KGeometryBufferType, RException> implements
   KGeometryBufferCacheType
 {
   /**
    * Wrap the given cache and expose a {@link KGeometryBufferCacheType}
    * interface.
-   * 
+   *
    * @param c
    *          The cache
    * @return A cache
    */
 
-  public static KGeometryBufferCacheType wrap(
-    final BLUCacheType<AreaInclusive, KGeometryBufferType, RException> c)
+  public static
+    KGeometryBufferCacheType
+    wrap(
+      final BLUCacheType<AreaInclusive, KGeometryBufferUsableType, KGeometryBufferType, RException> c)
   {
     return new KGeometryBufferCache(c);
   }
 
   private KGeometryBufferCache(
-    final BLUCacheType<AreaInclusive, KGeometryBufferType, RException> c)
+    final BLUCacheType<AreaInclusive, KGeometryBufferUsableType, KGeometryBufferType, RException> c)
   {
     super(c);
   }
