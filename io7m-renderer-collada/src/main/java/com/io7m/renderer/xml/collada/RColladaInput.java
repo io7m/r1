@@ -25,11 +25,11 @@ import com.io7m.jranges.RangeCheck;
  * A COLLADA input specification.
  */
 
-@EqualityStructural public final class ColladaInput
+@EqualityStructural public final class RColladaInput
 {
   private final int             offset;
-  private final ColladaSemantic semantic;
-  private final ColladaSourceID source;
+  private final RColladaSemantic semantic;
+  private final RColladaSourceID source;
 
   /**
    * Construct an input.
@@ -42,9 +42,9 @@ import com.io7m.jranges.RangeCheck;
    *          The offset.
    */
 
-  public ColladaInput(
-    final ColladaSourceID in_source,
-    final ColladaSemantic in_semantic,
+  public RColladaInput(
+    final RColladaSourceID in_source,
+    final RColladaSemantic in_semantic,
     final int in_offset)
   {
     this.source = NullCheck.notNull(in_source, "Source");
@@ -69,7 +69,7 @@ import com.io7m.jranges.RangeCheck;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final ColladaInput other = (ColladaInput) obj;
+    final RColladaInput other = (RColladaInput) obj;
     if (this.offset != other.offset) {
       return false;
     }
@@ -95,7 +95,7 @@ import com.io7m.jranges.RangeCheck;
    * @return The semantic.
    */
 
-  public ColladaSemantic getSemantic()
+  public RColladaSemantic getSemantic()
   {
     return this.semantic;
   }
@@ -104,7 +104,7 @@ import com.io7m.jranges.RangeCheck;
    * @return The source.
    */
 
-  public ColladaSourceID getSource()
+  public RColladaSourceID getSource()
   {
     return this.source;
   }
@@ -122,7 +122,7 @@ import com.io7m.jranges.RangeCheck;
   @Override public String toString()
   {
     final StringBuilder builder = new StringBuilder();
-    builder.append("[ColladaInput ");
+    builder.append("[RColladaInput ");
     builder.append(this.source);
     builder.append(" ");
     builder.append(this.semantic);

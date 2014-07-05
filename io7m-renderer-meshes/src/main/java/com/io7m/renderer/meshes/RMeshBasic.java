@@ -35,12 +35,12 @@ import com.io7m.renderer.types.RVectorI3F;
  * The type of <i>basic</i> mutable meshes.
  * </p>
  * <p>
- * Basic meshes have vertices (of type {@link MeshBasicVertex} that have
+ * Basic meshes have vertices (of type {@link RMeshBasicVertex} that have
  * positions, normals, and UV coordinates.
  * </p>
  */
 
-@EqualityReference public final class MeshBasic
+@EqualityReference public final class RMeshBasic
 {
   /**
    * Construct a new empty mesh with the given name.
@@ -50,33 +50,33 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return A new mesh.
    */
 
-  public static MeshBasic newMesh(
+  public static RMeshBasic newMesh(
     final String name)
   {
-    return new MeshBasic(name);
+    return new RMeshBasic(name);
   }
 
   private final String                              name;
   private final List<RVectorI3F<RSpaceObjectType>>  normals;
   private final List<RVectorI3F<RSpaceObjectType>>  positions;
-  private final List<MeshTriangle>                  triangles;
+  private final List<RMeshTriangle>                  triangles;
   private final List<RVectorI2F<RSpaceTextureType>> uvs;
-  private final Map<MeshBasicVertex, Integer>       vertex_map;
-  private final List<MeshBasicVertex>               vertices;
+  private final Map<RMeshBasicVertex, Integer>       vertex_map;
+  private final List<RMeshBasicVertex>               vertices;
 
-  private MeshBasic(
+  private RMeshBasic(
     final String in_name)
   {
     this.name = NullCheck.notNull(in_name, "Mesh name");
     this.normals = new ArrayList<RVectorI3F<RSpaceObjectType>>();
     this.positions = new ArrayList<RVectorI3F<RSpaceObjectType>>();
     this.uvs = new ArrayList<RVectorI2F<RSpaceTextureType>>();
-    this.vertices = new ArrayList<MeshBasicVertex>();
-    this.vertex_map = new HashMap<MeshBasicVertex, Integer>();
-    this.triangles = new ArrayList<MeshTriangle>();
+    this.vertices = new ArrayList<RMeshBasicVertex>();
+    this.vertex_map = new HashMap<RMeshBasicVertex, Integer>();
+    this.triangles = new ArrayList<RMeshTriangle>();
   }
 
-  private MeshBasicVertex createVertex(
+  private RMeshBasicVertex createVertex(
     final int position,
     final int normal,
     final int uv)
@@ -93,7 +93,7 @@ import com.io7m.renderer.types.RVectorI3F;
       "Maximum normal");
     RangeCheck.checkLessEqual(uv, "UV", this.uvs.size() - 1, "Maximum UV");
 
-    final MeshBasicVertex v = new MeshBasicVertex(position, normal, uv);
+    final RMeshBasicVertex v = new RMeshBasicVertex(position, normal, uv);
     return v;
   }
 
@@ -193,7 +193,7 @@ import com.io7m.renderer.types.RVectorI3F;
       this.vertices.size() - 1,
       "Maximum vertex index");
 
-    this.triangles.add(new MeshTriangle(v0, v1, v2));
+    this.triangles.add(new RMeshTriangle(v0, v1, v2));
     return this.triangles.size() - 1;
   }
 
@@ -201,9 +201,9 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return A read-only view of the current list of triangles.
    */
 
-  public List<MeshTriangle> trianglesGet()
+  public List<RMeshTriangle> trianglesGet()
   {
-    final List<MeshTriangle> r = Collections.unmodifiableList(this.triangles);
+    final List<RMeshTriangle> r = Collections.unmodifiableList(this.triangles);
     assert r != null;
     return r;
   }
@@ -252,7 +252,7 @@ import com.io7m.renderer.types.RVectorI3F;
     final int normal,
     final int uv)
   {
-    final MeshBasicVertex v = this.createVertex(position, normal, uv);
+    final RMeshBasicVertex v = this.createVertex(position, normal, uv);
 
     if (this.vertex_map.containsKey(v)) {
       return this.vertex_map.get(v).intValue();
@@ -268,9 +268,9 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return A read-only view of the current list of vertices.
    */
 
-  public List<MeshBasicVertex> verticesGet()
+  public List<RMeshBasicVertex> verticesGet()
   {
-    final List<MeshBasicVertex> r =
+    final List<RMeshBasicVertex> r =
       Collections.unmodifiableList(this.vertices);
     assert r != null;
     return r;

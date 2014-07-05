@@ -20,13 +20,15 @@ import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.Nullable;
 
 /**
- * The type of vertices in {@link MeshBasic} meshes.
+ * The type of vertices in {@link RMeshTangents} meshes.
  */
 
-@EqualityStructural public final class MeshBasicVertex
+@EqualityStructural public final class RMeshTangentsVertex
 {
-  private final int normal;
   private final int position;
+  private final int normal;
+  private final int tangent;
+  private final int bitangent;
   private final int uv;
 
   /**
@@ -36,17 +38,25 @@ import com.io7m.jnull.Nullable;
    *          The index of the position vector.
    * @param in_normal
    *          The index of the normal vector.
+   * @param in_tangent
+   *          The index of the tangent vector.
+   * @param in_bitangent
+   *          The index of the bitangent vector.
    * @param in_uv
-   *          The index of the texture coordinate vector.
+   *          The index of the UV coordinate vector.
    */
 
-  public MeshBasicVertex(
+  public RMeshTangentsVertex(
     final int in_position,
     final int in_normal,
+    final int in_tangent,
+    final int in_bitangent,
     final int in_uv)
   {
     this.position = in_position;
     this.normal = in_normal;
+    this.tangent = in_tangent;
+    this.bitangent = in_bitangent;
     this.uv = in_uv;
   }
 
@@ -62,10 +72,21 @@ import com.io7m.jnull.Nullable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final MeshBasicVertex other = (MeshBasicVertex) obj;
-    return (this.normal == other.normal)
+    final RMeshTangentsVertex other = (RMeshTangentsVertex) obj;
+    return (this.bitangent == other.bitangent)
+      && (this.normal == other.normal)
       && (this.position == other.position)
+      && (this.tangent == other.tangent)
       && (this.uv == other.uv);
+  }
+
+  /**
+   * @return The index of the bitangent vector.
+   */
+
+  public int getBitangent()
+  {
+    return this.bitangent;
   }
 
   /**
@@ -87,6 +108,15 @@ import com.io7m.jnull.Nullable;
   }
 
   /**
+   * @return The index of the tangent vector.
+   */
+
+  public int getTangent()
+  {
+    return this.tangent;
+  }
+
+  /**
    * @return The index of the UV coordinate vector.
    */
 
@@ -99,8 +129,10 @@ import com.io7m.jnull.Nullable;
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + this.bitangent;
     result = (prime * result) + this.normal;
     result = (prime * result) + this.position;
+    result = (prime * result) + this.tangent;
     result = (prime * result) + this.uv;
     return result;
   }
@@ -108,10 +140,14 @@ import com.io7m.jnull.Nullable;
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[MeshBasicVertex normal=");
-    b.append(this.normal);
-    b.append(" position=");
+    b.append("[RMeshTangentsVertex position=");
     b.append(this.position);
+    b.append(" normal=");
+    b.append(this.normal);
+    b.append(" tangent=");
+    b.append(this.tangent);
+    b.append(" bitangent=");
+    b.append(this.bitangent);
     b.append(" uv=");
     b.append(this.uv);
     b.append("]");

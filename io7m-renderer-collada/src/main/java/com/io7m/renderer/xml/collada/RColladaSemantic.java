@@ -28,7 +28,7 @@ import com.io7m.jnull.NullCheck;
  * </p>
  */
 
-public enum ColladaSemantic
+public enum RColladaSemantic
 {
   // CHECKSTYLE_JAVADOC:OFF
   SEMANTIC_BINORMAL("BINORMAL"),
@@ -64,18 +64,18 @@ public enum ColladaSemantic
    * @return A semantic.
    */
 
-  public static ColladaSemantic fromName(
+  public static RColladaSemantic fromName(
     final String name)
   {
     NullCheck.notNull(name, "Name");
-    final ColladaSemantic c = ColladaSemantic.valueOf("SEMANTIC_" + name);
+    final RColladaSemantic c = RColladaSemantic.valueOf("SEMANTIC_" + name);
     NullCheck.notNull(c, "Resulting value");
     return c;
   }
 
   private final String name;
 
-  private ColladaSemantic(
+  private RColladaSemantic(
     final String in_name)
   {
     this.name = in_name;

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,36 +16,41 @@
 
 package com.io7m.renderer.xml.collada;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 /**
- * A COLLADA polygon.
+ * A unique identifier for a geometry in a COLLADA document.
  */
 
-@EqualityStructural public final class ColladaPoly
+@EqualityStructural public final class RColladaGeometryID implements
+Comparable<RColladaGeometryID>
 {
-  private final List<ColladaVertex> vertices;
+  private final String actual;
 
   /**
-   * Construct a polygon.
-   * 
-   * @param in_vertices
-   *          The polygon vertices.
+   * Construct an identifier.
+   *
+   * @param in_actual
+   *          The base name of the identifier.
    */
 
-  public ColladaPoly(
-    final List<ColladaVertex> in_vertices)
+  public RColladaGeometryID(
+    final String in_actual)
   {
-    this.vertices = NullCheck.notNullAll(in_vertices, "Vertices");
+    this.actual = NullCheck.notNull(in_actual, "Actual");
+  }
+
+  @Override public int compareTo(
+    final @Nullable RColladaGeometryID o)
+  {
+    assert o != null;
+    return this.actual.compareTo(o.actual);
   }
 
   @Override public boolean equals(
-    @Nullable final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -56,23 +61,26 @@ import com.io7m.jnull.Nullable;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final ColladaPoly other = (ColladaPoly) obj;
-    return this.vertices.equals(other.vertices);
+    final RColladaGeometryID other = (RColladaGeometryID) obj;
+    return this.actual.equals(other.actual);
   }
 
   /**
-   * @return A read-only view of the list of vertices.
+   * @return The actual identifier name as a string.
    */
 
-  public List<ColladaVertex> getVertices()
+  public String getActual()
   {
-    final List<ColladaVertex> r = Collections.unmodifiableList(this.vertices);
-    assert r != null;
-    return r;
+    return this.actual;
   }
 
   @Override public int hashCode()
   {
-    return this.vertices.hashCode();
+    return this.actual.hashCode();
+  }
+
+  @Override public String toString()
+  {
+    return this.actual;
   }
 }

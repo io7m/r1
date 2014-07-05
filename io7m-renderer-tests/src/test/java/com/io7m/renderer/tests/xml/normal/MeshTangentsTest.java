@@ -32,18 +32,18 @@ import com.io7m.jlog.LogType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NonNull;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.renderer.meshes.MeshBasic;
-import com.io7m.renderer.meshes.MeshTangents;
+import com.io7m.renderer.meshes.RMeshBasic;
+import com.io7m.renderer.meshes.RMeshTangents;
 import com.io7m.renderer.tests.xml.collada.ColladaDocumentTest;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.types.RVectorI4F;
-import com.io7m.renderer.xml.collada.ColladaDocument;
-import com.io7m.renderer.xml.collada.ColladaGeometry;
-import com.io7m.renderer.xml.collada.ColladaGeometryID;
+import com.io7m.renderer.xml.collada.RColladaDocument;
+import com.io7m.renderer.xml.collada.RColladaGeometry;
+import com.io7m.renderer.xml.collada.RColladaGeometryID;
 import com.io7m.renderer.xml.collada.tools.MeshBasicColladaImporter;
-import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
+import com.io7m.renderer.xml.rmx.RXMLExporter;
 
 @SuppressWarnings({ "boxing", "static-method" }) public class MeshTangentsTest
 {
@@ -55,21 +55,21 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
     return r;
   }
 
-  private static @NonNull MeshTangents makeAndCheckTangents(
+  private static @NonNull RMeshTangents makeAndCheckTangents(
     final @NonNull LogUsableType log,
     final @NonNull String file,
-    final @NonNull ColladaGeometryID geo)
+    final @NonNull RColladaGeometryID geo)
     throws RException
   {
     final Document doc = ColladaDocumentTest.getDocument(file);
-    final ColladaDocument cd = ColladaDocument.newDocument(doc, log);
-    final ColladaGeometry geom = cd.getGeometry(geo);
+    final RColladaDocument cd = RColladaDocument.newDocument(doc, log);
+    final RColladaGeometry geom = cd.getGeometry(geo);
     assert geom != null;
 
     final MeshBasicColladaImporter importer =
       new MeshBasicColladaImporter(log);
-    final MeshBasic m = importer.newMeshFromColladaGeometry(cd, geom);
-    final MeshTangents mt = MeshTangents.makeWithTangents(m);
+    final RMeshBasic m = importer.newMeshFromColladaGeometry(cd, geom);
+    final RMeshTangents mt = RMeshTangents.makeWithTangents(m);
 
     final List<RVectorI3F<RSpaceObjectType>> normals = mt.normalsGet();
     final List<RVectorI4F<RSpaceObjectType>> tangents = mt.tangentsGet();
@@ -149,12 +149,12 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
       IOException
   {
     final LogType log = ColladaDocumentTest.getLog();
-    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
-    final MeshTangents mt =
+    final RXMLExporter exporter = new RXMLExporter(log);
+    final RMeshTangents mt =
       MeshTangentsTest.makeAndCheckTangents(
         log,
         "tri.dae",
-        new ColladaGeometryID("tri_textured-mesh"));
+        new RColladaGeometryID("tri_textured-mesh"));
 
     final Element x = exporter.toXML(mt);
     MeshTangentsTest.dumpXML(x);
@@ -165,12 +165,12 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
       IOException
   {
     final LogType log = ColladaDocumentTest.getLog();
-    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
-    final MeshTangents mt =
+    final RXMLExporter exporter = new RXMLExporter(log);
+    final RMeshTangents mt =
       MeshTangentsTest.makeAndCheckTangents(
         log,
         "cube.dae",
-        new ColladaGeometryID("cube_textured_mesh-mesh"));
+        new RColladaGeometryID("cube_textured_mesh-mesh"));
 
     final Element x = exporter.toXML(mt);
     MeshTangentsTest.dumpXML(x);
@@ -181,12 +181,12 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
       IOException
   {
     final LogType log = ColladaDocumentTest.getLog();
-    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
-    final MeshTangents mt =
+    final RXMLExporter exporter = new RXMLExporter(log);
+    final RMeshTangents mt =
       MeshTangentsTest.makeAndCheckTangents(
         log,
         "cube_oneface.dae",
-        new ColladaGeometryID("Cube_001-mesh"));
+        new RColladaGeometryID("Cube_001-mesh"));
 
     final Element x = exporter.toXML(mt);
     MeshTangentsTest.dumpXML(x);
@@ -197,12 +197,12 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
       IOException
   {
     final LogType log = ColladaDocumentTest.getLog();
-    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
-    final MeshTangents mt =
+    final RXMLExporter exporter = new RXMLExporter(log);
+    final RMeshTangents mt =
       MeshTangentsTest.makeAndCheckTangents(
         log,
         "cylinder.dae",
-        new ColladaGeometryID("cylinder_textured-mesh"));
+        new RColladaGeometryID("cylinder_textured-mesh"));
 
     final Element x = exporter.toXML(mt);
     MeshTangentsTest.dumpXML(x);
@@ -213,12 +213,12 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
       IOException
   {
     final LogType log = ColladaDocumentTest.getLog();
-    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
-    final MeshTangents mt =
+    final RXMLExporter exporter = new RXMLExporter(log);
+    final RMeshTangents mt =
       MeshTangentsTest.makeAndCheckTangents(
         log,
         "monkeys.dae",
-        new ColladaGeometryID("monkey_textured_mesh-mesh"));
+        new RColladaGeometryID("monkey_textured_mesh-mesh"));
 
     final Element x = exporter.toXML(mt);
     MeshTangentsTest.dumpXML(x);
@@ -229,12 +229,12 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
       IOException
   {
     final LogType log = ColladaDocumentTest.getLog();
-    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
-    final MeshTangents mt =
+    final RXMLExporter exporter = new RXMLExporter(log);
+    final RMeshTangents mt =
       MeshTangentsTest.makeAndCheckTangents(
         log,
         "sphere.dae",
-        new ColladaGeometryID("sphere_16_8_textured-mesh"));
+        new RColladaGeometryID("sphere_16_8_textured-mesh"));
 
     final Element x = exporter.toXML(mt);
     MeshTangentsTest.dumpXML(x);
@@ -257,12 +257,12 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
       IOException
   {
     final LogType log = ColladaDocumentTest.getLog();
-    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
-    final MeshTangents mt =
+    final RXMLExporter exporter = new RXMLExporter(log);
+    final RMeshTangents mt =
       MeshTangentsTest.makeAndCheckTangents(
         log,
         "tri_LHRH.dae",
-        new ColladaGeometryID("tri_lh-mesh"));
+        new RColladaGeometryID("tri_lh-mesh"));
 
     final Element x = exporter.toXML(mt);
     MeshTangentsTest.dumpXML(x);
@@ -273,12 +273,12 @@ import com.io7m.renderer.xml.rmx.MeshTangentsRMXExporter;
       IOException
   {
     final LogType log = ColladaDocumentTest.getLog();
-    final MeshTangentsRMXExporter exporter = new MeshTangentsRMXExporter(log);
-    final MeshTangents mt =
+    final RXMLExporter exporter = new RXMLExporter(log);
+    final RMeshTangents mt =
       MeshTangentsTest.makeAndCheckTangents(
         log,
         "tri_LHRH.dae",
-        new ColladaGeometryID("tri_rh-mesh"));
+        new RColladaGeometryID("tri_rh-mesh"));
 
     final Element x = exporter.toXML(mt);
     MeshTangentsTest.dumpXML(x);

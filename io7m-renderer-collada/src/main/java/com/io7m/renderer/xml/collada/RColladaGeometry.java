@@ -28,17 +28,17 @@ import com.io7m.jnull.NullCheck;
  * </p>
  */
 
-@EqualityReference public abstract class ColladaGeometry
+@EqualityReference public abstract class RColladaGeometry
 {
   /**
    * A polygon mesh.
    */
 
   @EqualityReference public static final class ColladaMesh extends
-    ColladaGeometry
+    RColladaGeometry
   {
-    private final ColladaPolylist            polylist;
-    private final SortedSet<ColladaSourceID> source_ids;
+    private final RColladaPolylist            polylist;
+    private final SortedSet<RColladaSourceID> source_ids;
 
     /**
      * Construct a polygon mesh.
@@ -56,11 +56,11 @@ import com.io7m.jnull.NullCheck;
      */
 
     @SuppressWarnings("synthetic-access") public ColladaMesh(
-      final ColladaGeometryID id,
-      final ColladaDocument document,
-      final SortedSet<ColladaSourceID> in_source_ids,
-      final ColladaPolylist p,
-      final ColladaAxis axis)
+      final RColladaGeometryID id,
+      final RColladaDocument document,
+      final SortedSet<RColladaSourceID> in_source_ids,
+      final RColladaPolylist p,
+      final RColladaAxis axis)
     {
       super(Type.GEOMETRY_MESH, document, id, axis);
       this.source_ids = NullCheck.notNull(in_source_ids, "Source IDs");
@@ -71,7 +71,7 @@ import com.io7m.jnull.NullCheck;
      * @return The list of polygons.
      */
 
-    public ColladaPolylist getPolylist()
+    public RColladaPolylist getPolylist()
     {
       return this.polylist;
     }
@@ -80,9 +80,9 @@ import com.io7m.jnull.NullCheck;
      * @return The set of source IDs.
      */
 
-    public SortedSet<ColladaSourceID> getSourceIDs()
+    public SortedSet<RColladaSourceID> getSourceIDs()
     {
-      final SortedSet<ColladaSourceID> r =
+      final SortedSet<RColladaSourceID> r =
         Collections.unmodifiableSortedSet(this.source_ids);
       assert r != null;
       return r;
@@ -117,16 +117,16 @@ import com.io7m.jnull.NullCheck;
     GEOMETRY_MESH
   }
 
-  private final ColladaAxis       axis;
-  private final ColladaDocument   document;
-  private final ColladaGeometryID id;
+  private final RColladaAxis       axis;
+  private final RColladaDocument   document;
+  private final RColladaGeometryID id;
   private final Type              type;
 
-  private ColladaGeometry(
+  private RColladaGeometry(
     final Type in_type,
-    final ColladaDocument in_document,
-    final ColladaGeometryID in_id,
-    final ColladaAxis in_axis)
+    final RColladaDocument in_document,
+    final RColladaGeometryID in_id,
+    final RColladaAxis in_axis)
   {
     this.document = NullCheck.notNull(in_document, "Document");
     this.type = NullCheck.notNull(in_type, "Type");
@@ -138,7 +138,7 @@ import com.io7m.jnull.NullCheck;
    * @return The axis type.
    */
 
-  public ColladaAxis getAxis()
+  public RColladaAxis getAxis()
   {
     return this.axis;
   }
@@ -147,7 +147,7 @@ import com.io7m.jnull.NullCheck;
    * @return The COLLADA document.
    */
 
-  public ColladaDocument getDocument()
+  public RColladaDocument getDocument()
   {
     return this.document;
   }
@@ -156,7 +156,7 @@ import com.io7m.jnull.NullCheck;
    * @return The geometry ID.
    */
 
-  public ColladaGeometryID getID()
+  public RColladaGeometryID getID()
   {
     return this.id;
   }

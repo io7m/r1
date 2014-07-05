@@ -29,7 +29,7 @@ import com.io7m.renderer.types.RVectorI4F;
  *          The type of exceptions raised.
  */
 
-public interface MeshParserEventsType<E extends Throwable>
+public interface RMeshParserEventsType<E extends Throwable>
 {
   /**
    * Called upon errors.

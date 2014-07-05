@@ -42,7 +42,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
  * </ul>
  */
 
-public enum ColladaAxis
+public enum RColladaAxis
 {
   /**
    * Positive X faces up, negative Y faces right, and positive Z faces towards
@@ -98,9 +98,9 @@ public enum ColladaAxis
 
   public static <R extends RSpaceType> RVectorI3F<R> convertAxes(
     final MatrixM3x3F matrix,
-    final ColladaAxis source_axes,
+    final RColladaAxis source_axes,
     final RVectorReadable3FType<R> source,
-    final ColladaAxis dest_axes)
+    final RColladaAxis dest_axes)
   {
     switch (source_axes) {
       case COLLADA_AXIS_X_UP:
@@ -117,7 +117,7 @@ public enum ColladaAxis
             MatrixM3x3F.setIdentity(matrix);
             MatrixM3x3F.makeRotation(
               Math.toRadians(90),
-              ColladaAxis.AXIS_Z,
+              RColladaAxis.AXIS_Z,
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
@@ -130,7 +130,7 @@ public enum ColladaAxis
             MatrixM3x3F.setIdentity(matrix);
             MatrixM3x3F.makeRotation(
               Math.toRadians(-90),
-              ColladaAxis.AXIS_Y,
+              RColladaAxis.AXIS_Y,
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
@@ -149,7 +149,7 @@ public enum ColladaAxis
             MatrixM3x3F.setIdentity(matrix);
             MatrixM3x3F.makeRotation(
               Math.toRadians(-90),
-              ColladaAxis.AXIS_Z,
+              RColladaAxis.AXIS_Z,
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
@@ -166,7 +166,7 @@ public enum ColladaAxis
             MatrixM3x3F.setIdentity(matrix);
             MatrixM3x3F.makeRotation(
               Math.toRadians(90),
-              ColladaAxis.AXIS_X,
+              RColladaAxis.AXIS_X,
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
@@ -185,7 +185,7 @@ public enum ColladaAxis
             MatrixM3x3F.setIdentity(matrix);
             MatrixM3x3F.makeRotation(
               Math.toRadians(90),
-              ColladaAxis.AXIS_Y,
+              RColladaAxis.AXIS_Y,
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
@@ -198,7 +198,7 @@ public enum ColladaAxis
             MatrixM3x3F.setIdentity(matrix);
             MatrixM3x3F.makeRotation(
               Math.toRadians(-90),
-              ColladaAxis.AXIS_X,
+              RColladaAxis.AXIS_X,
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);

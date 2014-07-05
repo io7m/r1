@@ -38,21 +38,21 @@ import com.io7m.renderer.types.RVectorM3F;
  * </p>
  */
 
-@EqualityReference public final class MeshTangents
+@EqualityReference public final class RMeshTangents
 {
-  private static MeshTangents copyMesh(
-    final MeshBasic m)
+  private static RMeshTangents copyMesh(
+    final RMeshBasic m)
   {
-    final MeshTangents mt =
-      new MeshTangents(
+    final RMeshTangents mt =
+      new RMeshTangents(
         m.normalsGet(),
         m.positionsGet(),
         m.uvsGet(),
         m.getName());
 
-    for (final MeshBasicVertex vb : m.verticesGet()) {
-      final MeshTangentsVertex vt =
-        new MeshTangentsVertex(
+    for (final RMeshBasicVertex vb : m.verticesGet()) {
+      final RMeshTangentsVertex vt =
+        new RMeshTangentsVertex(
           vb.getPosition(),
           vb.getNormal(),
           vb.getNormal(),
@@ -61,9 +61,9 @@ import com.io7m.renderer.types.RVectorM3F;
       mt.vertices.add(vt);
     }
 
-    for (final MeshTriangle bt : m.trianglesGet()) {
-      final MeshTriangle tt =
-        new MeshTriangle(bt.getV0(), bt.getV1(), bt.getV2());
+    for (final RMeshTriangle bt : m.trianglesGet()) {
+      final RMeshTriangle tt =
+        new RMeshTriangle(bt.getV0(), bt.getV1(), bt.getV2());
       mt.triangles.add(tt);
     }
 
@@ -79,19 +79,19 @@ import com.io7m.renderer.types.RVectorM3F;
   }
 
   /**
-   * Generate tangent and bitangent vectors from the given {@link MeshBasic}.
+   * Generate tangent and bitangent vectors from the given {@link RMeshBasic}.
    * 
    * @param m
    *          The basic mesh.
    * @return The same mesh with generated tangent and bitangent vectors.
    */
 
-  public static MeshTangents makeWithTangents(
-    final MeshBasic m)
+  public static RMeshTangents makeWithTangents(
+    final RMeshBasic m)
   {
     NullCheck.notNull(m, "Mesh");
 
-    final MeshTangents mt = MeshTangents.copyMesh(m);
+    final RMeshTangents mt = RMeshTangents.copyMesh(m);
     final RVectorM3F<RSpaceObjectType> tangent =
       new RVectorM3F<RSpaceObjectType>();
     final RVectorM3F<RSpaceObjectType> bitangent =
@@ -101,10 +101,10 @@ import com.io7m.renderer.types.RVectorM3F;
      * Generate tangents and bitangents, accumulating the resulting vectors.
      */
 
-    for (final MeshTriangle triangle : mt.triangles) {
-      final MeshTangentsVertex v0 = mt.vertices.get(triangle.getV0());
-      final MeshTangentsVertex v1 = mt.vertices.get(triangle.getV1());
-      final MeshTangentsVertex v2 = mt.vertices.get(triangle.getV2());
+    for (final RMeshTriangle triangle : mt.triangles) {
+      final RMeshTangentsVertex v0 = mt.vertices.get(triangle.getV0());
+      final RMeshTangentsVertex v1 = mt.vertices.get(triangle.getV1());
+      final RMeshTangentsVertex v2 = mt.vertices.get(triangle.getV2());
 
       final RVectorI3F<RSpaceObjectType> v0p =
         mt.positions.get(v0.getPosition());
@@ -272,11 +272,11 @@ import com.io7m.renderer.types.RVectorM3F;
   private final List<RVectorI3F<RSpaceObjectType>>  bitangents;
   private final List<RVectorI3F<RSpaceObjectType>>  positions;
   private final List<RVectorI2F<RSpaceTextureType>> uvs;
-  private final List<MeshTangentsVertex>            vertices;
-  private final List<MeshTriangle>                  triangles;
+  private final List<RMeshTangentsVertex>            vertices;
+  private final List<RMeshTriangle>                  triangles;
   private final String                              name;
 
-  private MeshTangents(
+  private RMeshTangents(
     final List<RVectorI3F<RSpaceObjectType>> in_normals,
     final List<RVectorI3F<RSpaceObjectType>> in_positions,
     final List<RVectorI2F<RSpaceTextureType>> in_uvs,
@@ -310,8 +310,8 @@ import com.io7m.renderer.types.RVectorM3F;
       this.bitangents.add(new RVectorI3F<RSpaceObjectType>(0, 0, 0));
     }
 
-    this.vertices = new ArrayList<MeshTangentsVertex>();
-    this.triangles = new ArrayList<MeshTriangle>();
+    this.vertices = new ArrayList<RMeshTangentsVertex>();
+    this.triangles = new ArrayList<RMeshTriangle>();
   }
 
   /**
@@ -375,9 +375,9 @@ import com.io7m.renderer.types.RVectorM3F;
    * @return A read-only view of the current list of triangles.
    */
 
-  public List<MeshTriangle> trianglesGet()
+  public List<RMeshTriangle> trianglesGet()
   {
-    final List<MeshTriangle> r = Collections.unmodifiableList(this.triangles);
+    final List<RMeshTriangle> r = Collections.unmodifiableList(this.triangles);
     assert r != null;
     return r;
   }
@@ -398,9 +398,9 @@ import com.io7m.renderer.types.RVectorM3F;
    * @return A read-only view of the current list of vertices.
    */
 
-  public List<MeshTangentsVertex> verticesGet()
+  public List<RMeshTangentsVertex> verticesGet()
   {
-    final List<MeshTangentsVertex> r =
+    final List<RMeshTangentsVertex> r =
       Collections.unmodifiableList(this.vertices);
     assert r != null;
     return r;
