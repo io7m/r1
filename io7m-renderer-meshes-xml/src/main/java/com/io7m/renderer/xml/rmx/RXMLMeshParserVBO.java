@@ -20,324 +20,32 @@ import nu.xom.Document;
 import nu.xom.Element;
 
 import com.io7m.jcanephora.ArrayBufferType;
-import com.io7m.jcanephora.ArrayBufferUpdateUnmapped;
-import com.io7m.jcanephora.ArrayBufferUpdateUnmappedType;
-import com.io7m.jcanephora.ArrayDescriptor;
-import com.io7m.jcanephora.ArrayDescriptorBuilderType;
-import com.io7m.jcanephora.CursorType;
-import com.io7m.jcanephora.CursorWritable2fType;
-import com.io7m.jcanephora.CursorWritable3fType;
-import com.io7m.jcanephora.CursorWritable4fType;
-import com.io7m.jcanephora.CursorWritableIndexType;
 import com.io7m.jcanephora.IndexBufferType;
-import com.io7m.jcanephora.IndexBufferUpdateUnmapped;
-import com.io7m.jcanephora.IndexBufferUpdateUnmappedType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLExceptionAttributeDuplicate;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLArrayBuffersType;
 import com.io7m.jcanephora.api.JCGLIndexBuffersType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KMeshAttributes;
+import com.io7m.renderer.meshes.MeshParserEventsVBO;
 import com.io7m.renderer.types.RSpaceObjectType;
-import com.io7m.renderer.types.RSpaceTextureType;
-import com.io7m.renderer.types.RVectorI2F;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.types.RVectorI4F;
 import com.io7m.renderer.types.RXMLException;
 
 /**
- * An implementation of the {@link RXMLMeshParserEventsType} interface that
- * produces an array buffer and index buffer whilst parsing.
- * 
+ * The glue between a {@link RXMLMeshParser} and a {@link MeshParserEventsVBO}
+ * for producing vertex buffer objects directly from XML meshes.
+ *
  * @param <G>
- *          The type of OpenGL interfaces.
+ *          The precise type of required OpenGL interfaces
  */
 
-@SuppressWarnings("synthetic-access") @EqualityReference public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
+@EqualityReference public final class RXMLMeshParserVBO<G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
 {
-  @EqualityReference private class Events implements
-    RXMLMeshParserEventsType<JCGLException>
-  {
-    private @Nullable ArrayBufferUpdateUnmappedType array_data;
-    private @Nullable CursorWritableIndexType       cursor_index;
-    private @Nullable CursorWritable3fType          cursor_normal;
-    private @Nullable CursorWritable3fType          cursor_pos;
-    private @Nullable CursorWritable4fType          cursor_tangent4f;
-    private @Nullable CursorWritable2fType          cursor_uv;
-    private final G                                 gl;
-    private @Nullable IndexBufferUpdateUnmappedType indices_data;
-    private final ArrayDescriptor                   type;
-    private final UsageHint                         usage;
-
-    public Events(
-      final G g,
-      final UsageHint hint)
-    {
-      this.gl = NullCheck.notNull(g, "OpenGL interface");
-      this.usage = NullCheck.notNull(hint, "Usage hint");
-
-      try {
-        final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
-        b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
-        b.addAttribute(KMeshAttributes.ATTRIBUTE_NORMAL);
-        b.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
-        b.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
-        this.type = b.build();
-      } catch (final JCGLExceptionAttributeDuplicate e) {
-        throw new UnreachableCodeException(e);
-      }
-    }
-
-    @Override public void eventError(
-      final RXMLException e)
-      throws JCGLException
-    {
-      this.checkParsing();
-      RXMLMeshParserVBO.this.error = true;
-
-      final ArrayBufferType a = RXMLMeshParserVBO.this.array;
-      if (a != null) {
-        this.gl.arrayBufferDelete(a);
-      }
-      final IndexBufferType i = RXMLMeshParserVBO.this.indices;
-      if (i != null) {
-        this.gl.indexBufferDelete(i);
-      }
-    }
-
-    private void checkParsing()
-    {
-      if (RXMLMeshParserVBO.this.parsing == false) {
-        throw new IllegalStateException(
-          "Parsing is not currently in progress");
-      }
-    }
-
-    @Override public void eventMeshEnded()
-      throws JCGLException
-    {
-      this.checkParsing();
-
-      RXMLMeshParserVBO.this.parsing = false;
-      RXMLMeshParserVBO.this.success = !RXMLMeshParserVBO.this.error;
-    }
-
-    @Override public void eventMeshName(
-      final String mesh_name)
-      throws JCGLException
-    {
-      this.checkParsing();
-      RXMLMeshParserVBO.this.name = mesh_name;
-    }
-
-    @Override public void eventMeshStarted()
-      throws JCGLException
-    {
-      if (RXMLMeshParserVBO.this.parsing != false) {
-        throw new IllegalStateException("Parsing is already in progress");
-      }
-
-      RXMLMeshParserVBO.this.parsing = true;
-    }
-
-    @Override public void eventMeshTriangle(
-      final int index,
-      final int v0,
-      final int v1,
-      final int v2)
-    {
-      this.checkParsing();
-
-      final CursorWritableIndexType ci = this.cursor_index;
-      assert ci != null;
-      ci.putIndex(v0);
-      ci.putIndex(v1);
-      ci.putIndex(v2);
-    }
-
-    @Override public void eventMeshTrianglesEnded()
-      throws JCGLException
-    {
-      this.checkParsing();
-
-      final CursorWritableIndexType ci = this.cursor_index;
-      assert ci != null;
-      if (ci.isValid()) {
-        throw new IllegalStateException(
-          "Index buffer has not been completely assigned");
-      }
-
-      final IndexBufferUpdateUnmappedType idata = this.indices_data;
-      assert idata != null;
-      this.gl.indexBufferUpdate(idata);
-    }
-
-    @Override public void eventMeshTrianglesStarted(
-      final int count)
-      throws JCGLException
-    {
-      this.checkParsing();
-
-      final ArrayBufferType a = RXMLMeshParserVBO.this.array;
-      assert a != null;
-
-      final IndexBufferType i =
-        this.gl
-          .indexBufferAllocate(a, count * 3, UsageHint.USAGE_STATIC_DRAW);
-      assert i != null;
-
-      RXMLMeshParserVBO.this.indices = i;
-      this.indices_data = IndexBufferUpdateUnmapped.newReplacing(i);
-      this.cursor_index = this.indices_data.getCursor();
-    }
-
-    @Override public void eventMeshVertexEnded(
-      final int index)
-    {
-      this.checkParsing();
-    }
-
-    @Override public void eventMeshVertexNormal(
-      final int index,
-      final RVectorI3F<RSpaceObjectType> normal)
-    {
-      this.checkParsing();
-
-      final CursorWritable3fType c = this.cursor_normal;
-      assert c != null;
-      c.put3f(normal.getXF(), normal.getYF(), normal.getZF());
-    }
-
-    @Override public void eventMeshVertexPosition(
-      final int index,
-      final RVectorI3F<RSpaceObjectType> position)
-    {
-      this.checkParsing();
-
-      final CursorWritable3fType c = this.cursor_pos;
-      assert c != null;
-      c.put3f(position.getXF(), position.getYF(), position.getZF());
-    }
-
-    @Override public void eventMeshVertexStarted(
-      final int index)
-    {
-      this.checkParsing();
-    }
-
-    @Override public void eventMeshVertexTangent4f(
-      final int index,
-      final RVectorI4F<RSpaceObjectType> tangent)
-    {
-      this.checkParsing();
-
-      final CursorWritable4fType c = this.cursor_tangent4f;
-      assert c != null;
-      c.put4f(
-        tangent.getXF(),
-        tangent.getYF(),
-        tangent.getZF(),
-        tangent.getWF());
-    }
-
-    @Override public void eventMeshVertexUV(
-      final int index,
-      final RVectorI2F<RSpaceTextureType> uv)
-    {
-      this.checkParsing();
-
-      final CursorWritable2fType c = this.cursor_uv;
-      assert c != null;
-      c.put2f(uv.getXF(), uv.getYF());
-    }
-
-    @Override public void eventMeshVerticesEnded(
-      final RVectorI3F<RSpaceObjectType> lower,
-      final RVectorI3F<RSpaceObjectType> upper)
-      throws JCGLException
-    {
-      this.checkParsing();
-
-      final CursorWritable3fType cpos = this.cursor_pos;
-      if (cpos != null) {
-        this.checkCursorCompletelyAssigned(cpos, "Position attribute");
-      }
-      final CursorWritable3fType cnor = this.cursor_normal;
-      if (cnor != null) {
-        this.checkCursorCompletelyAssigned(cnor, "Normal attribute");
-      }
-      final CursorWritable4fType ctan4 = this.cursor_tangent4f;
-      if (ctan4 != null) {
-        this.checkCursorCompletelyAssigned(ctan4, "Tangent4 attribute");
-      }
-      final CursorWritable2fType cuv = this.cursor_uv;
-      if (cuv != null) {
-        this.checkCursorCompletelyAssigned(cuv, "UV attribute attribute");
-      }
-
-      final ArrayBufferType a = RXMLMeshParserVBO.this.array;
-      assert a != null;
-
-      this.gl.arrayBufferBind(a);
-      try {
-        final ArrayBufferUpdateUnmappedType ad = this.array_data;
-        assert ad != null;
-        this.gl.arrayBufferUpdate(ad);
-      } finally {
-        this.gl.arrayBufferUnbind();
-      }
-
-      RXMLMeshParserVBO.this.bounds_lower = lower;
-      RXMLMeshParserVBO.this.bounds_upper = upper;
-    }
-
-    private void checkCursorCompletelyAssigned(
-      final CursorType cpos,
-      final String c_name)
-    {
-      if (cpos.isValid()) {
-        throw new IllegalStateException("Cursor '"
-          + c_name
-          + "' not completely assigned");
-      }
-    }
-
-    @Override public void eventMeshVerticesStarted(
-      final int count)
-      throws JCGLException
-    {
-      this.checkParsing();
-
-      final ArrayDescriptor at = this.type;
-      assert at != null;
-
-      final ArrayBufferType a =
-        this.gl.arrayBufferAllocate(count, at, this.usage);
-      final ArrayBufferUpdateUnmappedType ad =
-        ArrayBufferUpdateUnmapped.newUpdateReplacingAll(a);
-
-      this.array_data = ad;
-      RXMLMeshParserVBO.this.array = a;
-
-      this.cursor_pos =
-        this.array_data.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION
-          .getName());
-      this.cursor_normal =
-        ad.getCursor3f(KMeshAttributes.ATTRIBUTE_NORMAL.getName());
-      this.cursor_uv = ad.getCursor2f(KMeshAttributes.ATTRIBUTE_UV.getName());
-      this.cursor_tangent4f =
-        ad.getCursor4f(KMeshAttributes.ATTRIBUTE_TANGENT4.getName());
-    }
-  }
-
   /**
    * Construct a parser for the given document, which is expected to be
    * schema-valid.
-   * 
+   *
    * @param <G>
    *          The precise type of OpenGL interfaces.
    * @param d
@@ -374,7 +82,7 @@ import com.io7m.renderer.types.RXMLException;
   /**
    * Construct a parser for the given element, which is expected to be
    * schema-valid.
-   * 
+   *
    * @param <G>
    *          The precise type of OpenGL interfaces.
    * @param e
@@ -406,16 +114,8 @@ import com.io7m.renderer.types.RXMLException;
     return new RXMLMeshParserVBO<G>(g, hint, e);
   }
 
-  private @Nullable ArrayBufferType              array;
-  private @Nullable RVectorI3F<RSpaceObjectType> bounds_lower;
-  private @Nullable RVectorI3F<RSpaceObjectType> bounds_upper;
-  private boolean                                error;
-  private final Events                           events;
-  private @Nullable IndexBufferType              indices;
-  private @Nullable String                       name;
-  private final RXMLMeshParser<JCGLException>    parser;
-  private boolean                                parsing;
-  private boolean                                success;
+  private final MeshParserEventsVBO<G>                                    events;
+  @SuppressWarnings("unused") private final RXMLMeshParser<JCGLException> parser;
 
   private RXMLMeshParserVBO(
     final G g,
@@ -424,10 +124,7 @@ import com.io7m.renderer.types.RXMLException;
     throws JCGLException,
       RXMLException
   {
-    this.parsing = false;
-    this.success = false;
-    this.error = false;
-    this.events = new Events(g, hint);
+    this.events = MeshParserEventsVBO.newEvents(g, hint);
     this.parser = RXMLMeshParser.parseFromElement(e, this.events);
   }
 
@@ -437,10 +134,7 @@ import com.io7m.renderer.types.RXMLException;
 
   public ArrayBufferType getArrayBuffer()
   {
-    this.checkParsingSuccessful();
-    final ArrayBufferType r = this.array;
-    assert r != null;
-    return r;
+    return this.events.getArray();
   }
 
   /**
@@ -449,10 +143,7 @@ import com.io7m.renderer.types.RXMLException;
 
   public RVectorI3F<RSpaceObjectType> getBoundsLower()
   {
-    this.checkParsingSuccessful();
-    final RVectorI3F<RSpaceObjectType> r = this.bounds_lower;
-    assert r != null;
-    return r;
+    return this.events.getBoundsLower();
   }
 
   /**
@@ -461,10 +152,7 @@ import com.io7m.renderer.types.RXMLException;
 
   public RVectorI3F<RSpaceObjectType> getBoundsUpper()
   {
-    this.checkParsingSuccessful();
-    final RVectorI3F<RSpaceObjectType> r = this.bounds_upper;
-    assert r != null;
-    return r;
+    return this.events.getBoundsUpper();
   }
 
   /**
@@ -473,17 +161,7 @@ import com.io7m.renderer.types.RXMLException;
 
   public IndexBufferType getIndexBuffer()
   {
-    this.checkParsingSuccessful();
-    final IndexBufferType r = this.indices;
-    assert r != null;
-    return r;
-  }
-
-  private void checkParsingSuccessful()
-  {
-    if (this.success == false) {
-      throw new IllegalStateException("Parsing was not successful");
-    }
+    return this.events.getIndices();
   }
 
   /**
@@ -492,9 +170,6 @@ import com.io7m.renderer.types.RXMLException;
 
   public String getName()
   {
-    this.checkParsingSuccessful();
-    final String r = this.name;
-    assert r != null;
-    return r;
+    return this.events.getName();
   }
 }

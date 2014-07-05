@@ -288,39 +288,6 @@
           </execution>
         </executions>
       </plugin>
-
-      <!-- Produce tools onejar -->
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.4</version>
-        <executions>
-          <execution>
-            <id>make-collada-to-rmx-onejar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <archive>
-                <manifestEntries>
-                  <Specification-Title>${project.name}</Specification-Title>
-                  <Specification-Version>${project.version}</Specification-Version>
-                  <Specification-Vendor>io7m.com</Specification-Vendor>
-                  <Implementation-Title>${project.name}</Implementation-Title>
-                  <Implementation-Version>${project.version}</Implementation-Version>
-                  <Implementation-Vendor>io7m.com</Implementation-Vendor>
-                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
-                  <Built-By>io7m</Built-By>
-                  <Main-Class>com.io7m.renderer.xml.tools.ColladaToRMX</Main-Class>
-                </manifestEntries>
-              </archive>
-              <descriptors>
-                <descriptor>src/main/assembly/collada-to-rmx.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
 
     <!-- Allow deployment over ssh -->

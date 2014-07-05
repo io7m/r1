@@ -74,6 +74,11 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-kernel-types</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-types</artifactId>
       <version>${project.version}</version>
     </dependency>

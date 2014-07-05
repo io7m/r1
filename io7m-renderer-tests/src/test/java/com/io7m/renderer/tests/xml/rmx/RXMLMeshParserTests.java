@@ -28,6 +28,7 @@ import org.junit.Test;
 import com.io7m.jequality.AlmostEqualFloat.ContextRelative;
 import com.io7m.jnull.NonNull;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.renderer.meshes.MeshParserEventsType;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
@@ -37,14 +38,13 @@ import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.rmx.RXMLMeshAttribute;
 import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
 import com.io7m.renderer.xml.rmx.RXMLMeshParser;
-import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
 
 @SuppressWarnings("synthetic-access") public final class RXMLMeshParserTests
 {
-  class Show implements RXMLMeshParserEventsType<Throwable>
+  class Show implements MeshParserEventsType<Throwable>
   {
     @Override public void eventError(
-      final RXMLException e)
+      final Exception e)
       throws Throwable
     {
       // Nothing
@@ -266,7 +266,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     s.close();
   }
 
-  static class Checked implements RXMLMeshParserEventsType<Throwable>
+  static class Checked implements MeshParserEventsType<Throwable>
   {
     private boolean                                     mesh_ended;
     private boolean                                     mesh_started;
@@ -304,7 +304,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventError(
-      final RXMLException e)
+      final Exception e)
       throws Throwable
     {
       throw new AssertionError(e);
