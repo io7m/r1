@@ -42,7 +42,7 @@ import com.io7m.renderer.types.RVectorI4F;
 import com.io7m.renderer.xml.collada.RColladaDocument;
 import com.io7m.renderer.xml.collada.RColladaGeometry;
 import com.io7m.renderer.xml.collada.RColladaGeometryID;
-import com.io7m.renderer.xml.collada.tools.MeshBasicColladaImporter;
+import com.io7m.renderer.xml.collada.tools.RColladaToMeshBasic;
 import com.io7m.renderer.xml.rmx.RXMLExporter;
 
 @SuppressWarnings({ "boxing", "static-method" }) public class MeshTangentsTest
@@ -66,8 +66,8 @@ import com.io7m.renderer.xml.rmx.RXMLExporter;
     final RColladaGeometry geom = cd.getGeometry(geo);
     assert geom != null;
 
-    final MeshBasicColladaImporter importer =
-      new MeshBasicColladaImporter(log);
+    final RColladaToMeshBasic importer =
+      new RColladaToMeshBasic(log);
     final RMeshBasic m = importer.newMeshFromColladaGeometry(cd, geom);
     final RMeshTangents mt = RMeshTangents.makeWithTangents(m);
 

@@ -64,9 +64,9 @@ import com.io7m.renderer.xml.rmx.RXMLExporter;
  * The main program for converting COLLADA meshes to RMX meshes.
  */
 
-@EqualityReference public final class ColladaToRMX
+@EqualityReference public final class RColladaToRMX
 {
-  private ColladaToRMX()
+  private RColladaToRMX()
   {
     throw new UnreachableCodeException();
   }
@@ -108,18 +108,18 @@ import com.io7m.renderer.xml.rmx.RXMLExporter;
   public static void main(
     final String[] args)
   {
-    final Options o = ColladaToRMX.makeOptions();
+    final Options o = RColladaToRMX.makeOptions();
 
     try {
       final PosixParser parser = new PosixParser();
       final CommandLine line = parser.parse(o, args);
-      final LogUsableType log = ColladaToRMX.getLog(line.hasOption("debug"));
+      final LogUsableType log = RColladaToRMX.getLog(line.hasOption("debug"));
 
       if (line.hasOption("help")) {
-        ColladaToRMX.showHelp(o);
+        RColladaToRMX.showHelp(o);
         System.exit(0);
       } else if (line.hasOption("list")) {
-        ColladaToRMX.commandListFile(
+        RColladaToRMX.commandListFile(
           log,
           new File(line.getOptionValue("input")));
       } else if (line.hasOption("export")) {
@@ -145,12 +145,12 @@ import com.io7m.renderer.xml.rmx.RXMLExporter;
             mesh_name,
             output_mesh_name,
             compress);
-        ColladaToRMX.commandExportFile(log, config);
+        RColladaToRMX.commandExportFile(log, config);
       }
 
     } catch (final ParseException e) {
       System.err.println("error: " + e.getMessage());
-      ColladaToRMX.showHelp(o);
+      RColladaToRMX.showHelp(o);
     } catch (final ValidityException e) {
       System.err.println("fatal: XML validity error: " + e.getMessage());
     } catch (final ParsingException e) {
@@ -173,7 +173,7 @@ import com.io7m.renderer.xml.rmx.RXMLExporter;
       IOException,
       RException
   {
-    final Document doc = ColladaToRMX.getDocument(config.input);
+    final Document doc = RColladaToRMX.getDocument(config.input);
     doc.setBaseURI(config.input.toURI().toString());
 
     final RColladaGeometryID gid = new RColladaGeometryID(config.mesh_name);
@@ -184,8 +184,8 @@ import com.io7m.renderer.xml.rmx.RXMLExporter;
       throw new NoSuchElementException("Mesh '" + gid + "' does not exist");
     }
 
-    final MeshBasicColladaImporter importer =
-      new MeshBasicColladaImporter(log);
+    final RColladaToMeshBasic importer =
+      new RColladaToMeshBasic(log);
 
     RMeshBasic basic = null;
     final String m_name = config.output_mesh_name;
@@ -204,9 +204,9 @@ import com.io7m.renderer.xml.rmx.RXMLExporter;
     final OutputStream output_stream;
     if (config.compress) {
       output_stream =
-        new GZIPOutputStream(ColladaToRMX.openOutputStream(config));
+        new GZIPOutputStream(RColladaToRMX.openOutputStream(config));
     } else {
-      output_stream = ColladaToRMX.openOutputStream(config);
+      output_stream = RColladaToRMX.openOutputStream(config);
     }
     assert output_stream != null;
 
@@ -243,7 +243,7 @@ import com.io7m.renderer.xml.rmx.RXMLExporter;
       IOException,
       RXMLException
   {
-    final Document doc = ColladaToRMX.getDocument(input);
+    final Document doc = RColladaToRMX.getDocument(input);
     doc.setBaseURI(input.toURI().toString());
 
     final RColladaDocument cdoc = RColladaDocument.newDocument(doc, log);
@@ -367,7 +367,7 @@ import com.io7m.renderer.xml.rmx.RXMLExporter;
     formatter.printHelp(
       pw,
       120,
-      ColladaToRMX.PROGRAM,
+      RColladaToRMX.PROGRAM,
       null,
       o,
       4,
