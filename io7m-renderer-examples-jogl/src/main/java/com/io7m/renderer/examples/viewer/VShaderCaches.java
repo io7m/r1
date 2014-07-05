@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -95,7 +95,7 @@ public final class VShaderCaches
 
   /**
    * Construct caches.
-   * 
+   *
    * @param gi
    *          The GL implementation.
    * @param config
@@ -335,9 +335,9 @@ public final class VShaderCaches
   {
     final JCacheLoaderType<String, KProgram, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    return KShaderCache.wrapDebug(LRUCacheTrivial.newCache(
-      loader,
-      cache_config));
+    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+      LRUCacheTrivial.newCache(loader, cache_config);
+    return KShaderCache.wrapDebug(c);
   }
 
   private static KShaderCacheDeferredGeometryType wrapDeferredGeometry(
@@ -348,9 +348,9 @@ public final class VShaderCaches
   {
     final JCacheLoaderType<String, KProgram, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    return KShaderCache.wrapDeferredGeometry(LRUCacheTrivial.newCache(
-      loader,
-      cache_config));
+    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+      LRUCacheTrivial.newCache(loader, cache_config);
+    return KShaderCache.wrapDeferredGeometry(c);
   }
 
   private static KShaderCacheDeferredLightType wrapDeferredLight(
@@ -361,9 +361,9 @@ public final class VShaderCaches
   {
     final JCacheLoaderType<String, KProgram, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    return KShaderCache.wrapDeferredLight(LRUCacheTrivial.newCache(
-      loader,
-      cache_config));
+    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+      LRUCacheTrivial.newCache(loader, cache_config);
+    return KShaderCache.wrapDeferredLight(c);
   }
 
   private static KShaderCacheDepthType wrapDepth(
@@ -374,9 +374,9 @@ public final class VShaderCaches
   {
     final JCacheLoaderType<String, KProgram, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    return KShaderCache.wrapDepth(LRUCacheTrivial.newCache(
-      loader,
-      cache_config));
+    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+      LRUCacheTrivial.newCache(loader, cache_config);
+    return KShaderCache.wrapDepth(c);
   }
 
   private static KShaderCacheDepthVarianceType wrapDepthVariance(
@@ -387,9 +387,9 @@ public final class VShaderCaches
   {
     final JCacheLoaderType<String, KProgram, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    return KShaderCache.wrapDepthVariance(LRUCacheTrivial.newCache(
-      loader,
-      cache_config));
+    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+      LRUCacheTrivial.newCache(loader, cache_config);
+    return KShaderCache.wrapDepthVariance(c);
   }
 
   private static KShaderCacheForwardOpaqueLitType wrapForwardOpaqueLit(
@@ -400,9 +400,9 @@ public final class VShaderCaches
   {
     final JCacheLoaderType<String, KProgram, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    return KShaderCache.wrapForwardOpaqueLit(LRUCacheTrivial.newCache(
-      loader,
-      cache_config));
+    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+      LRUCacheTrivial.newCache(loader, cache_config);
+    return KShaderCache.wrapForwardOpaqueLit(c);
   }
 
   private static KShaderCacheForwardOpaqueUnlitType wrapForwardOpaqueUnlit(
@@ -413,9 +413,9 @@ public final class VShaderCaches
   {
     final JCacheLoaderType<String, KProgram, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    return KShaderCache.wrapForwardOpaqueUnlit(LRUCacheTrivial.newCache(
-      loader,
-      cache_config));
+    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+      LRUCacheTrivial.newCache(loader, cache_config);
+    return KShaderCache.wrapForwardOpaqueUnlit(c);
   }
 
   private static
@@ -428,9 +428,9 @@ public final class VShaderCaches
   {
     final JCacheLoaderType<String, KProgram, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    return KShaderCache.wrapForwardTranslucentLit(LRUCacheTrivial.newCache(
-      loader,
-      cache_config));
+    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+      LRUCacheTrivial.newCache(loader, cache_config);
+    return KShaderCache.wrapForwardTranslucentLit(c);
   }
 
   private static
@@ -443,9 +443,9 @@ public final class VShaderCaches
   {
     final JCacheLoaderType<String, KProgram, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    return KShaderCache.wrapForwardTranslucentUnlit(LRUCacheTrivial.newCache(
-      loader,
-      cache_config));
+    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+      LRUCacheTrivial.newCache(loader, cache_config);
+    return KShaderCache.wrapForwardTranslucentUnlit(c);
   }
 
   private static KShaderCachePostprocessingType wrapPostprocessing(
@@ -456,9 +456,9 @@ public final class VShaderCaches
   {
     final JCacheLoaderType<String, KProgram, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    return KShaderCache.wrapPostprocessing(LRUCacheTrivial.newCache(
-      loader,
-      cache_config));
+    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+      LRUCacheTrivial.newCache(loader, cache_config);
+    return KShaderCache.wrapPostprocessing(c);
   }
 
   private final KShaderCacheDebugType                   shader_debug_cache;
@@ -474,7 +474,7 @@ public final class VShaderCaches
 
   /**
    * Construct shader caches.
-   * 
+   *
    * @param in_shader_debug_cache
    *          A shader cache
    * @param in_shader_deferred_geo_cache
