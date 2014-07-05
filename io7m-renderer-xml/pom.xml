@@ -13,7 +13,7 @@
   <artifactId>io7m-renderer-xml</artifactId>
 
   <packaging>jar</packaging>
-  <description>3D renderer (XML functions, mesh formats, etc)</description>
+  <description>3D renderer (XML functions)</description>
   <url>http://mvn.io7m.com/${project.artifactId}/</url>
   <name>${project.artifactId}</name>
 
