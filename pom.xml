@@ -20,6 +20,7 @@
     <module>io7m-renderer-kernel-types</module>
     <module>io7m-renderer-kernel</module>
     <module>io7m-renderer-meshes</module>
+    <module>io7m-renderer-meshes-binary</module>
     <module>io7m-renderer-shaders-core</module>
     <module>io7m-renderer-shaders-debug</module>
     <module>io7m-renderer-shaders-deferred-geometry</module>
