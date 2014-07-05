@@ -69,10 +69,10 @@ import com.io7m.renderer.kernel.KShadowMapRenderer;
 import com.io7m.renderer.kernel.KShadowMapRendererType;
 import com.io7m.renderer.kernel.KTranslucentRenderer;
 import com.io7m.renderer.kernel.KTranslucentRendererType;
-import com.io7m.renderer.kernel.KUnitQuad;
-import com.io7m.renderer.kernel.KUnitQuadCache;
-import com.io7m.renderer.kernel.KUnitQuadCacheType;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
+import com.io7m.renderer.kernel.types.KUnitQuad;
+import com.io7m.renderer.kernel.types.KUnitQuadCache;
+import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceObjectType;
 

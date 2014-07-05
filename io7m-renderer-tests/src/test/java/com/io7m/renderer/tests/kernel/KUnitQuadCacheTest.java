@@ -25,9 +25,9 @@ import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogUsableType;
-import com.io7m.renderer.kernel.KUnitQuad;
-import com.io7m.renderer.kernel.KUnitQuadCache;
-import com.io7m.renderer.kernel.KUnitQuadCacheType;
+import com.io7m.renderer.kernel.types.KUnitQuad;
+import com.io7m.renderer.kernel.types.KUnitQuadCache;
+import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
 import com.io7m.renderer.tests.FakeJCGLArrayAndIndexBuffers;
 import com.io7m.renderer.types.RException;
 

@@ -49,6 +49,8 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.kernel.types.KUnitQuad;
+import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionCopierSourceEqualsTarget;
 import com.io7m.renderer.types.RExceptionJCGL;
