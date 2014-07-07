@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -186,10 +186,10 @@ import com.io7m.renderer.types.RVectorI4F;
   }
 
   @Override public void eventMeshTriangle(
-    final int index,
-    final int v0,
-    final int v1,
-    final int v2)
+    final long index,
+    final long v0,
+    final long v1,
+    final long v2)
     throws JCGLException
   {
     this.checkParsing();
@@ -219,7 +219,7 @@ import com.io7m.renderer.types.RVectorI4F;
   }
 
   @Override public void eventMeshTrianglesStarted(
-    final int count)
+    final long count)
     throws JCGLException
   {
     this.checkParsing();
@@ -237,14 +237,14 @@ import com.io7m.renderer.types.RVectorI4F;
   }
 
   @Override public void eventMeshVertexEnded(
-    final int index)
+    final long index)
     throws JCGLException
   {
     this.checkParsing();
   }
 
   @Override public void eventMeshVertexNormal(
-    final int index,
+    final long index,
     final RVectorI3F<RSpaceObjectType> normal)
     throws JCGLException
   {
@@ -256,7 +256,7 @@ import com.io7m.renderer.types.RVectorI4F;
   }
 
   @Override public void eventMeshVertexPosition(
-    final int index,
+    final long index,
     final RVectorI3F<RSpaceObjectType> position)
     throws JCGLException
   {
@@ -268,14 +268,14 @@ import com.io7m.renderer.types.RVectorI4F;
   }
 
   @Override public void eventMeshVertexStarted(
-    final int index)
+    final long index)
     throws JCGLException
   {
     this.checkParsing();
   }
 
   @Override public void eventMeshVertexTangent4f(
-    final int index,
+    final long index,
     final RVectorI4F<RSpaceObjectType> tangent)
     throws JCGLException
   {
@@ -291,7 +291,7 @@ import com.io7m.renderer.types.RVectorI4F;
   }
 
   @Override public void eventMeshVertexUV(
-    final int index,
+    final long index,
     final RVectorI2F<RSpaceTextureType> uv)
     throws JCGLException
   {
@@ -351,7 +351,7 @@ import com.io7m.renderer.types.RVectorI4F;
   }
 
   @Override public void eventMeshVerticesStarted(
-    final int count)
+    final long count)
     throws JCGLException
   {
     this.checkParsing();

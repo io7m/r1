@@ -29,6 +29,7 @@ import com.io7m.renderer.meshes.RMeshBasic;
 import com.io7m.renderer.types.RExceptionMeshMissingNormals;
 import com.io7m.renderer.types.RExceptionMeshMissingPositions;
 import com.io7m.renderer.types.RExceptionMeshMissingUVs;
+import com.io7m.renderer.types.RExceptionMeshNameInvalid;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
@@ -36,7 +37,7 @@ import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.xml.collada.RColladaAxis;
 import com.io7m.renderer.xml.collada.RColladaDocument;
 import com.io7m.renderer.xml.collada.RColladaGeometry;
-import com.io7m.renderer.xml.collada.RColladaGeometry.ColladaMesh;
+import com.io7m.renderer.xml.collada.RColladaGeometry.RColladaMesh;
 import com.io7m.renderer.xml.collada.RColladaGeometryID;
 import com.io7m.renderer.xml.collada.RColladaInput;
 import com.io7m.renderer.xml.collada.RColladaPoly;
@@ -198,7 +199,7 @@ import com.io7m.renderer.xml.collada.RColladaVertex;
 
   /**
    * Construct a new importer.
-   * 
+   *
    * @param in_log
    *          A log interface.
    */
@@ -376,7 +377,7 @@ import com.io7m.renderer.xml.collada.RColladaVertex;
 
   /**
    * Load the mesh from the given geometry and document.
-   * 
+   *
    * @param doc
    *          The document.
    * @param geom
@@ -388,6 +389,8 @@ import com.io7m.renderer.xml.collada.RColladaVertex;
    *           If the geometry does not have normal vectors.
    * @throws RExceptionMeshMissingPositions
    *           If the geometry does not have vertex positions.
+   * @throws RExceptionMeshNameInvalid
+   *           If the name of the geometry is not valid for use in a mesh.
    */
 
   public RMeshBasic newMeshFromColladaGeometry(
@@ -395,7 +398,8 @@ import com.io7m.renderer.xml.collada.RColladaVertex;
     final RColladaGeometry geom)
     throws RExceptionMeshMissingPositions,
       RExceptionMeshMissingNormals,
-      RExceptionMeshMissingUVs
+      RExceptionMeshMissingUVs,
+      RExceptionMeshNameInvalid
   {
     NullCheck.notNull(doc, "Document");
     NullCheck.notNull(geom, "Geometry");
@@ -407,7 +411,7 @@ import com.io7m.renderer.xml.collada.RColladaVertex;
   /**
    * Load the mesh from the given geometry and document, naming it
    * <code>name</code>.
-   * 
+   *
    * @param name
    *          The resulting mesh name.
    * @param doc
@@ -421,6 +425,8 @@ import com.io7m.renderer.xml.collada.RColladaVertex;
    *           If the geometry does not have normal vectors.
    * @throws RExceptionMeshMissingPositions
    *           If the geometry does not have vertex positions.
+   * @throws RExceptionMeshNameInvalid
+   *           If the name of the geometry is not valid for use in a mesh.
    */
 
   public RMeshBasic newMeshFromColladaGeometryWithName(
@@ -429,7 +435,8 @@ import com.io7m.renderer.xml.collada.RColladaVertex;
     final String name)
     throws RExceptionMeshMissingPositions,
       RExceptionMeshMissingNormals,
-      RExceptionMeshMissingUVs
+      RExceptionMeshMissingUVs,
+      RExceptionMeshNameInvalid
   {
     NullCheck.notNull(doc, "Document");
     NullCheck.notNull(geom, "Geometry");
@@ -444,17 +451,13 @@ import com.io7m.renderer.xml.collada.RColladaVertex;
     switch (geom.getType()) {
       case GEOMETRY_MESH:
       {
-        final ColladaMesh cm = (ColladaMesh) geom;
+        final RColladaMesh cm = (RColladaMesh) geom;
         final RColladaPolylist pl = cm.getPolylist();
         final List<RColladaInput> inputs = pl.getInputs();
         final Offsets offsets = new Offsets(cm.getID(), inputs);
         final List<RColladaPoly> polys = pl.getPolygons();
         this.loadColladaSources(doc, m, inputs);
-        RColladaToMeshBasic.loadColladaPolygons(
-          m,
-          offsets,
-          polys,
-          this.log);
+        RColladaToMeshBasic.loadColladaPolygons(m, offsets, polys, this.log);
         break;
       }
     }

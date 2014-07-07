@@ -370,7 +370,7 @@ import com.io7m.renderer.xml.collada.RColladaSource.Type;
     final RColladaPolylist p = this.geometryLoadPolylist(ep);
 
     final RColladaGeometry cg =
-      new RColladaGeometry.ColladaMesh(id, this, source_ids, p, axis);
+      new RColladaGeometry.RColladaMesh(id, this, source_ids, p, axis);
     this.geometryAdd(id, cg);
   }
 

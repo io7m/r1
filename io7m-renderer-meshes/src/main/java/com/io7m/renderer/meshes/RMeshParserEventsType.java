@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -81,7 +81,7 @@ public interface RMeshParserEventsType<E extends Throwable>
 
   /**
    * Called when a triangle is encountered. Guaranteed not to be called before
-   * {@link #eventMeshTrianglesStarted(int)}.
+   * {@link #eventMeshTrianglesStarted(long)}.
    *
    * @param index
    *          The triangle index.
@@ -96,15 +96,15 @@ public interface RMeshParserEventsType<E extends Throwable>
    */
 
   void eventMeshTriangle(
-    final int index,
-    final int v0,
-    final int v1,
-    final int v2)
+    final long index,
+    final long v0,
+    final long v1,
+    final long v2)
     throws E;
 
   /**
    * Called when parsing of triangles has ended. Guaranteed not to be called
-   * before {@link #eventMeshTrianglesStarted(int)}.
+   * before {@link #eventMeshTrianglesStarted(long)}.
    *
    * @throws E
    *           If required.
@@ -123,12 +123,12 @@ public interface RMeshParserEventsType<E extends Throwable>
    */
 
   void eventMeshTrianglesStarted(
-    final int count)
+    final long count)
     throws E;
 
   /**
    * Called when parsing of a mesh vertex has ended. Guaranteed not to be
-   * called before {@link #eventMeshVertexStarted(int)} for the given index.
+   * called before {@link #eventMeshVertexStarted(long)} for the given index.
    *
    * @param index
    *          The index of the vertex.
@@ -137,7 +137,7 @@ public interface RMeshParserEventsType<E extends Throwable>
    */
 
   void eventMeshVertexEnded(
-    final int index)
+    final long index)
     throws E;
 
   /**
@@ -152,7 +152,7 @@ public interface RMeshParserEventsType<E extends Throwable>
    */
 
   void eventMeshVertexNormal(
-    final int index,
+    final long index,
     final RVectorI3F<RSpaceObjectType> normal)
     throws E;
 
@@ -168,7 +168,7 @@ public interface RMeshParserEventsType<E extends Throwable>
    */
 
   void eventMeshVertexPosition(
-    final int index,
+    final long index,
     final RVectorI3F<RSpaceObjectType> position)
     throws E;
 
@@ -182,7 +182,7 @@ public interface RMeshParserEventsType<E extends Throwable>
    */
 
   void eventMeshVertexStarted(
-    final int index)
+    final long index)
     throws E;
 
   /**
@@ -197,7 +197,7 @@ public interface RMeshParserEventsType<E extends Throwable>
    */
 
   void eventMeshVertexTangent4f(
-    final int index,
+    final long index,
     final RVectorI4F<RSpaceObjectType> tangent)
     throws E;
 
@@ -213,7 +213,7 @@ public interface RMeshParserEventsType<E extends Throwable>
    */
 
   void eventMeshVertexUV(
-    final int index,
+    final long index,
     final RVectorI2F<RSpaceTextureType> uv)
     throws E;
 
@@ -243,6 +243,6 @@ public interface RMeshParserEventsType<E extends Throwable>
    */
 
   void eventMeshVerticesStarted(
-    final int count)
+    final long count)
     throws E;
 }

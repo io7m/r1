@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,7 +25,7 @@ import com.io7m.jvvfs.FilesystemError;
 /**
  * A generic exception visitor, returning values of type <code>T</code> and
  * raising exceptions of type <code>E</code>.
- * 
+ *
  * @param <T>
  *          The return value type of the implementing visitor
  * @param <E>
@@ -36,7 +36,7 @@ public interface RExceptionVisitorType<T, E extends Throwable>
 {
   /**
    * Visit the given exception type.
-   * 
+   *
    * @param e
    *          The exception
    * @return T value of type <code>T</code>
@@ -50,7 +50,21 @@ public interface RExceptionVisitorType<T, E extends Throwable>
 
   /**
    * Visit the given exception type.
-   * 
+   *
+   * @param e
+   *          The exception
+   * @return T value of type <code>T</code>
+   * @throws E
+   *           If required
+   */
+
+  T exceptionVisitInternalAssertionException(
+    final RExceptionInternalAssertion e)
+    throws E;
+
+  /**
+   * Visit the given exception type.
+   *
    * @param e
    *          The exception
    * @return T value of type <code>T</code>
@@ -64,7 +78,7 @@ public interface RExceptionVisitorType<T, E extends Throwable>
 
   /**
    * Visit the given exception type.
-   * 
+   *
    * @param e
    *          The exception
    * @return T value of type <code>T</code>
@@ -78,7 +92,7 @@ public interface RExceptionVisitorType<T, E extends Throwable>
 
   /**
    * Visit the given exception type.
-   * 
+   *
    * @param e
    *          The exception
    * @return T value of type <code>T</code>
@@ -92,7 +106,7 @@ public interface RExceptionVisitorType<T, E extends Throwable>
 
   /**
    * Visit the given exception type.
-   * 
+   *
    * @param e
    *          The exception
    * @return T value of type <code>T</code>
@@ -106,7 +120,7 @@ public interface RExceptionVisitorType<T, E extends Throwable>
 
   /**
    * Visit the given exception type.
-   * 
+   *
    * @param e
    *          The exception
    * @return T value of type <code>T</code>
@@ -114,13 +128,13 @@ public interface RExceptionVisitorType<T, E extends Throwable>
    *           If required
    */
 
-  T exceptionVisitUserErrorException(
-    RExceptionUserError e)
+  T exceptionVisitRBException(
+    RBException e)
     throws E;
 
   /**
    * Visit the given exception type.
-   * 
+   *
    * @param e
    *          The exception
    * @return T value of type <code>T</code>
@@ -134,7 +148,21 @@ public interface RExceptionVisitorType<T, E extends Throwable>
 
   /**
    * Visit the given exception type.
-   * 
+   *
+   * @param e
+   *          The exception
+   * @return T value of type <code>T</code>
+   * @throws E
+   *           If required
+   */
+
+  T exceptionVisitUserErrorException(
+    RExceptionUserError e)
+    throws E;
+
+  /**
+   * Visit the given exception type.
+   *
    * @param e
    *          The exception
    * @return T value of type <code>T</code>
@@ -144,19 +172,5 @@ public interface RExceptionVisitorType<T, E extends Throwable>
 
   T exceptionVisitXMLException(
     final RXMLException e)
-    throws E;
-
-  /**
-   * Visit the given exception type.
-   * 
-   * @param e
-   *          The exception
-   * @return T value of type <code>T</code>
-   * @throws E
-   *           If required
-   */
-
-  T exceptionVisitInternalAssertionException(
-    final RExceptionInternalAssertion e)
     throws E;
 }
