@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.meshes;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RExceptionMeshNameInvalid;
@@ -24,7 +25,7 @@ import com.io7m.renderer.types.RExceptionMeshNameInvalid;
  * Functions to check the validity of mesh names.
  */
 
-public final class RMeshNames
+@EqualityReference public final class RMeshNames
 {
   /**
    * The status of a mesh name.
