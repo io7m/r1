@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM3F;
@@ -41,7 +42,7 @@ import com.io7m.renderer.types.RVectorI4F;
  *          The type of exceptions raised by the event interface.
  */
 
-public final class RBImporter<E extends Throwable>
+@EqualityReference public final class RBImporter<E extends Throwable>
 {
   /**
    * Construct a new parser from the given document, which is expected to be
