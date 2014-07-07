@@ -25,6 +25,7 @@ import java.util.Map;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeCheck;
+import com.io7m.renderer.types.RExceptionMeshNameInvalid;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
@@ -44,14 +45,18 @@ import com.io7m.renderer.types.RVectorI3F;
 {
   /**
    * Construct a new empty mesh with the given name.
-   * 
+   *
    * @param name
    *          The name.
    * @return A new mesh.
+   * @throws RExceptionMeshNameInvalid
+   *           If the mesh name is not valid.
+   * @see RMeshNames
    */
 
   public static RMeshBasic newMesh(
     final String name)
+    throws RExceptionMeshNameInvalid
   {
     return new RMeshBasic(name);
   }
@@ -59,15 +64,16 @@ import com.io7m.renderer.types.RVectorI3F;
   private final String                              name;
   private final List<RVectorI3F<RSpaceObjectType>>  normals;
   private final List<RVectorI3F<RSpaceObjectType>>  positions;
-  private final List<RMeshTriangle>                  triangles;
+  private final List<RMeshTriangle>                 triangles;
   private final List<RVectorI2F<RSpaceTextureType>> uvs;
-  private final Map<RMeshBasicVertex, Integer>       vertex_map;
-  private final List<RMeshBasicVertex>               vertices;
+  private final Map<RMeshBasicVertex, Integer>      vertex_map;
+  private final List<RMeshBasicVertex>              vertices;
 
   private RMeshBasic(
     final String in_name)
+    throws RExceptionMeshNameInvalid
   {
-    this.name = NullCheck.notNull(in_name, "Mesh name");
+    this.name = RMeshNames.checkMeshName(in_name);
     this.normals = new ArrayList<RVectorI3F<RSpaceObjectType>>();
     this.positions = new ArrayList<RVectorI3F<RSpaceObjectType>>();
     this.uvs = new ArrayList<RVectorI2F<RSpaceTextureType>>();
@@ -108,7 +114,7 @@ import com.io7m.renderer.types.RVectorI3F;
 
   /**
    * Add a new normal vector.
-   * 
+   *
    * @param normal
    *          The normal vector.
    * @return The index of the newly added vector.
@@ -135,7 +141,7 @@ import com.io7m.renderer.types.RVectorI3F;
 
   /**
    * Add a new position vector.
-   * 
+   *
    * @param position
    *          The position vector.
    * @return The index of the newly added vector.
@@ -162,7 +168,7 @@ import com.io7m.renderer.types.RVectorI3F;
 
   /**
    * Add a new triangle consisting of the given vertices.
-   * 
+   *
    * @param v0
    *          The index of the first vertex.
    * @param v1
@@ -203,14 +209,15 @@ import com.io7m.renderer.types.RVectorI3F;
 
   public List<RMeshTriangle> trianglesGet()
   {
-    final List<RMeshTriangle> r = Collections.unmodifiableList(this.triangles);
+    final List<RMeshTriangle> r =
+      Collections.unmodifiableList(this.triangles);
     assert r != null;
     return r;
   }
 
   /**
    * Add a new UV coordinate vector.
-   * 
+   *
    * @param uv
    *          The UV coordinate vector.
    * @return The index of the newly added vector.
@@ -237,7 +244,7 @@ import com.io7m.renderer.types.RVectorI3F;
 
   /**
    * Add a new vertex consisting of the given indices.
-   * 
+   *
    * @param position
    *          The index of the position vector.
    * @param normal

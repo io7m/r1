@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -24,6 +24,8 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.OrthonormalizedI3F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.types.RExceptionMeshNameInvalid;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
@@ -43,44 +45,49 @@ import com.io7m.renderer.types.RVectorM3F;
   private static RMeshTangents copyMesh(
     final RMeshBasic m)
   {
-    final RMeshTangents mt =
-      new RMeshTangents(
-        m.normalsGet(),
-        m.positionsGet(),
-        m.uvsGet(),
-        m.getName());
+    try {
+      final RMeshTangents mt =
+        new RMeshTangents(
+          m.normalsGet(),
+          m.positionsGet(),
+          m.uvsGet(),
+          m.getName());
 
-    for (final RMeshBasicVertex vb : m.verticesGet()) {
-      final RMeshTangentsVertex vt =
-        new RMeshTangentsVertex(
-          vb.getPosition(),
-          vb.getNormal(),
-          vb.getNormal(),
-          vb.getNormal(),
-          vb.getUV());
-      mt.vertices.add(vt);
+      for (final RMeshBasicVertex vb : m.verticesGet()) {
+        final RMeshTangentsVertex vt =
+          new RMeshTangentsVertex(
+            vb.getPosition(),
+            vb.getNormal(),
+            vb.getNormal(),
+            vb.getNormal(),
+            vb.getUV());
+        mt.vertices.add(vt);
+      }
+
+      for (final RMeshTriangle bt : m.trianglesGet()) {
+        final RMeshTriangle tt =
+          new RMeshTriangle(bt.getV0(), bt.getV1(), bt.getV2());
+        mt.triangles.add(tt);
+      }
+
+      assert mt.positions.size() == m.positionsGet().size();
+      assert mt.normals.size() == m.normalsGet().size();
+      assert mt.tangents.size() == m.normalsGet().size();
+      assert mt.bitangents.size() == m.normalsGet().size();
+      assert mt.triangles.size() == m.trianglesGet().size();
+      assert mt.uvs.size() == m.uvsGet().size();
+      assert mt.name.equals(m.getName());
+
+      return mt;
+    } catch (final RExceptionMeshNameInvalid e) {
+      // If the name of the basic mesh was valid, then so is a copy of it.
+      throw new UnreachableCodeException(e);
     }
-
-    for (final RMeshTriangle bt : m.trianglesGet()) {
-      final RMeshTriangle tt =
-        new RMeshTriangle(bt.getV0(), bt.getV1(), bt.getV2());
-      mt.triangles.add(tt);
-    }
-
-    assert mt.positions.size() == m.positionsGet().size();
-    assert mt.normals.size() == m.normalsGet().size();
-    assert mt.tangents.size() == m.normalsGet().size();
-    assert mt.bitangents.size() == m.normalsGet().size();
-    assert mt.triangles.size() == m.trianglesGet().size();
-    assert mt.uvs.size() == m.uvsGet().size();
-    assert mt.name.equals(m.getName());
-
-    return mt;
   }
 
   /**
    * Generate tangent and bitangent vectors from the given {@link RMeshBasic}.
-   * 
+   *
    * @param m
    *          The basic mesh.
    * @return The same mesh with generated tangent and bitangent vectors.
@@ -205,10 +212,10 @@ import com.io7m.renderer.types.RVectorM3F;
 
     /**
      * Orthonormalize tangents and bitangents.
-     * 
+     *
      * The normal, tangent, and bitangent vectors must form an orthonormal
      * right-handed basis.
-     * 
+     *
      * Because precomputed bitangents are optional, this code does two things:
      * It calculates bitangents, inverting them if necessary to form a
      * right-handed coordinate space, and it also saves a value in the w
@@ -272,8 +279,8 @@ import com.io7m.renderer.types.RVectorM3F;
   private final List<RVectorI3F<RSpaceObjectType>>  bitangents;
   private final List<RVectorI3F<RSpaceObjectType>>  positions;
   private final List<RVectorI2F<RSpaceTextureType>> uvs;
-  private final List<RMeshTangentsVertex>            vertices;
-  private final List<RMeshTriangle>                  triangles;
+  private final List<RMeshTangentsVertex>           vertices;
+  private final List<RMeshTriangle>                 triangles;
   private final String                              name;
 
   private RMeshTangents(
@@ -281,8 +288,9 @@ import com.io7m.renderer.types.RVectorM3F;
     final List<RVectorI3F<RSpaceObjectType>> in_positions,
     final List<RVectorI2F<RSpaceTextureType>> in_uvs,
     final String in_name)
+    throws RExceptionMeshNameInvalid
   {
-    this.name = NullCheck.notNull(in_name, "Name");
+    this.name = RMeshNames.checkMeshName(in_name);
 
     this.normals =
       new ArrayList<RVectorI3F<RSpaceObjectType>>(NullCheck.notNullAll(
@@ -377,7 +385,8 @@ import com.io7m.renderer.types.RVectorM3F;
 
   public List<RMeshTriangle> trianglesGet()
   {
-    final List<RMeshTriangle> r = Collections.unmodifiableList(this.triangles);
+    final List<RMeshTriangle> r =
+      Collections.unmodifiableList(this.triangles);
     assert r != null;
     return r;
   }

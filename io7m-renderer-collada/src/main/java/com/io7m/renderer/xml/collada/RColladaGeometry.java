@@ -34,7 +34,7 @@ import com.io7m.jnull.NullCheck;
    * A polygon mesh.
    */
 
-  @EqualityReference public static final class ColladaMesh extends
+  @EqualityReference public static final class RColladaMesh extends
     RColladaGeometry
   {
     private final RColladaPolylist            polylist;
@@ -55,7 +55,7 @@ import com.io7m.jnull.NullCheck;
      *          The axis type.
      */
 
-    @SuppressWarnings("synthetic-access") public ColladaMesh(
+    @SuppressWarnings("synthetic-access") public RColladaMesh(
       final RColladaGeometryID id,
       final RColladaDocument document,
       final SortedSet<RColladaSourceID> in_source_ids,
@@ -91,7 +91,7 @@ import com.io7m.jnull.NullCheck;
     @Override public String toString()
     {
       final StringBuilder builder = new StringBuilder();
-      builder.append("[ColladaMesh ");
+      builder.append("[RColladaMesh ");
       builder.append(this.getID());
       builder.append(" ");
       builder.append(this.source_ids);
