@@ -31,7 +31,7 @@ module Light is
   --
 
   type t is record
-    color    : vector_3f,
+    color     : vector_3f,
     position  : vector_3f,
     intensity : float,
     range     : float,
