@@ -16,11 +16,14 @@
 
 package com.io7m.renderer.rmb;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jlog.LogLevel;
+import com.io7m.jlog.LogType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM3F;
@@ -45,8 +48,7 @@ import com.io7m.renderer.types.RVectorI4F;
 @EqualityReference public final class RBImporter<E extends Throwable>
 {
   /**
-   * Construct a new parser from the given document, which is expected to be
-   * schema-valid.
+   * Construct a new parser from the given stream.
    *
    * @param <E>
    *          The type of exceptions raised by the parser.
@@ -73,7 +75,7 @@ import com.io7m.renderer.types.RVectorI4F;
     throws E,
       RException
   {
-    return new RBImporter<E>(s, events, log);
+    return new RBImporter<E>(new BufferedInputStream(s, 65536), events, log);
   }
 
   private static RVectorI3F<RSpaceObjectType> readNormal(
@@ -145,8 +147,8 @@ import com.io7m.renderer.types.RVectorI4F;
       final RBInfo info = RBInfo.parseFromStream(in_log, in_s);
 
       this.events.eventMeshName(info.getName());
-      this.readVertices(in_s, info);
-      this.readTriangles(in_s, info);
+      this.readVertices(in_s, info, in_log.with("vertices"));
+      this.readTriangles(in_s, info, in_log.with("triangles"));
 
     } catch (final RException e) {
       in_events.eventError(e);
@@ -161,14 +163,25 @@ import com.io7m.renderer.types.RVectorI4F;
 
   private void readTriangles(
     final InputStream in_s,
-    final RBInfo info)
+    final RBInfo info,
+    final LogType log)
     throws E,
       RBException,
       IOException
   {
-    this.events.eventMeshTrianglesStarted((int) info.getTriangleCount());
+    final long count = info.getTriangleCount();
 
-    for (int index = 0; index < info.getTriangleCount(); ++index) {
+    if (log.wouldLog(LogLevel.LOG_DEBUG)) {
+      log.debug(String.format("reading %d triangles", count));
+    }
+
+    this.events.eventMeshTrianglesStarted((int) count);
+
+    for (int index = 0; index < count; ++index) {
+      if (log.wouldLog(LogLevel.LOG_DEBUG)) {
+        log.debug(String.format("reading triangle %d", index));
+      }
+
       final long v0 = RBParsing.readUnsigned32(this.temp, in_s);
       final long v1 = RBParsing.readUnsigned32(this.temp, in_s);
       final long v2 = RBParsing.readUnsigned32(this.temp, in_s);
@@ -180,19 +193,30 @@ import com.io7m.renderer.types.RVectorI4F;
 
   private void readVertices(
     final InputStream in_s,
-    final RBInfo info)
+    final RBInfo info,
+    final LogType log)
     throws E,
       RBException,
       IOException
   {
-    this.events.eventMeshVerticesStarted((int) info.getVertexCount());
+    final long count = info.getVertexCount();
+
+    if (log.wouldLog(LogLevel.LOG_DEBUG)) {
+      log.debug(String.format("reading %d vertices", count));
+    }
+
+    this.events.eventMeshVerticesStarted((int) count);
 
     final VectorM3F bounds_lower =
       new VectorM3F(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
     final VectorM3F bounds_upper =
       new VectorM3F(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
 
-    for (int index = 0; index < info.getVertexCount(); ++index) {
+    for (int index = 0; index < count; ++index) {
+      if (log.wouldLog(LogLevel.LOG_DEBUG)) {
+        log.debug(String.format("reading vertex %d", index));
+      }
+
       this.events.eventMeshVertexStarted(index);
 
       final RVectorI3F<RSpaceObjectType> position =

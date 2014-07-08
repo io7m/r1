@@ -48,6 +48,7 @@ import com.io7m.renderer.kernel.KRendererDeferred;
 import com.io7m.renderer.kernel.KRendererDeferredOpaque;
 import com.io7m.renderer.kernel.KRendererDeferredOpaqueType;
 import com.io7m.renderer.kernel.KRendererDeferredType;
+import com.io7m.renderer.kernel.KShaderCacheDebugType;
 import com.io7m.renderer.kernel.KShaderCacheDeferredGeometryType;
 import com.io7m.renderer.kernel.KShaderCacheDeferredLightType;
 import com.io7m.renderer.kernel.KShaderCacheDepthType;
@@ -98,6 +99,7 @@ public final class ExampleRendererDeferredDefault extends
         ExampleRendererType
         newRenderer(
           final LogUsableType log,
+          final KShaderCacheDebugType in_shader_debug_cache,
           final KShaderCacheForwardTranslucentLitType in_shader_translucent_lit_cache,
           final KShaderCacheForwardTranslucentUnlitType in_shader_translucent_unlit_cache,
           final KShaderCacheDepthType in_shader_depth_cache,
@@ -111,6 +113,7 @@ public final class ExampleRendererDeferredDefault extends
       {
         return ExampleRendererDeferredDefault.make(
           log,
+          in_shader_debug_cache,
           in_shader_translucent_lit_cache,
           in_shader_translucent_unlit_cache,
           in_shader_depth_cache,
@@ -127,6 +130,7 @@ public final class ExampleRendererDeferredDefault extends
     ExampleRendererDeferredType
     make(
       final LogUsableType log,
+      final KShaderCacheDebugType in_shader_debug_cache,
       final KShaderCacheForwardTranslucentLitType in_shader_translucent_lit_cache,
       final KShaderCacheForwardTranslucentUnlitType in_shader_translucent_unlit_cache,
       final KShaderCacheDepthType in_shader_depth_cache,
@@ -248,6 +252,7 @@ public final class ExampleRendererDeferredDefault extends
         gi,
         quad_cache,
         sphere_cache,
+        in_shader_debug_cache,
         in_shader_deferred_geo_cache,
         in_shader_deferred_light_cache);
 

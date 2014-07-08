@@ -42,6 +42,91 @@ import com.io7m.renderer.types.RVectorM3F;
 
 @EqualityReference public final class RMeshTangents
 {
+  /**
+   * Construct a new builder that will directly construct an
+   * {@link RMeshTangents}.
+   *
+   * @param in_name
+   *          The name of the mesh.
+   * @return A new mesh with tangents.
+   * @throws RExceptionMeshNameInvalid
+   *           If the mesh name is invalid.
+   */
+
+  public static RMeshTangentsBuilderType newBuilder(
+    final String in_name)
+    throws RExceptionMeshNameInvalid
+  {
+    final String mesh_name = RMeshNames.checkMeshName(in_name);
+
+    final List<RVectorI3F<RSpaceObjectType>> in_normals =
+      new ArrayList<RVectorI3F<RSpaceObjectType>>();
+    final List<RVectorI3F<RSpaceObjectType>> in_positions =
+      new ArrayList<RVectorI3F<RSpaceObjectType>>();
+    final List<RVectorI2F<RSpaceTextureType>> in_uvs =
+      new ArrayList<RVectorI2F<RSpaceTextureType>>();
+    final List<RVectorI4F<RSpaceObjectType>> in_tangents =
+      new ArrayList<RVectorI4F<RSpaceObjectType>>();
+    final List<RVectorI3F<RSpaceObjectType>> in_bitangents =
+      new ArrayList<RVectorI3F<RSpaceObjectType>>();
+    final List<RMeshTriangle> in_triangles = new ArrayList<RMeshTriangle>();
+    final List<RMeshTangentsVertex> in_vertices =
+      new ArrayList<RMeshTangentsVertex>();
+
+    return new RMeshTangentsBuilderType() {
+      @SuppressWarnings("synthetic-access") @Override public
+        RMeshTangents
+        build()
+      {
+        return new RMeshTangents(
+          in_normals,
+          in_tangents,
+          in_bitangents,
+          in_positions,
+          in_uvs,
+          in_vertices,
+          in_triangles,
+          mesh_name);
+      }
+
+      @Override public void addVertex(
+        final RVectorI3F<RSpaceObjectType> position,
+        final RVectorI3F<RSpaceObjectType> normal,
+        final RVectorI4F<RSpaceObjectType> tangent,
+        final RVectorI3F<RSpaceObjectType> bitangent,
+        final RVectorI2F<RSpaceTextureType> uv)
+      {
+        NullCheck.notNull(position, "Position");
+        NullCheck.notNull(normal, "Normal");
+        NullCheck.notNull(tangent, "Tangent");
+        NullCheck.notNull(bitangent, "Bitangent");
+        NullCheck.notNull(uv, "UV");
+
+        final int index = in_positions.size();
+        in_positions.add(position);
+        in_normals.add(normal);
+        in_tangents.add(tangent);
+        in_bitangents.add(bitangent);
+        in_uvs.add(uv);
+        in_vertices.add(new RMeshTangentsVertex(
+          index,
+          index,
+          index,
+          index,
+          index));
+      }
+
+      @Override public void addTriangle(
+        final long v0,
+        final long v1,
+        final long v2)
+      {
+        final RMeshTriangle tt = new RMeshTriangle(v0, v1, v2);
+        in_triangles.add(tt);
+      }
+    };
+  }
+
   private static RMeshTangents copyMesh(
     final RMeshBasic m)
   {
@@ -109,9 +194,9 @@ import com.io7m.renderer.types.RVectorM3F;
      */
 
     for (final RMeshTriangle triangle : mt.triangles) {
-      final RMeshTangentsVertex v0 = mt.vertices.get(triangle.getV0());
-      final RMeshTangentsVertex v1 = mt.vertices.get(triangle.getV1());
-      final RMeshTangentsVertex v2 = mt.vertices.get(triangle.getV2());
+      final RMeshTangentsVertex v0 = mt.vertices.get((int) triangle.getV0());
+      final RMeshTangentsVertex v1 = mt.vertices.get((int) triangle.getV1());
+      final RMeshTangentsVertex v2 = mt.vertices.get((int) triangle.getV2());
 
       final RVectorI3F<RSpaceObjectType> v0p =
         mt.positions.get(v0.getPosition());
@@ -320,6 +405,26 @@ import com.io7m.renderer.types.RVectorM3F;
 
     this.vertices = new ArrayList<RMeshTangentsVertex>();
     this.triangles = new ArrayList<RMeshTriangle>();
+  }
+
+  private RMeshTangents(
+    final List<RVectorI3F<RSpaceObjectType>> in_normals,
+    final List<RVectorI4F<RSpaceObjectType>> in_tangents,
+    final List<RVectorI3F<RSpaceObjectType>> in_bitangents,
+    final List<RVectorI3F<RSpaceObjectType>> in_positions,
+    final List<RVectorI2F<RSpaceTextureType>> in_uvs,
+    final List<RMeshTangentsVertex> in_vertices,
+    final List<RMeshTriangle> in_triangles,
+    final String in_name)
+  {
+    this.normals = NullCheck.notNull(in_normals, "Normals");
+    this.tangents = NullCheck.notNull(in_tangents, "Tangents");
+    this.bitangents = NullCheck.notNull(in_bitangents, "Bitangents");
+    this.positions = NullCheck.notNull(in_positions, "Positions");
+    this.uvs = NullCheck.notNull(in_uvs, "UVs");
+    this.vertices = NullCheck.notNull(in_vertices, "Vertices");
+    this.triangles = NullCheck.notNull(in_triangles, "Triangles");
+    this.name = NullCheck.notNull(in_name, "Name");
   }
 
   /**

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,6 +19,7 @@ package com.io7m.renderer.examples;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jlog.LogUsableType;
+import com.io7m.renderer.kernel.KShaderCacheDebugType;
 import com.io7m.renderer.kernel.KShaderCacheDeferredGeometryType;
 import com.io7m.renderer.kernel.KShaderCacheDeferredLightType;
 import com.io7m.renderer.kernel.KShaderCacheDepthType;
@@ -37,9 +38,11 @@ public interface ExampleRendererConstructorDeferredType extends
 {
   /**
    * Construct a new renderer.
-   * 
+   *
    * @param log
    *          A log handle
+   * @param in_shader_debug_cache
+   *          A shader cache
    * @param in_shader_translucent_lit_cache
    *          A shader cache
    * @param in_shader_translucent_unlit_cache
@@ -57,7 +60,7 @@ public interface ExampleRendererConstructorDeferredType extends
    * @param gi
    *          A GL implementation
    * @return A new renderer
-   * 
+   *
    * @throws JCGLException
    *           If an OpenGL error occurs
    * @throws RException
@@ -67,6 +70,7 @@ public interface ExampleRendererConstructorDeferredType extends
     ExampleRendererType
     newRenderer(
       final LogUsableType log,
+      final KShaderCacheDebugType in_shader_debug_cache,
       final KShaderCacheForwardTranslucentLitType in_shader_translucent_lit_cache,
       final KShaderCacheForwardTranslucentUnlitType in_shader_translucent_unlit_cache,
       final KShaderCacheDepthType in_shader_depth_cache,
