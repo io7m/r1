@@ -16,41 +16,31 @@
 
 package com.io7m.renderer.examples;
 
-import com.io7m.renderer.kernel.KRendererType;
-import com.io7m.renderer.types.RException;
+import java.io.InputStream;
 
 /**
- * The type of example renderers.
+ * The type of image loaders.
+ *
+ * @param <T>
+ *          The type of images.
  */
 
-public interface ExampleRendererType
+public interface ExampleImageLoaderType<T>
 {
   /**
-   * Accept a renderer visitor.
+   * Load an image from the stream.
    *
-   * @param v
-   *          The visitor
-   * @param <T>
-   *          The type of values returned by the visitor
-   * @return The value returned by the visitor
-   *
-   * @throws RException
-   *           If required
+   * @param name
+   *          The name of the image.
+   * @param stream
+   *          The stream.
+   * @return A value of <code>T</code>.
+   * @throws Exception
+   *           On errors.
    */
 
-  <T> T rendererAccept(
-    final ExampleRendererVisitorType<T> v)
-    throws RException;
-
-  /**
-   * @return The class that the renderer uses for rendering.
-   */
-
-  Class<? extends KRendererType> rendererGetActualClass();
-
-  /**
-   * @return The name of the renderer
-   */
-
-  String rendererGetName();
+  T loadImage(
+    final String name,
+    final InputStream stream)
+    throws Exception;
 }

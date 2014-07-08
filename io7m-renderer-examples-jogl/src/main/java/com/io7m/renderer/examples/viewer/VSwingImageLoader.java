@@ -14,43 +14,33 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.examples;
+package com.io7m.renderer.examples.viewer;
 
-import com.io7m.renderer.kernel.KRendererType;
-import com.io7m.renderer.types.RException;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 
-/**
- * The type of example renderers.
- */
+import javax.imageio.ImageIO;
 
-public interface ExampleRendererType
+import com.io7m.renderer.examples.ExampleImageLoaderType;
+
+final class VSwingImageLoader implements
+  ExampleImageLoaderType<BufferedImage>
 {
-  /**
-   * Accept a renderer visitor.
-   *
-   * @param v
-   *          The visitor
-   * @param <T>
-   *          The type of values returned by the visitor
-   * @return The value returned by the visitor
-   *
-   * @throws RException
-   *           If required
-   */
+  public VSwingImageLoader()
+  {
+    // Nothing
+  }
 
-  <T> T rendererAccept(
-    final ExampleRendererVisitorType<T> v)
-    throws RException;
-
-  /**
-   * @return The class that the renderer uses for rendering.
-   */
-
-  Class<? extends KRendererType> rendererGetActualClass();
-
-  /**
-   * @return The name of the renderer
-   */
-
-  String rendererGetName();
+  @Override public BufferedImage loadImage(
+    final String name,
+    final InputStream stream)
+    throws Exception
+  {
+    final BufferedImage r = ImageIO.read(stream);
+    if (r == null) {
+      throw new IOException(String.format("Could not parse image %s", name));
+    }
+    return r;
+  }
 }

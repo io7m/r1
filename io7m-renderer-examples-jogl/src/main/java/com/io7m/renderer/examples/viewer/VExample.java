@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,13 +25,8 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
@@ -49,8 +44,8 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLJPanel;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -58,8 +53,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import net.java.dev.designgridlayout.DesignGridLayout;
-import nu.xom.ParsingException;
-import nu.xom.ValidityException;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import com.io7m.jcache.JCacheException;
@@ -68,8 +61,6 @@ import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureLoaderType;
@@ -88,7 +79,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.examples.ExampleData;
+import com.io7m.renderer.examples.ExampleImages;
 import com.io7m.renderer.examples.ExampleRendererConstructorDebugType;
 import com.io7m.renderer.examples.ExampleRendererConstructorDeferredType;
 import com.io7m.renderer.examples.ExampleRendererConstructorForwardType;
@@ -99,7 +90,7 @@ import com.io7m.renderer.examples.ExampleRendererDeferredType;
 import com.io7m.renderer.examples.ExampleRendererForwardType;
 import com.io7m.renderer.examples.ExampleRendererType;
 import com.io7m.renderer.examples.ExampleRendererVisitorType;
-import com.io7m.renderer.examples.ExampleSceneBuilderType;
+import com.io7m.renderer.examples.ExampleSceneBuilder;
 import com.io7m.renderer.examples.ExampleSceneType;
 import com.io7m.renderer.examples.ExampleSceneUtilities;
 import com.io7m.renderer.examples.ExampleViewType;
@@ -115,238 +106,63 @@ import com.io7m.renderer.kernel.KProgram;
 import com.io7m.renderer.kernel.KRendererDebugType;
 import com.io7m.renderer.kernel.KRendererDeferredType;
 import com.io7m.renderer.kernel.KRendererForwardType;
+import com.io7m.renderer.kernel.KRendererType;
 import com.io7m.renderer.kernel.KShaderCachePostprocessingType;
 import com.io7m.renderer.kernel.KShadingProgramCommon;
-import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
-import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
-import com.io7m.renderer.kernel.types.KInstanceTranslucentLitType;
-import com.io7m.renderer.kernel.types.KInstanceTranslucentUnlitType;
-import com.io7m.renderer.kernel.types.KInstanceType;
-import com.io7m.renderer.kernel.types.KLightType;
-import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBatchedDeferred;
 import com.io7m.renderer.kernel.types.KSceneBatchedForward;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
-import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
-import com.io7m.renderer.kernel.types.KTranslucentType;
 import com.io7m.renderer.kernel.types.KUnitQuad;
 import com.io7m.renderer.kernel.types.KUnitQuadUsableType;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RExceptionIO;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
 import com.io7m.renderer.types.RExceptionJCGL;
-import com.io7m.renderer.types.RExceptionLightGroupAlreadyAdded;
-import com.io7m.renderer.types.RExceptionLightMissingShadow;
-import com.io7m.renderer.types.RXMLException;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.FPSAnimator;
 
 @SuppressWarnings("synthetic-access") final class VExample implements
   Callable<Unit>
 {
-  private static final class ExampleSceneBuilder implements
-    ExampleSceneBuilderType
-  {
-    private final KGraphicsCapabilitiesType   caps;
-    private final ETextureCubeCache           cube_cache;
-    private final EMeshCache                  mesh_cache;
-    private final KSceneBuilderWithCreateType scene_builder;
-    private final ETexture2DCache             texture2d_cache;
-
-    private ExampleSceneBuilder(
-      final KSceneBuilderWithCreateType in_scene_builder,
-      final KGraphicsCapabilitiesType in_caps,
-      final ETextureCubeCache in_cube_cache,
-      final EMeshCache in_mesh_cache,
-      final ETexture2DCache in_texture2d_cache)
-    {
-      this.scene_builder = in_scene_builder;
-      this.caps = in_caps;
-      this.cube_cache = in_cube_cache;
-      this.mesh_cache = in_mesh_cache;
-      this.texture2d_cache = in_texture2d_cache;
-    }
-
-    @Override public KGraphicsCapabilitiesType capabilities()
-    {
-      return this.caps;
-    }
-
-    @Override public TextureCubeStaticUsableType cubeTexture(
-      final String name)
-      throws RException
-    {
-      try {
-        final ETextureCubeCache cc = this.cube_cache;
-        assert cc != null;
-        return cc.loadCube(name);
-      } catch (final ValidityException e) {
-        throw RXMLException.validityException(e);
-      } catch (final IOException e) {
-        throw RExceptionIO.fromIOException(e);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
-      } catch (final ParsingException e) {
-        throw RXMLException.parsingException(e);
-      }
-    }
-
-    @Override public KMeshReadableType mesh(
-      final String name)
-      throws RException
-    {
-      final EMeshCache mc = this.mesh_cache;
-      assert mc != null;
-      return mc.loadMesh(name);
-    }
-
-    @Override public void sceneAddOpaqueUnlit(
-      final KInstanceOpaqueType instance)
-      throws RExceptionInstanceAlreadyLit
-    {
-      this.scene_builder.sceneAddOpaqueUnlit(instance);
-    }
-
-    @Override public void sceneAddShadowCaster(
-      final KLightType light,
-      final KInstanceOpaqueType instance)
-      throws RExceptionLightMissingShadow
-    {
-      this.scene_builder.sceneAddShadowCaster(light, instance);
-    }
-
-    @Override public void sceneAddTranslucentLit(
-      final KInstanceTranslucentLitType instance,
-      final Set<KLightType> lights)
-    {
-      this.scene_builder.sceneAddTranslucentLit(instance, lights);
-    }
-
-    @Override public void sceneAddTranslucentUnlit(
-      final KInstanceTranslucentUnlitType instance)
-    {
-      this.scene_builder.sceneAddTranslucentUnlit(instance);
-    }
-
-    @Override public KCamera sceneGetCamera()
-    {
-      return this.scene_builder.sceneGetCamera();
-    }
-
-    @Override public Set<KInstanceType> sceneGetInstances()
-    {
-      return this.scene_builder.sceneGetInstances();
-    }
-
-    @Override public
-      Set<KInstanceOpaqueType>
-      sceneGetInstancesOpaqueLitVisible()
-    {
-      return this.scene_builder.sceneGetInstancesOpaqueLitVisible();
-    }
-
-    @Override public
-      Map<KLightType, Set<KInstanceOpaqueType>>
-      sceneGetInstancesOpaqueShadowCastingByLight()
-    {
-      return this.scene_builder.sceneGetInstancesOpaqueShadowCastingByLight();
-    }
-
-    @Override public Set<KInstanceOpaqueType> sceneGetInstancesOpaqueUnlit()
-    {
-      return this.scene_builder.sceneGetInstancesOpaqueUnlit();
-    }
-
-    @Override public Set<KLightType> sceneGetLights()
-    {
-      return this.scene_builder.sceneGetLights();
-    }
-
-    @Override public Set<KLightType> sceneGetLightsShadowCasting()
-    {
-      return this.scene_builder.sceneGetLightsShadowCasting();
-    }
-
-    @Override public List<KTranslucentType> sceneGetTranslucents()
-    {
-      return this.scene_builder.sceneGetTranslucents();
-    }
-
-    @Override public KSceneLightGroupBuilderType sceneNewLightGroup(
-      final String name)
-      throws RExceptionLightGroupAlreadyAdded
-    {
-      return this.scene_builder.sceneNewLightGroup(name);
-    }
-
-    @Override public Texture2DStaticUsableType texture(
-      final String name)
-      throws RException
-    {
-      try {
-        final ETexture2DCache tc = this.texture2d_cache;
-        assert tc != null;
-        return tc.loadTexture(name);
-      } catch (final IOException e) {
-        throw RExceptionIO.fromIOException(e);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
-      }
-    }
-
-    @Override public Texture2DStaticUsableType textureClamped(
-      final String name)
-      throws RException
-    {
-      try {
-        final ETexture2DCache tc = this.texture2d_cache;
-        assert tc != null;
-        return tc.loadTextureClamped(name);
-      } catch (final IOException e) {
-        throw RExceptionIO.fromIOException(e);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
-      }
-    }
-  }
-
   private static final class VExampleWindow extends JFrame
   {
-    private static final long      serialVersionUID;
+    private static final long                               serialVersionUID;
 
     static {
       serialVersionUID = 2157518454345881373L;
     }
 
-    private final GLJPanel         canvas;
-    private final JLabel           canvas_label;
-    private final ViewerConfig     config;
-    private final AtomicInteger    current_view_index;
-    private final ExampleSceneType example;
-    private final VExpectedImage   expected;
-    private final JLabel           expected_label;
-    private final Timer            fps_update_timer;
-    private final VExampleWindowGL gl_events;
-    private final JLabel           label_example;
-    private final JLabel           label_fps;
-    private final JLabel           label_renderer;
-    private final JLabel           label_view;
-    private final LogUsableType    log;
-    private final AtomicBoolean    want_save;
+    private final GLJPanel                                  canvas;
+    private final JLabel                                    canvas_label;
+    private final ViewerConfig                              config;
+    private final AtomicInteger                             current_view_index;
+    private final ExampleSceneType                          example;
+    private final VExpectedImage                            expected;
+    private final JLabel                                    expected_label;
+    private final JComboBox<Class<? extends KRendererType>> expected_selector;
+    private final Timer                                     fps_update_timer;
+    private final VExampleWindowGL                          gl_events;
+    private final JLabel                                    label_example;
+    private final JLabel                                    label_fps;
+    private final JLabel                                    label_renderer;
+    private final JLabel                                    label_view;
+    private final LogUsableType                             log;
+    private final JLabel                                    renderer_label;
+    private final AtomicBoolean                             want_save;
 
     public VExampleWindow(
       final LogUsableType in_log,
       final ViewerConfig in_config,
+      final ExampleImages<BufferedImage> in_example_images,
       final ExampleRendererConstructorType in_renderer_cons,
       final ExampleSceneType in_example)
+      throws Exception
     {
       this.log = in_log.with("window");
       this.config = in_config;
@@ -364,10 +180,15 @@ import com.jogamp.opengl.util.FPSAnimator;
       this.label_fps = new JLabel("");
 
       this.expected =
-        new VExpectedImage(in_log, this.example, this.current_view_index);
+        new VExpectedImage(
+          in_log,
+          in_example_images,
+          this.example,
+          this.current_view_index);
 
       this.gl_events =
         new VExampleWindowGL(
+          this,
           in_log,
           in_config,
           this.current_view_index,
@@ -387,12 +208,45 @@ import com.jogamp.opengl.util.FPSAnimator;
         VExample.EXAMPLE_RESULT_IMAGE_WIDTH,
         VExample.EXAMPLE_RESULT_IMAGE_HEIGHT));
 
+      this.renderer_label = new JLabel("");
       this.expected_label = new JLabel("Expected");
       this.canvas_label = new JLabel("OpenGL");
+
+      this.expected_selector =
+        new JComboBox<Class<? extends KRendererType>>();
+
+      {
+        final List<Class<? extends KRendererType>> renderer_results =
+          in_example_images.getSceneRenderers(in_example.getClass());
+        for (final Class<? extends KRendererType> rc : renderer_results) {
+          this.expected_selector.addItem(rc);
+        }
+        this.expected_selector.addActionListener(new ActionListener() {
+          @Override public void actionPerformed(
+            @Nullable final ActionEvent _)
+          {
+            try {
+              @SuppressWarnings("unchecked") final Class<? extends KRendererType> i =
+                (Class<? extends KRendererType>) VExampleWindow.this.expected_selector
+                  .getSelectedItem();
+
+              VExampleWindow.this.expected.update(i);
+
+            } catch (final Exception e) {
+              throw new UnreachableCodeException(e);
+            }
+          }
+        });
+      }
 
       final JPanel top_panel = new JPanel();
       final DesignGridLayout top_layout = new DesignGridLayout(top_panel);
       top_layout.row().grid().add(this.expected_label).add(this.canvas_label);
+      top_layout
+        .row()
+        .grid()
+        .add(this.expected_selector)
+        .add(this.renderer_label);
       top_layout.row().grid().add(this.expected).add(this.canvas);
 
       this.canvas.setPreferredSize(new Dimension(
@@ -404,8 +258,12 @@ import com.jogamp.opengl.util.FPSAnimator;
         @Override public void actionPerformed(
           final @Nullable ActionEvent e)
         {
-          VExampleWindow.this.log.debug("Previous view requested");
-          VExampleWindow.this.exampleViewPrevious();
+          try {
+            VExampleWindow.this.log.debug("Previous view requested");
+            VExampleWindow.this.exampleViewPrevious();
+          } catch (final Exception x) {
+            throw new UnreachableCodeException(x);
+          }
         }
       });
 
@@ -414,8 +272,12 @@ import com.jogamp.opengl.util.FPSAnimator;
         @Override public void actionPerformed(
           final @Nullable ActionEvent e)
         {
-          VExampleWindow.this.log.debug("Next view requested");
-          VExampleWindow.this.exampleViewNext();
+          try {
+            VExampleWindow.this.log.debug("Next view requested");
+            VExampleWindow.this.exampleViewNext();
+          } catch (final Exception x) {
+            throw new UnreachableCodeException(x);
+          }
         }
       });
 
@@ -473,23 +335,35 @@ import com.jogamp.opengl.util.FPSAnimator;
     }
 
     private void exampleViewNext()
+      throws Exception
     {
       final int max = this.example.exampleViewpoints().size();
       final int current = this.current_view_index.get();
       final int next = ((current + 1) >= max) ? 0 : current + 1;
       this.current_view_index.set(next);
-      this.expected.viewChanged();
+      this.expected.updateWithSameRenderer();
       this.label_view.setText(this.getViewText(next, max));
     }
 
     private void exampleViewPrevious()
+      throws Exception
     {
       final int max = this.example.exampleViewpoints().size();
       final int current = this.current_view_index.get();
       final int next = ((current - 1) < 0) ? max - 1 : current - 1;
       this.current_view_index.set(next);
-      this.expected.viewChanged();
+      this.expected.updateWithSameRenderer();
       this.label_view.setText(this.getViewText(next, max));
+    }
+
+    private void rendererInitialized(
+      final Class<? extends KRendererType> i)
+      throws Exception
+    {
+      this.log.debug("Renderer started");
+      this.renderer_label.setText(i.getCanonicalName());
+      this.expected_selector.setSelectedItem(i);
+      this.expected.update(i);
     }
 
     @SuppressWarnings({ "static-method", "boxing" }) private
@@ -507,7 +381,6 @@ import com.jogamp.opengl.util.FPSAnimator;
 
   private static final class VExampleWindowGL implements GLEventListener
   {
-
     private static void drawQuad(
       final JCGLInterfaceCommonType gc,
       final KUnitQuadUsableType quad,
@@ -545,6 +418,7 @@ import com.jogamp.opengl.util.FPSAnimator;
     private @Nullable ETextureCubeCache          cube_cache;
     private final AtomicInteger                  current_view_index;
     private final ExampleSceneType               example;
+    private final VExampleWindow                 example_window;
     private @Nullable KFramebufferType           framebuffer;
     private @Nullable JCGLImplementationType     gi;
     private final LogUsableType                  glog;
@@ -563,6 +437,7 @@ import com.jogamp.opengl.util.FPSAnimator;
     private final AtomicBoolean                  want_save;
 
     public VExampleWindowGL(
+      final VExampleWindow in_window,
       final LogUsableType in_log,
       final ViewerConfig in_config,
       final AtomicInteger in_view_id,
@@ -573,6 +448,7 @@ import com.jogamp.opengl.util.FPSAnimator;
       final JLabel in_renderer_label)
     {
       this.glog = in_log.with("gl");
+      this.example_window = NullCheck.notNull(in_window, "Window");
       this.renderer_cons = in_renderer_cons;
       this.example = in_example;
       this.current_view_index = in_view_id;
@@ -628,6 +504,34 @@ import com.jogamp.opengl.util.FPSAnimator;
         assert r != null;
 
         r.rendererAccept(new ExampleRendererVisitorType<Unit>() {
+          @Override public Unit visitDebug(
+            final ExampleRendererDebugType rd)
+            throws RException
+          {
+            try {
+              final KRendererDebugType dr = rd.rendererGetDebug();
+              final KFramebufferForwardType fb =
+                (KFramebufferForwardType) VExampleWindowGL.this.framebuffer;
+              assert fb != null;
+
+              final KScene sc = scene_builder.sceneCreate();
+
+              dr.rendererDebugEvaluate(fb, sc);
+              VExampleWindowGL.this.renderSceneResults(fb);
+
+              if (VExampleWindowGL.this.want_save.get()) {
+                VExampleWindowGL.this.want_save.set(false);
+                VExampleWindowGL.this.saveImage(drawable, view_index);
+              }
+
+              return Unit.unit();
+            } catch (final JCGLException e) {
+              throw RExceptionJCGL.fromJCGLException(e);
+            } catch (final JCacheException e) {
+              throw new UnreachableCodeException(e);
+            }
+          }
+
           @Override public Unit visitDeferred(
             final ExampleRendererDeferredType rd)
             throws RException
@@ -687,34 +591,6 @@ import com.jogamp.opengl.util.FPSAnimator;
               throw new UnreachableCodeException(e);
             }
           }
-
-          @Override public Unit visitDebug(
-            final ExampleRendererDebugType rd)
-            throws RException
-          {
-            try {
-              final KRendererDebugType dr = rd.rendererGetDebug();
-              final KFramebufferForwardType fb =
-                (KFramebufferForwardType) VExampleWindowGL.this.framebuffer;
-              assert fb != null;
-
-              final KScene sc = scene_builder.sceneCreate();
-
-              dr.rendererDebugEvaluate(fb, sc);
-              VExampleWindowGL.this.renderSceneResults(fb);
-
-              if (VExampleWindowGL.this.want_save.get()) {
-                VExampleWindowGL.this.want_save.set(false);
-                VExampleWindowGL.this.saveImage(drawable, view_index);
-              }
-
-              return Unit.unit();
-            } catch (final JCGLException e) {
-              throw RExceptionJCGL.fromJCGLException(e);
-            } catch (final JCacheException e) {
-              throw new UnreachableCodeException(e);
-            }
-          }
         });
 
       } catch (final Throwable e) {
@@ -760,6 +636,14 @@ import com.jogamp.opengl.util.FPSAnimator;
     public double getFPSEstimate()
     {
       return this.time_fps_estimate.get();
+    }
+
+    public ExampleRendererType getRenderer()
+    {
+      assert this.running;
+      final ExampleRendererType r = this.renderer;
+      assert r != null;
+      return r;
     }
 
     @Override public void init(
@@ -853,6 +737,17 @@ import com.jogamp.opengl.util.FPSAnimator;
             });
 
         this.renderer = r;
+        SwingUtilities.invokeLater(new Runnable() {
+          @Override public void run()
+          {
+            try {
+              VExampleWindowGL.this.example_window.rendererInitialized(r
+                .rendererGetActualClass());
+            } catch (final Exception e) {
+              throw new UnreachableCodeException(e);
+            }
+          }
+        });
 
         SwingUtilities.invokeLater(new Runnable() {
           @Override public void run()
@@ -861,38 +756,9 @@ import com.jogamp.opengl.util.FPSAnimator;
           }
         });
 
-        this.results_panel.loadImages(r);
-
         this.framebuffer =
           r
             .rendererAccept(new ExampleRendererVisitorType<KFramebufferType>() {
-              @Override public KFramebufferType visitDeferred(
-                final ExampleRendererDeferredType rd)
-                throws RException
-              {
-                final AreaInclusive area = this.makeArea();
-
-                final KFramebufferRGBADescription rgba_description =
-                  KFramebufferRGBADescription.newDescription(
-                    area,
-                    TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-                    TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-                    KRGBAPrecision.RGBA_PRECISION_8);
-
-                final KFramebufferDepthDescription depth_description =
-                  KFramebufferDepthDescription.newDescription(
-                    area,
-                    TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
-                    TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-                    KDepthPrecision.DEPTH_PRECISION_24);
-
-                return KFramebufferDeferred.newFramebuffer(
-                  g,
-                  KFramebufferForwardDescription.newDescription(
-                    rgba_description,
-                    depth_description));
-              }
-
               private AreaInclusive makeArea()
               {
                 final RangeInclusiveL range_x =
@@ -902,13 +768,6 @@ import com.jogamp.opengl.util.FPSAnimator;
                 final AreaInclusive area =
                   new AreaInclusive(range_x, range_y);
                 return area;
-              }
-
-              @Override public KFramebufferType visitForward(
-                final ExampleRendererForwardType rf)
-                throws RException
-              {
-                return this.makeForward();
               }
 
               private KFramebufferType makeForward()
@@ -939,6 +798,40 @@ import com.jogamp.opengl.util.FPSAnimator;
 
               @Override public KFramebufferType visitDebug(
                 final ExampleRendererDebugType rd)
+                throws RException
+              {
+                return this.makeForward();
+              }
+
+              @Override public KFramebufferType visitDeferred(
+                final ExampleRendererDeferredType rd)
+                throws RException
+              {
+                final AreaInclusive area = this.makeArea();
+
+                final KFramebufferRGBADescription rgba_description =
+                  KFramebufferRGBADescription.newDescription(
+                    area,
+                    TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+                    TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+                    KRGBAPrecision.RGBA_PRECISION_8);
+
+                final KFramebufferDepthDescription depth_description =
+                  KFramebufferDepthDescription.newDescription(
+                    area,
+                    TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
+                    TextureFilterMinification.TEXTURE_FILTER_NEAREST,
+                    KDepthPrecision.DEPTH_PRECISION_24);
+
+                return KFramebufferDeferred.newFramebuffer(
+                  g,
+                  KFramebufferForwardDescription.newDescription(
+                    rgba_description,
+                    depth_description));
+              }
+
+              @Override public KFramebufferType visitForward(
+                final ExampleRendererForwardType rf)
                 throws RException
               {
                 return this.makeForward();
@@ -1107,125 +1000,6 @@ import com.jogamp.opengl.util.FPSAnimator;
     }
   }
 
-  private static final class VExpectedImage extends JLabel
-  {
-    private static final long      serialVersionUID;
-
-    static {
-      serialVersionUID = 1636894751686016138L;
-    }
-
-    private final AtomicInteger    current_view_index;
-    private final List<ImageIcon>  images;
-    private volatile boolean       images_loaded;
-    private final LogUsableType    rlog;
-    private final ExampleSceneType scene;
-
-    public VExpectedImage(
-      final LogUsableType in_log,
-      final ExampleSceneType in_scene,
-      final AtomicInteger in_current_view_index)
-    {
-      this.rlog = in_log.with("results");
-      this.scene = in_scene;
-      this.current_view_index = in_current_view_index;
-
-      this.setText("Waiting for images...");
-
-      final List<ExampleViewType> views = this.scene.exampleViewpoints();
-      this.images = new ArrayList<ImageIcon>(views.size());
-      this.images_loaded = false;
-
-      for (int index = 0; index < views.size(); ++index) {
-        this.images.add(index, null);
-      }
-    }
-
-    void loadImages(
-      final ExampleRendererType actual_renderer)
-    {
-      final List<ExampleViewType> views = this.scene.exampleViewpoints();
-
-      final SwingWorker<Unit, Unit> worker = new SwingWorker<Unit, Unit>() {
-        @Override protected Unit doInBackground()
-          throws Exception
-        {
-          for (int index = 0; index < views.size(); ++index) {
-            final String file =
-              ExampleData.getResultFile(
-                actual_renderer,
-                VExpectedImage.this.scene,
-                index);
-            VExpectedImage.this.rlog.debug(String.format(
-              "Attempting to load %s",
-              file));
-
-            final InputStream stream =
-              ExampleData.getResultImageStream(
-                actual_renderer,
-                VExpectedImage.this.scene,
-                index);
-
-            try {
-              if (stream == null) {
-                VExpectedImage.this.rlog.debug(String.format(
-                  "Nonexistent %s",
-                  file));
-                continue;
-              }
-
-              final BufferedImage i = ImageIO.read(stream);
-              if (i == null) {
-                VExpectedImage.this.rlog.debug(String.format(
-                  "Corrupt %s",
-                  file));
-                continue;
-              }
-
-              final ImageIcon icon = new ImageIcon(i);
-              VExpectedImage.this.images.set(index, icon);
-            } finally {
-              if (stream != null) {
-                stream.close();
-              }
-            }
-          }
-          return Unit.unit();
-        }
-
-        @Override protected void done()
-        {
-          try {
-            this.get();
-            VExpectedImage.this.rlog.debug("Finished loading images");
-            VExpectedImage.this.images_loaded = true;
-            VExpectedImage.this.viewChanged();
-          } catch (final InterruptedException e) {
-            VErrorBox.showErrorLater(VExpectedImage.this.rlog, e);
-          } catch (final ExecutionException e) {
-            VErrorBox.showErrorLater(VExpectedImage.this.rlog, e);
-          }
-        }
-      };
-
-      worker.execute();
-    }
-
-    void viewChanged()
-    {
-      final int view_index = this.current_view_index.get();
-      if (this.images_loaded) {
-        this.setText("");
-        if (view_index < this.images.size()) {
-          final ImageIcon icon = this.images.get(view_index);
-          if (icon != null) {
-            this.setIcon(icon);
-          }
-        }
-      }
-    }
-  }
-
   private static final int EXAMPLE_RESULT_IMAGE_HEIGHT;
   private static final int EXAMPLE_RESULT_IMAGE_WIDTH;
 
@@ -1249,6 +1023,7 @@ import com.jogamp.opengl.util.FPSAnimator;
 
   private final ViewerConfig                      config;
   private @Nullable ExampleSceneType              example;
+  private final ExampleImages<BufferedImage>      example_images;
   private final Class<? extends ExampleSceneType> example_type;
   private final LogUsableType                     log;
   private final ExampleRendererConstructorType    renderer_cons;
@@ -1257,11 +1032,13 @@ import com.jogamp.opengl.util.FPSAnimator;
   VExample(
     final LogUsableType in_log,
     final ViewerConfig in_config,
+    final ExampleImages<BufferedImage> in_example_images,
     final ExampleRendererConstructorType in_renderer_cons,
     final Class<? extends ExampleSceneType> in_example_type)
   {
     this.log = NullCheck.notNull(in_log, "Log");
     this.example_type = in_example_type;
+    this.example_images = in_example_images;
     this.renderer_cons = in_renderer_cons;
     this.config = in_config;
   }
@@ -1281,6 +1058,7 @@ import com.jogamp.opengl.util.FPSAnimator;
       new VExampleWindow(
         this.log,
         this.config,
+        this.example_images,
         this.renderer_cons,
         this.example);
     assert w != null;
