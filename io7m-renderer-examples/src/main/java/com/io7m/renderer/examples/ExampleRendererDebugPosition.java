@@ -28,6 +28,7 @@ import com.io7m.renderer.kernel.KDepthRenderer;
 import com.io7m.renderer.kernel.KDepthRendererType;
 import com.io7m.renderer.kernel.KRendererDebugPosition;
 import com.io7m.renderer.kernel.KRendererDebugType;
+import com.io7m.renderer.kernel.KRendererType;
 import com.io7m.renderer.kernel.KShaderCacheDebugType;
 import com.io7m.renderer.kernel.KShaderCacheDepthType;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
@@ -118,6 +119,11 @@ public final class ExampleRendererDebugPosition implements
     throws RException
   {
     return v.visitDebug(this);
+  }
+
+  @Override public Class<? extends KRendererType> rendererGetActualClass()
+  {
+    return this.actual.getClass();
   }
 
   @Override public KRendererDebugType rendererGetDebug()
