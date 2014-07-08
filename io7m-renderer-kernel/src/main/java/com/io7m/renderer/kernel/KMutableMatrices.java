@@ -190,8 +190,9 @@ import com.io7m.renderer.types.RTransformViewType;
       return this.parent.getProjection();
     }
 
-    void instanceStart(
-      final KInstanceType i)
+    void instanceStartWithTransform(
+      final KTransformType transform,
+      final RMatrixI3x3F<RTransformTextureType> uv)
     {
       assert KMutableMatrices.this.observerIsActive();
       KMutableMatrices.this.instanceSetStarted();
@@ -200,7 +201,6 @@ import com.io7m.renderer.types.RTransformViewType;
        * Calculate model and modelview transforms.
        */
 
-      final KTransformType transform = i.instanceGetTransform();
       transform.transformMakeMatrix4x4F(
         KMutableMatrices.this.transform_context,
         this.matrix_model);
@@ -213,12 +213,18 @@ import com.io7m.renderer.types.RTransformViewType;
       KMatrices.makeNormalMatrix(this.matrix_modelview, this.matrix_normal);
 
       /**
-       * Calculate texture transform.
+       * Make UV matrix.
        */
 
-      final RMatrixI3x3F<RTransformTextureType> instance_uv_m =
-        i.instanceGetUVMatrix();
-      instance_uv_m.makeMatrixM3x3F(this.matrix_uv);
+      uv.makeMatrixM3x3F(this.matrix_uv);
+    }
+
+    void instanceStart(
+      final KInstanceType i)
+    {
+      this.instanceStartWithTransform(
+        i.instanceGetTransform(),
+        i.instanceGetUVMatrix());
 
       try {
 
@@ -555,7 +561,7 @@ import com.io7m.renderer.types.RTransformViewType;
   /**
    * The type of functions evaluated within the context of a single
    * transformed instance (such as {@link KInstanceType}).
-   * 
+   *
    * @param <T>
    *          The type of values returned by the function
    * @param <E>
@@ -566,7 +572,7 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     /**
      * Evaluate the function with the resulting matrices.
-     * 
+     *
      * @param o
      *          The matrices
      * @return A value of type <code>T</code>
@@ -616,7 +622,7 @@ import com.io7m.renderer.types.RTransformViewType;
   /**
    * The type of functions evaluated within the context of a projective
    * observer (such as a projective light).
-   * 
+   *
    * @param <T>
    *          The type of values returned by the function
    * @param <E>
@@ -627,7 +633,7 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     /**
      * Evaluate the function with the resulting matrices.
-     * 
+     *
      * @param o
      *          The matrices
      * @return A value of type <code>T</code>
@@ -662,7 +668,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   /**
    * The type of functions evaluated within the context of an observer.
-   * 
+   *
    * @param <T>
    *          The type of values returned by the function
    * @param <E>
@@ -673,7 +679,7 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     /**
      * Evaluate the function with the resulting matrices.
-     * 
+     *
      * @param o
      *          The matrices
      * @return A value of type <code>T</code>
@@ -698,7 +704,7 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     /**
      * Evaluate the given function with the given transformed instance.
-     * 
+     *
      * @param <T>
      *          The type of values returned by the function
      * @param <E>
@@ -708,7 +714,7 @@ import com.io7m.renderer.types.RTransformViewType;
      * @param f
      *          The function
      * @return The value returned by the function
-     * 
+     *
      * @throws RException
      *           If the function raises {@link RException}
      * @throws E
@@ -723,8 +729,44 @@ import com.io7m.renderer.types.RTransformViewType;
         E;
 
     /**
+     * <p>
+     * Evaluate the given function with the given transform.
+     * </p>
+     * <p>
+     * This function is intended for use when there isn't necessarily a real
+     * instance available (such as when rendering light geometry for the light
+     * pass of a deferred renderer).
+     * </p>
+     *
+     * @param <T>
+     *          The type of values returned by the function
+     * @param <E>
+     *          The type of exceptions raised by the function
+     * @param t
+     *          The transform
+     * @param uv
+     *          The UV matrix
+     * @param f
+     *          The function
+     * @return The value returned by the function
+     *
+     * @throws RException
+     *           If the function raises {@link RException}
+     * @throws E
+     *           If the function raises <code>E</code> @ * If any parameter is
+     *           <code>null</code>
+     */
+
+    <T, E extends Throwable> T withGenericTransform(
+      KTransformType t,
+      RMatrixI3x3F<RTransformTextureType> uv,
+      MatricesInstanceFunctionType<T, E> f)
+      throws RException,
+        E;
+
+    /**
      * Evaluate the given function with the given projective light.
-     * 
+     *
      * @param <T>
      *          The type of values returned by the function
      * @param <E>
@@ -734,7 +776,7 @@ import com.io7m.renderer.types.RTransformViewType;
      * @param f
      *          The function
      * @return The value returned by the function
-     * 
+     *
      * @throws RException
      *           If the function raises {@link RException}
      * @throws E
@@ -788,7 +830,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   /**
    * The type of functions evaluated within the context of a projective light.
-   * 
+   *
    * @param <T>
    *          The type of values returned by the function
    * @param <E>
@@ -799,7 +841,7 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     /**
      * Evaluate the function with the resulting matrices.
-     * 
+     *
      * @param p
      *          The matrices
      * @return A value of type <code>T</code>
@@ -825,7 +867,7 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     /**
      * Evaluate the given function with the given transformed instance.
-     * 
+     *
      * @param <T>
      *          The type of values returned by the function
      * @param <E>
@@ -835,7 +877,7 @@ import com.io7m.renderer.types.RTransformViewType;
      * @param f
      *          The function
      * @return The value returned by the function
-     * 
+     *
      * @throws RException
      *           If the function raises {@link RException}
      * @throws E
@@ -969,6 +1011,34 @@ import com.io7m.renderer.types.RTransformViewType;
       }
 
       KMutableMatrices.this.instance.instanceStart(i);
+      try {
+        return f.run(KMutableMatrices.this.instance);
+      } finally {
+        KMutableMatrices.this.instanceSetStopped();
+      }
+    }
+
+    @Override public <T, E extends Throwable> T withGenericTransform(
+      final KTransformType t,
+      final RMatrixI3x3F<RTransformTextureType> uv,
+      final MatricesInstanceFunctionType<T, E> f)
+      throws RException,
+        E
+    {
+      NullCheck.notNull(t, "Transform");
+      NullCheck.notNull(uv, "UV matrix");
+      NullCheck.notNull(f, "Function");
+
+      if (KMutableMatrices.this.projectiveLightIsActive()) {
+        throw new RExceptionMatricesProjectiveActive(
+          "Projective light is already active");
+      }
+      if (KMutableMatrices.this.instanceIsActive()) {
+        throw new RExceptionMatricesInstanceActive(
+          "Instance is already active");
+      }
+
+      KMutableMatrices.this.instance.instanceStartWithTransform(t, uv);
       try {
         return f.run(KMutableMatrices.this.instance);
       } finally {
@@ -1218,7 +1288,7 @@ import com.io7m.renderer.types.RTransformViewType;
   /**
    * Evaluate the given observer function starting with the initial view and
    * projection matrices.
-   * 
+   *
    * @param <T>
    *          The type of values returned by the function
    * @param <E>
@@ -1230,7 +1300,7 @@ import com.io7m.renderer.types.RTransformViewType;
    * @param f
    *          The observer function
    * @return A set of matrices @ * If any parameter is <code>null</code>
-   * 
+   *
    * @throws E
    *           If the observer function raises <code>E</code>
    * @throws RException

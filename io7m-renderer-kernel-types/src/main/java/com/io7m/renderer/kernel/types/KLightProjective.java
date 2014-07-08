@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,6 +27,7 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionLightMissingTexture;
@@ -45,7 +46,8 @@ import com.io7m.renderer.types.RVectorI3F;
  * </p>
  */
 
-@EqualityReference public final class KLightProjective implements KLightType
+@EqualityReference public final class KLightProjective implements
+  KLightWithTransformType
 {
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightProjectiveBuilderType
@@ -183,6 +185,8 @@ import com.io7m.renderer.types.RVectorI3F;
     }
   }
 
+  private static final VectorI3F ONE = new VectorI3F(1.0f, 1.0f, 1.0f);
+
   private static String getCode(
     final KGraphicsCapabilitiesType caps,
     final OptionType<KShadowType> in_shadow)
@@ -228,7 +232,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * <p>
    * Create a builder for creating new projective lights.
    * </p>
-   * 
+   *
    * @param in_texture
    *          The texture.
    * @param in_projection
@@ -248,7 +252,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * Create a builder for creating new spherical lights. The builder will be
    * initialized to values based on the given light.
    * </p>
-   * 
+   *
    * @param p
    *          The initial light.
    * @return A new light builder.
@@ -271,6 +275,7 @@ import com.io7m.renderer.types.RVectorI3F;
   private final OptionType<KShadowType>     shadow;
   private final Texture2DStaticUsableType   texture;
   private final int                         textures;
+  private final KTransformType              transform;
 
   private KLightProjective(
     final Texture2DStaticUsableType in_texture,
@@ -294,6 +299,12 @@ import com.io7m.renderer.types.RVectorI3F;
     this.texture = NullCheck.notNull(in_texture, "Texture");
     this.shadow = NullCheck.notNull(in_shadow, "Shadow");
     this.code = NullCheck.notNull(in_code, "Code");
+
+    this.transform =
+      KTransformOST.newTransform(
+        this.orientation,
+        ONE,
+        this.position);
 
     /**
      * One texture for the light, and at most one for the shadow.
@@ -385,6 +396,11 @@ import com.io7m.renderer.types.RVectorI3F;
   public Texture2DStaticUsableType lightGetTexture()
   {
     return this.texture;
+  }
+
+  @Override public KTransformType lightGetTransform()
+  {
+    return this.transform;
   }
 
   @Override public boolean lightHasShadow()

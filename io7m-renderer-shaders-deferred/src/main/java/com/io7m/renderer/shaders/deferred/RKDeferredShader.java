@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -177,6 +177,9 @@ import com.io7m.renderer.types.RException;
           final KLightSphere ls)
           throws RException
         {
+          b.append("  -- Spherical light parameters\n");
+          b.append("  parameter light_spherical : Light.t;\n");
+          b.append("\n");
           return Unit.unit();
         }
       });
@@ -284,15 +287,29 @@ import com.io7m.renderer.types.RException;
           throws RException,
             UnreachableCodeException
         {
-          // TODO Auto-generated method stub
+          b.append("  -- Spherical light vectors\n");
+          b.append("  value light_vectors =\n");
+          b.append("    Light.vectors (\n");
+          b.append("      light_spherical.position,\n");
+          b.append("      eye_position [x y z],\n");
+          b.append("      normal\n");
+          b.append("    );\n");
 
-          b.append("  -- Directional emissive diffuse light term\n");
+          b.append("  -- Spherical emissive diffuse light term\n");
           b.append("  value light_diffuse : vector_3f =\n");
-          b.append("    new vector_3f (0.0,0.0,0.0);\n");
+          b.append("    SphericalLight.diffuse_color (\n");
+          b.append("      light_spherical,\n");
+          b.append("      light_vectors,\n");
+          b.append("      emission\n");
+          b.append("     );\n");
 
-          b.append("  -- Directional specular light term\n");
+          b.append("  -- Spherical specular light term\n");
           b.append("  value light_specular : vector_3f =\n");
-          b.append("    new vector_3f (0.0,0.0,0.0);\n");
+          b.append("    SphericalLight.specular_color (\n");
+          b.append("      light_spherical,\n");
+          b.append("      light_vectors,\n");
+          b.append("      specular\n");
+          b.append("    );\n");
 
           return Unit.unit();
         }
