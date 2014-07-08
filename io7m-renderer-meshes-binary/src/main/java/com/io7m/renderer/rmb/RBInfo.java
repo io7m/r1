@@ -81,15 +81,24 @@ import com.io7m.renderer.types.RBExceptionUnsupportedVersion;
     assert a != null;
     final int r = in_s.read(a, 0, 4);
 
-    if (r != 4) {
+    boolean ok = r == 4;
+    if (ok) {
+      ok = ok && (a[0] == 'R');
+      ok = ok && (a[1] == 'M');
+      ok = ok && (a[2] == 'B');
+      ok = ok && (a[3] == 0x0A);
+    }
+
+    if (!ok) {
       final StringBuilder m = new StringBuilder();
       m.append("Invalid magic number.\n");
       m.append("  Expected: ");
       // CHECKSTYLE:OFF
-      m.append(RBInfo.showBytes(new byte[] { 'R', 'M', 'B', 0x0A }));
+      m.append(RBInfo.showBytes(new byte[] { 'R', 'M', 'B', 0x0A }, 4));
       // CHECKSTYLE:ON
-      m.append("  Got:      ");
-      m.append(RBInfo.showBytes(a));
+      m.append("\n");
+      m.append("  Got: ");
+      m.append(RBInfo.showBytes(a, r));
       m.append("\n");
       final String s = m.toString();
       assert s != null;
@@ -124,11 +133,12 @@ import com.io7m.renderer.types.RBExceptionUnsupportedVersion;
   }
 
   private static String showBytes(
-    final byte[] a)
+    final byte[] a,
+    final int size)
   {
     final StringBuilder s = new StringBuilder();
     s.append("[");
-    for (int index = 0; index < a.length; ++index) {
+    for (int index = 0; index < Math.min(size, a.length); ++index) {
       final byte c = a[index];
       s.append(String.format("0x%02X", c));
       if ((index + 1) != a.length) {
