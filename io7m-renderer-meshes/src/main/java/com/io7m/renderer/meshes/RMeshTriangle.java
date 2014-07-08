@@ -30,13 +30,13 @@ import com.io7m.jnull.Nullable;
 
 @EqualityStructural public final class RMeshTriangle
 {
-  private final int v0;
-  private final int v1;
-  private final int v2;
+  private final long v0;
+  private final long v1;
+  private final long v2;
 
   /**
    * Construct a triangle.
-   * 
+   *
    * @param in_v0
    *          The index of the first vertex.
    * @param in_v1
@@ -46,9 +46,9 @@ import com.io7m.jnull.Nullable;
    */
 
   public RMeshTriangle(
-    final int in_v0,
-    final int in_v1,
-    final int in_v2)
+    final long in_v0,
+    final long in_v1,
+    final long in_v2)
   {
     this.v0 = in_v0;
     this.v1 = in_v1;
@@ -77,7 +77,7 @@ import com.io7m.jnull.Nullable;
    * @return The index of the first vertex.
    */
 
-  public int getV0()
+  public long getV0()
   {
     return this.v0;
   }
@@ -86,7 +86,7 @@ import com.io7m.jnull.Nullable;
    * @return The index of the second vertex.
    */
 
-  public int getV1()
+  public long getV1()
   {
     return this.v1;
   }
@@ -95,7 +95,7 @@ import com.io7m.jnull.Nullable;
    * @return The index of the third vertex.
    */
 
-  public int getV2()
+  public long getV2()
   {
     return this.v2;
   }
@@ -104,9 +104,9 @@ import com.io7m.jnull.Nullable;
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.v0;
-    result = (prime * result) + this.v1;
-    result = (prime * result) + this.v2;
+    result = (int) ((prime * result) + this.v0);
+    result = (int) ((prime * result) + this.v1);
+    result = (int) ((prime * result) + this.v2);
     return result;
   }
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -17,6 +17,7 @@
 package com.io7m.renderer.tests.rmb;
 
 import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -400,6 +401,252 @@ import com.io7m.renderer.types.RVectorI4F;
 
     RBImporter.parseFromStream(
       RBImporterTest.get("minimal-0.rmb"),
+      events,
+      Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests"));
+  }
+
+  @Test public void testSphere16()
+    throws Exception
+  {
+    final RMeshParserEventsType<Exception> events =
+      new RMeshParserEventsType<Exception>() {
+        @Override public void eventError(
+          final Exception e)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshEnded()
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshName(
+          final String name)
+          throws Exception
+        {
+          Assert.assertEquals("sphere16-mesh", name);
+        }
+
+        @Override public void eventMeshStarted()
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshTriangle(
+          final long index,
+          final long v0,
+          final long v1,
+          final long v2)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshTrianglesEnded()
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshTrianglesStarted(
+          final long count)
+          throws Exception
+        {
+          Assert.assertEquals(count, 224);
+        }
+
+        @Override public void eventMeshVertexEnded(
+          final long index)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVertexNormal(
+          final long index,
+          final RVectorI3F<RSpaceObjectType> normal)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVertexPosition(
+          final long index,
+          final RVectorI3F<RSpaceObjectType> position)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVertexStarted(
+          final long index)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVertexTangent4f(
+          final long index,
+          final RVectorI4F<RSpaceObjectType> tangent)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVertexUV(
+          final long index,
+          final RVectorI2F<RSpaceTextureType> uv)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVerticesEnded(
+          final RVectorI3F<RSpaceObjectType> bounds_lower,
+          final RVectorI3F<RSpaceObjectType> bounds_upper)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVerticesStarted(
+          final long count)
+          throws Exception
+        {
+          Assert.assertEquals(count, 672);
+        }
+      };
+
+    RBImporter.parseFromStream(
+      RBImporterTest.get("sphere16.rmb"),
+      events,
+      Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests"));
+  }
+
+  @Test public void testSphere16z()
+    throws Exception
+  {
+    final RMeshParserEventsType<Exception> events =
+      new RMeshParserEventsType<Exception>() {
+        @Override public void eventError(
+          final Exception e)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshEnded()
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshName(
+          final String name)
+          throws Exception
+        {
+          Assert.assertEquals("sphere16-mesh", name);
+        }
+
+        @Override public void eventMeshStarted()
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshTriangle(
+          final long index,
+          final long v0,
+          final long v1,
+          final long v2)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshTrianglesEnded()
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshTrianglesStarted(
+          final long count)
+          throws Exception
+        {
+          Assert.assertEquals(count, 224);
+        }
+
+        @Override public void eventMeshVertexEnded(
+          final long index)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVertexNormal(
+          final long index,
+          final RVectorI3F<RSpaceObjectType> normal)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVertexPosition(
+          final long index,
+          final RVectorI3F<RSpaceObjectType> position)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVertexStarted(
+          final long index)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVertexTangent4f(
+          final long index,
+          final RVectorI4F<RSpaceObjectType> tangent)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVertexUV(
+          final long index,
+          final RVectorI2F<RSpaceTextureType> uv)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVerticesEnded(
+          final RVectorI3F<RSpaceObjectType> bounds_lower,
+          final RVectorI3F<RSpaceObjectType> bounds_upper)
+          throws Exception
+        {
+          // Nothing
+        }
+
+        @Override public void eventMeshVerticesStarted(
+          final long count)
+          throws Exception
+        {
+          Assert.assertEquals(count, 672);
+        }
+      };
+
+    final InputStream s = RBImporterTest.get("sphere16.rmbz");
+    final GZIPInputStream zs = new GZIPInputStream(s);
+    RBImporter.parseFromStream(
+      zs,
       events,
       Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests"));
   }

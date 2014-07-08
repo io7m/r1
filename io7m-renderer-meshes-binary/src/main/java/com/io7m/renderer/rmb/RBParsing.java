@@ -121,20 +121,24 @@ import com.io7m.renderer.types.RBExceptionUnexpectedEOF;
     throws RBException,
       IOException
   {
-    log.debug("reading 2-byte name length");
+    log.debug("reading UTF-8 string");
+    log.debug("reading 2-byte string length");
 
-    final int size = RBParsing.readUnsigned16(temp, stream);
-    final int name_offset = 2;
-    final int aligned_size = ((size + 4 + name_offset) / 4) * 4;
-    final int pad = aligned_size - (size + name_offset);
+    final int name_size = RBParsing.readUnsigned16(temp, stream);
+    final int offset = 2;
+    final int name_aligned_size =
+      (int) RBAlign.alignedSize(offset + name_size, 4);
+    final int pad = (name_aligned_size - name_size) - offset;
 
     if (log.wouldLog(LogLevel.LOG_DEBUG)) {
       final String rs =
-        String.format(
-          "name is %d bytes, aligned size %d (%d padding bytes)",
-          size,
-          aligned_size,
-          pad);
+        String
+          .format(
+            "string is %d bytes, aligned size %d (%d byte offset, %d padding bytes)",
+            name_size,
+            name_aligned_size,
+            offset,
+            pad);
       assert rs != null;
       log.debug(rs);
     }
@@ -143,12 +147,12 @@ import com.io7m.renderer.types.RBExceptionUnexpectedEOF;
      * Read actual name bytes.
      */
 
-    final byte[] name_buffer = new byte[size];
+    final byte[] name_buffer = new byte[name_size];
     final int r = stream.read(name_buffer);
-    if (r < size) {
+    if (r < name_size) {
       final StringBuilder m = new StringBuilder();
       m.append("Expected ");
-      m.append(size);
+      m.append(name_size);
       m.append(" bytes, got ");
       m.append(r);
       final String s = m.toString();

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -121,15 +121,17 @@ import com.io7m.renderer.types.RVectorI4F;
     final String name = new String(original.getBytes(), "UTF-8");
     final byte[] name_bytes = name.getBytes();
     final int name_length = name_bytes.length;
-    assert name_length < 65536;
 
-    final int name_aligned_length = ((name_length + 4 + 2) / 4) * 4;
-    final int pad = name_aligned_length - name_length;
+    final int offset = 2;
+    final long name_aligned_size =
+      RBAlign.alignedSize(name_length + offset, 4);
+    assert name_aligned_size < 65536;
+    final int pad_size = (int) (name_aligned_size - (name_length + offset));
 
     this.writeUnsigned16(name_length, s);
     s.write(name_bytes);
 
-    for (int index = 0; index < pad; ++index) {
+    for (int index = 0; index < pad_size; ++index) {
       s.write(0x0);
     }
   }

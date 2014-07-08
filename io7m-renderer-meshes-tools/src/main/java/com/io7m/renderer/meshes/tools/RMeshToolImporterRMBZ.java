@@ -25,7 +25,6 @@ import java.util.zip.GZIPInputStream;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jlog.LogUsableType;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.renderer.meshes.RMeshTangents;
 import com.io7m.renderer.rmb.RBInfo;
 import com.io7m.renderer.types.RException;
@@ -62,13 +61,33 @@ public final class RMeshToolImporterRMBZ implements RMeshToolImporterType
   }
 
   @Override public RMeshTangents importFile(
-    final File input,
+    final File file,
     final String mesh_name,
     final OptionType<String> mesh_change_name,
     final LogUsableType log)
     throws RException
   {
-    throw new UnimplementedCodeException();
+    InputStream stream = null;
+
+    try {
+      stream = new GZIPInputStream(new FileInputStream(file));
+
+      return RMeshToolImporterRMB.parseMeshTangents(
+        mesh_name,
+        mesh_change_name,
+        log,
+        stream);
+    } catch (final IOException e) {
+      throw RExceptionIO.fromIOException(e);
+    } finally {
+      try {
+        if (stream != null) {
+          stream.close();
+        }
+      } catch (final IOException e) {
+        throw RExceptionIO.fromIOException(e);
+      }
+    }
   }
 
   @Override public void showFile(
