@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,6 +30,7 @@ import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLExceptionNoStencilBuffer;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.StencilFunction;
 import com.io7m.jcanephora.StencilOperation;
@@ -77,7 +78,10 @@ import com.io7m.renderer.kernel.types.KUnitSphereUsableType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixI3x3F;
+import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RTransformTextureType;
+import com.io7m.renderer.types.RVectorI3F;
+import com.io7m.renderer.types.RVectorI4F;
 
 /**
  * A deferred renderer for opaque objects.
@@ -580,6 +584,8 @@ import com.io7m.renderer.types.RTransformTextureType;
       JCacheException,
       JCGLException
   {
+    gc.cullingDisable();
+
     final KGeometryBufferUsableType gbuffer =
       framebuffer.kFramebufferGetGeometryBuffer();
     final KProgram kp = this.shader_light_cache.cacheGetLU(ld.lightGetCode());
@@ -638,13 +644,6 @@ import com.io7m.renderer.types.RTransformTextureType;
       gc.framebufferDrawBind(render_fb);
 
       /**
-       * Disable culling (will be re-enabled in specific ways by different
-       * lights).
-       */
-
-      gc.cullingDisable();
-
-      /**
        * Disable depth buffer writing and testing.
        */
 
@@ -652,7 +651,7 @@ import com.io7m.renderer.types.RTransformTextureType;
       gc.depthBufferWriteDisable();
 
       /**
-       * Configure the stencil buffer such that no data will be writtento it,
+       * Configure the stencil buffer such that no data will be written to it,
        * and only pixels in the color buffer that have a corresponding 0x1
        * value in the stencil buffer will be touched.
        */
@@ -716,8 +715,18 @@ import com.io7m.renderer.types.RTransformTextureType;
       JCacheException,
       JCGLException
   {
+    gc.cullingEnable(
+      FaceSelection.FACE_BACK,
+      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+
     final KGeometryBufferUsableType gbuffer =
       framebuffer.kFramebufferGetGeometryBuffer();
+
+    if (KRendererDeferredOpaque.renderWantDebugGeometry()) {
+      this.renderDebugGeometrySpherical(gc, mwi, ls);
+      return;
+    }
+
     final KProgram kp = this.shader_light_cache.cacheGetLU(ls.lightGetCode());
 
     final KUnitSphereUsableType s =
@@ -762,8 +771,72 @@ import com.io7m.renderer.types.RTransformTextureType;
           }
         });
       }
-
     });
+  }
+
+  private void renderDebugGeometrySpherical(
+    final JCGLInterfaceCommonType gc,
+    final MatricesInstanceType mwi,
+    final KLightSphere ls)
+    throws RException,
+      JCacheException,
+      JCGLException,
+      JCGLExceptionNoStencilBuffer
+  {
+    final KProgram kp = this.shader_debug_cache.cacheGetLU("show_ccolor");
+    gc.stencilBufferDisable();
+
+    final KUnitSphereUsableType s =
+      this.sphere_cache.cacheGetLU(KUnitSpherePrecision.KUNIT_SPHERE_16);
+    final ArrayBufferUsableType array = s.getArray();
+    final IndexBufferUsableType index = s.getIndices();
+
+    final JCBExecutorType exec = kp.getExecutable();
+    exec.execRun(new JCBExecutorProcedureType<RException>() {
+      @Override public void call(
+        final JCBProgramType program)
+        throws JCGLException,
+          RException
+      {
+        gc.arrayBufferBind(array);
+        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+
+        KShadingProgramCommon.putMatrixProjection(
+          program,
+          mwi.getMatrixProjection());
+        KShadingProgramCommon.putMatrixModelView(
+          program,
+          mwi.getMatrixModelView());
+
+        final RVectorI3F<RSpaceRGBType> lc = ls.lightGetColor();
+        program.programUniformPutVector4f(
+          "f_ccolor",
+          new RVectorI4F<RSpaceRGBType>(
+            lc.getXF(),
+            lc.getYF(),
+            lc.getZF(),
+            1.0f));
+
+        program.programExecute(new JCBProgramProcedureType<JCGLException>() {
+          @Override public void call()
+            throws JCGLException
+          {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
+          }
+        });
+      }
+    });
+
+    throw new UnreachableCodeException();
+  }
+
+  private static boolean renderWantDebugGeometry()
+  {
+    final String value =
+      System.getProperty("renderer.deferred.only_geometry");
+    final boolean debug_only_geometry =
+      value != null ? "true".equals(value) : false;
+    return debug_only_geometry;
   }
 
   private void renderInitial(
