@@ -393,51 +393,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     this.renderGroupLights(framebuffer, mwo, group);
   }
 
-  private void renderInitial(
-    final KFramebufferDeferredUsableType framebuffer)
-    throws JCGLException
-  {
-    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-
-    /**
-     * Clear the rendering framebuffer.
-     */
-
-    final FramebufferUsableType rb =
-      framebuffer.kFramebufferGetColorFramebuffer();
-    try {
-      gc.framebufferDrawBind(rb);
-      gc.colorBufferMask(true, true, true, true);
-      gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
-      gc.depthBufferWriteEnable();
-      gc.depthBufferClear(1.0f);
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
-
-    /**
-     * Clear the gbuffer.
-     */
-
-    final KGeometryBufferUsableType geom =
-      framebuffer.kFramebufferGetGeometryBuffer();
-    final FramebufferUsableType geom_fb = geom.geomGetFramebuffer();
-
-    try {
-      gc.framebufferDrawBind(geom_fb);
-      gc.colorBufferMask(true, true, true, true);
-      gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
-
-      /**
-       * Note that the depth buffer is shared with the rendering buffer and so
-       * was already cleared above.
-       */
-
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
-  }
-
   private void renderGroupGeometry(
     final KFramebufferDeferredUsableType framebuffer,
     final OptionType<DepthFunction> depth_function,
@@ -809,5 +764,50 @@ import com.io7m.renderer.types.RTransformTextureType;
       }
 
     });
+  }
+
+  private void renderInitial(
+    final KFramebufferDeferredUsableType framebuffer)
+    throws JCGLException
+  {
+    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+
+    /**
+     * Clear the rendering framebuffer.
+     */
+
+    final FramebufferUsableType rb =
+      framebuffer.kFramebufferGetColorFramebuffer();
+    try {
+      gc.framebufferDrawBind(rb);
+      gc.colorBufferMask(true, true, true, true);
+      gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+      gc.depthBufferWriteEnable();
+      gc.depthBufferClear(1.0f);
+    } finally {
+      gc.framebufferDrawUnbind();
+    }
+
+    /**
+     * Clear the gbuffer.
+     */
+
+    final KGeometryBufferUsableType geom =
+      framebuffer.kFramebufferGetGeometryBuffer();
+    final FramebufferUsableType geom_fb = geom.geomGetFramebuffer();
+
+    try {
+      gc.framebufferDrawBind(geom_fb);
+      gc.colorBufferMask(true, true, true, true);
+      gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+
+      /**
+       * Note that the depth buffer is shared with the rendering buffer and so
+       * was already cleared above.
+       */
+
+    } finally {
+      gc.framebufferDrawUnbind();
+    }
   }
 }
