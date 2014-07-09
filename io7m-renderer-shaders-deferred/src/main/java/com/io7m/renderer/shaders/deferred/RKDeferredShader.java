@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -289,27 +289,39 @@ import com.io7m.renderer.types.RException;
         {
           b.append("  -- Spherical light vectors\n");
           b.append("  value light_vectors =\n");
-          b.append("    Light.vectors (\n");
-          b.append("      light_spherical.position,\n");
+          b.append("    Light.calculate (\n");
+          b.append("      light_spherical,\n");
           b.append("      eye_position [x y z],\n");
           b.append("      normal\n");
           b.append("    );\n");
 
           b.append("  -- Spherical emissive diffuse light term\n");
-          b.append("  value light_diffuse : vector_3f =\n");
+          b.append("  value light_diffuse_unattenuated : vector_3f =\n");
           b.append("    SphericalLight.diffuse_color (\n");
           b.append("      light_spherical,\n");
-          b.append("      light_vectors,\n");
+          b.append("      light_vectors.vectors,\n");
           b.append("      emission\n");
-          b.append("     );\n");
+          b.append("    );\n");
+          b.append("  value light_diffuse : vector_3f =\n");
+          b.append("    V3.multiply_scalar (\n");
+          b.append("      light_diffuse_unattenuated,\n");
+          b.append("      light_vectors.attenuation\n");
+          b.append("    );\n");
+          b.append("\n");
 
           b.append("  -- Spherical specular light term\n");
-          b.append("  value light_specular : vector_3f =\n");
+          b.append("  value light_specular_unattenuated : vector_3f =\n");
           b.append("    SphericalLight.specular_color (\n");
           b.append("      light_spherical,\n");
-          b.append("      light_vectors,\n");
+          b.append("      light_vectors.vectors,\n");
           b.append("      specular\n");
           b.append("    );\n");
+          b.append("  value light_specular : vector_3f =\n");
+          b.append("    V3.multiply_scalar (\n");
+          b.append("      light_specular_unattenuated,\n");
+          b.append("      light_vectors.attenuation\n");
+          b.append("    );\n");
+          b.append("\n");
 
           return Unit.unit();
         }

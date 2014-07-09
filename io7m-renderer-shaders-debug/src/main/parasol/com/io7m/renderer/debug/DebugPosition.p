@@ -64,25 +64,6 @@ module DebugPosition is
 
     out out_0 : vector_4f as 0;
   with
-   -- value ndc =
-   --   Transform.screen_to_ndc (
-   --     Fragment.coordinate [x y],
-   --     screen_size
-   --   );
-
-   -- value eye_z =
-   --   Transform.eye_z_from_depth (
-   --     Fragment.coordinate [z],
-   --     frustum.z_near,
-   --     frustum.z_far
-   --   ); 
-
-   -- value eye =
-   --   new vector_4f (
-   --     Transform.ndc_to_eye (ndc, frustum, eye_z),
-   --     1.0
-   --   );
-      
     value eye =
       Transform.screen_to_eye (
         Fragment.coordinate [x y],
@@ -95,7 +76,7 @@ module DebugPosition is
       V4.subtract (f_position_eye, eye);
       
     value rgba =
-      eye;
+      diff;
   as
     out out_0 = rgba;
   end;
