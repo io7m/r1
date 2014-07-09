@@ -358,6 +358,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     throws RException
   {
     try {
+      this.renderInitial(framebuffer);
+
       final List<Group> groups = batches.getGroups();
       for (int gindex = 0; gindex < groups.size(); ++gindex) {
         final KSceneBatchedDeferredOpaque.Group group = groups.get(gindex);
@@ -391,6 +393,51 @@ import com.io7m.renderer.types.RTransformTextureType;
     this.renderGroupLights(framebuffer, mwo, group);
   }
 
+  private void renderInitial(
+    final KFramebufferDeferredUsableType framebuffer)
+    throws JCGLException
+  {
+    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+
+    /**
+     * Clear the rendering framebuffer.
+     */
+
+    final FramebufferUsableType rb =
+      framebuffer.kFramebufferGetColorFramebuffer();
+    try {
+      gc.framebufferDrawBind(rb);
+      gc.colorBufferMask(true, true, true, true);
+      gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+      gc.depthBufferWriteEnable();
+      gc.depthBufferClear(1.0f);
+    } finally {
+      gc.framebufferDrawUnbind();
+    }
+
+    /**
+     * Clear the gbuffer.
+     */
+
+    final KGeometryBufferUsableType geom =
+      framebuffer.kFramebufferGetGeometryBuffer();
+    final FramebufferUsableType geom_fb = geom.geomGetFramebuffer();
+
+    try {
+      gc.framebufferDrawBind(geom_fb);
+      gc.colorBufferMask(true, true, true, true);
+      gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+
+      /**
+       * Note that the depth buffer is shared with the rendering buffer and so
+       * was already cleared above.
+       */
+
+    } finally {
+      gc.framebufferDrawUnbind();
+    }
+  }
+
   private void renderGroupGeometry(
     final KFramebufferDeferredUsableType framebuffer,
     final OptionType<DepthFunction> depth_function,
@@ -419,7 +466,6 @@ import com.io7m.renderer.types.RTransformTextureType;
         FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
 
       gc.depthBufferWriteEnable();
-      gc.depthBufferClear(1.0f);
 
       depth_function
         .acceptPartial(new OptionPartialVisitorType<DepthFunction, Unit, JCGLException>() {
@@ -636,11 +682,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     try {
       gc.framebufferDrawBind(render_fb);
 
-      gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
-
-      gc.colorBufferMask(true, true, true, true);
-      gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
-
       /**
        * Disable culling (will be re-enabled in specific ways by different
        * lights).
@@ -656,9 +697,9 @@ import com.io7m.renderer.types.RTransformTextureType;
       gc.depthBufferWriteDisable();
 
       /**
-       * Configure the stencil buffer such that no data will be written, and
-       * only pixels that have a corresponding 0x1 value in the stencil buffer
-       * will be rendered.
+       * Configure the stencil buffer such that no data will be writtento it,
+       * and only pixels in the color buffer that have a corresponding 0x1
+       * value in the stencil buffer will be touched.
        */
 
       gc.stencilBufferEnable();
@@ -674,8 +715,16 @@ import com.io7m.renderer.types.RTransformTextureType;
         StencilOperation.STENCIL_OP_KEEP,
         StencilOperation.STENCIL_OP_KEEP);
 
+      boolean first = true;
       for (final KLightType light : group.getLights()) {
         assert light != null;
+
+        if (first) {
+          gc.blendingDisable();
+        } else {
+          gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+        }
+        first = false;
 
         /**
          * Create a new texture unit context for per-light textures.
