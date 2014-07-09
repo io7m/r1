@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -39,9 +39,6 @@ import com.io7m.renderer.kernel.types.KSceneBatchedDeferred;
 import com.io7m.renderer.kernel.types.KSceneBatchedDeferredOpaque;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
-import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjectionType;
-import com.io7m.renderer.types.RTransformViewType;
 
 /**
  * The primary forward renderer.
@@ -50,17 +47,15 @@ import com.io7m.renderer.types.RTransformViewType;
 @SuppressWarnings("synthetic-access") @EqualityReference public final class KRendererDeferred implements
   KRendererDeferredType
 {
-  private static final OptionType<DepthFunction> DEPTH_EQUALS;
-  private static final String                    NAME;
+  private static final String NAME;
 
   static {
-    NAME = "forward";
-    DEPTH_EQUALS = Option.some(DepthFunction.DEPTH_EQUAL);
+    NAME = "deferred";
   }
 
   /**
    * Construct a new forward renderer.
-   * 
+   *
    * @param in_g
    *          The OpenGL implementation
    * @param in_shadow_renderer
@@ -182,11 +177,6 @@ import com.io7m.renderer.types.RTransformViewType;
       JCacheException
   {
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-
-    final RMatrixI4x4F<RTransformViewType> m_view =
-      RMatrixI4x4F.newFromReadable(mwo.getMatrixView());
-    final RMatrixI4x4F<RTransformProjectionType> m_proj =
-      RMatrixI4x4F.newFromReadable(mwo.getMatrixProjection());
 
     /**
      * Render shadow maps.
