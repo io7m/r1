@@ -632,8 +632,6 @@ import com.io7m.renderer.types.RTransformTextureType;
 
     final FramebufferUsableType render_fb =
       framebuffer.kFramebufferGetColorFramebuffer();
-    final KGeometryBufferUsableType gbuffer =
-      framebuffer.kFramebufferGetGeometryBuffer();
 
     try {
       gc.framebufferDrawBind(render_fb);
@@ -675,7 +673,6 @@ import com.io7m.renderer.types.RTransformTextureType;
         StencilOperation.STENCIL_OP_KEEP,
         StencilOperation.STENCIL_OP_KEEP,
         StencilOperation.STENCIL_OP_KEEP);
-      gc.stencilBufferDisable();
 
       for (final KLightType light : group.getLights()) {
         assert light != null;
