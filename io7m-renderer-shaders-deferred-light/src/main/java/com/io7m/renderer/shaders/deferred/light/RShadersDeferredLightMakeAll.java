@@ -59,7 +59,7 @@ import com.io7m.renderer.shaders.deferred.RKDeferredShader;
 {
   /**
    * Main program.
-   * 
+   *
    * @param args
    *          Command line arguments.
    * @throws Exception
@@ -129,6 +129,10 @@ import com.io7m.renderer.shaders.deferred.RKDeferredShader;
             TASTShaderNameFlat.parse(name, meta),
             code);
         }
+
+        batch.addShaderWithOutputName(
+          TASTShaderNameFlat.parse("com.io7m.renderer.core.Empty.p", meta),
+          "empty");
       }
 
       final List<File> sources =
