@@ -91,6 +91,115 @@ import com.io7m.renderer.types.RVectorI4F;
   KRendererDeferredOpaqueType
 {
   /**
+   * <p>
+   * Configure the stencil buffer for the geometry pass.
+   * </p>
+   * <p>
+   * The stencil buffer is cleared to 0 and configured such that any geometry
+   * drawn will set the corresponding value in the stencil buffer to 1.
+   * </p>
+   */
+
+  private static void configureStencilGeometry(
+    final JCGLInterfaceCommonType gc)
+    throws JCGLException,
+      JCGLExceptionNoStencilBuffer
+  {
+    gc.stencilBufferEnable();
+    gc.stencilBufferMask(FaceSelection.FACE_FRONT, 0xffffffff);
+    gc.stencilBufferClear(0);
+    gc.stencilBufferFunction(
+      FaceSelection.FACE_FRONT,
+      StencilFunction.STENCIL_ALWAYS,
+      0x1,
+      0xffffffff);
+    gc.stencilBufferOperation(
+      FaceSelection.FACE_FRONT,
+      StencilOperation.STENCIL_OP_KEEP,
+      StencilOperation.STENCIL_OP_KEEP,
+      StencilOperation.STENCIL_OP_REPLACE);
+  }
+
+  /**
+   * <p>
+   * Configure the stencil buffer for the lighting pass.
+   * </p>
+   * <p>
+   * The stencil buffer is configured such that the stencil buffer is
+   * read-only, and only pixels where the corresponding value in the stencil
+   * buffer is <= 2 will be touched.
+   * </p>
+   */
+
+  private static void configureStencilLight(
+    final JCGLInterfaceCommonType gc)
+    throws JCGLException,
+      JCGLExceptionNoStencilBuffer
+  {
+    gc.stencilBufferEnable();
+    gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0x0);
+    gc.stencilBufferFunction(
+      FaceSelection.FACE_FRONT_AND_BACK,
+      StencilFunction.STENCIL_LESS_THAN_OR_EQUAL,
+      0x2,
+      0xffffffff);
+    gc.stencilBufferOperation(
+      FaceSelection.FACE_FRONT_AND_BACK,
+      StencilOperation.STENCIL_OP_KEEP,
+      StencilOperation.STENCIL_OP_KEEP,
+      StencilOperation.STENCIL_OP_KEEP);
+  }
+
+  /**
+   * <p>
+   * Configure the stencil buffer for the pre-lighting pass.
+   * </p>
+   * <p>
+   * The buffer is configured such that:
+   * </p>
+   * <ul>
+   * <li>
+   * The front-facing polygons of the light geometry will decrement the value
+   * in the stencil buffer if the depth test fails.</li>
+   * <li>
+   * The back-facing polygons of the light geometry will increment the value
+   * in the stencil buffer if the depth test fails.</li>
+   * <li>
+   * Only values in the stencil buffer that are >= 1 will be considered at
+   * all.</li>
+   * </ul>
+   * <p>
+   * This effectively leaves the stencil buffer (after rendering the light
+   * geometry) with all pixels corresponding to geometry set to 1, and all
+   * pixels that are inside the light volume set to >= 2.
+   * </p>
+   */
+
+  private static void configureStencilLightPre(
+    final JCGLInterfaceCommonType gc)
+    throws JCGLException,
+      JCGLExceptionNoStencilBuffer
+  {
+    gc.stencilBufferEnable();
+    gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0xffffffff);
+    gc.stencilBufferFunction(
+      FaceSelection.FACE_FRONT_AND_BACK,
+      StencilFunction.STENCIL_GREATER_THAN_OR_EQUAL,
+      0x1,
+      0xffffffff);
+    gc.stencilBufferOperation(
+      FaceSelection.FACE_BACK,
+      StencilOperation.STENCIL_OP_KEEP,
+      StencilOperation.STENCIL_OP_INCREMENT,
+      StencilOperation.STENCIL_OP_KEEP);
+    gc.stencilBufferOperation(
+      FaceSelection.FACE_FRONT,
+      StencilOperation.STENCIL_OP_KEEP,
+      StencilOperation.STENCIL_OP_DECREMENT,
+      StencilOperation.STENCIL_OP_KEEP);
+  }
+
+  /**
    * Construct a new opaque renderer.
    *
    * @param in_quad_cache
@@ -278,6 +387,15 @@ import com.io7m.renderer.types.RVectorI4F;
     });
   }
 
+  private static boolean renderWantDebugGeometry()
+  {
+    final String value =
+      System.getProperty("renderer.deferred.only_geometry");
+    final boolean debug_only_geometry =
+      value != null ? "true".equals(value) : false;
+    return debug_only_geometry;
+  }
+
   private final JCGLImplementationType           g;
   private final KUnitQuadCacheType               quad_cache;
   private final KShaderCacheDebugType            shader_debug_cache;
@@ -351,6 +469,62 @@ import com.io7m.renderer.types.RVectorI4F;
     KShadingProgramCommon.putScreenSize(
       program,
       KRendererDeferredOpaque.this.size);
+  }
+
+  private void renderDebugGeometrySpherical(
+    final JCGLInterfaceCommonType gc,
+    final MatricesInstanceType mwi,
+    final KLightSphere ls)
+    throws RException,
+      JCacheException,
+      JCGLException,
+      JCGLExceptionNoStencilBuffer
+  {
+    final KProgram kp = this.shader_debug_cache.cacheGetLU("show_ccolor");
+    gc.stencilBufferDisable();
+
+    final KUnitSphereUsableType s =
+      this.sphere_cache.cacheGetLU(KUnitSpherePrecision.KUNIT_SPHERE_16);
+    final ArrayBufferUsableType array = s.getArray();
+    final IndexBufferUsableType index = s.getIndices();
+
+    final JCBExecutorType exec = kp.getExecutable();
+    exec.execRun(new JCBExecutorProcedureType<RException>() {
+      @Override public void call(
+        final JCBProgramType program)
+        throws JCGLException,
+          RException
+      {
+        gc.arrayBufferBind(array);
+        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+
+        KShadingProgramCommon.putMatrixProjection(
+          program,
+          mwi.getMatrixProjection());
+        KShadingProgramCommon.putMatrixModelView(
+          program,
+          mwi.getMatrixModelView());
+
+        final RVectorI3F<RSpaceRGBType> lc = ls.lightGetColor();
+        program.programUniformPutVector4f(
+          "f_ccolor",
+          new RVectorI4F<RSpaceRGBType>(
+            lc.getXF(),
+            lc.getYF(),
+            lc.getZF(),
+            1.0f));
+
+        program.programExecute(new JCBProgramProcedureType<JCGLException>() {
+          @Override public void call()
+            throws JCGLException
+          {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
+          }
+        });
+      }
+    });
+
+    throw new UnreachableCodeException();
   }
 
   @Override public void rendererEvaluateOpaqueLit(
@@ -445,25 +619,7 @@ import com.io7m.renderer.types.RVectorI4F;
           }
         });
 
-      /**
-       * Configure the stencil buffer such that any bit of geometry written
-       * will write 0x1 into the stencil. The stencil is cleared to 0x0 prior
-       * to rendering.
-       */
-
-      gc.stencilBufferEnable();
-      gc.stencilBufferMask(FaceSelection.FACE_FRONT, 0xffffffff);
-      gc.stencilBufferClear(0);
-      gc.stencilBufferFunction(
-        FaceSelection.FACE_FRONT,
-        StencilFunction.STENCIL_ALWAYS,
-        0x1,
-        0xffffffff);
-      gc.stencilBufferOperation(
-        FaceSelection.FACE_FRONT,
-        StencilOperation.STENCIL_OP_KEEP,
-        StencilOperation.STENCIL_OP_KEEP,
-        StencilOperation.STENCIL_OP_REPLACE);
+      KRendererDeferredOpaque.configureStencilGeometry(gc);
 
       final Map<String, Set<KInstanceOpaqueType>> by_material =
         group.getInstances();
@@ -644,30 +800,10 @@ import com.io7m.renderer.types.RVectorI4F;
       gc.framebufferDrawBind(render_fb);
 
       /**
-       * Disable depth buffer writing and testing.
+       * Disable depth buffer writing.
        */
 
-      gc.depthBufferTestDisable();
       gc.depthBufferWriteDisable();
-
-      /**
-       * Configure the stencil buffer such that no data will be written to it,
-       * and only pixels in the color buffer that have a corresponding 0x1
-       * value in the stencil buffer will be touched.
-       */
-
-      gc.stencilBufferEnable();
-      gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0);
-      gc.stencilBufferFunction(
-        FaceSelection.FACE_FRONT_AND_BACK,
-        StencilFunction.STENCIL_EQUAL,
-        0x1,
-        0xffffffff);
-      gc.stencilBufferOperation(
-        FaceSelection.FACE_FRONT_AND_BACK,
-        StencilOperation.STENCIL_OP_KEEP,
-        StencilOperation.STENCIL_OP_KEEP,
-        StencilOperation.STENCIL_OP_KEEP);
 
       boolean first = true;
       for (final KLightType light : group.getLights()) {
@@ -715,17 +851,47 @@ import com.io7m.renderer.types.RVectorI4F;
       JCacheException,
       JCGLException
   {
-    gc.cullingEnable(
-      FaceSelection.FACE_BACK,
-      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-
-    final KGeometryBufferUsableType gbuffer =
-      framebuffer.kFramebufferGetGeometryBuffer();
-
     if (KRendererDeferredOpaque.renderWantDebugGeometry()) {
       this.renderDebugGeometrySpherical(gc, mwi, ls);
       return;
     }
+
+    this.renderGroupLightSphericalStencilPass(
+      framebuffer,
+      gc,
+      mwi,
+      texture_unit_context,
+      ls);
+
+    this.renderGroupLightSphericalLightPass(
+      framebuffer,
+      gc,
+      mwi,
+      texture_unit_context,
+      ls);
+  }
+
+  private void renderGroupLightSphericalLightPass(
+    final KFramebufferDeferredUsableType framebuffer,
+    final JCGLInterfaceCommonType gc,
+    final MatricesInstanceType mwi,
+    final KTextureUnitContextType texture_unit_context,
+    final KLightSphere ls)
+    throws RException,
+      JCacheException,
+      JCGLException
+  {
+    gc.colorBufferMask(true, true, true, true);
+
+    gc.cullingDisable();
+
+    gc.depthBufferWriteDisable();
+    gc.depthBufferTestDisable();
+
+    KRendererDeferredOpaque.configureStencilLight(gc);
+
+    final KGeometryBufferUsableType gbuffer =
+      framebuffer.kFramebufferGetGeometryBuffer();
 
     final KProgram kp = this.shader_light_cache.cacheGetLU(ls.lightGetCode());
 
@@ -774,17 +940,26 @@ import com.io7m.renderer.types.RVectorI4F;
     });
   }
 
-  private void renderDebugGeometrySpherical(
+  private void renderGroupLightSphericalStencilPass(
+    final KFramebufferDeferredUsableType framebuffer,
     final JCGLInterfaceCommonType gc,
     final MatricesInstanceType mwi,
+    final KTextureUnitContextType texture_unit_context,
     final KLightSphere ls)
-    throws RException,
-      JCacheException,
-      JCGLException,
-      JCGLExceptionNoStencilBuffer
+    throws JCGLException,
+      RException,
+      JCacheException
   {
-    final KProgram kp = this.shader_debug_cache.cacheGetLU("show_ccolor");
-    gc.stencilBufferDisable();
+    gc.colorBufferMask(false, false, false, false);
+
+    gc.cullingDisable();
+
+    gc.depthBufferWriteDisable();
+    gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+
+    KRendererDeferredOpaque.configureStencilLightPre(gc);
+
+    final KProgram kp = this.shader_light_cache.cacheGetLU("empty");
 
     final KUnitSphereUsableType s =
       this.sphere_cache.cacheGetLU(KUnitSpherePrecision.KUNIT_SPHERE_16);
@@ -808,15 +983,6 @@ import com.io7m.renderer.types.RVectorI4F;
           program,
           mwi.getMatrixModelView());
 
-        final RVectorI3F<RSpaceRGBType> lc = ls.lightGetColor();
-        program.programUniformPutVector4f(
-          "f_ccolor",
-          new RVectorI4F<RSpaceRGBType>(
-            lc.getXF(),
-            lc.getYF(),
-            lc.getZF(),
-            1.0f));
-
         program.programExecute(new JCBProgramProcedureType<JCGLException>() {
           @Override public void call()
             throws JCGLException
@@ -826,17 +992,6 @@ import com.io7m.renderer.types.RVectorI4F;
         });
       }
     });
-
-    throw new UnreachableCodeException();
-  }
-
-  private static boolean renderWantDebugGeometry()
-  {
-    final String value =
-      System.getProperty("renderer.deferred.only_geometry");
-    final boolean debug_only_geometry =
-      value != null ? "true".equals(value) : false;
-    return debug_only_geometry;
   }
 
   private void renderInitial(
