@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -23,7 +23,7 @@ import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.renderer.kernel.types.KCamera;
-import com.io7m.renderer.kernel.types.KProjection;
+import com.io7m.renderer.kernel.types.KProjectionFOV;
 import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceWorldType;
@@ -45,7 +45,7 @@ import com.io7m.renderer.types.RVectorI3F;
 
   /**
    * Look at a target from a source.
-   * 
+   *
    * @param in_source
    *          The source
    * @param in_target
@@ -83,12 +83,12 @@ import com.io7m.renderer.types.RVectorI3F;
 
     MatrixM4x4F.setIdentity(temp);
     final KProjectionType projection =
-      KProjection.fromPerspectiveWithContext(
+      KProjectionFOV.newProjection(
         temp,
-        0.1f,
-        100.0f,
+        (float) Math.toRadians(90),
         640.0f / 480.0f,
-        (float) Math.toRadians(90));
+        0.1f,
+        100.0f);
 
     this.camera = KCamera.newCamera(view, projection);
   }

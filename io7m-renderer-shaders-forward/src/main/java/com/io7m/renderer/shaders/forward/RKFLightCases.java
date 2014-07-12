@@ -37,7 +37,7 @@ import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
-import com.io7m.renderer.kernel.types.KProjection;
+import com.io7m.renderer.kernel.types.KProjectionFrustum;
 import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
 import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
@@ -86,7 +86,7 @@ import com.io7m.renderer.types.RVectorI3F;
         final KLightProjectiveBuilderType b =
           KLightProjective.newBuilder(
             FakeTexture2DStatic.getDefault(),
-            KProjection.fromFrustumWithContext(
+            KProjectionFrustum.newProjection(
               new MatrixM4x4F(),
               -1.0f,
               1.0f,

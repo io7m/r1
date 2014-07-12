@@ -14,25 +14,30 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.tests.kernel.types;
+package com.io7m.renderer.kernel.types;
 
-import net.java.quickcheck.Generator;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.IndexBufferUsableType;
+import com.io7m.jcanephora.JCGLResourceSizedType;
+import com.io7m.jcanephora.JCGLResourceUsableType;
 
-import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.renderer.kernel.types.KProjectionFrustum;
-import com.io7m.renderer.kernel.types.KProjectionType;
+/**
+ * The usable interface to frustum meshes.
+ */
 
-public final class KProjectionGenerator implements Generator<KProjectionType>
+public interface KFrustumMeshUsableType extends
+  JCGLResourceUsableType,
+  JCGLResourceSizedType
 {
-  @Override public KProjectionType next()
-  {
-    return KProjectionFrustum.newProjection(
-      new MatrixM4x4F(),
-      (float) Math.random(),
-      (float) Math.random(),
-      (float) Math.random(),
-      (float) Math.random(),
-      1.0f,
-      (float) (1.0f + (Math.random() * 100.0f)));
-  }
+  /**
+   * @return The array buffer that backs the frustum
+   */
+
+  ArrayBufferUsableType getArray();
+
+  /**
+   * @return The index buffer that backs the frustum
+   */
+
+  IndexBufferUsableType getIndices();
 }
