@@ -67,7 +67,7 @@ import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialSpecularNone;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
-import com.io7m.renderer.kernel.types.KProjection;
+import com.io7m.renderer.kernel.types.KProjectionFrustum;
 import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KTransformOST;
@@ -719,7 +719,7 @@ import com.io7m.renderer.types.RVectorI4F;
     m_projection.set(3, 3, 2.0f);
 
     final KProjectionType projection =
-      KProjection.fromFrustumWithContext(
+      KProjectionFrustum.newProjection(
         new MatrixM4x4F(),
         -10.0f,
         10.0f,
@@ -877,7 +877,7 @@ import com.io7m.renderer.types.RVectorI4F;
 
   private static @Nonnull KProjectionType arbitraryProjection()
   {
-    return KProjection.fromFrustumWithContext(
+    return KProjectionFrustum.newProjection(
       new MatrixM4x4F(),
       -1.0f,
       1.0f,

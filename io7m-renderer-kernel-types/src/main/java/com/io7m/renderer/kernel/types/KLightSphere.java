@@ -269,6 +269,11 @@ import com.io7m.renderer.types.RVectorI3F;
     return Option.none();
   }
 
+  @Override public KTransformType lightGetTransform()
+  {
+    return this.transform;
+  }
+
   @Override public boolean lightHasShadow()
   {
     return false;
@@ -296,10 +301,5 @@ import com.io7m.renderer.types.RVectorI3F;
     final String r = b.toString();
     assert r != null;
     return r;
-  }
-
-  @Override public KTransformType lightGetTransform()
-  {
-    return this.transform;
   }
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -36,7 +36,7 @@ import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
-import com.io7m.renderer.kernel.types.KProjection;
+import com.io7m.renderer.kernel.types.KProjectionFrustum;
 import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
 import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
@@ -73,7 +73,7 @@ import com.io7m.renderer.types.RVectorI3F;
         final KLightProjectiveBuilderType b =
           KLightProjective.newBuilder(
             FakeTexture2DStatic.getDefault(),
-            KProjection.fromFrustumWithContext(
+            KProjectionFrustum.newProjection(
               new MatrixM4x4F(),
               -1.0f,
               1.0f,
