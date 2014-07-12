@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -52,7 +52,7 @@ import com.io7m.renderer.types.RTransformProjectionType;
    * @return A new projection.
    */
 
-  public static KProjectionType newProjection(
+  public static KProjectionOrthographic newProjection(
     final MatrixM4x4F temporary,
     final float in_x_min,
     final float in_x_max,
@@ -92,6 +92,7 @@ import com.io7m.renderer.types.RTransformProjectionType;
   private final float                                  y_min;
   private final float                                  z_far;
   private final float                                  z_near;
+
   private KProjectionOrthographic(
     final float in_x_min,
     final float in_x_max,
@@ -109,6 +110,7 @@ import com.io7m.renderer.types.RTransformProjectionType;
     this.z_far = in_z_far;
     this.matrix = NullCheck.notNull(in_matrix, "Matrix");
   }
+
   @Override public boolean equals(
     final @Nullable Object obj)
   {
