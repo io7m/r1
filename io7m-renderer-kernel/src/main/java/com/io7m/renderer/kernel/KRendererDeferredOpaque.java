@@ -90,6 +90,12 @@ import com.io7m.renderer.types.RVectorI4F;
 @SuppressWarnings({ "synthetic-access" }) @EqualityReference public final class KRendererDeferredOpaque implements
   KRendererDeferredOpaqueType
 {
+  private static final RVectorI4F<RSpaceRGBType> BLACK;
+
+  static {
+    BLACK = new RVectorI4F<RSpaceRGBType>(0.0f, 0.0f, 0.0f, 1.0f);
+  }
+
   /**
    * <p>
    * Configure the stencil buffer for the geometry pass.
@@ -122,12 +128,37 @@ import com.io7m.renderer.types.RVectorI4F;
 
   /**
    * <p>
+   * Configure the stencil buffer for clearing all geometry in the group to
+   * black prior to rendering any light contributions.
+   * </p>
+   * <p>
+   * The set to read-only, and configured such that only pixels that have a
+   * corresponding value of 1 in the stencil buffer will be written.
+   * </p>
+   */
+
+  private static void configureStencilGeometryGroupClearing(
+    final JCGLInterfaceCommonType gc)
+    throws JCGLException,
+      JCGLExceptionNoStencilBuffer
+  {
+    gc.stencilBufferEnable();
+    gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0);
+    gc.stencilBufferFunction(
+      FaceSelection.FACE_FRONT_AND_BACK,
+      StencilFunction.STENCIL_EQUAL,
+      0x1,
+      0xffffffff);
+  }
+
+  /**
+   * <p>
    * Configure the stencil buffer for the lighting pass.
    * </p>
    * <p>
    * The stencil buffer is configured such that the stencil buffer is
    * read-only, and only pixels where the corresponding value in the stencil
-   * buffer is <= 2 will be touched.
+   * buffer is >= 2 will be touched.
    * </p>
    */
 
@@ -730,6 +761,49 @@ import com.io7m.renderer.types.RVectorI4F;
     });
   }
 
+  private void renderGroupClearToBlack(
+    final JCGLInterfaceCommonType gc)
+    throws RException,
+      JCacheException,
+      JCGLException
+  {
+    gc.blendingDisable();
+    gc.cullingDisable();
+    gc.depthBufferWriteDisable();
+    gc.depthBufferTestDisable();
+
+    KRendererDeferredOpaque.configureStencilGeometryGroupClearing(gc);
+
+    final KProgram kp = this.shader_light_cache.cacheGetLU("flat_clip");
+    final KUnitQuadUsableType q = this.quad_cache.cacheGetLU(Unit.unit());
+    final ArrayBufferUsableType array = q.getArray();
+    final IndexBufferUsableType index = q.getIndices();
+
+    final JCBExecutorType exec = kp.getExecutable();
+    exec.execRun(new JCBExecutorProcedureType<RException>() {
+      @Override public void call(
+        final JCBProgramType program)
+        throws JCGLException,
+          RException
+      {
+        gc.arrayBufferBind(array);
+        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+
+        program.programUniformPutVector4f(
+          "f_ccolor",
+          KRendererDeferredOpaque.BLACK);
+
+        program.programExecute(new JCBProgramProcedureType<JCGLException>() {
+          @Override public void call()
+            throws JCGLException
+          {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
+          }
+        });
+      }
+    });
+  }
+
   private void renderGroupLightDirectional(
     final KFramebufferDeferredUsableType framebuffer,
     final JCGLInterfaceCommonType gc,
@@ -740,6 +814,7 @@ import com.io7m.renderer.types.RVectorI4F;
       JCacheException,
       JCGLException
   {
+    gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
     gc.cullingDisable();
 
     final KGeometryBufferUsableType gbuffer =
@@ -799,22 +874,10 @@ import com.io7m.renderer.types.RVectorI4F;
     try {
       gc.framebufferDrawBind(render_fb);
 
-      /**
-       * Disable depth buffer writing.
-       */
+      this.renderGroupClearToBlack(gc);
 
-      gc.depthBufferWriteDisable();
-
-      boolean first = true;
       for (final KLightType light : group.getLights()) {
         assert light != null;
-
-        if (first) {
-          gc.blendingDisable();
-        } else {
-          gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
-        }
-        first = false;
 
         /**
          * Create a new texture unit context for per-light textures.
@@ -836,6 +899,8 @@ import com.io7m.renderer.types.RVectorI4F;
         });
       }
 
+    } catch (final JCacheException e) {
+      throw new UnreachableCodeException(e);
     } finally {
       gc.framebufferDrawUnbind();
     }
@@ -881,10 +946,9 @@ import com.io7m.renderer.types.RVectorI4F;
       JCacheException,
       JCGLException
   {
+    gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
     gc.colorBufferMask(true, true, true, true);
-
     gc.cullingDisable();
-
     gc.depthBufferWriteDisable();
     gc.depthBufferTestDisable();
 
@@ -951,9 +1015,7 @@ import com.io7m.renderer.types.RVectorI4F;
       JCacheException
   {
     gc.colorBufferMask(false, false, false, false);
-
     gc.cullingDisable();
-
     gc.depthBufferWriteDisable();
     gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
 
