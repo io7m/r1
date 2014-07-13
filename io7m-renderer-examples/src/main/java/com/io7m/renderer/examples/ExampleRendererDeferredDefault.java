@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -34,6 +34,8 @@ import com.io7m.renderer.kernel.KFramebufferDepthVarianceCache;
 import com.io7m.renderer.kernel.KFramebufferDepthVarianceCacheType;
 import com.io7m.renderer.kernel.KFramebufferForwardCache;
 import com.io7m.renderer.kernel.KFramebufferForwardCacheType;
+import com.io7m.renderer.kernel.KFramebufferStencilCache;
+import com.io7m.renderer.kernel.KFramebufferStencilCacheType;
 import com.io7m.renderer.kernel.KMeshBoundsCache;
 import com.io7m.renderer.kernel.KMeshBoundsCacheType;
 import com.io7m.renderer.kernel.KMeshBoundsTrianglesCache;
@@ -246,6 +248,18 @@ public final class ExampleRendererDeferredDefault extends
         in_shader_translucent_lit_cache,
         refraction_renderer,
         caps,
+        log);
+
+    final BLUCacheConfig stencil_cache_config =
+      BLUCacheConfig
+        .empty()
+        .withMaximumBorrowsPerKey(BigInteger.TEN)
+        .withMaximumCapacity(BigInteger.valueOf(640 * 480 * 4 * 128));
+
+    final KFramebufferStencilCacheType stencil_cache =
+      KFramebufferStencilCache.newCacheWithConfig(
+        gi,
+        stencil_cache_config,
         log);
 
     final KRendererDeferredOpaqueType opaque_renderer =
