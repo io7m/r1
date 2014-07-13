@@ -948,7 +948,9 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
     gc.colorBufferMask(true, true, true, true);
-    gc.cullingDisable();
+    gc.cullingEnable(
+      FaceSelection.FACE_FRONT,
+      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
     gc.depthBufferWriteDisable();
     gc.depthBufferTestDisable();
 
