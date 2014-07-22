@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel.types;
 
 import com.io7m.jcanephora.ProjectionMatrix;
+import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM4x4F;
@@ -28,7 +29,8 @@ import com.io7m.renderer.types.RTransformProjectionType;
  * A perspective projection based on an explicit frustum.
  */
 
-public final class KProjectionFrustum implements KProjectionType
+@EqualityStructural public final class KProjectionFrustum implements
+  KProjectionType
 {
   /**
    * Construct a new frustum projection.
@@ -122,9 +124,8 @@ public final class KProjectionFrustum implements KProjectionType
       return false;
     }
     final KProjectionFrustum other = (KProjectionFrustum) obj;
-    return this.matrix.equals(other.matrix)
-      && (Float.floatToIntBits(this.x_max) == Float
-        .floatToIntBits(other.x_max))
+    return (Float.floatToIntBits(this.x_max) == Float
+      .floatToIntBits(other.x_max))
       && (Float.floatToIntBits(this.x_min) == Float
         .floatToIntBits(other.x_min))
       && (Float.floatToIntBits(this.y_max) == Float
@@ -141,7 +142,6 @@ public final class KProjectionFrustum implements KProjectionType
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.matrix.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.x_max);
     result = (prime * result) + Float.floatToIntBits(this.x_min);
     result = (prime * result) + Float.floatToIntBits(this.y_max);

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -35,6 +35,8 @@ import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable2FType;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
+import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
@@ -67,6 +69,7 @@ import com.io7m.renderer.types.RSpaceRGBAType;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RSpaceWorldType;
+import com.io7m.renderer.types.RTransformDeferredProjectionType;
 import com.io7m.renderer.types.RTransformModelType;
 import com.io7m.renderer.types.RTransformModelViewType;
 import com.io7m.renderer.types.RTransformNormalType;
@@ -95,6 +98,8 @@ import com.io7m.renderer.types.RVectorReadable4FType;
 
 @EqualityReference public final class KShadingProgramCommon
 {
+  private static final String MATRIX_NAME_DEFERRED_PROJECTION    =
+                                                                   "m_deferred_projective";
   private static final String MATRIX_NAME_MODEL                  = "m_model";
   private static final String MATRIX_NAME_MODELVIEW              =
                                                                    "m_modelview";
@@ -140,7 +145,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
   /**
    * Bind the vertex color attribute of the given array to the color attribute
    * of the given program.
-   * 
+   *
    * @param program
    *          The program
    * @param array
@@ -182,7 +187,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
   /**
    * Bind the position attribute of the given array to the position attribute
    * of the given program.
-   * 
+   *
    * @param program
    *          The program
    * @param array
@@ -224,7 +229,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
   /**
    * Bind the UV attribute of the given array to the UV attribute of the given
    * program.
-   * 
+   *
    * @param program
    *          The program
    * @param array
@@ -1227,6 +1232,16 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     KShadingProgramCommon.putMaterialSpecularColor(program, m.getColor());
   }
 
+  static void putMatrixDeferredProjection(
+    final JCBProgramType program,
+    final RMatrixReadable4x4FType<RTransformDeferredProjectionType> m)
+    throws JCGLException
+  {
+    program.programUniformPutMatrix4x4f(
+      KShadingProgramCommon.MATRIX_NAME_DEFERRED_PROJECTION,
+      m);
+  }
+
   static void putMatrixInverseView(
     final JCBProgramType program,
     final RMatrixReadable4x4FType<RTransformViewInverseType> m)
@@ -1249,7 +1264,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
 
   /**
    * Set the model-view matrix for the given program.
-   * 
+   *
    * @param program
    *          The program
    * @param m
@@ -1300,7 +1315,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
 
   /**
    * Set the projection matrix for the given program.
-   * 
+   *
    * @param p
    *          The program
    * @param m
@@ -1374,7 +1389,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
 
   /**
    * Assign the given UV matrix to the program's UV matrix parameter.
-   * 
+   *
    * @param program
    *          The program
    * @param m
@@ -1431,6 +1446,75 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     program.programUniformPutVector2f("screen_size", size);
   }
 
+  static void putShadow(
+    final KShadowMapContextType shadow_context,
+    final KTextureUnitContextType unit_context,
+    final JCBProgramType program,
+    final OptionType<KShadowType> shadow)
+    throws RException
+  {
+    shadow
+      .acceptPartial(new OptionPartialVisitorType<KShadowType, Unit, RException>() {
+        @Override public Unit none(
+          final None<KShadowType> n)
+          throws RException
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit some(
+          final Some<KShadowType> some)
+          throws RException
+        {
+          try {
+            return some.get().shadowAccept(
+              new KShadowVisitorType<Unit, JCGLException>() {
+                @Override public Unit shadowMappedBasic(
+                  final KShadowMappedBasic s)
+                  throws JCGLException,
+                    RException
+                {
+                  final KShadowMapBasic map =
+                    (KShadowMapBasic) shadow_context.getShadowMap(s);
+
+                  final TextureUnitType unit =
+                    unit_context.withTexture2D(map
+                      .getFramebuffer()
+                      .kFramebufferGetDepthTexture());
+
+                  KShadingProgramCommon.putShadowBasic(program, s);
+                  KShadingProgramCommon.putTextureShadowMapBasic(
+                    program,
+                    unit);
+                  return Unit.unit();
+                }
+
+                @Override public Unit shadowMappedVariance(
+                  final KShadowMappedVariance s)
+                  throws JCGLException,
+                    RException
+                {
+                  final KShadowMapVariance map =
+                    (KShadowMapVariance) shadow_context.getShadowMap(s);
+                  final TextureUnitType unit =
+                    unit_context.withTexture2D(map
+                      .getFramebuffer()
+                      .kFramebufferGetDepthVarianceTexture());
+
+                  KShadingProgramCommon.putShadowVariance(program, s);
+                  KShadingProgramCommon.putTextureShadowMapVariance(
+                    program,
+                    unit);
+                  return Unit.unit();
+                }
+              });
+          } catch (final JCGLException e) {
+            throw RExceptionJCGL.fromJCGLException(e);
+          }
+        }
+      });
+  }
+
   static void putShadowBasic(
     final JCBProgramType program,
     final KShadowMappedBasic shadow)
@@ -1481,6 +1565,56 @@ import com.io7m.renderer.types.RVectorReadable4FType;
   {
     KShadingProgramCommon.putShadowBasicDepthBiasReuse(program);
     KShadingProgramCommon.putShadowBasicFactorMinimumReuse(program);
+  }
+
+  static void putShadowReuse(
+    final JCBProgramType program,
+    final OptionType<KShadowType> shadow)
+    throws RException
+  {
+    shadow
+      .acceptPartial(new OptionPartialVisitorType<KShadowType, Unit, RException>() {
+        @Override public Unit none(
+          final None<KShadowType> n)
+          throws RException
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit some(
+          final Some<KShadowType> some)
+          throws RException
+        {
+          try {
+            return some.get().shadowAccept(
+              new KShadowVisitorType<Unit, JCGLException>() {
+                @Override public Unit shadowMappedBasic(
+                  final KShadowMappedBasic s)
+                  throws JCGLException,
+                    RException
+                {
+                  KShadingProgramCommon.putShadowBasicReuse(program);
+                  KShadingProgramCommon
+                    .putTextureShadowMapBasicReuse(program);
+                  return Unit.unit();
+                }
+
+                @Override public Unit shadowMappedVariance(
+                  final KShadowMappedVariance s)
+                  throws JCGLException,
+                    RException
+                {
+                  KShadingProgramCommon.putShadowVarianceReuse(program);
+                  KShadingProgramCommon
+                    .putTextureShadowMapVarianceReuse(program);
+                  return Unit.unit();
+                }
+              });
+          } catch (final JCGLException e) {
+            throw RExceptionJCGL.fromJCGLException(e);
+          }
+        }
+      });
   }
 
   static void putShadowVariance(
@@ -1556,7 +1690,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
   /**
    * Associate the given texture unit with the albedo texture parameter of the
    * given program.
-   * 
+   *
    * @param program
    *          The program
    * @param unit

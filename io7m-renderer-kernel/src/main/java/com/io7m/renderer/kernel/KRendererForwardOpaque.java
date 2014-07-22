@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,7 +28,6 @@ import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
@@ -49,8 +48,6 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceWithProjectiveT
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightType;
-import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
-import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueVisitorType;
@@ -64,10 +61,6 @@ import com.io7m.renderer.kernel.types.KMaterialNormalVertex;
 import com.io7m.renderer.kernel.types.KMaterialNormalVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
-import com.io7m.renderer.kernel.types.KShadowMappedBasic;
-import com.io7m.renderer.kernel.types.KShadowMappedVariance;
-import com.io7m.renderer.kernel.types.KShadowType;
-import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 
@@ -80,14 +73,14 @@ import com.io7m.renderer.types.RExceptionJCGL;
 {
   /**
    * Construct a new opaque renderer.
-   * 
+   *
    * @param in_g
    *          The OpenGL interface.
    * @param in_shader_unlit_cache
    *          The unlit shader cache.
    * @param in_shader_lit_cache
    *          The lit shader cache.
-   * 
+   *
    * @return A new renderer.
    * @throws RException
    *           If an error occurs.
@@ -103,83 +96,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
       in_g,
       in_shader_unlit_cache,
       in_shader_lit_cache);
-  }
-
-  private static void putShadow(
-    final KShadowMapContextType shadow_context,
-    final KTextureUnitContextType unit_context,
-    final JCBProgramType program,
-    final KLightProjective light)
-    throws JCGLException,
-      RException
-  {
-    final Some<KShadowType> some = (Some<KShadowType>) light.lightGetShadow();
-    some.get().shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-      @Override public Unit shadowMappedBasic(
-        final KShadowMappedBasic s)
-        throws JCGLException,
-          RException
-      {
-        final KShadowMapBasic map =
-          (KShadowMapBasic) shadow_context.getShadowMap(s);
-
-        final TextureUnitType unit =
-          unit_context.withTexture2D(map
-            .getFramebuffer()
-            .kFramebufferGetDepthTexture());
-
-        KShadingProgramCommon.putShadowBasic(program, s);
-        KShadingProgramCommon.putTextureShadowMapBasic(program, unit);
-        return Unit.unit();
-      }
-
-      @Override public Unit shadowMappedVariance(
-        final KShadowMappedVariance s)
-        throws JCGLException,
-          RException
-      {
-        final KShadowMapVariance map =
-          (KShadowMapVariance) shadow_context.getShadowMap(s);
-        final TextureUnitType unit =
-          unit_context.withTexture2D(map
-            .getFramebuffer()
-            .kFramebufferGetDepthVarianceTexture());
-
-        KShadingProgramCommon.putShadowVariance(program, s);
-        KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
-        return Unit.unit();
-      }
-    });
-  }
-
-  private static void putShadowReuse(
-    final JCBProgramType program,
-    final KLightProjective light)
-    throws JCGLException,
-      RException
-  {
-    final Some<KShadowType> some = (Some<KShadowType>) light.lightGetShadow();
-    some.get().shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-      @Override public Unit shadowMappedBasic(
-        final KShadowMappedBasic s)
-        throws JCGLException,
-          RException
-      {
-        KShadingProgramCommon.putShadowBasicReuse(program);
-        KShadingProgramCommon.putTextureShadowMapBasicReuse(program);
-        return Unit.unit();
-      }
-
-      @Override public Unit shadowMappedVariance(
-        final KShadowMappedVariance s)
-        throws JCGLException,
-          RException
-      {
-        KShadingProgramCommon.putShadowVarianceReuse(program);
-        KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
-        return Unit.unit();
-      }
-    });
   }
 
   /**
@@ -429,13 +345,11 @@ import com.io7m.renderer.types.RExceptionJCGL;
     throws RException,
       JCGLException
   {
-    if (light.lightHasShadow()) {
-      KRendererForwardOpaque.putShadow(
-        shadow_context,
-        unit_context,
-        program,
-        light);
-    }
+    KShadingProgramCommon.putShadow(
+      shadow_context,
+      unit_context,
+      program,
+      light.lightGetShadow());
 
     KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
       program,
@@ -460,10 +374,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
         program,
         light);
       KShadingProgramCommon.putTextureProjectionReuse(program);
-
-      if (light.lightHasShadow()) {
-        KRendererForwardOpaque.putShadowReuse(program, light);
-      }
+      KShadingProgramCommon.putShadowReuse(program, light.lightGetShadow());
 
       mwp
         .withInstance(

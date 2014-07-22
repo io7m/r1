@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,7 +20,7 @@ import java.math.BigInteger;
 
 import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcanephora.ArrayBufferType;
-import com.io7m.jcanephora.ArrayBufferUpdateUnmapped;
+import com.io7m.jcanephora.ArrayBufferUpdateUnmappedConstructorType;
 import com.io7m.jcanephora.ArrayBufferUpdateUnmappedType;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.ArrayDescriptor;
@@ -28,7 +28,7 @@ import com.io7m.jcanephora.ArrayDescriptorBuilderType;
 import com.io7m.jcanephora.CursorWritable3fType;
 import com.io7m.jcanephora.CursorWritableIndexType;
 import com.io7m.jcanephora.IndexBufferType;
-import com.io7m.jcanephora.IndexBufferUpdateUnmapped;
+import com.io7m.jcanephora.IndexBufferUpdateUnmappedConstructorType;
 import com.io7m.jcanephora.IndexBufferUpdateUnmappedType;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
@@ -38,6 +38,7 @@ import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLArrayBuffersType;
 import com.io7m.jcanephora.api.JCGLIndexBuffersType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -96,6 +97,10 @@ import com.io7m.renderer.types.RExceptionJCGL;
    *
    * @param <G>
    *          The precise type of OpenGL interface required
+   * @param au_cons
+   *          An array buffer update constructor.
+   * @param iu_cons
+   *          An index buffer update constructor.
    * @param g
    *          The OpenGL interface
    * @param log
@@ -108,6 +113,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     JCacheLoaderType<KProjectionType, KFrustumMesh, RException>
     newCacheLoader(
       final G g,
+      final ArrayBufferUpdateUnmappedConstructorType au_cons,
+      final IndexBufferUpdateUnmappedConstructorType iu_cons,
       final LogUsableType log)
   {
     return new JCacheLoaderType<KProjectionType, KFrustumMesh, RException>() {
@@ -127,7 +134,13 @@ import com.io7m.renderer.types.RExceptionJCGL;
         throws RException
       {
         try {
-          return KFrustumMesh.newFromGeneral(g, p);
+          if (log.wouldLog(LogLevel.LOG_DEBUG)) {
+            final String s =
+              String.format("constructing frustum mesh for %s", p);
+            assert s != null;
+            log.debug(s);
+          }
+          return KFrustumMesh.newFromGeneral(g, au_cons, iu_cons, p);
         } catch (final JCGLException e) {
           throw RExceptionJCGL.fromJCGLException(e);
         }
@@ -149,6 +162,10 @@ import com.io7m.renderer.types.RExceptionJCGL;
    *
    * @param <G>
    *          The precise type of OpenGL interface.
+   * @param au_cons
+   *          An array buffer update constructor.
+   * @param iu_cons
+   *          An index buffer update constructor.
    * @param g
    *          The OpenGL interface.
    * @param p
@@ -163,6 +180,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     KFrustumMesh
     newFromFOV(
       final G g,
+      final ArrayBufferUpdateUnmappedConstructorType au_cons,
+      final IndexBufferUpdateUnmappedConstructorType iu_cons,
       final KProjectionFOV p)
       throws JCGLException
   {
@@ -188,6 +207,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     return KFrustumMesh.newMesh(
       g,
+      au_cons,
+      iu_cons,
       near_x_min,
       near_x_max,
       near_y_min,
@@ -205,6 +226,10 @@ import com.io7m.renderer.types.RExceptionJCGL;
    *
    * @param <G>
    *          The precise type of OpenGL interface.
+   * @param au_cons
+   *          An array buffer update constructor.
+   * @param iu_cons
+   *          An index buffer update constructor.
    * @param g
    *          The OpenGL interface.
    * @param p
@@ -219,6 +244,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     KFrustumMesh
     newFromFrustum(
       final G g,
+      final ArrayBufferUpdateUnmappedConstructorType au_cons,
+      final IndexBufferUpdateUnmappedConstructorType iu_cons,
       final KProjectionFrustum p)
       throws JCGLException
   {
@@ -236,6 +263,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     return KFrustumMesh.newMesh(
       g,
+      au_cons,
+      iu_cons,
       near_x_min,
       near_x_max,
       near_y_min,
@@ -253,6 +282,10 @@ import com.io7m.renderer.types.RExceptionJCGL;
    *
    * @param <G>
    *          The precise type of OpenGL interface.
+   * @param au_cons
+   *          An array buffer update constructor.
+   * @param iu_cons
+   *          An index buffer update constructor.
    * @param g
    *          The OpenGL interface.
    * @param p
@@ -267,6 +300,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     KFrustumMesh
     newFromGeneral(
       final G g,
+      final ArrayBufferUpdateUnmappedConstructorType au_cons,
+      final IndexBufferUpdateUnmappedConstructorType iu_cons,
       final KProjectionType p)
       throws JCGLException
   {
@@ -277,21 +312,21 @@ import com.io7m.renderer.types.RExceptionJCGL;
             final KProjectionFOV pf)
             throws JCGLException
           {
-            return KFrustumMesh.newFromFOV(g, pf);
+            return KFrustumMesh.newFromFOV(g, au_cons, iu_cons, pf);
           }
 
           @Override public KFrustumMesh frustum(
             final KProjectionFrustum pf)
             throws JCGLException
           {
-            return KFrustumMesh.newFromFrustum(g, pf);
+            return KFrustumMesh.newFromFrustum(g, au_cons, iu_cons, pf);
           }
 
           @Override public KFrustumMesh orthographic(
             final KProjectionOrthographic po)
             throws JCGLException
           {
-            return KFrustumMesh.newFromOrthographic(g, po);
+            return KFrustumMesh.newFromOrthographic(g, au_cons, iu_cons, po);
           }
         });
     } catch (final RException e) {
@@ -304,6 +339,10 @@ import com.io7m.renderer.types.RExceptionJCGL;
    *
    * @param <G>
    *          The precise type of OpenGL interface.
+   * @param au_cons
+   *          An array buffer update constructor.
+   * @param iu_cons
+   *          An index buffer update constructor.
    * @param g
    *          The OpenGL interface.
    * @param p
@@ -318,6 +357,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     KFrustumMesh
     newFromOrthographic(
       final G g,
+      final ArrayBufferUpdateUnmappedConstructorType au_cons,
+      final IndexBufferUpdateUnmappedConstructorType iu_cons,
       final KProjectionOrthographic p)
       throws JCGLException
   {
@@ -336,6 +377,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     return KFrustumMesh.newMesh(
       g,
+      au_cons,
+      iu_cons,
       near_x_min,
       near_x_max,
       near_y_min,
@@ -353,6 +396,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     KFrustumMesh
     newMesh(
       final G g,
+      final ArrayBufferUpdateUnmappedConstructorType au_cons,
+      final IndexBufferUpdateUnmappedConstructorType iu_cons,
       final float near_x_min,
       final float near_x_max,
       final float near_y_min,
@@ -370,8 +415,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
         KFrustumMesh.ARRAY_VERTEX_COUNT,
         KFrustumMesh.ARRAY_TYPE,
         UsageHint.USAGE_STATIC_DRAW);
-    final ArrayBufferUpdateUnmappedType am =
-      ArrayBufferUpdateUnmapped.newUpdateReplacingAll(a);
+    final ArrayBufferUpdateUnmappedType am = au_cons.newUpdateReplacingAll(a);
     final CursorWritable3fType pc =
       am.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION.getName());
 
@@ -391,8 +435,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
         KFrustumMesh.INDICES_COUNT,
         UsageHint.USAGE_STATIC_DRAW);
 
-    final IndexBufferUpdateUnmappedType im =
-      IndexBufferUpdateUnmapped.newReplacing(i);
+    final IndexBufferUpdateUnmappedType im = iu_cons.newReplacing(i);
     final CursorWritableIndexType ic = im.getCursor();
 
     /**
@@ -413,8 +456,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
      * Right side triangles.
      */
 
-    KFrustumMesh.triangle(ic, 6, 7, 3);
-    KFrustumMesh.triangle(ic, 6, 3, 2);
+    KFrustumMesh.triangle(ic, 6, 3, 7);
+    KFrustumMesh.triangle(ic, 6, 2, 3);
 
     /**
      * Top side triangles.
@@ -427,15 +470,18 @@ import com.io7m.renderer.types.RExceptionJCGL;
      * Bottom side triangles.
      */
 
-    KFrustumMesh.triangle(ic, 4, 0, 3);
-    KFrustumMesh.triangle(ic, 4, 3, 7);
+    KFrustumMesh.triangle(ic, 4, 3, 0);
+    KFrustumMesh.triangle(ic, 4, 7, 3);
 
     /**
      * Back side triangles.
      */
 
-    KFrustumMesh.triangle(ic, 5, 4, 7);
-    KFrustumMesh.triangle(ic, 5, 7, 6);
+    KFrustumMesh.triangle(ic, 5, 7, 4);
+    KFrustumMesh.triangle(ic, 6, 7, 5);
+
+    assert ic.hasNext() == false;
+    assert pc.hasNext() == false;
 
     g.arrayBufferBind(a);
     try {
