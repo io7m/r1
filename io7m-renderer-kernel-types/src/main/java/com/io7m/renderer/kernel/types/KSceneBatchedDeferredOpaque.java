@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -74,7 +74,7 @@ import com.io7m.renderer.types.RException;
 
   /**
    * Construct a new batched scene from the given scene.
-   * 
+   *
    * @param in_scene
    *          The scene.
    * @return A batched scene.
@@ -125,7 +125,9 @@ import com.io7m.renderer.types.RException;
         in_groups.add(new Group(lg.getLights(), by_material));
       }
 
-      return new KSceneBatchedDeferredOpaque(in_groups);
+      final Map<String, Set<KInstanceOpaqueType>> in_unlit =
+        KSceneBatchedCommon.makeUnlitBatches(in_scene.getUnlitOpaques());
+      return new KSceneBatchedDeferredOpaque(in_groups, in_unlit);
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
     } catch (final JCGLException e) {
@@ -133,12 +135,15 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private final List<Group> groups;
+  private final List<Group>                           groups;
+  private final Map<String, Set<KInstanceOpaqueType>> unlit;
 
   private KSceneBatchedDeferredOpaque(
-    final List<Group> in_groups)
+    final List<Group> in_groups,
+    final Map<String, Set<KInstanceOpaqueType>> in_unlit)
   {
     this.groups = in_groups;
+    this.unlit = in_unlit;
   }
 
   /**
@@ -148,5 +153,14 @@ import com.io7m.renderer.types.RException;
   public List<Group> getGroups()
   {
     return this.groups;
+  }
+
+  /**
+   * @return The unlit instances.
+   */
+
+  public Map<String, Set<KInstanceOpaqueType>> getUnlit()
+  {
+    return this.unlit;
   }
 }
