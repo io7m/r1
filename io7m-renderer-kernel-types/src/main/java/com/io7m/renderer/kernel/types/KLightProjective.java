@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,14 +27,13 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionLightMissingTexture;
 import com.io7m.renderer.types.RExceptionUserError;
-import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RVectorI3F;
 
 /**
@@ -47,33 +46,21 @@ import com.io7m.renderer.types.RVectorI3F;
  * </p>
  */
 
-@EqualityReference public final class KLightProjective implements KLightType
+@EqualityReference public final class KLightProjective implements
+  KLightWithTransformType
 {
-  @SuppressWarnings("synthetic-access") private static final class Builder implements
+  @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightProjectiveBuilderType
   {
-    private RVectorI3F<RSpaceRGBType>              color;
-    private float                                  falloff;
-    private float                                  intensity;
-    private QuaternionI4F                          orientation;
-    private RVectorI3F<RSpaceWorldType>            position;
-    private RMatrixI4x4F<RTransformProjectionType> projection;
-    private float                                  range;
-    private OptionType<KShadowType>                shadow;
-    private @Nullable Texture2DStaticUsableType    texture;
-
-    Builder()
-    {
-      this.color = RVectorI3F.one();
-      this.intensity = 1.0f;
-      this.falloff = 1.0f;
-      this.position = RVectorI3F.zero();
-      this.orientation = QuaternionI4F.IDENTITY;
-      this.projection = RMatrixI4x4F.identity();
-      this.range = 8.0f;
-      this.texture = null;
-      this.shadow = Option.none();
-    }
+    private RVectorI3F<RSpaceRGBType>           color;
+    private float                               falloff;
+    private float                               intensity;
+    private QuaternionI4F                       orientation;
+    private RVectorI3F<RSpaceWorldType>         position;
+    private KProjectionType                     projection;
+    private float                               range;
+    private OptionType<KShadowType>             shadow;
+    private @Nullable Texture2DStaticUsableType texture;
 
     Builder(
       final KLightProjective in_original)
@@ -88,6 +75,21 @@ import com.io7m.renderer.types.RVectorI3F;
       this.range = in_original.range;
       this.texture = in_original.texture;
       this.shadow = in_original.shadow;
+    }
+
+    Builder(
+      final Texture2DStaticUsableType in_texture,
+      final KProjectionType in_projection)
+    {
+      this.color = RVectorI3F.one();
+      this.intensity = 1.0f;
+      this.falloff = 1.0f;
+      this.position = RVectorI3F.zero();
+      this.orientation = QuaternionI4F.IDENTITY;
+      this.projection = NullCheck.notNull(in_projection, "Projection");
+      this.range = 8.0f;
+      this.texture = NullCheck.notNull(in_texture, "Texture");
+      this.shadow = Option.none();
     }
 
     @Override public KLightProjective build(
@@ -153,7 +155,7 @@ import com.io7m.renderer.types.RVectorI3F;
     }
 
     @Override public void setProjection(
-      final RMatrixI4x4F<RTransformProjectionType> in_projection)
+      final KProjectionType in_projection)
     {
       this.projection = NullCheck.notNull(in_projection, "Projection");
     }
@@ -182,6 +184,8 @@ import com.io7m.renderer.types.RVectorI3F;
       this.texture = NullCheck.notNull(in_texture, "Texture");
     }
   }
+
+  private static final VectorI3F ONE = new VectorI3F(1.0f, 1.0f, 1.0f);
 
   private static String getCode(
     final KGraphicsCapabilitiesType caps,
@@ -228,13 +232,19 @@ import com.io7m.renderer.types.RVectorI3F;
    * <p>
    * Create a builder for creating new projective lights.
    * </p>
-   * 
+   *
+   * @param in_texture
+   *          The texture.
+   * @param in_projection
+   *          The projection.
    * @return A new light builder.
    */
 
-  public static KLightProjectiveBuilderType newBuilder()
+  public static KLightProjectiveBuilderType newBuilder(
+    final Texture2DStaticUsableType in_texture,
+    final KProjectionType in_projection)
   {
-    return new Builder();
+    return new Builder(in_texture, in_projection);
   }
 
   /**
@@ -242,7 +252,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * Create a builder for creating new spherical lights. The builder will be
    * initialized to values based on the given light.
    * </p>
-   * 
+   *
    * @param p
    *          The initial light.
    * @return A new light builder.
@@ -254,17 +264,18 @@ import com.io7m.renderer.types.RVectorI3F;
     return new Builder(p);
   }
 
-  private final String                                 code;
-  private final RVectorI3F<RSpaceRGBType>              color;
-  private final float                                  falloff;
-  private final float                                  intensity;
-  private final QuaternionI4F                          orientation;
-  private final RVectorI3F<RSpaceWorldType>            position;
-  private final RMatrixI4x4F<RTransformProjectionType> projection;
-  private final float                                  range;
-  private final OptionType<KShadowType>                shadow;
-  private final Texture2DStaticUsableType              texture;
-  private final int                                    textures;
+  private final String                      code;
+  private final RVectorI3F<RSpaceRGBType>   color;
+  private final float                       falloff;
+  private final float                       intensity;
+  private final QuaternionI4F               orientation;
+  private final RVectorI3F<RSpaceWorldType> position;
+  private final KProjectionType             projection;
+  private final float                       range;
+  private final OptionType<KShadowType>     shadow;
+  private final Texture2DStaticUsableType   texture;
+  private final int                         textures;
+  private final KTransformType              transform;
 
   private KLightProjective(
     final Texture2DStaticUsableType in_texture,
@@ -274,7 +285,7 @@ import com.io7m.renderer.types.RVectorI3F;
     final float in_intensity,
     final float in_range,
     final float in_falloff,
-    final RMatrixI4x4F<RTransformProjectionType> in_projection,
+    final KProjectionType in_projection,
     final OptionType<KShadowType> in_shadow,
     final String in_code)
   {
@@ -288,6 +299,12 @@ import com.io7m.renderer.types.RVectorI3F;
     this.texture = NullCheck.notNull(in_texture, "Texture");
     this.shadow = NullCheck.notNull(in_shadow, "Shadow");
     this.code = NullCheck.notNull(in_code, "Code");
+
+    this.transform =
+      KTransformOST.newTransform(
+        this.orientation,
+        ONE,
+        this.position);
 
     /**
      * One texture for the light, and at most one for the shadow.
@@ -353,7 +370,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The projection matrix for the light
    */
 
-  public RMatrixI4x4F<RTransformProjectionType> lightGetProjection()
+  public KProjectionType lightGetProjection()
   {
     return this.projection;
   }
@@ -379,6 +396,11 @@ import com.io7m.renderer.types.RVectorI3F;
   public Texture2DStaticUsableType lightGetTexture()
   {
     return this.texture;
+  }
+
+  @Override public KTransformType lightGetTransform()
+  {
+    return this.transform;
   }
 
   @Override public boolean lightHasShadow()

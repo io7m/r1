@@ -20,16 +20,16 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
-import com.io7m.renderer.shaders.forward.RKMaterialCases;
-import com.io7m.renderer.shaders.forward.RKUnlitTranslucentRefractiveCases;
+import com.io7m.renderer.shaders.forward.RKFMaterialCases;
+import com.io7m.renderer.shaders.forward.RKFUnlitTranslucentRefractiveCases;
 
 @SuppressWarnings("static-method") public final class RKUnlitTranslucentRefractiveCasesTest
 {
   @Test public void testCasesUnlitTranslucentRefractive()
   {
-    final RKMaterialCases mc = new RKMaterialCases();
-    final RKUnlitTranslucentRefractiveCases oc =
-      new RKUnlitTranslucentRefractiveCases();
+    final RKFMaterialCases mc = new RKFMaterialCases();
+    final RKFUnlitTranslucentRefractiveCases oc =
+      new RKFUnlitTranslucentRefractiveCases();
 
     final int materials = oc.getCases().size();
     assert materials > 1;
@@ -44,8 +44,8 @@ import com.io7m.renderer.shaders.forward.RKUnlitTranslucentRefractiveCases;
 
   @Test public void testCasesUnlitTranslucentRefractiveShow()
   {
-    final RKUnlitTranslucentRefractiveCases oc =
-      new RKUnlitTranslucentRefractiveCases();
+    final RKFUnlitTranslucentRefractiveCases oc =
+      new RKFUnlitTranslucentRefractiveCases();
 
     for (final KMaterialTranslucentRefractive c : oc.getCases()) {
       System.out.println(c.materialUnlitGetCode());

@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel.types;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceRGBType;
@@ -26,7 +27,7 @@ import com.io7m.renderer.types.RVectorI3F;
  * The type of mapped specular properties.
  */
 
-public final class KMaterialSpecularMapped implements
+@EqualityReference public final class KMaterialSpecularMapped implements
   KMaterialSpecularNotNoneType
 {
   /**

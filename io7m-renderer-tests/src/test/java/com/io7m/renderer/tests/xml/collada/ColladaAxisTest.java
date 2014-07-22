@@ -30,7 +30,7 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceType;
 import com.io7m.renderer.types.RVectorI3F;
-import com.io7m.renderer.xml.collada.ColladaAxis;
+import com.io7m.renderer.xml.collada.RColladaAxis;
 
 @SuppressWarnings({ "null", "static-method" }) public final class ColladaAxisTest
 {
@@ -69,11 +69,11 @@ import com.io7m.renderer.xml.collada.ColladaAxis;
           final RVectorI3F<RSpaceObjectType> v)
           throws Throwable
         {
-          Assert.assertEquals(v, ColladaAxis.convertAxes(
+          Assert.assertEquals(v, RColladaAxis.convertAxes(
             matrix,
-            ColladaAxis.COLLADA_AXIS_X_UP,
+            RColladaAxis.COLLADA_AXIS_X_UP,
             v,
-            ColladaAxis.COLLADA_AXIS_X_UP));
+            RColladaAxis.COLLADA_AXIS_X_UP));
         }
       });
   }
@@ -88,11 +88,11 @@ import com.io7m.renderer.xml.collada.ColladaAxis;
     final RVectorI3F<RSpaceObjectType> v_exp =
       new RVectorI3F<RSpaceObjectType>(0, 1, 0);
     final RVectorI3F<RSpaceObjectType> v_out =
-      ColladaAxis.convertAxes(
+      RColladaAxis.convertAxes(
         matrix,
-        ColladaAxis.COLLADA_AXIS_X_UP,
+        RColladaAxis.COLLADA_AXIS_X_UP,
         v_in,
-        ColladaAxis.COLLADA_AXIS_Y_UP);
+        RColladaAxis.COLLADA_AXIS_Y_UP);
 
     System.out.println("v_in  : " + v_in);
     System.out.println("v_exp : " + v_exp);
@@ -111,11 +111,11 @@ import com.io7m.renderer.xml.collada.ColladaAxis;
     final RVectorI3F<RSpaceObjectType> v_exp =
       new RVectorI3F<RSpaceObjectType>(0, 0, 1);
     final RVectorI3F<RSpaceObjectType> v_out =
-      ColladaAxis.convertAxes(
+      RColladaAxis.convertAxes(
         matrix,
-        ColladaAxis.COLLADA_AXIS_X_UP,
+        RColladaAxis.COLLADA_AXIS_X_UP,
         v_in,
-        ColladaAxis.COLLADA_AXIS_Z_UP);
+        RColladaAxis.COLLADA_AXIS_Z_UP);
 
     System.out.println("v_in  : " + v_in);
     System.out.println("v_exp : " + v_exp);
@@ -134,11 +134,11 @@ import com.io7m.renderer.xml.collada.ColladaAxis;
     final RVectorI3F<RSpaceObjectType> v_exp =
       new RVectorI3F<RSpaceObjectType>(1, 0, 0);
     final RVectorI3F<RSpaceObjectType> v_out =
-      ColladaAxis.convertAxes(
+      RColladaAxis.convertAxes(
         matrix,
-        ColladaAxis.COLLADA_AXIS_Y_UP,
+        RColladaAxis.COLLADA_AXIS_Y_UP,
         v_in,
-        ColladaAxis.COLLADA_AXIS_X_UP);
+        RColladaAxis.COLLADA_AXIS_X_UP);
 
     System.out.println("v_in  : " + v_in);
     System.out.println("v_exp : " + v_exp);
@@ -158,11 +158,11 @@ import com.io7m.renderer.xml.collada.ColladaAxis;
           final RVectorI3F<RSpaceObjectType> v)
           throws Throwable
         {
-          Assert.assertEquals(v, ColladaAxis.convertAxes(
+          Assert.assertEquals(v, RColladaAxis.convertAxes(
             matrix,
-            ColladaAxis.COLLADA_AXIS_Y_UP,
+            RColladaAxis.COLLADA_AXIS_Y_UP,
             v,
-            ColladaAxis.COLLADA_AXIS_Y_UP));
+            RColladaAxis.COLLADA_AXIS_Y_UP));
         }
       });
   }
@@ -177,11 +177,11 @@ import com.io7m.renderer.xml.collada.ColladaAxis;
     final RVectorI3F<RSpaceObjectType> v_exp =
       new RVectorI3F<RSpaceObjectType>(0, 0, 1);
     final RVectorI3F<RSpaceObjectType> v_out =
-      ColladaAxis.convertAxes(
+      RColladaAxis.convertAxes(
         matrix,
-        ColladaAxis.COLLADA_AXIS_Y_UP,
+        RColladaAxis.COLLADA_AXIS_Y_UP,
         v_in,
-        ColladaAxis.COLLADA_AXIS_Z_UP);
+        RColladaAxis.COLLADA_AXIS_Z_UP);
 
     System.out.println("v_in  : " + v_in);
     System.out.println("v_exp : " + v_exp);
@@ -200,11 +200,11 @@ import com.io7m.renderer.xml.collada.ColladaAxis;
     final RVectorI3F<RSpaceObjectType> v_exp =
       new RVectorI3F<RSpaceObjectType>(1, 0, 0);
     final RVectorI3F<RSpaceObjectType> v_out =
-      ColladaAxis.convertAxes(
+      RColladaAxis.convertAxes(
         matrix,
-        ColladaAxis.COLLADA_AXIS_Z_UP,
+        RColladaAxis.COLLADA_AXIS_Z_UP,
         v_in,
-        ColladaAxis.COLLADA_AXIS_X_UP);
+        RColladaAxis.COLLADA_AXIS_X_UP);
 
     System.out.println("v_in  : " + v_in);
     System.out.println("v_exp : " + v_exp);
@@ -223,11 +223,11 @@ import com.io7m.renderer.xml.collada.ColladaAxis;
     final RVectorI3F<RSpaceObjectType> v_exp =
       new RVectorI3F<RSpaceObjectType>(0, 1, 0);
     final RVectorI3F<RSpaceObjectType> v_out =
-      ColladaAxis.convertAxes(
+      RColladaAxis.convertAxes(
         matrix,
-        ColladaAxis.COLLADA_AXIS_Z_UP,
+        RColladaAxis.COLLADA_AXIS_Z_UP,
         v_in,
-        ColladaAxis.COLLADA_AXIS_Y_UP);
+        RColladaAxis.COLLADA_AXIS_Y_UP);
 
     System.out.println("v_in  : " + v_in);
     System.out.println("v_exp : " + v_exp);
@@ -247,11 +247,11 @@ import com.io7m.renderer.xml.collada.ColladaAxis;
           final RVectorI3F<RSpaceObjectType> v)
           throws Throwable
         {
-          Assert.assertEquals(v, ColladaAxis.convertAxes(
+          Assert.assertEquals(v, RColladaAxis.convertAxes(
             matrix,
-            ColladaAxis.COLLADA_AXIS_Z_UP,
+            RColladaAxis.COLLADA_AXIS_Z_UP,
             v,
-            ColladaAxis.COLLADA_AXIS_Z_UP));
+            RColladaAxis.COLLADA_AXIS_Z_UP));
         }
       });
   }

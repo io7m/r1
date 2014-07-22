@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceRGBAType;
@@ -25,7 +26,8 @@ import com.io7m.renderer.types.RVectorI4F;
  * The type of untextured albedo properties.
  */
 
-public final class KMaterialAlbedoUntextured implements KMaterialAlbedoType
+@EqualityReference public final class KMaterialAlbedoUntextured implements
+  KMaterialAlbedoType
 {
   private static final KMaterialAlbedoUntextured WHITE;
 

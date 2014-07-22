@@ -131,6 +131,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
   @Override public BigInteger cacheValueSizeOf(
     final KShadowMapType f)
   {
-    return BigInteger.valueOf(f.kShadowMapGetSizeBytes());
+    final BigInteger r = BigInteger.valueOf(f.kShadowMapGetSizeBytes());
+    assert r != null;
+    return r;
   }
 }

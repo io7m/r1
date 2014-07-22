@@ -25,6 +25,7 @@ import java.util.Set;
 
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
 
@@ -53,47 +54,46 @@ import com.io7m.renderer.types.RException;
   /**
    * Construct batches for depth rendering from the given opaque instances.
    * 
-   * @param opaques
-   *          The opaque instances.
+   * @param scene
+   *          The scene.
    * @return New batches.
    */
 
   public static KSceneBatchedDepth newBatches(
-    final KSceneOpaques opaques)
+    final KScene scene)
   {
     try {
       final Map<String, List<KInstanceOpaqueType>> instances_by_code =
         new HashMap<String, List<KInstanceOpaqueType>>();
 
-      final Set<KInstanceOpaqueType> unlit = opaques.getUnlitInstances();
-      for (final KInstanceOpaqueType o : unlit) {
-        final String code = o.opaqueAccept(KSceneBatchedDepth.GET_CODE);
-        final List<KInstanceOpaqueType> instances;
-        if (instances_by_code.containsKey(code)) {
-          instances = instances_by_code.get(code);
-        } else {
-          instances = new ArrayList<KInstanceOpaqueType>();
-        }
-        instances.add(o);
-        instances_by_code.put(code, instances);
-      }
+      final Set<KInstanceType> is = scene.getVisibleInstances();
+      for (final KInstanceType i : is) {
+        i
+          .instanceAccept(new KInstanceVisitorType<Unit, UnreachableCodeException>() {
+            @Override public Unit opaque(
+              final KInstanceOpaqueType io)
+              throws RException,
+                JCGLException
+            {
+              final String code =
+                io.opaqueAccept(KSceneBatchedDepth.GET_CODE);
+              final List<KInstanceOpaqueType> instances;
+              if (instances_by_code.containsKey(code)) {
+                instances = instances_by_code.get(code);
+              } else {
+                instances = new ArrayList<KInstanceOpaqueType>();
+              }
+              instances.add(io);
+              instances_by_code.put(code, instances);
+              return Unit.unit();
+            }
 
-      final Map<KLightType, Set<KInstanceOpaqueType>> lit =
-        opaques.getLitInstances();
-      for (final KLightType l : lit.keySet()) {
-        final Set<KInstanceOpaqueType> lit_instances = lit.get(l);
-
-        for (final KInstanceOpaqueType o : lit_instances) {
-          final String code = o.opaqueAccept(KSceneBatchedDepth.GET_CODE);
-          final List<KInstanceOpaqueType> instances;
-          if (instances_by_code.containsKey(code)) {
-            instances = instances_by_code.get(code);
-          } else {
-            instances = new ArrayList<KInstanceOpaqueType>();
-          }
-          instances.add(o);
-          instances_by_code.put(code, instances);
-        }
+            @Override public Unit translucent(
+              final KInstanceTranslucentType _)
+            {
+              return Unit.unit();
+            }
+          });
       }
 
       return new KSceneBatchedDepth(instances_by_code);

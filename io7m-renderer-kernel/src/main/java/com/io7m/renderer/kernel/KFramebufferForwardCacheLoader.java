@@ -54,8 +54,8 @@ import com.io7m.renderer.types.RException;
     return new KFramebufferForwardCacheLoader(gi, log);
   }
 
-  private final JCGLImplementationType gi;
-  private final LogUsableType          log;
+  private final JCGLImplementationType                    gi;
+  @SuppressWarnings("unused") private final LogUsableType log;
 
   private KFramebufferForwardCacheLoader(
     final JCGLImplementationType in_gi,
@@ -84,6 +84,8 @@ import com.io7m.renderer.types.RException;
   @Override public BigInteger cacheValueSizeOf(
     final KFramebufferForwardType v)
   {
-    return BigInteger.valueOf(v.kFramebufferGetSizeBytes());
+    final BigInteger r = BigInteger.valueOf(v.kFramebufferGetSizeBytes());
+    assert r != null;
+    return r;
   }
 }

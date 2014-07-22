@@ -33,10 +33,10 @@ final class ViewerConfig
     return new ViewerConfig(props);
   }
 
-  private final Properties props;
-  private final File       replacement_results_directory;
   private final boolean    eclipse;
   private String           program_version;
+  private final Properties props;
+  private final File       replacement_results_directory;
 
   public ViewerConfig(
     final Properties in_props)
@@ -62,16 +62,14 @@ final class ViewerConfig
     }
 
     this.replacement_results_directory =
-      new File(
-        JProperties
-          .getString(
-            in_props,
-            "com.io7m.renderer.kernel.examples.viewer.replacement-results-directory"));
+      new File(JProperties.getString(
+        in_props,
+        "com.io7m.renderer.examples.viewer.replacement-results-directory"));
   }
 
-  public boolean isEclipse()
+  public String getProgramVersion()
   {
-    return this.eclipse;
+    return this.program_version;
   }
 
   public File getReplacementResultsDirectory()
@@ -79,8 +77,8 @@ final class ViewerConfig
     return this.replacement_results_directory;
   }
 
-  public String getProgramVersion()
+  public boolean isEclipse()
   {
-    return this.program_version;
+    return this.eclipse;
   }
 }

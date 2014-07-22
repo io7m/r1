@@ -16,6 +16,9 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.renderer.types.RExceptionLightGroupLacksInstances;
+import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
+
 /**
  * An extension of the {@link KSceneBuilderType} interface that allows for
  * final scene creation.
@@ -24,10 +27,17 @@ package com.io7m.renderer.kernel.types;
 public interface KSceneBuilderWithCreateType extends KSceneBuilderType
 {
   /**
-   * Construct a {@link KScene} from the currently added instances and lights.
+   * Construct a {@link KScene} from the currently added instances and light
+   * groups.
    * 
    * @return A newly constructed scene
+   * @throws RExceptionLightGroupLacksLights
+   *           One or more light groups lack lights.
+   * @throws RExceptionLightGroupLacksInstances
+   *           One or more light groups lack instances.
    */
 
-  KScene sceneCreate();
+  KScene sceneCreate()
+    throws RExceptionLightGroupLacksInstances,
+      RExceptionLightGroupLacksLights;
 }

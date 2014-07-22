@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,9 +16,10 @@
 
 package com.io7m.renderer.kernel;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
@@ -27,12 +28,12 @@ import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.OptionPartialVisitorType;
 import com.io7m.jfunctional.OptionType;
@@ -47,8 +48,6 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceWithProjectiveT
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunctionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightType;
-import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
-import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueVisitorType;
@@ -62,10 +61,6 @@ import com.io7m.renderer.kernel.types.KMaterialNormalVertex;
 import com.io7m.renderer.kernel.types.KMaterialNormalVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
-import com.io7m.renderer.kernel.types.KShadowMappedBasic;
-import com.io7m.renderer.kernel.types.KShadowMappedVariance;
-import com.io7m.renderer.kernel.types.KShadowType;
-import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 
@@ -73,16 +68,19 @@ import com.io7m.renderer.types.RExceptionJCGL;
  * A forward renderer for opaque objects.
  */
 
-@SuppressWarnings("synthetic-access") public final class KRendererForwardOpaque implements
+@SuppressWarnings("synthetic-access") @EqualityReference public final class KRendererForwardOpaque implements
   KRendererForwardOpaqueType
 {
   /**
    * Construct a new opaque renderer.
-   * 
+   *
    * @param in_g
    *          The OpenGL interface.
-   * @param in_shader_cache
-   *          The shader cache.
+   * @param in_shader_unlit_cache
+   *          The unlit shader cache.
+   * @param in_shader_lit_cache
+   *          The lit shader cache.
+   *
    * @return A new renderer.
    * @throws RException
    *           If an error occurs.
@@ -90,87 +88,14 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
   public static KRendererForwardOpaqueType newRenderer(
     final JCGLImplementationType in_g,
-    final KShaderCacheForwardOpaqueType in_shader_cache)
+    final KShaderCacheForwardOpaqueUnlitType in_shader_unlit_cache,
+    final KShaderCacheForwardOpaqueLitType in_shader_lit_cache)
     throws RException
   {
-    return new KRendererForwardOpaque(in_g, in_shader_cache);
-  }
-
-  private static void putShadow(
-    final KShadowMapContextType shadow_context,
-    final KTextureUnitContextType unit_context,
-    final JCBProgramType program,
-    final KLightProjective light)
-    throws JCGLException,
-      RException
-  {
-    final Some<KShadowType> some = (Some<KShadowType>) light.lightGetShadow();
-    some.get().shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-      @Override public Unit shadowMappedBasic(
-        final KShadowMappedBasic s)
-        throws JCGLException,
-          RException
-      {
-        final KShadowMapBasic map =
-          (KShadowMapBasic) shadow_context.getShadowMap(s);
-
-        final TextureUnitType unit =
-          unit_context.withTexture2D(map
-            .getFramebuffer()
-            .kFramebufferGetDepthTexture());
-
-        KShadingProgramCommon.putShadowBasic(program, s);
-        KShadingProgramCommon.putTextureShadowMapBasic(program, unit);
-        return Unit.unit();
-      }
-
-      @Override public Unit shadowMappedVariance(
-        final KShadowMappedVariance s)
-        throws JCGLException,
-          RException
-      {
-        final KShadowMapVariance map =
-          (KShadowMapVariance) shadow_context.getShadowMap(s);
-        final TextureUnitType unit =
-          unit_context.withTexture2D(map
-            .getFramebuffer()
-            .kFramebufferGetDepthVarianceTexture());
-
-        KShadingProgramCommon.putShadowVariance(program, s);
-        KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
-        return Unit.unit();
-      }
-    });
-  }
-
-  private static void putShadowReuse(
-    final JCBProgramType program,
-    final KLightProjective light)
-    throws JCGLException,
-      RException
-  {
-    final Some<KShadowType> some = (Some<KShadowType>) light.lightGetShadow();
-    some.get().shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-      @Override public Unit shadowMappedBasic(
-        final KShadowMappedBasic s)
-        throws JCGLException,
-          RException
-      {
-        KShadingProgramCommon.putShadowBasicReuse(program);
-        KShadingProgramCommon.putTextureShadowMapBasicReuse(program);
-        return Unit.unit();
-      }
-
-      @Override public Unit shadowMappedVariance(
-        final KShadowMappedVariance s)
-        throws JCGLException,
-          RException
-      {
-        KShadingProgramCommon.putShadowVarianceReuse(program);
-        KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
-        return Unit.unit();
-      }
-    });
+    return new KRendererForwardOpaque(
+      in_g,
+      in_shader_unlit_cache,
+      in_shader_lit_cache);
   }
 
   /**
@@ -272,7 +197,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KTextureUnitAllocator unit_allocator,
     final MatricesObserverType mwo,
     final KLightType light,
-    final List<KInstanceOpaqueType> instances,
+    final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program)
     throws JCGLException,
       RException
@@ -372,7 +297,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType unit_context,
     final MatricesObserverType mwo,
-    final List<KInstanceOpaqueType> instances,
+    final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program,
     final KLightDirectional l)
     throws JCGLException,
@@ -414,19 +339,17 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShadowMapContextType shadow_context,
     final KTextureUnitContextType unit_context,
     final MatricesProjectiveLightType mwp,
-    final List<KInstanceOpaqueType> instances,
+    final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program,
     final KLightProjective light)
     throws RException,
       JCGLException
   {
-    if (light.lightHasShadow()) {
-      KRendererForwardOpaque.putShadow(
-        shadow_context,
-        unit_context,
-        program,
-        light);
-    }
+    KShadingProgramCommon.putShadow(
+      shadow_context,
+      unit_context,
+      program,
+      light.lightGetShadow());
 
     KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
       program,
@@ -451,10 +374,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
         program,
         light);
       KShadingProgramCommon.putTextureProjectionReuse(program);
-
-      if (light.lightHasShadow()) {
-        KRendererForwardOpaque.putShadowReuse(program, light);
-      }
+      KShadingProgramCommon.putShadowReuse(program, light.lightGetShadow());
 
       mwp
         .withInstance(
@@ -485,7 +405,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType unit_context,
     final MatricesObserverType mwo,
-    final List<KInstanceOpaqueType> instances,
+    final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program,
     final KLightSphere l)
     throws JCGLException,
@@ -528,7 +448,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KTextureUnitAllocator units,
     final MatricesObserverType mwo,
-    final List<KInstanceOpaqueType> instances,
+    final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program)
     throws JCGLException,
       RException
@@ -582,20 +502,25 @@ import com.io7m.renderer.types.RExceptionJCGL;
     return r;
   }
 
-  private final JCGLImplementationType        g;
-  private final KShaderCacheForwardOpaqueType shader_cache;
-  private final KTextureUnitAllocator         texture_units;
+  private final JCGLImplementationType             g;
+  private final KShaderCacheForwardOpaqueLitType   shader_lit_cache;
+  private final KShaderCacheForwardOpaqueUnlitType shader_unlit_cache;
+  private final KTextureUnitAllocator              texture_units;
 
   private KRendererForwardOpaque(
     final JCGLImplementationType in_g,
-    final KShaderCacheForwardOpaqueType in_shader_cache)
+    final KShaderCacheForwardOpaqueUnlitType in_shader_unlit_cache,
+    final KShaderCacheForwardOpaqueLitType in_shader_lit_cache)
     throws RException
   {
     try {
       this.g = NullCheck.notNull(in_g, "GL");
       this.texture_units =
         KTextureUnitAllocator.newAllocator(this.g.getGLCommon());
-      this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
+      this.shader_lit_cache =
+        NullCheck.notNull(in_shader_lit_cache, "Shader lit cache");
+      this.shader_unlit_cache =
+        NullCheck.notNull(in_shader_unlit_cache, "Shader unlit cache");
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }
@@ -605,7 +530,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final MatricesObserverType mwo,
-    final Map<KLightType, Map<String, List<KInstanceOpaqueType>>> by_light)
+    final Map<KLightType, Map<String, Set<KInstanceOpaqueType>>> by_light)
     throws RException
   {
     NullCheck.notNull(shadow_context, "Shadow context");
@@ -645,18 +570,18 @@ import com.io7m.renderer.types.RExceptionJCGL;
       for (final KLightType light : by_light.keySet()) {
         assert light != null;
 
-        final Map<String, List<KInstanceOpaqueType>> by_code =
+        final Map<String, Set<KInstanceOpaqueType>> by_code =
           by_light.get(light);
 
         for (final String material_code : by_code.keySet()) {
           assert material_code != null;
 
-          final List<KInstanceOpaqueType> instances =
+          final Set<KInstanceOpaqueType> instances =
             by_code.get(material_code);
           assert instances != null;
           assert instances.isEmpty() == false;
 
-          final KInstanceOpaqueType first = instances.get(0);
+          final KInstanceOpaqueType first = instances.iterator().next();
           final KMaterialOpaqueRegular material =
             first
               .opaqueAccept(new KInstanceOpaqueVisitorType<KMaterialOpaqueRegular, RException>() {
@@ -683,7 +608,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
           final KTextureUnitAllocator unit_allocator = this.texture_units;
           final KProgram kprogram =
-            this.shader_cache.getForwardOpaqueLit(shader_code);
+            this.shader_lit_cache.cacheGetLU(shader_code);
 
           kprogram.getExecutable().execRun(
             new JCBExecutorProcedureType<RException>() {
@@ -707,6 +632,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
+    } catch (final JCacheException e) {
+      throw new UnreachableCodeException(e);
     }
   }
 
@@ -714,7 +641,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final MatricesObserverType mwo,
-    final Map<String, List<KInstanceOpaqueType>> batches)
+    final Map<String, Set<KInstanceOpaqueType>> batches)
     throws RException
   {
     NullCheck.notNull(shadow_context, "Shadow context");
@@ -754,14 +681,13 @@ import com.io7m.renderer.types.RExceptionJCGL;
       for (final String material_code : batches.keySet()) {
         assert material_code != null;
 
-        final List<KInstanceOpaqueType> instances =
-          batches.get(material_code);
+        final Set<KInstanceOpaqueType> instances = batches.get(material_code);
         assert instances != null;
         assert instances.isEmpty() == false;
 
         final KTextureUnitAllocator units = this.texture_units;
         final KProgram kprogram =
-          this.shader_cache.getForwardOpaqueUnlit(material_code);
+          this.shader_unlit_cache.cacheGetLU(material_code);
 
         kprogram.getExecutable().execRun(
           new JCBExecutorProcedureType<RException>() {
@@ -782,6 +708,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
+    } catch (final JCacheException e) {
+      throw new UnreachableCodeException(e);
     }
   }
 }

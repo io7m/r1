@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import nu.xom.Document;
 
@@ -32,13 +33,15 @@ import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.types.KMesh;
+import com.io7m.renderer.meshes.RMeshParserEventsVBO;
+import com.io7m.renderer.rmb.RBImporter;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionIO;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RVectorI3F;
 import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
-import com.io7m.renderer.xml.rmx.RXMLMeshParserVBO;
+import com.io7m.renderer.xml.rmx.RXMLMeshParser;
 
 /**
  * A simple mesh cache.
@@ -52,7 +55,7 @@ public final class EMeshCache
 
   /**
    * Initialize the cache.
-   * 
+   *
    * @param in_gi
    *          A GL interface.
    * @param in_log
@@ -68,9 +71,29 @@ public final class EMeshCache
     this.meshes = new HashMap<String, KMesh>();
   }
 
+  private static InputStream openMesh(
+    final String name)
+    throws IOException
+  {
+    final InputStream raw_stream =
+      EMeshCache.class.getResourceAsStream(String.format(
+        "/com/io7m/renderer/examples/%s",
+        name));
+    assert raw_stream != null;
+
+    final InputStream stream;
+    if (name.endsWith("z")) {
+      stream = new GZIPInputStream(raw_stream);
+    } else {
+      stream = raw_stream;
+    }
+
+    return stream;
+  }
+
   /**
    * Load a mesh with the given unqualified name.
-   * 
+   *
    * @param name
    *          The name.
    * @return A mesh.
@@ -92,30 +115,30 @@ public final class EMeshCache
     message.append(name);
     this.glog.debug(message.toString());
 
-    final InputStream stream =
-      EMeshCache.class.getResourceAsStream(String.format(
-        "/com/io7m/renderer/examples/%s",
-        name));
-    assert stream != null;
-
     final JCGLImplementationType g = this.gi;
     assert g != null;
     final JCGLInterfaceCommonType gl = g.getGLCommon();
 
+    InputStream stream = null;
+
     try {
-      final Document document =
-        RXMLMeshDocument.parseFromStreamValidating(stream);
+      stream = EMeshCache.openMesh(name);
 
-      final RXMLMeshParserVBO<JCGLInterfaceCommonType> p =
-        RXMLMeshParserVBO.parseFromDocument(
-          document,
-          gl,
-          UsageHint.USAGE_STATIC_DRAW);
+      final RMeshParserEventsVBO<JCGLInterfaceCommonType> events =
+        RMeshParserEventsVBO.newEvents(gl, UsageHint.USAGE_STATIC_DRAW);
 
-      final ArrayBufferType array = p.getArrayBuffer();
-      final IndexBufferType index = p.getIndexBuffer();
-      final RVectorI3F<RSpaceObjectType> lower = p.getBoundsLower();
-      final RVectorI3F<RSpaceObjectType> upper = p.getBoundsUpper();
+      if (name.endsWith(".rmbz") || name.endsWith(".rmb")) {
+        RBImporter.parseFromStream(stream, events, this.glog);
+      } else {
+        final Document document =
+          RXMLMeshDocument.parseFromStreamValidating(stream);
+        RXMLMeshParser.parseFromDocument(document, events);
+      }
+
+      final ArrayBufferType array = events.getArray();
+      final IndexBufferType index = events.getIndices();
+      final RVectorI3F<RSpaceObjectType> lower = events.getBoundsLower();
+      final RVectorI3F<RSpaceObjectType> upper = events.getBoundsUpper();
       final KMesh km = KMesh.newMesh(array, index, lower, upper);
       this.meshes.put(name, km);
 
@@ -141,7 +164,9 @@ public final class EMeshCache
       throw RExceptionIO.fromIOException(e);
     } finally {
       try {
-        stream.close();
+        if (stream != null) {
+          stream.close();
+        }
       } catch (final IOException e) {
         throw RExceptionIO.fromIOException(e);
       }

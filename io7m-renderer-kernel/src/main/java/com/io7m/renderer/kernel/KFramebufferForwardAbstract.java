@@ -44,10 +44,10 @@ import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
 import com.io7m.jcanephora.api.JCGLRenderbuffersGL3ES3Type;
 import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
@@ -59,12 +59,12 @@ import com.io7m.renderer.types.RExceptionJCGL;
  * Provides the base implementation for {@link KFramebufferForward}.
  */
 
-abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
+@EqualityReference abstract class KFramebufferForwardAbstract implements
+  KFramebufferForwardType
 {
-  private static final class KFramebufferForwardGL2 extends
+  @EqualityReference private static final class KFramebufferForwardGL2 extends
     KFramebufferForwardAbstract
   {
-
     public static KFramebufferForwardType newFramebuffer(
       final JCGLInterfaceGL2Type gl,
       final KFramebufferForwardDescription description)
@@ -141,36 +141,6 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
       this.description = in_description;
     }
 
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KFramebufferForwardGL2 other = (KFramebufferForwardGL2) obj;
-      return this.color.equals(other.color)
-        && this.depth.equals(other.depth)
-        && this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer);
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.color.hashCode();
-      result = (prime * result) + this.depth.hashCode();
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      return result;
-    }
-
     @Override public void kFramebufferDelete(
       final JCGLImplementationType g)
       throws RException
@@ -236,7 +206,7 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
     }
   }
 
-  private static final class KFramebufferForwardGL3ES3 extends
+  @EqualityReference private static final class KFramebufferForwardGL3ES3 extends
     KFramebufferForwardAbstract
   {
     private static Texture2DStaticType makeDepth(
@@ -396,36 +366,6 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
       this.description = in_description;
     }
 
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KFramebufferForwardGL3ES3 other = (KFramebufferForwardGL3ES3) obj;
-      return this.color.equals(other.color)
-        && this.depth.equals(other.depth)
-        && this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer);
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.color.hashCode();
-      result = (prime * result) + this.depth.hashCode();
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      return result;
-    }
-
     @Override public void kFramebufferDelete(
       final JCGLImplementationType g)
       throws RException
@@ -491,7 +431,7 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
     }
   }
 
-  private static final class KFramebufferForwardGLES2WithDepthTexture extends
+  @EqualityReference private static final class KFramebufferForwardGLES2WithDepthTexture extends
     KFramebufferForwardAbstract
   {
 
@@ -567,37 +507,6 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
       this.description = in_description;
     }
 
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KFramebufferForwardGLES2WithDepthTexture other =
-        (KFramebufferForwardGLES2WithDepthTexture) obj;
-      return this.color.equals(other.color)
-        && this.depth.equals(other.depth)
-        && this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer);
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.color.hashCode();
-      result = (prime * result) + this.depth.hashCode();
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      return result;
-    }
-
     @Override public void kFramebufferDelete(
       final JCGLImplementationType g)
       throws RException
@@ -663,7 +572,7 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
     }
   }
 
-  private static final class KFramebufferForwardGLES2WithoutDepthTexture extends
+  @EqualityReference private static final class KFramebufferForwardGLES2WithoutDepthTexture extends
     KFramebufferForwardAbstract
   {
 
@@ -759,41 +668,6 @@ abstract class KFramebufferForwardAbstract implements KFramebufferForwardType
       this.fb_depth = in_fb_depth;
       this.fb_color = in_fb_color;
       this.description = in_description;
-    }
-
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KFramebufferForwardGLES2WithoutDepthTexture other =
-        (KFramebufferForwardGLES2WithoutDepthTexture) obj;
-      return this.color.equals(other.color)
-        && this.depth.equals(other.depth)
-        && this.depth_rb.equals(other.depth_rb)
-        && this.description.equals(other.description)
-        && this.fb_color.equals(other.fb_color)
-        && this.fb_depth.equals(other.fb_depth);
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.color.hashCode();
-      result = (prime * result) + this.depth.hashCode();
-      result = (prime * result) + this.depth_rb.hashCode();
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.fb_color.hashCode();
-      result = (prime * result) + this.fb_depth.hashCode();
-      return result;
     }
 
     @Override public void kFramebufferDelete(

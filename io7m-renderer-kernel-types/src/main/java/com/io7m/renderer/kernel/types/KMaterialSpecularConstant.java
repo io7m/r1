@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceRGBType;
@@ -25,7 +26,7 @@ import com.io7m.renderer.types.RVectorI3F;
  * The type of constant specular properties.
  */
 
-public final class KMaterialSpecularConstant implements
+@EqualityReference public final class KMaterialSpecularConstant implements
   KMaterialSpecularNotNoneType
 {
   /**

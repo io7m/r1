@@ -46,7 +46,6 @@ import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
-import com.io7m.jnull.Nullable;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
@@ -120,34 +119,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
       this.depth = in_depth;
       this.framebuffer = in_framebuffer;
       this.description = in_description;
-    }
-
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KFramebufferDepthGL2 other = (KFramebufferDepthGL2) obj;
-      return this.depth.equals(other.depth)
-        && this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer);
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.depth.hashCode();
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      return result;
     }
 
     @Override public void kFramebufferDelete(
@@ -296,34 +267,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
       this.description = d;
     }
 
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KFramebufferDepthGL3ES3 other = (KFramebufferDepthGL3ES3) obj;
-      return this.depth.equals(other.depth)
-        && this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer);
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.depth.hashCode();
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      return result;
-    }
-
     @Override public void kFramebufferDelete(
       final JCGLImplementationType g)
       throws RException
@@ -427,35 +370,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
       this.depth = in_depth;
       this.framebuffer = in_framebuffer;
       this.description = in_description;
-    }
-
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KFramebufferDepthGLES2WithDepthTexture other =
-        (KFramebufferDepthGLES2WithDepthTexture) obj;
-      return this.depth.equals(other.depth)
-        && this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer);
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.depth.hashCode();
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      return result;
     }
 
     @Override public void kFramebufferDelete(
@@ -571,37 +485,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
       this.renderbuffer = rb;
       this.framebuffer = in_framebuffer;
       this.description = in_description;
-    }
-
-    @Override public boolean equals(
-      final @Nullable Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (this.getClass() != obj.getClass()) {
-        return false;
-      }
-      final KFramebufferDepthGLES2WithoutDepthTexture other =
-        (KFramebufferDepthGLES2WithoutDepthTexture) obj;
-      return this.depth.equals(other.depth)
-        && this.description.equals(other.description)
-        && this.framebuffer.equals(other.framebuffer)
-        && this.renderbuffer.equals(other.renderbuffer);
-    }
-
-    @Override public int hashCode()
-    {
-      final int prime = 31;
-      int result = 1;
-      result = (prime * result) + this.depth.hashCode();
-      result = (prime * result) + this.description.hashCode();
-      result = (prime * result) + this.framebuffer.hashCode();
-      result = (prime * result) + this.renderbuffer.hashCode();
-      return result;
     }
 
     @Override public void kFramebufferDelete(

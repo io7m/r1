@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel;
 import java.util.List;
 import java.util.Map;
 
+import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.DepthFunction;
@@ -57,10 +58,10 @@ import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitorType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformViewType;
 
 /**
@@ -290,7 +291,8 @@ import com.io7m.renderer.types.RTransformViewType;
     final MatricesObserverType mwo,
     final OptionType<KFaceSelection> faces)
     throws JCGLException,
-      RException
+      RException,
+      JCacheException
   {
     gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
     gc.depthBufferWriteEnable();
@@ -305,7 +307,7 @@ import com.io7m.renderer.types.RTransformViewType;
       final List<KInstanceOpaqueType> batch = batches.get(depth_code);
       assert batch != null;
 
-      final KProgram program = this.shader_cache.getDepthVariance(depth_code);
+      final KProgram program = this.shader_cache.cacheGetLU(depth_code);
       final JCBExecutorType exec = program.getExecutable();
 
       exec.execRun(new JCBExecutorProcedureType<RException>() {
@@ -330,7 +332,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   @Override public void rendererEvaluateDepthVariance(
     final RMatrixI4x4F<RTransformViewType> view,
-    final RMatrixI4x4F<RTransformProjectionType> projection,
+    final KProjectionType projection,
     final Map<String, List<KInstanceOpaqueType>> batches,
     final KFramebufferDepthVarianceUsableType framebuffer,
     final OptionType<KFaceSelection> faces)
@@ -352,12 +354,16 @@ import com.io7m.renderer.types.RTransformViewType;
             throws RException,
               JCGLException
           {
-            KDepthVarianceRenderer.this.renderScene(
-              batches,
-              framebuffer,
-              mwo,
-              faces);
-            return Unit.unit();
+            try {
+              KDepthVarianceRenderer.this.renderScene(
+                batches,
+                framebuffer,
+                mwo,
+                faces);
+              return Unit.unit();
+            } catch (final JCacheException e) {
+              throw new UnreachableCodeException(e);
+            }
           }
         });
     } catch (final JCGLException e) {
@@ -376,7 +382,8 @@ import com.io7m.renderer.types.RTransformViewType;
     final MatricesObserverType mwo,
     final OptionType<KFaceSelection> faces)
     throws JCGLException,
-      RException
+      RException,
+      JCacheException
   {
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
 

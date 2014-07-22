@@ -23,6 +23,7 @@ import nu.xom.Element;
 import nu.xom.Elements;
 import nu.xom.ValidityException;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorReadable3FType;
@@ -45,7 +46,7 @@ import com.io7m.renderer.types.RXMLException;
  * Utilities for reading XML documents.
  */
 
-public final class RXMLUtilities
+@EqualityReference public final class RXMLUtilities
 {
   /**
    * @param e

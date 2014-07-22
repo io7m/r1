@@ -16,8 +16,6 @@
 
 package com.io7m.renderer.kernel;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -25,14 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import nu.xom.ParsingException;
-import nu.xom.ValidityException;
-
-import org.xml.sax.SAXException;
-
 import com.io7m.jcanephora.FragmentShaderType;
+import com.io7m.jcanephora.FramebufferDrawBufferType;
 import com.io7m.jcanephora.JCGLApi;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLExceptionAttributeMissing;
@@ -40,28 +32,47 @@ import com.io7m.jcanephora.JCGLExceptionDeleted;
 import com.io7m.jcanephora.JCGLExceptionProgramCompileError;
 import com.io7m.jcanephora.JCGLExceptionProgramUniformMissing;
 import com.io7m.jcanephora.JCGLExceptionTypeError;
-import com.io7m.jcanephora.JCGLExceptionUnsupported;
 import com.io7m.jcanephora.JCGLSLVersionNumber;
 import com.io7m.jcanephora.JCGLType;
 import com.io7m.jcanephora.ProgramType;
 import com.io7m.jcanephora.VertexShaderType;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLInterfaceGL2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGL3Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
 import com.io7m.jcanephora.api.JCGLShadersCommonType;
 import com.io7m.jcanephora.batchexec.JCBExecutor;
 import com.io7m.jcanephora.batchexec.JCBExecutorType;
-import com.io7m.jcanephora.utilities.ShaderUtilities;
 import com.io7m.jequality.annotations.EqualityStructural;
-import com.io7m.jlog.LogLevel;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.jparasol.xml.API;
-import com.io7m.jparasol.xml.CompactedShaders;
-import com.io7m.jparasol.xml.FragmentParameter;
-import com.io7m.jparasol.xml.PGLSLMetaXML;
-import com.io7m.jparasol.xml.Version;
-import com.io7m.jparasol.xml.VertexInput;
-import com.io7m.jparasol.xml.VertexParameter;
+import com.io7m.jparasol.core.GVersionES;
+import com.io7m.jparasol.core.GVersionFull;
+import com.io7m.jparasol.core.GVersionType;
+import com.io7m.jparasol.core.GVersionVisitorType;
+import com.io7m.jparasol.core.JPCompactedFragmentShaderMeta;
+import com.io7m.jparasol.core.JPCompactedVertexShaderMeta;
+import com.io7m.jparasol.core.JPCompiledShaderMetaType;
+import com.io7m.jparasol.core.JPCompiledShaderMetaVisitorType;
+import com.io7m.jparasol.core.JPFragmentOutput;
+import com.io7m.jparasol.core.JPFragmentParameter;
+import com.io7m.jparasol.core.JPFragmentShaderMetaType;
+import com.io7m.jparasol.core.JPMissingHash;
+import com.io7m.jparasol.core.JPSourceLines;
+import com.io7m.jparasol.core.JPUncompactedFragmentShaderMeta;
+import com.io7m.jparasol.core.JPUncompactedProgramShaderMeta;
+import com.io7m.jparasol.core.JPUncompactedVertexShaderMeta;
+import com.io7m.jparasol.core.JPVertexInput;
+import com.io7m.jparasol.core.JPVertexParameter;
+import com.io7m.jparasol.core.JPVertexShaderMetaType;
+import com.io7m.jparasol.xml.JPXMLException;
+import com.io7m.jparasol.xml.XMLMeta;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.jvvfs.FSCapabilityReadType;
 import com.io7m.jvvfs.FilesystemError;
@@ -70,507 +81,419 @@ import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionFilesystem;
 import com.io7m.renderer.types.RExceptionIO;
 import com.io7m.renderer.types.RExceptionJCGL;
+import com.io7m.renderer.types.RExceptionNotSupported;
+import com.io7m.renderer.types.RExceptionProgramNotProgram;
+import com.io7m.renderer.types.RExceptionShaderFragmentConflictingOutputs;
+import com.io7m.renderer.types.RExceptionShaderNotFragmentShader;
+import com.io7m.renderer.types.RExceptionShaderNotVertexShader;
 import com.io7m.renderer.types.RXMLException;
 
 /**
  * A kernel program.
  */
 
-@EqualityStructural public final class KProgram
+@SuppressWarnings({ "boxing", "synthetic-access" }) @EqualityStructural public final class KProgram
 {
-  private static final PathVirtual BASE = KProgram.makeBasePath();
-
-  private static void checkSupport(
-    final Version v,
-    final PGLSLMetaXML m)
-    throws JCGLExceptionUnsupported
+  private static void checkProgramVersionSupport(
+    final GVersionType v,
+    final PathVirtual program_base,
+    final JPUncompactedProgramShaderMeta program_meta)
+    throws RException
   {
-    final Integer vn = Integer.valueOf(v.getVersion());
+    v.versionAccept(new GVersionVisitorType<Unit, RException>() {
+      @Override public Unit versionVisitES(
+        final GVersionES ve)
+        throws RException
+      {
+        if (program_meta.getSupportsES().contains(ve) == false) {
+          throw RExceptionNotSupported.programNotSupported(
+            program_base.toString(),
+            program_meta.getSupportsES(),
+            program_meta.getSupportsFull());
+        }
+        return Unit.unit();
+      }
 
-    switch (v.getAPI()) {
-      case API_GLSL:
+      @Override public Unit versionVisitFull(
+        final GVersionFull vf)
+        throws RException
       {
-        if (m.getSupportsFull().contains(vn) == false) {
-          KProgram.notSupported(v, m);
+        if (program_meta.getSupportsFull().contains(vf) == false) {
+          throw RExceptionNotSupported.programNotSupported(
+            program_base.toString(),
+            program_meta.getSupportsES(),
+            program_meta.getSupportsFull());
         }
-        break;
+        return Unit.unit();
       }
-      case API_GLSL_ES:
-      {
-        if (m.getSupportsES().contains(vn) == false) {
-          KProgram.notSupported(v, m);
-        }
-        break;
-      }
-    }
+    });
   }
 
-  private static PathVirtual makeBasePath()
+  private static String expectedFragmentShader(
+    final PathVirtual path,
+    final String type)
   {
+    final StringBuilder s = new StringBuilder();
+    s.append("Expected a fragment shader, but got a ");
+    s.append(type);
+    s.append(" (");
+    s.append(path.toString());
+    s.append(")");
+    final String r = s.toString();
+    assert r != null;
+    return r;
+  }
+
+  private static String expectedProgram(
+    final PathVirtual name,
+    final String type)
+  {
+    final StringBuilder s = new StringBuilder();
+    s.append("Expected a program, but got a ");
+    s.append(type);
+    s.append(" (");
+    s.append(name.toString());
+    s.append(")");
+    final String r = s.toString();
+    assert r != null;
+    return r;
+  }
+
+  private static String expectedVertexShader(
+    final PathVirtual path,
+    final String type)
+  {
+    final StringBuilder s = new StringBuilder();
+    s.append("Expected a vertex shader, but got a ");
+    s.append(type);
+    s.append(" (");
+    s.append(path.toString());
+    s.append(")");
+    final String r = s.toString();
+    assert r != null;
+    return r;
+  }
+
+  private static
+    JPFragmentShaderMetaType
+    getFragmentShaderMetaFromFilesystem(
+      final FSCapabilityReadType fs,
+      final PathVirtual path,
+      final LogUsableType log)
+      throws RException
+  {
+    InputStream stream = null;
     try {
-      return PathVirtual.ofString("/com/io7m/renderer/kernel");
+      try {
+        stream = fs.openFile(path.appendName("meta.xml"));
+
+        final JPCompiledShaderMetaType meta = XMLMeta.fromStream(stream, log);
+        return meta
+          .matchMeta(new JPCompiledShaderMetaVisitorType<JPFragmentShaderMetaType, RException>() {
+            @Override public JPFragmentShaderMetaType compactedFragment(
+              final JPCompactedFragmentShaderMeta m)
+              throws RExceptionShaderNotVertexShader
+            {
+              return m;
+            }
+
+            @Override public JPFragmentShaderMetaType compactedVertex(
+              final JPCompactedVertexShaderMeta m)
+              throws RExceptionShaderNotFragmentShader
+            {
+              throw new RExceptionShaderNotFragmentShader(KProgram
+                .expectedFragmentShader(path, "compacted vertex shader"));
+            }
+
+            @Override public JPFragmentShaderMetaType uncompactedFragment(
+              final JPUncompactedFragmentShaderMeta m)
+              throws RExceptionShaderNotVertexShader
+            {
+              return m;
+            }
+
+            @Override public JPFragmentShaderMetaType uncompactedProgram(
+              final JPUncompactedProgramShaderMeta m)
+              throws RExceptionShaderNotVertexShader,
+                RExceptionShaderNotFragmentShader
+            {
+              throw new RExceptionShaderNotFragmentShader(KProgram
+                .expectedFragmentShader(path, "program"));
+            }
+
+            @Override public JPFragmentShaderMetaType uncompactedVertex(
+              final JPUncompactedVertexShaderMeta m)
+              throws RExceptionShaderNotFragmentShader
+            {
+              throw new RExceptionShaderNotFragmentShader(KProgram
+                .expectedFragmentShader(path, "vertex shader"));
+            }
+          });
+      } finally {
+        if (stream != null) {
+          stream.close();
+        }
+      }
     } catch (final FilesystemError e) {
+      throw RExceptionFilesystem.fromFilesystemException(e);
+    } catch (final JPXMLException e) {
+      throw RXMLException.fromJPXMLException(e);
+    } catch (final JPMissingHash e) {
       throw new UnreachableCodeException(e);
+    } catch (final IOException e) {
+      throw RExceptionIO.fromIOException(e);
     }
   }
 
-  private static API getAPI(
-    final JCGLApi api)
+  private static JPUncompactedProgramShaderMeta getProgramMetaFromFilesystem(
+    final FSCapabilityReadType fs,
+    final PathVirtual name,
+    final LogUsableType log)
+    throws FilesystemError,
+      JPXMLException,
+      JPMissingHash,
+      IOException,
+      RException
   {
-    switch (api) {
-      case JCGL_ES:
-        return API.API_GLSL_ES;
-      case JCGL_FULL:
-        return API.API_GLSL;
-    }
+    InputStream stream = null;
+    try {
+      stream = fs.openFile(name.appendName("meta.xml"));
 
-    throw new UnreachableCodeException();
+      final JPCompiledShaderMetaType meta = XMLMeta.fromStream(stream, log);
+      return meta
+        .matchMeta(new JPCompiledShaderMetaVisitorType<JPUncompactedProgramShaderMeta, RException>() {
+          @Override public JPUncompactedProgramShaderMeta compactedFragment(
+            final JPCompactedFragmentShaderMeta m)
+            throws RExceptionProgramNotProgram
+          {
+            throw new RExceptionProgramNotProgram(KProgram.expectedProgram(
+              name,
+              "compacted fragment shader"));
+          }
+
+          @Override public JPUncompactedProgramShaderMeta compactedVertex(
+            final JPCompactedVertexShaderMeta m)
+            throws RExceptionProgramNotProgram
+          {
+            throw new RExceptionProgramNotProgram(KProgram.expectedProgram(
+              name,
+              "compacted vertex shader"));
+          }
+
+          @Override public
+            JPUncompactedProgramShaderMeta
+            uncompactedFragment(
+              final JPUncompactedFragmentShaderMeta m)
+              throws RExceptionProgramNotProgram
+          {
+            throw new RExceptionProgramNotProgram(KProgram.expectedProgram(
+              name,
+              "fragment shader"));
+          }
+
+          @Override public JPUncompactedProgramShaderMeta uncompactedProgram(
+            final JPUncompactedProgramShaderMeta m)
+          {
+            return m;
+          }
+
+          @Override public JPUncompactedProgramShaderMeta uncompactedVertex(
+            final JPUncompactedVertexShaderMeta m)
+            throws RExceptionProgramNotProgram
+          {
+            throw new RExceptionProgramNotProgram(KProgram.expectedProgram(
+              name,
+              "vertex shader"));
+          }
+        });
+    } finally {
+      if (stream != null) {
+        stream.close();
+      }
+    }
   }
 
-  private static LogUsableType getLog(
-    final JCGLSLVersionNumber version,
-    final JCGLApi api,
+  private static JPVertexShaderMetaType getVertexShaderMetaFromFilesystem(
+    final FSCapabilityReadType fs,
+    final PathVirtual path,
+    final LogUsableType log)
+    throws RException
+  {
+    InputStream stream = null;
+    try {
+      try {
+        stream = fs.openFile(path.appendName("meta.xml"));
+
+        final JPCompiledShaderMetaType meta = XMLMeta.fromStream(stream, log);
+        return meta
+          .matchMeta(new JPCompiledShaderMetaVisitorType<JPVertexShaderMetaType, RException>() {
+            @Override public JPVertexShaderMetaType compactedFragment(
+              final JPCompactedFragmentShaderMeta m)
+              throws RExceptionShaderNotVertexShader
+            {
+              throw new RExceptionShaderNotVertexShader(KProgram
+                .expectedVertexShader(path, "compacted fragment shader"));
+            }
+
+            @Override public JPVertexShaderMetaType compactedVertex(
+              final JPCompactedVertexShaderMeta m)
+            {
+              return m;
+            }
+
+            @Override public JPVertexShaderMetaType uncompactedFragment(
+              final JPUncompactedFragmentShaderMeta m)
+              throws RExceptionShaderNotVertexShader
+            {
+              throw new RExceptionShaderNotVertexShader(KProgram
+                .expectedVertexShader(path, "fragment shader"));
+            }
+
+            @Override public JPVertexShaderMetaType uncompactedProgram(
+              final JPUncompactedProgramShaderMeta m)
+              throws RExceptionShaderNotVertexShader
+            {
+              throw new RExceptionShaderNotVertexShader(KProgram
+                .expectedVertexShader(path, "program"));
+            }
+
+            @Override public JPVertexShaderMetaType uncompactedVertex(
+              final JPUncompactedVertexShaderMeta m)
+            {
+              return m;
+            }
+          });
+      } finally {
+        if (stream != null) {
+          stream.close();
+        }
+      }
+    } catch (final FilesystemError e) {
+      throw RExceptionFilesystem.fromFilesystemException(e);
+    } catch (final JPXMLException e) {
+      throw RXMLException.fromJPXMLException(e);
+    } catch (final JPMissingHash e) {
+      throw new UnreachableCodeException(e);
+    } catch (final IOException e) {
+      throw RExceptionIO.fromIOException(e);
+    }
+  }
+
+  private static Map<String, FramebufferDrawBufferType> makeOutputMappings(
+    final JCGLInterfaceCommonType gc,
+    final JPFragmentShaderMetaType meta)
+    throws JCGLException,
+      RExceptionNotSupported,
+      RExceptionShaderFragmentConflictingOutputs
+  {
+    final List<FramebufferDrawBufferType> buffers =
+      gc.framebufferGetDrawBuffers();
+    final SortedMap<Integer, JPFragmentOutput> outs =
+      meta.getDeclaredFragmentOutputs();
+
+    final Map<String, FramebufferDrawBufferType> results =
+      new HashMap<String, FramebufferDrawBufferType>();
+
+    for (final Integer index : outs.keySet()) {
+      final JPFragmentOutput o = outs.get(index);
+
+      if (index.intValue() >= buffers.size()) {
+        throw RExceptionNotSupported.notEnoughDrawBuffers(
+          meta.getName(),
+          buffers.size(),
+          outs.size());
+      }
+
+      if (results.containsKey(o.getName())) {
+        final String s =
+          String.format("Output '%s' already specified", o.getName());
+        assert s != null;
+        throw new RExceptionShaderFragmentConflictingOutputs(s);
+      }
+
+      final FramebufferDrawBufferType buffer = buffers.get(index.intValue());
+      assert buffer != null;
+      results.put(o.getName(), buffer);
+    }
+
+    return results;
+  }
+
+  private static ProgramType makeProgram(
+    final JCGLImplementationType gl,
     final String name,
-    final LogUsableType log)
+    final Map<String, FramebufferDrawBufferType> output_mappings,
+    final FragmentShaderType fragment_shader,
+    final VertexShaderType vertex_shader)
+    throws JCGLException,
+      RException
   {
-    final LogUsableType logp = log.with("kprogram");
-    if (logp.wouldLog(LogLevel.LOG_DEBUG)) {
-      final StringBuilder message = new StringBuilder();
-      message.append("Loading ");
-      message.append(name);
-      message.append(" for ");
-      message.append(version);
-      message.append(" ");
-      message.append(api);
-      final String r = message.toString();
-      assert r != null;
-      logp.debug(r);
-    }
-    return logp;
+    final ProgramType p =
+      gl
+        .implementationAccept(new JCGLImplementationVisitorType<ProgramType, RException>() {
+          @Override public ProgramType implementationIsGL2(
+            final JCGLInterfaceGL2Type gl2)
+            throws JCGLException,
+              RException
+          {
+            return gl2.programCreateCommon(
+              name,
+              vertex_shader,
+              fragment_shader);
+          }
+
+          @Override public ProgramType implementationIsGL3(
+            final JCGLInterfaceGL3Type gl3)
+            throws JCGLException,
+              RException
+          {
+            return gl3.programCreateWithOutputs(
+              name,
+              vertex_shader,
+              fragment_shader,
+              output_mappings);
+          }
+
+          @Override public ProgramType implementationIsGLES2(
+            final JCGLInterfaceGLES2Type gles2)
+            throws JCGLException,
+              RException
+          {
+            return gles2.programCreateCommon(
+              name,
+              vertex_shader,
+              fragment_shader);
+          }
+
+          @Override public ProgramType implementationIsGLES3(
+            final JCGLInterfaceGLES3Type gles3)
+            throws JCGLException,
+              RException
+          {
+            return gles3.programCreateCommon(
+              name,
+              vertex_shader,
+              fragment_shader);
+          }
+        });
+    return p;
   }
 
-  private static PGLSLMetaXML getMeta(
+  private static FragmentShaderType newFragmentShaderFromFilesystem(
+    final JCGLShadersCommonType gc,
+    final GVersionType version,
     final FSCapabilityReadType fs,
-    final PathVirtual name,
-    final LogUsableType log)
-    throws IOException,
-      FilesystemError,
-      ValidityException,
-      ParsingException,
-      SAXException,
-      ParserConfigurationException
-  {
-    final PathVirtual path = name.appendName("meta.xml");
-    final InputStream mf = fs.openFile(path);
-    try {
-      return PGLSLMetaXML.fromStream(mf, log);
-    } finally {
-      mf.close();
-    }
-  }
-
-  private static PGLSLMetaXML getMetaFromDirectory(
-    final File directory,
-    final LogUsableType log)
-    throws ParsingException,
-      IOException,
-      SAXException,
-      ParserConfigurationException
-  {
-    final File meta = new File(directory, "meta.xml");
-    final InputStream mf = new FileInputStream(meta);
-    try {
-      return PGLSLMetaXML.fromStream(mf, log);
-    } finally {
-      mf.close();
-    }
-  }
-
-  /**
-   * Retrieve the path of the directory that contains code and metadata for
-   * the shader <code>name</code>.
-   * 
-   * @param name
-   *          The name of the shader
-   * @return The shader code path
-   */
-
-  public static PathVirtual getShaderPathDirectory(
-    final String name)
-  {
-    try {
-      return KProgram.BASE.appendName(name);
-    } catch (final FilesystemError e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
-  /**
-   * @return The path to the metadata file for the shader.
-   * @param base
-   *          The shader directory.
-   * @param name
-   *          The name of the shader.
-   */
-
-  public static PathVirtual getShaderPathMeta(
-    final PathVirtual base,
-    final String name)
-  {
-    try {
-      return base.appendName(name).appendName("meta.xml");
-    } catch (final FilesystemError e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
-  private static String getShadingLanguageName(
-    final JCGLSLVersionNumber version,
-    final JCGLApi api)
-    throws JCGLExceptionUnsupported
-  {
-    switch (api) {
-      case JCGL_ES:
-      {
-        if (version.getVersionMajor() == 1) {
-          return "glsl-es-100";
-        }
-        if (version.getVersionMajor() == 3) {
-          return "glsl-es-300";
-        }
-        throw new JCGLExceptionUnsupported("Unsupported GLSL ES version: "
-          + version);
-      }
-      case JCGL_FULL:
-      {
-        switch (version.getVersionMajor()) {
-          case 1:
-          {
-            switch (version.getVersionMinor()) {
-              case 10:
-                return "glsl-110";
-              case 20:
-                return "glsl-120";
-              case 30:
-                return "glsl-130";
-              case 40:
-                return "glsl-140";
-              case 50:
-                return "glsl-150";
-            }
-            throw new JCGLExceptionUnsupported("Unsupported GLSL version: "
-              + version);
-          }
-          case 3:
-          {
-            switch (version.getVersionMinor()) {
-              case 30:
-                return "glsl-330";
-            }
-            throw new JCGLExceptionUnsupported("Unsupported GLSL version: "
-              + version);
-          }
-          case 4:
-          {
-            switch (version.getVersionMinor()) {
-              case 0:
-                return "glsl-400";
-              case 10:
-                return "glsl-410";
-              case 20:
-                return "glsl-420";
-              case 30:
-                return "glsl-430";
-              case 40:
-                return "glsl-440";
-            }
-
-            throw new JCGLExceptionUnsupported("Unsupported GLSL version: "
-              + version);
-          }
-          default:
-            throw new JCGLExceptionUnsupported("Unsupported GLSL version: "
-              + version);
-        }
-      }
-    }
-
-    throw new UnreachableCodeException();
-  }
-
-  private static int getVersion(
-    final JCGLSLVersionNumber version)
-  {
-    return (version.getVersionMajor() * 100) + version.getVersionMinor();
-  }
-
-  private static KProgram loadCompacted(
-    final JCGLShadersCommonType gl,
-    final FSCapabilityReadType fs,
-    final Version v,
-    final PathVirtual name,
-    final PGLSLMetaXML m,
-    final LogUsableType log)
+    final PathVirtual path,
+    final JPFragmentShaderMetaType meta)
     throws FilesystemError,
       IOException,
+      JCGLExceptionProgramCompileError,
       JCGLException
   {
-    final SortedMap<Version, CompactedShaders> mappings =
-      m.getCompactMappings();
-    assert mappings.containsKey(v);
-    final CompactedShaders cs = mappings.get(v);
+    final List<String> source =
+      KProgram.newSourceFromFilesystem(version, fs, path, meta);
 
-    final PathVirtual path_v = name.appendName(cs.getVertexShader() + ".g");
-    final PathVirtual path_f = name.appendName(cs.getFragmentShader() + ".g");
-
-    final InputStream v_stream = fs.openFile(path_v);
-    try {
-      final InputStream f_stream = fs.openFile(path_f);
-      try {
-        final ProgramType p =
-          KProgram.newProgramFromStreams(
-            gl,
-            name.toString(),
-            v_stream,
-            f_stream,
-            v);
-        return new KProgram(gl, m, p, log);
-      } finally {
-        f_stream.close();
-      }
-    } finally {
-      v_stream.close();
-    }
-  }
-
-  private static KProgram loadCompactedFromDirectory(
-    final JCGLShadersCommonType gl,
-    final File directory,
-    final Version v,
-    final PGLSLMetaXML m,
-    final LogUsableType log)
-    throws IOException,
-      JCGLException
-  {
-    final SortedMap<Version, CompactedShaders> mappings =
-      m.getCompactMappings();
-    assert mappings.containsKey(v);
-    final CompactedShaders cs = mappings.get(v);
-
-    final File path_v = new File(directory, cs.getVertexShader() + ".g");
-    final File path_f = new File(directory, cs.getFragmentShader() + ".g");
-
-    final InputStream v_stream = new FileInputStream(path_v);
-    try {
-      final InputStream f_stream = new FileInputStream(path_f);
-      try {
-        final ProgramType p =
-          KProgram.newProgramFromStreams(
-            gl,
-            m.getName(),
-            v_stream,
-            f_stream,
-            v);
-        return new KProgram(gl, m, p, log);
-      } finally {
-        f_stream.close();
-      }
-    } finally {
-      v_stream.close();
-    }
-  }
-
-  private static KProgram loadUncompacted(
-    final JCGLShadersCommonType gl,
-    final FSCapabilityReadType fs,
-    final JCGLSLVersionNumber version,
-    final JCGLApi api,
-    final PathVirtual name,
-    final PGLSLMetaXML m,
-    final LogUsableType log)
-    throws FilesystemError,
-      IOException,
-      JCGLException
-  {
-    final String name_v =
-      KProgram.getShadingLanguageName(version, api) + ".v";
-    final String name_f =
-      KProgram.getShadingLanguageName(version, api) + ".f";
-
-    final PathVirtual path_v = name.appendName(name_v);
-    final PathVirtual path_f = name.appendName(name_f);
-
-    final InputStream v_stream = fs.openFile(path_v);
-    try {
-      final InputStream f_stream = fs.openFile(path_f);
-      try {
-        final ProgramType p =
-          KProgram.newProgramFromStreams(
-            gl,
-            name.toString(),
-            v_stream,
-            f_stream,
-            null);
-        return new KProgram(gl, m, p, log);
-      } finally {
-        f_stream.close();
-      }
-    } finally {
-      v_stream.close();
-    }
-  }
-
-  private static KProgram loadUncompactedFromDirectory(
-    final JCGLShadersCommonType gl,
-    final File directory,
-    final JCGLSLVersionNumber version,
-    final JCGLApi api,
-    final PGLSLMetaXML m,
-    final LogUsableType log)
-    throws JCGLExceptionUnsupported,
-      IOException,
-      JCGLException
-  {
-    final String name_v =
-      KProgram.getShadingLanguageName(version, api) + ".v";
-    final String name_f =
-      KProgram.getShadingLanguageName(version, api) + ".f";
-
-    final File path_v = new File(directory, name_v);
-    final File path_f = new File(directory, name_f);
-
-    final InputStream v_stream = new FileInputStream(path_v);
-    try {
-      final InputStream f_stream = new FileInputStream(path_f);
-      try {
-        final ProgramType p =
-          KProgram.newProgramFromStreams(
-            gl,
-            m.getName(),
-            v_stream,
-            f_stream,
-            null);
-        return new KProgram(gl, m, p, log);
-      } finally {
-        f_stream.close();
-      }
-    } finally {
-      v_stream.close();
-    }
-  }
-
-  private static KProgram newProgramFromDirectory(
-    final JCGLShadersCommonType gl,
-    final JCGLSLVersionNumber version,
-    final JCGLApi api,
-    final File directory,
-    final LogUsableType log)
-    throws IOException,
-      JCGLException,
-      RXMLException
-  {
-    try {
-      NullCheck.notNull(gl, "GL");
-      NullCheck.notNull(version, "Version");
-      NullCheck.notNull(api, "API");
-      NullCheck.notNull(directory, "Directory");
-      NullCheck.notNull(log, "Log");
-
-      final String ds = directory.toString();
-      assert ds != null;
-
-      final LogUsableType logp = KProgram.getLog(version, api, ds, log);
-      final Version v =
-        Version
-          .newVersion(KProgram.getVersion(version), KProgram.getAPI(api));
-      final PGLSLMetaXML m = KProgram.getMetaFromDirectory(directory, logp);
-      KProgram.checkSupport(v, m);
-
-      if (m.isCompacted()) {
-        return KProgram.loadCompactedFromDirectory(gl, directory, v, m, logp);
-      }
-      return KProgram.loadUncompactedFromDirectory(
-        gl,
-        directory,
-        version,
-        api,
-        m,
-        logp);
-    } catch (final ValidityException x) {
-      throw RXMLException.validityException(x);
-    } catch (final ParsingException x) {
-      throw RXMLException.parsingException(x);
-    } catch (final SAXException x) {
-      throw RXMLException.saxException(x);
-    } catch (final ParserConfigurationException x) {
-      throw RXMLException.parserConfigurationException(x);
-    }
-  }
-
-  /**
-   * Load the shader named <code>name</code> from the given directory, for the
-   * given shading language API and version.
-   * 
-   * @param gl
-   *          The OpenGL interface
-   * @param version
-   *          The OpenGL version
-   * @param api
-   *          The OpenGL API
-   * @param directory
-   *          The directory
-   * @param meta
-   *          The shader's metadata
-   * @param log
-   *          A log handle
-   * @return A new program
-   * @throws JCGLExceptionUnsupported
-   *           If the shading program is not supported on the given API and
-   *           version
-   * @throws IOException
-   *           If an I/O error occurs during loading
-   * @throws JCGLExceptionProgramCompileError
-   *           If the program is invalid
-   * @throws JCGLException
-   *           If an OpenGL error occurs
-   */
-
-  public static KProgram newProgramFromDirectoryMeta(
-    final JCGLInterfaceCommonType gl,
-    final JCGLSLVersionNumber version,
-    final JCGLApi api,
-    final File directory,
-    final PGLSLMetaXML meta,
-    final LogUsableType log)
-    throws IOException,
-      JCGLException,
-      JCGLExceptionUnsupported,
-      JCGLExceptionProgramCompileError
-  {
-    NullCheck.notNull(gl, "GL");
-    NullCheck.notNull(version, "Version");
-    NullCheck.notNull(api, "API");
-    NullCheck.notNull(directory, "Filesystem");
-    NullCheck.notNull(log, "Log");
-
-    final LogUsableType logp =
-      KProgram.getLog(version, api, meta.getName(), log);
-
-    final Version v =
-      Version.newVersion(KProgram.getVersion(version), KProgram.getAPI(api));
-    KProgram.checkSupport(v, meta);
-
-    if (meta.isCompacted()) {
-      return KProgram
-        .loadCompactedFromDirectory(gl, directory, v, meta, logp);
-    }
-    return KProgram.loadUncompactedFromDirectory(
-      gl,
-      directory,
-      version,
-      api,
-      meta,
-      logp);
+    return gc.fragmentShaderCompile(path.toString(), source);
   }
 
   /**
@@ -589,6 +512,7 @@ import com.io7m.renderer.types.RXMLException;
    *          The name of the shader
    * @param log
    *          A log handle
+   * 
    * @return A new program
    * 
    * @throws RException
@@ -597,11 +521,11 @@ import com.io7m.renderer.types.RXMLException;
    */
 
   public static KProgram newProgramFromFilesystem(
-    final JCGLShadersCommonType gl,
+    final JCGLImplementationType gl,
     final JCGLSLVersionNumber version,
     final JCGLApi api,
     final FSCapabilityReadType fs,
-    final PathVirtual name,
+    final String name,
     final LogUsableType log)
     throws RException
   {
@@ -613,160 +537,233 @@ import com.io7m.renderer.types.RXMLException;
       NullCheck.notNull(name, "Name");
       NullCheck.notNull(log, "Log");
 
-      final LogUsableType logp =
-        KProgram.getLog(version, api, name.toString(), log);
+      final JCGLInterfaceCommonType gc = gl.getGLCommon();
+      final GVersionType v = KProgram.versionNumber(version, api);
 
-      final Version v =
-        Version
-          .newVersion(KProgram.getVersion(version), KProgram.getAPI(api));
+      final PathVirtual program_base = PathVirtual.ROOT.appendName(name);
+      final JPUncompactedProgramShaderMeta program_meta =
+        KProgram.getProgramMetaFromFilesystem(fs, program_base, log);
 
-      final PGLSLMetaXML m = KProgram.getMeta(fs, name, logp);
-      KProgram.checkSupport(v, m);
+      KProgram.checkProgramVersionSupport(v, program_base, program_meta);
 
-      if (m.isCompacted()) {
-        return KProgram.loadCompacted(gl, fs, v, name, m, logp);
-      }
-      return KProgram.loadUncompacted(gl, fs, version, api, name, m, logp);
+      final String fragment_shader_name = program_meta.getFragmentShader();
+      assert fragment_shader_name != null;
+      final PathVirtual fragment_shader_path =
+        PathVirtual.ROOT.appendName(fragment_shader_name);
+      final JPFragmentShaderMetaType fragment_shader_meta =
+        KProgram.getFragmentShaderMetaFromFilesystem(
+          fs,
+          fragment_shader_path,
+          log);
+      final FragmentShaderType fragment_shader =
+        KProgram.newFragmentShaderFromFilesystem(
+          gc,
+          v,
+          fs,
+          fragment_shader_path,
+          fragment_shader_meta);
 
-    } catch (final ValidityException x) {
-      throw RXMLException.validityException(x);
-    } catch (final ParsingException x) {
-      throw RXMLException.parsingException(x);
-    } catch (final SAXException x) {
-      throw RXMLException.saxException(x);
-    } catch (final ParserConfigurationException x) {
-      throw RXMLException.parserConfigurationException(x);
+      final String vertex_shader_name =
+        program_meta.getVertexShaders().first();
+      assert vertex_shader_name != null;
+      final PathVirtual vertex_shader_path =
+        PathVirtual.ROOT.appendName(vertex_shader_name);
+      final JPVertexShaderMetaType vertex_shader_meta =
+        KProgram.getVertexShaderMetaFromFilesystem(
+          fs,
+          vertex_shader_path,
+          log);
+      final VertexShaderType vertex_shader =
+        KProgram.newVertexShaderFromFilesystem(
+          gc,
+          v,
+          fs,
+          vertex_shader_path,
+          vertex_shader_meta);
+
+      final Map<String, FramebufferDrawBufferType> output_mappings =
+        KProgram.makeOutputMappings(gc, fragment_shader_meta);
+      final ProgramType p =
+        KProgram.makeProgram(
+          gl,
+          name,
+          output_mappings,
+          fragment_shader,
+          vertex_shader);
+
+      return new KProgram(
+        gl,
+        program_meta,
+        p,
+        vertex_shader_meta,
+        vertex_shader,
+        fragment_shader_meta,
+        fragment_shader,
+        log);
+
     } catch (final IOException e) {
       throw RExceptionIO.fromIOException(e);
     } catch (final FilesystemError e) {
       throw RExceptionFilesystem.fromFilesystemException(e);
+    } catch (final JPXMLException e) {
+      throw RXMLException.fromJPXMLException(e);
+    } catch (final JPMissingHash e) {
+      throw new UnreachableCodeException(e);
+    } catch (final JCGLExceptionProgramCompileError e) {
+      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
-  private static ProgramType newProgramFromStreams(
-    final JCGLShadersCommonType gl,
-    final String name,
-    final InputStream v_stream,
-    final InputStream f_stream,
-    final @Nullable Version prepend)
-    throws IOException,
+  private static List<String> newSourceFromFilesystem(
+    final GVersionType version,
+    final FSCapabilityReadType fs,
+    final PathVirtual path,
+    final JPCompiledShaderMetaType meta)
+    throws FilesystemError,
+      IOException
+  {
+    final Some<String> source_name_some =
+      (Some<String>) meta.getSourceCodeFilename(version);
+
+    final String source_name = source_name_some.get();
+    final PathVirtual source_path = path.appendName(source_name);
+    final InputStream stream = fs.openFile(source_path);
+    try {
+      final List<String> lines = JPSourceLines.fromStream(stream);
+      if (meta.isCompacted()) {
+        KProgram.prependVersionDirective(version, lines);
+      }
+
+      for (int index = 0; index < lines.size(); ++index) {
+        final String line = lines.get(index);
+        if (line.isEmpty()) {
+          lines.set(index, "\n");
+        } else if (line.charAt(line.length() - 1) != '\n') {
+          lines.set(index, line + "\n");
+        }
+      }
+
+      return lines;
+    } finally {
+      stream.close();
+    }
+  }
+
+  private static VertexShaderType newVertexShaderFromFilesystem(
+    final JCGLShadersCommonType gc,
+    final GVersionType version,
+    final FSCapabilityReadType fs,
+    final PathVirtual path,
+    final JPVertexShaderMetaType meta)
+    throws FilesystemError,
+      IOException,
+      JCGLExceptionProgramCompileError,
       JCGLException
   {
-    NullCheck.notNull(gl, "GL");
-    NullCheck.notNull(name, "Name");
-    NullCheck.notNull(v_stream, "Vertex shader stream");
-    NullCheck.notNull(f_stream, "Fragment shader stream");
-
-    VertexShaderType v = null;
-    FragmentShaderType f = null;
-
-    final List<String> v_lines = ShaderUtilities.readLines(v_stream);
-    if (prepend != null) {
-      KProgram.prependVersion(v_lines, prepend);
-    }
-    v = gl.vertexShaderCompile(name, v_lines);
-
-    final List<String> f_lines = ShaderUtilities.readLines(f_stream);
-    if (prepend != null) {
-      KProgram.prependVersion(f_lines, prepend);
-    }
-    f = gl.fragmentShaderCompile(name, f_lines);
-
-    assert v != null;
-    assert f != null;
-
-    final ProgramType p = gl.programCreateCommon(name, v, f);
-    gl.vertexShaderDelete(v);
-    gl.fragmentShaderDelete(f);
-    return p;
+    final List<String> source =
+      KProgram.newSourceFromFilesystem(version, fs, path, meta);
+    return gc.vertexShaderCompile(path.toString(), source);
   }
 
-  private static void notSupported(
-    final Version v,
-    final PGLSLMetaXML m)
-    throws JCGLExceptionUnsupported
+  private static void prependVersionDirective(
+    final GVersionType version,
+    final List<String> lines)
   {
-    final StringBuilder message = new StringBuilder();
-    message.append("GLSL version ");
-    message.append(v.getVersion());
-    message.append(" is not supported by program ");
-    message.append(m.getName());
-    message.append(".\n");
-    message.append("Supported versions are: ");
-
-    for (final Integer ver : m.getSupportsES()) {
-      message.append("GLSL ES ");
-      message.append(ver);
-      message.append("\n");
-    }
-    for (final Integer ver : m.getSupportsFull()) {
-      message.append("GLSL ");
-      message.append(ver);
-      message.append("\n");
-    }
-    final String r = message.toString();
-    assert r != null;
-    throw new JCGLExceptionUnsupported(r);
+    final String directive =
+      String.format("#version %d\n", version.versionGetNumber());
+    assert directive != null;
+    lines.add(0, directive);
   }
 
-  private static void prependVersion(
-    final List<String> lines,
-    final Version prepend)
+  private static GVersionType versionNumber(
+    final JCGLSLVersionNumber version,
+    final JCGLApi api)
   {
-    final StringBuilder directive = new StringBuilder();
-    directive.append("#version ");
-    directive.append(prepend.getVersion());
-    directive.append("\n");
-    lines.add(0, directive.toString());
+    final int n =
+      (version.getVersionMajor() * 100) + version.getVersionMinor();
+
+    switch (api) {
+      case JCGL_ES:
+      {
+        return new GVersionES(n);
+      }
+      case JCGL_FULL:
+      {
+        return new GVersionFull(n);
+      }
+    }
+
+    throw new UnreachableCodeException();
   }
 
-  private final Map<String, JCGLType> declared_attributes;
-  private final Map<String, JCGLType> declared_uniforms;
-  private final JCBExecutorType       exec;
-  private final PGLSLMetaXML          meta;
-  private final ProgramType           program;
+  private final Map<String, JCGLType>          declared_attributes;
+  private final Map<String, JCGLType>          declared_uniforms;
+  private final JCBExecutorType                exec;
+  private final FragmentShaderType             fragment_shader;
+  private final JPFragmentShaderMetaType       fragment_shader_meta;
+  private final ProgramType                    program;
+  private final JPUncompactedProgramShaderMeta program_meta;
+  private final VertexShaderType               vertex_shader;
+  private final JPVertexShaderMetaType         vertex_shader_meta;
 
   private KProgram(
-    final JCGLShadersCommonType gl,
-    final PGLSLMetaXML in_meta,
+    final JCGLImplementationType in_gl,
+    final JPUncompactedProgramShaderMeta in_program_meta,
     final ProgramType in_program,
-    final LogUsableType log)
+    final JPVertexShaderMetaType in_vertex_shader_meta,
+    final VertexShaderType in_vertex_shader,
+    final JPFragmentShaderMetaType in_fragment_shader_meta,
+    final FragmentShaderType in_fragment_shader,
+    final LogUsableType in_log)
     throws JCGLExceptionDeleted,
       JCGLExceptionProgramUniformMissing,
       JCGLExceptionTypeError,
       JCGLExceptionAttributeMissing
   {
-    this.meta = NullCheck.notNull(in_meta, "Meta");
+    this.program_meta = NullCheck.notNull(in_program_meta, "Program meta");
     this.program = NullCheck.notNull(in_program, "Program");
+    this.vertex_shader_meta =
+      NullCheck.notNull(in_vertex_shader_meta, "Vertex shader meta");
+    this.vertex_shader = NullCheck.notNull(in_vertex_shader, "Vertex shader");
+    this.fragment_shader_meta =
+      NullCheck.notNull(in_fragment_shader_meta, "Fragment shader meta");
+    this.fragment_shader =
+      NullCheck.notNull(in_fragment_shader, "Fragment shader");
+
     this.declared_uniforms = new HashMap<String, JCGLType>();
     this.declared_attributes = new HashMap<String, JCGLType>();
 
-    for (final VertexParameter p : in_meta.getDeclaredVertexParameters()) {
+    for (final JPVertexParameter p : in_vertex_shader_meta
+      .getDeclaredVertexParameters()) {
       final JCGLType t = JCGLType.fromName(p.getType());
       this.declared_uniforms.put(p.getName(), t);
     }
-    for (final FragmentParameter p : in_meta.getDeclaredFragmentParameters()) {
+
+    for (final JPFragmentParameter p : in_fragment_shader_meta
+      .getDeclaredFragmentParameters()) {
       final JCGLType t = JCGLType.fromName(p.getType());
       this.declared_uniforms.put(p.getName(), t);
     }
-    for (final VertexInput p : in_meta.getDeclaredVertexInputs()) {
+
+    for (final JPVertexInput p : in_vertex_shader_meta
+      .getDeclaredVertexInputs()) {
       final JCGLType t = JCGLType.fromName(p.getType());
       this.declared_attributes.put(p.getName(), t);
     }
 
     this.exec =
       JCBExecutor.newExecutorWithDeclarations(
-        gl,
+        in_gl.getGLCommon(),
         in_program,
         this.declared_uniforms,
         this.declared_attributes,
-        log);
+        in_log);
   }
 
   @Override public boolean equals(
-    final @Nullable Object obj)
+    @Nullable final Object obj)
   {
     if (this == obj) {
       return true;
@@ -778,11 +775,15 @@ import com.io7m.renderer.types.RXMLException;
       return false;
     }
     final KProgram other = (KProgram) obj;
-    return (this.declared_attributes.equals(other.declared_attributes))
-      && (this.declared_uniforms.equals(other.declared_uniforms))
-      && (this.exec.equals(other.exec))
-      && (this.meta.equals(other.meta))
-      && (this.program.equals(other.program));
+    return this.declared_attributes.equals(other.declared_attributes)
+      && this.declared_uniforms.equals(other.declared_uniforms)
+      && this.exec.equals(other.exec)
+      && this.fragment_shader.equals(other.fragment_shader)
+      && this.fragment_shader_meta.equals(other.fragment_shader_meta)
+      && this.program.equals(other.program)
+      && this.program_meta.equals(other.program_meta)
+      && this.vertex_shader.equals(other.vertex_shader)
+      && this.vertex_shader_meta.equals(other.vertex_shader_meta);
   }
 
   /**
@@ -795,12 +796,21 @@ import com.io7m.renderer.types.RXMLException;
   }
 
   /**
+   * @return The fragment shader metadata.
+   */
+
+  public JPFragmentShaderMetaType getFragmentShaderMeta()
+  {
+    return this.fragment_shader_meta;
+  }
+
+  /**
    * @return Information about the compiled program
    */
 
-  public PGLSLMetaXML getMeta()
+  public JPUncompactedProgramShaderMeta getMeta()
   {
-    return this.meta;
+    return this.program_meta;
   }
 
   /**
@@ -812,6 +822,24 @@ import com.io7m.renderer.types.RXMLException;
     return this.program;
   }
 
+  /**
+   * @return The program metadata.
+   */
+
+  public JPUncompactedProgramShaderMeta getProgramMeta()
+  {
+    return this.program_meta;
+  }
+
+  /**
+   * @return The vertex shader metadata.
+   */
+
+  public JPVertexShaderMetaType getVertexShaderMeta()
+  {
+    return this.vertex_shader_meta;
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;
@@ -819,8 +847,12 @@ import com.io7m.renderer.types.RXMLException;
     result = (prime * result) + this.declared_attributes.hashCode();
     result = (prime * result) + this.declared_uniforms.hashCode();
     result = (prime * result) + this.exec.hashCode();
-    result = (prime * result) + this.meta.hashCode();
+    result = (prime * result) + this.fragment_shader.hashCode();
+    result = (prime * result) + this.fragment_shader_meta.hashCode();
     result = (prime * result) + this.program.hashCode();
+    result = (prime * result) + this.program_meta.hashCode();
+    result = (prime * result) + this.vertex_shader.hashCode();
+    result = (prime * result) + this.vertex_shader_meta.hashCode();
     return result;
   }
 }

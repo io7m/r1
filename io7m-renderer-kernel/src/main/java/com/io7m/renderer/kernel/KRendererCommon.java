@@ -98,22 +98,6 @@ import com.io7m.renderer.types.RException;
     MatrixM3x3F.transposeInPlace(mr);
   }
 
-  static void putInstanceMatricesSpecularOnly(
-    final JCBProgramType program,
-    final MatricesInstanceType mwi,
-    final KMaterialTranslucentSpecularOnly material)
-    throws JCGLException
-  {
-    KShadingProgramCommon.putMatrixModelViewUnchecked(
-      program,
-      mwi.getMatrixModelView());
-    KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
-
-    if (material.materialRequiresUVCoordinates()) {
-      KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
-    }
-  }
-
   static void putInstanceMatricesRegular(
     final JCBProgramType program,
     final MatricesInstanceType mwi,
@@ -164,64 +148,20 @@ import com.io7m.renderer.types.RException;
       });
   }
 
-  static void putInstanceTexturesSpecularOnly(
-    final KTextureUnitContextType units,
+  static void putInstanceMatricesSpecularOnly(
     final JCBProgramType program,
+    final MatricesInstanceType mwi,
     final KMaterialTranslucentSpecularOnly material)
-    throws JCGLException,
-      RException
+    throws JCGLException
   {
-    material.materialGetNormal().normalAccept(
-      new KMaterialNormalVisitorType<Unit, JCGLException>() {
-        @Override public Unit mapped(
-          final KMaterialNormalMapped m)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putTextureNormal(
-            program,
-            units.withTexture2D(m.getTexture()));
-          return Unit.unit();
-        }
+    KShadingProgramCommon.putMatrixModelViewUnchecked(
+      program,
+      mwi.getMatrixModelView());
+    KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
 
-        @Override public Unit vertex(
-          final KMaterialNormalVertex m)
-          throws RException,
-            JCGLException
-        {
-          return Unit.unit();
-        }
-      });
-
-    material.getSpecular().specularAccept(
-      new KMaterialSpecularVisitorType<Unit, JCGLException>() {
-        @Override public Unit constant(
-          final KMaterialSpecularConstant m)
-          throws RException,
-            JCGLException
-        {
-          return Unit.unit();
-        }
-
-        @Override public Unit mapped(
-          final KMaterialSpecularMapped m)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putTextureSpecular(
-            program,
-            units.withTexture2D(m.getTexture()));
-          return Unit.unit();
-        }
-
-        @Override public Unit none(
-          final KMaterialSpecularNone m)
-          throws RException,
-            JCGLException
-        {
-          return Unit.unit();
-        }
-      });
+    if (material.materialRequiresUVCoordinates()) {
+      KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
+    }
   }
 
   static void putInstanceTexturesRegular(
@@ -367,6 +307,66 @@ import com.io7m.renderer.types.RException;
       });
   }
 
+  static void putInstanceTexturesSpecularOnly(
+    final KTextureUnitContextType units,
+    final JCBProgramType program,
+    final KMaterialTranslucentSpecularOnly material)
+    throws JCGLException,
+      RException
+  {
+    material.materialGetNormal().normalAccept(
+      new KMaterialNormalVisitorType<Unit, JCGLException>() {
+        @Override public Unit mapped(
+          final KMaterialNormalMapped m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putTextureNormal(
+            program,
+            units.withTexture2D(m.getTexture()));
+          return Unit.unit();
+        }
+
+        @Override public Unit vertex(
+          final KMaterialNormalVertex m)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+      });
+
+    material.getSpecular().specularAccept(
+      new KMaterialSpecularVisitorType<Unit, JCGLException>() {
+        @Override public Unit constant(
+          final KMaterialSpecularConstant m)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit mapped(
+          final KMaterialSpecularMapped m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putTextureSpecular(
+            program,
+            units.withTexture2D(m.getTexture()));
+          return Unit.unit();
+        }
+
+        @Override public Unit none(
+          final KMaterialSpecularNone m)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+      });
+  }
+
   static void putMaterialRegular(
     final JCBProgramType program,
     final KMaterialRegularType material)
@@ -484,6 +484,36 @@ import com.io7m.renderer.types.RException;
       });
   }
 
+  static void putMaterialTranslucentRegular(
+    final JCBProgramType program,
+    final KMaterialTranslucentRegular material)
+    throws JCGLException,
+      RException
+  {
+    KRendererCommon.putMaterialRegular(program, material);
+
+    material.materialGetAlpha().alphaAccept(
+      new KMaterialAlphaVisitorType<Unit, JCGLException>() {
+        @Override public Unit constant(
+          final KMaterialAlphaConstant m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putMaterialAlphaConstant(program, m);
+          return Unit.unit();
+        }
+
+        @Override public Unit oneMinusDot(
+          final KMaterialAlphaOneMinusDot m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putMaterialAlphaOneMinusDot(program, m);
+          return Unit.unit();
+        }
+      });
+  }
+
   static void putMaterialTranslucentSpecularOnly(
     final JCBProgramType program,
     final KMaterialTranslucentSpecularOnly material)
@@ -520,36 +550,6 @@ import com.io7m.renderer.types.RException;
       });
 
     material.getAlpha().alphaAccept(
-      new KMaterialAlphaVisitorType<Unit, JCGLException>() {
-        @Override public Unit constant(
-          final KMaterialAlphaConstant m)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putMaterialAlphaConstant(program, m);
-          return Unit.unit();
-        }
-
-        @Override public Unit oneMinusDot(
-          final KMaterialAlphaOneMinusDot m)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putMaterialAlphaOneMinusDot(program, m);
-          return Unit.unit();
-        }
-      });
-  }
-
-  static void putMaterialTranslucentRegular(
-    final JCBProgramType program,
-    final KMaterialTranslucentRegular material)
-    throws JCGLException,
-      RException
-  {
-    KRendererCommon.putMaterialRegular(program, material);
-
-    material.materialGetAlpha().alphaAccept(
       new KMaterialAlphaVisitorType<Unit, JCGLException>() {
         @Override public Unit constant(
           final KMaterialAlphaConstant m)

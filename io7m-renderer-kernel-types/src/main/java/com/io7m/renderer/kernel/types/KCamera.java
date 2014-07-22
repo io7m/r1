@@ -20,7 +20,6 @@ import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformViewType;
 
 /**
@@ -35,25 +34,25 @@ import com.io7m.renderer.types.RTransformViewType;
    * @param view
    *          The world-to-eye matrix.
    * @param projection
-   *          The eye-to-clip matrix.
+   *          The eye-to-clip projection.
    * @return A new camera
    */
 
   public static KCamera newCamera(
     final RMatrixI4x4F<RTransformViewType> view,
-    final RMatrixI4x4F<RTransformProjectionType> projection)
+    final KProjectionType projection)
   {
     return new KCamera(
       NullCheck.notNull(view, "View matrix"),
       NullCheck.notNull(projection, "Projection matrix"));
   }
 
-  private final RMatrixI4x4F<RTransformProjectionType> projection;
-  private final RMatrixI4x4F<RTransformViewType>       view;
+  private final KProjectionType                  projection;
+  private final RMatrixI4x4F<RTransformViewType> view;
 
   private KCamera(
     final RMatrixI4x4F<RTransformViewType> in_view,
-    final RMatrixI4x4F<RTransformProjectionType> in_projection)
+    final KProjectionType in_projection)
   {
     this.view = in_view;
     this.projection = in_projection;
@@ -82,10 +81,10 @@ import com.io7m.renderer.types.RTransformViewType;
   }
 
   /**
-   * @return The eye-to-clip projection matrix
+   * @return The eye-to-clip projection
    */
 
-  public RMatrixI4x4F<RTransformProjectionType> getProjectionMatrix()
+  public KProjectionType getProjection()
   {
     return this.projection;
   }

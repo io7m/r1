@@ -25,30 +25,29 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KShadowType;
-import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RVectorI3F;
 
 public final class KLightProjectiveGenerator implements
   Generator<KLightProjective>
 {
-  private final @NonNull Generator<RVectorI3F<RSpaceRGBType>>              colour_gen;
-  private final @NonNull Generator<RVectorI3F<RSpaceWorldType>>            position_gen;
-  private final @NonNull Generator<QuaternionI4F>                          quat_gen;
-  private final @NonNull Generator<RMatrixI4x4F<RTransformProjectionType>> proj_gen;
-  private final @NonNull Generator<Texture2DStaticUsableType>              tex_gen;
-  private final @NonNull Generator<KShadowType>                            shad_gen;
-  private final @NonNull KGraphicsCapabilitiesType                         caps;
+  private final @NonNull Generator<RVectorI3F<RSpaceRGBType>>   colour_gen;
+  private final @NonNull Generator<RVectorI3F<RSpaceWorldType>> position_gen;
+  private final @NonNull Generator<QuaternionI4F>               quat_gen;
+  private final @NonNull Generator<KProjectionType>             proj_gen;
+  private final @NonNull Generator<Texture2DStaticUsableType>   tex_gen;
+  private final @NonNull Generator<KShadowType>                 shad_gen;
+  private final @NonNull KGraphicsCapabilitiesType              caps;
 
   public KLightProjectiveGenerator(
     final @NonNull KGraphicsCapabilitiesType in_caps,
     final @NonNull Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen,
     final @NonNull Generator<RVectorI3F<RSpaceWorldType>> in_position_gen,
     final @NonNull Generator<QuaternionI4F> in_quat_gen,
-    final @NonNull Generator<RMatrixI4x4F<RTransformProjectionType>> in_proj_gen,
+    final @NonNull Generator<KProjectionType> in_proj_gen,
     final @NonNull Generator<Texture2DStaticUsableType> in_tex_gen,
     final @NonNull Generator<KShadowType> in_shad_gen)
   {
@@ -64,15 +63,15 @@ public final class KLightProjectiveGenerator implements
   @Override public KLightProjective next()
   {
     try {
-      final KLightProjectiveBuilderType b = KLightProjective.newBuilder();
+      final KLightProjectiveBuilderType b =
+        KLightProjective
+          .newBuilder(this.tex_gen.next(), this.proj_gen.next());
       b.setColor(this.colour_gen.next());
       b.setFalloff((float) Math.random());
       b.setIntensity((float) Math.random());
       b.setOrientation(this.quat_gen.next());
       b.setPosition(this.position_gen.next());
-      b.setProjection(this.proj_gen.next());
       b.setRange((float) Math.random());
-      b.setTexture(this.tex_gen.next());
 
       if (Math.random() > 0.5) {
         b.setShadow(this.shad_gen.next());

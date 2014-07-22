@@ -28,6 +28,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
+import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionCache;
 import com.io7m.renderer.types.RExceptionJCGL;
@@ -75,7 +76,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
   /**
    * Construct a new postprocessor.
-   * 
+   *
    * @param gi
    *          The OpenGL implementation
    * @param copier
@@ -84,8 +85,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
    *          A framebuffer cache
    * @param shader_cache
    *          A shader cache
-   * @param quad
-   *          A unit quad
+   * @param quad_cache
+   *          A unit quad_cache cache
    * @param log
    *          A log handle
    * @return A new postprocessor
@@ -96,7 +97,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KRegionCopierType copier,
     final KFramebufferRGBACacheType rgba_cache,
     final KShaderCachePostprocessingType shader_cache,
-    final KUnitQuadUsableType quad,
+    final KUnitQuadCacheType quad_cache,
     final LogUsableType log)
   {
     return new KPostprocessorBlurRGBA(
@@ -104,14 +105,14 @@ import com.io7m.renderer.types.RExceptionJCGL;
       copier,
       rgba_cache,
       shader_cache,
-      quad,
+      quad_cache,
       log);
   }
 
   private final KRegionCopierType              copier;
   private final JCGLImplementationType         gi;
   private final LogUsableType                  log;
-  private final KUnitQuadUsableType            quad;
+  private final KUnitQuadCacheType             quad_cache;
   private final KFramebufferRGBACacheType      rgba_cache;
   private final KShaderCachePostprocessingType shader_cache;
 
@@ -120,7 +121,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KRegionCopierType in_copier,
     final KFramebufferRGBACacheType in_rgba_cache,
     final KShaderCachePostprocessingType in_shader_cache,
-    final KUnitQuadUsableType in_quad,
+    final KUnitQuadCacheType in_quad_cache,
     final LogUsableType in_log)
   {
     this.gi = NullCheck.notNull(in_gi, "GL implementation");
@@ -131,7 +132,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     this.log =
       NullCheck.notNull(in_log, "Log").with(KPostprocessorBlurRGBA.NAME);
 
-    this.quad = NullCheck.notNull(in_quad, "Quad");
+    this.quad_cache = NullCheck.notNull(in_quad_cache, "Quad cache");
 
     if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
       this.log.debug("initialized");
@@ -144,7 +145,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KFramebufferRGBAUsableType temporary,
     final KFramebufferRGBAUsableType target)
     throws JCGLException,
-      RException
+      RException,
+      JCacheException
   {
     assert source != temporary;
     assert temporary != target;
@@ -152,8 +154,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     KPostprocessorBlurCommon.evaluateBlurH(
       this.gi,
       parameters.getBlurSize(),
-      this.quad,
-      this.shader_cache.getPostprocessing("gaussian_blur_horizontal_4f"),
+      this.quad_cache,
+      this.shader_cache.cacheGetLU("gaussian_blur_horizontal_4f"),
       source.kFramebufferGetRGBATexture(),
       source.kFramebufferGetArea(),
       temporary.kFramebufferGetColorFramebuffer(),
@@ -162,9 +164,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     KPostprocessorBlurCommon.evaluateBlurV(
       this.gi,
-      this.quad,
+      this.quad_cache,
       parameters.getBlurSize(),
-      this.shader_cache.getPostprocessing("gaussian_blur_vertical_4f"),
+      this.shader_cache.cacheGetLU("gaussian_blur_vertical_4f"),
       temporary.kFramebufferGetRGBATexture(),
       temporary.kFramebufferGetArea(),
       target.kFramebufferGetColorFramebuffer(),
@@ -206,7 +208,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
         return;
       }
 
-      final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAType> receipt_a =
+      final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt_a =
         this.rgba_cache.bluCacheGet(new_desc);
 
       try {
@@ -215,7 +217,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
           return;
         }
 
-        final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAType> receipt_b =
+        final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt_b =
           this.rgba_cache.bluCacheGet(new_desc);
 
         try {

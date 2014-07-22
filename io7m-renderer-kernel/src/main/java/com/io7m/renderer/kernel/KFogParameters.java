@@ -26,6 +26,11 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
 @EqualityStructural public final class KFogParameters
 {
+  private KFogParameters()
+  {
+    throw new UnimplementedCodeException();
+  }
+
   @Override public boolean equals(
     final @Nullable Object other)
   {
@@ -33,11 +38,6 @@ import com.io7m.junreachable.UnimplementedCodeException;
   }
 
   @Override public int hashCode()
-  {
-    throw new UnimplementedCodeException();
-  }
-
-  private KFogParameters()
   {
     throw new UnimplementedCodeException();
   }

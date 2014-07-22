@@ -23,13 +23,15 @@ import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureFormat;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jranges.RangeInclusiveL;
 
 /**
  * Fake 2D static textures for shader generation.
  */
 
-public final class FakeTexture2DStatic implements Texture2DStaticType
+@EqualityReference public final class FakeTexture2DStatic implements
+  Texture2DStaticType
 {
   /**
    * @return The default instance.

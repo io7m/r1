@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -32,6 +32,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheckException;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
@@ -45,10 +46,12 @@ import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
+import com.io7m.renderer.kernel.types.KProjectionFrustum;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
-import com.io7m.renderer.kernel.types.KSceneOpaques;
-import com.io7m.renderer.kernel.types.KSceneShadows;
+import com.io7m.renderer.kernel.types.KSceneLightGroup;
+import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KTranslucentRegularLit;
@@ -60,10 +63,10 @@ import com.io7m.renderer.tests.FakeTexture2DStatic;
 import com.io7m.renderer.tests.utilities.TestUtilities;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyShadowed;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyUnshadowed;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyVisible;
+import com.io7m.renderer.types.RExceptionLightGroupAlreadyAdded;
+import com.io7m.renderer.types.RExceptionLightGroupLacksInstances;
+import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
 import com.io7m.renderer.types.RExceptionLightMissingShadow;
 
 @SuppressWarnings({ "unchecked", "null" }) public abstract class KSceneBuilderContract
@@ -72,8 +75,20 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
   {
     try {
       final FakeCapabilities caps = new FakeCapabilities();
-      final KLightProjectiveBuilderType b = KLightProjective.newBuilder();
-      b.setTexture(FakeTexture2DStatic.getDefault());
+      final KProjectionType projection =
+        KProjectionFrustum.newProjection(
+          new MatrixM4x4F(),
+          -1.0f,
+          1.0f,
+          -1.0f,
+          1.0f,
+          1.0f,
+          100.0f);
+
+      final KLightProjectiveBuilderType b =
+        KLightProjective.newBuilder(
+          FakeTexture2DStatic.getDefault(),
+          projection);
       final RangeInclusiveL r = new RangeInclusiveL(0, 99);
       final KFramebufferDepthDescription fbd =
         KFramebufferDepthDescription.newDescription(
@@ -111,9 +126,7 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
     final KSceneBuilderWithCreateType b = this.newBuilder();
     final KInstanceOpaqueType i = this.getOpaque();
 
-    b.sceneAddInvisibleWithShadow(
-      (KLightType) TestUtilities.actuallyNull(),
-      i);
+    b.sceneAddShadowCaster((KLightType) TestUtilities.actuallyNull(), i);
   }
 
   @Test(expected = NullCheckException.class) public
@@ -124,59 +137,7 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
     final KSceneBuilderWithCreateType b = this.newBuilder();
     final KLightType l0 = KSceneBuilderContract.getSphericalLight();
 
-    b.sceneAddInvisibleWithShadow(
-      l0,
-      (KInstanceOpaqueType) TestUtilities.actuallyNull());
-  }
-
-  @Test(expected = NullCheckException.class) public
-    void
-    testNullOpaqueLitVisibleWithoutShadow_0()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType i = this.getOpaque();
-
-    b.sceneAddOpaqueLitVisibleWithoutShadow(
-      (KLightType) TestUtilities.actuallyNull(),
-      i);
-  }
-
-  @Test(expected = NullCheckException.class) public
-    void
-    testNullOpaqueLitVisibleWithoutShadow_1()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KLightType l0 = KSceneBuilderContract.getSphericalLight();
-
-    b.sceneAddOpaqueLitVisibleWithoutShadow(
-      l0,
-      (KInstanceOpaqueType) TestUtilities.actuallyNull());
-  }
-
-  @Test(expected = NullCheckException.class) public
-    void
-    testNullOpaqueLitVisibleWithShadow_0()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType i = this.getOpaque();
-
-    b.sceneAddOpaqueLitVisibleWithShadow(
-      (KLightType) TestUtilities.actuallyNull(),
-      i);
-  }
-
-  @Test(expected = NullCheckException.class) public
-    void
-    testNullOpaqueLitVisibleWithShadow_1()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KLightType l0 = KSceneBuilderContract.getSphericalLight();
-
-    b.sceneAddOpaqueLitVisibleWithShadow(
+    b.sceneAddShadowCaster(
       l0,
       (KInstanceOpaqueType) TestUtilities.actuallyNull());
   }
@@ -215,36 +176,146 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
       (Set<KLightType>) TestUtilities.actuallyNull());
   }
 
-  @Test(expected = RExceptionInstanceAlreadyVisible.class) public
-    void
-    testSceneAddInvisibleWithShadow_AlreadyShadowed0()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-
-    try {
-      b.sceneAddOpaqueLitVisibleWithShadow(l0, o0);
-    } catch (final Exception e) {
-      throw new UnreachableCodeException(e);
-    }
-    b.sceneAddInvisibleWithShadow(l0, o0);
-  }
-
   @Test(expected = RExceptionLightMissingShadow.class) public
     void
-    testSceneAddInvisibleWithShadow_NoShadow0()
+    testSceneAddShadowCaster_NoShadow0()
       throws RException
   {
     final KSceneBuilderWithCreateType b = this.newBuilder();
     final KInstanceOpaqueType o = this.getOpaque();
     final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
 
-    b.sceneAddInvisibleWithShadow(l0, o);
+    b.sceneAddShadowCaster(l0, o);
   }
 
-  @Test public void testSceneAddInvisibleWithShadow_NotShadowed0()
+  @Test(expected = RExceptionLightMissingShadow.class) public
+    void
+    testSceneAddShadowCaster_WithoutShadow0()
+      throws RException
+  {
+    final KSceneBuilderWithCreateType b = this.newBuilder();
+    final KInstanceOpaqueType o0 = this.getOpaque();
+    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
+
+    b.sceneAddShadowCaster(l0, o0);
+  }
+
+  @Test public void testSceneAddShadowCaster_0()
+    throws RException
+  {
+    final KSceneBuilderWithCreateType b = this.newBuilder();
+    final KInstanceOpaqueType o0 = this.getOpaque();
+    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
+
+    b.sceneAddShadowCaster(l0, o0);
+    final KScene s = b.sceneCreate();
+
+    final Map<KLightType, Set<KInstanceOpaqueType>> casters =
+      s.getShadows().getShadowCasters();
+    Assert.assertEquals(1, casters.size());
+    Assert.assertTrue(casters.containsKey(l0));
+    Assert.assertEquals(o0, casters.get(l0).iterator().next());
+  }
+
+  @Test(expected = NullCheckException.class) public
+    void
+    testNullLightGroup_0()
+      throws RException
+  {
+    final KSceneBuilderWithCreateType b = this.newBuilder();
+    b.sceneNewLightGroup((String) TestUtilities.actuallyNull());
+  }
+
+  @Test(expected = RExceptionLightGroupLacksLights.class) public
+    void
+    testSceneLightGroup_NoLights0()
+      throws RException
+  {
+    final KSceneBuilderWithCreateType b = this.newBuilder();
+    final KSceneLightGroupBuilderType gb = b.sceneNewLightGroup("g");
+    final KInstanceOpaqueType o0 = this.getOpaque();
+    gb.groupAddInstance(o0);
+    b.sceneCreate();
+  }
+
+  @Test(expected = RExceptionLightGroupLacksInstances.class) public
+    void
+    testSceneLightGroup_NoInstances0()
+      throws RException
+  {
+    final KSceneBuilderWithCreateType b = this.newBuilder();
+    final KSceneLightGroupBuilderType gb = b.sceneNewLightGroup("g");
+    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
+    gb.groupAddLight(l0);
+    b.sceneCreate();
+  }
+
+  @Test(expected = RExceptionInstanceAlreadyUnlit.class) public
+    void
+    testSceneLightGroup_AlreadyUnlit0()
+      throws RException
+  {
+    final KSceneBuilderWithCreateType b = this.newBuilder();
+    final KInstanceOpaqueType o = this.getOpaque();
+    b.sceneAddOpaqueUnlit(o);
+
+    final KSceneLightGroupBuilderType gb = b.sceneNewLightGroup("g");
+    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
+    gb.groupAddLight(l0);
+    gb.groupAddInstance(o);
+  }
+
+  @Test(expected = RExceptionInstanceAlreadyLit.class) public
+    void
+    testSceneLightGroup_AlreadyLit0()
+      throws RException
+  {
+    final KSceneBuilderWithCreateType b = this.newBuilder();
+    final KInstanceOpaqueType o = this.getOpaque();
+
+    final KSceneLightGroupBuilderType gb = b.sceneNewLightGroup("g");
+    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
+    gb.groupAddLight(l0);
+    gb.groupAddInstance(o);
+
+    b.sceneAddOpaqueUnlit(o);
+  }
+
+  @Test(expected = RExceptionLightGroupAlreadyAdded.class) public
+    void
+    testSceneLightGroup_Duplicate0()
+      throws RException
+  {
+    final KSceneBuilderWithCreateType b = this.newBuilder();
+    b.sceneNewLightGroup("g");
+    b.sceneNewLightGroup("g");
+  }
+
+  @Test public void testSceneLightGroup_Lights0()
+    throws RException
+  {
+    final KSceneBuilderWithCreateType b = this.newBuilder();
+    final KSceneLightGroupBuilderType gb = b.sceneNewLightGroup("g");
+    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
+    gb.groupAddLight(l0);
+    final KLightType l1 = KSceneBuilderContract.getShadowLight();
+    gb.groupAddLight(l1);
+    final KInstanceOpaqueType o = this.getOpaque();
+    gb.groupAddInstance(o);
+
+    final KScene s = b.sceneCreate();
+    final Map<String, KSceneLightGroup> gs = s.getLightGroups();
+    Assert.assertEquals(1, gs.size());
+
+    final KSceneLightGroup g = gs.get("g");
+    Assert.assertEquals(2, g.getLights().size());
+    Assert.assertTrue(g.getLights().contains(l0));
+    Assert.assertTrue(g.getLights().contains(l1));
+    Assert.assertEquals(1, g.getInstances().size());
+    Assert.assertTrue(g.getInstances().contains(o));
+  }
+
+  @Test public void testSceneAddShadowCaster_1()
     throws RException
   {
     final KSceneBuilderWithCreateType b = this.newBuilder();
@@ -252,206 +323,19 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
     final KInstanceOpaqueType o1 = this.getOpaque();
     final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
 
-    b.sceneAddOpaqueLitVisibleWithShadow(l0, o0);
-    b.sceneAddInvisibleWithShadow(l0, o1);
+    b.sceneAddShadowCaster(l0, o0);
+    b.sceneAddShadowCaster(l0, o1);
+    final KScene s = b.sceneCreate();
 
-    {
-      final Set<KInstanceType> m = b.sceneGetInstances();
-      Assert.assertEquals(2, m.size());
-      Assert.assertTrue(m.contains(o0));
-      Assert.assertTrue(m.contains(o1));
-    }
+    final Map<KLightType, Set<KInstanceOpaqueType>> casters =
+      s.getShadows().getShadowCasters();
+    Assert.assertEquals(1, casters.size());
+    Assert.assertTrue(casters.containsKey(l0));
 
-    {
-      final Set<KInstanceOpaqueType> m =
-        b.sceneGetInstancesOpaqueLitVisible();
-      Assert.assertEquals(1, m.size());
-      Assert.assertTrue(m.contains(o0));
-    }
-
-    {
-      final Map<KLightType, Set<KInstanceOpaqueType>> m =
-        b.sceneGetInstancesOpaqueLitVisibleByLight();
-      final Set<KInstanceOpaqueType> os = m.get(l0);
-      Assert.assertEquals(1, os.size());
-      Assert.assertTrue(os.contains(o0));
-    }
-
-    {
-      final Map<KLightType, Set<KInstanceOpaqueType>> m =
-        b.sceneGetInstancesOpaqueShadowCastingByLight();
-      final Set<KInstanceOpaqueType> os = m.get(l0);
-      Assert.assertEquals(2, os.size());
-      Assert.assertTrue(os.contains(o0));
-      Assert.assertTrue(os.contains(o1));
-    }
-  }
-
-  @Test public void testSceneAddInvisibleWithShadow_Shadow0()
-    throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o = this.getOpaque();
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-
-    b.sceneAddInvisibleWithShadow(l0, o);
-
-    {
-      final Set<KInstanceType> os = b.sceneGetInstances();
-      Assert.assertEquals(1, os.size());
-      Assert.assertTrue(os.contains(o));
-    }
-
-    {
-      final Set<KLightType> ls = b.sceneGetLights();
-      Assert.assertEquals(1, ls.size());
-      Assert.assertTrue(ls.contains(l0));
-    }
-
-    {
-      Assert.assertTrue(b.sceneGetInstancesOpaqueLitVisible().isEmpty());
-    }
-
-    {
-      Assert.assertTrue(b
-        .sceneGetInstancesOpaqueLitVisibleByLight()
-        .isEmpty());
-    }
-
-    {
-      Assert.assertTrue(b.sceneGetInstancesOpaqueUnlit().isEmpty());
-    }
-
-    {
-      final Set<KLightType> ls = b.sceneGetLightsShadowCasting();
-      Assert.assertEquals(1, ls.size());
-      Assert.assertTrue(ls.contains(l0));
-    }
-  }
-
-  @Test public void testSceneAddInvisibleWithShadow_Shadow1()
-    throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o = this.getOpaque();
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-
-    b.sceneAddInvisibleWithShadow(l0, o);
-    b.sceneAddInvisibleWithShadow(l0, o);
-
-    {
-      final Set<KInstanceType> os = b.sceneGetInstances();
-      Assert.assertEquals(1, os.size());
-      Assert.assertTrue(os.contains(o));
-    }
-
-    {
-      final Map<KLightType, Set<KInstanceOpaqueType>> os =
-        b.sceneGetInstancesOpaqueShadowCastingByLight();
-      Assert.assertEquals(1, os.size());
-
-      {
-        final Set<KInstanceOpaqueType> is = os.get(l0);
-        Assert.assertEquals(1, is.size());
-        Assert.assertTrue(is.contains(o));
-      }
-    }
-
-    {
-      Assert.assertTrue(b.sceneGetInstancesOpaqueLitVisible().isEmpty());
-    }
-
-    {
-      Assert.assertTrue(b
-        .sceneGetInstancesOpaqueLitVisibleByLight()
-        .isEmpty());
-    }
-
-    {
-      Assert.assertTrue(b.sceneGetInstancesOpaqueUnlit().isEmpty());
-    }
-
-    {
-      final Set<KLightType> ls = b.sceneGetLights();
-      Assert.assertEquals(1, ls.size());
-      Assert.assertTrue(ls.contains(l0));
-    }
-
-    {
-      final Set<KLightType> ls = b.sceneGetLightsShadowCasting();
-      Assert.assertEquals(1, ls.size());
-      Assert.assertTrue(ls.contains(l0));
-    }
-  }
-
-  @Test public void testSceneAddInvisibleWithShadow_Shadow2()
-    throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KInstanceOpaqueType o1 = this.getOpaque();
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-
-    b.sceneAddInvisibleWithShadow(l0, o0);
-    b.sceneAddInvisibleWithShadow(l0, o1);
-
-    {
-      final Set<KInstanceType> os = b.sceneGetInstances();
-      Assert.assertEquals(2, os.size());
-      Assert.assertTrue(os.contains(o0));
-      Assert.assertTrue(os.contains(o1));
-    }
-
-    {
-      final Map<KLightType, Set<KInstanceOpaqueType>> os =
-        b.sceneGetInstancesOpaqueShadowCastingByLight();
-      Assert.assertEquals(1, os.size());
-
-      {
-        final Set<KInstanceOpaqueType> is = os.get(l0);
-        Assert.assertEquals(2, is.size());
-        Assert.assertTrue(is.contains(o0));
-        Assert.assertTrue(is.contains(o1));
-      }
-    }
-
-    {
-      Assert.assertTrue(b.sceneGetInstancesOpaqueLitVisible().isEmpty());
-    }
-
-    {
-      Assert.assertTrue(b
-        .sceneGetInstancesOpaqueLitVisibleByLight()
-        .isEmpty());
-    }
-
-    {
-      Assert.assertTrue(b.sceneGetInstancesOpaqueUnlit().isEmpty());
-    }
-
-    {
-      final Set<KLightType> ls = b.sceneGetLights();
-      Assert.assertEquals(1, ls.size());
-      Assert.assertTrue(ls.contains(l0));
-    }
-
-    {
-      final Set<KLightType> ls = b.sceneGetLightsShadowCasting();
-      Assert.assertEquals(1, ls.size());
-      Assert.assertTrue(ls.contains(l0));
-    }
-  }
-
-  @Test(expected = RExceptionLightMissingShadow.class) public
-    void
-    testSceneAddInvisibleWithShadow_WithoutShadow0()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
-
-    b.sceneAddInvisibleWithShadow(l0, o0);
+    final Set<KInstanceOpaqueType> bl = casters.get(l0);
+    Assert.assertEquals(2, bl.size());
+    Assert.assertTrue(bl.contains(o0));
+    Assert.assertTrue(bl.contains(o1));
   }
 
   @Test public void testSceneAddTranslucentLit_0()
@@ -551,340 +435,5 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
 
     b.sceneAddTranslucentUnlit((KInstanceTranslucentUnlitType) TestUtilities
       .actuallyNull());
-  }
-
-  @Test public void testSceneOpaqueLitVisibleWithoutShadow_0()
-    throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KInstanceOpaqueType o1 = this.getOpaque();
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-
-    b.sceneAddOpaqueLitVisibleWithoutShadow(l0, o0);
-    b.sceneAddOpaqueLitVisibleWithoutShadow(l0, o1);
-
-    {
-      final Set<KInstanceType> os = b.sceneGetInstances();
-      Assert.assertEquals(2, os.size());
-      Assert.assertTrue(os.contains(o0));
-      Assert.assertTrue(os.contains(o1));
-    }
-
-    {
-      final Map<KLightType, Set<KInstanceOpaqueType>> os =
-        b.sceneGetInstancesOpaqueShadowCastingByLight();
-      Assert.assertTrue(os.isEmpty());
-    }
-
-    {
-      final Map<KLightType, Set<KInstanceOpaqueType>> lo =
-        b.sceneGetInstancesOpaqueLitVisibleByLight();
-      Assert.assertEquals(1, lo.size());
-
-      final Set<KInstanceOpaqueType> is = lo.get(l0);
-      Assert.assertEquals(2, is.size());
-      Assert.assertTrue(is.contains(o0));
-      Assert.assertTrue(is.contains(o1));
-    }
-
-    {
-      Assert.assertTrue(b.sceneGetInstancesOpaqueUnlit().isEmpty());
-    }
-
-    {
-      final Set<KInstanceOpaqueType> os =
-        b.sceneGetInstancesOpaqueLitVisible();
-      Assert.assertEquals(2, os.size());
-      Assert.assertTrue(os.contains(o0));
-      Assert.assertTrue(os.contains(o1));
-    }
-
-    {
-      final Set<KLightType> ls = b.sceneGetLights();
-      Assert.assertEquals(1, ls.size());
-      Assert.assertTrue(ls.contains(l0));
-    }
-
-    {
-      final Set<KLightType> ls = b.sceneGetLightsShadowCasting();
-      Assert.assertTrue(ls.isEmpty());
-    }
-  }
-
-  @Test(expected = RExceptionInstanceAlreadyUnlit.class) public
-    void
-    testSceneOpaqueLitVisibleWithoutShadow_1()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-
-    try {
-      b.sceneAddOpaqueUnlit(o0);
-    } catch (final Exception e) {
-      throw new UnreachableCodeException(e);
-    }
-    b.sceneAddOpaqueLitVisibleWithoutShadow(l0, o0);
-  }
-
-  @Test public void testSceneOpaqueLitVisibleWithShadow_0()
-    throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KInstanceOpaqueType o1 = this.getOpaque();
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-
-    b.sceneAddOpaqueLitVisibleWithShadow(l0, o0);
-    b.sceneAddOpaqueLitVisibleWithShadow(l0, o1);
-
-    {
-      final Set<KInstanceType> os = b.sceneGetInstances();
-      Assert.assertEquals(2, os.size());
-      Assert.assertTrue(os.contains(o0));
-      Assert.assertTrue(os.contains(o1));
-    }
-
-    {
-      final Map<KLightType, Set<KInstanceOpaqueType>> os =
-        b.sceneGetInstancesOpaqueShadowCastingByLight();
-      Assert.assertEquals(1, os.size());
-
-      final Set<KInstanceOpaqueType> is = os.get(l0);
-      Assert.assertEquals(2, is.size());
-      Assert.assertTrue(is.contains(o0));
-      Assert.assertTrue(is.contains(o1));
-    }
-
-    {
-      final Map<KLightType, Set<KInstanceOpaqueType>> lo =
-        b.sceneGetInstancesOpaqueLitVisibleByLight();
-      Assert.assertEquals(1, lo.size());
-
-      final Set<KInstanceOpaqueType> is = lo.get(l0);
-      Assert.assertEquals(2, is.size());
-      Assert.assertTrue(is.contains(o0));
-      Assert.assertTrue(is.contains(o1));
-    }
-
-    {
-      Assert.assertTrue(b.sceneGetInstancesOpaqueUnlit().isEmpty());
-    }
-
-    {
-      final Set<KInstanceOpaqueType> os =
-        b.sceneGetInstancesOpaqueLitVisible();
-      Assert.assertEquals(2, os.size());
-      Assert.assertTrue(os.contains(o0));
-      Assert.assertTrue(os.contains(o1));
-    }
-
-    {
-      final Set<KLightType> ls = b.sceneGetLights();
-      Assert.assertEquals(1, ls.size());
-      Assert.assertTrue(ls.contains(l0));
-    }
-
-    {
-      final Set<KLightType> ls = b.sceneGetLightsShadowCasting();
-      Assert.assertEquals(1, ls.size());
-      Assert.assertTrue(ls.contains(l0));
-    }
-  }
-
-  @Test(expected = RExceptionInstanceAlreadyShadowed.class) public
-    void
-    testSceneOpaqueLitVisibleWithShadowAlreadyShadowed_0()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-
-    try {
-      b.sceneAddOpaqueLitVisibleWithShadow(l0, o0);
-    } catch (final Exception e) {
-      throw new UnreachableCodeException(e);
-    }
-    b.sceneAddOpaqueLitVisibleWithoutShadow(l0, o0);
-  }
-
-  @Test(expected = RExceptionInstanceAlreadyUnlit.class) public
-    void
-    testSceneOpaqueLitVisibleWithShadowAlreadyUnlit_0()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-
-    try {
-      b.sceneAddOpaqueUnlit(o0);
-    } catch (final Exception e) {
-      throw new UnreachableCodeException(e);
-    }
-    b.sceneAddOpaqueLitVisibleWithShadow(l0, o0);
-  }
-
-  @Test(expected = RExceptionInstanceAlreadyUnshadowed.class) public
-    void
-    testSceneOpaqueLitVisibleWithShadowAlreadyUnshadowed_0()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-
-    try {
-      b.sceneAddOpaqueLitVisibleWithoutShadow(l0, o0);
-    } catch (final Exception e) {
-      throw new UnreachableCodeException(e);
-    }
-    b.sceneAddOpaqueLitVisibleWithShadow(l0, o0);
-  }
-
-  @Test(expected = RExceptionInstanceAlreadyUnshadowed.class) public
-    void
-    testSceneOpaqueLitVisibleWithShadowAlreadyUnshadowed_1()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KInstanceOpaqueType o1 = this.getOpaque();
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-
-    try {
-      b.sceneAddOpaqueLitVisibleWithoutShadow(l0, o0);
-      b.sceneAddOpaqueLitVisibleWithShadow(l0, o1);
-    } catch (final Exception x) {
-      throw new UnreachableCodeException(x);
-    }
-    b.sceneAddOpaqueLitVisibleWithShadow(l0, o0);
-  }
-
-  @Test(expected = RExceptionLightMissingShadow.class) public
-    void
-    testSceneOpaqueLitVisibleWithShadowMissing_0()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
-
-    b.sceneAddOpaqueLitVisibleWithShadow(l0, o0);
-  }
-
-  @Test(expected = RExceptionInstanceAlreadyLit.class) public
-    void
-    testSceneOpaqueUnlit_0()
-      throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-
-    try {
-      b.sceneAddOpaqueLitVisibleWithoutShadow(l0, o0);
-    } catch (final Exception e) {
-      throw new UnreachableCodeException(e);
-    }
-    b.sceneAddOpaqueUnlit(o0);
-  }
-
-  @Test public void testSceneBuild_0()
-    throws RException
-  {
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-
-    final KInstanceOpaqueType o0_shadow = this.getOpaque();
-    final KInstanceOpaqueType o0 = this.getOpaque();
-    final KInstanceOpaqueType o1 = this.getOpaque();
-    final KInstanceOpaqueType o2 = this.getOpaque();
-    final KInstanceOpaqueType o3 = this.getOpaque();
-    final KInstanceTranslucentUnlitType t0 = this.getTranslucentUnlit();
-    final KInstanceTranslucentLitType t1 = this.getTranslucent();
-
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight();
-    final KLightSphere l1 = KSceneBuilderContract.getSphericalLight();
-    final KLightSphere l2 = KSceneBuilderContract.getSphericalLight();
-    final Set<KLightType> lights = new HashSet<KLightType>();
-    lights.add(l0);
-    lights.add(l1);
-    lights.add(l2);
-
-    b.sceneAddInvisibleWithShadow(l0, o0_shadow);
-    b.sceneAddOpaqueLitVisibleWithoutShadow(l0, o0);
-    b.sceneAddOpaqueLitVisibleWithShadow(l0, o1);
-    b.sceneAddOpaqueLitVisibleWithShadow(l0, o2);
-    b.sceneAddOpaqueLitVisibleWithoutShadow(l1, o0);
-    b.sceneAddOpaqueLitVisibleWithoutShadow(l1, o1);
-    b.sceneAddOpaqueUnlit(o3);
-    b.sceneAddTranslucentUnlit(t0);
-    b.sceneAddTranslucentLit(t1, lights);
-
-    final KScene s = b.sceneCreate();
-    Assert.assertEquals(s.getCamera(), b.sceneGetCamera());
-
-    {
-      final KSceneOpaques so = s.getOpaques();
-      final Set<KInstanceOpaqueType> uli = so.getUnlitInstances();
-      Assert.assertEquals(1, uli.size());
-      Assert.assertTrue(uli.contains(o3));
-
-      final Map<KLightType, Set<KInstanceOpaqueType>> li =
-        so.getLitInstances();
-      Assert.assertEquals(2, li.size());
-
-      final Set<KInstanceOpaqueType> l0i = li.get(l0);
-      Assert.assertEquals(3, l0i.size());
-      Assert.assertTrue(l0i.contains(o0));
-      Assert.assertTrue(l0i.contains(o1));
-      Assert.assertTrue(l0i.contains(o2));
-
-      final Set<KInstanceOpaqueType> l1i = li.get(l1);
-      Assert.assertEquals(2, l1i.size());
-      Assert.assertTrue(l1i.contains(o0));
-      Assert.assertTrue(l1i.contains(o1));
-    }
-
-    {
-      final KSceneShadows ss = s.getShadows();
-      final Map<KLightType, Set<KInstanceOpaqueType>> sc =
-        ss.getShadowCasters();
-
-      Assert.assertEquals(1, sc.size());
-      final Set<KInstanceOpaqueType> l0i = sc.get(l0);
-      Assert.assertEquals(3, l0i.size());
-      Assert.assertTrue(l0i.contains(o0_shadow));
-      Assert.assertTrue(l0i.contains(o1));
-      Assert.assertTrue(l0i.contains(o2));
-    }
-
-    {
-      final Set<KInstanceType> sv = s.getVisibleInstances();
-      Assert.assertEquals(6, sv.size());
-      Assert.assertTrue(sv.contains(o0));
-      Assert.assertTrue(sv.contains(o1));
-      Assert.assertTrue(sv.contains(o2));
-      Assert.assertTrue(sv.contains(o3));
-      Assert.assertTrue(sv.contains(t0));
-      Assert.assertTrue(sv.contains(t1));
-    }
-
-    {
-      final List<KTranslucentType> kt = s.getTranslucents();
-      Assert.assertEquals(2, kt.size());
-
-      final KInstanceTranslucentUnlitType tt0 =
-        (KInstanceTranslucentUnlitType) kt.get(0);
-      Assert.assertEquals(tt0, t0);
-
-      final KTranslucentRegularLit tt1 = (KTranslucentRegularLit) kt.get(1);
-      final KInstanceTranslucentRegular tt1_r = tt1.translucentGetInstance();
-      Assert.assertEquals(tt1_r, t1);
-      Assert.assertEquals(lights, tt1.translucentGetLights());
-    }
   }
 }

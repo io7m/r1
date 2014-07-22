@@ -84,26 +84,6 @@ import com.io7m.jnull.NullCheck;
     return new RExceptionResource(s);
   }
 
-  /**
-   * Construct an exception with an informative message explaining why
-   * variance shadow maps are not available.
-   * 
-   * @return A new exception
-   */
-
-  public static RExceptionNotSupported varianceShadowMapsNotSupported()
-  {
-    final StringBuilder m = new StringBuilder();
-    m.append("Variance shadow maps are not supported on this platform.\n");
-    m.append("Variance shadow maps are currently supported on:\n");
-    m.append("  OpenGL >= 3.0 or\n");
-    m.append("  OpenGL ES >= 3.0 with GL_EXT_color_buffer_float or\n");
-    m.append("  OpenGL ES >= 3.0 with GL_EXT_color_buffer_half_float\n");
-    final String s = m.toString();
-    assert s != null;
-    return new RExceptionNotSupported(s);
-  }
-
   protected RException(
     final String message)
   {

@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
@@ -33,7 +34,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
  * {@link KFramebufferDepthVarianceDescription}.
  */
 
-public final class KFramebufferDepthVarianceCacheLoader implements
+@EqualityReference public final class KFramebufferDepthVarianceCacheLoader implements
   JCacheLoaderType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType, RException>
 {
   /**
@@ -55,8 +56,8 @@ public final class KFramebufferDepthVarianceCacheLoader implements
     return new KFramebufferDepthVarianceCacheLoader(gi, log);
   }
 
-  private final JCGLImplementationType gi;
-  private final LogUsableType          log;
+  private final JCGLImplementationType                    gi;
+  @SuppressWarnings("unused") private final LogUsableType log;
 
   private KFramebufferDepthVarianceCacheLoader(
     final JCGLImplementationType in_gi,
@@ -91,6 +92,8 @@ public final class KFramebufferDepthVarianceCacheLoader implements
   @Override public BigInteger cacheValueSizeOf(
     final KFramebufferDepthVarianceType v)
   {
-    return BigInteger.valueOf(v.kFramebufferGetSizeBytes());
+    final BigInteger r = BigInteger.valueOf(v.kFramebufferGetSizeBytes());
+    assert r != null;
+    return r;
   }
 }

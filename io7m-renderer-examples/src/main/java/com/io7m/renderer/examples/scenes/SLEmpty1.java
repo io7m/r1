@@ -25,6 +25,7 @@ import com.io7m.renderer.examples.ExampleSceneUtilities;
 import com.io7m.renderer.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
+import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.types.RException;
@@ -91,15 +92,11 @@ public final class SLEmpty1 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    scene.sceneAddOpaqueLitVisibleWithoutShadow(
-      ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE,
-      i0);
-    scene.sceneAddOpaqueLitVisibleWithoutShadow(
-      ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE,
-      i1);
-    scene.sceneAddOpaqueLitVisibleWithoutShadow(
-      ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE,
-      i2);
+    final KSceneLightGroupBuilderType g = scene.sceneNewLightGroup("g");
+    g.groupAddLight(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
+    g.groupAddInstance(i0);
+    g.groupAddInstance(i1);
+    g.groupAddInstance(i2);
   }
 
   @Override public List<ExampleViewType> exampleViewpoints()

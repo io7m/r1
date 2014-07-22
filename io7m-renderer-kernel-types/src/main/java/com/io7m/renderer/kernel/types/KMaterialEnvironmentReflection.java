@@ -17,6 +17,7 @@
 package com.io7m.renderer.kernel.types;
 
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.types.RException;
 
@@ -24,7 +25,7 @@ import com.io7m.renderer.types.RException;
  * An environment-mapped reflection.
  */
 
-public final class KMaterialEnvironmentReflection implements
+@EqualityReference public final class KMaterialEnvironmentReflection implements
   KMaterialEnvironmentType
 {
   /**

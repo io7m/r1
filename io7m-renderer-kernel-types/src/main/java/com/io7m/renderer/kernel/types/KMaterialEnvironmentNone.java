@@ -16,13 +16,14 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.types.RException;
 
 /**
  * The type of properties for surfaces that do not use environment mapping.
  */
 
-public final class KMaterialEnvironmentNone implements
+@EqualityReference public final class KMaterialEnvironmentNone implements
   KMaterialEnvironmentType
 {
   private static final KMaterialEnvironmentNone NONE_FIELD;
